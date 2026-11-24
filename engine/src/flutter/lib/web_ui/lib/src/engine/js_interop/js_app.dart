@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:js_interop';
+
 import 'package:ui/src/engine.dart';
 
 /// The JS bindings for the configuration object passed to [FlutterApp.addView].

@@ -22,18 +22,13 @@ import 'swift_package_manager.dart';
 /// project settings for the dependency manager(s) being used.
 class DarwinDependencyManagement {
   DarwinDependencyManagement({
-    required FlutterProject project,
-    required CocoaPods? cocoapods,
-    required SwiftPackageManager swiftPackageManager,
-    required FileSystem fileSystem,
-    required FeatureFlags featureFlags,
-    required Analytics analytics,
-  }) : _project = project,
-       _cocoapods = cocoapods,
-       _swiftPackageManager = swiftPackageManager,
-       _fileSystem = fileSystem,
-       _featureFlags = featureFlags,
-       _analytics = analytics;
+    required this._project,
+    required this._cocoapods,
+    required this._swiftPackageManager,
+    required this._fileSystem,
+    required this._featureFlags,
+    required this._analytics,
+  });
 
   final FlutterProject _project;
   final CocoaPods? _cocoapods;
@@ -164,6 +159,7 @@ class DarwinDependencyManagement {
   /// Validate that plugins are compatible with the project dependency management set up.
   ///
   /// This includes the following checks:
+  ///   - Warns when SwiftPM feature flag has been disabled
   ///   - Throws when using a SwiftPM-only plugin but SwiftPM is not enabled
   ///   - Warns when using CocoaPod-only plugins
   ///   - Warns when CocoaPods integration is removable
@@ -175,16 +171,25 @@ class DarwinDependencyManagement {
     required FileSystem fileSystem,
     required Logger logger,
     required CocoaPods? cocoapods,
+    required Analytics analytics,
+    required FeatureFlags featureFlags,
   }) async {
     final bool projectUsesSwiftPM =
         xcodeProject.usesSwiftPackageManager &&
         xcodeProject.flutterPluginSwiftPackageInProjectSettings;
+    if (!featureFlags.isSwiftPackageManagerEnabled) {
+      logger.printWarning(
+        'Swift Package Manager is currently disabled. $kSwiftPackageManagerDisabledWarning '
+        'To re-enable it, run "flutter config --enable-swift-package-manager"',
+      );
+    }
 
     final swiftPackageOnlyPlugins = <String>[];
     final cocoapodOnlyPlugins = <String>[];
     final List<Plugin> filteredPlugins = resolvePluginImplementationsForPlatform(
       plugins,
       platform.pluginConfigKey,
+      logger: logger,
       quiet: true,
     );
     for (final plugin in filteredPlugins) {
@@ -222,6 +227,7 @@ class DarwinDependencyManagement {
       cocoapodOnlyPlugins: cocoapodOnlyPlugins,
       logger: logger,
       platform: platform,
+      analytics: analytics,
     );
 
     await _printRemoveCocoapodIntegrationMessage(
@@ -279,16 +285,30 @@ class DarwinDependencyManagement {
     required List<String> cocoapodOnlyPlugins,
     required Logger logger,
     required FlutterDarwinPlatform platform,
+    required Analytics analytics,
   }) {
     if (cocoapodOnlyPlugins.isEmpty) {
       return;
     }
+    final String pluginNames = cocoapodOnlyPlugins.join(' ');
     logger.printWarning(
       'The following plugins do not support Swift Package Manager for ${platform.name}:\n'
       '  - ${cocoapodOnlyPlugins.join('\n  - ')}\n'
-      'This will become an error in a future version of Flutter. Please contact the plugin '
-      'maintainers to request Swift Package Manager adoption.',
+      'This will become an error in a future version of Flutter.\n'
+      "It's possible support was added in a newer version. "
+      'You can upgrade the plugin versions by running:\n'
+      '  flutter pub upgrade $pluginNames\n'
+      'You can try upgrading to new major versions, which may include breaking changes, '
+      'by running:\n'
+      '  flutter pub upgrade --major-versions $pluginNames\n'
+      'If the warning persists after upgrading, contact the plugin maintainers to request '
+      'Swift Package Manager adoption.',
     );
+    for (final plugin in cocoapodOnlyPlugins) {
+      analytics.send(
+        Event.appleUsageEvent(workflow: 'cocoapod-only-plugin-warning', parameter: plugin),
+      );
+    }
   }
 
   /// Print a message recommending removing CocoaPod integration when all plugins support SwiftPM.

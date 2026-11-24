@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
+
 import 'protocol_base/service.dart';
 
 /// Extension service interface for running diagnostic validation checks (e.g. for `flutter doctor`).
-abstract class DiagnosticsExtension extends ToolExtensionService {
+abstract base class DiagnosticsExtension extends ToolExtensionService {
   /// Service namespace identifier for diagnostics.
   static const String serviceNamespace = 'diagnostics';
 

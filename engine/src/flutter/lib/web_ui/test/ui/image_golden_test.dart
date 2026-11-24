@@ -15,6 +15,7 @@ import 'package:ui/ui.dart' as ui;
 import 'package:web_engine_tester/golden_tester.dart';
 
 import '../common/fake_asset_manager.dart';
+import '../common/rendering.dart';
 import '../common/test_initialization.dart';
 import 'utils.dart';
 
@@ -118,6 +119,41 @@ Future<void> testMain() async {
         await drawPictureUsingCurrentRenderer(recorder.endRecording());
 
         await matchGoldenFile('${name}_canvas_drawImage.png', region: drawRegion);
+      });
+
+      test('drawImage preserves image when image is disposed before rasterization', () async {
+        final ui.Image image = await generateImage();
+        // Remove from the suite's automatic tearDown disposal list because this
+        // test explicitly exercises manual disposal of [image].
+        images.remove(image);
+
+        // Record drawing operations to the canvas before disposing the image.
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder, drawRegion);
+        canvas.drawImage(image, const ui.Offset(10, 10), ui.Paint());
+        final ui.Picture picture = recorder.endRecording();
+
+        // Dispose the image immediately after recording. The picture tracker
+        // should retain the underlying ImageSource until rasterization/picture disposal.
+        image.dispose();
+
+        // Build and rasterize the scene.
+        final sceneBuilder = ui.SceneBuilder();
+        sceneBuilder.addPicture(ui.Offset.zero, picture);
+        final ui.Scene scene = sceneBuilder.build();
+        await renderScene(scene);
+        await matchGoldenFile('${name}_disposed_before_rasterization.png', region: drawRegion);
+
+        // If the image is backed by an ImageSource (DOM texture), disposing both the
+        // picture and scene drops the final references and closes the underlying source.
+        // Images not backed by ImageSource (e.g. created via toImage or raw pixel buffers)
+        // have null imageSource and are managed purely by the native backend.
+        picture.dispose();
+        scene.dispose();
+        final ImageSource? source = (image as EngineImage).imageSource;
+        if (source != null) {
+          expect(source.debugIsClosed, isTrue);
+        }
       });
 
       test('drawImageRect', () async {

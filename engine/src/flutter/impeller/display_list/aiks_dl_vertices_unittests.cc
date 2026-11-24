@@ -16,6 +16,7 @@
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/dl_runtime_effect_impeller.h"
+#include "impeller/entity/contents/content_context.h"
 #include "third_party/abseil-cpp/absl/status/status_matchers.h"
 
 namespace impeller {
@@ -53,7 +54,8 @@ TEST_P(AiksTest, VerticesGeometryUVPositionData) {
   DlPaint paint;
   auto image =
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
-  auto size = image->GetImpellerTexture(GetContext())->GetSize();
+  ContentContext content_context(GetContext(), nullptr);
+  auto size = image->GetImpellerTexture(content_context)->GetSize();
 
   paint.setColorSource(
       DlColorSource::MakeImage(image, DlTileMode::kClamp, DlTileMode::kClamp));
@@ -76,7 +78,8 @@ TEST_P(AiksTest, VerticesGeometryUVPositionDataWithTranslate) {
   DlPaint paint;
   auto image =
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
-  auto size = image->GetImpellerTexture(GetContext())->GetSize();
+  ContentContext content_context(GetContext(), nullptr);
+  auto size = image->GetImpellerTexture(content_context)->GetSize();
 
   DlMatrix matrix = DlMatrix::MakeTranslation({100, 100});
   paint.setColorSource(
@@ -101,7 +104,8 @@ TEST_P(AiksTest, VerticesGeometryColorUVPositionData) {
   DlPaint paint;
   auto image =
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
-  auto size = image->GetImpellerTexture(GetContext())->GetSize();
+  ContentContext content_context(GetContext(), nullptr);
+  auto size = image->GetImpellerTexture(content_context)->GetSize();
 
   paint.setColorSource(
       DlColorSource::MakeImage(image, DlTileMode::kClamp, DlTileMode::kClamp));
@@ -129,7 +133,8 @@ TEST_P(AiksTest, VerticesGeometryColorUVPositionDataAdvancedBlend) {
   DlPaint paint;
   auto image =
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
-  auto size = image->GetImpellerTexture(GetContext())->GetSize();
+  ContentContext content_context(GetContext(), nullptr);
+  auto size = image->GetImpellerTexture(content_context)->GetSize();
 
   paint.setColorSource(
       DlColorSource::MakeImage(image, DlTileMode::kClamp, DlTileMode::kClamp));
@@ -154,6 +159,59 @@ TEST_P(AiksTest, VerticesGeometryColorUVPositionDataAdvancedBlend) {
   builder.DrawVertices(vertices, DlBlendMode::kColorBurn, paint);
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
+
+// drawVertices with vertex colors, an image color source, and a blend mode
+// above kHardLight is drawn with the second "uber" vertices shader (see
+// ContentContext::GetDrawVerticesUberPipeline).
+static void DrawVerticesImageSourceWithAdvancedBlend(AiksTest* test,
+                                                     DlBlendMode mode) {
+  auto image = DlImageImpeller::Make(
+      test->CreateTextureForFixture("table_mountain_nx.png"));
+  ASSERT_TRUE(image);
+  DlISize size = image->GetSize();
+
+  // A triangle strip over the four corners covers the whole image exactly once.
+  std::vector<DlPoint> positions = {
+      DlPoint(0, 0),
+      DlPoint(size.width, 0),
+      DlPoint(0, size.height),
+      DlPoint(size.width, size.height),
+  };
+  std::vector<DlColor> colors = {
+      DlColor::kRed().modulateOpacity(0.5f),
+      DlColor::kBlue().modulateOpacity(0.5f),
+      DlColor::kGreen().modulateOpacity(0.5f),
+      DlColor::kRed().modulateOpacity(0.5f),
+  };
+  auto vertices =
+      MakeVertices(DlVertexMode::kTriangleStrip, positions, {}, {}, colors);
+
+  DlPaint paint;
+  paint.setColorSource(
+      DlColorSource::MakeImage(image, DlTileMode::kClamp, DlTileMode::kClamp));
+
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+  builder.DrawVertices(vertices, mode, paint);
+  ASSERT_TRUE(test->OpenPlaygroundHere(builder.Build()));
+}
+
+// One test per blend mode above kHardLight.
+#define VERTICES_ADVANCED_BLEND_TEST(mode)                                \
+  TEST_P(AiksTest, DrawVerticesImageSourceWithAdvancedBlend##mode) {      \
+    DrawVerticesImageSourceWithAdvancedBlend(this, DlBlendMode::k##mode); \
+  }
+
+VERTICES_ADVANCED_BLEND_TEST(SoftLight)
+VERTICES_ADVANCED_BLEND_TEST(Difference)
+VERTICES_ADVANCED_BLEND_TEST(Exclusion)
+VERTICES_ADVANCED_BLEND_TEST(Multiply)
+VERTICES_ADVANCED_BLEND_TEST(Hue)
+VERTICES_ADVANCED_BLEND_TEST(Saturation)
+VERTICES_ADVANCED_BLEND_TEST(Color)
+VERTICES_ADVANCED_BLEND_TEST(Luminosity)
+
+#undef VERTICES_ADVANCED_BLEND_TEST
 
 // Draw a hexagon using triangle fan
 TEST_P(AiksTest, CanConvertTriangleFanToTriangles) {

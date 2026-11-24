@@ -8,13 +8,9 @@ import 'package:yaml/yaml.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import 'gen_l10n_types.dart';
 import 'language_subtag_registry.dart';
-
-typedef HeaderGenerator = String Function(String regenerateInstructions);
-typedef ConstructorGenerator = String Function(LocaleInfo locale);
 
 int sortFilesByPath(File a, File b) {
   return a.path.compareTo(b.path);
@@ -347,6 +343,7 @@ class LocalizationOptions {
     bool? suppressWarnings,
     bool? relaxSyntax,
     bool? useNamedParameters,
+    bool? useExplicitPluralValues,
   }) : templateArbFile = templateArbFile ?? 'app_en.arb',
        outputLocalizationFile = outputLocalizationFile ?? 'app_localizations.dart',
        outputClass = outputClass ?? 'AppLocalizations',
@@ -357,7 +354,8 @@ class LocalizationOptions {
        useEscaping = useEscaping ?? false,
        suppressWarnings = suppressWarnings ?? false,
        relaxSyntax = relaxSyntax ?? false,
-       useNamedParameters = useNamedParameters ?? false;
+       useNamedParameters = useNamedParameters ?? false,
+       useExplicitPluralValues = useExplicitPluralValues ?? false;
 
   /// The `--arb-dir` argument.
   ///
@@ -460,6 +458,15 @@ class LocalizationOptions {
   ///
   /// Defaults to `false`.
   final bool useNamedParameters;
+
+  /// The `use-explicit-plural-values` argument.
+  ///
+  /// Whether explicit plural values such as `=1` match only that exact value
+  /// and take precedence over plural categories such as `one`. If false,
+  /// `=0`, `=1` and `=2` are treated as `zero`, `one` and `two`.
+  ///
+  /// Defaults to `false`.
+  final bool useExplicitPluralValues;
 }
 
 /// Parse the localizations configuration options from [file].
@@ -531,6 +538,7 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
     suppressWarnings: _tryReadBool(yamlNode, 'suppress-warnings', logger),
     relaxSyntax: _tryReadBool(yamlNode, 'relax-syntax', logger),
     useNamedParameters: _tryReadBool(yamlNode, 'use-named-parameters', logger),
+    useExplicitPluralValues: _tryReadBool(yamlNode, 'use-explicit-plural-values', logger),
   );
 }
 
@@ -538,6 +546,7 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
 LocalizationOptions parseLocalizationsOptionsFromCommand({
   required FlutterCommand command,
   required String defaultArbDir,
+  required Logger logger,
 }) {
   const kSyntheticPackage = 'synthetic-package';
   const kFlutterGenNotice = 'http://flutter.dev/to/flutter-gen-deprecation';
@@ -548,7 +557,7 @@ LocalizationOptions parseLocalizationsOptionsFromCommand({
         'See $kFlutterGenNotice.',
       );
     } else {
-      globals.logger.printWarning(
+      logger.printWarning(
         'The argument "$kSyntheticPackage" no longer has any effect and should '
         'be removed. See $kFlutterGenNotice',
       );
@@ -572,6 +581,7 @@ LocalizationOptions parseLocalizationsOptionsFromCommand({
     useEscaping: command.boolArg('use-escaping'),
     suppressWarnings: command.boolArg('suppress-warnings'),
     useNamedParameters: command.boolArg('use-named-parameters'),
+    useExplicitPluralValues: command.boolArg('use-explicit-plural-values'),
   );
 }
 

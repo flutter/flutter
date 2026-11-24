@@ -21,6 +21,9 @@ struct _FlCompositorOpenGL {
   // TRUE if glBlitFramebuffer can be used to composite the first layer.
   gboolean can_blit;
 
+  // TRUE if fences can be used to synchronize frames with other contexts.
+  gboolean can_fence;
+
   // Flutter OpenGL contexts.
   FlOpenGLManager* opengl_manager;
 
@@ -45,41 +48,6 @@ static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
 
 static void fl_compositor_opengl_init(FlCompositorOpenGL* self) {}
 
-// Checks if the current OpenGL driver is known to have a broken or unsupported
-// glBlitFramebuffer implementation.
-static gboolean driver_supports_blit() {
-  const gchar* vendor = reinterpret_cast<const gchar*>(glGetString(GL_VENDOR));
-  if (vendor == nullptr) {
-    return TRUE;
-  }
-
-  // Note: List of unsupported vendors due to issue
-  // https://github.com/flutter/flutter/issues/152099
-  const char* unsupported_vendors_exact[] = {"Vivante Corporation", "ARM"};
-  const char* unsupported_vendors_fuzzy[] = {"NVIDIA"};
-
-  for (const char* unsupported : unsupported_vendors_fuzzy) {
-    if (strstr(vendor, unsupported) != nullptr) {
-      return FALSE;
-    }
-  }
-  for (const char* unsupported : unsupported_vendors_exact) {
-    if (strcmp(vendor, unsupported) == 0) {
-      return FALSE;
-    }
-  }
-  return TRUE;
-}
-
-// Checks if glBlitFramebuffer can be used. It is a GLES3 / OpenGL 3.0 function
-// and may not be present on older drivers, so treat it as optional and fall
-// back to compositing with the shader when it is unavailable.
-static gboolean can_blit_framebuffer() {
-  return driver_supports_blit() &&
-         (epoxy_gl_version() >= 30 ||
-          epoxy_has_gl_extension("GL_EXT_framebuffer_blit"));
-}
-
 FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(
       g_object_new(fl_compositor_opengl_get_type(), nullptr));
@@ -89,7 +57,8 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager) {
 
   // Determine once whether glBlitFramebuffer is available on this driver.
   fl_opengl_manager_make_current(opengl_manager);
-  self->can_blit = can_blit_framebuffer();
+  self->can_blit = fl_opengl_manager_can_blit(opengl_manager);
+  self->can_fence = fl_opengl_manager_can_fence(opengl_manager);
 
   return self;
 }
@@ -100,12 +69,14 @@ static void composite_layer(FlCompositorOpenGL* self,
                             double y,
                             int width,
                             int height) {
-  size_t texture_width = fl_framebuffer_get_width(framebuffer);
-  size_t texture_height = fl_framebuffer_get_height(framebuffer);
-  fl_compositor_opengl_shader_set_offset(self->shader, (2 * x / width) - 1.0,
-                                         (2 * y / height) - 1.0);
-  fl_compositor_opengl_shader_set_scale(self->shader, texture_width / width,
-                                        texture_height / height);
+  double scale_x =
+      static_cast<double>(fl_framebuffer_get_width(framebuffer)) / width;
+  double scale_y =
+      static_cast<double>(fl_framebuffer_get_height(framebuffer)) / height;
+  fl_compositor_opengl_shader_set_offset(self->shader,
+                                         (2 * x / width) + scale_x - 1.0,
+                                         1.0 - (2 * y / height) - scale_y);
+  fl_compositor_opengl_shader_set_scale(self->shader, scale_x, scale_y);
 
   GLuint texture_id = fl_framebuffer_get_texture_id(framebuffer);
   glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -116,10 +87,6 @@ static void composite_layer(FlCompositorOpenGL* self,
 void fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
                                            const FlutterLayer** layers,
                                            size_t layers_count) {
-  if (layers_count == 0) {
-    return;
-  }
-
   // Save bindings that are set by this function.  All bindings must be restored
   // to their original values because Skia expects that its bindings have not
   // been altered.
@@ -143,9 +110,11 @@ void fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
   glGetIntegerv(GL_BLEND_DST_RGB, &saved_dst_rgb);
   GLint saved_dst_alpha;
   glGetIntegerv(GL_BLEND_DST_ALPHA, &saved_dst_alpha);
+  GLfloat saved_clear_color[4] = {0.0, 0.0, 0.0, 0.0};
+  glGetFloatv(GL_COLOR_CLEAR_VALUE, saved_clear_color);
 
-  size_t width = layers[0]->size.width;
-  size_t height = layers[0]->size.height;
+  size_t width = layers_count > 0 ? layers[0]->size.width : 0;
+  size_t height = layers_count > 0 ? layers[0]->size.height : 0;
 
   // FIXME(robert-ancell): The vertex array is the same for all views, but
   // cannot be shared in OpenGL. Find a way to not generate this every time.
@@ -163,6 +132,9 @@ void fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
   // See OpenGL specification version 4.6, section 18.3.1.
   glDisable(GL_SCISSOR_TEST);
 
+  glClearColor(0.0, 0.0, 0.0, 0.0);
+  glClear(GL_COLOR_BUFFER_BIT);
+
   gboolean first_layer = TRUE;
   for (size_t i = 0; i < layers_count; ++i) {
     const FlutterLayer* layer = layers[i];
@@ -177,11 +149,15 @@ void fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
         if (first_layer && self->can_blit) {
           glBindFramebuffer(GL_READ_FRAMEBUFFER,
                             fl_framebuffer_get_id(layer_framebuffer));
-          glBlitFramebuffer(layer->offset.x, layer->offset.y, layer->size.width,
-                            layer->size.height, layer->offset.x,
-                            layer->offset.y, layer->size.width,
-                            layer->size.height, GL_COLOR_BUFFER_BIT,
-                            GL_NEAREST);
+          // Flutter layer offsets have the origin at the top-left, OpenGL has
+          // the origin at the bottom-left.
+          GLint x0 = layer->offset.x;
+          GLint y0 = height - (layer->offset.y + layer->size.height);
+          GLint layer_width = layer->size.width;
+          GLint layer_height = layer->size.height;
+          glBlitFramebuffer(0, 0, layer_width, layer_height, x0, y0,
+                            x0 + layer_width, y0 + layer_height,
+                            GL_COLOR_BUFFER_BIT, GL_NEAREST);
         } else {
           composite_layer(self, layer_framebuffer, layer->offset.x,
                           layer->offset.y, width, height);
@@ -209,6 +185,8 @@ void fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
     glDisable(GL_SCISSOR_TEST);
   }
 
+  glClearColor(saved_clear_color[0], saved_clear_color[1], saved_clear_color[2],
+               saved_clear_color[3]);
   glBindTexture(GL_TEXTURE_2D, saved_texture_binding);
   glBindVertexArray(saved_vao_binding);
   glBindBuffer(GL_ARRAY_BUFFER, saved_array_buffer_binding);
@@ -216,4 +194,41 @@ void fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
   glUseProgram(saved_current_program);
   glBlendFuncSeparate(saved_src_rgb, saved_dst_rgb, saved_src_alpha,
                       saved_dst_alpha);
+}
+
+FlOpenGLManager* fl_compositor_opengl_get_opengl_manager(
+    FlCompositorOpenGL* self) {
+  g_return_val_if_fail(FL_IS_COMPOSITOR_OPENGL(self), nullptr);
+  return self->opengl_manager;
+}
+
+gboolean fl_compositor_opengl_can_fence(FlCompositorOpenGL* self) {
+  g_return_val_if_fail(FL_IS_COMPOSITOR_OPENGL(self), FALSE);
+  return self->can_fence;
+}
+
+GLint fl_compositor_opengl_get_frame_format(const FlutterLayer** layers,
+                                            size_t layers_count) {
+  // Every backing store in a frame is created by the same engine code from
+  // context-wide capabilities, so they all share a format and the first one
+  // describes the frame. Layers that aren't OpenGL framebuffer backing stores,
+  // e.g. platform views, don't have a format to match; fl_engine.cc only
+  // creates framebuffers, so there is nothing else to read a format from.
+  for (size_t i = 0; i < layers_count; i++) {
+    const FlutterLayer* layer = layers[i];
+    if (layer == nullptr ||
+        layer->type != kFlutterLayerContentTypeBackingStore ||
+        layer->backing_store == nullptr ||
+        layer->backing_store->type != kFlutterBackingStoreTypeOpenGL ||
+        layer->backing_store->open_gl.type !=
+            kFlutterOpenGLTargetTypeFramebuffer) {
+      continue;
+    }
+
+    return layer->backing_store->open_gl.framebuffer.target == GL_BGRA8_EXT
+               ? GL_BGRA_EXT
+               : GL_RGBA;
+  }
+
+  return GL_RGBA;
 }

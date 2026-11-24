@@ -16,7 +16,7 @@ platform_properties:
       # CIPD flutter/java/openjdk/$platform
       dependencies: >-
         [
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "gradle_cache", "version": "none"}
         ]
       device_type: none
@@ -28,10 +28,10 @@ platform_properties:
       # CIPD flutter/java/openjdk/$platform
       dependencies: >-
         [
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"}
         ]
       device_type: none
-      os: Mac-15.7
+      os: Mac-15.7|Mac-26.6
       $flutter/osx_sdk : >-
         {
           "sdk_version": "17c52"
@@ -41,7 +41,7 @@ platform_properties:
       # CIPD flutter/java/openjdk/$platform
       dependencies: >-
         [
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"}
         ]
       device_type: none
       os: Windows-10
@@ -51,10 +51,19 @@ targets:
     enabled_branches:
       - master
     recipe: engine_v2/engine_v2
-    bringup: true
+    presubmit: false
     properties:
       config_name: local_engine
     # local_engine schedules a bunch of other builds, so it's likely to timeout waiting for those builds to run.
+    timeout: 180
+
+  # The local engine configurations most contributors build, so run in presubmit.
+  - name: Linux local_engine_builds_common
+    enabled_branches:
+      - master
+    recipe: engine_v2/engine_v2
+    properties:
+      config_name: local_engine_common
     timeout: 180
 
   - name: Linux linux_android_emulator_tests
@@ -65,7 +74,7 @@ targets:
       config_name: linux_android_emulator
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"}
         ]
     timeout: 90
 
@@ -88,8 +97,7 @@ targets:
       gclient_variables: >-
         {
           "download_emsdk": "true",
-          "download_android_deps": "true",
-          "download_jdk": "true"
+          "download_android_deps": "true"
         }
     timeout: 60
 
@@ -111,8 +119,7 @@ targets:
         ]
       gclient_variables: >-
         {
-          "download_android_deps": "true",
-          "download_jdk": "true"
+          "download_android_deps": "true"
         }
     timeout: 60
 
@@ -136,8 +143,7 @@ targets:
         ]
       gclient_variables: >-
         {
-          "download_android_deps": "true",
-          "download_jdk": "true"
+          "download_android_deps": "true"
         }
     timeout: 60
 
@@ -240,7 +246,7 @@ targets:
       config_name: linux_host_engine
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"}
         ]
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
@@ -281,7 +287,7 @@ targets:
       config_name: linux_host_engine_test
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"}
         ]
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
@@ -483,7 +489,7 @@ targets:
       config_name: mac_host_engine
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"}
         ]
       $flutter/osx_sdk : >-
         {
@@ -492,7 +498,7 @@ targets:
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
     drone_dimensions:
-      - os=Mac-15.7
+      - os=Mac-15.7|Mac-26.6
 
   - name: Mac clangd
     recipe: engine_v2/builder
@@ -500,12 +506,73 @@ targets:
       config_name: mac_clangd
       cpu: arm64
 
-  - name: Mac mac_unopt
-    recipe: engine_v2/engine_v2
-    properties:
-      config_name: mac_unopt
-      add_recipes_cq: "true"
+  - name: Mac mac_host_debug_arm64_tests
+    recipe: engine_v2/builder
     timeout: 120
+    properties:
+      config_name: mac_host_debug_arm64_tests
+      cpu: arm64
+
+  - name: Mac mac_host_profile_arm64_tests
+    recipe: engine_v2/builder
+    timeout: 120
+    properties:
+      config_name: mac_host_profile_arm64_tests
+      cpu: arm64
+
+  - name: Mac mac_host_release_arm64_tests
+    recipe: engine_v2/builder
+    timeout: 120
+    properties:
+      config_name: mac_host_release_arm64_tests
+      cpu: arm64
+
+  - name: Mac mac_host_release_arm64_licenses
+    recipe: engine_v2/builder
+    timeout: 120
+    properties:
+      config_name: mac_host_release_arm64_licenses
+      cpu: arm64
+
+  - name: Mac mac_release_arm64_tests
+    recipe: engine_v2/builder
+    timeout: 120
+    properties:
+      config_name: mac_release_arm64_tests
+      cpu: arm64
+
+  - name: Mac mac_host_debug_unopt_arm64
+    recipe: engine_v2/builder
+    timeout: 120
+    properties:
+      add_recipes_cq: "true"
+      config_name: mac_host_debug_unopt_arm64
+      cpu: arm64
+
+  - name: Mac mac_ios_debug_unopt_sim_arm64
+    recipe: engine_v2/builder
+    timeout: 120
+    properties:
+      add_recipes_cq: "true"
+      config_name: mac_ios_debug_unopt_sim_arm64
+      cpu: arm64
+      $flutter/osx_sdk: >-
+        {
+          "sdk_version": "17c52",
+          "runtime_versions": ["ios-26-2_17c52"]
+        }
+
+  - name: Mac mac_ios_debug_unopt_sim_arm64_extension_safe
+    recipe: engine_v2/builder
+    timeout: 120
+    properties:
+      config_name: mac_ios_debug_unopt_sim_arm64_extension_safe
+      cpu: arm64
+      $flutter/osx_sdk: >-
+        {
+          "sdk_version": "17c52",
+          "runtime_versions": ["ios-26-2_17c52"]
+        }
 
   - name: Mac mac_ios_engine
     recipe: engine_v2/engine_v2
@@ -521,7 +588,7 @@ targets:
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
     drone_dimensions:
-      - os=Mac-15.7
+      - os=Mac-15.7|Mac-26.6
       - cpu=x86
 
   - name: Mac mac_ios_engine_ddm
@@ -541,7 +608,7 @@ targets:
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
     drone_dimensions:
-      - os=Mac-15.7
+      - os=Mac-15.7|Mac-26.6
       - cpu=x86
 
   - name: Linux windows_android_aot_engine
@@ -593,8 +660,6 @@ targets:
   - name: Windows windows_unopt
     recipe: engine_v2/builder
     timeout: 120
-    # TODO(#177172): dashboard super unhealthy
-    bringup: true
     properties:
       config_name: windows_unopt
 
@@ -606,7 +671,7 @@ targets:
   #
   - name: Linux linux_android_aot_engine_size_exp
     recipe: engine_v2/engine_v2
-    bringup: true
+    presubmit: false
     timeout: 120
     enabled_branches:
       # Don't run this on release branches

@@ -64,9 +64,9 @@ bool CompositorOpenGL::CreateBackingStore(
       gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
       gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
       gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-      gl_->TexImage2D(GL_TEXTURE_2D, 0, format_.sized_format, config.size.width,
-                      config.size.height, 0, format_.general_format,
-                      GL_UNSIGNED_BYTE, nullptr);
+      gl_->TexImage2D(GL_TEXTURE_2D, 0, format_.internal_format,
+                      config.size.width, config.size.height, 0,
+                      format_.general_format, GL_UNSIGNED_BYTE, nullptr);
       gl_->BindTexture(GL_TEXTURE_2D, 0);
 
       // MSAA color attachment
@@ -112,9 +112,9 @@ bool CompositorOpenGL::CreateBackingStore(
       gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
       gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
       gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-      gl_->TexImage2D(GL_TEXTURE_2D, 0, format_.sized_format, config.size.width,
-                      config.size.height, 0, format_.general_format,
-                      GL_UNSIGNED_BYTE, nullptr);
+      gl_->TexImage2D(GL_TEXTURE_2D, 0, format_.internal_format,
+                      config.size.width, config.size.height, 0,
+                      format_.general_format, GL_UNSIGNED_BYTE, nullptr);
       gl_->BindTexture(GL_TEXTURE_2D, 0);
 
       gl_->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
@@ -136,9 +136,9 @@ bool CompositorOpenGL::CreateBackingStore(
     gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    gl_->TexImage2D(GL_TEXTURE_2D, 0, format_.sized_format, config.size.width,
-                    config.size.height, 0, format_.general_format,
-                    GL_UNSIGNED_BYTE, nullptr);
+    gl_->TexImage2D(GL_TEXTURE_2D, 0, format_.internal_format,
+                    config.size.width, config.size.height, 0,
+                    format_.general_format, GL_UNSIGNED_BYTE, nullptr);
     gl_->BindTexture(GL_TEXTURE_2D, 0);
 
     gl_->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
@@ -280,6 +280,12 @@ bool CompositorOpenGL::Initialize() {
     format_.sized_format = GL_RGBA8;
     format_.general_format = GL_RGBA;
   }
+
+  const impeller::DescriptionGLES* description = gl_->GetDescription();
+  bool is_gles2 =
+      description->IsES() && description->GetGlVersion().major_version < 3;
+  format_.internal_format =
+      is_gles2 ? format_.general_format : format_.sized_format;
 
   if (!gl_->BlitFramebuffer.IsAvailable() &&
       !gl_->BlitFramebufferANGLE.IsAvailable()) {

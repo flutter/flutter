@@ -152,11 +152,11 @@ class RenderListWheelViewport extends RenderBox
   /// Optional arguments have reasonable defaults.
   RenderListWheelViewport({
     required this.childManager,
-    required ViewportOffset offset,
+    required this._offset,
     double diameterRatio = defaultDiameterRatio,
     double perspective = defaultPerspective,
-    double offAxisFraction = 0,
-    bool useMagnifier = false,
+    this._offAxisFraction = 0,
+    this._useMagnifier = false,
     double magnification = 1,
     double overAndUnderCenterOpacity = 1,
     required double itemExtent,
@@ -175,11 +175,8 @@ class RenderListWheelViewport extends RenderBox
          !renderChildrenOutsideViewport || clipBehavior == Clip.none,
          clipBehaviorAndRenderChildrenOutsideViewportConflict,
        ),
-       _offset = offset,
        _diameterRatio = diameterRatio,
        _perspective = perspective,
-       _offAxisFraction = offAxisFraction,
-       _useMagnifier = useMagnifier,
        _magnification = magnification,
        _overAndUnderCenterOpacity = overAndUnderCenterOpacity,
        _itemExtent = itemExtent,
@@ -260,7 +257,7 @@ class RenderListWheelViewport extends RenderBox
   /// [itemExtent]. Then the children are evenly distributed along the visible
   /// angles up to ±[math.pi] / 2.
   ///
-  /// Just as it's impossible to stretch a paper to cover the an entire
+  /// Just as it's impossible to stretch a paper to cover an entire
   /// half of a cylinder's surface where the cylinder has the same diameter
   /// as the paper's length, choosing a [diameterRatio] smaller than [math.pi]
   /// will leave same gaps between the children.

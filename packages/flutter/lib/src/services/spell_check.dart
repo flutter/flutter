@@ -8,6 +8,7 @@ library;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+
 import 'system_channels.dart';
 
 /// A data structure representing a range of misspelled text and the suggested
@@ -185,12 +186,10 @@ class DefaultSpellCheckService implements SpellCheckService {
     final String languageTag = locale.toLanguageTag();
 
     try {
-      rawResults =
-          await spellCheckChannel.invokeMethod('SpellCheck.initiateSpellCheck', <String>[
-                languageTag,
-                text,
-              ])
-              as List<dynamic>;
+      rawResults = await spellCheckChannel.invokeMethod('SpellCheck.initiateSpellCheck', <String>[
+        languageTag,
+        text,
+      ]) as List<dynamic>;
     } catch (e) {
       // Spell check request canceled due to pending request.
       return null;

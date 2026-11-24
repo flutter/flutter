@@ -8,9 +8,9 @@
 #include <cstdint>
 #include <unordered_map>
 
-#include "fml/status_or.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/pipeline.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace impeller {
 
@@ -43,7 +43,7 @@ class DescriptorPoolVK {
 
   ~DescriptorPoolVK();
 
-  fml::StatusOr<vk::DescriptorSet> AllocateDescriptorSets(
+  absl::StatusOr<vk::DescriptorSet> AllocateDescriptorSets(
       const vk::DescriptorSetLayout& layout,
       PipelineKey pipeline_key,
       const ContextVK& context_vk);
@@ -57,7 +57,7 @@ class DescriptorPoolVK {
 
   void Destroy();
 
-  fml::Status CreateNewPool(const ContextVK& context_vk);
+  absl::Status CreateNewPool(const ContextVK& context_vk);
 
   DescriptorPoolVK(const DescriptorPoolVK&) = delete;
 

@@ -4,16 +4,18 @@
 
 package io.flutter.embedding.android;
 
-import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_CACHED_ENGINE_ID;
-import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -24,6 +26,7 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.window.BackEvent;
@@ -43,6 +46,7 @@ import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterJNI;
+import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
@@ -56,9 +60,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockedStatic;
 import org.robolectric.Robolectric;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowLog;
 
 @RunWith(AndroidJUnit4.class)
 public class FlutterActivityTest {
@@ -111,7 +117,10 @@ public class FlutterActivityTest {
     // Set to framework handling and then recreate the activity and check the state is preserved.
     flutterActivityScenario.onActivity(activity -> activity.setFrameworkHandlesBack(true));
     flutterActivityScenario.onActivity(
-        activity -> activity.getIntent().putExtra(EXTRA_CACHED_ENGINE_ID, "my_cached_engine"));
+        activity ->
+            activity
+                .getIntent()
+                .putExtra(FlutterActivityLaunchConfigs.EXTRA_CACHED_ENGINE_ID, "my_cached_engine"));
 
     flutterActivityScenario.recreate();
     flutterActivityScenario.onActivity(activity -> assertTrue(activity.hasRegisteredBackCallback));
@@ -250,7 +259,7 @@ public class FlutterActivityTest {
     assertNull(flutterActivity.getDartEntrypointLibraryUri());
     assertNull(flutterActivity.getDartEntrypointArgs());
     assertEquals("/", flutterActivity.getInitialRoute());
-    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs().toArray());
+    assertTrue(flutterActivity.getFlutterEngineFlags().isEmpty());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
     assertNull(flutterActivity.getCachedEngineId());
     assertTrue(flutterActivity.shouldDestroyEngineWithHost());
@@ -303,7 +312,7 @@ public class FlutterActivityTest {
     assertEquals("/custom/route", flutterActivity.getInitialRoute());
     assertArrayEquals(
         new String[] {"foo", "bar"}, flutterActivity.getDartEntrypointArgs().toArray());
-    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs().toArray());
+    assertTrue(flutterActivity.getFlutterEngineFlags().isEmpty());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
     assertNull(flutterActivity.getCachedEngineId());
     assertTrue(flutterActivity.shouldDestroyEngineWithHost());
@@ -328,13 +337,86 @@ public class FlutterActivityTest {
     assertEquals("my_cached_engine_group", flutterActivity.getCachedEngineGroupId());
     assertEquals("custom_entrypoint", flutterActivity.getDartEntrypointFunctionName());
     assertEquals("/custom/route", flutterActivity.getInitialRoute());
-    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs().toArray());
+    assertTrue(flutterActivity.getFlutterEngineFlags().isEmpty());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
     assertTrue(flutterActivity.shouldDestroyEngineWithHost());
     assertNull(flutterActivity.getCachedEngineId());
     assertEquals(BackgroundMode.transparent, flutterActivity.getBackgroundMode());
     assertEquals(RenderMode.texture, flutterActivity.getRenderMode());
     assertEquals(TransparencyMode.transparent, flutterActivity.getTransparencyMode());
+  }
+
+  @Test
+  public void getInitialRoute_readsFromIntent() throws Exception {
+    Intent intent = FlutterActivity.withNewEngine().initialRoute("/custom/route/intent").build(ctx);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    FlutterActivity spyFlutterActivity = spy(flutterActivity);
+    PackageManager mockPackageManager = mock(PackageManager.class);
+    when(spyFlutterActivity.getPackageManager()).thenReturn(mockPackageManager);
+    ApplicationInfo mockApplicationInfo = new ApplicationInfo();
+    mockApplicationInfo.metaData = new Bundle();
+    mockApplicationInfo.metaData.putString(
+        "io.flutter.app.androidEngineShellArgs", "[\"--route=/custom/route/args\"]");
+    when(mockPackageManager.getApplicationInfo(
+            org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyInt()))
+        .thenReturn(mockApplicationInfo);
+
+    assertEquals("/custom/route/intent", spyFlutterActivity.getInitialRoute());
+  }
+
+  @Test
+  public void getInitialRoute_readsFromCommandLineArgs() throws Exception {
+    Intent intent = FlutterActivity.withNewEngine().build(ctx);
+    intent.removeExtra(FlutterActivityLaunchConfigs.EXTRA_INITIAL_ROUTE);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    FlutterActivity spyFlutterActivity = spy(flutterActivity);
+    PackageManager mockPackageManager = mock(PackageManager.class);
+    when(spyFlutterActivity.getPackageManager()).thenReturn(mockPackageManager);
+    ApplicationInfo mockApplicationInfo = new ApplicationInfo();
+    mockApplicationInfo.metaData = new Bundle();
+    mockApplicationInfo.metaData.putString(
+        "io.flutter.app.androidEngineShellArgs", "[\"--route=/custom/route\"]");
+    when(mockPackageManager.getApplicationInfo(
+            org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyInt()))
+        .thenReturn(mockApplicationInfo);
+
+    Bundle activityMetaData = new Bundle();
+    activityMetaData.putString(
+        FlutterActivityLaunchConfigs.INITIAL_ROUTE_META_DATA_KEY, "/fallback/route");
+    doReturn(activityMetaData).when(spyFlutterActivity).getMetaData();
+
+    assertEquals("/custom/route", spyFlutterActivity.getInitialRoute());
+  }
+
+  @Test
+  public void getInitialRoute_readsFromActivityInfoFallback() throws Exception {
+    Intent intent = FlutterActivity.withNewEngine().build(ctx);
+    intent.removeExtra(FlutterActivityLaunchConfigs.EXTRA_INITIAL_ROUTE);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    FlutterActivity spyFlutterActivity = spy(flutterActivity);
+
+    PackageManager mockPackageManager = mock(PackageManager.class);
+    when(spyFlutterActivity.getPackageManager()).thenReturn(mockPackageManager);
+    ApplicationInfo mockApplicationInfo = new ApplicationInfo();
+    when(mockPackageManager.getApplicationInfo(
+            org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyInt()))
+        .thenReturn(mockApplicationInfo);
+
+    Bundle activityMetaData = new Bundle();
+    activityMetaData.putString(
+        FlutterActivityLaunchConfigs.INITIAL_ROUTE_META_DATA_KEY, "/fallback/route");
+    doReturn(activityMetaData).when(spyFlutterActivity).getMetaData();
+
+    assertEquals("/fallback/route", spyFlutterActivity.getInitialRoute());
   }
 
   @Test
@@ -346,7 +428,7 @@ public class FlutterActivityTest {
         Robolectric.buildActivity(FlutterActivity.class, intent);
     FlutterActivity flutterActivity = activityController.get();
     Bundle bundle = new Bundle();
-    bundle.putBoolean(HANDLE_DEEPLINKING_META_DATA_KEY, true);
+    bundle.putBoolean(FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY, true);
     FlutterActivity spyFlutterActivity = spy(flutterActivity);
     when(spyFlutterActivity.getMetaData()).thenReturn(bundle);
     assertTrue(spyFlutterActivity.shouldHandleDeeplinking());
@@ -361,7 +443,7 @@ public class FlutterActivityTest {
         Robolectric.buildActivity(FlutterActivity.class, intent);
     FlutterActivity flutterActivity = activityController.get();
     Bundle bundle = new Bundle();
-    bundle.putBoolean(HANDLE_DEEPLINKING_META_DATA_KEY, false);
+    bundle.putBoolean(FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY, false);
     FlutterActivity spyFlutterActivity = spy(flutterActivity);
     when(spyFlutterActivity.getMetaData()).thenReturn(bundle);
     assertFalse(spyFlutterActivity.shouldHandleDeeplinking());
@@ -393,7 +475,7 @@ public class FlutterActivityTest {
         Robolectric.buildActivity(FlutterActivity.class, intent);
     FlutterActivity flutterActivity = activityController.get();
 
-    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs().toArray());
+    assertTrue(flutterActivity.getFlutterEngineFlags().isEmpty());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
     assertEquals("my_cached_engine", flutterActivity.getCachedEngineId());
     assertFalse(flutterActivity.shouldDestroyEngineWithHost());
@@ -409,7 +491,7 @@ public class FlutterActivityTest {
         Robolectric.buildActivity(FlutterActivity.class, intent);
     FlutterActivity flutterActivity = activityController.get();
 
-    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs().toArray());
+    assertTrue(flutterActivity.getFlutterEngineFlags().isEmpty());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
     assertEquals("my_cached_engine", flutterActivity.getCachedEngineId());
     assertTrue(flutterActivity.shouldDestroyEngineWithHost());
@@ -627,6 +709,253 @@ public class FlutterActivityTest {
     flutterActivity.resetFullyDrawn();
   }
 
+  @Test
+  public void getCachedEngineId_returnsIdWhenSelfSent() {
+    Intent intent = FlutterActivity.withCachedEngine("my_cached_engine").build(ctx);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_CACHED_ENGINE_ID)))
+          .thenReturn("my_cached_engine");
+      assertEquals("my_cached_engine", flutterActivity.getCachedEngineId());
+    }
+  }
+
+  @Test
+  public void getCachedEngineId_returnsNullWhenNotSelfSent() {
+    Intent intent = FlutterActivity.withCachedEngine("my_cached_engine").build(ctx);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_CACHED_ENGINE_ID)))
+          .thenReturn(null);
+      assertNull(flutterActivity.getCachedEngineId());
+    }
+  }
+
+  @Test
+  public void getCachedEngineGroupId_returnsIdWhenSelfSent() {
+    Intent intent =
+        FlutterActivity.withNewEngineInGroup("my_cached_engine_group")
+            .dartEntrypoint("main")
+            .build(ctx);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_CACHED_ENGINE_GROUP_ID)))
+          .thenReturn("my_cached_engine_group");
+      assertEquals("my_cached_engine_group", flutterActivity.getCachedEngineGroupId());
+    }
+  }
+
+  @Test
+  public void getCachedEngineGroupId_returnsNullWhenNotSelfSent() {
+    Intent intent =
+        FlutterActivity.withNewEngineInGroup("my_cached_engine_group")
+            .dartEntrypoint("main")
+            .build(ctx);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_CACHED_ENGINE_GROUP_ID)))
+          .thenReturn(null);
+      assertNull(flutterActivity.getCachedEngineGroupId());
+    }
+  }
+
+  @Test
+  public void getDartEntrypointFunctionName_returnsNameWhenSelfSent() {
+    Intent intent =
+        FlutterActivity.withNewEngine()
+            .build(ctx)
+            .putExtra(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT, "custom_entrypoint");
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT)))
+          .thenReturn("custom_entrypoint");
+      assertEquals("custom_entrypoint", flutterActivity.getDartEntrypointFunctionName());
+    }
+  }
+
+  @Test
+  public void getDartEntrypointFunctionName_returnsDefaultWhenNotSelfSent() {
+    Intent intent =
+        FlutterActivity.withNewEngine()
+            .build(ctx)
+            .putExtra(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT, "custom_entrypoint");
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT)))
+          .thenReturn(null);
+      assertEquals("main", flutterActivity.getDartEntrypointFunctionName());
+    }
+  }
+
+  @Test
+  public void getDartEntrypointArgs_returnsArgsWhenSelfSent() {
+    Intent intent =
+        FlutterActivity.withNewEngine()
+            .dartEntrypointArgs(new ArrayList<String>(Arrays.asList("foo", "bar")))
+            .build(ctx);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetSerializableExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT_ARGS)))
+          .thenReturn(new ArrayList<String>(Arrays.asList("foo", "bar")));
+      assertEquals(Arrays.asList("foo", "bar"), flutterActivity.getDartEntrypointArgs());
+    }
+  }
+
+  @Test
+  public void getDartEntrypointArgs_returnsNullWhenNotSelfSent() {
+    Intent intent =
+        FlutterActivity.withNewEngine()
+            .dartEntrypointArgs(new ArrayList<String>(Arrays.asList("foo", "bar")))
+            .build(ctx);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetSerializableExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT_ARGS)))
+          .thenReturn(null);
+      assertNull(flutterActivity.getDartEntrypointArgs());
+    }
+  }
+
+  @Test
+  public void getInitialRoute_returnsRouteWhenSelfSent() {
+    Intent intent = FlutterActivity.withNewEngine().initialRoute("/custom/route").build(ctx);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_INITIAL_ROUTE)))
+          .thenReturn("/custom/route");
+      assertEquals("/custom/route", flutterActivity.getInitialRoute());
+    }
+  }
+
+  @Test
+  public void getInitialRoute_returnsNullWhenNotSelfSent() {
+    Intent intent = FlutterActivity.withNewEngine().initialRoute("/custom/route").build(ctx);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_INITIAL_ROUTE)))
+          .thenReturn(null);
+      assertNull(flutterActivity.getInitialRoute());
+    }
+  }
+
+  @Test
+  public void getInitialRoute_returnsRouteFromMetaDataWhenNotSelfSent()
+      throws PackageManager.NameNotFoundException {
+    Intent intent = FlutterActivity.withNewEngine().initialRoute("/custom/route").build(ctx);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = spy(activityController.get());
+
+    Bundle bundle = new Bundle();
+    bundle.putString(FlutterActivityLaunchConfigs.INITIAL_ROUTE_META_DATA_KEY, "/meta/route");
+    when(flutterActivity.getMetaData()).thenReturn(bundle);
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_INITIAL_ROUTE)))
+          .thenReturn(null);
+      assertEquals("/meta/route", flutterActivity.getInitialRoute());
+    }
+  }
+
+  @Test
+  public void getDartEntrypointFunctionName_returnsNameFromMetaDataWhenNotSelfSent()
+      throws PackageManager.NameNotFoundException {
+    Intent intent =
+        FlutterActivity.withNewEngine()
+            .build(ctx)
+            .putExtra(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT, "custom_entrypoint");
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = spy(activityController.get());
+
+    Bundle bundle = new Bundle();
+    bundle.putString(FlutterActivityLaunchConfigs.DART_ENTRYPOINT_META_DATA_KEY, "meta_entrypoint");
+    when(flutterActivity.getMetaData()).thenReturn(bundle);
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT)))
+          .thenReturn(null);
+      assertEquals("meta_entrypoint", flutterActivity.getDartEntrypointFunctionName());
+    }
+  }
+
   static class FlutterActivityWithProvidedEngine extends FlutterActivity {
     @Override
     @SuppressLint("MissingSuperCall")
@@ -778,6 +1107,86 @@ public class FlutterActivityTest {
     public void onCreate(@NonNull LifecycleOwner lifecycleOwner) {
       assertTrue("State was restored before onCreate", stateRestored);
       onCreateCalled = true;
+    }
+  }
+
+  @Test
+  public void flutterActivity_forwardsOverriddenFlutterShellArgsToEngineFlags() {
+    ActivityController<FlutterActivityWithOverriddenShellArgs> activityController =
+        Robolectric.buildActivity(FlutterActivityWithOverriddenShellArgs.class);
+    FlutterActivityWithOverriddenShellArgs activity = activityController.get();
+
+    List<String> flags = activity.getFlutterEngineFlags();
+    assertEquals(2, flags.size());
+    assertTrue(flags.contains("--custom-flag-1"));
+    assertTrue(flags.contains("--custom-flag-2"));
+
+    List<ShadowLog.LogItem> logs = ShadowLog.getLogsForTag("FlutterActivity");
+    boolean hasDeprecationWarning = false;
+    for (ShadowLog.LogItem log : logs) {
+      if (log.msg.contains("FlutterShellArgs is deprecated")) {
+        hasDeprecationWarning = true;
+        break;
+      }
+    }
+    assertTrue(hasDeprecationWarning);
+  }
+
+  @Test
+  public void flutterActivity_superGetFlutterShellArgsDoesNotCauseRecursion() {
+    ActivityController<FlutterActivityWithSuperShellArgs> activityController =
+        Robolectric.buildActivity(FlutterActivityWithSuperShellArgs.class);
+    FlutterActivityWithSuperShellArgs activity = activityController.get();
+
+    List<String> flags = activity.getFlutterEngineFlags();
+    assertEquals(1, flags.size());
+    assertTrue(flags.contains(FlutterActivityWithSuperShellArgs.APPENDED_FLAG));
+  }
+
+  @Test
+  public void flutterActivity_superGetFlutterShellArgsIncludesIntentFlagsAndAppendedFlag() {
+    Intent intent = new Intent(ctx, FlutterActivityWithSuperShellArgs.class);
+    intent.putExtra("trace-startup", true);
+    ActivityController<FlutterActivityWithSuperShellArgs> activityController =
+        Robolectric.buildActivity(FlutterActivityWithSuperShellArgs.class, intent);
+    FlutterActivityWithSuperShellArgs activity = activityController.get();
+
+    List<String> flags = activity.getFlutterEngineFlags();
+    assertEquals(2, flags.size());
+    assertTrue(flags.contains("--trace-startup"));
+    assertTrue(flags.contains(FlutterActivityWithSuperShellArgs.APPENDED_FLAG));
+  }
+
+  @Test
+  public void flutterActivity_returnsEngineFlagsDirectlyWhenShellArgsNotOverridden() {
+    Intent intent = FlutterActivity.createDefaultIntent(ctx);
+    intent.putExtra("trace-startup", true);
+    FlutterActivity activity = RobolectricFlutterActivity.createFlutterActivity(intent);
+
+    List<String> flags = activity.getFlutterEngineFlags();
+    assertEquals(1, flags.size());
+    assertTrue(flags.contains("--trace-startup"));
+  }
+
+  static class FlutterActivityWithOverriddenShellArgs extends FlutterActivity {
+    @NonNull
+    @Override
+    @SuppressWarnings("deprecation")
+    public FlutterShellArgs getFlutterShellArgs() {
+      return new FlutterShellArgs(new String[] {"--custom-flag-1", "--custom-flag-2"});
+    }
+  }
+
+  static class FlutterActivityWithSuperShellArgs extends FlutterActivity {
+    static final String APPENDED_FLAG = "--appended-flag";
+
+    @NonNull
+    @Override
+    @SuppressWarnings("deprecation")
+    public FlutterShellArgs getFlutterShellArgs() {
+      FlutterShellArgs args = super.getFlutterShellArgs();
+      args.add(APPENDED_FLAG);
+      return args;
     }
   }
 }

@@ -8,17 +8,19 @@ import '../framework/talkback.dart' hide adbPath;
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
-TaskFunction createChannelsIntegrationTest() {
+TaskFunction createChannelsIntegrationTest({String? deviceIdOverride}) {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/channels',
     'integration_test/main_test.dart',
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
-TaskFunction createPlatformInteractionTest() {
+TaskFunction createPlatformInteractionTest({String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/platform_interaction',
     'lib/main.dart',
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
@@ -51,11 +53,13 @@ TaskFunction createIntegrationTestFlavorsTest({
 
 TaskFunction createExternalTexturesFrameRateIntegrationTest({
   List<String> extraOptions = const <String>[],
+  String? deviceIdOverride,
 }) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/external_textures',
     'lib/frame_rate_main.dart',
     extraOptions: extraOptions,
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
@@ -67,10 +71,11 @@ TaskFunction createPlatformChannelSampleTest({String? deviceIdOverride}) {
   ).call;
 }
 
-TaskFunction createPlatformChannelSwiftSampleTest() {
+TaskFunction createPlatformChannelSwiftSampleTest({String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/examples/platform_channel_swift',
     'test_driver/button_tap.dart',
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
@@ -89,18 +94,18 @@ TaskFunction createAndroidSemanticsIntegrationTest() {
   ).call;
 }
 
-TaskFunction createIOSPlatformViewTests() {
-  return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/ios_platform_view_tests',
-    'lib/main.dart',
-    extraOptions: <String>['--dart-define=ENABLE_DRIVER_EXTENSION=true'],
-  ).call;
-}
-
 TaskFunction createEndToEndKeyboardTest({String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/keyboard_resize.dart',
+    deviceIdOverride: deviceIdOverride,
+  ).call;
+}
+
+TaskFunction createEndToEndKeyboardInsetJumpTest({String? deviceIdOverride}) {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/keyboard_inset_jump.dart',
     deviceIdOverride: deviceIdOverride,
   ).call;
 }
@@ -195,10 +200,11 @@ TaskFunction createDisplayCutoutTest() {
   ).call;
 }
 
-TaskFunction dartDefinesTask() {
+TaskFunction dartDefinesTask({String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/defines.dart',
+    deviceIdOverride: deviceIdOverride,
     extraOptions: <String>[
       '--dart-define=test.valueA=Example,A',
       '--dart-define=test.valueB=Value',
@@ -217,17 +223,19 @@ TaskFunction featureFlagsTask() {
   };
 }
 
-TaskFunction createEndToEndIntegrationTest() {
+TaskFunction createEndToEndIntegrationTest({String? deviceIdOverride}) {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'integration_test/integration_test.dart',
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
-TaskFunction createSpellCheckIntegrationTest() {
+TaskFunction createSpellCheckIntegrationTest({String? deviceIdOverride}) {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/spell_check',
     'integration_test/integration_test.dart',
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
@@ -239,11 +247,14 @@ TaskFunction createWindowsStartupDriverTest({String? deviceIdOverride}) {
   ).call;
 }
 
-TaskFunction createEngineIntegrationGoldenTest() {
+TaskFunction createEngineIntegrationGoldenTest({String? maxD3DFeatureLevel}) {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/engine_integration_golden_test',
     'integration_test/engine_integration_golden_test.dart',
     createPlatforms: <String>['windows'],
+    environment: <String, String>{
+      if (maxD3DFeatureLevel != null) 'FLUTTER_WINDOWS_MAX_D3D_FEATURE_LEVEL': maxD3DFeatureLevel,
+    },
   ).call;
 }
 

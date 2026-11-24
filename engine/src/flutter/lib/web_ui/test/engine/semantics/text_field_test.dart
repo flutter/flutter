@@ -94,15 +94,13 @@ void testMain() {
 
       expectSemanticsTree(owner(), '<sem><input type="text" /></sem>');
 
-      // TODO(yjbanov): this used to attempt to test that value="hello" but the
-      //                test was a false positive. We should revise this test and
-      //                make sure it tests the right things:
-      //                https://github.com/flutter/flutter/issues/147200
+      // `outerHTML` does not include the `value` property, so it is checked
+      // on the element directly.
       final SemanticsObject node = owner().debugSemanticsTree![0]!;
       final textFieldRole = node.semanticRole! as SemanticTextField;
       final inputElement = textFieldRole.editableElement as DomHTMLInputElement;
       expect(inputElement.tagName.toLowerCase(), 'input');
-      expect(inputElement.value, '');
+      expect(inputElement.value, 'hello');
       expect(inputElement.disabled, isFalse);
       expect(inputElement.getAttribute('aria-required'), isNull);
     });
@@ -156,6 +154,44 @@ void testMain() {
       final inputElement = textFieldRole.editableElement as DomHTMLInputElement;
       expect(inputElement.tagName.toLowerCase(), 'input');
       expect(inputElement.disabled, isTrue);
+      // A disabled field is never focused, so its value has to come from
+      // semantics for screen readers to read it.
+      expect(inputElement.value, 'hello');
+    });
+
+    test('updates the value of a field that is not being edited', () {
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello');
+      final inputElement =
+          (node.semanticRole! as SemanticTextField).editableElement as DomHTMLInputElement;
+      expect(inputElement.value, 'hello');
+
+      createTextFieldSemantics(value: 'bye');
+      expect(inputElement.value, 'bye');
+    });
+
+    test('renders the value of a multi-line field that is not being edited', () {
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello', isMultiline: true);
+      final textArea =
+          (node.semanticRole! as SemanticTextField).editableElement as DomHTMLTextAreaElement;
+      expect(textArea.value, 'hello');
+    });
+
+    test('does not write the masked value of an obscured field', () {
+      final SemanticsObject node = createTextFieldSemantics(value: '•••', isObscured: true);
+      final inputElement =
+          (node.semanticRole! as SemanticTextField).editableElement as DomHTMLInputElement;
+      expect(inputElement.value, '');
+    });
+
+    test('does not write the value of a field owned by an autofill group', () {
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello');
+      final inputElement =
+          (node.semanticRole! as SemanticTextField).editableElement as DomHTMLInputElement;
+      inputElement.name = 'username';
+      inputElement.value = 'autofilled';
+
+      createTextFieldSemantics(value: 'bye');
+      expect(inputElement.value, 'autofilled');
     });
 
     test('sends a SemanticsAction.focus action when browser requests focus', () async {
@@ -520,6 +556,184 @@ void testMain() {
       }
     });
 
+    test('Restores the editing state into a re-created field while the connection is open', () {
+      // Open the connection the way the framework does, so `isEditing` is true
+      // while the semantics node leaves the tree and comes back.
+      testTextEditing.acceptCommand(
+        TextInputSetClient(clientId: 123, configuration: singlelineConfig),
+        () {},
+      );
+      testTextEditing.acceptCommand(const TextInputShow(), () {});
+      testTextEditing.acceptCommand(
+        TextInputSetEditingState(
+          state: EditingState(text: 'hello world', baseOffset: 11, extentOffset: 11),
+        ),
+        () {},
+      );
+
+      void applyTree(SemanticsTester tester, {required bool withTextField}) {
+        tester.updateNode(
+          id: 0,
+          children: <SemanticsNodeUpdate>[
+            if (withTextField)
+              tester.updateNode(
+                id: 1,
+                flags: const ui.SemanticsFlags(
+                  isEnabled: ui.Tristate.isTrue,
+                  isTextField: true,
+                  isFocused: ui.Tristate.isTrue,
+                ),
+                value: 'hello world',
+                textSelectionBase: 11,
+                textSelectionExtent: 11,
+                rect: const ui.Rect.fromLTRB(0, 0, 50, 10),
+              ),
+          ],
+        );
+        tester.apply();
+      }
+
+      final spy = PlatformMessagesSpy()..setUp();
+      try {
+        final tester = SemanticsTester(owner());
+        applyTree(tester, withTextField: true);
+        final firstInput = tester.getTextField(1).editableElement as DomHTMLInputElement;
+        expect(strategy.domElement, firstInput);
+        expect(firstInput.value, 'hello world');
+
+        // The focused field scrolls out of view: its node is removed and the
+        // element is disposed, but the framework never closes the connection.
+        applyTree(tester, withTextField: false);
+        expect(strategy.isEnabled, isFalse);
+        expect(testTextEditing.isEditing, isTrue);
+
+        // The node comes back under the same id with a brand new element.
+        applyTree(tester, withTextField: true);
+        final secondInput = tester.getTextField(1).editableElement as DomHTMLInputElement;
+        expect(secondInput, isNot(same(firstInput)));
+        expect(strategy.domElement, secondInput);
+        expect(secondInput.value, 'hello world');
+        expect(secondInput.selectionStart, 11);
+        expect(secondInput.selectionEnd, 11);
+
+        // The browser reports a selection change for the newly focused element.
+        // The restored state matches the element, so nothing is sent back to
+        // the framework as an edit.
+        domDocument.dispatchEvent(createDomEvent('Event', 'selectionchange'));
+        final Iterable<PlatformMessage> updates = spy.messages.where(
+          (m) =>
+              m.channel == 'flutter/textinput' &&
+              m.methodName == 'TextInputClient.updateEditingState',
+        );
+        expect(updates, isEmpty);
+      } finally {
+        spy.tearDown();
+        testTextEditing.acceptCommand(const TextInputClearClient(), () {});
+      }
+    });
+
+    test('Drops the editing state when the framework closes the connection', () {
+      testTextEditing.acceptCommand(
+        TextInputSetClient(clientId: 123, configuration: singlelineConfig),
+        () {},
+      );
+      testTextEditing.acceptCommand(const TextInputShow(), () {});
+      testTextEditing.acceptCommand(
+        TextInputSetEditingState(
+          state: EditingState(text: 'hello world', baseOffset: 11, extentOffset: 11),
+        ),
+        () {},
+      );
+      createTextFieldSemantics(value: 'hello world', isFocused: true);
+      expect(strategy.lastEditingState, isNotNull);
+
+      testTextEditing.acceptCommand(const TextInputClearClient(), () {});
+      expect(testTextEditing.isEditing, isFalse);
+      expect(strategy.lastEditingState, isNull);
+    });
+
+    test('Restores the style into a re-created field while the connection is open', () {
+      testTextEditing.acceptCommand(
+        TextInputSetClient(clientId: 123, configuration: singlelineConfig),
+        () {},
+      );
+      // The framework sends the style once, when it opens the connection, and
+      // only again if the style changes.
+      testTextEditing.acceptCommand(
+        TextInputSetStyle(
+          style: EditableTextStyle(
+            textDirection: ui.TextDirection.ltr,
+            fontSize: 24,
+            textAlign: ui.TextAlign.left,
+            fontFamily: 'Arial',
+            fontWeight: 'normal',
+            letterSpacing: null,
+            wordSpacing: null,
+            lineHeight: null,
+          ),
+        ),
+        () {},
+      );
+      testTextEditing.acceptCommand(const TextInputShow(), () {});
+
+      void applyTree(SemanticsTester tester, {required bool withTextField}) {
+        tester.updateNode(
+          id: 0,
+          children: <SemanticsNodeUpdate>[
+            if (withTextField)
+              tester.updateNode(
+                id: 1,
+                flags: const ui.SemanticsFlags(
+                  isEnabled: ui.Tristate.isTrue,
+                  isTextField: true,
+                  isFocused: ui.Tristate.isTrue,
+                ),
+                value: 'hello',
+                rect: const ui.Rect.fromLTRB(0, 0, 50, 10),
+              ),
+          ],
+        );
+        tester.apply();
+      }
+
+      try {
+        final tester = SemanticsTester(owner());
+        applyTree(tester, withTextField: true);
+        final DomHTMLElement firstInput = tester.getTextField(1).editableElement;
+        expect(firstInput.style.fontSize, '24px');
+
+        applyTree(tester, withTextField: false);
+        applyTree(tester, withTextField: true);
+        final DomHTMLElement secondInput = tester.getTextField(1).editableElement;
+        expect(secondInput, isNot(same(firstInput)));
+        expect(secondInput.style.fontSize, '24px');
+        expect(secondInput.style.fontFamily, contains('Arial'));
+      } finally {
+        testTextEditing.acceptCommand(const TextInputClearClient(), () {});
+      }
+    });
+
+    test('Does not attach a focused field after the connection is closed', () {
+      testTextEditing.acceptCommand(
+        TextInputSetClient(clientId: 123, configuration: singlelineConfig),
+        () {},
+      );
+      testTextEditing.acceptCommand(const TextInputShow(), () {});
+      createTextFieldSemantics(value: 'hello', isFocused: true);
+      expect(strategy.domElement, isNotNull);
+
+      // An app can hide the keyboard while the field keeps focus. The engine
+      // closes the connection, but the field is still focused in the semantics
+      // tree, so the next semantics update calls `activate` again.
+      testTextEditing.acceptCommand(const TextInputHide(), () {});
+      expect(testTextEditing.isEditing, isFalse);
+      expect(strategy.domElement, isNull);
+
+      expect(() => createTextFieldSemantics(value: 'hello', isFocused: true), returnsNormally);
+      expect(strategy.domElement, isNull);
+      expect(strategy.isEnabled, isFalse);
+    });
+
     test('renders a required text field', () {
       createTextFieldSemantics(isRequired: true, value: 'hello');
       expectSemanticsTree(owner(), '''<sem><input aria-required="true" /></sem>''');
@@ -753,6 +967,67 @@ void testMain() {
       expect(dormantForms[form.formIdentifier], form);
     });
 
+    // See https://github.com/flutter/flutter/issues/195174
+    test('hides synthetic autofill elements from assistive technology', () {
+      final (form: EngineAutofillForm form, textField: SemanticTextField textField) =
+          activateGroup();
+
+      // The synthetic element created for the non-focused member.
+      final DomHTMLElement password = form.elements['field2']!;
+      expect(password.getAttribute('aria-hidden'), 'true');
+      expect(password.tabIndex, -1);
+
+      // The focused member is the real semantics element and stays exposed.
+      expect(textField.editableElement.getAttribute('aria-hidden'), isNull);
+
+      strategy.disable();
+
+      // The synthetic placeholder created on blur stays in the dormant form for
+      // the rest of the session, so it must be hidden as well.
+      final DomHTMLElement placeholder = form.elements['field1']!;
+      expect(placeholder, isNot(same(textField.editableElement)));
+      expect(placeholder.getAttribute('aria-hidden'), 'true');
+      expect(placeholder.tabIndex, -1);
+      expect(textField.editableElement.getAttribute('aria-hidden'), isNull);
+    });
+
+    // See https://github.com/flutter/flutter/issues/192102
+    test('TextInput.updateConfig preserves active autofill form', () {
+      final (form: EngineAutofillForm form, textField: SemanticTextField textField) =
+          activateGroup();
+      final DomHTMLFormElement formElement = form.formElement!;
+
+      // A `TextInput.updateConfig` message (e.g. toggling obscureText) only
+      // describes the focused field, so the decoded group has no 'fields' and
+      // no DOM form.
+      final focusedMap =
+          _autofillFields(<String>['username'], <String>['field1']).single['autofill']!
+              as Map<String, Object?>;
+      testTextEditing.configuration = InputConfiguration(
+        viewId: kImplicitViewId,
+        obscureText: true,
+        autofill: AutofillInfo.fromFrameworkMessage(focusedMap),
+        autofillGroup: EngineAutofillForm.fromFrameworkMessage(kImplicitViewId, focusedMap, null),
+      );
+      const TextInputUpdateConfig().run(testTextEditing);
+
+      // The live form is kept and the focused field stays linked to it.
+      expect(strategy.inputConfiguration.obscureText, isTrue);
+      expect(strategy.inputConfiguration.autofillGroup, same(form));
+      expect(form.formElement, same(formElement));
+      expect(textField.editableElement.getAttribute('form'), form.formDomId);
+
+      strategy.disable();
+
+      // On blur the form goes dormant instead of being dropped, so the next
+      // connection can reuse it.
+      expect(dormantForms[form.formIdentifier], same(form));
+      expect(form.formElement, same(formElement));
+      expect(formElement.isConnected, isTrue);
+      expect(textField.editableElement.getAttribute('form'), isNull);
+      expect(formElement.contains(form.elements['field1']), isTrue);
+    });
+
     // Focus A, autofill A, focus B, autofill a different credential, focus A
     // again, then assert each field is represented in the form exactly once
     // with its latest value and the focused field is linked by attribute (not
@@ -917,6 +1192,8 @@ void testMain() {
       expect(textField.editableElement.getAttribute('form'), isNull);
     }, skip: !ui_web.browser.isSafari);
   });
+
+  _testIosMinimumFontSize();
 }
 
 /// Builds the `fields` list of a `TextInputConfiguration` autofill group, the
@@ -993,6 +1270,139 @@ SemanticsObject createTextFieldSemantics({
   );
   tester.apply();
   return tester.getSemanticsObject(0);
+}
+
+// Covers both orders in which the framework style and the semantic element can
+// arrive: the style queued before the element is activated, and the style
+// updated after it is already active.
+// See: https://github.com/flutter/flutter/issues/192327
+void _testIosMinimumFontSize() {
+  group('$SemanticTextField iOS minimum font size', () {
+    late HybridTextEditing testTextEditing;
+    late SemanticsTextEditingStrategy strategy;
+
+    setUp(() {
+      // Must be set before the element is created, because the floor is seeded
+      // at creation time.
+      debugEmulateIosSafari = true;
+      testTextEditing = HybridTextEditing();
+      SemanticsTextEditingStrategy.ensureInitialized(testTextEditing);
+      strategy = SemanticsTextEditingStrategy.instance;
+      testTextEditing.debugTextEditingStrategyOverride = strategy;
+      testTextEditing.configuration = singlelineConfig;
+      semantics()
+        ..debugOverrideTimestampFunction(() => _testTime)
+        ..semanticsEnabled = true;
+    });
+
+    tearDown(() {
+      if (strategy.isEnabled) {
+        strategy.disable();
+      }
+      cleanForms();
+      debugEmulateIosSafari = false;
+      semantics().semanticsEnabled = false;
+      domDocument.activeElement?.blur();
+    });
+
+    EditableTextStyle styleWithFontSize(double fontSize) => EditableTextStyle(
+      textDirection: ui.TextDirection.ltr,
+      fontSize: fontSize,
+      textAlign: ui.TextAlign.left,
+      fontFamily: 'Arial',
+      fontWeight: 'normal',
+      letterSpacing: null,
+      wordSpacing: null,
+      lineHeight: null,
+    );
+
+    test('seeds a newly created input with the minimum', () {
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello');
+      final textField = node.semanticRole! as SemanticTextField;
+
+      expect(textField.editableElement.style.fontSize, '16px');
+    });
+
+    test('seeds a newly created textarea with the minimum', () {
+      testTextEditing.configuration = multilineConfig;
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello', isMultiline: true);
+      final textField = node.semanticRole! as SemanticTextField;
+
+      expect(textField.editableElement.tagName.toLowerCase(), 'textarea');
+      expect(textField.editableElement.style.fontSize, '16px');
+    });
+
+    test('raises a framework font below the minimum', () {
+      strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello', isFocused: true);
+      final textField = node.semanticRole! as SemanticTextField;
+
+      strategy.updateElementStyle(styleWithFontSize(12));
+
+      // The framework shorthand has just written 12px onto the element. Without
+      // the floor that value persists past blur and a later refocus would zoom.
+      expect(textField.editableElement.style.fontSize, '16px');
+    });
+
+    // Production order: the framework sends the style before `show`, so it is
+    // queued while the element is still detached and replayed at activation.
+    test('raises a queued framework font below the minimum', () {
+      strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
+      strategy.updateElementStyle(styleWithFontSize(12));
+
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello', isFocused: true);
+      final textField = node.semanticRole! as SemanticTextField;
+
+      expect(textField.editableElement.style.fontSize, '16px');
+    });
+
+    test('preserves a queued framework font above the minimum', () {
+      strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
+      strategy.updateElementStyle(styleWithFontSize(24));
+
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello', isFocused: true);
+      final textField = node.semanticRole! as SemanticTextField;
+
+      expect(textField.editableElement.style.fontSize, '24px');
+      // The floor sets `font-size` as a longhand after the framework's `font`
+      // shorthand. Assert a sibling property to catch a regression that reached
+      // for the shorthand instead and wiped the rest of the style.
+      expect(textField.editableElement.style.fontFamily, contains('Arial'));
+      expect(textField.editableElement.style.fontWeight, 'normal');
+    });
+
+    test('keeps a framework font above the minimum', () {
+      strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello', isFocused: true);
+      final textField = node.semanticRole! as SemanticTextField;
+
+      strategy.updateElementStyle(styleWithFontSize(24));
+
+      expect(textField.editableElement.style.fontSize, '24px');
+    });
+  });
+
+  group('$SemanticTextField non-iOS font size', () {
+    setUp(() {
+      semantics()
+        ..debugOverrideTimestampFunction(() => _testTime)
+        ..semanticsEnabled = true;
+    });
+
+    tearDown(() {
+      semantics().semanticsEnabled = false;
+      domDocument.activeElement?.blur();
+    });
+
+    // Only the iOS minimum is platform-gated. A framework style still reaches
+    // the element everywhere; this field is never given one.
+    test('does not apply the minimum', () {
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello');
+      final textField = node.semanticRole! as SemanticTextField;
+
+      expect(textField.editableElement.style.fontSize, isEmpty);
+    });
+  }, skip: isIosSafari);
 }
 
 /// Emulates sending of a message by the framework to the engine.

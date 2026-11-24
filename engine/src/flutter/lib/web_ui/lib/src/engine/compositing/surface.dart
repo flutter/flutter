@@ -25,17 +25,22 @@ abstract class SurfaceProvider<C extends Surface, D extends CanvasProvider> {
 
   final List<C> _createdSurfaces = <C>[];
 
+  /// Creates a new [Surface], applies any configured resource cache limit, and
+  /// tracks it until either the surface or this provider is disposed.
   C createSurface() {
     final C surface = surfaceCreateFn(_canvasProvider);
     if (_resourceCacheMaxBytes != null) {
       surface.setSkiaResourceCacheMaxBytes(_resourceCacheMaxBytes!);
     }
     _createdSurfaces.add(surface);
+    surface.onDispose = () => _createdSurfaces.remove(surface);
     return surface;
   }
 
+  /// Disposes all live surfaces created by this provider and clears its
+  /// tracking list.
   void dispose() {
-    for (final C surface in _createdSurfaces) {
+    for (final surface in List<C>.of(_createdSurfaces)) {
       surface.dispose();
     }
     _createdSurfaces.clear();
@@ -82,8 +87,42 @@ abstract class Surface {
   /// `webglcontextlost` event.
   Future<void> recreateContextForCanvas(DomEventTarget newCanvas);
 
+  /// Whether [dispose] has been called on this surface.
+  bool get isDisposed => _isDisposed;
+  bool _isDisposed = false;
+
   /// Disposes of the surface and its resources.
-  void dispose();
+  ///
+  /// Calling this more than once has no effect.
+  ///
+  /// [onDispose] is invoked and cleared even if [disposeResources] throws, so
+  /// the owning [SurfaceProvider] never keeps tracking a disposed surface.
+  ///
+  /// Subclasses must not override this method; implement [disposeResources]
+  /// instead.
+  void dispose() {
+    if (_isDisposed) {
+      return;
+    }
+    _isDisposed = true;
+    try {
+      disposeResources();
+    } finally {
+      final ui.VoidCallback? callback = onDispose;
+      onDispose = null;
+      callback?.call();
+    }
+  }
+
+  /// Releases the resources owned by this surface.
+  ///
+  /// Called exactly once, by [dispose].
+  @protected
+  void disposeResources();
+
+  /// Callback owned by [SurfaceProvider] and invoked when the surface is
+  /// disposed so the provider can unregister it from its tracking list.
+  ui.VoidCallback? onDispose;
 
   /// A [Future] which completes when the [Surface] is initialized and ready to
   /// render pictures.
@@ -108,10 +147,34 @@ abstract class Surface {
 /// A rendering surface that is optimized for producing `DomImageBitmap` objects.
 ///
 /// This surface is not attached to the DOM and is used for off-screen rendering.
+///
+/// A single [OffscreenSurface] may be shared by multiple views (and, in some
+/// renderers, by image rasterization). Therefore, operations that depend on the
+/// size of the surface take the size as an argument and resize the surface as
+/// part of the same indivisible operation. This guarantees that no other
+/// operation can resize the surface between the resize and the capture.
 abstract class OffscreenSurface extends Surface {
-  /// Rasterizes the given list of [pictures] into a list of `DomImageBitmap`
-  /// objects.
-  Future<List<DomImageBitmap>> rasterizeToImageBitmaps(List<ui.Picture> pictures);
+  /// Resizes this surface to [size] and rasterizes each of the given [pictures]
+  /// into a `DomImageBitmap` of exactly [size].
+  ///
+  /// Resizing, rendering, and capturing the bitmaps happen atomically with
+  /// respect to every other operation on this surface.
+  Future<List<DomImageBitmap>> rasterizeToImageBitmaps(BitmapSize size, List<ui.Picture> pictures);
+
+  /// Resizes this surface to [size] and rasterizes each of the given [pictures]
+  /// in order, calling [onRendered] synchronously after each picture is
+  /// rendered, while the surface's [Surface.canvasImageSource] still holds that
+  /// picture.
+  ///
+  /// This is used when the browser does not support `createImageBitmap`.
+  ///
+  /// Resizing, rendering, and every call to [onRendered] happen atomically with
+  /// respect to every other operation on this surface.
+  Future<void> rasterizeToCanvasSource(
+    BitmapSize size,
+    List<ui.Picture> pictures,
+    void Function(int index, DomCanvasImageSource source) onRendered,
+  );
 }
 
 /// A rendering surface that is also a `DisplayCanvas`.

@@ -171,6 +171,9 @@ class TextureGLES final : public Texture,
   /// false, the FBO must be re-attached before use.
   bool CachedFBOMatchesSubresource(uint32_t mip_level, uint32_t slice) const;
 
+  /// Retrieve the reactor handle for this texture.
+  const HandleGLES& GetHandle() const { return handle_.Get(); }
+
   // Visible for testing.
   std::optional<HandleGLES> GetSyncFence() const;
 
@@ -228,6 +231,10 @@ class TextureGLES final : public Texture,
   ISize GetSize() const override;
 
   void InitializeContentsIfNecessary();
+
+  // Makes the current context wait for the fence set by `SetFence`, if any,
+  // then clears it.
+  void WaitForFence();
 
   // Allocates storage for `(slice, mip_level)` if it has not been allocated
   // yet, so the subresource can be attached to a framebuffer. Returns false on

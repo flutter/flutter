@@ -9,7 +9,6 @@
 #include <chrono>
 #include <memory>
 
-#include "flutter/fml/status.h"
 #include "flutter/fml/time/time_delta.h"
 #include "impeller/core/host_buffer.h"
 #include "impeller/core/runtime_types.h"
@@ -20,6 +19,7 @@
 #include "impeller/playground/image/decompressed_image.h"
 #include "impeller/playground/switches.h"
 #include "impeller/renderer/render_target.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace impeller {
 
@@ -113,7 +113,7 @@ class Playground {
 
   virtual std::string GetWindowTitle() const = 0;
 
-  [[nodiscard]] fml::Status SetCapabilities(
+  [[nodiscard]] absl::Status SetCapabilities(
       const std::shared_ptr<Capabilities>& capabilities);
 
   using GLProcAddressResolver = std::function<void*(const char* proc_name)>;

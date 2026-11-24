@@ -8,21 +8,41 @@ import 'package:completion/completion.dart';
 import 'package:file/file.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../android/gradle_utils.dart';
+import '../application_package.dart';
 import '../artifacts.dart';
+import '../base/bot_detector.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
+import '../base/logger.dart';
+import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/template.dart';
 import '../base/terminal.dart';
+import '../base/time.dart';
+import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../cache.dart';
+import '../context/android_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
+import '../dart/pub.dart';
+import '../device.dart';
+import '../doctor.dart';
+import '../experimental/extension_manager.dart';
+import '../features.dart';
+import '../ios/plist_parser.dart';
+import '../macos/cocoapods.dart';
 import '../resident_runner.dart';
+import '../template.dart';
 import '../tester/flutter_tester.dart';
 import '../version.dart';
 import '../web/web_device.dart';
+import 'flutter_command.dart';
+import 'local_engine.dart';
 
 /// Common flutter command line options.
 abstract final class FlutterGlobalOptions {
@@ -49,22 +69,27 @@ abstract final class FlutterGlobalOptions {
   static const kWrapColumnOption = 'wrap-column';
   static const kWrapFlag = 'wrap';
   static const kDebugLogsDirectoryFlag = 'debug-logs-dir';
+  static const kExtensionsFlag = 'extensions';
 }
 
 class FlutterCommandRunner extends CommandRunner<void> {
   FlutterCommandRunner({
-    Analytics analytics = const NoOpAnalytics(),
-    ToolContext? toolContext,
-    bool verboseHelp = false,
-  }) : _analytics = analytics,
-       _toolContext = toolContext,
-       _verboseHelp = verboseHelp,
-       _argParser = ArgParser(
-         allowTrailingOptions: false,
-         usageLineLength: toolContext?.outputPreferences.wrapText ?? false
-             ? toolContext?.outputPreferences.wrapColumn
-             : null,
-       ),
+    required this.analytics,
+    required this._androidContext,
+    required this.applicationPackageFactory,
+    required this.cocoaPods,
+    required this.deviceManager,
+    required this.devtoolsLauncher,
+    required this.doctor,
+    required this._extensionManager,
+    required this.featureFlags,
+    required this.plistParser,
+    required this.pub,
+    required this.templatePathProvider,
+    required this.templateRenderer,
+    required this.toolContext,
+    this._verboseHelp = false,
+  }) : _argParser = _createInitialArgParser(toolContext.outputPreferences),
        super(
          'flutter',
          'Manage your Flutter app development.\n'
@@ -77,7 +102,14 @@ class FlutterCommandRunner extends CommandRunner<void> {
              '  flutter run [options]\n'
              '    Run your Flutter application on an attached device or in an emulator.',
        ) {
-    _populateOptions(verboseHelp: verboseHelp);
+    _populateOptions(argParser, verboseHelp: _verboseHelp);
+  }
+
+  static ArgParser _createInitialArgParser(OutputPreferences outputPreferences) {
+    return ArgParser(
+      allowTrailingOptions: false,
+      usageLineLength: outputPreferences.wrapText ? outputPreferences.wrapColumn : null,
+    );
   }
 
   final bool _verboseHelp;
@@ -86,7 +118,33 @@ class FlutterCommandRunner extends CommandRunner<void> {
   ArgParser get argParser => _argParser;
   ArgParser _argParser;
 
-  void _populateOptions({required bool verboseHelp}) {
+  static ArgParser _createGlobalArgParser() {
+    final parser = ArgParser(allowTrailingOptions: false)
+      ..addFlag('help', abbr: 'h', negatable: false, help: 'Print this usage information.')
+      ..addCommand('help');
+    _populateOptions(parser, verboseHelp: false);
+    return parser;
+  }
+
+  /// The name of the command in [args], or null if there isn't one.
+  ///
+  /// Global options can come before the command, so it can't be found by
+  /// position. A throwaway parser walks past them instead: trailing options are
+  /// disabled, so parsing stops at the command and leaves it at the head of
+  /// [ArgResults.rest]. `help` is the exception, since the command runner
+  /// registers it on the parser itself and so reports it as a parsed command.
+  static String? findCommandName(List<String> args) {
+    final ArgResults results;
+    try {
+      results = _createGlobalArgParser().parse(args);
+    } on ArgParserException {
+      // The real parser will complain about these later.
+      return null;
+    }
+    return results.command?.name ?? results.rest.firstOrNull;
+  }
+
+  static void _populateOptions(ArgParser argParser, {required bool verboseHelp}) {
     argParser.addFlag(
       FlutterGlobalOptions.kVerboseFlag,
       abbr: 'v',
@@ -170,16 +228,13 @@ class FlutterCommandRunner extends CommandRunner<void> {
       negatable: false,
       help: 'Suppress analytics reporting for the current CLI invocation.',
     );
-    argParser.addOption(
-      FlutterGlobalOptions.kPackagesOption,
-      hide: !verboseHelp,
-      help: 'Path to your "package_config.json" file.',
-    );
+    argParser.addDescriptor(CommonOptions.packages, verboseHelp: verboseHelp);
+    argParser.addDescriptor(CommonOptions.printDtd, verboseHelp: verboseHelp);
     argParser.addFlag(
-      FlutterGlobalOptions.kPrintDtd,
-      negatable: false,
-      help: 'Print the address of the Dart Tooling Daemon, if one is hosted by the Flutter CLI.',
+      FlutterGlobalOptions.kExtensionsFlag,
+      defaultsTo: true,
       hide: !verboseHelp,
+      help: 'Whether to load Flutter tool extensions (pass "--no-extensions" for safe mode).',
     );
 
     if (verboseHelp) {
@@ -215,14 +270,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
           'platform (e.g. MacOS ARM64) but intend to run Flutter on another (e.g. Android).',
     );
 
-    argParser.addOption(
-      FlutterGlobalOptions.kLocalWebSDKOption,
-      hide: !verboseHelp,
-      help:
-          'Name of a build output within the engine out directory, if you are building Flutter locally.\n'
-          'Use this to select a specific version of the web sdk if you have built multiple engine targets.\n'
-          'This path is relative to "--local-engine-src-path" (see above).',
-    );
+    argParser.addDescriptor(CommonOptions.localWebSdk, verboseHelp: verboseHelp);
 
     if (verboseHelp) {
       argParser.addSeparator('Options for testing the "flutter" tool itself:');
@@ -241,17 +289,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
       hide: !verboseHelp,
       help: 'List the special "web-server" device in device listings.',
     );
-    argParser.addFlag(
-      FlutterGlobalOptions.kContinuousIntegrationFlag,
-      negatable: false,
-      help: 'Enable a set of CI-specific test debug settings.',
-      hide: !verboseHelp,
-    );
-    argParser.addOption(
-      FlutterGlobalOptions.kDebugLogsDirectoryFlag,
-      help: 'Path to a directory where logs for debugging may be added.',
-      hide: !verboseHelp,
-    );
+    argParser.addDescriptor(CommonOptions.ci, verboseHelp: verboseHelp);
+    argParser.addDescriptor(CommonOptions.debugLogsDir, verboseHelp: verboseHelp);
   }
 
   void _updateArgParser({required int? wrapColumn}) {
@@ -259,31 +298,31 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     argParser.addFlag('help', abbr: 'h', negatable: false, help: 'Print this usage information.');
 
-    _populateOptions(verboseHelp: _verboseHelp);
+    _populateOptions(argParser, verboseHelp: _verboseHelp);
 
-    for (final MapEntry<String, Command<void>> entry in commands.entries) {
-      argParser.addCommand(entry.key, entry.value.argParser);
+    for (final MapEntry(:String key, :Command<void> value) in commands.entries) {
+      argParser.addCommand(key, value.argParser);
     }
   }
 
   @override
   String get usageFooter {
-    final OutputPreferences? outputPreferences = _toolContext?.outputPreferences;
+    final OutputPreferences outputPreferences = toolContext.outputPreferences;
     return wrapText(
       'Run "flutter help -v" for verbose help output, including less commonly used options.',
-      columnWidth: outputPreferences?.wrapColumn ?? OutputPreferences.kDefaultTerminalColumns,
-      shouldWrap: outputPreferences?.wrapText ?? false,
+      columnWidth: outputPreferences.wrapColumn,
+      shouldWrap: outputPreferences.wrapText,
     );
   }
 
   @override
   String get usage {
     final String usageWithoutDescription = super.usage.substring(description.length + 2);
-    final OutputPreferences? outputPreferences = _toolContext?.outputPreferences;
+    final OutputPreferences outputPreferences = toolContext.outputPreferences;
     final String prefix = wrapText(
       description,
-      shouldWrap: outputPreferences?.wrapText ?? false,
-      columnWidth: outputPreferences?.wrapColumn ?? OutputPreferences.kDefaultTerminalColumns,
+      shouldWrap: outputPreferences.wrapText,
+      columnWidth: outputPreferences.wrapColumn,
     );
     return '$prefix\n\n$usageWithoutDescription';
   }
@@ -310,21 +349,53 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
   }
 
-  final Analytics _analytics;
-  final ToolContext? _toolContext;
+  final AndroidContext _androidContext;
+  final ExtensionManager _extensionManager;
 
   /// The [Analytics] instance.
-  Analytics get analytics => _analytics;
+  final Analytics analytics;
+
+  /// The [ApplicationPackageFactory] instance.
+  final ApplicationPackageFactory applicationPackageFactory;
+
+  /// The [CocoaPods] instance.
+  final CocoaPods cocoaPods;
+
+  /// The [DeviceManager] instance.
+  final DeviceManager deviceManager;
+
+  /// The [DevtoolsLauncher] instance.
+  final DevtoolsLauncher devtoolsLauncher;
+
+  /// The [Doctor] instance.
+  final Doctor doctor;
+
+  /// The [GradleUtils] instance from [AndroidContext].
+  GradleUtils get gradleUtils => _androidContext.gradleUtils;
+
+  /// The [PlistParser] instance.
+  final PlistParser plistParser;
+
+  /// The [Pub] instance.
+  final Pub pub;
+
+  /// The [TemplatePathProvider] instance.
+  final TemplatePathProvider templatePathProvider;
+
+  /// The [TemplateRenderer] instance.
+  final TemplateRenderer templateRenderer;
 
   /// The [ToolContext] instance.
-  ToolContext get toolContext => _toolContext!;
+  final ToolContext toolContext;
+
+  /// The [FeatureFlags] instance.
+  final FeatureFlags featureFlags;
 
   // See https://github.com/flutter/flutter/issues/145158.
   late bool _machineFlagPresentInAnyCliArg;
 
   @override
-  Future<void> run(Iterable<String> args) {
-    final ToolContext toolContext = _toolContext!;
+  Future<void> run(Iterable<String> args) async {
     var exitWithCodeOne = false;
 
     // Have invocations of 'build', 'custom-devices', and 'pub' print out
@@ -342,12 +413,108 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
 
     _machineFlagPresentInAnyCliArg = args.contains('--${FlutterGlobalOptions.kMachineFlag}');
-    return super.run(args).then((_) async {
-      if (exitWithCodeOne) {
-        // No need to print anything because the help was already printed.
-        await exitWithHooks(1, shutdownHooks: toolContext.shutdownHooks);
+    await _initializeDynamicOptions(args);
+    await super.run(args);
+    if (exitWithCodeOne) {
+      // No need to print anything because the help was already printed.
+      final ToolContext(:Logger logger, :ShutdownHooks shutdownHooks) = toolContext;
+      await exitWithHooks(1, analytics: analytics, logger: logger, shutdownHooks: shutdownHooks);
+    }
+  }
+
+  /// Traverses [args] to identify the target command being invoked and triggers
+  /// dynamic option initialization (via [FlutterCommand.initializeDynamicOptions])
+  /// before argument parsing begins.
+  Future<void> _initializeDynamicOptions(Iterable<String> args) async {
+    final (:Command<void>? command, :bool extensionsEnabled) = _findTargetCommand(args);
+    if (!extensionsEnabled) {
+      _extensionManager.disable();
+      return;
+    }
+    if (!featureFlags.isToolExtensionsEnabled) {
+      return;
+    }
+    var current = command;
+    if (current?.name == 'help') {
+      // If the top-level 'help' command was matched (e.g. `flutter help config` or `flutter help --verbose config`),
+      // identify the target command whose help documentation is requested rather than the help command itself.
+      current =
+          _findTargetCommand(args.skipWhile((String arg) => arg == 'help' || arg.startsWith('-')))
+              .command ??
+          current;
+    }
+    while (current != null) {
+      if (current case final FlutterCommand flutterCommand) {
+        await flutterCommand.initializeDynamicOptions();
       }
-    });
+      current = current.parent;
+    }
+  }
+
+  /// Helper to find the target command from [args] and determine whether
+  /// tool extensions are enabled (`--no-extensions` disables them).
+  ///
+  /// Skips global and command-level options and their values so that
+  /// non-option arguments are matched against registered command and
+  /// subcommand names. Stops scanning at `--`. If both `--extensions` and
+  /// `--no-extensions` appear, the last one wins.
+  ({Command<void>? command, bool extensionsEnabled}) _findTargetCommand(Iterable<String> args) {
+    Map<String, Command<void>> commandsMap = commands;
+    Command<void>? lastFoundCommand;
+    ArgParser currentParser = argParser;
+    final List<String> argsList = args.toList();
+    var extensionsEnabled = true;
+    var i = 0;
+    while (i < argsList.length) {
+      final String arg = argsList[i];
+      if (arg == '--') {
+        break;
+      }
+      // Options and flags start with '-'.
+      if (arg.startsWith('-')) {
+        if (arg == '--${FlutterGlobalOptions.kExtensionsFlag}') {
+          extensionsEnabled = true;
+        } else if (arg == '--no-${FlutterGlobalOptions.kExtensionsFlag}') {
+          extensionsEnabled = false;
+        }
+        i += _optionTokenCount(currentParser, arg);
+      } else {
+        if (commandsMap[arg] case final matchedCommand?) {
+          lastFoundCommand = matchedCommand;
+          final Command<void>(
+            subcommands: Map<String, Command<void>> nextCommands,
+            argParser: ArgParser nextParser,
+          ) = matchedCommand;
+          commandsMap = nextCommands;
+          currentParser = nextParser;
+        }
+        i++;
+      }
+    }
+    return (command: lastFoundCommand, extensionsEnabled: extensionsEnabled);
+  }
+
+  /// Returns the number of argument tokens consumed by [arg] against [parser]
+  /// (`2` for non-flag options with a separate value argument like `-d linux`,
+  /// `1` otherwise).
+  int _optionTokenCount(ArgParser parser, String arg) {
+    var name = arg;
+    while (name.startsWith('-')) {
+      name = name.substring(1);
+    }
+    // Option with inline value (e.g., '--device-id=foo' or '-d=foo'): consumes 1 argument token.
+    if (name.contains('=')) {
+      return 1;
+    }
+    final Option? option =
+        parser.findByNameOrAlias(name) ??
+        parser.findByAbbreviation(name) ??
+        argParser.findByNameOrAlias(name) ??
+        argParser.findByAbbreviation(name);
+    if (option != null) {
+      return option.isFlag ? 1 : 2;
+    }
+    return 1;
   }
 
   /// Whether to perform a flutter version check, which prints a warning if old.
@@ -355,11 +522,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
   /// This method should be narrowly used in the following manner:
   /// ```dart
   /// if (await _shouldCheckForUpdates(topLevelResult)) {
-  ///   await _toolContext.flutterVersion.checkFlutterVersionFreshness();
+  ///   await flutterVersion.checkFlutterVersionFreshness();
   /// }
   /// ```
   Future<bool> _shouldCheckForUpdates(ArgResults topLevelResults) async {
-    final ToolContext toolContext = _toolContext!;
+    final ToolContext(:BotDetector botDetector, :Stdio stdio) = toolContext;
     // Check if the user has explicitly requested a version check.
     final bool versionCheckFlag =
         topLevelResults[FlutterGlobalOptions.kVersionCheckFlag] as bool? ?? false;
@@ -387,9 +554,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     // e.g. `flutter bash-completion` or `flutter zsh-completion`
     final bool isShellCompletionCommand =
-        !toolContext.stdio.hasTerminal &&
-        (topLevelResults.command?.name ?? '').endsWith('-completion');
-    if (isShellCompletionCommand || await toolContext.botDetector.isRunningOnBot) {
+        !stdio.hasTerminal && (topLevelResults.command?.name ?? '').endsWith('-completion');
+    if (isShellCompletionCommand || botDetector.isRunningOnBot) {
       return false;
     }
 
@@ -399,7 +565,19 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
-    final ToolContext toolContext = _toolContext!;
+    final ToolContext(
+      :Artifacts artifacts,
+      :Cache cache,
+      :FlutterVersion flutterVersion,
+      :LocalEngineLocator localEngineLocator,
+      :Logger logger,
+      :OperatingSystemUtils os,
+      :Platform platform,
+      :Stdio stdio,
+      :SystemClock systemClock,
+      :UserMessages userMessages,
+    ) = toolContext;
+
     final contextOverrides = <Type, Object?>{};
 
     // If the flag for enabling or disabling telemetry is passed in,
@@ -418,14 +596,14 @@ class FlutterCommandRunner extends CommandRunner<void> {
         wrapColumn = int.parse(topLevelResults[FlutterGlobalOptions.kWrapColumnOption] as String);
         if (wrapColumn < 0) {
           throwToolExit(
-            toolContext.userMessages.runnerWrapColumnInvalid(
+            userMessages.runnerWrapColumnInvalid(
               topLevelResults[FlutterGlobalOptions.kWrapColumnOption],
             ),
           );
         }
       } on FormatException {
         throwToolExit(
-          toolContext.userMessages.runnerWrapColumnParseError(
+          userMessages.runnerWrapColumnParseError(
             topLevelResults[FlutterGlobalOptions.kWrapColumnOption],
           ),
         );
@@ -436,17 +614,14 @@ class FlutterCommandRunner extends CommandRunner<void> {
     // anything, unless the user explicitly said to.
     final bool useWrapping = topLevelResults.wasParsed(FlutterGlobalOptions.kWrapFlag)
         ? topLevelResults[FlutterGlobalOptions.kWrapFlag] as bool
-        : toolContext.stdio.terminalColumns != null &&
-              topLevelResults[FlutterGlobalOptions.kWrapFlag] as bool;
+        : stdio.terminalColumns != null && topLevelResults[FlutterGlobalOptions.kWrapFlag] as bool;
     contextOverrides[OutputPreferences] = OutputPreferences(
       wrapText: useWrapping,
       showColor: topLevelResults[FlutterGlobalOptions.kColorFlag] as bool?,
       wrapColumn: wrapColumn,
     );
 
-    _updateArgParser(
-      wrapColumn: useWrapping ? (wrapColumn ?? toolContext.stdio.terminalColumns) : null,
-    );
+    _updateArgParser(wrapColumn: useWrapping ? (wrapColumn ?? stdio.terminalColumns) : null);
 
     if (((topLevelResults[FlutterGlobalOptions.kShowTestDeviceFlag] as bool?) ?? false) ||
         topLevelResults[FlutterGlobalOptions.kDeviceIdOption] ==
@@ -460,7 +635,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
 
     // Set up the tooling configuration.
-    final EngineBuildPaths? engineBuildPaths = await toolContext.localEngineLocator.findEnginePath(
+    final EngineBuildPaths? engineBuildPaths = await localEngineLocator.findEnginePath(
       engineSourcePath: topLevelResults[FlutterGlobalOptions.kLocalEngineSrcPathOption] as String?,
       localEngine: topLevelResults[FlutterGlobalOptions.kLocalEngineOption] as String?,
       localHostEngine: topLevelResults[FlutterGlobalOptions.kLocalEngineHostOption] as String?,
@@ -468,9 +643,15 @@ class FlutterCommandRunner extends CommandRunner<void> {
       packagePath: topLevelResults[FlutterGlobalOptions.kPackagesOption] as String?,
     );
     if (engineBuildPaths != null) {
-      contextOverrides.addAll(<Type, Object?>{
-        Artifacts: Artifacts.getLocalEngine(engineBuildPaths),
-      });
+      final Artifacts localArtifacts = Artifacts.getLocalEngine(
+        engineBuildPaths,
+        toolContext: toolContext,
+      );
+      contextOverrides.addAll(<Type, Object?>{Artifacts: localArtifacts});
+      // Update the artifacts the commands were created with.
+      if (artifacts is DeferredArtifacts) {
+        artifacts.resolve(localArtifacts);
+      }
     }
 
     await context.run<void>(
@@ -478,53 +659,55 @@ class FlutterCommandRunner extends CommandRunner<void> {
         return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () async {
-        toolContext.logger.quiet =
-            (topLevelResults[FlutterGlobalOptions.kQuietFlag] as bool?) ?? false;
+        logger.quiet = (topLevelResults[FlutterGlobalOptions.kQuietFlag] as bool?) ?? false;
 
-        if (toolContext.platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
-          await toolContext.cache.lock();
+        if (platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
+          await cache.lock();
         }
 
         if ((topLevelResults[FlutterGlobalOptions.kSuppressAnalyticsFlag] as bool?) ?? false) {
-          _analytics.suppressTelemetry();
+          analytics.suppressTelemetry();
+        }
+
+        if (!((topLevelResults[FlutterGlobalOptions.kExtensionsFlag] as bool?) ?? true)) {
+          _extensionManager.disable();
         }
 
         // Required to support `flutter --version` before artifacts are cached.
-        await toolContext.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.informative});
+        await cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.informative});
 
-        toolContext.flutterVersion.ensureVersionFile();
+        flutterVersion.ensureVersionFile();
         if (await _shouldCheckForUpdates(topLevelResults)) {
-          await toolContext.flutterVersion.checkFlutterVersionFreshness();
+          await flutterVersion.checkFlutterVersionFreshness();
         }
 
         // See if the user specified a specific device.
         final specifiedDeviceId = topLevelResults[FlutterGlobalOptions.kDeviceIdOption] as String?;
         if (specifiedDeviceId != null) {
-          globals.deviceManager?.specifiedDeviceId = specifiedDeviceId;
+          deviceManager.specifiedDeviceId = specifiedDeviceId;
         }
 
         final bool topLevelMachineFlag =
             topLevelResults[FlutterGlobalOptions.kMachineFlag] as bool? ?? false;
         if ((topLevelResults[FlutterGlobalOptions.kVersionFlag] as bool?) ?? false) {
-          _analytics.send(
+          analytics.send(
             Event.flutterCommandResult(
               commandPath: 'version',
               result: 'success',
-              commandHasTerminal: toolContext.stdio.hasTerminal,
+              commandHasTerminal: stdio.hasTerminal,
+              hostArch: os.hostPlatform.cliName,
             ),
           );
-          final FlutterVersion version = toolContext.flutterVersion.fetchTagsAndGetVersion(
-            clock: toolContext.systemClock,
-          );
+          final FlutterVersion version = flutterVersion.fetchTagsAndGetVersion(clock: systemClock);
           final String status;
           if (topLevelMachineFlag) {
             final Map<String, Object> jsonOut = version.toJson();
-            jsonOut['flutterRoot'] = Cache.flutterRoot!;
+            jsonOut['flutterRoot'] = cache.flutterRoot;
             status = const JsonEncoder.withIndent('  ').convert(jsonOut);
           } else {
             status = version.toString();
           }
-          toolContext.logger.printStatus(status);
+          logger.printStatus(status);
           return;
         }
         if (topLevelMachineFlag && topLevelResults.command?.name != 'analyze') {
@@ -538,7 +721,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         final bool shouldPrintDtdUri =
             topLevelResults[FlutterGlobalOptions.kPrintDtd] as bool? ?? false;
         if (shouldPrintDtdUri) {
-          DevtoolsLauncher.instance?.printDtdUri = shouldPrintDtdUri;
+          devtoolsLauncher.printDtdUri = shouldPrintDtdUri;
         }
 
         await super.runCommand(topLevelResults);
@@ -548,8 +731,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   /// Get the root directories of the repo - the directories containing Dart packages.
   List<String> getRepoRoots() {
-    final FileSystem fs = _toolContext!.fs;
-    final String root = fs.path.absolute(Cache.flutterRoot!);
+    final ToolContext(:Cache cache, :FileSystem fs) = toolContext;
+    final String root = fs.path.absolute(cache.flutterRoot);
     // not bin, and not the root
     return <String>['dev', 'examples', 'packages'].map<String>((String item) {
       return fs.path.join(root, item);
@@ -558,12 +741,16 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   /// Get all pub packages in the Flutter repo.
   List<Directory> getRepoPackages() {
-    final FileSystem fs = _toolContext!.fs;
+    final FileSystem fs = toolContext.fs;
     return getRepoRoots()
         .expand<String>((String root) => _gatherProjectPaths(fs, root))
         .map<Directory>((String dir) => fs.directory(dir))
         .toList();
   }
+
+  /// Directory names to skip when scanning repository packages to avoid
+  /// traversing build caches and generated artifacts.
+  static const _ignoredDirectoryNames = <String>{'.dart_tool', 'build'};
 
   static List<String> _gatherProjectPaths(FileSystem fs, String rootPath) {
     if (fs.isFileSync(fs.path.join(rootPath, '.dartignore'))) {
@@ -577,7 +764,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     final List<String> projectPaths = directory.listSync(followLinks: false).expand((
       FileSystemEntity entity,
     ) {
-      if (entity is Directory && fs.path.basename(entity.path) != '.dart_tool') {
+      if (entity is Directory && !_ignoredDirectoryNames.contains(fs.path.basename(entity.path))) {
         return _gatherProjectPaths(fs, entity.path);
       }
       return <String>[];

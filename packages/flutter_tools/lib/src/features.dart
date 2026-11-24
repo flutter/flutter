@@ -7,10 +7,30 @@ library;
 
 import 'package:meta/meta.dart';
 
-import 'base/context.dart';
-
-/// The current [FeatureFlags] implementation.
-FeatureFlags get featureFlags => context.get<FeatureFlags>()!;
+/// All current Flutter feature flags.
+const allFlutterFeatures = <Feature>[
+  flutterWebFeature,
+  flutterLinuxDesktopFeature,
+  flutterMacOSDesktopFeature,
+  flutterWindowsDesktopFeature,
+  flutterAndroidFeature,
+  flutterIOSFeature,
+  flutterFuchsiaFeature,
+  flutterCustomDevicesFeature,
+  cliAnimation,
+  nativeAssets,
+  dartDataAssets,
+  recordUse,
+  swiftPackageManager,
+  omitLegacyVersionFile,
+  windowingFeature,
+  lldbDebugging,
+  uiSceneMigration,
+  riscv64,
+  macOSArm64Only,
+  hcpp,
+  toolExtensionsFeature,
+];
 
 /// The interface used to determine if a particular [Feature] is enabled.
 ///
@@ -73,9 +93,6 @@ abstract class FeatureFlags {
   /// Whether desktop windowing is enabled.
   bool get isWindowingEnabled;
 
-  /// Whether accessibility evaluations is enabled.
-  bool get isAccessibilityEvaluationsEnabled;
-
   /// Whether physical iOS devices are debugging with LLDB.
   bool get isLLDBDebuggingEnabled;
 
@@ -88,6 +105,9 @@ abstract class FeatureFlags {
   /// Whether to only build for arm64 when targeting macOS.
   bool get isMacOSArm64OnlyEnabled;
 
+  /// Whether the HCPP platform view rendering mode is enabled by default.
+  bool get isHcppEnabled;
+
   /// Whether support for tool extensions is enabled.
   bool get isToolExtensionsEnabled;
 
@@ -97,29 +117,7 @@ abstract class FeatureFlags {
   bool isEnabled(Feature feature);
 
   /// All current Flutter feature flags.
-  List<Feature> get allFeatures => const <Feature>[
-    flutterWebFeature,
-    flutterLinuxDesktopFeature,
-    flutterMacOSDesktopFeature,
-    flutterWindowsDesktopFeature,
-    flutterAndroidFeature,
-    flutterIOSFeature,
-    flutterFuchsiaFeature,
-    flutterCustomDevicesFeature,
-    cliAnimation,
-    nativeAssets,
-    dartDataAssets,
-    recordUse,
-    swiftPackageManager,
-    omitLegacyVersionFile,
-    windowingFeature,
-    accessibilityEvaluationsFeature,
-    lldbDebugging,
-    uiSceneMigration,
-    riscv64,
-    macOSArm64Only,
-    toolExtensionsFeature,
-  ];
+  List<Feature> get allFeatures => allFlutterFeatures;
 
   /// All current Flutter feature flags that can be configured.
   ///
@@ -138,7 +136,8 @@ abstract class FeatureFlags {
 /// All current Flutter feature flags that can be configured.
 ///
 /// [Feature.configSetting] is not `null`.
-Iterable<Feature> get allConfigurableFeatures => featureFlags.allConfigurableFeatures;
+Iterable<Feature> get allConfigurableFeatures =>
+    allFlutterFeatures.where((Feature feature) => feature.configSetting != null);
 
 /// The [Feature] for flutter web.
 const flutterWebFeature = Feature.fullyEnabled(
@@ -233,11 +232,16 @@ const recordUse = Feature(
   stable: FeatureChannelSetting(available: true, enabledByDefault: true),
 );
 
+/// Warning printed when Swift Package Manager is disabled in configuration.
+const kSwiftPackageManagerDisabledWarning =
+    'Enabling Swift Package Manager will be required in a future version of Flutter.';
+
 /// Enable Swift Package Manager as a darwin dependency manager.
 const swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',
   configSetting: 'enable-swift-package-manager',
   environmentOverride: 'FLUTTER_SWIFT_PACKAGE_MANAGER',
+  warningMessageOnDisable: kSwiftPackageManagerDisabledWarning,
   master: FeatureChannelSetting(available: true, enabledByDefault: true),
   beta: FeatureChannelSetting(available: true, enabledByDefault: true),
   stable: FeatureChannelSetting(available: true, enabledByDefault: true),
@@ -263,15 +267,6 @@ const windowingFeature = Feature(
   configSetting: 'enable-windowing',
   environmentOverride: 'FLUTTER_WINDOWING',
   runtimeId: 'windowing',
-  master: FeatureChannelSetting(available: true),
-);
-
-/// Whether accessibility evaluations is enabled.
-const accessibilityEvaluationsFeature = Feature(
-  name: 'support for accessibility evaluations',
-  configSetting: 'enable-accessibility-evaluations',
-  environmentOverride: 'FLUTTER_ACCESSIBILITY_EVALUATIONS',
-  runtimeId: 'accessibility_evaluations',
   master: FeatureChannelSetting(available: true),
 );
 
@@ -331,6 +326,34 @@ const macOSArm64Only = Feature(
   stable: FeatureChannelSetting(available: true),
 );
 
+/// Whether the HCPP (Hybrid Composition++) platform view rendering mode is used
+/// by default on Android.
+///
+/// This is the default only: it is baked into the Android manifest of the
+/// artifact the tool builds, and an explicit
+/// `io.flutter.embedding.android.EnableHcpp` entry in the app's manifest, or an
+/// explicit `--[no-]enable-hcpp`, takes priority over it.
+const hcpp = Feature(
+  name: 'the HCPP platform view rendering mode',
+  extraHelpText:
+      'HCPP requires the Impeller rendering backend, and Android API 34 or above. '
+      "Devices that do not support it fall back to each platform view's developer-chosen mode.",
+  configSetting: 'enable-hcpp',
+  environmentOverride: 'FLUTTER_ENABLE_HCPP',
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  stable: FeatureChannelSetting(available: true),
+);
+
+/// Environment variable that disables all tool extensions when set to `'1'`, `'true'`, or `'yes'`.
+const kFlutterNoExtensionsEnv = 'FLUTTER_NO_EXTENSIONS';
+
+/// Whether [environment] sets [kFlutterNoExtensionsEnv] to a truthy value (`1`, `true`, or `yes`).
+bool isSafeModeActive(Map<String, String> environment) {
+  final String? value = environment[kFlutterNoExtensionsEnv]?.trim().toLowerCase();
+  return value == '1' || value == 'true' || value == 'yes';
+}
+
 /// Enable tool extensions feature.
 const toolExtensionsFeature = Feature(
   name: 'support for tool extensions',
@@ -355,6 +378,7 @@ class Feature {
     this.configSetting,
     this.runtimeId,
     this.extraHelpText,
+    this.warningMessageOnDisable,
     this.master = const FeatureChannelSetting(),
     this.beta = const FeatureChannelSetting(),
     this.stable = const FeatureChannelSetting(),
@@ -367,6 +391,7 @@ class Feature {
     this.configSetting,
     this.runtimeId,
     this.extraHelpText,
+    this.warningMessageOnDisable,
   }) : master = const FeatureChannelSetting(available: true, enabledByDefault: true),
        beta = const FeatureChannelSetting(available: true, enabledByDefault: true),
        stable = const FeatureChannelSetting(available: true, enabledByDefault: true);
@@ -407,6 +432,11 @@ class Feature {
   ///
   /// If not provided, defaults to `null` meaning there is no additional text.
   final String? extraHelpText;
+
+  /// A warning to print when this feature is explicitly disabled.
+  ///
+  /// If not provided, defaults to `null` meaning there is no warning.
+  final String? warningMessageOnDisable;
 
   /// A help message for the `flutter config` command, or null if unsupported.
   String? generateHelpMessage() {

@@ -5,7 +5,10 @@
 #ifndef FLUTTER_IMPELLER_COMPILER_SHADER_BUNDLE_DATA_H_
 #define FLUTTER_IMPELLER_COMPILER_SHADER_BUNDLE_DATA_H_
 
+#include <array>
+#include <cstdint>
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "flutter/fml/mapping.h"
@@ -48,6 +51,30 @@ class ShaderBundleData {
     size_t binding = 0u;
   };
 
+  /// Reflection data for a storage buffer (an SSBO) that a compute shader
+  /// declares, serialized as a `ShaderStorageBuffer` in the bundle.
+  struct ShaderStorageBuffer {
+    /// The name of the buffer block.
+    std::string name;
+    /// The backend's index for the buffer: the Metal buffer index, or the
+    /// binding on Vulkan. `kOptimizedOutBinding` if the backend compiler
+    /// removed the buffer because the shader never uses it.
+    size_t ext_res_0 = 0u;
+    /// The descriptor set the shader declares the buffer in.
+    size_t set = 0u;
+    /// The binding the shader declares the buffer at.
+    size_t binding = 0u;
+    /// How the shader accesses the buffer, from its `readonly` or `writeonly`
+    /// qualifier.
+    fb::shaderbundle::ShaderResourceAccess access =
+        fb::shaderbundle::ShaderResourceAccess::kReadWrite;
+    /// The size of the block, counting a trailing runtime-sized array as empty.
+    size_t size_in_bytes = 0u;
+    /// The stride of the block's trailing runtime-sized array, or zero if the
+    /// block does not end in one.
+    size_t runtime_array_stride = 0u;
+  };
+
   ShaderBundleData(std::string entrypoint,
                    spv::ExecutionModel stage,
                    TargetPlatform target_platform);
@@ -58,7 +85,15 @@ class ShaderBundleData {
 
   void AddUniformTexture(ShaderUniformTexture uniform_texture);
 
+  void AddStorageBuffer(ShaderStorageBuffer storage_buffer);
+
   void AddInputDescription(InputDescription input);
+
+  /// Sets the workgroup size of a compute shader. A dimension of 0 means the
+  /// shader sizes it with a specialization constant.
+  void SetWorkgroupSize(std::array<uint32_t, 3> workgroup_size);
+
+  const std::optional<std::array<uint32_t, 3>>& GetWorkgroupSize() const;
 
   void SetShaderData(std::shared_ptr<fml::Mapping> shader);
 
@@ -72,6 +107,8 @@ class ShaderBundleData {
   const TargetPlatform target_platform_;
   std::vector<ShaderUniformStruct> uniform_structs_;
   std::vector<ShaderUniformTexture> uniform_textures_;
+  std::vector<ShaderStorageBuffer> storage_buffers_;
+  std::optional<std::array<uint32_t, 3>> workgroup_size_;
   std::vector<InputDescription> inputs_;
   std::shared_ptr<fml::Mapping> shader_;
   std::shared_ptr<fml::Mapping> sksl_;

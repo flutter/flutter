@@ -8,10 +8,12 @@ import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/template.dart';
@@ -25,7 +27,7 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -54,6 +56,11 @@ BufferLogger get testLogger => context.get<Logger>()! as BufferLogger;
 
 FakeDeviceManager get testDeviceManager => context.get<DeviceManager>()! as FakeDeviceManager;
 
+Platform _contextPlatform() => context.get<Platform>() ?? const LocalPlatform();
+
+FileSystem _contextFileSystem() =>
+    ErrorHandlingFileSystem(delegate: context.get<FileSystem>()!, platform: _contextPlatform());
+
 @isTest
 void testUsingContext(
   String description,
@@ -61,8 +68,7 @@ void testUsingContext(
   Map<Type, Generator> overrides = const <Type, Generator>{},
   bool initializeFlutterRoot = true,
   String? testOn,
-  bool?
-  skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
+  bool? skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
   if (overrides[FileSystem] != null && overrides[ProcessManager] == null) {
     fail(
@@ -85,13 +91,17 @@ void testUsingContext(
     }
   });
   Config buildConfig(FileSystem fs) {
-    configDir ??= globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
-    return Config.test(name: Config.kFlutterSettings, directory: configDir, logger: globals.logger);
+    configDir ??= fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
+    return Config.test(
+      name: Config.kFlutterSettings,
+      directory: configDir,
+      logger: context.get<Logger>(),
+    );
   }
 
   PersistentToolState buildPersistentToolState(FileSystem fs) {
-    configDir ??= globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
-    return PersistentToolState.test(directory: configDir!, logger: globals.logger);
+    configDir ??= fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
+    return PersistentToolState.test(directory: configDir!, logger: context.get<Logger>()!);
   }
 
   test(
@@ -102,17 +112,18 @@ void testUsingContext(
           return context.run<dynamic>(
             name: 'mocks',
             overrides: <Type, Generator>{
-              AnsiTerminal: () => AnsiTerminal(platform: globals.platform, stdio: globals.stdio),
-              Config: () => buildConfig(globals.fs),
+              AnsiTerminal: () =>
+                  AnsiTerminal(platform: _contextPlatform(), stdio: context.get<Stdio>()!),
+              Config: () => buildConfig(_contextFileSystem()),
               DeviceManager: () => FakeDeviceManager(),
-              Doctor: () => FakeDoctor(globals.logger),
+              Doctor: () => _ContextFakeDoctor(context.get<Logger>()!),
               FlutterVersion: () => FakeFlutterVersion(),
               HttpClient: () => FakeHttpClient.any(),
               IOSSimulatorUtils: () => const NoopIOSSimulatorUtils(),
               OutputPreferences: () => OutputPreferences.test(),
-              Logger: () => BufferLogger.test(),
+              Logger: () => BufferLogger.test(outputPreferences: context.get<OutputPreferences>()),
               OperatingSystemUtils: () => FakeOperatingSystemUtils(),
-              PersistentToolState: () => buildPersistentToolState(globals.fs),
+              PersistentToolState: () => buildPersistentToolState(_contextFileSystem()),
               XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
               FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
               PlistParser: () => FakePlistParser(),
@@ -141,10 +152,17 @@ void testUsingContext(
                       overrides: overrides,
                       name: 'test-specific overrides',
                       body: () async {
-                        if (initializeFlutterRoot) {
+                        if (initializeFlutterRoot &&
+                            overrides[Cache] == null &&
+                            (overrides[Platform] == null ||
+                                !_contextPlatform().environment.containsKey(
+                                  kFlutterRootEnvironmentVariableName,
+                                ))) {
                           // Provide a sane default for the flutterRoot directory. Individual
-                          // tests can override this either in the test or during setup.
-                          Cache.flutterRoot ??= getFlutterRoot();
+                          // tests can override this in the test. Skipped when a Platform
+                          // override supplies FLUTTER_ROOT, so FlutterCache resolves it via
+                          // Cache.defaultFlutterRoot.
+                          context.get<Cache>()!.flutterRoot = getFlutterRoot();
                         }
                         return await testMethod();
                       },
@@ -314,8 +332,15 @@ class FakeAndroidLicenseValidator extends Fake implements AndroidLicenseValidato
   Future<LicensesAccepted> get licensesAccepted async => LicensesAccepted.all;
 }
 
-class FakeDoctor extends Doctor {
-  FakeDoctor(Logger logger, {super.clock = const SystemClock()}) : super(logger: logger);
+class _ContextFakeDoctor extends Doctor {
+  _ContextFakeDoctor(Logger logger, {super.clock = const SystemClock()})
+    : super(
+        analytics: context.get<Analytics>()!,
+        cache: Cache.test(processManager: FakeProcessManager.any()),
+        logger: logger,
+        validatorsProviderBuilder: ({ExtensionManager? extensionManager}) =>
+            context.get<DoctorValidatorsProvider>()!,
+      );
 
   // True for testing.
   @override
@@ -351,22 +376,34 @@ class NoopIOSSimulatorUtils implements IOSSimulatorUtils {
 }
 
 class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
-  @override
-  bool get isInstalled => true;
+  FakeXcodeProjectInterpreter({
+    this._isInstalled = true,
+    this._versionText = 'Xcode 15',
+    this._version = const Version.withText(15, 0, 0, '15.0.0'),
+    this._build = '15A240D',
+  });
+
+  final bool _isInstalled;
+  final String? _versionText;
+  final Version? _version;
+  final String? _build;
 
   @override
-  String get versionText => 'Xcode 15';
+  bool get isInstalled => _isInstalled;
 
   @override
-  Version get version => Version(15, 0, 0);
+  String? get versionText => _versionText;
 
   @override
-  String get build => '15A240D';
+  Version? get version => _version;
+
+  @override
+  String? get build => _build;
 
   @override
   Future<Map<String, String>> getBuildSettings(
     XcodeBasedProject xcodeProject, {
-    XcodeProjectBuildContext? buildContext,
+    required XcodeProjectBuildContext buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{};
@@ -390,7 +427,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }) async {}
 
   @override
-  Future<XcodeProjectInfo> getInfo(
+  Future<XcodeProjectInfo?> getInfo(
     XcodeBasedProject xcodeProject, {
     String? projectFilename,
     required Directory buildDirectory,
@@ -440,10 +477,10 @@ class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
   @override
   set currentDirectory(dynamic value) {
     throw Exception(
-      'globals.fs.currentDirectory should not be set on the local file system during '
+      'FileSystem.currentDirectory should not be set on the local file system during '
       'tests as this can cause race conditions with concurrent tests. '
       'Consider using a MemoryFileSystem for testing if possible or refactor '
-      'code to not require setting globals.fs.currentDirectory.',
+      'code to not require setting FileSystem.currentDirectory.',
     );
   }
 }

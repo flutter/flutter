@@ -18,17 +18,13 @@ import 'web_server_utilities.dart';
 class ReleaseAssetServer {
   ReleaseAssetServer(
     this.entrypoint, {
-    required FileSystem fileSystem,
-    required String? webBuildDirectory,
-    required String? flutterRoot,
-    required Platform platform,
-    required bool needsCoopCoep,
+    required this._fileSystem,
+    required this._webBuildDirectory,
+    required this._flutterRoot,
+    required this._platform,
+    required this._needsCoopCoep,
     this.basePath = '',
-  }) : _fileSystem = fileSystem,
-       _platform = platform,
-       _flutterRoot = flutterRoot,
-       _webBuildDirectory = webBuildDirectory,
-       _needsCoopCoep = needsCoopCoep;
+  });
 
   final Uri entrypoint;
   final String? _flutterRoot;
@@ -52,9 +48,21 @@ class ReleaseAssetServer {
   // contains generated, publishable assets.
   static const Set<String> _sourceMapExtensions = <String>{'.dart', '.map'};
 
+  static const Set<String> _staticAssetExtensions = <String>{
+    '.wasm',
+    '.mjs',
+    '.js',
+    '.css',
+    '.json',
+    '.ico',
+    '.map',
+  };
+
   // Locations where source files, assets, or source maps may be located, paired
   // with the set of file extensions allowed to be served from each location. An
-  // empty set means no extension restriction is applied.
+  // empty set means no extension restriction is applied, and relies on the
+  // request path staying below its root, which `resolveRequestPathUnder`
+  // enforces for every root listed below.
   List<(Uri, Set<String>)> _searchPaths() => <(Uri, Set<String>)>[
     (_fileSystem.directory(_webBuildDirectory).uri, const <String>{}),
     (_fileSystem.directory(_flutterRoot).uri, _sourceMapExtensions),
@@ -77,15 +85,26 @@ class ReleaseAssetServer {
     if (request.url.toString() == 'main.dart') {
       fileUri = entrypoint;
     } else {
+      final String requestExtension = _fileSystem.path.extension(requestPath);
       for (final (Uri uri, Set<String> allowedExtensions) in _searchPaths()) {
-        final Uri potential = uri.resolve(requestPath);
-        final String potentialPath = potential.toFilePath(windows: _platform.isWindows);
-        if (allowedExtensions.isNotEmpty &&
-            !allowedExtensions.contains(_fileSystem.path.extension(potentialPath))) {
+        if (allowedExtensions.isNotEmpty && !allowedExtensions.contains(requestExtension)) {
           // This root only serves source-map related files; skip anything else
-          // so unrelated project or SDK files are not exposed.
+          // so unrelated project or SDK files are not exposed. A dot segment
+          // cannot change the extension: resolution keeps the last segment
+          // unless it is `.` or `..`, which have no extension.
           continue;
         }
+        final Uri? potential = resolveRequestPathUnder(
+          uri,
+          requestPath,
+          fileSystem: _fileSystem,
+          windows: _platform.isWindows,
+        );
+        if (potential == null) {
+          // The request path does not name a location below this root.
+          continue;
+        }
+        final String potentialPath = potential.toFilePath(windows: _platform.isWindows);
         if (_fileSystem.isFileSync(potentialPath)) {
           fileUri = potential;
           break;
@@ -111,7 +130,24 @@ class ReleaseAssetServer {
       );
     }
 
+    // Requests for specific compiled web build artifacts (.wasm, .mjs, .js, assets/, canvaskit/)
+    // that do not exist on disk must return 404 Not Found so browser entrypoint fallback
+    // functions properly. SPA index.html fallback is preserved for navigation routes and
+    // unallowed project path fallthroughs.
+    final String cleanPath = requestPath.startsWith('/') ? requestPath.substring(1) : requestPath;
+    final String extension = _fileSystem.path.extension(cleanPath);
+    final bool isMissingStaticAsset =
+        _staticAssetExtensions.contains(extension) ||
+        cleanPath.startsWith('assets/') ||
+        cleanPath.startsWith('canvaskit/');
+    if (isMissingStaticAsset) {
+      return shelf.Response.notFound('');
+    }
+
     final File file = _fileSystem.file(_fileSystem.path.join(_webBuildDirectory!, 'index.html'));
+    if (!file.existsSync()) {
+      return shelf.Response.notFound('');
+    }
     return shelf.Response.ok(
       file.readAsBytesSync(),
       headers: <String, String>{

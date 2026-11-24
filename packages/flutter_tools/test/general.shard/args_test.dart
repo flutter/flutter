@@ -6,23 +6,17 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/executable.dart' as executable;
 import 'package:flutter_tools/src/android/android_sdk.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/build_targets.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
-import 'package:flutter_tools/src/context/android_context.dart';
-import 'package:flutter_tools/src/context/apple_context.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
-import 'package:flutter_tools/src/context/tool_dependencies.dart';
-import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
-import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fakes.dart';
+import '../src/test_flutter_command_runner.dart';
 import '../src/testbed.dart';
 import 'runner/utils.dart';
 
@@ -46,7 +40,7 @@ void main() {
         appleContext: fakeAppleContext,
         toolContext: fakeToolContext,
       );
-      final runner = FlutterCommandRunner(
+      final runner = TestFlutterCommandRunner(
         analytics: fakeToolDependencies.analytics,
         toolContext: fakeToolContext,
         verboseHelp: true,
@@ -66,7 +60,10 @@ void main() {
         }
       }
     }),
-    overrides: <Type, Generator>{AndroidSdk: () => FakeAndroidSdk()},
+    overrides: <Type, Generator>{
+      AndroidSdk: () => FakeAndroidSdk(),
+      AndroidStudio: () => FakeAndroidStudio(),
+    },
   );
 
   testUsingContext('Global arg results are available in FlutterCommands', () async {
@@ -76,7 +73,7 @@ void main() {
       },
     );
 
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,
@@ -105,7 +102,7 @@ void main() {
 
     command.addSubcommand(subcommand);
 
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,
@@ -129,7 +126,7 @@ void main() {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,
@@ -159,7 +156,7 @@ void main() {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,
@@ -185,7 +182,7 @@ void main() {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,
@@ -216,7 +213,7 @@ void main() {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,
@@ -325,10 +322,10 @@ void verifyOptions(String? command, Iterable<Option> options) {
           '$_header$target--${option.name}" is not a valid name for a command line argument. (We use "--foo-url", not "--foo-uri", for example.)',
     );
 
-    // Deprecated options and flags should be hidden but still have help text.
-    const deprecatedOptions = <String>['pwa-strategy'];
-    final bool isOptionDeprecated = deprecatedOptions.contains(option.name);
-    if (!isOptionDeprecated) {
+    // Fully hidden options and flags should still have help text.
+    const hiddenOptions = <String>['pwa-strategy'];
+    final bool isHiddenOption = hiddenOptions.contains(option.name);
+    if (!isHiddenOption) {
       expect(
         option.hide,
         isFalse,
@@ -340,7 +337,7 @@ void verifyOptions(String? command, Iterable<Option> options) {
         option.hide,
         isTrue,
         reason:
-            '${_header}Deprecated option "--${option.name}" for "flutter $command" should be hidden. $_needHelp',
+            '${_header}Hidden option "--${option.name}" for "flutter $command" should be hidden. $_needHelp',
       );
     }
 
@@ -467,54 +464,14 @@ void verifyOptions(String? command, Iterable<Option> options) {
 }
 
 class FakeAnalytics extends Fake implements Analytics {
+  final sentEvents = <Event>[];
+
+  @override
+  void send(Event event) => sentEvents.add(event);
+
   @override
   bool get telemetryEnabled => false;
 
   @override
   bool get okToSend => false;
-}
-
-class FakeBuildSystem extends Fake implements BuildSystem {}
-
-class FakeBuildTargets extends Fake implements BuildTargets {}
-
-class FakeCrashReporter extends Fake implements CrashReporter {}
-
-class FakeToolDependencies extends Fake implements ToolDependencies {
-  FakeToolDependencies({
-    Analytics? analytics,
-    AndroidContext? androidContext,
-    AppleContext? appleContext,
-    BuildSystem? buildSystem,
-    BuildTargets? buildTargets,
-    CrashReporter? crashReporter,
-    ToolContext? toolContext,
-  }) : analytics = analytics ?? FakeAnalytics(),
-       androidContext = androidContext ?? FakeAndroidContext(),
-       appleContext = appleContext ?? FakeAppleContext(),
-       buildSystem = buildSystem ?? FakeBuildSystem(),
-       buildTargets = buildTargets ?? FakeBuildTargets(),
-       crashReporter = crashReporter ?? FakeCrashReporter(),
-       toolContext = toolContext ?? FakeToolContext();
-
-  @override
-  final Analytics analytics;
-
-  @override
-  final AndroidContext androidContext;
-
-  @override
-  final AppleContext appleContext;
-
-  @override
-  final BuildSystem buildSystem;
-
-  @override
-  final BuildTargets buildTargets;
-
-  @override
-  final CrashReporter crashReporter;
-
-  @override
-  final ToolContext toolContext;
 }

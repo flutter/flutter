@@ -20,12 +20,11 @@ class WidgetsAppExampleApp extends StatelessWidget {
       pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
           PageRouteBuilder<T>(
             settings: settings,
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           ),
     );
   }

@@ -49,6 +49,7 @@ class TestViewRasterizer extends ViewRasterizer {
   TestViewRasterizer(super.view);
 
   List<LayerTree> treesRendered = <LayerTree>[];
+  List<ui.Size> sizesRendered = <ui.Size>[];
 
   @override
   DisplayCanvasFactory<DisplayCanvas> get displayFactory => throw UnimplementedError();
@@ -59,8 +60,9 @@ class TestViewRasterizer extends ViewRasterizer {
   }
 
   @override
-  Future<void> draw(LayerTree tree, FrameTimingRecorder? recorder) async {
+  Future<void> draw(LayerTree tree, ui.Size frameSize, FrameTimingRecorder? recorder) async {
     treesRendered.add(tree);
+    sizesRendered.add(frameSize);
     return Future<void>.value();
   }
 
@@ -114,7 +116,7 @@ void testMain() {
         builder.addPicture(ui.Offset.zero, picture);
         final ui.Scene scene = builder.build();
         treesToRender.add((scene as LayerScene).layerTree);
-        renderFutures.add(renderer.renderScene(scene, testView));
+        renderFutures.add(renderer.renderScene(scene, testView, size: ui.Size(i * 10.0, i * 20.0)));
       }
       await Future.wait(renderFutures);
 
@@ -123,6 +125,10 @@ void testMain() {
       expect(treesRendered.length, 2);
       expect(treesRendered.first, treesToRender.first);
       expect(treesRendered.last, treesToRender.last);
+      expect(testRasterizer.viewRasterizers[testView]!.sizesRendered, const <ui.Size>[
+        ui.Size(10, 20),
+        ui.Size(190, 380),
+      ]);
     });
 
     test('can render multiple frames at once into multiple views', () async {
@@ -166,7 +172,7 @@ void testMain() {
           builder.addPicture(ui.Offset.zero, picture);
           final ui.Scene scene = builder.build();
           treesToRender[testView]!.add((scene as LayerScene).layerTree);
-          renderFutures.add(renderer.renderScene(scene, testView));
+          renderFutures.add(renderer.renderScene(scene, testView, size: testView.physicalSize));
         }
       }
       await Future.wait(renderFutures);
@@ -189,6 +195,47 @@ void testMain() {
       expect(treesRenderedInView3.length, 2);
       expect(treesRenderedInView3.first, treesToRenderInView3.first);
       expect(treesRenderedInView3.last, treesToRenderInView3.last);
+    });
+
+    test('a disposed view rasterizer is removed from OffscreenCanvasRasterizer', () {
+      renderer.rasterizer.dispose();
+      final offscreenRasterizer = OffscreenCanvasRasterizer(
+        (_) => throw StateError('Unexpected offscreen surface creation'),
+      );
+      renderer.debugOverrideRasterizer(offscreenRasterizer);
+
+      final testView = EngineFlutterView(
+        EnginePlatformDispatcher.instance,
+        createDomElement('test-view'),
+      );
+      EnginePlatformDispatcher.instance.viewManager.registerView(testView);
+      final ViewRasterizer viewRasterizer = renderer.rasterizers[testView.viewId]!;
+
+      EnginePlatformDispatcher.instance.viewManager.disposeAndUnregisterView(testView.viewId);
+
+      final OffscreenCanvasViewRasterizer recreated = offscreenRasterizer.createViewRasterizer(
+        testView,
+      );
+      addTearDown(recreated.dispose);
+      expect(recreated, isNot(same(viewRasterizer)));
+    });
+
+    test('MultiSurfaceViewRasterizer.prepareToDraw does not allocate a surface', () async {
+      final multiSurfaceRasterizer = MultiSurfaceRasterizer(
+        (_) => throw StateError('Unexpected onscreen surface creation'),
+      );
+      addTearDown(multiSurfaceRasterizer.dispose);
+
+      final testView = EngineFlutterView(
+        EnginePlatformDispatcher.instance,
+        createDomElement('test-view'),
+      );
+      final MultiSurfaceViewRasterizer viewRasterizer = multiSurfaceRasterizer.createViewRasterizer(
+        testView,
+      );
+
+      await viewRasterizer.prepareToDraw();
+      expect(viewRasterizer.displayFactory.debugSurfaceCount, 0);
     });
   });
 }
