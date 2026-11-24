@@ -681,10 +681,10 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext('AnalysisService --watch forwards plugin trust flags', () async {
-    Future<void> expectWatchServerFlags(
-      List<String> analyzeArgs,
-      List<String> expectedFlags, {
+  testWithoutContext('AnalysisService --watch forwards plugin trust flags', () async {
+    Future<void> expectWatchServerFlags({
+      required List<String> analyzeArgs,
+      required List<String> expectedFlags,
       bool isRunningOnBot = false,
     }) async {
       final process = MockLspServerProcess();
@@ -717,29 +717,42 @@ void main() {
         ),
       );
 
-      final commandRunner = TestFlutterCommandRunner();
-      commandRunner.addCommand(command);
-      unawaited(commandRunner.run(<String>['analyze', '--watch', ...analyzeArgs]));
+      unawaited(
+        createTestCommandRunner(command).run(<String>['analyze', '--watch', ...analyzeArgs]),
+      );
       await process.initializeRequest;
 
       expect(processManager, hasNoRemainingExpectations);
     }
 
-    await expectWatchServerFlags(<String>['--plugins'], <String>['--plugins']);
-    await expectWatchServerFlags(<String>['--no-plugins'], <String>['--no-plugins']);
-    await expectWatchServerFlags(<String>['--trust-plugins'], <String>['--trust-plugins']);
     await expectWatchServerFlags(
-      <String>['--always-trust-plugins'],
-      <String>['--always-trust-plugins'],
+      analyzeArgs: <String>['--plugins'],
+      expectedFlags: <String>['--plugins'],
     );
     await expectWatchServerFlags(
-      <String>['--never-trust-plugins'],
-      <String>['--never-trust-plugins'],
+      analyzeArgs: <String>['--no-plugins'],
+      expectedFlags: <String>['--no-plugins'],
     );
-    await expectWatchServerFlags(const <String>[], <String>['--plugins'], isRunningOnBot: true);
     await expectWatchServerFlags(
-      <String>['--never-trust-plugins'],
-      <String>['--never-trust-plugins'],
+      analyzeArgs: <String>['--trust-plugins'],
+      expectedFlags: <String>['--trust-plugins'],
+    );
+    await expectWatchServerFlags(
+      analyzeArgs: <String>['--always-trust-plugins'],
+      expectedFlags: <String>['--always-trust-plugins'],
+    );
+    await expectWatchServerFlags(
+      analyzeArgs: <String>['--never-trust-plugins'],
+      expectedFlags: <String>['--never-trust-plugins'],
+    );
+    await expectWatchServerFlags(
+      analyzeArgs: const <String>[],
+      expectedFlags: <String>['--plugins'],
+      isRunningOnBot: true,
+    );
+    await expectWatchServerFlags(
+      analyzeArgs: <String>['--never-trust-plugins'],
+      expectedFlags: <String>['--never-trust-plugins'],
       isRunningOnBot: true,
     );
   });
