@@ -4,6 +4,7 @@
 
 #define FML_USED_ON_EMBEDDER
 
+#include <atomic>
 #include <cstring>
 #include <string>
 #include <utility>
@@ -12,8 +13,11 @@
 #include "embedder.h"
 #include "embedder_engine.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
+#include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"
+#include "flutter/shell/platform/embedder/tests/embedder_test_backingstore_producer.h"
+#include "flutter/shell/platform/embedder/tests/embedder_test_compositor.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test_context_vulkan.h"
 #include "flutter/shell/platform/embedder/tests/embedder_unittests_util.h"
 #include "flutter/testing/test_vulkan_context.h"
@@ -111,6 +115,303 @@ TEST_F(EmbedderTest, CanGetVulkanEmbedderContext) {
       GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
 }
+
+#if IMPELLER_SUPPORTS_RENDERING
+
+/// Verifies that Impeller can render into an embedder-provided Vulkan backing
+/// store, present it to the compositor, and match the expected golden output.
+TEST_F(EmbedderTest, CanRenderWithImpellerVulkan) {
+  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  EmbedderConfigBuilder builder(context);
+
+  builder.AddCommandLineArgument("--enable-impeller");
+  builder.SetDartEntrypoint("render_impeller_test");
+  builder.SetSurface(DlISize(800, 600));
+  builder.SetCompositor();
+  builder.SetRenderTargetType(
+      EmbedderTestBackingStoreProducer::RenderTargetType::kVulkanImage);
+
+  fml::AutoResetWaitableEvent latch;
+  bool layer_was_a_vulkan_backing_store = false;
+  context.GetCompositor().SetNextPresentCallback(
+      [&](FlutterViewId view_id, const FlutterLayer** layers,
+          size_t layers_count) {
+        if (layers_count == 1u &&
+            layers[0]->type == kFlutterLayerContentTypeBackingStore &&
+            layers[0]->backing_store->type == kFlutterBackingStoreTypeVulkan) {
+          layer_was_a_vulkan_backing_store = true;
+        }
+        latch.Signal();
+      });
+
+  auto rendered_scene = context.GetNextSceneImage();
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  // Bound the wait so a dropped frame fails instead of hanging.
+  ASSERT_FALSE(latch.WaitWithTimeout(fml::TimeDelta::FromSeconds(30)))
+      << "no frame reached the compositor";
+  EXPECT_TRUE(layer_was_a_vulkan_backing_store);
+
+  ASSERT_TRUE(ImageMatchesFixture("impeller_test.png", rendered_scene));
+}
+
+namespace {
+
+struct VulkanDestructionTracker {
+  struct WrappedUserData {
+    VulkanDestructionTracker* tracker = nullptr;
+    VoidCallback original_callback = nullptr;
+    void* original_user_data = nullptr;
+  };
+
+  std::atomic<int> created_count{0};
+  std::atomic<int> destroyed_count{0};
+
+  void Reset() {
+    created_count.store(0);
+    destroyed_count.store(0);
+  }
+
+  void WrapBackingStore(FlutterBackingStore* backing_store_out) {
+    created_count++;
+    auto* wrapped = new WrappedUserData{
+        .tracker = this,
+        .original_callback = backing_store_out->vulkan.destruction_callback,
+        .original_user_data = backing_store_out->vulkan.user_data,
+    };
+    backing_store_out->vulkan.user_data = wrapped;
+    backing_store_out->vulkan.destruction_callback = [](void* data) {
+      auto* w = reinterpret_cast<WrappedUserData*>(data);
+      w->tracker->destroyed_count++;
+      if (w->original_callback) {
+        w->original_callback(w->original_user_data);
+      }
+      delete w;
+    };
+  }
+};
+
+void RunImpellerVulkanFailureCleanupTest(EmbedderTestContextVulkan& context,
+                                         bool use_null_image) {
+  EmbedderConfigBuilder builder(context);
+
+  builder.AddCommandLineArgument("--enable-impeller");
+  builder.SetDartEntrypoint("render_impeller_test");
+  builder.SetSurface(DlISize(800, 600));
+  builder.SetCompositor();
+  builder.SetRenderTargetType(
+      EmbedderTestBackingStoreProducer::RenderTargetType::kVulkanImage);
+
+  static std::atomic<int> created_count{0};
+  static std::atomic<int> destroyed_count{0};
+  static std::atomic<int> collected_count{0};
+  static fml::AutoResetWaitableEvent* cleanup_latch = nullptr;
+  static bool return_null_image = false;
+
+  created_count.store(0);
+  destroyed_count.store(0);
+  collected_count.store(0);
+  fml::AutoResetWaitableEvent latch;
+  cleanup_latch = &latch;
+  return_null_image = use_null_image;
+
+  builder.GetCompositor().create_backing_store_callback =
+      [](const FlutterBackingStoreConfig* config,
+         FlutterBackingStore* backing_store_out, void* user_data) -> bool {
+    created_count++;
+    backing_store_out->type = kFlutterBackingStoreTypeVulkan;
+    if (return_null_image) {
+      backing_store_out->vulkan.image = nullptr;
+    } else {
+      static FlutterVulkanImage invalid_format_image = {
+          .struct_size = sizeof(FlutterVulkanImage),
+          .image = 1,
+          .format = VK_FORMAT_B8G8R8A8_SRGB,
+      };
+      backing_store_out->vulkan.image = &invalid_format_image;
+    }
+    backing_store_out->vulkan.user_data = nullptr;
+    backing_store_out->vulkan.destruction_callback = [](void*) {
+      destroyed_count++;
+    };
+    return true;
+  };
+
+  builder.GetCompositor().collect_backing_store_callback =
+      [](const FlutterBackingStore* backing_store, void* user_data) -> bool {
+    collected_count++;
+    if (cleanup_latch) {
+      cleanup_latch->Signal();
+    }
+    return true;
+  };
+
+  {
+    auto engine = builder.LaunchEngine();
+    ASSERT_TRUE(engine.is_valid());
+
+    FlutterWindowMetricsEvent event = {};
+    event.struct_size = sizeof(event);
+    event.width = 800;
+    event.height = 600;
+    event.pixel_ratio = 1.0;
+    ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+              kSuccess);
+
+    ASSERT_FALSE(latch.WaitWithTimeout(fml::TimeDelta::FromSeconds(30)))
+        << "cleanup callbacks were not invoked on failure";
+  }
+
+  EXPECT_GT(created_count.load(), 0);
+  EXPECT_EQ(destroyed_count.load(), created_count.load());
+  EXPECT_EQ(collected_count.load(), created_count.load());
+  cleanup_latch = nullptr;
+}
+
+}  // namespace
+
+/// Verifies that `FlutterVulkanBackingStore.destruction_callback` is invoked
+/// when Impeller releases a Vulkan backing store.
+TEST_F(EmbedderTest, ImpellerVulkanBackingStoreCallsDestructionCallback) {
+  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  EmbedderConfigBuilder builder(context);
+
+  builder.AddCommandLineArgument("--enable-impeller");
+  builder.SetDartEntrypoint("render_impeller_test");
+  builder.SetSurface(DlISize(800, 600));
+  builder.SetCompositor();
+  builder.SetRenderTargetType(
+      EmbedderTestBackingStoreProducer::RenderTargetType::kVulkanImage);
+
+  static VulkanDestructionTracker tracker;
+  tracker.Reset();
+
+  builder.GetCompositor().create_backing_store_callback =
+      [](const FlutterBackingStoreConfig* config,
+         FlutterBackingStore* backing_store_out, void* user_data) -> bool {
+    auto* compositor = reinterpret_cast<EmbedderTestCompositor*>(user_data);
+    if (!compositor->CreateBackingStore(config, backing_store_out)) {
+      return false;
+    }
+    tracker.WrapBackingStore(backing_store_out);
+    return true;
+  };
+
+  fml::AutoResetWaitableEvent latch;
+  context.GetCompositor().SetNextPresentCallback(
+      [&](FlutterViewId view_id, const FlutterLayer** layers,
+          size_t layers_count) { latch.Signal(); });
+
+  {
+    auto engine = builder.LaunchEngine();
+    ASSERT_TRUE(engine.is_valid());
+
+    FlutterWindowMetricsEvent event = {};
+    event.struct_size = sizeof(event);
+    event.width = 800;
+    event.height = 600;
+    event.pixel_ratio = 1.0;
+    ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+              kSuccess);
+
+    ASSERT_FALSE(latch.WaitWithTimeout(fml::TimeDelta::FromSeconds(30)))
+        << "no frame reached the compositor";
+  }
+
+  EXPECT_GT(tracker.created_count.load(), 0);
+  EXPECT_EQ(tracker.destroyed_count.load(), tracker.created_count.load());
+}
+
+/// Verifies that `FlutterVulkanBackingStore.destruction_callback` is invoked
+/// for every backing store when `avoid_backing_store_cache` is true across
+/// multiple frames and a resize.
+TEST_F(EmbedderTest, ImpellerVulkanBackingStoreAvoidCacheDestructionCallback) {
+  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  EmbedderConfigBuilder builder(context);
+
+  builder.AddCommandLineArgument("--enable-impeller");
+  builder.SetDartEntrypoint("render_impeller_test");
+  builder.SetSurface(DlISize(800, 600));
+  builder.SetCompositor(/*avoid_backing_store_cache=*/true);
+  builder.SetRenderTargetType(
+      EmbedderTestBackingStoreProducer::RenderTargetType::kVulkanImage);
+
+  static VulkanDestructionTracker tracker;
+  tracker.Reset();
+
+  builder.GetCompositor().create_backing_store_callback =
+      [](const FlutterBackingStoreConfig* config,
+         FlutterBackingStore* backing_store_out, void* user_data) -> bool {
+    auto* compositor = reinterpret_cast<EmbedderTestCompositor*>(user_data);
+    if (!compositor->CreateBackingStore(config, backing_store_out)) {
+      return false;
+    }
+    tracker.WrapBackingStore(backing_store_out);
+    return true;
+  };
+
+  fml::AutoResetWaitableEvent latch;
+  context.GetCompositor().SetPresentCallback(
+      [&](FlutterViewId view_id, const FlutterLayer** layers,
+          size_t layers_count) { latch.Signal(); },
+      /*one_shot=*/false);
+
+  {
+    auto engine = builder.LaunchEngine();
+    ASSERT_TRUE(engine.is_valid());
+
+    FlutterWindowMetricsEvent event = {};
+    event.struct_size = sizeof(event);
+    event.width = 800;
+    event.height = 600;
+    event.pixel_ratio = 1.0;
+    ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+              kSuccess);
+    ASSERT_FALSE(latch.WaitWithTimeout(fml::TimeDelta::FromSeconds(30)))
+        << "first frame did not reach the compositor";
+
+    event.width = 400;
+    event.height = 300;
+    ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+              kSuccess);
+    ASSERT_FALSE(latch.WaitWithTimeout(fml::TimeDelta::FromSeconds(30)))
+        << "resized frame did not reach the compositor";
+  }
+
+  EXPECT_GE(tracker.created_count.load(), 2);
+  EXPECT_EQ(tracker.destroyed_count.load(), tracker.created_count.load());
+}
+
+/// Verifies that both `collect_backing_store_callback` and
+/// `FlutterVulkanBackingStore.destruction_callback` are invoked when render
+/// target creation fails due to an unsupported pixel format.
+TEST_F(EmbedderTest,
+       ImpellerVulkanBackingStoreUnsupportedFormatInvokesCleanup) {
+  RunImpellerVulkanFailureCleanupTest(
+      GetEmbedderContext<EmbedderTestContextVulkan>(),
+      /*use_null_image=*/false);
+}
+
+/// Verifies that both `collect_backing_store_callback` and
+/// `FlutterVulkanBackingStore.destruction_callback` are invoked when render
+/// target creation fails due to a null Vulkan image.
+TEST_F(EmbedderTest, ImpellerVulkanBackingStoreNullImageInvokesCleanup) {
+  RunImpellerVulkanFailureCleanupTest(
+      GetEmbedderContext<EmbedderTestContextVulkan>(),
+      /*use_null_image=*/true);
+}
+
+#endif  // IMPELLER_SUPPORTS_RENDERING
 
 TEST_F(EmbedderTest, CanSwapOutVulkanCalls) {
   fml::AutoResetWaitableEvent latch;

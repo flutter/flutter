@@ -18,28 +18,6 @@ OverlayLayer::OverlayLayer(UIView* overlay_view,
       ios_surface(std::move(ios_surface)),
       surface(std::move(surface)) {};
 
-void OverlayLayer::UpdateViewState(UIView* flutter_view,
-                                   DlRect rect,
-                                   int64_t view_id,
-                                   int64_t overlay_id) {
-  auto screenScale = [UIScreen mainScreen].scale;
-  // Set the size of the overlay view wrapper.
-  // This wrapper view masks the overlay view.
-  overlay_view_wrapper.frame =
-      CGRectMake(rect.GetX() / screenScale, rect.GetY() / screenScale,
-                 rect.GetWidth() / screenScale, rect.GetHeight() / screenScale);
-  // Set a unique view identifier, so the overlay_view_wrapper can be identified in XCUITests.
-  overlay_view_wrapper.accessibilityIdentifier =
-      [NSString stringWithFormat:@"platform_view[%lld].overlay[%lld]", view_id, overlay_id];
-
-  // Set the size of the overlay view.
-  // This size is equal to the device screen size.
-  overlay_view.frame = [flutter_view convertRect:flutter_view.bounds toView:overlay_view_wrapper];
-  // Set a unique view identifier, so the overlay_view can be identified in XCUITests.
-  overlay_view.accessibilityIdentifier =
-      [NSString stringWithFormat:@"platform_view[%lld].overlay_view[%lld]", view_id, overlay_id];
-}
-
 // OverlayLayerPool
 ////////////////////////////////////////////////////////
 

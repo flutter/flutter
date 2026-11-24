@@ -58,9 +58,14 @@ void main() {
         });
       processManager = FakeProcessManager.empty();
       final toolContext = DelegatingToolContext(systemClock: SystemClock.fixed(jan12026));
-      fakeCommandRunner = FakeUpgradeCommandRunner(toolContext: toolContext);
-      realCommandRunner = UpgradeCommandRunner(toolContext: toolContext)
-        ..workingDirectory = getFlutterRoot();
+      fakeCommandRunner = FakeUpgradeCommandRunner(
+        featureFlags: TestFeatureFlags(),
+        toolContext: toolContext,
+      );
+      realCommandRunner = UpgradeCommandRunner(
+        featureFlags: TestFeatureFlags(),
+        toolContext: toolContext,
+      )..workingDirectory = getFlutterRoot();
       fakeCommandRunner.willHaveUncommittedChanges = false;
     });
 
@@ -214,6 +219,7 @@ void main() {
 
         final DateTime now = DateTime.now().subtract(const Duration(minutes: 25));
         fakeCommandRunner = FakeUpgradeCommandRunner(
+          featureFlags: TestFeatureFlags(),
           toolContext: DelegatingToolContext(systemClock: SystemClock.fixed(now)),
         )..remoteVersion = latestVersion;
 
@@ -271,6 +277,7 @@ void main() {
         final now = DateTime.now();
         final DateTime before = now.subtract(const Duration(minutes: 25));
         fakeCommandRunner = FakeUpgradeCommandRunner(
+          featureFlags: TestFeatureFlags(),
           toolContext: DelegatingToolContext(systemClock: SystemClock.fixed(now)),
         )..remoteVersion = latestVersion;
 
@@ -640,6 +647,7 @@ void main() {
 
         final CommandRunner<void> runner = createTestCommandRunner(
           UpgradeCommand(
+            featureFlags: TestFeatureFlags(),
             toolContext: const DelegatingToolContext(),
             verboseHelp: false,
             commandRunner: fakeCommandRunner,
@@ -876,8 +884,12 @@ void main() {
               persistentToolState: PersistentToolState.test(directory: tempDir, logger: testLogger),
               processManager: fakeProcessManager,
             );
-            final fakeRunner = FakeUpgradeCommandRunner(toolContext: toolContext);
+            final fakeRunner = FakeUpgradeCommandRunner(
+              featureFlags: TestFeatureFlags(),
+              toolContext: toolContext,
+            );
             final upgradeCommand = UpgradeCommand(
+              featureFlags: TestFeatureFlags(),
               toolContext: toolContext,
               verboseHelp: false,
               commandRunner: fakeRunner,
@@ -909,7 +921,7 @@ void main() {
 }
 
 class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
-  FakeUpgradeCommandRunner({required super.toolContext});
+  FakeUpgradeCommandRunner({required super.featureFlags, required super.toolContext});
 
   bool willHaveUncommittedChanges = false;
   bool alreadyUpToDate = false;

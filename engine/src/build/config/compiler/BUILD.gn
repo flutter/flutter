@@ -15,6 +15,7 @@ if (is_win) {
 }
 
 import("//build/config/c++/c++.gni")
+import("//build/config/compiler/compiler.gni")
 import("//build/config/profiler.gni")
 import("//build/config/sanitizers/sanitizers.gni")
 import("//build/toolchain/ccache.gni")
@@ -645,7 +646,13 @@ config("runtime_library") {
     if (is_linux) {
       # Our custom libcxx doesn't include the unwinder, which is included in
       # libc++.a. Link the libunwind directly.
-      ldflags += [ "--unwindlib=libunwind" ]
+      #
+      # Keep libunwind's symbols out of the dynamic symbol table of shared
+      # libraries we link it into.
+      ldflags += [
+        "--unwindlib=libunwind",
+        "-Wl,--exclude-libs,libunwind.a",
+      ]
     }
   }
 
@@ -1044,7 +1051,11 @@ config("optimize") {
   lto_flags = []
   if (enable_lto &&
       (is_linux || is_ios || is_mac || is_android || is_fuchsia || is_wasm)) {
-    lto_flags += [ "-flto" ]
+    if (use_thin_lto) {
+      lto_flags += [ "-flto=thin" ]
+    } else {
+      lto_flags += [ "-flto" ]
+    }
   }
 
   ldflags = common_optimize_on_ldflags + lto_flags
