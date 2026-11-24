@@ -339,6 +339,19 @@ void main() {
       );
     });
 
+    testWithoutContext('analytics usage mentions feature branch when on a user branch', () async {
+      fakeFlutterVersion.channel = kUserBranch;
+      final ConfigCommand configCommand = createConfigCommand();
+      createRunner(configCommand);
+
+      expect(
+        configCommand.usage,
+        containsIgnoringWhitespace(
+          'Analytics reporting is currently disabled when running from a feature branch.',
+        ),
+      );
+    });
+
     testWithoutContext('resolves dependencies from injected ToolContext on write', () async {
       final fakeInjectedConfig = Config.test(name: 'injected', directory: fs.directory('/'));
       final fakeInjectedLogger = BufferLogger.test();
@@ -541,7 +554,7 @@ class FakeExtensionManager extends Fake implements ExtensionManager {
   Future<void> ensureInitialized() async {}
 }
 
-class FakeConfigurationExtension extends Fake implements ConfigurationExtension {
+final class FakeConfigurationExtension extends ConfigurationExtension {
   FakeConfigurationExtension({
     required this.title,
     required this.featureFlags,

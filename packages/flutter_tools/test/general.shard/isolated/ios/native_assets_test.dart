@@ -11,10 +11,10 @@ import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/ios/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
@@ -22,6 +22,7 @@ import 'package:hooks/hooks.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 import '../fake_native_assets_build_runner.dart';
 
@@ -42,6 +43,7 @@ void main() {
       fileSystem.currentDirectory,
       inputs: <String, String>{},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
@@ -50,253 +52,270 @@ void main() {
     projectUri = environment.projectDir.uri;
   });
 
-  for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
-    testUsingContext(
-      'build with assets $buildMode',
-      overrides: <Type, Generator>{
-        FeatureFlags: () =>
-            TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
-      },
-      () async {
-        if (const LocalPlatform().isWindows) {
-          return; // Backslashes in commands, but we will never run these commands on Windows.
-        }
-        processManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <Pattern>[
-              'xcrun',
-              'lipo',
-              '-create',
-              '-output',
-              '/build/native_assets/ios/bar.framework/bar',
-              'arm64/libbar.dylib',
-              'x64/libbar.dylib',
-            ],
-          ),
-          if (buildMode == BuildMode.release) ...<FakeCommand>[
-            FakeCommand(
-              command: const <Pattern>[
-                'xcrun',
-                'dsymutil',
-                '/build/native_assets/ios/bar.framework/bar',
-                '-o',
-                '/build/native_assets/ios/bar.framework.dSYM',
-              ],
-              onRun: (_) {
-                fileSystem
-                    .directory('/build/native_assets/ios/bar.framework.dSYM')
-                    .createSync(recursive: true);
-              },
-            ),
-            const FakeCommand(
-              command: <Pattern>[
-                'xcrun',
-                'strip',
-                '-x',
-                '-S',
-                '/build/native_assets/ios/bar.framework/bar',
-              ],
-            ),
+  for (final (
+        BuildMode buildMode,
+        String? deploymentTarget,
+        AppleVersion expectedVersion,
+        String expectedMinimum,
+      )
+      in <(BuildMode, String?, AppleVersion, String)>[
+        for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) ...[
+          (buildMode, null, AppleVersion(15), '15.0'),
+          (buildMode, '16.4', AppleVersion(16, minor: 4), '16.4'),
+          (buildMode, '17.2.1', AppleVersion(17, minor: 2, patch: 1), '17.2.1'),
+        ],
+      ]) {
+    testUsingContext('build with assets $buildMode deployment target $deploymentTarget', () async {
+      if (const LocalPlatform().isWindows) {
+        return; // Backslashes in commands, but we will never run these commands on Windows.
+      }
+      processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <Pattern>[
+            'xcrun',
+            'lipo',
+            '-create',
+            '-output',
+            '/build/native_assets/ios/bar.framework/bar',
+            'arm64/libbar.dylib',
+            'x64/libbar.dylib',
           ],
+        ),
+        if (buildMode == BuildMode.release) ...<FakeCommand>[
           FakeCommand(
             command: const <Pattern>[
               'xcrun',
-              'otool',
-              '-D',
+              'dsymutil',
               '/build/native_assets/ios/bar.framework/bar',
+              '-o',
+              '/build/native_assets/ios/bar.framework.dSYM',
             ],
-            stdout: <String>[
-              '/build/native_assets/ios/bar.framework/bar (architecture x86_64):',
-              '@rpath/libbar.dylib',
-              '/build/native_assets/ios/bar.framework/bar (architecture arm64):',
-              '@rpath/libbar.dylib',
-            ].join('\n'),
+            onRun: (_) {
+              fileSystem
+                  .directory('/build/native_assets/ios/bar.framework.dSYM')
+                  .createSync(recursive: true);
+            },
           ),
           const FakeCommand(
             command: <Pattern>[
               'xcrun',
-              'lipo',
-              '-create',
-              '-output',
-              '/build/native_assets/ios/buz.framework/buz',
-              'arm64/libbuz.dylib',
-              'x64/libbuz.dylib',
+              'strip',
+              '-x',
+              '-S',
+              '/build/native_assets/ios/bar.framework/bar',
             ],
           ),
-          if (buildMode == BuildMode.release) ...<FakeCommand>[
-            FakeCommand(
-              command: const <Pattern>[
-                'xcrun',
-                'dsymutil',
-                '/build/native_assets/ios/buz.framework/buz',
-                '-o',
-                '/build/native_assets/ios/buz.framework.dSYM',
-              ],
-              onRun: (_) {
-                fileSystem
-                    .directory('/build/native_assets/ios/buz.framework.dSYM')
-                    .createSync(recursive: true);
-              },
-            ),
-            const FakeCommand(
-              command: <Pattern>[
-                'xcrun',
-                'strip',
-                '-x',
-                '-S',
-                '/build/native_assets/ios/buz.framework/buz',
-              ],
-            ),
+        ],
+        FakeCommand(
+          command: const <Pattern>[
+            'xcrun',
+            'otool',
+            '-D',
+            '/build/native_assets/ios/bar.framework/bar',
           ],
+          stdout: <String>[
+            '/build/native_assets/ios/bar.framework/bar (architecture x86_64):',
+            '@rpath/libbar.dylib',
+            '/build/native_assets/ios/bar.framework/bar (architecture arm64):',
+            '@rpath/libbar.dylib',
+          ].join('\n'),
+        ),
+        const FakeCommand(
+          command: <Pattern>[
+            'xcrun',
+            'lipo',
+            '-create',
+            '-output',
+            '/build/native_assets/ios/buz.framework/buz',
+            'arm64/libbuz.dylib',
+            'x64/libbuz.dylib',
+          ],
+        ),
+        if (buildMode == BuildMode.release) ...<FakeCommand>[
           FakeCommand(
             command: const <Pattern>[
               'xcrun',
-              'otool',
-              '-D',
+              'dsymutil',
               '/build/native_assets/ios/buz.framework/buz',
+              '-o',
+              '/build/native_assets/ios/buz.framework.dSYM',
             ],
-            stdout: <String>[
-              '/build/native_assets/ios/buz.framework/buz (architecture x86_64):',
-              '@rpath/libbuz.dylib',
-              '/build/native_assets/ios/buz.framework/buz (architecture arm64):',
-              '@rpath/libbuz.dylib',
-            ].join('\n'),
+            onRun: (_) {
+              fileSystem
+                  .directory('/build/native_assets/ios/buz.framework.dSYM')
+                  .createSync(recursive: true);
+            },
           ),
           const FakeCommand(
             command: <Pattern>[
               'xcrun',
-              'install_name_tool',
-              '-id',
-              '@rpath/bar.framework/bar',
-              '-change',
-              '@rpath/libbar.dylib',
-              '@rpath/bar.framework/bar',
-              '-change',
-              '@rpath/libbuz.dylib',
-              '@rpath/buz.framework/buz',
-              '/build/native_assets/ios/bar.framework/bar',
-            ],
-          ),
-          FakeCommand(
-            command: <Pattern>[
-              'xcrun',
-              'codesign',
-              '--force',
-              '--sign',
-              '-',
-              if (buildMode == BuildMode.debug) '--timestamp=none',
-              '/build/native_assets/ios/bar.framework',
-            ],
-          ),
-          const FakeCommand(
-            command: <Pattern>[
-              'xcrun',
-              'install_name_tool',
-              '-id',
-              '@rpath/buz.framework/buz',
-              '-change',
-              '@rpath/libbar.dylib',
-              '@rpath/bar.framework/bar',
-              '-change',
-              '@rpath/libbuz.dylib',
-              '@rpath/buz.framework/buz',
+              'strip',
+              '-x',
+              '-S',
               '/build/native_assets/ios/buz.framework/buz',
             ],
           ),
-          FakeCommand(
-            command: <Pattern>[
-              'xcrun',
-              'codesign',
-              '--force',
-              '--sign',
-              '-',
-              if (buildMode == BuildMode.debug) '--timestamp=none',
-              '/build/native_assets/ios/buz.framework',
-            ],
-          ),
-        ]);
-        final File packageConfig = environment.projectDir.childFile(
-          '.dart_tool/package_config.json',
-        );
-        final Uri nonFlutterTesterAssetUri = environment.buildDir
-            .childFile(InstallCodeAssets.nativeAssetsFilename)
-            .uri;
-        await packageConfig.parent.create();
-        await packageConfig.create();
+        ],
+        FakeCommand(
+          command: const <Pattern>[
+            'xcrun',
+            'otool',
+            '-D',
+            '/build/native_assets/ios/buz.framework/buz',
+          ],
+          stdout: <String>[
+            '/build/native_assets/ios/buz.framework/buz (architecture x86_64):',
+            '@rpath/libbuz.dylib',
+            '/build/native_assets/ios/buz.framework/buz (architecture arm64):',
+            '@rpath/libbuz.dylib',
+          ].join('\n'),
+        ),
+        const FakeCommand(
+          command: <Pattern>[
+            'xcrun',
+            'install_name_tool',
+            '-id',
+            '@rpath/bar.framework/bar',
+            '-change',
+            '@rpath/libbar.dylib',
+            '@rpath/bar.framework/bar',
+            '-change',
+            '@rpath/libbuz.dylib',
+            '@rpath/buz.framework/buz',
+            '/build/native_assets/ios/bar.framework/bar',
+          ],
+        ),
+        FakeCommand(
+          command: <Pattern>[
+            'xcrun',
+            'codesign',
+            '--force',
+            '--sign',
+            '-',
+            if (buildMode == BuildMode.debug) '--timestamp=none',
+            '/build/native_assets/ios/bar.framework',
+          ],
+        ),
+        const FakeCommand(
+          command: <Pattern>[
+            'xcrun',
+            'install_name_tool',
+            '-id',
+            '@rpath/buz.framework/buz',
+            '-change',
+            '@rpath/libbar.dylib',
+            '@rpath/bar.framework/bar',
+            '-change',
+            '@rpath/libbuz.dylib',
+            '@rpath/buz.framework/buz',
+            '/build/native_assets/ios/buz.framework/buz',
+          ],
+        ),
+        FakeCommand(
+          command: <Pattern>[
+            'xcrun',
+            'codesign',
+            '--force',
+            '--sign',
+            '-',
+            if (buildMode == BuildMode.debug) '--timestamp=none',
+            '/build/native_assets/ios/buz.framework',
+          ],
+        ),
+      ]);
+      final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+      final Uri nonFlutterTesterAssetUri = environment.buildDir
+          .childFile(InstallCodeAssets.nativeAssetsFilename)
+          .uri;
+      await packageConfig.parent.create();
+      await packageConfig.create();
 
-        List<CodeAsset> codeAssets(OS targetOS, CodeConfig codeConfig) => <CodeAsset>[
-          CodeAsset(
-            package: 'bar',
-            name: 'bar.dart',
-            linkMode: DynamicLoadingBundled(),
-            file: Uri.file('${codeConfig.targetArchitecture}/libbar.dylib'),
-          ),
-          CodeAsset(
-            package: 'buz',
-            name: 'buz.dart',
-            linkMode: DynamicLoadingBundled(),
-            file: Uri.file('${codeConfig.targetArchitecture}/libbuz.dylib'),
-          ),
-        ];
-        final buildRunner = FakeFlutterNativeAssetsBuildRunner(
-          packagesWithNativeAssetsResult: <String>['bar'],
-          onBuild: (BuildInput input) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
+      List<CodeAsset> codeAssets(OS targetOS, CodeConfig codeConfig) => <CodeAsset>[
+        CodeAsset(
+          package: 'bar',
+          name: 'bar.dart',
+          linkMode: DynamicLoadingBundled(),
+          file: Uri.file('${codeConfig.targetArchitecture}/libbar.dylib'),
+        ),
+        CodeAsset(
+          package: 'buz',
+          name: 'buz.dart',
+          linkMode: DynamicLoadingBundled(),
+          file: Uri.file('${codeConfig.targetArchitecture}/libbuz.dylib'),
+        ),
+      ];
+      final buildRunner = FakeFlutterNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <String>['bar'],
+        onBuild: (BuildInput input) {
+          expect(input.config.code.iOS.deploymentVersion, expectedVersion);
+          return FakeFlutterNativeAssetsBuilderResult.fromAssets(
             codeAssets: buildMode == BuildMode.debug
                 ? codeAssets(input.config.code.targetOS, input.config.code)
                 : <CodeAsset>[],
-          ),
-          onLink: (LinkInput input) => buildMode == BuildMode.debug
+          );
+        },
+        onLink: (LinkInput input) {
+          expect(input.config.code.iOS.deploymentVersion, expectedVersion);
+          return buildMode == BuildMode.debug
               ? null
               : FakeFlutterNativeAssetsBuilderResult.fromAssets(
                   codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
-                ),
-        );
-        final environmentDefines = <String, String>{
-          kBuildMode: buildMode.cliName,
-          kSdkRoot: '.../iPhone Simulator',
-          kIosArchs: 'arm64 x86_64',
-        };
-        final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
-          environmentDefines: environmentDefines,
-          targetPlatform: TargetPlatform.ios,
-          projectUri: projectUri,
-          fileSystem: fileSystem,
-          logger: logger,
-          buildRunner: buildRunner,
-          buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
-          buildDataAssets: true,
-          recordedUsesFile: null,
-        );
-        await installCodeAssets(
-          dartHookResult: dartHookResult,
-          environmentDefines: environmentDefines,
-          targetPlatform: TargetPlatform.ios,
-          projectUri: projectUri,
-          fileSystem: fileSystem,
-          logger: logger,
-          processManager: processManager,
-          nativeAssetsFileUri: nonFlutterTesterAssetUri,
-          targetUri: projectUri.resolve(
-            '${getBuildDirectory(Config.test(), fileSystem)}/native_assets/ios/',
-          ),
-        );
+                );
+        },
+      );
+      final environmentDefines = <String, String>{
+        kBuildMode: buildMode.cliName,
+        kSdkRoot: '.../iPhone Simulator',
+        kIosArchs: 'arm64 x86_64',
+        kIosDeploymentTarget: ?deploymentTarget,
+      };
+      final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
+        environmentDefines: environmentDefines,
+        targetPlatform: TargetPlatform.ios,
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
+        logger: logger,
+        buildRunner: buildRunner,
+        buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
+        buildDataAssets: true,
+        recordedUsesFile: null,
+      );
+      await installCodeAssets(
+        dartHookResult: dartHookResult,
+        environmentDefines: environmentDefines,
+        targetPlatform: TargetPlatform.ios,
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        logger: logger,
+        processManager: processManager,
+        nativeAssetsFileUri: nonFlutterTesterAssetUri,
+        targetUri: projectUri.resolve(
+          '${getBuildDirectory(Config.test(), fileSystem)}/native_assets/ios/',
+        ),
+      );
+      expect(
+        logger.traceText,
+        stringContainsInOrder(<String>[
+          'Running build hooks for ios_arm64, ios_x64.',
+          'Running build hooks for ios_arm64, ios_x64 done.',
+          if (buildMode == BuildMode.release) ...<String>[
+            'Running link hooks for ios_arm64, ios_x64.',
+            'Running link hooks for ios_arm64, ios_x64 done.',
+          ],
+        ]),
+      );
+      expect(environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename), exists);
+      for (final name in <String>['bar', 'buz']) {
         expect(
-          logger.traceText,
-          stringContainsInOrder(<String>[
-            'Running build hooks for ios_arm64, ios_x64.',
-            'Running build hooks for ios_arm64, ios_x64 done.',
-            if (buildMode == BuildMode.release) ...<String>[
-              'Running link hooks for ios_arm64, ios_x64.',
-              'Running link hooks for ios_arm64, ios_x64 done.',
-            ],
-          ]),
+          fileSystem.file('/build/native_assets/ios/$name.framework/Info.plist').readAsStringSync(),
+          contains('<key>MinimumOSVersion</key>\n\t<string>$expectedMinimum</string>'),
         );
-        expect(environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename), exists);
-        // Two archs.
-        expect(buildRunner.buildInvocations, 2);
-        expect(buildRunner.linkInvocations, buildMode == BuildMode.release ? 2 : 0);
-      },
-    );
+      }
+      // Two archs.
+      expect(buildRunner.buildInvocations, 2);
+      expect(buildRunner.linkInvocations, buildMode == BuildMode.release ? 2 : 0);
+    });
   }
 
   testUsingContext(
@@ -342,4 +361,65 @@ void main() {
       Logger: () => logger,
     },
   );
+
+  testWithoutContext('iOS builds fail when the install name does not fit', () async {
+    if (const LocalPlatform().isWindows) {
+      return; // Backslashes in commands, but we will never run these commands on Windows.
+    }
+    const barPath = '/build/native_assets/ios/bar.framework/bar';
+    processManager.addCommands(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['xcrun', 'lipo', '-create', '-output', barPath, 'arm64/libbar.dylib'],
+      ),
+      const FakeCommand(
+        command: <String>['xcrun', 'otool', '-D', barPath],
+        stdout: '$barPath (architecture arm64):\n@rpath/libbar.dylib',
+      ),
+      const FakeCommand(
+        command: <String>[
+          'xcrun',
+          'install_name_tool',
+          '-id',
+          '@rpath/bar.framework/bar',
+          '-change',
+          '@rpath/libbar.dylib',
+          '@rpath/bar.framework/bar',
+          barPath,
+        ],
+        exitCode: 1,
+        stderr:
+            "error: install_name_tool: changing install names or rpaths can't be redone for: "
+            '$barPath (for architecture arm64) because larger updated load commands do not fit '
+            '(the program must be relinked, and you may need to use -headerpad or '
+            '-headerpad_max_install_names)',
+      ),
+    ]);
+
+    await expectLater(
+      copyNativeCodeAssetsIOS(
+        Uri.directory('/build/native_assets/ios/'),
+        <Uri, List<FlutterCodeAsset>>{
+          Uri.file('bar.framework/bar'): <FlutterCodeAsset>[
+            FlutterCodeAsset(
+              codeAsset: CodeAsset(
+                package: 'bar',
+                name: 'bar.dart',
+                linkMode: DynamicLoadingBundled(),
+                file: Uri.file('arm64/libbar.dylib'),
+              ),
+              os: OS.iOS,
+              architecture: Architecture.arm64,
+            ),
+          ],
+        },
+        null,
+        BuildMode.debug,
+        fileSystem,
+        logger: logger,
+        processUtils: ProcessUtils(processManager: processManager, logger: logger),
+      ),
+      throwsToolExit(message: 'larger updated load commands do not fit'),
+    );
+    expect(processManager, hasNoRemainingExpectations);
+  });
 }

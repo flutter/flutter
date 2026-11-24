@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/migrations/swift_package_manager_integration_migration.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -51,7 +52,6 @@ void main() {
         BuildInfo.debug,
         analytics: fakeAnalytics,
         plistParser: FakePlistParser(),
-        reportCrashes: true,
         toolContext: FakeToolContext(
           config: FakeConfig(),
           flutterVersion: FakeFlutterVersion(),
@@ -89,7 +89,6 @@ void main() {
         BuildInfo.debug,
         analytics: fakeAnalytics,
         plistParser: FakePlistParser(),
-        reportCrashes: true,
         toolContext: FakeToolContext(
           config: FakeConfig(),
           flutterVersion: FakeFlutterVersion(),
@@ -131,7 +130,6 @@ void main() {
         BuildInfo.debug,
         analytics: fakeAnalytics,
         plistParser: FakePlistParser(),
-        reportCrashes: true,
         toolContext: FakeToolContext(
           config: FakeConfig(),
           flutterVersion: FakeFlutterVersion(),
@@ -182,7 +180,6 @@ void main() {
           BuildInfo.debug,
           analytics: fakeAnalytics,
           plistParser: FakePlistParser(),
-          reportCrashes: true,
           toolContext: FakeToolContext(
             config: FakeConfig(),
             flutterVersion: FakeFlutterVersion(),
@@ -232,7 +229,6 @@ void main() {
           BuildInfo.debug,
           analytics: fakeAnalytics,
           plistParser: FakePlistParser(),
-          reportCrashes: true,
           toolContext: FakeToolContext(
             config: FakeConfig(),
             flutterVersion: FakeFlutterVersion(),
@@ -279,7 +275,6 @@ void main() {
           BuildInfo.debug,
           analytics: fakeAnalytics,
           plistParser: FakePlistParser(),
-          reportCrashes: true,
           toolContext: FakeToolContext(
             config: FakeConfig(),
             flutterVersion: FakeFlutterVersion(),
@@ -345,7 +340,6 @@ void main() {
           ),
           analytics: fakeAnalytics,
           plistParser: FakePlistParser(),
-          reportCrashes: true,
           toolContext: FakeToolContext(
             config: FakeConfig(),
             flutterVersion: FakeFlutterVersion(),
@@ -401,7 +395,6 @@ void main() {
         BuildInfo.debug,
         analytics: fakeAnalytics,
         plistParser: FakePlistParser(),
-        reportCrashes: true,
         toolContext: FakeToolContext(
           config: FakeConfig(),
           flutterVersion: FakeFlutterVersion(),
@@ -447,7 +440,6 @@ void main() {
           BuildInfo.debug,
           analytics: const NoOpAnalytics(),
           plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-          reportCrashes: true,
           toolContext: FakeToolContext(
             config: FakeConfig(),
             flutterVersion: FakeFlutterVersion(),
@@ -485,7 +477,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -535,7 +526,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: fakeAnalytics,
                 plistParser: FakePlistParser(),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -596,7 +586,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: fakeAnalytics,
                 plistParser: FakePlistParser(),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -657,7 +646,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: fakeAnalytics,
                 plistParser: FakePlistParser(),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -709,7 +697,6 @@ void main() {
               BuildInfo.debug,
               analytics: fakeAnalytics,
               plistParser: FakePlistParser(),
-              reportCrashes: true,
               toolContext: FakeToolContext(
                 config: FakeConfig(),
                 flutterVersion: FakeFlutterVersion(),
@@ -761,7 +748,6 @@ void main() {
               BuildInfo.debug,
               analytics: fakeAnalytics,
               plistParser: FakePlistParser(),
-              reportCrashes: true,
               toolContext: FakeToolContext(
                 config: FakeConfig(),
                 flutterVersion: FakeFlutterVersion(),
@@ -815,7 +801,6 @@ void main() {
               BuildInfo.debug,
               analytics: const NoOpAnalytics(),
               plistParser: plistParser,
-              reportCrashes: true,
               toolContext: FakeToolContext(
                 config: FakeConfig(),
                 flutterVersion: FakeFlutterVersion(),
@@ -859,7 +844,6 @@ void main() {
               BuildInfo.debug,
               analytics: const NoOpAnalytics(),
               plistParser: plistParser,
-              reportCrashes: true,
               toolContext: FakeToolContext(
                 config: FakeConfig(),
                 flutterVersion: FakeFlutterVersion(),
@@ -903,7 +887,6 @@ void main() {
               BuildInfo.debug,
               analytics: const NoOpAnalytics(),
               plistParser: plistParser,
-              reportCrashes: true,
               toolContext: FakeToolContext(
                 config: FakeConfig(),
                 flutterVersion: FakeFlutterVersion(),
@@ -952,7 +935,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: fakeAnalytics,
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -1037,7 +1019,6 @@ void main() {
               BuildInfo.debug,
               analytics: const NoOpAnalytics(),
               plistParser: plistParser,
-              reportCrashes: true,
               toolContext: FakeToolContext(
                 config: FakeConfig(),
                 flutterVersion: FakeFlutterVersion(),
@@ -1135,7 +1116,6 @@ void main() {
           BuildInfo.debug,
           analytics: const NoOpAnalytics(),
           plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-          reportCrashes: true,
           toolContext: FakeToolContext(
             config: FakeConfig(),
             flutterVersion: FakeFlutterVersion(),
@@ -1171,7 +1151,6 @@ void main() {
             BuildInfo.debug,
             analytics: fakeAnalytics,
             plistParser: FakePlistParser(),
-            reportCrashes: true,
             toolContext: FakeToolContext(
               config: FakeConfig(),
               flutterVersion: FakeFlutterVersion(),
@@ -1218,7 +1197,6 @@ void main() {
             BuildInfo.debug,
             analytics: fakeAnalytics,
             plistParser: FakePlistParser(json: '[]'),
-            reportCrashes: true,
             toolContext: FakeToolContext(
               config: FakeConfig(),
               flutterVersion: FakeFlutterVersion(),
@@ -1265,7 +1243,6 @@ void main() {
             BuildInfo.debug,
             analytics: fakeAnalytics,
             plistParser: FakePlistParser(json: 'this is not json'),
-            reportCrashes: true,
             toolContext: FakeToolContext(
               config: FakeConfig(),
               flutterVersion: FakeFlutterVersion(),
@@ -1315,7 +1292,6 @@ void main() {
             BuildInfo.debug,
             analytics: fakeAnalytics,
             plistParser: FakePlistParser(),
-            reportCrashes: true,
             toolContext: FakeToolContext(
               config: FakeConfig(),
               flutterVersion: FakeFlutterVersion(),
@@ -1363,7 +1339,6 @@ void main() {
             BuildInfo.debug,
             analytics: fakeAnalytics,
             plistParser: FakePlistParser(),
-            reportCrashes: true,
             toolContext: FakeToolContext(
               config: FakeConfig(),
               flutterVersion: FakeFlutterVersion(),
@@ -1411,7 +1386,6 @@ void main() {
             BuildInfo.debug,
             analytics: fakeAnalytics,
             plistParser: FakePlistParser(),
-            reportCrashes: true,
             toolContext: FakeToolContext(
               config: FakeConfig(),
               flutterVersion: FakeFlutterVersion(),
@@ -1459,7 +1433,6 @@ void main() {
             BuildInfo.debug,
             analytics: fakeAnalytics,
             plistParser: FakePlistParser(),
-            reportCrashes: true,
             toolContext: FakeToolContext(
               config: FakeConfig(),
               flutterVersion: FakeFlutterVersion(),
@@ -1523,7 +1496,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: fakeAnalytics,
                 plistParser: FakePlistParser(),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -1583,7 +1555,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: fakeAnalytics,
                 plistParser: FakePlistParser(),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -1636,7 +1607,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(<String>[])),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -1682,7 +1652,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(<String>[])),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -1729,7 +1698,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(<String>[])),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -1784,7 +1752,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: fakeAnalytics,
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -1843,7 +1810,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -1889,7 +1855,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -1936,7 +1901,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -1987,7 +1951,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -2065,7 +2028,6 @@ void main() {
                     BuildInfo.debug,
                     analytics: const NoOpAnalytics(),
                     plistParser: plistParser,
-                    reportCrashes: true,
                     toolContext: FakeToolContext(
                       config: FakeConfig(),
                       flutterVersion: FakeFlutterVersion(),
@@ -2125,7 +2087,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -2173,7 +2134,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -2226,7 +2186,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: const NoOpAnalytics(),
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -2277,7 +2236,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: fakeAnalytics,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -2340,7 +2298,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: fakeAnalytics,
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -2406,7 +2363,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -2461,7 +2417,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -2523,7 +2478,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -2577,7 +2531,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -2620,7 +2573,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -2667,7 +2619,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: const NoOpAnalytics(),
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -2720,7 +2671,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: const NoOpAnalytics(),
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -2780,7 +2730,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -2836,7 +2785,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -2918,7 +2866,6 @@ void main() {
                     BuildInfo.debug,
                     analytics: const NoOpAnalytics(),
                     plistParser: plistParser,
-                    reportCrashes: true,
                     toolContext: FakeToolContext(
                       config: FakeConfig(),
                       flutterVersion: FakeFlutterVersion(),
@@ -2976,7 +2923,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -3025,7 +2971,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: fakeAnalytics,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -3087,7 +3032,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: fakeAnalytics,
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -3147,7 +3091,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: const NoOpAnalytics(),
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -3200,7 +3143,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: const NoOpAnalytics(),
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -3263,7 +3205,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: const NoOpAnalytics(),
                   plistParser: plistParser,
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -3322,7 +3263,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: const NoOpAnalytics(),
                   plistParser: plistParser,
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -3387,7 +3327,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: const NoOpAnalytics(),
                   plistParser: plistParser,
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -3440,7 +3379,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -3489,7 +3427,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: const NoOpAnalytics(),
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -3544,7 +3481,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: const NoOpAnalytics(),
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -3592,7 +3528,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: fakeAnalytics,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -3652,7 +3587,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: fakeAnalytics,
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -3724,7 +3658,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: const NoOpAnalytics(),
                   plistParser: plistParser,
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -3781,7 +3714,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: const NoOpAnalytics(),
                   plistParser: plistParser,
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -3846,7 +3778,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: const NoOpAnalytics(),
                   plistParser: plistParser,
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -3894,7 +3825,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -3944,7 +3874,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -4001,7 +3930,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -4061,7 +3989,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -4110,7 +4037,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -4157,7 +4083,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -4214,7 +4139,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -4274,7 +4198,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -4329,7 +4252,6 @@ void main() {
               BuildInfo.debug,
               analytics: fakeAnalytics,
               plistParser: plistParser,
-              reportCrashes: true,
               toolContext: FakeToolContext(
                 config: FakeConfig(),
                 flutterVersion: FakeFlutterVersion(),
@@ -4422,7 +4344,6 @@ void main() {
               BuildInfo.debug,
               analytics: fakeAnalytics,
               plistParser: plistParser,
-              reportCrashes: true,
               toolContext: FakeToolContext(
                 config: FakeConfig(),
                 flutterVersion: FakeFlutterVersion(),
@@ -4506,7 +4427,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: fakeAnalytics,
                   plistParser: plistParser,
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -4590,7 +4510,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: fakeAnalytics,
                   plistParser: plistParser,
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -4643,6 +4562,7 @@ void main() {
           fs: memoryFileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
         );
+        final crashReportSender = FakeCrashReportSender();
         const FlutterDarwinPlatform platform = FlutterDarwinPlatform.ios;
         final project = FakeXcodeProject(
           platform: platform.name,
@@ -4664,8 +4584,8 @@ void main() {
           platform,
           BuildInfo.debug,
           analytics: fakeAnalytics,
+          crashReportSenderFactory: () => crashReportSender,
           plistParser: plistParser,
-          reportCrashes: true,
           toolContext: FakeToolContext(
             config: FakeConfig(),
             flutterVersion: FakeFlutterVersion(),
@@ -4690,8 +4610,20 @@ void main() {
             ),
           ),
         );
-        expect(testLogger.traceText, contains('Sending crash report to Google.'));
-      }, skip: true); // https://github.com/flutter/flutter/issues/196307
+        expect(crashReportSender.sentReports, hasLength(1));
+        final SentCrashReport report = crashReportSender.sentReports.single;
+        expect(report.command, 'swiftpm-migration');
+        expect(
+          report.error,
+          isA<ToolExit>().having(
+            (ToolExit e) => e.message,
+            'message',
+            'Unable to get Xcode project information',
+          ),
+        );
+        expect(report.flutterVersion, 'master/11111111111111111111');
+        expect(report.typeId, 'XcodeBuildError');
+      });
 
       testWithoutContext('throw if settings fail to compile due to package dependencies', () async {
         final memoryFileSystem = MemoryFileSystem();
@@ -4700,6 +4632,7 @@ void main() {
           fs: memoryFileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
         );
+        final crashReportSender = FakeCrashReportSender();
         const FlutterDarwinPlatform platform = FlutterDarwinPlatform.ios;
         final project = FakeXcodeProject(
           platform: platform.name,
@@ -4721,8 +4654,8 @@ void main() {
           platform,
           BuildInfo.debug,
           analytics: fakeAnalytics,
+          crashReportSenderFactory: () => crashReportSender,
           plistParser: plistParser,
-          reportCrashes: true,
           toolContext: FakeToolContext(
             config: FakeConfig(),
             flutterVersion: FakeFlutterVersion(),
@@ -4749,10 +4682,81 @@ void main() {
             ),
           ),
         );
-        expect(testLogger.traceText, contains('Sending crash report to Google.'));
-      }, skip: true); // https://github.com/flutter/flutter/issues/196307
+        expect(crashReportSender.sentReports, hasLength(1));
+        final SentCrashReport report = crashReportSender.sentReports.single;
+        expect(report.command, 'swiftpm-migration');
+        expect(
+          report.error,
+          isA<ToolExit>().having(
+            (ToolExit e) => e.message,
+            'message',
+            'Could not resolve package dependencies: network error',
+          ),
+        );
+        expect(report.flutterVersion, 'master/11111111111111111111');
+        expect(report.typeId, 'XcodeBuildError');
+      });
 
-      testWithoutContext('does not send crash report if reportCrashes is false', () async {
+      testWithoutContext(
+        'does not send crash report if crashReportSenderFactory is null',
+        () async {
+          final memoryFileSystem = MemoryFileSystem();
+          final testLogger = BufferLogger.test();
+          final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+            fs: memoryFileSystem,
+            fakeFlutterVersion: FakeFlutterVersion(),
+          );
+          const FlutterDarwinPlatform platform = FlutterDarwinPlatform.ios;
+          final project = FakeXcodeProject(
+            platform: platform.name,
+            fileSystem: memoryFileSystem,
+            logger: testLogger,
+          );
+          _createProjectFiles(project, platform);
+          project.xcodeProjectInfoFile.writeAsStringSync(
+            _projectSettings(_allSectionsUnmigrated(platform)),
+          );
+
+          final plistParser = FakePlistParser.multiple(<String>[
+            _plutilOutput(_allSectionsUnmigratedAsJson(platform)),
+            _plutilOutput(_allSectionsMigratedAsJson(platform)),
+          ]);
+
+          final projectMigration = SwiftPackageManagerIntegrationMigration(
+            project,
+            platform,
+            BuildInfo.debug,
+            analytics: fakeAnalytics,
+            plistParser: plistParser,
+            toolContext: FakeToolContext(
+              config: FakeConfig(),
+              flutterVersion: FakeFlutterVersion(),
+              fs: memoryFileSystem,
+              logger: testLogger,
+              os: FakeOperatingSystemUtils(),
+              platform: FakePlatform(),
+            ),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(throwErrorOnGetInfo: true),
+          );
+          await expectLater(
+            () => projectMigration.migrate(),
+            throwsToolExit(message: 'Unable to get Xcode project information'),
+          );
+          expect(
+            fakeAnalytics.sentEvents,
+            contains(
+              Event.appleUsageEvent(
+                workflow: 'swiftpm-migration-failure',
+                parameter: 'full',
+                result: 'Xcode failed for unknown reason.',
+              ),
+            ),
+          );
+          expect(testLogger.traceText, isNot(contains('Sending crash report to Google.')));
+        },
+      );
+
+      testWithoutContext('does not invoke crashReportSenderFactory if settings compile', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
         final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -4780,8 +4784,9 @@ void main() {
           platform,
           BuildInfo.debug,
           analytics: fakeAnalytics,
+          crashReportSenderFactory: () =>
+              fail('crashReportSenderFactory should not be invoked when settings compile'),
           plistParser: plistParser,
-          reportCrashes: false,
           toolContext: FakeToolContext(
             config: FakeConfig(),
             flutterVersion: FakeFlutterVersion(),
@@ -4790,23 +4795,13 @@ void main() {
             os: FakeOperatingSystemUtils(),
             platform: FakePlatform(),
           ),
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(throwErrorOnGetInfo: true),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         );
-        await expectLater(
-          () => projectMigration.migrate(),
-          throwsToolExit(message: 'Unable to get Xcode project information'),
-        );
+        await projectMigration.migrate();
         expect(
           fakeAnalytics.sentEvents,
-          contains(
-            Event.appleUsageEvent(
-              workflow: 'swiftpm-migration-failure',
-              parameter: 'full',
-              result: 'Xcode failed for unknown reason.',
-            ),
-          ),
+          contains(Event.appleUsageEvent(workflow: 'swiftpm-migration-success', parameter: 'full')),
         );
-        expect(testLogger.traceText, isNot(contains('Sending crash report to Google.')));
       });
 
       testWithoutContext('restore project settings from backup on failure', () async {
@@ -6053,7 +6048,6 @@ class FakeSwiftPackageManagerIntegrationMigration extends SwiftPackageManagerInt
     super.buildInfo, {
     super.analytics = const NoOpAnalytics(),
     required super.plistParser,
-    super.reportCrashes = true,
     required super.toolContext,
     this.validateBackup = false,
     required super.xcodeProjectInterpreter,
@@ -6101,4 +6095,26 @@ class FakePlugin extends Fake implements Plugin {
 class FakeConfig extends Fake implements Config {
   @override
   Object? getValue(String key) => null;
+}
+
+typedef SentCrashReport = ({String command, Object error, String flutterVersion, String? typeId});
+
+class FakeCrashReportSender extends Fake implements CrashReportSender {
+  final sentReports = <SentCrashReport>[];
+
+  @override
+  Future<void> sendReport({
+    required Object error,
+    required StackTrace stackTrace,
+    required String Function() getFlutterVersion,
+    required String command,
+    String? typeId,
+  }) async {
+    sentReports.add((
+      command: command,
+      error: error,
+      flutterVersion: getFlutterVersion(),
+      typeId: typeId,
+    ));
+  }
 }
