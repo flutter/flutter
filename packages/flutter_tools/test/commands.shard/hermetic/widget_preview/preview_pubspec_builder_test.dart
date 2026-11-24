@@ -16,6 +16,7 @@ import 'package:test_api/fake.dart';
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/package_config.dart';
+import '../../../src/throwing_pub.dart';
 
 void main() {
   group('$PreviewPubspecBuilder', () {
@@ -38,6 +39,7 @@ void main() {
         logger: logger,
         verbose: false,
         offline: false,
+        pub: const ThrowingPub(),
         rootProject: rootProject,
         previewManifest: PreviewManifest(
           logger: logger,

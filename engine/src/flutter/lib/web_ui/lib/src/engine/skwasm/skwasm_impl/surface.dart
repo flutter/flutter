@@ -103,7 +103,6 @@ abstract class SkwasmSurface<C extends DomEventTarget, P extends CanvasProvider<
   double _currentDevicePixelRatio = -1;
   late Future<void> _initialized;
   Completer<void>? _handledContextLostEvent;
-  bool _disposed = false;
   int? _contextLostCallbackId;
 
   @override
@@ -131,7 +130,7 @@ abstract class SkwasmSurface<C extends DomEventTarget, P extends CanvasProvider<
     final contextLostCallbackId =
         (await SkwasmCallbackHandler.instance.registerCallback(callbackId)) as JSNumber;
     _didTransferCanvas(canvas);
-    if (_disposed) {
+    if (isDisposed) {
       return;
     }
     final int id = contextLostCallbackId.toDartInt;
@@ -150,7 +149,7 @@ abstract class SkwasmSurface<C extends DomEventTarget, P extends CanvasProvider<
   /// Replaces the lost context. Rendering observes both successful recovery and
   /// errors through [initialized].
   void onContextLost() {
-    if (_disposed) {
+    if (isDisposed) {
       return;
     }
     if (!(_handledContextLostEvent?.isCompleted ?? true)) {
@@ -170,6 +169,9 @@ abstract class SkwasmSurface<C extends DomEventTarget, P extends CanvasProvider<
     _canvas = newCanvas;
     _attachCanvas();
     await _initialize();
+    if (isDisposed) {
+      return;
+    }
     _updateCanvasCss(_currentSize);
     await _resizeSurface(_currentSize);
   }
@@ -267,17 +269,15 @@ abstract class SkwasmSurface<C extends DomEventTarget, P extends CanvasProvider<
   }
 
   @override
-  void dispose() {
-    if (_disposed) {
-      return;
-    }
-    _disposed = true;
+  void disposeResources() {
     if (_contextLostCallbackId != null) {
       SkwasmCallbackHandler.instance.unregisterCallback(_contextLostCallbackId!);
       _contextLostCallbackId = null;
     }
-    surfaceDestroy(handle);
     _canvasProvider.releaseCanvas(_canvas);
+    // Context creation and recovery can outlive a frame. Their worker replies
+    // still use the native surface, including when initialization fails.
+    _initialized.whenComplete(() => surfaceDestroy(handle)).ignore();
   }
 
   @override

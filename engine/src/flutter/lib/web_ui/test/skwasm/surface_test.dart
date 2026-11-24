@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+import 'dart:ffi';
 import 'dart:js_interop';
 import 'dart:typed_data';
 
@@ -24,6 +24,25 @@ void main() {
 }
 
 void testMain() {
+  test('disposal keeps the native surface alive until initialization completes', () async {
+    int liveSurfaces() => withStackScope((StackScope scope) {
+      // The surface count is reported by SkwasmRenderer.dumpDebugInfo.
+      final Pointer<Uint32> counts = scope.allocUint32Array(28);
+      skwasmGetLiveObjectCounts(counts);
+      return counts[26];
+    });
+
+    final int before = liveSurfaces();
+    final provider = OffscreenCanvasProvider();
+    addTearDown(provider.dispose);
+    final surface = SkwasmOffscreenSurface(provider);
+    surface.dispose();
+    expect(surface.isDisposed, isTrue);
+    expect(liveSurfaces(), before + 1);
+    await surface.initialized;
+    expect(liveSurfaces(), before);
+  });
+
   for (final throwError in <bool>[false, true]) {
     test(
       'context creation failure reports initialization errors and skips bitmap frames ($throwError)',
@@ -333,7 +352,8 @@ Future<void> _expectOnscreenPixels(SkwasmOnscreenSurface surface, List<int> expe
   final deadline = Stopwatch()..start();
   late List<int> actual;
   do {
-    await _settleOnscreenFrame();
+    // Background tabs may suspend animation callbacks while pixels are ready.
+    await Future<void>.delayed(const Duration(milliseconds: 16));
     actual = _readOnscreenPixels(surface);
     if (listEquals(actual, expected)) {
       break;
@@ -350,25 +370,6 @@ List<int> _readOnscreenPixels(SkwasmOnscreenSurface surface) {
   canvas.width = 0;
   canvas.height = 0;
   return data.toList();
-}
-
-Future<void> _settleOnscreenFrame() async {
-  // A placeholder update can occur after rAF callbacks, so inspect it from a
-  // subsequent task rather than a microtask within the rendering opportunity.
-  final completer = Completer<void>();
-  final DomMessageChannel channel = createDomMessageChannel();
-  final DomEventListener listener = createDomEventListener((_) => completer.complete());
-  channel.port1.addEventListener('message', listener);
-  channel.port1.start();
-  final double id = domWindow.requestAnimationFrame((_) => channel.port2.postMessage(null));
-  try {
-    await completer.future.timeout(const Duration(seconds: 5));
-  } finally {
-    domWindow.cancelAnimationFrame(id);
-    channel.port1.removeEventListener('message', listener);
-    channel.port1.close();
-    channel.port2.close();
-  }
 }
 
 class _FailingCanvasProvider extends OnscreenCanvasProvider {

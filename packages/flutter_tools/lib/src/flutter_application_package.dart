@@ -13,6 +13,7 @@ import 'ios/plist_parser.dart';
 import 'linux/application_package.dart';
 import 'macos/application_package.dart';
 import 'project.dart';
+import 'template.dart';
 import 'tester/flutter_tester.dart';
 import 'web/web_device.dart';
 import 'windows/application_package.dart';
@@ -20,14 +21,19 @@ import 'windows/application_package.dart';
 /// A package factory that supports all Flutter target platforms.
 class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
   FlutterApplicationPackageFactory({
-    required this._androidSdk,
+    required this._androidSdkBuilder,
+    required this._plistParserBuilder,
+    required this._templatePathProvider,
     required this._toolContext,
-    required this._plistParser,
   });
 
-  final AndroidSdk? _androidSdk;
+  final AndroidSdk? Function() _androidSdkBuilder;
+  final PlistParser Function() _plistParserBuilder;
+  final TemplatePathProvider _templatePathProvider;
   final ToolContext _toolContext;
-  final PlistParser _plistParser;
+
+  late final AndroidSdk? _androidSdk = _androidSdkBuilder();
+  late final PlistParser _plistParser = _plistParserBuilder();
 
   FlutterProject _currentProject() {
     final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
@@ -60,6 +66,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
             ? await IOSApp.fromIosProject(
                 _currentProject().ios,
                 buildInfo,
+                templatePathProvider: _templatePathProvider,
                 toolContext: _toolContext,
               )
             : IOSApp.fromPrebuiltApp(

@@ -420,22 +420,24 @@ void testMain() {
     timeout: const Timeout(Duration(seconds: 30)),
   ); // https://github.com/flutter/flutter/issues/175431
 
-  test('a failed export preserves the active frame and permits another draw', () async {
-    await first.draw(1);
-    final OnscreenSurface surface = first.rasterizer.debugDirectSurface!;
-    final List<DomElement> children = first.rasterizer.sceneElement.children.toList();
-    export.failNextExport = true;
-    await expectLater(first.draw(2, overlay: true), throwsStateError);
-    expect(first.rasterizer.debugIsDirect, isTrue);
-    expect(first.rasterizer.sceneElement.children, orderedEquals(children));
-    expect(_pixel(surface.canvasImageSource as DomHTMLCanvasElement), <int>[1, 0, 0, 255]);
-    await first.draw(3, overlay: true);
-    expect(first.rasterizer.debugIsDirect, isFalse);
-    expect(first.canvases, hasLength(2));
-    expect(_pixel(first.canvases.first.canvasElement), <int>[3, 0, 0, 255]);
-    await first.draw(4);
-    expect(first.rasterizer.debugIsDirect, isTrue);
-  });
+  for (final _ExportFailure failure in _ExportFailure.values) {
+    test('export failure $failure preserves the active frame and permits another draw', () async {
+      await first.draw(1);
+      final OnscreenSurface surface = first.rasterizer.debugDirectSurface!;
+      final List<DomElement> children = first.rasterizer.sceneElement.children.toList();
+      export.nextFailure = failure;
+      await expectLater(first.draw(2, overlay: true), throwsStateError);
+      expect(first.rasterizer.debugIsDirect, isTrue);
+      expect(first.rasterizer.sceneElement.children, orderedEquals(children));
+      expect(_pixel(surface.canvasImageSource as DomHTMLCanvasElement), <int>[1, 0, 0, 255]);
+      await first.draw(3, overlay: true);
+      expect(first.rasterizer.debugIsDirect, isFalse);
+      expect(first.canvases, hasLength(2));
+      expect(_pixel(first.canvases.first.canvasElement), <int>[3, 0, 0, 255]);
+      await first.draw(4);
+      expect(first.rasterizer.debugIsDirect, isTrue);
+    });
+  }
 
   test('updates DPR without resizing the visible direct surface during export', () async {
     await first.draw(1);
@@ -550,6 +552,45 @@ void testMain() {
     }
   });
 
+  test(
+    'disposing during export releases surfaces after drawing and completes queued timings',
+    () async {
+      final active = FrameTimingRecorder()..recordBuildFinish();
+      final queued = FrameTimingRecorder()..recordBuildFinish();
+      final reportedTimings = <ui.FrameTiming>[];
+      EnginePlatformDispatcher.instance.onReportTimings = reportedTimings.addAll;
+      FrameTimingRecorder.debugResetFrameTimings();
+      addTearDown(() {
+        EnginePlatformDispatcher.instance.onReportTimings = null;
+        FrameTimingRecorder.debugResetFrameTimings();
+      });
+
+      export.hold();
+      final Future<void> pending = first.draw(1, overlay: true, timing: active);
+      await Future.any(<Future<void>>[pending, export.reached.future])
+          .timeout(const Duration(seconds: 5));
+      final Future<void> waiting = first.draw(2, timing: queued);
+      try {
+        first.dispose();
+        rasterizer.dispose();
+        expect(export.isDisposed, isFalse);
+        expect(first.rasterizer.displayFactory.debugSurfaceCount, greaterThan(0));
+      } finally {
+        export.release();
+        await Future.wait(<Future<void>>[pending, waiting]);
+      }
+      active.submitTimings();
+      queued.submitTimings();
+      expect(<ui.FrameTiming>[
+        ...reportedTimings,
+        ...FrameTimingRecorder.debugFrameTimings,
+      ], hasLength(2));
+      expect(export.isDisposed, isTrue);
+      expect(first.rasterizer.displayFactory.debugSurfaceCount, 0);
+      expect(first.rasterizer.displayFactory.debugCacheSize, 0);
+    },
+  );
+
   test('omits a platform view removed while bitmap export is pending', () async {
     await first.draw(1);
     export.hold();
@@ -599,6 +640,29 @@ void testMain() {
     expect(first.rasterizer.debugIsDirect, isFalse);
     expect(direct.renders, attempts, reason: 'A failed entry is not retried on every frame.');
     expect(_pixel(first.canvases.single.canvasElement), <int>[10, 0, 0, 255]);
+  });
+
+  test('checks published pixels when the observation timer is throttled', () async {
+    var delayedObservations = 0;
+    await runZoned(
+      () => first.draw(9),
+      zoneSpecification: ZoneSpecification(
+        createTimer:
+            (Zone self, ZoneDelegate parent, Zone zone, Duration delay, void Function() f) {
+              if (delay == const Duration(milliseconds: 16)) {
+                delayedObservations++;
+                return parent.createTimer(zone, const Duration(milliseconds: 150), f);
+              }
+              return parent.createTimer(zone, delay, f);
+            },
+      ),
+    );
+    expect(delayedObservations, 1);
+    expect(first.rasterizer.debugIsDirect, isTrue);
+    expect(
+      _pixel(first.rasterizer.debugDirectSurface!.canvasImageSource as DomHTMLCanvasElement),
+      <int>[9, 0, 0, 255],
+    );
   });
 
   test('slow native completion does not consume the placeholder observation budget', () async {
@@ -739,6 +803,7 @@ class _View {
     int frame, {
     bool overlay = false,
     bool transparent = false,
+    FrameTimingRecorder? timing,
     void Function(ui.Canvas)? paint,
   }) async {
     final recorder = ui.PictureRecorder();
@@ -774,7 +839,7 @@ class _View {
     }
     final scene = builder.build() as LayerScene;
     try {
-      await rasterizer.draw(scene.layerTree, view.physicalSize, null);
+      await rasterizer.draw(scene.layerTree, view.physicalSize, timing);
     } finally {
       scene.dispose();
       picture.dispose();
@@ -917,19 +982,27 @@ class _OnscreenSurface extends _TestSurface<SkwasmOnscreenSurface> implements On
   void setIsOverlay(bool isOverlay) => delegate.setIsOverlay(isOverlay);
 }
 
+enum _ExportFailure { exception, emptyResult }
+
 // Delay actual Skwasm exports to observe the old frame during native work.
 class _ExportSurface extends _TestSurface<SkwasmOffscreenSurface> implements OffscreenSurface {
   _ExportSurface(super.delegate);
-  bool failNextExport = false;
+  _ExportFailure? nextFailure;
 
   @override
   Future<List<DomImageBitmap>> rasterizeToImageBitmaps(
     BitmapSize size,
     List<ui.Picture> pictures,
   ) async {
-    if (failNextExport) {
-      failNextExport = false;
-      throw StateError('Simulated export failure.');
+    final _ExportFailure? failure = nextFailure;
+    nextFailure = null;
+    switch (failure) {
+      case _ExportFailure.exception:
+        throw StateError('Simulated export failure.');
+      case _ExportFailure.emptyResult:
+        return <DomImageBitmap>[];
+      case null:
+        break;
     }
     final Completer<void>? release = _release;
     if (release != null) {
@@ -947,7 +1020,7 @@ class _ExportSurface extends _TestSurface<SkwasmOffscreenSurface> implements Off
   ) => delegate.rasterizeToCanvasSource(size, pictures, onRendered);
 }
 
-class _TestSurface<S extends Surface> implements Surface {
+class _TestSurface<S extends Surface> extends Surface {
   _TestSurface(this.delegate);
   final S delegate;
   Completer<void>? _release;
@@ -976,7 +1049,7 @@ class _TestSurface<S extends Surface> implements Surface {
   Future<void> recreateContextForCanvas(DomEventTarget canvas) =>
       delegate.recreateContextForCanvas(canvas);
   @override
-  void dispose() => delegate.dispose();
+  void disposeResources() => delegate.dispose();
   @override
   Future<void> get initialized => delegate.initialized;
   @override

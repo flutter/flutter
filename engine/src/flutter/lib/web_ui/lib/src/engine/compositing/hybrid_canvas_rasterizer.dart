@@ -11,34 +11,23 @@ import 'package:ui/ui.dart' as ui;
 
 /// Presents a single canvas directly, and exports bitmaps for compositions that
 /// need several canvases. Exporting never clears the visible direct surface.
-class HybridCanvasRasterizer extends Rasterizer {
+class HybridCanvasRasterizer extends SurfaceRasterizer<HybridCanvasViewRasterizer> {
   HybridCanvasRasterizer(
     this.createOnscreenSurface,
     OffscreenSurface Function(OffscreenCanvasProvider) createOffscreenSurface,
-  ) : _surfaceProvider = OffscreenSurfaceProvider(
-        OffscreenCanvasProvider(),
-        createOffscreenSurface,
-      );
+  ) : surfaceProvider = OffscreenSurfaceProvider(OffscreenCanvasProvider(), createOffscreenSurface);
 
   final OnscreenSurface Function(OnscreenCanvasProvider) createOnscreenSurface;
-  final OffscreenSurfaceProvider _surfaceProvider;
-  final Map<EngineFlutterView, HybridCanvasViewRasterizer> _views =
-      <EngineFlutterView, HybridCanvasViewRasterizer>{};
+  @override
+  final OffscreenSurfaceProvider surfaceProvider;
   OffscreenSurface? _exportSurface;
   Future<void> _pendingFrame = Future<void>.value();
   int? _resourceCacheMaxBytes;
-  bool _disposed = false;
+  bool get _hasSingleView => activeViews.length == 1;
 
   @override
-  SurfaceProvider get surfaceProvider => _surfaceProvider;
-
-  @override
-  HybridCanvasViewRasterizer createViewRasterizer(EngineFlutterView view) {
-    if (_disposed) {
-      throw StateError('The hybrid rasterizer has been disposed.');
-    }
-    return _views.putIfAbsent(view, () => HybridCanvasViewRasterizer(view, this));
-  }
+  HybridCanvasViewRasterizer buildViewRasterizer(EngineFlutterView view) =>
+      HybridCanvasViewRasterizer(view, this);
 
   // Serialize frame commits and track native work before destroying surfaces.
   Future<void> _draw(Future<void> Function() draw) {
@@ -47,31 +36,15 @@ class HybridCanvasRasterizer extends Rasterizer {
     return result;
   }
 
-  OffscreenSurface get _export => _exportSurface ??= _surfaceProvider.createSurface();
-
-  @override
-  Surface createPictureToImageSurface() => _surfaceProvider.createSurface();
+  OffscreenSurface get _export => _exportSurface ??= surfaceProvider.createSurface();
 
   @override
   void setResourceCacheMaxBytes(int bytes) {
     _resourceCacheMaxBytes = bytes;
-    _surfaceProvider.setSkiaResourceCacheMaxBytes(bytes);
-    for (final HybridCanvasViewRasterizer view in _views.values) {
+    super.setResourceCacheMaxBytes(bytes);
+    for (final HybridCanvasViewRasterizer view in activeViews) {
       view._directProvider.setSkiaResourceCacheMaxBytes(bytes);
     }
-  }
-
-  @override
-  void dispose() {
-    if (_disposed) {
-      return;
-    }
-    _disposed = true;
-    for (final HybridCanvasViewRasterizer view in _views.values.toList()) {
-      view.dispose();
-    }
-    // Native jobs must finish before their surfaces are destroyed.
-    unawaited(_pendingFrame.then((_) => _surfaceProvider.dispose()));
   }
 }
 
@@ -124,9 +97,6 @@ class HybridCanvasViewRasterizer extends ViewRasterizer {
   @override
   Future<void> draw(LayerTree layerTree, ui.Size frameSize, FrameTimingRecorder? recorder) =>
       rasterizer._draw(() async {
-        if (isDisposed) {
-          return;
-        }
         _drawing = true;
         try {
           await super.draw(layerTree, frameSize, recorder);
@@ -167,13 +137,10 @@ class HybridCanvasViewRasterizer extends ViewRasterizer {
     final bool sourceChanged =
         _directSurface != null && _presentedSource != _directSurface!.canvasImageSource;
     final bool single =
-        displayCanvases.length == 1 &&
-        rasterizer._views.length == 1 &&
-        !debugOverlayOptimizationBounds;
+        displayCanvases.length == 1 && rasterizer._hasSingleView && !debugOverlayOptimizationBounds;
     if (metricsChanged || sourceChanged || !single) {
       _promotionAttempted = false;
     }
-    recorder?.recordRasterStart();
     try {
       if (single &&
           identical(_directCanvas, displayCanvases.single) &&
@@ -198,6 +165,9 @@ class HybridCanvasViewRasterizer extends ViewRasterizer {
       _nextBitmaps = await export.rasterizeToImageBitmaps(currentFrameSize, pictures);
       if (isDisposed) {
         return;
+      }
+      if (_nextBitmaps.length != pictures.length) {
+        throw StateError('Skwasm did not export every picture in the frame.');
       }
       // An active direct surface must remain untouched through an exit or
       // resize. A following frame can attempt entry from the committed bitmap.
@@ -268,11 +238,11 @@ class HybridCanvasViewRasterizer extends ViewRasterizer {
       final deadline = Stopwatch()..start();
       var reads = 0;
       while (!isDisposed && reads < 3 && deadline.elapsedMilliseconds < 100) {
-        // Animation callbacks can be suspended even while worker pixels are
-        // available. Yield between bounded observations; the pixel comparison,
-        // rather than a scheduling callback, determines whether entry is safe.
+        // Background tabs can suspend animation callbacks and throttle timers.
+        // If this timer fires late, still sample the pixels before deciding
+        // whether to schedule another observation.
         await Future<void>.delayed(const Duration(milliseconds: 16));
-        if (isDisposed || deadline.elapsedMilliseconds >= 100) {
+        if (isDisposed) {
           break;
         }
         final source = surface.canvasImageSource as DomHTMLCanvasElement;
@@ -382,7 +352,6 @@ class HybridCanvasViewRasterizer extends ViewRasterizer {
       return;
     }
     super.dispose();
-    rasterizer._views.remove(view);
     _stagingHost.remove();
     _directSurface?.hostElement.remove();
     if (!_drawing) {

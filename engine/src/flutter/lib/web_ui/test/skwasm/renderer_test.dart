@@ -12,24 +12,27 @@ import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+import '../common/test_initialization.dart';
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 void testMain() {
+  setUpUnitTests();
   group('SkwasmRenderer rasterizer', () {
-    late SkwasmRenderer testRenderer;
+    final testRenderer = renderer as SkwasmRenderer;
 
     setUp(() {
       debugOverrideJsConfiguration(null);
-      testRenderer = SkwasmRenderer()..debugResetRasterizer();
+      testRenderer.debugResetRasterizer();
     });
 
     tearDown(() {
-      testRenderer.rasterizer.dispose();
       ui_web.browser.debugBrowserEngineOverride = null;
       ui_web.browser.debugOperatingSystemOverride = null;
       debugOverrideJsConfiguration(null);
+      testRenderer.debugResetRasterizer();
     });
 
     for (final ui_web.BrowserEngine engine in ui_web.BrowserEngine.values) {
@@ -37,7 +40,6 @@ void testMain() {
         ui_web.browser.debugBrowserEngineOverride = engine;
         for (final ui_web.OperatingSystem os in ui_web.OperatingSystem.values) {
           ui_web.browser.debugOperatingSystemOverride = os;
-          testRenderer.rasterizer.dispose();
           testRenderer.debugResetRasterizer();
           expect(testRenderer.rasterizer, isA<OffscreenCanvasRasterizer>(), reason: '$os');
         }
@@ -54,7 +56,6 @@ void testMain() {
           ui_web.browser.debugBrowserEngineOverride = engine;
           for (final ui_web.OperatingSystem os in ui_web.OperatingSystem.values) {
             ui_web.browser.debugOperatingSystemOverride = os;
-            testRenderer.rasterizer.dispose();
             testRenderer.debugResetRasterizer();
             expect(
               testRenderer.rasterizer,
@@ -73,13 +74,12 @@ void testMain() {
         <String, Object?>{'skwasmUseHybridRasterizer': true}.jsify() as JsFlutterConfiguration?,
       );
 
-      final globalRenderer = renderer as SkwasmRenderer;
-      globalRenderer.debugResetRasterizer();
+      testRenderer.debugResetRasterizer();
 
-      if (globalRenderer.rasterizer is! HybridCanvasRasterizer) {
+      if (testRenderer.rasterizer is! HybridCanvasRasterizer) {
         return;
       }
-      expect(globalRenderer.pictureToImageSurface, isA<OffscreenSurface>());
+      expect(testRenderer.pictureToImageSurface, isA<OffscreenSurface>());
 
       final recorder = ui.PictureRecorder();
       final canvas = ui.Canvas(recorder);
@@ -97,18 +97,17 @@ void testMain() {
     }, timeout: const Timeout(Duration(seconds: 10)));
 
     test('picture to image preserves rendered pixels', () async {
-      final globalRenderer = renderer as SkwasmRenderer;
       for (final mode in <String>['bitmap', 'hybrid']) {
         debugOverrideJsConfiguration(
           <String, Object?>{'skwasmUseHybridRasterizer': mode == 'hybrid'}.jsify()
               as JsFlutterConfiguration?,
         );
-        globalRenderer.debugResetRasterizer();
+        testRenderer.debugResetRasterizer();
 
         if (mode == 'bitmap') {
-          expect(globalRenderer.rasterizer, isA<OffscreenCanvasRasterizer>());
+          expect(testRenderer.rasterizer, isA<OffscreenCanvasRasterizer>());
         } else if (browserSupportsTransferControlToOffscreen) {
-          expect(globalRenderer.rasterizer, isA<HybridCanvasRasterizer>());
+          expect(testRenderer.rasterizer, isA<HybridCanvasRasterizer>());
         }
 
         final recorder = ui.PictureRecorder();
