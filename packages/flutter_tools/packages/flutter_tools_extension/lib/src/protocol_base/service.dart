@@ -25,8 +25,9 @@ typedef ExtensionNotificationSender = void Function(String method, Map<String, O
 abstract base class ToolExtensionService {
   /// Internal JSON-RPC notification sender callback used by [sendNotification].
   ///
-  /// Wired by `ToolExtensionEntryPoint.run` before the extension peer begins
-  /// listening for RPC requests.
+  /// Wired by `ToolExtensionEntryPoint.run` prior to invoking [initialize],
+  /// queuing notifications emitted during [initialize] until the JSON-RPC
+  /// channel connects.
   @internal
   ExtensionNotificationSender? notificationSender;
 
@@ -41,8 +42,9 @@ abstract base class ToolExtensionService {
   /// Sends a fire-and-forget JSON-RPC 2.0 notification with [method] and
   /// [params] to the host tool.
   ///
-  /// Throws a [StateError] if called before this service has been attached to
-  /// an active extension peer by `ToolExtensionEntryPoint.run`.
+  /// Notifications sent during [initialize] are queued until the channel
+  /// connects. Throws a [StateError] if called before this service has been
+  /// attached by `ToolExtensionEntryPoint.run`.
   void sendNotification(String method, Map<String, Object?> params) {
     final ExtensionNotificationSender? sender = notificationSender;
     if (sender == null) {

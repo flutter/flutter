@@ -111,6 +111,15 @@ final class _LogTestService extends ToolExtensionService {
         log('Plain trace', level: .trace);
         return 'ok';
       },
+      'emitControlSequences': (Map<String, Object?> _) {
+        log('\u001B[2K\u001B[1ACleared\r\u0007\u0008\u007F\u009B\tindented\nnext line');
+        log(
+          '\u001B]0;Window Title\u0007\u001B]8;;https://flutter.dev\u001B\\Docs\u001B]8;;\u001B\\',
+          level: .warning,
+        );
+        log('\u001B[2K\u001B[32mGreen cleared\u001B]0;Title\u0007', level: .error);
+        return 'ok';
+      },
       'emitExplicitTimestamp': (Map<String, Object?> _) {
         log('explicit timestamp', timestamp: DateTime(2026, 11, 18, 12, 30));
         return 'ok';
@@ -131,6 +140,31 @@ void _logExtensionEntryPoint(SendPort sendPort) {
     ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
       _LogTestService(),
     ], extensionName: 'log_ext'),
+  );
+}
+
+final class _LogInInitService extends ToolExtensionService {
+  @override
+  String get namespace => 'log_init';
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    log('init first');
+    log('init second', level: .warning);
+    return <String, ExtensionRpcHandler>{
+      'emitAfterInit': (Map<String, Object?> _) {
+        log('post-handshake');
+        return 'ok';
+      },
+    };
+  }
+}
+
+void _logInInitExtensionEntryPoint(SendPort sendPort) {
+  unawaited(
+    ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+      _LogInInitService(),
+    ], extensionName: 'init_log_ext'),
   );
 }
 
@@ -942,6 +976,60 @@ void main() {
         );
         expect(logger.traceText, contains('[log_ext] Plain trace\n'));
         expect(logger.traceText, isNot(contains('[log_ext] Plain trace${AnsiTerminal.resetAll}')));
+      },
+    );
+
+    test('buffers logs emitted during ToolExtensionService.initialize and prefixes with resolved extensionName', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _logInInitExtensionEntryPoint,
+        logger: logger,
+      );
+      addTearDown(connection.dispose);
+
+      expect(connection.extensionName, 'init_log_ext');
+      expect(await connection.sendRequest('log_init.emitAfterInit'), 'ok');
+      await pumpEventQueue();
+
+      expect(logger.statusText, '[init_log_ext] init first\n[init_log_ext] post-handshake\n');
+      expect(logger.warningText, '[init_log_ext] init second\n');
+      expect(logger.statusText, isNot(contains(ExtensionConnection.defaultExtensionName)));
+      expect(logger.warningText, isNot(contains(ExtensionConnection.defaultExtensionName)));
+    });
+
+    test(
+      'strips non-SGR CSI, OSC, and C0 control sequences while preserving tabs and newlines',
+      () async {
+        final noColorLogger = BufferLogger.test();
+        final ExtensionConnection noColorConnection = await ExtensionConnection.spawn(
+          _logExtensionEntryPoint,
+          logger: noColorLogger,
+        );
+        addTearDown(noColorConnection.dispose);
+
+        expect(await noColorConnection.sendRequest('log_test.emitControlSequences'), 'ok');
+        await pumpEventQueue();
+
+        expect(noColorLogger.statusText, '[log_ext] Cleared\tindented\nnext line\n');
+        expect(noColorLogger.warningText, '[log_ext] Docs\n');
+        expect(noColorLogger.errorText, '[log_ext] Green cleared\n');
+
+        final colorLogger = BufferLogger.test(terminal: Terminal.test(supportsColor: true));
+        final ExtensionConnection colorConnection = await ExtensionConnection.spawn(
+          _logExtensionEntryPoint,
+          logger: colorLogger,
+        );
+        addTearDown(colorConnection.dispose);
+
+        expect(await colorConnection.sendRequest('log_test.emitControlSequences'), 'ok');
+        await pumpEventQueue();
+
+        expect(colorLogger.statusText, '[log_ext] Cleared\tindented\nnext line\n');
+        expect(colorLogger.warningText, '[log_ext] Docs\n');
+        expect(
+          colorLogger.errorText,
+          '[log_ext] \u001B[32mGreen cleared${AnsiTerminal.resetAll}\n',
+        );
       },
     );
 

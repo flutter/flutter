@@ -69,6 +69,13 @@ class ToolExtensionEntryPoint {
     String? extensionName,
   }) async {
     final rpcHandlers = <String, ExtensionRpcHandler>{};
+    final pendingNotifications = <(String, Map<String, Object?>)>[];
+
+    for (final service in services) {
+      service.notificationSender = (String method, Map<String, Object?> params) {
+        pendingNotifications.add((method, params));
+      };
+    }
 
     for (final service in services) {
       logger?.call(
@@ -105,6 +112,10 @@ class ToolExtensionEntryPoint {
     for (final service in services) {
       service.notificationSender = peer.sendNotification;
     }
+    for (final (String method, Map<String, Object?> params) in pendingNotifications) {
+      peer.sendNotification(method, params);
+    }
+    pendingNotifications.clear();
 
     peer.registerMethod(getCapabilitiesMethod, () {
       logger?.call('[ToolExtensionIsolate] Handling extension.getCapabilities query.');

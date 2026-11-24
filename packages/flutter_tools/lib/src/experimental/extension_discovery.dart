@@ -38,8 +38,13 @@ class ExtensionConnection {
   /// Fallback extension name used when an extension does not report one in its capabilities.
   static const defaultExtensionName = 'unknown_extension';
 
-  static const _ansiCsiPrefix = '\u001B[';
-  static final _ansiSgrPattern = RegExp('\u001B\\[[0-9;]*m');
+  static final _ansiSgrPattern = RegExp(r'^\x1B\[[0-9;:]*m$');
+  static final _terminalControlPattern = RegExp(
+    r'\x1B\[[\x30-\x3F]*[\x20-\x2F]*[\x40-\x7E]|'
+    r'\x1B\][^\x07\x1B\r\n]*(?:\x07|\x1B\\)?|'
+    r'\x1B[\x20-\x2F]*[\x30-\x7E]|'
+    r'[\x00-\x08\x0B-\x1F\x7F-\x9F]',
+  );
 
   // Bounded grace period for `extension.shutdown` RPCs so extensions can
   // terminate child processes and tunnels before the isolate is killed
@@ -236,6 +241,22 @@ class ExtensionConnection {
     );
   }
 
+  static String _sanitizeLogMessage(String message, {required bool supportsColor}) {
+    var hasSgrSequence = false;
+    final String sanitized = message.replaceAllMapped(_terminalControlPattern, (Match match) {
+      final String sequence = match.group(0)!;
+      if (supportsColor && _ansiSgrPattern.hasMatch(sequence)) {
+        hasSgrSequence = true;
+        return sequence;
+      }
+      return '';
+    });
+    if (hasSgrSequence) {
+      return '$sanitized${AnsiTerminal.resetAll}';
+    }
+    return sanitized;
+  }
+
   static void _handleLogNotification(
     json_rpc.Parameters params, {
     required String extensionName,
@@ -257,12 +278,10 @@ class ExtensionConnection {
       );
       return;
     }
-    String message = logMessage.message;
-    if (!logger.supportsColor) {
-      message = message.replaceAll(_ansiSgrPattern, '');
-    } else if (message.contains(_ansiCsiPrefix)) {
-      message = '$message${AnsiTerminal.resetAll}';
-    }
+    final String message = _sanitizeLogMessage(
+      logMessage.message,
+      supportsColor: logger.supportsColor,
+    );
     final formatted = '[$extensionName] $message';
     switch (logMessage.level) {
       case .trace:
@@ -349,6 +368,19 @@ class ExtensionConnection {
     });
 
     Isolate? isolate;
+    List<json_rpc.Parameters>? pendingLogNotifications = <json_rpc.Parameters>[];
+    String currentExtensionName = extensionName ?? defaultExtensionName;
+
+    void flushPendingLogNotifications() {
+      final pending = pendingLogNotifications;
+      if (pending == null) {
+        return;
+      }
+      pendingLogNotifications = null;
+      for (final json_rpc.Parameters params in pending) {
+        _handleLogNotification(params, extensionName: currentExtensionName, logger: logger);
+      }
+    }
 
     try {
       isolate = await isolateLauncher(receivePort.sendPort, errorPort.sendPort, exitPort.sendPort);
@@ -356,14 +388,15 @@ class ExtensionConnection {
       final channel = IsolateChannel<Object?>.connectReceive(receivePort);
       final peer = json_rpc.Peer.withoutJson(channel);
 
-      peer.registerMethod(
-        ToolExtensionEntryPoint.logNotificationMethod,
-        (json_rpc.Parameters params) => _handleLogNotification(
-          params,
-          extensionName: connection?.extensionName ?? extensionName ?? defaultExtensionName,
-          logger: logger,
-        ),
-      );
+      peer.registerMethod(ToolExtensionEntryPoint.logNotificationMethod, (
+        json_rpc.Parameters params,
+      ) {
+        if (pendingLogNotifications case final List<json_rpc.Parameters> pending) {
+          pending.add(params);
+          return;
+        }
+        _handleLogNotification(params, extensionName: currentExtensionName, logger: logger);
+      });
 
       unawaited(peer.listen());
 
@@ -384,6 +417,8 @@ class ExtensionConnection {
 
       final String resolvedExtensionName =
           extensionName ?? capabilities.extensionName ?? defaultExtensionName;
+      currentExtensionName = resolvedExtensionName;
+      flushPendingLogNotifications();
       if (expectedConfig != null) {
         _validateCapabilitiesMatchConfig(
           capabilities,
@@ -402,6 +437,7 @@ class ExtensionConnection {
         receivePort: receivePort,
       );
     } on TimeoutException {
+      flushPendingLogNotifications();
       logger.printTrace('ExtensionConnection handshake timed out.');
       receivePort.close();
       errorPort.close();
@@ -409,6 +445,7 @@ class ExtensionConnection {
       isolate?.kill(priority: Isolate.immediate);
       throw TimeoutException('Handshake with tool extension isolate timed out.');
     } on Object catch (error) {
+      flushPendingLogNotifications();
       logger.printTrace('ExtensionConnection spawn failed with error: $error');
       receivePort.close();
       errorPort.close();
