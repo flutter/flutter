@@ -277,6 +277,7 @@ class Doctor {
     required this._clock,
     required this._logger,
     required this.validatorsProviderBuilder,
+    this._stopwatchFactory = const StopwatchFactory(),
   });
 
   final Cache _cache;
@@ -284,6 +285,7 @@ class Doctor {
   final SystemClock _clock;
   final Analytics _analytics;
   final DoctorValidatorsProviderBuilder validatorsProviderBuilder;
+  final StopwatchFactory _stopwatchFactory;
 
   late final DoctorValidatorsProvider _validatorsProvider = validatorsProviderBuilder();
 
@@ -298,40 +300,54 @@ class Doctor {
     final List<DoctorValidator> validatorList = extensionManager != null
         ? validatorsProviderBuilder(extensionManager: extensionManager).validators
         : validators;
-    return <ValidatorTask>[
-      for (final DoctorValidator validator in validatorList)
-        ValidatorTask(
-          validator,
-          // We use an asyncGuard() here to be absolutely certain that
-          // DoctorValidators do not result in an uncaught exception. Since the
-          // Future returned by the asyncGuard() is not awaited, we pass an
-          // onError callback to it and translate errors into ValidationResults.
-          asyncGuard<ValidationResult>(
-            () {
-              final timeoutCompleter = Completer<ValidationResult>();
-              final timer = Timer(doctorDuration, () {
-                timeoutCompleter.completeError(
-                  Exception(
-                    '${validator.title} exceeded maximum allowed duration of $doctorDuration',
-                  ),
-                );
-              });
-              final Future<ValidationResult> validatorFuture = validator.validate();
-              return Future.any<ValidationResult>(<Future<ValidationResult>>[
-                validatorFuture,
-                // This future can only complete with an error
-                timeoutCompleter.future,
-              ]).then((ValidationResult result) async {
-                timer.cancel();
-                return result;
-              });
-            },
-            onError: (Object exception, StackTrace stackTrace) {
-              return ValidationResult.crash(exception, stackTrace);
-            },
+    final tasks = <ValidatorTask>[];
+    for (final validator in validatorList) {
+      late final ValidatorTask task;
+      task = ValidatorTask(
+        validator,
+        // We use an asyncGuard() here to be absolutely certain that
+        // DoctorValidators do not result in an uncaught exception. Since the
+        // Future returned by the asyncGuard() is not awaited, we pass an
+        // onError callback to it and translate errors into ValidationResults.
+        asyncGuard<ValidationResult>(
+          () => _runValidator(
+            validator,
+            onComplete: (Duration elapsed) => task.executionTime = elapsed,
           ),
+          onError: (Object exception, StackTrace stackTrace) {
+            return validator.createCrashResult(exception, stackTrace);
+          },
         ),
-    ];
+      );
+      tasks.add(task);
+    }
+    return tasks;
+  }
+
+  Future<ValidationResult> _runValidator(
+    DoctorValidator validator, {
+    required void Function(Duration) onComplete,
+  }) async {
+    final timeoutCompleter = Completer<ValidationResult>();
+    final timer = Timer(doctorDuration, () {
+      timeoutCompleter.completeError(
+        Exception('${validator.title} exceeded maximum allowed duration of $doctorDuration'),
+      );
+    });
+    final Stopwatch stopwatch = _stopwatchFactory.createStopwatch(validator.title)..start();
+    final ValidationResult result;
+    try {
+      result = await Future.any<ValidationResult>(<Future<ValidationResult>>[
+        validator.validate(),
+        // This future can only complete with an error
+        timeoutCompleter.future,
+      ]);
+    } finally {
+      timer.cancel();
+      stopwatch.stop();
+    }
+    onComplete(stopwatch.elapsed);
+    return result;
   }
 
   List<Workflow> get workflows => _validatorsProvider.workflows;
@@ -388,7 +404,7 @@ class Doctor {
         result = await validatorTask.result;
         status.stop();
       } on Exception catch (exception, stackTrace) {
-        result = ValidationResult.crash(exception, stackTrace);
+        result = validator.createCrashResult(exception, stackTrace);
         status.cancel();
       }
 
@@ -443,7 +459,7 @@ class Doctor {
       }
 
       final String executionDuration = () {
-        final Duration? executionTime = result.executionTime;
+        final Duration? executionTime = validatorTask.executionTime;
         if (!verbose || executionTime == null) {
           return '';
         }
