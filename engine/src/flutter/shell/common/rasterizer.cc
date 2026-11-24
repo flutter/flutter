@@ -965,6 +965,8 @@ Rasterizer::ScreenshotFormat ToScreenshotFormat(impeller::PixelFormat format) {
     case impeller::PixelFormat::kB10G10R10XR:
     case impeller::PixelFormat::kB10G10R10A10XR:
     case impeller::PixelFormat::kR32Float:
+    case impeller::PixelFormat::kR16Float:
+    case impeller::PixelFormat::kR16G16Float:
     case impeller::PixelFormat::kBC1RGBAUNormInt:
     case impeller::PixelFormat::kBC1RGBAUNormIntSRGB:
     case impeller::PixelFormat::kBC3RGBAUNormInt:

@@ -23,5 +23,17 @@ TEST(FormatsVKTest, DescriptorMapping) {
             vk::DescriptorType::eInputAttachment);
 }
 
+TEST(FormatsVKTest, Float16FormatMapping) {
+  EXPECT_EQ(ToVKImageFormat(PixelFormat::kR16Float), vk::Format::eR16Sfloat);
+  EXPECT_EQ(ToVKImageFormat(PixelFormat::kR16G16Float),
+            vk::Format::eR16G16Sfloat);
+  EXPECT_EQ(ToPixelFormat(vk::Format::eR16Sfloat), PixelFormat::kR16Float);
+  EXPECT_EQ(ToPixelFormat(vk::Format::eR16G16Sfloat),
+            PixelFormat::kR16G16Float);
+  EXPECT_EQ(ToVKImageAspectFlags(PixelFormat::kR16Float),
+            vk::ImageAspectFlags(vk::ImageAspectFlagBits::eColor));
+  EXPECT_FALSE(PixelFormatIsDepthStencil(PixelFormat::kR16G16Float));
+}
+
 }  // namespace testing
 }  // namespace impeller

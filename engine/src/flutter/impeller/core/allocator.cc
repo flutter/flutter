@@ -60,13 +60,14 @@ std::shared_ptr<Texture> Allocator::CreateTexture(const TextureDescriptor& desc,
     return nullptr;
   }
 
-  if (IsCompressed(desc.format)) {
-    // Block-compressed textures are sample-only. They cannot be rendered to,
-    // written from a shader, or allocated as transient attachments.
+  if (IsSampleOnly(desc.format)) {
+    // Sample-only textures (block-compressed and 16-bit per channel formats)
+    // cannot be rendered to, written from a shader, or allocated as transient
+    // attachments.
     if (desc.usage & TextureUsage::kRenderTarget ||
         desc.usage & TextureUsage::kShaderWrite ||
         desc.storage_mode == StorageMode::kDeviceTransient) {
-      VALIDATION_LOG << "Compressed texture format "
+      VALIDATION_LOG << "Texture format "
                      << PixelFormatToString(desc.format)
                      << " can only be used as a sample-only texture.";
       return nullptr;

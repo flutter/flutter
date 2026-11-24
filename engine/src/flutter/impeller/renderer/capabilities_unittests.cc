@@ -113,6 +113,14 @@ TEST(CapabilitiesTest, SupportsTextureCompression) {
       astc_hdr->SupportsTextureCompression(CompressedTextureFamily::kASTCHDR));
 }
 
+TEST(CapabilitiesTest, SupportsFloat16Formats) {
+  auto defaults = CapabilitiesBuilder().Build();
+  EXPECT_FALSE(defaults->SupportsFloat16Formats());
+
+  auto mutated = CapabilitiesBuilder().SetSupportsFloat16Formats(true).Build();
+  EXPECT_TRUE(mutated->SupportsFloat16Formats());
+}
+
 TEST(CapabilitiesTest, MinUniformAlignment) {
   auto defaults = CapabilitiesBuilder().Build();
   EXPECT_EQ(defaults->GetMinimumUniformAlignment(), 256u);

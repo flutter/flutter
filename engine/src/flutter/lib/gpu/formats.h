@@ -302,6 +302,10 @@ constexpr FlutterGPUPixelFormat FromImpellerPixelFormat(
       return FlutterGPUPixelFormat::kASTC4x4HDR;
     case impeller::PixelFormat::kASTC8x8HDR:
       return FlutterGPUPixelFormat::kASTC8x8HDR;
+    // 16-bit per channel formats are not yet exposed by the Flutter GPU API.
+    case impeller::PixelFormat::kR16Float:
+    case impeller::PixelFormat::kR16G16Float:
+      return FlutterGPUPixelFormat::kUnknown;
   }
 }
 

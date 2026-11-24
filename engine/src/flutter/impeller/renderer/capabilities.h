@@ -167,6 +167,13 @@ class Capabilities {
   virtual bool SupportsTextureCompression(
       CompressedTextureFamily family) const = 0;
 
+  /// @brief Whether the sample-only 16-bit float color formats (`kR16Float`
+  ///        and `kR16G16Float`) can be uploaded, sampled and linearly
+  ///        filtered. They are unavailable on OpenGL ES 2.0, so callers must
+  ///        check this before allocating. `kR16G16B16A16Float` is not covered;
+  ///        it is supported everywhere and usable as a render target.
+  virtual bool SupportsFloat16Formats() const = 0;
+
   /// @brief Whether a non-zero mip level of a texture can be attached as a
   ///        render target. Rendering into a cube map face or array layer is
   ///        always supported. Metal and Vulkan support this; the GLES backend
@@ -239,6 +246,8 @@ class CapabilitiesBuilder {
       CompressedTextureFamily family,
       bool value);
 
+  CapabilitiesBuilder& SetSupportsFloat16Formats(bool value);
+
   CapabilitiesBuilder& SetDefaultGlyphAtlasFormat(PixelFormat value);
 
   CapabilitiesBuilder& SetSupportsTriangleFan(bool value);
@@ -272,6 +281,7 @@ class CapabilitiesBuilder {
   bool supports_texture_compression_etc2_ = false;
   bool supports_texture_compression_astc_ = false;
   bool supports_texture_compression_astc_hdr_ = false;
+  bool supports_float16_formats_ = false;
   std::optional<PixelFormat> default_color_format_ = std::nullopt;
   std::optional<PixelFormat> default_stencil_format_ = std::nullopt;
   std::optional<PixelFormat> default_depth_stencil_format_ = std::nullopt;

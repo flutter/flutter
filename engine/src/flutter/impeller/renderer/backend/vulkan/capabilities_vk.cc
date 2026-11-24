@@ -350,6 +350,20 @@ static bool HasSuitableColorFormat(const vk::PhysicalDevice& device,
             vk::FormatFeatureFlagBits::eColorAttachment);
 }
 
+// Whether `format` can be sampled and linearly filtered with optimal tiling.
+// Transfer source and destination are required too, since `AllocatorVK` adds
+// both usages to every non-transient image for uploads and blits.
+static bool HasSampleableFilterableFormat(const vk::PhysicalDevice& device,
+                                          vk::Format format) {
+  constexpr vk::FormatFeatureFlags kRequired =
+      vk::FormatFeatureFlagBits::eSampledImage |
+      vk::FormatFeatureFlagBits::eSampledImageFilterLinear |
+      vk::FormatFeatureFlagBits::eTransferSrc |
+      vk::FormatFeatureFlagBits::eTransferDst;
+  const auto props = device.getFormatProperties(format);
+  return (props.optimalTilingFeatures & kRequired) == kRequired;
+}
+
 static bool HasSuitableDepthStencilFormat(const vk::PhysicalDevice& device,
                                           vk::Format format) {
   const auto props = device.getFormatProperties(format);
@@ -692,6 +706,13 @@ bool CapabilitiesVK::SetPhysicalDevice(
           .get<vk::PhysicalDeviceTextureCompressionASTCHDRFeatures>()
           .textureCompressionASTC_HDR;
 
+  // Sampling and linear filtering of R16_SFLOAT and R16G16_SFLOAT are
+  // mandatory in Vulkan, but query them anyway so a non-conformant driver
+  // reports false rather than failing at allocation.
+  supports_float16_formats_ =
+      HasSampleableFilterableFormat(device, vk::Format::eR16Sfloat) &&
+      HasSampleableFilterableFormat(device, vk::Format::eR16G16Sfloat);
+
   max_render_pass_attachment_size_ =
       ISize{device_properties_.limits.maxFramebufferWidth,
             device_properties_.limits.maxFramebufferHeight};
@@ -947,6 +968,10 @@ bool CapabilitiesVK::SupportsTextureCompression(
       return supports_texture_compression_astc_hdr_;
   }
   return false;
+}
+
+bool CapabilitiesVK::SupportsFloat16Formats() const {
+  return supports_float16_formats_;
 }
 
 }  // namespace impeller

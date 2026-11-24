@@ -249,6 +249,10 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   supports_texture_compression_etc2_ =
       desc->IsES() && desc->GetGlVersion().major_version >= 3;
 
+  // GL_R16F and GL_RG16F (with GL_RED, GL_RG and GL_HALF_FLOAT) are core and
+  // texture-filterable on desktop GL 3.0 and OpenGL ES 3.0.
+  supports_float16_formats_ = desc->GetGlVersion().major_version >= 3;
+
   // GL_TEXTURE_MAX_LEVEL is core on desktop GL and ES 3.0+, and available on
   // ES 2.0 through GL_APPLE_texture_max_level.
   supports_texture_max_level_ = !desc->IsES() ||
@@ -427,6 +431,10 @@ bool CapabilitiesGLES::SupportsTextureCompression(
       return supports_texture_compression_astc_hdr_;
   }
   return false;
+}
+
+bool CapabilitiesGLES::SupportsFloat16Formats() const {
+  return supports_float16_formats_;
 }
 
 PixelFormat CapabilitiesGLES::GetDefaultGlyphAtlasFormat() const {

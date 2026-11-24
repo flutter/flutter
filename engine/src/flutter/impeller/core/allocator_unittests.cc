@@ -225,5 +225,35 @@ TEST(AllocatorTest, CompressedTextureDescriptorByteSizes) {
   }
 }
 
+TEST(AllocatorTest, Float16FormatClassification) {
+  EXPECT_TRUE(IsSampleOnlyFloat16(PixelFormat::kR16Float));
+  EXPECT_TRUE(IsSampleOnlyFloat16(PixelFormat::kR16G16Float));
+  // The four channel half-float format predates these formats and stays
+  // usable as a render target.
+  EXPECT_FALSE(IsSampleOnlyFloat16(PixelFormat::kR16G16B16A16Float));
+  EXPECT_FALSE(IsSampleOnlyFloat16(PixelFormat::kR32Float));
+
+  EXPECT_TRUE(IsSampleOnly(PixelFormat::kR16Float));
+  EXPECT_TRUE(IsSampleOnly(PixelFormat::kR16G16Float));
+  EXPECT_TRUE(IsSampleOnly(PixelFormat::kBC1RGBAUNormInt));
+  EXPECT_FALSE(IsSampleOnly(PixelFormat::kR16G16B16A16Float));
+  EXPECT_FALSE(IsSampleOnly(PixelFormat::kR8G8B8A8UNormInt));
+
+  EXPECT_FALSE(IsCompressed(PixelFormat::kR16Float));
+}
+
+TEST(AllocatorTest, Float16FormatByteSizes) {
+  EXPECT_EQ(BytesPerPixelForPixelFormat(PixelFormat::kR16Float), 2u);
+  EXPECT_EQ(BytesPerPixelForPixelFormat(PixelFormat::kR16G16Float), 4u);
+
+  // Odd widths stay tightly packed.
+  EXPECT_EQ(BytesForTextureRegion(PixelFormat::kR16Float, 3, 5), 30u);
+  EXPECT_EQ(BytesPerRowForTextureWidth(PixelFormat::kR16G16Float, 3), 12u);
+
+  TextureDescriptor desc = {.format = PixelFormat::kR16Float,
+                            .size = ISize(512, 512)};
+  EXPECT_EQ(desc.GetByteSizeOfBaseMipLevel(), 512u * 512u * 2u);
+}
+
 }  // namespace testing
 }  // namespace impeller

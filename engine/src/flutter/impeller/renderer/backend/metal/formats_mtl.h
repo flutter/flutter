@@ -35,6 +35,10 @@ constexpr PixelFormat FromMTLPixelFormat(MTLPixelFormat format) {
       return PixelFormat::kR32G32B32A32Float;
     case MTLPixelFormatRGBA16Float:
       return PixelFormat::kR16G16B16A16Float;
+    case MTLPixelFormatR16Float:
+      return PixelFormat::kR16Float;
+    case MTLPixelFormatRG16Float:
+      return PixelFormat::kR16G16Float;
     case MTLPixelFormatStencil8:
       return PixelFormat::kS8UInt;
 #if !FML_OS_IOS
@@ -130,6 +134,10 @@ constexpr MTLPixelFormat ToMTLPixelFormat(PixelFormat format) {
       return SafeMTLPixelFormatBGRA10_XR();
     case PixelFormat::kR32Float:
       return MTLPixelFormatR32Float;
+    case PixelFormat::kR16Float:
+      return MTLPixelFormatR16Float;
+    case PixelFormat::kR16G16Float:
+      return MTLPixelFormatRG16Float;
     case PixelFormat::kBC1RGBAUNormInt:
       return SafeMTLPixelFormatBC1_RGBA();
     case PixelFormat::kBC1RGBAUNormIntSRGB:
