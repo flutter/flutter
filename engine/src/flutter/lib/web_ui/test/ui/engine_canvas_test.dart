@@ -27,9 +27,11 @@ Future<void> testMain() async {
     recorder.endRecording().dispose();
   });
 
-  test('ui.Canvas rejects a recorder that is already recording', () {
+  test('ui.Canvas rejects a recorder that is already recording', () async {
+    const bounds = ui.Rect.fromLTRB(0, 0, 4, 4);
     final recorder = ui.PictureRecorder();
-    ui.Canvas(recorder);
+    final canvas = ui.Canvas(recorder, bounds);
+    canvas.drawRect(bounds, ui.Paint()..color = const ui.Color(0xFFFF0000));
 
     expect(
       () => ui.Canvas(recorder),
@@ -41,7 +43,16 @@ Future<void> testMain() async {
         ),
       ),
     );
-    recorder.endRecording().dispose();
+
+    // The rejected call leaves the first canvas recording.
+    expect(recorder.isRecording, isTrue);
+    canvas.drawRect(bounds, ui.Paint()..color = const ui.Color(0xFF00FF00));
+    final ui.Picture picture = recorder.endRecording();
+    final ui.Image image = await picture.toImage(1, 1);
+    final ByteData bytes = (await image.toByteData())!;
+    expect(bytes.buffer.asUint8List(bytes.offsetInBytes, 4), <int>[0, 255, 0, 255]);
+    image.dispose();
+    picture.dispose();
   });
 
   test('drawAtlas with empty colors draws the same pixels as null colors', () async {

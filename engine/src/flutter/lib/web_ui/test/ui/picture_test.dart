@@ -167,17 +167,7 @@ Future<void> testMain() async {
         'collected with its native recorder and retained image sources', () async {
       final EngineImage image = await createImageBitmapImage();
       final ImageSource source = image.imageSource!;
-
-      final Finalizer originalFinalizer = UniqueRef.finalizer;
-      final bool originalInstrumentationEnabled = Instrumentation.enabled;
-      addTearDown(() {
-        UniqueRef.finalizer = originalFinalizer;
-        Instrumentation.enabled = originalInstrumentationEnabled;
-      });
-      final finalizer = RecordingFinalizer();
-      UniqueRef.finalizer = finalizer;
-      Instrumentation.enabled = true;
-      Instrumentation.instance.debugCounters.clear();
+      final RecordingFinalizer finalizer = _useRecordingFinalizer();
 
       final recorder = ui.PictureRecorder();
       expect(finalizer.registeredPairs, isEmpty);
@@ -204,6 +194,30 @@ Future<void> testMain() async {
       });
       expect(source.debugIsClosed, isTrue);
       expect(finalizer.pairsFor(recorder), isEmpty);
+    });
+
+    test('collecting a finished recorder leaves its picture and the recorded image '
+        'sources alive', () async {
+      final EngineImage image = await createImageBitmapImage();
+      final ImageSource source = image.imageSource!;
+      final RecordingFinalizer finalizer = _useRecordingFinalizer();
+
+      final recorder = ui.PictureRecorder();
+      ui.Canvas(recorder).drawImage(image, ui.Offset.zero, ui.Paint());
+      final ui.Picture picture = recorder.endRecording();
+      image.dispose();
+
+      expect(finalizer.pairsFor(recorder), isEmpty);
+      finalizer.collect(recorder);
+      expect(_pictureRecorderCounters(), <String, int>{
+        'PictureRecorder Created': 1,
+        'PictureRecorder Deleted': 1,
+      });
+      expect(source.debugIsClosed, isFalse);
+      expect(await _renderedPixels(picture), <List<int>>[_greenPixel]);
+
+      picture.dispose();
+      expect(source.debugIsClosed, isTrue);
     });
   });
 
@@ -287,6 +301,37 @@ Future<void> testMain() async {
       expect(disposedPicture, picture2);
 
       ui.Picture.onDispose = null;
+    });
+
+    test('onCreate and onDispose may query the picture and record other pictures', () {
+      final created = <ui.Picture>[];
+      final disposed = <ui.Picture>[];
+      ui.Picture.onCreate = (ui.Picture picture) {
+        expect(picture.approximateBytesUsed, greaterThanOrEqualTo(0));
+        created.add(picture);
+        if (created.length == 1) {
+          _createPicture().dispose();
+        }
+      };
+      ui.Picture.onDispose = (ui.Picture picture) {
+        expect(picture.approximateBytesUsed, greaterThanOrEqualTo(0));
+        disposed.add(picture);
+      };
+      addTearDown(() {
+        ui.Picture.onCreate = null;
+        ui.Picture.onDispose = null;
+      });
+
+      final ui.Picture picture = _createPicture();
+      expect(created, hasLength(2));
+      expect(created.first, same(picture));
+      expect(disposed, hasLength(1));
+      expect(disposed.single, same(created.last));
+      expect(picture.debugDisposed, isFalse);
+
+      picture.dispose();
+      expect(disposed, hasLength(2));
+      expect(disposed.last, same(picture));
     });
 
     test('can be disposed of manually', () {
@@ -413,6 +458,16 @@ Future<void> testMain() async {
       picture.dispose();
     });
 
+    test('cullRect of an unbounded draw is the cull rect passed to the Canvas', () {
+      const cullRect = ui.Rect.fromLTRB(2, 3, 7, 9);
+      final recorder = ui.PictureRecorder();
+      ui.Canvas(recorder, cullRect).drawColor(const ui.Color(0xFFFF0000), ui.BlendMode.src);
+
+      final picture = recorder.endRecording() as EnginePicture;
+      expect(picture.cullRect, cullRect);
+      picture.dispose();
+    });
+
     test('approximateBytesUsed', () async {
       const red = ui.Color.fromRGBO(255, 0, 0, 1);
       const green = ui.Color.fromRGBO(0, 255, 0, 1);
@@ -462,6 +517,37 @@ Future<void> testMain() async {
       ]);
 
       derivedClone.dispose();
+      expect(source.debugIsClosed, isTrue);
+    });
+
+    test('a clone keeps rendering and retaining recorded image sources after the '
+        'original is disposed', () async {
+      var onDisposeCount = 0;
+      ui.Picture.onDispose = (ui.Picture _) => onDisposeCount++;
+      addTearDown(() => ui.Picture.onDispose = null);
+      final EngineImage image = await createImageBitmapImage();
+      final ImageSource source = image.imageSource!;
+      final original = drawPicture((ui.Canvas canvas) {
+        canvas.drawImage(image, ui.Offset.zero, ui.Paint());
+      }) as EnginePicture;
+      final bool deferred = original.backendPicture.toImageSyncIsDeferred;
+      final EnginePicture clone = original.clone();
+
+      image.dispose();
+      original.dispose();
+      expect(onDisposeCount, 1);
+      expect(source.debugIsClosed, isFalse);
+      expect(await _renderedPixels(clone), <List<int>>[_greenPixel]);
+
+      final ui.Image derived = clone.toImageSync(4, 4);
+      clone.dispose();
+      expect(onDisposeCount, 1);
+      // Only a deferred image still needs the source to render.
+      expect(source.debugIsClosed, !deferred);
+
+      final ByteData bytes = (await derived.toByteData())!;
+      expect(_distinctPixels(bytes), <List<int>>[_greenPixel]);
+      derived.dispose();
       expect(source.debugIsClosed, isTrue);
     });
 
@@ -550,6 +636,33 @@ List<List<int>> _distinctPixels(ByteData bytes) {
     distinct.putIfAbsent(key, () => rgba.sublist(i, i + 4));
   }
   return distinct.values.toList();
+}
+
+/// The opaque green drawn by [createImageBitmapImage] by default.
+const List<int> _greenPixel = <int>[0x00, 0xFF, 0x00, 0xFF];
+
+/// The distinct RGBA pixels of [picture] rendered at 4x4.
+Future<List<List<int>>> _renderedPixels(ui.Picture picture) async {
+  final ui.Image image = await picture.toImage(4, 4);
+  final ByteData bytes = (await image.toByteData())!;
+  image.dispose();
+  return _distinctPixels(bytes);
+}
+
+/// Replaces [UniqueRef.finalizer] with a [RecordingFinalizer] and counts
+/// native object lifecycles from zero for the rest of the test.
+RecordingFinalizer _useRecordingFinalizer() {
+  final Finalizer originalFinalizer = UniqueRef.finalizer;
+  final bool originalInstrumentationEnabled = Instrumentation.enabled;
+  addTearDown(() {
+    UniqueRef.finalizer = originalFinalizer;
+    Instrumentation.enabled = originalInstrumentationEnabled;
+  });
+  final finalizer = RecordingFinalizer();
+  UniqueRef.finalizer = finalizer;
+  Instrumentation.enabled = true;
+  Instrumentation.instance.debugCounters.clear();
+  return finalizer;
 }
 
 /// Counters recorded by the `'PictureRecorder'` [UniqueRef].
