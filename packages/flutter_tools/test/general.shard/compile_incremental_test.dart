@@ -131,30 +131,127 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext(
-    'incremental compile exits the tool when dartaotruntime cannot be run',
-    () async {
-      // Regression test for https://github.com/flutter/flutter/issues/193518.
-      fakeProcessManager.excludedExecutables.add('Artifact.engineDartAotRuntime');
+  testWithoutContext('incremental compile exits the tool and invalidates stamps when dartaotruntime cannot run', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/193518.
+    final fileSystem = MemoryFileSystem.test();
+    final Directory cacheDir = fileSystem.directory('/bin/cache')..createSync(recursive: true);
+    final File engineStamp = cacheDir.childFile('engine-dart-sdk.stamp')..createSync();
+    final File toolsStamp = cacheDir.childFile('flutter_tools.stamp')..createSync();
+    final generatorWithInvalidation = DefaultResidentCompiler(
+      'sdkroot',
+      buildInfo: BuildInfo.debug,
+      logger: testLogger,
+      processManager: fakeProcessManager..excludedExecutables.add('Artifact.engineDartAotRuntime'),
+      artifacts: FakeArtifacts(fileSystem: fileSystem, sdkPath: '/bin/cache/dart-sdk'),
+      platform: FakePlatform(),
+      fileSystem: fileSystem,
+      stdoutHandler: generatorStdoutHandler,
+      shutdownHooks: FakeShutdownHooks(),
+      config: Config.test(),
+    );
 
-      await expectLater(
-        asyncGuard(
-          () => generator.recompile(
-            Uri.parse('/path/to/main.dart'),
-            null,
-            outputPath: '/build/',
-            packageConfig: PackageConfig.empty,
-            fs: MemoryFileSystem.test(),
-            projectRootPath: '',
-          ),
+    await expectLater(
+      asyncGuard(
+        () => generatorWithInvalidation.recompile(
+          Uri.parse('/path/to/main.dart'),
+          null,
+          outputPath: '/build/',
+          packageConfig: PackageConfig.empty,
+          fs: fileSystem,
+          projectRootPath: '',
         ),
-        throwsToolExit(
-          message: 'Unable to find dartaotruntime binary at Artifact.engineDartAotRuntime',
+      ),
+      throwsToolExit(
+        message:
+            'Unable to find dartaotruntime binary at Artifact.engineDartAotRuntime.\n'
+            'The Dart SDK cache appears to be incomplete (often caused by antivirus '
+            'software quarantining files) and has been invalidated.\n'
+            'Please re-run your command to automatically re-download the Dart SDK. '
+            'If this issue persists, add your Flutter SDK directory to your antivirus exclusions.',
+      ),
+    );
+    expect(engineStamp.existsSync(), isFalse);
+    expect(toolsStamp.existsSync(), isFalse);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('incremental compile exits the tool with cache deletion advice when stamps cannot be invalidated', () async {
+    final fileSystem = MemoryFileSystem.test();
+    final generatorWithNoInvalidation = DefaultResidentCompiler(
+      'sdkroot',
+      buildInfo: BuildInfo.debug,
+      logger: testLogger,
+      processManager: fakeProcessManager..excludedExecutables.add('Artifact.engineDartAotRuntime'),
+      artifacts: FakeArtifacts(fileSystem: fileSystem, sdkPath: '/bin/cache/dart-sdk'),
+      platform: FakePlatform(),
+      fileSystem: fileSystem,
+      stdoutHandler: generatorStdoutHandler,
+      shutdownHooks: FakeShutdownHooks(),
+      config: Config.test(),
+    );
+
+    await expectLater(
+      asyncGuard(
+        () => generatorWithNoInvalidation.recompile(
+          Uri.parse('/path/to/main.dart'),
+          null,
+          outputPath: '/build/',
+          packageConfig: PackageConfig.empty,
+          fs: fileSystem,
+          projectRootPath: '',
         ),
-      );
-      expect(fakeProcessManager, hasNoRemainingExpectations);
-    },
-  );
+      ),
+      throwsToolExit(
+        message:
+            'Unable to find dartaotruntime binary at Artifact.engineDartAotRuntime.\n'
+            'The Dart SDK cache appears to be incomplete or corrupted (often caused '
+            'by antivirus software quarantining files).\n'
+            'Please delete /bin/cache and re-run your command '
+            'to re-download the Dart SDK. '
+            'If this issue persists, add your Flutter SDK directory to your antivirus exclusions.',
+      ),
+    );
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('incremental compile exits the tool with engine rebuild advice when dartaotruntime cannot run on local engine', () async {
+    final fileSystem = MemoryFileSystem.test();
+    final generatorWithLocalEngine = DefaultResidentCompiler(
+      'sdkroot',
+      buildInfo: BuildInfo.debug,
+      logger: testLogger,
+      processManager: fakeProcessManager..excludedExecutables.add('Artifact.engineDartAotRuntime'),
+      artifacts: Artifacts.testLocalEngine(
+        localEngine: 'host_debug',
+        localEngineHost: 'host_debug',
+        fileSystem: fileSystem,
+      ),
+      platform: FakePlatform(),
+      fileSystem: fileSystem,
+      stdoutHandler: generatorStdoutHandler,
+      shutdownHooks: FakeShutdownHooks(),
+      config: Config.test(),
+    );
+
+    await expectLater(
+      asyncGuard(
+        () => generatorWithLocalEngine.recompile(
+          Uri.parse('/path/to/main.dart'),
+          null,
+          outputPath: '/build/',
+          packageConfig: PackageConfig.empty,
+          fs: fileSystem,
+          projectRootPath: '',
+        ),
+      ),
+      throwsToolExit(
+        message:
+            'Unable to find dartaotruntime binary at Artifact.engineDartAotRuntime. '
+            'Rebuild your local engine to generate the missing binary.',
+      ),
+    );
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  });
 
   testWithoutContext(
     'incremental compile runs the frontend server from source with the Dart binary '

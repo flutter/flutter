@@ -33,9 +33,11 @@ class _DefaultPreRunValidator implements PreRunValidator {
     if (!_toolsDir.existsSync()) {
       throwToolExit(
         'Flutter SDK installation appears corrupted: expected to find the '
-        'directory ${_toolsDir.path} but it does not exist! Please go to '
-        'https://flutter.dev/setup for instructions on how to re-install '
-        'Flutter.',
+        'directory ${_toolsDir.path} but it does not exist (often caused by '
+        'interrupted extraction or antivirus software quarantining files).\n'
+        'Please go to https://flutter.dev/setup for instructions on how to '
+        're-install Flutter. If this issue persists, add your Flutter SDK '
+        'directory to your antivirus exclusions.',
       );
     }
   }

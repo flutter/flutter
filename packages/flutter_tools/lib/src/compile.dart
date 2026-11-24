@@ -22,6 +22,7 @@ import 'base/process.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'bundle.dart';
+import 'cache.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 
@@ -352,9 +353,11 @@ class KernelCompiler {
 
     final List<String> commandToStartFrontendServer = _commandToStartFrontendServer(
       artifacts: _artifacts,
-      processManager: _processManager,
+      fileSystem: _fileSystem,
       frontendServerStarterPath: frontendServerStarterPath,
+      logger: _logger,
       platform: platform,
+      processManager: _processManager,
     );
 
     final List<String> command =
@@ -428,9 +431,11 @@ class KernelCompiler {
 /// message instead of crashing when the process fails to start.
 List<String> _commandToStartFrontendServer({
   required Artifacts artifacts,
-  required ProcessManager processManager,
+  required FileSystem fileSystem,
   required String? frontendServerStarterPath,
+  required Logger logger,
   required TargetPlatform? platform,
+  required ProcessManager processManager,
 }) {
   if (frontendServerStarterPath != null && frontendServerStarterPath.isNotEmpty) {
     return <String>[
@@ -443,7 +448,27 @@ List<String> _commandToStartFrontendServer({
     platform: platform,
   );
   if (!processManager.canRun(engineDartAotRuntimePath)) {
-    throwToolExit('Unable to find dartaotruntime binary at $engineDartAotRuntimePath');
+    if (artifacts.usesLocalArtifacts) {
+      if (artifacts.localEngineInfo != null) {
+        throwToolExit(
+          'Unable to find dartaotruntime binary at $engineDartAotRuntimePath. '
+          'Rebuild your local engine to generate the missing binary.',
+        );
+      }
+      throwToolExit('Unable to find dartaotruntime binary at $engineDartAotRuntimePath.');
+    }
+    // Derive the cache directory from the Dart SDK path's parent so that the
+    // public Artifacts interface does not require changes.
+    final String dartSdkDir = artifacts.getArtifactPath(Artifact.engineDartSdkPath);
+    final Directory cacheDir = fileSystem.directory(dartSdkDir).parent;
+    final bool invalidated = Cache.invalidateDartSdkStampsAt(cacheDir, logger: logger);
+    throwToolExit(
+      Cache.formatDartSdkCacheCorruptionMessage(
+        cacheDir: cacheDir,
+        invalidated: invalidated,
+        message: 'Unable to find dartaotruntime binary at $engineDartAotRuntimePath.',
+      ),
+    );
   }
   return <String>[
     engineDartAotRuntimePath,
@@ -752,7 +777,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     required this._processManager,
     required this.artifacts,
     required this._platform,
-    required FileSystem fileSystem,
+    required this._fileSystem,
     required this._shutdownHooks,
     required Config config,
     this.testCompilation = false,
@@ -768,7 +793,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
            buildInfo.initializeFromDill ??
            getDefaultCachedKernelPath(
              config: config,
-             fileSystem: fileSystem,
+             fileSystem: _fileSystem,
              trackWidgetCreation: buildInfo.trackWidgetCreation,
              dartDefines: buildInfo.dartDefines,
              targetModel: targetModel,
@@ -779,7 +804,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
        assumeInitializeFromDillUpToDate = buildInfo.assumeInitializeFromDillUpToDate,
        frontendServerStarterPath = buildInfo.frontendServerStarterPath,
        _logger = logger,
-       _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger, fileSystem: fileSystem),
+       _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger, fileSystem: _fileSystem),
        dartDefines = buildInfo.dartDefines,
        // This is a URI, not a file path, so the forward slash is correct even on Windows.
        sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/',
@@ -797,6 +822,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   }
 
   final Logger _logger;
+  final FileSystem _fileSystem;
   final ProcessManager _processManager;
   final Artifacts artifacts;
   final Platform _platform;
@@ -973,9 +999,11 @@ class DefaultResidentCompiler implements ResidentCompiler {
         : null;
     final List<String> commandToStartFrontendServer = _commandToStartFrontendServer(
       artifacts: artifacts,
-      processManager: _processManager,
+      fileSystem: _fileSystem,
       frontendServerStarterPath: frontendServerStarterPath,
+      logger: _logger,
       platform: platform,
+      processManager: _processManager,
     );
 
     final command = <String>[
