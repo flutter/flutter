@@ -208,6 +208,10 @@ and walks from the button through the Flutter view to the native window over
 AT-SPI. It runs at GTK scale factors 1 and 2, checking logical-coordinate conversion and
 outward rounding. A native tap triggers a root-only transform update; retained
 objects must report the updated geometry and dispatch exactly two Flutter taps.
+Between taps, a sibling GTK button hides and shows the host view. The AT-SPI
+client keeps its Flutter button reference, verifies that the hidden child drops
+out of traversal, and checks that the original child returns with showing and
+visible states, window ancestry, and the updated bounds.
 The second tap removes the realized subtree, exercising native notifications
 and proxy teardown after clients have queried the nodes.
 The JSON records GTK/GLib versions, scale, queried rectangles and the binary hash.

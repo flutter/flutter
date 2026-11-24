@@ -1310,6 +1310,14 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiGeometry) {
   gtk_window_set_child(window, host);
   gtk_widget_set_size_request(GTK_WIDGET(view), 700, 600);
   gtk_fixed_put(GTK_FIXED(host), GTK_WIDGET(view), 37, 29);
+  GtkWidget* visibility_button =
+      gtk_button_new_with_label("Toggle geometry view");
+  gtk_fixed_put(GTK_FIXED(host), visibility_button, 37, 640);
+  g_signal_connect_swapped(
+      visibility_button, "clicked", G_CALLBACK(+[](GtkWidget* view) {
+        gtk_widget_set_visible(view, !gtk_widget_get_visible(view));
+      }),
+      view);
   gtk_window_set_default_size(window, 800, 700);
   gtk_window_present(window);
   g_print("GEOMETRY_SCALE %d\n", gtk_widget_get_scale_factor(surface));

@@ -184,6 +184,23 @@ def run_fixture(binary, output, scale, check_hit_testing=False):
       after = snapshot(12, 8)
       if button != named('Geometry button') or group != named('Geometry group'):
         raise RuntimeError('Geometry update replaced retained native objects')
+      # A sibling GTK control remains reachable while the Flutter host is
+      # hidden. Drive both transitions without scheduling a timed remap.
+      toggle = wait_until(lambda: named('Toggle geometry view'), 'visibility control')
+      toggle_actions = toggle.get_action_iface()
+      click = next((
+          i for i in range(toggle_actions.get_n_actions())
+          if toggle_actions.get_action_name(i) == 'click'
+      ), None)
+      if click is None or not toggle_actions.do_action(click):
+        raise RuntimeError('Could not hide the Flutter view')
+      wait_until(lambda: named('Geometry button') is None, 'hidden Flutter content')
+      if not toggle_actions.do_action(click):
+        raise RuntimeError('Could not show the Flutter view')
+      restored = wait_until(lambda: named('Geometry button'), 'remapped Flutter content')
+      if restored != button:
+        raise RuntimeError('Remapping replaced the retained Flutter button')
+      remapped = snapshot(12, 8)
       if not actions.do_action(0):
         raise RuntimeError('Geometry fixture finish action was rejected')
       fixture.wait(timeout=10)
@@ -203,8 +220,8 @@ def run_fixture(binary, output, scale, check_hit_testing=False):
       return {
           'scale': scale, 'runtime': runtime, 'server_library': libraries[0],
           'server_library_sha256': hashlib.sha256(Path(libraries[0]).read_bytes()).hexdigest(),
-          'before': before, 'after': after, 'retained_identity': True, 'native_tap_dispatches': 2,
-          'passed': True
+          'before': before, 'after': after, 'remapped': remapped, 'retained_identity': True,
+          'hidden_content_undiscoverable': True, 'native_tap_dispatches': 2, 'passed': True
       }
 
 
