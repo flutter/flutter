@@ -55,6 +55,10 @@ class PlatformViewEmbedder {
   /// Returns the most recent composition. Only used in tests.
   Composition get debugActiveComposition => _activeComposition;
 
+  /// The platform view IDs in the order committed by the last frame.
+  @visibleForTesting
+  Iterable<int> get debugActiveCompositionOrder => _activeCompositionOrder;
+
   /// If [debugOverlayOptimizationBounds] is true, this canvas will draw
   /// semitransparent rectangles showing the computed bounds of the platform
   /// views and pictures in the scene.
@@ -534,13 +538,9 @@ class PlatformViewEmbedder {
       }
     }
 
-    // Updates [canvas] (located in [index] in the next composition) to have a
-    // display canvas, either taken from the associated canvas in the previous
-    // composition, or newly created.
-    void updateCompositionCanvasWithDisplay(CompositionCanvas canvas, int index) {
-      // Does [nextEntity] correspond with a canvas in the previous composition?
-      // If so, then the canvas in the previous composition had an associated
-      //display canvas. Use this display canvas for [nextEntity].
+    // Clear the previous composition's reference if this display canvas was
+    // reused, then apply the positioning for the new composition.
+    void handoffDisplayCanvas(CompositionCanvas canvas, int index) {
       if (indexMap[index] != -1) {
         final CompositionEntity previousEntity = _activeComposition.entities[indexMap[index]];
         assert(previousEntity is CompositionCanvas && previousEntity.displayCanvas != null);
@@ -573,7 +573,7 @@ class PlatformViewEmbedder {
       while (indexMap[nextCompositionIndex] != staticElementIndexInActiveComposition) {
         final CompositionEntity nextEntity = composition.entities[nextCompositionIndex];
         if (nextEntity is CompositionCanvas) {
-          updateCompositionCanvasWithDisplay(nextEntity, nextCompositionIndex);
+          handoffDisplayCanvas(nextEntity, nextCompositionIndex);
         }
         final DomElement? nextDomElement = _getElement(nextEntity);
         if (nextDomElement != null) {
@@ -584,7 +584,7 @@ class PlatformViewEmbedder {
         nextCompositionIndex++;
       }
       if (composition.entities[nextCompositionIndex] is CompositionCanvas) {
-        updateCompositionCanvasWithDisplay(
+        handoffDisplayCanvas(
           composition.entities[nextCompositionIndex] as CompositionCanvas,
           nextCompositionIndex,
         );
@@ -599,7 +599,7 @@ class PlatformViewEmbedder {
     while (nextCompositionIndex < composition.entities.length) {
       final CompositionEntity nextEntity = composition.entities[nextCompositionIndex];
       if (nextEntity is CompositionCanvas) {
-        updateCompositionCanvasWithDisplay(nextEntity, nextCompositionIndex);
+        handoffDisplayCanvas(nextEntity, nextCompositionIndex);
       }
       final DomElement? nextDomElement = _getElement(nextEntity);
       if (nextDomElement != null) {
@@ -611,12 +611,12 @@ class PlatformViewEmbedder {
     }
 
     if (missingViewIds.isNotEmpty) {
-      // Drop the skipped views, so the next frame doesn't expect them to be
-      // in the DOM.
+      // Only commit platform views that made it into the DOM.
       composition.entities.removeWhere(
         (CompositionEntity entity) =>
             entity is CompositionPlatformView && missingViewIds.contains(entity.viewId),
       );
+      _compositionOrder.removeWhere(missingViewIds.contains);
       printWarning(
         'Cannot render platform views: ${missingViewIds.join(', ')}. '
         'These views were disposed while they were being composited.',

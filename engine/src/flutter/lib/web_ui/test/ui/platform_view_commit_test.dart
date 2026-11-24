@@ -32,7 +32,6 @@ void testMain() {
           <String, Object>{'canvasKitForceMultiSurfaceRasterizer': forceMultiSurface}.jsify()
               as JsFlutterConfiguration?,
         );
-        renderer.rasterizer.dispose();
         renderer.debugResetRasterizer();
         host = createDomHTMLDivElement();
         domDocument.body!.append(host);
@@ -67,7 +66,6 @@ void testMain() {
         view.dispose();
         host.remove();
         PlatformViewManager.instance.debugClear();
-        renderer.rasterizer.dispose();
         debugOverrideJsConfiguration(null);
         renderer.debugResetRasterizer();
       });
@@ -344,6 +342,21 @@ void testMain() {
         final DomElement slot = rasterizer.sceneElement.querySelector('flt-platform-view-slot')!;
         expect(slot.style.width, '40px');
         expect(slot.isConnected, isTrue);
+      });
+
+      test('a registered view with a missing clip chain is left out of the active order', () async {
+        await draw(platformView: false);
+        final PlatformViewEmbedder embedder = rasterizer.viewEmbedder;
+        rasterizer.hold();
+        await whilePaused(draw(), () => embedder.disposeView(1));
+
+        expect(PlatformViewManager.instance.knowsViewId(1), isTrue);
+        expect(rasterizer.sceneElement.querySelector('flt-platform-view-slot'), isNull);
+        expect(embedder.debugActiveCompositionOrder, isEmpty);
+
+        await draw();
+        expect(embedder.debugActiveCompositionOrder, orderedEquals(<int>[1]));
+        expect(rasterizer.sceneElement.querySelector('flt-platform-view-slot'), isNotNull);
       });
     });
   }
