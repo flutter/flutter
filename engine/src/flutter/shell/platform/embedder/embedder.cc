@@ -18,8 +18,8 @@
 #include "flutter/fml/closure.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/native_library.h"
-#include "flutter/fml/status_or.h"
 #include "flutter/fml/thread.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 #include "third_party/dart/runtime/bin/elf_loader.h"
 #include "third_party/dart/runtime/include/dart_native_api.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -104,6 +104,17 @@ extern const intptr_t kPlatformStrongDillSize;
 #ifdef SHELL_ENABLE_VULKAN
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkTypes.h"
+#ifdef IMPELLER_SUPPORTS_RENDERING
+#include "flutter/shell/platform/embedder/embedder_render_target_impeller.h"  // nogncheck
+#include "impeller/core/texture.h"                                  // nogncheck
+#include "impeller/renderer/backend/vulkan/context_vk.h"            // nogncheck
+#include "impeller/renderer/backend/vulkan/formats_vk.h"            // nogncheck
+#include "impeller/renderer/backend/vulkan/swapchain/surface_vk.h"  // nogncheck
+#include "impeller/renderer/backend/vulkan/swapchain/swapchain_transients_vk.h"  // nogncheck
+#include "impeller/renderer/backend/vulkan/texture_wrapper_vk.h"  // nogncheck
+#include "impeller/renderer/context.h"                            // nogncheck
+#include "impeller/renderer/render_target.h"                      // nogncheck
+#endif  // IMPELLER_SUPPORTS_RENDERING
 #endif  // SHELL_ENABLE_VULKAN
 
 const int32_t kFlutterSemanticsNodeIdBatchEnd = -1;
@@ -550,7 +561,7 @@ InferMetalPlatformViewCreationCallback(
     frame_info.struct_size = sizeof(FlutterFrameInfo);
     frame_info.size = {static_cast<uint32_t>(frame_size.width),
                        static_cast<uint32_t>(frame_size.height)};
-    flutter::GPUMTLTextureInfo texture_info;
+    flutter::GPUMTLTextureInfo texture_info{};
 
     FlutterMetalTexture metal_texture = ptr(user_data, &frame_info);
     texture_info.texture_id = metal_texture.texture_id;
@@ -1242,6 +1253,94 @@ MakeRenderTargetFromBackingStoreImpeller(
 static std::unique_ptr<flutter::EmbedderRenderTarget>
 MakeRenderTargetFromBackingStoreImpeller(
     FlutterBackingStore backing_store,
+    fml::ScopedCleanupClosure on_release,
+    const std::shared_ptr<impeller::AiksContext>& aiks_context,
+    const FlutterBackingStoreConfig& config,
+    const FlutterVulkanBackingStore* vulkan) {
+  FML_DCHECK(vulkan != nullptr);
+  fml::ScopedCleanupClosure vulkan_destruct(
+      [callback = vulkan->destruction_callback,
+       user_data = vulkan->user_data]() {
+        if (callback) {
+          callback(user_data);
+        }
+      });
+
+#if defined(SHELL_ENABLE_VULKAN) && defined(IMPELLER_SUPPORTS_RENDERING)
+  if (!aiks_context || !aiks_context->GetContext()) {
+    FML_LOG(ERROR) << "No Impeller context to build a render target with.";
+    return nullptr;
+  }
+
+  if (!vulkan->image || !vulkan->image->image) {
+    FML_LOG(ERROR) << "Embedder supplied null Vulkan image.";
+    return nullptr;
+  }
+
+  // Read directly without struct_size validation to maintain backwards
+  // compatibility with embedders which leave FlutterVulkanImage::struct_size
+  // unpopulated.
+  const auto vk_format =
+      static_cast<impeller::vk::Format>(vulkan->image->format);
+  const auto format = impeller::VkFormatToImpellerFormat(vk_format);
+  if (!format.has_value()) {
+    FML_LOG(ERROR) << "Embedder supplied Vulkan image with an unsupported "
+                      "pixel format: "
+                   << impeller::vk::to_string(vk_format);
+    return nullptr;
+  }
+
+  const auto size = impeller::ISize(config.size.width, config.size.height);
+
+  impeller::TextureDescriptor desc;
+  desc.format = format.value();
+  desc.size = size;
+  desc.storage_mode = impeller::StorageMode::kDevicePrivate;
+  desc.mip_count = 1u;
+  desc.compression_type = impeller::CompressionType::kLossless;
+  desc.usage = impeller::TextureUsage::kRenderTarget;
+
+  auto& vk_context = impeller::ContextVK::Cast(*aiks_context->GetContext());
+  vk_context.SetOffscreenFormat(format.value());
+
+  auto texture_source = impeller::WrapTextureSourceVK(
+      vk_context, desc,
+      impeller::vk::Image(reinterpret_cast<VkImage>(vulkan->image->image)),
+      vulkan_destruct.Release());
+  if (!texture_source) {
+    FML_LOG(ERROR) << "Could not wrap embedder supplied Vulkan image.";
+    return nullptr;
+  }
+
+  // TODO(https://github.com/flutter/flutter/issues/194239): Cache swapchain
+  // transients in ContextVK instead of allocating per backing store.
+  auto transients = std::make_shared<impeller::SwapchainTransientsVK>(
+      aiks_context->GetContext(), desc, /*enable_msaa=*/true);
+
+  // TODO(https://github.com/flutter/flutter/issues/194238): Extract an
+  // offscreen render-target helper with configurable presentation layouts.
+  auto surface = impeller::SurfaceVK::WrapSwapchainImage(
+      transients, texture_source, []() -> bool { return true; });
+  if (!surface) {
+    FML_LOG(ERROR) << "Could not wrap embedder supplied Vulkan image as a "
+                      "surface.";
+    return nullptr;
+  }
+
+  auto render_target =
+      std::make_unique<impeller::RenderTarget>(surface->GetRenderTarget());
+
+  return std::make_unique<flutter::EmbedderRenderTargetImpeller>(
+      backing_store, aiks_context, std::move(render_target),
+      on_release.Release(), /*framebuffer_destruction_callback=*/nullptr);
+#else
+  return nullptr;
+#endif
+}
+
+static std::unique_ptr<flutter::EmbedderRenderTarget>
+MakeRenderTargetFromBackingStoreImpeller(
+    FlutterBackingStore backing_store,
     const fml::closure& on_release,
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
     const FlutterBackingStoreConfig& config,
@@ -1265,8 +1364,15 @@ MakeRenderTargetFromBackingStoreImpeller(
       resolve_tex_desc, metal->texture.texture,
       [callback = metal->texture.destruction_callback,
        user_data = metal->texture.user_data]() { callback(user_data); });
-  if (!resolve_tex) {
-    FML_LOG(ERROR) << "Could not wrap embedder supplied Metal render texture.";
+  if (!resolve_tex || !resolve_tex->IsValid()) {
+    // A wrapped texture is invalid when the embedder's texture disagrees with
+    // the requested backing store size. Rendering into it would leave the
+    // render target without a color attachment and crash the raster thread
+    // (https://github.com/flutter/flutter/issues/185394); skip the layer.
+    FML_LOG(ERROR) << "Could not wrap embedder supplied Metal render texture "
+                      "(requested "
+                   << size.width << "x" << size.height
+                   << ", texture is invalid or has a different size).";
     return nullptr;
   }
 
@@ -1286,7 +1392,7 @@ MakeRenderTargetFromBackingStoreImpeller(
   auto msaa_tex =
       aiks_context->GetContext()->GetResourceAllocator()->CreateTexture(
           msaa_tex_desc);
-  if (!msaa_tex) {
+  if (!msaa_tex || !msaa_tex->IsValid()) {
     FML_LOG(ERROR) << "Could not allocate MSAA color texture.";
     return nullptr;
   }
@@ -1523,7 +1629,9 @@ CreateEmbedderRenderTarget(
     }
     case kFlutterBackingStoreTypeVulkan: {
       if (enable_impeller) {
-        FML_LOG(ERROR) << "Unimplemented";
+        render_target = MakeRenderTargetFromBackingStoreImpeller(
+            backing_store, std::move(collect_callback), aiks_context, config,
+            &backing_store.vulkan);
         break;
       } else {
         auto skia_surface = MakeSkSurfaceFromBackingStore(
@@ -1545,7 +1653,7 @@ CreateEmbedderRenderTarget(
 /// Creates an EmbedderExternalViewEmbedder.
 ///
 /// When a non-OK status is returned, engine startup should be halted.
-static fml::StatusOr<std::unique_ptr<flutter::EmbedderExternalViewEmbedder>>
+static absl::StatusOr<std::unique_ptr<flutter::EmbedderExternalViewEmbedder>>
 InferExternalViewEmbedderFromArgs(const FlutterCompositor* compositor,
                                   bool enable_impeller) {
   if (compositor == nullptr) {
@@ -1565,15 +1673,15 @@ InferExternalViewEmbedderFromArgs(const FlutterCompositor* compositor,
 
   // Make sure the required callbacks are present
   if (!c_create_callback || !c_collect_callback) {
-    return fml::Status(fml::StatusCode::kInvalidArgument,
-                       "Required compositor callbacks absent.");
+    return absl::Status(absl::StatusCode::kInvalidArgument,
+                        "Required compositor callbacks absent.");
   }
   // Either the present view or the present layers callback must be provided.
   if ((!c_present_view_callback && !c_present_callback) ||
       (c_present_view_callback && c_present_callback)) {
-    return fml::Status(fml::StatusCode::kInvalidArgument,
-                       "Either present_layers_callback or "
-                       "present_view_callback must be provided but not both.");
+    return absl::Status(absl::StatusCode::kInvalidArgument,
+                        "Either present_layers_callback or "
+                        "present_view_callback must be provided but not both.");
   }
 
   FlutterCompositor captured_compositor = *compositor;
@@ -1707,6 +1815,7 @@ using UniqueLoadedElf = std::unique_ptr<Dart_LoadedElf, LoadedElfDeleter>;
 
 struct _FlutterEngineAOTData {
   UniqueLoadedElf loaded_elf = nullptr;
+  fml::RefPtr<fml::NativeLibrary> native_library = nullptr;
   const uint8_t* vm_snapshot_data = nullptr;
   const uint8_t* vm_snapshot_instrs = nullptr;
   const uint8_t* vm_isolate_data = nullptr;
@@ -1761,6 +1870,45 @@ FlutterEngineResult FlutterEngineCreateAOTData(
 
       *data_out = aot_data.release();
       return kSuccess;
+    }
+    case kFlutterEngineAOTDataSourceTypeDllPath: {
+// TODO(team-windows): Support PE/COFF AOT snapshots for Windows Arm64.
+// See: https://github.com/flutter/flutter/issues/190897
+#if FML_OS_WIN && FML_ARCH_CPU_X86_64
+      if (!source->dll_path || !fml::IsFile(source->dll_path)) {
+        return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                                  "Invalid DLL path specified.");
+      }
+
+      auto native_library = fml::NativeLibrary::Create(source->dll_path);
+      if (!native_library) {
+        return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                                  "Could not load DLL path specified.");
+      }
+
+      auto aot_data = std::make_unique<_FlutterEngineAOTData>();
+      aot_data->native_library = std::move(native_library);
+      aot_data->vm_snapshot_data =
+          aot_data->native_library->ResolveSymbol("_kDartSnapshotData");
+      aot_data->vm_snapshot_instrs =
+          aot_data->native_library->ResolveSymbol("_kDartSnapshotText");
+      aot_data->vm_isolate_data = aot_data->vm_snapshot_data;
+      aot_data->vm_isolate_instrs = aot_data->vm_snapshot_instrs;
+
+      if (aot_data->vm_snapshot_data == nullptr ||
+          aot_data->vm_snapshot_instrs == nullptr) {
+        return LOG_EMBEDDER_ERROR(
+            kInvalidArguments,
+            "Could not resolve required AOT snapshot symbols from DLL.");
+      }
+
+      *data_out = aot_data.release();
+      return kSuccess;
+#else   // FML_OS_WIN && FML_ARCH_CPU_X86_64
+      return LOG_EMBEDDER_ERROR(
+          kInvalidArguments,
+          "DLL AOT data sources are only supported on Windows x64.");
+#endif  // FML_OS_WIN && FML_ARCH_CPU_X86_64
     }
   }
 
@@ -2319,6 +2467,8 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
 
   impeller::Flags impeller_flags;
   impeller_flags.use_sdfs = settings.impeller_use_sdfs;
+  impeller_flags.top_left_default_framebuffer_origin =
+      settings.impeller_top_left_default_framebuffer_origin;
 
   auto on_create_platform_view = InferPlatformViewCreationCallback(
       config, user_data, platform_dispatch_table,
@@ -2383,6 +2533,29 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
       };
       external_texture_resolver = std::make_unique<ExternalTextureResolver>(
           external_texture_metal_callback);
+    }
+  }
+#endif
+#ifdef SHELL_ENABLE_VULKAN
+  if (config->type == kVulkan) {
+    const FlutterVulkanRendererConfig* vulkan_config = &config->vulkan;
+    if (auto callback = SAFE_ACCESS(vulkan_config,
+                                    external_texture_frame_callback, nullptr)) {
+      auto external_texture_vulkan_callback =
+          [frame_callback = callback, user_data](
+              int64_t texture_identifier, size_t width,
+              size_t height) -> std::unique_ptr<FlutterVulkanExternalTexture> {
+        std::unique_ptr<FlutterVulkanExternalTexture> texture =
+            std::make_unique<FlutterVulkanExternalTexture>();
+        texture->struct_size = sizeof(FlutterVulkanExternalTexture);
+        if (!frame_callback(user_data, texture_identifier, width, height,
+                            texture.get())) {
+          return nullptr;
+        }
+        return texture;
+      };
+      external_texture_resolver = std::make_unique<ExternalTextureResolver>(
+          external_texture_vulkan_callback);
     }
   }
 #endif
@@ -2825,7 +2998,7 @@ FlutterEngineResult FlutterEngineSendPointerEvent(
   const FlutterPointerEvent* current = pointers;
 
   for (size_t i = 0; i < events_count; ++i) {
-    flutter::PointerData pointer_data;
+    flutter::PointerData pointer_data{};
     pointer_data.Clear();
     // this is currely in use only on android embedding.
     pointer_data.embedder_id = 0;
@@ -2978,7 +3151,7 @@ FlutterEngineResult FlutterEngineSendKeyEvent(FLUTTER_API_SYMBOL(FlutterEngine)
 
   const char* character = SAFE_ACCESS(event, character, nullptr);
 
-  flutter::KeyData key_data;
+  flutter::KeyData key_data{};
   key_data.Clear();
   key_data.timestamp = static_cast<uint64_t>(SAFE_ACCESS(event, timestamp, 0));
   key_data.type = MapKeyEventType(

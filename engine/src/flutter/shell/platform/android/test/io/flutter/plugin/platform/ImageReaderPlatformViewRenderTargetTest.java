@@ -4,10 +4,9 @@
 
 package io.flutter.plugin.platform;
 
-import static android.os.Looper.getMainLooper;
 import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.*;
-import static org.robolectric.Shadows.shadowOf;
+import static org.robolectric.shadows.ShadowLooper.shadowMainLooper;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -97,7 +96,7 @@ public class ImageReaderPlatformViewRenderTargetTest {
 
     // Pump the UI thread task loop. This is needed so that the OnImageAvailable callback
     // gets invoked (resulting in textureEntry.pushImage being invoked).
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     // An image was pushed into the texture entry and it has the correct dimensions.
     Image pushedImage = textureEntry.acquireLatestImage();

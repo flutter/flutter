@@ -5,6 +5,7 @@
 /// @docImport 'dart:ui';
 ///
 /// @docImport 'package:flutter/widgets.dart';
+/// @docImport 'package:flutter/widgets.dart' as widgets;
 ///
 /// @docImport 'box.dart';
 /// @docImport 'paragraph.dart';
@@ -1619,15 +1620,14 @@ base class PipelineOwner with DiagnosticableTreeMixin {
             final _RenderObjectSemantics? parentInSemanticsTree =
                 node._semantics.parentInSemanticsTree;
             if (parentInSemanticsTree != null) {
-              if (!parentInSemanticsTree.geometryDirty) {
-                targets.add(parentInSemanticsTree);
-              } else {
-                final _RenderObjectSemantics? firstAncestorNodeWithCleanGeometry =
-                    parentInSemanticsTree.firstAncestorNodeWithCleanGeometry;
-                // firstAncestorNodeWithCleanGeometry can be null if this is a blocked branch.
-                if (firstAncestorNodeWithCleanGeometry != null) {
-                  targets.add(firstAncestorNodeWithCleanGeometry);
-                }
+              // This is the parent itself when its geometry is clean. The cache
+              // may be left over from an earlier flush, so compute it first.
+              parentInSemanticsTree.computeAncestorInfo(treeShapeToken);
+              final _RenderObjectSemantics? firstAncestorNodeWithCleanGeometry =
+                  parentInSemanticsTree.firstAncestorNodeWithCleanGeometry;
+              // firstAncestorNodeWithCleanGeometry can be null if this is a blocked branch.
+              if (firstAncestorNodeWithCleanGeometry != null) {
+                targets.add(firstAncestorNodeWithCleanGeometry);
               }
             }
           }
@@ -6606,9 +6606,13 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   }
 
   void _marksConflictsInMergeGroup(List<_SemanticsFragment> mergeGroup, {bool isMergeUp = false}) {
+    final wasConflicting = <_RenderObjectSemantics>{};
     final hasSiblingConflict = <_SemanticsFragment>{};
     for (var i = 0; i < mergeGroup.length; i += 1) {
       final _SemanticsFragment fragment = mergeGroup[i];
+      if (fragment is _RenderObjectSemantics && fragment._hasSiblingConflict) {
+        wasConflicting.add(fragment);
+      }
       // Remove old value
       fragment.markSiblingConfigurationConflict(false);
       if (fragment.configToMergeUp == null) {
@@ -6626,8 +6630,18 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         }
       }
     }
+    // A sibling conflict feeds shouldFormSemanticsNode, so gaining or losing one
+    // changes whether the fragment produces a semantics node of its own. What it
+    // has cached is stale until it is rebuilt.
     for (final fragment in hasSiblingConflict) {
       fragment.markSiblingConfigurationConflict(true);
+      if (fragment is _RenderObjectSemantics && !wasConflicting.remove(fragment)) {
+        fragment.markNeedsBuild();
+      }
+    }
+    // Whatever is left in wasConflicting stopped conflicting in this pass.
+    for (final fragment in wasConflicting) {
+      fragment.markNeedsBuild();
     }
   }
 

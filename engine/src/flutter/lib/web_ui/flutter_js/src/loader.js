@@ -4,11 +4,34 @@
 
 import { browserEnvironment, defaultWasmSupport } from './browser_environment.js';
 import { FlutterEntrypointLoader } from './entrypoint_loader.js';
-import { FlutterServiceWorkerLoader } from './service_worker_loader.js';
 import { FlutterTrustedTypesPolicy } from './trusted_types.js';
 import { loadCanvasKit } from './canvaskit_loader.js';
 import { loadSkwasm } from './skwasm_loader.js';
-import { getCanvaskitBaseUrl } from './utils.js';
+import { getCanvaskitBaseUrl, resolveUrlWithSegments } from './utils.js';
+
+/**
+ * Fire-and-forget cleanup for legacy `flutter_service_worker.js?v=` registrations
+ * whose script URL may be cached indefinitely by a CDN.
+ *
+ * TODO(kevmoo): Remove in 2027 H2 (https://github.com/flutter/flutter/issues/156910).
+ * @param {TrustedTypePolicy?} ttPolicy
+ */
+function cleanupLegacyServiceWorker(ttPolicy) {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistration().then((registration) => {
+      const scriptURL = registration?.active?.scriptURL ?? '';
+      if (scriptURL.includes('flutter_service_worker.js?v=')) {
+        let url = resolveUrlWithSegments(`flutter_service_worker.js?v=${Date.now()}`);
+        if (ttPolicy != null) {
+          url = ttPolicy.createScriptURL(url);
+        }
+        return navigator.serviceWorker.register(url);
+      }
+    }).catch(() => {
+      // Best-effort cleanup; ignore failures.
+    });
+  }
+}
 
 /**
  * The public interface of _flutter.loader. Exposes two methods:
@@ -28,16 +51,16 @@ export class FlutterLoader {
    */
   async loadEntrypoint(options) {
     const { serviceWorker, ...entrypoint } = options || {};
+    if (serviceWorker?.serviceWorkerUrl) {
+      console.warn(
+        'FlutterLoader.loadEntrypoint: The "serviceWorker" option is deprecated and ignored. ' +
+        'Register custom service workers directly with navigator.serviceWorker.register(). ' +
+        'See https://github.com/flutter/flutter/issues/156910 for more details.'
+      );
+    }
     // A Trusted Types policy that is going to be used by the loader.
     const flutterTT = new FlutterTrustedTypesPolicy();
-    // The FlutterServiceWorkerLoader instance could be injected as a dependency
-    // (and dynamically imported from a module if not present).
-    const serviceWorkerLoader = new FlutterServiceWorkerLoader();
-    serviceWorkerLoader.setTrustedTypesPolicy(flutterTT.policy);
-    await serviceWorkerLoader.loadServiceWorker(serviceWorker).catch(e => {
-      // Regardless of what happens with the injection of the SW, the show must go on
-      console.warn("Exception while loading service worker:", e);
-    });
+    cleanupLegacyServiceWorker(flutterTT.policy);
     // The FlutterEntrypointLoader instance could be injected as a dependency
     // (and dynamically imported from a module if not present).
     const entrypointLoader = new FlutterEntrypointLoader();
@@ -51,9 +74,6 @@ export class FlutterLoader {
   /**
    * Loads and initializes a flutter application.
    * @param {Object} options
-   * @param {import("/.types".ServiceWorkerSettings?)} options.serviceWorkerSettings
-   *   DEPRECATED: Settings for the service worker to be loaded. Can pass `undefined` or
-   *   `null` to not launch a service worker at all.
    * @param {import("/.types".OnEntryPointLoadedCallback)} options.onEntrypointLoaded
    *   An optional callback to invoke
    * @param {string} options.nonce
@@ -63,11 +83,18 @@ export class FlutterLoader {
    * @param {import("./types".FlutterConfiguration)} arg.config
    */
   async load({
-    serviceWorkerSettings,
     onEntrypointLoaded,
     nonce,
     config,
+    serviceWorkerSettings,
   } = {}) {
+    if (serviceWorkerSettings?.serviceWorkerUrl) {
+      console.warn(
+        'FlutterLoader.load: The "serviceWorkerSettings" option is deprecated and ignored. ' +
+        'Register custom service workers directly with navigator.serviceWorker.register(). ' +
+        'See https://github.com/flutter/flutter/issues/156910 for more details.'
+      );
+    }
     config ??= {};
 
     /** @type {import("./types").BuildConfig} */
@@ -87,7 +114,7 @@ export class FlutterLoader {
       switch (renderer) {
         case "skwasm":
           if (!supportsDart2Wasm) {
-            return "Skwasm requires WasmGC support; this browser does not implement it yet.";
+            return "Skwasm requires WebAssembly features (WasmGC, SIMD, js-string builtins, try_table) that this browser does not support.";
           }
           if (!(browserEnvironment.webGLVersion > 0)) {
             return "Skwasm requires WebGL support; this browser does not provide it.";
@@ -106,7 +133,7 @@ export class FlutterLoader {
     const buildIncompatibilityReason = (build) => {
       if (build.compileTarget === "dart2wasm") {
         if (!supportsDart2Wasm) {
-          return "dart2wasm requires WasmGC support; this browser does not implement it yet.";
+          return "dart2wasm requires WebAssembly features (WasmGC, SIMD, js-string builtins, try_table) that this browser does not support.";
         }
         if (!enableWasm) {
           if (config.wasmAllowList?.[browserEnvironment.browserEngine] === false) {
@@ -158,14 +185,7 @@ export class FlutterLoader {
 
     const deps = {};
     deps.flutterTT = new FlutterTrustedTypesPolicy();
-    if (serviceWorkerSettings) {
-      deps.serviceWorkerLoader = new FlutterServiceWorkerLoader();
-      deps.serviceWorkerLoader.setTrustedTypesPolicy(deps.flutterTT.policy);
-      await deps.serviceWorkerLoader.loadServiceWorker(serviceWorkerSettings).catch(e => {
-        // Regardless of what happens with the injection of the SW, the show must go on
-        console.warn("Exception while loading service worker:", e);
-      });
-    }
+    cleanupLegacyServiceWorker(deps.flutterTT.policy);
 
     const canvasKitBaseUrl = getCanvaskitBaseUrl(config, buildConfig);
     if (build.renderer === "canvaskit") {

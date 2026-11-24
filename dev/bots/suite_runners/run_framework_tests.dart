@@ -287,10 +287,6 @@ Future<void> frameworkTestsRunner() async {
     );
     await testHarnessTestsRunner();
     await runExampleTests();
-    await runFlutterTest(
-      path.join(flutterRoot, 'dev', 'a11y_assessments'),
-      tests: <String>['test'],
-    );
     await runDartTest(path.join(flutterRoot, 'dev', 'bots'));
     await runDartTest(
       path.join(flutterRoot, 'dev', 'devicelab'),

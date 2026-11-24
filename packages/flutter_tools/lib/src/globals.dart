@@ -10,6 +10,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
+import 'android/android_workflow.dart';
 import 'android/gradle_utils.dart';
 import 'android/java.dart';
 import 'artifacts.dart';
@@ -35,6 +36,7 @@ import 'cache.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
 import 'doctor.dart';
+import 'features.dart';
 import 'git.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
@@ -51,6 +53,7 @@ import 'project.dart';
 import 'reporting/crash_reporting.dart';
 import 'runner/local_engine.dart';
 import 'version.dart';
+import 'windows/windows_workflow.dart';
 
 // TODO(ianh): We should remove all the global variables and replace them with
 // arguments (to constructors, methods, etc, as appropriate).
@@ -71,24 +74,21 @@ OperatingSystemUtils get os => context.get<OperatingSystemUtils>()!;
 Signals get signals => context.get<Signals>() ?? LocalSignals.instance;
 AndroidStudio? get androidStudio => context.get<AndroidStudio>();
 AndroidSdk? get androidSdk => context.get<AndroidSdk>();
+AndroidWorkflow? get androidWorkflow => context.get<AndroidWorkflow>();
+FeatureFlags get featureFlags => context.get<FeatureFlags>()!;
 FlutterVersion get flutterVersion => context.get<FlutterVersion>()!;
 XcodeProjectInterpreter? get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 XCDevice? get xcdevice => context.get<XCDevice>();
 Xcode? get xcode => context.get<Xcode>();
 IOSWorkflow? get iosWorkflow => context.get<IOSWorkflow>();
 LocalEngineLocator? get localEngineLocator => context.get<LocalEngineLocator>();
+WindowsWorkflow? get windowsWorkflow => context.get<WindowsWorkflow>();
 
-PersistentToolState? get persistentToolState => PersistentToolState.instance;
+PersistentToolState? get persistentToolState => context.get<PersistentToolState>();
 
 BotDetector get botDetector => context.get<BotDetector>() ?? _defaultBotDetector;
-final _defaultBotDetector = BotDetector(
-  httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
-  platform: platform,
-  persistentToolState:
-      persistentToolState ??
-      PersistentToolState(fileSystem: fs, logger: logger, platform: platform),
-);
-Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
+final _defaultBotDetector = BotDetector(platform: platform);
+bool get isRunningOnBot => botDetector.isRunningOnBot;
 
 // Analytics instance for package:unified_analytics for analytics
 // reporting for all Flutter and Dart related tooling
@@ -260,7 +260,7 @@ TemplateRenderer get templateRenderer => context.get<TemplateRenderer>()!;
 ///
 /// This is depended on by [localFileSystem] which is called before any
 /// [AppContext] is set up, and thus this cannot be a Context getter.
-final shutdownHooks = ShutdownHooks();
+ShutdownHooks get shutdownHooks => LocalSignals.instance.shutdownHooks;
 
 // Unless we're in a test of this class's signal handling features, we must
 // have only one instance created with the singleton LocalSignals instance
@@ -276,18 +276,23 @@ CocoaPods? get cocoaPods => context.get<CocoaPods>();
 
 FlutterProjectFactory get projectFactory {
   return context.get<FlutterProjectFactory>() ??
-      FlutterProjectFactory(logger: logger, fileSystem: fs);
+      FlutterProjectFactory(
+        config: config,
+        featureFlagsBuilder: () => featureFlags,
+        fileSystem: fs,
+        logger: logger,
+        plistParser: plistParser,
+        // Lazy builders avoid an AppContext dependency cycle during early startup
+        // (e.g. Analytics -> Cache -> Xcode -> XcodeProjectInterpreter).
+        xcodeBuilder: () => xcode,
+        xcodeProjectInterpreterBuilder: () => xcodeProjectInterpreter,
+      );
 }
 
 CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>()!;
 
 PreRunValidator get preRunValidator =>
     context.get<PreRunValidator>() ?? const NoOpPreRunValidator();
-
-// Used to build RegExp instances which can detect the VM service message.
-final kVMServiceMessageRegExp = RegExp(
-  r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)',
-);
 
 /// Contains information about the JRE/JDK to use for Java-dependent operations.
 ///

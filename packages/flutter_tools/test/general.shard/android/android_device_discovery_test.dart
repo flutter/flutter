@@ -21,7 +21,7 @@ void main() {
 
   setUp(() {
     androidWorkflow = AndroidWorkflow(
-      androidSdk: FakeAndroidSdk(),
+      androidSdkBuilder: FakeAndroidSdk.new,
       featureFlags: TestFeatureFlags(),
     );
   });
@@ -33,7 +33,7 @@ void main() {
         androidSdk: FakeAndroidSdk(null),
         logger: BufferLogger.test(),
         androidWorkflow: AndroidWorkflow(
-          androidSdk: FakeAndroidSdk(null),
+          androidSdkBuilder: () => FakeAndroidSdk(null),
           featureFlags: TestFeatureFlags(),
         ),
         processManager: FakeProcessManager.empty(),
@@ -56,7 +56,7 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         logger: BufferLogger.test(),
         androidWorkflow: AndroidWorkflow(
-          androidSdk: FakeAndroidSdk(),
+          androidSdkBuilder: FakeAndroidSdk.new,
           featureFlags: TestFeatureFlags(),
         ),
         processManager: fakeProcessManager,
@@ -77,7 +77,7 @@ void main() {
       final androidDevices = AndroidDevices(
         logger: BufferLogger.test(),
         androidWorkflow: AndroidWorkflow(
-          androidSdk: FakeAndroidSdk(null),
+          androidSdkBuilder: () => FakeAndroidSdk(null),
           featureFlags: TestFeatureFlags(),
         ),
         processManager: FakeProcessManager.empty(),
@@ -125,7 +125,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       logger: BufferLogger.test(),
       androidWorkflow: AndroidWorkflow(
-        androidSdk: FakeAndroidSdk(),
+        androidSdkBuilder: FakeAndroidSdk.new,
         featureFlags: TestFeatureFlags(isAndroidEnabled: false),
       ),
       processManager: FakeProcessManager.any(),

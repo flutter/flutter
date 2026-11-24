@@ -165,7 +165,7 @@ class RuntimeController : public PlatformConfigurationClient,
   /// @return     If the isolate could be launched and guided to the
   ///             `DartIsolate::Phase::Running` phase.
   ///
-  [[nodiscard]] bool LaunchRootIsolate(
+  [[nodiscard]] virtual bool LaunchRootIsolate(
       const Settings& settings,
       const fml::closure& root_isolate_create_callback,
       std::optional<std::string> dart_entrypoint,
@@ -797,6 +797,9 @@ class RuntimeController : public PlatformConfigurationClient,
 
   // |PlatformConfigurationClient|
   void SetNeedsReportTimings(bool value) override;
+
+  // |PlatformConfigurationClient|
+  void ResetInternalState() override;
 
   // |PlatformConfigurationClient|
   std::unique_ptr<std::vector<std::string>> ComputePlatformResolvedLocale(

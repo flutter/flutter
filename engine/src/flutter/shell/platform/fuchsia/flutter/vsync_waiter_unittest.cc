@@ -45,7 +45,7 @@ TEST(VSyncWaiterFuchsia, FrameScheduledForStartTime) {
         const auto frame_end = now + fml::TimeDelta::FromMilliseconds(36);
         callback(frame_start, frame_end);
       },
-      /*secondary callback*/ nullptr, task_runners);
+      task_runners);
 
   fml::AutoResetWaitableEvent latch;
   task_runners.GetUITaskRunner()->PostTask([&]() {

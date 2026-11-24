@@ -69,4 +69,44 @@ public class PlatformChannelTest {
     assertEquals(expectedContent, valueCapture.getValue());
     verify(mockResult).success(null);
   }
+
+  @Test
+  public void platformChannel_replaysFrameworkHandlesBackForNewHandler() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    DartExecutor dartExecutor = new DartExecutor(mockFlutterJNI, mock(AssetManager.class));
+    PlatformChannel fakePlatformChannel = new PlatformChannel(dartExecutor);
+    PlatformChannel.PlatformMessageHandler firstMessageHandler =
+        mock(PlatformChannel.PlatformMessageHandler.class);
+    fakePlatformChannel.setPlatformMessageHandler(firstMessageHandler);
+
+    MethodCall methodCall = new MethodCall("SystemNavigator.setFrameworkHandlesBack", true);
+    MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
+    fakePlatformChannel.parsingMethodCallHandler.onMethodCall(methodCall, mockResult);
+    fakePlatformChannel.setPlatformMessageHandler(null);
+
+    PlatformChannel.PlatformMessageHandler replacementMessageHandler =
+        mock(PlatformChannel.PlatformMessageHandler.class);
+    fakePlatformChannel.setPlatformMessageHandler(replacementMessageHandler);
+
+    verify(mockResult).success(null);
+    verify(replacementMessageHandler).setFrameworkHandlesBack(true);
+  }
+
+  @Test
+  public void platformChannel_remembersFrameworkHandlesBackWithoutHandler() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    DartExecutor dartExecutor = new DartExecutor(mockFlutterJNI, mock(AssetManager.class));
+    PlatformChannel fakePlatformChannel = new PlatformChannel(dartExecutor);
+
+    MethodCall methodCall = new MethodCall("SystemNavigator.setFrameworkHandlesBack", true);
+    MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
+    fakePlatformChannel.parsingMethodCallHandler.onMethodCall(methodCall, mockResult);
+
+    PlatformChannel.PlatformMessageHandler messageHandler =
+        mock(PlatformChannel.PlatformMessageHandler.class);
+    fakePlatformChannel.setPlatformMessageHandler(messageHandler);
+
+    verify(mockResult).success(null);
+    verify(messageHandler).setFrameworkHandlesBack(true);
+  }
 }

@@ -79,6 +79,31 @@ void main() {
     }, retry: 1);
   });
 
+  group('testWidgets disposes semanticsHandle when test fails', () {
+    var retried = false;
+    testWidgets('failing attempt with semantics enabled', (WidgetTester tester) async {
+      addTearDown(() => retried = true);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(label: 'hello', child: const SizedBox(width: 10, height: 10)),
+        ),
+      );
+      if (!retried) {
+        debugPrint('DISREGARD NEXT FAILURE, IT IS EXPECTED');
+      }
+      expect(retried, isTrue);
+    }, retry: 1);
+
+    testWidgets(
+      'subsequent test with semanticsEnabled: false has semantics disabled',
+      semanticsEnabled: false,
+      (WidgetTester tester) async {
+        expect(SemanticsBinding.instance.semanticsEnabled, isFalse);
+      },
+    );
+  });
+
   group('respects the group skip flag', () {
     testWidgets('should be skipped', (WidgetTester tester) async {
       expect(false, true);
@@ -681,13 +706,14 @@ void main() {
         expect(timer.isActive, true);
       }, () {});
 
+      binding.postTest();
+
       expect(flutterErrorDetails.exception, isA<AssertionError>());
       expect(
         (flutterErrorDetails.exception as AssertionError).message,
         'A Timer is still pending even after the widget tree was disposed.',
       );
-      expect(binding.inTest, true);
-      binding.postTest();
+      expect(binding.inTest, false);
     });
   });
 

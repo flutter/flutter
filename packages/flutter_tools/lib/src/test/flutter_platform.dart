@@ -7,11 +7,11 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
-import 'package:process/process.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import 'package:vm_service/vm_service.dart';
 
+import '../application_package.dart';
 import '../base/async_guard.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -19,8 +19,8 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/template.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../compile.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
@@ -28,6 +28,7 @@ import '../dart/language_version.dart';
 import '../device.dart';
 import '../native_assets.dart';
 import '../project.dart';
+import '../version.dart';
 import '../vmservice.dart';
 import 'flutter_tester_device.dart';
 import 'font_config_manager.dart';
@@ -58,7 +59,9 @@ FlutterPlatform installHook({
   required BuildInfo buildInfo,
   required DebuggingOptions debuggingOptions,
   required String flutterTesterBinPath,
+  required TemplateRenderer templateRenderer,
   required ToolContext toolContext,
+  ApplicationPackageFactory? applicationPackageFactory,
   bool enableVmService = false,
   FlutterProject? flutterProject,
   String? icudtlPath,
@@ -92,7 +95,9 @@ FlutterPlatform installHook({
     buildInfo: buildInfo,
     debuggingOptions: debuggingOptions,
     flutterTesterBinPath: flutterTesterBinPath,
+    templateRenderer: templateRenderer,
     toolContext: toolContext,
+    applicationPackageFactory: applicationPackageFactory,
     enableVmService: enableVmService,
     flutterProject: flutterProject,
     host: _kHosts[serverType],
@@ -302,7 +307,9 @@ class FlutterPlatform extends PlatformPlugin {
     required this.buildInfo,
     required this.debuggingOptions,
     required this.flutterTesterBinPath,
+    required this._templateRenderer,
     required this._toolContext,
+    this._applicationPackageFactory,
     this.enableVmService,
     this.flutterProject,
     this.host,
@@ -325,6 +332,7 @@ class FlutterPlatform extends PlatformPlugin {
           TestCompiler(
             buildInfo,
             flutterProject,
+            templateRenderer: _templateRenderer,
             toolContext: _toolContext,
             testTimeRecorder: testTimeRecorder,
           ),
@@ -333,6 +341,8 @@ class FlutterPlatform extends PlatformPlugin {
     );
   }
 
+  final ApplicationPackageFactory? _applicationPackageFactory;
+  final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
 
   final String flutterTesterBinPath;
@@ -362,7 +372,7 @@ class FlutterPlatform extends PlatformPlugin {
 
   final String? integrationTestUserIdentifier;
 
-  final _fontConfigManager = FontConfigManager();
+  late final _fontConfigManager = FontConfigManager(toolContext: _toolContext);
 
   /// The test compiler produces dill files for each test main.
   ///
@@ -479,25 +489,18 @@ class FlutterPlatform extends PlatformPlugin {
   TestDevice _createTestDevice(int ourTestCount) {
     if (_isIntegrationTest) {
       return IntegrationTestTestDevice(
+        applicationPackageFactory: _applicationPackageFactory!,
         id: ourTestCount,
-        debuggingOptions: debuggingOptions,
         device: integrationTestDevice!,
+        debuggingOptions: debuggingOptions,
         userIdentifier: integrationTestUserIdentifier,
         compileExpression: _compileExpressionService,
+        toolContext: _toolContext,
       );
     }
-    final ToolContext(
-      :FileSystem fs,
-      :Logger logger,
-      :Platform platform,
-      :ProcessManager processManager,
-    ) = _toolContext;
     return FlutterTesterTestDevice(
       id: ourTestCount,
-      platform: platform,
-      fileSystem: fs,
-      processManager: processManager,
-      logger: logger,
+      toolContext: _toolContext,
       flutterTesterBinPath: flutterTesterBinPath,
       enableVmService: enableVmService!,
       machine: machine,
@@ -529,9 +532,14 @@ class FlutterPlatform extends PlatformPlugin {
   static const _kExtension = 'ext.$_kEventName';
 
   Future<void> _listenToVmServiceForGoldens({required Uri uri, required String testPath}) async {
-    final ToolContext(:Logger logger, :Platform platform) = _toolContext;
+    final ToolContext(:FlutterVersion flutterVersion, :Logger logger, :Platform platform) =
+        _toolContext;
     final goldensBaseUri = Uri.file(testPath, windows: platform.isWindows);
-    final FlutterVmService vmService = await connectToVmService(uri, logger: logger);
+    final FlutterVmService vmService = await connectToVmService(
+      uri,
+      flutterVersion: flutterVersion,
+      logger: logger,
+    );
     final IsolateRef testAppIsolate = await vmService.findExtensionIsolate(_kExtension);
     await vmService.service.streamListen(_kEventName);
     vmService.service.onEvent(_kEventName).listen((Event e) async {
@@ -630,6 +638,7 @@ class FlutterPlatform extends PlatformPlugin {
           compiler ??= TestCompiler(
             debuggingOptions.buildInfo,
             flutterProject,
+            templateRenderer: _templateRenderer,
             toolContext: _toolContext,
             precompiledDillPath: precompiledDillPath,
             testTimeRecorder: testTimeRecorder,
@@ -658,6 +667,7 @@ class FlutterPlatform extends PlatformPlugin {
           compiler ??= TestCompiler(
             debuggingOptions.buildInfo,
             flutterProject,
+            templateRenderer: _templateRenderer,
             toolContext: _toolContext,
             testTimeRecorder: testTimeRecorder,
           );
@@ -784,8 +794,42 @@ class FlutterPlatform extends PlatformPlugin {
     return outOfBandError;
   }
 
+  static const _kListenerBuildDirectoryName = 'test';
+
   String _createListenerDart(List<Finalizer> finalizers, int ourTestCount, String testPath) {
     final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final Uri testUrl = fs.path.toUri(fs.path.absolute(testPath));
+    // When running integration tests on a target device, the listener path is
+    // supplied as TargetFile to the build system, which includes TargetFile in
+    // the Environment.buildPrefix hash. Use a deterministic path inside the
+    // project's build directory so subsequent test runs reuse the build cache.
+    // Regular flutter_tester unit/widget tests do not use the build system and
+    // must use an isolated temporary directory to avoid file lock collisions
+    // across concurrent or nested test runs.
+    final FlutterProject? project = flutterProject;
+    if (_isIntegrationTest && project != null) {
+      final File listenerFile =
+          project.buildDirectory
+              .childDirectory(_kListenerBuildDirectoryName)
+              .childFile('listener_$ourTestCount.dart')
+            ..createSync(recursive: true)
+            ..writeAsStringSync(_generateTestMain(testUrl: testUrl));
+      finalizers.add(() async {
+        logger.printTrace('test $ourTestCount: deleting test listener file');
+        // TestCompiler copies '<listener>.dill' beside the listener for --start-paused expression compilation.
+        for (final file in <File>[listenerFile, fs.file('${listenerFile.path}.dill')]) {
+          try {
+            if (file.existsSync()) {
+              file.deleteSync();
+            }
+          } on FileSystemException catch (error) {
+            logger.printTrace('test $ourTestCount: failed to delete ${file.path}: $error');
+          }
+        }
+      });
+      return listenerFile.path;
+    }
+
     // Prepare a temporary directory to store the Dart file that will talk to us.
     final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_test_listener.');
     finalizers.add(() async {
@@ -796,9 +840,7 @@ class FlutterPlatform extends PlatformPlugin {
     // Prepare the Dart file that will talk to us and start the test.
     final File listenerFile = fs.file('${tempDir.path}/listener.dart');
     listenerFile.createSync();
-    listenerFile.writeAsStringSync(
-      _generateTestMain(testUrl: fs.path.toUri(fs.path.absolute(testPath))),
-    );
+    listenerFile.writeAsStringSync(_generateTestMain(testUrl: testUrl));
     return listenerFile.path;
   }
 
@@ -811,7 +853,7 @@ class FlutterPlatform extends PlatformPlugin {
     final LanguageVersion languageVersion = determineLanguageVersion(
       file,
       packageConfig[flutterProject!.manifest.appName],
-      Cache.flutterRoot!,
+      _toolContext.cache.flutterRoot,
     );
     return generateTestBootstrap(
       testUrl: testUrl,

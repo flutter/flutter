@@ -13,6 +13,14 @@ namespace {
 // X and Y directions.
 constexpr static Scalar kPrecision = 4;
 
+// Limit a subdivision count to kMaxCurveSubdivisions. The comparison is
+// written so that NaN (which compares false to everything) also produces
+// the maximum, as do infinities from overflow on very large coordinates.
+Scalar ClampSubdivisions(Scalar subdivisions) {
+  return (subdivisions <= kMaxCurveSubdivisions) ? subdivisions
+                                                 : kMaxCurveSubdivisions;
+}
+
 }  // namespace
 
 Scalar ComputeCubicSubdivisions(Scalar scale_factor,
@@ -25,7 +33,7 @@ Scalar ComputeCubicSubdivisions(Scalar scale_factor,
   const Vector2 b = p1 - p2 * 2 + p3;
   const Scalar max_len_sq =
       std::max(a.GetLengthSquared(), b.GetLengthSquared());
-  return std::sqrt(k * std::sqrt(max_len_sq));
+  return ClampSubdivisions(std::sqrt(k * std::sqrt(max_len_sq)));
 }
 
 Scalar ComputeQuadradicSubdivisions(Scalar scale_factor,
@@ -33,7 +41,7 @@ Scalar ComputeQuadradicSubdivisions(Scalar scale_factor,
                                     Point p1,
                                     Point p2) {
   const Scalar k = scale_factor * .25f * kPrecision;
-  return std::sqrt(k * (p0 - p1 * 2 + p2).GetLength());
+  return ClampSubdivisions(std::sqrt(k * (p0 - p1 * 2 + p2).GetLength()));
 }
 
 // Returns Wang's formula specialized for a conic curve.
@@ -76,7 +84,7 @@ Scalar ComputeConicSubdivisions(Scalar scale_factor,
   // This assumes parametric interval of curve being linearized is
   //   [t0,t1] = [0, 1].
   // If not, the number of segments is (tmax - tmin) / sqrt(denom / numer).
-  return std::sqrt(numer / denom);
+  return ClampSubdivisions(std::sqrt(numer / denom));
 }
 
 }  // namespace impeller

@@ -5,7 +5,9 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_H_
 
+#include <memory>
 #include <unordered_map>
+#include <vector>
 
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/embedded_views.h"
@@ -102,7 +104,7 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   const std::shared_ptr<AndroidSurfaceFactory> surface_factory_;
 
   // Holds surfaces. Allows to recycle surfaces or allocate new ones.
-  const std::unique_ptr<SurfacePool> surface_pool_;
+  const std::shared_ptr<SurfacePool> surface_pool_;
 
   // The task runners.
   const TaskRunners task_runners_;
@@ -112,7 +114,7 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
 
   // The pixel ratio used to determinate the size of a platform view layer
   // relative to the device layout system.
-  double device_pixel_ratio_;
+  double device_pixel_ratio_ = 0.0;
 
   // The order of composition. Each entry contains a unique id for the platform
   // view.
@@ -128,12 +130,20 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   std::unordered_map<int64_t, EmbeddedViewParams> view_params_;
 
   // The number of platform views in the previous frame.
-  int64_t previous_frame_view_count_;
+  int64_t previous_frame_view_count_ = 0;
 
   // Destroys the surfaces created from the surface factory.
   // This method schedules a task on the platform thread, and waits for
-  // the task until it completes.
+  // the task until it completes. Only call it where the platform thread can't
+  // be waiting for the caller, such as from |Teardown|, which the shell calls
+  // on the platform thread. Never call it from the raster thread.
   void DestroySurfaces();
+
+  // Takes the overlay layers out of the pool and releases them without waiting
+  // for the platform thread. The rendering surfaces are released on the
+  // calling thread, and the overlay views are destroyed on the platform
+  // thread.
+  void ReleaseOverlayLayers();
 
   // Resets the state.
   void Reset();
@@ -141,8 +151,9 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   // Whether the layer tree in the current frame has platform layers.
   bool FrameHasPlatformLayers();
 
-  // Creates a Surface when needed or recycles an existing one.
-  // Finally, draws the picture on the frame's canvas.
+  // Creates a Surface when needed or recycles an existing one, and draws the
+  // picture on the frame's canvas. Returns nullptr if acquiring a frame from
+  // the overlay surface fails.
   std::unique_ptr<SurfaceFrame> CreateSurfaceIfNeeded(GrDirectContext* context,
                                                       int64_t view_id,
                                                       EmbedderViewSlice* slice,

@@ -97,7 +97,32 @@ If you see a test failure that appears to be a flake:
 1. Re-trigger the test.
 1. If the build fails to fail (i.e. "passes"), it's a flake and should be treated as a failing test.
 1. Follow the instructions in this guide to find or create a new GitHub issue.
-1. If the test has neither been recently introduced, nor recently changed, disable the test. The test owner will turn it back on or delete the test as part of their investigation.
+1. If the test has neither been recently introduced, nor recently changed, [disable the test](#disabling-a-test). The test owner will turn it back on or delete the test as part of their investigation.
+
+### Disabling a test
+
+If a test is broken or flaky and cannot be fixed by [reverting a commit](#reverting-commits), disable it:
+
+1. [File an issue][new issue] to track the disabled test:
+   1. Copy the relevant information that led you to determine the test should be disabled (e.g., logs). Link to the test failure(s).
+   1. Add the `c: disabled test` label.
+   1. Assign the issue to the [test owner][TESTOWNERS].
+
+1. Create a pull request that adds `skip: true` to the affected test, with a comment that links to the issue you filed. For example:
+
+   ```dart
+   testWidgets(
+     'MyWidget does something',
+     (WidgetTester tester) async {
+       // ...
+     },
+     skip: true, // https://github.com/flutter/flutter/issues/12345
+   );
+   ```
+
+1. Send the pull request:
+   1. Request a review from the test owner.
+   1. Add the `emergency` label.
 
 ### Handling an engine roll failure
 If the failure is happening on an engine roll, contact the [Engine Sheriff chat] so the engine sheriff can locate and revert the engine or upstream commit(s) causing the issue.
