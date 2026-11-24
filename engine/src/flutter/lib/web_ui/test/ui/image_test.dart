@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -10,6 +12,27 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
+import 'utils.dart';
+
+@JS('gc')
+external JSFunction? get _jsGc;
+
+@JS('gc')
+external JSPromise<JSAny?> _callJsGc(_JsGcOptions options);
+
+extension type _JsGcOptions._(JSObject _) implements JSObject {
+  external factory _JsGcOptions({String type, String execution});
+}
+
+Future<void> _forceMajorGc() async {
+  // Run multiple async major GC + macrotask turns so chained objects (e.g.
+  // collected ImageShader -> CountedRef box) and separate FinalizationRegistry
+  // instances drain all queued cleanup callbacks.
+  for (var i = 0; i < 3; i++) {
+    await _callJsGc(_JsGcOptions(type: 'major', execution: 'async')).toDart;
+    await Future<void>.delayed(Duration.zero);
+  }
+}
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -354,6 +377,169 @@ Future<void> testMain() async {
       expect(trackedSource.debugIsClosed, isTrue);
     });
   });
+
+  group('Real GC finalization', () {
+    test('undisposed Picture releases ImageSource via DomFinalizationRegistry on GC', () async {
+      final DomImageBitmap bitmap = await createImageBitmap(createBlankDomImageData(4, 4));
+      final ImageSource source = _recordAndDropPictureWithBitmap(bitmap);
+      expect(source.debugIsClosed, isFalse);
+
+      await _forceMajorGc();
+      expect(source.debugIsClosed, isTrue);
+    }, skip: _jsGc == null);
+
+    test(
+      'Paragraph with foreground or background ImageShader retains ImageSource across GC',
+      () async {
+        for (final useBackground in <bool>[false, true]) {
+          final DomImageBitmap bitmap = await createImageBitmap(_createSolidGreenImageData(16, 16));
+          final (:ui.Paragraph paragraph, :ImageSource source) =
+              _buildParagraphDroppingShaderAndImage(bitmap, useBackground: useBackground);
+
+          await _forceMajorGc();
+          expect(
+            source.debugIsClosed,
+            isFalse,
+            reason: 'useBackground=$useBackground: Paragraph must retain ImageSource across GC',
+          );
+
+          final recorder = ui.PictureRecorder();
+          ui.Canvas(recorder).drawParagraph(paragraph, ui.Offset.zero);
+          final ui.Picture picture = recorder.endRecording();
+
+          paragraph.dispose();
+          expect(
+            source.debugIsClosed,
+            isFalse,
+            reason: 'useBackground=$useBackground: Picture must retain paragraph ImageSource',
+          );
+
+          // Wimp (Impeller) does not yet shade glyph foregrounds with ImageShader.
+          if (!isWimp || useBackground) {
+            final ui.Image rendered = await picture.toImage(16, 16);
+            final ByteData? pixels = await rendered.toByteData();
+            rendered.dispose();
+            expect(pixels, isNotNull);
+            const int centerOffset = (8 * 16 + 8) * 4;
+            expect(
+              <int>[
+                pixels!.getUint8(centerOffset),
+                pixels.getUint8(centerOffset + 1),
+                pixels.getUint8(centerOffset + 2),
+                pixels.getUint8(centerOffset + 3),
+              ],
+              <int>[0, 255, 0, 255],
+              reason: 'useBackground=$useBackground: Text must render green from ImageShader',
+            );
+          }
+
+          picture.dispose();
+          expect(source.debugIsClosed, isTrue);
+        }
+      },
+      skip: _jsGc == null,
+    );
+
+    test('undisposed Paragraph and abandoned ParagraphBuilder release ImageSource on GC', () async {
+      final DomImageBitmap paragraphBitmap = await createImageBitmap(createBlankDomImageData(4, 4));
+      final ImageSource paragraphSource = _buildAndDropParagraphWithBitmap(paragraphBitmap);
+      expect(paragraphSource.debugIsClosed, isFalse);
+
+      await _forceMajorGc();
+      expect(paragraphSource.debugIsClosed, isTrue);
+
+      final DomImageBitmap builderBitmap = await createImageBitmap(createBlankDomImageData(4, 4));
+      final ImageSource builderSource = _pushStyleAndAbandonParagraphBuilder(builderBitmap);
+      expect(builderSource.debugIsClosed, isFalse);
+
+      await _forceMajorGc();
+      expect(builderSource.debugIsClosed, isTrue);
+    }, skip: _jsGc == null);
+  });
+}
+
+DomImageData _createSolidGreenImageData(int width, int height) {
+  final DomImageData data = createBlankDomImageData(width, height);
+  for (var i = 0; i < data.data.length; i += 4) {
+    data.data[i] = 0;
+    data.data[i + 1] = 255;
+    data.data[i + 2] = 0;
+    data.data[i + 3] = 255;
+  }
+  return data;
+}
+
+Float64List _identityMatrix() => Float64List(16)
+  ..[0] = 1
+  ..[5] = 1
+  ..[10] = 1
+  ..[15] = 1;
+
+@pragma('dart2js:noInline')
+@pragma('wasm:never-inline')
+ImageSource _recordAndDropPictureWithBitmap(DomImageBitmap bitmap) {
+  final image = renderer.createImageFromImageBitmap(bitmap) as EngineImage;
+  final ImageSource source = image.imageSource!;
+  final recorder = ui.PictureRecorder();
+  ui.Canvas(recorder).drawImage(image, ui.Offset.zero, ui.Paint());
+  final ui.Picture picture = recorder.endRecording();
+  image.dispose();
+  expect(picture.debugDisposed, isFalse);
+  return source;
+}
+
+@pragma('dart2js:noInline')
+@pragma('wasm:never-inline')
+({ui.Paragraph paragraph, ImageSource source}) _buildParagraphDroppingShaderAndImage(
+  DomImageBitmap bitmap, {
+  required bool useBackground,
+}) {
+  final image = renderer.createImageFromImageBitmap(bitmap) as EngineImage;
+  final ImageSource source = image.imageSource!;
+  final shader = ui.ImageShader(
+    image,
+    ui.TileMode.repeated,
+    ui.TileMode.repeated,
+    _identityMatrix(),
+  );
+  final paint = ui.Paint()..shader = shader;
+  final builder = ui.ParagraphBuilder(ui.ParagraphStyle(fontFamily: 'Ahem', fontSize: 16));
+  builder.pushStyle(
+    useBackground
+        ? ui.TextStyle(background: paint, color: const ui.Color(0x00000000))
+        : ui.TextStyle(foreground: paint),
+  );
+  builder.addText('X');
+  final ui.Paragraph paragraph = builder.build()..layout(const ui.ParagraphConstraints(width: 16));
+  return (paragraph: paragraph, source: source);
+}
+
+@pragma('dart2js:noInline')
+@pragma('wasm:never-inline')
+ImageSource _buildAndDropParagraphWithBitmap(DomImageBitmap bitmap) {
+  final (:ui.Paragraph paragraph, :ImageSource source) = _buildParagraphDroppingShaderAndImage(
+    bitmap,
+    useBackground: false,
+  );
+  expect(paragraph.debugDisposed, isFalse);
+  return source;
+}
+
+@pragma('dart2js:noInline')
+@pragma('wasm:never-inline')
+ImageSource _pushStyleAndAbandonParagraphBuilder(DomImageBitmap bitmap) {
+  final image = renderer.createImageFromImageBitmap(bitmap) as EngineImage;
+  final ImageSource source = image.imageSource!;
+  final shader = ui.ImageShader(
+    image,
+    ui.TileMode.repeated,
+    ui.TileMode.repeated,
+    _identityMatrix(),
+  );
+  final builder = ui.ParagraphBuilder(ui.ParagraphStyle(fontFamily: 'Ahem', fontSize: 16));
+  builder.pushStyle(ui.TextStyle(foreground: ui.Paint()..shader = shader));
+  builder.addText('X');
+  return source;
 }
 
 class _ThrowingBackendImage implements BackendImage {

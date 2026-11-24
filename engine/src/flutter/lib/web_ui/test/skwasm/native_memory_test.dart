@@ -17,12 +17,18 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
+/// The number of native images currently alive.
+///
+/// The index matches `imageCount` in `SkwasmRenderer.dumpDebugInfo`.
 int _liveImageCount() => withStackScope((StackScope scope) {
   final Pointer<Uint32> counts = scope.allocUint32Array(28);
   skwasmGetLiveObjectCounts(counts);
   return counts[17];
 });
 
+/// The number of native pictures currently alive.
+///
+/// The index matches `pictureCount` in `SkwasmRenderer.dumpDebugInfo`.
 int _livePictureCount() => withStackScope((StackScope scope) {
   final Pointer<Uint32> counts = scope.allocUint32Array(28);
   skwasmGetLiveObjectCounts(counts);
