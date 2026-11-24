@@ -43,11 +43,14 @@ abstract class ContainerLayer extends Layer {
   /// Marks this layer and its descendant [ContainerLayer]s as pending render so
   /// child [PictureLayer]s are not disposed before rasterization completes.
   void pinForRender() {
-    if (_pendingRenderCount++ == 0) {
-      for (final Layer child in children) {
-        if (child is ContainerLayer) {
-          child.pinForRender();
-        }
+    _pendingRenderCount++;
+    if (_pendingRenderCount > 1) {
+      // Descendants are already pinned.
+      return;
+    }
+    for (final Layer child in children) {
+      if (child is ContainerLayer) {
+        child.pinForRender();
       }
     }
   }
@@ -57,14 +60,17 @@ abstract class ContainerLayer extends Layer {
   /// has been disposed.
   void unpinForRender() {
     assert(_pendingRenderCount > 0, 'Cannot unpin a ContainerLayer with _pendingRenderCount == 0');
-    if (--_pendingRenderCount == 0) {
-      for (final Layer child in children) {
-        if (child is ContainerLayer) {
-          child.unpinForRender();
-        }
-      }
-      _maybeDisposePictures();
+    _pendingRenderCount--;
+    if (_pendingRenderCount > 0) {
+      // Still pinned by another pending render.
+      return;
     }
+    for (final Layer child in children) {
+      if (child is ContainerLayer) {
+        child.unpinForRender();
+      }
+    }
+    _maybeDisposePictures();
   }
 
   @override
