@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' as tools_core;
 import 'package:meta/meta.dart';
 
@@ -1267,8 +1266,7 @@ class DebuggingOptions {
   static DebuggingOptions fromJson(
     Map<String, Object?> json,
     BuildInfo buildInfo, {
-    List<PlatformDebuggingOptionsParser> platformOptionParsers =
-        const <PlatformDebuggingOptionsParser>[],
+    required List<PlatformDebuggingOptionsParser> platformOptionParsers,
   }) => DebuggingOptions._(
     buildInfo: buildInfo,
     debuggingEnabled: json['debuggingEnabled']! as bool,
