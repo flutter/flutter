@@ -33,7 +33,6 @@ import '../device.dart';
 import '../doctor.dart';
 import '../features.dart';
 import '../flutter_plugins.dart';
-import '../ios/plist_parser.dart';
 import '../package_graph.dart';
 import '../pre_run_validator.dart';
 import '../project.dart';
@@ -183,6 +182,7 @@ abstract final class FlutterCommandCategory {
 abstract class FlutterCommand extends Command<void> {
   FlutterCommand({
     required this.toolContext,
+    this._applicationPackages,
     this.verboseHelp = false,
     this._outputPreferences,
     DeviceManager? deviceManager,
@@ -586,7 +586,7 @@ abstract class FlutterCommand extends Command<void> {
   /// This is only a default. Gradle injects it when the merged manifest does
   /// not set `io.flutter.embedding.android.EnableHcpp` at all, so an entry in
   /// the manifest wins over it. [explicitEnableHcpp] in turn wins over both.
-  bool get enableHcpp => explicitEnableHcpp ?? runner?.featureFlags?.isHcppEnabled ?? false;
+  bool get enableHcpp => explicitEnableHcpp ?? runner?.featureFlags.isHcppEnabled ?? false;
 
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
@@ -1231,7 +1231,7 @@ abstract class FlutterCommand extends Command<void> {
     project.checkForDeprecation(deprecationBehavior: deprecationBehavior);
 
     if (shouldRunPub) {
-      await pub.get(
+      await runner!.pub.get(
         context: PubContext.getVerifyContext(name),
         project: project,
         checkUpToDate: cachePubGet,
@@ -1283,21 +1283,21 @@ abstract class FlutterCommand extends Command<void> {
     PackageGraph? packageGraph,
     PackageConfig? packageConfig,
   }) {
+    final FlutterCommandRunner commandRunner = runner!;
     return project.regeneratePlatformSpecificTooling(
       toolContext: toolContext,
-      analytics: _analytics,
-      cocoaPods: runner?.cocoaPods,
+      analytics: commandRunner.analytics,
+      cocoaPods: commandRunner.cocoaPods,
       deprecationBehavior: deprecationBehavior,
-      featureFlags: runner?.featureFlags ?? featureFlags,
-      gradleUtils: runner?.gradleUtils,
-      plistParser:
-          runner?.plistParser ??
-          PlistParser(fileSystem: _fs, logger: _logger, processManager: toolContext.processManager),
+      featureFlags: commandRunner.featureFlags,
+      gradleUtils: commandRunner.gradleUtils,
+      plistParser: commandRunner.plistParser,
       releaseMode: releaseMode,
       pubspecCache: pubspecCache,
       packageGraph: packageGraph,
       packageConfig: packageConfig,
-      templateRenderer: runner!.templateRenderer!,
+      templatePathProvider: commandRunner.templatePathProvider,
+      templateRenderer: commandRunner.templateRenderer,
     );
   }
 
@@ -1401,9 +1401,8 @@ abstract class FlutterCommand extends Command<void> {
     return help;
   }
 
-  // TODO(bkonyi): Remove once commands using ApplicationPackageFactory are migrated to explicit dependency injection, https://github.com/flutter/flutter/issues/47161.
-  ApplicationPackageFactory? get applicationPackages =>
-      _applicationPackages ?? ApplicationPackageFactory.instance;
+  ApplicationPackageFactory get applicationPackages =>
+      _applicationPackages ?? runner!.applicationPackageFactory;
   set applicationPackages(ApplicationPackageFactory? value) {
     _applicationPackages = value;
   }
@@ -1452,7 +1451,7 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
       final TargetPlatform targetPlatform = await device.targetPlatform;
       final DevelopmentArtifact? developmentArtifact = artifactFromTargetPlatform(
         targetPlatform,
-        runner?.featureFlags ?? featureFlags,
+        runner!.featureFlags,
       );
       if (developmentArtifact != null) {
         artifacts.add(developmentArtifact);

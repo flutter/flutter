@@ -16,6 +16,7 @@
 #include "flutter/impeller/base/thread_safety.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewLayer.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewResponder.h"
 #include "flutter/shell/platform/darwin/ios/ios_context.h"
@@ -30,24 +31,27 @@
 // is replaced with the alpha channel of the |FlutterClippingMaskView|.
 @interface FlutterClippingMaskView : UIView
 
-- (instancetype)initWithFrame:(CGRect)frame screenScale:(CGFloat)screenScale;
+- (instancetype)initWithFrame:(CGRect)frame devicePixelRatio:(CGFloat)devicePixelRatio;
 
 - (void)reset;
 
 // Adds a clip rect operation to the queue.
 //
-// The `clipSkRect` is transformed with the `matrix` before adding to the queue.
-- (void)clipRect:(const flutter::DlRect&)clipDlRect matrix:(const flutter::DlMatrix&)matrix;
+// The `clipRect` is transformed with the `matrix` before adding to the queue.
+- (void)clipRect:(CGRect)clipRect matrix:(CATransform3D)matrix;
 
 // Adds a clip rrect operation to the queue.
 //
-// The `clipSkRRect` is transformed with the `matrix` before adding to the queue.
-- (void)clipRRect:(const flutter::DlRoundRect&)clipDlRRect matrix:(const flutter::DlMatrix&)matrix;
+// The rounded rect described by `clipRect` and `radii` is transformed with the `matrix` before
+// adding to the queue.
+- (void)clipRRect:(CGRect)clipRect
+            radii:(FlutterPlatformViewCornerRadii)radii
+           matrix:(CATransform3D)matrix;
 
 // Adds a clip path operation to the queue.
 //
 // The `path` is transformed with the `matrix` before adding to the queue.
-- (void)clipPath:(const flutter::DlPath&)path matrix:(const flutter::DlMatrix&)matrix;
+- (void)clipPath:(CGPathRef)path matrix:(CATransform3D)matrix;
 
 @end
 
@@ -66,7 +70,11 @@
 - (instancetype)initWithCapacity:(NSInteger)capacity;
 
 // Reuse a maskView from the pool, or allocate a new one.
-- (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame;
+//
+// `devicePixelRatio` is the number of physical pixels per point that the mask view converts its
+// clips with.
+- (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame
+                                devicePixelRatio:(CGFloat)devicePixelRatio;
 
 // Insert the `maskView` into the pool.
 - (void)insertViewToPoolIfNeeded:(FlutterClippingMaskView*)maskView;
@@ -157,6 +165,34 @@
 // Sets flutterAccessibilityContainer as this view's accessibilityContainer.
 @property(nonatomic, retain) id flutterAccessibilityContainer;
 @property(nonatomic, readonly) FlutterPlatformViewGestureRecognizersBlockingPolicy blockingPolicy;
+@end
+
+/// The views that make up an embedded platform view. These consist of the plugin-provided view,
+/// the touch interceptor wrapper view, and the clipping view at the root of the hierarchy.
+///
+/// Instances must only be accessed on the platform thread.
+@interface FlutterPlatformViewInfo : NSObject
+
+- (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithView:(NSObject<FlutterPlatformView>*)view
+            touchInterceptor:(FlutterTouchInterceptingView*)touchInterceptor
+                    rootView:(UIView*)rootView NS_DESIGNATED_INITIALIZER;
+
+@property(nonatomic, readonly) NSObject<FlutterPlatformView>* view;
+@property(nonatomic, readonly) FlutterTouchInterceptingView* touchInterceptor;
+@property(nonatomic, readonly) UIView* rootView;
+
+/// The layer that this platform view was last composited with.
+///
+/// `FlutterPlatformViewsController` composites the platform view in `presentFrame:` only if its
+/// layer in the frame differs from this one.
+///
+/// This value is nil for a new platform view. The controller also sets it to nil in the following
+/// cases, so that the platform view is composited in the next frame that includes it:
+/// * when the platform view is removed from the Flutter view
+/// * when the Flutter view changes
+@property(nonatomic, strong) FlutterPlatformViewLayer* lastCompositedLayer;
+
 @end
 
 @interface UIView (FirstResponder)

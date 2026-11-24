@@ -87,6 +87,7 @@ abstract class IOSApp extends ApplicationPackage {
   static Future<IOSApp?> fromIosProject(
     IosProject project,
     BuildInfo? buildInfo, {
+    required TemplatePathProvider templatePathProvider,
     required ToolContext toolContext,
   }) async {
     final ToolContext(:Logger logger, :Platform platform) = toolContext;
@@ -106,7 +107,12 @@ abstract class IOSApp extends ApplicationPackage {
       logger.printError('Expected ios/Runner.xcodeproj/project.pbxproj but this file is missing.');
       return null;
     }
-    return BuildableIOSApp.fromProject(project, buildInfo, toolContext: toolContext);
+    return BuildableIOSApp.fromProject(
+      project,
+      buildInfo,
+      templatePathProvider: templatePathProvider,
+      toolContext: toolContext,
+    );
   }
 
   @override
@@ -126,6 +132,7 @@ class BuildableIOSApp extends IOSApp {
     this.project,
     String projectBundleId,
     String? productName, {
+    required this._templatePathProvider,
     required this._toolContext,
   }) : _appProductName = productName,
        super(projectBundleId: projectBundleId);
@@ -133,17 +140,25 @@ class BuildableIOSApp extends IOSApp {
   static Future<BuildableIOSApp?> fromProject(
     IosProject project,
     BuildInfo? buildInfo, {
+    required TemplatePathProvider templatePathProvider,
     required ToolContext toolContext,
   }) async {
     final String? productName = await project.productName(buildInfo);
     final String? projectBundleId = await project.productBundleIdentifier(buildInfo);
     if (projectBundleId != null) {
-      return BuildableIOSApp(project, projectBundleId, productName, toolContext: toolContext);
+      return BuildableIOSApp(
+        project,
+        projectBundleId,
+        productName,
+        templatePathProvider: templatePathProvider,
+        toolContext: toolContext,
+      );
     }
     return null;
   }
 
   final IosProject project;
+  final TemplatePathProvider _templatePathProvider;
   final ToolContext _toolContext;
 
   final String? _appProductName;
@@ -236,7 +251,7 @@ class BuildableIOSApp extends IOSApp {
   // Template asset's images are in flutter_template_images package.
   Future<String> _templateImageAssetDirNameForImages(String asset) async {
     final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
-    final Directory imageTemplate = await templatePathProvider.imageDirectory(null, fs, logger);
+    final Directory imageTemplate = await _templatePathProvider.imageDirectory(null, fs, logger);
     return fs.path.join(imageTemplate.path, _templateImageAssetDirNameSuffix(asset));
   }
 

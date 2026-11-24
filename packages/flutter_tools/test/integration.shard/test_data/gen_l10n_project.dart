@@ -1098,3 +1098,96 @@ void main() {
     return l10nYamlString;
   }
 }
+
+class MaterialUiGenL10nProject extends Project {
+  @override
+  Future<void> setUpIn(Directory dir, {bool generateMain = true}) {
+    this.dir = dir;
+    writeFile(fileSystem.path.join(dir.path, 'l10n.yaml'), '');
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_en.arb'), _appEn);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_es.arb'), _appEs);
+    return super.setUpIn(dir, generateMain: generateMain);
+  }
+
+  static const _appEn = '''
+{
+  "@@locale": "en",
+  "helloWorld": "Hello World"
+}
+''';
+
+  static const _appEs = '''
+{
+  "@@locale": "es",
+  "helloWorld": "Hola Mundo"
+}
+''';
+
+  @override
+  final pubspec = '''
+name: test_material_ui_l10n_project
+environment:
+  sdk: ^3.7.0-0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  material_ui: ^1.1.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+''';
+
+  @override
+  final main = r'''
+import 'package:material_ui/material_ui.dart';
+
+import 'l10n/app_localizations.dart';
+
+void main() {
+  runApp(
+    const MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: _Home(),
+    ),
+  );
+}
+
+class _Home extends StatelessWidget {
+  const _Home();
+
+  @override
+  Widget build(BuildContext context) {
+    final results = <String>[];
+    return Column(
+      children: <Widget>[
+        for (final String code in <String>['en', 'es'])
+          Localizations.override(
+            context: context,
+            locale: Locale(code),
+            child: Builder(
+              builder: (BuildContext context) {
+                final AppLocalizations appL10n = AppLocalizations.of(context)!;
+                final MaterialLocalizations materialL10n = MaterialLocalizations.of(context);
+                results.add('$code (${appL10n.helloWorld} / ${materialL10n.okButtonLabel})');
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        Builder(
+          builder: (BuildContext context) {
+            for (final String result in results) {
+              debugPrint('#l10n $result');
+            }
+            debugPrint('#l10n END');
+            return const SizedBox.shrink();
+          },
+        ),
+      ],
+    );
+  }
+}
+''';
+}
