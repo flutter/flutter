@@ -504,11 +504,17 @@ void main() {
       timeStamp: Duration(seconds: 2),
       device: 1,
       position: Offset(20, 30),
+      pan: Offset(10, 15),
+      panDelta: Offset(5, 5),
+      scale: 1.5,
+      rotation: 0.5,
     );
     _expectTransformedEvent(
       original: panZoomUpdate,
       transform: transform,
       localPosition: localPosition,
+      localPan: const Offset(20, 30),
+      localPanDelta: const Offset(10, 10),
     );
 
     const panZoomEnd = PointerPanZoomEndEvent(
@@ -544,6 +550,123 @@ void main() {
       tilt: 4,
     );
     _expectTransformedEvent(original: up, transform: transform, localPosition: localPosition);
+  });
+
+  group('transforming pan-zoom events', () {
+    group('affine transform', () {
+      final Matrix4 transform = (Matrix4.identity()..scaleByDouble(2.0, 2.0, 1.0, 1.0)).multiplied(
+        Matrix4.translationValues(10.0, 20.0, 0.0),
+      );
+      const position = Offset(20, 30);
+      const pan = Offset(20, 30);
+      const localPan = Offset(40, 60);
+      const panDelta = Offset(5, 5);
+      const localPanDelta = Offset(10, 10);
+
+      test('zero pan is not affected by translation', () {
+        const update = PointerPanZoomUpdateEvent(
+          timeStamp: Duration(seconds: 2),
+          device: 1,
+          position: position,
+        );
+
+        final PointerPanZoomUpdateEvent transformed = update.transformed(transform);
+        expect(transformed.localPan, Offset.zero);
+        expect(transformed.localPanDelta, Offset.zero);
+      });
+
+      test('non-zero pan and panDelta', () {
+        const update = PointerPanZoomUpdateEvent(
+          timeStamp: Duration(seconds: 2),
+          device: 1,
+          position: position,
+          pan: pan,
+          panDelta: panDelta,
+        );
+
+        final PointerPanZoomUpdateEvent transformed = update.transformed(transform);
+        expect(transformed.pan, pan);
+        expect(transformed.localPan, localPan);
+        expect(
+          transformed.localPosition + transformed.localPan,
+          PointerEvent.transformPosition(transform, position + pan),
+        );
+        expect(transformed.panDelta, panDelta);
+        expect(transformed.localPanDelta, localPanDelta);
+      });
+    });
+
+    group('perspective transform', () {
+      final transform = Matrix4.translationValues(220.0, 120.0, 0.0)
+        ..setEntry(3, 2, 0.0025)
+        ..rotateY(-0.45);
+      const position = Offset(80, 60);
+      const pan0 = Offset(15, 25);
+      const panDelta = Offset(7, -11);
+      const pan1 = Offset(15 + 7, 25 - 11);
+
+      test('zero pan is Offset.zero at non-zero position', () {
+        const update = PointerPanZoomUpdateEvent(
+          timeStamp: Duration(seconds: 2),
+          device: 1,
+          position: position,
+        );
+
+        final PointerPanZoomUpdateEvent transformed = update.transformed(transform);
+        expect(transformed.localPan, Offset.zero);
+        expect(transformed.localPanDelta, Offset.zero);
+      });
+
+      test('localPosition + localPan matches transformed(position + pan)', () {
+        const updateAtPosition = PointerPanZoomUpdateEvent(
+          timeStamp: Duration(seconds: 2),
+          device: 1,
+          position: position,
+          pan: pan1,
+          panDelta: panDelta,
+        );
+        const updateAtOrigin = PointerPanZoomUpdateEvent(
+          timeStamp: Duration(seconds: 2),
+          device: 1,
+          pan: pan1,
+          panDelta: panDelta,
+        );
+
+        final PointerPanZoomUpdateEvent transformed = updateAtPosition.transformed(transform);
+        final PointerPanZoomUpdateEvent transformedAtOrigin = updateAtOrigin.transformed(transform);
+
+        // Under perspective projection, localPan depends on the anchor `position`.
+        expect(transformed.localPan, isNot(offsetMoreOrLessEquals(transformedAtOrigin.localPan)));
+        expect(
+          transformed.localPosition + transformed.localPan,
+          offsetMoreOrLessEquals(PointerEvent.transformPosition(transform, position + pan1)),
+        );
+      });
+
+      test('localPanDelta equals change in localPan across frames', () {
+        const prevUpdate = PointerPanZoomUpdateEvent(
+          timeStamp: Duration(seconds: 1),
+          device: 1,
+          position: position,
+          pan: pan0,
+        );
+        const currUpdate = PointerPanZoomUpdateEvent(
+          timeStamp: Duration(seconds: 2),
+          device: 1,
+          position: position,
+          pan: pan1,
+          panDelta: panDelta,
+        );
+
+        final PointerPanZoomUpdateEvent prevTransformed = prevUpdate.transformed(transform);
+        final PointerPanZoomUpdateEvent currTransformed = currUpdate.transformed(transform);
+
+        expect(
+          currTransformed.localPanDelta,
+          offsetMoreOrLessEquals(currTransformed.localPan - prevTransformed.localPan),
+        );
+      });
+    });
   });
 
   group('copyWith', () {
@@ -848,6 +971,8 @@ void _expectTransformedEvent({
   required Matrix4 transform,
   Offset? localDelta,
   Offset? localPosition,
+  Offset? localPan,
+  Offset? localPanDelta,
 }) {
   expect(original.position, original.localPosition);
   expect(original.delta, original.localDelta);
@@ -859,6 +984,18 @@ void _expectTransformedEvent({
   expect(transformed.transform, transform);
   expect(transformed.localDelta, localDelta ?? original.localDelta);
   expect(transformed.localPosition, localPosition ?? original.localPosition);
+
+  if (original is PointerPanZoomUpdateEvent) {
+    expect(original.pan, original.localPan);
+    expect(original.panDelta, original.localPanDelta);
+    transformed as PointerPanZoomUpdateEvent;
+    expect(transformed.pan, original.pan);
+    expect(transformed.panDelta, original.panDelta);
+    expect(transformed.scale, original.scale);
+    expect(transformed.rotation, original.rotation);
+    expect(transformed.localPan, localPan ?? original.localPan);
+    expect(transformed.localPanDelta, localPanDelta ?? original.localPanDelta);
+  }
 
   expect(transformed.buttons, original.buttons);
   expect(transformed.delta, original.delta);
