@@ -61,8 +61,10 @@ class GenSnapshot {
   /// The second line is only ignored right after the first one, because
   /// warnings that are not ignored share it.
   static const kIgnoredTwoLineWarnings = <String, String>{
-    // --obfuscate without --strip on pecoff object. The linker moves the
-    // debugging information into the PDB, so the DLL contains none of it.
+    // Warning when `--obfuscate` is used without `--strip` on a PE/COFF object.
+    // Safe to ignore because the object file is only an intermediate artifact:
+    // the linker extracts the debug info into the separate PDB, leaving none
+    // in the shipped DLL.
     'Warning: The generated PE/COFF object contains unobfuscated DWARF debugging information.':
         '         To avoid this, use --strip to remove it.',
   };
@@ -281,9 +283,11 @@ class AOTSnapshotter {
     // Debugging information.
     genSnapshotArgs.addAll(<String>[
       if (shouldSplitDebugInfo) ...<String>[
+        // Despite the "dwarf" names, these flags also apply to Windows
+        // to omit embedded stack-trace tables and resolve source paths;
+        // debug info is written to the PDB instead of --save-debugging-info.
         '--dwarf-stack-traces',
         '--resolve-dwarf-paths',
-        // On Windows x64, the debugging information goes into the PDB.
         if (!targetingWindowsX64)
           '--save-debugging-info=${_fileSystem.path.join(splitDebugInfo!, debugFilename)}',
       ],
