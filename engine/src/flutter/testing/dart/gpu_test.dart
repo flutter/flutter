@@ -1390,6 +1390,29 @@ void main() async {
     expect(gpu.gpuContext.maxSamplerAnisotropy, greaterThanOrEqualTo(1));
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  test('GpuContext.maxRenderTargetWidth and Height report a usable size', () async {
+    // OpenGL ES 3.0 and up guarantee a GL_MAX_TEXTURE_SIZE of at least 2048
+    // (OpenGL ES 2.0 only 64), and Vulkan's and Metal's minimums exceed it.
+    final int width = gpu.gpuContext.maxRenderTargetWidth;
+    final int height = gpu.gpuContext.maxRenderTargetHeight;
+    expect(width, greaterThanOrEqualTo(2048));
+    expect(height, greaterThanOrEqualTo(2048));
+
+    // Render targets of the maximum width and of the maximum height can be
+    // created and attached. (On OpenGL ES, the texture's storage and the
+    // framebuffer are set up later on the reactor, so this only proves the
+    // size is accepted at creation there.) Each is a single row or column,
+    // rather than width x height, which could exhaust a CI runner's memory.
+    for (final (int w, int h) in <(int, int)>[(width, 1), (1, height)]) {
+      final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.devicePrivate, w, h);
+      final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+      commandBuffer.createRenderPass(
+        gpu.RenderTarget.singleColor(gpu.ColorAttachment(texture: texture)),
+      );
+      commandBuffer.submit();
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   test('RenderPass.bindTexture throws for invalid SamplerOptions.maxAnisotropy', () async {
     final RenderPassState state = createSimpleRenderPass();
 
