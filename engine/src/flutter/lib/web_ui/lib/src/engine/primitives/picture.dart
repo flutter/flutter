@@ -131,7 +131,14 @@ class EnginePicture implements ui.Picture, StackTraceDebugger {
 
   @override
   Future<ui.Image> toImage(int width, int height) {
-    return Future<ui.Image>.value(toImageSync(width, height));
+    // Like native `_NativePicture.toImage`, disposal and dimension errors
+    // throw synchronously, while rasterization failures complete the returned
+    // future with an error.
+    assert(!_isDisposed, 'Cannot convert a disposed picture to an image.');
+    if (width <= 0 || height <= 0) {
+      throw Exception('Invalid image dimensions.');
+    }
+    return Future<ui.Image>.sync(() => toImageSync(width, height));
   }
 
   @override

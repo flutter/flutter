@@ -220,6 +220,21 @@ class ForeignBackendPicture implements BackendPicture {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+/// A [BackendPicture] whose [toImageSync] throws, as a backend does when it
+/// fails to rasterize a picture.
+class ThrowingBackendPicture implements BackendPicture {
+  @override
+  BackendImage toImageSync(int width, int height, TargetPixelFormat targetFormat) {
+    throw StateError('toImageSync failed');
+  }
+
+  @override
+  void dispose() {}
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 /// A [BackendCanvas] whose [drawPath] throws after [translate] succeeds.
 class ThrowingBackendCanvas implements BackendCanvas {
   @override

@@ -399,6 +399,22 @@ Future<void> testMain() async {
       picture.dispose();
     });
 
+    test('toImage reports backend rasterization failures through the returned future', () async {
+      final picture = EnginePicture(ThrowingBackendPicture());
+      addTearDown(picture.dispose);
+
+      late Future<ui.Image> result;
+      expect(() {
+        result = picture.toImage(4, 4);
+      }, returnsNormally);
+      await expectLater(
+        result,
+        throwsA(
+          isA<StateError>().having((StateError e) => e.message, 'message', 'toImageSync failed'),
+        ),
+      );
+    });
+
     test('toImageSync', () async {
       const color = ui.Color(0xFFAAAAAA);
       final recorder = ui.PictureRecorder();
