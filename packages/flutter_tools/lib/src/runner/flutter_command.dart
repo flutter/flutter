@@ -168,6 +168,7 @@ abstract final class FlutterOptions {
   static const kWebWasmFlag = 'wasm';
   static const kEnableImpeller = 'enable-impeller';
   static const kEnableSkoretext = 'enable-skoretext';
+  static const kEnableSkunicodeApple = 'enable-skunicode-apple';
   static const kCodesignIdentity = 'codesign-identity';
   static const kCodesign = 'codesign';
   static const kAdbLogFiltering = 'adb-log-filtering';
@@ -597,6 +598,16 @@ abstract class FlutterCommand extends Command<void> {
       return null;
     }
     return getValue(DebuggingOptionDescriptors.enableSkoretext);
+  }
+
+  /// The explicit `--[no-]enable-skunicode-apple` value, or null when the flag
+  /// was not passed (or the command does not define it).
+  bool? get enableSkunicodeApple {
+    if (!hasOption(DebuggingOptionDescriptors.enableSkunicodeApple) ||
+        !wasParsed(DebuggingOptionDescriptors.enableSkunicodeApple)) {
+      return null;
+    }
+    return getValue(DebuggingOptionDescriptors.enableSkunicodeApple);
   }
 
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,

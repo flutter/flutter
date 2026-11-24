@@ -616,6 +616,7 @@ class EngineRenderingFlagsBundle extends OptionBundle {
     DebuggingOptionDescriptors.enableFlutterGpu,
     DebuggingOptionDescriptors.enableHcpp,
     DebuggingOptionDescriptors.enableSkoretext,
+    DebuggingOptionDescriptors.enableSkunicodeApple,
     if (includeVulkanAndEmbedder) ...const <OptionDescriptor<Object?>>[
       DebuggingOptionDescriptors.enableVulkanValidation,
       DebuggingOptionDescriptors.enableEmbedderApi,
@@ -847,6 +848,15 @@ abstract final class DebuggingOptionDescriptors {
     help:
         'Whether to enable the SkoreText (CoreText + Apple Unicode) text layout '
         'pipeline on iOS and macOS. Ignored on other platforms.',
+  );
+
+  static const enableSkunicodeApple = NullableFlagOptionDescriptor(
+    name: FlutterOptions.kEnableSkunicodeApple,
+    verboseOnly: true,
+    help:
+        'Whether to enable Apple Unicode (SkUnicode_apple) on iOS and macOS '
+        'without enabling CoreText shaping. Automatically enabled when '
+        '--enable-skoretext is true. Ignored on other platforms.',
   );
 
   static const testFlag = FlagOptionDescriptor(

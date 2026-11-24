@@ -624,6 +624,7 @@ void main() {
           '--enable-impeller',
           '--enable-flutter-gpu',
           '--enable-skoretext',
+          '--enable-skunicode-apple',
           '--trace-systrace',
           '--profile-microtasks',
           '--profile-startup',
@@ -650,6 +651,7 @@ void main() {
       expect(options.enableImpeller, ImpellerStatus.enabled);
       expect(options.enableFlutterGpu, true);
       expect(options.enableSkoretext, true);
+      expect(options.enableSkunicodeApple, true);
       expect(options.traceSystrace, true);
       expect(options.enableSoftwareRendering, true);
       expect(options.skiaDeterministicRendering, true);

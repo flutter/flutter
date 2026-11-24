@@ -75,6 +75,7 @@ std::unique_ptr<RuntimeController> RuntimeController::Spawn(
       context_.enable_impeller,
       context_.enable_flutter_gpu,
       context_.enable_skoretext,
+      context_.enable_skunicode_apple,
   };
   auto result =
       std::make_unique<RuntimeController>(p_client,                      //

@@ -714,6 +714,18 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     switches.push_back("--enable-skoretext=true");
   }
 
+  if (std::find(switches.begin(), switches.end(), "--enable-skunicode-apple=false") !=
+      switches.end()) {
+    // Explicitly disabled via CLI; do not let Info.plist re-enable it.
+  } else if (std::find(switches.begin(), switches.end(), "--enable-skunicode-apple=true") !=
+                 switches.end() ||
+             std::find(switches.begin(), switches.end(), "--enable-skunicode-apple") !=
+                 switches.end()) {
+    // Already explicitly enabled via CLI switches.
+  } else if (_project.enableSkUnicodeApple) {
+    switches.push_back("--enable-skunicode-apple=true");
+  }
+
   std::transform(switches.begin(), switches.end(), std::back_inserter(argv),
                  [](const std::string& arg) -> const char* { return arg.c_str(); });
 

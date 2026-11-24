@@ -250,6 +250,19 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
     }
   }
 
+  if (!command_line.HasOption(flutter::FlagForSwitch(flutter::Switch::kEnableSkunicodeApple))) {
+    NSNumber* enableSkUnicodeApple =
+        (hasExplicitBundle && bundle != nil)
+            ? [bundle objectForInfoDictionaryKey:@"FLTEnableSkUnicodeApple"]
+            : nil;
+    if (enableSkUnicodeApple == nil) {
+      enableSkUnicodeApple = [mainBundle objectForInfoDictionaryKey:@"FLTEnableSkUnicodeApple"];
+    }
+    if (enableSkUnicodeApple != nil) {
+      settings.enable_skunicode_apple = enableSkUnicodeApple.boolValue;
+    }
+  }
+
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
   // There are no ownership concerns here as all mappings are owned by the
   // embedder and not the engine.

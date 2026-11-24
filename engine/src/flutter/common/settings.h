@@ -240,6 +240,11 @@ struct Settings {
   // and iOS. Ignored on other platforms.
   bool enable_skoretext = false;
 
+  // Enable Apple Unicode (SkUnicode_apple) on macOS and iOS without enabling
+  // CoreText shaping. Automatically enabled when enable_skoretext is true.
+  // Ignored on other platforms.
+  bool enable_skunicode_apple = false;
+
   // Enable android surface control swapchains where supported.
   bool enable_surface_control = false;
 

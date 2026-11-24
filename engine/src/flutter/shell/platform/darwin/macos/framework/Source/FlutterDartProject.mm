@@ -105,6 +105,15 @@ static NSString* const kAppBundleIdentifier = @"io.flutter.flutter.app";
   return NO;
 }
 
+- (BOOL)enableSkUnicodeApple {
+  NSNumber* enableSkUnicodeApple =
+      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTEnableSkUnicodeApple"];
+  if (enableSkUnicodeApple != nil) {
+    return enableSkUnicodeApple.boolValue;
+  }
+  return NO;
+}
+
 - (BOOL)enableSDFs {
   return YES;
 }

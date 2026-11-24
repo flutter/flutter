@@ -309,6 +309,63 @@ FLUTTER_ASSERT_ARC
   }
 }
 
+- (void)testEnableSkUnicodeAppleDefaultsToFalse {
+  id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableSkUnicodeApple"]).andReturn(nil);
+  id mockProcessInfo = OCMPartialMock([NSProcessInfo processInfo]);
+  NSArray* arguments = @[ @"process_name" ];
+  OCMStub([mockProcessInfo arguments]).andReturn(arguments);
+
+  auto settings = FLTDefaultSettingsForBundle(nil, mockProcessInfo);
+
+  XCTAssertFalse(settings.enable_skunicode_apple);
+  [mockProcessInfo stopMocking];
+  [mockMainBundle stopMocking];
+}
+
+- (void)testEnableSkUnicodeAppleFromInfoPlist {
+  id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableSkUnicodeApple"]).andReturn(@YES);
+  id mockProcessInfo = OCMPartialMock([NSProcessInfo processInfo]);
+  NSArray* arguments = @[ @"process_name" ];
+  OCMStub([mockProcessInfo arguments]).andReturn(arguments);
+
+  auto settings = FLTDefaultSettingsForBundle(nil, mockProcessInfo);
+
+  XCTAssertTrue(settings.enable_skunicode_apple);
+  [mockProcessInfo stopMocking];
+  [mockMainBundle stopMocking];
+}
+
+- (void)testEnableSkUnicodeAppleCommandLineOverridesInfoPlist {
+  {
+    id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
+    OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableSkUnicodeApple"]).andReturn(@NO);
+    id mockProcessInfo = OCMPartialMock([NSProcessInfo processInfo]);
+    NSArray* arguments = @[ @"process_name", @"--enable-skunicode-apple=true" ];
+    OCMStub([mockProcessInfo arguments]).andReturn(arguments);
+
+    auto settings = FLTDefaultSettingsForBundle(nil, mockProcessInfo);
+
+    XCTAssertTrue(settings.enable_skunicode_apple);
+    [mockProcessInfo stopMocking];
+    [mockMainBundle stopMocking];
+  }
+  {
+    id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
+    OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableSkUnicodeApple"]).andReturn(@YES);
+    id mockProcessInfo = OCMPartialMock([NSProcessInfo processInfo]);
+    NSArray* arguments = @[ @"process_name", @"--enable-skunicode-apple=false" ];
+    OCMStub([mockProcessInfo arguments]).andReturn(arguments);
+
+    auto settings = FLTDefaultSettingsForBundle(nil, mockProcessInfo);
+
+    XCTAssertFalse(settings.enable_skunicode_apple);
+    [mockProcessInfo stopMocking];
+    [mockMainBundle stopMocking];
+  }
+}
+
 - (void)testWideGamutSettingUsesBundleValue {
   id mockBundle = OCMClassMock([NSBundle class]);
   id mockMainBundle = OCMClassMock([NSBundle class]);

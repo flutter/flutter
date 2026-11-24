@@ -292,6 +292,11 @@ DEF_SWITCH(kEnableSkoretext,
            "enable-skoretext",
            "Enable the CoreText paragraph layout pipeline and Apple Unicode "
            "on macOS and iOS. Ignored on other platforms.")
+DEF_SWITCH(kEnableSkunicodeApple,
+           "enable-skunicode-apple",
+           "Enable Apple Unicode (SkUnicode_apple) on macOS and iOS without "
+           "enabling CoreText shaping. Automatically enabled when "
+           "--enable-skoretext is true. Ignored on other platforms.")
 DEF_SWITCH(kImpellerLazyShaderMode,
            "impeller-lazy-shader-mode",
            "Whether to defer initialization of all required PSOs for the "

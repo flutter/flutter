@@ -47,9 +47,9 @@ bool ShouldUseSkoreText(const ParagraphStyle& style) {
 #endif
 }
 
-sk_sp<SkUnicode> MakeUnicode(bool use_skoretext) {
+sk_sp<SkUnicode> MakeUnicode(bool use_apple_unicode) {
 #if defined(SK_UNICODE_APPLE_IMPLEMENTATION)
-  if (use_skoretext) {
+  if (use_apple_unicode) {
     return SkUnicodes::Apple::Make();
   }
 #endif
@@ -62,6 +62,19 @@ sk_sp<SkUnicode> MakeUnicode(bool use_skoretext) {
 
 }  // anonymous namespace
 
+// static
+bool ParagraphBuilderSkia::ShouldUseAppleUnicode(const ParagraphStyle& style) {
+#if defined(SK_UNICODE_APPLE_IMPLEMENTATION)
+#if !defined(SK_UNICODE_ICU_IMPLEMENTATION)
+  return true;
+#else
+  return ShouldUseSkoreText(style) || style.enable_skunicode_apple;
+#endif
+#else
+  return false;
+#endif
+}
+
 ParagraphBuilderSkia::ParagraphBuilderSkia(
     const ParagraphStyle& style,
     const std::shared_ptr<FontCollection>& font_collection,
@@ -69,7 +82,7 @@ ParagraphBuilderSkia::ParagraphBuilderSkia(
     : base_style_(style.GetTextStyle()), impeller_enabled_(impeller_enabled) {
   builder_ = skt::ParagraphBuilder::make(
       TxtToSkia(style), font_collection->CreateSktFontCollection(),
-      MakeUnicode(ShouldUseSkoreText(style)));
+      MakeUnicode(ShouldUseAppleUnicode(style)));
 }
 
 ParagraphBuilderSkia::~ParagraphBuilderSkia() = default;

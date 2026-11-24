@@ -102,7 +102,8 @@ Engine::Engine(Delegate& delegate,
           runtime_stage_backend,                     // runtime stage
           settings_.enable_impeller,                 // enable impeller
           settings_.enable_flutter_gpu,              // enable flutter_gpu
-          settings_.enable_skoretext                 // enable skoretext
+          settings_.enable_skoretext,                // enable skoretext
+          settings_.enable_skunicode_apple           // enable skunicode_apple
       });
 }
 

@@ -34,7 +34,8 @@ UIDartState::Context::Context(
     std::shared_future<impeller::RuntimeStageBackend> runtime_stage_backend,
     bool enable_impeller,
     bool enable_flutter_gpu,
-    bool enable_skoretext)
+    bool enable_skoretext,
+    bool enable_skunicode_apple)
     : task_runners(task_runners),
       snapshot_delegate(std::move(snapshot_delegate)),
       io_manager(std::move(io_manager)),
@@ -48,7 +49,8 @@ UIDartState::Context::Context(
       runtime_stage_backend(std::move(runtime_stage_backend)),
       enable_impeller(enable_impeller),
       enable_flutter_gpu(enable_flutter_gpu),
-      enable_skoretext(enable_skoretext) {}
+      enable_skoretext(enable_skoretext),
+      enable_skunicode_apple(enable_skunicode_apple) {}
 
 UIDartState::UIDartState(
     TaskObserverAdd add_callback,
@@ -92,6 +94,10 @@ bool UIDartState::IsFlutterGPUEnabled() const {
 
 bool UIDartState::IsSkoreTextEnabled() const {
   return context_.enable_skoretext;
+}
+
+bool UIDartState::IsSkUnicodeAppleEnabled() const {
+  return context_.enable_skunicode_apple;
 }
 
 void UIDartState::DidSetIsolate() {

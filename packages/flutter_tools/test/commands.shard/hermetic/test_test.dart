@@ -2199,6 +2199,61 @@ dev_dependencies:
     );
 
     testUsingContext(
+      'forwards an explicit --[no-]enable-skunicode-apple and defaults to null when omitted',
+      () async {
+        final testRunner = FakeFlutterTestRunner(0);
+
+        final enabledCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
+        await createTestCommandRunner(enabledCommand)
+            .run(const <String>['test', '--no-pub', '--enable-skunicode-apple']);
+        expect(testRunner.lastDebuggingOptionsValue.enableSkunicodeApple, isTrue);
+
+        final disabledCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
+        await createTestCommandRunner(disabledCommand)
+            .run(const <String>['test', '--no-pub', '--no-enable-skunicode-apple']);
+        expect(testRunner.lastDebuggingOptionsValue.enableSkunicodeApple, isFalse);
+
+        final defaultCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
+        await createTestCommandRunner(defaultCommand).run(const <String>['test', '--no-pub']);
+        expect(testRunner.lastDebuggingOptionsValue.enableSkunicodeApple, isNull);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
       'uninstallApp defaults to true',
       () async {
         final testRunner = FakeFlutterTestRunner(0);
@@ -2619,6 +2674,7 @@ resolution: workspace
           'enable-flutter-gpu',
           'enable-hcpp',
           'enable-skoretext',
+          'enable-skunicode-apple',
           'deprecated-js-interop',
           'fatal-warnings',
           'experimental-faster-testing',

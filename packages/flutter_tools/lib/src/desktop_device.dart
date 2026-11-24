@@ -333,6 +333,9 @@ abstract class DesktopDevice extends Device {
     if (debuggingOptions.enableSkoretext != null) {
       addFlag('enable-skoretext=${debuggingOptions.enableSkoretext}');
     }
+    if (debuggingOptions.enableSkunicodeApple != null) {
+      addFlag('enable-skunicode-apple=${debuggingOptions.enableSkunicodeApple}');
+    }
     // Options only supported when there is a VM Service connection between the
     // tool and the device, usually in debug or profile mode.
     if (debuggingOptions.debuggingEnabled) {

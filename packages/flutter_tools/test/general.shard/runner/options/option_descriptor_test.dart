@@ -860,6 +860,7 @@ void main() {
           DebuggingOptionDescriptors.enableFlutterGpu,
           DebuggingOptionDescriptors.enableHcpp,
           DebuggingOptionDescriptors.enableSkoretext,
+          DebuggingOptionDescriptors.enableSkunicodeApple,
           DebuggingOptionDescriptors.enableVulkanValidation,
           DebuggingOptionDescriptors.enableEmbedderApi,
           DebuggingOptionDescriptors.testFlag,

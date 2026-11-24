@@ -105,6 +105,11 @@ class ParagraphStyle {
   // on macOS and iOS. Ignored on non-Apple platforms.
   bool enable_skoretext = false;
 
+  // Whether to use Apple Unicode (SkUnicode_apple) on macOS and iOS without
+  // enabling CoreText shaping. Automatically enabled when enable_skoretext is
+  // true. Ignored on non-Apple platforms.
+  bool enable_skunicode_apple = false;
+
   TextStyle GetTextStyle() const;
 
   bool unlimited_lines() const;

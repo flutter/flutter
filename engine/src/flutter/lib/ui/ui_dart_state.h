@@ -61,7 +61,8 @@ class UIDartState : public tonic::DartState {
         std::shared_future<impeller::RuntimeStageBackend> runtime_stage_backend,
         bool enable_impeller,
         bool enable_flutter_gpu,
-        bool enable_skoretext = false);
+        bool enable_skoretext = false,
+        bool enable_skunicode_apple = false);
 
     /// The task runners used by the shell hosting this runtime controller. This
     /// may be used by the isolate to scheduled asynchronous texture uploads or
@@ -117,6 +118,10 @@ class UIDartState : public tonic::DartState {
     /// Whether the CoreText paragraph layout pipeline + Apple Unicode is
     /// enabled.
     bool enable_skoretext = false;
+
+    /// Whether Apple Unicode (SkUnicode_apple) is enabled independently of
+    /// SkoreText.
+    bool enable_skunicode_apple = false;
   };
 
   Dart_Port main_port() const { return main_port_; }
@@ -191,6 +196,9 @@ class UIDartState : public tonic::DartState {
   /// Whether SkoreText (CoreText + Apple Unicode) is enabled for this
   /// application.
   bool IsSkoreTextEnabled() const;
+
+  /// Whether Apple Unicode (SkUnicode_apple) is enabled for this application.
+  bool IsSkUnicodeAppleEnabled() const;
 
   /// The runtime stage to use for fragment shaders.
   impeller::RuntimeStageBackend GetRuntimeStageBackend() const;

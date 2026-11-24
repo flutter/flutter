@@ -116,6 +116,8 @@ class FlutterTesterTestDevice extends TestDevice {
       if (debuggingOptions.enableFlutterGpu) '--enable-flutter-gpu',
       if (debuggingOptions.enableSkoretext != null)
         '--enable-skoretext=${debuggingOptions.enableSkoretext}',
+      if (debuggingOptions.enableSkunicodeApple != null)
+        '--enable-skunicode-apple=${debuggingOptions.enableSkunicodeApple}',
       if (debuggingOptions.enableDartProfiling) '--enable-dart-profiling',
       '--non-interactive',
       '--use-test-fonts',

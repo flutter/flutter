@@ -47,6 +47,11 @@
 @property(nonatomic, readonly) BOOL enableSkoreText;
 
 /**
+ * Whether Apple Unicode (SkUnicode_apple) is enabled independently of SkoreText.
+ */
+@property(nonatomic, readonly) BOOL enableSkUnicodeApple;
+
+/**
  * Whether the Signed Distance Fields are enabled for rendering.
  */
 @property(nonatomic, readonly) BOOL enableSDFs;

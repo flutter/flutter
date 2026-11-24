@@ -570,6 +570,15 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
           enable_skoretext_value.empty() || "true" == enable_skoretext_value;
     }
   }
+  {
+    std::string enable_skunicode_apple_value;
+    if (command_line.GetOptionValue(
+            FlagForSwitch(Switch::kEnableSkunicodeApple),
+            &enable_skunicode_apple_value)) {
+      settings.enable_skunicode_apple = enable_skunicode_apple_value.empty() ||
+                                        "true" == enable_skunicode_apple_value;
+    }
+  }
   settings.impeller_enable_lazy_shader_mode =
       command_line.HasOption(FlagForSwitch(Switch::kImpellerLazyShaderMode));
   settings.impeller_use_sdfs =

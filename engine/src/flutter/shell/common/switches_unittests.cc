@@ -190,6 +190,40 @@ TEST(SwitchesTest, EnableSkoretext) {
   }
 }
 
+TEST(SwitchesTest, EnableSkunicodeApple) {
+  {
+    // enable with value
+    fml::CommandLine command_line = fml::CommandLineFromInitializerList(
+        {"command", "--enable-skunicode-apple=true"});
+    EXPECT_TRUE(command_line.HasOption("enable-skunicode-apple"));
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.enable_skunicode_apple, true);
+  }
+  {
+    // enable without value
+    fml::CommandLine command_line = fml::CommandLineFromInitializerList(
+        {"command", "--enable-skunicode-apple"});
+    EXPECT_TRUE(command_line.HasOption("enable-skunicode-apple"));
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.enable_skunicode_apple, true);
+  }
+  {
+    // disable
+    fml::CommandLine command_line = fml::CommandLineFromInitializerList(
+        {"command", "--enable-skunicode-apple=false"});
+    EXPECT_TRUE(command_line.HasOption("enable-skunicode-apple"));
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.enable_skunicode_apple, false);
+  }
+  {
+    // default (absent)
+    fml::CommandLine command_line =
+        fml::CommandLineFromInitializerList({"command"});
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.enable_skunicode_apple, false);
+  }
+}
+
 TEST(SwitchesTest, ProfileStartup) {
   {
     fml::CommandLine command_line =

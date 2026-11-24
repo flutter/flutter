@@ -218,6 +218,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         debugLogsDirectoryPath: debugLogsDirectoryPath,
         enableHcpp: explicitEnableHcpp,
         enableSkoretext: enableSkoretext,
+        enableSkunicodeApple: enableSkunicodeApple,
         testFlag: testFlag,
         iosProfileDebugger: iosProfileDebugger,
         traceSystrace: traceSystrace,
@@ -274,6 +275,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         printDtd: getValue(CommonOptions.printDtd),
         enableHcpp: explicitEnableHcpp,
         enableSkoretext: enableSkoretext,
+        enableSkunicodeApple: enableSkunicodeApple,
         testFlag: testFlag,
         iosProfileDebugger: iosProfileDebugger,
       );
