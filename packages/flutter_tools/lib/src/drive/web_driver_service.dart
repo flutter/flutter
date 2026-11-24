@@ -29,6 +29,7 @@ import '../hook_runner.dart' show FlutterHookRunner;
 import '../project.dart';
 import '../resident_runner.dart';
 import '../web/chrome_constants.dart';
+import '../web/web_debug_config.dart';
 import '../web/web_runner.dart';
 import 'drive_service.dart';
 
@@ -80,20 +81,32 @@ class WebDriverService extends DriverService {
     String? userIdentifier,
     String? mainPath,
     Map<String, Object> platformArgs = const <String, Object>{},
-    Map<String, String> webDefines = const <String, String>{},
   }) async {
-    final FlutterDevice flutterDevice = await FlutterDevice.create(
-      device,
-      toolContext: toolContext,
-      buildInfo: buildInfo,
-      target: mainPath,
-      userIdentifier: userIdentifier,
-    );
     final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
+    final FlutterProject flutterProject = projectFactory.fromDirectory(fs.currentDirectory);
     final webConfig = WebDebugConfig(
       devServerConfig: debuggingOptions.webConfig.devServerConfig,
       renderer: debuggingOptions.webConfig.renderer,
       useWasm: debuggingOptions.webConfig.useWasm,
+      webDefines: debuggingOptions.webConfig.webDefines,
+    );
+    final webDebuggingOptions = buildInfo.isRelease
+        ? DebuggingOptions.disabled(
+            buildInfo,
+            platformOptions: <PlatformDebuggingOptions>[webConfig],
+          )
+        : DebuggingOptions.enabled(
+            buildInfo,
+            disablePortPublication: debuggingOptions.disablePortPublication,
+            platformOptions: <PlatformDebuggingOptions>[webConfig],
+          );
+    final FlutterDevice flutterDevice = await device.createFlutterDevice(
+      buildInfo: buildInfo,
+      debuggingOptions: webDebuggingOptions,
+      flutterProject: flutterProject,
+      platformArgs: platformArgs,
+      toolContext: toolContext,
+      userIdentifier: userIdentifier,
     );
     _residentRunner = _webRunnerFactory!.createWebRunner(
       flutterDevice,
@@ -102,21 +115,14 @@ class WebDriverService extends DriverService {
       assetBundleFactory: _assetBundleFactory,
       buildSystem: buildSystem,
       buildTargets: buildTargets,
-      debuggingOptions: buildInfo.isRelease
-          ? DebuggingOptions.disabled(buildInfo, webConfig: webConfig)
-          : DebuggingOptions.enabled(
-              buildInfo,
-              disablePortPublication: debuggingOptions.disablePortPublication,
-              webConfig: webConfig,
-            ),
+      debuggingOptions: webDebuggingOptions,
       featureFlags: _featureFlags,
       flutterHookRunner: _flutterHookRunner,
-      flutterProject: projectFactory.fromDirectory(fs.currentDirectory),
+      flutterProject: flutterProject,
       platformArgs: platformArgs,
       stayResident: true,
       target: mainPath,
       toolContext: toolContext,
-      webDefines: webDefines,
     );
     final appStartedCompleter = Completer<void>.sync();
     final Future<int?> runFuture = _residentRunner.run(

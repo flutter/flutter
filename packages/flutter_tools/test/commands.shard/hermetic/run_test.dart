@@ -38,6 +38,7 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/web/compile.dart';
+import 'package:flutter_tools/src/web/web_debug_config.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart' as analytics;
@@ -2219,7 +2220,7 @@ server:
       expect(options.profileMicrotasks, true);
       expect(options.profileStartup, true);
       expect(options.verboseSystemLogs, true);
-      expect(options.nativeNullAssertions, true);
+      expect(options.webConfig.nativeNullAssertions, true);
       expect(options.traceSystrace, true);
       expect(options.enableImpeller, ImpellerStatus.enabled);
       expect(options.enableFlutterGpu, true);
@@ -2526,7 +2527,7 @@ class TestDeviceManager extends DeviceManager {
   }
 }
 
-class FakeDevice extends Fake implements Device {
+class FakeDevice extends Fake with DefaultCreateFlutterDevice implements Device {
   FakeDevice({
     this._isLocalEmulator = false,
     this._targetPlatform = TargetPlatform.ios,
@@ -2838,7 +2839,6 @@ class CapturingAppDomain extends AppDomain {
     String? route,
     DebuggingOptions options,
     bool enableHotReload, {
-    Map<String, String> webDefines = const <String, String>{},
     File? applicationBinary,
     required bool trackWidgetCreation,
     String? projectRootPath,
@@ -2921,10 +2921,9 @@ class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
     Map<String, Object?> platformArgs = const <String, Object?>{},
     String? target,
     Future<String> Function(String)? urlTunneller,
-    Map<String, String> webDefines = const <String, String>{},
   }) {
     lastOptions = debuggingOptions;
-    lastWebDefines = webDefines;
+    lastWebDefines = debuggingOptions.webConfig.webDefines;
     return FakeResidentRunner();
   }
 }

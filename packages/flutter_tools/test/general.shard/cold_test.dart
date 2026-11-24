@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
@@ -71,9 +75,130 @@ void main() {
 
       expect(flutterDevice1.stopEchoingDeviceLogCount, 1);
       expect(flutterDevice2.stopEchoingDeviceLogCount, 1);
+      expect(flutterDevice1.wasDisposed, true);
+      expect(flutterDevice2.wasDisposed, true);
       expect(device2.wasDisposed, true);
       expect(device1.wasDisposed, true);
     });
+
+    testWithoutContext('destroys devFS when present', () async {
+      final fs = MemoryFileSystem.test();
+      final devFS = _FakeColdDevFS();
+      final device = FakeDevice();
+      final flutterDevice = FakeFlutterDevice(device)..devFS = devFS;
+      final ColdRunner runner = createColdRunner(
+        <FlutterDevice>[flutterDevice],
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+        stayResident: false,
+        target: 'main.dart',
+        toolContext: FakeToolContext(
+          cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
+          fs: fs,
+        ),
+      );
+
+      await runner.cleanupAtFinish();
+
+      expect(devFS.wasDestroyed, true);
+      expect(flutterDevice.wasDisposed, true);
+      expect(device.wasDisposed, true);
+    });
+  });
+
+  group('cold restart', () {
+    testWithoutContext('supportsRestart and reloadIsRestart reflect supportsColdRestart', () {
+      final fs = MemoryFileSystem.test();
+      final toolContext = FakeToolContext(
+        cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
+        fs: fs,
+      );
+      final nativeDevice = FakeFlutterDevice(FakeDevice());
+      final coldRestartDevice = FakeFlutterDevice(FakeDevice())..supportsColdRestart = true;
+
+      final ColdRunner nativeRunner = createColdRunner(
+        <FlutterDevice>[nativeDevice],
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+        target: 'main.dart',
+        toolContext: toolContext,
+      );
+      expect(nativeRunner.supportsRestart, false);
+      expect(nativeRunner.reloadIsRestart, false);
+
+      final ColdRunner coldRestartRunner = createColdRunner(
+        <FlutterDevice>[coldRestartDevice],
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+        target: 'main.dart',
+        toolContext: toolContext,
+      );
+      expect(coldRestartRunner.supportsRestart, true);
+      expect(coldRestartRunner.reloadIsRestart, true);
+
+      final ColdRunner mixedRunner = createColdRunner(
+        <FlutterDevice>[nativeDevice, coldRestartDevice],
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+        target: 'main.dart',
+        toolContext: toolContext,
+      );
+      expect(mixedRunner.supportsRestart, false);
+    });
+
+    testWithoutContext('restart invokes restartCold and handles ToolExit and Exception', () async {
+      final fs = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final flutterDevice = FakeFlutterDevice(FakeDevice())..supportsColdRestart = true;
+      final ColdRunner runner = createColdRunner(
+        <FlutterDevice>[flutterDevice],
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+        stayResident: false,
+        target: 'main.dart',
+        toolContext: FakeToolContext(
+          cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
+          fs: fs,
+          logger: logger,
+        ),
+      );
+
+      final OperationResult okResult = await runner.restart(fullRestart: true);
+      expect(okResult.isOk, true);
+      expect(flutterDevice.restartColdCount, 1);
+      expect(logger.statusText, contains('Restarted application in'));
+
+      flutterDevice.onRestartCold = () => throwToolExit('compile failed');
+      final OperationResult compileFailure = await runner.restart(fullRestart: true);
+      expect(compileFailure.code, 1);
+      expect(compileFailure.message, 'Failed to recompile application.');
+      expect(compileFailure.fatal, false);
+
+      flutterDevice.onRestartCold = () => throw Exception('wip disconnected');
+      final OperationResult fatalFailure = await runner.restart(fullRestart: true);
+      expect(fatalFailure.code, 1);
+      expect(fatalFailure.message, contains('wip disconnected'));
+      expect(fatalFailure.fatal, true);
+    });
+
+    testWithoutContext(
+      'run completes connectionInfoCompleter when supportsColdRestart without service protocol',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final flutterDevice = FakeFlutterDevice(FakeDevice())..supportsColdRestart = true;
+        final ColdRunner runner = createColdRunner(
+          <FlutterDevice>[flutterDevice],
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+          stayResident: false,
+          target: 'main.dart',
+          toolContext: FakeToolContext(
+            cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
+            fs: fs,
+          ),
+        );
+        final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+
+        final int exitCode = await runner.run(connectionInfoCompleter: connectionInfoCompleter);
+
+        expect(exitCode, 0);
+        expect(connectionInfoCompleter.isCompleted, true);
+      },
+    );
   });
 
   group('cold run', () {
@@ -175,11 +300,45 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   @override
   final Device device;
 
+  @override
+  DevFS? devFS;
+
+  @override
+  bool defersServiceProtocolConnection = false;
+
+  @override
+  bool supportsColdRestart = false;
+
+  @override
+  bool supportsDebugRuntime = true;
+
+  @override
+  bool supportsProfileServiceProtocol = true;
+
+  @override
+  bool usesSharedDartPluginRegistry = true;
+
   int stopEchoingDeviceLogCount = 0;
 
   @override
   Future<void> stopEchoingDeviceLog() async {
     stopEchoingDeviceLogCount += 1;
+  }
+
+  bool wasDisposed = false;
+
+  @override
+  Future<void> dispose() async {
+    wasDisposed = true;
+  }
+
+  int restartColdCount = 0;
+  void Function()? onRestartCold;
+
+  @override
+  Future<void> restartCold({required ColdRunner coldRunner}) async {
+    restartColdCount += 1;
+    onRestartCold?.call();
   }
 
   @override
@@ -348,4 +507,13 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
 
   @override
   bool areDependenciesModified(DevFSContent shaderContent) => false;
+}
+
+class _FakeColdDevFS extends Fake implements DevFS {
+  bool wasDestroyed = false;
+
+  @override
+  Future<void> destroy() async {
+    wasDestroyed = true;
+  }
 }

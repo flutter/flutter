@@ -380,6 +380,95 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   Device? device;
 
   @override
+  bool defersServiceProtocolConnection = false;
+
+  @override
+  bool alwaysReloadSources = false;
+
+  @override
+  String hotRestartTimingVariableName = 'restart';
+
+  @override
+  bool supportsColdRestart = false;
+
+  @override
+  bool supportsPerformanceOverlay = true;
+
+  @override
+  bool supportsVmServiceScreenshot = false;
+
+  @override
+  bool supportsDebugRuntime = true;
+
+  @override
+  bool supportsProfileServiceProtocol = true;
+
+  @override
+  bool usesSharedDartPluginRegistry = true;
+
+  @override
+  bool supportsShaderReload = true;
+
+  @override
+  bool supportsIsolatePauseEventLookup = true;
+
+  @override
+  bool usesHotRunner({required bool hotMode}) => hotMode;
+
+  @override
+  bool launchDevToolsInBrowser() => device!.dds.launchDevToolsInBrowser(this);
+
+  List<String>? extraFrontEndOptionsForCacheOverride;
+
+  @override
+  List<String> extraFrontEndOptionsForCache(BuildInfo buildInfo) =>
+      extraFrontEndOptionsForCacheOverride ?? buildInfo.extraFrontEndOptions;
+
+  @override
+  Future<bool?> performHotRestart() async => null;
+
+  @override
+  Future<List<Future<vm_service.ReloadReport>>?> reloadDeviceSources(
+    String entryPath, {
+    bool? pause = false,
+  }) async {
+    final deviceEntryUri = '${devFS!.baseUri!.resolve(entryPath)}';
+    final vm_service.VM vm = await vmService!.service.getVM();
+    return <Future<vm_service.ReloadReport>>[
+      for (final vm_service.IsolateRef isolateRef in vm.isolates!)
+        vmService!.service.reloadSources(isolateRef.id!, pause: pause, rootLibUri: deviceEntryUri),
+    ];
+  }
+
+  @override
+  Future<void> confirmAssetDirectory(List<FlutterView> views) async {
+    final DevFS? currentDevFS = devFS;
+    if (currentDevFS == null || currentDevFS.hasSetAssetDirectory) {
+      return;
+    }
+    final Uri deviceAssetsDirectoryUri = currentDevFS.baseUri!.resolveUri(
+      Uri.parse('build/flutter_assets'),
+    );
+    final List<FlutterView> activeViews = views
+        .where((FlutterView view) => view.uiIsolate != null)
+        .toList();
+    await Future.wait<void>(
+      activeViews.map<Future<void>>(
+        (FlutterView view) => vmService!.setAssetDirectory(
+          assetsDirectory: deviceAssetsDirectoryUri,
+          uiIsolateId: view.uiIsolate!.id,
+          viewId: view.id,
+          windows: targetPlatform.os == .windows,
+        ),
+      ),
+    );
+    currentDevFS.hasSetAssetDirectory = true;
+  }
+
+  @override
+  Future<void> dispose() async {}
+
+  @override
   Future<void> stopEchoingDeviceLog() async {}
 
   @override
@@ -526,7 +615,7 @@ class FakeProjectFileInvalidator extends Fake implements ProjectFileInvalidator 
   }
 }
 
-class FakeDevice extends Fake implements Device {
+class FakeDevice extends Fake with DefaultCreateFlutterDevice implements Device {
   FakeDevice({
     this._sdkNameAndVersion = 'Android',
     this._targetPlatform = TargetPlatform.android_arm,

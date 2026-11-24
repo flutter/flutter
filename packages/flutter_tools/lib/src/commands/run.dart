@@ -37,6 +37,7 @@ import '../runner/flutter_command.dart';
 import '../tracing.dart';
 import '../web/compile.dart';
 import '../web/devfs_config.dart';
+import '../web/web_debug_config.dart';
 import '../web/web_options.dart';
 import '../web/web_runner.dart';
 import 'daemon.dart';
@@ -194,16 +195,19 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
           ? getValue(WebOptions.webLaunchUrl)
           : null,
       crossOriginIsolation: webCrossOriginIsolation,
+      nativeNullAssertions:
+          !buildInfo.mode.isRelease && getValue(CommonOptions.nativeNullAssertions),
       renderer: webRenderer,
       useWasm: useWasm,
       devServerConfig: webDevServerConfig,
+      webDefines: extractWebDefines(),
     );
 
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
         dartEntrypointArgs: getValue(DebuggingOptionDescriptors.dartEntrypointArgs),
-        webConfig: webConfig,
+        platformOptions: <PlatformDebuggingOptions>[webConfig],
         enableImpeller: enableImpeller,
         enableFlutterGpu: enableFlutterGpu,
         enableVulkanValidation: enableVulkanValidation,
@@ -253,9 +257,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         ddsPort: ddsPort,
         devToolsServerAddress: devToolsServerAddress,
         verboseSystemLogs: getValue(DebuggingOptionDescriptors.verboseSystemLogs),
-        webConfig: webConfig,
+        platformOptions: <PlatformDebuggingOptions>[webConfig],
         vmserviceOutFile: getValue(DebuggingOptionDescriptors.vmserviceOutFile),
-        nativeNullAssertions: getValue(CommonOptions.nativeNullAssertions),
         enableImpeller: enableImpeller,
         enableFlutterGpu: enableFlutterGpu,
         enableVulkanValidation: enableVulkanValidation,
@@ -713,7 +716,6 @@ class RunCommand extends RunCommandBase {
         featureFlags: _featureFlags,
         flutterHookRunner: _flutterHookRunner,
         toolContext: toolContext,
-        webDefines: extractWebDefines(),
       );
     }
     return ColdRunner(
@@ -793,7 +795,6 @@ class RunCommand extends RunCommandBase {
           route,
           debuggingOptions,
           hotMode,
-          webDefines: extractWebDefines(),
           applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
           trackWidgetCreation: trackWidgetCreation,
           projectRootPath: getValue(DebuggingOptionDescriptors.projectRoot),
@@ -837,10 +838,9 @@ class RunCommand extends RunCommandBase {
 
     final flutterDevices = <FlutterDevice>[
       for (final Device device in devices!)
-        await FlutterDevice.create(
-          device,
+        await device.createFlutterDevice(
           buildInfo: buildInfo,
-          target: targetFile,
+          flutterProject: project,
           toolContext: toolContext,
           userIdentifier: userIdentifier,
         ),

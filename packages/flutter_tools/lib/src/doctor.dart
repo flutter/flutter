@@ -28,6 +28,7 @@ import 'cache.dart';
 import 'context/android_context.dart';
 import 'context/apple_context.dart';
 import 'context/tool_context.dart';
+import 'context/web_context.dart';
 import 'custom_devices/custom_device_workflow.dart';
 import 'device.dart';
 import 'doctor_validator.dart';
@@ -46,7 +47,6 @@ import 'macos/xcode_validator.dart';
 import 'proxy_validator.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
-import 'web/chrome.dart';
 import 'web/web_validator.dart';
 import 'web/workflow.dart';
 import 'windows/visual_studio.dart';
@@ -67,6 +67,7 @@ abstract class DoctorValidatorsProvider {
     required AppleContext appleContext,
     required FeatureFlags featureFlags,
     required ToolContext toolContext,
+    required WebContext webContext,
     required WindowsWorkflow windowsWorkflow,
     DeviceManager? deviceManager,
     ExtensionManager? extensionManager,
@@ -81,6 +82,7 @@ abstract class DoctorValidatorsProvider {
       featureFlags: featureFlags,
       httpClientFactory: httpClientFactory,
       toolContext: toolContext,
+      webContext: webContext,
       windowsWorkflow: windowsWorkflow,
     );
   }
@@ -96,6 +98,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
     required this._appleContext,
     required this.featureFlags,
     required this._toolContext,
+    required this._webContext,
     required this.windowsWorkflow,
     this._deviceManager,
     this.extensionManager,
@@ -112,13 +115,12 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   final ExtensionManager? extensionManager;
   final HttpClientFactory? _httpClientFactory;
   final ToolContext _toolContext;
+  final WebContext _webContext;
   final WindowsWorkflow windowsWorkflow;
 
   Platform get _platform => _toolContext.platform;
 
   late final linuxWorkflow = LinuxWorkflow(platform: _platform, featureFlags: featureFlags);
-
-  late final webWorkflow = WebWorkflow(platform: _platform, featureFlags: featureFlags);
 
   late final macOSWorkflow = MacOSWorkflow(platform: _platform, featureFlags: featureFlags);
 
@@ -179,6 +181,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       :IOSWorkflow iosWorkflow,
       :Xcode xcode,
     ) = _appleContext;
+    final WebWorkflow webWorkflow = _webContext.webWorkflow;
     final proxyValidator = ProxyValidator(platform: platform);
     return _validators = <DoctorValidator>[
       FlutterValidator(
@@ -217,17 +220,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
           cocoapodsValidator,
         ]),
       if (webWorkflow.appliesToHostPlatform)
-        ChromeValidator(
-          chromiumLauncher: ChromiumLauncher(
-            browserFinder: findChromeExecutable,
-            fileSystem: fs,
-            operatingSystemUtils: os,
-            platform: platform,
-            processManager: processManager,
-            logger: logger,
-          ),
-          platform: platform,
-        ),
+        ChromeValidator(chromiumLauncher: _webContext.chromiumLauncher, platform: platform),
       if (linuxWorkflow.appliesToHostPlatform)
         LinuxDoctorValidator(processManager: processManager, userMessages: userMessages),
       if (extensionManager case final ExtensionManager manager)
@@ -252,6 +245,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   @override
   List<Workflow> get workflows {
     final IOSWorkflow iosWorkflow = _appleContext.iosWorkflow;
+    final WebWorkflow webWorkflow = _webContext.webWorkflow;
     return _workflows ??= <Workflow>[
       if (iosWorkflow.appliesToHostPlatform) iosWorkflow,
       if (androidWorkflow.appliesToHostPlatform) androidWorkflow,

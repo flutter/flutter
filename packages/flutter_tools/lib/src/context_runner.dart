@@ -34,6 +34,7 @@ import 'cache.dart';
 import 'context/android_context.dart';
 import 'context/apple_context.dart';
 import 'context/tool_context.dart';
+import 'context/web_context.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'dart/pub.dart';
 import 'devfs.dart';
@@ -67,6 +68,7 @@ import 'run_hot.dart';
 import 'runner/local_engine.dart';
 import 'template.dart';
 import 'version.dart';
+import 'web/chrome.dart';
 import 'web/workflow.dart';
 import 'windows/visual_studio.dart';
 import 'windows/visual_studio_validator.dart';
@@ -440,6 +442,18 @@ DoctorValidatorsProvider _createDoctorValidatorsProvider({ExtensionManager? exte
     featureFlags: globals.featureFlags,
     httpClientFactory: globals.httpClientFactory,
     toolContext: const _GlobalToolContext(),
+    webContext: WebContext(
+      chromiumLauncherBuilder: () => ChromiumLauncher(
+        browserFinder: findChromeExecutable,
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        operatingSystemUtils: globals.os,
+        platform: globals.platform,
+        processManager: globals.processManager,
+      ),
+      webWorkflowBuilder: () =>
+          WebWorkflow(featureFlags: globals.featureFlags, platform: globals.platform),
+    ),
     windowsWorkflow: globals.windowsWorkflow!,
   );
 }
