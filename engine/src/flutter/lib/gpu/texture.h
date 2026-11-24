@@ -61,7 +61,8 @@ extern bool InternalFlutterGpu_Texture_Initialize(
     bool enable_shader_read_usage,
     bool enable_shader_write_usage,
     int mip_level_count,
-    int layer_count);
+    int layer_count,
+    int depth);
 
 FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_Texture_Overwrite(

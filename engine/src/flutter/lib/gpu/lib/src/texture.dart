@@ -46,6 +46,7 @@ base class Texture extends NativeFieldWrapperClass1 {
     this.enableShaderWriteUsage,
     this.mipLevelCount,
     this.layerCount,
+    this.depth,
   ) : _gpuContext = gpuContext {
     if (sampleCount != 1 && sampleCount != 4) {
       throw Exception("Only a sample count of 1 or 4 is currently supported");
@@ -63,6 +64,7 @@ base class Texture extends NativeFieldWrapperClass1 {
       enableShaderWriteUsage,
       mipLevelCount,
       layerCount,
+      depth,
     );
     if (!_valid) {
       // The engine logs the specific reason (for example, a compressed format
@@ -87,7 +89,8 @@ base class Texture extends NativeFieldWrapperClass1 {
       enableShaderReadUsage = true,
       enableShaderWriteUsage = false,
       mipLevelCount = 1,
-      layerCount = 1;
+      layerCount = 1,
+      depth = 1;
 
   /// Wraps the GPU texture that backs [image] as a Flutter GPU [Texture],
   /// without copying any pixel data.
@@ -129,7 +132,8 @@ base class Texture extends NativeFieldWrapperClass1 {
       enableShaderReadUsage = info[7] != 0,
       enableShaderWriteUsage = info[8] != 0,
       mipLevelCount = info[9],
-      layerCount = info[10] {
+      layerCount = info[10],
+      depth = 1 {
     _valid = _initializeFromImage(gpuContext, image);
     if (!_valid) {
       throw Exception("Texture.fromImage failed to wrap the image texture");
@@ -167,15 +171,21 @@ base class Texture extends NativeFieldWrapperClass1 {
   /// types other than [TextureType.texture2DArray].
   final int layerCount;
 
+  /// The depth of this texture in texels. Always 1 for texture types other
+  /// than [TextureType.texture3D].
+  final int depth;
+
   /// The number of slices in this texture. Determined by [textureType]:
-  /// 1 for 2D and external textures, 6 for cubemap textures, and
-  /// [layerCount] for 2D array textures.
+  /// 1 for 2D and external textures, 6 for cubemap textures, [layerCount] for
+  /// 2D array textures, and [depth] for 3D textures.
   int get sliceCount {
     switch (textureType) {
       case TextureType.textureCube:
         return 6;
       case TextureType.texture2DArray:
         return layerCount;
+      case TextureType.texture3D:
+        return depth;
       default:
         return 1;
     }
@@ -222,7 +232,8 @@ base class Texture extends NativeFieldWrapperClass1 {
   ///
   /// [slice] selects which slice to write to. For cubemap textures each face
   /// is a separate slice in the order `+X, -X, +Y, -Y, +Z, -Z`; for 2D array
-  /// textures each layer is a slice, in the range `[0, layerCount)`. Must be
+  /// textures each layer is a slice, in the range `[0, layerCount)`; for 3D
+  /// textures each depth slice is a slice, in the range `[0, depth)`. Must be
   /// 0 for other texture types.
   ///
   /// The length of [sourceBytes] must exactly match the size returned by
@@ -289,6 +300,7 @@ base class Texture extends NativeFieldWrapperClass1 {
       Bool,
       Int,
       Int,
+      Int,
     )
   >(symbol: 'InternalFlutterGpu_Texture_Initialize')
   external bool _initialize(
@@ -304,6 +316,7 @@ base class Texture extends NativeFieldWrapperClass1 {
     bool enableShaderWriteUsage,
     int mipLevelCount,
     int layerCount,
+    int depth,
   );
 
   @Native<Bool Function(Pointer<Void>, Pointer<Void>, Handle, Int, Int)>(

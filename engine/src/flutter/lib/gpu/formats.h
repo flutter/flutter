@@ -59,6 +59,7 @@ enum class FlutterGPUTextureType {
   kTextureCube,
   kTextureExternalOES,
   kTexture2DArray,
+  kTexture3D,
 };
 
 constexpr impeller::TextureType ToImpellerTextureType(
@@ -74,6 +75,8 @@ constexpr impeller::TextureType ToImpellerTextureType(
       return impeller::TextureType::kTextureExternalOES;
     case FlutterGPUTextureType::kTexture2DArray:
       return impeller::TextureType::kTexture2DArray;
+    case FlutterGPUTextureType::kTexture3D:
+      return impeller::TextureType::kTexture3D;
   }
 }
 
@@ -95,10 +98,8 @@ constexpr FlutterGPUTextureType FromImpellerTextureType(
     case impeller::TextureType::kTexture2DArray:
       return FlutterGPUTextureType::kTexture2DArray;
     case impeller::TextureType::kTexture3D:
-      // Not yet exposed by the Flutter GPU API, which never creates one.
-      break;
+      return FlutterGPUTextureType::kTexture3D;
   }
-  FML_UNREACHABLE();
 }
 
 enum class FlutterGPUPixelFormat {

@@ -143,6 +143,14 @@ extern bool InternalFlutterGpu_Context_GetSupportsTextureArrays(
     flutter::gpu::Context* wrapper);
 
 FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_Context_GetSupportsTexture3D(
+    flutter::gpu::Context* wrapper);
+
+FLUTTER_GPU_EXPORT
+extern uint32_t InternalFlutterGpu_Context_GetMaximumTexture3DSize(
+    flutter::gpu::Context* wrapper);
+
+FLUTTER_GPU_EXPORT
 extern int InternalFlutterGpu_Context_GetMaxSamplerAnisotropy(
     flutter::gpu::Context* wrapper);
 

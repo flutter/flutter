@@ -206,11 +206,15 @@ bool InternalFlutterGpu_Texture_Initialize(Dart_Handle wrapper,
                                            bool enable_shader_read_usage,
                                            bool enable_shader_write_usage,
                                            int mip_level_count,
-                                           int layer_count) {
+                                           int layer_count,
+                                           int depth) {
   if (mip_level_count < 1) {
     return false;
   }
   if (layer_count < 1) {
+    return false;
+  }
+  if (depth < 1) {
     return false;
   }
   FML_DCHECK(layer_count <= std::numeric_limits<uint16_t>::max());
@@ -220,6 +224,7 @@ bool InternalFlutterGpu_Texture_Initialize(Dart_Handle wrapper,
   desc.format = flutter::gpu::ToImpellerPixelFormat(format);
   desc.mip_count = static_cast<size_t>(mip_level_count);
   desc.array_layer_count = static_cast<uint16_t>(layer_count);
+  desc.depth = static_cast<uint32_t>(depth);
   desc.usage = {};
   if (enable_render_target_usage) {
     desc.usage |= impeller::TextureUsage::kRenderTarget;

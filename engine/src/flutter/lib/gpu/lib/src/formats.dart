@@ -647,4 +647,12 @@ enum TextureType {
   /// shaders as `sampler2DArray`. The layer count is set with the
   /// `layerCount` argument to `GpuContext.createTexture`.
   texture2DArray,
+
+  /// A 3-dimensional texture, sampled in shaders as `sampler3D`. The depth is
+  /// set with the `depth` argument to `GpuContext.createTexture`.
+  ///
+  /// 3D textures are sample-only, have a single mip level, and are filled one
+  /// depth slice at a time with [Texture.overwrite]. Check
+  /// `GpuContext.doesSupportTexture3D` before creating one.
+  texture3D,
 }
