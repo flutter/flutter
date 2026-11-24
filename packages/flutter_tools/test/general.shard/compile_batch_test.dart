@@ -420,7 +420,7 @@ void main() {
         final fileSystem = MemoryFileSystem.test(style: style);
         final stdoutHandler = StdoutHandler(logger: logger, fileSystem: fileSystem);
 
-        final String projectRoot = style == FileSystemStyle.windows ? r'C:\project' : '/project';
+        final projectRoot = style == FileSystemStyle.windows ? r'C:\project' : '/project';
         final String fileSystemRoot = fileSystem.path.join(
           projectRoot,
           '.dart_tool',
