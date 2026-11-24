@@ -24,6 +24,11 @@ std::unordered_map<int64_t, DlRect> SliceViews(
   // below.
   DlAutoCanvasRestore save(background_canvas, /*do_save=*/true);
 
+  // The parts of the frame given to overlay layers so far. Each of them is
+  // clipped out of the background canvas below, so no later slice can draw
+  // there in the background canvas either.
+  DlRegion overlay_region;
+
   for (size_t i = 0; i < current_frame_view_count; i++) {
     int64_t view_id = composition_order[i];
     EmbedderViewSlice* slice = slices.at(view_id).get();
@@ -107,12 +112,31 @@ std::unordered_map<int64_t, DlRect> SliceViews(
       }
     }
 
+    // An overlay is the bounding rect of its slice's intersections with the
+    // platform views, so it can also cover parts of the frame that no platform
+    // view is in, for example between two platform views that a modal barrier
+    // covers. Those parts are clipped out of the background canvas, so this
+    // slice must draw whatever it has there in its own overlay, which is above
+    // the earlier ones. Otherwise that content is not drawn at all.
+    //
+    // See: https://github.com/flutter/flutter/issues/166682
+    if (!overlay_region.isEmpty()) {
+      const DlRegion under_overlays =
+          DlRegion::MakeIntersection(slice->getRegion(), overlay_region);
+      if (!under_overlays.isEmpty()) {
+        full_joined_rect =
+            full_joined_rect.Union(DlRect::Make(under_overlays.bounds()));
+      }
+    }
+
     if (!full_joined_rect.IsEmpty()) {
       overlay_layers.insert({view_id, full_joined_rect});
 
       // Clip the background canvas, so it doesn't contain any of the pixels
       // drawn on the overlay layer.
       background_canvas->ClipRect(full_joined_rect, DlClipOp::kDifference);
+      overlay_region = DlRegion::MakeUnion(
+          overlay_region, DlRegion(DlIRect::RoundOut(full_joined_rect)));
     }
     slice->render_into(background_canvas);
   }
