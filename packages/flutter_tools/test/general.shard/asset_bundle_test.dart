@@ -1384,6 +1384,46 @@ flutter:
         },
       );
     }
+
+    testWithoutContext(
+      'rejects two hook files with the same bundle path on ${platform.operatingSystem}',
+      () async {
+        final fs = MemoryFileSystem.test(style: style);
+        final logger = BufferLogger.test();
+        writePackageConfigFiles(directory: fs.currentDirectory, mainLibName: 'my_app');
+        fs.file('pubspec.yaml').writeAsStringSync('name: my_app');
+        final File first = fs.file('first.txt')..createSync();
+        final File second = fs.file('second.txt')..createSync();
+        final bundle = ManifestAssetBundle(
+          logger: logger,
+          fileSystem: fs,
+          platform: platform,
+          flutterRoot: getFlutterRoot(),
+        );
+
+        final int result = await bundle.build(
+          packageConfigPath: fs.path.join('.dart_tool', 'package_config.json'),
+          targetPlatform: TargetPlatform.tester,
+          flutterHookResult: FlutterHookResult(
+            buildStart: first.lastModifiedSync(),
+            buildEnd: second.lastModifiedSync(),
+            dataAssets: <HookAsset>[
+              HookAsset(file: first.uri, name: 'shared.txt', package: 'my_app'),
+              HookAsset(file: second.uri, name: 'shared.txt', package: 'my_app'),
+            ],
+            dependencies: const <Uri>[],
+          ),
+        );
+
+        expect(result, 1);
+        expect(
+          logger.errorText,
+          contains(
+            'Multiple hook assets target the same bundle path: "packages/my_app/shared.txt"',
+          ),
+        );
+      },
+    );
   }
 
   testWithoutContext('reports package that causes asset bundle error when it is '

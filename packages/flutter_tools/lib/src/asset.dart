@@ -536,6 +536,7 @@ class ManifestAssetBundle implements AssetBundle {
         for (final variants in assetVariants.values)
           for (final variant in variants) variant.entryUri.path,
       };
+      final hookAssetPaths = <String>{};
       for (final dataAsset in dataAssets) {
         final Package package = packageConfig[dataAsset.package]!;
         final String filePath = _fileSystem.path.fromUri(dataAsset.file);
@@ -545,10 +546,15 @@ class ManifestAssetBundle implements AssetBundle {
           entryUri: Uri.parse('packages/${dataAsset.package}/${dataAsset.name}'),
           package: package,
         );
-        if (pubspecAssetPaths.contains(asset.entryUri.path) || assetVariants.containsKey(asset)) {
+        final String bundlePath = asset.entryUri.path;
+        if (pubspecAssetPaths.contains(bundlePath)) {
           _logger.printError(
             'Conflicting assets: The asset "$asset" was declared in the pubspec and the hook.',
           );
+          return 1;
+        }
+        if (!hookAssetPaths.add(bundlePath)) {
+          _logger.printError('Multiple hook assets target the same bundle path: "$bundlePath".');
           return 1;
         }
         assetVariants[asset] = <_Asset>[asset];
