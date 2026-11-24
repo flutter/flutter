@@ -221,6 +221,42 @@ void main() {
         reason: 'Feature runtime ID must contain only alphabetical or underscore characters',
       );
     });
+
+    testWithoutContext(
+      'withFlutterVersion updates FlutterVersion while preserving config and platform',
+      () {
+        const masterDefaultFeature = Feature(
+          name: 'master default',
+          master: FeatureChannelSetting(available: true, enabledByDefault: true),
+          stable: FeatureChannelSetting(available: true),
+        );
+        const masterOnlyFeature = Feature(
+          name: 'master only',
+          master: FeatureChannelSetting(available: true),
+        );
+        const configuredFeature = Feature.fullyEnabled(name: 'configured');
+
+        final masterVersion = FakeFlutterVersion();
+        final stableVersion = FakeFlutterVersion(branch: 'stable');
+        final config = _FakeFeaturesConfig()
+          ..cannedResponse[masterOnlyFeature] = true
+          ..cannedResponse[configuredFeature] = false;
+        final platform = FakePlatform(environment: <String, String>{'TERM': 'dumb'});
+        final masterFlags = FlutterFeatureFlags(
+          flutterVersion: masterVersion,
+          featuresConfig: config,
+          platform: platform,
+        );
+
+        final FlutterFeatureFlags stableFlags = masterFlags.withFlutterVersion(stableVersion);
+        expect(masterFlags.isEnabled(masterDefaultFeature), isTrue);
+        expect(masterFlags.isEnabled(masterOnlyFeature), isTrue);
+        expect(stableFlags.isEnabled(masterDefaultFeature), isFalse);
+        expect(stableFlags.isEnabled(masterOnlyFeature), isFalse);
+        expect(stableFlags.isEnabled(configuredFeature), isFalse);
+        expect(stableFlags.isCliAnimationEnabled, isFalse);
+      },
+    );
   });
 
   group('Linux Destkop', () {
@@ -510,29 +546,6 @@ void main() {
       final checkFlags = _TestIsGetterForwarding(shouldInvoke: toolExtensionsFeature);
       expect(checkFlags.isToolExtensionsEnabled, isTrue);
     });
-
-    testWithoutContext(
-      'withFlutterVersion updates FlutterVersion while preserving config and platform',
-      () {
-        final masterVersion = FakeFlutterVersion();
-        final stableVersion = FakeFlutterVersion(branch: 'stable');
-        final config = _FakeFeaturesConfig()..cannedResponse[flutterWebFeature] = false;
-        final platform = FakePlatform(environment: <String, String>{'TERM': 'dumb'});
-        final masterFlags = FlutterFeatureFlags(
-          flutterVersion: masterVersion,
-          featuresConfig: config,
-          platform: platform,
-        );
-
-        final FlutterFeatureFlags stableFlags = masterFlags.withFlutterVersion(stableVersion);
-        expect(masterFlags.isHcppEnabled, isTrue);
-        expect(masterFlags.isRiscv64SupportEnabled, isTrue);
-        expect(stableFlags.isHcppEnabled, isFalse);
-        expect(stableFlags.isRiscv64SupportEnabled, isFalse);
-        expect(stableFlags.isWebEnabled, isFalse);
-        expect(stableFlags.isCliAnimationEnabled, isFalse);
-      },
-    );
   });
 }
 
