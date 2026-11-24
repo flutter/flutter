@@ -502,6 +502,14 @@ class Environment implements AndroidSdkProvider {
     this.engineVersion,
   });
 
+  static Directory _resolveDirectory(Directory directory) {
+    try {
+      return directory.fileSystem.directory(directory.resolveSymbolicLinksSync());
+    } on FileSystemException {
+      return directory.absolute;
+    }
+  }
+
   Environment copyWith({FeatureFlags? featureFlags, Directory? outputDir}) {
     return Environment._(
       outputDir: outputDir ?? this.outputDir,
@@ -647,6 +655,14 @@ class Environment implements AndroidSdkProvider {
   final bool generateDartPluginRegistry;
 
   late final depFileService = DepfileService(logger: logger, fileSystem: fileSystem);
+
+  /// Returns [projectDir] with symlinks and relative segments resolved,
+  /// falling back to [Directory.absolute] if [projectDir] does not yet exist.
+  Directory get resolvedProjectDir => _resolveDirectory(projectDir);
+
+  /// Returns [outputDir] with symlinks and relative segments resolved,
+  /// falling back to [Directory.absolute] if [outputDir] does not yet exist.
+  Directory get resolvedOutputDir => _resolveDirectory(outputDir);
 }
 
 /// The result information from the build system.
@@ -928,14 +944,13 @@ void _deleteStaleOutputs({
   required Set<String> preservedOutputFilePaths,
   required Iterable<String> previousOutputs,
 }) {
-  String projectDirPath;
-  try {
-    projectDirPath = environment.projectDir.resolveSymbolicLinksSync();
-  } on FileSystemException {
-    projectDirPath = environment.projectDir.absolute.path;
-  }
   final String sharedHooksPath = fileSystem.path.canonicalize(
-    fileSystem.path.join(projectDirPath, '.dart_tool', 'hooks_runner', 'shared'),
+    fileSystem.path.join(
+      environment.resolvedProjectDir.path,
+      '.dart_tool',
+      'hooks_runner',
+      'shared',
+    ),
   );
   for (final previousOutput in previousOutputs) {
     if (currentOutputs.containsKey(previousOutput)) {
