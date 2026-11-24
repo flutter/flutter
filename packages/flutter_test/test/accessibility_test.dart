@@ -1042,6 +1042,16 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('Skips images inside a hidden subtree', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(Semantics(container: true, hidden: true, child: image())),
+      );
+      final Evaluation result = await labeledImageGuideline.evaluate(tester);
+      expect(result.passed, true);
+      handle.dispose();
+    });
+
     testWidgets('Skips tappable images', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(image(onTap: () {})));

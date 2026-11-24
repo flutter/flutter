@@ -956,11 +956,15 @@ class UnlabeledImageEvaluation extends AccessibilityEvaluation {
 
   List<Violation> _traverse(SemanticsNode node) {
     final violations = <Violation>[];
+    // Children of a hidden node do not inherit the hidden flag, so skip the whole subtree.
+    if (node.flagsCollection.isHidden) {
+      return violations;
+    }
     node.visitChildren((SemanticsNode child) {
       violations.addAll(_traverse(child));
       return true;
     });
-    if (node.isMergedIntoParent || node.isInvisible || node.flagsCollection.isHidden) {
+    if (node.isMergedIntoParent || node.isInvisible) {
       return violations;
     }
     final SemanticsData data = node.getSemanticsData();

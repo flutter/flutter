@@ -770,6 +770,24 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('skips images inside a hidden subtree', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final List<Violation> violations = await evaluate(
+        tester,
+        Semantics(
+          container: true,
+          hidden: true,
+          child: Semantics(
+            container: true,
+            image: true,
+            child: const SizedBox.square(dimension: 10.0),
+          ),
+        ),
+      );
+      expect(violations, isEmpty);
+      handle.dispose();
+    });
+
     testWidgets('skips tappable images', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       final List<Violation> violations = await evaluate(

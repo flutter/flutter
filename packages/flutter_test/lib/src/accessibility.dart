@@ -87,6 +87,8 @@ class Evaluation {
 ///    requirements specified by [WCAG](https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html#contrast-ratiodef).
 ///  * [labeledTapTargetGuideline], which enforces that all nodes with a tap or
 ///    long press action also have a label.
+///  * [labeledImageGuideline], which enforces that all image nodes have a
+///    label, value, hint, or tooltip.
 abstract class AccessibilityGuideline {
   /// A const constructor allows subclasses to be const.
   const AccessibilityGuideline();
@@ -287,7 +289,10 @@ class LabeledImageGuideline extends AccessibilityGuideline {
     var result = const Evaluation.pass();
 
     for (final RenderView view in tester.binding.renderViews) {
-      result += _traverse(view.owner!.semanticsOwner!.rootSemanticsNode!);
+      final SemanticsNode? root = view.owner?.semanticsOwner?.rootSemanticsNode;
+      if (root != null) {
+        result += _traverse(root);
+      }
     }
 
     return result;
@@ -295,11 +300,15 @@ class LabeledImageGuideline extends AccessibilityGuideline {
 
   Evaluation _traverse(SemanticsNode node) {
     var result = const Evaluation.pass();
+    // Children of a hidden node do not inherit the hidden flag, so skip the whole subtree.
+    if (node.flagsCollection.isHidden) {
+      return result;
+    }
     node.visitChildren((SemanticsNode child) {
       result += _traverse(child);
       return true;
     });
-    if (node.isMergedIntoParent || node.isInvisible || node.flagsCollection.isHidden) {
+    if (node.isMergedIntoParent || node.isInvisible) {
       return result;
     }
     final SemanticsData data = node.getSemanticsData();
@@ -890,6 +899,7 @@ const AccessibilityGuideline labeledTapTargetGuideline = LabeledTapTargetGuideli
 /// be absorbed into an enclosing node that has an unrelated label, and that
 /// node passes. A decorative image should set [Image.excludeFromSemantics].
 ///
+/// See also:
 ///  * [AccessibilityGuideline], which provides a general overview of
 ///    accessibility guidelines and how to use them.
 const AccessibilityGuideline labeledImageGuideline = LabeledImageGuideline._();
