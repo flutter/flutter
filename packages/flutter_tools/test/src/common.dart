@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:test/test.dart' as test_package show test;
@@ -74,7 +73,7 @@ String getFlutterRoot() {
       throw invalidScript();
   }
 
-  final List<String> parts = path.split(globals.localFileSystem.path.fromUri(scriptUri));
+  final List<String> parts = path.split(path.fromUri(scriptUri));
   final int toolsIndex = parts.indexOf('flutter_tools');
   if (toolsIndex == -1) {
     throw invalidScript();
@@ -196,9 +195,7 @@ void test(
   test_package.test(
     description,
     () async {
-      addTearDown(() async {
-        await globals.localFileSystem.dispose();
-      });
+      addTearDown(disposeFallbackLocalFileSystem);
 
       return io.IOOverrides.runWithIOOverrides(() => body(), FSGuardIOOverrides());
     },
