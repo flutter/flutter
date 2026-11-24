@@ -90,6 +90,11 @@ abstract class AotAssemblyBase extends Target {
     }
     final String? codeSizeDirectory = environment.defines[kCodeSizeDirectory];
 
+    // sdkRoot is the SDK being built against (Xcode's SDKROOT for app
+    // builds), so xcrun reports that exact SDK's version. Look it up once
+    // here rather than once per architecture.
+    final String sdkVersion = await environment.xcode!.sdkVersion(sdkRoot);
+
     // If we're building multiple iOS archs the binaries need to be lipo'd
     // together.
     final pending = <Future<int>>[];
@@ -112,7 +117,7 @@ abstract class AotAssemblyBase extends Target {
           mainPath: environment.buildDir.childFile('app.dill').path,
           outputPath: environment.fileSystem.path.join(buildOutputPath, cpuArch.darwinArchName),
           cpuArch: cpuArch,
-          sdkRoot: sdkRoot,
+          sdkVersion: sdkVersion,
           quiet: true,
           splitDebugInfo: splitDebugInfo,
           dartObfuscation: dartObfuscation,

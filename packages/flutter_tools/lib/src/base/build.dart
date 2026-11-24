@@ -112,13 +112,17 @@ class AOTSnapshotter {
   final GenSnapshot _genSnapshot;
 
   /// Builds an architecture-specific ahead-of-time compiled snapshot of the specified script.
+  ///
+  /// [sdkVersion] is the version of the SDK being built against, for example
+  /// '26.0'. It is required when [platform] is iOS or macOS, where it is
+  /// written to the `LC_BUILD_VERSION` load command of the snapshot.
   Future<int> build({
     required TargetPlatform platform,
     required BuildMode buildMode,
     required String mainPath,
     required String outputPath,
     CpuArch? cpuArch,
-    String? sdkRoot,
+    String? sdkVersion,
     List<String> extraGenSnapshotOptions = const <String>[],
     String? splitDebugInfo,
     required bool dartObfuscation,
@@ -172,10 +176,6 @@ class AOTSnapshotter {
     if (targetingApplePlatform) {
       // On iOS and macOS, we use Xcode to compile the snapshot into a dynamic
       // library that the end-developer can link into their app.
-      final Xcode? xcode = _xcode;
-      if (xcode == null) {
-        throw StateError('Xcode must be provided when targeting Apple platforms.');
-      }
       const frameworkName = 'App.framework';
       if (!quiet) {
         final String targetArch = cpuArch!.darwinArchName;
@@ -193,14 +193,9 @@ class AOTSnapshotter {
       final minOSVersion = platform == TargetPlatform.ios
           ? FlutterDarwinPlatform.ios.deploymentTarget().toString()
           : FlutterDarwinPlatform.macos.deploymentTarget().toString();
-
-      // sdkRoot is the SDK being built against (Xcode's SDKROOT for app
-      // builds), so xcrun reports that exact SDK's version.
-      if (sdkRoot == null) {
-        throw ArgumentError.notNull('sdkRoot');
+      if (sdkVersion == null) {
+        throw ArgumentError.notNull('sdkVersion');
       }
-      final String sdkVersion = await xcode.sdkVersion(sdkRoot);
-
       genSnapshotArgs.addAll(<String>[
         '--snapshot_kind=app-aot-macho-dylib',
         '--macho=$aotSharedLibrary',

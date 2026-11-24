@@ -134,7 +134,7 @@ void main() {
         await snapshotter.build(
           platform: TargetPlatform.ios,
           cpuArch: CpuArch.arm64,
-          sdkRoot: 'path/to/sdk',
+          sdkVersion: '27.0',
           buildMode: BuildMode.debug,
           mainPath: 'main.dill',
           outputPath: outputPath,
@@ -174,7 +174,25 @@ void main() {
       );
     });
 
-    testWithoutContext('throws if sdkRoot is missing for macOS', () async {
+    testWithoutContext('throws if sdkVersion is missing for iOS', () async {
+      final String outputPath = fileSystem.path.join('build', 'foo');
+
+      await expectLater(
+        snapshotter.build(
+          platform: TargetPlatform.ios,
+          cpuArch: CpuArch.arm64,
+          buildMode: BuildMode.release,
+          mainPath: 'main.dill',
+          outputPath: outputPath,
+          dartObfuscation: false,
+          quiet: true,
+        ),
+        throwsArgumentError,
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('throws if sdkVersion is missing for macOS', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
 
       await expectLater(
@@ -201,12 +219,6 @@ void main() {
         mode: BuildMode.profile,
       );
       processManager.addCommands(<FakeCommand>[
-        kWhichSysctlCommand,
-        kx64CheckCommand,
-        const FakeCommand(
-          command: <String>['xcrun', '--sdk', 'path/to/sdk', '--show-sdk-version'],
-          stdout: '27.0',
-        ),
         FakeCommand(
           command: <String>[
             genSnapshotPath,
@@ -224,6 +236,8 @@ void main() {
             'main.dill',
           ],
         ),
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -251,7 +265,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         cpuArch: CpuArch.arm64,
-        sdkRoot: 'path/to/sdk',
+        sdkVersion: '27.0',
         splitDebugInfo: 'foo',
         dartObfuscation: false,
       );
@@ -268,12 +282,6 @@ void main() {
         mode: BuildMode.profile,
       );
       processManager.addCommands(<FakeCommand>[
-        kWhichSysctlCommand,
-        kx64CheckCommand,
-        const FakeCommand(
-          command: <String>['xcrun', '--sdk', 'path/to/sdk', '--show-sdk-version'],
-          stdout: '27.0',
-        ),
         FakeCommand(
           command: <String>[
             genSnapshotPath,
@@ -289,6 +297,8 @@ void main() {
             'main.dill',
           ],
         ),
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -316,7 +326,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         cpuArch: CpuArch.arm64,
-        sdkRoot: 'path/to/sdk',
+        sdkVersion: '27.0',
         dartObfuscation: true,
       );
 
@@ -332,12 +342,6 @@ void main() {
         mode: BuildMode.release,
       );
       processManager.addCommands(<FakeCommand>[
-        kWhichSysctlCommand,
-        kx64CheckCommand,
-        const FakeCommand(
-          command: <String>['xcrun', '--sdk', 'path/to/sdk', '--show-sdk-version'],
-          stdout: '27.0',
-        ),
         FakeCommand(
           command: <String>[
             genSnapshotPath,
@@ -352,6 +356,8 @@ void main() {
             'main.dill',
           ],
         ),
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -379,7 +385,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         cpuArch: CpuArch.arm64,
-        sdkRoot: 'path/to/sdk',
+        sdkVersion: '27.0',
         dartObfuscation: false,
       );
 

@@ -295,6 +295,11 @@ class CompileMacOSFramework extends Target {
       throw Exception('compile_macos_framework is only supported for darwin TargetPlatform.');
     }
 
+    // sdkRoot is the SDK being built against (Xcode's SDKROOT for app
+    // builds), so xcrun reports that exact SDK's version. Look it up once
+    // here rather than once per architecture.
+    final String sdkVersion = await environment.xcode!.sdkVersion(sdkRoot);
+
     final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
@@ -326,7 +331,7 @@ class CompileMacOSFramework extends Target {
           outputPath: environment.fileSystem.path.join(buildOutputPath, cpuArch.darwinArchName),
           platform: TargetPlatform.darwin,
           cpuArch: cpuArch,
-          sdkRoot: sdkRoot,
+          sdkVersion: sdkVersion,
           splitDebugInfo: splitDebugInfo,
           dartObfuscation: dartObfuscation,
           extraGenSnapshotOptions: extraGenSnapshotOptions,

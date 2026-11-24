@@ -862,11 +862,7 @@ void main() {
           .createSync(recursive: true);
 
       processManager.addCommands(<FakeCommand>[
-        // One SDK version lookup per architecture.
-        const FakeCommand(
-          command: <String>['xcrun', '--sdk', sdkRoot, '--show-sdk-version'],
-          stdout: '27.0',
-        ),
+        // One SDK version lookup for both architectures.
         const FakeCommand(
           command: <String>['xcrun', '--sdk', sdkRoot, '--show-sdk-version'],
           stdout: '27.0',
