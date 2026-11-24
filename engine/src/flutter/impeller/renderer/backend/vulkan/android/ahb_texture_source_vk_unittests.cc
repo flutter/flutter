@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <algorithm>
 #include <android/hardware_buffer.h>
+#include <algorithm>
 #include <memory>
 
 #include "flutter/testing/testing.h"

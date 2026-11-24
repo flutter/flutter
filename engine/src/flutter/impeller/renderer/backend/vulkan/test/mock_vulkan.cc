@@ -588,6 +588,19 @@ VkResult vkAllocateMemory(VkDevice device,
   return VK_SUCCESS;
 }
 
+VkResult vkMapMemory(VkDevice device,
+                     VkDeviceMemory memory,
+                     VkDeviceSize offset,
+                     VkDeviceSize size,
+                     VkMemoryMapFlags flags,
+                     void** ppData) {
+  alignas(16) static uint8_t mapped_memory[65536];
+  *ppData = mapped_memory;
+  return VK_SUCCESS;
+}
+
+void vkUnmapMemory(VkDevice device, VkDeviceMemory memory) {}
+
 VkResult vkBindImageMemory(VkDevice device,
                            VkImage image,
                            VkDeviceMemory memory,
@@ -618,6 +631,13 @@ VkResult vkCreateBuffer(VkDevice device,
                         VkBuffer* pBuffer) {
   *pBuffer = reinterpret_cast<VkBuffer>(0xDEADDEAD);
   return VK_SUCCESS;
+}
+
+void vkDestroyBuffer(VkDevice device,
+                     VkBuffer buffer,
+                     const VkAllocationCallbacks* pAllocator) {
+  MockDevice* mock_device = MockDevice::Unwrap(device);
+  mock_device->AddCalledFunction("vkDestroyBuffer");
 }
 
 void vkGetBufferMemoryRequirements2KHR(
@@ -1321,6 +1341,10 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
         vkGetImageMemoryRequirements2KHR);
   } else if (strcmp("vkAllocateMemory", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkAllocateMemory);
+  } else if (strcmp("vkMapMemory", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkMapMemory);
+  } else if (strcmp("vkUnmapMemory", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkUnmapMemory);
   } else if (strcmp("vkBindImageMemory", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkBindImageMemory);
   } else if (strcmp("vkCreateImageView", pName) == 0) {
@@ -1329,6 +1353,8 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyImageView);
   } else if (strcmp("vkCreateBuffer", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreateBuffer);
+  } else if (strcmp("vkDestroyBuffer", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyBuffer);
   } else if (strcmp("vkGetBufferMemoryRequirements2KHR", pName) == 0 ||
              strcmp("vkGetBufferMemoryRequirements2", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(

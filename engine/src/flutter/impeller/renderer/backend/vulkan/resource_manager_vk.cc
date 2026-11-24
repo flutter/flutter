@@ -23,13 +23,7 @@ std::shared_ptr<ResourceManagerVK> ResourceManagerVK::Create() {
 ResourceManagerVK::ResourceManagerVK() : waiter_([&]() { Start(); }) {}
 
 ResourceManagerVK::~ResourceManagerVK() {
-  FML_DCHECK(waiter_.get_id() != std::this_thread::get_id())
-      << "The ResourceManager being destructed on its own spawned thread is a "
-      << "sign that ContextVK was not properly destroyed. A usual fix for this "
-      << "is to ensure that ContextVK is shutdown (i.e. context->Shutdown()) "
-         "before the ResourceManager is destroyed (i.e. at the end of a test).";
   Terminate();
-  waiter_.join();
 }
 
 void ResourceManagerVK::Start() {
@@ -78,20 +72,32 @@ void ResourceManagerVK::Reclaim(std::unique_ptr<ResourceVK> resource) {
   }
   {
     std::scoped_lock lock(reclaimables_mutex_);
-    reclaimables_.emplace_back(std::move(resource));
+    if (!should_exit_) {
+      reclaimables_.emplace_back(std::move(resource));
+      reclaimables_cv_.notify_one();
+      return;
+    }
   }
-  reclaimables_cv_.notify_one();
+  // ResourceManagerVK has already terminated; destroy inline outside the lock.
+  resource.reset();
 }
 
 void ResourceManagerVK::Terminate() {
-  // The thread should not be terminated more than once.
-  FML_DCHECK(!should_exit_);
-
+  std::scoped_lock terminate_lock(terminate_mutex_);
   {
     std::scoped_lock lock(reclaimables_mutex_);
     should_exit_ = true;
   }
   reclaimables_cv_.notify_one();
+  if (waiter_.joinable()) {
+    FML_DCHECK(waiter_.get_id() != std::this_thread::get_id())
+        << "The ResourceManager being terminated on its own spawned thread is "
+        << "a sign that ContextVK was not properly destroyed. A usual fix for "
+        << "this is to ensure that ContextVK is shutdown (i.e. "
+        << "context->Shutdown()) before the ResourceManager is destroyed (i.e. "
+        << "at the end of a test).";
+    waiter_.join();
+  }
 }
 
 }  // namespace impeller

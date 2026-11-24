@@ -9,19 +9,45 @@
 
 namespace impeller {
 
+DeviceBufferVK::BufferResource::~BufferResource() {
+  if (tracker) {
+    auto lock = tracker->LockShared();
+    if (!tracker->IsShutdown()) {
+      tracker->Unregister(this);
+      info = {};
+      buffer.reset();
+    }
+  }
+}
+
+void DeviceBufferVK::BufferResource::Invalidate(void* ptr) {
+  auto* self = static_cast<BufferResource*>(ptr);
+  self->info = {};
+  self->buffer.reset();
+}
+
 DeviceBufferVK::DeviceBufferVK(DeviceBufferDescriptor desc,
                                std::weak_ptr<Context> context,
                                UniqueBufferVMA buffer,
                                VmaAllocationInfo info,
-                               bool is_host_coherent)
+                               bool is_host_coherent,
+                               std::shared_ptr<VmaResourceTracker> tracker)
     : DeviceBuffer(desc),
       context_(std::move(context)),
+      tracker_(tracker),
       resource_(ContextVK::Cast(*context_.lock().get()).GetResourceManager(),
                 BufferResource{
                     std::move(buffer),  //
-                    info                //
+                    info,               //
+                    std::move(tracker)  //
                 }),
-      is_host_coherent_(is_host_coherent) {}
+      is_host_coherent_(is_host_coherent) {
+  if (tracker_) {
+    if (auto* res = resource_.GetMutable()) {
+      tracker_->Register(res, &BufferResource::Invalidate);
+    }
+  }
+}
 
 DeviceBufferVK::~DeviceBufferVK() = default;
 
@@ -32,6 +58,11 @@ uint8_t* DeviceBufferVK::OnGetContents() const {
 bool DeviceBufferVK::OnCopyHostBuffer(const uint8_t* source,
                                       Range source_range,
                                       size_t offset) {
+  auto lock =
+      tracker_ ? tracker_->LockShared() : std::shared_lock<std::shared_mutex>{};
+  if ((tracker_ && tracker_->IsShutdown()) || !resource_->buffer.is_valid()) {
+    return false;
+  }
   uint8_t* dest = OnGetContents();
 
   if (!dest) {
@@ -50,9 +81,15 @@ bool DeviceBufferVK::OnCopyHostBuffer(const uint8_t* source,
 
 bool DeviceBufferVK::SetLabel(std::string_view label) {
 #ifdef IMPELLER_DEBUG
+  // Lock context_ before tracker_ so context drops after the shared lock.
   auto context = context_.lock();
-  if (!context || !resource_->buffer.is_valid()) {
+  if (!context) {
     // The context could have died at this point.
+    return false;
+  }
+  auto lock =
+      tracker_ ? tracker_->LockShared() : std::shared_lock<std::shared_mutex>{};
+  if ((tracker_ && tracker_->IsShutdown()) || !resource_->buffer.is_valid()) {
     return false;
   }
 
@@ -69,7 +106,7 @@ bool DeviceBufferVK::SetLabel(std::string_view label) {
 }
 
 void DeviceBufferVK::Flush(std::optional<Range> range) const {
-  if (is_host_coherent_) {
+  if (is_host_coherent_ || !resource_->buffer.is_valid()) {
     return;
   }
   auto flush_range = range.value_or(Range{0, GetDeviceBufferDescriptor().size});
@@ -84,6 +121,11 @@ bool DeviceBufferVK::IsHostCoherent() const {
 }
 
 void DeviceBufferVK::Invalidate(std::optional<Range> range) const {
+  auto lock =
+      tracker_ ? tracker_->LockShared() : std::shared_lock<std::shared_mutex>{};
+  if ((tracker_ && tracker_->IsShutdown()) || !resource_->buffer.is_valid()) {
+    return;
+  }
   auto flush_range = range.value_or(Range{0, GetDeviceBufferDescriptor().size});
   ::vmaInvalidateAllocation(resource_->buffer.get().allocator,
                             resource_->buffer.get().allocation,

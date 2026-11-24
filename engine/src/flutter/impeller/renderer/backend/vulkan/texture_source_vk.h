@@ -6,8 +6,10 @@
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_TEXTURE_SOURCE_VK_H_
 
 #include <cstdint>
+#include <memory>
 #include <vector>
 
+#include "impeller/base/thread.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/vulkan/barrier_vk.h"
@@ -51,6 +53,10 @@ class TextureSourceVK {
   /// @return     The texture descriptor.
   ///
   const TextureDescriptor& GetTextureDescriptor() const;
+
+  /// @brief      Returns whether the backing Vulkan image and views are still
+  ///             valid. Returns false after context teardown invalidation.
+  virtual bool IsValid() const { return true; }
 
   //----------------------------------------------------------------------------
   /// @brief      Get the image handle for this texture source.
@@ -173,29 +179,42 @@ class TextureSourceVK {
                                               uint32_t slice = 0u) const;
 
  protected:
-  const TextureDescriptor desc_;
-
-  explicit TextureSourceVK(TextureDescriptor desc);
-
-  /// Clear cached framebuffers and render passes before subclass members
-  /// release their VkImageView or DeviceHolderVK references.
-  ///
-  /// Must only be called from subclass destructors, as `frame_data_` is not
-  /// synchronized.
-  void ResetFrameData() { frame_data_.clear(); }
-
- private:
   struct CachedFrameDataEntry {
     SampleCount sample_count = SampleCount::kCount1;
     uint32_t mip_level = 0;
     uint32_t slice = 0;
     FramebufferAndRenderPass data;
   };
-  // Linear-scanned because N is typically 1 and bounded by
-  // `sample_counts * mip_count * layer_count` for the rare textures that
-  // are rendered to across many subresources (e.g. a fully populated cube
-  // mip chain).
-  std::vector<CachedFrameDataEntry> frame_data_;
+
+  struct FrameDataCache {
+    mutable Mutex mutex;
+    // Linear-scanned because N is typically 1 and bounded by
+    // `sample_counts * mip_count * layer_count` for the rare textures that
+    // are rendered to across many subresources (e.g. a fully populated cube
+    // mip chain).
+    std::vector<CachedFrameDataEntry> entries IPLR_GUARDED_BY(mutex);
+
+    void Clear() {
+      Lock lock(mutex);
+      entries.clear();
+    }
+  };
+
+  const TextureDescriptor desc_;
+
+  explicit TextureSourceVK(TextureDescriptor desc);
+
+  /// Clear cached framebuffers and render passes before subclass members
+  /// release their VkImageView or DeviceHolderVK references.
+  void ResetFrameData() { frame_data_->Clear(); }
+
+  std::weak_ptr<FrameDataCache> GetFrameDataCache() const {
+    return frame_data_;
+  }
+
+ private:
+  std::shared_ptr<FrameDataCache> frame_data_ =
+      std::make_shared<FrameDataCache>();
   mutable vk::ImageLayout layout_ = vk::ImageLayout::eUndefined;
 };
 

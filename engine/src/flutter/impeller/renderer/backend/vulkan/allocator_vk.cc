@@ -164,14 +164,24 @@ AllocatorVK::AllocatorVK(std::weak_ptr<Context> context,
   allocator_.reset(allocator);
   supports_memoryless_textures_ =
       capabilities.SupportsDeviceTransientTextures();
-  is_valid_ = true;
+  is_valid_.store(true, std::memory_order_release);
 }
 
-AllocatorVK::~AllocatorVK() = default;
+AllocatorVK::~AllocatorVK() {
+  Invalidate();
+}
+
+void AllocatorVK::Invalidate() {
+  tracker_->Shutdown([this]() {
+    is_valid_.store(false, std::memory_order_release);
+    staging_buffer_pool_.reset();
+    allocator_.reset();
+  });
+}
 
 // |Allocator|
 bool AllocatorVK::IsValid() const {
-  return is_valid_;
+  return is_valid_.load(std::memory_order_acquire);
 }
 
 // |Allocator|
@@ -292,8 +302,11 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
                            const TextureDescriptor& desc,
                            VmaAllocator allocator,
                            vk::Device device,
-                           bool supports_memoryless_textures)
-      : TextureSourceVK(desc), resource_(context.GetResourceManager()) {
+                           bool supports_memoryless_textures,
+                           std::shared_ptr<VmaResourceTracker> tracker)
+      : TextureSourceVK(desc),
+        tracker_(std::move(tracker)),
+        resource_(context.GetResourceManager()) {
     FML_DCHECK(desc.format != PixelFormat::kUnknown);
     vk::StructureChain<vk::ImageCreateInfo, vk::ImageCompressionControlEXT>
         image_info_chain;
@@ -405,6 +418,7 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     }
 
     auto image = vk::Image{vk_image};
+    UniqueImageVMA unique_image{ImageVMA{allocator, allocation, image}};
 
     vk::ImageViewCreateInfo view_info = {};
     view_info.image = image;
@@ -480,20 +494,23 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
       }
     }
 
-    resource_.Swap(ImageResource(
-        ImageVMA{allocator, allocation, image}, std::move(image_view),
-        std::move(base_mip_image_view), std::move(rt_image_views),
-        context.GetResourceAllocator(), context.GetDeviceHolder()));
+    resource_.Swap(ImageResource(std::move(unique_image), std::move(image_view),
+                                 std::move(base_mip_image_view),
+                                 std::move(rt_image_views), tracker_,
+                                 GetFrameDataCache()));
     is_valid_ = true;
+    if (tracker_) {
+      if (auto* res = resource_.GetMutable()) {
+        tracker_->Register(res, &ImageResource::Invalidate);
+      }
+    }
   }
 
-  ~AllocatedTextureSourceVK() override {
-    // Destroy cached framebuffers and render passes while resource_ still keeps
-    // the backing DeviceHolderVK alive.
-    ResetFrameData();
-  }
+  ~AllocatedTextureSourceVK() override { ResetFrameData(); }
 
-  bool IsValid() const { return is_valid_; }
+  bool IsValid() const override {
+    return is_valid_ && resource_->is_valid.load(std::memory_order_acquire);
+  }
 
   vk::Image GetImage() const override { return resource_->image.get().image; }
 
@@ -521,8 +538,8 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
 
  private:
   struct ImageResource {
-    std::shared_ptr<DeviceHolderVK> device_holder;
-    std::shared_ptr<Allocator> allocator;
+    std::shared_ptr<VmaResourceTracker> tracker;
+    std::weak_ptr<FrameDataCache> frame_data_cache;
     UniqueImageVMA image;
     vk::UniqueImageView image_view;
     // Covers the base mip level only. Null unless the driver generates corrupt
@@ -530,29 +547,64 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     vk::UniqueImageView base_mip_image_view;
     // One attachment view per (mip level, array layer), row-major by mip.
     std::vector<vk::UniqueImageView> rt_image_views;
+    std::atomic<bool> is_valid{true};
 
     ImageResource() = default;
 
-    ImageResource(ImageVMA p_image,
+    ImageResource(UniqueImageVMA p_image,
                   vk::UniqueImageView p_image_view,
                   vk::UniqueImageView p_base_mip_image_view,
                   std::vector<vk::UniqueImageView> p_rt_image_views,
-                  std::shared_ptr<Allocator> allocator,
-                  std::shared_ptr<DeviceHolderVK> device_holder)
-        : device_holder(std::move(device_holder)),
-          allocator(std::move(allocator)),
-          image(p_image),
+                  std::shared_ptr<VmaResourceTracker> p_tracker,
+                  std::weak_ptr<FrameDataCache> p_frame_data_cache)
+        : tracker(std::move(p_tracker)),
+          frame_data_cache(std::move(p_frame_data_cache)),
+          image(std::move(p_image)),
           image_view(std::move(p_image_view)),
           base_mip_image_view(std::move(p_base_mip_image_view)),
           rt_image_views(std::move(p_rt_image_views)) {}
 
-    ImageResource(ImageResource&& o) = default;
+    ImageResource(ImageResource&& o) noexcept
+        : tracker(std::move(o.tracker)),
+          frame_data_cache(std::move(o.frame_data_cache)),
+          image(std::move(o.image)),
+          image_view(std::move(o.image_view)),
+          base_mip_image_view(std::move(o.base_mip_image_view)),
+          rt_image_views(std::move(o.rt_image_views)),
+          is_valid(o.is_valid.load(std::memory_order_relaxed)) {}
+
+    ~ImageResource() {
+      if (tracker) {
+        auto lock = tracker->LockShared();
+        if (!tracker->IsShutdown()) {
+          tracker->Unregister(this);
+          ResetHandles();
+        }
+      }
+    }
+
+    static void Invalidate(void* ptr) {
+      auto* self = static_cast<ImageResource*>(ptr);
+      self->is_valid.store(false, std::memory_order_release);
+      self->ResetHandles();
+    }
+
+    void ResetHandles() {
+      if (auto cache = frame_data_cache.lock()) {
+        cache->Clear();
+      }
+      rt_image_views.clear();
+      base_mip_image_view.reset();
+      image_view.reset();
+      image.reset();
+    }
 
     ImageResource(const ImageResource&) = delete;
 
     ImageResource& operator=(const ImageResource&) = delete;
   };
 
+  std::shared_ptr<VmaResourceTracker> tracker_;
   UniqueResourceVKT<ImageResource> resource_;
   bool is_valid_ = false;
 
@@ -569,19 +621,24 @@ std::shared_ptr<Texture> AllocatorVK::OnCreateTexture(
     return nullptr;
   }
   auto device_holder = device_holder_.lock();
-  if (!device_holder) {
+  if (!device_holder || !device_holder->GetDevice()) {
     return nullptr;
   }
   auto context = context_.lock();
   if (!context) {
     return nullptr;
   }
+  auto lock = tracker_->LockShared();
+  if (tracker_->IsShutdown() || !allocator_.is_valid()) {
+    return nullptr;
+  }
   auto source = std::make_shared<AllocatedTextureSourceVK>(
-      ContextVK::Cast(*context),     //
-      desc,                          //
-      allocator_.get(),              //
-      device_holder->GetDevice(),    //
-      supports_memoryless_textures_  //
+      ContextVK::Cast(*context),      //
+      desc,                           //
+      allocator_.get(),               //
+      device_holder->GetDevice(),     //
+      supports_memoryless_textures_,  //
+      tracker_                        //
   );
   if (!source->IsValid()) {
     return nullptr;
@@ -592,6 +649,21 @@ std::shared_ptr<Texture> AllocatorVK::OnCreateTexture(
 // |Allocator|
 std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
     const DeviceBufferDescriptor& desc) {
+  if (!IsValid()) {
+    return nullptr;
+  }
+  auto device_holder = device_holder_.lock();
+  if (!device_holder || !device_holder->GetDevice()) {
+    return nullptr;
+  }
+  auto context = context_.lock();
+  if (!context) {
+    return nullptr;
+  }
+  auto lock = tracker_->LockShared();
+  if (tracker_->IsShutdown() || !allocator_.is_valid()) {
+    return nullptr;
+  }
   vk::BufferCreateInfo buffer_info;
   buffer_info.usage = vk::BufferUsageFlagBits::eVertexBuffer |
                       vk::BufferUsageFlagBits::eIndexBuffer |
@@ -642,10 +714,19 @@ std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
                                 buffer_allocation,     //
                                 vk::Buffer{buffer}}},  //
       buffer_allocation_info,                          //
-      is_host_coherent);
+      is_host_coherent,                                //
+      tracker_);
 }
 
 Bytes AllocatorVK::DebugGetHeapUsage() const {
+  auto device_holder = device_holder_.lock();
+  if (!device_holder || !device_holder->GetDevice()) {
+    return Bytes{0};
+  }
+  auto lock = tracker_->LockShared();
+  if (tracker_->IsShutdown() || !allocator_.is_valid()) {
+    return Bytes{0};
+  }
   auto count = memory_properties_.memoryHeapCount;
   std::vector<VmaBudget> budgets(count);
   vmaGetHeapBudgets(allocator_.get(), budgets.data());

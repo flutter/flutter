@@ -26,7 +26,7 @@ TextureVK::~TextureVK() = default;
 
 void TextureVK::SetLabel(std::string_view label) {
 #ifdef IMPELLER_DEBUG
-  if (!has_validation_layers_) {
+  if (!has_validation_layers_ || !IsValid()) {
     return;
   }
   auto context = context_.lock();
@@ -34,21 +34,32 @@ void TextureVK::SetLabel(std::string_view label) {
     // The context may have died.
     return;
   }
-  ContextVK::Cast(*context).SetDebugName(GetImage(), label);
-  ContextVK::Cast(*context).SetDebugName(GetImageView(), label);
+  if (auto image = GetImage()) {
+    ContextVK::Cast(*context).SetDebugName(image, label);
+  }
+  if (auto image_view = GetImageView()) {
+    ContextVK::Cast(*context).SetDebugName(image_view, label);
+  }
 #endif  // IMPELLER_DEBUG
 }
 
 void TextureVK::SetLabel(std::string_view label, std::string_view trailing) {
 #ifdef IMPELLER_DEBUG
+  if (!IsValid()) {
+    return;
+  }
   auto context = context_.lock();
   if (!context) {
     // The context may have died.
     return;
   }
 
-  ContextVK::Cast(*context).SetDebugName(GetImage(), label, trailing);
-  ContextVK::Cast(*context).SetDebugName(GetImageView(), label, trailing);
+  if (auto image = GetImage()) {
+    ContextVK::Cast(*context).SetDebugName(image, label, trailing);
+  }
+  if (auto image_view = GetImageView()) {
+    ContextVK::Cast(*context).SetDebugName(image_view, label, trailing);
+  }
 #endif  // IMPELLER_DEBUG
 }
 
@@ -160,7 +171,7 @@ bool TextureVK::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
 }
 
 bool TextureVK::IsValid() const {
-  return !!source_;
+  return source_ && source_->IsValid();
 }
 
 ISize TextureVK::GetSize() const {

@@ -4,6 +4,8 @@
 
 #include "flutter/lib/ui/painting/image_encoding_impeller.h"
 
+#include <cstring>
+
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/lib/ui/painting/image.h"
@@ -41,9 +43,23 @@ std::optional<SkColorType> ToSkColorType(impeller::PixelFormat format) {
 sk_sp<SkImage> ConvertBufferToSkImage(
     const std::shared_ptr<impeller::DeviceBuffer>& buffer,
     SkColorType color_type,
-    SkISize dimensions) {
+    SkISize dimensions,
+    bool copy_pixels) {
   SkImageInfo image_info = SkImageInfo::Make(dimensions, color_type,
                                              SkAlphaType::kPremul_SkAlphaType);
+  if (copy_pixels) {
+    const uint8_t* contents = buffer->OnGetContents();
+    if (!contents) {
+      return nullptr;
+    }
+    SkBitmap bitmap;
+    if (!bitmap.tryAllocPixels(image_info)) {
+      return nullptr;
+    }
+    std::memcpy(bitmap.getPixels(), contents, bitmap.computeByteSize());
+    bitmap.setImmutable();
+    return SkImages::RasterFromBitmap(bitmap);
+  }
   SkBitmap bitmap;
   auto func = [](void* addr, void* context) {
     auto buffer =
@@ -57,8 +73,7 @@ sk_sp<SkImage> ConvertBufferToSkImage(
                        new std::shared_ptr<impeller::DeviceBuffer>(buffer));
   bitmap.setImmutable();
 
-  sk_sp<SkImage> raster_image = SkImages::RasterFromBitmap(bitmap);
-  return raster_image;
+  return SkImages::RasterFromBitmap(bitmap);
 }
 
 [[nodiscard]] absl::Status DoConvertImageToRasterImpeller(
@@ -218,16 +233,18 @@ void ImageEncodingImpeller::ConvertDlImageToSkImage(
   pass->SetLabel("BlitTextureToBuffer Blit Pass");
   pass->AddCopy(texture, buffer);
   pass->EncodeCommands();
+  const bool copy_pixels = impeller_context->GetBackendType() ==
+                           impeller::Context::BackendType::kVulkan;
   auto completion = [buffer, color_type = color_type.value(), dimensions,
-                     encode_task = std::move(encode_task)](
+                     copy_pixels, encode_task = std::move(encode_task)](
                         impeller::CommandBuffer::Status status) {
     if (status != impeller::CommandBuffer::Status::kCompleted) {
       encode_task(absl::Status(absl::StatusCode::kUnknown, ""));
       return;
     }
     buffer->Invalidate();
-    auto sk_image =
-        ConvertBufferToSkImage(buffer, color_type, ToSkISize(dimensions));
+    auto sk_image = ConvertBufferToSkImage(buffer, color_type,
+                                           ToSkISize(dimensions), copy_pixels);
     encode_task(sk_image);
   };
 

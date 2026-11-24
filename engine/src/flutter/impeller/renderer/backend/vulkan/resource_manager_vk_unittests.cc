@@ -84,5 +84,29 @@ TEST(ResourceManagerVKTest, IsThreadSafe) {
   EXPECT_EQ(manager.lock(), nullptr);
 }
 
+TEST(ResourceManagerVKTest, TerminateDrainsAndReclaimsInline) {
+  auto const manager = ResourceManagerVK::Create();
+
+  bool queued_destroyed = false;
+  {
+    auto resource = UniqueResourceVKT<fml::ScopedCleanupClosure>(
+        manager, fml::ScopedCleanupClosure([&]() { queued_destroyed = true; }));
+  }
+
+  // Terminate() must synchronously drain and join the reclamation thread.
+  manager->Terminate();
+  EXPECT_TRUE(queued_destroyed);
+  // Idempotent on repeat calls.
+  manager->Terminate();
+
+  // Resources reclaimed after Terminate() must be destroyed inline.
+  bool inline_destroyed = false;
+  {
+    auto resource = UniqueResourceVKT<fml::ScopedCleanupClosure>(
+        manager, fml::ScopedCleanupClosure([&]() { inline_destroyed = true; }));
+  }
+  EXPECT_TRUE(inline_destroyed);
+}
+
 }  // namespace testing
 }  // namespace impeller

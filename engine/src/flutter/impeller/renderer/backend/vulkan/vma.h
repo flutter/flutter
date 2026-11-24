@@ -5,6 +5,11 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_VMA_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_VMA_H_
 
+#include <memory>
+#include <mutex>
+#include <shared_mutex>
+#include <unordered_map>
+
 #include "flutter/flutter_vma/flutter_vma.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/fml/unique_object.h"
@@ -125,6 +130,75 @@ struct ImageVMATraits {
 };
 
 using UniqueImageVMA = fml::UniqueObject<ImageVMA, ImageVMATraits>;
+
+// -----------------------------------------------------------------------------
+// Tracks live VMA-backed resource payloads so ~ContextVK() / ~AllocatorVK()
+// can invalidate them while VmaAllocator and VkDevice are still valid.
+// -----------------------------------------------------------------------------
+class VmaResourceTracker final {
+ public:
+  using InvalidateFn = void (*)(void*);
+
+  VmaResourceTracker() = default;
+  ~VmaResourceTracker() = default;
+
+  /// Acquire a shared lifecycle lock. Callers performing VMA allocations,
+  /// handle reads, or destructions must hold this lock and check `IsShutdown()`
+  /// before touching VmaAllocator or VkDevice so they cannot race with
+  /// `Shutdown()`.
+  std::shared_lock<std::shared_mutex> LockShared() const {
+    return std::shared_lock<std::shared_mutex>(lifecycle_mutex_);
+  }
+
+  /// Must be called while holding `LockShared()` or `Shutdown()`'s exclusive
+  /// lock.
+  bool IsShutdown() const { return is_shutdown_; }
+
+  /// Register a live resource payload with a non-virtual invalidation callback.
+  /// Must be called while holding `LockShared()` after confirming
+  /// `!IsShutdown()`.
+  void Register(void* key, InvalidateFn invalidate_fn) {
+    std::scoped_lock lock(map_mutex_);
+    resources_.emplace(key, invalidate_fn);
+  }
+
+  /// Unregister a live resource payload. Must be called while holding
+  /// `LockShared()` after confirming `!IsShutdown()`.
+  void Unregister(void* key) {
+    std::scoped_lock lock(map_mutex_);
+    resources_.erase(key);
+  }
+
+  /// Mark the tracker shut down and invalidate all remaining live resources.
+  /// Runs `on_after_sweep` under the exclusive lifecycle lock so the caller can
+  /// destroy VmaPool / VmaAllocator with zero live allocations.
+  template <typename Fn>
+  void Shutdown(Fn&& on_after_sweep) {
+    std::unique_lock lifecycle_lock(lifecycle_mutex_);
+    if (is_shutdown_) {
+      return;
+    }
+    is_shutdown_ = true;
+    std::unordered_map<void*, InvalidateFn> to_invalidate;
+    {
+      std::scoped_lock map_lock(map_mutex_);
+      to_invalidate.swap(resources_);
+    }
+    for (const auto& [key, invalidate_fn] : to_invalidate) {
+      invalidate_fn(key);
+    }
+    on_after_sweep();
+  }
+
+ private:
+  mutable std::shared_mutex lifecycle_mutex_;
+  std::mutex map_mutex_;
+  std::unordered_map<void*, InvalidateFn> resources_;
+  bool is_shutdown_ = false;
+
+  VmaResourceTracker(const VmaResourceTracker&) = delete;
+  VmaResourceTracker& operator=(const VmaResourceTracker&) = delete;
+};
 
 }  // namespace impeller
 
