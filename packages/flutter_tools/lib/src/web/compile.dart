@@ -33,6 +33,9 @@ export 'compiler_config.dart';
 /// Whether the application has web plugins.
 const kHasWebPlugins = 'HasWebPlugins';
 
+/// Distinguishes Wasm-only builds from dual builds in the build cache.
+const kWebWasmOnly = 'WebWasmOnly';
+
 /// Base href to set in index.html in flutter build command
 const kBaseHref = 'baseHref';
 
@@ -101,6 +104,7 @@ class WebBuilder {
     final migration = ProjectMigration(migrators);
     await migration.run();
 
+    final CompileTarget? singleTarget = compilerConfigs.singleOrNull?.compileTarget;
     final String buildSettingsString = _buildEventAnalyticsSettings(configs: compilerConfigs);
     final Status status = logger.startProgress('Compiling $target for the Web...');
     final sw = Stopwatch()..start();
@@ -120,6 +124,7 @@ class WebBuilder {
               .childDirectory('.dart_tool')
               .childDirectory('flutter_build'),
           defines: <String, String>{
+            if (singleTarget == CompileTarget.wasm) kWebWasmOnly: 'true',
             kTargetFile: target,
             kHasWebPlugins: hasWebPlugins.toString(),
             kBaseHref: ?baseHref,
@@ -182,7 +187,11 @@ class WebBuilder {
     );
 
     final Duration elapsedDuration = sw.elapsed;
-    final variableName = compilerConfigs.length > 1 ? 'dual-compile' : 'dart2js';
+    final String variableName = switch (singleTarget) {
+      CompileTarget.wasm => 'dart2wasm',
+      CompileTarget.js => 'dart2js',
+      null => 'dual-compile',
+    };
     _analytics.send(
       Event.timing(
         workflow: 'build',

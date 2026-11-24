@@ -684,6 +684,25 @@ void main() {
     },
   );
 
+  testWithoutContext('Wasm-only web builds select only the Wasm compiler', () async {
+    final TestWebBuildCommand buildCommand = createBuildCommand(
+      buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+        Target target,
+        Environment environment,
+      ) {
+        final List<WebCompilerConfig> configs = (target as WebServiceWorker).compileConfigs;
+        expect(configs, hasLength(1));
+        expect(configs.single.compileTarget, CompileTarget.wasm);
+        expect(configs.single.renderer, WebRendererMode.skwasm);
+        expect((configs.single as WasmCompilerConfig).dryRun, isFalse);
+        expect(environment.defines[kWebWasmOnly], 'true');
+      }),
+    );
+    setupFileSystemForEndToEndTest(fileSystem);
+    await createTestCommandRunner(buildCommand)
+        .run(<String>['build', 'web', '--no-pub', '--wasm-only']);
+  });
+
   testWithoutContext(
     'Web build propagates local engine options to build system Environment',
     () async {

@@ -3484,6 +3484,36 @@ _flutter.loader.load({
     }),
   );
 
+  for (final (List<WebCompilerConfig> configs, List<String> expected) in const [
+    (<WebCompilerConfig>[WasmCompilerConfig()], <String>[LinkHooks.recordedUsesWasmFileName]),
+    (
+      <WebCompilerConfig>[WasmCompilerConfig(), JsCompilerConfig()],
+      <String>[LinkHooks.recordedUsesWasmFileName, LinkHooks.recordedUsesJsFileName],
+    ),
+    (
+      <WebCompilerConfig>[JsCompilerConfig(), WasmCompilerConfig(dryRun: true)],
+      <String>[LinkHooks.recordedUsesJsFileName],
+    ),
+  ]) {
+    test('Web link hooks use the recorded uses files of the active compilers $expected', () {
+      return testbed.run(() {
+        final bundle = WebReleaseBundle(
+          configs,
+          const NoOpAnalytics(),
+          engineRevision: _kEngineRevision,
+        );
+        final LinkHooks linkHooks = bundle.dependencies.whereType<LinkHooks>().single;
+        final Iterable<String> recordedUses = linkHooks
+            .resolveInputs(environment)
+            .sources
+            .map((File file) => file.basename)
+            .where((String name) => name.startsWith('recorded_uses_'));
+
+        expect(recordedUses, expected);
+      });
+    });
+  }
+
   test(
     'WebReleaseBundle includes templated index.html and flutter_bootstrap.js in inputs and outputs only when webContentHash is true',
     () => testbed.run(() async {
