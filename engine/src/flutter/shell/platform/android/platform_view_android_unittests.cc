@@ -143,7 +143,7 @@ class MockPlatformViewAndroidJNI : public PlatformViewAndroidJNI {
   MOCK_METHOD(void, destroyOverlaySurface2, (), (override));
   MOCK_METHOD(std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>,
               createOverlaySurface2,
-              (),
+              (int32_t width, int32_t height),
               (override));
   MOCK_METHOD(void,
               onDisplayPlatformView2,

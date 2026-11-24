@@ -540,7 +540,7 @@ public class PlatformViewsController2Test {
     when(rootSurfaceControl.buildReparentTransaction(any()))
         .thenReturn(new SurfaceControl.Transaction());
     controller.attachToView(flutterView);
-    controller.createOverlaySurface();
+    controller.createOverlaySurface(100, 100);
     return rootSurfaceControl;
   }
 
@@ -1169,6 +1169,427 @@ public class PlatformViewsController2Test {
     ShadowLooper.idleMainLooper();
   }
 
+  @Test
+  @Config(
+      shadows = {
+        ShadowFlutterJNI.class,
+        ShadowPlatformTaskQueue.class,
+        ShadowRecordingSurfaceControlBuilder.class
+      })
+  public void createOverlaySurfaceOnBackgroundThreadDefersReparentToCommitActiveFrame()
+      throws Exception {
+    ShadowRecordingSurfaceControlBuilder.reset();
+    TransactionTrackingController controller = new TransactionTrackingController();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+    FlutterJNI jni = new FlutterJNI();
+    jni.setPlatformViewsController2(controller);
+
+    FlutterView flutterView = mock(FlutterView.class);
+    AttachedSurfaceControl rootSurfaceControl = mock(AttachedSurfaceControl.class);
+    SurfaceControl.Transaction reparentTx = spy(new SurfaceControl.Transaction());
+    when(flutterView.getRootSurfaceControl()).thenReturn(rootSurfaceControl);
+    when(rootSurfaceControl.buildReparentTransaction(any())).thenReturn(reparentTx);
+    controller.attachToView(flutterView);
+
+    AtomicReference<Throwable> threadError = new AtomicReference<>();
+    Thread rasterThread =
+        new Thread(
+            () -> {
+              try {
+                assertNotNull(jni.createOverlaySurface2(1080, 2400));
+              } catch (Throwable t) {
+                threadError.set(t);
+              }
+            },
+            "fake-raster");
+    rasterThread.start();
+    rasterThread.join(10000);
+    assertFalse(rasterThread.isAlive());
+    if (threadError.get() != null) {
+      throw new AssertionError("createOverlaySurface2 failed on raster thread", threadError.get());
+    }
+
+    // Creating the overlay surface on the raster thread must use the passed dimensions directly
+    // without touching FlutterView layout/rootSurfaceControl or applying a reparent transaction.
+    assertEquals(1, ShadowRecordingSurfaceControlBuilder.bufferSizes.size());
+    assertArrayEquals(
+        new int[] {1080, 2400}, ShadowRecordingSurfaceControlBuilder.bufferSizes.get(0));
+    verify(flutterView, never()).getWidth();
+    verify(flutterView, never()).getHeight();
+    verify(flutterView, never()).getRootSurfaceControl();
+    verify(rootSurfaceControl, never()).buildReparentTransaction(any());
+    verify(reparentTx, never()).apply();
+
+    // showOverlaySurface() only records visibility; reparenting happens once during commit.
+    controller.showOverlaySurface();
+    verify(rootSurfaceControl, never()).buildReparentTransaction(any());
+
+    controller.swapTransactions();
+    controller.onEndFrame();
+    verify(rootSurfaceControl, times(1)).buildReparentTransaction(any(SurfaceControl.class));
+    verify(reparentTx).setLayer(any(SurfaceControl.class), eq(1000));
+    verify(reparentTx).close();
+    verify(reparentTx, never()).apply();
+    verify(rootSurfaceControl, times(1))
+        .applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
+
+    // Subsequent show/hide commits for the same overlay do not reparent again.
+    controller.hideOverlaySurface();
+    controller.showOverlaySurface();
+    controller.swapTransactions();
+    controller.onEndFrame();
+    verify(rootSurfaceControl, times(1)).buildReparentTransaction(any(SurfaceControl.class));
+  }
+
+  @Test
+  @Config(
+      shadows = {
+        ShadowFlutterJNI.class,
+        ShadowPlatformTaskQueue.class,
+        ShadowRecordingSurfaceControlBuilder.class,
+        ShadowRecordingTransaction.class
+      })
+  public void createOverlaySurfaceUsesPassedDimensionsAndClampsNonPositive() {
+    ShadowRecordingSurfaceControlBuilder.reset();
+    ShadowRecordingTransaction.reset();
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+
+    // Even when flutterView is null, the requested dimensions must be passed to setBufferSize.
+    assertNotNull(controller.createOverlaySurface(1080, 2400));
+    assertEquals(1, ShadowRecordingSurfaceControlBuilder.bufferSizes.size());
+    assertArrayEquals(
+        new int[] {1080, 2400}, ShadowRecordingSurfaceControlBuilder.bufferSizes.get(0));
+
+    // Destroying the overlay unparents the SurfaceControl and clears state.
+    controller.destroyOverlaySurface();
+    assertEquals(1, ShadowRecordingTransaction.unparented.size());
+
+    // Non-positive dimensions are clamped to 1x1 so SurfaceControl.Builder does not throw.
+    assertNotNull(controller.createOverlaySurface(0, -5));
+    assertEquals(2, ShadowRecordingSurfaceControlBuilder.bufferSizes.size());
+    assertArrayEquals(new int[] {1, 1}, ShadowRecordingSurfaceControlBuilder.bufferSizes.get(1));
+  }
+
+  @Test
+  @Config(
+      shadows = {
+        ShadowFlutterJNI.class,
+        ShadowPlatformTaskQueue.class,
+        ShadowRecordingTransaction.class
+      })
+  public void
+      createOverlaySurfaceWhenRootSurfaceControlUnavailableReparentsWhenAttachedOnLaterFrame() {
+    ShadowRecordingTransaction.reset();
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+
+    // Create the overlay surface before a FlutterView is attached (or while detached).
+    assertNotNull(controller.createOverlaySurface(1080, 2400));
+
+    // Attach a FlutterView whose window is not yet attached (getRootSurfaceControl() == null).
+    FlutterView flutterView = mock(FlutterView.class);
+    when(flutterView.getRootSurfaceControl()).thenReturn(null);
+    controller.attachToView(flutterView);
+
+    // Frame 1 calls showOverlaySurface(), swapTransactions(), and onEndFrame() while
+    // getRootSurfaceControl() is still null.
+    controller.showOverlaySurface();
+    controller.swapTransactions();
+    controller.onEndFrame();
+
+    // On Frame 2, the window is attached so getRootSurfaceControl() is available. Even without a
+    // second showOverlaySurface() call (since C++ only calls showOverlaySurface2() on the hidden ->
+    // shown transition), commitActiveFrame() must reparent and re-sync visibility.
+    AttachedSurfaceControl rootSurfaceControl = mock(AttachedSurfaceControl.class);
+    SurfaceControl.Transaction reparentTx = spy(new SurfaceControl.Transaction());
+    when(flutterView.getRootSurfaceControl()).thenReturn(rootSurfaceControl);
+    when(rootSurfaceControl.buildReparentTransaction(any())).thenReturn(reparentTx);
+
+    ShadowRecordingTransaction.reset();
+    SurfaceControl.Transaction rasterTx = createAndPublishRasterTransaction(controller);
+    controller.sealFrameTransactions();
+    controller.swapTransactions();
+    controller.onEndFrame();
+
+    verify(rootSurfaceControl, times(1)).buildReparentTransaction(any(SurfaceControl.class));
+    verify(reparentTx).setLayer(any(SurfaceControl.class), eq(1000));
+    verify(reparentTx).close();
+    verify(rootSurfaceControl, times(1))
+        .applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
+    assertTrue(ShadowRecordingTransaction.merged.contains(reparentTx));
+    assertTrue(ShadowRecordingTransaction.merged.contains(rasterTx));
+    assertEquals(Arrays.asList(Boolean.TRUE), ShadowRecordingTransaction.visibilityChanges);
+  }
+
+  @Test
+  @Config(
+      shadows = {
+        ShadowFlutterJNI.class,
+        ShadowPlatformTaskQueue.class,
+        ShadowRecordingTransaction.class
+      })
+  public void showOverlaySurfaceWhileFrameStagedForTraversalDefersReparentToQueuedFrame() {
+    ShadowRecordingTransaction.reset();
+    PlatformViewsController2 controller =
+        new PlatformViewsController2() {
+          @Override
+          boolean shouldDeferUntilNextTraversal() {
+            return true;
+          }
+        };
+    controller.setRegistry(new PlatformViewRegistryImpl());
+
+    FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    FlutterView flutterView = spy(attach(jni, controller));
+    AttachedSurfaceControl rootSurfaceControl = mock(AttachedSurfaceControl.class);
+    SurfaceControl.Transaction reparentTx = spy(new SurfaceControl.Transaction());
+    doReturn(rootSurfaceControl).when(flutterView).getRootSurfaceControl();
+    when(rootSurfaceControl.buildReparentTransaction(any())).thenReturn(reparentTx);
+    controller.attachToView(flutterView);
+
+    // Frame 1 (without overlay) commits and stages traversal deferral.
+    SurfaceControl.Transaction rasterTx1 = createAndPublishRasterTransaction(controller);
+    controller.sealFrameTransactions();
+    controller.swapTransactions();
+    controller.onEndFrame();
+    verify(rootSurfaceControl, times(1))
+        .applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
+
+    // Frame 2 creates the overlay and calls showOverlaySurface() while Frame 1 is still staged for
+    // traversal. Reparenting must be deferred until Frame 1's traversal completes.
+    ShadowRecordingTransaction.reset();
+    controller.createOverlaySurface(1080, 2400);
+    SurfaceControl.Transaction rasterTx2 = createAndPublishRasterTransaction(controller);
+    controller.sealFrameTransactions();
+    controller.showOverlaySurface();
+    controller.swapTransactions();
+    controller.onEndFrame();
+
+    verify(rootSurfaceControl, never()).buildReparentTransaction(any());
+    verify(rootSurfaceControl, times(1))
+        .applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
+
+    ShadowLooper.idleMainLooper();
+
+    verify(rootSurfaceControl, times(1)).buildReparentTransaction(any(SurfaceControl.class));
+    verify(reparentTx).setLayer(any(SurfaceControl.class), eq(1000));
+    verify(rootSurfaceControl, times(2))
+        .applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
+    assertTrue(ShadowRecordingTransaction.merged.contains(reparentTx));
+    assertTrue(ShadowRecordingTransaction.merged.contains(rasterTx2));
+  }
+
+  @Test
+  @Config(
+      shadows = {
+        ShadowFlutterJNI.class,
+        ShadowPlatformTaskQueue.class,
+        ShadowRecordingTransaction.class
+      })
+  public void buildReparentTransactionReturningNullRetriesOnSubsequentFrame() {
+    ShadowRecordingTransaction.reset();
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+
+    assertNotNull(controller.createOverlaySurface(1080, 2400));
+
+    // ViewRootImpl can be non-null while its underlying SurfaceControl is not yet valid, causing
+    // buildReparentTransaction() to return null on Frame 1.
+    FlutterView flutterView = mock(FlutterView.class);
+    AttachedSurfaceControl rootSurfaceControl = mock(AttachedSurfaceControl.class);
+    when(flutterView.getRootSurfaceControl()).thenReturn(rootSurfaceControl);
+    when(rootSurfaceControl.buildReparentTransaction(any())).thenReturn(null);
+    controller.attachToView(flutterView);
+
+    controller.showOverlaySurface();
+    controller.swapTransactions();
+    controller.onEndFrame();
+    verify(rootSurfaceControl, times(1)).buildReparentTransaction(any(SurfaceControl.class));
+
+    // On Frame 2, ViewRootImpl's SurfaceControl is ready so buildReparentTransaction() succeeds.
+    // Even without another showOverlaySurface() call, commitActiveFrame() must retry reparenting.
+    SurfaceControl.Transaction reparentTx = spy(new SurfaceControl.Transaction());
+    when(rootSurfaceControl.buildReparentTransaction(any())).thenReturn(reparentTx);
+
+    ShadowRecordingTransaction.reset();
+    SurfaceControl.Transaction rasterTx = createAndPublishRasterTransaction(controller);
+    controller.sealFrameTransactions();
+    controller.swapTransactions();
+    controller.onEndFrame();
+
+    verify(rootSurfaceControl, times(2)).buildReparentTransaction(any(SurfaceControl.class));
+    verify(reparentTx).setLayer(any(SurfaceControl.class), eq(1000));
+    verify(reparentTx).close();
+    assertTrue(ShadowRecordingTransaction.merged.contains(reparentTx));
+    assertTrue(ShadowRecordingTransaction.merged.contains(rasterTx));
+  }
+
+  @Test
+  @Config(
+      shadows = {
+        ShadowFlutterJNI.class,
+        ShadowPlatformTaskQueue.class,
+        ShadowRecordingTransaction.class
+      })
+  public void attachToNewFlutterViewWhileOverlayVisibleReparentsOnNextFrame() {
+    ShadowRecordingTransaction.reset();
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+    FlutterJNI mockJni = mock(FlutterJNI.class);
+    when(mockJni.isAttached()).thenReturn(true);
+    controller.setFlutterJNI(mockJni);
+
+    FlutterView firstView = mock(FlutterView.class);
+    AttachedSurfaceControl firstRoot = mock(AttachedSurfaceControl.class);
+    SurfaceControl.Transaction firstReparentTx = spy(new SurfaceControl.Transaction());
+    when(firstView.getRootSurfaceControl()).thenReturn(firstRoot);
+    when(firstRoot.buildReparentTransaction(any())).thenReturn(firstReparentTx);
+    controller.attachToView(firstView);
+    verify(mockJni, never()).scheduleFrame();
+
+    assertNotNull(controller.createOverlaySurface(1080, 2400));
+    controller.showOverlaySurface();
+    controller.swapTransactions();
+    controller.onEndFrame();
+    verify(firstRoot, times(1)).buildReparentTransaction(any(SurfaceControl.class));
+    verify(firstReparentTx).setLayer(any(SurfaceControl.class), eq(1000));
+
+    // Realistic view-swap lifecycle: detachFromView() destroys the previous overlay and clears
+    // flutterView, then the raster thread recreates the overlay while flutterView == null before
+    // attachToView(secondView) runs.
+    controller.detachFromView();
+    assertNotNull(controller.createOverlaySurface(1080, 2400));
+
+    FlutterView secondView = mock(FlutterView.class);
+    AttachedSurfaceControl secondRoot = mock(AttachedSurfaceControl.class);
+    SurfaceControl.Transaction secondReparentTx = spy(new SurfaceControl.Transaction());
+    when(secondView.getRootSurfaceControl()).thenReturn(secondRoot);
+    when(secondRoot.buildReparentTransaction(any())).thenReturn(secondReparentTx);
+    controller.attachToView(secondView);
+    // Attaching with a pending overlay reparent schedules a retry frame so static UIs recover.
+    verify(mockJni, times(1)).scheduleFrame();
+
+    // Next frame commits without another showOverlaySurface() call and must reparent the overlay
+    // to secondView's rootSurfaceControl.
+    ShadowRecordingTransaction.reset();
+    SurfaceControl.Transaction rasterTx = createAndPublishRasterTransaction(controller);
+    controller.sealFrameTransactions();
+    controller.swapTransactions();
+    controller.onEndFrame();
+
+    verify(secondRoot, times(1)).buildReparentTransaction(any(SurfaceControl.class));
+    verify(secondReparentTx).setLayer(any(SurfaceControl.class), eq(1000));
+    verify(secondReparentTx).close();
+    verify(secondRoot, times(1)).applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
+    assertTrue(ShadowRecordingTransaction.merged.contains(secondReparentTx));
+    assertTrue(ShadowRecordingTransaction.merged.contains(rasterTx));
+  }
+
+  @Test
+  @Config(
+      shadows = {
+        ShadowFlutterJNI.class,
+        ShadowPlatformTaskQueue.class,
+        ShadowRecordingTransaction.class
+      })
+  public void swapTransactionsDiscardReSyncsOverlayVisibilityWithoutSpuriousReparent() {
+    ShadowRecordingTransaction.reset();
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+
+    FlutterView flutterView = mock(FlutterView.class);
+    AttachedSurfaceControl rootSurfaceControl = mock(AttachedSurfaceControl.class);
+    when(flutterView.getRootSurfaceControl()).thenReturn(rootSurfaceControl);
+    when(rootSurfaceControl.buildReparentTransaction(any()))
+        .thenAnswer(invocation -> spy(new SurfaceControl.Transaction()));
+    controller.attachToView(flutterView);
+
+    // Frame 1 creates, shows, and commits the overlay so it is already parented.
+    assertNotNull(controller.createOverlaySurface(1080, 2400));
+    controller.showOverlaySurface();
+    controller.swapTransactions();
+    controller.onEndFrame();
+    verify(rootSurfaceControl, times(1)).buildReparentTransaction(any(SurfaceControl.class));
+
+    // Frame 2 hides the overlay, swaps into activePlatformTransaction, then a second
+    // swapTransactions() discards it before onEndFrame() runs.
+    ShadowRecordingTransaction.reset();
+    controller.hideOverlaySurface();
+    controller.swapTransactions();
+    controller.swapTransactions();
+
+    // Frame 3 commits with no new hideOverlaySurface() call: visibility (false) must be re-synced
+    // without triggering a redundant buildReparentTransaction().
+    ShadowRecordingTransaction.reset();
+    controller.onEndFrame();
+    verify(rootSurfaceControl, times(1)).buildReparentTransaction(any(SurfaceControl.class));
+    assertEquals(Arrays.asList(Boolean.FALSE), ShadowRecordingTransaction.visibilityChanges);
+
+    // Now test the un-reparented show discard path: recreate overlay, discard show's transaction,
+    // and confirm the next commit both reparents once and re-syncs visibility (true).
+    controller.destroyOverlaySurface();
+    assertNotNull(controller.createOverlaySurface(1080, 2400));
+    controller.showOverlaySurface();
+    controller.swapTransactions();
+    controller.swapTransactions();
+
+    ShadowRecordingTransaction.reset();
+    controller.onEndFrame();
+    verify(rootSurfaceControl, times(2)).buildReparentTransaction(any(SurfaceControl.class));
+    assertEquals(Arrays.asList(Boolean.TRUE), ShadowRecordingTransaction.visibilityChanges);
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void createOverlaySurfaceAndDestroyOverlaySurfaceConcurrentlyAreThreadSafe()
+      throws Exception {
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+    FlutterView flutterView = mock(FlutterView.class);
+    AttachedSurfaceControl rootSurfaceControl = mock(AttachedSurfaceControl.class);
+    when(flutterView.getRootSurfaceControl()).thenReturn(rootSurfaceControl);
+    when(rootSurfaceControl.buildReparentTransaction(any()))
+        .thenAnswer(invocation -> new SurfaceControl.Transaction());
+    controller.attachToView(flutterView);
+
+    final int iterations = 100;
+    final CyclicBarrier startBarrier = new CyclicBarrier(2);
+    final AtomicReference<Throwable> threadError = new AtomicReference<>();
+    Thread rasterThread =
+        new Thread(
+            () -> {
+              try {
+                startBarrier.await(10, TimeUnit.SECONDS);
+                for (int i = 0; i < iterations; i++) {
+                  assertNotNull(controller.createOverlaySurface(1080, 2400));
+                }
+              } catch (Throwable t) {
+                threadError.set(t);
+              }
+            },
+            "fake-raster-concurrent");
+    rasterThread.start();
+    try {
+      startBarrier.await(10, TimeUnit.SECONDS);
+      for (int i = 0; i < iterations; i++) {
+        controller.showOverlaySurface();
+        controller.swapTransactions();
+        controller.onEndFrame();
+        controller.hideOverlaySurface();
+        controller.destroyOverlaySurface();
+      }
+    } finally {
+      rasterThread.join(10000);
+    }
+    assertFalse("Concurrent raster thread did not finish", rasterThread.isAlive());
+    if (threadError.get() != null) {
+      throw new AssertionError("Concurrent overlay creation failed", threadError.get());
+    }
+    controller.destroyOverlaySurface();
+  }
+
   private static ByteBuffer encodeMethodCall(MethodCall call) {
     final ByteBuffer buffer = StandardMethodCodec.INSTANCE.encodeMethodCall(call);
     buffer.rewind();
@@ -1541,20 +1962,56 @@ public class PlatformViewsController2Test {
     return tx;
   }
 
-  /** Records every transaction merged into another, so tests can see what a frame picked up. */
+  /** Records transactions merged, visibility changes, and unparented SurfaceControls. */
   @Implements(SurfaceControl.Transaction.class)
   public static class ShadowRecordingTransaction {
     static final List<SurfaceControl.Transaction> merged = new ArrayList<>();
+    static final List<Boolean> visibilityChanges = new ArrayList<>();
+    static final List<SurfaceControl> unparented = new ArrayList<>();
 
     @RealObject private SurfaceControl.Transaction realObject;
 
     static void reset() {
       merged.clear();
+      visibilityChanges.clear();
+      unparented.clear();
     }
 
     @Implementation
     protected SurfaceControl.Transaction merge(SurfaceControl.Transaction other) {
       merged.add(other);
+      return realObject;
+    }
+
+    @Implementation
+    protected SurfaceControl.Transaction setVisibility(SurfaceControl sc, boolean visible) {
+      visibilityChanges.add(visible);
+      return realObject;
+    }
+
+    @Implementation
+    protected SurfaceControl.Transaction reparent(SurfaceControl sc, SurfaceControl newParent) {
+      if (newParent == null) {
+        unparented.add(sc);
+      }
+      return realObject;
+    }
+  }
+
+  /** Records buffer sizes passed to {@link SurfaceControl.Builder#setBufferSize(int, int)}. */
+  @Implements(SurfaceControl.Builder.class)
+  public static class ShadowRecordingSurfaceControlBuilder {
+    static final List<int[]> bufferSizes = new ArrayList<>();
+
+    @RealObject private SurfaceControl.Builder realObject;
+
+    static void reset() {
+      bufferSizes.clear();
+    }
+
+    @Implementation
+    protected SurfaceControl.Builder setBufferSize(int width, int height) {
+      bufferSizes.add(new int[] {width, height});
       return realObject;
     }
   }
