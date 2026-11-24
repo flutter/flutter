@@ -156,14 +156,15 @@ PowerVRGPU GetPowerVRVersion(std::string_view version) {
 }
 
 MaliGPU GetMaliVersion(std::string_view version) {
-  // These names are usually Mali-VERSION or Mali-Version-EXTRA_CRAP.
+  // These names are usually Mali-VERSION, Mali-VERSION-EXTRA_CRAP or
+  // Mali-VERSION MPn (core count).
   auto dash_pos = version.find("Mali-");
   if (dash_pos == std::string::npos) {
     return MaliGPU::kUnknown;
   }
   auto version_string_with_trailing = version.substr(dash_pos + 5);
   // Remove any trailing crap if present.
-  auto more_dash_pos = version_string_with_trailing.find("-");
+  auto more_dash_pos = version_string_with_trailing.find_first_of("- ");
   if (more_dash_pos != std::string::npos) {
     version_string_with_trailing =
         version_string_with_trailing.substr(0, more_dash_pos);
@@ -396,6 +397,16 @@ bool DriverInfoVK::IsKnownBadDriver() const {
   // https://github.com/flutter/flutter/issues/178285
   // https://github.com/flutter/flutter/issues/178498
   if (adreno_gpu_ && *adreno_gpu_ <= AdrenoGPU::kAdreno650) {
+    return true;
+  }
+
+  // Mali-G72 is blocked for the MediaTek MT6771 and MT8788 SoCs, which have
+  // rendering defects with external textures and platform views. The other
+  // common SoCs with this GPU (Exynos 9610, 9611, 9810 and Kirin 970) are
+  // already blocked elsewhere. See:
+  // https://github.com/flutter/flutter/issues/186067
+  // https://github.com/flutter/flutter/issues/192798
+  if (mali_gpu_ == MaliGPU::kG72) {
     return true;
   }
 
