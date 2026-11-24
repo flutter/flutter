@@ -203,14 +203,22 @@ bool BlitPassMTL::OnCopyBufferToTextureCommand(
     return false;
   }
 
+  // A 3D texture has a single slice; its depth slices are addressed by the
+  // destination's z origin instead.
+  const bool is_3d =
+      destination->GetTextureDescriptor().type == TextureType::kTexture3D;
   auto destination_origin_mtl =
-      MTLOriginMake(destination_region.GetX(), destination_region.GetY(), 0);
+      MTLOriginMake(destination_region.GetX(), destination_region.GetY(),
+                    is_3d ? slice : 0u);
   auto source_size_mtl = MTLSizeMake(destination_region.GetWidth(),
                                      destination_region.GetHeight(), 1);
 
   auto source_bytes_per_row =
       BytesPerRowForTextureWidth(destination->GetTextureDescriptor().format,
                                  destination_region.GetWidth());
+  // 3D destinations need the stride between images, even for a single one.
+  auto source_bytes_per_image =
+      is_3d ? source_bytes_per_row * destination_region.GetHeight() : 0u;
 
 #ifdef IMPELLER_DEBUG
   if (is_metal_trace_active_) {
@@ -222,11 +230,11 @@ bool BlitPassMTL::OnCopyBufferToTextureCommand(
              sourceOffset:source.GetRange().offset
         sourceBytesPerRow:source_bytes_per_row
       sourceBytesPerImage:
-          0  // 0 for 2D textures according to
-             // https://developer.apple.com/documentation/metal/mtlblitcommandencoder/1400752-copyfrombuffer
+          source_bytes_per_image  // 0 for 2D textures according to
+                                  // https://developer.apple.com/documentation/metal/mtlblitcommandencoder/1400752-copyfrombuffer
                sourceSize:source_size_mtl
                 toTexture:destination_mtl
-         destinationSlice:slice
+         destinationSlice:is_3d ? 0u : slice
          destinationLevel:mip_level
         destinationOrigin:destination_origin_mtl];
 

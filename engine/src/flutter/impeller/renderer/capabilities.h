@@ -126,6 +126,16 @@ class Capabilities {
   ///        fall back to a texture atlas.
   virtual bool SupportsTextureArrays() const = 0;
 
+  /// @brief Whether 3D textures (`TextureType::kTexture3D`) can be allocated,
+  ///        uploaded one depth slice at a time, and sampled. 3D textures are
+  ///        sample-only and have a single mip level. False on OpenGL ES 2.0.
+  virtual bool SupportsTexture3D() const = 0;
+
+  /// @brief The largest width, height, or depth of a 3D texture, or 0 when
+  ///        `SupportsTexture3D` is false. Vulkan and OpenGL ES 3.0 only
+  ///        guarantee 256, so check this before allocating a large volume.
+  virtual uint32_t GetMaximumTexture3DSize() const = 0;
+
   /// @brief  Returns a supported `PixelFormat` for textures that store
   ///         4-channel colors (red/green/blue/alpha).
   virtual PixelFormat GetDefaultColorFormat() const = 0;

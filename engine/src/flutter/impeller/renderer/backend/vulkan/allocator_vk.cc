@@ -299,12 +299,12 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
         image_info_chain;
     auto& image_info = image_info_chain.get();
     image_info.flags = ToVKImageCreateFlags(desc.type);
-    image_info.imageType = vk::ImageType::e2D;
+    image_info.imageType = ToVKImageType(desc.type);
     image_info.format = ToVKImageFormat(desc.format);
     image_info.extent = VkExtent3D{
         static_cast<uint32_t>(desc.size.width),   // width
         static_cast<uint32_t>(desc.size.height),  // height
-        1u                                        // depth
+        desc.depth                                // depth
     };
     image_info.samples = ToVKSampleCount(desc.sample_count);
     image_info.mipLevels = desc.mip_count;

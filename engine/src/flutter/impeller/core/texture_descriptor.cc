@@ -25,6 +25,28 @@ absl::Status TextureDescriptor::Validate() const {
     return absl::InvalidArgumentError(
         "A 2D array texture must have at least one layer.");
   }
+  if (type == TextureType::kTexture3D) {
+    if (depth < 1u) {
+      return absl::InvalidArgumentError(
+          "A 3D texture must have a depth of at least one.");
+    }
+    if (mip_count != 1u) {
+      return absl::InvalidArgumentError(
+          "3D textures support a single mip level.");
+    }
+    if (IsCompressed(format)) {
+      return absl::InvalidArgumentError(
+          "3D textures cannot use block-compressed formats.");
+    }
+    if (usage & TextureUsage::kRenderTarget) {
+      return absl::InvalidArgumentError(
+          "3D textures cannot be used as render targets.");
+    }
+  } else if (depth != 1u) {
+    return absl::InvalidArgumentError(absl::StrCat(
+        "Only 3D textures can have a depth other than one, got ", depth,
+        " for the texture type ", TextureTypeToString(type), "."));
+  }
   if (!SamplingOptionsAreValid()) {
     return absl::InvalidArgumentError(absl::StrCat(
         "The sample count ", static_cast<uint64_t>(sample_count),
@@ -39,6 +61,9 @@ std::string TextureDescriptorToString(const TextureDescriptor& desc) {
   stream << "Type=" << TextureTypeToString(desc.type) << ",";
   stream << "Format=" << PixelFormatToString(desc.format) << ",";
   stream << "Size=" << desc.size << ",";
+  if (desc.type == TextureType::kTexture3D) {
+    stream << "Depth=" << desc.depth << ",";
+  }
   stream << "MipCount=" << desc.mip_count << ",";
   stream << "SampleCount=" << static_cast<size_t>(desc.sample_count) << ",";
   stream << "Compression=" << CompressionTypeToString(desc.compression_type);

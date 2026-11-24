@@ -457,6 +457,10 @@ enum class TextureType {
   // the integer values of the existing types (mirrored by Flutter GPU) are
   // unchanged.
   kTexture2DArray,
+  // A 3D texture, sampled as `sampler3D`. The depth is carried by
+  // `TextureDescriptor::depth`. Sample-only and limited to a single mip level
+  // for now.
+  kTexture3D,
 };
 
 constexpr const char* TextureTypeToString(TextureType type) {
@@ -471,6 +475,8 @@ constexpr const char* TextureTypeToString(TextureType type) {
       return "TextureExternalOES";
     case TextureType::kTexture2DArray:
       return "Texture2DArray";
+    case TextureType::kTexture3D:
+      return "Texture3D";
   }
   FML_UNREACHABLE();
 }
@@ -481,6 +487,7 @@ constexpr bool IsMultisampleCapable(TextureType type) {
     case TextureType::kTextureCube:
     case TextureType::kTextureExternalOES:
     case TextureType::kTexture2DArray:
+    case TextureType::kTexture3D:
       return false;
     case TextureType::kTexture2DMultisample:
       return true;

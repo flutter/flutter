@@ -111,16 +111,19 @@ bool TextureVK::OnSetContents(const uint8_t* contents,
   copy.bufferOffset = 0u;
   copy.bufferRowLength = 0u;    // 0u means tightly packed per spec.
   copy.bufferImageHeight = 0u;  // 0u means tightly packed per spec.
+  // A 3D texture has a single array layer; its depth slices are addressed by
+  // the z offset instead.
+  const bool is_3d = desc.type == TextureType::kTexture3D;
   copy.imageOffset.x = 0u;
   copy.imageOffset.y = 0u;
-  copy.imageOffset.z = 0u;
+  copy.imageOffset.z = is_3d ? static_cast<int32_t>(slice) : 0;
   copy.imageExtent.width = desc.size.width;
   copy.imageExtent.height = desc.size.height;
   copy.imageExtent.depth = 1u;
   copy.imageSubresource.aspectMask =
       ToImageAspectFlags(GetTextureDescriptor().format);
   copy.imageSubresource.mipLevel = 0u;
-  copy.imageSubresource.baseArrayLayer = slice;
+  copy.imageSubresource.baseArrayLayer = is_3d ? 0u : slice;
   copy.imageSubresource.layerCount = 1u;
 
   vk_cmd_buffer.copyBufferToImage(

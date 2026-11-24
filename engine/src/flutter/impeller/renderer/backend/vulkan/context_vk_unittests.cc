@@ -229,6 +229,19 @@ TEST(CapabilitiesVKTest, ReportsBlockCompressedTextureSupport) {
       CompressedTextureFamily::kBC));
 }
 
+TEST(CapabilitiesVKTest, ReportsTexture3DLimit) {
+  const std::shared_ptr<ContextVK> context =
+      MockVulkanContextBuilder()
+          .SetPhysicalPropertiesCallback(
+              [](VkPhysicalDevice device, VkPhysicalDeviceProperties* props) {
+                props->limits.maxImageDimension3D = 512;
+              })
+          .Build();
+  ASSERT_NE(context, nullptr);
+  EXPECT_TRUE(context->GetCapabilities()->SupportsTexture3D());
+  EXPECT_EQ(context->GetCapabilities()->GetMaximumTexture3DSize(), 512u);
+}
+
 // Impeller's 2D renderer relies on hardware support for a combined
 // depth-stencil format (widely supported). So fail initialization if a suitable
 // one couldn't be found. That way we have an opportunity to fallback to

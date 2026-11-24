@@ -266,22 +266,31 @@ bool TextureGLES::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
       texture_type = GL_TEXTURE_2D_ARRAY;
       texture_target = GL_TEXTURE_2D_ARRAY;
       break;
+    case TextureType::kTexture3D:
+      texture_type = GL_TEXTURE_3D;
+      texture_target = GL_TEXTURE_3D;
+      break;
     case TextureType::kTextureExternalOES:
       texture_type = GL_TEXTURE_EXTERNAL_OES;
       texture_target = GL_TEXTURE_EXTERNAL_OES;
       break;
   }
 
-  // Array textures allocate all layers up front (glTexImage3D); a per-layer
-  // upload then fills one layer with glTexSubImage3D, so make sure the storage
-  // exists before uploading.
-  const bool is_array = tex_descriptor.type == TextureType::kTexture2DArray;
-  if (is_array) {
-    // Bail out synchronously on contexts without array support (e.g. ES 2.0).
-    // The glTexImage3D/glTexSubImage3D procs are null there, so queuing the
+  // Array and 3D textures allocate all layers or depth slices up front
+  // (glTexImage3D); a per-slice upload then fills one with glTexSubImage3D, so
+  // make sure the storage exists before uploading.
+  const bool is_layered = tex_descriptor.type == TextureType::kTexture2DArray ||
+                          tex_descriptor.type == TextureType::kTexture3D;
+  if (is_layered) {
+    // Bail out synchronously on contexts without support (e.g. ES 2.0). The
+    // glTexImage3D/glTexSubImage3D procs are null there, so queuing the
     // upload would dereference a null proc on the reactor thread.
-    if (!reactor_->GetProcTable().GetCapabilities()->SupportsTextureArrays()) {
-      VALIDATION_LOG << "2D array textures are not supported on this context.";
+    const auto& capabilities = reactor_->GetProcTable().GetCapabilities();
+    if (tex_descriptor.type == TextureType::kTexture2DArray
+            ? !capabilities->SupportsTextureArrays()
+            : !capabilities->SupportsTexture3D()) {
+      VALIDATION_LOG << TextureTypeToString(tex_descriptor.type)
+                     << " textures are not supported on this context.";
       return false;
     }
     InitializeContentsIfNecessary();
@@ -305,7 +314,7 @@ bool TextureGLES::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
        image_size = tex_descriptor.GetByteSizeOfBaseMipLevel(),  //
        texture_type,                                             //
        texture_target,                                           //
-       is_array,                                                 //
+       is_layered,                                                 //
        slice                                                     //
   ](const auto& reactor) {
         auto gl_handle = reactor.GetGLHandle(handle);
@@ -325,7 +334,7 @@ bool TextureGLES::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
           TRACE_EVENT1("impeller", "TexImage2DUpload", "Bytes",
                        std::to_string(mapping->GetSize()).c_str());
           gl.PixelStorei(GL_UNPACK_ALIGNMENT, 1);
-          if (is_array) {
+          if (is_layered) {
             // Storage for every layer is allocated by the initializer; fill the
             // requested layer (slice) of the already-allocated base mip level.
             if (format.is_compressed) {
@@ -530,6 +539,27 @@ void TextureGLES::InitializeContentsIfNecessary() {
         // glTexImage3D allocated every layer of the base level at once, so a
         // single entry covers the whole level.
         MarkSliceMipLevelInitialized(0, 0);
+      } else if (desc.type == TextureType::kTexture3D) {
+        if (!gl.GetCapabilities()->SupportsTexture3D()) {
+          VALIDATION_LOG << "3D textures are not supported on this context.";
+          return;
+        }
+        // Like array textures, every depth slice is allocated at once and
+        // then filled per slice with glTexSubImage3D.
+        gl.BindTexture(GL_TEXTURE_3D, handle.value());
+        gl.TexImage3D(
+            /*target=*/GL_TEXTURE_3D,                          //
+            /*level=*/0u,                                      //
+            /*internal_format=*/gles_format->internal_format,  //
+            /*width=*/size.width,                              //
+            /*height=*/size.height,                            //
+            /*depth=*/static_cast<GLsizei>(desc.depth),        //
+            /*border=*/0u,                                     //
+            /*format=*/gles_format->external_format,           //
+            /*type=*/gles_format->type,                        //
+            /*data=*/nullptr                                   //
+        );
+        MarkSliceMipLevelInitialized(0, 0);
       } else {
         // 2D / multisampled. External-OES textures are always wrapped, so
         // they returned at the is_wrapped_ check above. Only the base mip
@@ -682,6 +712,9 @@ bool TextureGLES::GenerateMipmap() {
       break;
     case TextureType::kTexture2DArray:
       break;
+    case TextureType::kTexture3D:
+      VALIDATION_LOG << "3D textures have a single mip level.";
+      return false;
     case TextureType::kTextureExternalOES:
       break;
   }

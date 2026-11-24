@@ -56,8 +56,9 @@ class Texture {
   bool NeedsMipmapGeneration() const;
 
   /// Returns true if `slice` addresses a valid layer for this texture's type
-  /// (0 for 2D textures, 0-5 for cube maps, and below the descriptor's
-  /// `array_layer_count` for 2D array textures).
+  /// (0 for 2D textures, 0-5 for cube maps, below the descriptor's
+  /// `array_layer_count` for 2D array textures, and below its `depth` for 3D
+  /// textures, where a slice is one depth slice).
   bool IsSliceValid(size_t slice) const;
 
  protected:

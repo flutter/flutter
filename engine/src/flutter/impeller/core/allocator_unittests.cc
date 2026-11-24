@@ -106,6 +106,54 @@ TEST(AllocatorTest, TextureDescriptorArrayValidity) {
   EXPECT_TRUE(absl::StrContains(desc.Validate().message(), "layer"));
 }
 
+TEST(AllocatorTest, TextureDescriptor3DValidity) {
+  TextureDescriptor desc = {.type = TextureType::kTexture3D,
+                            .format = PixelFormat::kR8G8B8A8UNormInt,
+                            .size = ISize(16, 16),
+                            .depth = 8};
+  EXPECT_TRUE(desc.IsValid());
+
+  TextureDescriptor no_depth = desc;
+  no_depth.depth = 0;
+  EXPECT_FALSE(no_depth.IsValid());
+
+  TextureDescriptor mipped = desc;
+  mipped.mip_count = 2;
+  EXPECT_FALSE(mipped.IsValid());
+  EXPECT_TRUE(absl::StrContains(mipped.Validate().message(), "mip"));
+
+  TextureDescriptor render_target = desc;
+  render_target.usage = TextureUsage::kRenderTarget;
+  EXPECT_FALSE(render_target.IsValid());
+
+  TextureDescriptor compressed = desc;
+  compressed.format = PixelFormat::kBC1RGBAUNormInt;
+  EXPECT_FALSE(compressed.IsValid());
+
+  // Only 3D textures may have a depth.
+  TextureDescriptor flat = {.type = TextureType::kTexture2D,
+                            .format = PixelFormat::kR8G8B8A8UNormInt,
+                            .size = ISize(16, 16),
+                            .depth = 2};
+  EXPECT_FALSE(flat.IsValid());
+  EXPECT_TRUE(absl::StrContains(flat.Validate().message(), "depth"));
+}
+
+TEST(AllocatorTest, TextureDescriptor3DByteSizes) {
+  TextureDescriptor desc = {.type = TextureType::kTexture3D,
+                            .format = PixelFormat::kR8G8B8A8UNormInt,
+                            .size = ISize(16, 8),
+                            .depth = 4};
+  // Uploads address one depth slice at a time.
+  EXPECT_EQ(desc.GetByteSizeOfBaseMipLevel(), 16u * 8u * 4u);
+  // The whole texture covers every slice.
+  EXPECT_EQ(desc.GetByteSizeOfAllMipLevels(), 16u * 8u * 4u * 4u);
+
+  TextureDescriptor deeper = desc;
+  deeper.depth = 5;
+  EXPECT_NE(desc, deeper);
+}
+
 TEST(AllocatorTest, RangeTest) {
   {
     Range a = Range{0, 10};

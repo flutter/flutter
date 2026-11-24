@@ -48,6 +48,9 @@ struct TextureDescriptor {
   /// The number of layers in a `kTexture2DArray`. Ignored by other texture
   /// types (a cube map implies 6 layers from its type).
   uint16_t array_layer_count = 1u;
+  /// The depth, in texels, of a `kTexture3D`. Must be 1 for every other
+  /// texture type.
+  uint32_t depth = 1u;
 
   /// @brief The number of bytes required to store an image of the given texel
   ///        dimensions in this format. Block-compressed formats round the
@@ -64,9 +67,16 @@ struct TextureDescriptor {
     return GetByteSizeForDimensions(size.width, size.height);
   }
 
+  /// @brief The number of bytes for every mip level. For a `kTexture3D` this
+  ///        covers every depth slice, while `GetByteSizeOfBaseMipLevel`
+  ///        returns the size of one slice (the unit that uploads address).
   size_t GetByteSizeOfAllMipLevels() const {
     if (!IsValid()) {
       return 0u;
+    }
+    if (type == TextureType::kTexture3D) {
+      // 3D textures have a single mip level (see `Validate`).
+      return GetByteSizeForDimensions(size.width, size.height) * depth;
     }
     size_t result = 0u;
     int64_t width = size.width;

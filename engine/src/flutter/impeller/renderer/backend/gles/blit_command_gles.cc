@@ -193,6 +193,14 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
       texture_type = GL_TEXTURE_2D_ARRAY;
       texture_target = GL_TEXTURE_2D_ARRAY;
       break;
+    case TextureType::kTexture3D:
+      if (!reactor.GetProcTable().GetCapabilities()->SupportsTexture3D()) {
+        VALIDATION_LOG << "3D textures are not supported on this context.";
+        return false;
+      }
+      texture_type = GL_TEXTURE_3D;
+      texture_target = GL_TEXTURE_3D;
+      break;
     case TextureType::kTextureExternalOES:
       texture_type = GL_TEXTURE_EXTERNAL_OES;
       texture_target = GL_TEXTURE_EXTERNAL_OES;
@@ -262,9 +270,11 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
     return true;
   }
 
-  if (tex_descriptor.type == TextureType::kTexture2DArray) {
-    // glTexImage3D allocates this mip level for every layer at once, so the
-    // level's storage is tracked with a single entry (slice 0).
+  if (tex_descriptor.type == TextureType::kTexture2DArray ||
+      tex_descriptor.type == TextureType::kTexture3D) {
+    // glTexImage3D allocates this mip level for every layer (or depth slice)
+    // at once, so the level's storage is tracked with a single entry (slice
+    // 0).
     if (!texture_gles.IsSliceMipLevelInitialized(0, mip_level)) {
       const auto level_width =
           std::max<int32_t>(1, tex_descriptor.size.width >> mip_level);
@@ -277,7 +287,10 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
           /*width=*/level_width,                             //
           /*height=*/level_height,                           //
           /*depth=*/
-          static_cast<GLsizei>(tex_descriptor.array_layer_count),  //
+          static_cast<GLsizei>(
+              tex_descriptor.type == TextureType::kTexture3D
+                  ? tex_descriptor.depth
+                  : tex_descriptor.array_layer_count),  //
           /*border=*/0u,                                           //
           /*format=*/gles_format->external_format,                 //
           /*type=*/gles_format->type,                              //

@@ -616,6 +616,8 @@ constexpr uint32_t ToArrayLayerCount(const TextureDescriptor& desc) {
       return 1u;
     case TextureType::kTexture2DArray:
       return desc.array_layer_count;
+    case TextureType::kTexture3D:
+      return 1u;
     case TextureType::kTextureCube:
       return 6u;
     case TextureType::kTextureExternalOES:
@@ -632,6 +634,8 @@ constexpr vk::ImageViewType ToVKImageViewType(TextureType type) {
       return vk::ImageViewType::e2D;
     case TextureType::kTexture2DArray:
       return vk::ImageViewType::e2DArray;
+    case TextureType::kTexture3D:
+      return vk::ImageViewType::e3D;
     case TextureType::kTextureCube:
       return vk::ImageViewType::eCube;
     case TextureType::kTextureExternalOES:
@@ -641,11 +645,17 @@ constexpr vk::ImageViewType ToVKImageViewType(TextureType type) {
   FML_UNREACHABLE();
 }
 
+constexpr vk::ImageType ToVKImageType(TextureType type) {
+  return type == TextureType::kTexture3D ? vk::ImageType::e3D
+                                         : vk::ImageType::e2D;
+}
+
 constexpr vk::ImageCreateFlags ToVKImageCreateFlags(TextureType type) {
   switch (type) {
     case TextureType::kTexture2D:
     case TextureType::kTexture2DMultisample:
     case TextureType::kTexture2DArray:
+    case TextureType::kTexture3D:
       return {};
     case TextureType::kTextureCube:
       return vk::ImageCreateFlagBits::eCubeCompatible;

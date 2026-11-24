@@ -105,6 +105,16 @@ class StandardCapabilities final : public Capabilities {
   bool SupportsTextureArrays() const override { return true; }
 
   // |Capabilities|
+  bool SupportsTexture3D() const override { return true; }
+
+  // |Capabilities|
+  uint32_t GetMaximumTexture3DSize() const override {
+    // Every Metal GPU family supports 3D textures up to 2048 in each
+    // dimension.
+    return 2048u;
+  }
+
+  // |Capabilities|
   bool SupportsExtendedRangeFormats() const override {
     return supports_extended_range_formats_;
   }

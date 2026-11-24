@@ -442,6 +442,8 @@ constexpr MTLTextureType ToMTLTextureType(TextureType type) {
       return MTLTextureTypeCube;
     case TextureType::kTexture2DArray:
       return MTLTextureType2DArray;
+    case TextureType::kTexture3D:
+      return MTLTextureType3D;
     case TextureType::kTextureExternalOES:
       VALIDATION_LOG
           << "kTextureExternalOES can not be used with the Metal backend.";
