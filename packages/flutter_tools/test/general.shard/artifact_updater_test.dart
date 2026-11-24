@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
+
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -229,6 +231,44 @@ void main() {
       throwsToolExit(message: 'k7iFrf4SQT9WfcQ=='),
     ); // validate that the hash mismatch message is included.
   });
+
+  testWithoutContext(
+    'ArtifactUpdater closes the downloaded file if the connection drops so it can be '
+    'deleted and the download retried',
+    () async {
+      final operatingSystemUtils = FakeOperatingSystemUtils();
+      final fileSystem = _OpenHandleTrackingFileSystem(MemoryFileSystem.test());
+      final logger = BufferLogger.test();
+      final artifactUpdater = ArtifactUpdater(
+        fileSystem: fileSystem,
+        logger: logger,
+        operatingSystemUtils: operatingSystemUtils,
+        platform: testPlatform,
+        httpClient: FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('http://test.zip'),
+            response: const FakeResponse(
+              body: <int>[0],
+              bodyError: HttpException('Connection closed while receiving data'),
+            ),
+          ),
+          FakeRequest(Uri.parse('http://test.zip')),
+        ]),
+        tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
+        allowedBaseUrls: <String>['http://test.zip'],
+      );
+
+      await artifactUpdater.downloadZipArchive(
+        'test message',
+        Uri.parse('http://test.zip'),
+        fileSystem.currentDirectory.childDirectory('out'),
+      );
+
+      expect(logger.traceText, contains('Connection closed while receiving data'));
+      expect(fileSystem.file('out/test'), exists);
+      expect(fileSystem.openPaths, isEmpty);
+    },
+  );
 
   testWithoutContext(
     'ArtifactUpdater will restart the status ticker if it needs to retry the download',
@@ -621,5 +661,78 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
     targetDirectory
         .childFile(gzippedTarFile.fileSystem.path.basenameWithoutExtension(gzippedTarFile.path))
         .createSync();
+  }
+}
+
+/// A file system that emulates Windows by refusing to delete files that still
+/// have an open [RandomAccessFile] handle.
+class _OpenHandleTrackingFileSystem extends ForwardingFileSystem {
+  _OpenHandleTrackingFileSystem(super.delegate);
+
+  final openPaths = <String>{};
+
+  @override
+  File file(dynamic path) => _OpenHandleTrackingFile(this, delegate.file(path));
+}
+
+class _OpenHandleTrackingFile extends ForwardingFileSystemEntity<File, io.File>
+    with ForwardingFile {
+  _OpenHandleTrackingFile(this._fileSystem, this.delegate);
+
+  final _OpenHandleTrackingFileSystem _fileSystem;
+
+  @override
+  final io.File delegate;
+
+  @override
+  FileSystem get fileSystem => _fileSystem;
+
+  @override
+  File wrapFile(io.File delegate) => _fileSystem.file(delegate.path);
+
+  @override
+  Directory wrapDirectory(io.Directory delegate) => _fileSystem.directory(delegate.path);
+
+  @override
+  Link wrapLink(io.Link delegate) => _fileSystem.link(delegate.path);
+
+  @override
+  RandomAccessFile openSync({FileMode mode = FileMode.read}) {
+    final RandomAccessFile file = super.openSync(mode: mode);
+    _fileSystem.openPaths.add(path);
+    return _OpenHandleTrackingRandomAccessFile(file, () {
+      _fileSystem.openPaths.remove(path);
+    });
+  }
+
+  @override
+  void deleteSync({bool recursive = false}) {
+    if (_fileSystem.openPaths.contains(path)) {
+      throw FileSystemException(
+        'Cannot delete file',
+        path,
+        const OSError(
+          'The process cannot access the file because it is being used by '
+          'another process',
+          32,
+        ),
+      );
+    }
+    super.deleteSync(recursive: recursive);
+  }
+}
+
+class _OpenHandleTrackingRandomAccessFile with ForwardingRandomAccessFile {
+  _OpenHandleTrackingRandomAccessFile(this.delegate, this._onClose);
+
+  @override
+  final RandomAccessFile delegate;
+
+  final void Function() _onClose;
+
+  @override
+  void closeSync() {
+    _onClose();
+    super.closeSync();
   }
 }

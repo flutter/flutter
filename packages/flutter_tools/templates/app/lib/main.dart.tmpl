@@ -30,6 +30,10 @@ import 'dart:async';
 
 import 'package:{{pluginProjectName}}/{{pluginProjectName}}.dart' as {{pluginProjectName}};
 {{/withFfi}}
+{{#withPackage}}
+
+import 'package:{{pluginProjectName}}/{{pluginProjectName}}.dart';
+{{/withPackage}}
 
 void main() {
   runApp(const MyApp());
@@ -271,4 +275,22 @@ class _MyAppState extends State<MyApp> {
   }
 }
 {{/withFfi}}
+{{#withPackage}}
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final calculator = Calculator();
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Package example app')),
+        body: Center(
+          child: Text('Calculator addOne(2) = ${calculator.addOne(2)}'),
+        ),
+      ),
+    );
+  }
+}
+{{/withPackage}}
 {{/withEmptyMain}}
