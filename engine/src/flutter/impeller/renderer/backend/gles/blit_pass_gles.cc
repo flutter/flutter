@@ -136,6 +136,23 @@ bool BlitPassGLES::OnCopyBufferToTextureCommand(
     bool convert_to_read) {
   auto command = std::make_unique<BlitCopyBufferToTextureCommandGLES>();
   command->label = label;
+  if (const DeviceBuffer* buffer = source.GetBuffer()) {
+    // The view may not own its buffer, such as an allocation from a
+    // `HostBuffer`, but the copy may only run later, once a context is current.
+    // By then, the owner may have collected the buffer, for example when the
+    // surface that owns the `HostBuffer` was torn down. Keep the buffer alive
+    // until the copy runs. A buffer that no `std::shared_ptr` owns can't be
+    // retained.
+    //
+    // Other backends don't need this because they encode the copy into a
+    // native command buffer right away and never read the buffer on the CPU
+    // again, whereas the reactor reads the buffer's contents on the CPU
+    // whenever the copy finally runs.
+    if (std::shared_ptr<const DeviceBuffer> owned_buffer =
+            buffer->weak_from_this().lock()) {
+      source = BufferView(std::move(owned_buffer), source.GetRange());
+    }
+  }
   command->source = std::move(source);
   command->destination = std::move(destination);
   command->destination_region = destination_region;

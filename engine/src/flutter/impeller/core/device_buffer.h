@@ -15,7 +15,7 @@
 
 namespace impeller {
 
-class DeviceBuffer {
+class DeviceBuffer : public std::enable_shared_from_this<DeviceBuffer> {
  public:
   virtual ~DeviceBuffer();
 
