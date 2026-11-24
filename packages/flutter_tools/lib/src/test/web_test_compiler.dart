@@ -77,6 +77,9 @@ class WebTestCompiler {
     required WebRendererMode webRenderer,
     required bool useWasm,
   }) async {
+    if (testFiles.isEmpty) {
+      return WebMemoryFS();
+    }
     return useWasm
         ? _compileWasm(
             projectDirectory: projectDirectory,
