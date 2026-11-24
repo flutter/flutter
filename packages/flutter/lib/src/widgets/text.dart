@@ -66,6 +66,8 @@ class DefaultTextStyle extends InheritedTheme {
     this.textAlign,
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
+    this.overflowPosition = TextOverflowPosition.end,
+    this.scrollOverflow = TextScrollOverflow.wrap,
     this.maxLines,
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
@@ -84,6 +86,8 @@ class DefaultTextStyle extends InheritedTheme {
       softWrap = true,
       maxLines = null,
       overflow = TextOverflow.clip,
+      overflowPosition = TextOverflowPosition.end,
+      scrollOverflow = TextScrollOverflow.wrap,
       textWidthBasis = TextWidthBasis.parent,
       textHeightBehavior = null,
       super(child: const _NullWidget());
@@ -114,6 +118,8 @@ class DefaultTextStyle extends InheritedTheme {
     TextAlign? textAlign,
     bool? softWrap,
     TextOverflow? overflow,
+    TextOverflowPosition? overflowPosition,
+    TextScrollOverflow? scrollOverflow,
     int? maxLines,
     TextWidthBasis? textWidthBasis,
     TextHeightBehavior? textHeightBehavior,
@@ -128,6 +134,8 @@ class DefaultTextStyle extends InheritedTheme {
           textAlign: textAlign ?? parent.textAlign,
           softWrap: softWrap ?? parent.softWrap,
           overflow: overflow ?? parent.overflow,
+          overflowPosition: overflowPosition ?? parent.overflowPosition,
+          scrollOverflow: scrollOverflow ?? parent.scrollOverflow,
           maxLines: maxLines ?? parent.maxLines,
           textWidthBasis: textWidthBasis ?? parent.textWidthBasis,
           textHeightBehavior: textHeightBehavior ?? parent.textHeightBehavior,
@@ -156,6 +164,12 @@ class DefaultTextStyle extends InheritedTheme {
   /// If [softWrap] is true or null, the glyph causing overflow, and those that follow,
   /// will not be rendered. Otherwise, it will be shown with the given overflow option.
   final TextOverflow overflow;
+
+  /// {@macro flutter.rendering.RenderParagraph.overflowPosition}
+  final TextOverflowPosition overflowPosition;
+
+  /// {@macro flutter.rendering.RenderParagraph.scrollOverflow}
+  final TextScrollOverflow scrollOverflow;
 
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
   /// If the text exceeds the given number of lines, it will be truncated according
@@ -197,6 +211,8 @@ class DefaultTextStyle extends InheritedTheme {
         textAlign != oldWidget.textAlign ||
         softWrap != oldWidget.softWrap ||
         overflow != oldWidget.overflow ||
+        overflowPosition != oldWidget.overflowPosition ||
+        scrollOverflow != oldWidget.scrollOverflow ||
         maxLines != oldWidget.maxLines ||
         textWidthBasis != oldWidget.textWidthBasis ||
         textHeightBehavior != oldWidget.textHeightBehavior;
@@ -209,6 +225,8 @@ class DefaultTextStyle extends InheritedTheme {
       textAlign: textAlign,
       softWrap: softWrap,
       overflow: overflow,
+      overflowPosition: overflowPosition,
+      scrollOverflow: scrollOverflow,
       maxLines: maxLines,
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
@@ -231,6 +249,20 @@ class DefaultTextStyle extends InheritedTheme {
       ),
     );
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
+    properties.add(
+      EnumProperty<TextOverflowPosition>(
+        'overflowPosition',
+        overflowPosition,
+        defaultValue: TextOverflowPosition.end,
+      ),
+    );
+    properties.add(
+      EnumProperty<TextScrollOverflow>(
+        'scrollOverflow',
+        scrollOverflow,
+        defaultValue: TextScrollOverflow.wrap,
+      ),
+    );
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(
       EnumProperty<TextWidthBasis>(
@@ -514,6 +546,8 @@ class Text extends StatelessWidget {
     this.locale,
     this.softWrap,
     this.overflow,
+    this.overflowPosition,
+    this.scrollOverflow,
     @Deprecated(
       'Use textScaler instead. '
       'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
@@ -552,6 +586,8 @@ class Text extends StatelessWidget {
     this.locale,
     this.softWrap,
     this.overflow,
+    this.overflowPosition,
+    this.scrollOverflow,
     @Deprecated(
       'Use textScaler instead. '
       'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
@@ -641,6 +677,16 @@ class Text extends StatelessWidget {
   /// If this is null [TextStyle.overflow] will be used, otherwise the value
   /// from the nearest [DefaultTextStyle] ancestor will be used.
   final TextOverflow? overflow;
+
+  /// {@macro flutter.rendering.RenderParagraph.overflowPosition}
+  ///
+  /// If null, the value from the nearest [DefaultTextStyle] ancestor is used.
+  final TextOverflowPosition? overflowPosition;
+
+  /// {@macro flutter.rendering.RenderParagraph.scrollOverflow}
+  ///
+  /// If null, the value from the nearest [DefaultTextStyle] ancestor is used.
+  final TextScrollOverflow? scrollOverflow;
 
   /// Deprecated. Will be removed in a future version of Flutter. Use
   /// [textScaler] instead.
@@ -770,6 +816,8 @@ class Text extends StatelessWidget {
               locale, // RichText uses Localizations.localeOf to obtain a default if this is null
           softWrap: softWrap ?? defaultTextStyle.softWrap,
           overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
+          overflowPosition: overflowPosition ?? defaultTextStyle.overflowPosition,
+          scrollOverflow: scrollOverflow ?? defaultTextStyle.scrollOverflow,
           textScaler: textScaler,
           maxLines: maxLines ?? defaultTextStyle.maxLines,
           strutStyle: effectiveStrutStyle,
@@ -794,6 +842,8 @@ class Text extends StatelessWidget {
         locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
         softWrap: softWrap ?? defaultTextStyle.softWrap,
         overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
+        overflowPosition: overflowPosition ?? defaultTextStyle.overflowPosition,
+        scrollOverflow: scrollOverflow ?? defaultTextStyle.scrollOverflow,
         textScaler: textScaler,
         maxLines: maxLines ?? defaultTextStyle.maxLines,
         strutStyle: effectiveStrutStyle,
@@ -844,6 +894,12 @@ class Text extends StatelessWidget {
       ),
     );
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
+    properties.add(
+      EnumProperty<TextOverflowPosition>('overflowPosition', overflowPosition, defaultValue: null),
+    );
+    properties.add(
+      EnumProperty<TextScrollOverflow>('scrollOverflow', scrollOverflow, defaultValue: null),
+    );
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(
@@ -873,6 +929,8 @@ class _SelectableTextContainer extends StatefulWidget {
     this.textDirection,
     required this.softWrap,
     required this.overflow,
+    required this.overflowPosition,
+    required this.scrollOverflow,
     required this.textScaler,
     this.maxLines,
     this.locale,
@@ -888,6 +946,8 @@ class _SelectableTextContainer extends StatefulWidget {
   final TextDirection? textDirection;
   final bool softWrap;
   final TextOverflow overflow;
+  final TextOverflowPosition overflowPosition;
+  final TextScrollOverflow scrollOverflow;
   final TextScaler textScaler;
   final int? maxLines;
   final Locale? locale;
@@ -930,6 +990,8 @@ class _SelectableTextContainerState extends State<_SelectableTextContainer> {
         locale: widget.locale,
         softWrap: widget.softWrap,
         overflow: widget.overflow,
+        overflowPosition: widget.overflowPosition,
+        scrollOverflow: widget.scrollOverflow,
         textScaler: widget.textScaler,
         maxLines: widget.maxLines,
         strutStyle: widget.strutStyle,
@@ -951,6 +1013,8 @@ class _RichText extends StatelessWidget {
     this.textDirection,
     required this.softWrap,
     required this.overflow,
+    required this.overflowPosition,
+    required this.scrollOverflow,
     required this.textScaler,
     this.maxLines,
     this.locale,
@@ -967,6 +1031,8 @@ class _RichText extends StatelessWidget {
   final TextDirection? textDirection;
   final bool softWrap;
   final TextOverflow overflow;
+  final TextOverflowPosition overflowPosition;
+  final TextScrollOverflow scrollOverflow;
   final TextScaler textScaler;
   final int? maxLines;
   final Locale? locale;
@@ -986,6 +1052,8 @@ class _RichText extends StatelessWidget {
       locale: locale,
       softWrap: softWrap,
       overflow: overflow,
+      overflowPosition: overflowPosition,
+      scrollOverflow: scrollOverflow,
       textScaler: textScaler,
       maxLines: maxLines,
       strutStyle: strutStyle,

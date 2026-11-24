@@ -36,6 +36,16 @@ class Paragraph : public RefCountedDartWrappable<Paragraph> {
 
   void layout(double width);
   void paint(Canvas* canvas, double x, double y);
+  void paintMasked(Canvas* canvas,
+                   double x,
+                   double y,
+                   double clip_left,
+                   double clip_top,
+                   double clip_right,
+                   double clip_bottom,
+                   double opacity,
+                   bool fade_horizontal = false,
+                   int overflow_position = 2);
 
   tonic::Float32List getRectsForRange(unsigned start,
                                       unsigned end,

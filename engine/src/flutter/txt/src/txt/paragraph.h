@@ -140,6 +140,27 @@ class Paragraph {
                      double x,
                      double y) = 0;
 
+  // Paints the laid out text clipped to [clip_left, clip_top, clip_right,
+  // clip_bottom], modulated by [opacity] and an optional horizontal fade
+  // shader supporting multiline last-line horizontal fade and directional
+  // start/middle/end fade.
+  virtual bool PaintMasked(
+      flutter::DisplayListBuilder* builder,
+      double x,
+      double y,
+      double clip_left,
+      double clip_top,
+      double clip_right,
+      double clip_bottom,
+      double opacity = 1.0,
+      bool fade_horizontal = false,
+      OverflowPosition overflow_position = OverflowPosition::kEnd) {
+    if (!builder || !(opacity > 0.0)) {
+      return true;
+    }
+    return Paint(builder, x, y);
+  }
+
   // Returns a vector of bounding boxes that enclose all text between start and
   // end glyph indexes, including start and excluding end.
   virtual std::vector<TextBox> GetRectsForRange(

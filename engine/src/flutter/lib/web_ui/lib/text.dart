@@ -710,6 +710,14 @@ abstract class Paragraph {
   LineMetrics? getLineMetricsAt(int lineNumber);
   int get numberOfLines;
   int? getLineNumberAt(int codeUnitOffset);
+  void paintMasked(
+    Canvas canvas,
+    Offset offset, {
+    required Rect clipRect,
+    double opacity = 1.0,
+    bool fadeHorizontal = false,
+    int overflowPosition = 2,
+  });
   void dispose();
   bool get debugDisposed;
 }

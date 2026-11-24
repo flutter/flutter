@@ -245,6 +245,7 @@ typedef CanvasPath Path;
   V(Paragraph, maxIntrinsicWidth)                \
   V(Paragraph, minIntrinsicWidth)                \
   V(Paragraph, paint)                            \
+  V(Paragraph, paintMasked)                      \
   V(Paragraph, width)                            \
   V(PathMeasure, getLength)                      \
   V(PathMeasure, getPosTan)                      \

@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <cmath>
+#include <limits>
 #include <memory>
 #include "display_list/dl_color.h"
 #include "display_list/dl_paint.h"
 #include "display_list/dl_tile_mode.h"
+#include "display_list/effects/color_sources/dl_linear_gradient_color_source.h"
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/utils/dl_receiver_utils.h"
 #include "gtest/gtest.h"
@@ -49,8 +52,30 @@ class DlOpRecorder final : public virtual DlOpReceiver,
   int pathCount() const { return paths_.size(); }
   int textFrameCount() const { return text_frames_.size(); }
   int blobCount() const { return blobs_.size(); }
+  int clipRectCount() const { return clip_rects_.size(); }
+  int saveLayerCount() const { return save_layer_count_; }
+  const std::vector<DlRect>& rects() const { return rects_; }
+  const std::vector<std::shared_ptr<DlColorSource>>& colorSources() const {
+    return color_sources_;
+  }
 
  private:
+  void setColorSource(const DlColorSource* source) override {
+    if (source) {
+      color_sources_.push_back(source->shared());
+    }
+  }
+
+  void clipRect(const DlRect& clip, DlClipOp clip_op, bool is_aa) override {
+    clip_rects_.push_back(clip);
+  }
+
+  void saveLayer(const DlRect& bounds,
+                 const SaveLayerOptions options,
+                 const DlImageFilter* backdrop,
+                 std::optional<int64_t> backdrop_id) override {
+    save_layer_count_++;
+  }
   void drawLine(const DlPoint& p0, const DlPoint& p1) override {
     lines_.emplace_back(p0, p1);
   }
@@ -85,6 +110,9 @@ class DlOpRecorder final : public virtual DlOpReceiver,
   std::vector<std::tuple<DlPoint, DlPoint, DlPoint>> dashed_lines_;
   std::vector<DlRect> rects_;
   std::vector<DlPath> paths_;
+  std::vector<DlRect> clip_rects_;
+  std::vector<std::shared_ptr<DlColorSource>> color_sources_;
+  int save_layer_count_ = 0;
 };
 
 template <typename T>
@@ -152,6 +180,22 @@ class PainterTestBase : public CanvasTestBase<T> {
     paragraph->Paint(&builder, 0, 0);
 
     return builder.Build();
+  }
+
+  std::unique_ptr<txt::Paragraph> buildParagraph(
+      const txt::TextStyle& style,
+      const std::u16string& text,
+      size_t max_lines = std::numeric_limits<size_t>::max(),
+      txt::TextDirection text_direction = txt::TextDirection::ltr) const {
+    auto p_style = txt::ParagraphStyle();
+    p_style.max_lines = max_lines;
+    p_style.text_direction = text_direction;
+    auto f_collection = makeFontCollection();
+    auto pb_skia = txt::ParagraphBuilderSkia(p_style, f_collection, impeller_);
+    pb_skia.PushStyle(style);
+    pb_skia.AddText(text);
+    pb_skia.Pop();
+    return pb_skia.Build();
   }
 
  private:
@@ -329,6 +373,220 @@ TEST_F(PainterTest, DrawTextBlobNoImpeller) {
 
   EXPECT_EQ(recorder.textFrameCount(), 0);
   EXPECT_EQ(recorder.blobCount(), 1);
+}
+#endif  // IMPELLER_SUPPORTS_RENDERING
+
+TEST_F(PainterTest, PaintMaskedOpacityAndNoOp) {
+  PretendImpellerIsEnabled(false);
+
+  auto paragraph = buildParagraph(
+      makeStyle(), u"Sample headline text that locks its layout width");
+  paragraph->Layout(300.0);
+  const double initial_height = paragraph->GetHeight();
+
+  // PaintMasked with opacity 0.5 records a clipRect and a saveLayer.
+  auto builder = DisplayListBuilder();
+  paragraph->PaintMasked(&builder, 0, 0, 0, 0, 225.0, initial_height,
+                         /*opacity=*/0.5, /*fade_horizontal=*/false);
+  auto recorder = DlOpRecorder();
+  builder.Build()->Dispatch(recorder);
+  EXPECT_EQ(recorder.clipRectCount(), 1);
+  EXPECT_EQ(recorder.saveLayerCount(), 1);
+
+  // Zero, negative, and NaN opacities record no draw operations.
+  for (const double invalid_opacity :
+       {0.0, -0.5, std::numeric_limits<double>::quiet_NaN()}) {
+    auto noop_builder = DisplayListBuilder();
+    paragraph->PaintMasked(&noop_builder, 0, 0, 0, 0, 150.0, initial_height,
+                           invalid_opacity, /*fade_horizontal=*/true);
+    auto noop_recorder = DlOpRecorder();
+    noop_builder.Build()->Dispatch(noop_recorder);
+    EXPECT_EQ(noop_recorder.clipRectCount(), 0);
+    EXPECT_EQ(noop_recorder.saveLayerCount(), 0);
+  }
+}
+
+TEST_F(PainterTest, PaintMaskedMultilineLastLineHorizontalFade) {
+  PretendImpellerIsEnabled(false);
+
+  // Multiline text with max_lines = 2 and horizontal fade modulates only the
+  // last line's vertical band, and uses a single SaveLayer even with opacity
+  // < 1.
+  auto paragraph = buildParagraph(
+      makeStyle(),
+      u"Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod",
+      /*max_lines=*/2);
+  paragraph->Layout(200.0);
+  ASSERT_EQ(paragraph->GetNumberOfLines(), 2u);
+
+  auto builder = DisplayListBuilder();
+  paragraph->PaintMasked(&builder, 0, 0, 0, 0, 200.0, paragraph->GetHeight(),
+                         /*opacity=*/0.5, /*fade_horizontal=*/true,
+                         txt::OverflowPosition::kEnd);
+  auto recorder = DlOpRecorder();
+  builder.Build()->Dispatch(recorder);
+
+  EXPECT_EQ(recorder.clipRectCount(), 1);
+  EXPECT_EQ(recorder.saveLayerCount(), 1);
+  ASSERT_EQ(recorder.rectCount(), 1);
+  // The modulate gradient rect only covers the 2nd line (top > 0).
+  EXPECT_GT(recorder.rects().front().GetTop(), 0.0f);
+  EXPECT_FLOAT_EQ(recorder.rects().front().GetBottom(),
+                  static_cast<float>(paragraph->GetHeight()));
+  ASSERT_FALSE(recorder.colorSources().empty());
+  const auto* linear = recorder.colorSources().back()->asLinearGradient();
+  ASSERT_NE(linear, nullptr);
+  EXPECT_LT(linear->start_point().x, linear->end_point().x);
+}
+
+TEST_F(PainterTest, PaintMaskedSingleLineOverflowPositions) {
+  PretendImpellerIsEnabled(false);
+
+  // Single-line directional fade for kStart, kMiddle, kEnd in LTR.
+  auto paragraph = buildParagraph(
+      makeStyle(), u"0x71C95823F4B9E1029384756ABCDEF01239B8F", /*max_lines=*/1);
+  paragraph->Layout(120.0);
+
+  // kStart (LTR): fades toward left edge (start_point.x > end_point.x == 0).
+  {
+    auto builder = DisplayListBuilder();
+    paragraph->PaintMasked(&builder, 0, 0, 0, 0, 120.0, paragraph->GetHeight(),
+                           /*opacity=*/1.0, /*fade_horizontal=*/true,
+                           txt::OverflowPosition::kStart);
+    auto recorder = DlOpRecorder();
+    builder.Build()->Dispatch(recorder);
+    EXPECT_EQ(recorder.clipRectCount(), 1);
+    EXPECT_EQ(recorder.saveLayerCount(), 1);
+    ASSERT_EQ(recorder.rectCount(), 1);
+    ASSERT_FALSE(recorder.colorSources().empty());
+    const auto* linear = recorder.colorSources().back()->asLinearGradient();
+    ASSERT_NE(linear, nullptr);
+    EXPECT_EQ(linear->stop_count(), 2);
+    EXPECT_GT(linear->start_point().x, linear->end_point().x);
+    EXPECT_FLOAT_EQ(linear->end_point().x, 0.0f);
+  }
+
+  // kMiddle: keeps leading and trailing edges opaque and fades the center.
+  {
+    auto builder = DisplayListBuilder();
+    paragraph->PaintMasked(&builder, 0, 0, 0, 0, 120.0, paragraph->GetHeight(),
+                           /*opacity=*/1.0, /*fade_horizontal=*/true,
+                           txt::OverflowPosition::kMiddle);
+    auto recorder = DlOpRecorder();
+    builder.Build()->Dispatch(recorder);
+    EXPECT_EQ(recorder.clipRectCount(), 1);
+    EXPECT_EQ(recorder.saveLayerCount(), 1);
+    ASSERT_EQ(recorder.rectCount(), 1);
+    ASSERT_FALSE(recorder.colorSources().empty());
+    const auto* linear = recorder.colorSources().back()->asLinearGradient();
+    ASSERT_NE(linear, nullptr);
+    EXPECT_EQ(linear->stop_count(), 5);
+    EXPECT_EQ(linear->colors()[0], DlColor::kWhite());
+    EXPECT_EQ(linear->colors()[2], DlColor::kTransparent());
+    EXPECT_EQ(linear->colors()[4], DlColor::kWhite());
+  }
+
+  // kEnd (LTR): fades toward right edge (start_point.x < end_point.x == 120).
+  {
+    auto builder = DisplayListBuilder();
+    paragraph->PaintMasked(&builder, 0, 0, 0, 0, 120.0, paragraph->GetHeight(),
+                           /*opacity=*/1.0, /*fade_horizontal=*/true,
+                           txt::OverflowPosition::kEnd);
+    auto recorder = DlOpRecorder();
+    builder.Build()->Dispatch(recorder);
+    EXPECT_EQ(recorder.clipRectCount(), 1);
+    EXPECT_EQ(recorder.saveLayerCount(), 1);
+    ASSERT_EQ(recorder.rectCount(), 1);
+    ASSERT_FALSE(recorder.colorSources().empty());
+    const auto* linear = recorder.colorSources().back()->asLinearGradient();
+    ASSERT_NE(linear, nullptr);
+    EXPECT_EQ(linear->stop_count(), 2);
+    EXPECT_LT(linear->start_point().x, linear->end_point().x);
+    EXPECT_FLOAT_EQ(linear->end_point().x, 120.0f);
+  }
+
+  // kEnd (RTL): fades toward the left edge (end_point.x == 0).
+  auto rtl_paragraph =
+      buildParagraph(makeStyle(), u"0x71C95823F4B9E1029384756ABCDEF01239B8F",
+                     /*max_lines=*/1, txt::TextDirection::rtl);
+  rtl_paragraph->Layout(120.0);
+  {
+    auto builder = DisplayListBuilder();
+    rtl_paragraph->PaintMasked(&builder, 0, 0, 0, 0, 120.0,
+                               rtl_paragraph->GetHeight(), /*opacity=*/1.0,
+                               /*fade_horizontal=*/true,
+                               txt::OverflowPosition::kEnd);
+    auto recorder = DlOpRecorder();
+    builder.Build()->Dispatch(recorder);
+    ASSERT_FALSE(recorder.colorSources().empty());
+    const auto* linear = recorder.colorSources().back()->asLinearGradient();
+    ASSERT_NE(linear, nullptr);
+    EXPECT_GT(linear->start_point().x, linear->end_point().x);
+    EXPECT_FLOAT_EQ(linear->end_point().x, 0.0f);
+  }
+}
+
+#ifdef IMPELLER_SUPPORTS_RENDERING
+TEST_F(PainterTest, PaintMaskedWithImpeller) {
+  PretendImpellerIsEnabled(true);
+
+  // Multiline paragraph with opacity < 1.0 and horizontal fade records Impeller
+  // TextFrames (no SkTextBlobs), a single SaveLayer, clipRect, and modulate
+  // linear gradient over the last line.
+  auto multiline = buildParagraph(
+      makeStyle(),
+      u"Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod",
+      /*max_lines=*/2);
+  multiline->Layout(200.0);
+  ASSERT_EQ(multiline->GetNumberOfLines(), 2u);
+
+  {
+    auto builder = DisplayListBuilder();
+    multiline->PaintMasked(&builder, 0, 0, 0, 0, 200.0, multiline->GetHeight(),
+                           /*opacity=*/0.5, /*fade_horizontal=*/true,
+                           txt::OverflowPosition::kEnd);
+    auto recorder = DlOpRecorder();
+    builder.Build()->Dispatch(recorder);
+
+    EXPECT_GT(recorder.textFrameCount(), 0);
+    EXPECT_EQ(recorder.blobCount(), 0);
+    EXPECT_EQ(recorder.clipRectCount(), 1);
+    EXPECT_EQ(recorder.saveLayerCount(), 1);
+    ASSERT_EQ(recorder.rectCount(), 1);
+    EXPECT_GT(recorder.rects().front().GetTop(), 0.0f);
+    ASSERT_FALSE(recorder.colorSources().empty());
+    const auto* linear = recorder.colorSources().back()->asLinearGradient();
+    ASSERT_NE(linear, nullptr);
+    EXPECT_LT(linear->start_point().x, linear->end_point().x);
+  }
+
+  // Single-line middle fade under Impeller emits TextFrames and the 5-stop
+  // center fade gradient.
+  auto single_line = buildParagraph(
+      makeStyle(), u"0x71C95823F4B9E1029384756ABCDEF01239B8F", /*max_lines=*/1);
+  single_line->Layout(120.0);
+
+  {
+    auto builder = DisplayListBuilder();
+    single_line->PaintMasked(
+        &builder, 0, 0, 0, 0, 120.0, single_line->GetHeight(), /*opacity=*/1.0,
+        /*fade_horizontal=*/true, txt::OverflowPosition::kMiddle);
+    auto recorder = DlOpRecorder();
+    builder.Build()->Dispatch(recorder);
+
+    EXPECT_GT(recorder.textFrameCount(), 0);
+    EXPECT_EQ(recorder.blobCount(), 0);
+    EXPECT_EQ(recorder.clipRectCount(), 1);
+    EXPECT_EQ(recorder.saveLayerCount(), 1);
+    ASSERT_EQ(recorder.rectCount(), 1);
+    ASSERT_FALSE(recorder.colorSources().empty());
+    const auto* linear = recorder.colorSources().back()->asLinearGradient();
+    ASSERT_NE(linear, nullptr);
+    EXPECT_EQ(linear->stop_count(), 5);
+    EXPECT_EQ(linear->colors()[0], DlColor::kWhite());
+    EXPECT_EQ(linear->colors()[2], DlColor::kTransparent());
+    EXPECT_EQ(linear->colors()[4], DlColor::kWhite());
+  }
 }
 #endif  // IMPELLER_SUPPORTS_RENDERING
 

@@ -1898,6 +1898,103 @@ void main() {
     );
     expect(tester.getSize(find.byType(Text)), Size.zero);
   });
+
+  testWidgets('Text inherits overflowPosition and scrollOverflow from DefaultTextStyle', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: DefaultTextStyle(
+          style: TextStyle(fontSize: 14.0),
+          overflowPosition: TextOverflowPosition.middle,
+          scrollOverflow: TextScrollOverflow.fade,
+          child: Text('Inherited'),
+        ),
+      ),
+    );
+
+    final RenderParagraph paragraph = tester.renderObject(find.byType(RichText));
+    expect(paragraph.overflowPosition, TextOverflowPosition.middle);
+    expect(paragraph.scrollOverflow, TextScrollOverflow.fade);
+
+    // Explicit Text parameters override DefaultTextStyle.
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: DefaultTextStyle(
+          style: TextStyle(fontSize: 14.0),
+          overflowPosition: TextOverflowPosition.middle,
+          scrollOverflow: TextScrollOverflow.fade,
+          child: Text(
+            'Overridden',
+            overflowPosition: TextOverflowPosition.start,
+            scrollOverflow: TextScrollOverflow.clip,
+          ),
+        ),
+      ),
+    );
+
+    expect(paragraph.overflowPosition, TextOverflowPosition.start);
+    expect(paragraph.scrollOverflow, TextScrollOverflow.clip);
+
+    // DefaultTextStyle.merge preserves unspecified properties and overrides specified ones.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: DefaultTextStyle(
+          style: const TextStyle(fontSize: 14.0),
+          overflowPosition: TextOverflowPosition.start,
+          scrollOverflow: TextScrollOverflow.fade,
+          child: DefaultTextStyle.merge(
+            scrollOverflow: TextScrollOverflow.clip,
+            child: const Text('Merged'),
+          ),
+        ),
+      ),
+    );
+
+    final RenderParagraph mergedParagraph = tester.renderObject(find.byType(RichText));
+    expect(mergedParagraph.overflowPosition, TextOverflowPosition.start);
+    expect(mergedParagraph.scrollOverflow, TextScrollOverflow.clip);
+  });
+
+  testWidgets(
+    'AnimatedDefaultTextStyle and DefaultTextStyleTransition forward overflowPosition and scrollOverflow',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: AnimatedDefaultTextStyle(
+            style: TextStyle(fontSize: 14.0),
+            overflowPosition: TextOverflowPosition.middle,
+            scrollOverflow: TextScrollOverflow.fade,
+            duration: Duration(milliseconds: 100),
+            child: Text('Animated'),
+          ),
+        ),
+      );
+      final RenderParagraph animatedParagraph = tester.renderObject(find.byType(RichText));
+      expect(animatedParagraph.overflowPosition, TextOverflowPosition.middle);
+      expect(animatedParagraph.scrollOverflow, TextScrollOverflow.fade);
+
+      const animation = AlwaysStoppedAnimation<TextStyle>(TextStyle(fontSize: 16.0));
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: DefaultTextStyleTransition(
+            style: animation,
+            overflowPosition: TextOverflowPosition.start,
+            scrollOverflow: TextScrollOverflow.clip,
+            child: Text('Transition'),
+          ),
+        ),
+      );
+      final RenderParagraph transitionParagraph = tester.renderObject(find.byType(RichText));
+      expect(transitionParagraph.overflowPosition, TextOverflowPosition.start);
+      expect(transitionParagraph.scrollOverflow, TextScrollOverflow.clip);
+    },
+  );
 }
 
 Future<void> _pumpTextWidget({

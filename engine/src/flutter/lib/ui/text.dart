@@ -3224,6 +3224,25 @@ abstract class Paragraph {
   /// after this method is called.
   void dispose();
 
+  /// Draws the text in this paragraph onto [canvas] at [offset], clipped to
+  /// [clipRect] and modulated by [opacity].
+  ///
+  /// This paragraph must have had [layout] called on it first. Values of
+  /// [opacity] are clamped to `0.0..1.0`; if [opacity] is less than or equal to
+  /// `0.0` or `NaN`, nothing is drawn.
+  ///
+  /// When [fadeHorizontal] is true, applies a horizontal overflow fade
+  /// controlled by [overflowPosition] (`0` for start, `1` for middle, `2` for
+  /// end).
+  void paintMasked(
+    Canvas canvas,
+    Offset offset, {
+    required Rect clipRect,
+    double opacity = 1.0,
+    bool fadeHorizontal = false,
+    int overflowPosition = 2,
+  });
+
   /// Whether this reference to the underlying picture is [dispose]d.
   ///
   /// This only returns a valid value if asserts are enabled, and must not be
@@ -3398,6 +3417,88 @@ base class _NativeParagraph extends NativeFieldWrapperClass1 implements Paragrap
   // this indirection.
   @Native<Void Function(Pointer<Void>, Pointer<Void>, Double, Double)>(symbol: 'Paragraph::paint')
   external void _paint(_NativeCanvas canvas, double x, double y);
+
+  @Native<
+    Void Function(
+      Pointer<Void>,
+      Pointer<Void>,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Bool,
+      Int32,
+    )
+  >(symbol: 'Paragraph::paintMasked')
+  external void _paintMasked(
+    _NativeCanvas canvas,
+    double x,
+    double y,
+    double clipLeft,
+    double clipTop,
+    double clipRight,
+    double clipBottom,
+    double opacity,
+    bool fadeHorizontal,
+    int overflowPosition,
+  );
+
+  @override
+  void paintMasked(
+    Canvas canvas,
+    Offset offset, {
+    required Rect clipRect,
+    double opacity = 1.0,
+    bool fadeHorizontal = false,
+    int overflowPosition = 2,
+  }) {
+    assert(!debugDisposed);
+    assert(_offsetIsValid(offset));
+    assert(_rectIsValid(clipRect));
+    assert(!_needsLayout);
+    assert(overflowPosition >= 0 && overflowPosition <= 2);
+    if (!(opacity > 0.0)) {
+      return;
+    }
+    final Rect sortedClip = _NativeCanvas._sorted(clipRect);
+    if (sortedClip.isEmpty) {
+      return;
+    }
+    final double clampedOpacity = opacity > 1.0 ? 1.0 : opacity;
+    if (canvas case final _NativeCanvas nativeCanvas) {
+      _paintMasked(
+        nativeCanvas,
+        offset.dx,
+        offset.dy,
+        sortedClip.left,
+        sortedClip.top,
+        sortedClip.right,
+        sortedClip.bottom,
+        clampedOpacity,
+        fadeHorizontal,
+        overflowPosition,
+      );
+      return;
+    }
+
+    final int alpha = Color.getAlphaFromOpacity(clampedOpacity);
+    if (alpha == 0) {
+      return;
+    }
+    canvas.save();
+    canvas.clipRect(sortedClip);
+    if (alpha < 255) {
+      canvas.saveLayer(sortedClip, Paint()..color = Color.fromARGB(alpha, 0, 0, 0));
+      canvas.drawParagraph(this, offset);
+      canvas.restore();
+    } else {
+      canvas.drawParagraph(this, offset);
+    }
+    canvas.restore();
+  }
 
   @override
   List<LineMetrics> computeLineMetrics() {

@@ -36,7 +36,9 @@ ParagraphBuilderSkia::ParagraphBuilderSkia(
     const ParagraphStyle& style,
     const std::shared_ptr<FontCollection>& font_collection,
     const bool impeller_enabled)
-    : base_style_(style.GetTextStyle()), impeller_enabled_(impeller_enabled) {
+    : base_style_(style.GetTextStyle()),
+      impeller_enabled_(impeller_enabled),
+      text_direction_(style.text_direction) {
   builder_ = skt::ParagraphBuilder::make(
       TxtToSkia(style), font_collection->CreateSktFontCollection(),
       SkUnicodes::ICU::Make());
@@ -80,8 +82,9 @@ void ParagraphBuilderSkia::AddPlaceholder(PlaceholderRun& span) {
 }
 
 std::unique_ptr<Paragraph> ParagraphBuilderSkia::Build() {
-  return std::make_unique<ParagraphSkia>(
-      builder_->Build(), std::move(dl_paints_), impeller_enabled_);
+  return std::make_unique<ParagraphSkia>(builder_->Build(),
+                                         std::move(dl_paints_),
+                                         impeller_enabled_, text_direction_);
 }
 
 skt::ParagraphPainter::PaintID ParagraphBuilderSkia::CreatePaintID(

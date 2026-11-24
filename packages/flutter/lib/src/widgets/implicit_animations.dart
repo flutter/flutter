@@ -2065,6 +2065,8 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
     this.textAlign,
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
+    this.overflowPosition = TextOverflowPosition.end,
+    this.scrollOverflow = TextScrollOverflow.wrap,
     this.maxLines,
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
@@ -2100,6 +2102,16 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   /// This property takes effect immediately when changed, it is not animated.
   final TextOverflow overflow;
 
+  /// {@macro flutter.rendering.RenderParagraph.overflowPosition}
+  ///
+  /// This property takes effect immediately when changed, it is not animated.
+  final TextOverflowPosition overflowPosition;
+
+  /// {@macro flutter.rendering.RenderParagraph.scrollOverflow}
+  ///
+  /// This property takes effect immediately when changed, it is not animated.
+  final TextScrollOverflow scrollOverflow;
+
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
   ///
   /// This property takes effect immediately when changed, it is not animated.
@@ -2134,6 +2146,20 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
       ),
     );
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
+    properties.add(
+      EnumProperty<TextOverflowPosition>(
+        'overflowPosition',
+        overflowPosition,
+        defaultValue: TextOverflowPosition.end,
+      ),
+    );
+    properties.add(
+      EnumProperty<TextScrollOverflow>(
+        'scrollOverflow',
+        scrollOverflow,
+        defaultValue: TextScrollOverflow.wrap,
+      ),
+    );
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(
       EnumProperty<TextWidthBasis>(
@@ -2171,6 +2197,8 @@ class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDef
       textAlign: widget.textAlign,
       softWrap: widget.softWrap,
       overflow: widget.overflow,
+      overflowPosition: widget.overflowPosition,
+      scrollOverflow: widget.scrollOverflow,
       maxLines: widget.maxLines,
       textWidthBasis: widget.textWidthBasis,
       textHeightBehavior: widget.textHeightBehavior,

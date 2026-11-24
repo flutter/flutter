@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
@@ -370,6 +371,187 @@ class EngineCanvas implements LayerCanvas {
     } else {
       throw UnimplementedError('Unknown paragraph type.');
     }
+  }
+
+  static bool _isParagraphRtl(ui.Paragraph paragraph) {
+    if (paragraph is EngineParagraph) {
+      return paragraph.textDirection == ui.TextDirection.rtl;
+    }
+    if (paragraph is WebParagraph) {
+      return paragraph.paragraphStyle.textDirection == ui.TextDirection.rtl;
+    }
+    return false;
+  }
+
+  /// Draws the text in [paragraph] onto this canvas at [offset], clipped to
+  /// [clipRect] and modulated by [opacity].
+  void _drawParagraphAlignedOrSplit(
+    ui.Paragraph paragraph,
+    ui.Offset offset,
+    ui.Rect sortedClip,
+    int overflowPosition,
+    bool isRtl,
+  ) {
+    final double clipWidth = sortedClip.width;
+    final double contentWidth = paragraph.width.isFinite ? paragraph.width : paragraph.longestLine;
+    final double overflowWidth = contentWidth - clipWidth;
+    if (overflowWidth <= 0.0 || paragraph.numberOfLines > 1) {
+      drawParagraph(paragraph, offset);
+      return;
+    }
+    if (overflowPosition == 1 && clipWidth > 0.0) {
+      final double halfWidth = clipWidth / 2.0;
+      final double midX = sortedClip.left + halfWidth;
+
+      save();
+      clipRect(
+        ui.Rect.fromLTRB(sortedClip.left, sortedClip.top, midX, sortedClip.bottom),
+        doAntiAlias: false,
+      );
+      drawParagraph(paragraph, offset);
+      restore();
+
+      save();
+      clipRect(
+        ui.Rect.fromLTRB(midX, sortedClip.top, sortedClip.right, sortedClip.bottom),
+        doAntiAlias: false,
+      );
+      drawParagraph(paragraph, ui.Offset(offset.dx - overflowWidth, offset.dy));
+      restore();
+      return;
+    }
+    if ((overflowPosition == 0 && !isRtl) || (overflowPosition == 2 && isRtl)) {
+      drawParagraph(paragraph, ui.Offset(offset.dx - overflowWidth, offset.dy));
+      return;
+    }
+    drawParagraph(paragraph, offset);
+  }
+
+  /// Draws the text in [paragraph] onto this canvas at [offset], clipped to
+  /// [clipRect] and modulated by [opacity].
+  void drawParagraphMasked(
+    ui.Paragraph paragraph,
+    ui.Offset offset, {
+    required ui.Rect clipRect,
+    double opacity = 1.0,
+    bool fadeHorizontal = false,
+    int overflowPosition = 2,
+  }) {
+    assert(!paragraph.debugDisposed);
+    assert(offsetIsValid(offset));
+    assert(rectIsValid(clipRect));
+    assert(overflowPosition >= 0 && overflowPosition <= 2);
+    if (!(opacity > 0.0)) {
+      return;
+    }
+    final ui.Rect sortedClip = ui.Rect.fromLTRB(
+      math.min(clipRect.left, clipRect.right),
+      math.min(clipRect.top, clipRect.bottom),
+      math.max(clipRect.left, clipRect.right),
+      math.max(clipRect.top, clipRect.bottom),
+    );
+    if (sortedClip.isEmpty) {
+      return;
+    }
+    final effectiveOpacity = opacity > 1.0 ? 1.0 : opacity;
+    final int alpha = ui.Color.getAlphaFromOpacity(effectiveOpacity);
+    if (alpha == 0) {
+      return;
+    }
+
+    final bool isRtl = _isParagraphRtl(paragraph);
+
+    save();
+    this.clipRect(sortedClip, doAntiAlias: false);
+
+    if (fadeHorizontal) {
+      final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+      // Default 14.0 logical-pixel font size fallback when no line metrics are available.
+      var fadeWidth = 14.0;
+      if (lines.isNotEmpty) {
+        final ui.LineMetrics lastLine = lines.last;
+        fadeWidth = (lastLine.ascent + lastLine.descent).roundToDouble();
+      } else if (sortedClip.height > 0.0) {
+        fadeWidth = sortedClip.height;
+      }
+      fadeWidth = math.max(fadeWidth, 1.0);
+
+      final layerPaint = ui.Paint();
+      if (alpha < 255) {
+        layerPaint.color = ui.Color.fromARGB(alpha, 0, 0, 0);
+      }
+      saveLayer(sortedClip, layerPaint);
+      _drawParagraphAlignedOrSplit(paragraph, offset, sortedClip, overflowPosition, isRtl);
+
+      final maskPaint = ui.Paint()..blendMode = ui.BlendMode.modulate;
+      final bool fadeAtLeft = (overflowPosition == 0 && !isRtl) || (overflowPosition == 2 && isRtl);
+      if (lines.length > 1) {
+        final ui.LineMetrics lastLine = lines.last;
+        final double lineTop = math.max(
+          sortedClip.top,
+          offset.dy + lastLine.baseline - lastLine.ascent,
+        );
+        final double lineLeft = math.max(sortedClip.left, offset.dx + lastLine.left);
+        final double lineRight = math.min(
+          sortedClip.right,
+          offset.dx + lastLine.left + lastLine.width,
+        );
+        if (lineRight > lineLeft && sortedClip.bottom > lineTop) {
+          final double effectiveFade = math.min(fadeWidth * 2.0, lineRight - lineLeft);
+          final double fadeStart = fadeAtLeft
+              ? math.min(lineRight, lineLeft + effectiveFade)
+              : math.max(lineLeft, lineRight - effectiveFade);
+          final fadeEnd = fadeAtLeft ? lineLeft : lineRight;
+          maskPaint.shader = ui.Gradient.linear(
+            ui.Offset(fadeStart, 0.0),
+            ui.Offset(fadeEnd, 0.0),
+            const <ui.Color>[ui.Color(0xFFFFFFFF), ui.Color(0x00FFFFFF)],
+          );
+          drawRect(
+            ui.Rect.fromLTRB(sortedClip.left, lineTop, sortedClip.right, sortedClip.bottom),
+            maskPaint,
+          );
+        }
+      } else if (overflowPosition == 1 && sortedClip.width > 0.0) {
+        final double halfWidth = sortedClip.width / 2.0;
+        final double halfFade = math.min(fadeWidth, halfWidth);
+        final double stop1 = ui.clampDouble((halfWidth - halfFade) / sortedClip.width, 0.0, 0.5);
+        final double stop2 = ui.clampDouble((halfWidth + halfFade) / sortedClip.width, 0.5, 1.0);
+        maskPaint.shader = ui.Gradient.linear(
+          ui.Offset(sortedClip.left, 0.0),
+          ui.Offset(sortedClip.right, 0.0),
+          const <ui.Color>[
+            ui.Color(0xFFFFFFFF),
+            ui.Color(0xFFFFFFFF),
+            ui.Color(0x00FFFFFF),
+            ui.Color(0xFFFFFFFF),
+            ui.Color(0xFFFFFFFF),
+          ],
+          <double>[0.0, stop1, 0.5, stop2, 1.0],
+        );
+        drawRect(sortedClip, maskPaint);
+      } else {
+        final double fadeStart = fadeAtLeft
+            ? math.min(sortedClip.right, sortedClip.left + fadeWidth)
+            : math.max(sortedClip.left, sortedClip.right - fadeWidth);
+        final double fadeEnd = fadeAtLeft ? sortedClip.left : sortedClip.right;
+        maskPaint.shader = ui.Gradient.linear(
+          ui.Offset(fadeStart, 0.0),
+          ui.Offset(fadeEnd, 0.0),
+          const <ui.Color>[ui.Color(0xFFFFFFFF), ui.Color(0x00FFFFFF)],
+        );
+        drawRect(sortedClip, maskPaint);
+      }
+      restore();
+    } else if (alpha < 255) {
+      saveLayer(sortedClip, ui.Paint()..color = ui.Color.fromARGB(alpha, 0, 0, 0));
+      _drawParagraphAlignedOrSplit(paragraph, offset, sortedClip, overflowPosition, isRtl);
+      restore();
+    } else {
+      _drawParagraphAlignedOrSplit(paragraph, offset, sortedClip, overflowPosition, isRtl);
+    }
+
+    restore();
   }
 
   /// Draws a sequence of points according to [pointMode].

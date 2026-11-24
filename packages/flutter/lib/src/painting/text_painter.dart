@@ -59,6 +59,38 @@ enum TextOverflow {
   visible,
 }
 
+/// Where within the text visual overflow truncation or fading occurs.
+///
+/// With [TextOverflow.ellipsis], [start] and [middle] apply to single-line text
+/// without inline [PlaceholderSpan]s; multiline text or spans with inline
+/// placeholders fall back to [end].
+///
+/// See also:
+///
+///  * [TextOverflow], which defines the visual effect applied at this position.
+enum TextOverflowPosition {
+  /// Truncate or fade the start of the text, keeping the end visible.
+  start,
+
+  /// Truncate or fade the middle of the text, keeping the start and end visible.
+  middle,
+
+  /// Truncate or fade the end of the text, keeping the start visible.
+  end,
+}
+
+/// How text responds when its layout constraints shrink below its laid-out size.
+enum TextScrollOverflow {
+  /// Re-wrap lines to fit the incoming constraints.
+  wrap,
+
+  /// Keep the laid-out line breaks and fade the text out as available space shrinks.
+  fade,
+
+  /// Keep the laid-out line breaks and clip the overflowing edge without fading.
+  clip,
+}
+
 /// Holds the [Size] and baseline required to represent the dimensions of
 /// a placeholder in text.
 ///
@@ -1405,6 +1437,63 @@ class TextPainter {
     canvas.drawParagraph(layoutCache.paragraph, offset + layoutCache.paintOffset);
   }
 
+  /// Paints the text onto [canvas] at [offset], clipped to [clipRect] and
+  /// composited with [opacity].
+  ///
+  /// Valid only after [layout] has been called. Values of [opacity] are clamped
+  /// to the range `0.0` to `1.0`; if the resulting opacity is `0.0` or
+  /// [clipRect] is empty, nothing is painted.
+  void paintMasked(
+    Canvas canvas,
+    Offset offset, {
+    required Rect clipRect,
+    double opacity = 1.0,
+    bool fadeHorizontal = false,
+    TextOverflowPosition overflowPosition = TextOverflowPosition.end,
+  }) {
+    final _TextPainterLayoutCacheWithOffset? layoutCache = _layoutCache;
+    if (layoutCache == null) {
+      throw StateError(
+        'TextPainter.paintMasked called when text geometry was not yet calculated.\n'
+        'Please call layout() before paintMasked() to position the text before painting it.',
+      );
+    }
+
+    final double effectiveOpacity = clampDouble(opacity, 0.0, 1.0);
+    final int alpha = Color.getAlphaFromOpacity(effectiveOpacity);
+    if (alpha == 0 || clipRect.isEmpty) {
+      return;
+    }
+
+    if (_rebuildParagraphForPaint) {
+      Size? debugSize;
+      assert(() {
+        debugSize = size;
+        return true;
+      }());
+      final ui.Paragraph paragraph = layoutCache.paragraph;
+      assert(!layoutCache.layoutMaxWidth.isNaN);
+      layoutCache.layout._paragraph = _createParagraph(text!)
+        ..layout(ui.ParagraphConstraints(width: layoutCache.layoutMaxWidth));
+      assert(paragraph.width == layoutCache.layout._paragraph.width);
+      paragraph.dispose();
+      assert(debugSize == size);
+    }
+    assert(!_rebuildParagraphForPaint);
+
+    assert(
+      !debugPaintTextLayoutBoxes || _debugPaintCharacterLayoutBoxes(canvas, layoutCache, offset),
+    );
+    layoutCache.paragraph.paintMasked(
+      canvas,
+      offset + layoutCache.paintOffset,
+      clipRect: clipRect,
+      opacity: effectiveOpacity,
+      fadeHorizontal: fadeHorizontal,
+      overflowPosition: overflowPosition.index,
+    );
+  }
+
   bool _debugPaintCharacterLayoutBoxes(
     Canvas canvas,
     _TextPainterLayoutCacheWithOffset layout,
@@ -1729,6 +1818,24 @@ class TextPainter {
     return offset == Offset.zero
         ? boxes
         : boxes.map((TextBox box) => _shiftTextBox(box, offset)).toList(growable: false);
+  }
+
+  /// Returns the [GlyphInfo] of the grapheme cluster containing the UTF-16
+  /// [codeUnitOffset] in the paragraph coordinate system, or null if the offset
+  /// is out of bounds or not laid out.
+  ui.GlyphInfo? getGlyphInfoAt(int codeUnitOffset) {
+    assert(_debugAssertTextLayoutIsValid);
+    assert(!_debugNeedsRelayout);
+    final _TextPainterLayoutCacheWithOffset cachedLayout = _layoutCache!;
+    final ui.GlyphInfo? rawGlyphInfo = cachedLayout.paragraph.getGlyphInfoAt(codeUnitOffset);
+    if (rawGlyphInfo == null || cachedLayout.paintOffset == Offset.zero) {
+      return rawGlyphInfo;
+    }
+    return ui.GlyphInfo(
+      rawGlyphInfo.graphemeClusterLayoutBounds.shift(cachedLayout.paintOffset),
+      rawGlyphInfo.graphemeClusterCodeUnitRange,
+      rawGlyphInfo.writingDirection,
+    );
   }
 
   /// Returns the [GlyphInfo] of the glyph closest to the given `offset` in the

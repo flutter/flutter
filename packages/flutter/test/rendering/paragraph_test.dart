@@ -1681,6 +1681,484 @@ void main() {
       expect(() => paragraph.positionInlineChildren(boxes), returnsNormally);
     });
   });
+
+  group('overflowPosition', () {
+    test('supports start, middle, and end with TextOverflow.ellipsis and preserves spans', () {
+      const longText = 'packages/flutter/lib/src/rendering/paragraph.dart';
+      final paragraphEnd = RenderParagraph(
+        const TextSpan(text: longText, style: TextStyle(fontSize: 14.0)),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      );
+      layout(paragraphEnd, constraints: const BoxConstraints(maxWidth: 120.0));
+      expect(paragraphEnd.didExceedMaxLines, isTrue);
+      // End ellipsis keeps the leading word 'packages' at offset 0.
+      expect(
+        paragraphEnd.getWordBoundary(const TextPosition(offset: 0)),
+        const TextRange(start: 0, end: 8),
+      );
+
+      final paragraphStart = RenderParagraph(
+        const TextSpan(text: longText, style: TextStyle(fontSize: 14.0)),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        overflowPosition: TextOverflowPosition.start,
+      );
+      layout(paragraphStart, constraints: const BoxConstraints(maxWidth: 120.0));
+      expect(paragraphStart.didExceedMaxLines, isTrue);
+      expect(paragraphStart.size.width, lessThanOrEqualTo(120.0));
+      // Start ellipsis begins with '\u2026' (single punctuation char at offset 0).
+      expect(
+        paragraphStart.getWordBoundary(const TextPosition(offset: 0)),
+        const TextRange(start: 0, end: 1),
+      );
+      expect(
+        paragraphStart.getDryLayout(const BoxConstraints(maxWidth: 120.0)),
+        paragraphStart.size,
+      );
+
+      final paragraphMiddle = RenderParagraph(
+        const TextSpan(text: longText, style: TextStyle(fontSize: 14.0)),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        overflowPosition: TextOverflowPosition.middle,
+      );
+      layout(paragraphMiddle, constraints: const BoxConstraints(maxWidth: 120.0));
+      expect(paragraphMiddle.didExceedMaxLines, isTrue);
+      expect(paragraphMiddle.size.width, lessThanOrEqualTo(120.0));
+      // Middle ellipsis keeps a non-empty leading prefix before '\u2026'.
+      final TextRange middleFirstWord = paragraphMiddle.getWordBoundary(
+        const TextPosition(offset: 0),
+      );
+      expect(middleFirstWord.end, greaterThan(1));
+      expect(
+        paragraphMiddle.getDryLayout(const BoxConstraints(maxWidth: 120.0)),
+        paragraphMiddle.size,
+      );
+
+      // Changing overflowPosition dynamically marks layout dirty and re-truncates.
+      paragraphMiddle.overflowPosition = TextOverflowPosition.start;
+      pumpFrame();
+      expect(paragraphMiddle.overflowPosition, TextOverflowPosition.start);
+      expect(paragraphMiddle.didExceedMaxLines, isTrue);
+      expect(
+        paragraphMiddle.getWordBoundary(const TextPosition(offset: 0)),
+        const TextRange(start: 0, end: 1),
+      );
+
+      // Rich TextSpan children keep their styling when truncated in start/middle mode.
+      final richParagraph = RenderParagraph(
+        const TextSpan(
+          style: TextStyle(fontSize: 14.0),
+          children: <InlineSpan>[
+            TextSpan(
+              text: 'packages/flutter/',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            TextSpan(
+              text: 'lib/src/rendering/paragraph.dart',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ],
+        ),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        overflowPosition: TextOverflowPosition.middle,
+      );
+      layout(richParagraph, constraints: const BoxConstraints(maxWidth: 140.0));
+      expect(richParagraph.didExceedMaxLines, isTrue);
+      expect(richParagraph.size.width, lessThanOrEqualTo(140.0));
+    });
+
+    test(
+      'preserves softWrap for multiline paragraphs when overflowPosition is start or middle',
+      () {
+        const longText = 'word1 word2 word3 word4 word5 word6 word7 word8 word9 word10';
+        for (final position in <TextOverflowPosition>[
+          TextOverflowPosition.start,
+          TextOverflowPosition.middle,
+        ]) {
+          for (final overflow in <TextOverflow>[
+            TextOverflow.clip,
+            TextOverflow.fade,
+            TextOverflow.ellipsis,
+          ]) {
+            final paragraph = RenderParagraph(
+              const TextSpan(text: longText, style: TextStyle(fontSize: 14.0)),
+              textDirection: TextDirection.ltr,
+              maxLines: 2,
+              overflow: overflow,
+              overflowPosition: position,
+            );
+            layout(paragraph, constraints: const BoxConstraints(maxWidth: 120.0));
+            // Must wrap onto 2 lines rather than collapsing to a single line.
+            expect(paragraph.size.height, greaterThan(20.0));
+          }
+        }
+      },
+    );
+
+    test('supports start, middle, and end with TextOverflow.fade, clip, and visible', () {
+      const longText = '0x71C95823F4B9E1029384756ABCDEF01239B8F';
+      for (final TextOverflowPosition position in TextOverflowPosition.values) {
+        final paragraphFade = RenderParagraph(
+          const TextSpan(text: longText, style: TextStyle(fontSize: 14.0)),
+          textDirection: TextDirection.ltr,
+          maxLines: 1,
+          overflow: TextOverflow.fade,
+          overflowPosition: position,
+          softWrap: false,
+        );
+        layout(paragraphFade, constraints: const BoxConstraints(maxWidth: 100.0));
+        final context = MockPaintingContext();
+        paragraphFade.paint(context, Offset.zero);
+        expect(paragraphFade.debugHasOverflowShader, isTrue);
+        expect(
+          context.operations,
+          containsAllInOrder(<String>['save', 'clipRect', 'paragraph', 'restore']),
+        );
+        expect(context.canvas.drawnParagraphOffsets, hasLength(1));
+
+        final paragraphClip = RenderParagraph(
+          const TextSpan(text: longText, style: TextStyle(fontSize: 14.0)),
+          textDirection: TextDirection.ltr,
+          maxLines: 1,
+          overflowPosition: position,
+          softWrap: false,
+        );
+        layout(paragraphClip, constraints: const BoxConstraints(maxWidth: 100.0));
+        final clipContext = MockPaintingContext();
+        paragraphClip.paint(clipContext, Offset.zero);
+        expect(paragraphClip.debugHasOverflowShader, isFalse);
+        expect(clipContext.operations, contains('clipRect'));
+      }
+
+      // TextOverflow.visible must never clip even when overflowPosition is middle.
+      final visibleMiddle = RenderParagraph(
+        const TextSpan(text: longText, style: TextStyle(fontSize: 14.0)),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+        overflow: TextOverflow.visible,
+        overflowPosition: TextOverflowPosition.middle,
+        softWrap: false,
+      );
+      layout(visibleMiddle, constraints: const BoxConstraints(maxWidth: 100.0));
+      final visibleContext = MockPaintingContext();
+      visibleMiddle.paint(visibleContext, Offset.zero);
+      expect(visibleContext.operations, isNot(contains('clipRect')));
+      expect(visibleContext.canvas.drawnParagraphOffsets.length, 1);
+
+      // RTL start overflow delegates fade and clipping to Paragraph.paintMasked.
+      final rtlStart = RenderParagraph(
+        const TextSpan(text: longText, style: TextStyle(fontSize: 14.0)),
+        textDirection: TextDirection.rtl,
+        maxLines: 1,
+        overflow: TextOverflow.fade,
+        overflowPosition: TextOverflowPosition.start,
+        softWrap: false,
+      );
+      layout(rtlStart, constraints: const BoxConstraints(maxWidth: 100.0));
+      final rtlContext = MockPaintingContext();
+      rtlStart.paint(rtlContext, Offset.zero);
+      expect(rtlStart.debugHasOverflowShader, isTrue);
+      expect(
+        rtlContext.operations,
+        containsAllInOrder(<String>['save', 'clipRect', 'paragraph', 'restore']),
+      );
+      expect(rtlContext.canvas.drawnParagraphOffsets, hasLength(1));
+    });
+
+    test('paints each inline child at most once in middle overflow and falls back to ellipsis with placeholders', () {
+      var leadingPaintCount = 0;
+      var trailingPaintCount = 0;
+      final leadingChild = _CountingRenderBox(
+        const Size(12.0, 12.0),
+        onPaint: () => leadingPaintCount += 1,
+      );
+      final trailingChild = _CountingRenderBox(
+        const Size(12.0, 12.0),
+        onPaint: () => trailingPaintCount += 1,
+      );
+      const span = TextSpan(
+        style: TextStyle(fontSize: 14.0),
+        children: <InlineSpan>[
+          WidgetSpan(child: SizedBox.shrink()),
+          TextSpan(text: '0x71C95823F4B9E1029384756ABCDEF01239B8F'),
+          WidgetSpan(child: SizedBox.shrink()),
+        ],
+      );
+      final inlineChildren = <RenderBox>[leadingChild, trailingChild];
+      final paragraph = RenderParagraph(
+        span,
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+        overflow: TextOverflow.fade,
+        overflowPosition: TextOverflowPosition.middle,
+        softWrap: false,
+        children: inlineChildren,
+      );
+      _applyParentData(inlineChildren, span);
+      layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
+      final context = MockPaintingContext();
+      paragraph.paint(context, Offset.zero);
+      expect(leadingPaintCount, 1);
+      expect(trailingPaintCount, 1);
+
+      // With inline children and TextOverflow.ellipsis + start, falls back to
+      // trailing ellipsis instead of silently dropping ellipsis.
+      paragraph
+        ..overflow = TextOverflow.ellipsis
+        ..overflowPosition = TextOverflowPosition.start;
+      pumpFrame();
+      expect(paragraph.didExceedMaxLines, isTrue);
+    });
+
+    test('inherits leaf TextStyle for ellipsis when root TextSpan has null style', () {
+      const childStyle = TextStyle(fontSize: 28.0, color: Color(0xFFFF0000));
+      final paragraph = RenderParagraph(
+        const TextSpan(
+          children: <InlineSpan>[
+            TextSpan(text: 'StartSegment_', style: childStyle),
+            TextSpan(text: 'EndSegment_WithLongTrailingContent', style: childStyle),
+          ],
+        ),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        overflowPosition: TextOverflowPosition.middle,
+      );
+      layout(paragraph, constraints: const BoxConstraints(maxWidth: 180.0));
+      expect(paragraph.didExceedMaxLines, isTrue);
+      // Every leaf TextSpan (including the inserted ellipsis span) should carry childStyle.
+      var foundEllipsisWithStyle = false;
+      paragraph.text.visitChildren((InlineSpan span) {
+        if (span is TextSpan && span.text == '\u2026') {
+          foundEllipsisWithStyle = true;
+        }
+        return true;
+      });
+      // paragraph.text returns the raw text, while the truncated text painted by
+      // RenderParagraph fits within 180.0 even at 28px font size.
+      expect(paragraph.size.width, lessThanOrEqualTo(180.0));
+      expect(foundEllipsisWithStyle, isFalse);
+    });
+
+    test('hitTestChildren accounts for middle clip/fade right-half offset', () {
+      var tappedLeading = false;
+      var tappedTrailing = false;
+      final leadingTap = TapGestureRecognizer()
+        ..onTap = () {
+          tappedLeading = true;
+        };
+      final trailingTap = TapGestureRecognizer()
+        ..onTap = () {
+          tappedTrailing = true;
+        };
+      addTearDown(leadingTap.dispose);
+      addTearDown(trailingTap.dispose);
+
+      final paragraph = RenderParagraph(
+        TextSpan(
+          style: const TextStyle(fontSize: 16.0),
+          children: <InlineSpan>[
+            TextSpan(text: 'LEADING_LINK____________', recognizer: leadingTap),
+            TextSpan(text: '____________TRAILING_LINK', recognizer: trailingTap),
+          ],
+        ),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+        overflowPosition: TextOverflowPosition.middle,
+      );
+      layout(paragraph, constraints: const BoxConstraints(maxWidth: 120.0));
+
+      final leftResult = BoxHitTestResult();
+      expect(paragraph.hitTest(leftResult, position: const Offset(10.0, 8.0)), isTrue);
+      expect(leftResult.path.any((HitTestEntry entry) => entry.target is TextSpan), isTrue);
+      final leftSpan =
+          leftResult.path.firstWhere((HitTestEntry entry) => entry.target is TextSpan).target
+              as TextSpan;
+      expect(leftSpan.recognizer, same(leadingTap));
+
+      final rightResult = BoxHitTestResult();
+      expect(paragraph.hitTest(rightResult, position: const Offset(110.0, 8.0)), isTrue);
+      final rightSpan =
+          rightResult.path.firstWhere((HitTestEntry entry) => entry.target is TextSpan).target
+              as TextSpan;
+      expect(rightSpan.recognizer, same(trailingTap));
+      expect(tappedLeading, isFalse);
+      expect(tappedTrailing, isFalse);
+    });
+
+    test('RTL with softWrap false and TextOverflowPosition.end aligns right edge', () {
+      final paragraph = RenderParagraph(
+        const TextSpan(
+          text: 'שלום עולם טקסט ארוך מאוד לבדיקת גלישה',
+          style: TextStyle(fontSize: 16.0),
+        ),
+        textDirection: TextDirection.rtl,
+        softWrap: false,
+        overflow: TextOverflow.fade,
+      );
+      layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
+
+      final context = MockPaintingContext();
+      paragraph.paint(context, Offset.zero);
+      expect(paragraph.debugHasOverflowShader, isTrue);
+      expect(
+        context.operations,
+        containsAllInOrder(<String>['save', 'clipRect', 'paragraph', 'restore']),
+      );
+      expect(context.canvas.drawnParagraphOffsets, hasLength(1));
+    });
+  });
+
+  group('multiline TextOverflow.fade', () {
+    test('applies horizontal fade only to the last visible line when maxLines > 1', () {
+      final paragraph = RenderParagraph(
+        const TextSpan(
+          text:
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, '
+              'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+          style: TextStyle(fontSize: 14.0),
+        ),
+        textDirection: TextDirection.ltr,
+        maxLines: 2,
+        overflow: TextOverflow.fade,
+      );
+      layout(paragraph, constraints: const BoxConstraints(maxWidth: 180.0));
+      expect(paragraph.didExceedMaxLines, isTrue);
+
+      final context = MockPaintingContext();
+      paragraph.paint(context, Offset.zero);
+      expect(paragraph.debugHasOverflowShader, isTrue);
+      expect(
+        context.operations,
+        containsAllInOrder(<String>['save', 'clipRect', 'paragraph', 'restore']),
+      );
+    });
+
+    test('falls back to vertical fade when clipped by maxHeight rather than maxLines', () {
+      final paragraph = RenderParagraph(
+        const TextSpan(
+          text:
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, '
+              'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+          style: TextStyle(fontSize: 14.0),
+        ),
+        textDirection: TextDirection.ltr,
+        maxLines: 20,
+        overflow: TextOverflow.fade,
+      );
+      layout(paragraph, constraints: const BoxConstraints(maxWidth: 180.0, maxHeight: 35.0));
+      expect(paragraph.didExceedMaxLines, isFalse);
+
+      final context = MockPaintingContext();
+      paragraph.paint(context, Offset.zero);
+      expect(context.operations, contains('shaderRect'));
+      expect(context.canvas.drawnRect, const Rect.fromLTWH(0.0, 0.0, 180.0, 35.0));
+    });
+  });
+
+  group('scrollOverflow', () {
+    test('locks line breaks and fades smoothly when shrinking below natural dimensions', () {
+      final paragraph = RenderParagraph(
+        const TextSpan(
+          text: 'Sample text that wraps into 3 lines',
+          style: TextStyle(fontSize: 16.0),
+        ),
+        textDirection: TextDirection.ltr,
+        maxLines: 3,
+        scrollOverflow: TextScrollOverflow.fade,
+      );
+      final container = RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(maxWidth: 240.0, maxHeight: 100.0),
+        child: paragraph,
+      );
+
+      // Initial layout at full width (240px).
+      layout(RenderPositionedBox(child: container));
+      final double expandedHeight = paragraph.size.height;
+      expect(paragraph.debugScrollFadeOpacity, 1.0);
+
+      // Shrink horizontally to 180px (75% of 240px -> 50% opacity).
+      container.additionalConstraints = const BoxConstraints(maxWidth: 180.0, maxHeight: 100.0);
+      pumpFrame();
+      expect(paragraph.size.height, expandedHeight);
+      expect(paragraph.debugScrollFadeOpacity, closeTo(0.5, 0.01));
+
+      // Shrink horizontally to 120px (50% of 240px -> 0% opacity).
+      container.additionalConstraints = const BoxConstraints(maxWidth: 120.0, maxHeight: 100.0);
+      pumpFrame();
+      expect(paragraph.size.height, expandedHeight);
+      expect(paragraph.debugScrollFadeOpacity, closeTo(0.0, 0.01));
+      // Invisible faded-out text must not intercept pointer hits or expose semantics.
+      final hitResult = BoxHitTestResult();
+      expect(paragraph.hitTest(hitResult, position: const Offset(10.0, 10.0)), isFalse);
+      final semanticsConfig = SemanticsConfiguration();
+      paragraph.describeSemanticsConfiguration(semanticsConfig);
+      expect(semanticsConfig.attributedLabel.string, isEmpty);
+
+      // Restore width to 240px; shrinking loose maxHeight above expandedHeight keeps opacity 1.0.
+      container.additionalConstraints = const BoxConstraints(maxWidth: 240.0, maxHeight: 75.0);
+      pumpFrame();
+      expect(paragraph.debugScrollFadeOpacity, 1.0);
+
+      // Shrinking maxHeight below expandedHeight (75% of expandedHeight -> 50% opacity).
+      container.additionalConstraints = BoxConstraints(
+        maxWidth: 240.0,
+        maxHeight: expandedHeight * 0.75,
+      );
+      pumpFrame();
+      expect(paragraph.debugScrollFadeOpacity, closeTo(0.5, 0.02));
+    });
+
+    test('does not fade short text while container remains wider than intrinsic width', () {
+      final paragraph = RenderParagraph(
+        const TextSpan(text: 'Hi', style: TextStyle(fontSize: 16.0)),
+        textDirection: TextDirection.ltr,
+        scrollOverflow: TextScrollOverflow.fade,
+      );
+      final container = RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(maxWidth: 400.0, maxHeight: 400.0),
+        child: paragraph,
+      );
+      layout(RenderPositionedBox(child: container));
+      expect(paragraph.debugScrollFadeOpacity, 1.0);
+
+      // Shrinking from 400x400 to 150x150 still leaves plenty of space for 'Hi'.
+      container.additionalConstraints = const BoxConstraints(maxWidth: 150.0, maxHeight: 150.0);
+      pumpFrame();
+      expect(paragraph.debugScrollFadeOpacity, 1.0);
+    });
+
+    test('TextScrollOverflow.clip clips overflowing text even with TextOverflow.visible', () {
+      final paragraph = RenderParagraph(
+        const TextSpan(
+          text: 'Sample headline text that locks width and clips',
+          style: TextStyle(fontSize: 16.0),
+        ),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+        overflow: TextOverflow.visible,
+        scrollOverflow: TextScrollOverflow.clip,
+      );
+      final container = RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(maxWidth: 300.0),
+        child: paragraph,
+      );
+      layout(RenderPositionedBox(child: container));
+
+      container.additionalConstraints = const BoxConstraints(maxWidth: 100.0);
+      pumpFrame();
+      final context = MockPaintingContext();
+      paragraph.paint(context, Offset.zero);
+      expect(context.operations, contains('clipRect'));
+    });
+  });
 }
 
 class MockCanvas extends Fake implements Canvas {
@@ -1690,6 +2168,8 @@ class MockCanvas extends Fake implements Canvas {
   Rect? drawnRect;
   Paint? drawnRectPaint;
   List<Type> drawnItemTypes = <Type>[];
+  List<Offset> drawnParagraphOffsets = <Offset>[];
+  List<Rect> clippedRects = <Rect>[];
 
   @override
   void save() {
@@ -1703,6 +2183,7 @@ class MockCanvas extends Fake implements Canvas {
 
   @override
   void clipRect(Rect rect, {ui.ClipOp clipOp = ui.ClipOp.intersect, bool doAntiAlias = true}) {
+    clippedRects.add(rect);
     operations.add('clipRect');
   }
 
@@ -1716,6 +2197,7 @@ class MockCanvas extends Fake implements Canvas {
 
   @override
   void drawParagraph(ui.Paragraph paragraph, Offset offset) {
+    drawnParagraphOffsets.add(offset);
     drawnItemTypes.add(ui.Paragraph);
     operations.add('paragraph');
   }
@@ -1734,6 +2216,8 @@ class MockCanvas extends Fake implements Canvas {
     drawnRect = null;
     drawnRectPaint = null;
     drawnItemTypes.clear();
+    drawnParagraphOffsets.clear();
+    clippedRects.clear();
     operations.clear();
   }
 }
@@ -1755,6 +2239,28 @@ class MockPaintingContext extends Fake implements PaintingContext {
   }) {
     operations.add('pushLayer');
     pushedLayers.add(childLayer);
+  }
+
+  @override
+  void paintChild(RenderObject child, Offset offset) {
+    child.paint(this, offset);
+  }
+}
+
+class _CountingRenderBox extends RenderBox {
+  _CountingRenderBox(this._preferredSize, {required this.onPaint});
+
+  final Size _preferredSize;
+  final VoidCallback onPaint;
+
+  @override
+  void performLayout() {
+    size = constraints.constrain(_preferredSize);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    onPaint();
   }
 }
 

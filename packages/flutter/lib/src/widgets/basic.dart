@@ -80,6 +80,8 @@ export 'package:flutter/rendering.dart'
         StackFit,
         SystemMouseCursors,
         TextOverflow,
+        TextOverflowPosition,
+        TextScrollOverflow,
         ValueChanged,
         ValueGetter,
         WrapAlignment,
@@ -6573,6 +6575,8 @@ class RichText extends MultiChildRenderObjectWidget {
     this.textDirection,
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
+    this.overflowPosition = TextOverflowPosition.end,
+    this.scrollOverflow = TextScrollOverflow.wrap,
     @Deprecated(
       'Use textScaler instead. '
       'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
@@ -6639,6 +6643,12 @@ class RichText extends MultiChildRenderObjectWidget {
 
   /// How visual overflow should be handled.
   final TextOverflow overflow;
+
+  /// {@macro flutter.rendering.RenderParagraph.overflowPosition}
+  final TextOverflowPosition overflowPosition;
+
+  /// {@macro flutter.rendering.RenderParagraph.scrollOverflow}
+  final TextScrollOverflow scrollOverflow;
 
   /// Deprecated. Will be removed in a future version of Flutter. Use
   /// [textScaler] instead.
@@ -6724,6 +6734,8 @@ class RichText extends MultiChildRenderObjectWidget {
       textDirection: textDirection ?? Directionality.of(context),
       softWrap: softWrap,
       overflow: overflow,
+      overflowPosition: overflowPosition,
+      scrollOverflow: scrollOverflow,
       textScaler: textScaler,
       maxLines: maxLines,
       strutStyle: strutStyle,
@@ -6746,6 +6758,8 @@ class RichText extends MultiChildRenderObjectWidget {
       ..textDirection = textDirection ?? Directionality.of(context)
       ..softWrap = softWrap
       ..overflow = overflow
+      ..overflowPosition = overflowPosition
+      ..scrollOverflow = scrollOverflow
       ..textScaler = textScaler
       ..maxLines = maxLines
       ..strutStyle = strutStyle
@@ -6774,6 +6788,20 @@ class RichText extends MultiChildRenderObjectWidget {
     );
     properties.add(
       EnumProperty<TextOverflow>('overflow', overflow, defaultValue: TextOverflow.clip),
+    );
+    properties.add(
+      EnumProperty<TextOverflowPosition>(
+        'overflowPosition',
+        overflowPosition,
+        defaultValue: TextOverflowPosition.end,
+      ),
+    );
+    properties.add(
+      EnumProperty<TextScrollOverflow>(
+        'scrollOverflow',
+        scrollOverflow,
+        defaultValue: TextScrollOverflow.wrap,
+      ),
     );
     properties.add(
       DiagnosticsProperty<TextScaler>('textScaler', textScaler, defaultValue: TextScaler.noScaling),

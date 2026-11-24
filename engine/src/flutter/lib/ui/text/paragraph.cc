@@ -6,6 +6,7 @@
 
 #include "flutter/common/settings.h"
 #include "flutter/common/task_runners.h"
+#include "flutter/display_list/dl_builder.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/task_runner.h"
 #include "third_party/dart/runtime/include/dart_api.h"
@@ -72,6 +73,34 @@ void Paragraph::paint(Canvas* canvas, double x, double y) {
   if (builder) {
     m_paragraph_->Paint(builder, x, y);
   }
+}
+
+void Paragraph::paintMasked(Canvas* canvas,
+                            double x,
+                            double y,
+                            double clip_left,
+                            double clip_top,
+                            double clip_right,
+                            double clip_bottom,
+                            double opacity,
+                            bool fade_horizontal,
+                            int overflow_position) {
+  if (!m_paragraph_ || !canvas || !(opacity > 0.0)) {
+    return;
+  }
+
+  DisplayListBuilder* builder = canvas->builder();
+  if (!builder) {
+    return;
+  }
+
+  const auto pos =
+      (overflow_position == 0)
+          ? txt::OverflowPosition::kStart
+          : (overflow_position == 1 ? txt::OverflowPosition::kMiddle
+                                    : txt::OverflowPosition::kEnd);
+  m_paragraph_->PaintMasked(builder, x, y, clip_left, clip_top, clip_right,
+                            clip_bottom, opacity, fade_horizontal, pos);
 }
 
 static tonic::Float32List EncodeTextBoxes(

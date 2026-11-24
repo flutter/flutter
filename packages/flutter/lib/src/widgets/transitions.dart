@@ -1027,6 +1027,8 @@ class DefaultTextStyleTransition extends AnimatedWidget {
     this.textAlign,
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
+    this.overflowPosition = TextOverflowPosition.end,
+    this.scrollOverflow = TextScrollOverflow.wrap,
     this.maxLines,
   }) : super(listenable: style);
 
@@ -1045,6 +1047,12 @@ class DefaultTextStyleTransition extends AnimatedWidget {
   ///
   final TextOverflow overflow;
 
+  /// {@macro flutter.rendering.RenderParagraph.overflowPosition}
+  final TextOverflowPosition overflowPosition;
+
+  /// {@macro flutter.rendering.RenderParagraph.scrollOverflow}
+  final TextScrollOverflow scrollOverflow;
+
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
   ///
   /// See [DefaultTextStyle.maxLines] for more details.
@@ -1062,6 +1070,8 @@ class DefaultTextStyleTransition extends AnimatedWidget {
       textAlign: textAlign,
       softWrap: softWrap,
       overflow: overflow,
+      overflowPosition: overflowPosition,
+      scrollOverflow: scrollOverflow,
       maxLines: maxLines,
       child: child,
     );

@@ -5,9 +5,13 @@
 #include "paragraph_skia.h"
 
 #include <algorithm>
+#include <cmath>
 #include <numeric>
+#include "display_list/dl_blend_mode.h"
 #include "display_list/dl_paint.h"
 #include "display_list/dl_text_skia.h"
+#include "display_list/dl_tile_mode.h"
+#include "display_list/effects/dl_color_source.h"
 #include "display_list/geometry/dl_geometry_conversions.h"
 #include "fml/logging.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
@@ -208,10 +212,12 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
 
 ParagraphSkia::ParagraphSkia(std::unique_ptr<skt::Paragraph> paragraph,
                              std::vector<flutter::DlPaint>&& dl_paints,
-                             bool impeller_enabled)
+                             bool impeller_enabled,
+                             TextDirection text_direction)
     : paragraph_(std::move(paragraph)),
       dl_paints_(dl_paints),
-      impeller_enabled_(impeller_enabled) {}
+      impeller_enabled_(impeller_enabled),
+      text_direction_(text_direction) {}
 
 double ParagraphSkia::GetMaxWidth() {
   return SkScalarToDouble(paragraph_->getMaxWidth());
@@ -300,6 +306,190 @@ void ParagraphSkia::Layout(double width) {
 bool ParagraphSkia::Paint(DisplayListBuilder* builder, double x, double y) {
   DisplayListParagraphPainter painter(builder, dl_paints_, impeller_enabled_);
   paragraph_->paint(&painter, x, y);
+  return true;
+}
+
+void ParagraphSkia::PaintAlignedOrSplit(DisplayListBuilder* builder,
+                                        double x,
+                                        double y,
+                                        const DlRect& clip,
+                                        OverflowPosition overflow_position) {
+  const double clip_width = static_cast<double>(clip.GetWidth());
+  const double content_width =
+      std::isfinite(GetMaxWidth()) ? GetMaxWidth() : GetLongestLine();
+  const double overflow_width = content_width - clip_width;
+  if (overflow_width <= 0.0 || GetNumberOfLines() > 1) {
+    Paint(builder, x, y);
+    return;
+  }
+
+  const bool is_rtl = text_direction_ == TextDirection::rtl;
+  if (overflow_position == OverflowPosition::kMiddle && clip_width > 0.0) {
+    const double half_width = clip_width / 2.0;
+    const DlScalar mid_x =
+        static_cast<DlScalar>(static_cast<double>(clip.GetLeft()) + half_width);
+
+    builder->Save();
+    builder->ClipRect(DlRect::MakeLTRB(clip.GetLeft(), clip.GetTop(), mid_x,
+                                       clip.GetBottom()),
+                      DlClipOp::kIntersect, false);
+    Paint(builder, x, y);
+    builder->Restore();
+
+    builder->Save();
+    builder->ClipRect(DlRect::MakeLTRB(mid_x, clip.GetTop(), clip.GetRight(),
+                                       clip.GetBottom()),
+                      DlClipOp::kIntersect, false);
+    Paint(builder, x - overflow_width, y);
+    builder->Restore();
+    return;
+  }
+
+  if ((overflow_position == OverflowPosition::kStart && !is_rtl) ||
+      (overflow_position == OverflowPosition::kEnd && is_rtl)) {
+    Paint(builder, x - overflow_width, y);
+    return;
+  }
+
+  Paint(builder, x, y);
+}
+
+bool ParagraphSkia::PaintMasked(DisplayListBuilder* builder,
+                                double x,
+                                double y,
+                                double clip_left,
+                                double clip_top,
+                                double clip_right,
+                                double clip_bottom,
+                                double opacity,
+                                bool fade_horizontal,
+                                OverflowPosition overflow_position) {
+  if (!builder || !(opacity > 0.0)) {
+    return true;
+  }
+
+  const double left = std::min(clip_left, clip_right);
+  const double right = std::max(clip_left, clip_right);
+  const double top = std::min(clip_top, clip_bottom);
+  const double bottom = std::max(clip_top, clip_bottom);
+  const DlRect clip = DlRect::MakeLTRB(
+      static_cast<DlScalar>(left), static_cast<DlScalar>(top),
+      static_cast<DlScalar>(right), static_cast<DlScalar>(bottom));
+  if (clip.IsEmpty()) {
+    return true;
+  }
+
+  const double clamped_opacity = std::min(opacity, 1.0);
+  const bool has_opacity_layer = clamped_opacity < 1.0;
+  DlPaint opacity_paint;
+  if (has_opacity_layer) {
+    opacity_paint.setOpacity(static_cast<DlScalar>(clamped_opacity));
+  }
+
+  builder->Save();
+  builder->ClipRect(clip, DlClipOp::kIntersect, false);
+
+  if (fade_horizontal) {
+    const std::vector<LineMetrics>& lines = GetLineMetrics();
+    // Default 14.0 logical-pixel font size fallback when no line metrics are
+    // available.
+    double fade_width = 14.0;
+    if (!lines.empty()) {
+      const LineMetrics& last_line = lines.back();
+      fade_width = std::round(last_line.ascent + last_line.descent);
+    } else if (clip.GetHeight() > 0.0f) {
+      fade_width = clip.GetHeight();
+    }
+    fade_width = std::max(fade_width, 1.0);
+
+    builder->SaveLayer(clip, has_opacity_layer ? &opacity_paint : nullptr);
+    PaintAlignedOrSplit(builder, x, y, clip, overflow_position);
+
+    const bool is_rtl = text_direction_ == TextDirection::rtl;
+    DlPaint mask_paint;
+    mask_paint.setBlendMode(DlBlendMode::kModulate);
+
+    if (lines.size() > 1) {
+      // Multiline horizontal fade on the last visible line:
+      // Only the last line's vertical band is modulated, and the gradient is
+      // anchored to the last line's actual glyph bounds.
+      const LineMetrics& last_line = lines.back();
+      const double line_top =
+          std::max(top, y + last_line.baseline - last_line.ascent);
+      const double line_left = std::max(left, x + last_line.left);
+      const double line_right =
+          std::min(right, x + last_line.left + last_line.width);
+      if (line_right > line_left && bottom > line_top) {
+        const double effective_fade =
+            std::min(fade_width * 2.0, line_right - line_left);
+        const bool fade_at_left =
+            (overflow_position == OverflowPosition::kStart && !is_rtl) ||
+            (overflow_position == OverflowPosition::kEnd && is_rtl);
+        const double fade_start =
+            fade_at_left ? std::min(line_right, line_left + effective_fade)
+                         : std::max(line_left, line_right - effective_fade);
+        const double fade_end = fade_at_left ? line_left : line_right;
+
+        const DlColor colors[2] = {DlColor::kWhite(), DlColor::kTransparent()};
+        const float stops[2] = {0.0f, 1.0f};
+        mask_paint.setColorSource(DlColorSource::MakeLinear(
+            DlPoint(static_cast<DlScalar>(fade_start), 0.0f),
+            DlPoint(static_cast<DlScalar>(fade_end), 0.0f), 2, colors, stops,
+            DlTileMode::kClamp));
+        const DlRect last_line_rect = DlRect::MakeLTRB(
+            static_cast<DlScalar>(left), static_cast<DlScalar>(line_top),
+            static_cast<DlScalar>(right), static_cast<DlScalar>(bottom));
+        builder->DrawRect(last_line_rect, mask_paint);
+      }
+    } else if (overflow_position == OverflowPosition::kMiddle &&
+               clip.GetWidth() > 0.0f) {
+      // Single-line middle fade: keep leading prefix and trailing suffix opaque
+      // while fading out the center.
+      const double half_width = clip.GetWidth() / 2.0;
+      const double half_fade = std::min(fade_width, half_width);
+      const float stop1 = std::clamp(
+          static_cast<float>((half_width - half_fade) / clip.GetWidth()), 0.0f,
+          0.5f);
+      const float stop2 = std::clamp(
+          static_cast<float>((half_width + half_fade) / clip.GetWidth()), 0.5f,
+          1.0f);
+      const DlColor colors[5] = {DlColor::kWhite(), DlColor::kWhite(),
+                                 DlColor::kTransparent(), DlColor::kWhite(),
+                                 DlColor::kWhite()};
+      const float stops[5] = {0.0f, stop1, 0.5f, stop2, 1.0f};
+      mask_paint.setColorSource(
+          DlColorSource::MakeLinear(DlPoint(static_cast<DlScalar>(left), 0.0f),
+                                    DlPoint(static_cast<DlScalar>(right), 0.0f),
+                                    5, colors, stops, DlTileMode::kClamp));
+      builder->DrawRect(clip, mask_paint);
+    } else {
+      // Single-line directional start or end fade respecting text direction.
+      const bool fade_at_left =
+          (overflow_position == OverflowPosition::kStart && !is_rtl) ||
+          (overflow_position == OverflowPosition::kEnd && is_rtl);
+      const double fade_start = fade_at_left
+                                    ? std::min(right, left + fade_width)
+                                    : std::max(left, right - fade_width);
+      const double fade_end = fade_at_left ? left : right;
+      const DlColor colors[2] = {DlColor::kWhite(), DlColor::kTransparent()};
+      const float stops[2] = {0.0f, 1.0f};
+      mask_paint.setColorSource(DlColorSource::MakeLinear(
+          DlPoint(static_cast<DlScalar>(fade_start), 0.0f),
+          DlPoint(static_cast<DlScalar>(fade_end), 0.0f), 2, colors, stops,
+          DlTileMode::kClamp));
+      builder->DrawRect(clip, mask_paint);
+    }
+
+    builder->Restore();
+  } else if (has_opacity_layer) {
+    builder->SaveLayer(clip, &opacity_paint);
+    PaintAlignedOrSplit(builder, x, y, clip, overflow_position);
+    builder->Restore();
+  } else {
+    PaintAlignedOrSplit(builder, x, y, clip, overflow_position);
+  }
+
+  builder->Restore();
   return true;
 }
 
