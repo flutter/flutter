@@ -327,6 +327,9 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   // Once set, they are not reset to nullptr.
   void CreateAxFragmentRoot();
 
+  // True when TSF owns IME composition for this window.
+  bool IsTsfImeActive() const;
+
   // A pointer to a FlutterWindowsView that can be used to update engine
   // windowing and input state.
   WindowBindingHandlerDelegate* binding_handler_delegate_ = nullptr;

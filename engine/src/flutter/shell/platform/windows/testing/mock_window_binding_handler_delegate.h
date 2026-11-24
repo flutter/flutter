@@ -78,6 +78,7 @@ class MockWindowBindingHandlerDelegate : public WindowBindingHandlerDelegate {
       (override));
   MOCK_METHOD(void, OnScrollInertiaCancel, (int32_t), (override));
   MOCK_METHOD(void, OnHighContrastChanged, (), (override));
+  MOCK_METHOD(bool, IsTsfImeActive, (), (const, override));
 
   MOCK_METHOD(ui::AXFragmentRootDelegateWin*,
               GetAxFragmentRootDelegate,

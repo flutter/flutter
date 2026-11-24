@@ -6,6 +6,8 @@
 
 #include <atomic>
 #include <chrono>
+#include <condition_variable>
+#include <mutex>
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/task_runner_window.h"
@@ -25,6 +27,8 @@ class MockTaskRunner : public TaskRunner {
 
   void SimulateTimerAwake() { ProcessTasks(); }
 
+  void AdvanceTime(std::chrono::milliseconds delay) { current_time_ += delay; }
+
  protected:
   virtual void WakeUp() override {
     // Do nothing to avoid processing tasks immediately after the tasks is
@@ -32,12 +36,14 @@ class MockTaskRunner : public TaskRunner {
   }
 
   virtual TaskTimePoint GetCurrentTimeForTask() const override {
-    return TaskTimePoint(
-        std::chrono::duration_cast<std::chrono::steady_clock::duration>(
-            std::chrono::nanoseconds(10000)));
+    return current_time_;
   }
 
  private:
+  TaskTimePoint current_time_ = TaskTimePoint(
+      std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+          std::chrono::nanoseconds(10000)));
+
   FML_DISALLOW_COPY_AND_ASSIGN(MockTaskRunner);
 };
 
@@ -116,6 +122,68 @@ TEST(TaskRunnerTest, TimerThreadDoesNotCancelEarlierScheduledTasks) {
   timer_thread.Stop();
 }
 
+TEST(TaskRunnerTest, TimerThreadUsesRescheduledEarlierDeadline) {
+  std::mutex mutex;
+  std::condition_variable cv;
+  bool signaled = false;
+  std::optional<std::chrono::high_resolution_clock::time_point> callback_time;
+  TimerThread timer_thread([&]() {
+    std::lock_guard<std::mutex> lock(mutex);
+    callback_time = std::chrono::high_resolution_clock::now();
+    signaled = true;
+    cv.notify_one();
+  });
+  timer_thread.Start();
+
+  const auto original_deadline =
+      std::chrono::high_resolution_clock::now() + std::chrono::seconds(5);
+  timer_thread.ScheduleAt(original_deadline);
+
+  const auto earlier_deadline =
+      std::chrono::high_resolution_clock::now() + std::chrono::milliseconds(20);
+  timer_thread.ScheduleAt(earlier_deadline);
+
+  std::unique_lock<std::mutex> lock(mutex);
+  const bool fired_before_timeout = cv.wait_for(
+      lock, std::chrono::seconds(1), [&signaled]() { return signaled; });
+  lock.unlock();
+  timer_thread.Stop();
+
+  ASSERT_TRUE(fired_before_timeout);
+  ASSERT_TRUE(callback_time.has_value());
+  EXPECT_GE(*callback_time, earlier_deadline);
+  EXPECT_LT(*callback_time, original_deadline);
+}
+
+TEST(TaskRunnerTest, TimerThreadCanRescheduleFromCallback) {
+  std::mutex mutex;
+  std::condition_variable cv;
+  int callback_count = 0;
+  TimerThread* timer = nullptr;
+  TimerThread timer_thread([&]() {
+    std::lock_guard<std::mutex> lock(mutex);
+    callback_count++;
+    if (callback_count == 1) {
+      timer->ScheduleAt(std::chrono::high_resolution_clock::now() +
+                        std::chrono::milliseconds(20));
+    }
+    cv.notify_one();
+  });
+  timer = &timer_thread;
+  timer_thread.Start();
+  timer_thread.ScheduleAt(std::chrono::high_resolution_clock::now() +
+                          std::chrono::milliseconds(20));
+
+  std::unique_lock<std::mutex> lock(mutex);
+  const bool fired_twice =
+      cv.wait_for(lock, std::chrono::seconds(1),
+                  [&callback_count]() { return callback_count == 2; });
+  lock.unlock();
+  timer_thread.Stop();
+
+  EXPECT_TRUE(fired_twice);
+}
+
 class TestTaskRunnerWindow : public TaskRunnerWindow {
  public:
   TestTaskRunnerWindow() : TaskRunnerWindow() {}
@@ -155,6 +223,25 @@ TEST(TaskRunnerTest, TaskRunnerWindowCoalescesWakeUpMessages) {
   }
 
   EXPECT_EQ(delegate.process_tasks_call_count_, 1);
+}
+
+TEST(TaskRunnerTest, PostDelayedTaskRunsAfterDelay) {
+  bool ran = false;
+  MockTaskRunner runner(MockGetCurrentTime, [](const FlutterTask*) {});
+
+  runner.PostDelayedTask([&ran]() { ran = true; },
+                         std::chrono::milliseconds(300));
+
+  runner.SimulateTimerAwake();
+  EXPECT_FALSE(ran);
+
+  runner.AdvanceTime(std::chrono::milliseconds(299));
+  runner.SimulateTimerAwake();
+  EXPECT_FALSE(ran);
+
+  runner.AdvanceTime(std::chrono::milliseconds(1));
+  runner.SimulateTimerAwake();
+  EXPECT_TRUE(ran);
 }
 
 }  // namespace testing

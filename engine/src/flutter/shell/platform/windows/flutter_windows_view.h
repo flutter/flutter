@@ -285,6 +285,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // |WindowBindingHandlerDelegate|
   void OnWindowStateEvent(HWND hwnd, WindowStateEvent event) override;
 
+  // |WindowBindingHandlerDelegate|
+  bool IsTsfImeActive() const override;
+
   // Focus the view.
   // Returns true if the view was focused.
   virtual bool Focus();

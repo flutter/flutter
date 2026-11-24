@@ -139,7 +139,9 @@ ViewControllerPtr WindowsConfigBuilder::Run() const {
 }
 
 void WindowsConfigBuilder::InitializeCOM() const {
-  FML_CHECK(SUCCEEDED(::CoInitializeEx(nullptr, COINIT_MULTITHREADED)));
+  // TSF's thread manager is an STA object. Activating it from an MTA thread
+  // can deadlock waiting for a COM pump that never runs.
+  FML_CHECK(SUCCEEDED(::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED)));
 }
 
 }  // namespace testing
