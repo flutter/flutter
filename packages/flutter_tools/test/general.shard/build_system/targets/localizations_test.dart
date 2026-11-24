@@ -208,6 +208,7 @@ template-arb-file: {name}_en.arb
       final environment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: Artifacts.test(),
+        featureFlags: TestFeatureFlags(),
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
