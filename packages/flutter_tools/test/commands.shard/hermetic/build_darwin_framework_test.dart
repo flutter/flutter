@@ -1870,7 +1870,6 @@ BuildIOSFrameworkCommand createBuildIOSFrameworkCommand({
     appleContext: appleContext ?? FakeAppleContext(),
     buildSystem: buildSystem ?? TestBuildSystem.all(BuildResult(success: true)),
     codesign: codesign ?? FakeDarwinAddToAppCodesigning(),
-    featureFlags: TestFeatureFlags(),
     templateRenderer: const MustacheTemplateRenderer(),
     toolContext: FakeToolContext(
       artifacts: artifacts,
@@ -1920,7 +1919,6 @@ BuildMacOSFrameworkCommand createBuildMacOSFrameworkCommand({
     appleContext: appleContext ?? FakeAppleContext(),
     buildSystem: buildSystem ?? TestBuildSystem.all(BuildResult(success: true)),
     codesign: codesign ?? FakeDarwinAddToAppCodesigning(),
-    featureFlags: TestFeatureFlags(),
     templateRenderer: const MustacheTemplateRenderer(),
     toolContext: FakeToolContext(
       artifacts: artifacts,

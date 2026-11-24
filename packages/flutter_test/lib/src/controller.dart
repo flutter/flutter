@@ -1152,7 +1152,7 @@ abstract class WidgetController {
         kind: kind,
         view: view,
       );
-      await gesture.up();
+      await gesture.up(view: view);
     });
   }
 
@@ -1342,7 +1342,7 @@ abstract class WidgetController {
         view: view,
       );
       await pump(kLongPressTimeout + kPressTimeout);
-      await gesture.up();
+      await gesture.up(view: view);
     });
   }
 
@@ -1459,6 +1459,7 @@ abstract class WidgetController {
           testPointer.move(
             startLocation + initialOffset,
             timeStamp: Duration(microseconds: timeStamp.round()),
+            view: view,
           ),
         );
         timeStamp += initialOffsetDelay.inMicroseconds;
@@ -1856,6 +1857,7 @@ abstract class WidgetController {
     bool warnIfMissed = true,
     FlutterView? view,
   }) {
+    final FlutterView? viewOfFinder = view ?? _maybeViewOf(finder);
     return timedDragFrom(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'timedDrag'),
       offset,
@@ -1863,7 +1865,7 @@ abstract class WidgetController {
       pointer: pointer,
       buttons: buttons,
       frequency: frequency,
-      view: view,
+      view: viewOfFinder,
     );
   }
 
@@ -1895,20 +1897,26 @@ abstract class WidgetController {
       startLocation,
       for (int t = 0; t <= intervals; t += 1) startLocation + offset * (t / intervals),
     ];
+    // All events of the gesture must target the same view: omitting the view
+    // id from any of them would silently dispatch it to a different view (or
+    // nowhere at all) in multi-view applications.
+    final int viewId =
+        view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView!.viewId;
     final records = <PointerEventRecord>[
       PointerEventRecord(Duration.zero, <PointerEvent>[
-        PointerAddedEvent(
+        PointerAddedEvent(position: startLocation, viewId: viewId),
+        PointerDownEvent(
           position: startLocation,
-          viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView!.viewId,
+          pointer: pointer,
+          buttons: buttons,
+          viewId: viewId,
         ),
-        PointerDownEvent(position: startLocation, pointer: pointer, buttons: buttons),
       ]),
       ...<PointerEventRecord>[
         for (int t = 0; t <= intervals; t += 1)
           PointerEventRecord(timeStamps[t], <PointerEvent>[
             PointerMoveEvent(
-              viewId:
-                  view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView!.viewId,
+              viewId: viewId,
               timeStamp: timeStamps[t],
               position: offsets[t + 1],
               delta: offsets[t + 1] - offsets[t],
@@ -1919,7 +1927,7 @@ abstract class WidgetController {
       ],
       PointerEventRecord(duration, <PointerEvent>[
         PointerUpEvent(
-          viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView!.viewId,
+          viewId: viewId,
           timeStamp: duration,
           position: offsets.last,
           pointer: pointer,
@@ -2581,18 +2589,23 @@ abstract class WidgetController {
     bool continuous = false,
   }) {
     return TestAsyncUtils.guard<void>(() async {
+      // The gesture is performed on the widget found by `view`, so its events
+      // must be dispatched to the view that widget renders into. In an
+      // application without an implicit view, falling back to the implicit
+      // view would crash.
+      final FlutterView? dragView = _maybeViewOf(view);
       TestGesture? gesture;
       while (maxIteration > 0 && finder.evaluate().isEmpty) {
         if (continuous) {
-          gesture ??= await startGesture(getCenter(view, warnIfMissed: true));
-          await gesture.moveBy(moveStep);
+          gesture ??= await startGesture(getCenter(view, warnIfMissed: true), view: dragView);
+          await gesture.moveBy(moveStep, view: dragView);
         } else {
           await drag(view, moveStep);
         }
         await pump(duration);
         maxIteration -= 1;
       }
-      await gesture?.up();
+      await gesture?.up(view: dragView);
       await Scrollable.ensureVisible(element(finder));
     });
   }

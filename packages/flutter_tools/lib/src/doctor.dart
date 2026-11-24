@@ -9,7 +9,9 @@ import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
+import 'android/java.dart';
 import 'artifacts.dart';
 import 'base/async_guard.dart';
 import 'base/file_system.dart';
@@ -23,6 +25,7 @@ import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'cache.dart';
+import 'context/android_context.dart';
 import 'context/apple_context.dart';
 import 'context/tool_context.dart';
 import 'custom_devices/custom_device_workflow.dart';
@@ -46,6 +49,7 @@ import 'version.dart';
 import 'web/chrome.dart';
 import 'web/web_validator.dart';
 import 'web/workflow.dart';
+import 'windows/visual_studio.dart';
 import 'windows/visual_studio_validator.dart';
 import 'windows/windows_version_validator.dart';
 import 'windows/windows_workflow.dart';
@@ -58,20 +62,26 @@ const _kIntelMacWarning = ValidationMessage.hint(
 abstract class DoctorValidatorsProvider {
   /// Create a [DoctorValidatorsProvider] with explicit options.
   factory DoctorValidatorsProvider.create({
+    required AndroidContext androidContext,
+    required AndroidWorkflow androidWorkflow,
     required AppleContext appleContext,
     required FeatureFlags featureFlags,
     required ToolContext toolContext,
+    required WindowsWorkflow windowsWorkflow,
     DeviceManager? deviceManager,
     ExtensionManager? extensionManager,
     HttpClientFactory? httpClientFactory,
   }) {
     return _DefaultDoctorValidatorsProvider(
+      androidContext: androidContext,
+      androidWorkflow: androidWorkflow,
       appleContext: appleContext,
       deviceManager: deviceManager,
       extensionManager: extensionManager,
       featureFlags: featureFlags,
       httpClientFactory: httpClientFactory,
       toolContext: toolContext,
+      windowsWorkflow: windowsWorkflow,
     );
   }
 
@@ -81,9 +91,12 @@ abstract class DoctorValidatorsProvider {
 
 class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   _DefaultDoctorValidatorsProvider({
+    required this._androidContext,
+    required this.androidWorkflow,
     required this._appleContext,
     required this.featureFlags,
     required this._toolContext,
+    required this.windowsWorkflow,
     this._deviceManager,
     this.extensionManager,
     this._httpClientFactory,
@@ -91,26 +104,56 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
   List<DoctorValidator>? _validators;
   List<Workflow>? _workflows;
+  final AndroidContext _androidContext;
+  final AndroidWorkflow androidWorkflow;
   final AppleContext _appleContext;
   final DeviceManager? _deviceManager;
   final FeatureFlags featureFlags;
   final ExtensionManager? extensionManager;
   final HttpClientFactory? _httpClientFactory;
   final ToolContext _toolContext;
+  final WindowsWorkflow windowsWorkflow;
 
-  late final linuxWorkflow = LinuxWorkflow(
-    platform: _toolContext.platform,
-    featureFlags: featureFlags,
-  );
+  Platform get _platform => _toolContext.platform;
 
-  late final webWorkflow = WebWorkflow(platform: _toolContext.platform, featureFlags: featureFlags);
+  late final linuxWorkflow = LinuxWorkflow(platform: _platform, featureFlags: featureFlags);
 
-  late final macOSWorkflow = MacOSWorkflow(
-    platform: _toolContext.platform,
-    featureFlags: featureFlags,
-  );
+  late final webWorkflow = WebWorkflow(platform: _platform, featureFlags: featureFlags);
+
+  late final macOSWorkflow = MacOSWorkflow(platform: _platform, featureFlags: featureFlags);
 
   late final customDeviceWorkflow = CustomDeviceWorkflow(featureFlags: featureFlags);
+
+  GroupedValidator _createAndroidValidators({
+    required Logger logger,
+    required OperatingSystemUtils os,
+    required Platform platform,
+    required ProcessManager processManager,
+    required Stdio stdio,
+    required UserMessages userMessages,
+  }) {
+    final AndroidContext(:AndroidSdk? androidSdk, :Java? java) = _androidContext;
+    return GroupedValidator(<DoctorValidator>[
+      AndroidValidator(
+        androidSdk: androidSdk,
+        java: java,
+        logger: logger,
+        osUtils: os,
+        platform: platform,
+        processManager: processManager,
+        userMessages: userMessages,
+      ),
+      AndroidLicenseValidator(
+        androidSdk: androidSdk,
+        java: java,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+        stdio: stdio,
+        userMessages: userMessages,
+      ),
+    ]);
+  }
 
   @override
   List<DoctorValidator> get validators {
@@ -126,6 +169,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       :OperatingSystemUtils os,
       :Platform platform,
       :ProcessManager processManager,
+      :Stdio stdio,
       :SystemClock systemClock,
       :UserMessages userMessages,
     ) = _toolContext;
@@ -154,8 +198,15 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
           processLister: ProcessLister(processManager),
           versionExtractor: WindowsVersionExtractor(processManager: processManager, logger: logger),
         ),
-      if (androidWorkflow!.appliesToHostPlatform)
-        GroupedValidator(<DoctorValidator>[androidValidator!, androidLicenseValidator!]),
+      if (androidWorkflow.appliesToHostPlatform)
+        _createAndroidValidators(
+          logger: logger,
+          os: os,
+          platform: platform,
+          processManager: processManager,
+          stdio: stdio,
+          userMessages: userMessages,
+        ),
       if (iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[
           XcodeValidator(
@@ -182,7 +233,11 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (extensionManager case final ExtensionManager manager)
         for (final DiagnosticsExtension extension in manager.diagnosticsExtensions)
           ExtensionDoctorValidator(extension: extension, logger: logger),
-      if (windowsWorkflow!.appliesToHostPlatform) visualStudioValidator!,
+      if (windowsWorkflow.appliesToHostPlatform)
+        VisualStudioValidator(
+          userMessages: userMessages,
+          visualStudio: VisualStudio(toolContext: _toolContext),
+        ),
       if (proxyValidator.shouldShow) proxyValidator,
       if (_deviceManager case final DeviceManager deviceManager when deviceManager.canListAnything)
         DeviceValidator(deviceManager: deviceManager),
@@ -199,10 +254,10 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
     final IOSWorkflow iosWorkflow = _appleContext.iosWorkflow;
     return _workflows ??= <Workflow>[
       if (iosWorkflow.appliesToHostPlatform) iosWorkflow,
-      if (androidWorkflow?.appliesToHostPlatform ?? false) androidWorkflow!,
+      if (androidWorkflow.appliesToHostPlatform) androidWorkflow,
       if (linuxWorkflow.appliesToHostPlatform) linuxWorkflow,
       if (macOSWorkflow.appliesToHostPlatform) macOSWorkflow,
-      if (windowsWorkflow?.appliesToHostPlatform ?? false) windowsWorkflow!,
+      if (windowsWorkflow.appliesToHostPlatform) windowsWorkflow,
       if (webWorkflow.appliesToHostPlatform) webWorkflow,
       if (customDeviceWorkflow.appliesToHostPlatform) customDeviceWorkflow,
     ];
@@ -222,6 +277,7 @@ class Doctor {
     required this._clock,
     required this._logger,
     required this.validatorsProviderBuilder,
+    this._stopwatchFactory = const StopwatchFactory(),
   });
 
   final Cache _cache;
@@ -229,6 +285,7 @@ class Doctor {
   final SystemClock _clock;
   final Analytics _analytics;
   final DoctorValidatorsProviderBuilder validatorsProviderBuilder;
+  final StopwatchFactory _stopwatchFactory;
 
   late final DoctorValidatorsProvider _validatorsProvider = validatorsProviderBuilder();
 
@@ -243,40 +300,54 @@ class Doctor {
     final List<DoctorValidator> validatorList = extensionManager != null
         ? validatorsProviderBuilder(extensionManager: extensionManager).validators
         : validators;
-    return <ValidatorTask>[
-      for (final DoctorValidator validator in validatorList)
-        ValidatorTask(
-          validator,
-          // We use an asyncGuard() here to be absolutely certain that
-          // DoctorValidators do not result in an uncaught exception. Since the
-          // Future returned by the asyncGuard() is not awaited, we pass an
-          // onError callback to it and translate errors into ValidationResults.
-          asyncGuard<ValidationResult>(
-            () {
-              final timeoutCompleter = Completer<ValidationResult>();
-              final timer = Timer(doctorDuration, () {
-                timeoutCompleter.completeError(
-                  Exception(
-                    '${validator.title} exceeded maximum allowed duration of $doctorDuration',
-                  ),
-                );
-              });
-              final Future<ValidationResult> validatorFuture = validator.validate();
-              return Future.any<ValidationResult>(<Future<ValidationResult>>[
-                validatorFuture,
-                // This future can only complete with an error
-                timeoutCompleter.future,
-              ]).then((ValidationResult result) async {
-                timer.cancel();
-                return result;
-              });
-            },
-            onError: (Object exception, StackTrace stackTrace) {
-              return ValidationResult.crash(exception, stackTrace);
-            },
+    final tasks = <ValidatorTask>[];
+    for (final validator in validatorList) {
+      late final ValidatorTask task;
+      task = ValidatorTask(
+        validator,
+        // We use an asyncGuard() here to be absolutely certain that
+        // DoctorValidators do not result in an uncaught exception. Since the
+        // Future returned by the asyncGuard() is not awaited, we pass an
+        // onError callback to it and translate errors into ValidationResults.
+        asyncGuard<ValidationResult>(
+          () => _runValidator(
+            validator,
+            onComplete: (Duration elapsed) => task.executionTime = elapsed,
           ),
+          onError: (Object exception, StackTrace stackTrace) {
+            return validator.createCrashResult(exception, stackTrace);
+          },
         ),
-    ];
+      );
+      tasks.add(task);
+    }
+    return tasks;
+  }
+
+  Future<ValidationResult> _runValidator(
+    DoctorValidator validator, {
+    required void Function(Duration) onComplete,
+  }) async {
+    final timeoutCompleter = Completer<ValidationResult>();
+    final timer = Timer(doctorDuration, () {
+      timeoutCompleter.completeError(
+        Exception('${validator.title} exceeded maximum allowed duration of $doctorDuration'),
+      );
+    });
+    final Stopwatch stopwatch = _stopwatchFactory.createStopwatch(validator.title)..start();
+    final ValidationResult result;
+    try {
+      result = await Future.any<ValidationResult>(<Future<ValidationResult>>[
+        validator.validate(),
+        // This future can only complete with an error
+        timeoutCompleter.future,
+      ]);
+    } finally {
+      timer.cancel();
+      stopwatch.stop();
+    }
+    onComplete(stopwatch.elapsed);
+    return result;
   }
 
   List<Workflow> get workflows => _validatorsProvider.workflows;
@@ -333,7 +404,7 @@ class Doctor {
         result = await validatorTask.result;
         status.stop();
       } on Exception catch (exception, stackTrace) {
-        result = ValidationResult.crash(exception, stackTrace);
+        result = validator.createCrashResult(exception, stackTrace);
         status.cancel();
       }
 
@@ -388,7 +459,7 @@ class Doctor {
       }
 
       final String executionDuration = () {
-        final Duration? executionTime = result.executionTime;
+        final Duration? executionTime = validatorTask.executionTime;
         if (!verbose || executionTime == null) {
           return '';
         }

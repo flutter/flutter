@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/commands/build_appbundle.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:process/process.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -237,6 +238,7 @@ void main() {
         androidBuilder: FakeAndroidBuilder(),
         androidContext: FakeAndroidContext(),
         buildSystem: FakeBuildSystem(),
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: FakeToolContext(logger: BufferLogger.test()),
       );
@@ -713,6 +715,7 @@ Future<BuildAppBundleCommand> runBuildAppBundleCommand(
       logger: resolvedLogger,
       platform: localPlatform,
     ),
+    templatePathProvider: TemplatePathProvider(flutterRoot: flutterRoot),
     templateRenderer: const MustacheTemplateRenderer(),
     toolContext: FakeToolContext(
       cache: cache,

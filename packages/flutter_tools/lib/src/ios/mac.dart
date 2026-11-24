@@ -29,7 +29,7 @@ import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../device.dart';
-import '../features.dart' show FeatureFlags;
+import '../features.dart';
 import '../flutter_manifest.dart';
 import '../macos/cocoapod_utils.dart';
 import '../macos/cocoapods.dart';
@@ -488,8 +488,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (!hasWatchCompanion) {
       // ONLY_ACTIVE_ARCH specifies whether the product includes only code for
       // the native architecture.
-      final HostPlatform hostPlatform = os.hostPlatform;
-      final onlyActiveArch = activeArch == CpuArch.fromHostPlatform(hostPlatform);
+      final onlyActiveArch = activeArch == os.hostPlatform.cpuArch;
 
       buildCommands.add('ONLY_ACTIVE_ARCH=${onlyActiveArch ? 'YES' : 'NO'}');
       buildCommands.add('ARCHS=${activeArch.darwinArchName}');
@@ -621,19 +620,13 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
 
     // Notifies listener that no more output is coming. The temporary directory
-    // may have been deleted mid-build (e.g. by fatal-signal temp cleanup), or
-    // may be removed between existsSync and writeAsStringSync.
-    if (scriptOutputPipeFile != null) {
-      try {
-        ErrorHandlingFileSystem.noExitOnFailure(() {
-          if (scriptOutputPipeFile!.existsSync()) {
-            scriptOutputPipeFile.writeAsStringSync('all done');
-          }
-        });
-      } on FileSystemException {
-        // Ignore if the temporary directory or pipe was deleted after the
-        // existsSync check.
-      }
+    // may have been deleted mid-build (e.g. by fatal-signal temp cleanup).
+    try {
+      ErrorHandlingFileSystem.noExitOnFailure(
+        () => scriptOutputPipeFile?.writeAsStringSync('all done'),
+      );
+    } on FileSystemException {
+      // Ignore if the temporary directory or pipe was deleted mid-build.
     }
     buildSubStatus?.stop();
     buildSubStatus = null;

@@ -325,7 +325,6 @@ void main() {
       final bool supported = BuildIOSCommand(
         appleContext: FakeAppleContext(),
         buildSystem: FakeBuildSystem(),
-        featureFlags: TestFeatureFlags(),
         templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(logger: BufferLogger.test()),
         verboseHelp: false,
@@ -670,6 +669,60 @@ void main() {
       expect(configContent, contains('LOCAL_ENGINE=ios_debug'));
       expect(configContent, contains('LOCAL_ENGINE_HOST=host_debug'));
       expect(configContent, contains('FLUTTER_ENGINE=engine/src'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    },
+  );
+
+  testUsingContext(
+    'ios build debug config-only writes TRACK_WIDGET_CREATION=true to Generated.xcconfig by default',
+    () async {
+      createMinimalMockProjectFiles();
+
+      final BuildCommand command = createBuildCommand();
+
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'ios', '--debug', '--config-only', '--no-pub']);
+
+      final File configFile = fileSystem.file('ios/Flutter/Generated.xcconfig');
+      expect(configFile, exists);
+      final String configContent = configFile.readAsStringSync();
+      expect(configContent, contains('TRACK_WIDGET_CREATION=true'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    },
+  );
+
+  testUsingContext(
+    'ios build debug config-only respects --no-track-widget-creation flag',
+    () async {
+      createMinimalMockProjectFiles();
+
+      final BuildCommand command = createBuildCommand();
+
+      await createTestCommandRunner(command).run(const <String>[
+        'build',
+        'ios',
+        '--debug',
+        '--config-only',
+        '--no-pub',
+        '--no-track-widget-creation',
+      ]);
+
+      final File configFile = fileSystem.file('ios/Flutter/Generated.xcconfig');
+      expect(configFile, exists);
+      final String configContent = configFile.readAsStringSync();
+      expect(configContent, contains('TRACK_WIDGET_CREATION=false'));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -1668,64 +1721,10 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       },
     );
 
-    testWithoutContext(
-      'Do not crash if temporary build directory is deleted before cleanup in terminal session.',
-      () async {
-        final errorHandlingFileSystem = ErrorHandlingFileSystem(
-          delegate: fileSystem,
-          platform: macosPlatform,
-        );
-        final BuildCommand command = createTestBuildCommand(
-          fileSystem: errorHandlingFileSystem,
-          logger: _TerminalBufferLogger(),
-          osUtils: _PipeOperatingSystemUtils(errorHandlingFileSystem),
-        );
-        final Directory tempDir = errorHandlingFileSystem.directory(_xcBundleDirectoryPath).parent;
-        final File pipeFile = tempDir.childFile('pipe_to_stdout');
-        processManager.addCommand(
-          setUpFakeXcodeBuildHandler(
-            simulator: true,
-            exitCode: 1,
-            scriptOutputStreamFile: pipeFile.path,
-            onRun: (_) {
-              expect(pipeFile, exists);
-              tempDir.deleteSync(recursive: true);
-            },
-          ),
-        );
-
-        createMinimalMockProjectFiles();
-
-        await expectLater(
-          createTestCommandRunner(command)
-              .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
-          throwsToolExit(message: 'Encountered error while building for simulator.'),
-        );
-        expect(tempDir, isNot(exists));
-        expect(pipeFile, isNot(exists));
-        expect(processManager.hasRemainingExpectations, isFalse);
-      },
-    );
-
-    testWithoutContext('Do not crash or recreate pipe if temporary build directory is deleted after existsSync in terminal session.', () async {
-      // POSIX errno for ENOENT (No such file or directory).
-      const kEnoent = 2;
-      var deleteOnNextPipeWrite = false;
-      fileSystem = MemoryFileSystem.test(
-        opHandle: (String path, FileSystemOp op) {
-          if (deleteOnNextPipeWrite &&
-              op == FileSystemOp.write &&
-              path.endsWith('pipe_to_stdout')) {
-            deleteOnNextPipeWrite = false;
-            fileSystem.directory(_xcBundleDirectoryPath).parent.deleteSync(recursive: true);
-            throw FileSystemException(
-              'Cannot open file',
-              path,
-              const OSError('No such file or directory', kEnoent),
-            );
-          }
-        },
-      );
+    Future<void> runTerminalBuildWithDeletedTempDir({
+      required void Function(Directory tempDir, File pipeFile) onXcodeRun,
+      String initialPipeContents = '',
+    }) async {
       final errorHandlingFileSystem = ErrorHandlingFileSystem(
         delegate: fileSystem,
         platform: macosPlatform,
@@ -1733,7 +1732,10 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       final BuildCommand command = createTestBuildCommand(
         fileSystem: errorHandlingFileSystem,
         logger: _TerminalBufferLogger(),
-        osUtils: _PipeOperatingSystemUtils(errorHandlingFileSystem, initialContents: 'all done\n'),
+        osUtils: _PipeOperatingSystemUtils(
+          errorHandlingFileSystem,
+          initialContents: initialPipeContents,
+        ),
       );
       final Directory tempDir = errorHandlingFileSystem.directory(_xcBundleDirectoryPath).parent;
       final File pipeFile = tempDir.childFile('pipe_to_stdout');
@@ -1744,7 +1746,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           scriptOutputStreamFile: pipeFile.path,
           onRun: (_) {
             expect(pipeFile, exists);
-            deleteOnNextPipeWrite = true;
+            onXcodeRun(tempDir, pipeFile);
           },
         ),
       );
@@ -1759,7 +1761,48 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       expect(tempDir, isNot(exists));
       expect(pipeFile, isNot(exists));
       expect(processManager.hasRemainingExpectations, isFalse);
-    });
+    }
+
+    testWithoutContext(
+      'Do not crash if temporary build directory is deleted before cleanup in terminal session.',
+      () async {
+        await runTerminalBuildWithDeletedTempDir(
+          onXcodeRun: (Directory tempDir, File pipeFile) {
+            tempDir.deleteSync(recursive: true);
+          },
+        );
+      },
+    );
+
+    testWithoutContext(
+      'Do not crash if temporary build directory is deleted during pipe write in terminal session.',
+      () async {
+        // POSIX errno for ENOENT (No such file or directory).
+        const kEnoent = 2;
+        var deleteOnNextPipeWrite = false;
+        fileSystem = MemoryFileSystem.test(
+          opHandle: (String path, FileSystemOp op) {
+            if (deleteOnNextPipeWrite &&
+                op == FileSystemOp.write &&
+                path.endsWith('pipe_to_stdout')) {
+              deleteOnNextPipeWrite = false;
+              fileSystem.directory(_xcBundleDirectoryPath).parent.deleteSync(recursive: true);
+              throw FileSystemException(
+                'Cannot open file',
+                path,
+                const OSError('No such file or directory', kEnoent),
+              );
+            }
+          },
+        );
+        await runTerminalBuildWithDeletedTempDir(
+          initialPipeContents: 'all done\n',
+          onXcodeRun: (Directory tempDir, File pipeFile) {
+            deleteOnNextPipeWrite = true;
+          },
+        );
+      },
+    );
 
     testWithoutContext('Do not crash if temporary build directory is deleted between existsSync and reading pipe in terminal session.', () async {
       var deleteOnNextPipeRead = false;
@@ -1773,39 +1816,11 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           }
         },
       );
-      final errorHandlingFileSystem = ErrorHandlingFileSystem(
-        delegate: fileSystem,
-        platform: macosPlatform,
+      await runTerminalBuildWithDeletedTempDir(
+        onXcodeRun: (Directory tempDir, File pipeFile) {
+          deleteOnNextPipeRead = true;
+        },
       );
-      final BuildCommand command = createTestBuildCommand(
-        fileSystem: errorHandlingFileSystem,
-        logger: _TerminalBufferLogger(),
-        osUtils: _PipeOperatingSystemUtils(errorHandlingFileSystem),
-      );
-      final Directory tempDir = errorHandlingFileSystem.directory(_xcBundleDirectoryPath).parent;
-      final File pipeFile = tempDir.childFile('pipe_to_stdout');
-      processManager.addCommand(
-        setUpFakeXcodeBuildHandler(
-          simulator: true,
-          exitCode: 1,
-          scriptOutputStreamFile: pipeFile.path,
-          onRun: (_) {
-            expect(pipeFile, exists);
-            deleteOnNextPipeRead = true;
-          },
-        ),
-      );
-
-      createMinimalMockProjectFiles();
-
-      await expectLater(
-        createTestCommandRunner(command)
-            .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
-        throwsToolExit(message: 'Encountered error while building for simulator.'),
-      );
-      expect(tempDir, isNot(exists));
-      expect(pipeFile, isNot(exists));
-      expect(processManager.hasRemainingExpectations, isFalse);
     });
   });
 }

@@ -31,7 +31,7 @@ import '../darwin/darwin.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
-import '../features.dart' show FeatureFlags;
+import '../features.dart';
 import '../macos/cocoapods.dart';
 import '../macos/xcdevice.dart';
 import '../macos/xcode.dart';
@@ -329,6 +329,7 @@ class IOSDevice extends Device {
     required this._analytics,
     required this._cocoaPods,
     required this._featureFlags,
+    required this._mdnsVmServiceDiscovery,
     required this._plistParser,
     required this._xcode,
     required this._xcodeProjectInterpreter,
@@ -357,6 +358,7 @@ class IOSDevice extends Device {
   final IMobileDevice _iMobileDevice;
   final IOSCoreDeviceControl _coreDeviceControl;
   final IOSCoreDeviceLauncher _coreDeviceLauncher;
+  final MDnsVmServiceDiscovery _mdnsVmServiceDiscovery;
   final PlistParser _plistParser;
   final XcodeDebug _xcodeDebug;
   final Xcode _xcode;
@@ -775,7 +777,7 @@ class IOSDevice extends Device {
         });
 
         // Get Dart VM Service URL with the device IP as the host.
-        localUri = await MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
+        localUri = await _mdnsVmServiceDiscovery.getVMServiceUriForLaunch(
           packageId,
           this,
           usesIpv6: debuggingOptions.ipv6,
@@ -979,7 +981,7 @@ class IOSDevice extends Device {
   }) async {
     final bool discoverVMUrlFromLogs = vmServiceDiscovery != null && !isWirelesslyConnected;
 
-    final Future<Uri?> vmUrlFromMDns = MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
+    final Future<Uri?> vmUrlFromMDns = _mdnsVmServiceDiscovery.getVMServiceUriForLaunch(
       packageId,
       this,
       // If mDNS fails, don't throw if the URL may still be findable through
@@ -1374,6 +1376,7 @@ class IOSDevice extends Device {
         !isWirelesslyConnected;
     final mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
       device: this,
+      mdnsVmServiceDiscovery: _mdnsVmServiceDiscovery,
       appId: appId,
       deviceVmservicePort: filterDevicePort,
       hostVmservicePort: expectedHostPort,
