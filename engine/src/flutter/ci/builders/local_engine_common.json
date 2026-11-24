@@ -30,7 +30,7 @@
       },
       "properties": {
         "$flutter/osx_sdk": {
-          "sdk_version": "17c52"
+          "sdk_version": "27b52"
         }
       }
     },
@@ -87,7 +87,7 @@
       },
       "properties": {
         "$flutter/osx_sdk": {
-          "sdk_version": "17c52"
+          "sdk_version": "27b52"
         }
       }
     },
@@ -145,7 +145,8 @@
       "name": "linux/wasm_debug_unopt",
       "drone_dimensions": [
         "device_type=none",
-        "os=Linux"
+        "os=Linux",
+        "cores=32"
       ],
       "gclient_variables": {
         "download_android_deps": false,

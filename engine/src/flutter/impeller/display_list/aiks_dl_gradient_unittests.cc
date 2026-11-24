@@ -1129,5 +1129,46 @@ TEST_P(AiksTest, VerifyNonOptimizedGradient) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+// Gradients whose parameter grows large across the shape: long linear and
+// radial gradients, and short repeating gradients sampled far from their
+// origin. These must not lose precision when computing the gradient parameter
+// (e.g. on GPUs that run mediump at fp16).
+TEST_P(AiksTest, LargeGradientsRenderCorrectly) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  DlPaint paint;
+
+  std::vector<DlColor> colors = {DlColor::kRed(), DlColor::kYellow(),
+                                 DlColor::kBlue()};
+  std::vector<Scalar> stops = {0.0, 0.5, 1.0};
+
+  // A linear gradient 1000 units long.
+  paint.setColorSource(
+      DlColorSource::MakeLinear({0, 0}, {1000, 0}, stops.size(), colors.data(),
+                                stops.data(), DlTileMode::kClamp));
+  builder.DrawRect(DlRect::MakeXYWH(0, 0, 1000, 180), paint);
+
+  // A linear gradient that repeats every 40 units, 25 times across the rect.
+  paint.setColorSource(DlColorSource::MakeLinear({0, 0}, {40, 0}, stops.size(),
+                                                 colors.data(), stops.data(),
+                                                 DlTileMode::kRepeat));
+  builder.DrawRect(DlRect::MakeXYWH(0, 190, 1000, 180), paint);
+
+  // A radial gradient with a 600 unit radius.
+  paint.setColorSource(DlColorSource::MakeRadial({0, 560}, 600, stops.size(),
+                                                 colors.data(), stops.data(),
+                                                 DlTileMode::kClamp));
+  builder.DrawRect(DlRect::MakeXYWH(0, 380, 1000, 180), paint);
+
+  // A radial gradient with a 30 unit radius that mirrors, sampled up to about
+  // 1000 units from its center.
+  paint.setColorSource(DlColorSource::MakeRadial({0, 750}, 30, stops.size(),
+                                                 colors.data(), stops.data(),
+                                                 DlTileMode::kMirror));
+  builder.DrawRect(DlRect::MakeXYWH(0, 570, 1000, 180), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller

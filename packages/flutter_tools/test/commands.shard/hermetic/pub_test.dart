@@ -292,7 +292,6 @@ void main() {
       fs: fileSystem,
       logger: logger,
       processManager: processManager,
-      stdio: io.Stdio(),
     );
     fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
     final command = PackagesCommand(

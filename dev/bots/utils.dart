@@ -553,7 +553,7 @@ Future<void> runFlutterTest(
     flutter,
     args,
     workingDirectory: workingDirectory,
-    expectNonZeroExit: expectFailure,
+    expectedExit: expectFailure ? ExpectedExit.nonZero : ExpectedExit.zero,
     outputMode: outputMode,
     environment: environment,
   );

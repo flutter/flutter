@@ -26,6 +26,7 @@ import '../cache.dart';
 import '../context/tool_context.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
+import '../features.dart';
 import '../flutter_plugins.dart';
 import '../package_graph.dart';
 import '../plugins.dart';
@@ -100,7 +101,12 @@ class PackagesCommand extends FlutterCommand {
       ),
     );
     addSubcommand(
-      PackagesForwardCommand('deps', 'Print package dependencies.', toolContext: toolContext, pub: pub),
+      PackagesForwardCommand(
+        'deps',
+        'Print package dependencies.',
+        toolContext: toolContext,
+        pub: pub,
+      ),
     ); // path to package can be specified with --directory argument
     addSubcommand(
       PackagesForwardCommand(
@@ -112,7 +118,12 @@ class PackagesCommand extends FlutterCommand {
       ),
     );
     addSubcommand(
-      PackagesForwardCommand('cache', 'Work with the Pub system cache.', toolContext: toolContext, pub: pub),
+      PackagesForwardCommand(
+        'cache',
+        'Work with the Pub system cache.',
+        toolContext: toolContext,
+        pub: pub,
+      ),
     );
     addSubcommand(
       PackagesForwardCommand('version', 'Print Pub version.', toolContext: toolContext, pub: pub),
@@ -125,12 +136,19 @@ class PackagesCommand extends FlutterCommand {
         pub: pub,
       ),
     );
-    addSubcommand(PackagesForwardCommand('login', 'Log into pub.dev.', toolContext: toolContext, pub: pub));
+    addSubcommand(
+      PackagesForwardCommand('login', 'Log into pub.dev.', toolContext: toolContext, pub: pub),
+    );
     addSubcommand(
       PackagesForwardCommand('logout', 'Log out of pub.dev.', toolContext: toolContext, pub: pub),
     );
     addSubcommand(
-      PackagesForwardCommand('global', 'Work with Pub global packages.', toolContext: toolContext, pub: pub),
+      PackagesForwardCommand(
+        'global',
+        'Work with Pub global packages.',
+        toolContext: toolContext,
+        pub: pub,
+      ),
     );
     addSubcommand(
       PackagesForwardCommand(
@@ -169,16 +187,15 @@ class PackagesCommand extends FlutterCommand {
 }
 
 class PackagesTestCommand extends FlutterCommand {
-  PackagesTestCommand({
-    required super.toolContext,
-    @visibleForTesting Pub? pub,
-  }) : _injectedPub = pub {
+  PackagesTestCommand({required super.toolContext, @visibleForTesting Pub? pub})
+    : _injectedPub = pub {
     requiresPubspecYaml();
   }
 
   final Pub? _injectedPub;
 
-  late final Pub _pub = _injectedPub ?? _createPub(toolContext);
+  late final Pub _pub =
+      _injectedPub ?? Pub(featureFlags: runner!.featureFlags, toolContext: toolContext);
 
   @override
   String get name => 'test';
@@ -220,7 +237,8 @@ class PackagesForwardCommand extends FlutterCommand {
 
   final Pub? _injectedPub;
 
-  late final Pub _pub = _injectedPub ?? _createPub(toolContext);
+  late final Pub _pub =
+      _injectedPub ?? Pub(featureFlags: runner!.featureFlags, toolContext: toolContext);
 
   PubContext context = PubContext.pubForward;
 
@@ -258,17 +276,16 @@ class PackagesForwardCommand extends FlutterCommand {
 }
 
 class PackagesPassthroughCommand extends FlutterCommand {
-  PackagesPassthroughCommand({
-    required super.toolContext,
-    @visibleForTesting Pub? pub,
-  }) : _injectedPub = pub;
+  PackagesPassthroughCommand({required super.toolContext, @visibleForTesting Pub? pub})
+    : _injectedPub = pub;
 
   final Pub? _injectedPub;
 
   @override
   ArgParser argParser = ArgParser.allowAnything();
 
-  late final Pub _pub = _injectedPub ?? _createPub(toolContext);
+  late final Pub _pub =
+      _injectedPub ?? Pub(featureFlags: runner!.featureFlags, toolContext: toolContext);
 
   @override
   String get name => 'pub';
@@ -329,7 +346,8 @@ class PackagesGetCommand extends FlutterCommand {
     return '${runner!.executableName} pub $_commandName [<arguments...>]';
   }
 
-  late final Pub _pub = _injectedPub ?? _createPub(toolContext);
+  late final Pub _pub =
+      _injectedPub ?? Pub(featureFlags: runner!.featureFlags, toolContext: toolContext);
 
   /// An [ArgParser] that accepts all options and flags that the
   ///
@@ -490,6 +508,7 @@ class PackagesGetCommand extends FlutterCommand {
             platform: platform,
             analytics: analytics,
             androidSdkBuilder: null,
+            featureFlags: runner!.featureFlags,
             projectFactory: projectFactory,
             visualStudio: null,
             xcode: null,
@@ -624,8 +643,4 @@ class PackagesGetCommand extends FlutterCommand {
       packagesAndroidEmbeddingVersion: _androidEmbeddingVersion,
     );
   }
-}
-
-Pub _createPub(ToolContext toolContext) {
-  return Pub(toolContext: toolContext);
 }
