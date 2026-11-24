@@ -128,10 +128,9 @@ TEST_F(FlAccessibilityParityTest, ExternalAtspiParity) {
   g_autoptr(GtkWidget) surface =
       GTK_WIDGET(g_object_new(parity_surface_get_type(), nullptr));
   g_object_ref_sink(surface);
-  g_autofree gchar* plug_id = atk_plug_get_id(ATK_PLUG(accessible));
-  ASSERT_NE(plug_id, nullptr);
   fl_socket_accessible_embed(
-      FL_SOCKET_ACCESSIBLE(gtk_widget_get_accessible(surface)), plug_id);
+      FL_SOCKET_ACCESSIBLE(gtk_widget_get_accessible(surface)),
+      ATK_PLUG(accessible));
   g_autoptr(GtkWidget) window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   g_object_ref_sink(window);
   gtk_container_add(GTK_CONTAINER(window), surface);

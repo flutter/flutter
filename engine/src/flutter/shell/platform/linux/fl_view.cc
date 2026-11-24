@@ -556,7 +556,7 @@ static void setup_engine(FlView* self) {
   self->view_accessible = fl_view_accessible_new(self->engine, self->view_id);
   fl_socket_accessible_embed(
       FL_SOCKET_ACCESSIBLE(gtk_widget_get_accessible(GTK_WIDGET(self))),
-      atk_plug_get_id(ATK_PLUG(self->view_accessible)));
+      ATK_PLUG(self->view_accessible));
 #else
   self->accessibility_backend =
       fl_view_gtk4_accessibility_new(self, self->view_id);
