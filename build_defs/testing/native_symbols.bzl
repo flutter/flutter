@@ -10,7 +10,8 @@ libflutter.so, the embedder's libflutter_engine.so, the Linux shell's
 libflutter_linux_gtk.so, the Apple frameworks' dylib as copied into the
 framework -- that runs testing/symbols/check_forbidden_native_symbols.dart
 with the host toolchain's llvm-nm and fails the build when the library
-defines a std::format or Ryu symbol (the libc++ `<format>` ban). Its output
+defines a std::format or Ryu symbol (the libc++ `<format>` ban) or, built
+for Linux, exports a symbol of the libunwind linked into it. Its output
 is a stamp, which the targets that ship the library depend on
 (`:android_jar`, `:flutter_engine`, the frameworks' symlink step, ...).
 
@@ -74,6 +75,12 @@ def _check_forbidden_native_symbols_impl(ctx):
     # //engine/src/flutter/build/bazel:unoptimized reads them.
     if ctx.var["COMPILATION_MODE"] != "opt":
         args.add("--unoptimized")
+
+    # GN's is_linux (`--forbid-exported-unwind-symbols`): a Linux link puts
+    # the toolchain's static libunwind into the library, and none of its
+    # symbols may reach the process that loads the library.
+    if ctx.target_platform_has_constraint(ctx.attr._linux[platform_common.ConstraintValueInfo]):
+        args.add("--forbid-exported-unwind-symbols")
     ctx.actions.run(
         executable = dart[0],
         arguments = [args],
@@ -116,6 +123,10 @@ check_forbidden_native_symbols = rule(
             allow_files = True,
             cfg = "exec",
             doc = "The host toolchain's llvm-nm (GN's $buildtools_path/<host>/clang/bin/llvm-nm).",
+        ),
+        "_linux": attr.label(
+            default = "@platforms//os:linux",
+            doc = "GN's is_linux: whether the library is built for Linux.",
         ),
     },
 )

@@ -288,9 +288,13 @@ _LINUX_LINK_FLAGS = [
     "-Wl,--build-id=sha1",
     "-pthread",
     # The engine links its own libc++ (see `cxx_runtime` in BUILD.bazel); the
-    # unwinder is the toolchain's static libunwind.
+    # unwinder is the toolchain's static libunwind, and its symbols stay out
+    # of the dynamic symbol table of a shared library it is linked into: a
+    # process that loads libflutter_linux_gtk.so would bind its own
+    # _Unwind_* calls to them.
     "-nostdlib++",
     "--unwindlib=libunwind",
+    "-Wl,--exclude-libs,libunwind.a",
 ]
 
 LINUX_X64_LINK_FLAGS = ["-m64"]
