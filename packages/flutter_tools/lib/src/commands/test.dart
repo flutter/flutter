@@ -145,6 +145,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   static const _name = MultiOptionDescriptor(
     name: 'name',
+    abbr: 'n',
     help: 'A regular expression matching substrings of the names of tests to run.',
     valueHelp: 'regexp',
     splitCommas: false,
@@ -152,6 +153,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   static const _plainName = MultiOptionDescriptor(
     name: 'plain-name',
+    abbr: 'N',
     help: 'A plain-text substring of the names of tests to run.',
     valueHelp: 'substring',
     splitCommas: false,

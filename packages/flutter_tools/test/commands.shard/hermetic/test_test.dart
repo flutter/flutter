@@ -329,6 +329,36 @@ dev_dependencies:
     );
   });
 
+  testUsingContext(
+    'passes -n and -N through to package:test as --name and --plain-name',
+    () async {
+      final fakePackageTest = FakePackageTest();
+      final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testWrapper: fakePackageTest,
+      );
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(<String>['test', '--no-pub', '-n', 'foo.*', '-N', 'bar']);
+      expect(
+        fakePackageTest.lastArgs,
+        containsAllInOrder(<String>['--name', 'foo.*', '--plain-name', 'bar']),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    },
+  );
+
   group('--reporter/-r', () {
     String? passedReporter(List<String> args) {
       final int i = args.indexOf('-r');
