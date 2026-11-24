@@ -95,14 +95,42 @@ string_flag(
 ]
 
 # GN's `slimpeller` argument: build without the Skia-backed rendering paths.
+# tools/gn sets it for every iOS build (`target_os == 'ios' or --slimpeller`),
+# and turns Skia's Ganesh backend off with it (bazel_mapping.dart's
+# skia_enable_ganesh): the setting holds on iOS whatever the flag says, and
+# elsewhere where the flag is given.
 bool_flag(
     name = "slimpeller",
     build_setting_default = False,
 )
 
 config_setting(
-    name = "slimpeller_enabled",
+    name = "slimpeller_flag",
     flag_values = {":slimpeller": "True"},
+)
+
+selects.config_setting_group(
+    name = "slimpeller_enabled",
+    match_any = [
+        ":slimpeller_flag",
+        "@platforms//os:ios",
+    ],
+)
+
+# Its complement, for the denied term of a conjunction (Skia's Vulkan
+# sources under `skia_enable_ganesh && skia_use_vulkan`): the flag off, and
+# not iOS.
+config_setting(
+    name = "slimpeller_flag_off",
+    flag_values = {":slimpeller": "False"},
+)
+
+selects.config_setting_group(
+    name = "slimpeller_disabled",
+    match_all = [
+        ":slimpeller_flag_off",
+        "//engine/src/flutter/build/bazel:not_ios",
+    ],
 )
 
 # GN's enable_backtrace, as tools/gn sets it (--backtrace, which every

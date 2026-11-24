@@ -1626,6 +1626,9 @@ final Map<String, String> negatedSettings = Map<String, String>.unmodifiable(<St
   'use_flutter_cxx': '//engine/src/flutter/build/bazel:not_flutter_cxx',
   for (final String argument in webVariantArguments) argument: '$_webSettings:${argument}_off',
   'enable_backtrace': '//engine/src/flutter/common:backtrace_disabled',
+  // Not a Slimpeller build: Skia's Ganesh backend (skia_enable_ganesh), in
+  // conjunctions with Skia's other arguments.
+  'slimpeller': '//engine/src/flutter/common:slimpeller_disabled',
   // The shell's backends, denied (software is everywhere: no complement).
   'shell_enable_gl': '//engine/src/flutter/shell:not_enable_gl',
   'shell_enable_metal': '//engine/src/flutter/shell:not_enable_metal',
@@ -3061,13 +3064,17 @@ const GnCasedValue _androidAppAbi = GnCasedValue('current_cpu', <String, String>
 });
 
 /// skia.gni's skia_gl_standard as tools/gn passes it: "gles" for Android
-/// (and iOS), "webgl" for the web (to_gn_wasm_args), "" for a host -- the
+/// and iOS, "webgl" for the web (to_gn_wasm_args), "" for a host -- the
 /// host runs its GLES tests under SwiftShader and must not assume GL. The
 /// Skia wrapper's config turns it into SK_ASSUME_GL_ES=1 / SK_ASSUME_WEBGL=1.
 /// (skia.gni's own default would give the web its value and "" to the rest,
-/// which is wrong for Android: the argument is tools/gn's, not a derivation.)
+/// which is wrong for Android and iOS: the argument is tools/gn's, not a
+/// derivation. iOS had no case here until 11-23: GN's iOS build defines
+/// SK_ASSUME_GL_ES=1 on 1,095 compiles, and the Bazel build defined it on
+/// none.)
 const GnCasedValue _skiaGlStandard = GnCasedValue('target_os', <String, String>{
   'android': 'gles',
+  'ios': 'gles',
   'linux': '',
   'wasm': 'webgl',
 });
@@ -3238,6 +3245,15 @@ Assumptions generationAssumptions() {
     // codecs), which stay derivations. skia_gl_standard is tools/gn's, per
     // target OS (_skiaGlStandard).
     'skia_gl_standard': _skiaGlStandard,
+    // tools/gn turns Skia's Ganesh and Graphite backends off where it sets
+    // `slimpeller` (`target_os == 'ios' or --slimpeller`), and no build has
+    // Graphite, skia.gni's default: Ganesh exactly where the build is not a
+    // Slimpeller one (//engine/src/flutter/common:slimpeller_enabled: iOS,
+    // or the flag). Until 11-23 neither was here, and the iOS engine was
+    // built with Ganesh and without SLIMPELLER: 1,273 compiles of the iOS
+    // device build had SK_GANESH where GN's have none.
+    'skia_enable_ganesh': const GnConditionValue(ConditionNot(ConditionVariable('slimpeller'))),
+    'skia_enable_graphite': const GnBoolValue(false),
     'glfw_vulkan_library': _glfwVulkanLibrary,
     'skia_enable_pdf': const GnBoolValue(false),
     'skia_use_dng_sdk': const GnBoolValue(false),
@@ -3560,6 +3576,10 @@ Assumptions linuxHostAssumptions() {
     // skia_use_fontconfig is not here: tools/gn sets it from
     // --enable-fontconfig, which is a Bazel flag (conditionSettings).
     'skia_enable_pdf': GnBoolValue(false),
+    // tools/gn's `slimpeller` branch (generationAssumptions): slimpeller is
+    // a setting both scopes leave open, so the same formula here.
+    'skia_enable_ganesh': GnConditionValue(ConditionNot(ConditionVariable('slimpeller'))),
+    'skia_enable_graphite': GnBoolValue(false),
     'skia_gl_standard': GnStringValue(''),
     // tools/gn's --use-glfw-swiftshader on a Linux host (the host test
     // builders pass it): GLFW opens the loader by this name (_glfwVulkanLibrary).

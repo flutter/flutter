@@ -809,9 +809,11 @@ source_set("x") {
         final GnValue? value = generation[name];
         if (value is GnConditionValue) {
           final GnValue? expected = host[name];
-          if (name == 'using_sanitizer') {
-            // BUILDCONFIG.gn's formula over is_asan, a setting both scopes
-            // leave open: the same formula in both.
+          if (name == 'using_sanitizer' || name == 'skia_enable_ganesh') {
+            // BUILDCONFIG.gn's formula over is_asan, and tools/gn's over
+            // slimpeller (Skia's Ganesh backend where the build is not a
+            // Slimpeller one): settings both scopes leave open, so the same
+            // formula in both.
             expect(expected, value, reason: name);
             continue;
           }
@@ -836,13 +838,14 @@ source_set("x") {
       expect(
         generation.names.where((String n) => generation[n] is GnConditionValue).toList()..sort(),
         // ... and is_apple, BUILDCONFIG.gn's `is_ios || is_mac`, its Ozone
-        // platforms, which are `is_linux`, and its using_sanitizer, which
-        // is `is_asan`.
+        // platforms, which are `is_linux`, its using_sanitizer, which is
+        // `is_asan`, and Skia's Ganesh backend, which is `!slimpeller`.
         <String>[
           ...perTargetOsArguments.keys,
           'is_apple',
           'ozone_platform_wayland',
           'ozone_platform_x11',
+          'skia_enable_ganesh',
           'using_sanitizer',
         ]..sort(),
       );
@@ -1474,8 +1477,9 @@ if (enable_unittests) {
 '''),
         );
         // A conjunction of mixed settings keys a config_setting_group of
-        // the file; a denied OS predicate is its complement group. A denied
-        // flag has no complement and stays an error.
+        // the file; a denied OS predicate is its complement group, and so
+        // is a denied flag that has one (slimpeller). A denied flag without
+        // a complement stays an error.
         final String mixed = await convert(
           '''
 if (enable_unittests && !is_wasm) {
@@ -1531,9 +1535,28 @@ selects.config_setting_group(
     }),
 '''),
         );
+        final String notSlim = await convert('''
+if (enable_unittests && !slimpeller) {
+  source_set("x") {
+    sources = [ "a.cc" ]
+  }
+}
+''', assumptions: Assumptions(const <String, GnValue>{}));
+        expect(
+          notSlim,
+          contains('''
+selects.config_setting_group(
+    name = "when_enable_unittests_and_not_slimpeller",
+    match_all = [
+        "//engine/src/flutter/testing:unittests_enabled",
+        "//engine/src/flutter/common:slimpeller_disabled",
+    ],
+)
+'''),
+        );
         await expectLater(
           convert('''
-if (enable_unittests && !slimpeller) {
+if (enable_unittests && !impeller_enable_vulkan) {
   source_set("x") {
     sources = [ "a.cc" ]
   }
@@ -1541,9 +1564,76 @@ if (enable_unittests && !slimpeller) {
 ''', assumptions: Assumptions(const <String, GnValue>{})),
           throwsGnError(
             line: 2,
-            message: 'no config_setting holds exactly when `!slimpeller` does',
+            message: 'no config_setting holds exactly when `!impeller_enable_vulkan` does',
           ),
         );
+      });
+
+      test("Skia's Ganesh backend is where the build is not a Slimpeller one", () async {
+        // tools/gn sets slimpeller for an iOS build (or --slimpeller) and
+        // turns skia_enable_ganesh off with it, and gives Android and iOS
+        // skia_gl_standard = "gles". The generation scope reads the first
+        // as `!slimpeller` (common's slimpeller_enabled holds on iOS and
+        // with the flag; its complement serves a conjunction) and the
+        // second per target OS. GN's iOS build has SLIMPELLER=1 and
+        // SK_ASSUME_GL_ES=1 and no SK_GANESH; until 11-23 Bazel's had it
+        // the other way round.
+        final String output = await convert('''
+source_set("x") {
+  sources = [ "a.cc" ]
+  defines = []
+  if (skia_enable_ganesh) {
+    defines += [ "SK_GANESH" ]
+  }
+  if (skia_enable_ganesh && is_linux) {
+    defines += [ "GANESH_ON_LINUX" ]
+  }
+  if (skia_gl_standard == "gles") {
+    defines += [ "SK_ASSUME_GL_ES=1" ]
+  }
+  if (skia_enable_graphite) {
+    defines += [ "SK_GRAPHITE" ]
+  }
+}
+''', assumptions: generationAssumptions());
+        expect(
+          output,
+          contains('''
+    local_defines = FLUTTER_LOCAL_DEFINES + select({
+        "//engine/src/flutter/common:slimpeller_enabled": [],
+        "//conditions:default": [
+            "SK_GANESH",  # skia_enable_ganesh
+        ],
+    }) + select({
+        ":when_not_slimpeller_and_is_linux": [
+            "GANESH_ON_LINUX",  # skia_enable_ganesh && is_linux
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:android": [
+            "SK_ASSUME_GL_ES=1",  # skia_gl_standard == "gles"
+        ],
+        "@platforms//os:ios": [
+            "SK_ASSUME_GL_ES=1",  # skia_gl_standard == "gles"
+        ],
+        "//conditions:default": [],
+    }),
+'''),
+        );
+        expect(
+          output,
+          contains('''
+# `!slimpeller && is_linux`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_slimpeller_and_is_linux",
+    match_all = [
+        "//engine/src/flutter/common:slimpeller_disabled",
+        "@platforms//os:linux",
+    ],
+)
+'''),
+        );
+        expect(output, isNot(contains('SK_GRAPHITE')));
       });
     });
 
@@ -5149,8 +5239,9 @@ impeller_shaders(
       // select(): a negated case whose complement overlaps another case
       // (`!is_win` then `!slimpeller`: unset where slimpeller holds and
       // is_win does, which no key can say beside the group's value), and a
-      // denied flag inside a conjunction (no complement setting). A name
-      // that varies no target can have.
+      // denied flag inside a conjunction when the flag has no complement
+      // setting (`!impeller_enable_vulkan`; slimpeller has one). A name that
+      // varies no target can have.
       final String grouped = await convert(
         '''
 impeller_shaders("entity_shaders") {
@@ -5209,7 +5300,7 @@ impeller_shaders("entity_shaders") {
           '''
 impeller_shaders("entity_shaders") {
   name = "entity"
-  if (!slimpeller) {
+  if (!impeller_enable_vulkan) {
     metal_version = "2.1"
   }
   if (!is_win) {
@@ -5221,7 +5312,10 @@ impeller_shaders("entity_shaders") {
           templates: <String>{'impeller_shaders'},
           assumptions: Assumptions(const <String, GnValue>{}),
         ),
-        throwsGnError(line: 4, message: 'no config_setting holds exactly when `!slimpeller` does'),
+        throwsGnError(
+          line: 4,
+          message: 'no config_setting holds exactly when `!impeller_enable_vulkan` does',
+        ),
       );
       await expectLater(
         convert('''
