@@ -30,6 +30,7 @@ import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
 import '../web/compile.dart';
 import '../web/web_constants.dart';
+import '../web/web_debug_config.dart';
 import '../web/web_options.dart';
 
 /// The name of the directory where Integration Tests are placed.
@@ -558,11 +559,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       enableImpeller: ImpellerStatus.fromBool(getValue(DebuggingOptionDescriptors.enableImpeller)),
       enableFlutterGpu: getValue(DebuggingOptionDescriptors.enableFlutterGpu) ?? false,
       debugLogsDirectoryPath: debugLogsDirectoryPath,
-      webConfig: WebDebugConfig(
-        renderer: webRenderer,
-        crossOriginIsolation: getValue(WebOptions.crossOriginIsolation),
-        useWasm: useWasm,
-      ),
+      platformOptions: <PlatformDebuggingOptions>[
+        WebDebugConfig(
+          renderer: webRenderer,
+          crossOriginIsolation: getValue(WebOptions.crossOriginIsolation),
+          useWasm: useWasm,
+        ),
+      ],
       printDtd: getValue(CommonOptions.printDtd),
       enableHcpp: explicitEnableHcpp,
       uninstallApp: getValue(_uninstall),
