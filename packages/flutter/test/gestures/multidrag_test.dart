@@ -8,10 +8,47 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'gesture_tester.dart';
 
-class TestDrag extends Drag {}
+class TestDrag extends Drag {
+  final List<DragUpdateDetails> updates = <DragUpdateDetails>[];
+
+  @override
+  void update(DragUpdateDetails details) {
+    updates.add(details);
+  }
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  testGesture('MultiDrag: reports local positions for a transformed pointer', (
+    GestureTester tester,
+  ) {
+    final recognizer = ImmediateMultiDragGestureRecognizer();
+    final drag = TestDrag();
+    recognizer.onStart = (Offset position) => drag;
+
+    final pointer = TestPointer(5);
+    final transform = Matrix4.diagonal3Values(0.5, 0.5, 1.0)..setTranslationRaw(-10.0, -20.0, 0.0);
+    recognizer.addPointer(pointer.down(const Offset(30.0, 50.0)).transformed(transform));
+    tester.closeArena(5);
+    tester.async.flushMicrotasks();
+    tester.route(pointer.move(const Offset(50.0, 70.0)));
+    tester.route(pointer.up());
+    recognizer.dispose();
+
+    expect(drag.updates.map((DragUpdateDetails details) => details.localPosition), <Offset>[
+      const Offset(5.0, 5.0),
+      const Offset(15.0, 15.0),
+    ]);
+    expect(drag.updates.map((DragUpdateDetails details) => details.globalPosition), <Offset>[
+      const Offset(30.0, 50.0),
+      const Offset(50.0, 70.0),
+    ]);
+    expect(drag.updates.map((DragUpdateDetails details) => details.delta), <Offset>[
+      Offset.zero,
+      const Offset(20.0, 20.0),
+    ]);
+  });
 
   testGesture('MultiDrag: moving before delay rejects', (GestureTester tester) {
     final drag = DelayedMultiDragGestureRecognizer();
