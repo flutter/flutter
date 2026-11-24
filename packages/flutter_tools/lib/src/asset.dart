@@ -656,6 +656,7 @@ class ManifestAssetBundle implements AssetBundle {
     final LicenseResult licenseResult = _licenseCollector.obtainLicenses(
       packageConfig,
       additionalLicenseFiles,
+      applicationPackage: flutterManifest.appName,
     );
     if (licenseResult.errorMessages.isNotEmpty) {
       licenseResult.errorMessages.forEach(_logger.printError);
