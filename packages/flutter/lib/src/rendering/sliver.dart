@@ -1802,23 +1802,21 @@ abstract class RenderSliver extends RenderObject {
       }
       assert(p0.dx == p1.dx || p0.dy == p1.dy); // must be axis-aligned
       final double d = (p1 - p0).distance * 0.2;
-      double dx1, dx2, dy1, dy2;
 
       final (Offset start, Offset end, double headOffset) = switch (direction) {
         GrowthDirection.forward => (p0, p1, d),
         GrowthDirection.reverse => (p1, p0, -d),
       };
-      dx1 = dx2 = dy1 = dy2 = headOffset;
-      if (start.dx == end.dx) {
-        dx2 = -dx2;
-      } else {
-        dy2 = -dy2;
-      }
+
+      final (double dx2, double dy2) = start.dx == end.dx
+          ? (-headOffset, headOffset)
+          : (headOffset, -headOffset);
+
       canvas.drawPath(
         Path()
           ..moveTo(start.dx, start.dy)
           ..lineTo(end.dx, end.dy)
-          ..moveTo(end.dx - dx1, end.dy - dy1)
+          ..moveTo(end.dx - headOffset, end.dy - headOffset)
           ..lineTo(end.dx, end.dy)
           ..lineTo(end.dx - dx2, end.dy - dy2),
         paint,
