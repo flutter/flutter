@@ -43,6 +43,7 @@ class IconTreeShaker {
     required FileSystem fileSystem,
     required this._artifacts,
     required this._targetPlatform,
+    this.recordedUsesFileNames,
   }) : _logger = logger,
        _fs = fileSystem,
        _fontManifest = fontManifest?.string {
@@ -68,8 +69,8 @@ class IconTreeShaker {
   /// The [Source] inputs that native targets using this should depend on.
   ///
   /// Web targets (such as `WebReleaseBundle`) do not use this field because
-  /// their recorded uses inputs are dynamically provided via `LinkHooks` and
-  /// `Dart2WebTarget.outputs`.
+  /// their recorded uses inputs are dynamically provided via
+  /// `WebReleaseBundle.inputs`, `LinkHooks`, and `Dart2WebTarget.outputs`.
   ///
   /// See [Target.inputs].
   static const inputs = <Source>[
@@ -82,6 +83,7 @@ class IconTreeShaker {
 
   final Environment _environment;
   final String? _fontManifest;
+  final List<String>? recordedUsesFileNames;
   Future<void>? _iconDataProcessing;
   Map<String, _IconTreeShakerData>? _iconData;
 
@@ -103,11 +105,9 @@ class IconTreeShaker {
       return;
     }
 
-    final candidates = <String>[
-      'recorded_uses.json',
-      'recorded_uses_js.json',
-      'recorded_uses_wasm.json',
-    ];
+    final List<String> candidates =
+        recordedUsesFileNames ??
+        const <String>['recorded_uses.json', 'recorded_uses_js.json', 'recorded_uses_wasm.json'];
     final recordedUsesFiles = <File>[];
     for (final candidate in candidates) {
       final File file = environment.buildDir.childFile(candidate);

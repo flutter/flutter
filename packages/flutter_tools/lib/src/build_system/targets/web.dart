@@ -530,7 +530,7 @@ class Dart2JSTarget extends Dart2WebTarget {
     final ResolvedFiles resolved = super.resolveOutputs(environment);
     // `{BUILD_DIR}/main.dart.*.js` matches `Dart2WasmTarget`'s `main.dart.support.js`;
     // exclude it so `dart2js` never claims or deletes wasm support output.
-    resolved.sources.removeWhere((File file) => file.basename == Dart2WasmTarget.supportJsFileName);
+    Dart2WasmTarget.removeBuildSupportJs(resolved.sources, environment);
     return resolved;
   }
 
@@ -580,6 +580,14 @@ class Dart2WasmTarget extends Dart2WebTarget {
   Dart2WasmTarget(this.compilerConfig, this._analytics, {required super.engineRevision});
 
   static const String supportJsFileName = 'main.dart.support.js';
+
+  static void removeBuildSupportJs(List<File> files, Environment environment) {
+    final String supportJsPath = environment.fileSystem.path.join(
+      environment.buildDir.resolveSymbolicLinksSync(),
+      supportJsFileName,
+    );
+    files.removeWhere((File file) => environment.fileSystem.path.equals(file.path, supportJsPath));
+  }
 
   @override
   final WasmCompilerConfig compilerConfig;
@@ -1204,6 +1212,13 @@ class WebReleaseBundle extends Target {
   @override
   String get name => 'web_release_bundle';
 
+  List<String> get _recordedUsesFileNames => <String>[
+    for (final Dart2WebTarget target in compileTargets) ?target.recordedUsesFileName,
+  ];
+
+  @override
+  String get buildKey => _recordedUsesFileNames.join(',');
+
   @override
   List<Target> get dependencies => <Target>[
     ...compileTargets,
@@ -1211,9 +1226,7 @@ class WebReleaseBundle extends Target {
     LinkHooks(
       platform: HookPlatform.web,
       extraDependencies: compileTargets,
-      recordedUsesFileNames: <String>[
-        for (final Dart2WebTarget target in compileTargets) ?target.recordedUsesFileName,
-      ],
+      recordedUsesFileNames: _recordedUsesFileNames,
     ),
   ];
 
@@ -1228,6 +1241,13 @@ class WebReleaseBundle extends Target {
     const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     const Source.pattern('{BUILD_DIR}/${LinkHooks.resultFilename}'),
     for (final String file in buildPatternStems) Source.pattern('{BUILD_DIR}/$file'),
+    Source.fromEnvironment(
+      (Environment environment) => <Source>[
+        if (environment.featureFlags.isRecordUseEnabled)
+          for (final String filename in _recordedUsesFileNames)
+            Source.pattern('{BUILD_DIR}/$filename'),
+      ],
+    ),
     if (_hasWebContentHash) ...<Source>[
       const Source.pattern('{OUTPUT_DIR}/index.html', optional: true),
       const Source.pattern('{OUTPUT_DIR}/flutter_bootstrap.js', optional: true),
@@ -1237,7 +1257,7 @@ class WebReleaseBundle extends Target {
   @override
   ResolvedFiles resolveInputs(Environment environment) {
     final ResolvedFiles resolved = super.resolveInputs(environment);
-    resolved.sources.removeWhere((File file) => file.basename == Dart2WasmTarget.supportJsFileName);
+    Dart2WasmTarget.removeBuildSupportJs(resolved.sources, environment);
     return resolved;
   }
 
@@ -1300,6 +1320,7 @@ class WebReleaseBundle extends Target {
       dartHookResult: dartHookResult,
       targetPlatform: TargetPlatform.web_javascript,
       buildMode: buildMode,
+      recordedUsesFileNames: _recordedUsesFileNames,
     );
     final Depfile bundledDepfile = _bundleLocalRobotoFallback(environment, depfile);
     final DepfileService depfileService = environment.depFileService;
@@ -1651,9 +1672,7 @@ $supportsDart2WasmLine''';
     // `{BUILD_DIR}/main.dart.*.js` from `Dart2JSTarget` also matches a stale
     // `Dart2WasmTarget.supportJsFileName`; exclude it on non-Wasm builds.
     if (!_hasWasmBuild) {
-      resolved.sources.removeWhere(
-        (File file) => file.basename == Dart2WasmTarget.supportJsFileName,
-      );
+      Dart2WasmTarget.removeBuildSupportJs(resolved.sources, environment);
     }
     return resolved;
   }

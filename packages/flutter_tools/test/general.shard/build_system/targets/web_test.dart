@@ -24,6 +24,7 @@ import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/content_hash.dart';
 import 'package:flutter_tools/src/web_template.dart';
+import 'package:record_use/record_use.dart' as record_use;
 import 'package:standard_message_codec/standard_message_codec.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -4496,6 +4497,7 @@ flutter:
       required bool sourceMaps,
       bool dumpInfo = false,
       String jsCode = 'console.log("app");',
+      String? recordedUsesJson,
     }) {
       final File mainDart = environment.projectDir.childFile('lib/main.dart');
       final common = <String>[
@@ -4542,6 +4544,11 @@ flutter:
                   .childFile('main.dart.js.info.json')
                   .writeAsStringSync('{"dump":true}');
             }
+            if (recordedUsesJson != null) {
+              environment.buildDir
+                  .childFile('main.dart.js.resources.json')
+                  .writeAsStringSync(recordedUsesJson);
+            }
           },
         ),
       ]);
@@ -4551,6 +4558,7 @@ flutter:
       required bool sourceMaps,
       required bool dryRun,
       String supportJs = '(WebAssembly.validate(new Uint8Array([0,97,115,109])))',
+      String recordedUsesJson = '{"wasm":true}',
     }) {
       final File mainDart = environment.projectDir.childFile('lib/main.dart');
       final File depFile = environment.buildDir.childFile('dart2wasm.d');
@@ -4590,7 +4598,7 @@ flutter:
                 .writeAsStringSync('$supportJs\n');
             environment.buildDir
                 .childFile('recorded_uses_wasm.json')
-                .writeAsStringSync('{"wasm":true}');
+                .writeAsStringSync(recordedUsesJson);
             if (sourceMaps) {
               environment.buildDir
                   .childFile('main.dart.wasm.map')
@@ -4647,6 +4655,23 @@ flutter:
           expect(environment.buildDir.childFile('recorded_uses_wasm.json'), isNot(exists));
           expect(environment.buildDir.childFile('main.dart.wasm'), isNot(exists));
           expect(environment.buildDir.childFile('dart2wasm.d'), isNot(exists));
+
+          // Repeating an unchanged default JS build (with wasm dryRun: true)
+          // re-runs dart2wasm because `dart compile wasm --dry-run` exits
+          // before writing `dart2wasm.d` (and dry-run warnings are not cached),
+          // while skipping dart2js, link_hooks, web_templated_files,
+          // web_release_bundle, and web_service_worker.
+          queueDart2WasmCompile(sourceMaps: false, dryRun: true);
+          final BuildResult repeatDryRunResult = await runWebBuild(const <WebCompilerConfig>[
+            JsCompilerConfig(sourceMaps: false),
+            WasmCompilerConfig(sourceMaps: false, dryRun: true),
+          ]);
+          expect(repeatDryRunResult.performance['dart2wasm']!.skipped, isFalse);
+          expect(repeatDryRunResult.performance['dart2js']!.skipped, isTrue);
+          expect(repeatDryRunResult.performance['link_hooks']!.skipped, isTrue);
+          expect(repeatDryRunResult.performance['web_templated_files']!.skipped, isTrue);
+          expect(repeatDryRunResult.performance['web_release_bundle']!.skipped, isTrue);
+          expect(repeatDryRunResult.performance['web_service_worker']!.skipped, isTrue);
           expect(processManager, hasNoRemainingExpectations);
         },
         overrides: <Type, Generator>{
@@ -4785,6 +4810,185 @@ flutter:
           expect(jsHash2.performance['web_templated_files']!.skipped, isTrue);
           expect(jsHash2.performance['web_release_bundle']!.skipped, isTrue);
           expect(jsHash2.performance['web_service_worker']!.skipped, isTrue);
+          expect(processManager, hasNoRemainingExpectations);
+        },
+        overrides: <Type, Generator>{
+          ProcessManager: () => processManager,
+          TemplateRenderer: () => const MustacheTemplateRenderer(),
+          Pub: ThrowingPub.new,
+        },
+      ),
+    );
+
+    test(
+      'WebReleaseBundle preserves user web/vendor/main.dart.support.js in inputs and rebuilds when edited',
+      () => testbed.run(
+        () async {
+          setUpWebProject();
+          final File vendorSupportJs =
+              environment.projectDir.childFile('web/vendor/main.dart.support.js')
+                ..createSync(recursive: true)
+                ..writeAsStringSync('// vendor v1\n');
+          // Leave a stale compiler main.dart.support.js in buildDir as well.
+          environment.buildDir
+              .childFile(Dart2WasmTarget.supportJsFileName)
+              .writeAsStringSync('true\n');
+
+          const jsHashConfigs = <WebCompilerConfig>[
+            JsCompilerConfig(webContentHash: true, sourceMaps: false),
+          ];
+          queueDart2JsCompile(sourceMaps: false);
+          final BuildResult firstBuild = await runWebBuild(jsHashConfigs);
+          expect(firstBuild.success, isTrue);
+          expect(
+            environment.outputDir.childFile('vendor/main.dart.support.js').readAsStringSync(),
+            '// vendor v1\n',
+          );
+
+          final bundle = WebReleaseBundle(
+            jsHashConfigs,
+            const NoOpAnalytics(),
+            engineRevision: _kEngineRevision,
+          );
+          final List<String> resolvedInputPaths = bundle
+              .resolveInputs(environment)
+              .sources
+              .map((File f) => f.path)
+              .toList();
+          expect(resolvedInputPaths, contains(vendorSupportJs.path));
+          expect(
+            resolvedInputPaths,
+            isNot(contains(environment.buildDir.childFile(Dart2WasmTarget.supportJsFileName).path)),
+          );
+
+          // Editing web/vendor/main.dart.support.js invalidates web_release_bundle.
+          vendorSupportJs.writeAsStringSync('// vendor v2\n');
+          final BuildResult secondBuild = await runWebBuild(jsHashConfigs);
+          expect(secondBuild.success, isTrue);
+          expect(secondBuild.performance['dart2js']!.skipped, isTrue);
+          expect(secondBuild.performance['web_release_bundle']!.skipped, isFalse);
+          expect(
+            environment.outputDir.childFile('vendor/main.dart.support.js').readAsStringSync(),
+            '// vendor v2\n',
+          );
+          expect(processManager, hasNoRemainingExpectations);
+        },
+        overrides: <Type, Generator>{
+          ProcessManager: () => processManager,
+          TemplateRenderer: () => const MustacheTemplateRenderer(),
+          Pub: ThrowingPub.new,
+        },
+      ),
+    );
+
+    test(
+      'WebReleaseBundle passes active recordedUsesFileNames to IconTreeShaker and drops Wasm-only glyph on --no-wasm-dry-run',
+      () => testbed.run(
+        () async {
+          setUpWebProject();
+          environment.defines[kIconTreeShakerFlag] = 'true';
+          environment.projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: foo
+flutter:
+  fonts:
+    - family: MaterialIcons
+      fonts:
+        - asset: fonts/MaterialIcons-Regular.otf
+''');
+          const ttfHeader = <int>[0, 1, 0, 0, 0, 15, 0, 128, 0, 3, 0, 112];
+          final File inputFont = environment.projectDir.childFile('fonts/MaterialIcons-Regular.otf')
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(<int>[...ttfHeader, ...List<int>.filled(100, 0)]);
+          final String fontSubsetPath = environment.artifacts.getArtifactPath(Artifact.fontSubset);
+          fs.file(fontSubsetPath).createSync(recursive: true);
+
+          String encodeIconRecording(int codePoint) {
+            const iconLibrary = record_use.Library('package:flutter/src/widgets/icon_data.dart');
+            const iconClass = record_use.Class('IconData', iconLibrary);
+            return json.encode(
+              record_use.Recordings(
+                calls: <record_use.DefinitionWithStaticCalls, List<record_use.CallReference>>{},
+                instances: <record_use.DefinitionWithInstances, List<record_use.InstanceReference>>{
+                  iconClass: <record_use.InstanceReference>[
+                    record_use.InstanceConstantReference(
+                      instanceConstant: record_use.InstanceConstant(
+                        definition: iconClass,
+                        fields: <String, record_use.Constant>{
+                          'codePoint': record_use.IntConstant(codePoint),
+                          'fontFamily': const record_use.StringConstant('MaterialIcons'),
+                        },
+                      ),
+                      loadingUnit: const record_use.LoadingUnit('root'),
+                    ),
+                  ],
+                },
+              ).toJson(),
+            );
+          }
+
+          final String outputFontPath = environment.resolvedOutputDir
+              .childDirectory('assets')
+              .childFile('fonts/MaterialIcons-Regular.otf')
+              .path;
+
+          void queueFontSubset(CompleterIOSink stdinSink) {
+            stdinSink.clear();
+            processManager.addCommand(
+              FakeCommand(
+                command: <String>[fontSubsetPath, outputFontPath, inputFont.path],
+                stdin: stdinSink,
+                onRun: (_) {
+                  fs.file(outputFontPath)
+                    ..createSync(recursive: true)
+                    ..writeAsBytesSync(ttfHeader);
+                },
+              ),
+            );
+          }
+
+          // 1. Build with --wasm: JS uses glyph 59470, Wasm uses Wasm-only glyph 59471.
+          queueDart2WasmCompile(
+            sourceMaps: false,
+            dryRun: false,
+            recordedUsesJson: encodeIconRecording(59471),
+          );
+          queueDart2JsCompile(sourceMaps: false, recordedUsesJson: encodeIconRecording(59470));
+          final wasmStdin = CompleterIOSink();
+          queueFontSubset(wasmStdin);
+
+          final BuildResult wasmBuild = await runWebBuild(const <WebCompilerConfig>[
+            WasmCompilerConfig(sourceMaps: false),
+            JsCompilerConfig(sourceMaps: false),
+          ]);
+          expect(wasmBuild.success, isTrue);
+          final String wasmFontSubsetStdin = wasmStdin.getAndClear();
+          expect(wasmFontSubsetStdin, contains('59470'));
+          expect(wasmFontSubsetStdin, contains('59471'));
+
+          // 2. Switch to --no-wasm-dry-run (Dart2WasmTarget omitted; stale recorded_uses_wasm.json stays in buildDir).
+          final jsOnlyStdin = CompleterIOSink();
+          queueFontSubset(jsOnlyStdin);
+
+          const jsNoDryRunConfigs = <WebCompilerConfig>[JsCompilerConfig(sourceMaps: false)];
+          final jsBundle = WebReleaseBundle(
+            jsNoDryRunConfigs,
+            const NoOpAnalytics(),
+            engineRevision: _kEngineRevision,
+          );
+          final List<String> jsBundleInputs = jsBundle
+              .resolveInputs(environment)
+              .sources
+              .map((File f) => f.basename)
+              .toList();
+          expect(jsBundleInputs, contains(LinkHooks.recordedUsesJsFileName));
+          expect(jsBundleInputs, isNot(contains(LinkHooks.recordedUsesWasmFileName)));
+
+          final BuildResult jsBuild = await runWebBuild(jsNoDryRunConfigs);
+          expect(jsBuild.success, isTrue);
+          expect(environment.buildDir.childFile('recorded_uses_wasm.json'), exists);
+          final String jsFontSubsetStdin = jsOnlyStdin.getAndClear();
+          expect(jsFontSubsetStdin, contains('59470'));
+          expect(jsFontSubsetStdin, isNot(contains('59471')));
           expect(processManager, hasNoRemainingExpectations);
         },
         overrides: <Type, Generator>{
