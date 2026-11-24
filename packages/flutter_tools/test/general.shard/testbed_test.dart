@@ -50,7 +50,7 @@ void main() {
 
       FileSystem? localFileSystem;
       await testbed.run(() {
-        localFileSystem = context.resolveOverride<FileSystem>();
+        localFileSystem = context.get<FileSystem>();
       });
 
       expect(localFileSystem, isA<MemoryFileSystem>());

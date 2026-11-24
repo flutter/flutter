@@ -758,20 +758,19 @@ enum TargetPlatform {
     .unsupported => throw UnsupportedError('Unexpected target platform $this'),
   };
 
-  String get simpleName => switch (this) {
-    linux_x64 || darwin || windows_x64 => 'x64',
-    linux_arm64 || windows_arm64 => 'arm64',
-    linux_riscv64 => 'riscv64',
-    android ||
-    android_arm ||
-    android_arm64 ||
-    android_x64 ||
-    fuchsia_arm64 ||
-    fuchsia_x64 ||
-    ios ||
-    tester ||
-    web_javascript ||
-    unsupported => throw UnsupportedError('Unexpected target platform $this'),
+  /// The [CpuArch] for architecture-specific target platforms.
+  ///
+  /// Throws an [UnsupportedError] for multi-architecture,
+  /// architecture-independent, or non-native target platforms ([android],
+  /// [darwin], [ios], [tester], [web_javascript], and [unsupported]).
+  CpuArch get cpuArch => switch (this) {
+    android_arm => .armv7,
+    android_arm64 || fuchsia_arm64 || linux_arm64 || windows_arm64 => .arm64,
+    android_x64 || fuchsia_x64 || linux_x64 || windows_x64 => .x64,
+    linux_riscv64 => .riscv64,
+    android || darwin || ios || tester || web_javascript || unsupported => throw UnsupportedError(
+      'Target platform $this does not specify a CPU architecture.',
+    ),
   };
 
   static Never throwUnsupportedTarget() =>
@@ -929,16 +928,15 @@ String getLinuxBuildDirectory(
     os: OperatingSystemUtils operatingSystemUtils,
     :Platform platform,
   ) = toolContext;
-  final String arch = switch (targetPlatform) {
-    final TargetPlatform target => target.simpleName,
-    null => getCurrentHostPlatform(
-      operatingSystemUtils: operatingSystemUtils,
-      platform: platform,
-    ).cpuArchName,
-  };
+  final CpuArch cpuArch =
+      targetPlatform?.cpuArch ??
+      getCurrentHostPlatform(
+        operatingSystemUtils: operatingSystemUtils,
+        platform: platform,
+      ).cpuArch;
   final String subDirs = fileSystem.path.joinAll(<String>[
     'linux',
-    arch,
+    cpuArch.name,
     if (flavor != null && flavor.isNotEmpty) flavor,
   ]);
   return fileSystem.path.join(getBuildDirectory(config, fileSystem), subDirs);
@@ -954,10 +952,9 @@ String getWindowsBuildDirectory(
   required FileSystem fileSystem,
   String? flavor,
 }) {
-  final String arch = targetPlatform.simpleName;
   final String subDirs = fileSystem.path.joinAll(<String>[
     'windows',
-    arch,
+    targetPlatform.cpuArch.name,
     if (flavor != null && flavor.isNotEmpty) flavor,
   ]);
   return fileSystem.path.join(getBuildDirectory(config, fileSystem), subDirs);
@@ -1016,6 +1013,20 @@ const kFileSystemRoots = 'FileSystemRoots';
 /// This is expected to be a space-delimited list of architectures. If not
 /// provided, defaults to arm64.
 const kIosArchs = 'IosArchs';
+
+/// The iOS deployment target used for native asset hooks and framework metadata.
+///
+/// Passed from Xcode's IPHONEOS_DEPLOYMENT_TARGET build setting. May include
+/// minor and patch versions. If absent, uses the native-assets default.
+const kIosDeploymentTarget = 'IosDeploymentTarget';
+
+/// The macOS deployment target used for native asset hooks.
+///
+/// Passed from the app target's setting when the Flutter tool forwarded it as
+/// FLUTTER_MACOS_DEPLOYMENT_TARGET, otherwise from the build phase's
+/// MACOSX_DEPLOYMENT_TARGET. May include minor and patch versions. If absent,
+/// uses the native-assets default.
+const kMacOSDeploymentTarget = 'MacOSDeploymentTarget';
 
 /// The define to control what macOS architectures are built for.
 ///
