@@ -540,7 +540,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // - Painting
 
   Paint get _paintThumb {
-    return Paint()..color = color.withOpacity(color.opacity * fadeoutOpacityAnimation.value);
+    return Paint()..color = color.withValues(alpha: color.a * fadeoutOpacityAnimation.value);
   }
 
   bool _needPaint(ScrollMetrics? metrics) {
@@ -551,14 +551,14 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   Paint _paintTrack({bool isBorder = false}) {
     if (isBorder) {
       return Paint()
-        ..color = trackBorderColor.withOpacity(
-          trackBorderColor.opacity * fadeoutOpacityAnimation.value,
+        ..color = trackBorderColor.withValues(
+          alpha: trackBorderColor.opacity * fadeoutOpacityAnimation.value,
         )
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.0;
     }
     return Paint()
-      ..color = trackColor.withOpacity(trackColor.opacity * fadeoutOpacityAnimation.value);
+      ..color = trackColor.withValues(alpha: trackColor.opacity * fadeoutOpacityAnimation.value);
   }
 
   void _paintScrollbar(Canvas canvas, Size size) {
