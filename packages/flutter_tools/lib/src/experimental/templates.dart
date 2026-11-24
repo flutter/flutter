@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../features.dart';
@@ -71,6 +72,9 @@ base class ExtensionTemplateManager extends TemplateService {
               .sendRequest(TemplateService.getProjectTemplatesMethod)
               .timeout(_kRpcTimeout);
           return ExtensionProjectTemplate.listFromJson(rpcResult);
+        } on ToolExtensionException catch (e) {
+          _logger.printWarning('Extension "${connection.extensionName}": ${e.message}');
+          return const <ExtensionProjectTemplate>[];
         } on Object catch (e) {
           _logger.printTrace(
             'Failed to get results from extension for ${TemplateService.getProjectTemplatesMethod}: $e',
@@ -156,6 +160,8 @@ base class ExtensionTemplateManager extends TemplateService {
         if (result is Map) {
           return result.cast<String, Object?>();
         }
+      } on ToolExtensionException catch (e) {
+        throwToolExit(e.message);
       } on Object catch (e) {
         _logger.printTrace('Failed to generate template parameters from extension: $e');
       }
