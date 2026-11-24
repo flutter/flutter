@@ -41,7 +41,7 @@
                 "--linux-cpu=riscv64",
                 "--enable-fontconfig",
                 "--no-prebuilt-dart-sdk",
-                "--no-lto",
+                "--thin-lto",
                 "--rbe"
             ],
             "name": "ci/linux_profile_riscv64",
@@ -135,7 +135,7 @@
                 "--linux-cpu=riscv64",
                 "--enable-fontconfig",
                 "--no-prebuilt-dart-sdk",
-                "--no-lto",
+                "--thin-lto",
                 "--rbe"
             ],
             "name": "ci/linux_release_riscv64",
