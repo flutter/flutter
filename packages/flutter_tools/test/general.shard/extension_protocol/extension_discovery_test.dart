@@ -10,7 +10,9 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
+import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
+import 'package:stream_channel/isolate_channel.dart';
 import 'package:test/test.dart';
 
 void _dummyExtensionEntryPoint(SendPort sendPort) {
@@ -129,6 +131,10 @@ void _asyncErrorExtensionEntryPoint(SendPort sendPort) {
 }
 
 final class _ProtocolHardeningService extends ToolExtensionService {
+  _ProtocolHardeningService({this.onBeforeGetCurrentDir});
+
+  final void Function()? onBeforeGetCurrentDir;
+
   @override
   String get namespace => 'hardening';
 
@@ -141,6 +147,37 @@ final class _ProtocolHardeningService extends ToolExtensionService {
       'callProcessExit': (Map<String, Object?> _) {
         io.exit(42);
       },
+      'inspectStdin': (Map<String, Object?> _) async {
+        return <String, Object?>{
+          'echoMode': io.stdin.echoMode,
+          'echoNewlineMode': io.stdin.echoNewlineMode,
+          'hasTerminal': io.stdin.hasTerminal,
+          'isEmpty': await io.stdin.isEmpty,
+          'lineMode': io.stdin.lineMode,
+          'readByteSync': io.stdin.readByteSync(),
+          'readLineSync': io.stdin.readLineSync(),
+          'supportsAnsiEscapes': io.stdin.supportsAnsiEscapes,
+        };
+      },
+      'mutateStdinMode': (Map<String, Object?> params) {
+        switch (params['mode']) {
+          case 'echoMode':
+            io.stdin.echoMode = true;
+          case 'echoNewlineMode':
+            io.stdin.echoNewlineMode = true;
+          case 'lineMode':
+            io.stdin.lineMode = false;
+        }
+        return null;
+      },
+      'getCurrentDir': (Map<String, Object?> _) {
+        onBeforeGetCurrentDir?.call();
+        return io.Directory.current.path;
+      },
+      'setCurrentDir': (Map<String, Object?> _) {
+        io.Directory.current = io.Directory.systemTemp;
+        return null;
+      },
     };
   }
 }
@@ -148,6 +185,20 @@ final class _ProtocolHardeningService extends ToolExtensionService {
 void _protocolHardeningEntryPoint(SendPort sendPort) {
   unawaited(
     ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_ProtocolHardeningService()]),
+  );
+}
+
+void _cwdSnapshotEntryPoint(SendPort sendPort) {
+  var currentDir = io.Directory('/initial_cwd');
+  unawaited(
+    io.IOOverrides.runZoned(
+      () => ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+        _ProtocolHardeningService(
+          onBeforeGetCurrentDir: () => currentDir = io.Directory('/mutated_cwd'),
+        ),
+      ]),
+      getCurrentDirectory: () => currentDir,
+    ),
   );
 }
 
@@ -211,6 +262,7 @@ void main() {
         logger: logger,
       );
       expect(connection.capabilities, isA<ToolExtensionCapabilities>());
+      expect(connection.capabilities.protocolVersion, kExtensionProtocolVersion);
 
       final discovery = ExtensionDiscovery(logger: logger);
       discovery.registerConnection(connection);
@@ -219,6 +271,56 @@ void main() {
       await discovery.dispose();
       expect(discovery.connections, isEmpty);
     });
+
+    test(
+      'ExtensionConnection.spawn sends protocolVersion in handshake and rejects newer versions',
+      () async {
+        final logger = BufferLogger.test();
+        final capturedParamsPort = ReceivePort();
+        addTearDown(capturedParamsPort.close);
+        final SendPort capturedParamsSendPort = capturedParamsPort.sendPort;
+
+        void futureProtocolEntryPoint(SendPort sendPort) {
+          final channel = IsolateChannel<Object?>.connectSend(sendPort);
+          final peer = json_rpc.Peer.withoutJson(channel);
+          peer.registerMethod(ToolExtensionEntryPoint.getCapabilitiesMethod, (
+            json_rpc.Parameters params,
+          ) {
+            capturedParamsSendPort.send(params.value);
+            return <String, Object?>{
+              ToolExtensionCapabilities.extensionNameKey: 'future_extension',
+              ToolExtensionCapabilities.protocolVersionKey: kExtensionProtocolVersion + 1,
+              ToolExtensionCapabilities.servicesKey: const <String>[],
+              ToolExtensionCapabilities.supportedPlatformsKey: const <String>[
+                'linux',
+                'macos',
+                'windows',
+              ],
+            };
+          });
+          unawaited(peer.listen());
+        }
+
+        await expectLater(
+          ExtensionConnection.spawn(futureProtocolEntryPoint, logger: logger),
+          throwsA(
+            isA<StateError>().having(
+              (StateError e) => e.message,
+              'message',
+              allOf(
+                contains('future_extension'),
+                contains('${kExtensionProtocolVersion + 1}'),
+                contains('Upgrade Flutter'),
+              ),
+            ),
+          ),
+        );
+
+        expect(await capturedParamsPort.first, const <String, Object?>{
+          ToolExtensionCapabilities.protocolVersionKey: kExtensionProtocolVersion,
+        });
+      },
+    );
 
     test('ExtensionConnection.spawn throws and cleans up on isolate startup failure', () async {
       final logger = BufferLogger.test();
@@ -279,18 +381,25 @@ void main() {
       'ToolExtensionCapabilities.fromJson eagerly deserializes lists and normalizes platforms',
       () {
         final capabilities = ToolExtensionCapabilities.fromJson(const <String, Object?>{
-          'services': <Object?>['diagnostics', 'config'],
-          'supportedPlatforms': <Object?>['Linux', 'MacOS'],
+          ToolExtensionCapabilities.protocolVersionKey: kExtensionProtocolVersion,
+          ToolExtensionCapabilities.servicesKey: <Object?>['diagnostics', 'config'],
+          ToolExtensionCapabilities.supportedPlatformsKey: <Object?>['Linux', 'MacOS'],
         });
 
+        expect(capabilities.protocolVersion, kExtensionProtocolVersion);
         expect(capabilities.services, const <String>['diagnostics', 'config']);
         expect(capabilities.supportedPlatforms, const <String>{'linux', 'macos'});
         expect(capabilities.supportsHostPlatform('LINUX'), isTrue);
         expect(capabilities.supportsHostPlatform('windows'), isFalse);
+        expect(
+          capabilities.toMap()[ToolExtensionCapabilities.protocolVersionKey],
+          kExtensionProtocolVersion,
+        );
 
         final defaultPlatformsCapabilities = ToolExtensionCapabilities.fromJson(
           const <String, Object?>{
-            'services': <Object?>['diagnostics'],
+            ToolExtensionCapabilities.protocolVersionKey: kExtensionProtocolVersion,
+            ToolExtensionCapabilities.servicesKey: <Object?>['diagnostics'],
           },
         );
         expect(defaultPlatformsCapabilities.supportedPlatforms, isEmpty);
@@ -300,19 +409,40 @@ void main() {
     test('ToolExtensionCapabilities.fromJson throws FormatException on invalid field types', () {
       expect(
         () => ToolExtensionCapabilities.fromJson(const <String, Object?>{
+          ToolExtensionCapabilities.protocolVersionKey: kExtensionProtocolVersion,
           ToolExtensionCapabilities.extensionNameKey: 42,
         }),
         throwsFormatException,
       );
       expect(
         () => ToolExtensionCapabilities.fromJson(const <String, Object?>{
+          ToolExtensionCapabilities.protocolVersionKey: kExtensionProtocolVersion,
           ToolExtensionCapabilities.servicesKey: 'not-a-list',
         }),
         throwsFormatException,
       );
       expect(
         () => ToolExtensionCapabilities.fromJson(const <String, Object?>{
+          ToolExtensionCapabilities.protocolVersionKey: kExtensionProtocolVersion,
           ToolExtensionCapabilities.supportedPlatformsKey: <Object?>[123],
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ToolExtensionCapabilities.fromJson(const <String, Object?>{
+          ToolExtensionCapabilities.servicesKey: <Object?>[],
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ToolExtensionCapabilities.fromJson(const <String, Object?>{
+          ToolExtensionCapabilities.protocolVersionKey: '1',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ToolExtensionCapabilities.fromJson(const <String, Object?>{
+          ToolExtensionCapabilities.protocolVersionKey: 0,
         }),
         throwsFormatException,
       );
@@ -705,6 +835,89 @@ void main() {
           ),
         ),
       );
+    });
+
+    test('IOOverrides stdin override provides empty non-blocking stream and blocks terminal mode mutations', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _protocolHardeningEntryPoint,
+        logger: logger,
+      );
+      addTearDown(connection.dispose);
+
+      expect(await connection.sendRequest('hardening.inspectStdin'), const <String, Object?>{
+        'echoMode': false,
+        'echoNewlineMode': false,
+        'hasTerminal': false,
+        'isEmpty': true,
+        'lineMode': true,
+        'readByteSync': -1,
+        'readLineSync': null,
+        'supportsAnsiEscapes': false,
+      });
+
+      for (final mode in const <String>['echoMode', 'echoNewlineMode', 'lineMode']) {
+        await expectLater(
+          connection.sendRequest(
+            'hardening.mutateStdinMode',
+            params: <String, Object?>{'mode': mode},
+          ),
+          throwsA(
+            isA<json_rpc.RpcException>()
+                .having((json_rpc.RpcException e) => e.code, 'code', error_code.SERVER_ERROR)
+                .having(
+                  (json_rpc.RpcException e) => e.message,
+                  'message',
+                  contains('Tool extensions must not modify stdin terminal settings'),
+                ),
+          ),
+        );
+      }
+    });
+
+    test(
+      'IOOverrides Directory.current guard snapshots working directory and blocks mutation',
+      () async {
+        final logger = BufferLogger.test();
+        final String hostCwdBefore = io.Directory.current.path;
+        final ExtensionConnection connection = await ExtensionConnection.spawn(
+          _cwdSnapshotEntryPoint,
+          logger: logger,
+        );
+        addTearDown(connection.dispose);
+
+        expect(await connection.sendRequest('hardening.getCurrentDir'), '/initial_cwd');
+
+        await expectLater(
+          connection.sendRequest('hardening.setCurrentDir'),
+          throwsA(
+            isA<json_rpc.RpcException>()
+                .having((json_rpc.RpcException e) => e.code, 'code', error_code.SERVER_ERROR)
+                .having(
+                  (json_rpc.RpcException e) => e.message,
+                  'message',
+                  contains('Tool extensions must not modify Directory.current'),
+                ),
+          ),
+        );
+        expect(io.Directory.current.path, hostCwdBefore);
+      },
+    );
+
+    test('extension.shutdown returns acknowledged response', () async {
+      final receivePort = ReceivePort();
+      final Isolate isolate = await Isolate.spawn(_dummyExtensionEntryPoint, receivePort.sendPort);
+      final channel = IsolateChannel<Object?>.connectReceive(receivePort);
+      final peer = json_rpc.Peer.withoutJson(channel);
+      unawaited(peer.listen());
+      addTearDown(() async {
+        receivePort.close();
+        await peer.close();
+        isolate.kill(priority: Isolate.immediate);
+      });
+
+      final Object? response = await peer.sendRequest(ToolExtensionEntryPoint.shutdownMethod);
+      expect(response, const <String, Object?>{'acknowledged': true});
     });
 
     test('ExtensionConnection.dispose sends extension.shutdown and isolates per-service shutdown failures', () async {

@@ -309,7 +309,9 @@ class ExtensionConnection {
 
       logger.printTrace('ExtensionConnection querying extension.getCapabilities...');
       final Object? responseObj = await Future.any<Object?>([
-        peer.sendRequest(ToolExtensionEntryPoint.getCapabilitiesMethod),
+        peer.sendRequest(ToolExtensionEntryPoint.getCapabilitiesMethod, <String, Object?>{
+          ToolExtensionCapabilities.protocolVersionKey: kExtensionProtocolVersion,
+        }),
         errorCompleter.future,
       ]).timeout(timeout);
       if (responseObj is! Map<String, Object?>) {
@@ -324,6 +326,14 @@ class ExtensionConnection {
 
       final String resolvedExtensionName =
           extensionName ?? capabilities.extensionName ?? defaultExtensionName;
+      if (capabilities.protocolVersion > kExtensionProtocolVersion) {
+        throw StateError(
+          'Extension "$resolvedExtensionName" requires tool extension protocol version '
+          '${capabilities.protocolVersion}, but this Flutter SDK only supports up to '
+          'version $kExtensionProtocolVersion. Upgrade Flutter or pin a compatible version '
+          'of "$resolvedExtensionName".',
+        );
+      }
       if (expectedConfig != null) {
         _validateCapabilitiesMatchConfig(
           capabilities,

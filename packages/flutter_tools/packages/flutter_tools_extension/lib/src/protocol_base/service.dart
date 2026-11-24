@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_core/json.dart';
 import 'package:meta/meta.dart';
 
@@ -40,6 +41,7 @@ abstract base class ToolExtensionService {
   ///
   /// Throws a [StateError] if called before this service has been attached to
   /// an active extension peer by `ToolExtensionEntryPoint.run`.
+  @nonVirtual
   void sendNotification(String method, Map<String, Object?> params) {
     final ExtensionNotificationSender? sender = notificationSender;
     if (sender == null) {
@@ -64,17 +66,25 @@ abstract base class ToolExtensionService {
 @immutable
 class ToolExtensionCapabilities {
   /// Creates [ToolExtensionCapabilities] listing supported [services],
-  /// [supportedPlatforms], and optional [extensionName].
+  /// [protocolVersion], [supportedPlatforms], and optional [extensionName].
   const ToolExtensionCapabilities({
     required this.services,
     this.extensionName,
+    this.protocolVersion = kExtensionProtocolVersion,
     this.supportedPlatforms = const <String>{'linux', 'macos', 'windows'},
-  });
+  }) : assert(protocolVersion >= 1, 'protocolVersion must be >= 1');
 
   /// Deserializes [ToolExtensionCapabilities] from a JSON map payload.
   factory ToolExtensionCapabilities.fromJson(Map<String, Object?> json) {
+    final int protocolVersion = json.requiredField<int>(protocolVersionKey);
+    if (protocolVersion < 1) {
+      throw FormatException(
+        'Invalid "$protocolVersionKey": expected a positive integer, got $protocolVersion.',
+      );
+    }
     return ToolExtensionCapabilities(
       extensionName: json.nullableField<String>(extensionNameKey),
+      protocolVersion: protocolVersion,
       services: json.stringIterable(servicesKey).toList(),
       supportedPlatforms: json
           .stringIterable(supportedPlatformsKey)
@@ -85,6 +95,9 @@ class ToolExtensionCapabilities {
 
   /// Map key for [extensionName].
   static const String extensionNameKey = 'extensionName';
+
+  /// Map key for [protocolVersion].
+  static const String protocolVersionKey = 'protocolVersion';
 
   /// Map key for [services].
   static const String servicesKey = 'services';
@@ -97,6 +110,9 @@ class ToolExtensionCapabilities {
   /// When provided, this should match the extension's package name. The host
   /// tool uses this identifier in error messages and artifact cache paths.
   final String? extensionName;
+
+  /// The JSON-RPC wire protocol version supported by this extension.
+  final int protocolVersion;
 
   /// The list of service namespace identifiers supported by the extension.
   final List<String> services;
@@ -112,6 +128,7 @@ class ToolExtensionCapabilities {
   /// Serializes capabilities to a map payload.
   Map<String, Object?> toMap() => <String, Object?>{
     extensionNameKey: ?extensionName,
+    protocolVersionKey: protocolVersion,
     servicesKey: services,
     supportedPlatformsKey: supportedPlatforms.toList(),
   };
