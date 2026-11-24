@@ -7,7 +7,6 @@ import 'package:package_config/package_config_types.dart';
 
 import '../asset.dart';
 import '../base/common.dart';
-import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -38,6 +37,7 @@ import '../web/web_options.dart';
 /// this directory, *relative to the package root*, the files will be executed
 /// as Integration Tests.
 const _kIntegrationTestDirectory = 'integration_test';
+const _kUnitTestAssetsDirectory = 'unit_test_assets';
 
 /// A command to run tests.
 ///
@@ -579,10 +579,15 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
                 toolContext: toolContext,
               ) ??
               (nativeAssetsManifest: null, flutterHookResult: null));
+    final FlutterProject assetProject = _resolveAssetProject(
+      flutterProject,
+      buildInfo.packageConfig,
+    );
     String? testAssetPath;
     if (buildTestAssets) {
       await _buildTestAsset(
         flavor: buildInfo.flavor,
+        flutterProject: assetProject,
         impellerStatus: debuggingOptions.enableImpeller,
         buildMode: debuggingOptions.buildInfo.mode,
         packageConfigPath: buildInfo.packageConfigPath,
@@ -590,7 +595,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
     if (buildTestAssets || nativeAssetsManifest != null) {
-      testAssetPath = fs.path.join(flutterProject.directory.path, 'build', 'unit_test_assets');
+      testAssetPath = assetProject.buildDirectory.childDirectory(_kUnitTestAssetsDirectory).path;
     }
     if (nativeAssetsManifest != null) {
       final Directory testAssetDirectory = fs.directory(testAssetPath);
@@ -834,16 +839,45 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
   }
 
+  /// Returns the deepest package in [packageConfig] under [rootProject] that
+  /// encloses every path in [_testFileUris], or [rootProject] if the tests do
+  /// not all belong to a single nested package.
+  FlutterProject _resolveAssetProject(FlutterProject rootProject, PackageConfig packageConfig) {
+    if (_testFileUris.isEmpty) {
+      return rootProject;
+    }
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
+    final String rootDir = fs.path.normalize(rootProject.directory.absolute.path);
+    final testPaths = <String>[for (final Uri uri in _testFileUris) fs.path.fromUri(uri)];
+
+    String? bestPackageDir;
+    for (final Package package in packageConfig.packages) {
+      final String packageDir = fs.path.normalize(fs.path.fromUri(package.root));
+      if (!fs.path.isWithin(rootDir, packageDir)) {
+        continue;
+      }
+      if ((bestPackageDir == null || fs.path.isWithin(bestPackageDir, packageDir)) &&
+          testPaths.every((String path) => fs.path.isWithin(packageDir, path))) {
+        bestPackageDir = packageDir;
+      }
+    }
+
+    return bestPackageDir == null
+        ? rootProject
+        : projectFactory.fromDirectory(fs.directory(bestPackageDir));
+  }
+
   Future<void> _buildTestAsset({
     required String? flavor,
+    required FlutterProject flutterProject,
     required ImpellerStatus impellerStatus,
     required BuildMode buildMode,
     required String packageConfigPath,
     FlutterHookResult? flutterHookResult,
   }) async {
-    final ToolContext(:Config config, :FileSystem fs) = toolContext;
     final AssetBundle assetBundle = _assetBundleFactory.createBundle();
     final int build = await assetBundle.build(
+      manifestPath: flutterProject.pubspecFile.path,
       flutterHookResult: flutterHookResult,
       packageConfigPath: packageConfigPath,
       flavor: flavor,
@@ -853,20 +887,20 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }
-    if (await _needsRebuild(assetBundle.entries, flavor, flutterHookResult)) {
+    if (await _needsRebuild(assetBundle.entries, flavor, flutterHookResult, flutterProject)) {
       await writeBundle(
-        fs.directory(fs.path.join(getBuildDirectory(config, fs), 'unit_test_assets')),
+        flutterProject.buildDirectory.childDirectory(_kUnitTestAssetsDirectory),
         assetBundle.entries,
         buildMode: buildMode,
         impellerStatus: impellerStatus,
-        projectDir: fs.currentDirectory,
+        projectDir: flutterProject.directory,
         targetPlatform: TargetPlatform.tester,
         toolContext: toolContext,
       );
 
-      final File cachedFlavorFile = fs.file(
-        fs.path.join(getBuildDirectory(config, fs), 'test_cache', 'flavor.txt'),
-      );
+      final File cachedFlavorFile = flutterProject.buildDirectory
+          .childDirectory('test_cache')
+          .childFile('flavor.txt');
       if (cachedFlavorFile.existsSync()) {
         await cachedFlavorFile.delete();
       }
@@ -881,25 +915,25 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     Map<String, AssetBundleEntry> entries,
     String? flavor,
     FlutterHookResult? flutterHookResult,
+    FlutterProject flutterProject,
   ) async {
-    final ToolContext(:Config config, :FileSystem fs) = toolContext;
-    final String unitTestAssetsDir = fs.path.join(
-      getBuildDirectory(config, fs),
-      'unit_test_assets',
+    final FileSystem fs = toolContext.fs;
+    final Directory unitTestAssetsDir = flutterProject.buildDirectory.childDirectory(
+      _kUnitTestAssetsDirectory,
     );
-    final File manifest = fs.file(fs.path.join(unitTestAssetsDir, 'AssetManifest.bin'));
+    final File manifest = unitTestAssetsDir.childFile('AssetManifest.bin');
     if (!manifest.existsSync()) {
       return true;
     }
     final DateTime lastModified = manifest.lastModifiedSync();
-    final File pub = fs.file('pubspec.yaml');
+    final File pub = flutterProject.pubspecFile;
     if (pub.existsSync() && pub.lastModifiedSync().isAfter(lastModified)) {
       return true;
     }
 
     for (final MapEntry(key: String assetPath, value: AssetBundleEntry assetEntry)
         in entries.entries) {
-      final File file = fs.file(fs.path.join(unitTestAssetsDir, assetPath));
+      final File file = unitTestAssetsDir.childFile(assetPath);
       if (!file.existsSync()) {
         return true;
       }
@@ -927,9 +961,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       }
     }
 
-    final File cachedFlavorFile = fs.file(
-      fs.path.join(getBuildDirectory(config, fs), 'test_cache', 'flavor.txt'),
-    );
+    final File cachedFlavorFile = flutterProject.buildDirectory
+        .childDirectory('test_cache')
+        .childFile('flavor.txt');
     final String? cachedFlavor = cachedFlavorFile.existsSync()
         ? cachedFlavorFile.readAsStringSync()
         : null;

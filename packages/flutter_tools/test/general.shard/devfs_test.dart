@@ -25,7 +25,6 @@ import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -1325,7 +1324,6 @@ class FakeBundle extends AssetBundle {
   Future<int> build({
     FlutterHookResult? flutterHookResult,
     String manifestPath = defaultManifestPath,
-    FlutterProject? flutterProject,
     String? assetDirPath,
     String? packageConfigPath,
     bool deferredComponentsEnabled = false,

@@ -188,7 +188,6 @@ abstract class AssetBundle {
   Future<int> build({
     FlutterHookResult? flutterHookResult,
     String manifestPath = defaultManifestPath,
-    FlutterProject? flutterProject,
     required String packageConfigPath,
     bool deferredComponentsEnabled = false,
     required TargetPlatform targetPlatform,
