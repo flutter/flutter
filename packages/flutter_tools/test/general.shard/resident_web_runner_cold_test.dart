@@ -24,7 +24,7 @@ import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/template.dart';
-import 'package:flutter_tools/src/vmservice.dart';
+import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
@@ -331,11 +331,18 @@ class FakeWebDevice extends Fake implements Device {
   }
 }
 
-class FakeFlutterDevice extends Fake implements FlutterDevice {
-  FakeFlutterDevice(this.device);
+class FakeFlutterDevice extends WebCapabilityFlutterDevice {
+  FakeFlutterDevice(FakeWebDevice super.device)
+    : super(
+        buildInfo: BuildInfo.release,
+        developmentShaderCompiler: const FakeShaderCompiler(),
+        generator: null,
+        targetPlatform: TargetPlatform.web_javascript,
+        toolContext: FakeToolContext(),
+      );
 
   @override
-  final FakeWebDevice device;
+  FakeWebDevice get device => super.device! as FakeWebDevice;
 
   DevFS? _devFS;
 
@@ -344,12 +351,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   set devFS(DevFS? value) {}
-
-  @override
-  FlutterVmService? vmService;
-
-  @override
-  final DevelopmentShaderCompiler developmentShaderCompiler = const FakeShaderCompiler();
 
   @override
   Future<void> handleHotRestart() async {}

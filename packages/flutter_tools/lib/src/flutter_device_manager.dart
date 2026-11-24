@@ -22,6 +22,7 @@ import 'build_system/build_targets.dart';
 import 'cache.dart';
 import 'context/apple_context.dart';
 import 'context/tool_context.dart';
+import 'context/web_context.dart';
 import 'custom_devices/custom_device.dart';
 import 'device.dart';
 import 'experimental/extension_build_manager.dart';
@@ -58,6 +59,7 @@ class FlutterDeviceManager extends DeviceManager {
     required this._mdnsVmServiceDiscovery,
     required this._templateRenderer,
     required this._toolContext,
+    required this._webContext,
     required this._windowsWorkflow,
   }) : super(fileSystem: _toolContext.fs, logger: _toolContext.logger);
 
@@ -76,6 +78,7 @@ class FlutterDeviceManager extends DeviceManager {
   final MDnsVmServiceDiscovery _mdnsVmServiceDiscovery;
   final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
+  final WebContext _webContext;
   final WindowsWorkflow _windowsWorkflow;
 
   @override
@@ -145,9 +148,10 @@ class FlutterDeviceManager extends DeviceManager {
       WebDevices(
         featureFlags: _featureFlags,
         fileSystem: fs,
+        logger: logger,
         platform: platform,
         processManager: processManager,
-        logger: logger,
+        webContext: _webContext,
       ),
       CustomDevices(
         featureFlags: _featureFlags,
