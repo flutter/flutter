@@ -5,7 +5,11 @@
 // Shared body of the UberSDF shaders, included by `uber_sdf.frag` and
 // `uber_sdf_ssbo.frag`. Each entrypoint supplies only `getGradientColor()`.
 
-precision mediump float;
+// highp by default: distances and gradient parameters are small differences of
+// large local coordinates, which mediump (fp16 on many mobile GPUs) can't
+// represent. Colors, enums, antialiasing math and the oval solver's first
+// Newton steps are marked mediump to save uniform registers.
+precision highp float;
 
 #include <impeller/color.glsl>
 #include <impeller/constants.glsl>
@@ -31,7 +35,7 @@ uniform FragInfo {
   // ===========================================================================
 
   /// The RGBA color of the shape (or paint opacity in color.a for gradients).
-  vec4 color;
+  mediump vec4 color;
   /// Corner radii for rounded rects (top-left, top-right, bottom-left,
   /// bottom-right).
   ///
@@ -50,7 +54,7 @@ uniform FragInfo {
   /// The half-dimensions of the shape (half-width, half-height).
   vec2 size;
   /// The size of a device pixel in local coordinates.
-  vec2 pixel_size;
+  mediump vec2 pixel_size;
 
   // --- Gradient Parameters ---
   /// The linear gradient's delta vector (end - start) in local coordinates.
@@ -59,7 +63,7 @@ uniform FragInfo {
 
   // --- Superellipse Parameters ---
   /// The exponent degree (n_x, n_y) of the superellipse curvature.
-  vec2 superellipse_degree;
+  mediump vec2 superellipse_degree;
   /// The center of the corner transition circle for the top octant of a
   /// rounded superellipse.
   vec2 circle_center_top;
@@ -78,23 +82,23 @@ uniform FragInfo {
   ///   2: Oval
   ///   3: RoundRect
   ///   4: Rounded Superellipse (must have uniform circular corner radii)
-  float type;
+  mediump float type;
   /// The type of color source:
   ///   0: Solid color
   ///   1: Linear gradient
   ///   2: Radial gradient
-  float color_source_type;
+  mediump float color_source_type;
 
   // --- Stroke Parameters ---
   /// Whether the shape is stroked (1.0) or filled (0.0).
-  float stroked;
+  mediump float stroked;
   /// The width of the stroke.
   float stroke_width;
   /// The join style for the stroke:
   ///   0: Miter
   ///   1: Bevel
   ///   2: Round
-  float stroke_join;
+  mediump float stroke_join;
 
   // --- Gradient Parameters ---
   /// The tile mode for gradient sampling:
@@ -102,7 +106,7 @@ uniform FragInfo {
   ///   1: Repeat
   ///   2: Mirror
   ///   3: Decal
-  float tile_mode;
+  mediump float tile_mode;
   /// Inverse gradient length:
   ///   - Linear gradient: 1.0 / dot(delta, delta)
   ///   - Radial gradient: 1.0 / radius
@@ -115,15 +119,15 @@ uniform FragInfo {
   /// coordinates along the gradient ramp (x axis).
   ///
   /// Only used by the gradient ramp texture variant.
-  float half_texel;
+  mediump float half_texel;
   /// The number of gradient stops in the color data storage buffer.
   ///
   /// Only used by the storage buffer variant.
-  float colors_length;
+  mediump float colors_length;
 }
 frag_info;
 
-out vec4 frag_color;
+out mediump vec4 frag_color;
 
 // The fragment position in local coordinates, relative to the shape's center
 // (see `uber_sdf.vert`).
@@ -141,8 +145,8 @@ highp in vec2 v_gradient_position;
 vec4 getGradientColor(float t);
 
 // Gets the color to use at v_position based on frag_info properties.
-vec4 getColor() {
-  vec4 color;
+mediump vec4 getColor() {
+  mediump vec4 color;
   if (frag_info.color_source_type < 0.5) {
     // Solid color
     color = frag_info.color;
@@ -160,7 +164,7 @@ vec4 getColor() {
       // Radial gradient
       t = length(gradient_position) * frag_info.inv_gradient_length;
     }
-    vec4 gradient_color = getGradientColor(t);
+    mediump vec4 gradient_color = getGradientColor(t);
     color = vec4(gradient_color.rgb, gradient_color.a * frag_info.color.a);
   }
   return color;
@@ -175,18 +179,41 @@ float distanceFromRect(vec2 p, vec2 b) {
   return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
 }
 
-float distanceFromOval(vec2 p, vec2 ab) {
-  p = abs(p);
-  vec2 q = ab * (p - ab);
-  float w = (q.x < q.y) ? 1.570796327 : 0.0;
-  for (int i = 0; i < 5; i++) {
-    vec2 cs = vec2(cos(w), sin(w));
-    vec2 u = ab * vec2(cs.x, cs.y);
-    vec2 v = ab * vec2(-cs.y, cs.x);
+float distanceFromOval(vec2 position, vec2 semi_axes) {
+  position = abs(position);
+
+  // Find the angle `w` of the closest point on the ellipse with Newton's
+  // method. The iteration is scale invariant, so the first steps run in
+  // mediump on coordinates normalized by the larger semi-axis, where their
+  // intermediate products can't overflow.
+  float scale = 1.0 / max(semi_axes.x, semi_axes.y);
+  vec2 p_normalized = position * scale;
+  vec2 ab_normalized = semi_axes * scale;
+  mediump vec2 p = p_normalized;
+  mediump vec2 ab = ab_normalized;
+  mediump vec2 q = ab * (p - ab);
+  mediump float w = (q.x < q.y) ? 1.570796327 : 0.0;
+  for (int i = 0; i < 4; i++) {
+    mediump vec2 cs = vec2(cos(w), sin(w));
+    mediump vec2 u = ab * vec2(cs.x, cs.y);
+    mediump vec2 v = ab * vec2(-cs.y, cs.x);
     w = w + dot(p - u, v) / (dot(p - u, u) + dot(v, v));
   }
-  float d = length(p - ab * vec2(cos(w), sin(w)));
-  return (dot(p / ab, p / ab) > 1.0) ? d : -d;
+
+  // A final Newton step in highp refines the angle to full precision.
+  float hw = w;
+  vec2 hcs = vec2(cos(hw), sin(hw));
+  vec2 hu = ab_normalized * hcs;
+  vec2 hv = ab_normalized * vec2(-hcs.y, hcs.x);
+  hw = hw +
+       dot(p_normalized - hu, hv) / (dot(p_normalized - hu, hu) + dot(hv, hv));
+
+  float d = length(position - semi_axes * vec2(cos(hw), sin(hw)));
+  vec2 scaled_position = position * semi_axes.yx;
+  float axes_product = semi_axes.x * semi_axes.y;
+  return (dot(scaled_position, scaled_position) > axes_product * axes_product)
+             ? d
+             : -d;
 }
 
 float distanceFromRoundedRect(in vec2 p, in vec2 b, in vec4 r) {
@@ -362,32 +389,33 @@ vec2 strokedSDF(vec2 p) {
 }
 
 // Converts linear coverage alpha to perceptual alpha.
-float gammaCorrectedAlpha(float alpha, vec3 foreground_rgb) {
+mediump float gammaCorrectedAlpha(mediump float alpha,
+                                  mediump vec3 foreground_rgb) {
   // Gamma corrected alpha used for dark colors.
   // Fast approximation for `1.0 - pow(1.0 - alpha, 1.0 / 2.2)`.
-  float alpha_dark = 1.0 - sqrt(1.0 - alpha);
+  mediump float alpha_dark = 1.0 - sqrt(1.0 - alpha);
 
   // Gamma corrected alpha used for light colors.
   // Fast approximation for `pow(alpha, 1.0 / 2.2)`.
-  float alpha_light = sqrt(alpha);
+  mediump float alpha_light = sqrt(alpha);
 
   // Interpolate between the dark and light gamma corrected alphas based on the
   // foreground luma.
-  float luma = dot(foreground_rgb, vec3(0.2126, 0.7152, 0.0722));
+  mediump float luma = dot(foreground_rgb, vec3(0.2126, 0.7152, 0.0722));
   return mix(alpha_dark, alpha_light, luma);
 }
 
 void main() {
-  vec4 color = getColor();
+  mediump vec4 color = getColor();
 
   vec2 p = v_position;
 
   vec2 sdf_and_pixel_size =
       (frag_info.stroked < 0.5) ? filledSDF(p) : strokedSDF(p);
-  float sdf = sdf_and_pixel_size.x;
-  float pixel_size = sdf_and_pixel_size.y;
+  mediump float sdf = sdf_and_pixel_size.x;
+  mediump float pixel_size = sdf_and_pixel_size.y;
 
-  float alpha = SDFAlpha(sdf, pixel_size, aa_pixels);
+  mediump float alpha = SDFAlpha(sdf, pixel_size, aa_pixels);
   // Clamp alpha in case floating point precision errors cause it to be outside
   // [0.0, 1.0].
   alpha = clamp(alpha, 0.0, 1.0);

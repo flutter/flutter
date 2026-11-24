@@ -58,14 +58,24 @@ TEST_F(FlSubsurfaceTest, EmptyInputRegion) {
   ASSERT_NE(subsurface, nullptr);
 }
 
-// The subsurface is synchronized with the parent surface, so its contents stay
-// in step with the GTK window.
-TEST_F(FlSubsurfaceTest, Synchronized) {
+TEST_F(FlSubsurfaceTest, SetSync) {
+  g_autoptr(FlSubsurface) subsurface = CreateSubsurface();
+  ASSERT_NE(subsurface, nullptr);
+
   EXPECT_CALL(wayland, Request(::testing::StrEq("wl_subsurface"),
                                WL_SUBSURFACE_SET_SYNC));
 
+  fl_subsurface_set_sync(subsurface);
+}
+
+TEST_F(FlSubsurfaceTest, SetDesync) {
   g_autoptr(FlSubsurface) subsurface = CreateSubsurface();
   ASSERT_NE(subsurface, nullptr);
+
+  EXPECT_CALL(wayland, Request(::testing::StrEq("wl_subsurface"),
+                               WL_SUBSURFACE_SET_DESYNC));
+
+  fl_subsurface_set_desync(subsurface);
 }
 
 TEST_F(FlSubsurfaceTest, SetPosition) {

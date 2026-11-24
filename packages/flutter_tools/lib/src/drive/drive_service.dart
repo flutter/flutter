@@ -23,6 +23,7 @@ import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../device.dart';
+import '../features.dart' show FeatureFlags;
 import '../hook_runner.dart' show FlutterHookRunner;
 import '../resident_runner.dart';
 import '../version.dart';
@@ -39,6 +40,7 @@ class FlutterDriverFactory {
     required this._buildTargets,
     required this._dartSdkPath,
     required this._devtoolsLauncher,
+    required this._featureFlags,
     required this._toolContext,
     this._flutterHookRunner,
     this._webRunnerFactory,
@@ -51,6 +53,7 @@ class FlutterDriverFactory {
   final BuildTargets _buildTargets;
   final String _dartSdkPath;
   final DevtoolsLauncher _devtoolsLauncher;
+  final FeatureFlags _featureFlags;
   final FlutterHookRunner? _flutterHookRunner;
   final ToolContext _toolContext;
   final WebRunnerFactory? _webRunnerFactory;
@@ -65,6 +68,7 @@ class FlutterDriverFactory {
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
         dartSdkPath: _dartSdkPath,
+        featureFlags: _featureFlags,
         flutterHookRunner: _flutterHookRunner,
         toolContext: _toolContext,
         webRunnerFactory: _webRunnerFactory,
