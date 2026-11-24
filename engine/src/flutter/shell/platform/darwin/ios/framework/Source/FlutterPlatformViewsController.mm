@@ -46,7 +46,7 @@ static void ResetAnchor(CALayer* layer) {
 // The platform view's |EmbedderViewSlice| keyed off the view id, which contains any subsequent
 // operation until the next platform view or the end of the last leaf node in the layer tree.
 //
-// The Slices are deleted by the PlatformViewsController.reset().
+// The Slices are deleted by `resetFrameState`.
 @property(nonatomic, readonly)
     std::unordered_map<int64_t, std::unique_ptr<flutter::EmbedderViewSlice>>& slices;
 
@@ -666,13 +666,10 @@ static void ResetAnchor(CALayer* layer) {
 }
 
 - (void)reset {
-  // `PlatformViewIOS::OnPreEngineRestart` calls this on the platform thread during hot restart.
-  // _platformViews must only be modified on the platform thread, and any operations that
-  // read or modify platform views should occur there.
-  std::vector<int64_t> compositionOrder = self.compositionOrder;
+  // `platformViews` must only be modified on the platform thread.
   [self.taskRunner runNowOrPostTask:^{
-    for (int64_t viewId : compositionOrder) {
-      [self.platformViews[@(viewId)].rootView removeFromSuperview];
+    for (FlutterPlatformViewInfo* info in self.platformViews.objectEnumerator) {
+      [info.rootView removeFromSuperview];
     }
     [self.platformViews removeAllObjects];
     [_previousCompositionOrder removeAllObjects];
@@ -682,13 +679,6 @@ static void ResetAnchor(CALayer* layer) {
     // ID after the hot restart.
     [self.viewsToDispose removeAllObjects];
   }];
-
-  // The state below is otherwise only modified on the raster thread.
-  self.compositionOrder.clear();
-  self.slices.clear();
-  self.currentCompositionParams.clear();
-  self.layerPool->RecycleLayers();
-  self.visitedPlatformViews.clear();
 }
 
 - (void)submitFrame:(std::unique_ptr<flutter::SurfaceFrame>)background_frame
