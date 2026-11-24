@@ -219,8 +219,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
 }
 
 /// A guideline which enforces that all nodes with a tap or long press action,
-/// and all link nodes that have a URL, also have a label. A link node can also
-/// take its label from a descendant.
+/// and all link nodes that have a URL, also have a label.
 ///
 /// See also:
 ///  * [AccessibilityGuideline], which provides a general overview of
@@ -264,9 +263,7 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
     if (!isTappable && !isLink) {
       return result;
     }
-    if (data.label.isEmpty &&
-        data.tooltip.isEmpty &&
-        (isTappable || !_hasLabeledDescendant(node))) {
+    if (data.label.isEmpty && data.tooltip.isEmpty) {
       final kind = isTappable ? 'tappable' : 'link';
       result += Evaluation.fail(
         '$node: expected $kind node to have semantic label, '
@@ -274,16 +271,6 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
       );
     }
     return result;
-  }
-
-  static bool _hasLabeledDescendant(SemanticsNode node) {
-    var found = false;
-    node.visitChildren((SemanticsNode child) {
-      final SemanticsData data = child.getSemanticsData();
-      found = data.label.isNotEmpty || data.tooltip.isNotEmpty || _hasLabeledDescendant(child);
-      return !found;
-    });
-    return found;
   }
 }
 
@@ -833,8 +820,7 @@ const AccessibilityGuideline iOSTapTargetGuideline = MinimumTapTargetGuideline(
 const AccessibilityGuideline textContrastGuideline = MinimumTextContrastGuideline();
 
 /// A guideline which enforces that all nodes with a tap or long press action,
-/// and all link nodes that have a URL, also have a label. A link node can also
-/// take its label from a descendant.
+/// and all link nodes that have a URL, also have a label.
 ///
 ///  * [AccessibilityGuideline], which provides a general overview of
 ///    accessibility guidelines and how to use them.

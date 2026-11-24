@@ -40,7 +40,8 @@ enum AccessibilityEvaluationType {
   /// Evaluated by [MinimumTapTargetEvaluation].
   minimumTapTarget,
 
-  /// Enforces that all nodes with a tap or long press action also have a label.
+  /// Enforces that all nodes with a tap or long press action, and all link
+  /// nodes that have a URL, also have a label.
   ///
   /// Evaluated by [LabeledTapTargetEvaluation].
   labeledTapTarget,
@@ -227,8 +228,7 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
 /// {@macro flutter.widgets.accessibility_evaluations.internal}
 ///
 /// An evaluation which enforces that all nodes with a tap or long press action,
-/// and all link nodes that have a URL, also have a label. A link node can also
-/// take its label from a descendant.
+/// and all link nodes that have a URL, also have a label.
 @internal
 class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
   const LabeledTapTargetEvaluation();
@@ -271,9 +271,7 @@ class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
     if (!isTappable && !isLink) {
       return violations;
     }
-    if (data.label.isEmpty &&
-        data.tooltip.isEmpty &&
-        (isTappable || !_hasLabeledDescendant(node))) {
+    if (data.label.isEmpty && data.tooltip.isEmpty) {
       final kind = isTappable ? 'tappable' : 'link';
       violations.add(
         Violation(
@@ -284,16 +282,6 @@ class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
       );
     }
     return violations;
-  }
-
-  static bool _hasLabeledDescendant(SemanticsNode node) {
-    var found = false;
-    node.visitChildren((SemanticsNode child) {
-      final SemanticsData data = child.getSemanticsData();
-      found = data.label.isNotEmpty || data.tooltip.isNotEmpty || _hasLabeledDescendant(child);
-      return !found;
-    });
-    return found;
   }
 }
 

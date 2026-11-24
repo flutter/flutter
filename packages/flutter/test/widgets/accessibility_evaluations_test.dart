@@ -133,7 +133,9 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('passes when the link label is on an unmerged child', (WidgetTester tester) async {
+    testWidgets('fails when the link label is only on an unmerged child', (
+      WidgetTester tester,
+    ) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         TestWidgetsApp(
@@ -146,6 +148,24 @@ void main() {
               label: 'Flutter',
               child: const SizedBox.square(dimension: 48.0),
             ),
+          ),
+        ),
+      );
+      final EvaluationResult result = await evaluation.evaluate(tester.binding);
+      expect(result.violations, hasLength(1));
+      expect(result.violations.first.reason, contains('expected link node to have semantic label'));
+      handle.dispose();
+    });
+
+    testWidgets('passes when the link label is merged from a child', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Semantics(
+            container: true,
+            link: true,
+            linkUrl: Uri.parse('https://flutter.dev'),
+            child: Semantics(label: 'Flutter', child: const SizedBox.square(dimension: 48.0)),
           ),
         ),
       );
