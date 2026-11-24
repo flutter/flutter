@@ -49,11 +49,14 @@ class SurfacePool {
 
   ~SurfacePool();
 
-  // Gets a layer from the pool if available, or allocates a new one. If
-  // |TakeLayers| left stale Java overlay surfaces pending destruction, flushes
-  // them first via `jni_facade` (requiring the platform thread whenever
-  // |HasPendingDestroy| is true or a new/resized HC layer must be created).
-  // Finally, it marks the layer as used. That is, it increments
+  // Gets a layer from the pool if available, or allocates a new one. For legacy
+  // HC (`use_new_surface_methods_ == false`), if |TakeLayers| left stale Java
+  // overlay surfaces pending destruction, flushes them first via `jni_facade`
+  // (requiring the platform thread whenever |HasPendingDestroy| is true or a
+  // new/resized legacy HC layer must be created). For HCPP
+  // (`use_new_surface_methods_ == true`), overlay creation and resizing may run
+  // on the raster thread, and nullptr is returned without caching if overlay
+  // creation fails. Finally, it marks the layer as used by incrementing
   // `available_layer_index_`.
   std::shared_ptr<OverlayLayer> GetLayer(
       GrDirectContext* gr_context,

@@ -6,6 +6,8 @@
 
 #include <utility>
 
+#include "flutter/fml/logging.h"
+
 namespace flutter {
 
 OverlayLayer::OverlayLayer(int id,
@@ -60,23 +62,62 @@ std::shared_ptr<OverlayLayer> SurfacePool::GetLayer(
 
     std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata> java_metadata =
         use_new_surface_methods_
-            ? jni_facade->createOverlaySurface2()
+            ? jni_facade->createOverlaySurface2(requested_frame_size_.width,
+                                                requested_frame_size_.height)
             : jni_facade->FlutterViewCreateOverlaySurface();
 
-    FML_CHECK(java_metadata->window);
-    android_surface->SetNativeWindow(java_metadata->window, jni_facade);
-    android_surface->SetupImpellerSurface();
+    if (use_new_surface_methods_) {
+      if (!java_metadata || !java_metadata->window ||
+          (!java_metadata->window->IsValid() &&
+           !java_metadata->window->IsFakeWindow())) {
+        FML_LOG(WARNING)
+            << "Could not create overlay surface: invalid native window.";
+        return nullptr;
+      }
+      if (!android_surface->SetNativeWindow(java_metadata->window,
+                                            jni_facade)) {
+        FML_LOG(WARNING) << "Could not set native window on overlay surface.";
+        return nullptr;
+      }
+      android_surface->SetupImpellerSurface();
 
-    std::unique_ptr<Surface> surface =
-        android_surface->CreateGPUSurface(gr_context);
+      std::unique_ptr<Surface> surface =
+          android_surface->CreateGPUSurface(gr_context);
+      if (!surface) {
+        FML_LOG(WARNING) << "Could not create GPU surface for overlay.";
+        return nullptr;
+      }
+      // Run any fallback resize only after CreateGPUSurface() returns non-null
+      // so AndroidSurfaceDynamicImpeller has initialized its inner surface and
+      // swapchain.
+      if (!requested_frame_size_.IsEmpty() &&
+          java_metadata->window->GetSize() != requested_frame_size_) {
+        android_surface->OnScreenSurfaceResize(requested_frame_size_);
+      }
 
-    std::shared_ptr<OverlayLayer> layer =
-        std::make_shared<OverlayLayer>(java_metadata->id,           //
-                                       std::move(android_surface),  //
-                                       std::move(surface)           //
-        );
-    layer->gr_context_key = gr_context_key;
-    layers_.push_back(layer);
+      std::shared_ptr<OverlayLayer> layer =
+          std::make_shared<OverlayLayer>(java_metadata->id,           //
+                                         std::move(android_surface),  //
+                                         std::move(surface)           //
+          );
+      layer->gr_context_key = gr_context_key;
+      layers_.push_back(layer);
+    } else {
+      FML_CHECK(java_metadata && java_metadata->window);
+      android_surface->SetNativeWindow(java_metadata->window, jni_facade);
+      android_surface->SetupImpellerSurface();
+
+      std::unique_ptr<Surface> surface =
+          android_surface->CreateGPUSurface(gr_context);
+
+      std::shared_ptr<OverlayLayer> layer =
+          std::make_shared<OverlayLayer>(java_metadata->id,           //
+                                         std::move(android_surface),  //
+                                         std::move(surface)           //
+          );
+      layer->gr_context_key = gr_context_key;
+      layers_.push_back(layer);
+    }
   }
 
   std::shared_ptr<OverlayLayer> layer = layers_[available_layer_index_];
@@ -171,6 +212,7 @@ void SurfacePool::SetFrameSize(DlISize frame_size) {
 }
 
 void SurfacePool::ResetLayers() {
+  std::lock_guard lock(mutex_);
   available_layer_index_ = 0;
 }
 

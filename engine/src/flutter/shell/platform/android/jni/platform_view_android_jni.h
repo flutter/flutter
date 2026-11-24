@@ -262,8 +262,14 @@ class PlatformViewAndroidJNI {
 
   virtual void swapTransaction() = 0;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Creates the HCPP overlay surface with the requested buffer
+  ///             size in physical pixels.
+  ///
+  /// @note       May be called from the raster thread or the platform thread.
+  ///
   virtual std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>
-  createOverlaySurface2() = 0;
+  createOverlaySurface2(int32_t width, int32_t height) = 0;
 
   virtual void destroyOverlaySurface2() = 0;
 

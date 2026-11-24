@@ -85,7 +85,7 @@ static jfieldID g_jni_shell_holder_field = nullptr;
   V(g_seal_frame_transactions_method, sealFrameTransactions, "()V")           \
   V(g_swap_transaction_method, swapTransactions, "()V")                       \
   V(g_create_overlay_surface2_method, createOverlaySurface2,                  \
-    "()Lio/flutter/embedding/engine/FlutterOverlaySurface;")                  \
+    "(II)Lio/flutter/embedding/engine/FlutterOverlaySurface;")                \
   V(g_destroy_overlay_surface2_method, destroyOverlaySurface2, "()V")         \
   V(g_on_display_platform_view2_method, onDisplayPlatformView2,               \
     "(IIIIIIILio/flutter/embedding/engine/mutatorsstack/"                     \
@@ -2157,7 +2157,8 @@ void PlatformViewAndroidJNIImpl::swapTransaction() {
 }
 
 std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>
-PlatformViewAndroidJNIImpl::createOverlaySurface2() {
+PlatformViewAndroidJNIImpl::createOverlaySurface2(int32_t width,
+                                                  int32_t height) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
 
   auto java_object = java_object_.get(env);
@@ -2166,8 +2167,9 @@ PlatformViewAndroidJNIImpl::createOverlaySurface2() {
   }
 
   fml::jni::ScopedJavaLocalRef<jobject> overlay(
-      env, env->CallObjectMethod(java_object.obj(),
-                                 g_create_overlay_surface2_method));
+      env,
+      env->CallObjectMethod(java_object.obj(), g_create_overlay_surface2_method,
+                            width, height));
   FML_CHECK(fml::jni::CheckException(env));
 
   if (overlay.is_null()) {
@@ -2178,11 +2180,14 @@ PlatformViewAndroidJNIImpl::createOverlaySurface2() {
   jint overlay_id =
       env->CallIntMethod(overlay.obj(), g_overlay_surface_id_method);
 
-  jobject overlay_surface =
-      env->CallObjectMethod(overlay.obj(), g_overlay_surface_surface_method);
+  fml::jni::ScopedJavaLocalRef<jobject> overlay_surface(
+      env,
+      env->CallObjectMethod(overlay.obj(), g_overlay_surface_surface_method));
 
   auto overlay_window = fml::MakeRefCounted<AndroidNativeWindow>(
-      ANativeWindow_fromSurface(env, overlay_surface));
+      overlay_surface.is_null()
+          ? nullptr
+          : ANativeWindow_fromSurface(env, overlay_surface.obj()));
 
   return std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
       overlay_id, std::move(overlay_window));
