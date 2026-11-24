@@ -213,7 +213,7 @@ class PictureLayer extends Layer {
   PictureLayer(this.picture, this.offset, this.isComplex, this.willChange);
 
   /// The picture to paint into the canvas.
-  final LayerPicture picture;
+  final EnginePicture picture;
 
   /// The offset at which to paint the picture.
   final ui.Offset offset;

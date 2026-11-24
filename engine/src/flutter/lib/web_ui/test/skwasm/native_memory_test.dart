@@ -66,14 +66,17 @@ void testMain() {
       expect(clone.box.refCount, 0);
     });
 
-    test('SkwasmPicture.clone share same handle and box', () {
+    test('EnginePicture.clone shares the same SkwasmPicture handle and box', () {
       final recorder = ui.PictureRecorder();
       final canvas = ui.Canvas(recorder);
       canvas.drawRect(const ui.Rect.fromLTRB(0, 0, 10, 10), ui.Paint());
-      final picture = recorder.endRecording() as SkwasmPicture;
+      final picture = recorder.endRecording() as EnginePicture;
 
-      final clone = picture.clone() as SkwasmPicture;
-      expect(clone.handle, picture.handle);
+      final EnginePicture clone = picture.clone();
+      expect(
+        (clone.backendPicture as SkwasmPicture).handle,
+        (picture.backendPicture as SkwasmPicture).handle,
+      );
       expect(clone.box, picture.box);
       expect(picture.box.refCount, 2);
 
@@ -116,7 +119,7 @@ void testMain() {
           final plainRecorder = ui.PictureRecorder();
           final plainCanvas = ui.Canvas(plainRecorder);
           plainCanvas.drawRect(const ui.Rect.fromLTRB(0, 0, 10, 10), ui.Paint());
-          final plainPicture = plainRecorder.endRecording() as SkwasmPicture;
+          final plainPicture = plainRecorder.endRecording() as EnginePicture;
           expect(_livePictureCount(), baseline + 1);
 
           mockFinalizer.trigger(plainPicture.box);
@@ -130,7 +133,7 @@ void testMain() {
           final imageRecorder = ui.PictureRecorder();
           final imageCanvas = ui.Canvas(imageRecorder);
           imageCanvas.drawImage(image, ui.Offset.zero, ui.Paint());
-          final trackedPicture = imageRecorder.endRecording() as SkwasmPicture;
+          final trackedPicture = imageRecorder.endRecording() as EnginePicture;
           expect(_livePictureCount(), baseline + 1);
 
           image.dispose();
@@ -145,17 +148,17 @@ void testMain() {
       },
     );
 
-    test('Abandoned SkwasmPictureRecorder releases retained ImageSource via finalizer', () async {
-      final NativeMemoryFinalizer originalFinalizer = SkwasmPictureRecorder.finalizer;
-      final mockFinalizer = _MockFinalizer();
-      SkwasmPictureRecorder.finalizer = mockFinalizer;
-      try {
-        final DomImageBitmap bitmap = await createImageBitmap(createBlankDomImageData(4, 4));
-        final image = renderer.createImageFromImageBitmap(bitmap) as EngineImage;
-        final ImageSource source = image.imageSource!;
+    test('Abandoned PictureRecorder releases retained ImageSource via finalizer', () async {
+      final DomImageBitmap bitmap = await createImageBitmap(createBlankDomImageData(4, 4));
+      final image = renderer.createImageFromImageBitmap(bitmap) as EngineImage;
+      final ImageSource source = image.imageSource!;
 
-        final recorder = SkwasmPictureRecorder();
-        final EngineCanvas canvas = recorder.beginRecording(ui.Rect.largest);
+      final Finalizer originalFinalizer = UniqueRef.finalizer;
+      final mockFinalizer = _MockFinalizer();
+      UniqueRef.finalizer = mockFinalizer;
+      try {
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder);
         canvas.drawImage(image, ui.Offset.zero, ui.Paint());
 
         image.dispose();
@@ -163,13 +166,12 @@ void testMain() {
 
         expect(mockFinalizer.registeredPairs, hasLength(1));
         expect(mockFinalizer.registeredPairs.single.target, same(recorder));
-        expect(mockFinalizer.registeredPairs.single.value, same(recorder.tracker));
+        expect(mockFinalizer.registeredPairs.single.value, isA<UniqueRef<dynamic>>());
 
         mockFinalizer.trigger(recorder);
         expect(source.debugIsClosed, isTrue);
-        recorder.dispose();
       } finally {
-        SkwasmPictureRecorder.finalizer = originalFinalizer;
+        UniqueRef.finalizer = originalFinalizer;
       }
     });
 
@@ -232,7 +234,7 @@ void testMain() {
 
         final recorder = ui.PictureRecorder();
         ui.Canvas(recorder).drawImage(image, ui.Offset.zero, ui.Paint());
-        final picture = recorder.endRecording() as SkwasmPicture;
+        final picture = recorder.endRecording() as EnginePicture;
         final snapshot = picture.toImageSync(4, 4) as EngineImage;
 
         // Collect undisposed source image and dispose intermediate picture.

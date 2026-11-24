@@ -232,7 +232,7 @@ class SkwasmSurface extends OffscreenSurface {
           .allocPointerArray(pictures.length)
           .cast<PictureHandle>();
       for (var i = 0; i < pictures.length; i++) {
-        pictureHandles[i] = (pictures[i] as SkwasmPicture).handle;
+        pictureHandles[i] = ((pictures[i] as EnginePicture).backendPicture as SkwasmPicture).handle;
       }
       return surfaceRenderPictures(
         handle,

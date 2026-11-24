@@ -69,11 +69,6 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) {
-    throw UnimplementedError('Skwasm not implemented on this platform.');
-  }
-
-  @override
   BackendGradient createGradientLinear(
     Float32List endPoints,
     Uint32List colors,
@@ -154,7 +149,7 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  ui.PictureRecorder createPictureRecorder() {
+  BackendPictureRecorder createPictureRecorder() {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 

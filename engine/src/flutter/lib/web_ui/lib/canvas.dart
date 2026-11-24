@@ -47,14 +47,14 @@ abstract class Vertices {
 }
 
 abstract class PictureRecorder {
-  factory PictureRecorder() => engine.renderer.createPictureRecorder();
+  factory PictureRecorder() => engine.EnginePictureRecorder();
   bool get isRecording;
   Picture endRecording();
 }
 
 abstract class Canvas {
   factory Canvas(PictureRecorder recorder, [Rect? cullRect]) =>
-      engine.renderer.createCanvas(recorder, cullRect);
+      engine.EngineCanvas.fromRecorder(recorder, cullRect);
   void save();
   void saveLayer(Rect? bounds, Paint paint);
   void restore();

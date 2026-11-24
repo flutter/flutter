@@ -174,7 +174,7 @@ void testMain() {
     final canvas = ui.Canvas(recorder);
     canvas.drawImage(image, ui.Offset.zero, ui.Paint());
     final ui.Picture picture1 = recorder.endRecording();
-    final ui.Picture picture2 = (picture1 as CkPicture).clone();
+    final ui.Picture picture2 = (picture1 as EnginePicture).clone();
 
     image.dispose();
     expect(source.debugIsClosed, isFalse);
@@ -249,32 +249,33 @@ void testMain() {
     },
   );
 
-  test('Abandoned CkPictureRecorder releases retained ImageSource via finalizer', () async {
-    final Finalizer originalFinalizer = CkPictureRecorder.finalizer;
-    final mockFinalizer = _MockFinalizer();
-    CkPictureRecorder.finalizer = mockFinalizer;
-    try {
-      final ui.Image image = await _createBitmapTestImage();
-      final ImageSource source = (image as EngineImage).imageSource!;
+  test('Abandoned PictureRecorder releases retained ImageSource via finalizer', () async {
+    final ui.Image image = await _createBitmapTestImage();
+    final ImageSource source = (image as EngineImage).imageSource!;
 
-      final recorder = CkPictureRecorder();
-      final EngineCanvas canvas = recorder.beginRecording(ui.Rect.largest);
+    final Finalizer originalFinalizer = UniqueRef.finalizer;
+    final mockFinalizer = _MockFinalizer();
+    UniqueRef.finalizer = mockFinalizer;
+    try {
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
       canvas.drawImage(image, ui.Offset.zero, ui.Paint());
 
       image.dispose();
       // Image is retained by the unended recorder's tracker.
       expect(source.debugIsClosed, isFalse);
 
-      // Verify the recorder attached its tracker to the finalizer.
+      // Verify the recording registered a single finalizer on the recorder.
       expect(mockFinalizer.registeredPairs, hasLength(1));
-      expect(mockFinalizer.registeredPairs.single.target, same(recorder));
-      expect(mockFinalizer.registeredPairs.single.value, same(recorder.tracker));
+      final _MockPair pair = mockFinalizer.registeredPairs.single;
+      expect(pair.target, same(recorder));
+      expect(pair.value, isA<UniqueRef<dynamic>>());
 
       // Simulate GC collection of the abandoned recorder.
-      mockFinalizer.trigger(recorder);
+      (pair.value as UniqueRef<dynamic>).collect();
       expect(source.debugIsClosed, isTrue);
     } finally {
-      CkPictureRecorder.finalizer = originalFinalizer;
+      UniqueRef.finalizer = originalFinalizer;
     }
   });
 
@@ -299,8 +300,8 @@ void testMain() {
         final recorder = ui.PictureRecorder();
         final canvas = ui.Canvas(recorder);
         canvas.drawImage(image, ui.Offset.zero, ui.Paint());
-        final picture = recorder.endRecording() as CkPicture;
-        final skPicture = picture.skiaObject as SkDeletable;
+        final picture = recorder.endRecording() as EnginePicture;
+        final skPicture = (picture.backendPicture as CkPicture).skiaObject as SkDeletable;
 
         // Simulate GC collection of the undisposed EngineImage while CkPicture is alive.
         mockFinalizer.trigger(image.box);

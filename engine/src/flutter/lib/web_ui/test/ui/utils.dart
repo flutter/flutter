@@ -211,6 +211,15 @@ class ForeignVertices implements EngineVertices {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+/// A [BackendPicture] that belongs to no renderer, so drawing it fails.
+class ForeignBackendPicture implements BackendPicture {
+  @override
+  void dispose() {}
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 /// A [BackendCanvas] whose [drawPath] throws after [translate] succeeds.
 class ThrowingBackendCanvas implements BackendCanvas {
   @override

@@ -298,7 +298,7 @@ class SkwasmCanvas implements BackendCanvas {
   }
 
   @override
-  void drawPicture(ui.Picture picture) {
+  void drawPicture(BackendPicture picture) {
     canvasDrawPicture(_handle, (picture as SkwasmPicture).handle);
   }
 

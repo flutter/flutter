@@ -21,8 +21,8 @@ import 'package:ui/ui.dart' as ui;
 ///  * The per-draw paint lifecycle: a [BackendPaint] is created right before
 ///    each backend call and disposed right after it.
 ///  * Unwrapping frontend objects ([EnginePath], [EngineImage],
-///    [EngineVertices], [EngineParagraph], [EngineImageFilter]) into their
-///    backend delegates.
+///    [EngineVertices], [EngineParagraph], [EngineImageFilter],
+///    [EnginePicture]) into their backend delegates.
 class EngineCanvas implements LayerCanvas {
   /// Creates a canvas that forwards every operation to the given backend.
   ///
@@ -33,28 +33,40 @@ class EngineCanvas implements LayerCanvas {
     : _recorder = recorder,
       _tracker = tracker;
 
-  /// Checks that [recorder] can start a new recording, and returns the cull
-  /// rect to record with.
-  static ui.Rect resolveCullRect(ui.PictureRecorder recorder, ui.Rect? cullRect) {
+  /// Starts recording into [recorder] and returns the recording canvas.
+  ///
+  /// This implements the `ui.Canvas` constructor. Like native `dart:ui`, it
+  /// rejects recorders that are already recording, have already finished
+  /// their recording, or were not created by the engine.
+  factory EngineCanvas.fromRecorder(ui.PictureRecorder recorder, [ui.Rect? cullRect]) {
+    if (recorder is! EnginePictureRecorder || recorder.isDisposed) {
+      throw ArgumentError('Canvas constructor called with non-genuine PictureRecorder.');
+    }
     if (recorder.isRecording) {
       throw ArgumentError('"recorder" must not already be associated with another Canvas.');
     }
-    return cullRect ?? ui.Rect.largest;
+    return recorder.beginRecording(cullRect ?? ui.Rect.largest);
   }
 
-  final BackendCanvas _backend;
+  BackendCanvas _backend;
 
   // Holds a reference to the recorder to prevent premature garbage collection
   // of the recorder while this canvas is active. This ensures the recorder's
   // finalizer does not run prematurely to release tracked image sources.
   // ignore: unused_field
-  final ui.PictureRecorder? _recorder;
+  ui.PictureRecorder? _recorder;
 
   PictureImageTracker? _tracker;
 
-  /// Clears the tracker reference when recording finishes so subsequent
-  /// operations (if any) do not retain images.
-  void clearTracker() => _tracker = null;
+  /// Detaches this canvas from its finished recording.
+  ///
+  /// Every later operation is a no-op that retains no images, and queries
+  /// report an empty canvas, matching native `dart:ui`.
+  void invalidate() {
+    _backend = const _InvalidatedBackendCanvas();
+    _tracker = null;
+    _recorder = null;
+  }
 
   @override
   void save() => _backend.save();
@@ -347,10 +359,9 @@ class EngineCanvas implements LayerCanvas {
   @override
   void drawPicture(ui.Picture picture) {
     assert(!picture.debugDisposed);
-    _backend.drawPicture(picture);
-    if (picture case LayerPicture(:final imageTracker?)) {
-      _tracker?.recordFrom(imageTracker);
-    }
+    final enginePicture = picture as EnginePicture;
+    _backend.drawPicture(enginePicture.backendPicture);
+    _tracker?.recordFrom(enginePicture.imageTracker);
   }
 
   /// Draws a text [paragraph] at [offset].
@@ -590,4 +601,165 @@ class EngineCanvas implements LayerCanvas {
       EngineFlutterDisplay.instance.devicePixelRatio,
     );
   }
+}
+
+/// The backend of an [EngineCanvas] whose recording has finished.
+///
+/// Every operation is a no-op, and queries report an empty canvas.
+class _InvalidatedBackendCanvas implements BackendCanvas {
+  const _InvalidatedBackendCanvas();
+
+  @override
+  void save() {}
+
+  @override
+  void saveLayer(ui.Rect? bounds, BackendPaint paint) {}
+
+  @override
+  void saveLayerWithFilter(
+    ui.Rect? bounds,
+    BackendPaint paint,
+    BackendImageFilter backdropFilter,
+    ui.TileMode backdropTileMode,
+  ) {}
+
+  @override
+  void restore() {}
+
+  @override
+  void restoreToCount(int count) {}
+
+  @override
+  int getSaveCount() => 0;
+
+  @override
+  void translate(double dx, double dy) {}
+
+  @override
+  void scale(double sx, double sy) {}
+
+  @override
+  void rotate(double radians) {}
+
+  @override
+  void skew(double sx, double sy) {}
+
+  @override
+  void transform(Float64List matrix4) {}
+
+  @override
+  Float64List getTransform() => Float64List(16);
+
+  @override
+  void clipRect(ui.Rect rect, ui.ClipOp clipOp, bool doAntiAlias) {}
+
+  @override
+  void clipRRect(ui.RRect rrect, bool doAntiAlias) {}
+
+  @override
+  void clipPath(BackendPath path, bool doAntiAlias) {}
+
+  @override
+  ui.Rect getDestinationClipBounds() => ui.Rect.zero;
+
+  @override
+  void clear(ui.Color color) {}
+
+  @override
+  bool quickReject(ui.Rect rect) => false;
+
+  @override
+  void drawColor(ui.Color color, ui.BlendMode blendMode) {}
+
+  @override
+  void drawLine(ui.Offset p1, ui.Offset p2, BackendPaint paint) {}
+
+  @override
+  void drawPaint(BackendPaint paint) {}
+
+  @override
+  void drawRect(ui.Rect rect, BackendPaint paint) {}
+
+  @override
+  void drawRRect(ui.RRect rrect, BackendPaint paint) {}
+
+  @override
+  void drawDRRect(ui.RRect outer, ui.RRect inner, BackendPaint paint) {}
+
+  @override
+  void drawOval(ui.Rect rect, BackendPaint paint) {}
+
+  @override
+  void drawCircle(ui.Offset center, double radius, BackendPaint paint) {}
+
+  @override
+  void drawArc(
+    ui.Rect rect,
+    double startAngle,
+    double sweepAngle,
+    bool useCenter,
+    BackendPaint paint,
+  ) {}
+
+  @override
+  void drawPath(BackendPath path, BackendPaint paint) {}
+
+  @override
+  void drawImage(
+    BackendImage image,
+    ui.Offset offset,
+    BackendPaint paint,
+    ui.FilterQuality filterQuality,
+  ) {}
+
+  @override
+  void drawImageRect(
+    BackendImage image,
+    ui.Rect src,
+    ui.Rect dst,
+    BackendPaint paint,
+    ui.FilterQuality filterQuality,
+  ) {}
+
+  @override
+  void drawImageNine(
+    BackendImage image,
+    ui.Rect center,
+    ui.Rect dst,
+    BackendPaint paint,
+    ui.FilterQuality filterQuality,
+  ) {}
+
+  @override
+  void drawPicture(BackendPicture picture) {}
+
+  @override
+  void drawParagraph(BackendParagraph paragraph, ui.Offset offset) {}
+
+  @override
+  void drawPoints(ui.PointMode pointMode, Float32List points, BackendPaint paint) {}
+
+  @override
+  void drawVertices(BackendVertices vertices, ui.BlendMode blendMode, BackendPaint paint) {}
+
+  @override
+  void drawAtlas(
+    BackendImage atlas,
+    Float32List rstTransforms,
+    Float32List rects,
+    Uint32List? colors,
+    ui.BlendMode blendMode,
+    ui.Rect? cullRect,
+    BackendPaint paint,
+    ui.FilterQuality filterQuality,
+  ) {}
+
+  @override
+  void drawShadow(
+    BackendPath path,
+    ui.Color color,
+    double elevation,
+    bool transparentOccluder,
+    double devicePixelRatio,
+  ) {}
 }

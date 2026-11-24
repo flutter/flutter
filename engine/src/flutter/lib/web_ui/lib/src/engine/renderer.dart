@@ -113,8 +113,8 @@ abstract class Renderer {
     Uint16List? indices,
   });
 
-  ui.PictureRecorder createPictureRecorder();
-  ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]);
+  /// Creates the native recorder for a single picture recording.
+  BackendPictureRecorder createPictureRecorder();
   ui.SceneBuilder createSceneBuilder();
 
   BackendGradient createGradientLinear(

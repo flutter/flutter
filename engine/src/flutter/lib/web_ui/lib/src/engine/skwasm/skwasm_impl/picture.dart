@@ -2,104 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
-class SkwasmPicture implements LayerPicture, StackTraceDebugger {
-  SkwasmPicture.fromHandle(PictureHandle handle, [this.imageTracker]) : _isClone = false {
-    box = CountedRef<SkwasmPicture, PictureHandle>(
-      handle,
-      this,
-      'Picture',
-      onDispose: _createDisposer(imageTracker),
-    );
-    _init();
-    ui.Picture.onCreate?.call(this);
-  }
+/// The Skwasm [BackendPicture], wrapping a native picture handle.
+class SkwasmPicture implements BackendPicture {
+  /// Wraps [handle], which this picture owns.
+  SkwasmPicture(this.handle);
 
-  /// Clones a picture from an existing [handleBox], retaining references
-  /// to any recorded image sources.
-  SkwasmPicture.cloneOf(CountedRef<SkwasmPicture, PictureHandle> handleBox, [this.imageTracker])
-    : box = handleBox,
-      _isClone = true {
-    box.ref(this);
-    _init();
-  }
-
-  static void _disposePictureHandle(PictureHandle h) {
-    pictureDispose(h);
-  }
-
-  /// Builds the [UniqueRef] disposal callback without capturing `this`, so
-  /// [DomFinalizationRegistry]'s strongly held [UniqueRef] does not retain
-  /// [box] and prevent garbage collection.
-  static void Function(PictureHandle) _createDisposer(PictureImageTracker? tracker) {
-    if (tracker == null) {
-      return _disposePictureHandle;
-    }
-    return _createTrackedDisposer(tracker);
-  }
-
-  static void Function(PictureHandle) _createTrackedDisposer(PictureImageTracker tracker) {
-    return (PictureHandle h) {
-      try {
-        pictureDispose(h);
-      } finally {
-        tracker.releaseAll();
-      }
-    };
-  }
-
-  final bool _isClone;
-
-  /// Retained image sources for images recorded onto this picture.
-  @override
-  final PictureImageTracker? imageTracker;
-
-  void _init() {
-    assert(() {
-      _debugStackTrace = StackTrace.current;
-      return true;
-    }());
-  }
-
-  @override
-  StackTrace get debugStackTrace => _debugStackTrace;
-  late StackTrace _debugStackTrace;
-
-  late final CountedRef<SkwasmPicture, PictureHandle> box;
-
-  PictureHandle get handle => box.nativeObject;
-
-  @override
-  Future<ui.Image> toImage(int width, int height) async => toImageSync(width, height);
-
-  @override
-  int get approximateBytesUsed => pictureApproximateBytesUsed(handle);
-
-  @override
-  void dispose() {
-    if (_disposed) {
-      return;
-    }
-    if (!_isClone) {
-      ui.Picture.onDispose?.call(this);
-    }
-    _disposed = true;
-    box.unref(this);
-  }
-
-  @override
-  ui.Image toImageSync(
-    int width,
-    int height, {
-    ui.TargetPixelFormat targetFormat = ui.TargetPixelFormat.dontCare,
-  }) {
-    final ImageHandle handleImg = imageCreateFromPicture(handle, width, height);
-    return EngineImage(SkwasmImage(handleImg), width, height, imageTracker: imageTracker);
-  }
+  /// The underlying native picture.
+  final PictureHandle handle;
 
   @override
   ui.Rect get cullRect {
@@ -111,114 +24,44 @@ class SkwasmPicture implements LayerPicture, StackTraceDebugger {
   }
 
   @override
-  LayerPicture clone() => SkwasmPicture.cloneOf(box, imageTracker);
+  int get approximateBytesUsed => pictureApproximateBytesUsed(handle);
 
   @override
-  String toString() {
-    return 'SkwasmPicture(${handle.address})';
+  bool get toImageSyncIsDeferred => true;
+
+  @override
+  BackendImage toImageSync(int width, int height, ui.TargetPixelFormat targetFormat) {
+    return SkwasmImage(imageCreateFromPicture(handle, width, height));
   }
 
   @override
-  bool get isDisposed => _disposed;
+  void dispose() => pictureDispose(handle);
+}
 
+/// The Skwasm [BackendPictureRecorder], wrapping a native picture recorder
+/// handle.
+class SkwasmPictureRecorder implements BackendPictureRecorder {
+  final PictureRecorderHandle _handle = pictureRecorderCreate();
   bool _disposed = false;
 
   @override
-  bool get debugDisposed {
-    bool? result;
-    assert(() {
-      result = _disposed;
-      return true;
-    }());
-
-    if (result != null) {
-      return result!;
-    }
-
-    throw StateError('Picture.debugDisposed is only available when asserts are enabled.');
-  }
-}
-
-/// Records a sequence of canvas drawing commands into a [SkwasmPicture].
-///
-/// Manages a [PictureImageTracker] that retains any [ImageSource] instances
-/// drawn to the recording canvas until the resulting picture is finished and
-/// subsequently disposed.
-///
-/// If a recorder is abandoned and collected by garbage collection without
-/// [endRecording] being called, [finalizer] releases all retained image
-/// sources to prevent memory leaks.
-class SkwasmPictureRecorder extends SkwasmObjectWrapper<RawPictureRecorder>
-    implements LayerPictureRecorder {
-  SkwasmPictureRecorder()
-    : super(
-        pictureRecorderCreate(),
-        (PictureRecorderHandle h) => pictureRecorderDispose(h),
-        'PictureRecorder',
-      );
-
-  @visibleForTesting
-  static NativeMemoryFinalizer finalizer = NativeMemoryFinalizer((Object tracker) {
-    (tracker as PictureImageTracker).releaseAll();
-  });
-
-  EngineCanvas? _recordingCanvas;
-
-  /// Tracks [ImageSource] references for draw operations recorded on this recorder.
-  final PictureImageTracker tracker = PictureImageTracker();
-
-  /// Begins recording canvas commands within the specified [bounds].
-  EngineCanvas beginRecording(ui.Rect bounds) {
-    if (isRecording) {
-      throw StateError('PictureRecorder is already recording');
-    }
-    _isRecording = true;
-    final canvas = EngineCanvas(
-      SkwasmCanvas(
-        withStackScope(
-          (StackScope s) => pictureRecorderBeginRecording(handle, s.convertRectToNative(bounds)),
-        ),
+  BackendCanvas beginRecording(ui.Rect cullRect) {
+    return SkwasmCanvas(
+      withStackScope(
+        (StackScope s) => pictureRecorderBeginRecording(_handle, s.convertRectToNative(cullRect)),
       ),
-      recorder: this,
-      tracker: tracker,
     );
-    _recordingCanvas = canvas;
-    finalizer.attach(this, tracker, detach: this);
-    return canvas;
   }
 
   @override
-  SkwasmPicture endRecording() {
-    if (!isRecording) {
-      throw StateError('PictureRecorder is not recording');
-    }
-    _isRecording = false;
-    // Detach the unended-recording finalizer now that ownership of the tracker
-    // is being handed off to the resulting SkwasmPicture.
-    finalizer.detach(this);
-    _recordingCanvas?.clearTracker();
-    _recordingCanvas = null;
-
-    final PictureImageTracker? imageTracker = tracker.isEmpty ? null : tracker;
-    final picture = SkwasmPicture.fromHandle(pictureRecorderEndRecording(handle), imageTracker);
-    dispose();
-    return picture;
-  }
+  BackendPicture endRecording() => SkwasmPicture(pictureRecorderEndRecording(_handle));
 
   @override
   void dispose() {
-    if (_isRecording) {
-      _isRecording = false;
-      finalizer.detach(this);
-      _recordingCanvas?.clearTracker();
-      _recordingCanvas = null;
-      tracker.releaseAll();
+    if (_disposed) {
+      return;
     }
-    super.dispose();
+    _disposed = true;
+    pictureRecorderDispose(_handle);
   }
-
-  bool _isRecording = false;
-
-  @override
-  bool get isRecording => _isRecording;
 }

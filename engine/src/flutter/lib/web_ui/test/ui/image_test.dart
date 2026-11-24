@@ -307,7 +307,7 @@ Future<void> testMain() async {
       final canvas = ui.Canvas(recorder);
       canvas.drawImage(image, ui.Offset.zero, ui.Paint());
       final ui.Picture picture = recorder.endRecording();
-      final LayerPicture pictureClone = (picture as LayerPicture).clone();
+      final EnginePicture pictureClone = (picture as EnginePicture).clone();
       expect(pictureClone.isDisposed, isFalse);
 
       // Disposing the image detaches image.box, leaving only the picture's CountedRef
@@ -367,7 +367,7 @@ Future<void> testMain() async {
         4,
         4,
         imageSource: source,
-        imageTracker: tracker,
+        retainedTracker: tracker.clone(),
       );
       tracker.releaseAll();
       expect(trackedSource.debugIsClosed, isFalse);

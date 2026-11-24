@@ -70,12 +70,12 @@ void testMain() {
     final surface = SkwasmSurface(provider);
     final recorder = ui.PictureRecorder();
     ui.Canvas(recorder).drawColor(const ui.Color(0xFF00FF00), ui.BlendMode.src);
-    final picture = recorder.endRecording() as SkwasmPicture;
+    final picture = recorder.endRecording() as EnginePicture;
     try {
       await surface.initialized;
       final int callbackId = withStackScope((StackScope scope) {
         final Pointer<PictureHandle> pictures = scope.allocPointerArray(1).cast<PictureHandle>();
-        pictures[0] = picture.handle;
+        pictures[0] = (picture.backendPicture as SkwasmPicture).handle;
         return surfaceRenderPictures(surface.handle, pictures, 1, 16, 12, false);
       });
       final result =

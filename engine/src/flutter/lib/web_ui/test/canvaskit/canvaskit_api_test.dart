@@ -1420,7 +1420,7 @@ void _canvasTests() {
       Float32List.fromList(<double>[0, 0, 1, 1]),
       SkPaint()..setColorInt(0xAAFFFFFF),
     );
-    final picture = CkPicture(otherRecorder.finishRecordingAsPicture());
+    final picture = EnginePicture(CkPicture(otherRecorder.finishRecordingAsPicture()));
     final image = await picture.toImage(1, 1) as EngineImage;
     final ByteData rawData = (await image.toByteData())!;
     expect(rawData.lengthInBytes, greaterThan(0));

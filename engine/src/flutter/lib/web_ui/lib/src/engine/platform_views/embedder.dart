@@ -283,11 +283,11 @@ class PlatformViewEmbedder {
     _context.optimizedComposition = composition;
     // Create new picture recorders for the optimized canvases and record
     // which pictures go in which canvas.
-    final optimizedCanvasRecorders = <LayerPictureRecorder>[];
+    final optimizedCanvasRecorders = <EnginePictureRecorder>[];
     final optimizedCanvases = <LayerCanvas>[];
     final pictureToOptimizedCanvasMap = <PictureLayer, LayerCanvas>{};
     for (final CompositionCanvas canvas in composition.canvases) {
-      final pictureRecorder = ui.PictureRecorder() as LayerPictureRecorder;
+      final pictureRecorder = EnginePictureRecorder();
       optimizedCanvasRecorders.add(pictureRecorder);
       final layerCanvas =
           ui.Canvas(pictureRecorder, ui.Offset.zero & _frameSize.toSize()) as LayerCanvas;
@@ -331,7 +331,7 @@ class PlatformViewEmbedder {
       picture.dispose();
     }
 
-    for (final LayerPictureRecorder recorder in _context.measuringPictureRecorders.values) {
+    for (final EnginePictureRecorder recorder in _context.measuringPictureRecorders.values) {
       if (recorder.isRecording) {
         recorder.endRecording();
       }
@@ -864,8 +864,8 @@ class PlatformViewSceneElement extends SceneElement {
 class EmbedderFrameContext {
   /// Picture recorders which were created to measure the final bounds of the
   /// picture in the scene.
-  final Map<PictureLayer, LayerPictureRecorder> measuringPictureRecorders =
-      <PictureLayer, LayerPictureRecorder>{};
+  final Map<PictureLayer, EnginePictureRecorder> measuringPictureRecorders =
+      <PictureLayer, EnginePictureRecorder>{};
 
   /// List of picture recorders and platform view ids in the order they were
   /// painted.
@@ -877,7 +877,7 @@ class EmbedderFrameContext {
 
   /// The picture recorders for the optimized composition. This is set by
   /// calling [optimizeComposition].
-  List<LayerPictureRecorder>? optimizedCanvasRecorders;
+  List<EnginePictureRecorder>? optimizedCanvasRecorders;
 
   /// The Canvases which will be drawn into in the optimized composition. This
   /// is set by calling [optimizeComposition].

@@ -72,13 +72,13 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     bool isComplexHint = false,
     bool willChangeHint = false,
   }) {
-    final layerPicture = picture as LayerPicture;
-    if (layerPicture.isDisposed) {
+    final enginePicture = picture as EnginePicture;
+    if (enginePicture.isDisposed) {
       return;
     }
     // Add a clone of the picture to the layer tree so that the original picture
     // can be disposed.
-    final LayerPicture clonedPicture = layerPicture.clone();
+    final EnginePicture clonedPicture = enginePicture.clone();
     currentLayer.add(PictureLayer(clonedPicture, offset, isComplexHint, willChangeHint));
   }
 
