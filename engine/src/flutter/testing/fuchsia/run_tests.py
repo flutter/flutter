@@ -100,12 +100,10 @@ def main() -> int:
   _force_symlink(IMAGES_ROOT, os.path.join(OUT_DIR, 'fuchsia-images'))
   assert VARIANT.endswith(('_arm64', '_arm64_tester', '_x64', '_x64_tester')
                          ), 'Unsupported variant ' + VARIANT
-  os.environ['FUCHSIA_ORCHESTRATE_CONFIG'] = os.path.abspath(
-      os.path.join(
-          os.path.dirname(__file__),
-          'orchestrate_x64_arm64.json'
-          if VARIANT.endswith(('_arm64', '_arm64_tester')) else 'orchestrate_x64.json',
-      )
+  os.environ['FUCHSIA_ORCHESTRATE_CONFIG'] = os.path.join(
+      os.path.dirname(__file__),
+      'orchestrate_x64_arm64.json'
+      if VARIANT.endswith(('_arm64', '_arm64_tester')) else 'orchestrate_x64.json',
   )
   sys.argv.append('--out-dir=' + OUT_DIR)
   sys.argv.append('--test-realm=/core/testing/system-tests')

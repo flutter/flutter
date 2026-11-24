@@ -88,9 +88,7 @@ class RunTestsTest(unittest.TestCase):
           self.assertIn('--logs-dir=' + logs_dir, argv)
           self.assertFalse(any(arg.startswith('--product') for arg in argv))
           mock_run_tests.assert_called_once()
-          expected_config = os.path.abspath(
-              os.path.join(os.path.dirname(run_tests.__file__), config_name)
-          )
+          expected_config = os.path.join(os.path.dirname(run_tests.__file__), config_name)
           self.assertEqual(os.environ['FUCHSIA_ORCHESTRATE_CONFIG'], expected_config)
           with open(expected_config, 'r') as config_file:
             config = json.load(config_file)
