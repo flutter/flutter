@@ -28,6 +28,7 @@ import 'dart/package_map.dart';
 /// Opt-in changes to the dart compilers.
 const kDartCompilerExperiments = <String>[];
 
+/// Keeps absolute paths to the dart_plugin_registrant out of compiled output.
 const kDartPluginRegistrantScheme = 'org-dartlang-plugin-registrant';
 
 /// Whether DDC canary features are enabled.
@@ -333,7 +334,10 @@ class KernelCompiler {
       _fileSystem.file(outputFilePath).createSync(recursive: true);
     }
 
-    depFilePath = fileSystemRoots == null || fileSystemRoots.isEmpty ? depFilePath : null;
+    // Check before adding the plugin registrant root below so it doesn't disable --depfile.
+    if (fileSystemRoots != null && fileSystemRoots.isNotEmpty) {
+      depFilePath = null;
+    }
 
     // Check if there's a Dart plugin registrant.
     // This is contained in the file `dart_plugin_registrant.dart` under `.dart_tools/flutter_build/`.
