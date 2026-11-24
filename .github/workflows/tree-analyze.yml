@@ -38,5 +38,11 @@ jobs:
       - uses: ./.github/actions/composite-flutter-setup
 
       - name: Run Analyze
+        if: github.event_name != 'merge_group'
         run: |
           SHARD=analyze LUCI_CI=true dart --enable-asserts dev/bots/test.dart
+
+      - name: Run Merge Queue Analyze
+        if: github.event_name == 'merge_group'
+        run: |
+          LUCI_CI=true dart --enable-asserts dev/bots/analyze.dart --only=update-packages,dart-analysis

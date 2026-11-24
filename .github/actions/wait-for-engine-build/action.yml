@@ -57,3 +57,14 @@ runs:
       run: echo "FLUTTER_PREBUILT_ENGINE_VERSION=$HEAD_SHA" >> $GITHUB_ENV # zizmor: ignore[github-env]
       env:
         HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+
+    # Wait for sky_engine.zip to become readable in GCS. The linux_android_debug_engine
+    # upload can finish slightly after the check reports success.
+    - name: Wait for Engine Artifacts in GCS
+      if: steps.check_engine.outputs.changed == 'true' && github.repository == 'flutter/flutter' && env.ACT != 'true' && contains(inputs.check-name, 'linux_android_debug_engine')
+      shell: bash
+      run: |
+        ENGINE_VERSION="${FLUTTER_PREBUILT_ENGINE_VERSION:-$(bin/internal/content_aware_hash.sh)}"
+        ARTIFACT_URL="https://storage.googleapis.com/${FLUTTER_REALM:+$FLUTTER_REALM/}flutter_infra_release/flutter/${ENGINE_VERSION}/sky_engine.zip"
+        echo "Waiting for $ARTIFACT_URL"
+        curl -fsSI --retry 24 --retry-delay 10 --retry-all-errors "$ARTIFACT_URL" >/dev/null || { echo "::error::Timed out waiting for $ARTIFACT_URL"; exit 1; }
