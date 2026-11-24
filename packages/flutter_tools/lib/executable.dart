@@ -56,7 +56,6 @@ import 'src/isolated/mustache_template.dart';
 import 'src/isolated/native_assets/test/native_assets.dart';
 import 'src/isolated/resident_web_runner.dart';
 import 'src/native_assets.dart';
-import 'src/pre_run_validator.dart';
 import 'src/project_validator.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
@@ -123,13 +122,13 @@ Future<void> main(List<String> args) async {
 
   final ToolDependencies toolDependencies = await ToolDependencies.bootstrap(
     buildTargets: const BuildTargetsImpl(),
+    enablePreRunValidator: true,
     extensionEntryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
     flutterHookRunner: FlutterHookRunnerNative(),
     logger: logger,
     nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
     outputPreferences: outputPreferences,
     platform: platform,
-    preRunValidatorBuilder: PreRunValidator.new,
     shutdownHooks: shutdownHooks,
     stdio: stdio,
     templateRenderer: const MustacheTemplateRenderer(),

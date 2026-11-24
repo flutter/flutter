@@ -183,7 +183,7 @@ void main() {
           templateRenderer: const MustacheTemplateRenderer(),
         );
 
-        final ExtensionManager manager = deps.extensionManager!;
+        final ExtensionManager manager = deps.extensionManager;
         await manager.ensureInitialized();
         expect(manager.connections, hasLength(1));
 
