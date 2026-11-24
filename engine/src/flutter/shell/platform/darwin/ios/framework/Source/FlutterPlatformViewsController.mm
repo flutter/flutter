@@ -46,7 +46,7 @@ static void ResetAnchor(CALayer* layer) {
 // The platform view's |EmbedderViewSlice| keyed off the view id, which contains any subsequent
 // operation until the next platform view or the end of the last leaf node in the layer tree.
 //
-// The Slices are deleted by the PlatformViewsController.reset().
+// The Slices are deleted by `resetFrameState`.
 @property(nonatomic, readonly)
     std::unordered_map<int64_t, std::unique_ptr<flutter::EmbedderViewSlice>>& slices;
 
@@ -151,13 +151,6 @@ static void ResetAnchor(CALayer* layer) {
 - (void)onRejectGesture:(FlutterMethodCall*)call result:(FlutterResult)result;
 
 - (void)clipViewSetMaskView:(UIView*)clipView devicePixelRatio:(CGFloat)devicePixelRatio;
-
-// Composites the platform view described by `layer`.
-//
-// This method sets the frames of the view's |ChildClippingView| and
-// |FlutterTouchInterceptingView|, then applies the layer's mutators.
-// This method divides by `devicePixelRatio` to convert the layer from physical pixels to points.
-- (void)compositeLayer:(FlutterPlatformViewLayer*)layer devicePixelRatio:(CGFloat)devicePixelRatio;
 
 // Applies the mutators to the UIView chain that was constructed by
 // `ReconstructClipViewsChain`
@@ -643,13 +636,6 @@ static void ResetAnchor(CALayer* layer) {
   embeddedView.layer.transform = transformMatrix;
 }
 
-- (void)compositeView:(int64_t)viewId withParams:(const flutter::EmbeddedViewParams&)params {
-  CGFloat screenScale = [UIScreen mainScreen].scale;
-  [self compositeLayer:flutter::GetPlatformViewLayerFromEmbeddedViewParams(viewId, params,
-                                                                           screenScale)
-      devicePixelRatio:screenScale];
-}
-
 - (void)compositeLayer:(FlutterPlatformViewLayer*)layer devicePixelRatio:(CGFloat)devicePixelRatio {
   // TODO(https://github.com/flutter/flutter/issues/109700)
   CGRect frame =
@@ -680,24 +666,19 @@ static void ResetAnchor(CALayer* layer) {
 }
 
 - (void)reset {
-  // `PlatformViewIOS::OnPreEngineRestart` calls this on the platform thread during hot restart.
-  // _platformViews must only be modified on the platform thread, and any operations that
-  // read or modify platform views should occur there.
-  std::vector<int64_t> compositionOrder = self.compositionOrder;
+  // `platformViews` must only be modified on the platform thread.
   [self.taskRunner runNowOrPostTask:^{
-    for (int64_t viewId : compositionOrder) {
-      [self.platformViews[@(viewId)].rootView removeFromSuperview];
+    for (FlutterPlatformViewInfo* info in self.platformViews.objectEnumerator) {
+      [info.rootView removeFromSuperview];
     }
     [self.platformViews removeAllObjects];
     [_previousCompositionOrder removeAllObjects];
-  }];
 
-  // The state below is otherwise only modified on the raster thread.
-  self.compositionOrder.clear();
-  self.slices.clear();
-  self.currentCompositionParams.clear();
-  self.layerPool->RecycleLayers();
-  self.visitedPlatformViews.clear();
+    // Discard any pending disposals, since their views were removed above.
+    // If we don't do this, `presentFrame:` would incorrectly dispose a view created with the same
+    // ID after the hot restart.
+    [self.viewsToDispose removeAllObjects];
+  }];
 }
 
 - (void)submitFrame:(std::unique_ptr<flutter::SurfaceFrame>)background_frame
@@ -1090,10 +1071,6 @@ static void ResetAnchor(CALayer* layer) {
     params.PushPlatformViewClipPath(clipPath);
     self.currentCompositionParams[id] = params;
   }
-}
-
-- (const flutter::EmbeddedViewParams&)compositionParamsForView:(int64_t)viewId {
-  return self.currentCompositionParams.find(viewId)->second;
 }
 
 #pragma mark - Properties
