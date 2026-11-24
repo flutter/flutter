@@ -19,7 +19,6 @@ Future<String> _handleDriverMessage(String? message) async {
     throw ArgumentError('Unknown message: $message');
   }
   _currentPage.value = parts[1].isEmpty ? null : parts[1];
-  await WidgetsBinding.instance.endOfFrame;
   return 'ok';
 }
 
