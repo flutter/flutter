@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -221,6 +222,7 @@ void main() {
     bool hasWorkspace = true,
     bool disablePortPublication = false,
     String? deviceId,
+    String? scriptOutputStreamFile,
     int exitCode = 0,
     String? stdout,
     void Function(List<String> command)? onRun,
@@ -253,6 +255,7 @@ void main() {
           '-destination',
           'generic/platform=iOS Simulator',
         ] else ...<String>['-destination', 'generic/platform=iOS'],
+        if (scriptOutputStreamFile != null) 'SCRIPT_OUTPUT_STREAM_FILE=$scriptOutputStreamFile',
         '-resultBundlePath',
         _xcBundleDirectoryPath,
         '-resultBundleVersion',
@@ -1591,6 +1594,165 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         Artifacts: () => Artifacts.test(),
       },
     );
+
+    testUsingContext(
+      'Do not crash if temporary build directory is deleted before cleanup.',
+      () async {
+        final BuildCommand command = createBuildCommand();
+        processManager.addCommands(<FakeCommand>[
+          setUpFakeXcodeBuildHandler(
+            simulator: true,
+            exitCode: 1,
+            onRun: (_) {
+              final Directory tempDir = fileSystem.directory(_xcBundleDirectoryPath).parent;
+              expect(tempDir, exists);
+              tempDir.deleteSync(recursive: true);
+            },
+          ),
+        ]);
+
+        createMinimalMockProjectFiles();
+
+        await expectLater(
+          createTestCommandRunner(command)
+              .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
+          throwsToolExit(message: 'Encountered error while building for simulator.'),
+        );
+        expect(processManager.hasRemainingExpectations, isFalse);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        Logger: () => logger,
+        ProcessManager: () => processManager,
+        Pub: ThrowingPub.new,
+        Platform: () => macosPlatform,
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
+      },
+    );
+
+    void testTerminalBuildWithDeletedTempDir(
+      String description, {
+      required void Function(Directory tempDir, File pipeFile) onXcodeRun,
+      MemoryFileSystem Function()? createFileSystem,
+      String initialPipeContents = '',
+    }) {
+      ErrorHandlingFileSystem? errorHandlingFileSystem;
+      ErrorHandlingFileSystem getErrorHandlingFileSystem() {
+        if (errorHandlingFileSystem != null) {
+          return errorHandlingFileSystem!;
+        }
+        if (createFileSystem != null) {
+          fileSystem = createFileSystem();
+        }
+        return errorHandlingFileSystem = ErrorHandlingFileSystem(
+          delegate: fileSystem,
+          platform: macosPlatform,
+        );
+      }
+
+      testUsingContext(
+        description,
+        () async {
+          final ErrorHandlingFileSystem fs = getErrorHandlingFileSystem();
+          final BuildCommand command = createBuildCommand();
+          final Directory tempDir = fs.directory(_xcBundleDirectoryPath).parent;
+          final File pipeFile = tempDir.childFile('pipe_to_stdout');
+          processManager.addCommand(
+            setUpFakeXcodeBuildHandler(
+              simulator: true,
+              exitCode: 1,
+              scriptOutputStreamFile: pipeFile.path,
+              onRun: (_) {
+                expect(pipeFile, exists);
+                onXcodeRun(tempDir, pipeFile);
+              },
+            ),
+          );
+
+          createMinimalMockProjectFiles();
+
+          await expectLater(
+            createTestCommandRunner(command)
+                .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
+            throwsToolExit(message: 'Encountered error while building for simulator.'),
+          );
+          expect(tempDir, isNot(exists));
+          expect(pipeFile, isNot(exists));
+          expect(processManager.hasRemainingExpectations, isFalse);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: getErrorHandlingFileSystem,
+          Logger: _TerminalBufferLogger.new,
+          OperatingSystemUtils: () => _PipeOperatingSystemUtils(
+            getErrorHandlingFileSystem(),
+            initialContents: initialPipeContents,
+          ),
+          ProcessManager: () => processManager,
+          Pub: ThrowingPub.new,
+          Platform: () => macosPlatform,
+          XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+          Artifacts: () => Artifacts.test(),
+        },
+      );
+    }
+
+    testTerminalBuildWithDeletedTempDir(
+      'Do not crash if temporary build directory is deleted before cleanup in terminal session.',
+      onXcodeRun: (Directory tempDir, File pipeFile) {
+        tempDir.deleteSync(recursive: true);
+      },
+    );
+
+    var deleteOnNextPipeWrite = false;
+    testTerminalBuildWithDeletedTempDir(
+      'Do not crash if temporary build directory is deleted during pipe write in terminal session.',
+      initialPipeContents: 'all done\n',
+      createFileSystem: () {
+        // POSIX errno for ENOENT (No such file or directory).
+        const kEnoent = 2;
+        deleteOnNextPipeWrite = false;
+        return MemoryFileSystem.test(
+          opHandle: (String path, FileSystemOp op) {
+            if (deleteOnNextPipeWrite &&
+                op == FileSystemOp.write &&
+                path.endsWith('pipe_to_stdout')) {
+              deleteOnNextPipeWrite = false;
+              fileSystem.directory(_xcBundleDirectoryPath).parent.deleteSync(recursive: true);
+              throw FileSystemException(
+                'Cannot open file',
+                path,
+                const OSError('No such file or directory', kEnoent),
+              );
+            }
+          },
+        );
+      },
+      onXcodeRun: (Directory tempDir, File pipeFile) {
+        deleteOnNextPipeWrite = true;
+      },
+    );
+
+    var deleteOnNextPipeRead = false;
+    testTerminalBuildWithDeletedTempDir(
+      'Do not crash if temporary build directory is deleted between existsSync and reading pipe in terminal session.',
+      createFileSystem: () {
+        deleteOnNextPipeRead = false;
+        return MemoryFileSystem.test(
+          opHandle: (String path, FileSystemOp op) {
+            if (deleteOnNextPipeRead &&
+                (op == FileSystemOp.open || op == FileSystemOp.read) &&
+                path.endsWith('pipe_to_stdout')) {
+              deleteOnNextPipeRead = false;
+              fileSystem.directory(_xcBundleDirectoryPath).parent.deleteSync(recursive: true);
+            }
+          },
+        );
+      },
+      onXcodeRun: (Directory tempDir, File pipeFile) {
+        deleteOnNextPipeRead = true;
+      },
+    );
   });
 }
 
@@ -1616,4 +1778,29 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
 
   @override
   int? getDirectorySize(Directory directory) => 1024;
+}
+
+class _TerminalBufferLogger extends BufferLogger {
+  _TerminalBufferLogger() : super.test();
+
+  @override
+  bool get hasTerminal => true;
+}
+
+class _PipeOperatingSystemUtils extends FakeOperatingSystemUtils {
+  _PipeOperatingSystemUtils(this._fileSystem, {this.initialContents = ''});
+
+  final FileSystem _fileSystem;
+
+  /// Defaults to an empty pipe file so the listener keeps re-reading until the
+  /// temporary directory is deleted. Pass 'all done\n' when deletion happens
+  /// after the build so the listener does not spin on microtasks and starve
+  /// FakeProcess timers.
+  final String initialContents;
+
+  @override
+  void chmod(FileSystemEntity entity, String mode) {}
+
+  @override
+  File makePipe(String path) => _fileSystem.file(path)..writeAsStringSync(initialContents);
 }
