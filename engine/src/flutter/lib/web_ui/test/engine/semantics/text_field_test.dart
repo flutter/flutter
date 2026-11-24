@@ -181,12 +181,22 @@ void testMain() {
       expect(inputElement.getAttribute('autocapitalize'), 'words');
 
       // Reconfiguring via `applyConfiguration` updates/clears stale attributes.
+      //
+      // This uses `sentences` rather than the default `TextCapitalization.none`
+      // because Firefox rewrites `autocapitalize="off"` to its `none` alias on
+      // a focused input.
       strategy.applyConfiguration(
-        InputConfiguration(viewId: kImplicitViewId, inputAction: 'TextInputAction.none'),
+        InputConfiguration(
+          viewId: kImplicitViewId,
+          inputAction: 'TextInputAction.none',
+          textCapitalization: const TextCapitalizationConfig.fromInputConfiguration(
+            'TextCapitalization.sentences',
+          ),
+        ),
       );
       expect(inputElement.getAttribute('inputmode'), isNull);
       expect(inputElement.getAttribute('enterkeyhint'), isNull);
-      expect(inputElement.getAttribute('autocapitalize'), 'off');
+      expect(inputElement.getAttribute('autocapitalize'), 'sentences');
 
       strategy.disable();
 
