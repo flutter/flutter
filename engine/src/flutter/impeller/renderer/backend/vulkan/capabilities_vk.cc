@@ -713,6 +713,15 @@ bool CapabilitiesVK::SetPhysicalDevice(
       HasSampleableFilterableFormat(device, vk::Format::eR16Sfloat) &&
       HasSampleableFilterableFormat(device, vk::Format::eR16G16Sfloat);
 
+  // The 16-bit normalized formats are optional. Require all of them so the
+  // capability means the same thing for every format it covers.
+  supports_norm16_formats_ =
+      HasSampleableFilterableFormat(device, vk::Format::eR16Unorm) &&
+      HasSampleableFilterableFormat(device, vk::Format::eR16Snorm) &&
+      HasSampleableFilterableFormat(device, vk::Format::eR16G16Unorm) &&
+      HasSampleableFilterableFormat(device, vk::Format::eR16G16Snorm) &&
+      HasSampleableFilterableFormat(device, vk::Format::eR16G16B16A16Unorm);
+
   max_render_pass_attachment_size_ =
       ISize{device_properties_.limits.maxFramebufferWidth,
             device_properties_.limits.maxFramebufferHeight};
@@ -972,6 +981,10 @@ bool CapabilitiesVK::SupportsTextureCompression(
 
 bool CapabilitiesVK::SupportsFloat16Formats() const {
   return supports_float16_formats_;
+}
+
+bool CapabilitiesVK::SupportsNorm16Formats() const {
+  return supports_norm16_formats_;
 }
 
 }  // namespace impeller

@@ -255,5 +255,36 @@ TEST(AllocatorTest, Float16FormatByteSizes) {
   EXPECT_EQ(desc.GetByteSizeOfBaseMipLevel(), 512u * 512u * 2u);
 }
 
+TEST(AllocatorTest, Norm16FormatClassification) {
+  EXPECT_TRUE(IsNorm16(PixelFormat::kR16UNormInt));
+  EXPECT_TRUE(IsNorm16(PixelFormat::kR16SNormInt));
+  EXPECT_TRUE(IsNorm16(PixelFormat::kR16G16UNormInt));
+  EXPECT_TRUE(IsNorm16(PixelFormat::kR16G16SNormInt));
+  EXPECT_TRUE(IsNorm16(PixelFormat::kR16G16B16A16UNormInt));
+  EXPECT_FALSE(IsNorm16(PixelFormat::kR16Float));
+  EXPECT_FALSE(IsNorm16(PixelFormat::kR16G16B16A16Float));
+  EXPECT_FALSE(IsNorm16(PixelFormat::kR8G8UNormInt));
+
+  EXPECT_TRUE(IsSampleOnly(PixelFormat::kR16UNormInt));
+  EXPECT_TRUE(IsSampleOnly(PixelFormat::kR16G16B16A16UNormInt));
+  EXPECT_FALSE(IsSampleOnlyFloat16(PixelFormat::kR16UNormInt));
+  EXPECT_FALSE(IsCompressed(PixelFormat::kR16UNormInt));
+}
+
+TEST(AllocatorTest, Norm16FormatByteSizes) {
+  EXPECT_EQ(BytesPerPixelForPixelFormat(PixelFormat::kR16UNormInt), 2u);
+  EXPECT_EQ(BytesPerPixelForPixelFormat(PixelFormat::kR16SNormInt), 2u);
+  EXPECT_EQ(BytesPerPixelForPixelFormat(PixelFormat::kR16G16UNormInt), 4u);
+  EXPECT_EQ(BytesPerPixelForPixelFormat(PixelFormat::kR16G16SNormInt), 4u);
+  EXPECT_EQ(BytesPerPixelForPixelFormat(PixelFormat::kR16G16B16A16UNormInt),
+            8u);
+
+  // A 512 x 512 slice of 16-bit scalar data.
+  TextureDescriptor desc = {.format = PixelFormat::kR16UNormInt,
+                            .size = ISize(512, 512)};
+  EXPECT_EQ(desc.GetByteSizeOfBaseMipLevel(), 512u * 512u * 2u);
+  EXPECT_EQ(BytesPerRowForTextureWidth(PixelFormat::kR16UNormInt, 3), 6u);
+}
+
 }  // namespace testing
 }  // namespace impeller

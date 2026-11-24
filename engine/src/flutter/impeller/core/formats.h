@@ -114,9 +114,15 @@ enum class PixelFormat : uint8_t {
   // 16-bit per channel color formats. These are sample-only; they cannot be
   // used as render targets, storage textures, or transient attachments, and
   // their support varies by device (see
-  // `Capabilities::SupportsFloat16Formats`).
+  // `Capabilities::SupportsFloat16Formats` and
+  // `Capabilities::SupportsNorm16Formats`).
   kR16Float,
   kR16G16Float,
+  kR16UNormInt,
+  kR16SNormInt,
+  kR16G16UNormInt,
+  kR16G16SNormInt,
+  kR16G16B16A16UNormInt,
   // Depth and stencil formats.
   kS8UInt,
   kD24UnormS8Uint,
@@ -202,11 +208,28 @@ constexpr bool IsSampleOnlyFloat16(PixelFormat format) {
   }
 }
 
+/// @brief Whether `format` is a 16-bit per channel normalized (UNorm or SNorm)
+///        color format. Support for these varies by device, see
+///        `Capabilities::SupportsNorm16Formats`.
+constexpr bool IsNorm16(PixelFormat format) {
+  switch (format) {
+    case PixelFormat::kR16UNormInt:
+    case PixelFormat::kR16SNormInt:
+    case PixelFormat::kR16G16UNormInt:
+    case PixelFormat::kR16G16SNormInt:
+    case PixelFormat::kR16G16B16A16UNormInt:
+      return true;
+    default:
+      return false;
+  }
+}
+
 /// @brief Whether textures of `format` can only be sampled. Sample-only
 ///        textures cannot be render targets, storage textures, or transient
 ///        attachments.
 constexpr bool IsSampleOnly(PixelFormat format) {
-  return IsCompressed(format) || IsSampleOnlyFloat16(format);
+  return IsCompressed(format) || IsSampleOnlyFloat16(format) ||
+         IsNorm16(format);
 }
 
 /// @brief The compression family that `format` belongs to. Only valid for
@@ -358,6 +381,16 @@ constexpr const char* PixelFormatToString(PixelFormat format) {
       return "R16Float";
     case PixelFormat::kR16G16Float:
       return "R16G16Float";
+    case PixelFormat::kR16UNormInt:
+      return "R16UNormInt";
+    case PixelFormat::kR16SNormInt:
+      return "R16SNormInt";
+    case PixelFormat::kR16G16UNormInt:
+      return "R16G16UNormInt";
+    case PixelFormat::kR16G16SNormInt:
+      return "R16G16SNormInt";
+    case PixelFormat::kR16G16B16A16UNormInt:
+      return "R16G16B16A16UNormInt";
     case PixelFormat::kBC1RGBAUNormInt:
       return "BC1RGBAUNormInt";
     case PixelFormat::kBC1RGBAUNormIntSRGB:
@@ -691,6 +724,8 @@ constexpr size_t BytesPerPixelForPixelFormat(PixelFormat format) {
       return 1u;
     case PixelFormat::kR8G8UNormInt:
     case PixelFormat::kR16Float:
+    case PixelFormat::kR16UNormInt:
+    case PixelFormat::kR16SNormInt:
       return 2u;
     case PixelFormat::kR8G8B8A8UNormInt:
     case PixelFormat::kR8G8B8A8UNormIntSRGB:
@@ -700,12 +735,15 @@ constexpr size_t BytesPerPixelForPixelFormat(PixelFormat format) {
     case PixelFormat::kB10G10R10XR:
     case PixelFormat::kR32Float:
     case PixelFormat::kR16G16Float:
+    case PixelFormat::kR16G16UNormInt:
+    case PixelFormat::kR16G16SNormInt:
       return 4u;
     case PixelFormat::kD24UnormS8Uint:
       return 4u;
     case PixelFormat::kD32FloatS8UInt:
       return 5u;
     case PixelFormat::kR16G16B16A16Float:
+    case PixelFormat::kR16G16B16A16UNormInt:
     case PixelFormat::kB10G10R10A10XR:
       return 8u;
     case PixelFormat::kR32G32B32A32Float:

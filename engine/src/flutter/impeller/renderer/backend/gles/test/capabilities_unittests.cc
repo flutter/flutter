@@ -139,6 +139,22 @@ TEST(CapabilitiesGLES, DoesNotSupportFloat16FormatsOnES2) {
   EXPECT_FALSE(capabilities->SupportsFloat16Formats());
 }
 
+TEST(CapabilitiesGLES, DoesNotSupportNorm16FormatsOnES3WithoutExtension) {
+  auto mock_gles = MockGLES::Init(std::nullopt, "OpenGL ES 3.2");
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  EXPECT_FALSE(capabilities->SupportsNorm16Formats());
+}
+
+TEST(CapabilitiesGLES, SupportsNorm16FormatsWithExtension) {
+  auto const extensions = std::vector<const char*>{
+      "GL_KHR_debug",           //
+      "GL_EXT_texture_norm16",  //
+  };
+  auto mock_gles = MockGLES::Init(extensions, "OpenGL ES 3.1");
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  EXPECT_TRUE(capabilities->SupportsNorm16Formats());
+}
+
 TEST(CapabilitiesGLES, MaxShaderCompilerThreadsIsZeroWithoutExtension) {
   auto mock_gles = MockGLES::Init();
   auto capabilities = mock_gles->GetProcTable().GetCapabilities();

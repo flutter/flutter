@@ -172,6 +172,9 @@ class CapabilitiesGLES final
   bool SupportsFloat16Formats() const override;
 
   // |Capabilities|
+  bool SupportsNorm16Formats() const override;
+
+  // |Capabilities|
   PixelFormat GetDefaultColorFormat() const override;
 
   // |Capabilities|
@@ -216,6 +219,7 @@ class CapabilitiesGLES final
   bool supports_texture_compression_astc_ = false;
   bool supports_texture_compression_astc_hdr_ = false;
   bool supports_float16_formats_ = false;
+  bool supports_norm16_formats_ = false;
   uint32_t max_sampler_anisotropy_ = 1;
   int32_t max_shader_compiler_threads_ = 0;
   PixelFormat default_glyph_atlas_format_ = PixelFormat::kUnknown;

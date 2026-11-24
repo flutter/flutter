@@ -290,6 +290,9 @@ class CapabilitiesVK final : public Capabilities,
   bool SupportsFloat16Formats() const override;
 
   // |Capabilities|
+  bool SupportsNorm16Formats() const override;
+
+  // |Capabilities|
   bool SupportsFramebufferRenderMipmap() const override;
 
   // |Capabilities|
@@ -379,6 +382,7 @@ class CapabilitiesVK final : public Capabilities,
   bool supports_texture_compression_astc_ = false;
   bool supports_texture_compression_astc_hdr_ = false;
   bool supports_float16_formats_ = false;
+  bool supports_norm16_formats_ = false;
   bool is_valid_ = false;
 
   // The embedder.h API is responsible for providing the instance and device

@@ -130,6 +130,33 @@ std::optional<PixelFormatGLES> ToPixelFormatGLES(PixelFormat pixel_format,
       format.external_format = GL_RG;
       format.type = GL_HALF_FLOAT;
       break;
+    // The *_EXT enums from GL_EXT_texture_norm16 share their values with the
+    // core desktop GL internal formats.
+    case PixelFormat::kR16UNormInt:
+      format.internal_format = GL_R16_EXT;
+      format.external_format = GL_RED;
+      format.type = GL_UNSIGNED_SHORT;
+      break;
+    case PixelFormat::kR16SNormInt:
+      format.internal_format = GL_R16_SNORM_EXT;
+      format.external_format = GL_RED;
+      format.type = GL_SHORT;
+      break;
+    case PixelFormat::kR16G16UNormInt:
+      format.internal_format = GL_RG16_EXT;
+      format.external_format = GL_RG;
+      format.type = GL_UNSIGNED_SHORT;
+      break;
+    case PixelFormat::kR16G16SNormInt:
+      format.internal_format = GL_RG16_SNORM_EXT;
+      format.external_format = GL_RG;
+      format.type = GL_SHORT;
+      break;
+    case PixelFormat::kR16G16B16A16UNormInt:
+      format.internal_format = GL_RGBA16_EXT;
+      format.external_format = GL_RGBA;
+      format.type = GL_UNSIGNED_SHORT;
+      break;
     case PixelFormat::kS8UInt:
       // Pure stencil textures are only available in OpenGL 4.4+, which is
       // ~0% of mobile devices. Instead, we use a depth-stencil texture and

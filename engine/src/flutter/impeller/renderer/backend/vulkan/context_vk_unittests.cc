@@ -285,6 +285,34 @@ TEST(CapabilitiesVKTest, Float16FormatsNeedEveryFormat) {
   EXPECT_FALSE(context->GetCapabilities()->SupportsFloat16Formats());
 }
 
+TEST(CapabilitiesVKTest, ReportsNorm16FormatSupport) {
+  const std::shared_ptr<ContextVK> context =
+      MockVulkanContextBuilder()
+          .SetPhysicalDeviceFormatPropertiesCallback(
+              FormatPropertiesWithSampleable({
+                  VK_FORMAT_R16_UNORM,
+                  VK_FORMAT_R16_SNORM,
+                  VK_FORMAT_R16G16_UNORM,
+                  VK_FORMAT_R16G16_SNORM,
+                  VK_FORMAT_R16G16B16A16_UNORM,
+              }))
+          .Build();
+  ASSERT_NE(context, nullptr);
+  EXPECT_TRUE(context->GetCapabilities()->SupportsNorm16Formats());
+}
+
+TEST(CapabilitiesVKTest, Norm16FormatsNeedEveryFormat) {
+  // A device with R16 but without SNorm or RGBA16 reports no support.
+  const std::shared_ptr<ContextVK> context =
+      MockVulkanContextBuilder()
+          .SetPhysicalDeviceFormatPropertiesCallback(
+              FormatPropertiesWithSampleable(
+                  {VK_FORMAT_R16_UNORM, VK_FORMAT_R16G16_UNORM}))
+          .Build();
+  ASSERT_NE(context, nullptr);
+  EXPECT_FALSE(context->GetCapabilities()->SupportsNorm16Formats());
+}
+
 // Impeller's 2D renderer relies on hardware support for a combined
 // depth-stencil format (widely supported). So fail initialization if a suitable
 // one couldn't be found. That way we have an opportunity to fallback to
