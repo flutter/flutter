@@ -196,7 +196,7 @@ vars = {
   # The version / instance id of the cipd:chromium/fuchsia/test-scripts which
   # will be used altogether with fuchsia-sdk to setup the build / test
   # environment.
-  'fuchsia_test_scripts_version': 'oEU515sDqSTvD8SpxKQZK5U4uzo-VV_raZOIqsDjE-oC',
+  'fuchsia_test_scripts_version': 'GPtykFNizlaauBqzsZ7qruRcCVG6LgcBM23akavMs-gC',
 
   # The version / instance id of the cipd:chromium/fuchsia/gn-sdk which will be
   # used altogether with fuchsia-sdk to generate gn based build rules.
