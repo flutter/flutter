@@ -30,7 +30,19 @@ class PipelineLibraryVK final
   // |PipelineLibrary|
   ~PipelineLibraryVK() override;
 
+  /// @brief Called each time a surface frame is acquired, on the thread that
+  ///        acquires it (the raster thread in Flutter). Periodically persists
+  ///        the pipeline cache.
   void DidAcquireSurfaceFrame();
+
+  /// @brief Asynchronously persists the Vulkan pipeline cache to disk if
+  ///        pipelines have been created since the last persist was posted.
+  ///
+  ///        Called from `DidAcquireSurfaceFrame` and
+  ///        `SurfaceContextVK::TeardownSwapchain` (on the raster thread in
+  ///        Flutter). The persist itself is posted to the context's concurrent
+  ///        worker threads (see `PipelineCacheVK::PersistCacheToDisk`).
+  void PersistPipelineCacheToDisk();
 
   const std::shared_ptr<PipelineCacheVK>& GetPSOCache() const;
 
@@ -48,7 +60,10 @@ class PipelineLibraryVK final
   std::atomic_size_t frames_acquired_ = 0u;
   PipelineKey pipeline_key_ IPLR_GUARDED_BY(pipelines_mutex_) = 1;
   bool is_valid_ = false;
-  bool cache_dirty_ = false;
+  /// Whether a pipeline has been created since the last persist was posted.
+  /// Set on the thread that creates the pipeline, and cleared when a persist
+  /// is posted.
+  std::atomic_bool cache_dirty_ = false;
   std::shared_ptr<PipelineCompileQueueVulkan> compile_queue_;
 
   PipelineLibraryVK(
@@ -84,8 +99,6 @@ class PipelineLibraryVK final
   std::unique_ptr<ComputePipelineVK> CreateComputePipeline(
       const ComputePipelineDescriptor& desc,
       PipelineKey pipeline_key);
-
-  void PersistPipelineCacheToDisk();
 
   PipelineLibraryVK(const PipelineLibraryVK&) = delete;
 
