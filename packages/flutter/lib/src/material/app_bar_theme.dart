@@ -230,6 +230,12 @@ class AppBarTheme extends InheritedTheme with Diagnosticable {
 
   /// Overrides the default value of [AppBar.systemOverlayStyle]
   /// property in all descendant [AppBar] widgets.
+  ///
+  /// See also:
+  ///
+  ///  * [SystemChrome.setSystemUIOverlayStyle], which explains how system
+  ///    overlay styles are applied, including through an
+  ///    `AnnotatedRegion<SystemUiOverlayStyle>`.
   SystemUiOverlayStyle? get systemOverlayStyle =>
       _data != null ? _data.systemOverlayStyle : _systemOverlayStyle;
 
@@ -461,6 +467,12 @@ class AppBarThemeData with Diagnosticable {
   final TextStyle? titleTextStyle;
 
   /// Overrides the default value of [AppBar.systemOverlayStyle].
+  ///
+  /// See also:
+  ///
+  ///  * [SystemChrome.setSystemUIOverlayStyle], which explains how system
+  ///    overlay styles are applied, including through an
+  ///    `AnnotatedRegion<SystemUiOverlayStyle>`.
   final SystemUiOverlayStyle? systemOverlayStyle;
 
   /// Overrides the default value of [AppBar.actionsPadding].
