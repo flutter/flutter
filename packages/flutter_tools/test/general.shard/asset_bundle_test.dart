@@ -1322,6 +1322,70 @@ flutter:
     expect(bundle.needsBuild(), false);
   });
 
+  for (final style in <FileSystemStyle>[FileSystemStyle.posix, FileSystemStyle.windows]) {
+    final platform = FakePlatform(
+      operatingSystem: style == FileSystemStyle.windows ? 'windows' : 'linux',
+    );
+    for (final assetName in <String>['assets/image.png', 'assets/2x/image.png']) {
+      testWithoutContext(
+        'rejects a hook asset that targets $assetName on ${platform.operatingSystem}',
+        () async {
+          final fs = MemoryFileSystem.test(style: style);
+          final logger = BufferLogger.test();
+          writePackageConfigFiles(
+            directory: fs.currentDirectory,
+            mainLibName: 'my_app',
+            packages: <String, String>{'foo': 'foo'},
+          );
+          fs.file('pubspec.yaml').writeAsStringSync('''
+name: my_app
+dependencies:
+  foo: any
+''');
+          fs.file(fs.path.join('foo', 'pubspec.yaml'))
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: foo
+flutter:
+  assets:
+    - assets/image.png
+''');
+          fs.file(fs.path.join('foo', 'assets', 'image.png')).createSync(recursive: true);
+          fs.file(fs.path.join('foo', 'assets', '2x', 'image.png')).createSync(recursive: true);
+          final File generatedAsset = fs.file(fs.path.join('.dart_tool', 'generated.png'))
+            ..createSync();
+          final DateTime timestamp = generatedAsset.lastModifiedSync();
+          final bundle = ManifestAssetBundle(
+            logger: logger,
+            fileSystem: fs,
+            platform: platform,
+            flutterRoot: getFlutterRoot(),
+          );
+
+          expect(
+            await bundle.build(
+              packageConfigPath: fs.path.join('.dart_tool', 'package_config.json'),
+              targetPlatform: TargetPlatform.tester,
+              flutterHookResult: FlutterHookResult(
+                buildStart: timestamp,
+                buildEnd: timestamp,
+                dataAssets: <HookAsset>[
+                  HookAsset(file: generatedAsset.uri, name: assetName, package: 'foo'),
+                ],
+                dependencies: const <Uri>[],
+              ),
+            ),
+            1,
+          );
+          expect(
+            logger.errorText,
+            contains('Conflicting assets: The asset "asset: packages/foo/$assetName"'),
+          );
+        },
+      );
+    }
+  }
+
   testWithoutContext('reports package that causes asset bundle error when it is '
       'a dependency', () async {
     final fs = MemoryFileSystem.test();
