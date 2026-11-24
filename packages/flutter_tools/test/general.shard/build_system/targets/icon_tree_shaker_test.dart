@@ -783,6 +783,63 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
+  test(
+    'recordedUsesFileNames restricts candidate files and ignores stale recorded_uses_wasm.json',
+    () async {
+      final Environment environment = createEnvironment(<String, String>{
+        kIconTreeShakerFlag: 'true',
+        kBuildMode: 'release',
+      });
+      final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
+
+      final iconTreeShaker = IconTreeShaker(
+        environment,
+        fontManifestContent,
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        targetPlatform: TargetPlatform.web_javascript,
+        recordedUsesFileNames: const <String>['recorded_uses_js.json'],
+      );
+
+      writeRecordedUsesFile(
+        appDill.path,
+        content: validRecordedUsesResult,
+        fileName: 'recorded_uses_js.json',
+      );
+      writeRecordedUsesFile(
+        appDill.path,
+        content: validRecordedUsesSecondResult,
+        fileName: 'recorded_uses_wasm.json',
+      );
+
+      final stdinSink = CompleterIOSink();
+      resetFontSubsetInvocation(stdinSink: stdinSink);
+
+      final File inputFont = fileSystem.file(inputPath)
+        ..writeAsBytesSync(List<int>.filled(2500, 0));
+      fileSystem.file(outputPath)
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(List<int>.filled(1200, 0));
+
+      expect(
+        await iconTreeShaker.subsetFont(
+          input: inputFont,
+          outputPath: outputPath,
+          relativePath: relativePath,
+        ),
+        true,
+      );
+
+      final String stdin = stdinSink.getAndClear();
+      expect(stdin, contains('59470'));
+      expect(stdin, isNot(contains('59471')));
+      expect(stdin, contains('optional:32'));
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
+
   test('Non-constant instance of non-Flutter IconData does not fail icon tree shaking', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
