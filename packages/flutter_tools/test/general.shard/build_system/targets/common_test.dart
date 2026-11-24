@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -55,6 +54,7 @@ void main() {
       },
       inputs: <String, String>{},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
@@ -68,6 +68,7 @@ void main() {
       },
       inputs: <String, String>{},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
@@ -91,15 +92,15 @@ void main() {
     iosEnvironment.buildDir.createSync(recursive: true);
   });
 
-  testUsingContext('KernelSnapshot throws error if missing build mode', () async {
+  testWithoutContext('KernelSnapshot throws error if missing build mode', () async {
     androidEnvironment.defines.remove(kBuildMode);
     expect(
       const KernelSnapshot().build(androidEnvironment),
       throwsA(isA<MissingDefineException>()),
     );
-  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
+  });
 
-  testUsingContext('KernelSnapshot handles null result from kernel compilation', () async {
+  testWithoutContext('KernelSnapshot handles null result from kernel compilation', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
@@ -140,9 +141,9 @@ void main() {
 
     await expectLater(() => const KernelSnapshot().build(androidEnvironment), throwsException);
     expect(processManager, hasNoRemainingExpectations);
-  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
+  });
 
-  testUsingContext('KernelSnapshot does use track widget creation on profile builds', () async {
+  testWithoutContext('KernelSnapshot does use track widget creation on profile builds', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
@@ -187,9 +188,9 @@ void main() {
     await const KernelSnapshot().build(androidEnvironment);
 
     expect(processManager, hasNoRemainingExpectations);
-  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
+  });
 
-  testUsingContext(
+  testWithoutContext(
     'KernelSnapshot correctly handles an empty string in ExtraFrontEndOptions',
     () async {
       fileSystem.file('.dart_tool/package_config.json')
@@ -237,10 +238,9 @@ void main() {
 
       expect(processManager, hasNoRemainingExpectations);
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
   );
 
-  testUsingContext('KernelSnapshot correctly forwards FrontendServerStarterPath', () async {
+  testWithoutContext('KernelSnapshot correctly forwards FrontendServerStarterPath', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
@@ -288,9 +288,9 @@ void main() {
     );
 
     expect(processManager, hasNoRemainingExpectations);
-  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
+  });
 
-  testUsingContext('KernelSnapshot correctly forwards ExtraFrontEndOptions', () async {
+  testWithoutContext('KernelSnapshot correctly forwards ExtraFrontEndOptions', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
@@ -339,9 +339,9 @@ void main() {
     );
 
     expect(processManager, hasNoRemainingExpectations);
-  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
+  });
 
-  testUsingContext('KernelSnapshot can disable track-widget-creation on debug builds', () async {
+  testWithoutContext('KernelSnapshot can disable track-widget-creation on debug builds', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
@@ -386,7 +386,7 @@ void main() {
     );
 
     expect(processManager, hasNoRemainingExpectations);
-  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
+  });
 
   testUsingContext(
     'KernelSnapshot forces platform linking on debug for darwin target platforms',
@@ -640,7 +640,7 @@ void main() {
     },
   );
 
-  testUsingContext('KernelSnapshot does use track widget creation on debug builds', () async {
+  testWithoutContext('KernelSnapshot does use track widget creation on debug builds', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
@@ -652,6 +652,7 @@ void main() {
       },
       processManager: processManager,
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       fileSystem: fileSystem,
       logger: logger,
     );
@@ -694,7 +695,7 @@ void main() {
     await const KernelSnapshot().build(testEnvironment);
 
     expect(processManager, hasNoRemainingExpectations);
-  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
+  });
 
   testWithoutContext('AotSnapshotProfile Produces correct output directory', () async {
     final String build = androidEnvironment.buildDir.path;

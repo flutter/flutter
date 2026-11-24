@@ -15,6 +15,7 @@ class AppDelegate: FlutterAppDelegate {
 
   override func applicationDidFinishLaunching(_ notification: Notification) {
     engine = FlutterEngine(name: "project", project: nil)
-    engine?.run(withEntrypoint:nil)
+    RegisterGeneratedPlugins(registry: engine!)
+    engine!.run(withEntrypoint:nil)
   }
 }
