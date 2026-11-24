@@ -10,6 +10,7 @@ template("shader_archive") {
   assert(defined(invoker.deps), "Target dependencies must be specified.")
 
   output_file = "$target_gen_dir/$target_name.shar"
+
   compiled_action(target_name) {
     mnemonic = "SHADER_ARCHIVE"
     tool = "//flutter/impeller/shader_archive:shader_archiver"

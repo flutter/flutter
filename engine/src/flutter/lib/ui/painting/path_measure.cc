@@ -41,10 +41,6 @@ CanvasPathMeasure::CanvasPathMeasure() {}
 
 CanvasPathMeasure::~CanvasPathMeasure() {}
 
-void CanvasPathMeasure::setPath(const CanvasPath* path, bool isClosed) {
-  path_measure_->reset(path->path().GetSkPath(), isClosed);
-}
-
 double CanvasPathMeasure::getLength(int contour_index) {
   if (static_cast<std::vector<sk_sp<SkContourMeasure>>::size_type>(
           contour_index) < measures_.size()) {
@@ -62,7 +58,7 @@ tonic::Float32List CanvasPathMeasure::getPosTan(int contour_index,
     return posTan;
   }
 
-  SkPoint pos;
+  SkPoint pos{};
   SkVector tan;
   float fdistance = SafeNarrow(distance);
   bool success = measures_[contour_index]->getPosTan(fdistance, &pos, &tan);

@@ -7,12 +7,10 @@ import 'dart:typed_data';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../src/common.dart';
@@ -20,13 +18,22 @@ import '../src/context.dart';
 import '../src/package_config.dart';
 
 void main() {
+  late FileSystem testFileSystem;
+
+  AssetBundle createBundle() => AssetBundleFactory.defaultInstance(
+    fileSystem: testFileSystem,
+    flutterRoot: getFlutterRoot(),
+    logger: testLogger,
+    platform: const LocalPlatform(),
+  ).createBundle();
+
   String fixPath(String path) {
     // The in-memory file system is strict about slashes on Windows being the
     // correct way so until https://github.com/google/file.dart/issues/112 is
     // fixed we fix them here.
     // TODO(dantup): Remove this function once the above issue is fixed and
     // rolls into Flutter.
-    return path.replaceAll('/', globals.fs.path.separator);
+    return path.replaceAll('/', testFileSystem.path.separator);
   }
 
   void writePubspecFile(
@@ -65,7 +72,7 @@ flutter:
 
     dependencies = dependencies ?? <String, String>{};
 
-    globals.fs.file(fixPath(path))
+    testFileSystem.file(fixPath(path))
       ..createSync(recursive: true)
       ..writeAsStringSync('''
 name: $name
@@ -83,7 +90,7 @@ $assetsSection
     Map<Object, Object> expectedAssetManifest, {
     String? flavor,
   }) async {
-    final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+    final AssetBundle bundle = createBundle();
     await bundle.build(
       packageConfigPath: '.dart_tool/package_config.json',
       flavor: flavor,
@@ -109,19 +116,17 @@ $assetsSection
 
   void writeAssets(String path, List<String> assets) {
     for (final asset in assets) {
-      final String fullPath = fixPath(globals.fs.path.join(path, asset));
+      final String fullPath = fixPath(testFileSystem.path.join(path, asset));
 
-      globals.fs.file(fullPath)
+      testFileSystem.file(fullPath)
         ..createSync(recursive: true)
         ..writeAsStringSync(asset);
     }
   }
 
-  late FileSystem testFileSystem;
-
   setUp(() async {
     testFileSystem = MemoryFileSystem(
-      style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+      style: const LocalPlatform().isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
     );
     testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync(
       'flutter_asset_bundle_test.',
@@ -134,7 +139,7 @@ $assetsSection
       () async {
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
           packages: <String, String>{'test_package': 'p/p/'},
           mainLibName: 'test',
         );
@@ -147,7 +152,7 @@ $assetsSection
           assets: <String>['../../../escaped_secret'],
         );
 
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createBundle();
         expect(
           () => bundle.build(
             packageConfigPath: '.dart_tool/package_config.json',
@@ -167,7 +172,7 @@ $assetsSection
       () async {
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
           packages: <String, String>{'test_package': 'p/p/'},
           mainLibName: 'test',
         );
@@ -175,7 +180,7 @@ $assetsSection
         // directory. Without containment this would read a file outside the package on the
         // build machine and bundle its contents into the consuming app's NOTICES, which the
         // consuming app never declared.
-        globals.fs.file(fixPath('p/p/pubspec.yaml'))
+        testFileSystem.file(fixPath('p/p/pubspec.yaml'))
           ..createSync(recursive: true)
           ..writeAsStringSync('''
 name: test_package
@@ -184,7 +189,7 @@ flutter:
     - ../../../escaped_secret
 ''');
 
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createBundle();
         expect(
           () => bundle.build(
             packageConfigPath: '.dart_tool/package_config.json',
@@ -204,13 +209,13 @@ flutter:
       () async {
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
           packages: <String, String>{'test_package': 'p/p/'},
           mainLibName: 'test',
         );
         writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           targetPlatform: TargetPlatform.tester,
@@ -232,7 +237,7 @@ flutter:
       () async {
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
           packages: <String, String>{'test_package': 'p/p/'},
           mainLibName: 'test',
         );
@@ -241,7 +246,7 @@ flutter:
         final assets = <String>['a/foo'];
         writeAssets('p/p/', assets);
 
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           targetPlatform: TargetPlatform.tester,
@@ -264,7 +269,7 @@ flutter:
       () async {
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
           packages: <String, String>{'test_package': 'p/p/'},
           mainLibName: 'test',
         );
@@ -295,7 +300,7 @@ flutter:
         final assetEntries = <String>['packages/test_package/a/foo'];
         writePubspecFile('pubspec.yaml', 'test', assets: assetEntries);
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
           packages: <String, String>{'test_package': 'p/p/'},
           mainLibName: 'test',
         );
@@ -323,7 +328,7 @@ flutter:
       () async {
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
           packages: <String, String>{'test_package': 'p/p/'},
           mainLibName: 'test',
         );
@@ -356,7 +361,7 @@ flutter:
       () async {
         writePubspecFile('pubspec.yaml', 'test', assets: <String>['packages/test_package/a/foo']);
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
           mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/'},
         );
@@ -386,7 +391,7 @@ flutter:
       () async {
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
           mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/'},
         );
@@ -418,7 +423,7 @@ flutter:
         final assetEntries = <String>['packages/test_package/a/foo', 'packages/test_package/a/bar'];
         writePubspecFile('pubspec.yaml', 'test', assets: assetEntries);
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
           mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/'},
         );
@@ -449,7 +454,7 @@ flutter:
       () async {
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
           mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/', 'test_package2': 'p2/p/'},
         );
@@ -491,7 +496,7 @@ flutter:
         ];
         writePubspecFile('pubspec.yaml', 'test', assets: assetEntries);
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
           mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/', 'test_package2': 'p2/p/'},
         );
@@ -530,7 +535,7 @@ flutter:
       () async {
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
           mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/', 'test_package2': 'p2/p/'},
         );
@@ -564,7 +569,7 @@ flutter:
       () async {
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
           mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/'},
         );
@@ -602,7 +607,7 @@ flutter:
     () async {
       writePubspecFile('pubspec.yaml', 'test');
       writePackageConfigFiles(
-        directory: globals.fs.currentDirectory,
+        directory: testFileSystem.currentDirectory,
         mainLibName: 'test',
         packages: <String, String>{'test_package': 'p/p/'},
       );
@@ -633,7 +638,7 @@ flutter:
     () async {
       writePubspecFile('pubspec.yaml', 'test');
       writePackageConfigFiles(
-        directory: globals.fs.currentDirectory,
+        directory: testFileSystem.currentDirectory,
         mainLibName: 'test',
         packages: <String, String>{'test_package': 'p/p/'},
       );
@@ -665,7 +670,7 @@ flutter:
       () async {
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
           mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/'},
         );
@@ -698,7 +703,7 @@ flutter:
       () async {
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
           mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/'},
         );
@@ -731,7 +736,7 @@ flutter:
       () async {
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
           mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/'},
         );
@@ -743,7 +748,7 @@ flutter:
 
         writeAssets('p/p/', assetsOnDisk);
 
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           targetPlatform: TargetPlatform.tester,
@@ -768,7 +773,7 @@ flutter:
       () async {
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
           mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/'},
         );
@@ -798,7 +803,7 @@ flutter:
       () async {
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
           mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/'},
         );
@@ -826,7 +831,7 @@ flutter:
       () async {
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
           mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/'},
         );
@@ -835,7 +840,7 @@ flutter:
 
         writePubspecFile('p/p/pubspec.yaml', 'test_package', assets: assetOnManifest);
 
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           targetPlatform: TargetPlatform.tester,
@@ -853,7 +858,7 @@ flutter:
         final assetEntries = <String>['packages/test_package/a/'];
         writePubspecFile('pubspec.yaml', 'test', assets: assetEntries);
         writePackageConfigFiles(
-          directory: globals.fs.currentDirectory,
+          directory: testFileSystem.currentDirectory,
           mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/'},
         );
@@ -884,9 +889,9 @@ flutter:
       () async {
         final assetEntries = <String>['packages/'];
         writePubspecFile('pubspec.yaml', 'test', assets: assetEntries);
-        writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'test');
+        writePackageConfigFiles(directory: testFileSystem.currentDirectory, mainLibName: 'test');
 
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           targetPlatform: TargetPlatform.tester,

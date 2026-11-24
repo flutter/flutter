@@ -28,7 +28,6 @@ import 'analysis_server_mock.dart';
 void main() {
   setUpAll(() {
     Cache.disableLocking();
-    Cache.flutterRoot = getFlutterRoot();
   });
 
   late Directory tempDir;
@@ -98,12 +97,14 @@ void main() {
     final server = AnalysisServer(
       'Artifact.engineDartSdkPath',
       <String>[tempDir.path],
-      fileSystem: fileSystem,
-      platform: FakePlatform(),
-      processManager: processManager,
-      logger: logger,
-      terminal: terminal,
       suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+        terminal: terminal,
+      ),
     );
 
     var errorCount = 0;
@@ -146,12 +147,14 @@ void main() {
       final server = AnalysisServer(
         'Artifact.engineDartSdkPath',
         <String>[tempDir.path],
-        fileSystem: fileSystem,
-        platform: FakePlatform(),
-        processManager: processManager,
-        logger: logger,
-        terminal: terminal,
         suppressAnalytics: true,
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+          terminal: terminal,
+        ),
       );
 
       await server.start();
@@ -216,12 +219,14 @@ void main() {
       final server = AnalysisServer(
         'Artifact.engineDartSdkPath',
         <String>[tempDir.path],
-        fileSystem: fileSystem,
-        platform: FakePlatform(),
-        processManager: processManager,
-        logger: logger,
-        terminal: terminal,
         suppressAnalytics: true,
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+          terminal: terminal,
+        ),
       );
 
       final analyzingEvents = <bool>[];
@@ -266,12 +271,14 @@ void main() {
     final server = AnalysisServer(
       'Artifact.engineDartSdkPath',
       <String>[tempDir.path],
-      fileSystem: fileSystem,
-      platform: FakePlatform(),
-      processManager: processManager,
-      logger: logger,
-      terminal: terminal,
       suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+        terminal: terminal,
+      ),
     );
 
     var errorCount = 0;
@@ -312,12 +319,14 @@ void main() {
     final server = AnalysisServer(
       'Artifact.engineDartSdkPath',
       <String>[tempDir.path],
-      fileSystem: fileSystem,
-      platform: FakePlatform(),
-      processManager: processManager,
-      logger: logger,
-      terminal: terminal,
       suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+        terminal: terminal,
+      ),
     );
 
     var errorCount = 0;
@@ -358,12 +367,14 @@ void main() {
     final server = AnalysisServer(
       'Artifact.engineDartSdkPath',
       <String>[tempDir.path],
-      fileSystem: fileSystem,
-      platform: FakePlatform(),
-      processManager: processManager,
-      logger: logger,
-      terminal: terminal,
       suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+        terminal: terminal,
+      ),
     );
 
     var errorCount = 0;
@@ -389,6 +400,7 @@ void main() {
           'Artifact.engineDartSdkPath',
           '--disable-server-feature-completion',
           '--disable-server-feature-search',
+          '--client-id=flutter-analyze',
         ],
         process: process,
       ),
@@ -426,6 +438,7 @@ void main() {
           'Artifact.engineDartSdkPath',
           '--disable-server-feature-completion',
           '--disable-server-feature-search',
+          '--client-id=flutter-analyze',
           '--suppress-analytics',
         ],
         process: process,
@@ -464,6 +477,7 @@ void main() {
           'Artifact.engineDartSdkPath',
           '--disable-server-feature-completion',
           '--disable-server-feature-search',
+          '--client-id=flutter-analyze',
           '--suppress-analytics',
         ],
         process: process,
@@ -515,6 +529,7 @@ void main() {
           'Artifact.engineDartSdkPath',
           '--disable-server-feature-completion',
           '--disable-server-feature-search',
+          '--client-id=flutter-analyze',
           '--suppress-analytics',
         ],
         process: process,
@@ -570,6 +585,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
             '--suppress-analytics',
           ],
           process: process,
@@ -618,6 +634,7 @@ void main() {
           'Artifact.engineDartSdkPath',
           '--disable-server-feature-completion',
           '--disable-server-feature-search',
+          '--client-id=flutter-analyze',
           '--suppress-analytics',
         ],
         process: process,

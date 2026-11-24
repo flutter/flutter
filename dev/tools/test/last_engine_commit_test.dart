@@ -12,6 +12,8 @@ import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 import 'package:test/test.dart';
 
+import 'temp_git_repo_utils.dart';
+
 //////////////////////////////////////////////////////////////////////
 //                                                                  //
 //  ✨ THINKING OF MOVING/REFACTORING THIS FILE? READ ME FIRST! ✨  //
@@ -99,7 +101,7 @@ void main() {
       forcePowershell: usePowershellOnPosix,
     );
 
-    environment = <String, String>{};
+    environment = <String, String>{...kDisableGitAutoMaintenanceEnvironment};
 
     if (const LocalPlatform().isWindows || usePowershellOnPosix) {
       // Copy a minimal set of environment variables needed to run the update_engine_version script in PowerShell.
@@ -120,8 +122,8 @@ void main() {
     initGitRepoWithBlankInitialCommit();
   });
 
-  tearDown(() {
-    tmpDir.deleteSync(recursive: true);
+  tearDown(() async {
+    await deleteTempDirectory(tmpDir);
   });
 
   /// Runs `bin/internal/last_engine_commit.{sh|ps1}` and returns the stdout.

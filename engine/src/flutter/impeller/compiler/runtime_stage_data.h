@@ -23,11 +23,11 @@ class RuntimeStageData {
     Shader() = default;
 
     std::string entrypoint;
-    spv::ExecutionModel stage;
+    spv::ExecutionModel stage = spv::ExecutionModelVertex;
     std::vector<UniformDescription> uniforms;
     std::vector<InputDescription> inputs;
     std::shared_ptr<fml::Mapping> shader;
-    RuntimeStageBackend backend;
+    RuntimeStageBackend backend = RuntimeStageBackend::kSkSL;
 
     Shader(const Shader&) = delete;
     Shader& operator=(const Shader&) = delete;

@@ -33,6 +33,8 @@ import 'package:vector_math/vector_math.dart' as vm;
 part 'src/binding_set.dart';
 part 'src/buffer.dart';
 part 'src/command_buffer.dart';
+part 'src/compute_pass.dart';
+part 'src/compute_pipeline.dart';
 part 'src/context.dart';
 part 'src/formats.dart';
 part 'src/natives.dart';
