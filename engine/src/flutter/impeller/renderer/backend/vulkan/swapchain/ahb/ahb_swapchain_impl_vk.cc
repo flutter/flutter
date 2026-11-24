@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/backend/vulkan/swapchain/ahb/ahb_swapchain_impl_vk.h"
 
+#include <algorithm>
+
 #include "fml/closure.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
@@ -111,6 +113,12 @@ AHBSwapchainImplVK::~AHBSwapchainImplVK() {
   // Ensure that the Vulkan device is idle before destroying objects that the
   // device may have been using.
   WaitIdle();
+  {
+    Lock lock(currently_displayed_texture_mutex_);
+    in_flight_textures_.clear();
+    currently_displayed_texture_.reset();
+  }
+  pool_.reset();
 }
 
 const ISize& AHBSwapchainImplVK::GetSize() const {
@@ -230,14 +238,33 @@ bool AHBSwapchainImplVK::Present(
     return false;
   }
   const uint64_t present_id = next_present_id_++;
-  return transaction.Apply([texture, present_id, weak = weak_from_this()](
-                               ASurfaceTransactionStats* stats) {
-    auto thiz = weak.lock();
-    if (!thiz) {
-      return;
+  {
+    Lock lock(currently_displayed_texture_mutex_);
+    in_flight_textures_.push_back(texture);
+  }
+  // Only capture the HardwareBuffer (not AHBTextureSourceVK) in the
+  // transaction completion callback so that Vulkan resources are destroyed
+  // deterministically during swapchain teardown before vkDestroyDevice.
+  const bool applied = transaction.Apply(
+      [present_id, weak = weak_from_this(),
+       weak_texture = std::weak_ptr<AHBTextureSourceVK>(texture),
+       backing_store =
+           texture->GetSharedBackingStore()](ASurfaceTransactionStats* stats) {
+        auto thiz = weak.lock();
+        if (!thiz) {
+          return;
+        }
+        thiz->OnTextureUpdatedOnSurfaceControl(weak_texture, stats, present_id);
+      });
+  if (!applied) {
+    Lock lock(currently_displayed_texture_mutex_);
+    auto it = std::find(in_flight_textures_.begin(), in_flight_textures_.end(),
+                        texture);
+    if (it != in_flight_textures_.end()) {
+      in_flight_textures_.erase(it);
     }
-    thiz->OnTextureUpdatedOnSurfaceControl(texture, stats, present_id);
-  });
+  }
+  return applied;
 }
 
 void AHBSwapchainImplVK::AddFinalCommandBuffer(
@@ -362,11 +389,16 @@ bool AHBSwapchainImplVK::ImportRenderReady(
 }
 
 void AHBSwapchainImplVK::OnTextureUpdatedOnSurfaceControl(
-    std::shared_ptr<AHBTextureSourceVK> texture,
+    const std::weak_ptr<AHBTextureSourceVK>& weak_texture,
     ASurfaceTransactionStats* stats,
     uint64_t present_id) {
   auto control = surface_control_.lock();
   if (!control) {
+    return;
+  }
+
+  auto texture = weak_texture.lock();
+  if (!texture) {
     return;
   }
 
@@ -387,15 +419,23 @@ void AHBSwapchainImplVK::OnTextureUpdatedOnSurfaceControl(
   // the newer callback before the older, superseded callback. Track the
   // monotonic present ID so a superseded callback recycles its own dropped
   // texture directly instead of displacing the currently displayed texture.
-  Lock lock(currently_displayed_texture_mutex_);
-  if (present_id > last_completed_present_id_) {
-    last_completed_present_id_ = present_id;
-    auto old_texture = currently_displayed_texture_;
-    currently_displayed_texture_ = std::move(texture);
-    pool_->Push(std::move(old_texture), std::move(render_ready_fence));
-  } else {
-    pool_->Push(std::move(texture), std::move(render_ready_fence));
+  std::shared_ptr<AHBTextureSourceVK> texture_to_recycle;
+  {
+    Lock lock(currently_displayed_texture_mutex_);
+    auto it = std::find(in_flight_textures_.begin(), in_flight_textures_.end(),
+                        texture);
+    if (it != in_flight_textures_.end()) {
+      in_flight_textures_.erase(it);
+    }
+    if (present_id > last_completed_present_id_) {
+      last_completed_present_id_ = present_id;
+      texture_to_recycle = std::move(currently_displayed_texture_);
+      currently_displayed_texture_ = std::move(texture);
+    } else {
+      texture_to_recycle = std::move(texture);
+    }
   }
+  pool_->Push(std::move(texture_to_recycle), std::move(render_ready_fence));
 }
 
 }  // namespace impeller
