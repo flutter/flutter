@@ -265,6 +265,26 @@ void main() {
       expect(logger.checkForFatalLogs, returnsNormally);
     });
 
+    testWithoutContext('Intel Mac warning on macOS X64 is not fatal in verbose mode', () async {
+      final verboseLogger = VerboseLogger(logger);
+      final flutterCommand = DummyFlutterCommand(
+        noUsagePath: true,
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: verboseLogger,
+          os: FakeOperatingSystemUtils(hostPlatform: .darwin_x64),
+          processManager: processManager,
+        ),
+      );
+      verboseLogger.fatalWarnings = true;
+
+      await flutterCommand.run();
+
+      expect(logger.warningText, contains('Flutter is deprecating support for Intel-based Macs.'));
+      expect(verboseLogger.hadWarningOutput, isFalse);
+      expect(verboseLogger.checkForFatalLogs, returnsNormally);
+    });
+
     testUsingContext(
       'prints warning when enable-impeller flag is used with release build',
       () async {
