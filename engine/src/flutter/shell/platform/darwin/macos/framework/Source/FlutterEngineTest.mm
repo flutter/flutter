@@ -312,7 +312,7 @@ TEST_F(FlutterEngineTest, EnableSkoreTextCommandLineTrueOverridesInfoPlistFalse)
 }
 #endif  // !FLUTTER_RELEASE
 
-TEST_F(FlutterEngineTest, EnableSkUnicodeAppleDefaultsToNo) {
+TEST_F(FlutterEngineTest, EnableSkUnicodeAppleDefaultsToYes) {
   id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
   OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableSkUnicodeApple"]).andReturn(nil);
 
@@ -320,7 +320,7 @@ TEST_F(FlutterEngineTest, EnableSkUnicodeAppleDefaultsToNo) {
   FlutterDartProject* project = [[FlutterDartProject alloc]
       initWithAssetsPath:fixtures
              ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
-  EXPECT_FALSE([project enableSkUnicodeApple]);
+  EXPECT_TRUE([project enableSkUnicodeApple]);
 
   FlutterEngine* engine = GetFlutterEngine();
   std::vector<std::string> captured_args;
@@ -335,9 +335,36 @@ TEST_F(FlutterEngineTest, EnableSkUnicodeAppleDefaultsToNo) {
         return original_init(version, config, args, user_data, engine_out);
       }));
   EXPECT_TRUE([engine runWithEntrypoint:@"main"]);
-  EXPECT_EQ(std::find(captured_args.begin(), captured_args.end(), "--enable-skunicode-apple=true"),
+  EXPECT_NE(std::find(captured_args.begin(), captured_args.end(), "--enable-skunicode-apple=true"),
             captured_args.end());
   EXPECT_EQ(std::find(captured_args.begin(), captured_args.end(), "--enable-skunicode-apple=false"),
+            captured_args.end());
+
+  [mockMainBundle stopMocking];
+}
+
+TEST_F(FlutterEngineTest, EnableSkUnicodeAppleDisabledFromInfoPlist) {
+  id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableSkUnicodeApple"]).andReturn(@NO);
+
+  FlutterEngine* engine = GetFlutterEngine();
+  EXPECT_FALSE([engine.project enableSkUnicodeApple]);
+
+  std::vector<std::string> captured_args;
+  auto original_init = engine.embedderAPI.Initialize;
+  engine.embedderAPI.Initialize = MOCK_ENGINE_PROC(
+      Initialize, ([&captured_args, &original_init](
+                       size_t version, const FlutterRendererConfig* config,
+                       const FlutterProjectArgs* args, void* user_data, auto engine_out) {
+        for (int i = 0; i < args->command_line_argc; ++i) {
+          captured_args.emplace_back(args->command_line_argv[i]);
+        }
+        return original_init(version, config, args, user_data, engine_out);
+      }));
+  EXPECT_TRUE([engine runWithEntrypoint:@"main"]);
+  EXPECT_NE(std::find(captured_args.begin(), captured_args.end(), "--enable-skunicode-apple=false"),
+            captured_args.end());
+  EXPECT_EQ(std::find(captured_args.begin(), captured_args.end(), "--enable-skunicode-apple=true"),
             captured_args.end());
 
   [mockMainBundle stopMocking];

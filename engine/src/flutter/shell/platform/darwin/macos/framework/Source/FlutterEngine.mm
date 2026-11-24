@@ -724,6 +724,8 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     // Already explicitly enabled via CLI switches.
   } else if (_project.enableSkUnicodeApple) {
     switches.push_back("--enable-skunicode-apple=true");
+  } else {
+    switches.push_back("--enable-skunicode-apple=false");
   }
 
   std::transform(switches.begin(), switches.end(), std::back_inserter(argv),

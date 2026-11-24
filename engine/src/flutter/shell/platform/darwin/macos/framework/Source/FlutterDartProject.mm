@@ -111,7 +111,7 @@ static NSString* const kAppBundleIdentifier = @"io.flutter.flutter.app";
   if (enableSkUnicodeApple != nil) {
     return enableSkUnicodeApple.boolValue;
   }
-  return NO;
+  return YES;
 }
 
 - (BOOL)enableSDFs {

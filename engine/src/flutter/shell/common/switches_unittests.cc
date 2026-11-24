@@ -220,7 +220,12 @@ TEST(SwitchesTest, EnableSkunicodeApple) {
     fml::CommandLine command_line =
         fml::CommandLineFromInitializerList({"command"});
     Settings settings = SettingsFromCommandLine(command_line);
+#if defined(FML_OS_MACOSX) || defined(FML_OS_IOS) || \
+    defined(FML_OS_IOS_SIMULATOR)
+    EXPECT_EQ(settings.enable_skunicode_apple, true);
+#else
     EXPECT_EQ(settings.enable_skunicode_apple, false);
+#endif
   }
 }
 
