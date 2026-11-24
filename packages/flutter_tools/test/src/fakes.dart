@@ -1299,9 +1299,9 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     this._devtoolsLauncher,
     this._doctor,
     this._emulatorManager,
-    this.extensionBuildManager,
-    this.extensionCleanManager,
-    this.extensionManager,
+    this._extensionBuildManager,
+    this._extensionCleanManager,
+    this._extensionManager,
     this._featureFlags,
     this.flutterHookRunner,
     this._macOSWorkflow,
@@ -1328,6 +1328,9 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   final DevtoolsLauncher? _devtoolsLauncher;
   final Doctor? _doctor;
   final EmulatorManager? _emulatorManager;
+  final ExtensionBuildManager? _extensionBuildManager;
+  final ExtensionCleanManager? _extensionCleanManager;
+  final ExtensionManager? _extensionManager;
   final FeatureFlags? _featureFlags;
   final MacOSWorkflow? _macOSWorkflow;
   final MDnsVmServiceDiscovery? _mdnsVmServiceDiscovery;
@@ -1398,13 +1401,25 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   EmulatorManager get emulatorManager => _emulatorManager ?? FakeEmulatorManager();
 
   @override
-  final ExtensionBuildManager? extensionBuildManager;
+  late final ExtensionBuildManager extensionBuildManager =
+      _extensionBuildManager ??
+      ExtensionBuildManager(
+        extensionManager: extensionManager,
+        featureFlags: featureFlags,
+        logger: _logger,
+      );
 
   @override
-  final ExtensionCleanManager? extensionCleanManager;
+  late final ExtensionCleanManager extensionCleanManager =
+      _extensionCleanManager ??
+      ExtensionCleanManager(
+        extensionManager: extensionManager,
+        featureFlags: featureFlags,
+        logger: _logger,
+      );
 
   @override
-  final ExtensionManager? extensionManager;
+  late final ExtensionManager extensionManager = _extensionManager ?? FakeExtensionManager();
 
   @override
   FeatureFlags get featureFlags => _featureFlags ?? TestFeatureFlags();

@@ -156,7 +156,6 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryVK::GetPipeline(
     return found->second;
   }
 
-  cache_dirty_ = true;
   if (!IsValid()) {
     return {
         descriptor,
@@ -179,12 +178,18 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryVK::GetPipeline(
       return;
     }
 
-    promise->set_value(PipelineVK::Create(
+    auto pipeline = PipelineVK::Create(
         descriptor,                                            //
         PipelineLibraryVK::Cast(*thiz).device_holder_.lock(),  //
         weak_this,                                             //
         next_key                                               //
-        ));
+    );
+    if (pipeline) {
+      // Only mark the cache dirty once the pipeline has been created, as that
+      // is when it is added to the Vulkan pipeline cache.
+      PipelineLibraryVK::Cast(*thiz).cache_dirty_ = true;
+    }
+    promise->set_value(std::move(pipeline));
   };
 
   if (async) {
@@ -207,7 +212,6 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryVK::GetPipeline(
     return found->second;
   }
 
-  cache_dirty_ = true;
   if (!IsValid()) {
     return {
         descriptor,
@@ -241,6 +245,9 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryVK::GetPipeline(
       return;
     }
 
+    // Only mark the cache dirty once the pipeline has been created, as that is
+    // when it is added to the Vulkan pipeline cache.
+    PipelineLibraryVK::Cast(*self).cache_dirty_ = true;
     promise->set_value(std::move(pipeline));
   };
 
@@ -281,15 +288,15 @@ void PipelineLibraryVK::RemovePipelinesWithEntryPoint(
 
 void PipelineLibraryVK::DidAcquireSurfaceFrame() {
   if (++frames_acquired_ == 50u) {
-    if (cache_dirty_) {
-      cache_dirty_ = false;
-      PersistPipelineCacheToDisk();
-    }
+    PersistPipelineCacheToDisk();
     frames_acquired_ = 0;
   }
 }
 
 void PipelineLibraryVK::PersistPipelineCacheToDisk() {
+  if (!cache_dirty_.exchange(false)) {
+    return;
+  }
   worker_task_runner_->PostTask(
       [weak_cache = decltype(pso_cache_)::weak_type(pso_cache_)]() {
         auto cache = weak_cache.lock();
