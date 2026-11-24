@@ -194,7 +194,8 @@ class EnginePictureRecorder implements ui.PictureRecorder {
 
   /// Retains the image sources drawn into the recording canvas.
   ///
-  /// Ownership passes to the recorded picture when [endRecording] is called.
+  /// Ownership passes to the recorded picture when [endRecording] is called,
+  /// if any image sources were recorded.
   final PictureImageTracker tracker = PictureImageTracker();
 
   _RecorderState _state = _RecorderState.idle;

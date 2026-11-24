@@ -106,47 +106,44 @@ void testMain() {
       expect(_liveImageCount(), baseline);
     });
 
-    test(
-      'Undisposed SkwasmPicture collected by finalizer frees native picture and ImageSource',
-      () async {
-        final Finalizer originalFinalizer = UniqueRef.finalizer;
-        final mockFinalizer = _MockFinalizer();
-        UniqueRef.finalizer = mockFinalizer;
-        try {
-          final int baseline = _livePictureCount();
+    test('Undisposed EnginePicture collected by finalizer frees the native SkwasmPicture and ImageSource', () async {
+      final Finalizer originalFinalizer = UniqueRef.finalizer;
+      final mockFinalizer = _MockFinalizer();
+      UniqueRef.finalizer = mockFinalizer;
+      try {
+        final int baseline = _livePictureCount();
 
-          // Plain picture with null imageTracker.
-          final plainRecorder = ui.PictureRecorder();
-          final plainCanvas = ui.Canvas(plainRecorder);
-          plainCanvas.drawRect(const ui.Rect.fromLTRB(0, 0, 10, 10), ui.Paint());
-          final plainPicture = plainRecorder.endRecording() as EnginePicture;
-          expect(_livePictureCount(), baseline + 1);
+        // Plain picture with null imageTracker.
+        final plainRecorder = ui.PictureRecorder();
+        final plainCanvas = ui.Canvas(plainRecorder);
+        plainCanvas.drawRect(const ui.Rect.fromLTRB(0, 0, 10, 10), ui.Paint());
+        final plainPicture = plainRecorder.endRecording() as EnginePicture;
+        expect(_livePictureCount(), baseline + 1);
 
-          mockFinalizer.trigger(plainPicture.box);
-          expect(_livePictureCount(), baseline);
+        mockFinalizer.trigger(plainPicture.box);
+        expect(_livePictureCount(), baseline);
 
-          // Picture retaining an ImageSource via PictureImageTracker.
-          final DomImageBitmap bitmap = await createImageBitmap(createBlankDomImageData(4, 4));
-          final image = renderer.createImageFromImageBitmap(bitmap) as EngineImage;
-          final ImageSource source = image.imageSource!;
+        // Picture retaining an ImageSource via PictureImageTracker.
+        final DomImageBitmap bitmap = await createImageBitmap(createBlankDomImageData(4, 4));
+        final image = renderer.createImageFromImageBitmap(bitmap) as EngineImage;
+        final ImageSource source = image.imageSource!;
 
-          final imageRecorder = ui.PictureRecorder();
-          final imageCanvas = ui.Canvas(imageRecorder);
-          imageCanvas.drawImage(image, ui.Offset.zero, ui.Paint());
-          final trackedPicture = imageRecorder.endRecording() as EnginePicture;
-          expect(_livePictureCount(), baseline + 1);
+        final imageRecorder = ui.PictureRecorder();
+        final imageCanvas = ui.Canvas(imageRecorder);
+        imageCanvas.drawImage(image, ui.Offset.zero, ui.Paint());
+        final trackedPicture = imageRecorder.endRecording() as EnginePicture;
+        expect(_livePictureCount(), baseline + 1);
 
-          image.dispose();
-          expect(source.debugIsClosed, isFalse);
+        image.dispose();
+        expect(source.debugIsClosed, isFalse);
 
-          mockFinalizer.trigger(trackedPicture.box);
-          expect(_livePictureCount(), baseline);
-          expect(source.debugIsClosed, isTrue);
-        } finally {
-          UniqueRef.finalizer = originalFinalizer;
-        }
-      },
-    );
+        mockFinalizer.trigger(trackedPicture.box);
+        expect(_livePictureCount(), baseline);
+        expect(source.debugIsClosed, isTrue);
+      } finally {
+        UniqueRef.finalizer = originalFinalizer;
+      }
+    });
 
     test('Abandoned PictureRecorder releases retained ImageSource via finalizer', () async {
       final DomImageBitmap bitmap = await createImageBitmap(createBlankDomImageData(4, 4));
@@ -223,32 +220,35 @@ void testMain() {
       },
     );
 
-    test('Undisposed SkwasmPicture.toImageSync releases retained ImageSource on GC', () async {
-      final Finalizer originalFinalizer = UniqueRef.finalizer;
-      final mockFinalizer = _MockFinalizer();
-      UniqueRef.finalizer = mockFinalizer;
-      try {
-        final DomImageBitmap bitmap = await createImageBitmap(createBlankDomImageData(4, 4));
-        final image = renderer.createImageFromImageBitmap(bitmap) as EngineImage;
-        final ImageSource source = image.imageSource!;
+    test(
+      'Undisposed EnginePicture.toImageSync image releases retained ImageSource on GC',
+      () async {
+        final Finalizer originalFinalizer = UniqueRef.finalizer;
+        final mockFinalizer = _MockFinalizer();
+        UniqueRef.finalizer = mockFinalizer;
+        try {
+          final DomImageBitmap bitmap = await createImageBitmap(createBlankDomImageData(4, 4));
+          final image = renderer.createImageFromImageBitmap(bitmap) as EngineImage;
+          final ImageSource source = image.imageSource!;
 
-        final recorder = ui.PictureRecorder();
-        ui.Canvas(recorder).drawImage(image, ui.Offset.zero, ui.Paint());
-        final picture = recorder.endRecording() as EnginePicture;
-        final snapshot = picture.toImageSync(4, 4) as EngineImage;
+          final recorder = ui.PictureRecorder();
+          ui.Canvas(recorder).drawImage(image, ui.Offset.zero, ui.Paint());
+          final picture = recorder.endRecording() as EnginePicture;
+          final snapshot = picture.toImageSync(4, 4) as EngineImage;
 
-        // Collect undisposed source image and dispose intermediate picture.
-        mockFinalizer.trigger(image.box);
-        picture.dispose();
-        expect(source.debugIsClosed, isFalse);
+          // Collect undisposed source image and dispose intermediate picture.
+          mockFinalizer.trigger(image.box);
+          picture.dispose();
+          expect(source.debugIsClosed, isFalse);
 
-        // Collecting the undisposed deferred snapshot releases the ImageSource.
-        mockFinalizer.trigger(snapshot.box);
-        expect(source.debugIsClosed, isTrue);
-      } finally {
-        UniqueRef.finalizer = originalFinalizer;
-      }
-    });
+          // Collecting the undisposed deferred snapshot releases the ImageSource.
+          mockFinalizer.trigger(snapshot.box);
+          expect(source.debugIsClosed, isTrue);
+        } finally {
+          UniqueRef.finalizer = originalFinalizer;
+        }
+      },
+    );
   });
 }
 
@@ -272,9 +272,7 @@ class _MockFinalizer extends NativeMemoryFinalizer {
         .where((pair) => identical(pair.target, target))
         .toList();
     for (final match in matches) {
-      if (match.value is PictureImageTracker) {
-        (match.value as PictureImageTracker).releaseAll();
-      } else if (match.value is UniqueRef<dynamic>) {
+      if (match.value is UniqueRef<dynamic>) {
         (match.value as UniqueRef<dynamic>).collect();
       }
     }

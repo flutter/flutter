@@ -391,9 +391,7 @@ class _MockFinalizer implements Finalizer {
         .where((_MockPair pair) => identical(pair.target, target))
         .toList();
     for (final pair in pairs) {
-      if (pair.value is PictureImageTracker) {
-        (pair.value as PictureImageTracker).releaseAll();
-      } else if (pair.value is UniqueRef<dynamic>) {
+      if (pair.value is UniqueRef<dynamic>) {
         (pair.value as UniqueRef<dynamic>).collect();
       }
     }

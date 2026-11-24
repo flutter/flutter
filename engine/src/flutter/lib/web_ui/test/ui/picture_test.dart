@@ -156,9 +156,7 @@ Future<void> testMain() async {
       // The picture only contains what was drawn before endRecording.
       final ui.Image rendered = await picture.toImage(8, 8);
       final ByteData bytes = (await rendered.toByteData())!;
-      expect(_distinctPixels(bytes), <List<int>>[
-        <int>[0x00, 0xFF, 0x00, 0xFF],
-      ]);
+      expect(_distinctPixels(bytes), <List<int>>[_greenPixel]);
       rendered.dispose();
       picture.dispose();
     });
@@ -512,9 +510,7 @@ Future<void> testMain() async {
       }
 
       final ByteData bytes = (await derivedClone.toByteData())!;
-      expect(_distinctPixels(bytes), <List<int>>[
-        <int>[0x00, 0xFF, 0x00, 0xFF],
-      ]);
+      expect(_distinctPixels(bytes), <List<int>>[_greenPixel]);
 
       derivedClone.dispose();
       expect(source.debugIsClosed, isTrue);
@@ -597,9 +593,7 @@ Future<void> testMain() async {
 
         final ui.Image rendered = await secondPicture.toImage(4, 4);
         final ByteData bytes = (await rendered.toByteData())!;
-        expect(_distinctPixels(bytes), <List<int>>[
-          <int>[0x00, 0xFF, 0x00, 0xFF],
-        ]);
+        expect(_distinctPixels(bytes), <List<int>>[_greenPixel]);
         rendered.dispose();
         if (deferred) {
           expect(source.debugIsClosed, isFalse);
