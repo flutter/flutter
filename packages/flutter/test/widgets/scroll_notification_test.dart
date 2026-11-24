@@ -215,6 +215,33 @@ void main() {
     expect(notificationTypes, equals(types));
   });
 
+  testWidgets('ScrollNotificationObserver forwards a viewport resize as a scroll update', (
+    WidgetTester tester,
+  ) async {
+    final observer = GlobalKey<ScrollNotificationObserverState>();
+    final updates = <ScrollNotification>[];
+    Widget buildFrame(double height) {
+      return ScrollNotificationObserver(
+        key: observer,
+        child: Align(
+          child: SizedBox(
+            height: height,
+            child: const SingleChildScrollView(child: SizedBox(height: 1200)),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(300));
+    observer.currentState!.addListener(updates.add);
+    await tester.pumpWidget(buildFrame(400));
+
+    final update = updates.single as ScrollUpdateNotification;
+    expect(update.metrics.viewportDimension, 400);
+    expect(update.metrics.pixels, 0);
+    expect(update.scrollDelta, isNull);
+  });
+
   testWidgets('ScrollNotificationObserver', (WidgetTester tester) async {
     late ScrollNotificationObserverState observer;
     ScrollNotification? notification;

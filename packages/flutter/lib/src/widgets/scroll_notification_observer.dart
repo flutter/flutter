@@ -44,7 +44,13 @@ final class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
   final ScrollNotificationCallback listener;
 }
 
-/// Notifies its listeners when a descendant scrolls.
+/// Notifies its listeners when a descendant scrolls or its scroll metrics change.
+///
+/// The observer also forwards [ScrollMetricsNotification]s as
+/// [ScrollUpdateNotification]s with a null [ScrollUpdateNotification.scrollDelta].
+/// For example, resizing the viewport can notify listeners even when the scroll
+/// position stays the same. To listen only for notifications dispatched by
+/// scrolling, use a [NotificationListener] of type [ScrollNotification].
 ///
 /// To add a listener to a [ScrollNotificationObserver] ancestor:
 ///
