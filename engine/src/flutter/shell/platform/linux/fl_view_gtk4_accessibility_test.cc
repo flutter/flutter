@@ -1299,15 +1299,17 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiGeometry) {
                          }
                          return kSuccess;
                        }));
-  g_autoptr(GtkWidget) surface = GTK_WIDGET(g_object_ref(view->render_area));
+  GtkWidget* surface = view->render_area;
+  // The test already started the mock engine. Keep the real widget hierarchy
+  // without invoking the rendering lifecycle a second time.
   g_signal_handlers_disconnect_by_data(surface, view);
-  gtk_box_remove(GTK_BOX(view), surface);
   g_autoptr(GtkWindow) window = GTK_WINDOW(gtk_window_new());
   g_object_ref_sink(window);
+  gtk_window_set_title(window, "Geometry window");
   GtkWidget* host = gtk_fixed_new();
   gtk_window_set_child(window, host);
-  gtk_widget_set_size_request(surface, 700, 600);
-  gtk_fixed_put(GTK_FIXED(host), surface, 37, 29);
+  gtk_widget_set_size_request(GTK_WIDGET(view), 700, 600);
+  gtk_fixed_put(GTK_FIXED(host), GTK_WIDGET(view), 37, 29);
   gtk_window_set_default_size(window, 800, 700);
   gtk_window_present(window);
   g_print("GEOMETRY_SCALE %d\n", gtk_widget_get_scale_factor(surface));
@@ -1327,8 +1329,6 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiGeometry) {
     g_source_remove(timeout);
   }
   EXPECT_EQ(calls, 2u);
-  gtk_fixed_remove(GTK_FIXED(host), surface);
-  gtk_box_append(GTK_BOX(view), surface);
   gtk_window_destroy(window);
 }
 

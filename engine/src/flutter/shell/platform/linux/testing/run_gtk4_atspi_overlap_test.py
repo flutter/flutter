@@ -43,8 +43,10 @@ def probe(binary, output):
             )
         return None
 
-      root = wait_until(lambda: named('Geometry root'), 'root')
       group = wait_until(lambda: named('Geometry group'), 'group')
+      root = group.get_parent()
+      if root is None or root.get_name() != 'Geometry root':
+        raise RuntimeError('Geometry group has the wrong semantic root')
       front = wait_until(lambda: named('Geometry button'), 'first button')
       back = wait_until(lambda: named('Overlapping geometry button'), 'second button')
       libraries = sorted({

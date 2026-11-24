@@ -44,10 +44,15 @@ def run_fixture(binary, output, scale, check_hit_testing=False):
             )
         return None
 
-      root = wait_until(lambda: named('Geometry root'), 'geometry root')
       group = wait_until(lambda: named('Geometry group'), 'geometry group')
       button = wait_until(lambda: named('Geometry button'), 'geometry button')
+      root = group.get_parent()
+      if root is None or root.get_name() != 'Geometry root':
+        raise RuntimeError('Geometry group has the wrong semantic root')
       surface = root.get_parent()
+      view = surface.get_parent() if surface is not None else None
+      if view is None or view.get_role() != Atspi.Role.GROUPING:
+        raise RuntimeError('Render surface has no Flutter view parent')
       libraries = sorted({
           line.split()[-1]
           for line in Path(f'/proc/{fixture.pid}/maps').read_text().splitlines()
@@ -59,6 +64,28 @@ def run_fixture(binary, output, scale, check_hit_testing=False):
       def rectangle(node, coordinates):
         rect = node.get_component_iface().get_extents(coordinates)
         return [rect.x, rect.y, rect.width, rect.height]
+
+      def flat_review_path():
+        chain = []
+        node = button
+        for expected in (button, group, root, surface, view):
+          if node is None or node != expected:
+            raise RuntimeError('Accessible parent chain left the Flutter view')
+          node.clear_cache()
+          states = node.get_state_set()
+          if not states.contains(Atspi.StateType.VISIBLE) or not states.contains(
+              Atspi.StateType.SHOWING):
+            raise RuntimeError(f'Flat review cannot see {node.get_name()!r}')
+          chain.append(node.get_name())
+          node = node.get_parent()
+        for _ in range(16):
+          if node is None:
+            break
+          chain.append(node.get_name())
+          if node.get_role() == Atspi.Role.FRAME and node.get_name() == 'Geometry window':
+            return chain
+          node = node.get_parent()
+        raise RuntimeError(f'Accessible parent chain did not reach the native window: {chain}')
 
       # Physical view bounds are independently derived from the fixture's
       # composed transforms. GTK coordinates are logical and parent-relative.
@@ -135,7 +162,10 @@ def run_fixture(binary, output, scale, check_hit_testing=False):
                 f'window={window}, expected={window_expected}; scale={scale}'
             )
           records.append({'name': node.get_name(), 'parent': parent, 'window': window})
-        result = {'surface_window': surface_bounds, 'nodes': records}
+        result = {
+            'surface_window': surface_bounds, 'nodes': records,
+            'flat_review_parent_path': flat_review_path()
+        }
         if check_hit_testing:
           result['hit_testing'] = hit_checks()
         return result
@@ -217,6 +247,7 @@ def main():
           environment.pop(key, None)
         environment.update(
             FLUTTER_TEST_ATSPI_GEOMETRY='1',
+            FLUTTER_GTK4_ENABLE_GRAPHICS_OFFLOAD='0',
             FLUTTER_TEST_ATSPI_OVERLAP='0',
             GTK_A11Y='atspi',
             GDK_BACKEND='x11',

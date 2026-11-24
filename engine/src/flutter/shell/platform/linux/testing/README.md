@@ -203,16 +203,18 @@ The runner creates private sessions with desktop-service autoactivation disabled
 then starts the required accessibility services. It verifies parent and window
 coordinates through three semantic levels, composed scale/translation, nonzero
 semantic rectangle origins, and a render surface offset within a GTK host.
-It runs at GTK scale factors 1 and 2, checking logical-coordinate conversion and
+Before and after the transform update, it checks visible and showing states
+and walks from the button through the Flutter view to the native window over
+AT-SPI. It runs at GTK scale factors 1 and 2, checking logical-coordinate conversion and
 outward rounding. A native tap triggers a root-only transform update; retained
 objects must report the updated geometry and dispatch exactly two Flutter taps.
 The second tap removes the realized subtree, exercising native notifications
 and proxy teardown after clients have queried the nodes.
 The JSON records GTK/GLib versions, scale, queried rectangles and the binary hash.
 
-This tests Component geometry with a mocked engine. It does not establish
-screen-coordinate support, clipping/hit testing, text character extents,
-Wayland behavior, arbitrary fractional desktop scaling, or real Dart layout.
+This fixture uses a mocked engine and real GTK4 AT-SPI. The flat-review checks
+cover visibility, ancestor traversal, and parent/window geometry on X11.
+Screen coordinates and Orca navigation require separate validation.
 
 Add `--check-hit-testing` to require native Contains and GetAccessibleAtPoint
 results to match the queried parent/window rectangles before and after the
@@ -221,9 +223,9 @@ including an overlapping hidden sibling that must not intercept the visible
 button. Both modes verify that native child traversal excludes this sibling.
 The report records the loaded GTK library path and hash as well as its version.
 
-This strict gate fails on the tested stock GTK 4.22.5: containment compares local
-points to the object's position instead of size, and point lookup subtracts the
-queried object's origin twice. Point lookup also visits hidden nodes and their
+The strict gate fails on stock GTK 4.22.5 and 4.24.1. GTK's containment
+compares local points to the object's position instead of size. Point lookup
+subtracts the queried object's origin twice. Point lookup also visits hidden nodes and their
 subtrees, unlike ordinary native child traversal. Independent GTK corrections
 and standalone reproductions are tracked in the accessibility investigation.
 Use a GTK runtime with those corrections to pass this gate; the Flutter bridge
