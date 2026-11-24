@@ -522,7 +522,6 @@ void main() {
           ),
         );
       });
-
       test('command release lock on kill signal', () async {
         clock.times = <int>[1000, 2000];
         final completer = Completer<void>();

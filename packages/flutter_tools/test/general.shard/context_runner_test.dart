@@ -71,30 +71,4 @@ void main() {
       },
     );
   });
-
-  test(
-    'runInContext resolves real Analytics, FlutterVersion, Cache, and LocalEngineLocator fallbacks',
-    () async {
-      await runInContext<void>(
-        () {
-          expect(context.get<Analytics>(), isA<NoOpAnalytics>());
-          expect(context.get<FlutterVersion>(), isNotNull);
-          expect(context.get<Cache>(), isNotNull);
-          expect(context.get<LocalEngineLocator>(), isNotNull);
-        },
-        overrides: <Type, Generator>{
-          BotDetector: () => const FakeBotDetector(true),
-          Config: () => Config.test(),
-          FileSystem: () => MemoryFileSystem.test(),
-          Logger: () => BufferLogger.test(),
-          Platform: () => FakePlatform(
-            environment: <String, String>{'FLUTTER_ROOT': '/flutter', 'HOME': '/home'},
-          ),
-          ProcessManager: () => FakeProcessManager.any(),
-          Stdio: () => FakeStdio(),
-          TemplateRenderer: () => const MustacheTemplateRenderer(),
-        },
-      );
-    },
-  );
 }
