@@ -25,11 +25,14 @@ class MockDevice;
 
 struct MockCommandBuffer {
   explicit MockCommandBuffer(
+      MockDevice& device,
       std::shared_ptr<std::vector<std::string>> called_functions)
-      : called_functions_(std::move(called_functions)) {}
+      : device_(device), called_functions_(std::move(called_functions)) {}
+  MockDevice& device_;
   std::shared_ptr<std::vector<std::string>> called_functions_;
   std::vector<VkImageMemoryBarrier> image_memory_barriers_;
   std::vector<VkViewport> recorded_viewports_;
+  std::vector<VkPipelineStageFlagBits> recorded_timestamps_;
 };
 
 class MockQueue {
@@ -44,7 +47,11 @@ class MockQueue {
   MockDevice& device_;
 };
 
-struct MockQueryPool {};
+struct MockQueryPool {
+  explicit MockQueryPool(uint32_t count) : timestamps(count, 0u) {}
+  Mutex mutex;
+  std::vector<uint64_t> timestamps IPLR_GUARDED_BY(mutex);
+};
 
 struct MockCommandPool {};
 
@@ -92,6 +99,17 @@ class MockDevice final {
 
   MockPhysicalDevice& physical_device() { return physical_device_; }
 
+  /// Sets the callback that `vkGetPipelineCacheData` calls for this device in
+  /// place of its default implementation. Set from the
+  /// `MockVulkanContextBuilder` when the device is created.
+  void SetGetPipelineCacheDataCallback(GetPipelineCacheDataCallback callback) {
+    get_pipeline_cache_data_callback_ = std::move(callback);
+  }
+
+  const GetPipelineCacheDataCallback& get_pipeline_cache_data_callback() const {
+    return get_pipeline_cache_data_callback_;
+  }
+
   // Get the MockDevice wrapped by a VkDevice handle and check that the
   // VkDevice has not been destroyed.
   static MockDevice* Unwrap(VkDevice vk_device) {
@@ -103,7 +121,7 @@ class MockDevice final {
   }
 
   MockCommandBuffer* NewCommandBuffer() {
-    auto buffer = std::make_unique<MockCommandBuffer>(called_functions_);
+    auto buffer = std::make_unique<MockCommandBuffer>(*this, called_functions_);
     MockCommandBuffer* result = buffer.get();
     Lock lock(command_buffers_mutex_);
     command_buffers_.emplace_back(std::move(buffer));
@@ -138,6 +156,20 @@ class MockDevice final {
     called_functions_->push_back(function);
   }
 
+  void AddQueryPoolResultCount(uint32_t query_count) {
+    Lock lock(called_functions_mutex_);
+    query_pool_result_counts_.push_back(query_count);
+  }
+
+  std::vector<uint32_t> GetQueryPoolResultCounts() {
+    Lock lock(called_functions_mutex_);
+    return query_pool_result_counts_;
+  }
+
+  uint64_t NextMockTimestamp() {
+    return next_mock_timestamp_.fetch_add(1000000u);
+  }
+
   MockQueue& GetQueue() { return queue_; }
 
  private:
@@ -150,6 +182,8 @@ class MockDevice final {
   Mutex called_functions_mutex_;
   std::shared_ptr<std::vector<std::string>> called_functions_
       IPLR_GUARDED_BY(called_functions_mutex_);
+  std::vector<uint32_t> query_pool_result_counts_
+      IPLR_GUARDED_BY(called_functions_mutex_);
 
   Mutex command_buffers_mutex_;
   std::vector<std::unique_ptr<MockCommandBuffer>> command_buffers_
@@ -160,6 +194,8 @@ class MockDevice final {
       IPLR_GUARDED_BY(commmand_pools_mutex_);
 
   MockQueue queue_;
+  std::atomic<uint64_t> next_mock_timestamp_{1000000u};
+  GetPipelineCacheDataCallback get_pipeline_cache_data_callback_;
 };
 
 std::weak_ptr<MockDevice>* MockPhysicalDevice::CreateDevice() {
@@ -197,6 +233,7 @@ struct MockVulkanState {
       wait_for_fences_callback;
   std::function<std::remove_pointer_t<PFN_vkAcquireNextImageKHR>>
       acquire_next_image_callback;
+  GetPipelineCacheDataCallback get_pipeline_cache_data_callback;
   // When > 0, the next vkCreateImage for a fixed-rate-compressed image returns
   // VK_ERROR_COMPRESSION_EXHAUSTED_EXT and decrements (models PowerVR).
   int compression_exhausted_create_image_failures = 0;
@@ -423,6 +460,12 @@ VkResult vkCreateDevice(VkPhysicalDevice physicalDevice,
   MockPhysicalDevice* mock_physical_device =
       reinterpret_cast<MockPhysicalDevice*>(physicalDevice);
   *pDevice = reinterpret_cast<VkDevice>(mock_physical_device->CreateDevice());
+  // The mock state is thread-local, but vkGetPipelineCacheData is usually
+  // called on a worker thread, so store the callback on the device.
+  if (g_mock_vulkan_state) {
+    MockDevice::Unwrap(*pDevice)->SetGetPipelineCacheDataCallback(
+        GetMockVulkanState().get_pipeline_cache_data_callback);
+  }
   return VK_SUCCESS;
 }
 
@@ -704,7 +747,7 @@ void vkCmdBindPipeline(VkCommandBuffer commandBuffer,
                        VkPipeline pipeline) {
   MockCommandBuffer* mock_command_buffer =
       reinterpret_cast<MockCommandBuffer*>(commandBuffer);
-  mock_command_buffer->called_functions_->push_back("vkCmdBindPipeline");
+  mock_command_buffer->device_.AddCalledFunction("vkCmdBindPipeline");
 }
 
 void vkCmdPipelineBarrier(VkCommandBuffer commandBuffer,
@@ -719,7 +762,7 @@ void vkCmdPipelineBarrier(VkCommandBuffer commandBuffer,
                           const VkImageMemoryBarrier* pImageMemoryBarriers) {
   MockCommandBuffer* mock_command_buffer =
       reinterpret_cast<MockCommandBuffer*>(commandBuffer);
-  mock_command_buffer->called_functions_->push_back("vkCmdPipelineBarrier");
+  mock_command_buffer->device_.AddCalledFunction("vkCmdPipelineBarrier");
   if (pImageMemoryBarriers) {
     for (uint32_t i = 0; i < imageMemoryBarrierCount; ++i) {
       mock_command_buffer->image_memory_barriers_.push_back(
@@ -733,7 +776,7 @@ void vkCmdSetStencilReference(VkCommandBuffer commandBuffer,
                               uint32_t reference) {
   MockCommandBuffer* mock_command_buffer =
       reinterpret_cast<MockCommandBuffer*>(commandBuffer);
-  mock_command_buffer->called_functions_->push_back("vkCmdSetStencilReference");
+  mock_command_buffer->device_.AddCalledFunction("vkCmdSetStencilReference");
 }
 
 void vkCmdSetScissor(VkCommandBuffer commandBuffer,
@@ -742,7 +785,7 @@ void vkCmdSetScissor(VkCommandBuffer commandBuffer,
                      const VkRect2D* pScissors) {
   MockCommandBuffer* mock_command_buffer =
       reinterpret_cast<MockCommandBuffer*>(commandBuffer);
-  mock_command_buffer->called_functions_->push_back("vkCmdSetScissor");
+  mock_command_buffer->device_.AddCalledFunction("vkCmdSetScissor");
 }
 
 void vkCmdSetViewport(VkCommandBuffer commandBuffer,
@@ -751,7 +794,7 @@ void vkCmdSetViewport(VkCommandBuffer commandBuffer,
                       const VkViewport* pViewports) {
   MockCommandBuffer* mock_command_buffer =
       reinterpret_cast<MockCommandBuffer*>(commandBuffer);
-  mock_command_buffer->called_functions_->push_back("vkCmdSetViewport");
+  mock_command_buffer->device_.AddCalledFunction("vkCmdSetViewport");
   for (uint32_t i = 0; i < viewportCount; ++i) {
     mock_command_buffer->recorded_viewports_.push_back(pViewports[i]);
   }
@@ -812,6 +855,13 @@ VkResult vkQueueSubmit(VkQueue queue,
   return VK_SUCCESS;
 }
 
+VkResult vkQueuePresentKHR(VkQueue queue,
+                           const VkPresentInfoKHR* pPresentInfo) {
+  const MockQueue* mock_queue = reinterpret_cast<const MockQueue*>(queue);
+  mock_queue->device().AddCalledFunction("vkQueuePresentKHR");
+  return VK_SUCCESS;
+}
+
 VkResult vkWaitForFences(VkDevice device,
                          uint32_t fenceCount,
                          const VkFence* pFences,
@@ -853,7 +903,8 @@ VkResult vkCreateQueryPool(VkDevice device,
                            const VkQueryPoolCreateInfo* pCreateInfo,
                            const VkAllocationCallbacks* pAllocator,
                            VkQueryPool* pQueryPool) {
-  *pQueryPool = reinterpret_cast<VkQueryPool>(new MockQueryPool());
+  uint32_t count = pCreateInfo ? pCreateInfo->queryCount : 0u;
+  *pQueryPool = reinterpret_cast<VkQueryPool>(new MockQueryPool(count));
   MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkCreateQueryPool");
   return VK_SUCCESS;
@@ -867,6 +918,39 @@ void vkDestroyQueryPool(VkDevice device,
   delete reinterpret_cast<MockQueryPool*>(queryPool);
 }
 
+void vkCmdResetQueryPool(VkCommandBuffer commandBuffer,
+                         VkQueryPool queryPool,
+                         uint32_t firstQuery,
+                         uint32_t queryCount) {
+  MockCommandBuffer* mock_command_buffer =
+      reinterpret_cast<MockCommandBuffer*>(commandBuffer);
+  mock_command_buffer->device_.AddCalledFunction("vkCmdResetQueryPool");
+  MockQueryPool* mock_pool = reinterpret_cast<MockQueryPool*>(queryPool);
+  Lock lock(mock_pool->mutex);
+  for (uint32_t i = 0; i < queryCount; ++i) {
+    uint32_t idx = firstQuery + i;
+    if (idx < mock_pool->timestamps.size()) {
+      mock_pool->timestamps[idx] = 0u;
+    }
+  }
+}
+
+void vkCmdWriteTimestamp(VkCommandBuffer commandBuffer,
+                         VkPipelineStageFlagBits pipelineStage,
+                         VkQueryPool queryPool,
+                         uint32_t query) {
+  MockCommandBuffer* mock_command_buffer =
+      reinterpret_cast<MockCommandBuffer*>(commandBuffer);
+  mock_command_buffer->device_.AddCalledFunction("vkCmdWriteTimestamp");
+  mock_command_buffer->recorded_timestamps_.push_back(pipelineStage);
+  MockQueryPool* mock_pool = reinterpret_cast<MockQueryPool*>(queryPool);
+  Lock lock(mock_pool->mutex);
+  if (query < mock_pool->timestamps.size()) {
+    mock_pool->timestamps[query] =
+        mock_command_buffer->device_.NextMockTimestamp();
+  }
+}
+
 VkResult vkGetQueryPoolResults(VkDevice device,
                                VkQueryPool queryPool,
                                uint32_t firstQuery,
@@ -876,17 +960,31 @@ VkResult vkGetQueryPoolResults(VkDevice device,
                                VkDeviceSize stride,
                                VkQueryResultFlags flags) {
   MockDevice* mock_device = MockDevice::Unwrap(device);
-  if (dataSize == sizeof(uint32_t)) {
-    uint32_t* data = static_cast<uint32_t*>(pData);
-    for (auto i = firstQuery; i < queryCount; i++) {
-      data[0] = i;
-    }
-  } else if (dataSize == sizeof(int64_t)) {
-    uint64_t* data = static_cast<uint64_t*>(pData);
-    for (auto i = firstQuery; i < queryCount; i++) {
-      data[0] = i;
+  MockQueryPool* mock_pool = reinterpret_cast<MockQueryPool*>(queryPool);
+  {
+    Lock lock(mock_pool->mutex);
+    const bool is_64_bit = (flags & VK_QUERY_RESULT_64_BIT) != 0;
+    const size_t write_size = is_64_bit ? sizeof(uint64_t) : sizeof(uint32_t);
+    const size_t element_size =
+        stride > 0 ? static_cast<size_t>(stride) : write_size;
+    uint8_t* dst = static_cast<uint8_t*>(pData);
+    for (uint32_t i = 0; i < queryCount; ++i) {
+      if (i * element_size + write_size > dataSize) {
+        break;
+      }
+      uint32_t query_idx = firstQuery + i;
+      uint64_t value = query_idx < mock_pool->timestamps.size()
+                           ? mock_pool->timestamps[query_idx]
+                           : static_cast<uint64_t>(query_idx);
+      if (is_64_bit) {
+        std::memcpy(dst + i * element_size, &value, sizeof(uint64_t));
+      } else {
+        uint32_t value32 = static_cast<uint32_t>(value);
+        std::memcpy(dst + i * element_size, &value32, sizeof(uint32_t));
+      }
     }
   }
+  mock_device->AddQueryPoolResultCount(queryCount);
   mock_device->AddCalledFunction("vkGetQueryPoolResults");
   return VK_SUCCESS;
 }
@@ -1027,6 +1125,19 @@ void vkDestroySemaphore(VkDevice device,
   delete reinterpret_cast<MockSemaphore*>(semaphore);
 }
 
+VkResult vkGetSemaphoreFdKHR(VkDevice device,
+                             const VkSemaphoreGetFdInfoKHR* pGetFdInfo,
+                             int* pFd) {
+  *pFd = -1;
+  return VK_SUCCESS;
+}
+
+VkResult vkImportSemaphoreFdKHR(
+    VkDevice device,
+    const VkImportSemaphoreFdInfoKHR* pImportSemaphoreFdInfo) {
+  return VK_SUCCESS;
+}
+
 VkResult vkAcquireNextImageKHR(VkDevice device,
                                VkSwapchainKHR swapchain,
                                uint64_t timeout,
@@ -1068,6 +1179,11 @@ VkResult vkGetPipelineCacheData(VkDevice device,
                                 VkPipelineCache pipelineCache,
                                 size_t* pDataSize,
                                 void* pData) {
+  MockDevice* mock_device = MockDevice::Unwrap(device);
+  mock_device->AddCalledFunction("vkGetPipelineCacheData");
+  if (const auto& callback = mock_device->get_pipeline_cache_data_callback()) {
+    return callback(device, pipelineCache, pDataSize, pData);
+  }
   if (pData) {
     const std::array<uint8_t, 5> cache_data{1, 2, 3, 4, 5};
     size_t dst_buffer_size = *pDataSize;
@@ -1224,6 +1340,8 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return reinterpret_cast<PFN_vkVoidFunction>(vkGetDeviceQueue);
   } else if (strcmp("vkQueueSubmit", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkQueueSubmit);
+  } else if (strcmp("vkQueuePresentKHR", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkQueuePresentKHR);
   } else if (strcmp("vkWaitForFences", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkWaitForFences);
   } else if (strcmp("vkGetFenceStatus", pName) == 0) {
@@ -1238,6 +1356,10 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreateQueryPool);
   } else if (strcmp("vkDestroyQueryPool", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyQueryPool);
+  } else if (strcmp("vkCmdResetQueryPool", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCmdResetQueryPool);
+  } else if (strcmp("vkCmdWriteTimestamp", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCmdWriteTimestamp);
   } else if (strcmp("vkGetQueryPoolResults", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkGetQueryPoolResults);
   } else if (strcmp("vkCreateDescriptorPool", pName) == 0) {
@@ -1267,6 +1389,10 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreateSemaphore);
   } else if (strcmp("vkDestroySemaphore", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkDestroySemaphore);
+  } else if (strcmp("vkGetSemaphoreFdKHR", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkGetSemaphoreFdKHR);
+  } else if (strcmp("vkImportSemaphoreFdKHR", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkImportSemaphoreFdKHR);
   } else if (strcmp("vkDestroySurfaceKHR", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkDestroySurfaceKHR);
   } else if (strcmp("vkAcquireNextImageKHR", pName) == 0) {
@@ -1330,6 +1456,8 @@ ContextVK::Settings MockVulkanContextBuilder::PrepareSettings() {
   g_mock_vulkan_state->acquire_next_image_callback =
       acquire_next_image_callback_;
   g_mock_vulkan_state->wait_for_fences_callback = wait_for_fences_callback_;
+  g_mock_vulkan_state->get_pipeline_cache_data_callback =
+      get_pipeline_cache_data_callback_;
   g_mock_vulkan_state->compression_exhausted_create_image_failures =
       compression_exhausted_create_image_failures_;
   settings.embedder_data = embedder_data_;
@@ -1367,6 +1495,18 @@ const std::vector<VkViewport>& GetRecordedViewports(VkCommandBuffer buffer) {
   MockCommandBuffer* mock_command_buffer =
       reinterpret_cast<MockCommandBuffer*>(buffer);
   return mock_command_buffer->recorded_viewports_;
+}
+
+const std::vector<VkPipelineStageFlagBits>& GetRecordedTimestamps(
+    VkCommandBuffer buffer) {
+  MockCommandBuffer* mock_command_buffer =
+      reinterpret_cast<MockCommandBuffer*>(buffer);
+  return mock_command_buffer->recorded_timestamps_;
+}
+
+std::vector<uint32_t> GetQueryPoolResultCounts(VkDevice device) {
+  MockDevice* mock_device = MockDevice::Unwrap(device);
+  return mock_device->GetQueryPoolResultCounts();
 }
 
 }  // namespace testing

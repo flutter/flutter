@@ -17,6 +17,9 @@ import 'gen_l10n_types.dart';
 import 'localizations_utils.dart';
 import 'message_parser.dart';
 
+const _kMaterialUiPackage = 'material_ui';
+const _kCupertinoUiPackage = 'cupertino_ui';
+
 /// Run the localizations generation script with the configuration [options].
 Future<LocalizationsGenerator> generateLocalizations({
   required Directory projectDir,
@@ -1226,6 +1229,28 @@ class LocalizationsGenerator {
       fileName: fileName,
     );
 
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromPath(
+      projectDirectory.childFile('pubspec.yaml').path,
+      fileSystem: _fs,
+      logger: logger,
+    );
+    final Set<String> dependencies = flutterManifest?.dependencies ?? const <String>{};
+    final String localizationsPackageImport;
+    final String defaultLocalizationsDelegates;
+    if (dependencies.contains(_kMaterialUiPackage)) {
+      localizationsPackageImport =
+          "import 'package:material_ui/material_ui.dart' show GlobalMaterialLocalizations;";
+      defaultLocalizationsDelegates = 'GlobalMaterialLocalizations.delegates';
+    } else if (dependencies.contains(_kCupertinoUiPackage)) {
+      localizationsPackageImport =
+          "import 'package:cupertino_ui/cupertino_ui.dart' show GlobalCupertinoLocalizations;";
+      defaultLocalizationsDelegates = 'GlobalCupertinoLocalizations.delegates';
+    } else {
+      localizationsPackageImport =
+          "import 'package:flutter_localizations/flutter_localizations.dart';";
+      defaultLocalizationsDelegates = 'GlobalMaterialLocalizations.delegates';
+    }
+
     return fileTemplate
         .replaceAll('@(header)', header.isEmpty ? '' : '$header\n')
         .replaceAll('@(class)', className)
@@ -1247,6 +1272,8 @@ class LocalizationsGenerator {
           '@(requiresFoundationImport)',
           useDeferredLoading ? '' : "import 'package:flutter/foundation.dart';",
         )
+        .replaceAll('@(localizationsPackageImport)', localizationsPackageImport)
+        .replaceAll('@(defaultLocalizationsDelegates)', defaultLocalizationsDelegates)
         .replaceAll('@(canBeNullable)', usesNullableGetter ? '?' : '')
         .replaceAll('@(needsNullCheck)', usesNullableGetter ? '' : '!')
         // Removes all trailing whitespace from the generated file.

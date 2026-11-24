@@ -25,6 +25,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class FlutterPlatformViewLayer;
 @class FlutterTouchInterceptingView;
 @class FlutterClippingMaskViewPool;
 
@@ -35,7 +36,10 @@ NS_ASSUME_NONNULL_BEGIN
 /// The task runner used to post rendering tasks to the platform thread.
 @property(nonatomic, strong) FlutterFMLTaskRunner* taskRunner;
 
-/// The flutter view.
+/// The view that displays the Flutter content, to which platform views are added as subviews.
+///
+/// `FlutterViewController` sets this when its surface appears, and sets it to nil when the surface
+/// is destroyed.
 @property(nonatomic, weak) UIView* _Nullable flutterView;
 
 /// @brief The flutter view controller.
@@ -47,8 +51,9 @@ NS_ASSUME_NONNULL_BEGIN
     gestureRecognizersBlockingPolicy:
         (FlutterPlatformViewGestureRecognizersBlockingPolicy)gestureRecognizerBlockingPolicy;
 
-/// @brief Mark the beginning of a frame and record the size of the onscreen.
-- (void)beginFrameWithSize:(flutter::DlISize)frameSize;
+/// @brief Mark the beginning of a frame and record the size of the onscreen and the device pixel
+/// ratio (the number of physical pixels per point).
+- (void)beginFrameWithSize:(flutter::DlISize)frameSize devicePixelRatio:(CGFloat)devicePixelRatio;
 
 /// @brief Cancel the current frame, indicating that no platform views are composited.
 ///
@@ -74,9 +79,13 @@ NS_ASSUME_NONNULL_BEGIN
 /// Called from the raster thread.
 - (flutter::DlCanvas*)compositeEmbeddedViewWithId:(int64_t)viewId;
 
-/// @brief Discards all platform views instances and auxiliary resources.
+/// @brief Discards all platform view instances and removes their views from the Flutter view.
 ///
-/// Called from the platform thread during hot restart.
+/// `PlatformViewIOS::OnPreEngineRestart` calls this on the platform thread during hot restart.
+///
+/// This method doesn't clear the state of the frame being built (composition order, slices,
+/// composition params, visited views). That state is only accessed on the raster thread and is
+/// cleared in `beginFrameWithSize:devicePixelRatio:` at the start of the next frame.
 - (void)reset;
 
 /// @brief Encode rendering for the Flutter overlay views and queue up perform platform view
@@ -131,13 +140,13 @@ NS_ASSUME_NONNULL_BEGIN
 // returns nil.
 - (UIView* _Nullable)platformViewForId:(int64_t)viewId;
 
-// Composite the PlatformView with `viewId`.
+// Composites the platform view described by `layer`.
 //
-// This method is called from `performSubmit:` on the platform thread for each platform view whose
-// composition parameters changed since the previous frame.
-- (void)compositeView:(int64_t)viewId withParams:(const flutter::EmbeddedViewParams&)params;
-
-- (const flutter::EmbeddedViewParams&)compositionParamsForView:(int64_t)viewId;
+// This method sets the frames of the view's |ChildClippingView| and |FlutterTouchInterceptingView|,
+// then applies the layer's mutators.
+//
+// It divides by `devicePixelRatio` to convert the layer from physical pixels to points.
+- (void)compositeLayer:(FlutterPlatformViewLayer*)layer devicePixelRatio:(CGFloat)devicePixelRatio;
 
 /// @brief The composition order from the previous frame.
 ///
