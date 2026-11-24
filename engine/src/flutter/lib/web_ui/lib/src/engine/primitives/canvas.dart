@@ -20,9 +20,7 @@ import 'package:ui/ui.dart' as ui;
 ///    picture's [PictureImageTracker].
 ///  * The per-draw paint lifecycle: a [BackendPaint] is created right before
 ///    each backend call and disposed right after it.
-///  * Unwrapping frontend objects ([EnginePath], [EngineImage],
-///    [EngineVertices], [EngineParagraph], [EngineImageFilter],
-///    [EnginePicture]) into their backend delegates.
+///  * Unwrapping frontend objects into their backend delegates.
 class EngineCanvas implements LayerCanvas {
   /// Creates a canvas that forwards every operation to the given backend.
   ///
