@@ -9,6 +9,7 @@
 
 #include <memory>
 
+#include "flutter/flow/embedded_views.h"
 #include "flutter/flow/surface_frame.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunners.h"
 #import "flutter/shell/platform/darwin/ios/ios_context.h"
@@ -45,6 +46,14 @@ FlutterFMLTaskRunners* CreateTestTaskRunners(NSString* label);
  * Returns a FlutterPlatformViewsController pre-configured for testing with the default task runner.
  */
 FlutterPlatformViewsController* CreateTestPlatformViewsController(NSString* label);
+
+/**
+ * Returns an IOSExternalViewEmbedder for `controller` using a FakeIOSContext.
+ *
+ * The embedder holds `controller` weakly, and aborts if called after `controller` is deallocated.
+ */
+std::unique_ptr<ExternalViewEmbedder> CreateTestExternalViewEmbedder(
+    FlutterPlatformViewsController* controller);
 
 /**
  * Returns an 800x600 test SurfaceFrame.

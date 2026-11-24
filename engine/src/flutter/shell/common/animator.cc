@@ -147,7 +147,10 @@ void Animator::EndFrame() {
   }
   if (!layer_trees_tasks_.empty()) {
     // The build is completed in OnAnimatorBeginFrame.
-    frame_timings_recorder_->RecordBuildEnd(fml::TimePoint::Now());
+    const fml::TimePoint build_end_time = fml::TimePoint::Now();
+    frame_timings_recorder_->RecordBuildEnd(build_end_time);
+    const fml::TimePoint build_start_time =
+        frame_timings_recorder_->GetBuildStartTime();
 
     delegate_.OnAnimatorUpdateLatestFrameTargetTime(
         frame_timings_recorder_->GetVsyncTargetTime());
@@ -165,12 +168,15 @@ void Animator::EndFrame() {
 
     if (!result.success) {
       FML_DLOG(INFO) << "Failed to commit to the pipeline";
-    } else if (!result.is_first_item) {
-      // Do nothing. It has been successfully pushed to the pipeline but not as
-      // the first item. Eventually the 'Rasterizer' will consume it, so we
-      // don't need to notify the delegate.
     } else {
-      delegate_.OnAnimatorDraw(layer_tree_pipeline_);
+      // Only call OnAnimatorDraw for the first item in the pipeline; otherwise
+      // the Rasterizer will consume it once it finishes the current item.
+      if (result.is_first_item) {
+        delegate_.OnAnimatorDraw(layer_tree_pipeline_);
+      }
+      // Notify after OnAnimatorDraw so callback work does not delay waking the
+      // raster thread.
+      delegate_.OnAnimatorFrameBuilt(build_start_time, build_end_time);
     }
   }
   frame_timings_recorder_ = nullptr;
