@@ -2,35 +2,60 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 import 'json_utils.dart';
+
+List<T> _parseObjectList<T>(
+  List<Object?> jsonList,
+  T Function(Map<String, Object?>) fromJson,
+  String typeName,
+) {
+  return <T>[
+    for (final Object? element in jsonList)
+      switch (element) {
+        final Map<String, Object?> map => fromJson(map),
+        _ => throw FormatException(
+          'Invalid $typeName element: expected Map<String, Object?>, got ${element.runtimeType}.',
+        ),
+      },
+  ];
+}
 
 /// Representation of an experimental or platform-specific feature flag.
 @immutable
 class FeatureFlag {
   const FeatureFlag({
-    required this.name,
     required this.help,
-    this.environmentVariable,
+    required this.name,
     this.enabledByDefault = false,
+    this.environmentOverride,
   });
 
   /// Deserializes a [FeatureFlag] from a JSON-serializable map.
   factory FeatureFlag.fromJson(Map<String, Object?> json) {
+    final String name = json.requiredField<String>(nameKey);
+    if (name.isEmpty) {
+      throw const FormatException('Field "$nameKey" must not be empty.');
+    }
     return FeatureFlag(
-      name: json.optionalField<String>(nameKey, defaultValue: ''),
-      help: json.optionalField<String>(helpKey, defaultValue: ''),
-      environmentVariable: json.nullableField<String>(environmentVariableKey),
-      enabledByDefault: json.optionalField<bool>(enabledByDefaultKey, defaultValue: false),
+      name: name,
+      help: json.requiredField<String>(helpKey),
+      environmentOverride: json.nullableField<String>(environmentOverrideKey),
+      enabledByDefault: json.requiredField<bool>(enabledByDefaultKey),
     );
   }
+
+  /// Deserializes a list of [FeatureFlag]s from a JSON list.
+  static List<FeatureFlag> listFromJson(List<Object?> jsonList) =>
+      _parseObjectList(jsonList, FeatureFlag.fromJson, 'FeatureFlag');
 
   /// Map key for [enabledByDefault].
   static const String enabledByDefaultKey = 'enabledByDefault';
 
-  /// Map key for [environmentVariable].
-  static const String environmentVariableKey = 'environmentVariable';
+  /// Map key for [environmentOverride].
+  static const String environmentOverrideKey = 'environmentOverride';
 
   /// Map key for [help].
   static const String helpKey = 'help';
@@ -42,11 +67,15 @@ class FeatureFlag {
   /// `<name>` typically begins with `enable-`).
   final String name;
 
+  /// Configuration setting key name stored in `flutter_settings` for this
+  /// feature flag.
+  String get settingName => name;
+
   /// Human-readable description displayed in `flutter config`.
   final String help;
 
   /// Optional environment variable name that overrides this feature flag setting.
-  final String? environmentVariable;
+  final String? environmentOverride;
 
   /// Whether this feature flag is enabled by default.
   final bool enabledByDefault;
@@ -55,40 +84,62 @@ class FeatureFlag {
   Map<String, Object?> toMap() => <String, Object?>{
     nameKey: name,
     helpKey: help,
-    environmentVariableKey: ?environmentVariable,
+    environmentOverrideKey: ?environmentOverride,
     enabledByDefaultKey: enabledByDefault,
   };
 
   @override
   String toString() =>
-      'FeatureFlag(name: $name, help: $help, environmentVariable: $environmentVariable, enabledByDefault: $enabledByDefault)';
+      'FeatureFlag(name: $name, help: $help, environmentOverride: $environmentOverride, enabledByDefault: $enabledByDefault)';
 
   @override
   bool operator ==(Object other) {
     return other is FeatureFlag &&
         other.name == name &&
         other.help == help &&
-        other.environmentVariable == environmentVariable &&
+        other.environmentOverride == environmentOverride &&
         other.enabledByDefault == enabledByDefault;
   }
 
   @override
-  int get hashCode => Object.hash(name, help, environmentVariable, enabledByDefault);
+  int get hashCode => Object.hash(name, help, environmentOverride, enabledByDefault);
 }
 
 /// Representation of a custom configuration setting key and value pair.
 @immutable
 class ConfigOption {
-  const ConfigOption({required this.name, required this.help, this.value});
+  const ConfigOption({
+    required this.help,
+    required this.name,
+    this.aliases = const <String>[],
+    this.environmentOverride,
+    this.value,
+  });
 
   /// Deserializes a [ConfigOption] from a JSON-serializable map.
   factory ConfigOption.fromJson(Map<String, Object?> json) {
+    final String name = json.requiredField<String>(nameKey);
+    if (name.isEmpty) {
+      throw const FormatException('Field "$nameKey" must not be empty.');
+    }
     return ConfigOption(
-      name: json.optionalField<String>(nameKey, defaultValue: ''),
-      help: json.optionalField<String>(helpKey, defaultValue: ''),
+      name: name,
+      help: json.requiredField<String>(helpKey),
+      environmentOverride: json.nullableField<String>(environmentOverrideKey),
       value: json.nullableField<String>(valueKey),
+      aliases: List<String>.unmodifiable(json.stringIterable(aliasesKey)),
     );
   }
+
+  /// Deserializes a list of [ConfigOption]s from a JSON list.
+  static List<ConfigOption> listFromJson(List<Object?> jsonList) =>
+      _parseObjectList(jsonList, ConfigOption.fromJson, 'ConfigOption');
+
+  /// Map key for [aliases].
+  static const String aliasesKey = 'aliases';
+
+  /// Map key for [environmentOverride].
+  static const String environmentOverrideKey = 'environmentOverride';
 
   /// Map key for [help].
   static const String helpKey = 'help';
@@ -105,23 +156,45 @@ class ConfigOption {
   /// Description of the configuration option displayed in `flutter config`.
   final String help;
 
-  /// Current value set for this configuration option, if any.
+  /// Optional environment variable name that overrides this configuration option.
+  final String? environmentOverride;
+
+  /// Current or default value set for this configuration option, if any.
   final String? value;
 
+  /// Optional CLI flag and legacy settings key aliases for this option.
+  final List<String> aliases;
+
   /// Serializes the configuration option to a JSON-serializable map.
-  Map<String, Object?> toMap() => <String, Object?>{nameKey: name, helpKey: help, valueKey: ?value};
+  Map<String, Object?> toMap() => <String, Object?>{
+    nameKey: name,
+    helpKey: help,
+    environmentOverrideKey: ?environmentOverride,
+    valueKey: ?value,
+    if (aliases.isNotEmpty) aliasesKey: aliases,
+  };
 
   @override
-  String toString() => 'ConfigOption(name: $name, help: $help, value: $value)';
+  String toString() =>
+      'ConfigOption(name: $name, help: $help, environmentOverride: $environmentOverride, value: $value, aliases: $aliases)';
 
   @override
   bool operator ==(Object other) {
+    const listEquality = ListEquality<String>();
     return other is ConfigOption &&
         other.name == name &&
         other.help == help &&
-        other.value == value;
+        other.environmentOverride == environmentOverride &&
+        other.value == value &&
+        listEquality.equals(other.aliases, aliases);
   }
 
   @override
-  int get hashCode => Object.hash(name, help, value);
+  int get hashCode => Object.hash(
+    name,
+    help,
+    environmentOverride,
+    value,
+    const ListEquality<String>().hash(aliases),
+  );
 }

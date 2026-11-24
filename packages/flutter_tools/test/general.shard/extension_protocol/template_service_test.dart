@@ -74,9 +74,8 @@ void main() {
 
     test('returns empty templates when tool extensions feature flag is disabled', () async {
       final manager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
         featureFlags: TestFeatureFlags(),
+        toolContext: FakeToolContext(logger: logger),
       );
       final templateManager = ExtensionTemplateManager(
         extensionManager: manager,
@@ -103,9 +102,8 @@ void main() {
 
     test('queries project templates over RPC and caches results', () async {
       final manager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        toolContext: FakeToolContext(logger: logger),
       );
       await manager.initialize(entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint]);
 
@@ -136,9 +134,8 @@ void main() {
 
     test('generateTemplateParameters delegates over RPC', () async {
       final manager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        toolContext: FakeToolContext(logger: logger),
       );
       await manager.initialize(entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint]);
 
@@ -167,9 +164,8 @@ void main() {
 
     test('resolveTemplateDirectory resolves package paths correctly', () {
       final manager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        toolContext: FakeToolContext(logger: logger),
       );
       final templateManager = ExtensionTemplateManager(
         extensionManager: manager,
@@ -215,9 +211,8 @@ void main() {
       () async {
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
           featureFlags: featureFlags,
+          toolContext: FakeToolContext(logger: logger),
         );
         addTearDown(manager.dispose);
         await manager.initialize(

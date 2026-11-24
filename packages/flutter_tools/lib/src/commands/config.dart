@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/args.dart';
+import 'package:args/command_runner.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
@@ -13,6 +14,7 @@ import '../base/common.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../context/android_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
@@ -45,7 +47,9 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   @override
   ToolContext get toolContext => _toolContext;
 
-  var _extensionSettingsGroups = const <ExtensionSettingsGroup>[];
+  List<ExtensionSettingsGroup>? _extensionSettingsGroups;
+  final _acceptedExtensionFlags = <({String extensionName, FeatureFlag flag})>[];
+  final _acceptedExtensionOptions = <({String extensionName, ConfigOption option})>[];
 
   @override
   ArgParser createBaseArgParser() {
@@ -115,53 +119,137 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
     return parser;
   }
 
-  Future<ExtensionConfiguration?> get _activeExtensionConfig async {
-    if (!featureFlags.isToolExtensionsEnabled) {
-      return null;
+  Future<List<ExtensionSettingsGroup>> _getExtensionSettingsGroups() async {
+    if (_extensionSettingsGroups case final cached?) {
+      return cached;
     }
-    if (_extensionManager case final extensionManager?) {
-      await extensionManager.ensureInitialized();
-      final List<ConfigurationExtension> extensions = extensionManager.configurationExtensions;
-      if (extensions.isNotEmpty) {
-        return ExtensionConfiguration(extensions: extensions, logger: _toolContext.logger);
+    if (featureFlags.isToolExtensionsEnabled) {
+      if (_extensionManager case final extensionManager?) {
+        await extensionManager.ensureInitialized();
+        final List<ConfigurationExtension> extensions = extensionManager.configurationExtensions;
+        if (extensions.isNotEmpty) {
+          final config = ExtensionConfiguration(
+            extensions: extensions,
+            logger: _toolContext.logger,
+          );
+          return _extensionSettingsGroups = await config.fetchExtensionSettings();
+        }
       }
     }
-    return null;
+    return _extensionSettingsGroups = const <ExtensionSettingsGroup>[];
   }
 
   @override
   Future<void> initializeDynamicOptions() async {
-    if (await _activeExtensionConfig case final activeConfig?) {
-      _extensionSettingsGroups = await activeConfig.fetchExtensionSettings();
-      if (_extensionSettingsGroups.isNotEmpty) {
-        rebuildDynamicArgParser();
-      }
+    if ((await _getExtensionSettingsGroups()).isNotEmpty) {
+      rebuildDynamicArgParser();
     }
+  }
+
+  static String _formatCollisionConflict(String extensionId, String? existingOwner) {
+    if (existingOwner == null) {
+      return 'conflicts with an existing option';
+    }
+    if (existingOwner == extensionId) {
+      return 'conflicts with an existing option in "$extensionId"';
+    }
+    return 'conflicts with an existing option registered by extension "$existingOwner"';
+  }
+
+  Set<String> _builtInOptionNames(ArgParser parser) {
+    return <String>{
+      for (final Option option in parser.options.values) ...<String>[
+        option.name,
+        ...option.aliases,
+      ],
+      if (runner case final CommandRunner<void> commandRunner)
+        for (final Option option in commandRunner.argParser.options.values) ...<String>[
+          option.name,
+          ...option.aliases,
+        ],
+    };
   }
 
   @override
   ArgParser buildDynamicArgParser(ArgParser dynamicParser) {
-    for (final ExtensionSettingsGroup(:featureFlags, :configOptions) in _extensionSettingsGroups) {
-      for (final FeatureFlag(:name, :help, :enabledByDefault) in featureFlags) {
-        if (!dynamicParser.options.containsKey(name)) {
-          dynamicParser.addFlag(name, help: help, defaultsTo: enabledByDefault);
-        } else {
-          _toolContext.logger.printTrace(
-            'Extension feature flag "$name" conflicts with an existing option and was skipped.',
-          );
+    final Logger logger = _toolContext.logger;
+    _acceptedExtensionFlags.clear();
+    _acceptedExtensionOptions.clear();
+    // Maps registered option/alias names to their owning extension identifier,
+    // or `null` for built-in ConfigCommand / global FlutterCommandRunner options.
+    final optionOwners = <String, String?>{
+      for (final String name in _builtInOptionNames(dynamicParser)) name: null,
+    };
+    for (final ExtensionSettingsGroup group
+        in _extensionSettingsGroups ?? const <ExtensionSettingsGroup>[]) {
+      final ExtensionSettingsGroup(
+        :String extensionName,
+        :String displayTitle,
+        :List<FeatureFlag> featureFlags,
+        :List<ConfigOption> configOptions,
+      ) = group;
+      var addedSeparator = false;
+      void ensureSeparator() {
+        if (!addedSeparator) {
+          dynamicParser.addSeparator(displayTitle);
+          addedSeparator = true;
         }
       }
-      for (final ConfigOption(:name, :help, :value) in configOptions) {
-        if (!dynamicParser.options.containsKey(name)) {
-          dynamicParser.addOption(name, help: help, defaultsTo: value);
-        } else {
-          _toolContext.logger.printTrace(
-            'Extension config option "$name" conflicts with an existing option and was skipped.',
+
+      bool claimName(String kind, String name, {String? aliasFor}) {
+        if (!optionOwners.containsKey(name)) {
+          optionOwners[name] = extensionName;
+          return true;
+        }
+        final String reason = _formatCollisionConflict(extensionName, optionOwners[name]);
+        final target = aliasFor != null
+            ? '$kind alias "--$name" for "--$aliasFor"'
+            : '$kind "--$name"';
+        logger.printWarning('Extension "$extensionName" $target $reason and was skipped.');
+        return false;
+      }
+
+      for (final flag in featureFlags) {
+        if (claimName('feature flag', flag.name)) {
+          ensureSeparator();
+          dynamicParser.addFlag(flag.name, help: flag.help, defaultsTo: flag.enabledByDefault);
+          _acceptedExtensionFlags.add((extensionName: extensionName, flag: flag));
+        }
+      }
+      for (final option in configOptions) {
+        if (claimName('config option', option.name)) {
+          final availableAliases = <String>[
+            for (final String alias in option.aliases)
+              if (claimName('config option', alias, aliasFor: option.name)) alias,
+          ];
+          ensureSeparator();
+          dynamicParser.addOption(
+            option.name,
+            help: option.help,
+            defaultsTo: option.value,
+            aliases: availableAliases,
           );
+          _acceptedExtensionOptions.add((extensionName: extensionName, option: option));
         }
       }
     }
     return dynamicParser;
+  }
+
+  // Matches ArgParserException message prefix from package:args.
+  static const _kUnknownOptionPrefix = 'Could not find an option ';
+
+  @override
+  Never usageException(String message) {
+    if (featureFlags.isToolExtensionsEnabled && message.startsWith(_kUnknownOptionPrefix)) {
+      super.usageException(
+        '$message\n\n'
+        'Extension configuration flags are provided by project extensions. '
+        'Run "flutter config" inside a Flutter project or Pub workspace that '
+        'declares the extension.',
+      );
+    }
+    super.usageException(message);
   }
 
   @override
@@ -192,9 +280,8 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Logger logger = _toolContext.logger;
-    final Config config = _toolContext.config;
-    final FileSystem fs = _toolContext.fs;
+    final ToolContext(:Config config, :FileSystem fs, :Logger logger, :Platform platform) =
+        _toolContext;
 
     final List<String> rest = argResults!.rest;
     if (rest.isNotEmpty) {
@@ -225,13 +312,14 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
           config.removeValue(configSetting);
         }
       }
-      final ExtensionConfiguration? activeConfig = await _activeExtensionConfig;
-      final List<ExtensionSettingsGroup> groups = _extensionSettingsGroups.isNotEmpty
-          ? _extensionSettingsGroups
-          : await activeConfig?.fetchExtensionSettings() ?? const <ExtensionSettingsGroup>[];
-      for (final ExtensionSettingsGroup(:featureFlags) in groups) {
-        for (final FeatureFlag(:name) in featureFlags) {
-          config.removeValue(name);
+      for (final ExtensionSettingsGroup(:extensionName, :featureFlags)
+          in await _getExtensionSettingsGroups()) {
+        for (final FeatureFlag(:settingName) in featureFlags) {
+          ExtensionConfiguration.removeSettingValue(
+            config,
+            settingName,
+            extensionName: extensionName,
+          );
         }
       }
       logger.printStatus(requireReloadTipText);
@@ -240,7 +328,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
 
     if (argResults!.wasParsed('analytics')) {
       final bool value = boolArg('analytics');
-      if (isDashAnalyticsSuppressionRequested(_toolContext.platform.environment)) {
+      if (isDashAnalyticsSuppressionRequested(platform.environment)) {
         // `analytics` is a no-op, so `setTelemetry` would silently do nothing.
         logger.printWarning(dashSuppressedTelemetryChangeMessage(enable: value));
       } else {
@@ -302,18 +390,26 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       }
     }
 
-    for (final ExtensionSettingsGroup(:featureFlags, :configOptions) in _extensionSettingsGroups) {
-      for (final FeatureFlag(:name) in featureFlags) {
-        if (argResults!.wasParsed(name)) {
-          final bool keyValue = boolArg(name);
-          config.setValue(name, keyValue);
-          logger.printStatus('Setting "$name" value to "$keyValue".');
-        }
+    for (final (:String extensionName, :FeatureFlag flag) in _acceptedExtensionFlags) {
+      if (argResults!.wasParsed(flag.name)) {
+        final bool keyValue = boolArg(flag.name);
+        ExtensionConfiguration.setSettingValue(
+          config,
+          flag.settingName,
+          keyValue,
+          extensionName: extensionName,
+        );
+        logger.printStatus('Setting "${flag.name}" value to "$keyValue".');
       }
-      for (final ConfigOption(:name) in configOptions) {
-        if (argResults!.wasParsed(name)) {
-          _updateConfig(name, stringArg(name));
-        }
+    }
+    for (final (:String extensionName, :ConfigOption option) in _acceptedExtensionOptions) {
+      if (argResults!.wasParsed(option.name)) {
+        _updateConfig(
+          option.name,
+          stringArg(option.name),
+          extensionName: extensionName,
+          aliases: option.aliases,
+        );
       }
     }
 
@@ -351,28 +447,54 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
     logger.printStatus(const JsonEncoder.withIndent('  ').convert(results));
   }
 
-  void _updateConfig(String keyName, String? keyValue) {
-    final Config config = _toolContext.config;
-    final Logger logger = _toolContext.logger;
+  void _updateConfig(
+    String keyName,
+    String? keyValue, {
+    String? extensionName,
+    List<String> aliases = const <String>[],
+  }) {
+    final ToolContext(:Config config, :Logger logger) = _toolContext;
     if (keyValue == null || keyValue.isEmpty) {
-      config.removeValue(keyName);
+      if (extensionName != null) {
+        ExtensionConfiguration.removeSettingValue(
+          config,
+          keyName,
+          extensionName: extensionName,
+          aliases: aliases,
+        );
+      } else {
+        config.removeValue(keyName);
+      }
       logger.printStatus('Removing "$keyName" value.');
     } else {
-      config.setValue(keyName, keyValue);
+      if (extensionName != null) {
+        ExtensionConfiguration.setSettingValue(
+          config,
+          keyName,
+          keyValue,
+          extensionName: extensionName,
+          aliases: aliases,
+        );
+      } else {
+        config.setValue(keyName, keyValue);
+      }
       logger.printStatus('Setting "$keyName" value to "$keyValue".');
     }
   }
 
   /// List all config settings. for feature flags, include whether they are available.
   Future<String> get settingsText async {
-    final Config config = _toolContext.config;
+    final ToolContext(:Config config, :FlutterVersion flutterVersion, :Platform platform) =
+        _toolContext;
+    final Map<String, String> environment = platform.environment;
     final featuresByName = <String, Feature>{
       for (final feature in featureFlags.allFeatures) ?feature.configSetting: feature,
     };
-    final String channel = _toolContext.flutterVersion.channel;
+    final String channel = flutterVersion.channel;
     final keys = <String>{
       ...featureFlags.allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
-      ...config.keys,
+      for (final String key in config.keys)
+        if (key != ExtensionConfiguration.extensionsSettingsKey) key,
     };
     final Iterable<String> settings = keys.map<String>((String key) {
       Object? value = config.getValue(key);
@@ -394,25 +516,55 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       buffer.writeln(settings.join('\n'));
     }
 
-    final ExtensionConfiguration? activeConfig = await _activeExtensionConfig;
-    final List<ExtensionSettingsGroup> groups = _extensionSettingsGroups.isNotEmpty
-        ? _extensionSettingsGroups
-        : (await activeConfig?.fetchExtensionSettings()) ?? const <ExtensionSettingsGroup>[];
-    if (groups.any((ExtensionSettingsGroup g) => g.isNotEmpty)) {
+    final List<ExtensionSettingsGroup> groups = await _getExtensionSettingsGroups();
+    if (groups.any((ExtensionSettingsGroup g) => g.hasDisplayableSettings)) {
       buffer.writeln('\nExtension Settings:');
-      for (final ExtensionSettingsGroup(:title, :featureFlags, :configOptions, :isEmpty)
-          in groups) {
-        if (isEmpty) {
+      for (final group in groups) {
+        if (!group.hasDisplayableSettings) {
           continue;
         }
-        buffer.writeln('  $title:');
-        for (final FeatureFlag(:name, :enabledByDefault) in featureFlags) {
-          final Object val = config.getValue(name) ?? enabledByDefault;
-          buffer.writeln('    $name: $val');
+        final ExtensionSettingsGroup(
+          :String displayTitle,
+          :String extensionName,
+          :List<FeatureFlag> featureFlags,
+          :List<ConfigOption> configOptions,
+        ) = group;
+        buffer.writeln('  $displayTitle:');
+        for (final flag in featureFlags) {
+          final bool val = ExtensionConfiguration.resolveFeatureFlagValue(
+            config,
+            flag,
+            environment: environment,
+            extensionName: extensionName,
+          );
+          buffer.writeln('    ${flag.name}: $val');
         }
-        for (final ConfigOption(:name, :value) in configOptions) {
-          final Object val = config.getValue(name) ?? value ?? '(Not set)';
-          buffer.writeln('    $name: $val');
+        for (final option in configOptions) {
+          final String val =
+              ExtensionConfiguration.resolveConfigOptionValue(
+                config,
+                option,
+                environment: environment,
+                extensionName: extensionName,
+              ) ??
+              '(Not set)';
+          buffer.writeln('    ${option.name}: $val');
+        }
+      }
+    }
+
+    final activeExtensionNames = <String>{for (final group in groups) group.extensionName};
+    final Map<String, Map<String, Object?>> inactiveSettings =
+        ExtensionConfiguration.inactiveSavedExtensionSettings(
+          config,
+          activeExtensionNames: activeExtensionNames,
+        );
+    if (inactiveSettings.isNotEmpty) {
+      buffer.writeln('\nSaved Extension Settings (inactive outside project):');
+      for (final MapEntry(key: packageName, value: pkgSettings) in inactiveSettings.entries) {
+        buffer.writeln('  $packageName:');
+        for (final MapEntry(:key, :value) in pkgSettings.entries) {
+          buffer.writeln('    $key: $value');
         }
       }
     }

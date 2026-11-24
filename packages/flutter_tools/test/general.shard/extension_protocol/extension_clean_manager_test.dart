@@ -46,9 +46,8 @@ void main() {
       }
 
       final manager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        toolContext: FakeToolContext(logger: logger),
         entryPoints: <ExtensionEntryPoint>[entryPoint],
       );
       addTearDown(manager.dispose);
@@ -77,9 +76,8 @@ void main() {
       }
 
       final manager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        toolContext: FakeToolContext(logger: logger),
         entryPoints: <ExtensionEntryPoint>[noCleanEntryPoint],
       );
       addTearDown(manager.dispose);
@@ -117,9 +115,8 @@ void main() {
       }
 
       final manager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        toolContext: FakeToolContext(logger: logger),
         entryPoints: <ExtensionEntryPoint>[entryPoint],
       );
       addTearDown(manager.dispose);
@@ -177,9 +174,8 @@ void main() {
         }
 
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          toolContext: FakeToolContext(logger: logger),
           entryPoints: <ExtensionEntryPoint>[failingEntryPoint, succeedingEntryPoint],
         );
         addTearDown(manager.dispose);
@@ -240,9 +236,8 @@ void main() {
       }
 
       final manager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        toolContext: FakeToolContext(logger: logger),
         entryPoints: <ExtensionEntryPoint>[domainErrorEntryPoint, succeedingEntryPoint],
       );
       addTearDown(manager.dispose);

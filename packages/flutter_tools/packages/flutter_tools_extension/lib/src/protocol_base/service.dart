@@ -4,7 +4,9 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_core/json.dart';
+import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:meta/meta.dart';
 
 /// Typedef for an extension RPC handler function.
@@ -14,18 +16,31 @@ typedef ExtensionRpcHandler = FutureOr<Object?> Function(Map<String, Object?> pa
 /// service to the host tool.
 typedef ExtensionNotificationSender = void Function(String method, Map<String, Object?> params);
 
+typedef _ExtensionRequestSender = Future<Object?> Function(String method, [Object? parameters]);
+
 /// Represents a logical service exposed by a Flutter Tool Extension.
 ///
 /// Extension authors extend this class (via specific service base classes) to
 /// group related RPC endpoints under a specific [namespace] (e.g.
 /// `diagnostics`, `config`, `device`, `build`, `template`).
 abstract base class ToolExtensionService {
+  /// JSON-RPC method name invoked by extensions to query their resolved
+  /// configuration values from the host tool.
+  static const String getConfigurationValuesMethod = 'extension.getConfigurationValues';
+
   /// Internal JSON-RPC notification sender callback used by [sendNotification].
   ///
   /// Wired by `ToolExtensionEntryPoint.run` before the extension peer begins
   /// listening for RPC requests.
   @internal
   ExtensionNotificationSender? notificationSender;
+
+  /// Internal JSON-RPC request sender callback used by [sendHostRequest].
+  ///
+  /// Wired by `ToolExtensionEntryPoint.run` to `peer.sendRequest` before the
+  /// extension peer begins listening for RPC requests.
+  @internal
+  _ExtensionRequestSender? requestSender;
 
   /// The namespace string of the service (e.g. `'diagnostics'`).
   String get namespace;
@@ -48,6 +63,55 @@ abstract base class ToolExtensionService {
       );
     }
     sender(method, params);
+  }
+
+  /// Sends a JSON-RPC 2.0 request to the host tool over the bidirectional
+  /// `Peer` and returns the decoded result payload.
+  ///
+  /// Throws a [StateError] if called before this service has been attached to
+  /// an active extension peer by `ToolExtensionEntryPoint.run`.
+  @protected
+  @nonVirtual
+  Future<Object?> sendHostRequest(String method, Map<String, Object?> params) async {
+    final _ExtensionRequestSender? sender = requestSender;
+    if (sender == null) {
+      throw StateError(
+        'Cannot send request "$method": service "$namespace" is not attached to an active peer.',
+      );
+    }
+    try {
+      return await sender(method, params);
+    } on json_rpc.RpcException catch (error) {
+      if (tryParseToolExtensionRpcError(code: error.code, message: error.message, data: error.data)
+          case final ToolExtensionException translated) {
+        throw translated;
+      }
+      rethrow;
+    }
+  }
+
+  /// Queries the host tool for the current persisted values of all configuration
+  /// keys owned by this extension.
+  ///
+  /// Only keys declared by this extension's `ConfigService` (`FeatureFlag.settingName`
+  /// mapped to `bool`, and `ConfigOption.name` mapped to `String`, omitting unset
+  /// keys) are returned. The host resolves `environmentOverride` ahead of
+  /// `"extensions"` settings in `flutter_settings` and falls back to any
+  /// `ConfigOption.aliases` and default values.
+  @nonVirtual
+  Future<Map<String, Object?>> getConfigurationValues() async {
+    final Object? rawResult = await sendHostRequest(
+      getConfigurationValuesMethod,
+      const <String, Object?>{},
+    );
+    if (rawResult case final Map<String, Object?> map) {
+      return map;
+    }
+    throw FormatException(
+      'Expected Map<String, Object?> from "$getConfigurationValuesMethod", got '
+      '${rawResult.runtimeType}.',
+      rawResult,
+    );
   }
 
   /// Cleans up resources held by the service when the extension is shut down.
