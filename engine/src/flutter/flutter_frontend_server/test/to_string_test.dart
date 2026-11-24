@@ -59,6 +59,7 @@ void main() {
 
     final expectedStdout =
         '{$paintString,'
+        '"Size.toString":"Size(12.5, 34.0)",'
         '"Brightness.toString":"Brightness.dark",'
         '"Foo.toString":"I am a Foo",'
         '"Keep.toString":"I am a Keep"}';
@@ -86,6 +87,7 @@ void main() {
 
     const expectedStdout =
         '{"Paint.toString":"Instance of \'Paint\'",'
+        '"Size.toString":"Size(12.5, 34.0)",'
         '"Brightness.toString":"Brightness.dark",'
         '"Foo.toString":"Instance of \'Foo\'",'
         '"Keep.toString":"I am a Keep"}';

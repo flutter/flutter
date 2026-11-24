@@ -611,6 +611,7 @@ class Size extends OffsetBase {
   @override
   int get hashCode => Object.hash(_dx, _dy);
 
+  @keepToString
   @override
   String toString() => 'Size(${width.toStringAsFixed(1)}, ${height.toStringAsFixed(1)})';
 }
