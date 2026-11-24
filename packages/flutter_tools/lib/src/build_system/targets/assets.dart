@@ -40,6 +40,7 @@ Future<Depfile> copyAssets(
   required TargetPlatform targetPlatform,
   required BuildMode buildMode,
   List<File> additionalInputs = const <File>[],
+  List<String>? recordedUsesFileNames,
   String? flavor,
 }) async {
   final File pubspecFile = environment.projectDir.childFile('pubspec.yaml');
@@ -82,6 +83,7 @@ Future<Depfile> copyAssets(
     fileSystem: environment.fileSystem,
     artifacts: environment.artifacts,
     targetPlatform: targetPlatform,
+    recordedUsesFileNames: recordedUsesFileNames,
   );
   final shaderCompiler = ShaderCompiler(
     processManager: environment.processManager,
