@@ -93,6 +93,8 @@
 
 /**
  * Removes surface with given size from cache (if available) and returns it.
+ * All cached surfaces are the same size; a request for a different size
+ * purges the cache first.
  */
 - (nullable FlutterSurface*)removeSurfaceForSize:(CGSize)size;
 
