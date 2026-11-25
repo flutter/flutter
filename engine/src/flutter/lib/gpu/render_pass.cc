@@ -98,12 +98,13 @@ void RenderPass::End() {
   }
 }
 
-void RenderPass::SetPipeline(RenderPipeline* pipeline) {
-  if (render_pipeline_.get() == pipeline) {
+void RenderPass::SetPipeline(RenderPipeline& pipeline) {
+  const std::shared_ptr<const RenderPipeline::Core>& core = pipeline.GetCore();
+  if (pipeline_core_ == core) {
     return;
   }
   pipeline_state_dirty_ = true;
-  render_pipeline_ = fml::Ref(pipeline);
+  pipeline_core_ = core;
 }
 
 // Callers re-send the same fixed-function state ahead of most draws, and
@@ -293,8 +294,7 @@ void RenderPass::SetViewport(const impeller::Viewport& viewport) {
 
 void RenderPass::RecordPipelineState(PassRecording& recording) {
   pipeline_state_dirty_ = false;
-  const std::shared_ptr<const RenderPipeline::Core>& core =
-      render_pipeline_->GetCore();
+  const std::shared_ptr<const RenderPipeline::Core>& core = pipeline_core_;
   pipeline_known_failed_ = core->HasBuildFailed(pipeline_state_);
   if (pipeline_known_failed_) {
     return;
@@ -319,7 +319,7 @@ bool RenderPass::Draw(size_t element_count,
     // drawIndexed was called without an index buffer bound.
     return false;
   }
-  if (!render_pipeline_) {
+  if (!pipeline_core_) {
     return false;
   }
   if (pipeline_state_dirty_) {
@@ -442,7 +442,7 @@ Dart_Handle InternalFlutterGpu_RenderPass_End(
 void InternalFlutterGpu_RenderPass_BindPipeline(
     flutter::gpu::RenderPass* wrapper,
     flutter::gpu::RenderPipeline* pipeline) {
-  wrapper->SetPipeline(pipeline);
+  wrapper->SetPipeline(*pipeline);
 }
 
 void InternalFlutterGpu_RenderPass_BindVertexBufferDevice(

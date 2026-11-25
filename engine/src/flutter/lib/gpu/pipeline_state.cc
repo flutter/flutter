@@ -7,8 +7,6 @@
 #include <map>
 #include <type_traits>
 
-#include "flutter/fml/hash_combine.h"
-
 namespace flutter {
 namespace gpu {
 
@@ -33,17 +31,6 @@ bool PipelineState::operator==(const PipelineState& other) const {
     }
   }
   return true;
-}
-
-size_t PipelineState::GetHash() const {
-  size_t hash = fml::HashCombine(
-      cull_mode, winding_order, primitive_type, polygon_mode, sample_count,
-      depth_format, stencil_format, color_attachment_count, depth.GetHash(),
-      stencil_front.GetHash(), stencil_back.GetHash());
-  for (size_t i = 0; i < color_attachment_count; i++) {
-    hash = fml::HashCombine(hash, colors[i].Hash());
-  }
-  return hash;
 }
 
 impeller::PipelineDescriptor PipelineState::ToDescriptor() const {

@@ -78,8 +78,7 @@ class RenderPipeline : public RefCountedDartWrappable<RenderPipeline> {
     // Replay thread only.
     mutable absl::flat_hash_map<
         PipelineState,
-        std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>,
-        PipelineState::Hash>
+        std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>>
         resolved_;
     mutable uint64_t resolved_generation_ = 0;
 

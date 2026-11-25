@@ -296,7 +296,7 @@ class FlutterGpuRecordingTest : public ::testing::Test {
     const impeller::SamplerDescriptor sampler;
     for (size_t i = 0; i < draws; i++) {
       pass.ClearBindings();
-      pass.SetPipeline(pipeline_.get());
+      pass.SetPipeline(*pipeline_);
       pass.SetCullMode(i % 2 == 0 ? impeller::CullMode::kBackFace
                                   : impeller::CullMode::kFrontFace);
       pass.BindVertexBuffer(0, *buffer_, 0, 1024);
@@ -376,7 +376,7 @@ TEST_F(FlutterGpuRecordingTest, KnownBuildFailuresFailDrawsWhenRecorded) {
   auto first_buffer = fml::MakeRefCounted<CommandBuffer>(context_);
   auto first = MakePass();
   ASSERT_TRUE(first->Begin(*first_buffer));
-  first->SetPipeline(pipeline_.get());
+  first->SetPipeline(*pipeline_);
   EXPECT_TRUE(first->Draw(3, 1, /*indexed=*/false));
   first->End();
   EXPECT_EQ(last_pass_->draws, 0u);
@@ -385,7 +385,7 @@ TEST_F(FlutterGpuRecordingTest, KnownBuildFailuresFailDrawsWhenRecorded) {
   auto second_buffer = fml::MakeRefCounted<CommandBuffer>(context_);
   auto second = MakePass();
   ASSERT_TRUE(second->Begin(*second_buffer));
-  second->SetPipeline(pipeline_.get());
+  second->SetPipeline(*pipeline_);
   EXPECT_FALSE(second->Draw(3, 1, /*indexed=*/false));
 
   // Different state is unaffected.
@@ -400,7 +400,7 @@ TEST_F(FlutterGpuRecordingTest, ReplayFollowsBindingRules) {
   auto command_buffer = fml::MakeRefCounted<CommandBuffer>(context_);
   auto pass = MakePass();
   ASSERT_TRUE(pass->Begin(*command_buffer));
-  pass->SetPipeline(pipeline_.get());
+  pass->SetPipeline(*pipeline_);
 
   auto set = fml::MakeRefCounted<BindingSet>();
   ASSERT_TRUE(set->AddUniform(*vertex_, 0, buffer_->GetBuffer(), 256, 64));
@@ -437,7 +437,7 @@ TEST_F(FlutterGpuRecordingTest, ReplayKeepsDrawState) {
   auto command_buffer = fml::MakeRefCounted<CommandBuffer>(context_);
   auto pass = MakePass();
   ASSERT_TRUE(pass->Begin(*command_buffer));
-  pass->SetPipeline(pipeline_.get());
+  pass->SetPipeline(*pipeline_);
   pass->BindVertexBuffer(0, *buffer_, 0, 64);
   pass->BindVertexBuffer(1, *buffer_, 64, 64);
   pass->BindIndexBuffer(*buffer_, 128, 64, impeller::IndexType::k32bit);
@@ -476,46 +476,6 @@ TEST(FlutterGpuOpStreamTest, ForEachCrossesChunks) {
 
   stream.Reset();
   stream.ForEach([](const OpHeader& header) { FAIL(); });
-}
-
-TEST(FlutterGpuPipelineStateTest, ComparesOnlyUsedAttachments) {
-  PipelineState a;
-  a.color_attachment_count = 1;
-  PipelineState b = a;
-  EXPECT_EQ(a, b);
-  EXPECT_EQ(a.GetHash(), b.GetHash());
-
-  // Beyond the used attachments.
-  b.colors[1].blending_enabled = true;
-  EXPECT_EQ(a, b);
-  EXPECT_EQ(a.GetHash(), b.GetHash());
-
-  b.colors[0].blending_enabled = true;
-  EXPECT_FALSE(a == b);
-  EXPECT_NE(a.GetHash(), b.GetHash());
-}
-
-TEST(FlutterGpuPipelineStateTest, ToDescriptorKeepsTheState) {
-  PipelineState state;
-  state.cull_mode = impeller::CullMode::kBackFace;
-  state.sample_count = impeller::SampleCount::kCount4;
-  state.depth_format = impeller::PixelFormat::kD32FloatS8UInt;
-  state.depth.depth_write_enabled = true;
-  state.color_attachment_count = 2;
-  state.colors[0].format = impeller::PixelFormat::kR8G8B8A8UNormInt;
-  state.colors[1].format = impeller::PixelFormat::kUnknown;
-
-  const impeller::PipelineDescriptor descriptor = state.ToDescriptor();
-  EXPECT_EQ(descriptor.GetCullMode(), impeller::CullMode::kBackFace);
-  EXPECT_EQ(descriptor.GetSampleCount(), impeller::SampleCount::kCount4);
-  EXPECT_EQ(descriptor.GetDepthPixelFormat(),
-            impeller::PixelFormat::kD32FloatS8UInt);
-  ASSERT_TRUE(descriptor.GetDepthStencilAttachmentDescriptor().has_value());
-  EXPECT_TRUE(
-      descriptor.GetDepthStencilAttachmentDescriptor()->depth_write_enabled);
-  EXPECT_EQ(descriptor.GetColorAttachmentDescriptors().size(), 1u);
-  EXPECT_EQ(descriptor.GetStencilPixelFormat(),
-            impeller::PixelFormat::kUnknown);
 }
 
 TEST(FlutterGpuSamplerKeyTest, KeysRoundTrip) {

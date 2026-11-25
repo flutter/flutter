@@ -146,7 +146,7 @@ RenderPipeline::Core::Resolve(impeller::Context& context,
   }
   if (!pipeline) {
     std::scoped_lock lock(failed_mutex_);
-    failed_keys_.insert(state.GetHash());
+    failed_keys_.insert(absl::HashOf(state));
     has_failures_.store(true, std::memory_order_relaxed);
   }
   return pipeline;
@@ -157,7 +157,7 @@ bool RenderPipeline::Core::HasBuildFailed(const PipelineState& state) const {
     return false;
   }
   std::scoped_lock lock(failed_mutex_);
-  return failed_keys_.contains(state.GetHash());
+  return failed_keys_.contains(absl::HashOf(state));
 }
 
 bool RenderPipeline::BindToPipelineDescriptor(

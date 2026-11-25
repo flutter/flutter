@@ -63,7 +63,7 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
   /// nothing if a later command already ended it.
   void End();
 
-  void SetPipeline(RenderPipeline* pipeline);
+  void SetPipeline(RenderPipeline& pipeline);
 
   /// Set the face culling mode for subsequent draws.
   void SetCullMode(impeller::CullMode mode);
@@ -164,7 +164,9 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
   // Set by `Begin`. A pass records only while the command buffer says it is
   // the open pass, so nothing has to tell the pass when it ended.
   fml::RefPtr<CommandBuffer> command_buffer_;
-  fml::RefPtr<RenderPipeline> render_pipeline_;
+  // The bound pipeline's core. The pipeline itself is wrapped by Dart, and
+  // the leaf call that rebinds one can't be what releases a wrapped object.
+  std::shared_ptr<const RenderPipeline::Core> pipeline_core_;
 
   PipelineState pipeline_state_;
   bool pipeline_state_dirty_ = true;
