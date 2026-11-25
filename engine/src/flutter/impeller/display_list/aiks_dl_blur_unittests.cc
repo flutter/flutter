@@ -505,6 +505,65 @@ TEST_P(AiksTest, CanRenderBoundedBlurWithTranslation) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, CanRenderBoundedBlurInTranslatedSaveLayer) {
+  auto image = DlImageImpeller::Make(CreateTextureForFixture("boston.jpg"));
+  DlRect image_bounds = DlRect::MakeWH(image->width(), image->height());
+
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint image_paint;
+  DlPaint save_paint;
+  save_paint.setBlendMode(DlBlendMode::kSrcOver);
+
+  // Subcase 1: Bounded backdrop blur inside a translated SaveLayer.
+  builder.Save();
+  builder.Translate(100, 150);
+  DlRect layer_rect1 = DlRect::MakeXYWH(0, 0, 300, 150);
+  builder.ClipRect(layer_rect1);
+  builder.SaveLayer(layer_rect1, nullptr);
+  builder.DrawImageRect(image, image_bounds, layer_rect1,
+                        DlImageSampling::kLinear, &image_paint);
+  DlRect blur_rect1 = DlRect::MakeXYWH(0, 0, 300, 75);
+  builder.Save();
+  builder.ClipRect(blur_rect1);
+  auto backdrop_filter1 = DlBlurImageFilter::Make(10, 10, DlTileMode::kClamp,
+                                                  /*bounds=*/blur_rect1);
+  builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter1.get());
+  builder.Restore();
+  builder.Restore();
+  builder.Restore();
+  builder.Restore();
+
+  // Subcase 2: Nested translated and scaled SaveLayers with bounded blur.
+  builder.Save();
+  builder.Translate(100, 350);
+  DlRect layer_rect2 = DlRect::MakeXYWH(0, 0, 300, 150);
+  builder.ClipRect(layer_rect2);
+  builder.SaveLayer(layer_rect2, nullptr);
+  builder.Save();
+  builder.Translate(20, 10);
+  builder.Scale(0.8f, 0.8f);
+  builder.ClipRect(layer_rect2);
+  builder.SaveLayer(layer_rect2, nullptr);
+  builder.DrawImageRect(image, image_bounds, layer_rect2,
+                        DlImageSampling::kLinear, &image_paint);
+  DlRect blur_rect2 = DlRect::MakeXYWH(40, 30, 220, 75);
+  builder.Save();
+  builder.ClipRect(blur_rect2);
+  auto backdrop_filter2 = DlBlurImageFilter::Make(10, 10, DlTileMode::kClamp,
+                                                  /*bounds=*/blur_rect2);
+  builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter2.get());
+  builder.Restore();
+  builder.Restore();
+  builder.Restore();
+  builder.Restore();
+  builder.Restore();
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, CanRenderClippedBlur) {
   DisplayListBuilder builder;
   builder.ClipRect(DlRect::MakeXYWH(100, 150, 400, 400));
