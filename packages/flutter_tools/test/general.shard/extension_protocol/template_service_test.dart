@@ -208,7 +208,7 @@ void main() {
       return (manager, templateManager);
     }
 
-    testWithoutContext(
+    test(
       'returns empty results without initializing extensions when feature flag is disabled',
       () async {
         final manager = ExtensionManager(
@@ -252,7 +252,7 @@ void main() {
       },
     );
 
-    testWithoutContext(
+    test(
       'queries supported platforms, caches results, and resolves platform templates over RPC',
       () async {
         final (_, ExtensionTemplateManager templateManager) = await createManagers(
@@ -296,38 +296,34 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'generatePlatformTemplateParameters delegates over RPC and augments parameters',
-      () async {
-        final (_, ExtensionTemplateManager templateManager) = await createManagers(
-          entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
-        );
+    test('generatePlatformTemplateParameters delegates over RPC and augments parameters', () async {
+      final (_, ExtensionTemplateManager templateManager) = await createManagers(
+        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+      );
 
-        const inputParams = <String, Object?>{
-          'projectName': 'sample_linux_app',
-          'org': 'com.example',
-        };
-        final Map<String, Object?> result = await templateManager
-            .generatePlatformTemplateParameters(
-              platform: LinuxTemplateService.customLinuxPlatformName,
-              toolParameters: inputParams,
-            );
+      const inputParams = <String, Object?>{
+        'projectName': 'sample_linux_app',
+        'org': 'com.example',
+      };
+      final Map<String, Object?> result = await templateManager.generatePlatformTemplateParameters(
+        platform: LinuxTemplateService.customLinuxPlatformName,
+        toolParameters: inputParams,
+      );
 
-        expect(result['projectName'], 'sample_linux_app');
-        expect(result['org'], 'com.example');
-        expect(result['customLinux'], isTrue);
+      expect(result['projectName'], 'sample_linux_app');
+      expect(result['org'], 'com.example');
+      expect(result['customLinux'], isTrue);
 
-        expect(
-          await templateManager.generatePlatformTemplateParameters(
-            platform: 'unknown_platform',
-            toolParameters: inputParams,
-          ),
-          equals(inputParams),
-        );
-      },
-    );
+      expect(
+        await templateManager.generatePlatformTemplateParameters(
+          platform: 'unknown_platform',
+          toolParameters: inputParams,
+        ),
+        equals(inputParams),
+      );
+    });
 
-    testWithoutContext('rejects built-in platform collisions with a warning', () async {
+    test('rejects built-in platform collisions with a warning', () async {
       final (_, ExtensionTemplateManager templateManager) = await createManagers(
         entryPoints: <ExtensionEntryPoint>[_builtInCollisionEntryPoint],
       );
@@ -351,7 +347,7 @@ void main() {
       );
     });
 
-    testWithoutContext('logs warning when duplicate platform template is encountered', () async {
+    test('logs warning when duplicate platform template is encountered', () async {
       final (_, ExtensionTemplateManager templateManager) = await createManagers(
         entryPoints: <ExtensionEntryPoint>[
           linuxExtensionEntryPoint,
@@ -371,7 +367,7 @@ void main() {
       );
     });
 
-    testWithoutContext('logs warning and preserves owner when second extension registers plugin template for same platform', () async {
+    test('logs warning and preserves owner when second extension registers plugin template for same platform', () async {
       final (_, ExtensionTemplateManager templateManager) = await createManagers(
         entryPoints: <ExtensionEntryPoint>[
           linuxExtensionEntryPoint,
@@ -402,7 +398,7 @@ void main() {
       expect(params.containsKey('fromConflictingPluginExtension'), isFalse);
     });
 
-    testWithoutContext(
+    test(
       'allows single extension to resolve multi-variant templates across template types',
       () async {
         final (_, ExtensionTemplateManager templateManager) = await createManagers(
@@ -443,73 +439,70 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'RPC parameter validation throws INVALID_PARAMS on invalid or missing params',
-      () async {
-        final (ExtensionManager manager, _) = await createManagers(
-          entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
-        );
-        final ExtensionConnection connection = manager.connections.first;
+    test('RPC parameter validation throws INVALID_PARAMS on invalid or missing params', () async {
+      final (ExtensionManager manager, _) = await createManagers(
+        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+      );
+      final ExtensionConnection connection = manager.connections.first;
 
-        final invalidCases = <(String, Map<String, Object?>)>[
-          (TemplateService.resolvePlatformTemplateMethod, const <String, Object?>{}),
-          (
-            TemplateService.resolvePlatformTemplateMethod,
-            const <String, Object?>{
-              TemplateService.platformParam: 123,
-              TemplateService.templateTypeParam: 'app',
-              TemplateService.toolParametersParam: <String, Object?>{},
-            },
-          ),
-          (
-            TemplateService.resolvePlatformTemplateMethod,
-            const <String, Object?>{
-              TemplateService.platformParam: 'custom_linux',
-              TemplateService.templateTypeParam: 'unknown_type',
-              TemplateService.toolParametersParam: <String, Object?>{},
-            },
-          ),
-          (
-            TemplateService.resolvePlatformTemplateMethod,
-            const <String, Object?>{
-              TemplateService.platformParam: 'custom_linux',
-              TemplateService.templateTypeParam: 'app',
-              TemplateService.toolParametersParam: 'invalid',
-            },
-          ),
-          (TemplateService.generatePlatformTemplateParametersMethod, const <String, Object?>{}),
-          (
-            TemplateService.generatePlatformTemplateParametersMethod,
-            const <String, Object?>{
-              TemplateService.platformParam: 123,
-              TemplateService.toolParametersParam: <String, Object?>{},
-            },
-          ),
-          (
-            TemplateService.generatePlatformTemplateParametersMethod,
-            const <String, Object?>{
-              TemplateService.platformParam: 'custom_linux',
-              TemplateService.toolParametersParam: 'invalid',
-            },
-          ),
-        ];
+      final invalidCases = <(String, Map<String, Object?>)>[
+        (TemplateService.resolvePlatformTemplateMethod, const <String, Object?>{}),
+        (
+          TemplateService.resolvePlatformTemplateMethod,
+          const <String, Object?>{
+            TemplateService.platformParam: 123,
+            TemplateService.templateTypeParam: 'app',
+            TemplateService.toolParametersParam: <String, Object?>{},
+          },
+        ),
+        (
+          TemplateService.resolvePlatformTemplateMethod,
+          const <String, Object?>{
+            TemplateService.platformParam: 'custom_linux',
+            TemplateService.templateTypeParam: 'unknown_type',
+            TemplateService.toolParametersParam: <String, Object?>{},
+          },
+        ),
+        (
+          TemplateService.resolvePlatformTemplateMethod,
+          const <String, Object?>{
+            TemplateService.platformParam: 'custom_linux',
+            TemplateService.templateTypeParam: 'app',
+            TemplateService.toolParametersParam: 'invalid',
+          },
+        ),
+        (TemplateService.generatePlatformTemplateParametersMethod, const <String, Object?>{}),
+        (
+          TemplateService.generatePlatformTemplateParametersMethod,
+          const <String, Object?>{
+            TemplateService.platformParam: 123,
+            TemplateService.toolParametersParam: <String, Object?>{},
+          },
+        ),
+        (
+          TemplateService.generatePlatformTemplateParametersMethod,
+          const <String, Object?>{
+            TemplateService.platformParam: 'custom_linux',
+            TemplateService.toolParametersParam: 'invalid',
+          },
+        ),
+      ];
 
-        for (final (method, params) in invalidCases) {
-          await expectLater(
-            connection.sendRequest(method, params: params),
-            throwsA(
-              isA<json_rpc.RpcException>().having(
-                (json_rpc.RpcException e) => e.code,
-                'code',
-                equals(error_code.INVALID_PARAMS),
-              ),
+      for (final (method, params) in invalidCases) {
+        await expectLater(
+          connection.sendRequest(method, params: params),
+          throwsA(
+            isA<json_rpc.RpcException>().having(
+              (json_rpc.RpcException e) => e.code,
+              'code',
+              equals(error_code.INVALID_PARAMS),
             ),
-          );
-        }
-      },
-    );
+          ),
+        );
+      }
+    });
 
-    testWithoutContext('resolveTemplateDirectory resolves package URIs correctly', () {
+    test('resolveTemplateDirectory resolves package URIs correctly', () {
       final manager = ExtensionManager(
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
         hostPlatform: HostPlatform.linux_x64,
@@ -556,7 +549,7 @@ void main() {
       );
     });
 
-    testWithoutContext('surfaces resolvePlatformTemplate errors as ToolExit and falls back on unexpected parameter errors', () async {
+    test('surfaces resolvePlatformTemplate errors as ToolExit and falls back on unexpected parameter errors', () async {
       final (_, ExtensionTemplateManager templateManager) = await createManagers(
         entryPoints: <ExtensionEntryPoint>[_failingTemplateEntryPoint],
       );

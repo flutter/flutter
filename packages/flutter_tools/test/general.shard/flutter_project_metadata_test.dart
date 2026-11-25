@@ -22,7 +22,7 @@ void main() {
     metadataFile = fileSystem.file('.metadata');
   });
 
-  testWithoutContext('project metadata fields are empty when file does not exist', () {
+  test('project metadata fields are empty when file does not exist', () {
     final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     expect(projectMetadata.projectType, isNull);
     expect(projectMetadata.versionChannel, isNull);
@@ -31,7 +31,7 @@ void main() {
     expect(logger.traceText, contains('No .metadata file found at .metadata'));
   });
 
-  testWithoutContext('project metadata fields are empty when file is empty', () {
+  test('project metadata fields are empty when file is empty', () {
     metadataFile.createSync();
     final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     expect(projectMetadata.projectType, isNull);
@@ -41,7 +41,7 @@ void main() {
     expect(logger.traceText, contains('.metadata file at .metadata was empty or malformed.'));
   });
 
-  testWithoutContext('project metadata fields are empty when file is not valid yaml', () {
+  test('project metadata fields are empty when file is not valid yaml', () {
     metadataFile.writeAsStringSync(' channel: @something');
     final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     expect(projectMetadata.projectType, isNull);
@@ -51,7 +51,7 @@ void main() {
     expect(logger.traceText, contains('.metadata file at .metadata was empty or malformed.'));
   });
 
-  testWithoutContext('projectType is populated when version is null', () {
+  test('projectType is populated when version is null', () {
     metadataFile
       ..createSync()
       ..writeAsStringSync('''
@@ -69,7 +69,7 @@ project_type: plugin
     );
   });
 
-  testWithoutContext('projectType is populated when version is malformed', () {
+  test('projectType is populated when version is malformed', () {
     metadataFile
       ..createSync()
       ..writeAsStringSync('''
@@ -87,7 +87,7 @@ project_type: plugin
     );
   });
 
-  testWithoutContext('version is populated when projectType is malformed', () {
+  test('version is populated when projectType is malformed', () {
     metadataFile
       ..createSync()
       ..writeAsStringSync('''
@@ -109,7 +109,7 @@ project_type: {}
     );
   });
 
-  testWithoutContext('migrate config is populated when version is malformed', () {
+  test('migrate config is populated when version is malformed', () {
     metadataFile
       ..createSync()
       ..writeAsStringSync('''
@@ -149,7 +149,7 @@ migration:
     );
   });
 
-  testWithoutContext('migrate config is populated when unmanaged_files is malformed', () {
+  test('migrate config is populated when unmanaged_files is malformed', () {
     metadataFile
       ..createSync()
       ..writeAsStringSync('''
@@ -187,7 +187,7 @@ migration:
     );
   });
 
-  testWithoutContext('platforms is populated with a malformed entry', () {
+  test('platforms is populated with a malformed entry', () {
     metadataFile
       ..createSync()
       ..writeAsStringSync('''
@@ -237,7 +237,7 @@ migration:
     expect(logger.traceText, contains('The key `create_revision` was not found'));
   });
 
-  testWithoutContext('enabledValues does not contain packageFfi if native-assets not enabled', () {
+  test('enabledValues does not contain packageFfi if native-assets not enabled', () {
     final flags = TestFeatureFlags();
     expect(
       ParsedFlutterTemplateType.enabledValues(flags),
@@ -246,7 +246,7 @@ migration:
     expect(ParsedFlutterTemplateType.enabledValues(flags), contains(FlutterTemplateType.plugin));
   });
 
-  testWithoutContext('enabledValues contains packageFfi if natives-assets enabled', () {
+  test('enabledValues contains packageFfi if natives-assets enabled', () {
     final flags = TestFeatureFlags(isNativeAssetsEnabled: true);
     expect(
       ParsedFlutterTemplateType.enabledValues(flags),
@@ -255,7 +255,7 @@ migration:
     expect(ParsedFlutterTemplateType.enabledValues(flags), contains(FlutterTemplateType.plugin));
   });
 
-  testWithoutContext('projectType is null for unknown template', () {
+  test('projectType is null for unknown template', () {
     metadataFile
       ..createSync()
       ..writeAsStringSync('''
@@ -268,7 +268,7 @@ project_type: custom-linux-app
     expect(projectMetadata.projectType, isNull);
   });
 
-  testWithoutContext('ParsedFlutterTemplateType.fromCliName returns null when not found', () {
+  test('ParsedFlutterTemplateType.fromCliName returns null when not found', () {
     expect(ParsedFlutterTemplateType.fromCliName('custom-template'), isNull);
   });
 }

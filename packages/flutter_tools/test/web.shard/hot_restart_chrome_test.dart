@@ -67,32 +67,29 @@ Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) a
     tryToDelete(tempDir);
   });
 
-  testWithoutContext(
-    '$testName: hot restart works without error and newly added code executes',
-    () async {
-      await flutter.run(
-        device: GoogleChromeDevice.kChromeDeviceId,
-        additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
-      );
-      // hot restart works without error
-      await flutter.hotRestart();
+  test('$testName: hot restart works without error and newly added code executes', () async {
+    await flutter.run(
+      device: GoogleChromeDevice.kChromeDeviceId,
+      additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
+    );
+    // hot restart works without error
+    await flutter.hotRestart();
 
-      final completer = Completer<void>();
-      final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
-        printOnFailure(line);
-        if (!completer.isCompleted && line.contains('(((((RELOAD WORKED)))))')) {
-          completer.complete();
-        }
-      });
-      project.uncommentHotReloadPrint();
-      try {
-        await flutter.hotRestart();
-        await completer.future.timeout(const Duration(seconds: 15));
-      } finally {
-        await subscription.cancel();
+    final completer = Completer<void>();
+    final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
+      printOnFailure(line);
+      if (!completer.isCompleted && line.contains('(((((RELOAD WORKED)))))')) {
+        completer.complete();
       }
-    },
-  );
+    });
+    project.uncommentHotReloadPrint();
+    try {
+      await flutter.hotRestart();
+      await completer.future.timeout(const Duration(seconds: 15));
+    } finally {
+      await subscription.cancel();
+    }
+  });
 }
 
 void main() async {

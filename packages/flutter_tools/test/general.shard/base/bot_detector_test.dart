@@ -18,7 +18,7 @@ void main() {
     });
 
     group('isRunningOnBot', () {
-      testWithoutContext('returns false unconditionally if BOT=false or BOT=0 is set', () {
+      test('returns false unconditionally if BOT=false or BOT=0 is set', () {
         fakePlatform.environment['BOT'] = 'false';
         fakePlatform.environment['TRAVIS'] = 'true';
         expect(botDetector.isRunningOnBot, isFalse);
@@ -30,7 +30,7 @@ void main() {
         expect(botDetector.isRunningOnBot, isFalse);
       });
 
-      testWithoutContext('returns false when BOT or CI is false, 0, or empty', () {
+      test('returns false when BOT or CI is false, 0, or empty', () {
         for (final value in <String>['false', 'False', 'FALSE', '0', ' 0 ', '', '   ']) {
           fakePlatform.environment
             ..clear()
@@ -44,7 +44,7 @@ void main() {
         }
       });
 
-      testWithoutContext('returns true when BOT or CI is true or 1', () {
+      test('returns true when BOT or CI is true or 1', () {
         for (final value in <String>['true', 'True', 'TRUE', '1', ' 1 ']) {
           fakePlatform.environment
             ..clear()
@@ -58,7 +58,7 @@ void main() {
         }
       });
 
-      testWithoutContext('does not cache BOT environment variable', () {
+      test('does not cache BOT environment variable', () {
         fakePlatform.environment['BOT'] = 'true';
         expect(botDetector.isRunningOnBot, isTrue);
 
@@ -66,33 +66,33 @@ void main() {
         expect(botDetector.isRunningOnBot, isFalse);
       });
 
-      testWithoutContext('returns false unconditionally if FLUTTER_HOST is set', () {
+      test('returns false unconditionally if FLUTTER_HOST is set', () {
         fakePlatform.environment['FLUTTER_HOST'] = 'foo';
         fakePlatform.environment['TRAVIS'] = 'true';
 
         expect(botDetector.isRunningOnBot, isFalse);
       });
 
-      testWithoutContext('can test analytics outputs on bots when outputting to a file', () {
+      test('can test analytics outputs on bots when outputting to a file', () {
         fakePlatform.environment['TRAVIS'] = 'true';
         fakePlatform.environment['FLUTTER_ANALYTICS_LOG_FILE'] = '/some/file';
 
         expect(botDetector.isRunningOnBot, isFalse);
       });
 
-      testWithoutContext('returns true when running on borg', () {
+      test('returns true when running on borg', () {
         fakePlatform.environment['BORG_ALLOC_DIR'] = 'true';
 
         expect(botDetector.isRunningOnBot, isTrue);
       });
 
-      testWithoutContext('returns true when running on Azure (AZURE_HTTP_USER_AGENT is set)', () {
+      test('returns true when running on Azure (AZURE_HTTP_USER_AGENT is set)', () {
         fakePlatform.environment['AZURE_HTTP_USER_AGENT'] = 'VSTS_...';
 
         expect(botDetector.isRunningOnBot, isTrue);
       });
 
-      testWithoutContext('returns true when running on Azure DevOps (TF_BUILD is set)', () {
+      test('returns true when running on Azure DevOps (TF_BUILD is set)', () {
         fakePlatform.environment['TF_BUILD'] = 'True';
 
         expect(botDetector.isRunningOnBot, isTrue);

@@ -99,13 +99,13 @@ void main() {
       await flutterRun.stop();
     });
 
-    testWithoutContext('can hot reload', () async {
+    test('can hot reload', () async {
       await flutterRun.run(withDebugger: true);
       await flutterAttach.attach(flutterRun.vmServicePort!);
       await flutterAttach.hotReload();
     });
 
-    testWithoutContext('can detach, reattach, hot reload', () async {
+    test('can detach, reattach, hot reload', () async {
       await flutterRun.run(withDebugger: true);
       await flutterAttach.attach(flutterRun.vmServicePort!);
       await flutterAttach.detach();
@@ -113,7 +113,7 @@ void main() {
       await flutterAttach.hotReload();
     });
 
-    testWithoutContext('killing process behaves the same as detach ', () async {
+    test('killing process behaves the same as detach ', () async {
       await flutterRun.run(withDebugger: true);
       await flutterAttach.attach(flutterRun.vmServicePort!);
       await flutterAttach.quit();
@@ -122,7 +122,7 @@ void main() {
       await flutterAttach.hotReload();
     });
 
-    testWithoutContext('sets activeDevToolsServerAddress extension', () async {
+    test('sets activeDevToolsServerAddress extension', () async {
       await flutterRun.run(
         startPaused: true,
         withDebugger: true,
@@ -179,7 +179,7 @@ void main() {
       await flutterRun.stop();
     });
 
-    testWithoutContext('uses the designated dds port', () async {
+    test('uses the designated dds port', () async {
       final int ddsPort = await getFreePort();
 
       await flutterRun.run(withDebugger: true);

@@ -14,7 +14,7 @@ import '../../src/fakes.dart';
 
 void main() {
   group('output preferences', () {
-    testWithoutContext('can wrap output', () async {
+    test('can wrap output', () async {
       final bufferLogger = BufferLogger(
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40),
         terminal: TestTerminal(platform: FakePlatform()..stdoutSupportsAnsi = true),
@@ -24,7 +24,7 @@ void main() {
       expect(bufferLogger.statusText, equals('${'0123456789' * 4}\n' * 2));
     });
 
-    testWithoutContext('can turn off wrapping', () async {
+    test('can turn off wrapping', () async {
       final bufferLogger = BufferLogger(
         outputPreferences: OutputPreferences.test(),
         terminal: TestTerminal(platform: FakePlatform()..stdoutSupportsAnsi = true),
@@ -48,7 +48,7 @@ void main() {
       );
     });
 
-    testWithoutContext('adding colors works', () {
+    test('adding colors works', () {
       for (final TerminalColor color in TerminalColor.values) {
         expect(
           terminal.color('output', color),
@@ -57,7 +57,7 @@ void main() {
       }
     });
 
-    testWithoutContext('can opt-out of color using NO_COLOR', () {
+    test('can opt-out of color using NO_COLOR', () {
       platform.environment = <String, String>{'NO_COLOR': ''};
       expect(
         terminal,
@@ -70,14 +70,14 @@ void main() {
       );
     });
 
-    testWithoutContext('adding bold works', () {
+    test('adding bold works', () {
       expect(
         terminal.bolden('output'),
         equals('${AnsiTerminal.bold}output${AnsiTerminal.resetBold}'),
       );
     });
 
-    testWithoutContext('nesting bold within color works', () {
+    test('nesting bold within color works', () {
       expect(
         terminal.color(terminal.bolden('output'), TerminalColor.blue),
         equals(
@@ -92,7 +92,7 @@ void main() {
       );
     });
 
-    testWithoutContext('nesting color within bold works', () {
+    test('nesting color within bold works', () {
       expect(
         terminal.bolden(terminal.color('output', TerminalColor.blue)),
         equals(
@@ -107,7 +107,7 @@ void main() {
       );
     });
 
-    testWithoutContext('nesting color within color works', () {
+    test('nesting color within color works', () {
       expect(
         terminal.color(terminal.color('output', TerminalColor.blue), TerminalColor.magenta),
         equals(
@@ -125,7 +125,7 @@ void main() {
       );
     });
 
-    testWithoutContext('nesting bold within bold works', () {
+    test('nesting bold within bold works', () {
       expect(
         terminal.bolden(terminal.bolden('output')),
         equals('${AnsiTerminal.bold}output${AnsiTerminal.resetBold}'),
@@ -136,7 +136,7 @@ void main() {
       );
     });
 
-    testWithoutContext('clearing lines works', () {
+    test('clearing lines works', () {
       expect(
         terminal.clearLines(3),
         equals(
@@ -158,7 +158,7 @@ void main() {
       );
     });
 
-    testWithoutContext('clearing lines when color is not supported does not work', () {
+    test('clearing lines when color is not supported does not work', () {
       terminal = AnsiTerminal(
         stdio: Stdio(), // Danger, using real stdio.
         platform: FakePlatform()..stdoutSupportsAnsi = false,
@@ -174,7 +174,7 @@ void main() {
       terminalUnderTest = TestTerminal(stdio: FakeStdio());
     });
 
-    testWithoutContext('character prompt throws if usesTerminalUi is false', () async {
+    test('character prompt throws if usesTerminalUi is false', () async {
       expect(
         terminalUnderTest.promptForCharInput(
           <String>['a', 'b', 'c'],
@@ -185,7 +185,7 @@ void main() {
       );
     });
 
-    testWithoutContext('character prompt', () async {
+    test('character prompt', () async {
       final bufferLogger = BufferLogger(
         terminal: terminalUnderTest,
         outputPreferences: OutputPreferences.test(),
@@ -210,7 +210,7 @@ void main() {
       );
     });
 
-    testWithoutContext('default character choice without displayAcceptedCharacters', () async {
+    test('default character choice without displayAcceptedCharacters', () async {
       final bufferLogger = BufferLogger(
         terminal: terminalUnderTest,
         outputPreferences: OutputPreferences.test(),
@@ -231,7 +231,7 @@ void main() {
       expect(bufferLogger.statusText, 'Please choose something: \n');
     });
 
-    testWithoutContext('line input prompt', () async {
+    test('line input prompt', () async {
       final stdio = FakeStdio()
         .._stdin = Stream<List<int>>.fromIterable(<List<int>>[
           <int>[49, 49, 10], // 11\n
@@ -241,7 +241,7 @@ void main() {
       expect(await terminalUnderTest.readLine(), '11');
     });
 
-    testWithoutContext('Does not set single char mode when a terminal is not attached', () {
+    test('Does not set single char mode when a terminal is not attached', () {
       final Stdio stdio = FakeStdio()..stdinHasTerminal = false;
       final ansiTerminal = AnsiTerminal(stdio: stdio, platform: const LocalPlatform());
 
@@ -249,7 +249,7 @@ void main() {
     });
   });
 
-  testWithoutContext('AnsiTerminal.preferredStyle', () {
+  test('AnsiTerminal.preferredStyle', () {
     final Stdio stdio = FakeStdio();
     expect(
       AnsiTerminal(stdio: stdio, platform: const LocalPlatform()).preferredStyle,
@@ -524,7 +524,7 @@ void main() {
     );
   });
 
-  testWithoutContext('set singleCharMode resilient to StdinException', () async {
+  test('set singleCharMode resilient to StdinException', () async {
     final stdio = FakeStdio();
     final terminal = AnsiTerminal(stdio: stdio, platform: const LocalPlatform());
     stdio.stdinHasTerminal = true;
@@ -535,7 +535,7 @@ void main() {
     terminal.singleCharMode = true;
   });
 
-  testWithoutContext('singleCharMode is reset by shutdown hook', () {
+  test('singleCharMode is reset by shutdown hook', () {
     final shutdownHooks = ShutdownHooks();
     final stdio = FakeStdio();
     final terminal = AnsiTerminal(

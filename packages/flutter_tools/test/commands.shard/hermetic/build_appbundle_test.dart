@@ -86,7 +86,7 @@ flutter:
 ''');
   }
 
-  testWithoutContext('has alias aab', () async {
+  test('has alias aab', () async {
     final command = BuildAppBundleCommand(
       androidBuilder: FakeAndroidBuilder(),
       androidContext: androidContext,

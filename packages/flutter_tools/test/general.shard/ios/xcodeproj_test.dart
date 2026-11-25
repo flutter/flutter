@@ -103,28 +103,25 @@ void main() {
     );
   });
 
-  testWithoutContext(
-    'xcodebuild versionText returns null when xcodebuild is not fully installed',
-    () {
-      fakeProcessManager.addCommands(const <FakeCommand>[
-        kWhichSysctlCommand,
-        kx64CheckCommand,
-        FakeCommand(
-          command: <String>['xcrun', 'xcodebuild', '-version'],
-          stdout:
-              "xcode-select: error: tool 'xcodebuild' requires Xcode, "
-              "but active developer directory '/Library/Developer/CommandLineTools' "
-              'is a command line tools instance',
-          exitCode: 1,
-        ),
-      ]);
+  test('xcodebuild versionText returns null when xcodebuild is not fully installed', () {
+    fakeProcessManager.addCommands(const <FakeCommand>[
+      kWhichSysctlCommand,
+      kx64CheckCommand,
+      FakeCommand(
+        command: <String>['xcrun', 'xcodebuild', '-version'],
+        stdout:
+            "xcode-select: error: tool 'xcodebuild' requires Xcode, "
+            "but active developer directory '/Library/Developer/CommandLineTools' "
+            'is a command line tools instance',
+        exitCode: 1,
+      ),
+    ]);
 
-      expect(xcodeProjectInterpreter.versionText, isNull);
-      expect(fakeProcessManager, hasNoRemainingExpectations);
-    },
-  );
+    expect(xcodeProjectInterpreter.versionText, isNull);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  });
 
-  testWithoutContext('xcodebuild versionText returns null when xcodebuild is not installed', () {
+  test('xcodebuild versionText returns null when xcodebuild is not installed', () {
     fakeProcessManager.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
@@ -137,7 +134,7 @@ void main() {
     expect(xcodeProjectInterpreter.versionText, isNull);
   });
 
-  testWithoutContext('xcodebuild versionText returns formatted version text', () {
+  test('xcodebuild versionText returns formatted version text', () {
     fakeProcessManager.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
@@ -151,24 +148,21 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext(
-    'xcodebuild versionText handles Xcode version string with unexpected format',
-    () {
-      fakeProcessManager.addCommands(const <FakeCommand>[
-        kWhichSysctlCommand,
-        kx64CheckCommand,
-        FakeCommand(
-          command: <String>['xcrun', 'xcodebuild', '-version'],
-          stdout: 'Xcode Ultra5000\nBuild version 8E3004b',
-        ),
-      ]);
+  test('xcodebuild versionText handles Xcode version string with unexpected format', () {
+    fakeProcessManager.addCommands(const <FakeCommand>[
+      kWhichSysctlCommand,
+      kx64CheckCommand,
+      FakeCommand(
+        command: <String>['xcrun', 'xcodebuild', '-version'],
+        stdout: 'Xcode Ultra5000\nBuild version 8E3004b',
+      ),
+    ]);
 
-      expect(xcodeProjectInterpreter.versionText, 'Xcode Ultra5000, Build version 8E3004b');
-      expect(fakeProcessManager, hasNoRemainingExpectations);
-    },
-  );
+    expect(xcodeProjectInterpreter.versionText, 'Xcode Ultra5000, Build version 8E3004b');
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  });
 
-  testWithoutContext('xcodebuild version parts can be parsed', () {
+  test('xcodebuild version parts can be parsed', () {
     fakeProcessManager.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
@@ -183,7 +177,7 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('xcodebuild minor and patch version default to 0', () {
+  test('xcodebuild minor and patch version default to 0', () {
     fakeProcessManager.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
@@ -197,7 +191,7 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('xcodebuild version parts is null when version has unexpected format', () {
+  test('xcodebuild version parts is null when version has unexpected format', () {
     fakeProcessManager.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
@@ -211,7 +205,7 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('xcodebuild isInstalled is false when not on MacOS', () {
+  test('xcodebuild isInstalled is false when not on MacOS', () {
     final Platform platform = FakePlatform(operatingSystem: 'notMacOS');
     xcodeProjectInterpreter = XcodeProjectInterpreter(
       analytics: const NoOpAnalytics(),
@@ -223,14 +217,14 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('xcodebuild isInstalled is false when xcodebuild does not exist', () {
+  test('xcodebuild isInstalled is false when xcodebuild does not exist', () {
     fileSystem.file(xcodebuild).deleteSync();
 
     expect(xcodeProjectInterpreter.isInstalled, isFalse);
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('xcodebuild isInstalled is false when Xcode is not fully installed', () {
+  test('xcodebuild isInstalled is false when Xcode is not fully installed', () {
     fakeProcessManager.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
@@ -248,7 +242,7 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('xcodebuild isInstalled is false when version has unexpected format', () {
+  test('xcodebuild isInstalled is false when version has unexpected format', () {
     fakeProcessManager.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
@@ -262,7 +256,7 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('xcodebuild isInstalled is true when version has expected format', () {
+  test('xcodebuild isInstalled is true when version has expected format', () {
     fakeProcessManager.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
@@ -276,7 +270,7 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('xcrun runs natively on arm64', () {
+  test('xcrun runs natively on arm64', () {
     fakeProcessManager.addCommands(const <FakeCommand>[kWhichSysctlCommand, kARMCheckCommand]);
 
     expect(xcodeProjectInterpreter.xcrunCommand(), <String>['/usr/bin/arch', '-arm64e', 'xcrun']);
@@ -600,7 +594,7 @@ void main() {
     },
   );
 
-  testWithoutContext('xcodebuild clean contains Flutter Xcode environment variables', () async {
+  test('xcodebuild clean contains Flutter Xcode environment variables', () async {
     final Directory buildDirectory = fileSystem.directory('build/ios');
     platform.environment = const <String, String>{
       'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
@@ -640,129 +634,120 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext(
-    'xcodebuild -list getInfo returns something when xcodebuild -list succeeds',
-    () async {
-      const workingDirectory = '/';
-      final Directory buildDirectory = fileSystem.directory('build/ios');
-      fakeProcessManager.addCommands(const <FakeCommand>[
-        kWhichSysctlCommand,
-        kx64CheckCommand,
-        kResolvePackagesCommand,
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'xcodebuild',
-            '-clonedSourcePackagesDirPath',
-            '/build/ios/SourcePackages',
-            '-skipPackagePluginValidation',
-            '-skipPackageSignatureValidation',
-            '-list',
-          ],
-        ),
-      ]);
+  test('xcodebuild -list getInfo returns something when xcodebuild -list succeeds', () async {
+    const workingDirectory = '/';
+    final Directory buildDirectory = fileSystem.directory('build/ios');
+    fakeProcessManager.addCommands(const <FakeCommand>[
+      kWhichSysctlCommand,
+      kx64CheckCommand,
+      kResolvePackagesCommand,
+      FakeCommand(
+        command: <String>[
+          'xcrun',
+          'xcodebuild',
+          '-clonedSourcePackagesDirPath',
+          '/build/ios/SourcePackages',
+          '-skipPackagePluginValidation',
+          '-skipPackageSignatureValidation',
+          '-list',
+        ],
+      ),
+    ]);
 
-      final xcodeProjectInterpreter = XcodeProjectInterpreter(
-        analytics: const NoOpAnalytics(),
-        toolContext: createToolContext(),
-      );
+    final xcodeProjectInterpreter = XcodeProjectInterpreter(
+      analytics: const NoOpAnalytics(),
+      toolContext: createToolContext(),
+    );
 
-      expect(
-        await xcodeProjectInterpreter.getInfo(
-          FakeXcodeBasedProject(workingDirectory, fileSystem),
-          buildDirectory: buildDirectory,
-        ),
-        isNotNull,
-      );
-      expect(fakeProcessManager, hasNoRemainingExpectations);
-    },
-  );
+    expect(
+      await xcodeProjectInterpreter.getInfo(
+        FakeXcodeBasedProject(workingDirectory, fileSystem),
+        buildDirectory: buildDirectory,
+      ),
+      isNotNull,
+    );
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  });
 
-  testWithoutContext(
-    'xcodebuild -list getInfo throws a tool exit when it is unable to find a project',
-    () async {
-      const workingDirectory = '/';
-      final Directory buildDirectory = fileSystem.directory('build/ios');
-      const stderr = 'Useful Xcode failure message about missing project.';
+  test('xcodebuild -list getInfo throws a tool exit when it is unable to find a project', () async {
+    const workingDirectory = '/';
+    final Directory buildDirectory = fileSystem.directory('build/ios');
+    const stderr = 'Useful Xcode failure message about missing project.';
 
-      fakeProcessManager.addCommands(const <FakeCommand>[
-        kWhichSysctlCommand,
-        kx64CheckCommand,
-        kResolvePackagesCommand,
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'xcodebuild',
-            '-clonedSourcePackagesDirPath',
-            '/build/ios/SourcePackages',
-            '-skipPackagePluginValidation',
-            '-skipPackageSignatureValidation',
-            '-list',
-          ],
-          exitCode: 66,
-          stderr: stderr,
-        ),
-      ]);
+    fakeProcessManager.addCommands(const <FakeCommand>[
+      kWhichSysctlCommand,
+      kx64CheckCommand,
+      kResolvePackagesCommand,
+      FakeCommand(
+        command: <String>[
+          'xcrun',
+          'xcodebuild',
+          '-clonedSourcePackagesDirPath',
+          '/build/ios/SourcePackages',
+          '-skipPackagePluginValidation',
+          '-skipPackageSignatureValidation',
+          '-list',
+        ],
+        exitCode: 66,
+        stderr: stderr,
+      ),
+    ]);
 
-      final xcodeProjectInterpreter = XcodeProjectInterpreter(
-        analytics: const NoOpAnalytics(),
-        toolContext: createToolContext(),
-      );
+    final xcodeProjectInterpreter = XcodeProjectInterpreter(
+      analytics: const NoOpAnalytics(),
+      toolContext: createToolContext(),
+    );
 
-      await expectLater(
-        () => xcodeProjectInterpreter.getInfo(
-          FakeXcodeBasedProject(workingDirectory, fileSystem),
-          buildDirectory: buildDirectory,
-        ),
-        throwsToolExit(message: stderr),
-      );
-      expect(fakeProcessManager, hasNoRemainingExpectations);
-    },
-  );
+    await expectLater(
+      () => xcodeProjectInterpreter.getInfo(
+        FakeXcodeBasedProject(workingDirectory, fileSystem),
+        buildDirectory: buildDirectory,
+      ),
+      throwsToolExit(message: stderr),
+    );
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  });
 
-  testWithoutContext(
-    'xcodebuild -list getInfo throws a tool exit when project is corrupted',
-    () async {
-      const workingDirectory = '/';
-      const stderr = 'Useful Xcode failure message about corrupted project.';
-      final Directory buildDirectory = fileSystem.directory('build/ios');
+  test('xcodebuild -list getInfo throws a tool exit when project is corrupted', () async {
+    const workingDirectory = '/';
+    const stderr = 'Useful Xcode failure message about corrupted project.';
+    final Directory buildDirectory = fileSystem.directory('build/ios');
 
-      fakeProcessManager.addCommands(const <FakeCommand>[
-        kWhichSysctlCommand,
-        kx64CheckCommand,
-        kResolvePackagesCommand,
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'xcodebuild',
-            '-clonedSourcePackagesDirPath',
-            '/build/ios/SourcePackages',
-            '-skipPackagePluginValidation',
-            '-skipPackageSignatureValidation',
-            '-list',
-          ],
-          exitCode: 74,
-          stderr: stderr,
-        ),
-      ]);
+    fakeProcessManager.addCommands(const <FakeCommand>[
+      kWhichSysctlCommand,
+      kx64CheckCommand,
+      kResolvePackagesCommand,
+      FakeCommand(
+        command: <String>[
+          'xcrun',
+          'xcodebuild',
+          '-clonedSourcePackagesDirPath',
+          '/build/ios/SourcePackages',
+          '-skipPackagePluginValidation',
+          '-skipPackageSignatureValidation',
+          '-list',
+        ],
+        exitCode: 74,
+        stderr: stderr,
+      ),
+    ]);
 
-      final xcodeProjectInterpreter = XcodeProjectInterpreter(
-        analytics: const NoOpAnalytics(),
-        toolContext: createToolContext(),
-      );
+    final xcodeProjectInterpreter = XcodeProjectInterpreter(
+      analytics: const NoOpAnalytics(),
+      toolContext: createToolContext(),
+    );
 
-      await expectLater(
-        () => xcodeProjectInterpreter.getInfo(
-          FakeXcodeBasedProject(workingDirectory, fileSystem),
-          buildDirectory: buildDirectory,
-        ),
-        throwsToolExit(message: stderr),
-      );
-      expect(fakeProcessManager, hasNoRemainingExpectations);
-    },
-  );
+    await expectLater(
+      () => xcodeProjectInterpreter.getInfo(
+        FakeXcodeBasedProject(workingDirectory, fileSystem),
+        buildDirectory: buildDirectory,
+      ),
+      throwsToolExit(message: stderr),
+    );
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  });
 
-  testWithoutContext(
+  test(
     'xcodebuild -list getInfo throws a tool exit when xcodebuild is missing (exit code 72)',
     () async {
       const workingDirectory = '/';
@@ -805,7 +790,7 @@ void main() {
     },
   );
 
-  testWithoutContext(
+  test(
     'xcodebuild -list getInfo throws a tool exit when process execution throws ProcessException',
     () async {
       const workingDirectory = '/';
@@ -849,7 +834,7 @@ void main() {
     },
   );
 
-  testWithoutContext('Xcode project properties from default project can be parsed', () {
+  test('Xcode project properties from default project can be parsed', () {
     const output = '''
 Information about project "Runner":
     Targets:
@@ -871,7 +856,7 @@ Information about project "Runner":
     expect(info.buildConfigurations, <String>['Debug', 'Release']);
   });
 
-  testWithoutContext('Xcode project properties from project with custom schemes can be parsed', () {
+  test('Xcode project properties from project with custom schemes can be parsed', () {
     const output = '''
 Information about project "Runner":
     Targets:
@@ -901,7 +886,7 @@ Information about project "Runner":
     ]);
   });
 
-  testWithoutContext('getInfo filters Swift package schemes from project schemes', () async {
+  test('getInfo filters Swift package schemes from project schemes', () async {
     const workingDirectory = '/';
     final Directory buildDirectory = fileSystem.directory('build/ios');
     buildDirectory
@@ -968,7 +953,7 @@ Information about project "Runner":
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('getInfo filters local Swift package schemes from project schemes', () async {
+  test('getInfo filters local Swift package schemes from project schemes', () async {
     const workingDirectory = '/';
     final Directory buildDirectory = fileSystem.directory('build/ios');
     final xcodeProject = FakeXcodeBasedProject(workingDirectory, fileSystem);
@@ -1043,28 +1028,19 @@ Information about project "Runner":
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('expected scheme for non-flavored build is Runner', () {
+  test('expected scheme for non-flavored build is Runner', () {
     expect(XcodeProjectInfo.expectedSchemeFor(BuildInfo.debug), 'Runner');
     expect(XcodeProjectInfo.expectedSchemeFor(BuildInfo.profile), 'Runner');
     expect(XcodeProjectInfo.expectedSchemeFor(BuildInfo.release), 'Runner');
   });
 
-  testWithoutContext(
-    'expected build configuration for non-flavored build is derived from BuildMode',
-    () {
-      expect(XcodeProjectInfo.expectedBuildConfigurationFor(BuildInfo.debug, 'Runner'), 'Debug');
-      expect(
-        XcodeProjectInfo.expectedBuildConfigurationFor(BuildInfo.profile, 'Runner'),
-        'Profile',
-      );
-      expect(
-        XcodeProjectInfo.expectedBuildConfigurationFor(BuildInfo.release, 'Runner'),
-        'Release',
-      );
-    },
-  );
+  test('expected build configuration for non-flavored build is derived from BuildMode', () {
+    expect(XcodeProjectInfo.expectedBuildConfigurationFor(BuildInfo.debug, 'Runner'), 'Debug');
+    expect(XcodeProjectInfo.expectedBuildConfigurationFor(BuildInfo.profile, 'Runner'), 'Profile');
+    expect(XcodeProjectInfo.expectedBuildConfigurationFor(BuildInfo.release, 'Runner'), 'Release');
+  });
 
-  testWithoutContext('expected scheme for flavored build is the title-cased flavor', () {
+  test('expected scheme for flavored build is the title-cased flavor', () {
     expect(
       XcodeProjectInfo.expectedSchemeFor(
         const BuildInfo(
@@ -1100,7 +1076,7 @@ Information about project "Runner":
     );
   });
 
-  testWithoutContext('expected build configuration for flavored build is Mode-Flavor', () {
+  test('expected build configuration for flavored build is Mode-Flavor', () {
     expect(
       XcodeProjectInfo.expectedBuildConfigurationFor(
         const BuildInfo(
@@ -1139,7 +1115,7 @@ Information about project "Runner":
     );
   });
 
-  testWithoutContext('scheme for default project is Runner', () {
+  test('scheme for default project is Runner', () {
     final info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>[
       'Runner',
     ], logger);
@@ -1160,7 +1136,7 @@ Information about project "Runner":
     );
   });
 
-  testWithoutContext('build configuration for default project is matched against BuildMode', () {
+  test('build configuration for default project is matched against BuildMode', () {
     final info = XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Profile', 'Release'],
@@ -1173,7 +1149,7 @@ Information about project "Runner":
     expect(info.buildConfigurationFor(BuildInfo.release, 'Runner'), 'Release');
   });
 
-  testWithoutContext('scheme for project with custom schemes is matched against flavor', () {
+  test('scheme for project with custom schemes is matched against flavor', () {
     final info = XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug (Free)', 'Debug (Paid)', 'Release (Free)', 'Release (Paid)'],
@@ -1228,7 +1204,7 @@ Information about project "Runner":
     );
   });
 
-  testWithoutContext('reports default scheme error and exit', () {
+  test('reports default scheme error and exit', () {
     final defaultInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
 
     expect(
@@ -1240,7 +1216,7 @@ Information about project "Runner":
     );
   });
 
-  testWithoutContext('reports custom scheme error and exit', () {
+  test('reports custom scheme error and exit', () {
     final info = XcodeProjectInfo(<String>[], <String>[], <String>['Free', 'Paid'], logger);
 
     expect(
@@ -1251,7 +1227,7 @@ Information about project "Runner":
     );
   });
 
-  testWithoutContext(
+  test(
     'build configuration for project with custom schemes is matched against BuildMode and flavor',
     () {
       final info = XcodeProjectInfo(
@@ -1382,7 +1358,7 @@ Information about project "Runner":
     },
   );
 
-  testWithoutContext('build configuration for flavored project falls back to BuildMode when flavor match is unavailable', () {
+  test('build configuration for flavored project falls back to BuildMode when flavor match is unavailable', () {
     final info = XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Profile', 'Release'],
@@ -1417,7 +1393,7 @@ Information about project "Runner":
     );
   });
 
-  testWithoutContext(
+  test(
     "build configuration doesn't fall back when multiple matches for mode and flavor are available",
     () {
       final info = XcodeProjectInfo(
@@ -1442,7 +1418,7 @@ Information about project "Runner":
     },
   );
 
-  testWithoutContext('build configuration for project with inconsistent naming is null', () {
+  test('build configuration for project with inconsistent naming is null', () {
     final info = XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug-F', 'Dbg Paid', 'Rel Free', 'Release Full'],
@@ -1493,7 +1469,7 @@ Information about project "Runner":
       platform = FakePlatform();
     });
 
-    testWithoutContext('environment variables as Xcode build settings', () {
+    test('environment variables as Xcode build settings', () {
       platform.environment = const <String, String>{
         'Ignored': 'Bogus',
         'FLUTTER_NOT_XCODE': 'Bogus',
@@ -2769,7 +2745,7 @@ flutter:
     );
   });
 
-  testWithoutContext('swiftPackageCachePath returns the correct cache path', () {
+  test('swiftPackageCachePath returns the correct cache path', () {
     final fs = MemoryFileSystem.test();
     final Directory buildDirectory = fs.directory('/build/ios');
     final xcodeProjectInterpreter = XcodeProjectInterpreter(

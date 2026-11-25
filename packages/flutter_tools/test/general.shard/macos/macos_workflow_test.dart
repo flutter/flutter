@@ -13,7 +13,7 @@ final macOS = FakePlatform(operatingSystem: 'macos');
 final linux = FakePlatform();
 
 void main() {
-  testWithoutContext('Applies to macOS platform', () {
+  test('Applies to macOS platform', () {
     final macOSWorkflow = MacOSWorkflow(
       platform: macOS,
       featureFlags: TestFeatureFlags(isMacOSEnabled: true),
@@ -25,7 +25,7 @@ void main() {
     expect(macOSWorkflow.canListEmulators, false);
   });
 
-  testWithoutContext('Does not apply to non-macOS platform', () {
+  test('Does not apply to non-macOS platform', () {
     final macOSWorkflow = MacOSWorkflow(
       platform: linux,
       featureFlags: TestFeatureFlags(isMacOSEnabled: true),
@@ -37,7 +37,7 @@ void main() {
     expect(macOSWorkflow.canListEmulators, false);
   });
 
-  testWithoutContext('Does not apply when feature is disabled', () {
+  test('Does not apply when feature is disabled', () {
     final macOSWorkflow = MacOSWorkflow(platform: macOS, featureFlags: TestFeatureFlags());
 
     expect(macOSWorkflow.appliesToHostPlatform, false);

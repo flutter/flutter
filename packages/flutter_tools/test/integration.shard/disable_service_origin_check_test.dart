@@ -25,117 +25,111 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext(
-    'VM service origin check is active by default and blocks non-localhost origins',
-    () async {
-      final completer = Completer<Uri>();
-      final Process process = await processManager.start(<String>[
-        flutterBin,
-        'run',
-        '--no-dds',
-        '--start-paused',
-        '--show-test-device',
-        '-d',
-        'flutter-tester',
-        ...getLocalEngineArguments(),
-      ], workingDirectory: tempDir.path);
+  test('VM service origin check is active by default and blocks non-localhost origins', () async {
+    final completer = Completer<Uri>();
+    final Process process = await processManager.start(<String>[
+      flutterBin,
+      'run',
+      '--no-dds',
+      '--start-paused',
+      '--show-test-device',
+      '-d',
+      'flutter-tester',
+      ...getLocalEngineArguments(),
+    ], workingDirectory: tempDir.path);
 
-      try {
-        final StreamSubscription<String> subErr = transformToLines(process.stderr)
-            .listen((String line) {});
+    try {
+      final StreamSubscription<String> subErr = transformToLines(process.stderr)
+          .listen((String line) {});
 
-        final StreamSubscription<String> sub;
-        sub = transformToLines(process.stdout).listen((String line) {
-          if (line.contains('is available at: http://127.0.0.1:')) {
-            final exp = RegExp(r'is available at: (http://127.0.0.1:\d+/[^ \n\r]*)');
-            final RegExpMatch? match = exp.firstMatch(line);
-            if (match != null) {
-              final Uri uri = Uri.parse(match.group(1)!);
-              if (!completer.isCompleted) {
-                completer.complete(uri);
-              }
+      final StreamSubscription<String> sub;
+      sub = transformToLines(process.stdout).listen((String line) {
+        if (line.contains('is available at: http://127.0.0.1:')) {
+          final exp = RegExp(r'is available at: (http://127.0.0.1:\d+/[^ \n\r]*)');
+          final RegExpMatch? match = exp.firstMatch(line);
+          if (match != null) {
+            final Uri uri = Uri.parse(match.group(1)!);
+            if (!completer.isCompleted) {
+              completer.complete(uri);
             }
           }
-        });
+        }
+      });
 
-        final Uri vmServiceUri = await completer.future.timeout(const Duration(seconds: 60));
-        await sub.cancel();
-        await subErr.cancel();
+      final Uri vmServiceUri = await completer.future.timeout(const Duration(seconds: 60));
+      await sub.cancel();
+      await subErr.cancel();
 
-        final Uri wsUri = vmServiceUri.replace(scheme: 'ws', path: '${vmServiceUri.path}ws');
+      final Uri wsUri = vmServiceUri.replace(scheme: 'ws', path: '${vmServiceUri.path}ws');
 
-        // Connecting with a localhost origin should succeed.
-        final WebSocket wsLocal = await WebSocket.connect(
-          wsUri.toString(),
-          headers: <String, dynamic>{'Origin': 'http://localhost'},
-        );
-        await wsLocal.close();
+      // Connecting with a localhost origin should succeed.
+      final WebSocket wsLocal = await WebSocket.connect(
+        wsUri.toString(),
+        headers: <String, dynamic>{'Origin': 'http://localhost'},
+      );
+      await wsLocal.close();
 
-        // Connecting with a non-localhost origin should fail.
-        await expectLater(
-          WebSocket.connect(
-            wsUri.toString(),
-            headers: <String, dynamic>{'Origin': 'http://evil.com'},
-          ),
-          throwsA(isA<WebSocketException>()),
-        );
-      } finally {
-        process.kill();
-        await process.exitCode;
-      }
-    },
-  );
-
-  testWithoutContext(
-    'VM service origin check is disabled with --disable-service-origin-check',
-    () async {
-      final completer = Completer<Uri>();
-      final Process process = await processManager.start(<String>[
-        flutterBin,
-        'run',
-        '--no-dds',
-        '--start-paused',
-        '--show-test-device',
-        '-d',
-        'flutter-tester',
-        '--disable-service-origin-check',
-        ...getLocalEngineArguments(),
-      ], workingDirectory: tempDir.path);
-
-      try {
-        final StreamSubscription<String> subErr = transformToLines(process.stderr)
-            .listen((String line) {});
-
-        final StreamSubscription<String> sub;
-        sub = transformToLines(process.stdout).listen((String line) {
-          if (line.contains('is available at: http://127.0.0.1:')) {
-            final exp = RegExp(r'is available at: (http://127.0.0.1:\d+/[^ \n\r]*)');
-            final RegExpMatch? match = exp.firstMatch(line);
-            if (match != null) {
-              final Uri uri = Uri.parse(match.group(1)!);
-              if (!completer.isCompleted) {
-                completer.complete(uri);
-              }
-            }
-          }
-        });
-
-        final Uri vmServiceUri = await completer.future.timeout(const Duration(seconds: 60));
-        await sub.cancel();
-        await subErr.cancel();
-
-        final Uri wsUri = vmServiceUri.replace(scheme: 'ws', path: '${vmServiceUri.path}ws');
-
-        // Connecting with a non-localhost origin should succeed.
-        final WebSocket ws = await WebSocket.connect(
+      // Connecting with a non-localhost origin should fail.
+      await expectLater(
+        WebSocket.connect(
           wsUri.toString(),
           headers: <String, dynamic>{'Origin': 'http://evil.com'},
-        );
-        await ws.close();
-      } finally {
-        process.kill();
-        await process.exitCode;
-      }
-    },
-  );
+        ),
+        throwsA(isA<WebSocketException>()),
+      );
+    } finally {
+      process.kill();
+      await process.exitCode;
+    }
+  });
+
+  test('VM service origin check is disabled with --disable-service-origin-check', () async {
+    final completer = Completer<Uri>();
+    final Process process = await processManager.start(<String>[
+      flutterBin,
+      'run',
+      '--no-dds',
+      '--start-paused',
+      '--show-test-device',
+      '-d',
+      'flutter-tester',
+      '--disable-service-origin-check',
+      ...getLocalEngineArguments(),
+    ], workingDirectory: tempDir.path);
+
+    try {
+      final StreamSubscription<String> subErr = transformToLines(process.stderr)
+          .listen((String line) {});
+
+      final StreamSubscription<String> sub;
+      sub = transformToLines(process.stdout).listen((String line) {
+        if (line.contains('is available at: http://127.0.0.1:')) {
+          final exp = RegExp(r'is available at: (http://127.0.0.1:\d+/[^ \n\r]*)');
+          final RegExpMatch? match = exp.firstMatch(line);
+          if (match != null) {
+            final Uri uri = Uri.parse(match.group(1)!);
+            if (!completer.isCompleted) {
+              completer.complete(uri);
+            }
+          }
+        }
+      });
+
+      final Uri vmServiceUri = await completer.future.timeout(const Duration(seconds: 60));
+      await sub.cancel();
+      await subErr.cancel();
+
+      final Uri wsUri = vmServiceUri.replace(scheme: 'ws', path: '${vmServiceUri.path}ws');
+
+      // Connecting with a non-localhost origin should succeed.
+      final WebSocket ws = await WebSocket.connect(
+        wsUri.toString(),
+        headers: <String, dynamic>{'Origin': 'http://evil.com'},
+      );
+      await ws.close();
+    } finally {
+      process.kill();
+      await process.exitCode;
+    }
+  });
 }

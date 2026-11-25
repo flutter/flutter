@@ -699,7 +699,7 @@ android.newDsl  :  false
             .childFile(gradleWrapperPropertiesFilename);
       });
 
-      testWithoutContext('skipped if files are missing', () async {
+      test('skipped if files are missing', () async {
         final migration = AndroidStudioJavaGradleConflictMigration(
           java: FakeJava(version: _javaVersion17),
           bufferLogger,
@@ -711,7 +711,7 @@ android.newDsl  :  false
         expect(bufferLogger.traceText, contains(gradleWrapperNotFound));
       });
 
-      testWithoutContext('skipped if android studio is null', () async {
+      test('skipped if android studio is null', () async {
         final migration = AndroidStudioJavaGradleConflictMigration(
           java: FakeJava(version: _javaVersion17),
           bufferLogger,
@@ -723,7 +723,7 @@ android.newDsl  :  false
         expect(gradleWrapperPropertiesFile.readAsStringSync(), gradleWrapperToMigrate);
       });
 
-      testWithoutContext('skipped if android studio version is null', () async {
+      test('skipped if android studio version is null', () async {
         final migration = AndroidStudioJavaGradleConflictMigration(
           java: FakeJava(version: _javaVersion17),
           bufferLogger,
@@ -736,7 +736,7 @@ android.newDsl  :  false
         expect(gradleWrapperPropertiesFile.readAsStringSync(), gradleWrapperToMigrate);
       });
 
-      testWithoutContext('skipped if error is encountered in migrate()', () async {
+      test('skipped if error is encountered in migrate()', () async {
         final migration = AndroidStudioJavaGradleConflictMigration(
           java: FakeErroringJava(),
           bufferLogger,
@@ -749,7 +749,7 @@ android.newDsl  :  false
         expect(gradleWrapperPropertiesFile.readAsStringSync(), gradleWrapperToMigrate);
       });
 
-      testWithoutContext('skipped if android studio version is less than flamingo', () async {
+      test('skipped if android studio version is less than flamingo', () async {
         final migration = AndroidStudioJavaGradleConflictMigration(
           java: FakeJava(),
           bufferLogger,
@@ -762,7 +762,7 @@ android.newDsl  :  false
         expect(bufferLogger.traceText, contains(androidStudioVersionBelowFlamingo));
       });
 
-      testWithoutContext('skipped if bundled java version is less than 17', () async {
+      test('skipped if bundled java version is less than 17', () async {
         final migration = AndroidStudioJavaGradleConflictMigration(
           java: FakeJava(version: _javaVersion16),
           bufferLogger,
@@ -775,7 +775,7 @@ android.newDsl  :  false
         expect(bufferLogger.traceText, contains(javaVersionNot17));
       });
 
-      testWithoutContext('nothing is changed if gradle version not one that was '
+      test('nothing is changed if gradle version not one that was '
           'used by flutter create', () async {
         final migration = AndroidStudioJavaGradleConflictMigration(
           java: FakeJava(version: _javaVersion17),
@@ -789,7 +789,7 @@ android.newDsl  :  false
         expect(bufferLogger.traceText, isEmpty);
       });
 
-      testWithoutContext('change is made with one of the specific gradle versions'
+      test('change is made with one of the specific gradle versions'
           ' we migrate for', () async {
         final migration = AndroidStudioJavaGradleConflictMigration(
           java: FakeJava(version: _javaVersion17),
@@ -810,7 +810,7 @@ android.newDsl  :  false
         );
       });
 
-      testWithoutContext('change is not made when opt out flag is set', () async {
+      test('change is not made when opt out flag is set', () async {
         final migration = AndroidStudioJavaGradleConflictMigration(
           java: FakeJava(version: _javaVersion17),
           bufferLogger,
@@ -842,12 +842,12 @@ android.newDsl  :  false
         migration = MinSdkVersionMigration(project, bufferLogger);
       });
 
-      testWithoutContext('do nothing when files missing', () async {
+      test('do nothing when files missing', () async {
         await migration.migrate();
         expect(bufferLogger.traceText, contains(appGradleNotFoundWarning));
       });
 
-      testWithoutContext('replace when api 19', () async {
+      test('replace when api 19', () async {
         const minSdkVersion19 = 'minSdkVersion 19';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion19));
         await migration.migrate();
@@ -857,7 +857,7 @@ android.newDsl  :  false
         );
       });
 
-      testWithoutContext('replace when api 20', () async {
+      test('replace when api 20', () async {
         const minSdkVersion20 = 'minSdkVersion 20';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion20));
         await migration.migrate();
@@ -867,7 +867,7 @@ android.newDsl  :  false
         );
       });
 
-      testWithoutContext('replace when api 21', () async {
+      test('replace when api 21', () async {
         const minSdkVersion21 = 'minSdkVersion 21';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion21));
         await migration.migrate();
@@ -877,7 +877,7 @@ android.newDsl  :  false
         );
       });
 
-      testWithoutContext('replace when api 22', () async {
+      test('replace when api 22', () async {
         const minSdkVersion22 = 'minSdkVersion 22';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion22));
         await migration.migrate();
@@ -887,7 +887,7 @@ android.newDsl  :  false
         );
       });
 
-      testWithoutContext('replace when api 23', () async {
+      test('replace when api 23', () async {
         const minSdkVersion23 = 'minSdkVersion 23';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion23));
         await migration.migrate();
@@ -897,7 +897,7 @@ android.newDsl  :  false
         );
       });
 
-      testWithoutContext('do nothing when >=api 24', () async {
+      test('do nothing when >=api 24', () async {
         const minSdkVersion24 = 'minSdkVersion 24';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion24));
         await migration.migrate();
@@ -907,7 +907,7 @@ android.newDsl  :  false
         );
       });
 
-      testWithoutContext('do nothing when already using '
+      test('do nothing when already using '
           'flutter.minSdkVersion', () async {
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(replacementMinSdkText));
         await migration.migrate();
@@ -917,7 +917,7 @@ android.newDsl  :  false
         );
       });
 
-      testWithoutContext('avoid rewriting comments', () async {
+      test('avoid rewriting comments', () async {
         const code =
             '// minSdkVersion 19  // old default\n'
             '        minSdkVersion 24  // new version';
@@ -926,7 +926,7 @@ android.newDsl  :  false
         expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(code));
       });
 
-      testWithoutContext('do nothing when project is a module', () async {
+      test('do nothing when project is a module', () async {
         project = FakeAndroidProject(
           root: memoryFileSystem.currentDirectory.childDirectory('android'),
           module: true,
@@ -941,7 +941,7 @@ android.newDsl  :  false
         );
       });
 
-      testWithoutContext('do nothing when minSdkVersion is set '
+      test('do nothing when minSdkVersion is set '
           'to a constant', () async {
         const minSdkVersionConstant = 'minSdkVersion kMinSdkversion';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersionConstant));
@@ -952,7 +952,7 @@ android.newDsl  :  false
         );
       });
 
-      testWithoutContext('migrate when minSdkVersion is set '
+      test('migrate when minSdkVersion is set '
           'using = syntax', () async {
         const equalsSyntaxMinSdkVersion19 = 'minSdkVersion = 19';
         project.appGradleFile.writeAsStringSync(
@@ -983,7 +983,7 @@ android.newDsl  :  false
         migration = MinSdkVersionMigration(project, bufferLogger);
       });
 
-      testWithoutContext('do nothing when already using '
+      test('do nothing when already using '
           'flutter.minSdkVersion', () async {
         project.appGradleFile.writeAsStringSync(
           sampleKotlinDslModuleGradleBuildFile(kotlinReplacementMinSdkText),
@@ -995,7 +995,7 @@ android.newDsl  :  false
         );
       });
 
-      testWithoutContext('migrate when minSdkVersion is set '
+      test('migrate when minSdkVersion is set '
           'using = syntax', () async {
         const equalsSyntaxMinSdkVersion19 = 'minSdk = 19';
         project.appGradleFile.writeAsStringSync(
@@ -1026,35 +1026,29 @@ android.newDsl  :  false
         migration = MultidexRemovalMigration(project, bufferLogger);
       });
 
-      testWithoutContext(
-        'do nothing when FlutterMultiDexApplication.java is not present',
-        () async {
-          await migration.migrate();
-          expect(bufferLogger.traceText, isEmpty);
-        },
-      );
+      test('do nothing when FlutterMultiDexApplication.java is not present', () async {
+        await migration.migrate();
+        expect(bufferLogger.traceText, isEmpty);
+      });
 
-      testWithoutContext(
-        'delete and note when FlutterMultiDexApplication.java is present',
-        () async {
-          // Write a blank string to the FlutterMultiDexApplication.java file.
-          final File flutterMultiDexApplication =
-              project.hostAppGradleRoot
-                  .childDirectory('src')
-                  .childDirectory('main')
-                  .childDirectory('java')
-                  .childDirectory('io')
-                  .childDirectory('flutter')
-                  .childDirectory('app')
-                  .childFile('FlutterMultiDexApplication.java')
-                ..createSync(recursive: true);
-          flutterMultiDexApplication.writeAsStringSync('');
+      test('delete and note when FlutterMultiDexApplication.java is present', () async {
+        // Write a blank string to the FlutterMultiDexApplication.java file.
+        final File flutterMultiDexApplication =
+            project.hostAppGradleRoot
+                .childDirectory('src')
+                .childDirectory('main')
+                .childDirectory('java')
+                .childDirectory('io')
+                .childDirectory('flutter')
+                .childDirectory('app')
+                .childFile('FlutterMultiDexApplication.java')
+              ..createSync(recursive: true);
+        flutterMultiDexApplication.writeAsStringSync('');
 
-          await migration.migrate();
-          expect(bufferLogger.traceText, contains(MultidexRemovalMigration.deletionMessage));
-          expect(flutterMultiDexApplication.existsSync(), false);
-        },
-      );
+        await migration.migrate();
+        expect(bufferLogger.traceText, contains(MultidexRemovalMigration.deletionMessage));
+        expect(flutterMultiDexApplication.existsSync(), false);
+      });
     });
   });
 }
