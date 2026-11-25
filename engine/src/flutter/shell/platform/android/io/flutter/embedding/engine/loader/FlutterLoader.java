@@ -4,20 +4,27 @@
 
 package io.flutter.embedding.engine.loader;
 
+import static io.flutter.Build.API_LEVELS;
+
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
+import android.graphics.fonts.Font;
+import android.graphics.fonts.FontStyle;
+import android.graphics.fonts.SystemFonts;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.BuildConfig;
 import io.flutter.FlutterInjector;
@@ -29,7 +36,9 @@ import io.flutter.util.PathUtils;
 import io.flutter.util.TraceSection;
 import io.flutter.view.VsyncWaiter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -50,6 +59,7 @@ public class FlutterLoader {
   private static final String DEFAULT_LIBRARY = "libflutter.so";
   private static final String DEFAULT_KERNEL_BLOB = "kernel_blob.bin";
   private static final String VMSERVICE_SNAPSHOT_LIBRARY = "libvmservice_snapshot.so";
+  private static final String UPDATED_SYSTEM_FONTS_XML = "updated_system_fonts.xml";
 
   // The manifest metadata key for engine flags specified via the command line
   // that are injected into the application merged manifest to be loaded here in the
@@ -273,6 +283,16 @@ public class FlutterLoader {
 
                 flutterJNI.updateRefreshRate();
 
+                // Must precede the prefetch below: the font manager reads the XML once
+                if (Build.VERSION.SDK_INT >= API_LEVELS.API_31) {
+                  String updatedFontsXml =
+                      writeUpdatedSystemFontsXml(
+                          appContext, getAvailableSystemFonts(), getSystemFontsDir());
+                  if (updatedFontsXml != null) {
+                    flutterJNI.setUpdatedSystemFontsXml(updatedFontsXml);
+                  }
+                }
+
                 // Prefetch the default font manager as soon as possible on a background thread.
                 // It helps to reduce time cost of engine setup that blocks the platform thread.
                 executorService.execute(() -> flutterJNI.prefetchDefaultFontManager());
@@ -290,6 +310,95 @@ public class FlutterLoader {
           };
       initResultFuture = executorService.submit(initTask);
     }
+  }
+
+  @RequiresApi(API_LEVELS.API_31)
+  @VisibleForTesting
+  @Nullable
+  Collection<Font> getAvailableSystemFonts() {
+    // A failure here must not block engine startup; without the list, /system fonts are used
+    // (Robolectric's legacy graphics mode throws NullPointerException in app JVM tests)
+    try {
+      return SystemFonts.getAvailableFonts();
+    } catch (RuntimeException e) {
+      Log.w(TAG, "Could not list system fonts", e);
+      return null;
+    }
+  }
+
+  @VisibleForTesting
+  @NonNull
+  File getSystemFontsDir() {
+    return new File("/system/fonts");
+  }
+
+  /**
+   * Writes a Skia version-21 fonts XML listing fonts in /data/fonts that replace a file in
+   * systemFontsDir (Google Play font updates), so Flutter renders the same glyphs as native views.
+   * Returns its path, or null if no font is updated or the file cannot be written.
+   */
+  @RequiresApi(API_LEVELS.API_31)
+  @VisibleForTesting
+  @Nullable
+  static String writeUpdatedSystemFontsXml(
+      @NonNull Context context, @Nullable Collection<Font> fonts, @NonNull File systemFontsDir) {
+    File cacheDir = new File(PathUtils.getCacheDirectory(context));
+    File xmlFile = new File(cacheDir, UPDATED_SYSTEM_FONTS_XML);
+    if (fonts == null) {
+      xmlFile.delete();
+      return null;
+    }
+    StringBuilder xml = new StringBuilder("<familyset version=\"21\">\n");
+    boolean hasUpdatedFonts = false;
+    // getBuffer() memory-maps the font file; read only path, index, style, and locale
+    for (Font font : fonts) {
+      File file = font.getFile();
+      // New named families (e.g. google-sans) also live in /data/fonts; written as unnamed
+      // fallbacks they would win over system fallbacks, so keep only replacements
+      if (file == null
+          || !file.getAbsolutePath().startsWith("/data/fonts/")
+          || !new File(systemFontsDir, file.getName()).exists()) {
+        continue;
+      }
+      hasUpdatedFonts = true;
+      FontStyle style = font.getStyle();
+      String languages = font.getLocaleList().toLanguageTags().replace(',', ' ');
+      xml.append("<family lang=\"")
+          .append(TextUtils.htmlEncode(languages))
+          .append("\"><font weight=\"")
+          .append(style.getWeight())
+          .append("\" style=\"")
+          .append(style.getSlant() == FontStyle.FONT_SLANT_ITALIC ? "italic" : "normal")
+          .append("\" index=\"")
+          .append(font.getTtcIndex())
+          .append("\">")
+          .append(TextUtils.htmlEncode(file.getAbsolutePath()))
+          .append("</font></family>\n");
+    }
+    if (!hasUpdatedFonts) {
+      xmlFile.delete();
+      return null;
+    }
+    xml.append("</familyset>\n");
+    // A per-call temp file keeps processes of one app from publishing each other's partial
+    // writes; rename atomically replaces any older XML
+    File tmpFile = null;
+    try {
+      tmpFile = File.createTempFile(UPDATED_SYSTEM_FONTS_XML, ".tmp", cacheDir);
+      try (FileOutputStream out = new FileOutputStream(tmpFile)) {
+        out.write(xml.toString().getBytes(StandardCharsets.UTF_8));
+      }
+      if (!tmpFile.renameTo(xmlFile)) {
+        throw new IOException("Could not rename " + tmpFile + " to " + xmlFile);
+      }
+    } catch (IOException e) {
+      if (tmpFile != null) {
+        tmpFile.delete();
+      }
+      Log.w(TAG, "Could not write " + xmlFile, e);
+      return null;
+    }
+    return xmlFile.getAbsolutePath();
   }
 
   /**

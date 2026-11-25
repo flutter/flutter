@@ -67,6 +67,7 @@ executable("flutter_shell_native_unittests") {
     "//flutter/shell/platform/android/jni:mock_jni_env",
     "//flutter/third_party/googletest:gmock",
     "//flutter/third_party/googletest:gtest",
+    "//flutter/txt:android_unittests",
   ]
 }
 

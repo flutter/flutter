@@ -102,7 +102,10 @@ source_set("txt") {
     ]
     deps += [ "//flutter/fml" ]
   } else if (is_android) {
-    sources += [ "src/txt/platform_android.cc" ]
+    sources += [
+      "src/txt/platform_android.cc",
+      "src/txt/platform_android.h",
+    ]
   } else if (is_linux) {
     sources += [ "src/txt/platform_linux.cc" ]
   } else if (is_fuchsia) {
@@ -181,5 +184,22 @@ if (enable_unittests) {
     if (is_fuchsia) {
       libs = [ "${fuchsia_arch_root}/sysroot/lib/libzircon.so" ]
     }
+  }
+}
+
+if (is_android) {
+  source_set("android_unittests") {
+    testonly = true
+
+    sources = [ "tests/platform_android_tests.cc" ]
+
+    public_configs = [ ":txt_config" ]
+
+    deps = [
+      ":txt",
+      "//flutter/runtime:test_font",
+      "//flutter/skia",
+      "//flutter/third_party/googletest:gtest",
+    ]
   }
 }
