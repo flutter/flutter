@@ -15,7 +15,6 @@ import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
-import '../src/context.dart' hide testLogger;
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
 
@@ -90,11 +89,13 @@ void main() {
     expect(mockVMService.services, isNot(contains(kFlutterVersionServiceName)));
   });
 
-  testUsingContext('VM Service prints messages for connection failures', () {
+  test('VM Service prints messages for connection failures', () {
     final logger = BufferLogger.test();
     FakeAsync().run((FakeAsync time) {
       final Uri uri = Uri.parse('ws://127.0.0.1:12345/QqL7EFEDNG0=/ws');
-      unawaited(connectToVmService(uri, logger: logger));
+      unawaited(
+        connectToVmService(uri, logger: logger, webSocketConnector: failingWebSocketConnector),
+      );
 
       time.elapse(const Duration(seconds: 5));
       expect(logger.statusText, isEmpty);
@@ -115,38 +116,36 @@ void main() {
       );
       expect(statusText, containsIgnoringWhitespace('This was attempt #50. Will retry'));
     });
-  }, overrides: <Type, Generator>{WebSocketConnector: () => failingWebSocketConnector});
+  });
 
-  testUsingContext(
-    'VM Service prints messages for HttpException connection failures and retries',
-    () {
-      final logger = BufferLogger.test();
-      FakeAsync().run((FakeAsync time) {
-        final Uri uri = Uri.parse('ws://127.0.0.1:12345/QqL7EFEDNG0=/ws');
-        unawaited(connectToVmService(uri, logger: logger));
+  test('VM Service prints messages for HttpException connection failures and retries', () {
+    final logger = BufferLogger.test();
+    FakeAsync().run((FakeAsync time) {
+      final Uri uri = Uri.parse('ws://127.0.0.1:12345/QqL7EFEDNG0=/ws');
+      unawaited(
+        connectToVmService(uri, logger: logger, webSocketConnector: httpFailingWebSocketConnector),
+      );
 
-        time.elapse(const Duration(seconds: 5));
-        expect(logger.statusText, isEmpty);
+      time.elapse(const Duration(seconds: 5));
+      expect(logger.statusText, isEmpty);
 
-        time.elapse(const Duration(minutes: 2));
+      time.elapse(const Duration(minutes: 2));
 
-        final String statusText = logger.statusText;
-        expect(
-          statusText,
-          containsIgnoringWhitespace(
-            'Connecting to the VM Service is taking longer than expected...',
-          ),
-        );
-        expect(statusText, containsIgnoringWhitespace('try re-running with --host-vmservice-port'));
-        expect(
-          statusText,
-          containsIgnoringWhitespace('Exception attempting to connect to the VM Service:'),
-        );
-        expect(statusText, containsIgnoringWhitespace('This was attempt #50. Will retry'));
-      });
-    },
-    overrides: <Type, Generator>{WebSocketConnector: () => httpFailingWebSocketConnector},
-  );
+      final String statusText = logger.statusText;
+      expect(
+        statusText,
+        containsIgnoringWhitespace(
+          'Connecting to the VM Service is taking longer than expected...',
+        ),
+      );
+      expect(statusText, containsIgnoringWhitespace('try re-running with --host-vmservice-port'));
+      expect(
+        statusText,
+        containsIgnoringWhitespace('Exception attempting to connect to the VM Service:'),
+      );
+      expect(statusText, containsIgnoringWhitespace('This was attempt #50. Will retry'));
+    });
+  });
 
   test('setAssetDirectory forwards arguments correctly', () async {
     final mockVMService = FakeVMService();
@@ -794,7 +793,7 @@ void main() {
     expect(processVmServiceMessage(event), 'flutter: \u{FFFD}');
   });
 
-  testUsingContext('WebSocket URL construction uses correct URI join primitives', () async {
+  test('WebSocket URL construction uses correct URI join primitives', () async {
     final completer = Completer<String>();
     openChannelForTesting =
         (
