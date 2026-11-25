@@ -89,6 +89,13 @@ static void wait_for_frame(FlViewRendererSubsurface* self,
                            size_t height) {
   gint64 expiry_time = g_get_monotonic_time() + kRenderTimeoutMicroseconds;
   while (true) {
+    // Waiting runs Flutter tasks, and the UI isolate runs on this thread, so
+    // it runs Dart code. That code can destroy the window this widget is in,
+    // in which case there is no frame to wait for.
+    if (self->subsurface == nullptr) {
+      break;
+    }
+
     if (self->presented_width == width && self->presented_height == height) {
       break;
     }
@@ -550,9 +557,6 @@ static void fl_view_renderer_subsurface_dispose(GObject* object) {
   FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(object);
 
   end_synchronized_resize(self);
-  g_clear_object(&self->engine);
-  g_clear_object(&self->task_runner);
-  g_mutex_clear(&self->frame_mutex);
 
   G_OBJECT_CLASS(fl_view_renderer_subsurface_parent_class)->dispose(object);
 }
@@ -560,14 +564,19 @@ static void fl_view_renderer_subsurface_dispose(GObject* object) {
 static void fl_view_renderer_subsurface_finalize(GObject* object) {
   FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(object);
 
-  // The compositor is released here rather than in dispose() so it outlives a
-  // forced dispose (e.g. gtk_widget_destroy()) and is only freed once the last
-  // reference is dropped. This keeps it alive for the raster thread, which
-  // holds a strong reference on the view (and thus this renderer) while
-  // presenting.
+  // Everything present_layers and wait_for_frame use is released here rather
+  // than in dispose() so it outlives a forced dispose (e.g.
+  // gtk_widget_destroy()) and is only freed once the last reference is
+  // dropped. This keeps it alive for the raster thread, which holds a strong
+  // reference on the view (and thus this renderer) while presenting, and for
+  // the GTK thread if the window is destroyed by a task run while it waits for
+  // a frame.
   g_clear_object(&self->compositor);
   g_clear_object(&self->framebuffer);
   g_clear_object(&self->egl);
+  g_clear_object(&self->engine);
+  g_clear_object(&self->task_runner);
+  g_mutex_clear(&self->frame_mutex);
 
   G_OBJECT_CLASS(fl_view_renderer_subsurface_parent_class)->finalize(object);
 }
