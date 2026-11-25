@@ -22,6 +22,9 @@ abstract final class ToolExtensionEntryPoint {
   /// The reserved JSON-RPC method name used to query extension capabilities.
   static const String getCapabilitiesMethod = 'extension.getCapabilities';
 
+  /// The reserved JSON-RPC notification method name used for extension log messages.
+  static const String logNotificationMethod = 'extension.log';
+
   /// The reserved JSON-RPC method name used to request graceful extension shutdown.
   static const String shutdownMethod = 'extension.shutdown';
 
@@ -77,6 +80,13 @@ abstract final class ToolExtensionEntryPoint {
     String? extensionName,
   }) async {
     final rpcHandlers = <String, ExtensionRpcHandler>{};
+    final pendingNotifications = <(String, Map<String, Object?>)>[];
+
+    for (final service in services) {
+      service.notificationSender = (String method, Map<String, Object?> params) {
+        pendingNotifications.add((method, params));
+      };
+    }
 
     for (final service in services) {
       logger?.call(
@@ -85,7 +95,9 @@ abstract final class ToolExtensionEntryPoint {
       final Map<String, ExtensionRpcHandler> handlers = await service.initialize();
       handlers.forEach((String method, ExtensionRpcHandler handler) {
         final fullMethod = '${service.namespace}.$method';
-        if (fullMethod == getCapabilitiesMethod || fullMethod == shutdownMethod) {
+        if (fullMethod == getCapabilitiesMethod ||
+            fullMethod == shutdownMethod ||
+            fullMethod == logNotificationMethod) {
           throw StateError('Reserved RPC method registered: "$fullMethod"');
         }
         if (rpcHandlers.containsKey(fullMethod)) {
@@ -111,6 +123,10 @@ abstract final class ToolExtensionEntryPoint {
     for (final service in services) {
       service.notificationSender = peer.sendNotification;
     }
+    for (final (String method, Map<String, Object?> params) in pendingNotifications) {
+      peer.sendNotification(method, params);
+    }
+    pendingNotifications.clear();
 
     peer.registerMethod(getCapabilitiesMethod, (json_rpc.Parameters _) {
       logger?.call('[ToolExtensionIsolate] Handling extension.getCapabilities query.');
