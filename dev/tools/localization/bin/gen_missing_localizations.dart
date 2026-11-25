@@ -106,8 +106,8 @@ void updateMissingResources(
       final String localeString = filenamePattern.firstMatch(entityPath)![1]!;
       final locale = LocaleInfo.fromString(localeString);
 
-      // Only look at top-level language locales
-      if (locale.length == 1) {
+      final isBaseLocale = locale.length == 1;
+      if (isBaseLocale || removeUndefined) {
         final arbFile = File(entityPath);
         final Map<String, dynamic> localeBundle = loadBundle(arbFile);
         final Set<String> localeResources = resourceKeys(localeBundle);
@@ -119,7 +119,8 @@ void updateMissingResources(
         // --remove-undefined is passed.
         if (removeUndefined) {
           bool isIncluded(String key) {
-            return !isPluralVariation(key, localeBundle) &&
+            // A regional or script bundle can inherit the default plural form.
+            return !isPluralVariation(key, isBaseLocale ? localeBundle : englishBundle) &&
                 !intentionallyOmitted(key, localeBundle);
           }
 
@@ -144,23 +145,27 @@ void updateMissingResources(
           }
         }
 
-        // Add in any resources that are in the canonical locale and not present
-        // in this locale.
-        final Set<String> missingResources = requiredKeys
-            .difference(localeResources)
-            .where(
-              (String key) =>
-                  !isPluralVariation(key, localeBundle) && !intentionallyOmitted(key, localeBundle),
-            )
-            .toSet();
-        if (missingResources.isNotEmpty) {
-          localeBundle.addEntries(
-            missingResources.map(
-              (String k) => MapEntry<String, String>(k, englishBundle[k].toString()),
-            ),
-          );
-          shouldWrite = true;
-          print('Updating $entityPath with missing entries for $missingResources');
+        // Regional and script bundles inherit strings from their parent locale.
+        if (isBaseLocale) {
+          // Add in any resources that are in the canonical locale and not present
+          // in this locale.
+          final Set<String> missingResources = requiredKeys
+              .difference(localeResources)
+              .where(
+                (String key) =>
+                    !isPluralVariation(key, localeBundle) &&
+                    !intentionallyOmitted(key, localeBundle),
+              )
+              .toSet();
+          if (missingResources.isNotEmpty) {
+            localeBundle.addEntries(
+              missingResources.map(
+                (String k) => MapEntry<String, String>(k, englishBundle[k].toString()),
+              ),
+            );
+            shouldWrite = true;
+            print('Updating $entityPath with missing entries for $missingResources');
+          }
         }
         if (shouldWrite) {
           writeBundle(arbFile, localeBundle);
