@@ -205,11 +205,8 @@ Future<void> initializeEngineUi() async {
   _initializationState = DebugEngineInitializationState.initialized;
 }
 
-ui_web.AssetManager get engineAssetManager => _debugAssetManager ?? _assetManager!;
+ui_web.AssetManager get engineAssetManager => _assetManager!;
 ui_web.AssetManager? _assetManager;
-ui_web.AssetManager? _debugAssetManager;
-
-set debugOnlyAssetManager(ui_web.AssetManager? manager) => _debugAssetManager = manager;
 
 void _setAssetManager(ui_web.AssetManager assetManager) {
   if (assetManager == _assetManager) {

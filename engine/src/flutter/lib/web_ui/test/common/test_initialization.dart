@@ -25,7 +25,7 @@ void setUpUnitTests({
     ui_web.TestEnvironment.setUp(testEnvironment);
 
     debugFontsScope = configureDebugFontsAssetScope(fakeAssetManager);
-    debugOnlyAssetManager = fakeAssetManager;
+    setAssetManager(fakeAssetManager);
     await bootstrapAndRunApp(withImplicitView: withImplicitView);
     engine.debugOverrideJsConfiguration(
       <String, Object?>{'fontFallbackBaseUrl': 'assets/fallback_fonts/'}.jsify()
