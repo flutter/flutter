@@ -1898,6 +1898,140 @@ void main() {
     );
     expect(tester.getSize(find.byType(Text)), Size.zero);
   });
+
+  testWidgets('Hard-break ellipsized Text includes ellipsis under loose constraints', (
+    WidgetTester tester,
+  ) async {
+    const style = TextStyle(fontSize: 10);
+
+    // Loose constraint wide enough for "AAA\u2026" (40px in Ahem).
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 100),
+            child: const Text(
+              'AAA\nBBB',
+              style: style,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Text)).width, 40);
+
+    // Narrow loose constraint (35px) trims to "AA\u2026" (30px).
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 35),
+            child: const Text(
+              'AAA\nBBB',
+              style: style,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Text)).width, 30);
+    final RenderParagraph narrowParagraph = tester.renderObject<RenderParagraph>(
+      find.byType(RichText),
+    );
+    expect(
+      narrowParagraph
+          .getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 3))
+          .single
+          .right,
+      lessThanOrEqualTo(30),
+    );
+  });
+
+  testWidgets('Hard-break ellipsized Text in IntrinsicWidth and Row(mainAxisSize: min)', (
+    WidgetTester tester,
+  ) async {
+    const style = TextStyle(fontSize: 10);
+    const intrinsicKey = Key('intrinsic');
+    const rowCenterKey = Key('row-center');
+    const rowRightKey = Key('row-right');
+    const rowRtlKey = Key('row-rtl');
+    const widgetSpanKey = Key('widget-span');
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            IntrinsicWidth(
+              child: Text(
+                'AAA\nBBB',
+                key: intrinsicKey,
+                style: style,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  'AAA\nBBB',
+                  key: rowCenterKey,
+                  style: style,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  'AAA\nBBB',
+                  key: rowRightKey,
+                  style: style,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.right,
+                ),
+                Text(
+                  'AAA\nBBB',
+                  key: rowRtlKey,
+                  style: style,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textDirection: TextDirection.rtl,
+                ),
+              ],
+            ),
+            IntrinsicWidth(
+              child: Text.rich(
+                TextSpan(
+                  style: style,
+                  children: <InlineSpan>[
+                    WidgetSpan(child: SizedBox(width: 20, height: 10)),
+                    TextSpan(text: 'A\nBBB'),
+                  ],
+                ),
+                key: widgetSpanKey,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(intrinsicKey)).width, 40);
+    expect(tester.getSize(find.byKey(rowCenterKey)).width, 40);
+    expect(tester.getSize(find.byKey(rowRightKey)).width, 40);
+    expect(tester.getSize(find.byKey(rowRtlKey)).width, 40);
+    expect(tester.getSize(find.byKey(widgetSpanKey)).width, 40);
+  });
 }
 
 Future<void> _pumpTextWidget({

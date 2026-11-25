@@ -824,10 +824,12 @@ class RenderParagraph extends RenderBox
           Size(child.getMaxIntrinsicWidth(double.infinity), 0.0),
       ChildLayoutHelper.getDryBaseline,
     );
-    return (_textIntrinsics
-          ..setPlaceholderDimensions(placeholderDimensions)
-          ..layout())
-        .maxIntrinsicWidth;
+    final TextPainter painter = _textIntrinsics
+      ..setPlaceholderDimensions(placeholderDimensions)
+      ..layout();
+    return painter.didExceedMaxLines && painter.ellipsis != null
+        ? math.max(painter.maxIntrinsicWidth, painter.width)
+        : painter.maxIntrinsicWidth;
   }
 
   /// An estimate of the height of a line in the text. See [TextPainter.preferredLineHeight].
