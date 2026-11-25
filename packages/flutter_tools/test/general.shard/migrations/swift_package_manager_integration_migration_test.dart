@@ -15,11 +15,11 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/migrations/swift_package_manager_integration_migration.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fakes.dart';
 
 const pluginName = 'my_plugin';
@@ -30,7 +30,7 @@ const supportedPlatforms = <FlutterDarwinPlatform>[
 
 void main() {
   group('Flutter Package Migration', () {
-    testWithoutContext('skips if swift package manager is off', () async {
+    test('skips if swift package manager is off', () async {
       final memoryFileSystem = MemoryFileSystem();
       final testLogger = BufferLogger.test();
       final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -51,7 +51,6 @@ void main() {
         BuildInfo.debug,
         analytics: fakeAnalytics,
         plistParser: FakePlistParser(),
-        reportCrashes: true,
         toolContext: FakeToolContext(
           config: FakeConfig(),
           flutterVersion: FakeFlutterVersion(),
@@ -71,7 +70,7 @@ void main() {
       expect(fakeAnalytics.sentEvents, isEmpty);
     });
 
-    testWithoutContext("skips if there's no generated swift package", () async {
+    test("skips if there's no generated swift package", () async {
       final memoryFileSystem = MemoryFileSystem();
       final testLogger = BufferLogger.test();
       final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -89,7 +88,6 @@ void main() {
         BuildInfo.debug,
         analytics: fakeAnalytics,
         plistParser: FakePlistParser(),
-        reportCrashes: true,
         toolContext: FakeToolContext(
           config: FakeConfig(),
           flutterVersion: FakeFlutterVersion(),
@@ -110,7 +108,7 @@ void main() {
       expect(fakeAnalytics.sentEvents, isEmpty);
     });
 
-    testWithoutContext('fails if Xcode project not found', () async {
+    test('fails if Xcode project not found', () async {
       final memoryFileSystem = MemoryFileSystem();
       final testLogger = BufferLogger.test();
       final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -131,7 +129,6 @@ void main() {
         BuildInfo.debug,
         analytics: fakeAnalytics,
         plistParser: FakePlistParser(),
-        reportCrashes: true,
         toolContext: FakeToolContext(
           config: FakeConfig(),
           flutterVersion: FakeFlutterVersion(),
@@ -161,7 +158,7 @@ void main() {
     });
 
     group('get scheme file', () {
-      testWithoutContext('fails if Xcode project info not found', () async {
+      test('fails if Xcode project info not found', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
         final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -182,7 +179,6 @@ void main() {
           BuildInfo.debug,
           analytics: fakeAnalytics,
           plistParser: FakePlistParser(),
-          reportCrashes: true,
           toolContext: FakeToolContext(
             config: FakeConfig(),
             flutterVersion: FakeFlutterVersion(),
@@ -211,7 +207,7 @@ void main() {
         expect(testLogger.statusText, isEmpty);
       });
 
-      testWithoutContext('fails if scheme not found', () async {
+      test('fails if scheme not found', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
         final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -232,7 +228,6 @@ void main() {
           BuildInfo.debug,
           analytics: fakeAnalytics,
           plistParser: FakePlistParser(),
-          reportCrashes: true,
           toolContext: FakeToolContext(
             config: FakeConfig(),
             flutterVersion: FakeFlutterVersion(),
@@ -254,7 +249,7 @@ void main() {
         expect(testLogger.statusText, isEmpty);
       });
 
-      testWithoutContext('fails if scheme file not found', () async {
+      test('fails if scheme file not found', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
         final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -279,7 +274,6 @@ void main() {
           BuildInfo.debug,
           analytics: fakeAnalytics,
           plistParser: FakePlistParser(),
-          reportCrashes: true,
           toolContext: FakeToolContext(
             config: FakeConfig(),
             flutterVersion: FakeFlutterVersion(),
@@ -308,7 +302,7 @@ void main() {
         expect(testLogger.statusText, isEmpty);
       });
 
-      testWithoutContext('fails if custom scheme file not found', () async {
+      test('fails if custom scheme file not found', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
         final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -345,7 +339,6 @@ void main() {
           ),
           analytics: fakeAnalytics,
           plistParser: FakePlistParser(),
-          reportCrashes: true,
           toolContext: FakeToolContext(
             config: FakeConfig(),
             flutterVersion: FakeFlutterVersion(),
@@ -375,7 +368,7 @@ void main() {
       });
     });
 
-    testWithoutContext('does not migrate if already migrated', () async {
+    test('does not migrate if already migrated', () async {
       final memoryFileSystem = MemoryFileSystem();
       final testLogger = BufferLogger.test();
       final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -401,7 +394,6 @@ void main() {
         BuildInfo.debug,
         analytics: fakeAnalytics,
         plistParser: FakePlistParser(),
-        reportCrashes: true,
         toolContext: FakeToolContext(
           config: FakeConfig(),
           flutterVersion: FakeFlutterVersion(),
@@ -421,7 +413,7 @@ void main() {
     });
 
     group('migrate scheme', () {
-      testWithoutContext('skipped if already updated', () async {
+      test('skipped if already updated', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
         final project = FakeXcodeProject(
@@ -447,7 +439,6 @@ void main() {
           BuildInfo.debug,
           analytics: const NoOpAnalytics(),
           plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-          reportCrashes: true,
           toolContext: FakeToolContext(
             config: FakeConfig(),
             flutterVersion: FakeFlutterVersion(),
@@ -464,63 +455,57 @@ void main() {
 
       for (final FlutterDarwinPlatform platform in supportedPlatforms) {
         group('for ${platform.name}', () {
-          testWithoutContext(
-            'fails if scheme is missing BlueprintIdentifier for Runner native target',
-            () async {
-              final memoryFileSystem = MemoryFileSystem();
-              final testLogger = BufferLogger.test();
-              final project = FakeXcodeProject(
-                platform: platform.name,
-                fileSystem: memoryFileSystem,
-                logger: testLogger,
-              );
-              _createProjectFiles(project, platform, schemeMigrated: false);
-              project.xcodeProjectSchemeFile().writeAsStringSync(
-                '<?xml version="1.0" encoding="UTF-8"?><Scheme></Scheme>',
-              );
+          test('fails if scheme is missing BlueprintIdentifier for Runner native target', () async {
+            final memoryFileSystem = MemoryFileSystem();
+            final testLogger = BufferLogger.test();
+            final project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: memoryFileSystem,
+              logger: testLogger,
+            );
+            _createProjectFiles(project, platform, schemeMigrated: false);
+            project.xcodeProjectSchemeFile().writeAsStringSync(
+              '<?xml version="1.0" encoding="UTF-8"?><Scheme></Scheme>',
+            );
 
-              final projectMigration = SwiftPackageManagerIntegrationMigration(
-                project,
-                platform,
-                BuildInfo.debug,
-                analytics: const NoOpAnalytics(),
-                plistParser: FakePlistParser(),
-                reportCrashes: true,
-                toolContext: FakeToolContext(
-                  config: FakeConfig(),
-                  flutterVersion: FakeFlutterVersion(),
-                  fs: memoryFileSystem,
-                  logger: testLogger,
-                  os: FakeOperatingSystemUtils(),
-                  platform: FakePlatform(),
-                ),
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-              );
-              await expectLater(
-                () => projectMigration.migrate(),
-                throwsToolExit(
-                  message: 'Failed to parse Runner.xcscheme: Could not find BuildableReference',
-                ),
-              );
-            },
-          );
-
-          testWithoutContext(
-            'fails if BuildableName does not follow BlueprintIdentifier in scheme',
-            () async {
-              final memoryFileSystem = MemoryFileSystem();
-              final testLogger = BufferLogger.test();
-              final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+            final projectMigration = SwiftPackageManagerIntegrationMigration(
+              project,
+              platform,
+              BuildInfo.debug,
+              analytics: const NoOpAnalytics(),
+              plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                flutterVersion: FakeFlutterVersion(),
                 fs: memoryFileSystem,
-                fakeFlutterVersion: FakeFlutterVersion(),
-              );
-              final project = FakeXcodeProject(
-                platform: platform.name,
-                fileSystem: memoryFileSystem,
                 logger: testLogger,
-              );
-              _createProjectFiles(project, platform, schemeMigrated: false);
-              project.xcodeProjectSchemeFile().writeAsStringSync('''
+                os: FakeOperatingSystemUtils(),
+                platform: FakePlatform(),
+              ),
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+            );
+            await expectLater(
+              () => projectMigration.migrate(),
+              throwsToolExit(
+                message: 'Failed to parse Runner.xcscheme: Could not find BuildableReference',
+              ),
+            );
+          });
+
+          test('fails if BuildableName does not follow BlueprintIdentifier in scheme', () async {
+            final memoryFileSystem = MemoryFileSystem();
+            final testLogger = BufferLogger.test();
+            final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+              fs: memoryFileSystem,
+              fakeFlutterVersion: FakeFlutterVersion(),
+            );
+            final project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: memoryFileSystem,
+              logger: testLogger,
+            );
+            _createProjectFiles(project, platform, schemeMigrated: false);
+            project.xcodeProjectSchemeFile().writeAsStringSync('''
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "${_runnerNativeTargetIdentifier(platform)}"
@@ -529,59 +514,55 @@ void main() {
          </BuildableReference>
 ''');
 
-              final projectMigration = SwiftPackageManagerIntegrationMigration(
-                project,
-                platform,
-                BuildInfo.debug,
-                analytics: fakeAnalytics,
-                plistParser: FakePlistParser(),
-                reportCrashes: true,
-                toolContext: FakeToolContext(
-                  config: FakeConfig(),
-                  flutterVersion: FakeFlutterVersion(),
-                  fs: memoryFileSystem,
-                  logger: testLogger,
-                  os: FakeOperatingSystemUtils(),
-                  platform: FakePlatform(),
-                ),
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-              );
-
-              await expectLater(
-                () => projectMigration.migrate(),
-                throwsToolExit(
-                  message: 'Failed to parse Runner.xcscheme: Could not find BuildableName',
-                ),
-              );
-              expect(
-                fakeAnalytics.sentEvents,
-                contains(
-                  Event.appleUsageEvent(
-                    workflow: 'swiftpm-migration-failure',
-                    parameter: 'full',
-                    result: 'Failed to parse Runner.xcscheme: Could not find BuildableName.',
-                  ),
-                ),
-              );
-            },
-          );
-
-          testWithoutContext(
-            'fails if BlueprintName does not follow BuildableName in scheme',
-            () async {
-              final memoryFileSystem = MemoryFileSystem();
-              final testLogger = BufferLogger.test();
-              final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+            final projectMigration = SwiftPackageManagerIntegrationMigration(
+              project,
+              platform,
+              BuildInfo.debug,
+              analytics: fakeAnalytics,
+              plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                flutterVersion: FakeFlutterVersion(),
                 fs: memoryFileSystem,
-                fakeFlutterVersion: FakeFlutterVersion(),
-              );
-              final project = FakeXcodeProject(
-                platform: platform.name,
-                fileSystem: memoryFileSystem,
                 logger: testLogger,
-              );
-              _createProjectFiles(project, platform, schemeMigrated: false);
-              project.xcodeProjectSchemeFile().writeAsStringSync('''
+                os: FakeOperatingSystemUtils(),
+                platform: FakePlatform(),
+              ),
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+            );
+
+            await expectLater(
+              () => projectMigration.migrate(),
+              throwsToolExit(
+                message: 'Failed to parse Runner.xcscheme: Could not find BuildableName',
+              ),
+            );
+            expect(
+              fakeAnalytics.sentEvents,
+              contains(
+                Event.appleUsageEvent(
+                  workflow: 'swiftpm-migration-failure',
+                  parameter: 'full',
+                  result: 'Failed to parse Runner.xcscheme: Could not find BuildableName.',
+                ),
+              ),
+            );
+          });
+
+          test('fails if BlueprintName does not follow BuildableName in scheme', () async {
+            final memoryFileSystem = MemoryFileSystem();
+            final testLogger = BufferLogger.test();
+            final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+              fs: memoryFileSystem,
+              fakeFlutterVersion: FakeFlutterVersion(),
+            );
+            final project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: memoryFileSystem,
+              logger: testLogger,
+            );
+            _createProjectFiles(project, platform, schemeMigrated: false);
+            project.xcodeProjectSchemeFile().writeAsStringSync('''
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "${_runnerNativeTargetIdentifier(platform)}"
@@ -590,59 +571,55 @@ void main() {
          </BuildableReference>
 ''');
 
-              final projectMigration = SwiftPackageManagerIntegrationMigration(
-                project,
-                platform,
-                BuildInfo.debug,
-                analytics: fakeAnalytics,
-                plistParser: FakePlistParser(),
-                reportCrashes: true,
-                toolContext: FakeToolContext(
-                  config: FakeConfig(),
-                  flutterVersion: FakeFlutterVersion(),
-                  fs: memoryFileSystem,
-                  logger: testLogger,
-                  os: FakeOperatingSystemUtils(),
-                  platform: FakePlatform(),
-                ),
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-              );
-
-              await expectLater(
-                () => projectMigration.migrate(),
-                throwsToolExit(
-                  message: 'Failed to parse Runner.xcscheme: Could not find BlueprintName',
-                ),
-              );
-              expect(
-                fakeAnalytics.sentEvents,
-                contains(
-                  Event.appleUsageEvent(
-                    workflow: 'swiftpm-migration-failure',
-                    parameter: 'full',
-                    result: 'Failed to parse Runner.xcscheme: Could not find BlueprintName.',
-                  ),
-                ),
-              );
-            },
-          );
-
-          testWithoutContext(
-            'fails if ReferencedContainer does not follow BlueprintName in scheme',
-            () async {
-              final memoryFileSystem = MemoryFileSystem();
-              final testLogger = BufferLogger.test();
-              final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+            final projectMigration = SwiftPackageManagerIntegrationMigration(
+              project,
+              platform,
+              BuildInfo.debug,
+              analytics: fakeAnalytics,
+              plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                flutterVersion: FakeFlutterVersion(),
                 fs: memoryFileSystem,
-                fakeFlutterVersion: FakeFlutterVersion(),
-              );
-              final project = FakeXcodeProject(
-                platform: platform.name,
-                fileSystem: memoryFileSystem,
                 logger: testLogger,
-              );
-              _createProjectFiles(project, platform, schemeMigrated: false);
-              project.xcodeProjectSchemeFile().writeAsStringSync('''
+                os: FakeOperatingSystemUtils(),
+                platform: FakePlatform(),
+              ),
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+            );
+
+            await expectLater(
+              () => projectMigration.migrate(),
+              throwsToolExit(
+                message: 'Failed to parse Runner.xcscheme: Could not find BlueprintName',
+              ),
+            );
+            expect(
+              fakeAnalytics.sentEvents,
+              contains(
+                Event.appleUsageEvent(
+                  workflow: 'swiftpm-migration-failure',
+                  parameter: 'full',
+                  result: 'Failed to parse Runner.xcscheme: Could not find BlueprintName.',
+                ),
+              ),
+            );
+          });
+
+          test('fails if ReferencedContainer does not follow BlueprintName in scheme', () async {
+            final memoryFileSystem = MemoryFileSystem();
+            final testLogger = BufferLogger.test();
+            final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+              fs: memoryFileSystem,
+              fakeFlutterVersion: FakeFlutterVersion(),
+            );
+            final project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: memoryFileSystem,
+              logger: testLogger,
+            );
+            _createProjectFiles(project, platform, schemeMigrated: false);
+            project.xcodeProjectSchemeFile().writeAsStringSync('''
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "${_runnerNativeTargetIdentifier(platform)}"
@@ -651,44 +628,42 @@ void main() {
          </BuildableReference>
 ''');
 
-              final projectMigration = SwiftPackageManagerIntegrationMigration(
-                project,
-                platform,
-                BuildInfo.debug,
-                analytics: fakeAnalytics,
-                plistParser: FakePlistParser(),
-                reportCrashes: true,
-                toolContext: FakeToolContext(
-                  config: FakeConfig(),
-                  flutterVersion: FakeFlutterVersion(),
-                  fs: memoryFileSystem,
-                  logger: testLogger,
-                  os: FakeOperatingSystemUtils(),
-                  platform: FakePlatform(),
-                ),
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-              );
+            final projectMigration = SwiftPackageManagerIntegrationMigration(
+              project,
+              platform,
+              BuildInfo.debug,
+              analytics: fakeAnalytics,
+              plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                flutterVersion: FakeFlutterVersion(),
+                fs: memoryFileSystem,
+                logger: testLogger,
+                os: FakeOperatingSystemUtils(),
+                platform: FakePlatform(),
+              ),
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+            );
 
-              await expectLater(
-                () => projectMigration.migrate(),
-                throwsToolExit(
-                  message: 'Failed to parse Runner.xcscheme: Could not find ReferencedContainer',
+            await expectLater(
+              () => projectMigration.migrate(),
+              throwsToolExit(
+                message: 'Failed to parse Runner.xcscheme: Could not find ReferencedContainer',
+              ),
+            );
+            expect(
+              fakeAnalytics.sentEvents,
+              contains(
+                Event.appleUsageEvent(
+                  workflow: 'swiftpm-migration-failure',
+                  parameter: 'full',
+                  result: 'Failed to parse Runner.xcscheme: Could not find ReferencedContainer.',
                 ),
-              );
-              expect(
-                fakeAnalytics.sentEvents,
-                contains(
-                  Event.appleUsageEvent(
-                    workflow: 'swiftpm-migration-failure',
-                    parameter: 'full',
-                    result: 'Failed to parse Runner.xcscheme: Could not find ReferencedContainer.',
-                  ),
-                ),
-              );
-            },
-          );
+              ),
+            );
+          });
 
-          testWithoutContext('fails if cannot find BuildAction in scheme', () async {
+          test('fails if cannot find BuildAction in scheme', () async {
             final memoryFileSystem = MemoryFileSystem();
             final testLogger = BufferLogger.test();
             final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -709,7 +684,6 @@ void main() {
               BuildInfo.debug,
               analytics: fakeAnalytics,
               plistParser: FakePlistParser(),
-              reportCrashes: true,
               toolContext: FakeToolContext(
                 config: FakeConfig(),
                 flutterVersion: FakeFlutterVersion(),
@@ -739,7 +713,7 @@ void main() {
             );
           });
 
-          testWithoutContext('fails if scheme is not valid xml', () async {
+          test('fails if scheme is not valid xml', () async {
             final memoryFileSystem = MemoryFileSystem();
             final testLogger = BufferLogger.test();
             final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -761,7 +735,6 @@ void main() {
               BuildInfo.debug,
               analytics: fakeAnalytics,
               plistParser: FakePlistParser(),
-              reportCrashes: true,
               toolContext: FakeToolContext(
                 config: FakeConfig(),
                 flutterVersion: FakeFlutterVersion(),
@@ -789,7 +762,7 @@ void main() {
             );
           });
 
-          testWithoutContext('successfully updates scheme with no BuildActionEntries', () async {
+          test('successfully updates scheme with no BuildActionEntries', () async {
             final memoryFileSystem = MemoryFileSystem();
             final testLogger = BufferLogger.test();
             final project = FakeXcodeProject(
@@ -815,7 +788,6 @@ void main() {
               BuildInfo.debug,
               analytics: const NoOpAnalytics(),
               plistParser: plistParser,
-              reportCrashes: true,
               toolContext: FakeToolContext(
                 config: FakeConfig(),
                 flutterVersion: FakeFlutterVersion(),
@@ -834,7 +806,7 @@ void main() {
             );
           });
 
-          testWithoutContext('successfully updates scheme with no Runner.xcworkspace', () async {
+          test('successfully updates scheme with no Runner.xcworkspace', () async {
             final memoryFileSystem = MemoryFileSystem();
             final testLogger = BufferLogger.test();
             final project = FakeXcodeProject(
@@ -859,7 +831,6 @@ void main() {
               BuildInfo.debug,
               analytics: const NoOpAnalytics(),
               plistParser: plistParser,
-              reportCrashes: true,
               toolContext: FakeToolContext(
                 config: FakeConfig(),
                 flutterVersion: FakeFlutterVersion(),
@@ -878,7 +849,7 @@ void main() {
             );
           });
 
-          testWithoutContext('successfully updates scheme with preexisting PreActions', () async {
+          test('successfully updates scheme with preexisting PreActions', () async {
             final memoryFileSystem = MemoryFileSystem();
             final testLogger = BufferLogger.test();
             final project = FakeXcodeProject(
@@ -903,7 +874,6 @@ void main() {
               BuildInfo.debug,
               analytics: const NoOpAnalytics(),
               plistParser: plistParser,
-              reportCrashes: true,
               toolContext: FakeToolContext(
                 config: FakeConfig(),
                 flutterVersion: FakeFlutterVersion(),
@@ -922,63 +892,59 @@ void main() {
             );
           });
 
-          testWithoutContext(
-            'successfully updates scheme with no preexisting PreActions',
-            () async {
-              final memoryFileSystem = MemoryFileSystem();
-              final testLogger = BufferLogger.test();
-              final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+          test('successfully updates scheme with no preexisting PreActions', () async {
+            final memoryFileSystem = MemoryFileSystem();
+            final testLogger = BufferLogger.test();
+            final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+              fs: memoryFileSystem,
+              fakeFlutterVersion: FakeFlutterVersion(),
+            );
+            final project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: memoryFileSystem,
+              logger: testLogger,
+            );
+            _createProjectFiles(project, platform, schemeMigrated: false);
+            project.xcodeProjectSchemeFile().writeAsStringSync(_validBuildActions(platform));
+
+            final plistParser = FakePlistParser.multiple(<String>[
+              _plutilOutput(_allSectionsMigratedAsJson(platform)),
+              _plutilOutput(_allSectionsMigratedAsJson(platform)),
+            ]);
+            project.xcodeProjectInfoFile.writeAsStringSync(
+              _projectSettings(_allSectionsMigrated(platform)),
+            );
+            final projectMigration = SwiftPackageManagerIntegrationMigration(
+              project,
+              platform,
+              BuildInfo.debug,
+              analytics: fakeAnalytics,
+              plistParser: plistParser,
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                flutterVersion: FakeFlutterVersion(),
                 fs: memoryFileSystem,
-                fakeFlutterVersion: FakeFlutterVersion(),
-              );
-              final project = FakeXcodeProject(
-                platform: platform.name,
-                fileSystem: memoryFileSystem,
                 logger: testLogger,
-              );
-              _createProjectFiles(project, platform, schemeMigrated: false);
-              project.xcodeProjectSchemeFile().writeAsStringSync(_validBuildActions(platform));
+                os: FakeOperatingSystemUtils(),
+                platform: FakePlatform(),
+              ),
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+            );
 
-              final plistParser = FakePlistParser.multiple(<String>[
-                _plutilOutput(_allSectionsMigratedAsJson(platform)),
-                _plutilOutput(_allSectionsMigratedAsJson(platform)),
-              ]);
-              project.xcodeProjectInfoFile.writeAsStringSync(
-                _projectSettings(_allSectionsMigrated(platform)),
-              );
-              final projectMigration = SwiftPackageManagerIntegrationMigration(
-                project,
-                platform,
-                BuildInfo.debug,
-                analytics: fakeAnalytics,
-                plistParser: plistParser,
-                reportCrashes: true,
-                toolContext: FakeToolContext(
-                  config: FakeConfig(),
-                  flutterVersion: FakeFlutterVersion(),
-                  fs: memoryFileSystem,
-                  logger: testLogger,
-                  os: FakeOperatingSystemUtils(),
-                  platform: FakePlatform(),
-                ),
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-              );
+            await projectMigration.migrate();
+            expect(
+              project.xcodeProjectSchemeFile().readAsStringSync(),
+              _validBuildActions(platform, hasFrameworkScript: true),
+            );
+            expect(
+              fakeAnalytics.sentEvents,
+              contains(
+                Event.appleUsageEvent(workflow: 'swiftpm-migration-success', parameter: 'full'),
+              ),
+            );
+          });
 
-              await projectMigration.migrate();
-              expect(
-                project.xcodeProjectSchemeFile().readAsStringSync(),
-                _validBuildActions(platform, hasFrameworkScript: true),
-              );
-              expect(
-                fakeAnalytics.sentEvents,
-                contains(
-                  Event.appleUsageEvent(workflow: 'swiftpm-migration-success', parameter: 'full'),
-                ),
-              );
-            },
-          );
-
-          testWithoutContext('successfully updates when spacing differs', () async {
+          test('successfully updates when spacing differs', () async {
             final memoryFileSystem = MemoryFileSystem();
             final testLogger = BufferLogger.test();
             final project = FakeXcodeProject(
@@ -1037,7 +1003,6 @@ void main() {
               BuildInfo.debug,
               analytics: const NoOpAnalytics(),
               plistParser: plistParser,
-              reportCrashes: true,
               toolContext: FakeToolContext(
                 config: FakeConfig(),
                 flutterVersion: FakeFlutterVersion(),
@@ -1110,7 +1075,7 @@ void main() {
     });
 
     group('migrate pbxproj', () {
-      testWithoutContext('skipped if already updated', () async {
+      test('skipped if already updated', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
         final project = FakeXcodeProject(
@@ -1135,7 +1100,6 @@ void main() {
           BuildInfo.debug,
           analytics: const NoOpAnalytics(),
           plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-          reportCrashes: true,
           toolContext: FakeToolContext(
             config: FakeConfig(),
             flutterVersion: FakeFlutterVersion(),
@@ -1151,7 +1115,7 @@ void main() {
       });
 
       group('fails if parsing project.pbxproj', () {
-        testWithoutContext('fails plutil command', () async {
+        test('fails plutil command', () async {
           final memoryFileSystem = MemoryFileSystem();
           final testLogger = BufferLogger.test();
           final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -1171,7 +1135,6 @@ void main() {
             BuildInfo.debug,
             analytics: fakeAnalytics,
             plistParser: FakePlistParser(),
-            reportCrashes: true,
             toolContext: FakeToolContext(
               config: FakeConfig(),
               flutterVersion: FakeFlutterVersion(),
@@ -1198,7 +1161,7 @@ void main() {
           );
         });
 
-        testWithoutContext('returns unexpected JSON', () async {
+        test('returns unexpected JSON', () async {
           final memoryFileSystem = MemoryFileSystem();
           final testLogger = BufferLogger.test();
           final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -1218,7 +1181,6 @@ void main() {
             BuildInfo.debug,
             analytics: fakeAnalytics,
             plistParser: FakePlistParser(json: '[]'),
-            reportCrashes: true,
             toolContext: FakeToolContext(
               config: FakeConfig(),
               flutterVersion: FakeFlutterVersion(),
@@ -1245,7 +1207,7 @@ void main() {
           );
         });
 
-        testWithoutContext('returns non-JSON', () async {
+        test('returns non-JSON', () async {
           final memoryFileSystem = MemoryFileSystem();
           final testLogger = BufferLogger.test();
           final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -1265,7 +1227,6 @@ void main() {
             BuildInfo.debug,
             analytics: fakeAnalytics,
             plistParser: FakePlistParser(json: 'this is not json'),
-            reportCrashes: true,
             toolContext: FakeToolContext(
               config: FakeConfig(),
               flutterVersion: FakeFlutterVersion(),
@@ -1294,7 +1255,7 @@ void main() {
       });
 
       group('fails if duplicate id', () {
-        testWithoutContext('for PBXBuildFile', () async {
+        test('for PBXBuildFile', () async {
           final memoryFileSystem = MemoryFileSystem();
           final testLogger = BufferLogger.test();
           final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -1315,7 +1276,6 @@ void main() {
             BuildInfo.debug,
             analytics: fakeAnalytics,
             plistParser: FakePlistParser(),
-            reportCrashes: true,
             toolContext: FakeToolContext(
               config: FakeConfig(),
               flutterVersion: FakeFlutterVersion(),
@@ -1342,7 +1302,7 @@ void main() {
           );
         });
 
-        testWithoutContext('for XCSwiftPackageProductDependency', () async {
+        test('for XCSwiftPackageProductDependency', () async {
           final memoryFileSystem = MemoryFileSystem();
           final testLogger = BufferLogger.test();
           final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -1363,7 +1323,6 @@ void main() {
             BuildInfo.debug,
             analytics: fakeAnalytics,
             plistParser: FakePlistParser(),
-            reportCrashes: true,
             toolContext: FakeToolContext(
               config: FakeConfig(),
               flutterVersion: FakeFlutterVersion(),
@@ -1390,7 +1349,7 @@ void main() {
           );
         });
 
-        testWithoutContext('for XCLocalSwiftPackageReference', () async {
+        test('for XCLocalSwiftPackageReference', () async {
           final memoryFileSystem = MemoryFileSystem();
           final testLogger = BufferLogger.test();
           final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -1411,7 +1370,6 @@ void main() {
             BuildInfo.debug,
             analytics: fakeAnalytics,
             plistParser: FakePlistParser(),
-            reportCrashes: true,
             toolContext: FakeToolContext(
               config: FakeConfig(),
               flutterVersion: FakeFlutterVersion(),
@@ -1438,7 +1396,7 @@ void main() {
           );
         });
 
-        testWithoutContext('for FlutterGeneratedPluginSwiftPackage PBXFileReference', () async {
+        test('for FlutterGeneratedPluginSwiftPackage PBXFileReference', () async {
           final memoryFileSystem = MemoryFileSystem();
           final testLogger = BufferLogger.test();
           final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -1459,7 +1417,6 @@ void main() {
             BuildInfo.debug,
             analytics: fakeAnalytics,
             plistParser: FakePlistParser(),
-            reportCrashes: true,
             toolContext: FakeToolContext(
               config: FakeConfig(),
               flutterVersion: FakeFlutterVersion(),
@@ -1495,132 +1452,116 @@ void main() {
             memoryFileSystem = MemoryFileSystem.test();
           });
 
-          testUsingContext(
-            'PBXFileReference',
-            () async {
-              final testLogger = BufferLogger.test();
-              final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+          test('PBXFileReference', () async {
+            final testLogger = BufferLogger.test();
+            final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+              fs: memoryFileSystem,
+              fakeFlutterVersion: FakeFlutterVersion(),
+            );
+            final project = FakeXcodeProject(
+              platform: FlutterDarwinPlatform.ios.name,
+              fileSystem: memoryFileSystem,
+              logger: testLogger,
+              projectDir: memoryFileSystem.currentDirectory
+                  .childDirectory(pluginName)
+                  .childDirectory('example/ios'),
+              plugins: [
+                FakePlugin(name: pluginName, swiftPackagePath: '/$pluginName/ios/$pluginName'),
+              ],
+            );
+            _createProjectFiles(project, FlutterDarwinPlatform.ios, isExampleApp: true);
+            project.xcodeProjectInfoFile.writeAsStringSync('78DABEA22ED26510000E7860');
+
+            final projectMigration = SwiftPackageManagerIntegrationMigration(
+              project,
+              FlutterDarwinPlatform.ios,
+              BuildInfo.debug,
+              analytics: fakeAnalytics,
+              plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                flutterVersion: FakeFlutterVersion(),
                 fs: memoryFileSystem,
-                fakeFlutterVersion: FakeFlutterVersion(),
-              );
-              final project = FakeXcodeProject(
-                platform: FlutterDarwinPlatform.ios.name,
-                fileSystem: memoryFileSystem,
                 logger: testLogger,
-                projectDir: memoryFileSystem.currentDirectory
-                    .childDirectory(pluginName)
-                    .childDirectory('example/ios'),
-                plugins: [
-                  FakePlugin(name: pluginName, swiftPackagePath: '/$pluginName/ios/$pluginName'),
-                ],
-              );
-              _createProjectFiles(project, FlutterDarwinPlatform.ios, isExampleApp: true);
-              project.xcodeProjectInfoFile.writeAsStringSync('78DABEA22ED26510000E7860');
-
-              final projectMigration = SwiftPackageManagerIntegrationMigration(
-                project,
-                FlutterDarwinPlatform.ios,
-                BuildInfo.debug,
-                analytics: fakeAnalytics,
-                plistParser: FakePlistParser(),
-                reportCrashes: true,
-                toolContext: FakeToolContext(
-                  config: FakeConfig(),
-                  flutterVersion: FakeFlutterVersion(),
-                  fs: memoryFileSystem,
-                  logger: testLogger,
-                  os: FakeOperatingSystemUtils(),
-                  platform: FakePlatform(),
+                os: FakeOperatingSystemUtils(),
+                platform: FakePlatform(),
+              ),
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+            );
+            await expectLater(
+              () => projectMigration.migrate(),
+              throwsToolExit(message: 'Duplicate id found for $pluginName PBXFileReference'),
+            );
+            expect(
+              fakeAnalytics.sentEvents,
+              contains(
+                Event.appleUsageEvent(
+                  workflow: 'swiftpm-migration-failure',
+                  parameter: 'full',
+                  result: 'Duplicate id found for plugin PBXFileReference.',
                 ),
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-              );
-              await expectLater(
-                () => projectMigration.migrate(),
-                throwsToolExit(message: 'Duplicate id found for $pluginName PBXFileReference'),
-              );
-              expect(
-                fakeAnalytics.sentEvents,
-                contains(
-                  Event.appleUsageEvent(
-                    workflow: 'swiftpm-migration-failure',
-                    parameter: 'full',
-                    result: 'Duplicate id found for plugin PBXFileReference.',
-                  ),
-                ),
-              );
-            },
-            overrides: <Type, Generator>{
-              FileSystem: () => memoryFileSystem,
-              ProcessManager: () => FakeProcessManager.any(),
-            },
-          );
+              ),
+            );
+          });
 
-          testUsingContext(
-            'FlutterFramework PBXFileReference',
-            () async {
-              final testLogger = BufferLogger.test();
-              final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+          test('FlutterFramework PBXFileReference', () async {
+            final testLogger = BufferLogger.test();
+            final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+              fs: memoryFileSystem,
+              fakeFlutterVersion: FakeFlutterVersion(),
+            );
+            final project = FakeXcodeProject(
+              platform: FlutterDarwinPlatform.ios.name,
+              fileSystem: memoryFileSystem,
+              logger: testLogger,
+              projectDir: memoryFileSystem.currentDirectory
+                  .childDirectory(pluginName)
+                  .childDirectory('example/ios'),
+              plugins: [
+                FakePlugin(name: pluginName, swiftPackagePath: '/$pluginName/ios/$pluginName'),
+              ],
+            );
+            _createProjectFiles(project, FlutterDarwinPlatform.ios, isExampleApp: true);
+            project.xcodeProjectInfoFile.writeAsStringSync('784666492D4C4C64000A1A5F');
+
+            final projectMigration = SwiftPackageManagerIntegrationMigration(
+              project,
+              FlutterDarwinPlatform.ios,
+              BuildInfo.debug,
+              analytics: fakeAnalytics,
+              plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                flutterVersion: FakeFlutterVersion(),
                 fs: memoryFileSystem,
-                fakeFlutterVersion: FakeFlutterVersion(),
-              );
-              final project = FakeXcodeProject(
-                platform: FlutterDarwinPlatform.ios.name,
-                fileSystem: memoryFileSystem,
                 logger: testLogger,
-                projectDir: memoryFileSystem.currentDirectory
-                    .childDirectory(pluginName)
-                    .childDirectory('example/ios'),
-                plugins: [
-                  FakePlugin(name: pluginName, swiftPackagePath: '/$pluginName/ios/$pluginName'),
-                ],
-              );
-              _createProjectFiles(project, FlutterDarwinPlatform.ios, isExampleApp: true);
-              project.xcodeProjectInfoFile.writeAsStringSync('784666492D4C4C64000A1A5F');
-
-              final projectMigration = SwiftPackageManagerIntegrationMigration(
-                project,
-                FlutterDarwinPlatform.ios,
-                BuildInfo.debug,
-                analytics: fakeAnalytics,
-                plistParser: FakePlistParser(),
-                reportCrashes: true,
-                toolContext: FakeToolContext(
-                  config: FakeConfig(),
-                  flutterVersion: FakeFlutterVersion(),
-                  fs: memoryFileSystem,
-                  logger: testLogger,
-                  os: FakeOperatingSystemUtils(),
-                  platform: FakePlatform(),
+                os: FakeOperatingSystemUtils(),
+                platform: FakePlatform(),
+              ),
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+            );
+            await expectLater(
+              () => projectMigration.migrate(),
+              throwsToolExit(message: 'Duplicate id found for FlutterFramework PBXFileReference'),
+            );
+            expect(
+              fakeAnalytics.sentEvents,
+              contains(
+                Event.appleUsageEvent(
+                  workflow: 'swiftpm-migration-failure',
+                  parameter: 'full',
+                  result: 'Duplicate id found for FlutterFramework PBXFileReference.',
                 ),
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-              );
-              await expectLater(
-                () => projectMigration.migrate(),
-                throwsToolExit(message: 'Duplicate id found for FlutterFramework PBXFileReference'),
-              );
-              expect(
-                fakeAnalytics.sentEvents,
-                contains(
-                  Event.appleUsageEvent(
-                    workflow: 'swiftpm-migration-failure',
-                    parameter: 'full',
-                    result: 'Duplicate id found for FlutterFramework PBXFileReference.',
-                  ),
-                ),
-              );
-            },
-            overrides: <Type, Generator>{
-              FileSystem: () => memoryFileSystem,
-              ProcessManager: () => FakeProcessManager.any(),
-            },
-          );
+              ),
+            );
+          });
         });
       });
 
       for (final FlutterDarwinPlatform platform in supportedPlatforms) {
         group('for ${platform.name}', () {
           group('migrate PBXBuildFile', () {
-            testWithoutContext('fails if missing Begin PBXBuildFile section', () async {
+            test('fails if missing Begin PBXBuildFile section', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -1636,7 +1577,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(<String>[])),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -1653,7 +1593,7 @@ void main() {
               );
             });
 
-            testWithoutContext('fails if missing End PBXBuildFile section', () async {
+            test('fails if missing End PBXBuildFile section', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -1682,7 +1622,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(<String>[])),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -1699,7 +1638,7 @@ void main() {
               );
             });
 
-            testWithoutContext('fails if End before Begin for PBXBuildFile section', () async {
+            test('fails if End before Begin for PBXBuildFile section', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -1729,7 +1668,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(<String>[])),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -1748,7 +1686,7 @@ void main() {
               );
             });
 
-            testWithoutContext('successfully added', () async {
+            test('successfully added', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -1784,7 +1722,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: fakeAnalytics,
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -1817,7 +1754,7 @@ void main() {
           });
 
           group('migrate PBXFileReference', () {
-            testWithoutContext('fails if missing Begin PBXFileReference section', () async {
+            test('fails if missing Begin PBXFileReference section', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -1843,7 +1780,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -1860,7 +1796,7 @@ void main() {
               );
             });
 
-            testWithoutContext('fails if missing End PBXFileReference section', () async {
+            test('fails if missing End PBXFileReference section', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -1889,7 +1825,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -1906,7 +1841,7 @@ void main() {
               );
             });
 
-            testWithoutContext('fails if End before Begin for PBXFileReference section', () async {
+            test('fails if End before Begin for PBXFileReference section', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -1936,7 +1871,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -1955,7 +1889,7 @@ void main() {
               );
             });
 
-            testWithoutContext('successfully added', () async {
+            test('successfully added', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -1987,7 +1921,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -2020,86 +1953,80 @@ void main() {
                 memoryFileSystem = MemoryFileSystem.test();
               });
 
-              testUsingContext(
-                'successfully added',
-                () async {
-                  final testLogger = BufferLogger.test();
-                  final project = FakeXcodeProject(
-                    platform: platform.name,
-                    fileSystem: memoryFileSystem,
-                    logger: testLogger,
-                    projectDir: memoryFileSystem.currentDirectory
-                        .childDirectory(pluginName)
-                        .childDirectory('example/${platform.name}'),
-                    plugins: [
-                      FakePlugin(
-                        name: pluginName,
-                        swiftPackagePath: '/$pluginName/${platform.name}/$pluginName',
-                      ),
-                    ],
-                  );
-                  _createProjectFiles(project, platform, isExampleApp: true);
-
-                  final settingsBeforeMigration = <String>[
-                    ..._allSectionsMigrated(platform, includePlugin: true),
-                  ];
-                  settingsBeforeMigration[_fileReferenceSectionIndex] =
-                      unmigratedFileReferenceSection;
-                  project.xcodeProjectInfoFile.writeAsStringSync(
-                    _projectSettings(settingsBeforeMigration),
-                  );
-                  final settingsAsJsonBeforeMigration = <String>[
-                    ..._allSectionsMigratedAsJson(platform, includePlugin: true),
-                  ];
-                  settingsAsJsonBeforeMigration[_fileReferenceSectionIndex] =
-                      unmigratedFileReferenceAsJson(platform);
-
-                  final plistParser = FakePlistParser.multiple(<String>[
-                    _plutilOutput(settingsAsJsonBeforeMigration),
-                    _plutilOutput(_allSectionsMigratedAsJson(platform, includePlugin: true)),
-                  ]);
-
-                  final projectMigration = SwiftPackageManagerIntegrationMigration(
-                    project,
-                    platform,
-                    BuildInfo.debug,
-                    analytics: const NoOpAnalytics(),
-                    plistParser: plistParser,
-                    reportCrashes: true,
-                    toolContext: FakeToolContext(
-                      config: FakeConfig(),
-                      flutterVersion: FakeFlutterVersion(),
-                      fs: memoryFileSystem,
-                      logger: testLogger,
-                      os: FakeOperatingSystemUtils(),
-                      platform: FakePlatform(),
+              test('successfully added', () async {
+                final testLogger = BufferLogger.test();
+                final project = FakeXcodeProject(
+                  platform: platform.name,
+                  fileSystem: memoryFileSystem,
+                  logger: testLogger,
+                  projectDir: memoryFileSystem.currentDirectory
+                      .childDirectory(pluginName)
+                      .childDirectory('example/${platform.name}'),
+                  plugins: [
+                    FakePlugin(
+                      name: pluginName,
+                      swiftPackagePath: '/$pluginName/${platform.name}/$pluginName',
                     ),
-                    xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  );
-                  await projectMigration.migrate();
-                  expect(testLogger.errorText, isEmpty);
-                  expect(
-                    testLogger.traceText.contains('PBXFileReference already migrated. Skipping...'),
-                    isFalse,
-                  );
-                  settingsBeforeMigration[_fileReferenceSectionIndex] =
-                      migratedFileReferenceSection(platform, includePlugin: true);
-                  expect(
-                    project.xcodeProjectInfoFile.readAsStringSync(),
-                    _projectSettings(settingsBeforeMigration),
-                  );
-                  expect(plistParser.hasRemainingExpectations, isFalse);
-                },
-                overrides: <Type, Generator>{
-                  FileSystem: () => memoryFileSystem,
-                  ProcessManager: () => FakeProcessManager.any(),
-                },
-              );
+                  ],
+                );
+                _createProjectFiles(project, platform, isExampleApp: true);
+
+                final settingsBeforeMigration = <String>[
+                  ..._allSectionsMigrated(platform, includePlugin: true),
+                ];
+                settingsBeforeMigration[_fileReferenceSectionIndex] =
+                    unmigratedFileReferenceSection;
+                project.xcodeProjectInfoFile.writeAsStringSync(
+                  _projectSettings(settingsBeforeMigration),
+                );
+                final settingsAsJsonBeforeMigration = <String>[
+                  ..._allSectionsMigratedAsJson(platform, includePlugin: true),
+                ];
+                settingsAsJsonBeforeMigration[_fileReferenceSectionIndex] =
+                    unmigratedFileReferenceAsJson(platform);
+
+                final plistParser = FakePlistParser.multiple(<String>[
+                  _plutilOutput(settingsAsJsonBeforeMigration),
+                  _plutilOutput(_allSectionsMigratedAsJson(platform, includePlugin: true)),
+                ]);
+
+                final projectMigration = SwiftPackageManagerIntegrationMigration(
+                  project,
+                  platform,
+                  BuildInfo.debug,
+                  analytics: const NoOpAnalytics(),
+                  plistParser: plistParser,
+                  toolContext: FakeToolContext(
+                    config: FakeConfig(),
+                    flutterVersion: FakeFlutterVersion(),
+                    fs: memoryFileSystem,
+                    logger: testLogger,
+                    os: FakeOperatingSystemUtils(),
+                    platform: FakePlatform(),
+                  ),
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                );
+                await projectMigration.migrate();
+                expect(testLogger.errorText, isEmpty);
+                expect(
+                  testLogger.traceText.contains('PBXFileReference already migrated. Skipping...'),
+                  isFalse,
+                );
+                settingsBeforeMigration[_fileReferenceSectionIndex] = migratedFileReferenceSection(
+                  platform,
+                  includePlugin: true,
+                );
+                expect(
+                  project.xcodeProjectInfoFile.readAsStringSync(),
+                  _projectSettings(settingsBeforeMigration),
+                );
+                expect(plistParser.hasRemainingExpectations, isFalse);
+              });
             });
           });
 
           group('migrate PBXFrameworksBuildPhase', () {
-            testWithoutContext('fails if missing PBXFrameworksBuildPhase section', () async {
+            test('fails if missing PBXFrameworksBuildPhase section', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -2125,7 +2052,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -2144,7 +2070,7 @@ void main() {
               );
             });
 
-            testWithoutContext('fails if missing Runner target subsection following PBXFrameworksBuildPhase begin header', () async {
+            test('fails if missing Runner target subsection following PBXFrameworksBuildPhase begin header', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -2173,7 +2099,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -2190,7 +2115,7 @@ void main() {
               );
             });
 
-            testWithoutContext(
+            test(
               'fails if missing Runner target subsection before PBXFrameworksBuildPhase end header',
               () async {
                 final memoryFileSystem = MemoryFileSystem();
@@ -2226,7 +2151,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: const NoOpAnalytics(),
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -2246,7 +2170,7 @@ void main() {
               },
             );
 
-            testWithoutContext('fails if missing Runner target in parsed settings', () async {
+            test('fails if missing Runner target in parsed settings', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -2277,7 +2201,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: fakeAnalytics,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -2306,7 +2229,7 @@ void main() {
               );
             });
 
-            testWithoutContext(
+            test(
               'fails and anonymizes names if missing CustomApp target in parsed settings',
               () async {
                 final memoryFileSystem = MemoryFileSystem();
@@ -2340,7 +2263,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: fakeAnalytics,
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -2370,7 +2292,7 @@ void main() {
               },
             );
 
-            testWithoutContext('successfully added when files field is missing', () async {
+            test('successfully added when files field is missing', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -2406,7 +2328,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -2432,7 +2353,7 @@ void main() {
               expect(plistParser.hasRemainingExpectations, isFalse);
             });
 
-            testWithoutContext('successfully added when files field is empty', () async {
+            test('successfully added when files field is empty', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -2461,7 +2382,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -2487,7 +2407,7 @@ void main() {
               expect(plistParser.hasRemainingExpectations, isFalse);
             });
 
-            testWithoutContext('successfully added when files field is not empty', () async {
+            test('successfully added when files field is not empty', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -2523,7 +2443,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -2551,7 +2470,7 @@ void main() {
           });
 
           group('migrate PBXGroup', () {
-            testWithoutContext('fails if missing PBXGroup section', () async {
+            test('fails if missing PBXGroup section', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -2577,7 +2496,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -2594,7 +2512,7 @@ void main() {
               );
             });
 
-            testWithoutContext('fails if missing Flutter group in parsed settings', () async {
+            test('fails if missing Flutter group in parsed settings', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -2620,7 +2538,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -2637,7 +2554,7 @@ void main() {
               );
             });
 
-            testWithoutContext(
+            test(
               'fails if missing Flutter group subsection following PBXGroup begin header',
               () async {
                 final memoryFileSystem = MemoryFileSystem();
@@ -2667,7 +2584,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: const NoOpAnalytics(),
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -2685,21 +2601,19 @@ void main() {
               },
             );
 
-            testWithoutContext(
-              'fails if missing Flutter group subsection before PBXGroup end header',
-              () async {
-                final memoryFileSystem = MemoryFileSystem();
-                final testLogger = BufferLogger.test();
-                final project = FakeXcodeProject(
-                  platform: platform.name,
-                  fileSystem: memoryFileSystem,
-                  logger: testLogger,
-                );
-                _createProjectFiles(project, platform);
+            test('fails if missing Flutter group subsection before PBXGroup end header', () async {
+              final memoryFileSystem = MemoryFileSystem();
+              final testLogger = BufferLogger.test();
+              final project = FakeXcodeProject(
+                platform: platform.name,
+                fileSystem: memoryFileSystem,
+                logger: testLogger,
+              );
+              _createProjectFiles(project, platform);
 
-                final settingsBeforeMigration = <String>[..._allSectionsUnmigrated(platform)];
-                settingsBeforeMigration[_groupSectionIndex] =
-                    '''
+              final settingsBeforeMigration = <String>[..._allSectionsUnmigrated(platform)];
+              settingsBeforeMigration[_groupSectionIndex] =
+                  '''
 /* Begin PBXGroup section */
 /* End PBXGroup section */
 /* Begin NonExistant section */
@@ -2707,38 +2621,36 @@ void main() {
     };
 /* End NonExistant section */
 ''';
-                project.xcodeProjectInfoFile.writeAsStringSync(
-                  _projectSettings(settingsBeforeMigration),
-                );
-                final settingsAsJsonBeforeMigration = <String>[
-                  ..._allSectionsUnmigratedAsJson(platform),
-                ];
+              project.xcodeProjectInfoFile.writeAsStringSync(
+                _projectSettings(settingsBeforeMigration),
+              );
+              final settingsAsJsonBeforeMigration = <String>[
+                ..._allSectionsUnmigratedAsJson(platform),
+              ];
 
-                final projectMigration = SwiftPackageManagerIntegrationMigration(
-                  project,
-                  platform,
-                  BuildInfo.debug,
-                  analytics: const NoOpAnalytics(),
-                  plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  reportCrashes: true,
-                  toolContext: FakeToolContext(
-                    config: FakeConfig(),
-                    flutterVersion: FakeFlutterVersion(),
-                    fs: memoryFileSystem,
-                    logger: testLogger,
-                    os: FakeOperatingSystemUtils(),
-                    platform: FakePlatform(),
-                  ),
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                );
-                await expectLater(
-                  () => projectMigration.migrate(),
-                  throwsToolExit(message: 'Unable to find Flutter PBXGroup.'),
-                );
-              },
-            );
+              final projectMigration = SwiftPackageManagerIntegrationMigration(
+                project,
+                platform,
+                BuildInfo.debug,
+                analytics: const NoOpAnalytics(),
+                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
+                  logger: testLogger,
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+              );
+              await expectLater(
+                () => projectMigration.migrate(),
+                throwsToolExit(message: 'Unable to find Flutter PBXGroup.'),
+              );
+            });
 
-            testWithoutContext('successfully added when children field is missing', () async {
+            test('successfully added when children field is missing', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -2780,7 +2692,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -2804,7 +2715,7 @@ void main() {
               expect(plistParser.hasRemainingExpectations, isFalse);
             });
 
-            testWithoutContext('successfully added when children field is not empty', () async {
+            test('successfully added when children field is not empty', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -2836,7 +2747,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -2866,91 +2776,83 @@ void main() {
                 memoryFileSystem = MemoryFileSystem.test();
               });
 
-              testUsingContext(
-                'successfully added',
-                () async {
-                  final testLogger = BufferLogger.test();
-                  final project = FakeXcodeProject(
-                    platform: platform.name,
-                    fileSystem: memoryFileSystem,
-                    logger: testLogger,
-                    projectDir: memoryFileSystem.currentDirectory
-                        .childDirectory(pluginName)
-                        .childDirectory('example/${platform.name}'),
-                    plugins: [
-                      FakePlugin(
-                        name: pluginName,
-                        swiftPackagePath: '/$pluginName/${platform.name}/$pluginName',
-                      ),
-                    ],
-                  );
-                  _createProjectFiles(project, platform, isExampleApp: true);
-
-                  final settingsBeforeMigration = <String>[..._allSectionsUnmigrated(platform)];
-                  settingsBeforeMigration[_groupSectionIndex] = unmigratedGroupSection(platform);
-                  project.xcodeProjectInfoFile.writeAsStringSync(
-                    _projectSettings(settingsBeforeMigration),
-                  );
-
-                  final settingsAsJsonBeforeMigration = <String>[
-                    ..._allSectionsUnmigratedAsJson(platform),
-                  ];
-
-                  final expectedSettings = <String>[
-                    ..._allSectionsMigrated(platform, includePlugin: true),
-                  ];
-                  expectedSettings[_groupSectionIndex] = migratedGroupSection(
-                    platform,
-                    includePlugin: true,
-                  );
-                  expectedSettings[_fileReferenceSectionIndex] = migratedFileReferenceSection(
-                    platform,
-                    includePlugin: true,
-                  );
-                  final plistParser = FakePlistParser.multiple(<String>[
-                    _plutilOutput(settingsAsJsonBeforeMigration),
-                    _plutilOutput(_allSectionsMigratedAsJson(platform, includePlugin: true)),
-                  ]);
-
-                  final projectMigration = SwiftPackageManagerIntegrationMigration(
-                    project,
-                    platform,
-                    BuildInfo.debug,
-                    analytics: const NoOpAnalytics(),
-                    plistParser: plistParser,
-                    reportCrashes: true,
-                    toolContext: FakeToolContext(
-                      config: FakeConfig(),
-                      flutterVersion: FakeFlutterVersion(),
-                      fs: memoryFileSystem,
-                      logger: testLogger,
-                      os: FakeOperatingSystemUtils(),
-                      platform: FakePlatform(),
+              test('successfully added', () async {
+                final testLogger = BufferLogger.test();
+                final project = FakeXcodeProject(
+                  platform: platform.name,
+                  fileSystem: memoryFileSystem,
+                  logger: testLogger,
+                  projectDir: memoryFileSystem.currentDirectory
+                      .childDirectory(pluginName)
+                      .childDirectory('example/${platform.name}'),
+                  plugins: [
+                    FakePlugin(
+                      name: pluginName,
+                      swiftPackagePath: '/$pluginName/${platform.name}/$pluginName',
                     ),
-                    xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  );
-                  await projectMigration.migrate();
-                  expect(testLogger.errorText, isEmpty);
-                  expect(
-                    testLogger.traceText.contains('PBXGroup already migrated. Skipping...'),
-                    isFalse,
-                  );
-                  expect(
-                    project.xcodeProjectInfoFile.readAsStringSync(),
-                    _projectSettings(expectedSettings),
-                  );
-                  expect(plistParser.hasRemainingExpectations, isFalse);
-                },
-                overrides: <Type, Generator>{
-                  FileSystem: () => memoryFileSystem,
-                  ProcessManager: () => FakeProcessManager.any(),
-                },
-              );
+                  ],
+                );
+                _createProjectFiles(project, platform, isExampleApp: true);
+
+                final settingsBeforeMigration = <String>[..._allSectionsUnmigrated(platform)];
+                settingsBeforeMigration[_groupSectionIndex] = unmigratedGroupSection(platform);
+                project.xcodeProjectInfoFile.writeAsStringSync(
+                  _projectSettings(settingsBeforeMigration),
+                );
+
+                final settingsAsJsonBeforeMigration = <String>[
+                  ..._allSectionsUnmigratedAsJson(platform),
+                ];
+
+                final expectedSettings = <String>[
+                  ..._allSectionsMigrated(platform, includePlugin: true),
+                ];
+                expectedSettings[_groupSectionIndex] = migratedGroupSection(
+                  platform,
+                  includePlugin: true,
+                );
+                expectedSettings[_fileReferenceSectionIndex] = migratedFileReferenceSection(
+                  platform,
+                  includePlugin: true,
+                );
+                final plistParser = FakePlistParser.multiple(<String>[
+                  _plutilOutput(settingsAsJsonBeforeMigration),
+                  _plutilOutput(_allSectionsMigratedAsJson(platform, includePlugin: true)),
+                ]);
+
+                final projectMigration = SwiftPackageManagerIntegrationMigration(
+                  project,
+                  platform,
+                  BuildInfo.debug,
+                  analytics: const NoOpAnalytics(),
+                  plistParser: plistParser,
+                  toolContext: FakeToolContext(
+                    config: FakeConfig(),
+                    flutterVersion: FakeFlutterVersion(),
+                    fs: memoryFileSystem,
+                    logger: testLogger,
+                    os: FakeOperatingSystemUtils(),
+                    platform: FakePlatform(),
+                  ),
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                );
+                await projectMigration.migrate();
+                expect(testLogger.errorText, isEmpty);
+                expect(
+                  testLogger.traceText.contains('PBXGroup already migrated. Skipping...'),
+                  isFalse,
+                );
+                expect(
+                  project.xcodeProjectInfoFile.readAsStringSync(),
+                  _projectSettings(expectedSettings),
+                );
+                expect(plistParser.hasRemainingExpectations, isFalse);
+              });
             });
           });
 
           group('migrate PBXNativeTarget', () {
-            testWithoutContext('fails if missing PBXNativeTarget section', () async {
+            test('fails if missing PBXNativeTarget section', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -2976,7 +2878,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -2993,7 +2894,7 @@ void main() {
               );
             });
 
-            testWithoutContext('fails if missing Runner target in parsed settings', () async {
+            test('fails if missing Runner target in parsed settings', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -3025,7 +2926,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: fakeAnalytics,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -3052,7 +2952,7 @@ void main() {
               );
             });
 
-            testWithoutContext(
+            test(
               'fails and anonymizes names if missing CustomApp target in parsed settings',
               () async {
                 final memoryFileSystem = MemoryFileSystem();
@@ -3087,7 +2987,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: fakeAnalytics,
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -3117,7 +3016,7 @@ void main() {
               },
             );
 
-            testWithoutContext(
+            test(
               'fails if missing Runner target subsection following PBXNativeTarget begin header',
               () async {
                 final memoryFileSystem = MemoryFileSystem();
@@ -3147,7 +3046,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: const NoOpAnalytics(),
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -3165,7 +3063,7 @@ void main() {
               },
             );
 
-            testWithoutContext(
+            test(
               'fails if missing Runner target subsection before PBXNativeTarget end header',
               () async {
                 final memoryFileSystem = MemoryFileSystem();
@@ -3200,7 +3098,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: const NoOpAnalytics(),
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -3218,203 +3115,191 @@ void main() {
               },
             );
 
-            testWithoutContext(
-              'successfully added when packageProductDependencies field is missing',
-              () async {
-                final memoryFileSystem = MemoryFileSystem();
-                final testLogger = BufferLogger.test();
-                final project = FakeXcodeProject(
-                  platform: platform.name,
-                  fileSystem: memoryFileSystem,
+            test('successfully added when packageProductDependencies field is missing', () async {
+              final memoryFileSystem = MemoryFileSystem();
+              final testLogger = BufferLogger.test();
+              final project = FakeXcodeProject(
+                platform: platform.name,
+                fileSystem: memoryFileSystem,
+                logger: testLogger,
+              );
+              _createProjectFiles(project, platform);
+
+              final settingsBeforeMigration = <String>[..._allSectionsUnmigrated(platform)];
+              settingsBeforeMigration[_nativeTargetSectionIndex] = unmigratedNativeTargetSection(
+                platform,
+                missingPackageProductDependencies: true,
+              );
+              project.xcodeProjectInfoFile.writeAsStringSync(
+                _projectSettings(settingsBeforeMigration),
+              );
+              final settingsAsJsonBeforeMigration = <String>[
+                ..._allSectionsUnmigratedAsJson(platform),
+              ];
+              settingsAsJsonBeforeMigration[_nativeTargetSectionIndex] =
+                  unmigratedNativeTargetSectionAsJson(
+                    platform,
+                    missingPackageProductDependencies: true,
+                  );
+              final expectedSettings = <String>[..._allSectionsMigrated(platform)];
+              expectedSettings[_nativeTargetSectionIndex] = migratedNativeTargetSection(
+                platform,
+                missingPackageProductDependencies: true,
+              );
+
+              final plistParser = FakePlistParser.multiple(<String>[
+                _plutilOutput(settingsAsJsonBeforeMigration),
+                _plutilOutput(_allSectionsMigratedAsJson(platform)),
+              ]);
+
+              final projectMigration = SwiftPackageManagerIntegrationMigration(
+                project,
+                platform,
+                BuildInfo.debug,
+                analytics: const NoOpAnalytics(),
+                plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
                   logger: testLogger,
-                );
-                _createProjectFiles(project, platform);
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+              );
+              await projectMigration.migrate();
+              expect(testLogger.errorText, isEmpty);
+              expect(
+                testLogger.traceText.contains('PBXNativeTarget already migrated. Skipping...'),
+                isFalse,
+              );
+              expect(
+                project.xcodeProjectInfoFile.readAsStringSync(),
+                _projectSettings(expectedSettings),
+              );
+              expect(plistParser.hasRemainingExpectations, isFalse);
+            });
 
-                final settingsBeforeMigration = <String>[..._allSectionsUnmigrated(platform)];
-                settingsBeforeMigration[_nativeTargetSectionIndex] = unmigratedNativeTargetSection(
-                  platform,
-                  missingPackageProductDependencies: true,
-                );
-                project.xcodeProjectInfoFile.writeAsStringSync(
-                  _projectSettings(settingsBeforeMigration),
-                );
-                final settingsAsJsonBeforeMigration = <String>[
-                  ..._allSectionsUnmigratedAsJson(platform),
-                ];
-                settingsAsJsonBeforeMigration[_nativeTargetSectionIndex] =
-                    unmigratedNativeTargetSectionAsJson(
-                      platform,
-                      missingPackageProductDependencies: true,
-                    );
-                final expectedSettings = <String>[..._allSectionsMigrated(platform)];
-                expectedSettings[_nativeTargetSectionIndex] = migratedNativeTargetSection(
-                  platform,
-                  missingPackageProductDependencies: true,
-                );
+            test('successfully added when packageProductDependencies field is empty', () async {
+              final memoryFileSystem = MemoryFileSystem();
+              final testLogger = BufferLogger.test();
+              final project = FakeXcodeProject(
+                platform: platform.name,
+                fileSystem: memoryFileSystem,
+                logger: testLogger,
+              );
+              _createProjectFiles(project, platform);
 
-                final plistParser = FakePlistParser.multiple(<String>[
-                  _plutilOutput(settingsAsJsonBeforeMigration),
-                  _plutilOutput(_allSectionsMigratedAsJson(platform)),
-                ]);
+              final settingsBeforeMigration = <String>[..._allSectionsUnmigrated(platform)];
+              settingsBeforeMigration[_nativeTargetSectionIndex] = unmigratedNativeTargetSection(
+                platform,
+              );
+              project.xcodeProjectInfoFile.writeAsStringSync(
+                _projectSettings(settingsBeforeMigration),
+              );
+              final settingsAsJsonBeforeMigration = <String>[
+                ..._allSectionsUnmigratedAsJson(platform),
+              ];
 
-                final projectMigration = SwiftPackageManagerIntegrationMigration(
-                  project,
-                  platform,
-                  BuildInfo.debug,
-                  analytics: const NoOpAnalytics(),
-                  plistParser: plistParser,
-                  reportCrashes: true,
-                  toolContext: FakeToolContext(
-                    config: FakeConfig(),
-                    flutterVersion: FakeFlutterVersion(),
-                    fs: memoryFileSystem,
-                    logger: testLogger,
-                    os: FakeOperatingSystemUtils(),
-                    platform: FakePlatform(),
-                  ),
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                );
-                await projectMigration.migrate();
-                expect(testLogger.errorText, isEmpty);
-                expect(
-                  testLogger.traceText.contains('PBXNativeTarget already migrated. Skipping...'),
-                  isFalse,
-                );
-                expect(
-                  project.xcodeProjectInfoFile.readAsStringSync(),
-                  _projectSettings(expectedSettings),
-                );
-                expect(plistParser.hasRemainingExpectations, isFalse);
-              },
-            );
+              final plistParser = FakePlistParser.multiple(<String>[
+                _plutilOutput(settingsAsJsonBeforeMigration),
+                _plutilOutput(_allSectionsMigratedAsJson(platform)),
+              ]);
 
-            testWithoutContext(
-              'successfully added when packageProductDependencies field is empty',
-              () async {
-                final memoryFileSystem = MemoryFileSystem();
-                final testLogger = BufferLogger.test();
-                final project = FakeXcodeProject(
-                  platform: platform.name,
-                  fileSystem: memoryFileSystem,
+              final projectMigration = SwiftPackageManagerIntegrationMigration(
+                project,
+                platform,
+                BuildInfo.debug,
+                analytics: const NoOpAnalytics(),
+                plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
                   logger: testLogger,
-                );
-                _createProjectFiles(project, platform);
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+              );
+              await projectMigration.migrate();
+              expect(testLogger.errorText, isEmpty);
+              expect(
+                testLogger.traceText.contains('PBXNativeTarget already migrated. Skipping...'),
+                isFalse,
+              );
+              expect(
+                project.xcodeProjectInfoFile.readAsStringSync(),
+                _projectSettings(_allSectionsMigrated(platform)),
+              );
+              expect(plistParser.hasRemainingExpectations, isFalse);
+            });
 
-                final settingsBeforeMigration = <String>[..._allSectionsUnmigrated(platform)];
-                settingsBeforeMigration[_nativeTargetSectionIndex] = unmigratedNativeTargetSection(
-                  platform,
-                );
-                project.xcodeProjectInfoFile.writeAsStringSync(
-                  _projectSettings(settingsBeforeMigration),
-                );
-                final settingsAsJsonBeforeMigration = <String>[
-                  ..._allSectionsUnmigratedAsJson(platform),
-                ];
+            test('successfully added when packageProductDependencies field is not empty', () async {
+              final memoryFileSystem = MemoryFileSystem();
+              final testLogger = BufferLogger.test();
+              final project = FakeXcodeProject(
+                platform: platform.name,
+                fileSystem: memoryFileSystem,
+                logger: testLogger,
+              );
+              _createProjectFiles(project, platform);
 
-                final plistParser = FakePlistParser.multiple(<String>[
-                  _plutilOutput(settingsAsJsonBeforeMigration),
-                  _plutilOutput(_allSectionsMigratedAsJson(platform)),
-                ]);
+              final settingsBeforeMigration = <String>[..._allSectionsUnmigrated(platform)];
+              settingsBeforeMigration[_nativeTargetSectionIndex] = unmigratedNativeTargetSection(
+                platform,
+                withOtherDependency: true,
+              );
+              project.xcodeProjectInfoFile.writeAsStringSync(
+                _projectSettings(settingsBeforeMigration),
+              );
+              final settingsAsJsonBeforeMigration = <String>[
+                ..._allSectionsUnmigratedAsJson(platform),
+              ];
+              final expectedSettings = <String>[..._allSectionsMigrated(platform)];
+              expectedSettings[_nativeTargetSectionIndex] = migratedNativeTargetSection(
+                platform,
+                withOtherDependency: true,
+              );
 
-                final projectMigration = SwiftPackageManagerIntegrationMigration(
-                  project,
-                  platform,
-                  BuildInfo.debug,
-                  analytics: const NoOpAnalytics(),
-                  plistParser: plistParser,
-                  reportCrashes: true,
-                  toolContext: FakeToolContext(
-                    config: FakeConfig(),
-                    flutterVersion: FakeFlutterVersion(),
-                    fs: memoryFileSystem,
-                    logger: testLogger,
-                    os: FakeOperatingSystemUtils(),
-                    platform: FakePlatform(),
-                  ),
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                );
-                await projectMigration.migrate();
-                expect(testLogger.errorText, isEmpty);
-                expect(
-                  testLogger.traceText.contains('PBXNativeTarget already migrated. Skipping...'),
-                  isFalse,
-                );
-                expect(
-                  project.xcodeProjectInfoFile.readAsStringSync(),
-                  _projectSettings(_allSectionsMigrated(platform)),
-                );
-                expect(plistParser.hasRemainingExpectations, isFalse);
-              },
-            );
+              final plistParser = FakePlistParser.multiple(<String>[
+                _plutilOutput(settingsAsJsonBeforeMigration),
+                _plutilOutput(_allSectionsMigratedAsJson(platform)),
+              ]);
 
-            testWithoutContext(
-              'successfully added when packageProductDependencies field is not empty',
-              () async {
-                final memoryFileSystem = MemoryFileSystem();
-                final testLogger = BufferLogger.test();
-                final project = FakeXcodeProject(
-                  platform: platform.name,
-                  fileSystem: memoryFileSystem,
+              final projectMigration = SwiftPackageManagerIntegrationMigration(
+                project,
+                platform,
+                BuildInfo.debug,
+                analytics: const NoOpAnalytics(),
+                plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
                   logger: testLogger,
-                );
-                _createProjectFiles(project, platform);
-
-                final settingsBeforeMigration = <String>[..._allSectionsUnmigrated(platform)];
-                settingsBeforeMigration[_nativeTargetSectionIndex] = unmigratedNativeTargetSection(
-                  platform,
-                  withOtherDependency: true,
-                );
-                project.xcodeProjectInfoFile.writeAsStringSync(
-                  _projectSettings(settingsBeforeMigration),
-                );
-                final settingsAsJsonBeforeMigration = <String>[
-                  ..._allSectionsUnmigratedAsJson(platform),
-                ];
-                final expectedSettings = <String>[..._allSectionsMigrated(platform)];
-                expectedSettings[_nativeTargetSectionIndex] = migratedNativeTargetSection(
-                  platform,
-                  withOtherDependency: true,
-                );
-
-                final plistParser = FakePlistParser.multiple(<String>[
-                  _plutilOutput(settingsAsJsonBeforeMigration),
-                  _plutilOutput(_allSectionsMigratedAsJson(platform)),
-                ]);
-
-                final projectMigration = SwiftPackageManagerIntegrationMigration(
-                  project,
-                  platform,
-                  BuildInfo.debug,
-                  analytics: const NoOpAnalytics(),
-                  plistParser: plistParser,
-                  reportCrashes: true,
-                  toolContext: FakeToolContext(
-                    config: FakeConfig(),
-                    flutterVersion: FakeFlutterVersion(),
-                    fs: memoryFileSystem,
-                    logger: testLogger,
-                    os: FakeOperatingSystemUtils(),
-                    platform: FakePlatform(),
-                  ),
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                );
-                await projectMigration.migrate();
-                expect(testLogger.errorText, isEmpty);
-                expect(
-                  testLogger.traceText.contains('PBXNativeTarget already migrated. Skipping...'),
-                  isFalse,
-                );
-                expect(
-                  project.xcodeProjectInfoFile.readAsStringSync(),
-                  _projectSettings(expectedSettings),
-                );
-                expect(plistParser.hasRemainingExpectations, isFalse);
-              },
-            );
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+              );
+              await projectMigration.migrate();
+              expect(testLogger.errorText, isEmpty);
+              expect(
+                testLogger.traceText.contains('PBXNativeTarget already migrated. Skipping...'),
+                isFalse,
+              );
+              expect(
+                project.xcodeProjectInfoFile.readAsStringSync(),
+                _projectSettings(expectedSettings),
+              );
+              expect(plistParser.hasRemainingExpectations, isFalse);
+            });
           });
 
           group('migrate PBXProject', () {
-            testWithoutContext('fails if missing PBXProject section', () async {
+            test('fails if missing PBXProject section', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -3440,7 +3325,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -3457,7 +3341,7 @@ void main() {
               );
             });
 
-            testWithoutContext(
+            test(
               'fails if missing Runner project subsection following PBXProject begin header',
               () async {
                 final memoryFileSystem = MemoryFileSystem();
@@ -3489,7 +3373,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: const NoOpAnalytics(),
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -3507,7 +3390,7 @@ void main() {
               },
             );
 
-            testWithoutContext(
+            test(
               'fails if missing Runner project subsection before PBXProject end header',
               () async {
                 final memoryFileSystem = MemoryFileSystem();
@@ -3544,7 +3427,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: const NoOpAnalytics(),
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -3562,7 +3444,7 @@ void main() {
               },
             );
 
-            testWithoutContext('fails if missing Runner project in parsed settings', () async {
+            test('fails if missing Runner project in parsed settings', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -3592,7 +3474,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: fakeAnalytics,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -3619,7 +3500,7 @@ void main() {
               );
             });
 
-            testWithoutContext(
+            test(
               'fails and anonymizes names if missing CustomApp project in parsed settings',
               () async {
                 final memoryFileSystem = MemoryFileSystem();
@@ -3652,7 +3533,6 @@ void main() {
                   BuildInfo.debug,
                   analytics: fakeAnalytics,
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                  reportCrashes: true,
                   toolContext: FakeToolContext(
                     config: FakeConfig(),
                     flutterVersion: FakeFlutterVersion(),
@@ -3680,200 +3560,190 @@ void main() {
               },
             );
 
-            testWithoutContext(
-              'successfully added when packageReferences field is missing',
-              () async {
-                final memoryFileSystem = MemoryFileSystem();
-                final testLogger = BufferLogger.test();
-                final project = FakeXcodeProject(
-                  platform: platform.name,
-                  fileSystem: memoryFileSystem,
+            test('successfully added when packageReferences field is missing', () async {
+              final memoryFileSystem = MemoryFileSystem();
+              final testLogger = BufferLogger.test();
+              final project = FakeXcodeProject(
+                platform: platform.name,
+                fileSystem: memoryFileSystem,
+                logger: testLogger,
+              );
+              _createProjectFiles(project, platform);
+
+              final settingsBeforeMigration = <String>[..._allSectionsUnmigrated(platform)];
+              settingsBeforeMigration[_projectSectionIndex] = unmigratedProjectSection(
+                platform,
+                missingPackageReferences: true,
+              );
+              project.xcodeProjectInfoFile.writeAsStringSync(
+                _projectSettings(settingsBeforeMigration),
+              );
+
+              final settingsAsJsonBeforeMigration = <String>[
+                ..._allSectionsUnmigratedAsJson(platform),
+              ];
+              settingsAsJsonBeforeMigration[_projectSectionIndex] = unmigratedProjectSectionAsJson(
+                platform,
+                missingPackageReferences: true,
+              );
+
+              final expectedSettings = <String>[..._allSectionsMigrated(platform)];
+              expectedSettings[_projectSectionIndex] = migratedProjectSection(
+                platform,
+                missingPackageReferences: true,
+              );
+
+              final plistParser = FakePlistParser.multiple(<String>[
+                _plutilOutput(settingsAsJsonBeforeMigration),
+                _plutilOutput(_allSectionsMigratedAsJson(platform)),
+              ]);
+
+              final projectMigration = SwiftPackageManagerIntegrationMigration(
+                project,
+                platform,
+                BuildInfo.debug,
+                analytics: const NoOpAnalytics(),
+                plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
                   logger: testLogger,
-                );
-                _createProjectFiles(project, platform);
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+              );
+              await projectMigration.migrate();
+              expect(testLogger.errorText, isEmpty);
+              expect(
+                testLogger.traceText.contains('PBXProject already migrated. Skipping...'),
+                isFalse,
+              );
+              expect(
+                project.xcodeProjectInfoFile.readAsStringSync(),
+                _projectSettings(expectedSettings),
+              );
+              expect(plistParser.hasRemainingExpectations, isFalse);
+            });
 
-                final settingsBeforeMigration = <String>[..._allSectionsUnmigrated(platform)];
-                settingsBeforeMigration[_projectSectionIndex] = unmigratedProjectSection(
-                  platform,
-                  missingPackageReferences: true,
-                );
-                project.xcodeProjectInfoFile.writeAsStringSync(
-                  _projectSettings(settingsBeforeMigration),
-                );
+            test('successfully added when packageReferences field is empty', () async {
+              final memoryFileSystem = MemoryFileSystem();
+              final testLogger = BufferLogger.test();
+              final project = FakeXcodeProject(
+                platform: platform.name,
+                fileSystem: memoryFileSystem,
+                logger: testLogger,
+              );
+              _createProjectFiles(project, platform);
 
-                final settingsAsJsonBeforeMigration = <String>[
-                  ..._allSectionsUnmigratedAsJson(platform),
-                ];
-                settingsAsJsonBeforeMigration[_projectSectionIndex] =
-                    unmigratedProjectSectionAsJson(platform, missingPackageReferences: true);
+              final settingsBeforeMigration = <String>[..._allSectionsUnmigrated(platform)];
+              settingsBeforeMigration[_projectSectionIndex] = unmigratedProjectSection(platform);
+              project.xcodeProjectInfoFile.writeAsStringSync(
+                _projectSettings(settingsBeforeMigration),
+              );
+              final settingsAsJsonBeforeMigration = <String>[
+                ..._allSectionsUnmigratedAsJson(platform),
+              ];
 
-                final expectedSettings = <String>[..._allSectionsMigrated(platform)];
-                expectedSettings[_projectSectionIndex] = migratedProjectSection(
-                  platform,
-                  missingPackageReferences: true,
-                );
+              final plistParser = FakePlistParser.multiple(<String>[
+                _plutilOutput(settingsAsJsonBeforeMigration),
+                _plutilOutput(_allSectionsMigratedAsJson(platform)),
+              ]);
 
-                final plistParser = FakePlistParser.multiple(<String>[
-                  _plutilOutput(settingsAsJsonBeforeMigration),
-                  _plutilOutput(_allSectionsMigratedAsJson(platform)),
-                ]);
-
-                final projectMigration = SwiftPackageManagerIntegrationMigration(
-                  project,
-                  platform,
-                  BuildInfo.debug,
-                  analytics: const NoOpAnalytics(),
-                  plistParser: plistParser,
-                  reportCrashes: true,
-                  toolContext: FakeToolContext(
-                    config: FakeConfig(),
-                    flutterVersion: FakeFlutterVersion(),
-                    fs: memoryFileSystem,
-                    logger: testLogger,
-                    os: FakeOperatingSystemUtils(),
-                    platform: FakePlatform(),
-                  ),
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                );
-                await projectMigration.migrate();
-                expect(testLogger.errorText, isEmpty);
-                expect(
-                  testLogger.traceText.contains('PBXProject already migrated. Skipping...'),
-                  isFalse,
-                );
-                expect(
-                  project.xcodeProjectInfoFile.readAsStringSync(),
-                  _projectSettings(expectedSettings),
-                );
-                expect(plistParser.hasRemainingExpectations, isFalse);
-              },
-            );
-
-            testWithoutContext(
-              'successfully added when packageReferences field is empty',
-              () async {
-                final memoryFileSystem = MemoryFileSystem();
-                final testLogger = BufferLogger.test();
-                final project = FakeXcodeProject(
-                  platform: platform.name,
-                  fileSystem: memoryFileSystem,
+              final projectMigration = SwiftPackageManagerIntegrationMigration(
+                project,
+                platform,
+                BuildInfo.debug,
+                analytics: const NoOpAnalytics(),
+                plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
                   logger: testLogger,
-                );
-                _createProjectFiles(project, platform);
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+              );
+              await projectMigration.migrate();
+              expect(testLogger.errorText, isEmpty);
+              expect(
+                testLogger.traceText.contains('PBXProject already migrated. Skipping...'),
+                isFalse,
+              );
+              expect(
+                project.xcodeProjectInfoFile.readAsStringSync(),
+                _projectSettings(_allSectionsMigrated(platform)),
+              );
+              expect(plistParser.hasRemainingExpectations, isFalse);
+            });
 
-                final settingsBeforeMigration = <String>[..._allSectionsUnmigrated(platform)];
-                settingsBeforeMigration[_projectSectionIndex] = unmigratedProjectSection(platform);
-                project.xcodeProjectInfoFile.writeAsStringSync(
-                  _projectSettings(settingsBeforeMigration),
-                );
-                final settingsAsJsonBeforeMigration = <String>[
-                  ..._allSectionsUnmigratedAsJson(platform),
-                ];
+            test('successfully added when packageReferences field is not empty', () async {
+              final memoryFileSystem = MemoryFileSystem();
+              final testLogger = BufferLogger.test();
+              final project = FakeXcodeProject(
+                platform: platform.name,
+                fileSystem: memoryFileSystem,
+                logger: testLogger,
+              );
+              _createProjectFiles(project, platform);
 
-                final plistParser = FakePlistParser.multiple(<String>[
-                  _plutilOutput(settingsAsJsonBeforeMigration),
-                  _plutilOutput(_allSectionsMigratedAsJson(platform)),
-                ]);
+              final settingsBeforeMigration = <String>[..._allSectionsUnmigrated(platform)];
+              settingsBeforeMigration[_projectSectionIndex] = unmigratedProjectSection(
+                platform,
+                withOtherReference: true,
+              );
+              project.xcodeProjectInfoFile.writeAsStringSync(
+                _projectSettings(settingsBeforeMigration),
+              );
+              final settingsAsJsonBeforeMigration = <String>[
+                ..._allSectionsUnmigratedAsJson(platform),
+              ];
+              final expectedSettings = <String>[..._allSectionsMigrated(platform)];
+              expectedSettings[_projectSectionIndex] = migratedProjectSection(
+                platform,
+                withOtherReference: true,
+              );
 
-                final projectMigration = SwiftPackageManagerIntegrationMigration(
-                  project,
-                  platform,
-                  BuildInfo.debug,
-                  analytics: const NoOpAnalytics(),
-                  plistParser: plistParser,
-                  reportCrashes: true,
-                  toolContext: FakeToolContext(
-                    config: FakeConfig(),
-                    flutterVersion: FakeFlutterVersion(),
-                    fs: memoryFileSystem,
-                    logger: testLogger,
-                    os: FakeOperatingSystemUtils(),
-                    platform: FakePlatform(),
-                  ),
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                );
-                await projectMigration.migrate();
-                expect(testLogger.errorText, isEmpty);
-                expect(
-                  testLogger.traceText.contains('PBXProject already migrated. Skipping...'),
-                  isFalse,
-                );
-                expect(
-                  project.xcodeProjectInfoFile.readAsStringSync(),
-                  _projectSettings(_allSectionsMigrated(platform)),
-                );
-                expect(plistParser.hasRemainingExpectations, isFalse);
-              },
-            );
+              final plistParser = FakePlistParser.multiple(<String>[
+                _plutilOutput(settingsAsJsonBeforeMigration),
+                _plutilOutput(_allSectionsMigratedAsJson(platform)),
+              ]);
 
-            testWithoutContext(
-              'successfully added when packageReferences field is not empty',
-              () async {
-                final memoryFileSystem = MemoryFileSystem();
-                final testLogger = BufferLogger.test();
-                final project = FakeXcodeProject(
-                  platform: platform.name,
-                  fileSystem: memoryFileSystem,
+              final projectMigration = SwiftPackageManagerIntegrationMigration(
+                project,
+                platform,
+                BuildInfo.debug,
+                analytics: const NoOpAnalytics(),
+                plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
+                  fs: memoryFileSystem,
                   logger: testLogger,
-                );
-                _createProjectFiles(project, platform);
-
-                final settingsBeforeMigration = <String>[..._allSectionsUnmigrated(platform)];
-                settingsBeforeMigration[_projectSectionIndex] = unmigratedProjectSection(
-                  platform,
-                  withOtherReference: true,
-                );
-                project.xcodeProjectInfoFile.writeAsStringSync(
-                  _projectSettings(settingsBeforeMigration),
-                );
-                final settingsAsJsonBeforeMigration = <String>[
-                  ..._allSectionsUnmigratedAsJson(platform),
-                ];
-                final expectedSettings = <String>[..._allSectionsMigrated(platform)];
-                expectedSettings[_projectSectionIndex] = migratedProjectSection(
-                  platform,
-                  withOtherReference: true,
-                );
-
-                final plistParser = FakePlistParser.multiple(<String>[
-                  _plutilOutput(settingsAsJsonBeforeMigration),
-                  _plutilOutput(_allSectionsMigratedAsJson(platform)),
-                ]);
-
-                final projectMigration = SwiftPackageManagerIntegrationMigration(
-                  project,
-                  platform,
-                  BuildInfo.debug,
-                  analytics: const NoOpAnalytics(),
-                  plistParser: plistParser,
-                  reportCrashes: true,
-                  toolContext: FakeToolContext(
-                    config: FakeConfig(),
-                    flutterVersion: FakeFlutterVersion(),
-                    fs: memoryFileSystem,
-                    logger: testLogger,
-                    os: FakeOperatingSystemUtils(),
-                    platform: FakePlatform(),
-                  ),
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                );
-                await projectMigration.migrate();
-                expect(testLogger.errorText, isEmpty);
-                expect(
-                  testLogger.traceText.contains('PBXProject already migrated. Skipping...'),
-                  isFalse,
-                );
-                expect(
-                  project.xcodeProjectInfoFile.readAsStringSync(),
-                  _projectSettings(expectedSettings),
-                );
-                expect(plistParser.hasRemainingExpectations, isFalse);
-              },
-            );
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+              );
+              await projectMigration.migrate();
+              expect(testLogger.errorText, isEmpty);
+              expect(
+                testLogger.traceText.contains('PBXProject already migrated. Skipping...'),
+                isFalse,
+              );
+              expect(
+                project.xcodeProjectInfoFile.readAsStringSync(),
+                _projectSettings(expectedSettings),
+              );
+              expect(plistParser.hasRemainingExpectations, isFalse);
+            });
           });
 
           group('migrate XCLocalSwiftPackageReference', () {
-            testWithoutContext('fails if unable to find section to append it after', () async {
+            test('fails if unable to find section to append it after', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -3894,7 +3764,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -3911,7 +3780,7 @@ void main() {
               );
             });
 
-            testWithoutContext('successfully added when section is missing', () async {
+            test('successfully added when section is missing', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -3944,7 +3813,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -3970,7 +3838,7 @@ void main() {
               expect(plistParser.hasRemainingExpectations, isFalse);
             });
 
-            testWithoutContext('successfully added when section is empty', () async {
+            test('successfully added when section is empty', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -4001,7 +3869,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -4027,7 +3894,7 @@ void main() {
               expect(plistParser.hasRemainingExpectations, isFalse);
             });
 
-            testWithoutContext('successfully added when section is not empty', () async {
+            test('successfully added when section is not empty', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -4061,7 +3928,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -4089,7 +3955,7 @@ void main() {
           });
 
           group('migrate XCSwiftPackageProductDependency', () {
-            testWithoutContext('fails if unable to find section to append it after', () async {
+            test('fails if unable to find section to append it after', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -4110,7 +3976,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -4127,7 +3992,7 @@ void main() {
               );
             });
 
-            testWithoutContext('successfully added when section is missing', () async {
+            test('successfully added when section is missing', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -4157,7 +4022,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -4183,7 +4047,7 @@ void main() {
               expect(plistParser.hasRemainingExpectations, isFalse);
             });
 
-            testWithoutContext('successfully added when section is empty', () async {
+            test('successfully added when section is empty', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -4214,7 +4078,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -4240,7 +4103,7 @@ void main() {
               expect(plistParser.hasRemainingExpectations, isFalse);
             });
 
-            testWithoutContext('successfully added when section is not empty', () async {
+            test('successfully added when section is not empty', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
               final project = FakeXcodeProject(
@@ -4274,7 +4137,6 @@ void main() {
                 BuildInfo.debug,
                 analytics: const NoOpAnalytics(),
                 plistParser: plistParser,
-                reportCrashes: true,
                 toolContext: FakeToolContext(
                   config: FakeConfig(),
                   flutterVersion: FakeFlutterVersion(),
@@ -4301,7 +4163,7 @@ void main() {
             });
           });
 
-          testWithoutContext('throw if settings not updated correctly', () async {
+          test('throw if settings not updated correctly', () async {
             final memoryFileSystem = MemoryFileSystem();
             final testLogger = BufferLogger.test();
             final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -4329,7 +4191,6 @@ void main() {
               BuildInfo.debug,
               analytics: fakeAnalytics,
               plistParser: plistParser,
-              reportCrashes: true,
               toolContext: FakeToolContext(
                 config: FakeConfig(),
                 flutterVersion: FakeFlutterVersion(),
@@ -4384,7 +4245,7 @@ void main() {
             );
           });
 
-          testWithoutContext('migrates FlutterGeneratedPluginSwiftPackage file and group when already partially migrated', () async {
+          test('migrates FlutterGeneratedPluginSwiftPackage file and group when already partially migrated', () async {
             final memoryFileSystem = MemoryFileSystem();
             final testLogger = BufferLogger.test();
             final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -4422,7 +4283,6 @@ void main() {
               BuildInfo.debug,
               analytics: fakeAnalytics,
               plistParser: plistParser,
-              reportCrashes: true,
               toolContext: FakeToolContext(
                 config: FakeConfig(),
                 flutterVersion: FakeFlutterVersion(),
@@ -4460,189 +4320,174 @@ void main() {
               memoryFileSystem = MemoryFileSystem.test();
             });
 
-            testUsingContext(
-              'successfully added',
-              () async {
-                final testLogger = BufferLogger.test();
-                final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+            test('successfully added', () async {
+              final testLogger = BufferLogger.test();
+              final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+                fs: memoryFileSystem,
+                fakeFlutterVersion: FakeFlutterVersion(),
+              );
+              final project = FakeXcodeProject(
+                platform: platform.name,
+                fileSystem: memoryFileSystem,
+                logger: testLogger,
+                projectDir: memoryFileSystem.currentDirectory
+                    .childDirectory(pluginName)
+                    .childDirectory('example/${platform.name}'),
+                plugins: [
+                  FakePlugin(
+                    name: pluginName,
+                    swiftPackagePath: '/$pluginName/${platform.name}/$pluginName',
+                  ),
+                ],
+              );
+              _createProjectFiles(project, platform, isExampleApp: true);
+
+              final settingsBeforeMigration = <String>[..._allSectionsMigrated(platform)];
+              project.xcodeProjectInfoFile.writeAsStringSync(
+                _projectSettings(settingsBeforeMigration),
+              );
+              final settingsAsJsonBeforeMigration = <String>[
+                ..._allSectionsMigratedAsJson(platform),
+              ];
+
+              final expectedSettings = <String>[
+                ..._allSectionsMigrated(platform, includePlugin: true),
+              ];
+              final plistParser = FakePlistParser.multiple(<String>[
+                _plutilOutput(settingsAsJsonBeforeMigration),
+                _plutilOutput(_allSectionsMigratedAsJson(platform, includePlugin: true)),
+              ]);
+
+              final projectMigration = SwiftPackageManagerIntegrationMigration(
+                project,
+                platform,
+                BuildInfo.debug,
+                analytics: fakeAnalytics,
+                plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
                   fs: memoryFileSystem,
-                  fakeFlutterVersion: FakeFlutterVersion(),
-                );
-                final project = FakeXcodeProject(
-                  platform: platform.name,
-                  fileSystem: memoryFileSystem,
                   logger: testLogger,
-                  projectDir: memoryFileSystem.currentDirectory
-                      .childDirectory(pluginName)
-                      .childDirectory('example/${platform.name}'),
-                  plugins: [
-                    FakePlugin(
-                      name: pluginName,
-                      swiftPackagePath: '/$pluginName/${platform.name}/$pluginName',
-                    ),
-                  ],
-                );
-                _createProjectFiles(project, platform, isExampleApp: true);
-
-                final settingsBeforeMigration = <String>[..._allSectionsMigrated(platform)];
-                project.xcodeProjectInfoFile.writeAsStringSync(
-                  _projectSettings(settingsBeforeMigration),
-                );
-                final settingsAsJsonBeforeMigration = <String>[
-                  ..._allSectionsMigratedAsJson(platform),
-                ];
-
-                final expectedSettings = <String>[
-                  ..._allSectionsMigrated(platform, includePlugin: true),
-                ];
-                final plistParser = FakePlistParser.multiple(<String>[
-                  _plutilOutput(settingsAsJsonBeforeMigration),
-                  _plutilOutput(_allSectionsMigratedAsJson(platform, includePlugin: true)),
-                ]);
-
-                final projectMigration = SwiftPackageManagerIntegrationMigration(
-                  project,
-                  platform,
-                  BuildInfo.debug,
-                  analytics: fakeAnalytics,
-                  plistParser: plistParser,
-                  reportCrashes: true,
-                  toolContext: FakeToolContext(
-                    config: FakeConfig(),
-                    flutterVersion: FakeFlutterVersion(),
-                    fs: memoryFileSystem,
-                    logger: testLogger,
-                    os: FakeOperatingSystemUtils(),
-                    platform: FakePlatform(),
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+              );
+              await projectMigration.migrate();
+              expect(
+                testLogger.traceText,
+                'Runner.xcscheme already migrated. Skipping...\n'
+                'PBXFileReference for 78E0A7A72DC9AD7400C4905E already migrated. Skipping...\n'
+                'PBXGroup for 78E0A7A72DC9AD7400C4905E already migrated. Skipping...\n'
+                'Updating project settings...\n'
+                'Validating project settings...\n',
+              );
+              expect(testLogger.errorText, isEmpty);
+              expect(
+                project.xcodeProjectInfoFile.readAsStringSync(),
+                _projectSettings(expectedSettings),
+              );
+              expect(plistParser.hasRemainingExpectations, isFalse);
+              expect(
+                fakeAnalytics.sentEvents,
+                contains(
+                  Event.appleUsageEvent(
+                    workflow: 'swiftpm-migration-success',
+                    parameter: 'optional',
                   ),
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                );
-                await projectMigration.migrate();
-                expect(
-                  testLogger.traceText,
-                  'Runner.xcscheme already migrated. Skipping...\n'
-                  'PBXFileReference for 78E0A7A72DC9AD7400C4905E already migrated. Skipping...\n'
-                  'PBXGroup for 78E0A7A72DC9AD7400C4905E already migrated. Skipping...\n'
-                  'Updating project settings...\n'
-                  'Validating project settings...\n',
-                );
-                expect(testLogger.errorText, isEmpty);
-                expect(
-                  project.xcodeProjectInfoFile.readAsStringSync(),
-                  _projectSettings(expectedSettings),
-                );
-                expect(plistParser.hasRemainingExpectations, isFalse);
-                expect(
-                  fakeAnalytics.sentEvents,
-                  contains(
-                    Event.appleUsageEvent(
-                      workflow: 'swiftpm-migration-success',
-                      parameter: 'optional',
-                    ),
-                  ),
-                );
-              },
-              overrides: <Type, Generator>{
-                FileSystem: () => memoryFileSystem,
-                ProcessManager: () => FakeProcessManager.any(),
-              },
-            );
+                ),
+              );
+            });
 
-            testUsingContext(
-              'failure does not throw',
-              () async {
-                final testLogger = BufferLogger.test();
-                final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+            test('failure does not throw', () async {
+              final testLogger = BufferLogger.test();
+              final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+                fs: memoryFileSystem,
+                fakeFlutterVersion: FakeFlutterVersion(),
+              );
+              final project = FakeXcodeProject(
+                platform: platform.name,
+                fileSystem: memoryFileSystem,
+                logger: testLogger,
+                projectDir: memoryFileSystem.currentDirectory
+                    .childDirectory(pluginName)
+                    .childDirectory('example/${platform.name}'),
+                plugins: [
+                  FakePlugin(
+                    name: pluginName,
+                    swiftPackagePath: '/$pluginName/${platform.name}/$pluginName',
+                  ),
+                ],
+              );
+              _createProjectFiles(project, platform, isExampleApp: true);
+
+              final settingsBeforeMigration = <String>[..._allSectionsMigrated(platform)];
+              project.xcodeProjectInfoFile.writeAsStringSync(
+                _projectSettings(settingsBeforeMigration),
+              );
+              final settingsAsJsonBeforeMigration = <String>[
+                ..._allSectionsMigratedAsJson(platform),
+              ];
+
+              final plistParser = FakePlistParser.multiple(<String>[
+                _plutilOutput(settingsAsJsonBeforeMigration),
+              ]);
+
+              final projectMigration = SwiftPackageManagerIntegrationMigration(
+                project,
+                platform,
+                BuildInfo.debug,
+                analytics: fakeAnalytics,
+                plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  flutterVersion: FakeFlutterVersion(),
                   fs: memoryFileSystem,
-                  fakeFlutterVersion: FakeFlutterVersion(),
-                );
-                final project = FakeXcodeProject(
-                  platform: platform.name,
-                  fileSystem: memoryFileSystem,
                   logger: testLogger,
-                  projectDir: memoryFileSystem.currentDirectory
-                      .childDirectory(pluginName)
-                      .childDirectory('example/${platform.name}'),
-                  plugins: [
-                    FakePlugin(
-                      name: pluginName,
-                      swiftPackagePath: '/$pluginName/${platform.name}/$pluginName',
-                    ),
-                  ],
-                );
-                _createProjectFiles(project, platform, isExampleApp: true);
-
-                final settingsBeforeMigration = <String>[..._allSectionsMigrated(platform)];
-                project.xcodeProjectInfoFile.writeAsStringSync(
-                  _projectSettings(settingsBeforeMigration),
-                );
-                final settingsAsJsonBeforeMigration = <String>[
-                  ..._allSectionsMigratedAsJson(platform),
-                ];
-
-                final plistParser = FakePlistParser.multiple(<String>[
-                  _plutilOutput(settingsAsJsonBeforeMigration),
-                ]);
-
-                final projectMigration = SwiftPackageManagerIntegrationMigration(
-                  project,
-                  platform,
-                  BuildInfo.debug,
-                  analytics: fakeAnalytics,
-                  plistParser: plistParser,
-                  reportCrashes: true,
-                  toolContext: FakeToolContext(
-                    config: FakeConfig(),
-                    flutterVersion: FakeFlutterVersion(),
-                    fs: memoryFileSystem,
-                    logger: testLogger,
-                    os: FakeOperatingSystemUtils(),
-                    platform: FakePlatform(),
+                  os: FakeOperatingSystemUtils(),
+                  platform: FakePlatform(),
+                ),
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+              );
+              await projectMigration.migrate();
+              expect(testLogger.errorText, isEmpty);
+              expect(
+                testLogger.traceText,
+                contains(
+                  "An error occurred when adding the plugin's Swift package to the Xcode project",
+                ),
+              );
+              expect(
+                project.xcodeProjectInfoFile.readAsStringSync(),
+                _projectSettings(settingsBeforeMigration),
+              );
+              expect(plistParser.hasRemainingExpectations, isFalse);
+              expect(
+                fakeAnalytics.sentEvents,
+                contains(
+                  Event.appleUsageEvent(
+                    workflow: 'swiftpm-migration-failure',
+                    parameter: 'optional',
+                    result: 'Failed to parse project settings.',
                   ),
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                );
-                await projectMigration.migrate();
-                expect(testLogger.errorText, isEmpty);
-                expect(
-                  testLogger.traceText,
-                  contains(
-                    "An error occurred when adding the plugin's Swift package to the Xcode project",
-                  ),
-                );
-                expect(
-                  project.xcodeProjectInfoFile.readAsStringSync(),
-                  _projectSettings(settingsBeforeMigration),
-                );
-                expect(plistParser.hasRemainingExpectations, isFalse);
-                expect(
-                  fakeAnalytics.sentEvents,
-                  contains(
-                    Event.appleUsageEvent(
-                      workflow: 'swiftpm-migration-failure',
-                      parameter: 'optional',
-                      result: 'Failed to parse project settings.',
-                    ),
-                  ),
-                );
-              },
-              overrides: <Type, Generator>{
-                FileSystem: () => memoryFileSystem,
-                ProcessManager: () => FakeProcessManager.any(),
-              },
-            );
+                ),
+              );
+            });
           });
         });
       }
     });
 
     group('validate project settings', () {
-      testWithoutContext('throw if settings fail to compile', () async {
+      test('throw if settings fail to compile', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
         final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
           fs: memoryFileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
         );
+        final crashReportSender = FakeCrashReportSender();
         const FlutterDarwinPlatform platform = FlutterDarwinPlatform.ios;
         final project = FakeXcodeProject(
           platform: platform.name,
@@ -4664,8 +4509,8 @@ void main() {
           platform,
           BuildInfo.debug,
           analytics: fakeAnalytics,
+          crashReportSenderFactory: () => crashReportSender,
           plistParser: plistParser,
-          reportCrashes: true,
           toolContext: FakeToolContext(
             config: FakeConfig(),
             flutterVersion: FakeFlutterVersion(),
@@ -4690,16 +4535,29 @@ void main() {
             ),
           ),
         );
-        expect(testLogger.traceText, contains('Sending crash report to Google.'));
+        expect(crashReportSender.sentReports, hasLength(1));
+        final SentCrashReport report = crashReportSender.sentReports.single;
+        expect(report.command, 'swiftpm-migration');
+        expect(
+          report.error,
+          isA<ToolExit>().having(
+            (ToolExit e) => e.message,
+            'message',
+            'Unable to get Xcode project information',
+          ),
+        );
+        expect(report.flutterVersion, 'master/11111111111111111111');
+        expect(report.typeId, 'XcodeBuildError');
       });
 
-      testWithoutContext('throw if settings fail to compile due to package dependencies', () async {
+      test('throw if settings fail to compile due to package dependencies', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
         final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
           fs: memoryFileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
         );
+        final crashReportSender = FakeCrashReportSender();
         const FlutterDarwinPlatform platform = FlutterDarwinPlatform.ios;
         final project = FakeXcodeProject(
           platform: platform.name,
@@ -4721,8 +4579,8 @@ void main() {
           platform,
           BuildInfo.debug,
           analytics: fakeAnalytics,
+          crashReportSenderFactory: () => crashReportSender,
           plistParser: plistParser,
-          reportCrashes: true,
           toolContext: FakeToolContext(
             config: FakeConfig(),
             flutterVersion: FakeFlutterVersion(),
@@ -4749,10 +4607,22 @@ void main() {
             ),
           ),
         );
-        expect(testLogger.traceText, contains('Sending crash report to Google.'));
+        expect(crashReportSender.sentReports, hasLength(1));
+        final SentCrashReport report = crashReportSender.sentReports.single;
+        expect(report.command, 'swiftpm-migration');
+        expect(
+          report.error,
+          isA<ToolExit>().having(
+            (ToolExit e) => e.message,
+            'message',
+            'Could not resolve package dependencies: network error',
+          ),
+        );
+        expect(report.flutterVersion, 'master/11111111111111111111');
+        expect(report.typeId, 'XcodeBuildError');
       });
 
-      testWithoutContext('does not send crash report if reportCrashes is false', () async {
+      test('does not send crash report if crashReportSenderFactory is null', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
         final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -4781,7 +4651,6 @@ void main() {
           BuildInfo.debug,
           analytics: fakeAnalytics,
           plistParser: plistParser,
-          reportCrashes: false,
           toolContext: FakeToolContext(
             config: FakeConfig(),
             flutterVersion: FakeFlutterVersion(),
@@ -4809,7 +4678,55 @@ void main() {
         expect(testLogger.traceText, isNot(contains('Sending crash report to Google.')));
       });
 
-      testWithoutContext('restore project settings from backup on failure', () async {
+      test('does not invoke crashReportSenderFactory if settings compile', () async {
+        final memoryFileSystem = MemoryFileSystem();
+        final testLogger = BufferLogger.test();
+        final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+          fs: memoryFileSystem,
+          fakeFlutterVersion: FakeFlutterVersion(),
+        );
+        const FlutterDarwinPlatform platform = FlutterDarwinPlatform.ios;
+        final project = FakeXcodeProject(
+          platform: platform.name,
+          fileSystem: memoryFileSystem,
+          logger: testLogger,
+        );
+        _createProjectFiles(project, platform);
+        project.xcodeProjectInfoFile.writeAsStringSync(
+          _projectSettings(_allSectionsUnmigrated(platform)),
+        );
+
+        final plistParser = FakePlistParser.multiple(<String>[
+          _plutilOutput(_allSectionsUnmigratedAsJson(platform)),
+          _plutilOutput(_allSectionsMigratedAsJson(platform)),
+        ]);
+
+        final projectMigration = SwiftPackageManagerIntegrationMigration(
+          project,
+          platform,
+          BuildInfo.debug,
+          analytics: fakeAnalytics,
+          crashReportSenderFactory: () =>
+              fail('crashReportSenderFactory should not be invoked when settings compile'),
+          plistParser: plistParser,
+          toolContext: FakeToolContext(
+            config: FakeConfig(),
+            flutterVersion: FakeFlutterVersion(),
+            fs: memoryFileSystem,
+            logger: testLogger,
+            os: FakeOperatingSystemUtils(),
+            platform: FakePlatform(),
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        );
+        await projectMigration.migrate();
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(Event.appleUsageEvent(workflow: 'swiftpm-migration-success', parameter: 'full')),
+        );
+      });
+
+      test('restore project settings from backup on failure', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
         const FlutterDarwinPlatform platform = FlutterDarwinPlatform.ios;
@@ -6053,7 +5970,6 @@ class FakeSwiftPackageManagerIntegrationMigration extends SwiftPackageManagerInt
     super.buildInfo, {
     super.analytics = const NoOpAnalytics(),
     required super.plistParser,
-    super.reportCrashes = true,
     required super.toolContext,
     this.validateBackup = false,
     required super.xcodeProjectInterpreter,
@@ -6101,4 +6017,26 @@ class FakePlugin extends Fake implements Plugin {
 class FakeConfig extends Fake implements Config {
   @override
   Object? getValue(String key) => null;
+}
+
+typedef SentCrashReport = ({String command, Object error, String flutterVersion, String? typeId});
+
+class FakeCrashReportSender extends Fake implements CrashReportSender {
+  final sentReports = <SentCrashReport>[];
+
+  @override
+  Future<void> sendReport({
+    required Object error,
+    required StackTrace stackTrace,
+    required String Function() getFlutterVersion,
+    required String command,
+    String? typeId,
+  }) async {
+    sentReports.add((
+      command: command,
+      error: error,
+      flutterVersion: getFlutterVersion(),
+      typeId: typeId,
+    ));
+  }
 }

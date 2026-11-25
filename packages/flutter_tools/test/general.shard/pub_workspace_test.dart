@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 
 void main() {
-  final FileSystem fs = globals.localFileSystem;
+  final FileSystem fs = LocalFileSystem.test(signals: FakeSignals());
   final String flutterToolsRoot = fs.path.join(getFlutterRoot(), 'packages', 'flutter_tools');
   const expectedWorkspaceMembers = <String>[
     'packages/flutter_tools_core',
@@ -18,7 +18,7 @@ void main() {
   ];
 
   group('Flutter Tools Pub Workspace', () {
-    testWithoutContext('root pubspec.yaml declares all sub-packages in workspace', () {
+    test('root pubspec.yaml declares all sub-packages in workspace', () {
       final File pubspecFile = fs.file(fs.path.join(flutterToolsRoot, 'pubspec.yaml'));
       expect(pubspecFile.existsSync(), isTrue);
 
@@ -34,7 +34,7 @@ void main() {
       }
     });
 
-    testWithoutContext('member pubspec.yaml files declare workspace resolution', () {
+    test('member pubspec.yaml files declare workspace resolution', () {
       for (final member in expectedWorkspaceMembers) {
         final File memberPubspec = fs.file(fs.path.join(flutterToolsRoot, member, 'pubspec.yaml'));
         expect(

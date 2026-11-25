@@ -31,7 +31,7 @@ void main() {
       ['web'],
       ['web', '--wasm'],
     ]) {
-      testWithoutContext('flutter build ${target.join(' ')} --release', () async {
+      test('flutter build ${target.join(' ')} --release', () async {
         final ProcessTestResult result = await runFlutter(
           <String>['build', '-v', ...target, '--release'],
           appRoot.path,

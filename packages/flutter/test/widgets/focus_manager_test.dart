@@ -19,6 +19,15 @@ void main() {
     return widgetKey.currentContext!;
   }
 
+  Future<void> setAppLifecycleState(AppLifecycleState state) async {
+    final ByteData? message = const StringCodec().encodeMessage(state.toString());
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/lifecycle',
+      message,
+      (_) {},
+    );
+  }
+
   group(FocusNode, () {
     testWidgets('Can add children.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
@@ -356,14 +365,11 @@ void main() {
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets(
-      'FocusManager ignores app lifecycle changes on Android and iOS.',
+      'automatic lifecycle policy keeps primary focus intact on Android and iOS.',
       (WidgetTester tester) async {
-        Future<void> setAppLifecycleState(AppLifecycleState state) async {
-          final ByteData? message = const StringCodec().encodeMessage(state.toString());
-          await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-              .handlePlatformMessage('flutter/lifecycle', message, (_) {});
-        }
-
+        final FocusLifecyclePolicy oldPolicy = tester.binding.focusManager.lifecyclePolicy;
+        addTearDown(() => tester.binding.focusManager.lifecyclePolicy = oldPolicy);
+        tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.automatic;
         final BuildContext context = await setupWidget(tester);
         final scope = FocusScopeNode(debugLabel: 'Scope');
         addTearDown(scope.dispose);
@@ -390,99 +396,348 @@ void main() {
       }),
     );
 
-    testWidgets('FocusManager responds to app lifecycle changes.', (WidgetTester tester) async {
-      Future<void> setAppLifecycleState(AppLifecycleState state) async {
-        final ByteData? message = const StringCodec().encodeMessage(state.toString());
-        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .handlePlatformMessage('flutter/lifecycle', message, (_) {});
-      }
-
-      final BuildContext context = await setupWidget(tester);
-      final scope = FocusScopeNode(debugLabel: 'Scope');
-      addTearDown(scope.dispose);
-      final FocusAttachment scopeAttachment = scope.attach(context);
-      final focusNode = FocusNode(debugLabel: 'Focus Node');
-      addTearDown(focusNode.dispose);
-      final FocusAttachment focusNodeAttachment = focusNode.attach(context);
-      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
-      focusNodeAttachment.reparent(parent: scope);
-      focusNode.requestFocus();
-      await tester.pump();
-      expect(focusNode.hasPrimaryFocus, isTrue);
-
-      await setAppLifecycleState(AppLifecycleState.paused);
-      expect(focusNode.hasPrimaryFocus, isFalse);
-
-      await setAppLifecycleState(AppLifecycleState.resumed);
-      expect(focusNode.hasPrimaryFocus, isTrue);
-    }, variant: TargetPlatformVariant.desktop());
-
-    testWidgets('Node is removed completely even if app is paused.', (WidgetTester tester) async {
-      Future<void> setAppLifecycleState(AppLifecycleState state) async {
-        final ByteData? message = const StringCodec().encodeMessage(state.toString());
-        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .handlePlatformMessage('flutter/lifecycle', message, (_) {});
-      }
-
-      final BuildContext context = await setupWidget(tester);
-      final scope = FocusScopeNode(debugLabel: 'Scope');
-      addTearDown(scope.dispose);
-      final FocusAttachment scopeAttachment = scope.attach(context);
-      final focusNode = FocusNode(debugLabel: 'Focus Node');
-      addTearDown(focusNode.dispose);
-      final FocusAttachment focusNodeAttachment = focusNode.attach(context);
-      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
-      focusNodeAttachment.reparent(parent: scope);
-      focusNode.requestFocus();
-      await tester.pump();
-      expect(focusNode.hasPrimaryFocus, isTrue);
-
-      await setAppLifecycleState(AppLifecycleState.paused);
-      focusNodeAttachment.detach();
-      expect(focusNode.hasPrimaryFocus, isFalse);
-
-      await setAppLifecycleState(AppLifecycleState.resumed);
-      expect(focusNode.hasPrimaryFocus, isFalse);
-    });
-
-    testWidgets('Suspended focus is not restored on resume when another node claimed focus.', (
+    testWidgets('automatic lifecycle policy clears and restores primary focus on desktop.', (
       WidgetTester tester,
     ) async {
-      Future<void> setAppLifecycleState(AppLifecycleState state) async {
-        final ByteData? message = const StringCodec().encodeMessage(state.toString());
-        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .handlePlatformMessage('flutter/lifecycle', message, (_) {});
-      }
+      final FocusLifecyclePolicy oldPolicy = tester.binding.focusManager.lifecyclePolicy;
+      addTearDown(() => tester.binding.focusManager.lifecyclePolicy = oldPolicy);
+      tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.automatic;
+      final BuildContext context = await setupWidget(tester);
+      final scope = FocusScopeNode(debugLabel: 'Scope');
+      addTearDown(scope.dispose);
+      final FocusAttachment scopeAttachment = scope.attach(context);
+      final focusNode = FocusNode(debugLabel: 'Focus Node');
+      addTearDown(focusNode.dispose);
+      final FocusAttachment focusNodeAttachment = focusNode.attach(context);
+      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+      focusNodeAttachment.reparent(parent: scope);
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+
+      await setAppLifecycleState(AppLifecycleState.paused);
+      expect(focusNode.hasPrimaryFocus, isFalse);
+
+      await setAppLifecycleState(AppLifecycleState.resumed);
+      expect(focusNode.hasPrimaryFocus, isTrue);
+    }, variant: TargetPlatformVariant.desktop());
+
+    testWidgets(
+      'automatic lifecycle policy does not restore a node that was detached while paused.',
+      (WidgetTester tester) async {
+        final FocusLifecyclePolicy oldPolicy = tester.binding.focusManager.lifecyclePolicy;
+        addTearDown(() => tester.binding.focusManager.lifecyclePolicy = oldPolicy);
+        tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.automatic;
+        final BuildContext context = await setupWidget(tester);
+        final scope = FocusScopeNode(debugLabel: 'Scope');
+        addTearDown(scope.dispose);
+        final FocusAttachment scopeAttachment = scope.attach(context);
+        final focusNode = FocusNode(debugLabel: 'Focus Node');
+        addTearDown(focusNode.dispose);
+        final FocusAttachment focusNodeAttachment = focusNode.attach(context);
+        scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+        focusNodeAttachment.reparent(parent: scope);
+        focusNode.requestFocus();
+        await tester.pump();
+        expect(focusNode.hasPrimaryFocus, isTrue);
+
+        await setAppLifecycleState(AppLifecycleState.paused);
+        focusNodeAttachment.detach();
+        expect(focusNode.hasPrimaryFocus, isFalse);
+
+        await setAppLifecycleState(AppLifecycleState.resumed);
+        expect(focusNode.hasPrimaryFocus, isFalse);
+      },
+      variant: TargetPlatformVariant.desktop(),
+    );
+
+    testWidgets(
+      'automatic lifecycle policy does not restore focus when another node requests focus while paused.',
+      (WidgetTester tester) async {
+        final FocusLifecyclePolicy oldPolicy = tester.binding.focusManager.lifecyclePolicy;
+        addTearDown(() => tester.binding.focusManager.lifecyclePolicy = oldPolicy);
+        tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.automatic;
+        final BuildContext context = await setupWidget(tester);
+        final scope = FocusScopeNode(debugLabel: 'Scope');
+        addTearDown(scope.dispose);
+        scope.attach(context).reparent(parent: tester.binding.focusManager.rootScope);
+        final nodeA = FocusNode(debugLabel: 'A');
+        addTearDown(nodeA.dispose);
+        nodeA.attach(context).reparent(parent: scope);
+        final nodeB = FocusNode(debugLabel: 'B');
+        addTearDown(nodeB.dispose);
+        nodeB.attach(context).reparent(parent: scope);
+
+        nodeA.requestFocus();
+        await tester.pump();
+        expect(nodeA.hasPrimaryFocus, isTrue);
+
+        // App goes inactive: nodeA's focus is suspended and parked.
+        await setAppLifecycleState(AppLifecycleState.inactive);
+        expect(nodeA.hasPrimaryFocus, isFalse);
+
+        // Another node requests focus before the app resumes (e.g. a different
+        // window/view was activated).
+        nodeB.requestFocus();
+
+        // On resume, the suspended nodeA must not steal focus back from nodeB.
+        await setAppLifecycleState(AppLifecycleState.resumed);
+        await tester.pump();
+        expect(nodeB.hasPrimaryFocus, isTrue);
+        expect(nodeA.hasPrimaryFocus, isFalse);
+      },
+      variant: TargetPlatformVariant.desktop(),
+    );
+
+    testWidgets('suspendAndRestore lifecycle policy clears and restores primary focus.', (
+      WidgetTester tester,
+    ) async {
+      final FocusLifecyclePolicy oldPolicy = tester.binding.focusManager.lifecyclePolicy;
+      addTearDown(() => tester.binding.focusManager.lifecyclePolicy = oldPolicy);
+      tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.suspendAndRestore;
 
       final BuildContext context = await setupWidget(tester);
       final scope = FocusScopeNode(debugLabel: 'Scope');
       addTearDown(scope.dispose);
-      scope.attach(context).reparent(parent: tester.binding.focusManager.rootScope);
-      final nodeA = FocusNode(debugLabel: 'A');
-      addTearDown(nodeA.dispose);
-      nodeA.attach(context).reparent(parent: scope);
-      final nodeB = FocusNode(debugLabel: 'B');
-      addTearDown(nodeB.dispose);
-      nodeB.attach(context).reparent(parent: scope);
-
-      nodeA.requestFocus();
+      final FocusAttachment scopeAttachment = scope.attach(context);
+      final focusNode = FocusNode(debugLabel: 'Focus Node');
+      addTearDown(focusNode.dispose);
+      final FocusAttachment focusNodeAttachment = focusNode.attach(context);
+      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+      focusNodeAttachment.reparent(parent: scope);
+      focusNode.requestFocus();
       await tester.pump();
-      expect(nodeA.hasPrimaryFocus, isTrue);
+      expect(focusNode.hasPrimaryFocus, isTrue);
 
-      // App goes inactive: nodeA's focus is suspended and parked.
-      await setAppLifecycleState(AppLifecycleState.inactive);
-      expect(nodeA.hasPrimaryFocus, isFalse);
+      // suspendAndRestore always adds the lifecycle listener regardless of platform,
+      // so focus is cleared and restored on all platforms including mobile and web.
+      await setAppLifecycleState(AppLifecycleState.paused);
+      expect(focusNode.hasPrimaryFocus, isFalse);
 
-      // Another node requests focus before the app resumes (e.g. a different
-      // window/view was activated).
-      nodeB.requestFocus();
-
-      // On resume, the suspended nodeA must not steal focus back from nodeB.
+      // And restored on resume.
       await setAppLifecycleState(AppLifecycleState.resumed);
-      await tester.pump();
-      expect(nodeB.hasPrimaryFocus, isTrue);
-      expect(nodeA.hasPrimaryFocus, isFalse);
-    }, variant: TargetPlatformVariant.desktop());
+      expect(focusNode.hasPrimaryFocus, isTrue);
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets(
+      'suspendAndRestore lifecycle policy does not restore a node that was detached while paused.',
+      (WidgetTester tester) async {
+        final FocusLifecyclePolicy oldPolicy = tester.binding.focusManager.lifecyclePolicy;
+        addTearDown(() => tester.binding.focusManager.lifecyclePolicy = oldPolicy);
+        tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.suspendAndRestore;
+
+        final BuildContext context = await setupWidget(tester);
+        final scope = FocusScopeNode(debugLabel: 'Scope');
+        addTearDown(scope.dispose);
+        final FocusAttachment scopeAttachment = scope.attach(context);
+        final focusNode = FocusNode(debugLabel: 'Focus Node');
+        addTearDown(focusNode.dispose);
+        final FocusAttachment focusNodeAttachment = focusNode.attach(context);
+        scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+        focusNodeAttachment.reparent(parent: scope);
+        focusNode.requestFocus();
+        await tester.pump();
+        expect(focusNode.hasPrimaryFocus, isTrue);
+
+        // Pause the app — focus is suspended and saved.
+        await setAppLifecycleState(AppLifecycleState.paused);
+        expect(focusNode.hasPrimaryFocus, isFalse);
+
+        // Remove the node while the app is paused.
+        focusNodeAttachment.detach();
+
+        // On resume, the detached node should not be restored.
+        await setAppLifecycleState(AppLifecycleState.resumed);
+        expect(focusNode.hasPrimaryFocus, isFalse);
+      },
+      variant: TargetPlatformVariant.all(),
+    );
+
+    testWidgets(
+      'suspendAndRestore lifecycle policy does not restore focus when another node requests focus while paused.',
+      (WidgetTester tester) async {
+        final FocusLifecyclePolicy oldPolicy = tester.binding.focusManager.lifecyclePolicy;
+        addTearDown(() => tester.binding.focusManager.lifecyclePolicy = oldPolicy);
+        tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.suspendAndRestore;
+
+        final BuildContext context = await setupWidget(tester);
+        final scope = FocusScopeNode(debugLabel: 'Scope');
+        addTearDown(scope.dispose);
+        scope.attach(context).reparent(parent: tester.binding.focusManager.rootScope);
+        final nodeA = FocusNode(debugLabel: 'A');
+        addTearDown(nodeA.dispose);
+        nodeA.attach(context).reparent(parent: scope);
+        final nodeB = FocusNode(debugLabel: 'B');
+        addTearDown(nodeB.dispose);
+        nodeB.attach(context).reparent(parent: scope);
+
+        nodeA.requestFocus();
+        await tester.pump();
+        expect(nodeA.hasPrimaryFocus, isTrue);
+
+        // Pause the app — nodeA's focus is suspended and saved.
+        await setAppLifecycleState(AppLifecycleState.paused);
+        expect(nodeA.hasPrimaryFocus, isFalse);
+
+        // Another node requests focus before the app resumes.
+        nodeB.requestFocus();
+
+        // On resume, the suspended nodeA must not steal focus back from nodeB.
+        await setAppLifecycleState(AppLifecycleState.resumed);
+        await tester.pump();
+        expect(nodeB.hasPrimaryFocus, isTrue);
+        expect(nodeA.hasPrimaryFocus, isFalse);
+      },
+      variant: TargetPlatformVariant.all(),
+    );
+
+    testWidgets(
+      'keepFocused lifecycle policy keeps primary focus intact through lifecycle changes.',
+      (WidgetTester tester) async {
+        final FocusLifecyclePolicy oldPolicy = tester.binding.focusManager.lifecyclePolicy;
+        addTearDown(() => tester.binding.focusManager.lifecyclePolicy = oldPolicy);
+        tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.keepFocused;
+
+        final BuildContext context = await setupWidget(tester);
+        final scope = FocusScopeNode(debugLabel: 'Scope');
+        addTearDown(scope.dispose);
+        final FocusAttachment scopeAttachment = scope.attach(context);
+        final focusNode = FocusNode(debugLabel: 'Focus Node');
+        addTearDown(focusNode.dispose);
+        final FocusAttachment focusNodeAttachment = focusNode.attach(context);
+        scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+        focusNodeAttachment.reparent(parent: scope);
+        focusNode.requestFocus();
+        await tester.pump();
+        expect(focusNode.hasPrimaryFocus, isTrue);
+
+        // keepFocused removes the lifecycle listener regardless of platform, so focus
+        // is unaffected by lifecycle changes on all platforms including web.
+        await setAppLifecycleState(AppLifecycleState.paused);
+        expect(focusNode.hasPrimaryFocus, isTrue);
+
+        await setAppLifecycleState(AppLifecycleState.resumed);
+        expect(focusNode.hasPrimaryFocus, isTrue);
+      },
+      variant: TargetPlatformVariant.all(),
+    );
+
+    testWidgets(
+      'Switching back to automatic lifecycle policy on desktop re-enables lifecycle focus save and restore.',
+      (WidgetTester tester) async {
+        final FocusLifecyclePolicy oldPolicy = tester.binding.focusManager.lifecyclePolicy;
+        addTearDown(() => tester.binding.focusManager.lifecyclePolicy = oldPolicy);
+        tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.automatic;
+
+        final BuildContext context = await setupWidget(tester);
+        final scope = FocusScopeNode(debugLabel: 'Scope');
+        addTearDown(scope.dispose);
+        final FocusAttachment scopeAttachment = scope.attach(context);
+        final focusNode = FocusNode(debugLabel: 'Focus Node');
+        addTearDown(focusNode.dispose);
+        final FocusAttachment focusNodeAttachment = focusNode.attach(context);
+        scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+        focusNodeAttachment.reparent(parent: scope);
+        focusNode.requestFocus();
+        await tester.pump();
+        expect(focusNode.hasPrimaryFocus, isTrue);
+
+        // Disable save/restore, confirm focus persists through lifecycle.
+        tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.keepFocused;
+        await setAppLifecycleState(AppLifecycleState.paused);
+        expect(focusNode.hasPrimaryFocus, isTrue);
+        await setAppLifecycleState(AppLifecycleState.resumed);
+        expect(focusNode.hasPrimaryFocus, isTrue);
+
+        // Restore automatic policy — save/restore should be active again.
+        tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.automatic;
+        await setAppLifecycleState(AppLifecycleState.paused);
+        expect(focusNode.hasPrimaryFocus, isFalse);
+
+        await setAppLifecycleState(AppLifecycleState.resumed);
+        expect(focusNode.hasPrimaryFocus, isTrue);
+      },
+      variant: TargetPlatformVariant.desktop(),
+    );
+
+    testWidgets(
+      'Switching the lifecycle policy to keepFocused while app is paused discards the saved focus node.',
+      (WidgetTester tester) async {
+        final FocusLifecyclePolicy oldPolicy = tester.binding.focusManager.lifecyclePolicy;
+        addTearDown(() => tester.binding.focusManager.lifecyclePolicy = oldPolicy);
+        tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.suspendAndRestore;
+
+        final BuildContext context = await setupWidget(tester);
+        final scope = FocusScopeNode(debugLabel: 'Scope');
+        addTearDown(scope.dispose);
+        final FocusAttachment scopeAttachment = scope.attach(context);
+        final focusNode = FocusNode(debugLabel: 'Focus Node');
+        addTearDown(focusNode.dispose);
+        final FocusAttachment focusNodeAttachment = focusNode.attach(context);
+        scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+        focusNodeAttachment.reparent(parent: scope);
+        focusNode.requestFocus();
+        await tester.pump();
+        expect(focusNode.hasPrimaryFocus, isTrue);
+
+        // Pause the app — focus is suspended and saved.
+        await setAppLifecycleState(AppLifecycleState.paused);
+        expect(focusNode.hasPrimaryFocus, isFalse);
+
+        // Switch to keepFocused while paused — the suspended node must be discarded.
+        tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.keepFocused;
+        // Switch back so the lifecycle listener is registered again and
+        // receives the resumed state below.
+        tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.suspendAndRestore;
+
+        // On resume, the previously suspended node should NOT be restored.
+        await setAppLifecycleState(AppLifecycleState.resumed);
+        expect(focusNode.hasPrimaryFocus, isFalse);
+      },
+      variant: TargetPlatformVariant.all(),
+    );
+
+    testWidgets(
+      'Switching back to automatic lifecycle policy on mobile stops lifecycle focus save and restore.',
+      (WidgetTester tester) async {
+        final FocusLifecyclePolicy oldPolicy = tester.binding.focusManager.lifecyclePolicy;
+        addTearDown(() => tester.binding.focusManager.lifecyclePolicy = oldPolicy);
+        tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.suspendAndRestore;
+
+        final BuildContext context = await setupWidget(tester);
+        final scope = FocusScopeNode(debugLabel: 'Scope');
+        addTearDown(scope.dispose);
+        final FocusAttachment scopeAttachment = scope.attach(context);
+        final focusNode = FocusNode(debugLabel: 'Focus Node');
+        addTearDown(focusNode.dispose);
+        final FocusAttachment focusNodeAttachment = focusNode.attach(context);
+        scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+        focusNodeAttachment.reparent(parent: scope);
+        focusNode.requestFocus();
+        await tester.pump();
+        expect(focusNode.hasPrimaryFocus, isTrue);
+
+        // With suspendAndRestore, focus is cleared on mobile.
+        await setAppLifecycleState(AppLifecycleState.paused);
+        expect(focusNode.hasPrimaryFocus, isFalse);
+        await setAppLifecycleState(AppLifecycleState.resumed);
+        expect(focusNode.hasPrimaryFocus, isTrue);
+
+        // Switch back to automatic — on mobile the listener should be removed,
+        // so subsequent lifecycle changes must no longer affect focus.
+        tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.automatic;
+        await setAppLifecycleState(AppLifecycleState.paused);
+        expect(focusNode.hasPrimaryFocus, isTrue);
+
+        await setAppLifecycleState(AppLifecycleState.resumed);
+        expect(focusNode.hasPrimaryFocus, isTrue);
+      },
+      skip: kIsWeb, // [intended] kIsWeb overrides defaultTargetPlatform for lifecycle policy.
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.android,
+        TargetPlatform.iOS,
+      }),
+    );
   });
 
   group(FocusScopeNode, () {
@@ -2409,6 +2664,198 @@ void main() {
       debugFocusChanges = oldDebugFocusChanges;
       debugPrint = oldDebugPrint;
     }
+  });
+
+  group('FocusNode.canRequestFocus -', () {
+    // Builds a column of focusable nodes.
+    Widget buildNodeList(List<FocusNode> nodes, Set<int> disabledNodes) {
+      return Column(
+        children: List<Widget>.generate(
+          nodes.length,
+          (int index) => Focus(
+            debugLabel: 'node$index',
+            focusNode: nodes[index],
+            canRequestFocus: !disabledNodes.contains(index),
+            child: const SizedBox.shrink(),
+          ),
+        ),
+      );
+    }
+
+    // Requests focus for every node in order, then returns to node 8 so that
+    // it becomes the current primary focus.
+    //
+    // Node 8 (not 9) is focused last so that node 9 — a later sibling in build
+    // order — is still focusable when node 8 is disabled, which is what hands
+    // the stale mark to node 9.
+    Future<void> focusEveryNodeInOrder(WidgetTester tester, List<FocusNode> nodes) async {
+      for (final node in nodes) {
+        node.requestFocus();
+        await tester.pump();
+      }
+      nodes[8].requestFocus();
+      await tester.pump();
+      expect(nodes[8].hasPrimaryFocus, isTrue);
+    }
+
+    List<FocusNode> createFocusNodes(int count) {
+      return List<FocusNode>.generate(count, (int index) => FocusNode(debugLabel: 'node$index'));
+    }
+
+    Future<List<FocusNode>> createFocusedNodes(WidgetTester tester) async {
+      final List<FocusNode> nodes = createFocusNodes(10);
+      addTearDown(() {
+        for (final node in nodes) {
+          node.dispose();
+        }
+      });
+      await tester.pumpWidget(buildNodeList(nodes, <int>{}));
+      await focusEveryNodeInOrder(tester, nodes);
+      return nodes;
+    }
+
+    // Regression test for https://github.com/flutter/flutter/issues/185076.
+    testWidgets('disabling all siblings in the same build does not leave '
+        'primary focus on an unfocusable node', (WidgetTester tester) async {
+      final List<FocusNode> nodes = await createFocusedNodes(tester);
+
+      final FocusScopeNode enclosingScope = nodes[8].enclosingScope!;
+
+      // Disable every node in a single build.
+      await tester.pumpWidget(buildNodeList(nodes, <int>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}));
+      await tester.pump();
+
+      // No node can take focus, so focus falls back to the enclosing scope
+      // rather than staying on a disabled node.
+      expect(tester.binding.focusManager.primaryFocus, same(enclosingScope));
+      for (final node in nodes) {
+        expect(node.hasPrimaryFocus, isFalse);
+      }
+    });
+
+    testWidgets('disabling a focused sibling in the same build moves focus '
+        'to the most recently focused sibling', (WidgetTester tester) async {
+      final List<FocusNode> nodes = await createFocusedNodes(tester);
+
+      // Disable the current primary focus (node 8) and node 9 in a single build.
+      await tester.pumpWidget(buildNodeList(nodes, <int>{8, 9}));
+      await tester.pump();
+
+      // Focus moves to node 7, the most recently focused node that can still
+      // take focus, rather than to one of the disabled nodes.
+      expect(nodes[7].hasPrimaryFocus, isTrue);
+      expect(nodes[8].hasPrimaryFocus, isFalse);
+      expect(nodes[9].hasPrimaryFocus, isFalse);
+    });
+
+    testWidgets('disabling a sibling scope in the same build does not leave '
+        'primary focus on its unfocusable child', (WidgetTester tester) async {
+      final node = FocusNode(debugLabel: 'node');
+      final scopedNode = FocusNode(debugLabel: 'scopedNode');
+      final scope = FocusScopeNode(debugLabel: 'scope');
+      addTearDown(() {
+        node.dispose();
+        scopedNode.dispose();
+        scope.dispose();
+      });
+
+      Widget build({required bool enabled}) => Column(
+        children: <Widget>[
+          Focus(focusNode: node, canRequestFocus: enabled, child: const SizedBox.shrink()),
+          FocusScope(
+            node: scope,
+            canRequestFocus: enabled,
+            child: Focus(focusNode: scopedNode, child: const SizedBox.shrink()),
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(build(enabled: true));
+      scopedNode.requestFocus();
+      await tester.pump();
+      node.requestFocus();
+      await tester.pump();
+      final FocusScopeNode enclosingScope = node.enclosingScope!;
+
+      // `node` is disabled first and hands focus to `scope`'s child, which is
+      // still focusable at that instant; `scope` is disabled afterwards.
+      await tester.pumpWidget(build(enabled: false));
+      await tester.pump();
+
+      expect(scopedNode.hasPrimaryFocus, isFalse);
+      expect(tester.binding.focusManager.primaryFocus, same(enclosingScope));
+    });
+
+    testWidgets('a pending autofocus wins over a node that became unfocusable '
+        'in the same build', (WidgetTester tester) async {
+      final List<FocusNode> nodes = createFocusNodes(10);
+      final autofocusNode = FocusNode(debugLabel: 'autofocusNode');
+      addTearDown(() {
+        for (final node in nodes) {
+          node.dispose();
+        }
+        autofocusNode.dispose();
+      });
+
+      Widget build({required Set<int> disabledNodes, required bool autofocus}) {
+        return FocusScope(
+          child: Column(
+            children: <Widget>[
+              for (int index = 0; index < nodes.length; index += 1)
+                Focus(
+                  debugLabel: 'node$index',
+                  focusNode: nodes[index],
+                  canRequestFocus: !disabledNodes.contains(index),
+                  child: const SizedBox.shrink(),
+                ),
+              Focus(focusNode: autofocusNode, autofocus: autofocus, child: const SizedBox.shrink()),
+            ],
+          ),
+        );
+      }
+
+      await tester.pumpWidget(build(disabledNodes: const <int>{}, autofocus: false));
+      await focusEveryNodeInOrder(tester, nodes);
+
+      // Every node becomes unfocusable in this build, which hands the stale
+      // mark to the unfocusable node 9. An autofocus request for the same
+      // scope is queued in that same build, and must win over the stale mark.
+      await tester.pumpWidget(
+        build(disabledNodes: const <int>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, autofocus: true),
+      );
+      await tester.pump();
+
+      expect(nodes[9].hasPrimaryFocus, isFalse);
+      expect(autofocusNode.hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets('an unfocusable ancestor releases an explicitly requested '
+        'focus', (WidgetTester tester) async {
+      final node = FocusNode(debugLabel: 'node');
+      final scope = FocusScopeNode(debugLabel: 'scope');
+      addTearDown(() {
+        node.dispose();
+        scope.dispose();
+      });
+
+      await tester.pumpWidget(
+        FocusScope(
+          node: scope,
+          child: Focus(focusNode: node, child: const SizedBox.shrink()),
+        ),
+      );
+
+      // The mark comes from an explicit requestFocus() call, so the node is
+      // also the scope's focused child. Before the mark can be applied, an
+      // ancestor is disabled, which makes the node unfocusable without moving
+      // focus itself.
+      node.requestFocus();
+      scope.descendantsAreFocusable = false;
+      await tester.pump();
+
+      expect(node.hasPrimaryFocus, isFalse);
+      expect(tester.binding.focusManager.primaryFocus, same(scope));
+    });
   });
 }
 

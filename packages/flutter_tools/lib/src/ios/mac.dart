@@ -11,6 +11,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../artifacts.dart';
 import '../base/bot_detector.dart';
 import '../base/config.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/fingerprint.dart';
 import '../base/io.dart';
@@ -25,6 +26,7 @@ import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
+import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../device.dart';
 import '../features.dart';
@@ -43,6 +45,7 @@ import '../migrations/xcode_script_build_phase_migration.dart';
 import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
 import '../plugins.dart';
 import '../project.dart';
+import '../reporting/crash_reporting.dart';
 import 'application_package.dart';
 import 'code_signing.dart';
 import 'migrations/host_app_info_plist_migration.dart';
@@ -120,6 +123,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   required BuildableIOSApp app,
   required BuildInfo buildInfo,
   required CocoaPods cocoaPods,
+  required FeatureFlags featureFlags,
   required PlistParser plistParser,
   required TemplateRenderer templateRenderer,
   required ToolContext toolContext,
@@ -170,8 +174,15 @@ Future<XcodeBuildResult> buildXcodeProject({
       darwinPlatform,
       buildInfo,
       analytics: analytics,
+      crashReportSenderFactory: botDetector.isRunningOnBot
+          ? null
+          : () => CrashReportSender(
+              platform: platform,
+              logger: logger,
+              operatingSystemUtils: os,
+              analytics: analytics,
+            ),
       plistParser: plistParser,
-      reportCrashes: !botDetector.isRunningOnBot,
       toolContext: toolContext,
       xcodeProjectInterpreter: xcodeProjectInterpreter,
     ),
@@ -395,6 +406,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildDirectoryPath,
     buildInfo.mode,
     cocoaPods: cocoaPods,
+    featureFlags: featureFlags,
     templateRenderer: templateRenderer,
     toolContext: toolContext,
   );
@@ -476,8 +488,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (!hasWatchCompanion) {
       // ONLY_ACTIVE_ARCH specifies whether the product includes only code for
       // the native architecture.
-      final HostPlatform hostPlatform = os.hostPlatform;
-      final onlyActiveArch = activeArch == CpuArch.fromHostPlatform(hostPlatform);
+      final onlyActiveArch = activeArch == os.hostPlatform.cpuArch;
 
       buildCommands.add('ONLY_ACTIVE_ARCH=${onlyActiveArch ? 'YES' : 'NO'}');
       buildCommands.add('ARCHS=${activeArch.darwinArchName}');
@@ -505,7 +516,24 @@ Future<XcodeBuildResult> buildXcodeProject({
       os.makePipe(scriptOutputPipeFile.path);
 
       Future<void> listenToScriptOutputLine() async {
-        final List<String> lines = await scriptOutputPipeFile!.readAsLines();
+        // The temporary directory may have been deleted mid-build (e.g. by
+        // fatal-signal temp cleanup), so there's nothing left to listen to.
+        if (!scriptOutputPipeFile!.existsSync()) {
+          return;
+        }
+        final List<String> lines;
+        try {
+          // Use openRead() instead of readAsLines() so ErrorHandlingFile does
+          // not convert ENOENT into a ToolExit if the pipe is deleted between
+          // existsSync() and opening the stream.
+          lines = await scriptOutputPipeFile
+              .openRead()
+              .transform(utf8AllowMalformed.decoder)
+              .transform(const LineSplitter())
+              .toList();
+        } on FileSystemException {
+          return;
+        }
         var inWarningBlock = false;
         var inNoteBlock = false;
         for (final line in lines) {
@@ -591,8 +619,15 @@ Future<XcodeBuildResult> buildXcodeProject({
       processUtils: processUtils,
     );
 
-    // Notifies listener that no more output is coming.
-    scriptOutputPipeFile?.writeAsStringSync('all done');
+    // Notifies listener that no more output is coming. The temporary directory
+    // may have been deleted mid-build (e.g. by fatal-signal temp cleanup).
+    try {
+      ErrorHandlingFileSystem.noExitOnFailure(
+        () => scriptOutputPipeFile?.writeAsStringSync('all done'),
+      );
+    } on FileSystemException {
+      // Ignore if the temporary directory or pipe was deleted mid-build.
+    }
     buildSubStatus?.stop();
     buildSubStatus = null;
     initialBuildStatus?.cancel();
@@ -634,7 +669,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       }
     }
   } finally {
-    tempDir.deleteSync(recursive: true);
+    ErrorHandlingFileSystem.deleteIfExists(tempDir, recursive: true);
   }
   if (buildResult != null && buildResult.exitCode != 0) {
     logger.printStatus('Failed to build iOS app');

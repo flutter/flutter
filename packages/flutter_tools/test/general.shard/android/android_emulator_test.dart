@@ -21,7 +21,7 @@ const kEmulatorLaunchCommand = <String>['emulator', '-avd', emulatorID];
 
 void main() {
   group('android_emulator', () {
-    testWithoutContext('flags emulators without config', () {
+    test('flags emulators without config', () {
       const emulatorID = '1234';
 
       final emulator = AndroidEmulator(
@@ -34,7 +34,7 @@ void main() {
       expect(emulator.hasConfig, false);
     });
 
-    testWithoutContext('flags emulators with config', () {
+    test('flags emulators with config', () {
       const emulatorID = '1234';
       final emulator = AndroidEmulator(
         emulatorID,
@@ -48,7 +48,7 @@ void main() {
       expect(emulator.hasConfig, true);
     });
 
-    testWithoutContext('reads expected metadata', () {
+    test('reads expected metadata', () {
       const emulatorID = '1234';
       const manufacturer = 'Me';
       const displayName = 'The best one';
@@ -71,7 +71,7 @@ void main() {
       expect(emulator.platformType, PlatformType.android);
     });
 
-    testWithoutContext('prefers displayname for name', () {
+    test('prefers displayname for name', () {
       const emulatorID = '1234';
       const displayName = 'The best one';
       final properties = <String, String>{'avd.ini.displayname': displayName};
@@ -86,7 +86,7 @@ void main() {
       expect(emulator.name, displayName);
     });
 
-    testWithoutContext('uses cleaned up ID if no displayname is set', () {
+    test('uses cleaned up ID if no displayname is set', () {
       // Android Studio uses the ID with underscores replaced with spaces
       // for the name if displayname is not set so we do the same.
       const emulatorID = 'This_is_my_ID';
@@ -102,7 +102,7 @@ void main() {
       expect(emulator.name, 'This is my ID');
     });
 
-    testWithoutContext('parses ini files', () {
+    test('parses ini files', () {
       const iniFile = '''
         hw.device.name=My Test Name
         #hw.device.name=Bad Name
@@ -126,7 +126,7 @@ void main() {
       mockSdk.emulatorPath = 'emulator';
     });
 
-    testWithoutContext('succeeds', () async {
+    test('succeeds', () async {
       final emulator = AndroidEmulator(
         emulatorID,
         processManager: FakeProcessManager.list(<FakeCommand>[
@@ -139,7 +139,7 @@ void main() {
       await emulator.launch(startupDuration: Duration.zero);
     });
 
-    testWithoutContext('succeeds with coldboot launch', () async {
+    test('succeeds with coldboot launch', () async {
       final kEmulatorLaunchColdBootCommand = <String>[
         ...kEmulatorLaunchCommand,
         '-no-snapshot-load',
@@ -156,7 +156,7 @@ void main() {
       await emulator.launch(startupDuration: Duration.zero, coldBoot: true);
     });
 
-    testWithoutContext('prints error on failure', () async {
+    test('prints error on failure', () async {
       final logger = BufferLogger.test();
       final emulator = AndroidEmulator(
         emulatorID,
@@ -180,7 +180,7 @@ void main() {
       expect(logger.errorText, contains(errorText));
     });
 
-    testWithoutContext('throws ToolExit on AVD lock error during startup without AVD directory', () async {
+    test('throws ToolExit on AVD lock error during startup without AVD directory', () async {
       final logger = BufferLogger.test();
       final emulator = AndroidEmulator(
         emulatorID,
@@ -215,7 +215,7 @@ void main() {
       );
     });
 
-    testWithoutContext('throws ToolExit on AVD lock error during startup with AVD directory', () async {
+    test('throws ToolExit on AVD lock error during startup with AVD directory', () async {
       final logger = BufferLogger.test();
       final emulator = AndroidEmulator(
         emulatorID,
@@ -251,7 +251,7 @@ void main() {
       );
     });
 
-    testWithoutContext('prints nothing on late failure with empty stderr', () async {
+    test('prints nothing on late failure with empty stderr', () async {
       final logger = BufferLogger.test();
       final emulator = AndroidEmulator(
         emulatorID,
@@ -271,7 +271,7 @@ void main() {
       expect(logger.errorText, isEmpty);
     });
 
-    testWithoutContext('throws if emulator not found', () async {
+    test('throws if emulator not found', () async {
       mockSdk.emulatorPath = null;
 
       final emulator = AndroidEmulator(

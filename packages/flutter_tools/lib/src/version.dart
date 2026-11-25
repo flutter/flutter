@@ -13,7 +13,6 @@ import 'base/time.dart';
 import 'base/utils.dart';
 import 'cache.dart';
 import 'convert.dart';
-import 'features.dart';
 import 'git.dart';
 
 /// The default version when a version could not be determined.
@@ -74,6 +73,7 @@ abstract class FlutterVersion {
     required FileSystem fs,
     required Git git,
     required Cache cache,
+    required bool Function() isOmitLegacyVersionFileEnabled,
     SystemClock clock = const SystemClock(),
     @protected bool fetchTags = false,
     required Logger logger,
@@ -89,6 +89,7 @@ abstract class FlutterVersion {
         logger: logger,
         platform: platform,
         cache: cache,
+        isOmitLegacyVersionFileEnabled: isOmitLegacyVersionFileEnabled,
       );
       if (version != null) {
         final String gitPath = fs.path.join(flutterRoot, '.git');
@@ -131,6 +132,7 @@ abstract class FlutterVersion {
       frameworkRevision: frameworkRevision,
       fs: fs,
       git: git,
+      isOmitLegacyVersionFileEnabled: isOmitLegacyVersionFileEnabled,
       logger: logger,
       platform: platform,
     );
@@ -142,6 +144,7 @@ abstract class FlutterVersion {
     required this.fs,
     required this._git,
     required this._cache,
+    required this._isOmitLegacyVersionFileEnabled,
     required this._logger,
     required this._platform,
   });
@@ -153,6 +156,7 @@ abstract class FlutterVersion {
     required Git git,
     required Platform platform,
     required Cache cache,
+    required bool Function() isOmitLegacyVersionFileEnabled,
     SystemClock clock = const SystemClock(),
     bool fetchTags = false,
     required Logger logger,
@@ -175,6 +179,7 @@ abstract class FlutterVersion {
       fs: fs,
       git: git,
       gitTagVersion: gitTagVersion,
+      isOmitLegacyVersionFileEnabled: isOmitLegacyVersionFileEnabled,
       logger: logger,
       platform: platform,
     );
@@ -187,6 +192,7 @@ abstract class FlutterVersion {
   final Platform _platform;
   final Logger _logger;
   final Cache _cache;
+  final bool Function() _isOmitLegacyVersionFileEnabled;
 
   /// Ensure the latest git tags are fetched and recalculate [FlutterVersion].
   ///
@@ -209,6 +215,7 @@ abstract class FlutterVersion {
       fetchTags: true,
       git: _git,
       cache: _cache,
+      isOmitLegacyVersionFileEnabled: _isOmitLegacyVersionFileEnabled,
       logger: _logger,
       platform: _platform,
     );
@@ -502,8 +509,6 @@ abstract class FlutterVersion {
       await cache.getStampFileFor(VersionCheckStamp.flutterVersionCheckStampFile).delete();
     } on FileSystemException {
       // Ignore, since we don't mind if the file didn't exist in the first place.
-    } on UnsupportedError {
-      // In testWithoutContext.
     }
   }
 }
@@ -565,6 +570,7 @@ class _FlutterVersionFromFile extends FlutterVersion {
     required super.flutterRoot,
     required super.fs,
     required super.git,
+    required super.isOmitLegacyVersionFileEnabled,
     required super.platform,
     required super.logger,
     required super.cache,
@@ -574,6 +580,7 @@ class _FlutterVersionFromFile extends FlutterVersion {
     File jsonFile, {
     required String flutterRoot,
     required Git git,
+    required bool Function() isOmitLegacyVersionFileEnabled,
     SystemClock clock = const SystemClock(),
     required Logger logger,
     required Platform platform,
@@ -588,7 +595,7 @@ class _FlutterVersionFromFile extends FlutterVersion {
         git: git,
         frameworkVersion: manifest['frameworkVersion']! as String,
         channel: manifest['channel']! as String,
-        repositoryUrl: manifest['repositoryUrl']! as String,
+        repositoryUrl: sanitizeGitUrl(manifest['repositoryUrl']! as String),
         frameworkRevision: manifest['frameworkRevision']! as String,
         frameworkCommitDate: manifest['frameworkCommitDate']! as String,
         engineRevision: manifest['engineRevision']! as String,
@@ -600,6 +607,7 @@ class _FlutterVersionFromFile extends FlutterVersion {
         gitTagVersion: GitTagVersion.parse(manifest['flutterVersion']! as String, logger: logger),
         flutterRoot: flutterRoot,
         fs: jsonFile.fileSystem,
+        isOmitLegacyVersionFileEnabled: isOmitLegacyVersionFileEnabled,
         platform: platform,
         logger: logger,
         cache: cache,
@@ -658,7 +666,12 @@ class _FlutterVersionFromFile extends FlutterVersion {
 
   @override
   void ensureVersionFile() {
-    _ensureLegacyVersionFile(fs: fs, flutterRoot: flutterRoot, frameworkVersion: frameworkVersion);
+    _ensureLegacyVersionFile(
+      flutterRoot: flutterRoot,
+      frameworkVersion: frameworkVersion,
+      fs: fs,
+      isOmitLegacyVersionFileEnabled: _isOmitLegacyVersionFileEnabled(),
+    );
   }
 }
 
@@ -671,6 +684,7 @@ class _FlutterVersionGit extends FlutterVersion {
     required this.gitTagVersion,
     required super.fs,
     required super.git,
+    required super.isOmitLegacyVersionFileEnabled,
     required super.platform,
     required super.logger,
     required super.cache,
@@ -708,6 +722,7 @@ class _FlutterVersionGit extends FlutterVersion {
   @override
   String? get repositoryUrl {
     if (_repositoryUrl == null) {
+      String? url;
       final RunResult trackingResult = _git.runSync([
         'rev-parse',
         '--abbrev-ref',
@@ -725,19 +740,22 @@ class _FlutterVersionGit extends FlutterVersion {
             remote,
           ], workingDirectory: flutterRoot);
           if (remoteResult.exitCode == 0) {
-            _repositoryUrl = remoteResult.stdout.trim();
+            url = remoteResult.stdout.trim();
           }
         }
       }
-      if (_repositoryUrl == null || _repositoryUrl!.isEmpty) {
+      if (url == null || url.isEmpty) {
         final RunResult originResult = _git.runSync([
           'remote',
           'get-url',
           'origin',
         ], workingDirectory: flutterRoot);
         if (originResult.exitCode == 0) {
-          _repositoryUrl = originResult.stdout.trim();
+          url = originResult.stdout.trim();
         }
+      }
+      if (url != null) {
+        _repositoryUrl = sanitizeGitUrl(url);
       }
     }
     return _repositoryUrl;
@@ -771,7 +789,12 @@ class _FlutterVersionGit extends FlutterVersion {
 
   @override
   void ensureVersionFile() {
-    _ensureLegacyVersionFile(fs: fs, flutterRoot: flutterRoot, frameworkVersion: frameworkVersion);
+    _ensureLegacyVersionFile(
+      flutterRoot: flutterRoot,
+      frameworkVersion: frameworkVersion,
+      fs: fs,
+      isOmitLegacyVersionFileEnabled: _isOmitLegacyVersionFileEnabled(),
+    );
     const encoder = JsonEncoder.withIndent('  ');
     final File newVersionFile = FlutterVersion.getVersionFile(fs, flutterRoot);
     newVersionFile.writeAsStringSync(encoder.convert(toJson()));
@@ -785,12 +808,13 @@ class _FlutterVersionGit extends FlutterVersion {
 }
 
 void _ensureLegacyVersionFile({
-  required FileSystem fs,
   required String flutterRoot,
   required String frameworkVersion,
+  required FileSystem fs,
+  required bool isOmitLegacyVersionFileEnabled,
 }) {
   // TODO(matanlurey): https://github.com/flutter/flutter/issues/171900.
-  if (featureFlags.isOmitLegacyVersionFileEnabled) {
+  if (isOmitLegacyVersionFileEnabled) {
     return;
   }
   final File legacyVersionFile = fs.file(fs.path.join(flutterRoot, 'version'));
@@ -823,7 +847,8 @@ class VersionUpstreamValidator {
   ///
   /// Returns [VersionCheckError] if the tracking remote is not standard.
   VersionCheckError? run() {
-    final String? flutterGit = platform.environment['FLUTTER_GIT_URL'];
+    final String? rawFlutterGit = platform.environment['FLUTTER_GIT_URL'];
+    final String? flutterGit = rawFlutterGit == null ? null : sanitizeGitUrl(rawFlutterGit);
     final String? repositoryUrl = version.repositoryUrl;
 
     if (repositoryUrl == null) {
@@ -1467,12 +1492,37 @@ final class FlutterEngineStampFromFile {
   }
 }
 
+/// Strips embedded credentials from [url] so they are not cached, exposed via
+/// `FLUTTER_GIT_URL`, or printed in diagnostics.
+///
+/// For `http` and `https` URLs, removes `userInfo`, `query`, and `fragment`.
+/// For other schemes with an authority (such as `ssh://`), strips only the
+/// password portion of `userInfo` so standard username-only SSH remotes like
+/// `ssh://git@github.com/flutter/flutter.git` remain unchanged.
+/// SCP-like URLs (such as `git@github.com:flutter/flutter.git`), local paths,
+/// and non-URL strings are returned unchanged.
+String sanitizeGitUrl(String url) {
+  final Uri? uri = Uri.tryParse(url);
+  if (uri == null || !uri.hasScheme || !uri.hasAuthority) {
+    return url;
+  }
+  if (uri.scheme == 'http' || uri.scheme == 'https') {
+    return Uri(scheme: uri.scheme, host: uri.host, port: uri.port, path: uri.path).toString();
+  }
+  if (uri.userInfo.contains(':')) {
+    final String user = uri.userInfo.split(':').first;
+    return uri.replace(userInfo: user).toString();
+  }
+  return url;
+}
+
 bool _isStandardRemote(String remote, {required Platform platform}) {
   final String sanitized = VersionUpstreamValidator.stripDotGit(remote);
 
   // Whitelist custom enterprise mirror or fork if specified by environment variable
   final String? customGitUrl = platform.environment['FLUTTER_GIT_URL'];
-  if (customGitUrl != null && VersionUpstreamValidator.stripDotGit(customGitUrl) == sanitized) {
+  if (customGitUrl != null &&
+      VersionUpstreamValidator.stripDotGit(sanitizeGitUrl(customGitUrl)) == sanitized) {
     return true;
   }
   for (final standard in const <String>[

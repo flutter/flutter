@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
+
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -20,7 +22,7 @@ import '../src/fakes.dart';
 final Platform testPlatform = FakePlatform();
 
 void main() {
-  testWithoutContext('ArtifactUpdater can download a zip archive', () async {
+  test('ArtifactUpdater can download a zip archive', () async {
     final operatingSystemUtils = FakeOperatingSystemUtils();
     final fileSystem = MemoryFileSystem.test();
     final logger = BufferLogger.test();
@@ -43,7 +45,7 @@ void main() {
     expect(fileSystem.file('out/test'), exists);
   });
 
-  testWithoutContext('ArtifactUpdater can download a zip archive and delete stale files', () async {
+  test('ArtifactUpdater can download a zip archive and delete stale files', () async {
     final operatingSystemUtils = FakeOperatingSystemUtils();
     final fileSystem = MemoryFileSystem.test();
     final logger = BufferLogger.test();
@@ -72,56 +74,53 @@ void main() {
     expect(fileSystem.file('out/test/foo.txt'), isNot(exists));
   });
 
-  testWithoutContext(
-    'ArtifactUpdater will delete any denylisted files from the outputDirectory',
-    () async {
-      final operatingSystemUtils = FakeOperatingSystemUtils();
-      final fileSystem = MemoryFileSystem.test();
-      final logger = BufferLogger.test();
-      final Directory tempStorage = fileSystem.currentDirectory.childDirectory('temp');
-      final String localZipPath = tempStorage.childFile('test.zip').path;
-      File? desiredArtifact;
-      File? entitlementsFile;
-      File? nestedWithoutEntitlementsFile;
-      File? unsignedBinariesFile;
-      operatingSystemUtils.unzipCallbacks[localZipPath] = (Directory outputDirectory) {
-        desiredArtifact = outputDirectory.childFile('artifact.bin')..createSync();
-        entitlementsFile = outputDirectory.childFile('entitlements.txt')..createSync();
-        nestedWithoutEntitlementsFile =
-            outputDirectory.childDirectory('dir').childFile('without_entitlements.txt')
-              ..createSync(recursive: true);
-        unsignedBinariesFile = outputDirectory.childFile('unsigned_binaries.txt')..createSync();
-      };
-      final artifactUpdater = ArtifactUpdater(
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: operatingSystemUtils,
-        platform: testPlatform,
-        httpClient: FakeHttpClient.any(),
-        tempStorage: tempStorage..createSync(),
-        allowedBaseUrls: <String>['http://test.zip'],
-      );
+  test('ArtifactUpdater will delete any denylisted files from the outputDirectory', () async {
+    final operatingSystemUtils = FakeOperatingSystemUtils();
+    final fileSystem = MemoryFileSystem.test();
+    final logger = BufferLogger.test();
+    final Directory tempStorage = fileSystem.currentDirectory.childDirectory('temp');
+    final String localZipPath = tempStorage.childFile('test.zip').path;
+    File? desiredArtifact;
+    File? entitlementsFile;
+    File? nestedWithoutEntitlementsFile;
+    File? unsignedBinariesFile;
+    operatingSystemUtils.unzipCallbacks[localZipPath] = (Directory outputDirectory) {
+      desiredArtifact = outputDirectory.childFile('artifact.bin')..createSync();
+      entitlementsFile = outputDirectory.childFile('entitlements.txt')..createSync();
+      nestedWithoutEntitlementsFile =
+          outputDirectory.childDirectory('dir').childFile('without_entitlements.txt')
+            ..createSync(recursive: true);
+      unsignedBinariesFile = outputDirectory.childFile('unsigned_binaries.txt')..createSync();
+    };
+    final artifactUpdater = ArtifactUpdater(
+      fileSystem: fileSystem,
+      logger: logger,
+      operatingSystemUtils: operatingSystemUtils,
+      platform: testPlatform,
+      httpClient: FakeHttpClient.any(),
+      tempStorage: tempStorage..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
+    );
 
-      // entitlements file cached from before the tool had a denylist
-      final File staleEntitlementsFile = fileSystem.file('out/path/to/entitlements.txt')
-        ..createSync(recursive: true);
+    // entitlements file cached from before the tool had a denylist
+    final File staleEntitlementsFile = fileSystem.file('out/path/to/entitlements.txt')
+      ..createSync(recursive: true);
 
-      expect(staleEntitlementsFile, exists);
-      await artifactUpdater.downloadZipArchive(
-        'test message',
-        Uri.parse('http://test.zip'),
-        fileSystem.currentDirectory.childDirectory('out'),
-      );
-      expect(logger.statusText, contains('test message'));
-      expect(desiredArtifact, exists);
-      expect(entitlementsFile, isNot(exists));
-      expect(nestedWithoutEntitlementsFile, isNot(exists));
-      expect(unsignedBinariesFile, isNot(exists));
-      expect(staleEntitlementsFile, isNot(exists));
-    },
-  );
+    expect(staleEntitlementsFile, exists);
+    await artifactUpdater.downloadZipArchive(
+      'test message',
+      Uri.parse('http://test.zip'),
+      fileSystem.currentDirectory.childDirectory('out'),
+    );
+    expect(logger.statusText, contains('test message'));
+    expect(desiredArtifact, exists);
+    expect(entitlementsFile, isNot(exists));
+    expect(nestedWithoutEntitlementsFile, isNot(exists));
+    expect(unsignedBinariesFile, isNot(exists));
+    expect(staleEntitlementsFile, isNot(exists));
+  });
 
-  testWithoutContext('ArtifactUpdater will not validate the md5 hash if the '
+  test('ArtifactUpdater will not validate the md5 hash if the '
       'x-goog-hash header is present but missing an md5 entry', () async {
     final operatingSystemUtils = FakeOperatingSystemUtils();
     final fileSystem = MemoryFileSystem.test();
@@ -151,7 +150,7 @@ void main() {
     expect(fileSystem.file('out/test'), exists);
   });
 
-  testWithoutContext('ArtifactUpdater will validate the md5 hash if the '
+  test('ArtifactUpdater will validate the md5 hash if the '
       'x-goog-hash header is present', () async {
     final operatingSystemUtils = FakeOperatingSystemUtils();
     final fileSystem = MemoryFileSystem.test();
@@ -186,7 +185,7 @@ void main() {
     expect(fileSystem.file('out/test'), exists);
   });
 
-  testWithoutContext('ArtifactUpdater will validate the md5 hash if the '
+  test('ArtifactUpdater will validate the md5 hash if the '
       'x-goog-hash header is present and throw if it does not match', () async {
     final operatingSystemUtils = FakeOperatingSystemUtils();
     final fileSystem = MemoryFileSystem.test();
@@ -230,7 +229,42 @@ void main() {
     ); // validate that the hash mismatch message is included.
   });
 
-  testWithoutContext(
+  test('ArtifactUpdater closes the downloaded file if the connection drops so it can be '
+      'deleted and the download retried', () async {
+    final operatingSystemUtils = FakeOperatingSystemUtils();
+    final fileSystem = _OpenHandleTrackingFileSystem(MemoryFileSystem.test());
+    final logger = BufferLogger.test();
+    final artifactUpdater = ArtifactUpdater(
+      fileSystem: fileSystem,
+      logger: logger,
+      operatingSystemUtils: operatingSystemUtils,
+      platform: testPlatform,
+      httpClient: FakeHttpClient.list(<FakeRequest>[
+        FakeRequest(
+          Uri.parse('http://test.zip'),
+          response: const FakeResponse(
+            body: <int>[0],
+            bodyError: HttpException('Connection closed while receiving data'),
+          ),
+        ),
+        FakeRequest(Uri.parse('http://test.zip')),
+      ]),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
+    );
+
+    await artifactUpdater.downloadZipArchive(
+      'test message',
+      Uri.parse('http://test.zip'),
+      fileSystem.currentDirectory.childDirectory('out'),
+    );
+
+    expect(logger.traceText, contains('Connection closed while receiving data'));
+    expect(fileSystem.file('out/test'), exists);
+    expect(fileSystem.openPaths, isEmpty);
+  });
+
+  test(
     'ArtifactUpdater will restart the status ticker if it needs to retry the download',
     () async {
       final operatingSystemUtils = FakeOperatingSystemUtils();
@@ -263,7 +297,7 @@ void main() {
     },
   );
 
-  testWithoutContext('ArtifactUpdater will re-attempt on a non-200 response', () async {
+  test('ArtifactUpdater will re-attempt on a non-200 response', () async {
     final operatingSystemUtils = FakeOperatingSystemUtils();
     final fileSystem = MemoryFileSystem.test();
     final logger = BufferLogger.test();
@@ -300,7 +334,7 @@ void main() {
     expect(fileSystem.file('out/test'), isNot(exists));
   });
 
-  testWithoutContext(
+  test(
     'ArtifactUpdater will tool exit on an ArgumentError from http client with base url override',
     () async {
       final operatingSystemUtils = FakeOperatingSystemUtils();
@@ -334,7 +368,7 @@ void main() {
     },
   );
 
-  testWithoutContext(
+  test(
     'ArtifactUpdater will rethrow on an ArgumentError from http client without base url override',
     () async {
       final operatingSystemUtils = FakeOperatingSystemUtils();
@@ -366,7 +400,7 @@ void main() {
     },
   );
 
-  testWithoutContext('ArtifactUpdater will re-download a file if unzipping fails', () async {
+  test('ArtifactUpdater will re-download a file if unzipping fails', () async {
     final operatingSystemUtils = FakeOperatingSystemUtils();
     final fileSystem = MemoryFileSystem.test();
     final logger = BufferLogger.test();
@@ -390,94 +424,85 @@ void main() {
     expect(fileSystem.file('out/test'), exists);
   });
 
-  testWithoutContext(
-    'ArtifactUpdater will de-download a file if unzipping fails on windows',
-    () async {
-      final operatingSystemUtils = FakeOperatingSystemUtils();
-      final fileSystem = MemoryFileSystem.test();
-      final logger = BufferLogger.test();
-      final artifactUpdater = ArtifactUpdater(
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: operatingSystemUtils,
-        platform: testPlatform,
-        httpClient: FakeHttpClient.any(),
-        tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
-        allowedBaseUrls: <String>['http://test.zip'],
-      );
-      operatingSystemUtils.failures = 1;
+  test('ArtifactUpdater will de-download a file if unzipping fails on windows', () async {
+    final operatingSystemUtils = FakeOperatingSystemUtils();
+    final fileSystem = MemoryFileSystem.test();
+    final logger = BufferLogger.test();
+    final artifactUpdater = ArtifactUpdater(
+      fileSystem: fileSystem,
+      logger: logger,
+      operatingSystemUtils: operatingSystemUtils,
+      platform: testPlatform,
+      httpClient: FakeHttpClient.any(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
+    );
+    operatingSystemUtils.failures = 1;
 
-      await artifactUpdater.downloadZipArchive(
+    await artifactUpdater.downloadZipArchive(
+      'test message',
+      Uri.parse('http://test.zip'),
+      fileSystem.currentDirectory.childDirectory('out'),
+    );
+    expect(logger.statusText, contains('test message'));
+    expect(fileSystem.file('out/test'), exists);
+  });
+
+  test('ArtifactUpdater will bail with a tool exit if unzipping fails more than twice', () async {
+    final operatingSystemUtils = FakeOperatingSystemUtils();
+    final fileSystem = MemoryFileSystem.test();
+    final logger = BufferLogger.test();
+    final artifactUpdater = ArtifactUpdater(
+      fileSystem: fileSystem,
+      logger: logger,
+      operatingSystemUtils: operatingSystemUtils,
+      platform: testPlatform,
+      httpClient: FakeHttpClient.any(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
+    );
+    operatingSystemUtils.failures = 2;
+
+    expect(
+      artifactUpdater.downloadZipArchive(
         'test message',
         Uri.parse('http://test.zip'),
         fileSystem.currentDirectory.childDirectory('out'),
-      );
-      expect(logger.statusText, contains('test message'));
-      expect(fileSystem.file('out/test'), exists);
-    },
-  );
+      ),
+      throwsToolExit(),
+    );
+    expect(fileSystem.file('te,[/test'), isNot(exists));
+    expect(fileSystem.file('out/test'), isNot(exists));
+  });
 
-  testWithoutContext(
-    'ArtifactUpdater will bail with a tool exit if unzipping fails more than twice',
-    () async {
-      final operatingSystemUtils = FakeOperatingSystemUtils();
-      final fileSystem = MemoryFileSystem.test();
-      final logger = BufferLogger.test();
-      final artifactUpdater = ArtifactUpdater(
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: operatingSystemUtils,
-        platform: testPlatform,
-        httpClient: FakeHttpClient.any(),
-        tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
-        allowedBaseUrls: <String>['http://test.zip'],
-      );
-      operatingSystemUtils.failures = 2;
+  test('ArtifactUpdater will bail if unzipping fails more than twice on Windows', () async {
+    final operatingSystemUtils = FakeOperatingSystemUtils();
+    final fileSystem = MemoryFileSystem.test();
+    final logger = BufferLogger.test();
+    final artifactUpdater = ArtifactUpdater(
+      fileSystem: fileSystem,
+      logger: logger,
+      operatingSystemUtils: operatingSystemUtils,
+      platform: testPlatform,
+      httpClient: FakeHttpClient.any(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
+    );
+    operatingSystemUtils.failures = 2;
 
-      expect(
-        artifactUpdater.downloadZipArchive(
-          'test message',
-          Uri.parse('http://test.zip'),
-          fileSystem.currentDirectory.childDirectory('out'),
-        ),
-        throwsToolExit(),
-      );
-      expect(fileSystem.file('te,[/test'), isNot(exists));
-      expect(fileSystem.file('out/test'), isNot(exists));
-    },
-  );
+    expect(
+      artifactUpdater.downloadZipArchive(
+        'test message',
+        Uri.parse('http://test.zip'),
+        fileSystem.currentDirectory.childDirectory('out'),
+      ),
+      throwsToolExit(),
+    );
+    expect(fileSystem.file('te,[/test'), isNot(exists));
+    expect(fileSystem.file('out/test'), isNot(exists));
+  });
 
-  testWithoutContext(
-    'ArtifactUpdater will bail if unzipping fails more than twice on Windows',
-    () async {
-      final operatingSystemUtils = FakeOperatingSystemUtils();
-      final fileSystem = MemoryFileSystem.test();
-      final logger = BufferLogger.test();
-      final artifactUpdater = ArtifactUpdater(
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: operatingSystemUtils,
-        platform: testPlatform,
-        httpClient: FakeHttpClient.any(),
-        tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
-        allowedBaseUrls: <String>['http://test.zip'],
-      );
-      operatingSystemUtils.failures = 2;
-
-      expect(
-        artifactUpdater.downloadZipArchive(
-          'test message',
-          Uri.parse('http://test.zip'),
-          fileSystem.currentDirectory.childDirectory('out'),
-        ),
-        throwsToolExit(),
-      );
-      expect(fileSystem.file('te,[/test'), isNot(exists));
-      expect(fileSystem.file('out/test'), isNot(exists));
-    },
-  );
-
-  testWithoutContext('ArtifactUpdater can download a tar archive', () async {
+  test('ArtifactUpdater can download a tar archive', () async {
     final operatingSystemUtils = FakeOperatingSystemUtils();
     final fileSystem = MemoryFileSystem.test();
     final logger = BufferLogger.test();
@@ -499,7 +524,7 @@ void main() {
     expect(fileSystem.file('out/test'), exists);
   });
 
-  testWithoutContext('ArtifactUpdater can download a single file', () async {
+  test('ArtifactUpdater can download a single file', () async {
     final operatingSystemUtils = FakeOperatingSystemUtils();
     final fileSystem = MemoryFileSystem.test();
     final logger = BufferLogger.test();
@@ -521,7 +546,7 @@ void main() {
     expect(fileSystem.file('out/test.json'), exists);
   });
 
-  testWithoutContext('ArtifactUpdater will delete downloaded files if they exist.', () async {
+  test('ArtifactUpdater will delete downloaded files if they exist.', () async {
     final operatingSystemUtils = FakeOperatingSystemUtils();
     final fileSystem = MemoryFileSystem.test();
     final logger = BufferLogger.test();
@@ -546,7 +571,7 @@ void main() {
     expect(logger.errorText, isEmpty);
   });
 
-  testWithoutContext(
+  test(
     'ArtifactUpdater will tool exit if deleting the existing artifacts fails with 32 on windows',
     () async {
       const kSharingViolation = 32;
@@ -621,5 +646,78 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
     targetDirectory
         .childFile(gzippedTarFile.fileSystem.path.basenameWithoutExtension(gzippedTarFile.path))
         .createSync();
+  }
+}
+
+/// A file system that emulates Windows by refusing to delete files that still
+/// have an open [RandomAccessFile] handle.
+class _OpenHandleTrackingFileSystem extends ForwardingFileSystem {
+  _OpenHandleTrackingFileSystem(super.delegate);
+
+  final openPaths = <String>{};
+
+  @override
+  File file(dynamic path) => _OpenHandleTrackingFile(this, delegate.file(path));
+}
+
+class _OpenHandleTrackingFile extends ForwardingFileSystemEntity<File, io.File>
+    with ForwardingFile {
+  _OpenHandleTrackingFile(this._fileSystem, this.delegate);
+
+  final _OpenHandleTrackingFileSystem _fileSystem;
+
+  @override
+  final io.File delegate;
+
+  @override
+  FileSystem get fileSystem => _fileSystem;
+
+  @override
+  File wrapFile(io.File delegate) => _fileSystem.file(delegate.path);
+
+  @override
+  Directory wrapDirectory(io.Directory delegate) => _fileSystem.directory(delegate.path);
+
+  @override
+  Link wrapLink(io.Link delegate) => _fileSystem.link(delegate.path);
+
+  @override
+  RandomAccessFile openSync({FileMode mode = FileMode.read}) {
+    final RandomAccessFile file = super.openSync(mode: mode);
+    _fileSystem.openPaths.add(path);
+    return _OpenHandleTrackingRandomAccessFile(file, () {
+      _fileSystem.openPaths.remove(path);
+    });
+  }
+
+  @override
+  void deleteSync({bool recursive = false}) {
+    if (_fileSystem.openPaths.contains(path)) {
+      throw FileSystemException(
+        'Cannot delete file',
+        path,
+        const OSError(
+          'The process cannot access the file because it is being used by '
+          'another process',
+          32,
+        ),
+      );
+    }
+    super.deleteSync(recursive: recursive);
+  }
+}
+
+class _OpenHandleTrackingRandomAccessFile with ForwardingRandomAccessFile {
+  _OpenHandleTrackingRandomAccessFile(this.delegate, this._onClose);
+
+  @override
+  final RandomAccessFile delegate;
+
+  final void Function() _onClose;
+
+  @override
+  void closeSync() {
+    _onClose();
+    super.closeSync();
   }
 }

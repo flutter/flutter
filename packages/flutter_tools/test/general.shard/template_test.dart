@@ -9,14 +9,12 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/template.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/template.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 
 void main() {
-  testWithoutContext('Template constructor throws ToolExit when source directory is missing', () {
+  test('Template constructor throws ToolExit when source directory is missing', () {
     final handler = FileExceptionHandler();
     final fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
 
@@ -32,7 +30,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Template.render throws ToolExit when FileSystem exception is raised', () {
+  test('Template.render throws ToolExit when FileSystem exception is raised', () {
     final handler = FileExceptionHandler();
     final fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
     final template = Template(
@@ -50,16 +48,14 @@ void main() {
 
   group('template image directory', () {
     const flutterRoot = '/flutter';
-    final overrides = <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
-    };
     const templatePathProvider = TemplatePathProvider(flutterRoot: flutterRoot);
 
-    testUsingContext(
+    test(
       'templatePathProvider.imageDirectory returns parent template directory if passed null name',
       () async {
-        final String packageConfigPath = globals.fs.path.join(
+        final fileSystem = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final String packageConfigPath = fileSystem.path.join(
           flutterRoot,
           'packages',
           'flutter_tools',
@@ -67,7 +63,7 @@ void main() {
           'package_config.json',
         );
 
-        globals.fs.file(packageConfigPath)
+        fileSystem.file(packageConfigPath)
           ..createSync(recursive: true)
           ..writeAsStringSync('''
 {
@@ -83,22 +79,23 @@ void main() {
 }
 ''');
         expect(
-          (await templatePathProvider.imageDirectory(null, globals.fs, globals.logger)).path,
-          globals.fs.path.absolute('flutter_template_images', 'templates'),
+          (await templatePathProvider.imageDirectory(null, fileSystem, logger)).path,
+          fileSystem.path.absolute('flutter_template_images', 'templates'),
         );
       },
-      overrides: overrides,
     );
 
-    testUsingContext('templatePathProvider.imageDirectory returns the directory containing the `name` template directory', () async {
-      final String packageConfigPath = globals.fs.path.join(
+    test('templatePathProvider.imageDirectory returns the directory containing the `name` template directory', () async {
+      final fileSystem = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final String packageConfigPath = fileSystem.path.join(
         flutterRoot,
         'packages',
         'flutter_tools',
         '.dart_tool',
         'package_config.json',
       );
-      globals.fs.file(packageConfigPath)
+      fileSystem.file(packageConfigPath)
         ..createSync(recursive: true)
         ..writeAsStringSync('''
 {
@@ -114,10 +111,10 @@ void main() {
 }
 ''');
       expect(
-        (await templatePathProvider.imageDirectory('app', globals.fs, globals.logger)).path,
-        globals.fs.path.absolute('flutter_template_images', 'templates', 'app'),
+        (await templatePathProvider.imageDirectory('app', fileSystem, logger)).path,
+        fileSystem.path.absolute('flutter_template_images', 'templates', 'app'),
       );
-    }, overrides: overrides);
+    });
   });
 
   group('renders template', () {
@@ -147,7 +144,7 @@ void main() {
       );
     });
 
-    testWithoutContext('overwrites .img.tmpl files with files from the image source', () {
+    test('overwrites .img.tmpl files with files from the image source', () {
       expect(template.render(destination, <String, Object>{}), 1);
 
       final File destinationImage = destination.childFile(imageName);
@@ -167,7 +164,7 @@ void main() {
       expect(logger.statusText, contains('${destinationImage.path} (overwritten)'));
     });
 
-    testWithoutContext('does not overwrite .img.tmpl files with files from the image source', () {
+    test('does not overwrite .img.tmpl files with files from the image source', () {
       expect(template.render(destination, <String, Object>{}), 1);
 
       final File destinationImage = destination.childFile(imageName);
@@ -185,7 +182,7 @@ void main() {
       expect(logger.statusText, isEmpty);
     });
 
-    testWithoutContext('can suppress file printing', () {
+    test('can suppress file printing', () {
       template.render(destination, <String, Object>{}, printStatusWhenWriting: false);
 
       final File destinationImage = destination.childFile(imageName);
@@ -196,7 +193,7 @@ void main() {
     });
   });
 
-  testWithoutContext('escapeYamlString', () {
+  test('escapeYamlString', () {
     expect(escapeYamlString(''), r'""');
     expect(escapeYamlString('\x00\n\r\t\b'), r'"\0\n\r\t\x08"');
     expect(escapeYamlString('test'), r'"test"');

@@ -49,7 +49,7 @@ void main() {
     logger = BufferLogger.test();
   });
 
-  testWithoutContext('matchesPattern matches only entire strings', () {
+  test('matchesPattern matches only entire strings', () {
     expect(matchesPattern('', pattern: ''), isNotNull);
     expect(matchesPattern('', pattern: 'foo'), null);
     expect(matchesPattern('foo', pattern: ''), null);
@@ -60,7 +60,7 @@ void main() {
     expect(matchesPattern('foobar', pattern: RegExp(r'.*b')), null);
   });
 
-  testWithoutContext('builds APK analysis correctly', () async {
+  test('builds APK analysis correctly', () async {
     final sizeAnalyzer = SizeAnalyzer(
       fileSystem: fileSystem,
       logger: logger,
@@ -142,7 +142,7 @@ void main() {
     expect(result['precompiler-trace'], <String, Object>{});
   });
 
-  testWithoutContext('outputs summary to command line correctly', () async {
+  test('outputs summary to command line correctly', () async {
     final sizeAnalyzer = SizeAnalyzer(
       fileSystem: fileSystem,
       logger: logger,
@@ -181,7 +181,7 @@ void main() {
     );
   });
 
-  testWithoutContext('can analyze contents of output directory', () async {
+  test('can analyze contents of output directory', () async {
     final sizeAnalyzer = SizeAnalyzer(
       fileSystem: fileSystem,
       logger: logger,
@@ -222,7 +222,7 @@ void main() {
     expect(result['precompiler-trace'], <String, Object>{});
   });
 
-  testWithoutContext('handles null AOT snapshot json', () async {
+  test('handles null AOT snapshot json', () async {
     final sizeAnalyzer = SizeAnalyzer(
       fileSystem: fileSystem,
       logger: logger,

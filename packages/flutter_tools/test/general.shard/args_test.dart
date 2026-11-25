@@ -5,39 +5,16 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/executable.dart' as executable;
-import 'package:flutter_tools/src/android/android_sdk.dart';
-import 'package:flutter_tools/src/android/android_studio.dart';
-import 'package:flutter_tools/src/android/android_workflow.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/template.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
-import 'package:flutter_tools/src/context/android_context.dart';
-import 'package:flutter_tools/src/context/apple_context.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
-import 'package:flutter_tools/src/context/tool_dependencies.dart';
-import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/doctor.dart';
-import 'package:flutter_tools/src/emulator.dart';
-import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
-import 'package:flutter_tools/src/experimental/extension_clean_manager.dart';
-import 'package:flutter_tools/src/experimental/extension_manager.dart';
-import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/isolated/mustache_template.dart';
-import 'package:flutter_tools/src/macos/macos_workflow.dart';
-import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
-import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fakes.dart';
-import '../src/testbed.dart';
+import '../src/test_flutter_command_runner.dart';
 import 'runner/utils.dart';
 
 void main() {
@@ -49,53 +26,47 @@ void main() {
     Cache.enableLocking();
   });
 
-  testUsingContext(
-    'Help for command line arguments is consistently styled and complete',
-    () => TestBed().run(() {
-      final fakeAndroidContext = FakeAndroidContext();
-      final fakeAppleContext = FakeAppleContext();
-      final fakeToolContext = FakeToolContext();
-      final fakeToolDependencies = FakeToolDependencies(
-        androidContext: fakeAndroidContext,
-        appleContext: fakeAppleContext,
-        toolContext: fakeToolContext,
-      );
-      final runner = FlutterCommandRunner(
-        analytics: fakeToolDependencies.analytics,
-        toolContext: fakeToolContext,
-        verboseHelp: true,
-      );
-      executable
-          .generateCommands(
-            toolDependencies: fakeToolDependencies,
-            verbose: true,
-            verboseHelp: true,
-          )
-          .forEach(runner.addCommand);
-      verifyCommandRunner(runner);
-      for (final Command<void> command in runner.commands.values) {
-        if (command.name == 'analyze') {
-          final analyze = command as AnalyzeCommand;
-          expect(analyze.allProjectValidators().length, 2);
-        }
+  test('Help for command line arguments is consistently styled and complete', () {
+    final fakeAndroidContext = FakeAndroidContext(
+      androidSdk: FakeAndroidSdk(),
+      androidStudio: FakeAndroidStudio(),
+    );
+    final fakeAppleContext = FakeAppleContext();
+    final fakeToolContext = FakeToolContext();
+    final fakeToolDependencies = FakeToolDependencies(
+      androidContext: fakeAndroidContext,
+      appleContext: fakeAppleContext,
+      toolContext: fakeToolContext,
+    );
+    final runner = TestFlutterCommandRunner(
+      analytics: fakeToolDependencies.analytics,
+      toolContext: fakeToolContext,
+      verboseHelp: true,
+    );
+    executable
+        .generateCommands(toolDependencies: fakeToolDependencies, verbose: true, verboseHelp: true)
+        .forEach(runner.addCommand);
+    verifyCommandRunner(runner);
+    for (final Command<void> command in runner.commands.values) {
+      if (command.name == 'analyze') {
+        final analyze = command as AnalyzeCommand;
+        expect(analyze.allProjectValidators().length, 2);
       }
-    }),
-    overrides: <Type, Generator>{
-      AndroidSdk: () => FakeAndroidSdk(),
-      AndroidStudio: () => FakeAndroidStudio(),
-    },
-  );
+    }
+  });
 
-  testUsingContext('Global arg results are available in FlutterCommands', () async {
+  test('Global arg results are available in FlutterCommands', () async {
+    final toolContext = FakeToolContext();
     final command = DummyFlutterCommand(
+      toolContext: toolContext,
       commandFunction: () async {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
 
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
-      toolContext: FakeToolContext(),
+      toolContext: toolContext,
       verboseHelp: true,
     );
 
@@ -106,8 +77,10 @@ void main() {
     expect(command.boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true), true);
   });
 
-  testUsingContext('Global arg results are available in FlutterCommands sub commands', () async {
+  test('Global arg results are available in FlutterCommands sub commands', () async {
+    final toolContext = FakeToolContext();
     final command = DummyFlutterCommand(
+      toolContext: toolContext,
       commandFunction: () async {
         return const FlutterCommandResult(ExitStatus.success);
       },
@@ -115,6 +88,7 @@ void main() {
 
     final subcommand = DummyFlutterCommand(
       name: 'sub',
+      toolContext: toolContext,
       commandFunction: () async {
         return const FlutterCommandResult(ExitStatus.success);
       },
@@ -122,9 +96,9 @@ void main() {
 
     command.addSubcommand(subcommand);
 
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
-      toolContext: FakeToolContext(),
+      toolContext: toolContext,
       verboseHelp: true,
     );
 
@@ -140,15 +114,17 @@ void main() {
     expect(subcommand.boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true), true);
   });
 
-  testUsingContext('bool? safe argResults', () async {
+  test('bool? safe argResults', () async {
+    final toolContext = FakeToolContext();
     final command = DummyFlutterCommand(
+      toolContext: toolContext,
       commandFunction: () async {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
-      toolContext: FakeToolContext(),
+      toolContext: toolContext,
       verboseHelp: true,
     );
     command.argParser.addFlag('key');
@@ -170,15 +146,17 @@ void main() {
     expect(command.boolArg('key-false'), false);
   });
 
-  testUsingContext('String? safe argResults', () async {
+  test('String? safe argResults', () async {
+    final toolContext = FakeToolContext();
     final command = DummyFlutterCommand(
+      toolContext: toolContext,
       commandFunction: () async {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
-      toolContext: FakeToolContext(),
+      toolContext: toolContext,
       verboseHelp: true,
     );
     command.argParser.addOption('key');
@@ -196,15 +174,17 @@ void main() {
     expect(() => command.stringArg('non-existent'), throwsA(const TypeMatcher<ArgumentError>()));
   });
 
-  testUsingContext('List<String> safe argResults', () async {
+  test('List<String> safe argResults', () async {
+    final toolContext = FakeToolContext();
     final command = DummyFlutterCommand(
+      toolContext: toolContext,
       commandFunction: () async {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
-      toolContext: FakeToolContext(),
+      toolContext: toolContext,
       verboseHelp: true,
     );
     command.argParser.addMultiOption('key', allowed: <String>['a', 'b', 'c']);
@@ -227,15 +207,17 @@ void main() {
     expect(command.stringsArg('key'), <String>[]);
   });
 
-  testUsingContext('wrap-column option updates argParser usageLineLength', () async {
+  test('wrap-column option updates argParser usageLineLength', () async {
+    final toolContext = FakeToolContext();
     final command = DummyFlutterCommand(
+      toolContext: toolContext,
       commandFunction: () async {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
-      toolContext: FakeToolContext(),
+      toolContext: toolContext,
       verboseHelp: true,
     );
     runner.addCommand(command);
@@ -494,111 +476,4 @@ class FakeAnalytics extends Fake implements Analytics {
 
   @override
   bool get okToSend => false;
-}
-
-class FakeBuildSystem extends Fake implements BuildSystem {}
-
-class FakeBuildTargets extends Fake implements BuildTargets {}
-
-class FakeCrashReporter extends Fake implements CrashReporter {}
-
-class FakeToolDependencies extends Fake implements ToolDependencies {
-  FakeToolDependencies({
-    Analytics? analytics,
-    AndroidContext? androidContext,
-    this._androidWorkflow,
-    AppleContext? appleContext,
-    BuildSystem? buildSystem,
-    BuildTargets? buildTargets,
-    CrashReporter? crashReporter,
-    DeviceManager? deviceManager,
-    Doctor? doctor,
-    EmulatorManager? emulatorManager,
-    this.extensionBuildManager,
-    this.extensionCleanManager,
-    this.extensionManager,
-    FeatureFlags? featureFlags,
-    this._macOSWorkflow,
-    TemplateRenderer? templateRenderer,
-    ToolContext? toolContext,
-    this._windowsWorkflow,
-  }) : analytics = analytics ?? FakeAnalytics(),
-       androidContext = androidContext ?? FakeAndroidContext(),
-       appleContext = appleContext ?? FakeAppleContext(),
-       buildSystem = buildSystem ?? FakeBuildSystem(),
-       buildTargets = buildTargets ?? FakeBuildTargets(),
-       crashReporter = crashReporter ?? FakeCrashReporter(),
-       deviceManager = deviceManager ?? FakeDeviceManager(),
-       doctor = doctor ?? FakeDoctor(),
-       emulatorManager = emulatorManager ?? FakeEmulatorManager(),
-       featureFlags = featureFlags ?? TestFeatureFlags(),
-       templateRenderer = templateRenderer ?? const MustacheTemplateRenderer(),
-       toolContext = toolContext ?? FakeToolContext();
-
-  final AndroidWorkflow? _androidWorkflow;
-  final MacOSWorkflow? _macOSWorkflow;
-  final WindowsWorkflow? _windowsWorkflow;
-
-  @override
-  final Analytics analytics;
-
-  @override
-  final AndroidContext androidContext;
-
-  @override
-  late final AndroidWorkflow androidWorkflow =
-      _androidWorkflow ??
-      AndroidWorkflow(
-        androidSdkBuilder: () => androidContext.androidSdk,
-        featureFlags: featureFlags,
-      );
-
-  @override
-  final AppleContext appleContext;
-
-  @override
-  final BuildSystem buildSystem;
-
-  @override
-  final BuildTargets buildTargets;
-
-  @override
-  final CrashReporter crashReporter;
-
-  @override
-  final DeviceManager deviceManager;
-
-  @override
-  final Doctor doctor;
-
-  @override
-  final EmulatorManager emulatorManager;
-
-  @override
-  final ExtensionBuildManager? extensionBuildManager;
-
-  @override
-  final ExtensionCleanManager? extensionCleanManager;
-
-  @override
-  final ExtensionManager? extensionManager;
-
-  @override
-  final FeatureFlags featureFlags;
-
-  @override
-  late final MacOSWorkflow macOSWorkflow =
-      _macOSWorkflow ?? MacOSWorkflow(featureFlags: featureFlags, platform: _platform);
-
-  @override
-  final TemplateRenderer templateRenderer;
-
-  @override
-  final ToolContext toolContext;
-
-  @override
-  late final WindowsWorkflow windowsWorkflow =
-      _windowsWorkflow ?? WindowsWorkflow(featureFlags: featureFlags, platform: _platform);
-
-  Platform get _platform => toolContext.platform;
 }

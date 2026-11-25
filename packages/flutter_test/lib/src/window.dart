@@ -459,12 +459,22 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   // ignore: avoid_setters_without_getters
   set alwaysUse24HourFormatTestValue(bool alwaysUse24HourFormatTestValue) {
     _alwaysUse24HourFormatTestValue = alwaysUse24HourFormatTestValue;
+    onAlwaysUse24HourFormatChanged?.call();
   }
 
   /// Deletes any existing test clock format and returns to using the real clock
   /// format.
   void clearAlwaysUse24HourTestValue() {
     _alwaysUse24HourFormatTestValue = null;
+    onAlwaysUse24HourFormatChanged?.call();
+  }
+
+  @override
+  VoidCallback? get onAlwaysUse24HourFormatChanged =>
+      _platformDispatcher.onAlwaysUse24HourFormatChanged;
+  @override
+  set onAlwaysUse24HourFormatChanged(VoidCallback? callback) {
+    _platformDispatcher.onAlwaysUse24HourFormatChanged = callback;
   }
 
   @override

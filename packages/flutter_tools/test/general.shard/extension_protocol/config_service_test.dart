@@ -17,7 +17,7 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/fakes.dart';
 
-class _SecondaryConfigurationExtension extends ConfigurationExtension {
+final class _SecondaryConfigurationExtension extends ConfigurationExtension {
   @override
   String get title => 'Secondary Configuration Extension';
 
@@ -40,7 +40,7 @@ class _SecondaryConfigurationExtension extends ConfigurationExtension {
   }
 }
 
-class _FailingConfigurationExtension extends ConfigurationExtension {
+final class _FailingConfigurationExtension extends ConfigurationExtension {
   @override
   String get title => 'Failing Configuration Extension';
 
@@ -72,9 +72,30 @@ void _secondaryExtensionEntryPoint(SendPort sendPort) {
   ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_SecondaryConfigurationExtension()]);
 }
 
+final class _DomainErrorConfigurationExtension extends ConfigurationExtension {
+  @override
+  String get title => 'Custom Config';
+
+  @override
+  Future<List<FeatureFlag>> getFeatureFlags() async {
+    throw const ToolExtensionException('Config failed with actionable user error.');
+  }
+
+  @override
+  Future<List<ConfigOption>> getConfigurations() async {
+    throw const ToolExtensionException('Config options failed with actionable user error.');
+  }
+}
+
+void _domainErrorConfigEntryPoint(SendPort sendPort) {
+  ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+    _DomainErrorConfigurationExtension(),
+  ], extensionName: 'custom_config_ext');
+}
+
 void main() {
   group('ExtensionConfiguration Host Integration', () {
-    testWithoutContext(
+    test(
       'ExtensionConfiguration fetches feature flags and config options from single extension',
       () async {
         final logger = BufferLogger.test();
@@ -110,7 +131,7 @@ void main() {
       },
     );
 
-    testWithoutContext('ExtensionConfiguration aggregates feature flags and config options across multiple extensions', () async {
+    test('ExtensionConfiguration aggregates feature flags and config options across multiple extensions', () async {
       final logger = BufferLogger.test();
       final manager = ExtensionManager(
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
@@ -146,7 +167,7 @@ void main() {
       await manager.dispose();
     });
 
-    testWithoutContext('ConfigCommand settingsText incorporates extension flags and options grouped by extension title', () async {
+    test('ConfigCommand settingsText incorporates extension flags and options grouped by extension title', () async {
       final logger = BufferLogger.test();
       final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
       final manager = ExtensionManager(
@@ -177,7 +198,7 @@ void main() {
       await manager.dispose();
     });
 
-    testWithoutContext('ExtensionConfiguration handles failing extensions gracefully without failing other extensions', () async {
+    test('ExtensionConfiguration handles failing extensions gracefully without failing other extensions', () async {
       final logger = BufferLogger.test();
       final config = ExtensionConfiguration(
         extensions: <ConfigurationExtension>[
@@ -200,27 +221,71 @@ void main() {
       expect(groups.first.title, 'Secondary Configuration Extension');
     });
 
-    testWithoutContext(
-      'ConfigurationExtensionClient handles null and invalid responses gracefully',
-      () async {
-        final logger = BufferLogger.test();
-        final clientWithNull = ConfigurationExtensionClient(
-          _FakeExtensionConnection(),
-          logger: logger,
-        );
+    test('ConfigurationExtensionClient handles null and invalid responses gracefully', () async {
+      final logger = BufferLogger.test();
+      final clientWithNull = ConfigurationExtensionClient(
+        _FakeExtensionConnection(),
+        logger: logger,
+      );
 
-        expect(await clientWithNull.fetchTitle(), 'Tool Extension Configuration');
-        expect(await clientWithNull.getFeatureFlags(), isEmpty);
-        expect(await clientWithNull.getConfigurations(), isEmpty);
+      expect(await clientWithNull.fetchTitle(), 'Tool Extension Configuration');
+      expect(await clientWithNull.getFeatureFlags(), isEmpty);
+      expect(await clientWithNull.getConfigurations(), isEmpty);
 
-        final clientWithInvalid = ConfigurationExtensionClient(
-          _FakeExtensionConnection(response: 'not-a-list'),
-          logger: logger,
-        );
+      final clientWithInvalid = ConfigurationExtensionClient(
+        _FakeExtensionConnection(response: 'not-a-list'),
+        logger: logger,
+      );
 
-        expect(await clientWithInvalid.getFeatureFlags(), isEmpty);
-        expect(await clientWithInvalid.getConfigurations(), isEmpty);
-      },
-    );
+      expect(await clientWithInvalid.getFeatureFlags(), isEmpty);
+      expect(await clientWithInvalid.getConfigurations(), isEmpty);
+    });
+
+    test('ExtensionConfiguration logs warning with extension name and skips extension on ToolExtensionException', () async {
+      final logger = BufferLogger.test();
+      final manager = ExtensionManager(
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+      );
+      addTearDown(manager.dispose);
+      await manager.initialize(
+        entryPoints: <ExtensionEntryPoint>[
+          _domainErrorConfigEntryPoint,
+          _secondaryExtensionEntryPoint,
+        ],
+      );
+
+      final config = ExtensionConfiguration(
+        extensions: manager.configurationExtensions,
+        logger: logger,
+      );
+
+      final List<FeatureFlag> flags = await config.fetchFeatureFlags();
+      expect(flags.map((FeatureFlag f) => f.name), const <String>['enable-secondary-feature']);
+      expect(
+        logger.warningText,
+        contains('Extension "custom_config_ext": Config failed with actionable user error.'),
+      );
+
+      logger.clear();
+      final List<ConfigOption> options = await config.fetchConfigurations();
+      expect(options.map((ConfigOption o) => o.name), const <String>['secondary-config-key']);
+      expect(
+        logger.warningText,
+        contains(
+          'Extension "custom_config_ext": Config options failed with actionable user error.',
+        ),
+      );
+
+      logger.clear();
+      final List<ExtensionSettingsGroup> groups = await config.fetchExtensionSettings();
+      expect(groups, hasLength(1));
+      expect(groups.single.title, 'Secondary Configuration Extension');
+      expect(
+        logger.warningText,
+        contains('Extension "custom_config_ext": Config failed with actionable user error.'),
+      );
+    });
   });
 }

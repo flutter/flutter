@@ -24,21 +24,25 @@ const kIntegrationTestMethod = 'ext.flutter.integrationTest';
 
 class IntegrationTestTestDevice extends TestDevice {
   IntegrationTestTestDevice({
-    required this.id,
-    required this.device,
-    required this.debuggingOptions,
-    required this.userIdentifier,
+    required this.applicationPackageFactory,
     required this.compileExpression,
+    required this.debuggingOptions,
+    required this.device,
+    required this.id,
     required super.toolContext,
+    required this.userIdentifier,
     this.ddsShutdownTimeout = const Duration(seconds: 5),
+    this._vmServiceConnector = connectToVmService,
   });
 
+  final ApplicationPackageFactory applicationPackageFactory;
   final int id;
   final Device device;
   final DebuggingOptions debuggingOptions;
   final String? userIdentifier;
   final CompileExpression? compileExpression;
   final Duration ddsShutdownTimeout;
+  final VMServiceConnector _vmServiceConnector;
   late final _ddsLauncher = DartDevelopmentService(logger: toolContext.logger);
 
   ApplicationPackage? _applicationPackage;
@@ -53,7 +57,7 @@ class IntegrationTestTestDevice extends TestDevice {
     final ToolContext(:Artifacts artifacts, :FlutterVersion flutterVersion, :Logger logger) =
         toolContext;
     final TargetPlatform targetPlatform = await device.targetPlatform;
-    _applicationPackage = await ApplicationPackageFactory.instance?.getPackageForPlatform(
+    _applicationPackage = await applicationPackageFactory.getPackageForPlatform(
       targetPlatform,
       buildInfo: debuggingOptions.buildInfo,
     );
@@ -101,7 +105,7 @@ class IntegrationTestTestDevice extends TestDevice {
 
     logger.printTrace('test $id: Connecting to vm service');
     final FlutterVmService vmService =
-        await connectToVmService(
+        await _vmServiceConnector(
           vmServiceUri!,
           compileExpression: compileExpression,
           flutterVersion: flutterVersion,
