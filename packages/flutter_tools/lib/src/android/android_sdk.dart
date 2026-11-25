@@ -409,10 +409,20 @@ class AndroidSdk {
     if (!ndk.existsSync()) {
       return ndkDirectories;
     }
-    if (ndkVersion != null) {
-      final Directory requestedNdkDir = ndk.childDirectory(ndkVersion);
-      if (requestedNdkDir.existsSync()) {
-        ndkDirectories.add(requestedNdkDir);
+    final String? trimmedNdkVersion = ndkVersion?.trim();
+    Directory? requestedNdkDir;
+    if (trimmedNdkVersion != null && trimmedNdkVersion.isNotEmpty) {
+      final Directory directMatch = ndk.childDirectory(trimmedNdkVersion);
+      if (directMatch.existsSync()) {
+        requestedNdkDir = directMatch;
+      }
+    }
+    Version? parsedNdkVersion;
+    if (trimmedNdkVersion != null && trimmedNdkVersion.isNotEmpty) {
+      try {
+        parsedNdkVersion = Version.parse(trimmedNdkVersion);
+      } on Exception {
+        // Ignore parsing errors and fallback to string comparison.
       }
     }
     final ndkVersions = <Version>[
@@ -425,8 +435,22 @@ class AndroidSdk {
       }).whereType<Version>(),
       // Use latest NDK first.
     ]..sort((Version a, Version b) => -a.compareTo(b));
+    if (requestedNdkDir == null && parsedNdkVersion != null) {
+      for (final version in ndkVersions) {
+        if (version == parsedNdkVersion) {
+          requestedNdkDir = ndk.childDirectory(version.toString());
+          break;
+        }
+      }
+    }
+    if (requestedNdkDir != null) {
+      ndkDirectories.add(requestedNdkDir);
+    }
     for (final version in ndkVersions) {
-      if (ndkVersion != null && version.toString() == ndkVersion) {
+      if (trimmedNdkVersion != null &&
+          trimmedNdkVersion.isNotEmpty &&
+          (version.toString() == trimmedNdkVersion ||
+              (parsedNdkVersion != null && version == parsedNdkVersion))) {
         continue;
       }
       ndkDirectories.add(ndk.childDirectory(version.toString()));

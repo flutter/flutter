@@ -674,9 +674,14 @@ void main() {
           .childFile('clang$extension')
           .path;
       expect(sdk.getNdkClangPath(ndkVersion: '22.1.7171670'), firstVersionClangPath);
+      expect(sdk.getNdkClangPath(ndkVersion: '  22.1.7171670  '), firstVersionClangPath);
 
       // Check fallback to newest when requested version is not found.
       expect(sdk.getNdkClangPath(ndkVersion: 'nonexistent'), clang.path);
+
+      // Check fallback to newest when requested version is empty or blank.
+      expect(sdk.getNdkClangPath(ndkVersion: ''), clang.path);
+      expect(sdk.getNdkClangPath(ndkVersion: '   '), clang.path);
     });
 
     for (final envVar in <String>[kAndroidNdkHome, kAndroidNdkPath, kAndroidNdkRoot]) {
