@@ -2171,6 +2171,72 @@ void main() {
     );
     expect(tester.getSize(find.byType(ReorderableDelayedDragStartListener)), Size.zero);
   });
+
+  testWidgets(
+    'SliverReorderableList gap does not flip when dragging a taller item over a shorter one',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/194436.
+      const itemHeights = <double>[68, 85, 126, 97, 54, 106, 110, 119];
+      final items = List<int>.generate(itemHeights.length, (int index) => index);
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return CustomScrollView(
+                slivers: <Widget>[
+                  SliverReorderableList(
+                    itemCount: items.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final int item = items[index];
+                      return SizedBox(
+                        key: ValueKey<int>(item),
+                        height: itemHeights[item],
+                        child: ReorderableDragStartListener(
+                          index: index,
+                          child: Text('item $item'),
+                        ),
+                      );
+                    },
+                    onReorderItem: (int fromIndex, int toIndex) {
+                      setState(() {
+                        items.insert(toIndex, items.removeAt(fromIndex));
+                      });
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+
+      final Finder item4 = find.text('item 4');
+      final Finder item5 = find.text('item 5');
+      expect(tester.getTopLeft(item4).dy, 376.0);
+      expect(tester.getTopLeft(item5).dy, 430.0);
+
+      // Pick up item 5 (106px) and move it up into the top half of item 4 (54px).
+      final TestGesture drag = await tester.startGesture(tester.getCenter(item5));
+      await tester.pump(kPressTimeout);
+      await drag.moveBy(const Offset(0, -48.5));
+      await tester.pumpAndSettle();
+
+      // Item 4 is pushed down by item 5's extent: 376 + 106.
+      final double pushedDown = tester.getTopLeft(item4).dy;
+      expect(pushedDown, 482.0);
+
+      // Creep upward half a pixel at a time; item 4 must not flip back to 376.
+      for (var move = 0; move < 8; move++) {
+        await drag.moveBy(const Offset(0, -0.5));
+        await tester.pumpAndSettle();
+        expect(tester.getTopLeft(item4).dy, pushedDown);
+      }
+
+      await drag.up();
+      await tester.pumpAndSettle();
+    },
+  );
 }
 
 class TestList extends StatelessWidget {

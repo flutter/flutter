@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <list>
 #include <memory>
-#include <mutex>
+#include <optional>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -27,18 +27,38 @@ FontCollection::~FontCollection() {
   }
 }
 
-size_t FontCollection::GetFontManagersCount() const {
+size_t FontCollection::GetFontManagersCount() {
   return GetFontManagerOrder().size();
 }
 
 void FontCollection::SetupDefaultFontManager(
     uint32_t font_initialization_data) {
-  default_font_manager_ = GetDefaultFontManager(font_initialization_data);
+  default_font_manager_ = txt::GetDefaultFontManager(font_initialization_data);
+  default_font_manager_init_data_.reset();
   skt_collection_.reset();
+}
+
+void FontCollection::DeferDefaultFontManager(
+    uint32_t font_initialization_data) {
+  default_font_manager_.reset();
+  default_font_manager_init_data_ = font_initialization_data;
+  skt_collection_.reset();
+}
+
+sk_sp<SkFontMgr> FontCollection::GetDefaultFontManager() {
+  if (default_font_manager_init_data_.has_value()) {
+    // Resolve the default font manager on first usage since the last call to
+    // DeferDefaultFontManager.
+    default_font_manager_ =
+        txt::GetDefaultFontManager(*default_font_manager_init_data_);
+    default_font_manager_init_data_.reset();
+  }
+  return default_font_manager_;
 }
 
 void FontCollection::SetDefaultFontManager(sk_sp<SkFontMgr> font_manager) {
   default_font_manager_ = std::move(font_manager);
+  default_font_manager_init_data_.reset();
   skt_collection_.reset();
 }
 
@@ -58,7 +78,7 @@ void FontCollection::SetTestFontManager(sk_sp<SkFontMgr> font_manager) {
 }
 
 // Return the available font managers in the order they should be queried.
-std::vector<sk_sp<SkFontMgr>> FontCollection::GetFontManagerOrder() const {
+std::vector<sk_sp<SkFontMgr>> FontCollection::GetFontManagerOrder() {
   std::vector<sk_sp<SkFontMgr>> order;
   if (dynamic_font_manager_) {
     order.push_back(dynamic_font_manager_);
@@ -69,8 +89,9 @@ std::vector<sk_sp<SkFontMgr>> FontCollection::GetFontManagerOrder() const {
   if (test_font_manager_) {
     order.push_back(test_font_manager_);
   }
-  if (default_font_manager_) {
-    order.push_back(default_font_manager_);
+  sk_sp<SkFontMgr> default_font_manager = GetDefaultFontManager();
+  if (default_font_manager) {
+    order.push_back(default_font_manager);
   }
   return order;
 }
@@ -97,7 +118,7 @@ FontCollection::CreateSktFontCollection() {
     for (const std::string& family : GetDefaultFontFamilies()) {
       default_font_families.emplace_back(family);
     }
-    skt_collection_->setDefaultFontManager(default_font_manager_,
+    skt_collection_->setDefaultFontManager(GetDefaultFontManager(),
                                            default_font_families);
     skt_collection_->setAssetFontManager(asset_font_manager_);
     skt_collection_->setDynamicFontManager(dynamic_font_manager_);

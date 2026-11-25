@@ -326,13 +326,23 @@ class EngineImageShader extends EngineShader implements ui.ImageShader {
 }
 
 class EngineFragmentShader extends EngineShader implements ui.FragmentShader {
-  EngineFragmentShader(BackendFragmentShader delegate) {
+  EngineFragmentShader(BackendFragmentShader delegate, this._shaderData) {
     _backendShader = _cacheAndAttach(delegate) as BackendFragmentShader;
   }
 
   late final BackendFragmentShader _backendShader;
+
+  /// The uniform metadata of the program this shader was created from.
+  ///
+  /// Lookups that only depend on this metadata, such as resolving an image
+  /// sampler name to its index, live here so they are shared by all backends.
+  final ShaderData _shaderData;
   final Map<int, BackendImageShader> _imageSamplers = <int, BackendImageShader>{};
+  // _samplerImages preserves the caller's original ui.Image handles for
+  // samplerImages identity, while _retainedSamplerImages holds the
+  // shader-owned clones that keep CountedRef and ImageSource alive.
   final Map<int, ui.Image> _samplerImages = <int, ui.Image>{};
+  final Map<int, EngineImage> _retainedSamplerImages = <int, EngineImage>{};
 
   /// The images currently assigned to samplers in this shader.
   Iterable<ui.Image> get samplerImages => _samplerImages.values;
@@ -359,22 +369,40 @@ class EngineFragmentShader extends EngineShader implements ui.FragmentShader {
     ui.FilterQuality filterQuality = ui.FilterQuality.none,
   }) {
     assert(!debugDisposed, 'Tried to access uniforms on a disposed Shader: $this');
-    final BackendImageShader sampler = renderer.createImageShader(
-      image as EngineImage,
-      ui.TileMode.clamp,
-      ui.TileMode.clamp,
-      null,
-      filterQuality,
-    );
+    final EngineImage clonedImage = (image as EngineImage).clone();
+    BackendImageShader? sampler;
+    try {
+      sampler = renderer.createImageShader(
+        clonedImage,
+        ui.TileMode.clamp,
+        ui.TileMode.clamp,
+        null,
+        filterQuality,
+      );
+      _backendShader.setImageSampler(
+        index,
+        sampler,
+        image.width.toDouble(),
+        image.height.toDouble(),
+      );
+    } catch (_) {
+      try {
+        sampler?.dispose();
+      } finally {
+        clonedImage.dispose();
+      }
+      rethrow;
+    }
     final BackendImageShader? oldSampler = _imageSamplers[index];
     if (oldSampler != null) {
       _shaderFinalizer.detach(oldSampler);
       oldSampler.dispose();
     }
+    _retainedSamplerImages[index]?.dispose();
     _imageSamplers[index] = sampler;
     _samplerImages[index] = image;
+    _retainedSamplerImages[index] = clonedImage;
     _shaderFinalizer.attach(this, sampler, detach: sampler);
-    _backendShader.setImageSampler(index, sampler, image.width.toDouble(), image.height.toDouble());
   }
 
   @override
@@ -388,6 +416,10 @@ class EngineFragmentShader extends EngineShader implements ui.FragmentShader {
         sampler.dispose();
       }
       _imageSamplers.clear();
+      for (final EngineImage retainedImage in _retainedSamplerImages.values) {
+        retainedImage.dispose();
+      }
+      _retainedSamplerImages.clear();
       _samplerImages.clear();
     }
   }
@@ -408,7 +440,8 @@ class EngineFragmentShader extends EngineShader implements ui.FragmentShader {
   @override
   ui.UniformMat4Slot getUniformMat4(String name) => _backendShader.getUniformMat4(name);
   @override
-  ui.ImageSamplerSlot getImageSampler(String name) => _backendShader.getImageSampler(name);
+  ui.ImageSamplerSlot getImageSampler(String name) =>
+      EngineImageSamplerSlot._(this, name, _shaderData.getImageSamplerIndex(name));
   @override
   ui.UniformArray<ui.UniformFloatSlot> getUniformFloatArray(String name) =>
       _backendShader.getUniformFloatArray(name);
@@ -430,4 +463,30 @@ class EngineFragmentShader extends EngineShader implements ui.FragmentShader {
   @override
   ui.UniformArray<ui.UniformMat4Slot> getUniformMat4Array(String name) =>
       _backendShader.getUniformMat4Array(name);
+}
+
+/// A binding to an image sampler of an [EngineFragmentShader].
+///
+/// Calling [set] updates the image bound to the sampler.
+///
+/// Unlike the uniform float slots, which write directly into backend uniform
+/// storage, this slot is created by the frontend so that [set] goes through
+/// [EngineFragmentShader.setImageSampler], which owns the lifetime of the
+/// backend image shaders and keeps the bound image alive for recorded
+/// pictures.
+class EngineImageSamplerSlot implements ui.ImageSamplerSlot {
+  EngineImageSamplerSlot._(this._shader, this.name, this.shaderIndex);
+
+  final EngineFragmentShader _shader;
+
+  @override
+  final String name;
+
+  @override
+  final int shaderIndex;
+
+  @override
+  void set(ui.Image val) {
+    _shader.setImageSampler(shaderIndex, val);
+  }
 }

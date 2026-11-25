@@ -30,7 +30,6 @@
         "--simulator",
         "--no-lto",
         "--rbe",
-        "--no-goma",
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true"
       ],
@@ -49,13 +48,12 @@
           "--simulator",
           "--no-lto",
           "--no-rbe",
-          "--no-goma",
           "--gn-args=dart_dynamic_modules=true"
         ]
       },
       "properties": {
         "$flutter/osx_sdk": {
-          "sdk_version": "17c52"
+          "sdk_version": "27b52"
         }
       }
     },
@@ -79,7 +77,6 @@
         "--simulator-cpu=arm64",
         "--no-lto",
         "--rbe",
-        "--no-goma",
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true"
       ],
@@ -99,13 +96,12 @@
           "--simulator-cpu=arm64",
           "--no-lto",
           "--no-rbe",
-          "--no-goma",
           "--gn-args=dart_dynamic_modules=true"
         ]
       },
       "properties": {
         "$flutter/osx_sdk": {
-          "sdk_version": "17c52"
+          "sdk_version": "27b52"
         }
       }
     },
@@ -126,7 +122,6 @@
         "--runtime-mode",
         "debug",
         "--rbe",
-        "--no-goma",
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true"
       ],
@@ -147,13 +142,12 @@
           "--runtime-mode",
           "debug",
           "--no-rbe",
-          "--no-goma",
           "--gn-args=dart_dynamic_modules=true"
         ]
       },
       "properties": {
         "$flutter/osx_sdk": {
-          "sdk_version": "17c52"
+          "sdk_version": "27b52"
         }
       }
     },
@@ -174,7 +168,6 @@
         "--runtime-mode",
         "release",
         "--rbe",
-        "--no-goma",
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true"
       ],
@@ -195,13 +188,12 @@
           "--runtime-mode",
           "release",
           "--no-rbe",
-          "--no-goma",
           "--gn-args=dart_dynamic_modules=true"
         ]
       },
       "properties": {
         "$flutter/osx_sdk": {
-          "sdk_version": "17c52"
+          "sdk_version": "27b52"
         }
       }
     }

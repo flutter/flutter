@@ -634,11 +634,13 @@ IOSDeploy setUpIOSDeploy(ProcessManager processManager, {Artifacts? artifacts}) 
   );
 
   return IOSDeploy(
-    logger: BufferLogger.test(),
-    platform: macPlatform,
-    processManager: processManager,
-    artifacts: artifacts ?? Artifacts.test(),
-    cache: cache,
+    toolContext: FakeToolContext(
+      artifacts: artifacts ?? Artifacts.test(),
+      cache: cache,
+      logger: BufferLogger.test(),
+      platform: macPlatform,
+      processManager: processManager,
+    ),
   );
 }
 

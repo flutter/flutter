@@ -8,6 +8,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include "impeller/base/thread.h"
@@ -17,6 +18,10 @@
 
 namespace impeller {
 namespace testing {
+
+/// A replacement implementation of `vkGetPipelineCacheData`.
+using GetPipelineCacheDataCallback =
+    std::function<std::remove_pointer_t<PFN_vkGetPipelineCacheData>>;
 
 std::shared_ptr<std::vector<std::string>> GetMockVulkanFunctions(
     VkDevice device);
@@ -143,6 +148,16 @@ class MockVulkanContextBuilder {
     return *this;
   }
 
+  /// Sets the callback that implements `vkGetPipelineCacheData` for devices
+  /// created by this builder. It is called on whichever thread persists the
+  /// pipeline cache, which is usually a worker thread.
+  MockVulkanContextBuilder& SetGetPipelineCacheDataCallback(
+      GetPipelineCacheDataCallback get_pipeline_cache_data_callback) {
+    get_pipeline_cache_data_callback_ =
+        std::move(get_pipeline_cache_data_callback);
+    return *this;
+  }
+
   /// Make the next `count` calls to vkCreateImage for a fixed-rate-compressed
   /// image (one carrying a VkImageCompressionControlEXT in its pNext chain)
   /// fail with VK_ERROR_COMPRESSION_EXHAUSTED_EXT. Also advertises the
@@ -173,6 +188,7 @@ class MockVulkanContextBuilder {
       acquire_next_image_callback_;
   std::function<std::remove_pointer_t<PFN_vkWaitForFences>>
       wait_for_fences_callback_;
+  GetPipelineCacheDataCallback get_pipeline_cache_data_callback_;
   int compression_exhausted_create_image_failures_ = 0;
 };
 
@@ -185,6 +201,15 @@ std::vector<VkImageMemoryBarrier>& GetImageMemoryBarriers(
 /// @brief Returns the viewports passed to `vkCmdSetViewport` calls on the
 ///        given command buffer, in call order.
 const std::vector<VkViewport>& GetRecordedViewports(VkCommandBuffer buffer);
+
+/// @brief Returns the pipeline stages passed to `vkCmdWriteTimestamp` calls on
+///        the given command buffer, in call order.
+const std::vector<VkPipelineStageFlagBits>& GetRecordedTimestamps(
+    VkCommandBuffer buffer);
+
+/// @brief Returns the `queryCount` values passed to `vkGetQueryPoolResults`
+///        calls on the given device, in call order.
+std::vector<uint32_t> GetQueryPoolResultCounts(VkDevice device);
 
 }  // namespace testing
 }  // namespace impeller

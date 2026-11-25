@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:quiver/testing/async.dart';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -551,6 +553,37 @@ void testMain() {
       });
     });
 
+    test('invokeOnAlwaysUse24HourFormatChanged calls onAlwaysUse24HourFormatChanged', () {
+      var called = false;
+      void callback() {
+        called = true;
+      }
+
+      dispatcher.onAlwaysUse24HourFormatChanged = callback;
+      expect(dispatcher.onAlwaysUse24HourFormatChanged, same(callback));
+
+      dispatcher.invokeOnAlwaysUse24HourFormatChanged();
+      expect(called, isTrue);
+    });
+
+    test('invokeOnAlwaysUse24HourFormatChanged preserves the zone', () {
+      final Zone zone1 = Zone.current.fork();
+      final Zone zone2 = Zone.current.fork();
+      Zone? invokedZone;
+
+      zone1.runGuarded(() {
+        dispatcher.onAlwaysUse24HourFormatChanged = () {
+          invokedZone = Zone.current;
+        };
+      });
+
+      zone2.runGuarded(() {
+        dispatcher.invokeOnAlwaysUse24HourFormatChanged();
+      });
+
+      expect(invokedZone, same(zone1));
+    });
+
     test('adds the accessibility placeholder', () {
       final DomElement placeholder = domDocument.querySelector('flt-semantics-placeholder')!;
       expect(placeholder.isConnected, isTrue);
@@ -924,6 +957,169 @@ void testMain() {
         expect(() => parentElement.dispatchEvent(atEvent), returnsNormally);
         expect(parentElement.isConnected, isTrue);
         expect(childElement.isConnected, isTrue);
+      });
+    });
+
+    group('flutter-tester emulation (ignorePlatformMessages)', () {
+      setUp(() {
+        ui_web.TestEnvironment.setUp(const ui_web.TestEnvironment(ignorePlatformMessages: true));
+      });
+
+      tearDown(() {
+        ui_web.TestEnvironment.tearDown();
+      });
+
+      test('replies null asynchronously to an unhandled channel', () async {
+        var called = false;
+        final completer = Completer<ByteData?>();
+        ui.PlatformDispatcher.instance.sendPlatformMessage('flutter/test-unhandled', null, (
+          ByteData? reply,
+        ) {
+          called = true;
+          completer.complete(reply);
+        });
+        expect(called, isFalse);
+
+        final ByteData? reply = await completer.future.timeout(const Duration(seconds: 2));
+        expect(called, isTrue);
+        expect(reply, isNull);
+      });
+
+      test('replies null to flutter/assets without fetching', () async {
+        final warnings = <String>[];
+        final void Function(String) oldPrintWarning = printWarning;
+        printWarning = warnings.add;
+        addTearDown(() {
+          printWarning = oldPrintWarning;
+        });
+
+        final completer = Completer<ByteData?>();
+        ui.PlatformDispatcher.instance.sendPlatformMessage(
+          'flutter/assets',
+          ByteData.sublistView(utf8.encode('does-not-exist')),
+          completer.complete,
+        );
+
+        final ByteData? reply = await completer.future.timeout(const Duration(seconds: 2));
+        expect(reply, isNull);
+        expect(warnings, isEmpty);
+      });
+
+      test('invokes the callback in the registration zone', () async {
+        Object? callbackMarker;
+        final completer = Completer<ByteData?>();
+        runZoned(() {
+          ui.PlatformDispatcher.instance.sendPlatformMessage('flutter/test-unhandled', null, (
+            ByteData? reply,
+          ) {
+            callbackMarker = Zone.current[#marker];
+            completer.complete(reply);
+          });
+        }, zoneValues: <Object?, Object?>{#marker: 'x'});
+
+        final ByteData? reply = await completer.future.timeout(const Duration(seconds: 2));
+        expect(callbackMarker, 'x');
+        expect(reply, isNull);
+      });
+
+      test('does not create FakeAsync timers', () async {
+        var called = false;
+        final completer = Completer<ByteData?>();
+        FakeAsync().run((FakeAsync async) {
+          ui.PlatformDispatcher.instance.sendPlatformMessage('flutter/test-unhandled', null, (
+            ByteData? reply,
+          ) {
+            called = true;
+            completer.complete(reply);
+          });
+          expect(async.nonPeriodicTimerCount, 0);
+          expect(async.microtaskCount, 0);
+          async.elapse(const Duration(seconds: 1));
+          expect(called, isFalse);
+        });
+
+        final ByteData? reply = await completer.future.timeout(const Duration(seconds: 2));
+        expect(called, isTrue);
+        expect(reply, isNull);
+      });
+
+      test(
+        'handles null callbacks, null data, and flutter/debug-echo without side effects',
+        () async {
+          ui.PlatformDispatcher.instance.sendPlatformMessage('flutter/assets', null, null);
+          ui.PlatformDispatcher.instance.sendPlatformMessage('', ByteData(0), null);
+
+          final payload = ByteData(4)..setUint32(0, 0xdeadbeef);
+          final completer = Completer<ByteData?>();
+          ui.PlatformDispatcher.instance.sendPlatformMessage(
+            'flutter/debug-echo',
+            payload,
+            completer.complete,
+          );
+
+          final ByteData? reply = await completer.future.timeout(const Duration(seconds: 2));
+          expect(reply, isNull);
+        },
+      );
+
+      test(
+        'delivers in-flight null reply across tearDown and resumes normal dispatch afterward',
+        () async {
+          ui_web.TestEnvironment.setUp(const ui_web.TestEnvironment.flutterTester());
+          final payload = ByteData(4)..setUint32(0, 42);
+          final inFlight = Completer<ByteData?>();
+          ui.PlatformDispatcher.instance.sendPlatformMessage(
+            'flutter/debug-echo',
+            payload,
+            inFlight.complete,
+          );
+
+          ui_web.TestEnvironment.tearDown();
+          // Verify tearDown() is idempotent.
+          ui_web.TestEnvironment.tearDown();
+
+          final afterTearDown = Completer<ByteData?>();
+          ui.PlatformDispatcher.instance.sendPlatformMessage(
+            'flutter/debug-echo',
+            payload,
+            afterTearDown.complete,
+          );
+
+          expect(await inFlight.future.timeout(const Duration(seconds: 2)), isNull);
+          final ByteData? echoed = await afterTearDown.future.timeout(const Duration(seconds: 2));
+          expect(echoed, isNotNull);
+          expect(echoed!.getUint32(0), 42);
+        },
+      );
+
+      test('delivers burst of messages across engine channels in FIFO order', () async {
+        const channels = <String>[
+          'flutter/platform',
+          'flutter/assets',
+          'flutter/debug-echo',
+          'flutter/skia',
+          'flutter/navigation',
+        ];
+        final order = <int>[];
+        final replies = <ByteData?>[];
+        final done = Completer<void>();
+
+        for (var i = 0; i < channels.length; i++) {
+          ui.PlatformDispatcher.instance.sendPlatformMessage(channels[i], ByteData(0), (
+            ByteData? reply,
+          ) {
+            order.add(i);
+            replies.add(reply);
+            if (order.length == channels.length) {
+              done.complete();
+            }
+          });
+        }
+        expect(order, isEmpty);
+
+        await done.future.timeout(const Duration(seconds: 2));
+        expect(order, <int>[0, 1, 2, 3, 4]);
+        expect(replies, everyElement(isNull));
       });
     });
   }, skip: ui_web.browser.isFirefox);

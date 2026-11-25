@@ -12,8 +12,8 @@
 #include <vector>
 
 #include "flutter/fml/closure.h"
-#include "flutter/fml/status.h"
 #include "impeller/renderer/backend/vulkan/device_holder_vk.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace impeller {
 
@@ -34,9 +34,9 @@ class FenceWaiterVK {
   ///        the wait set if it succeeds.  The [completion_callback] will be
   ///        called when the submitted command completes and the fence is
   ///        signaled.
-  fml::Status AddFence(
+  absl::Status AddFence(
       vk::UniqueFence fence,
-      const std::function<fml::Status(vk::Fence)>& submit_callback,
+      const std::function<absl::Status(vk::Fence)>& submit_callback,
       fml::closure completion_callback);
 
  private:

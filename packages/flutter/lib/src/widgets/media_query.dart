@@ -177,11 +177,12 @@ enum _MediaQueryAspect {
 /// configuration of the device and are used and optionally consumed by widgets
 /// that position content within these insets. The padding value defines areas
 /// that might not be completely visible, like the display "notch" on the iPhone
-/// X. The viewInsets value defines areas that aren't visible at all, typically
-/// because they're obscured by the device's keyboard. Similar to viewInsets,
-/// viewPadding does not differentiate padding in areas that may be obscured.
-/// For example, by using the viewPadding property, padding would defer to the
-/// iPhone "safe area" regardless of whether a keyboard is showing.
+/// X. The viewInsets value defines areas reserved for system UI, typically the
+/// device's keyboard (which may be translucent or have rounded corners, leaving
+/// what is painted behind it visible). Unlike padding, viewPadding is not
+/// reduced when the viewInsets overlap it. For example, viewPadding still
+/// includes the iPhone "safe area" at the bottom of the screen while a keyboard
+/// is showing, whereas padding does not.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ceCo8U0XHqw}
 ///
@@ -283,9 +284,11 @@ class MediaQueryData {
   ///  * [WidgetsBindingObserver.didChangeTextScaleFactor] or
   ///    [dart:ui.PlatformDispatcher.onTextScaleFactorChanged],
   ///  * [WidgetsBindingObserver.didChangePlatformBrightness] or
-  ///    [dart:ui.PlatformDispatcher.onPlatformBrightnessChanged].
+  ///    [dart:ui.PlatformDispatcher.onPlatformBrightnessChanged],
+  ///  * [WidgetsBindingObserver.didChangeAlwaysUse24HourFormat] or
+  ///    [dart:ui.PlatformDispatcher.onAlwaysUse24HourFormatChanged].
   ///
-  /// The last three notifications are only relevant if no `platformData` is
+  /// The last four notifications are only relevant if no `platformData` is
   /// provided. If `platformData` is provided, callers should ensure to call
   /// this method again when it changes to keep the constructed [MediaQueryData]
   /// updated.
@@ -295,12 +298,30 @@ class MediaQueryData {
   /// constructor is primarily for use in the implementation of the framework
   /// itself.
   ///
+  /// A [debugViewMetricsOverrides] entry for `view` is applied by the view and
+  /// its [PlatformDispatcher], so it reaches this constructor only through
+  /// what they report: its geometry always, and its platform-wide values only
+  /// when `platformData` does not supply them. An ancestor [MediaQuery] that
+  /// does supply them is not overridden, just as it is not overridden by the
+  /// real platform settings.
+  ///
   /// See also:
   ///
   ///  * [MediaQuery.fromView], which constructs [MediaQueryData] from a provided
   ///    [FlutterView], makes it available to descendant widgets, and sets up
   ///    the appropriate notification listeners to keep the data updated.
   MediaQueryData.fromView(ui.FlutterView view, {MediaQueryData? platformData})
+    : this._fromView(
+        kDebugMode ? debugViewWithMetricsOverrides(view) : view,
+        platformData: platformData,
+      );
+
+  // A hop, so that everything below reads the view that applies the
+  // [debugViewMetricsOverrides] entry registered for `view`: in debug mode, a
+  // view read straight from a PlatformDispatcher the framework wrapped applies
+  // none of its own, and the one [debugViewWithMetricsOverrides] returns for it
+  // does.
+  MediaQueryData._fromView(ui.FlutterView view, {required MediaQueryData? platformData})
     : size = view.physicalSize / view.devicePixelRatio,
       devicePixelRatio = view.devicePixelRatio,
       _textScaleFactor = 1.0, // _textScaler is the source of truth.
@@ -485,11 +506,49 @@ class MediaQueryData {
   ///    platformBrightness defined for a [BuildContext].
   final Brightness platformBrightness;
 
-  /// The parts of the display that are completely obscured by system UI,
-  /// typically by the device's keyboard.
+  /// The parts of the display that are reserved for system UI, typically the
+  /// device's keyboard.
   ///
-  /// When a mobile device's keyboard is visible `viewInsets.bottom`
-  /// corresponds to the top of the keyboard.
+  /// When a mobile device's keyboard is visible, `viewInsets.bottom`
+  /// corresponds to the top of the keyboard. Because the keyboard or other
+  /// system UI may be translucent or have rounded corners, what is painted
+  /// behind it can remain visible. It is typically not interactive, however,
+  /// because the system UI receives the pointer events in the inset area.
+  /// Consider keeping content and controls out of the inset area while
+  /// continuing to paint backgrounds behind the system UI (for example, by
+  /// applying `viewInsets` as padding inside a background surface rather than
+  /// outside it).
+  ///
+  /// {@tool snippet}
+  /// This widget paints its color behind the keyboard and keeps its child above
+  /// the keyboard. The [ColoredBox] is outside the [Padding], so it fills the
+  /// inset area. The child is inside the [Padding], so it does not.
+  ///
+  /// ```dart
+  /// class KeyboardAwareSurface extends StatelessWidget {
+  ///   const KeyboardAwareSurface({super.key, required this.child});
+  ///
+  ///   final Widget child;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return ColoredBox(
+  ///       color: const Color(0xFFFFFFFF),
+  ///       child: Padding(
+  ///         padding: EdgeInsets.only(
+  ///           bottom: MediaQuery.viewInsetsOf(context).bottom,
+  ///         ),
+  ///         child: MediaQuery.removeViewInsets(
+  ///           context: context,
+  ///           removeBottom: true,
+  ///           child: child,
+  ///         ),
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
   ///
   /// This value is independent of the [padding] and [viewPadding]. viewPadding
   /// is measured from the edges of the [MediaQuery] widget's bounds. Padding is
@@ -2475,6 +2534,17 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
     // have a parent, we get our platform brightness from the PlatformDispatcher
     // and need to update our data in response to the PlatformDispatcher
     // changing its platform brightness setting.
+    if (_parentData == null) {
+      _updateData();
+    }
+  }
+
+  @override
+  void didChangeAlwaysUse24HourFormat() {
+    // If we have a parent, it dictates our 24-hour format preference. If we don't
+    // have a parent, we get our 24-hour format preference from the PlatformDispatcher
+    // and need to update our data in response to the PlatformDispatcher changing
+    // its 24-hour format preference.
     if (_parentData == null) {
       _updateData();
     }
