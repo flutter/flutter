@@ -24,7 +24,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -339,7 +339,7 @@ void main() {
       );
     });
 
-    testUsingContext('custom-devices delete command fails when feature is not enabled', () async {
+    test('custom-devices delete command fails when feature is not enabled', () async {
       final CommandRunner<void> runner = createCustomDevicesCommandRunner();
       expect(
         runner.run(const <String>['custom-devices', 'delete', '-d', 'testid']),
@@ -803,7 +803,7 @@ void main() {
       },
     );
 
-    testUsingContext('custom-devices delete command deletes device and creates backup', () async {
+    test('custom-devices delete command deletes device and creates backup', () async {
       final fs = MemoryFileSystem.test();
 
       final config = CustomDevicesConfig.test(
@@ -856,7 +856,7 @@ void main() {
       expect(fs.file('.flutter_custom_devices.json.bak').existsSync(), isFalse);
     });
 
-    testUsingContext('custom-devices delete command throws tool exit with invalid device id', () async {
+    test('custom-devices delete command throws tool exit with invalid device id', () async {
       final CommandRunner<void> runner = createCustomDevicesCommandRunner(featureEnabled: true);
       await expectLater(
         runner.run(const <String>['custom-devices', 'delete', '-d', 'testid']),

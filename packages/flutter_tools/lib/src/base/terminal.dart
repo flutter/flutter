@@ -17,15 +17,15 @@ enum TerminalColor { red, green, blue, cyan, yellow, magenta, grey }
 class OutputPreferences {
   OutputPreferences({bool? wrapText, int? wrapColumn, bool? showColor, io.Stdio? stdio})
     : _stdio = stdio,
-      wrapText = wrapText ?? stdio?.hasTerminal ?? false,
+      _wrapText = wrapText ?? stdio?.hasTerminal ?? false,
       _overrideWrapColumn = wrapColumn,
-      showColor = showColor ?? false;
+      _showColor = showColor ?? false;
 
   /// A version of this class for use in tests.
   OutputPreferences.test({
-    this.wrapText = false,
+    this._wrapText = false,
     int wrapColumn = kDefaultTerminalColumns,
-    this.showColor = false,
+    this._showColor = false,
   }) : _overrideWrapColumn = wrapColumn,
        _stdio = null;
 
@@ -39,7 +39,8 @@ class OutputPreferences {
   ///
   /// To determine if there's a terminal,
   /// [OutputPreferences] asks the context's stdio.
-  final bool wrapText;
+  bool get wrapText => _wrapText;
+  bool _wrapText;
 
   /// The terminal width used by the [wrapText] function if there is no terminal
   /// attached to [io.Stdio], --wrap is on, and --wrap-columns was not specified.
@@ -50,7 +51,7 @@ class OutputPreferences {
   /// will be wrapped. Ignored if [wrapText] is `false`.
   /// Defaults to the width of the output terminal, or to
   /// [kDefaultTerminalColumns] if not writing to a terminal.
-  final int? _overrideWrapColumn;
+  int? _overrideWrapColumn;
   int get wrapColumn {
     return _overrideWrapColumn ?? _stdio?.terminalColumns ?? kDefaultTerminalColumns;
   }
@@ -58,7 +59,21 @@ class OutputPreferences {
   /// Whether or not to output ANSI color codes when writing to the output
   /// terminal. Defaults to whatever [Platform.stdoutSupportsAnsi] says if
   /// writing to a terminal, and false otherwise.
-  final bool showColor;
+  bool get showColor => _showColor;
+  bool _showColor;
+
+  /// Updates output preferences from parsed command-line options.
+  void configure({bool? showColor, int? wrapColumn, bool? wrapText}) {
+    if (wrapText != null) {
+      _wrapText = wrapText;
+    }
+    if (wrapColumn != null) {
+      _overrideWrapColumn = wrapColumn;
+    }
+    if (showColor != null) {
+      _showColor = showColor;
+    }
+  }
 
   @override
   String toString() {
