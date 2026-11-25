@@ -280,6 +280,10 @@ class CompileMacOSFramework extends Target {
     final String buildOutputPath = environment.buildDir.path;
     final String? codeSizeDirectory = environment.defines[kCodeSizeDirectory];
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
+    final String? sdkRoot = environment.defines[kSdkRoot];
+    if (sdkRoot == null) {
+      throw MissingDefineException(kSdkRoot, 'compile_macos_framework');
+    }
     final dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final List<String> extraGenSnapshotOptions = decodeCommaSeparated(
       environment.defines,
@@ -290,6 +294,11 @@ class CompileMacOSFramework extends Target {
     if (targetPlatform != TargetPlatform.darwin) {
       throw Exception('compile_macos_framework is only supported for darwin TargetPlatform.');
     }
+
+    // sdkRoot is the SDK being built against (Xcode's SDKROOT for app
+    // builds), so xcrun reports that exact SDK's version. Look it up once
+    // here rather than once per architecture.
+    final String sdkVersion = await environment.xcode!.sdkVersion(sdkRoot);
 
     final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
@@ -322,6 +331,7 @@ class CompileMacOSFramework extends Target {
           outputPath: environment.fileSystem.path.join(buildOutputPath, cpuArch.darwinArchName),
           platform: TargetPlatform.darwin,
           cpuArch: cpuArch,
+          sdkVersion: sdkVersion,
           splitDebugInfo: splitDebugInfo,
           dartObfuscation: dartObfuscation,
           extraGenSnapshotOptions: extraGenSnapshotOptions,

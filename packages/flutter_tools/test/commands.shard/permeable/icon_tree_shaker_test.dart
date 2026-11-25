@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// tool_backend.dart is only used by the Linux and Windows CMake builds.
+@TestOn('windows || linux')
+library;
+
 import 'dart:io' as io;
 
 import 'package:flutter_tools/src/artifacts.dart';
@@ -97,12 +101,7 @@ void main() {
     expect(pubResult.exitCode, 0, reason: 'flutter pub get failed: ${pubResult.stderr}');
 
     // 4. Determine target platform
-    var targetPlatform = 'windows-x64';
-    if (io.Platform.isLinux) {
-      targetPlatform = 'linux-x64';
-    } else if (io.Platform.isMacOS) {
-      targetPlatform = 'darwin';
-    }
+    final targetPlatform = io.Platform.isLinux ? 'linux-x64' : 'windows-x64';
 
     // 5. Run tool_backend.dart
     final io.ProcessResult toolBackendResult = await io.Process.run(
@@ -123,19 +122,13 @@ void main() {
     );
 
     // 6. Verify font size
-    final String fontPath = io.Platform.isMacOS
-        ? fs.path.join(
-            projectDir,
-            'build',
-            'App.framework',
-            'Versions',
-            'A',
-            'Resources',
-            'flutter_assets',
-            'fonts',
-            'MaterialIcons-Regular.otf',
-          )
-        : fs.path.join(projectDir, 'build', 'flutter_assets', 'fonts', 'MaterialIcons-Regular.otf');
+    final String fontPath = fs.path.join(
+      projectDir,
+      'build',
+      'flutter_assets',
+      'fonts',
+      'MaterialIcons-Regular.otf',
+    );
 
     final File shakenFont = fs.file(fontPath);
     expect(shakenFont.existsSync(), isTrue);

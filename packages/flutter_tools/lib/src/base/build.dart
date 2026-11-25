@@ -112,13 +112,17 @@ class AOTSnapshotter {
   final GenSnapshot _genSnapshot;
 
   /// Builds an architecture-specific ahead-of-time compiled snapshot of the specified script.
+  ///
+  /// [sdkVersion] is the version of the SDK being built against, for example
+  /// '26.0'. It is required when [platform] is iOS or macOS, where it is
+  /// written to the `LC_BUILD_VERSION` load command of the snapshot.
   Future<int> build({
     required TargetPlatform platform,
     required BuildMode buildMode,
     required String mainPath,
     required String outputPath,
     CpuArch? cpuArch,
-    String? sdkRoot,
+    String? sdkVersion,
     List<String> extraGenSnapshotOptions = const <String>[],
     String? splitDebugInfo,
     required bool dartObfuscation,
@@ -189,11 +193,15 @@ class AOTSnapshotter {
       final minOSVersion = platform == TargetPlatform.ios
           ? FlutterDarwinPlatform.ios.deploymentTarget().toString()
           : FlutterDarwinPlatform.macos.deploymentTarget().toString();
+      if (sdkVersion == null) {
+        throw ArgumentError.notNull('sdkVersion');
+      }
       genSnapshotArgs.addAll(<String>[
         '--snapshot_kind=app-aot-macho-dylib',
         '--macho=$aotSharedLibrary',
         '--macho-object=$relocatableObject',
         '--macho-min-os-version=$minOSVersion',
+        '--macho-sdk-version=$sdkVersion',
         '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
         '--macho-install-name=@rpath/$frameworkName/$frameworkSnapshotName',
       ]);

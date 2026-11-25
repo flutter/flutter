@@ -134,7 +134,7 @@ void main() {
         await snapshotter.build(
           platform: TargetPlatform.ios,
           cpuArch: CpuArch.arm64,
-          sdkRoot: 'path/to/sdk',
+          sdkVersion: '27.0',
           buildMode: BuildMode.debug,
           mainPath: 'main.dill',
           outputPath: outputPath,
@@ -174,6 +174,42 @@ void main() {
       );
     });
 
+    testWithoutContext('throws if sdkVersion is missing for iOS', () async {
+      final String outputPath = fileSystem.path.join('build', 'foo');
+
+      await expectLater(
+        snapshotter.build(
+          platform: TargetPlatform.ios,
+          cpuArch: CpuArch.arm64,
+          buildMode: BuildMode.release,
+          mainPath: 'main.dill',
+          outputPath: outputPath,
+          dartObfuscation: false,
+          quiet: true,
+        ),
+        throwsArgumentError,
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('throws if sdkVersion is missing for macOS', () async {
+      final String outputPath = fileSystem.path.join('build', 'foo');
+
+      await expectLater(
+        snapshotter.build(
+          platform: TargetPlatform.darwin,
+          cpuArch: CpuArch.arm64,
+          buildMode: BuildMode.release,
+          mainPath: 'main.dill',
+          outputPath: outputPath,
+          dartObfuscation: false,
+          quiet: true,
+        ),
+        throwsArgumentError,
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
     testWithoutContext('builds iOS snapshot with dwarfStackTraces', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
       final String debugPath = fileSystem.path.join('foo', 'app.ios-arm64.symbols');
@@ -191,6 +227,7 @@ void main() {
             '--macho=$outputPath/App.framework/App',
             '--macho-object=$outputPath/app.o',
             '--macho-min-os-version=15.0',
+            '--macho-sdk-version=27.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             '--dwarf-stack-traces',
@@ -228,7 +265,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         cpuArch: CpuArch.arm64,
-        sdkRoot: 'path/to/sdk',
+        sdkVersion: '27.0',
         splitDebugInfo: 'foo',
         dartObfuscation: false,
       );
@@ -253,6 +290,7 @@ void main() {
             '--macho=$outputPath/App.framework/App',
             '--macho-object=$outputPath/app.o',
             '--macho-min-os-version=15.0',
+            '--macho-sdk-version=27.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             '--obfuscate',
@@ -288,7 +326,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         cpuArch: CpuArch.arm64,
-        sdkRoot: 'path/to/sdk',
+        sdkVersion: '27.0',
         dartObfuscation: true,
       );
 
@@ -312,6 +350,7 @@ void main() {
             '--macho=$outputPath/App.framework/App',
             '--macho-object=$outputPath/app.o',
             '--macho-min-os-version=15.0',
+            '--macho-sdk-version=27.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             'main.dill',
@@ -346,7 +385,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         cpuArch: CpuArch.arm64,
-        sdkRoot: 'path/to/sdk',
+        sdkVersion: '27.0',
         dartObfuscation: false,
       );
 
