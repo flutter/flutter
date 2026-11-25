@@ -21,7 +21,7 @@ class DeviceBufferMTL final
   // |DeviceBuffer|
   ~DeviceBufferMTL() override;
 
-  const id<MTLBuffer>& GetMTLBuffer() const { return buffer_; }
+  id<MTLBuffer> GetMTLBuffer() const { return buffer_; }
 
  private:
   friend class AllocatorMTL;

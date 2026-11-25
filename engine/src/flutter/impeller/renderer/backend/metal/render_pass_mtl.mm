@@ -226,7 +226,8 @@ static bool Bind(PassBindingsCacheMTL& pass,
   }
 
   const TextureMTL& texture_mtl = TextureMTL::Cast(texture);
-  const id<MTLTexture>& resolved_texture = texture_mtl.GetResolvedMTLTexture();
+  __unsafe_unretained id<MTLTexture> resolved_texture =
+      texture_mtl.GetResolvedMTLTexture();
   return pass.SetTexture(stage, bind_index,
                          resolved_texture ? resolved_texture
                                           : texture_mtl.GetMTLTexture()) &&

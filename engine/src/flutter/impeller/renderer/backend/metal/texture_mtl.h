@@ -41,9 +41,7 @@ class TextureMTL final : public Texture,
   /// The texture, without acquiring it or touching its reference count, for
   /// use once per bind. Nil for a drawable, which only `GetMTLTexture` can
   /// acquire.
-  const id<MTLTexture>& GetResolvedMTLTexture() const {
-    return resolved_texture_;
-  }
+  id<MTLTexture> GetResolvedMTLTexture() const { return resolved_texture_; }
 
   bool IsWrapped() const;
 
