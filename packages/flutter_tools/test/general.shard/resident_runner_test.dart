@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/bundle.dart';
@@ -2364,6 +2365,56 @@ flutter:
       }),
     );
   });
+
+  test('FlutterDevice.create uses provided ResidentCompilerFactory', () async {
+    final expectedCompiler = FakeResidentCompiler();
+    final compilerFactory = _FakeResidentCompilerFactory(expectedCompiler);
+    final device = FakeDevice();
+    final FlutterDevice flutterDevice = await FlutterDevice.create(
+      device,
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        config: config,
+        fs: fs,
+        processManager: FakeProcessManager.any(),
+      ),
+      buildInfo: BuildInfo.debug,
+      target: null,
+      residentCompilerFactory: compilerFactory,
+      targetModelOverride: TargetModel.flutterRunner,
+    );
+
+    expect(flutterDevice.generator, same(expectedCompiler));
+    expect(compilerFactory.lastTargetPlatform, TargetPlatform.android_arm);
+    expect(compilerFactory.lastTargetModelOverride, TargetModel.flutterRunner);
+  });
+}
+
+class _FakeResidentCompilerFactory implements ResidentCompilerFactory {
+  _FakeResidentCompilerFactory(this._compiler);
+
+  final ResidentCompiler _compiler;
+  TargetPlatform? lastTargetPlatform;
+  TargetModel? lastTargetModelOverride;
+
+  @override
+  ResidentCompiler create({
+    required TargetPlatform targetPlatform,
+    required BuildInfo buildInfo,
+    required Logger logger,
+    required ProcessManager processManager,
+    required Artifacts artifacts,
+    required Platform platform,
+    required FileSystem fileSystem,
+    required ShutdownHooks shutdownHooks,
+    required Config config,
+    bool testCompilation = false,
+    TargetModel? targetModelOverride,
+  }) {
+    lastTargetPlatform = targetPlatform;
+    lastTargetModelOverride = targetModelOverride;
+    return _compiler;
+  }
 }
 
 class TestHotRunner extends HotRunner {
