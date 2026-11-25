@@ -134,7 +134,6 @@ abstract class DriverService {
     String? userIdentifier,
     String? mainPath,
     Map<String, Object> platformArgs = const <String, Object>{},
-    Map<String, String> webDefines = const <String, String>{},
   });
 
   /// If --use-existing-app is provided, configured the correct VM Service URI.
@@ -186,7 +185,6 @@ class FlutterDriverService extends DriverService {
     String? userIdentifier,
     Map<String, Object> platformArgs = const <String, Object>{},
     String? mainPath,
-    Map<String, String> webDefines = const <String, String>{},
   }) async {
     if (buildInfo.isRelease) {
       throwToolExit(

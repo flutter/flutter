@@ -1518,6 +1518,17 @@ void Shell::OnAnimatorUpdateLatestFrameTargetTime(
 }
 
 // |Animator::Delegate|
+void Shell::OnAnimatorFrameBuilt(fml::TimePoint build_start,
+                                 fml::TimePoint build_end) {
+  FML_DCHECK(is_set_up_);
+  FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
+
+  if (settings_.frame_built_callback) {
+    settings_.frame_built_callback(build_start, build_end);
+  }
+}
+
+// |Animator::Delegate|
 void Shell::OnAnimatorDraw(std::shared_ptr<FramePipeline> pipeline) {
   FML_DCHECK(is_set_up_);
 

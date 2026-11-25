@@ -994,6 +994,66 @@ TEST_F(ShellTest, FrameRasterizedCallbackIsCalled) {
   DestroyShell(std::move(shell));
 }
 
+TEST_F(ShellTest, FrameBuiltCallbackIsCalled) {
+  auto settings = CreateSettingsForFixture();
+  TaskRunners task_runners = GetTaskRunnersForFixture();
+
+  int build_callback_count = 0;
+  fml::TimePoint build_start;
+  fml::TimePoint build_end;
+  bool called_on_ui_thread = false;
+  fml::AutoResetWaitableEvent build_latch;
+  settings.frame_built_callback =
+      [&build_callback_count, &build_start, &build_end, &called_on_ui_thread,
+       &build_latch, ui_task_runner = task_runners.GetUITaskRunner()](
+          fml::TimePoint start, fml::TimePoint end) {
+        ++build_callback_count;
+        build_start = start;
+        build_end = end;
+        called_on_ui_thread = ui_task_runner->RunsTasksOnCurrentThread();
+        build_latch.Signal();
+      };
+
+  FrameTiming rasterized_timing;
+  fml::AutoResetWaitableEvent raster_latch;
+  settings.frame_rasterized_callback = [&rasterized_timing,
+                                        &raster_latch](const FrameTiming& t) {
+    rasterized_timing = t;
+    raster_latch.Signal();
+  };
+
+  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
+
+  // We MUST put |start| after |CreateShell()| because the clock source will be
+  // reset through |TimePoint::SetClockSource()| in
+  // |DartVMInitializer::Initialize()| within |CreateShell()|.
+  fml::TimePoint start = fml::TimePoint::Now();
+
+  // Create the surface needed by rasterizer.
+  PlatformViewNotifyCreated(shell.get());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("emptyMain");
+
+  RunEngine(shell.get(), std::move(configuration));
+
+  PumpOneFrame(shell.get());
+
+  build_latch.Wait();
+  fml::TimePoint finish = fml::TimePoint::Now();
+  raster_latch.Wait();
+
+  EXPECT_EQ(build_callback_count, 1);
+  EXPECT_TRUE(called_on_ui_thread);
+  EXPECT_GE(build_start, start);
+  EXPECT_LE(build_start, build_end);
+  EXPECT_LE(build_end, finish);
+  EXPECT_EQ(build_start, rasterized_timing.Get(FrameTiming::kBuildStart));
+  EXPECT_EQ(build_end, rasterized_timing.Get(FrameTiming::kBuildFinish));
+
+  DestroyShell(std::move(shell), task_runners);
+}
+
 TEST_F(ShellTest, ExternalEmbedderNoThreadMerger) {
   auto settings = CreateSettingsForFixture();
   fml::AutoResetWaitableEvent end_frame_latch;
