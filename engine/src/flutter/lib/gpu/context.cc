@@ -162,6 +162,33 @@ extern bool InternalFlutterGpu_Context_GetSupportsCompute(
   return flutter::gpu::SupportsCompute(wrapper->GetContext());
 }
 
+// A render target must be both attachable and creatable, so this is the
+// smaller of the attachment limit and the allocator's texture size limit, which
+// on Vulkan are separate (maxFramebufferWidth/Height and maxImageDimension2D)
+// and not ordered by the spec.
+//
+// TODO(spydon): On OpenGL ES, a render-target-only depth/stencil texture, or an
+// MSAA color texture without implicit resolve, is a renderbuffer, bounded by
+// GL_MAX_RENDERBUFFER_SIZE rather than GL_MAX_TEXTURE_SIZE.
+// CapabilitiesGLES::GetMaximumRenderPassAttachmentSize should take that and
+// GL_MAX_VIEWPORT_DIMS into account.
+extern uint32_t InternalFlutterGpu_Context_GetMaximumRenderTargetSize(
+    flutter::gpu::Context* wrapper,
+    int dimension) {
+  const impeller::Context& context = wrapper->GetContext();
+  const impeller::ISize size =
+      context.GetCapabilities()->GetMaximumRenderPassAttachmentSize().Min(
+          context.GetResourceAllocator()->GetMaxTextureSizeSupported());
+  switch (dimension) {
+    case 0:
+      return static_cast<uint32_t>(size.width);
+    case 1:
+      return static_cast<uint32_t>(size.height);
+    default:
+      return 0u;
+  }
+}
+
 // The compute limits are zero wherever Flutter GPU does not support compute,
 // whatever the backend reports.
 

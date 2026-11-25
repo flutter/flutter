@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_kernel_compiler.dart';
@@ -22,6 +23,7 @@ import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:package_config/package_config.dart';
+import 'package:stream_channel/isolate_channel.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -121,6 +123,99 @@ final class _NotificationTestService extends ToolExtensionService {
 void _notificationExtensionEntryPoint(SendPort sendPort) {
   unawaited(
     ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_NotificationTestService()]),
+  );
+}
+
+final class _LogTestService extends ToolExtensionService {
+  @override
+  String get namespace => 'log_test';
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    return <String, ExtensionRpcHandler>{
+      'emitAll': (Map<String, Object?> _) {
+        log('info message');
+        log('warning message', level: .warning);
+        log('error message', level: .error);
+        log('trace message', level: .trace);
+        return 'ok';
+      },
+      'emitAnsi': (Map<String, Object?> _) {
+        log('\u001B[32mGreen unclosed');
+        log('\u001B[1;33mBold yellow\u001B[m warning', level: .warning);
+        log('Plain trace', level: .trace);
+        return 'ok';
+      },
+      'emitControlSequences': (Map<String, Object?> _) {
+        log('\u001B[2K\u001B[1ACleared\r\u0007\u0008\u007F\u009B\tindented\nnext line');
+        log(
+          '\u001B]0;Window Title\u0007\u001B]8;;https://flutter.dev\u001B\\Docs\u001B]8;;\u001B\\',
+          level: .warning,
+        );
+        log('\u001B[2K\u001B[32mGreen cleared\u001B]0;Title\u0007', level: .error);
+        return 'ok';
+      },
+      'emitExplicitTimestamp': (Map<String, Object?> _) {
+        log('explicit timestamp', timestamp: DateTime(2026, 11, 18, 12, 30));
+        return 'ok';
+      },
+      'emitMalformed': (Map<String, Object?> _) {
+        sendNotification(ToolExtensionEntryPoint.logNotificationMethod, const <String, Object?>{
+          ExtensionLogMessage.levelKey: 'unknown',
+          ExtensionLogMessage.messageKey: 'bad',
+        });
+        return 'ok';
+      },
+    };
+  }
+}
+
+void _logExtensionEntryPoint(SendPort sendPort) {
+  unawaited(
+    ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+      _LogTestService(),
+    ], extensionName: 'log_ext'),
+  );
+}
+
+final class _LogInInitService extends ToolExtensionService {
+  @override
+  String get namespace => 'log_init';
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    log('init first');
+    log('init second', level: .warning);
+    return <String, ExtensionRpcHandler>{
+      'emitAfterInit': (Map<String, Object?> _) {
+        log('post-handshake');
+        return 'ok';
+      },
+    };
+  }
+}
+
+void _logInInitExtensionEntryPoint(SendPort sendPort) {
+  unawaited(
+    ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+      _LogInInitService(),
+    ], extensionName: 'init_log_ext'),
+  );
+}
+
+final class _ReservedLogMethodService extends ToolExtensionService {
+  @override
+  String get namespace => 'extension';
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    return <String, ExtensionRpcHandler>{'log': (Map<String, Object?> _) => null};
+  }
+}
+
+void _reservedLogMethodEntryPoint(SendPort sendPort) {
+  unawaited(
+    ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_ReservedLogMethodService()]),
   );
 }
 
@@ -990,62 +1085,263 @@ void main() {
         expect(shutdownServices, const <String>['gated_service']);
       },
     );
+
+    test('routes extension.log notifications for all levels to host Logger', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _logExtensionEntryPoint,
+        logger: logger,
+      );
+      addTearDown(connection.dispose);
+
+      expect(await connection.sendRequest('log_test.emitAll'), 'ok');
+      await pumpEventQueue();
+
+      expect(logger.statusText, contains('[log_ext] info message'));
+      expect(logger.warningText, contains('[log_ext] warning message'));
+      expect(logger.errorText, contains('[log_ext] error message'));
+      expect(logger.traceText, contains('[log_ext] trace message'));
+    });
+
+    test('ToolExtensionService.log populates default UTC timestamp and normalizes explicit timestamps to UTC', () async {
+      final receivePort = ReceivePort();
+      addTearDown(receivePort.close);
+      final Isolate isolate = await Isolate.spawn(_logExtensionEntryPoint, receivePort.sendPort);
+      addTearDown(() => isolate.kill(priority: Isolate.immediate));
+
+      final hostPeer = json_rpc.Peer.withoutJson(
+        IsolateChannel<Object?>.connectReceive(receivePort),
+      );
+      addTearDown(hostPeer.close);
+      final notifications = <Map<String, Object?>>[];
+      hostPeer.registerMethod(ToolExtensionEntryPoint.logNotificationMethod, (
+        json_rpc.Parameters params,
+      ) {
+        if (params.value case final Map<String, Object?> payload) {
+          notifications.add(payload);
+        }
+      });
+      unawaited(hostPeer.listen());
+
+      final DateTime before = DateTime.now().toUtc();
+      expect(await hostPeer.sendRequest('log_test.emitAll'), 'ok');
+      expect(await hostPeer.sendRequest('log_test.emitExplicitTimestamp'), 'ok');
+      await pumpEventQueue();
+      final DateTime after = DateTime.now().toUtc();
+
+      expect(notifications, hasLength(5));
+      for (final Map<String, Object?> payload in notifications.take(4)) {
+        expect(payload[ExtensionLogMessage.timestampKey], allOf(isA<String>(), endsWith('Z')));
+        final parsed = ExtensionLogMessage.fromJson(payload);
+        expect(parsed.timestamp, isNotNull);
+        expect(parsed.timestamp!.isUtc, isTrue);
+        expect(parsed.timestamp!.isBefore(before), isFalse);
+        expect(parsed.timestamp!.isAfter(after), isFalse);
+      }
+
+      expect(
+        notifications.last[ExtensionLogMessage.timestampKey],
+        DateTime(2026, 11, 18, 12, 30).toUtc().toIso8601String(),
+      );
+
+      await hostPeer.sendRequest(ToolExtensionEntryPoint.shutdownMethod);
+    });
+
+    test(
+      'strips ANSI SGR escape sequences from extension.log when !logger.supportsColor',
+      () async {
+        final logger = BufferLogger.test();
+        expect(logger.supportsColor, isFalse);
+        final ExtensionConnection connection = await ExtensionConnection.spawn(
+          _logExtensionEntryPoint,
+          logger: logger,
+        );
+        addTearDown(connection.dispose);
+
+        expect(await connection.sendRequest('log_test.emitAnsi'), 'ok');
+        await pumpEventQueue();
+
+        expect(logger.statusText, '[log_ext] Green unclosed\n');
+        expect(logger.warningText, '[log_ext] Bold yellow warning\n');
+        expect(logger.traceText, contains('[log_ext] Plain trace\n'));
+      },
+    );
+
+    test(
+      'appends trailing ANSI reset on color terminals when extension.log contains ANSI sequences',
+      () async {
+        final logger = BufferLogger.test(terminal: Terminal.test(supportsColor: true));
+        expect(logger.supportsColor, isTrue);
+        final ExtensionConnection connection = await ExtensionConnection.spawn(
+          _logExtensionEntryPoint,
+          logger: logger,
+        );
+        addTearDown(connection.dispose);
+
+        expect(await connection.sendRequest('log_test.emitAnsi'), 'ok');
+        await pumpEventQueue();
+
+        expect(logger.statusText, '[log_ext] \u001B[32mGreen unclosed${AnsiTerminal.resetAll}\n');
+        expect(
+          logger.warningText,
+          '[log_ext] \u001B[1;33mBold yellow\u001B[m warning${AnsiTerminal.resetAll}\n',
+        );
+        expect(logger.traceText, contains('[log_ext] Plain trace\n'));
+        expect(logger.traceText, isNot(contains('[log_ext] Plain trace${AnsiTerminal.resetAll}')));
+      },
+    );
+
+    test('buffers logs emitted during ToolExtensionService.initialize and prefixes with resolved extensionName', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _logInInitExtensionEntryPoint,
+        logger: logger,
+      );
+      addTearDown(connection.dispose);
+
+      expect(connection.extensionName, 'init_log_ext');
+      expect(await connection.sendRequest('log_init.emitAfterInit'), 'ok');
+      await pumpEventQueue();
+
+      expect(logger.statusText, '[init_log_ext] init first\n[init_log_ext] post-handshake\n');
+      expect(logger.warningText, '[init_log_ext] init second\n');
+      expect(logger.statusText, isNot(contains(ExtensionConnection.defaultExtensionName)));
+      expect(logger.warningText, isNot(contains(ExtensionConnection.defaultExtensionName)));
+    });
+
+    test(
+      'strips non-SGR CSI, OSC, and C0 control sequences while preserving tabs and newlines',
+      () async {
+        final noColorLogger = BufferLogger.test();
+        final ExtensionConnection noColorConnection = await ExtensionConnection.spawn(
+          _logExtensionEntryPoint,
+          logger: noColorLogger,
+        );
+        addTearDown(noColorConnection.dispose);
+
+        expect(await noColorConnection.sendRequest('log_test.emitControlSequences'), 'ok');
+        await pumpEventQueue();
+
+        expect(noColorLogger.statusText, '[log_ext] Cleared\tindented\nnext line\n');
+        expect(noColorLogger.warningText, '[log_ext] Docs\n');
+        expect(noColorLogger.errorText, '[log_ext] Green cleared\n');
+
+        final colorLogger = BufferLogger.test(terminal: Terminal.test(supportsColor: true));
+        final ExtensionConnection colorConnection = await ExtensionConnection.spawn(
+          _logExtensionEntryPoint,
+          logger: colorLogger,
+        );
+        addTearDown(colorConnection.dispose);
+
+        expect(await colorConnection.sendRequest('log_test.emitControlSequences'), 'ok');
+        await pumpEventQueue();
+
+        expect(colorLogger.statusText, '[log_ext] Cleared\tindented\nnext line\n');
+        expect(colorLogger.warningText, '[log_ext] Docs\n');
+        expect(
+          colorLogger.errorText,
+          '[log_ext] \u001B[32mGreen cleared${AnsiTerminal.resetAll}\n',
+        );
+      },
+    );
+
+    test('logs warning on malformed extension.log notification', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _logExtensionEntryPoint,
+        logger: logger,
+      );
+      addTearDown(connection.dispose);
+
+      expect(await connection.sendRequest('log_test.emitMalformed'), 'ok');
+      await pumpEventQueue();
+
+      expect(
+        logger.warningText,
+        contains('Extension "log_ext" sent malformed "extension.log" notification'),
+      );
+    });
+
+    test('rejects registering reserved extension.log RPC method', () async {
+      final logger = BufferLogger.test();
+      await expectLater(
+        ExtensionConnection.spawn(_reservedLogMethodEntryPoint, logger: logger),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('Reserved RPC method registered: "extension.log"'),
+          ),
+        ),
+      );
+    });
+
+    test('onNotification throws ArgumentError for extension.log', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _dummyExtensionEntryPoint,
+        logger: logger,
+      );
+      addTearDown(connection.dispose);
+
+      expect(
+        () => connection.onNotification(ToolExtensionEntryPoint.logNotificationMethod),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
   });
 
   group('ProjectExtensionFinder', () {
-    testWithoutContext(
-      'returns empty list before package_config.json creation and succeeds after',
-      () async {
-        final fs = MemoryFileSystem.test();
-        final Directory projectDir = fs.directory('/workspace/app')..createSync(recursive: true);
-        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+    test('returns empty list before package_config.json creation and succeeds after', () async {
+      final fs = MemoryFileSystem.test();
+      final Directory projectDir = fs.directory('/workspace/app')..createSync(recursive: true);
+      projectDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: app
 dev_dependencies:
   my_ext:
     path: ../my_ext
 ''');
-        _writeExtensionPackage(fs.directory('/workspace/my_ext'), name: 'my_ext');
+      _writeExtensionPackage(fs.directory('/workspace/my_ext'), name: 'my_ext');
 
-        final finder = ProjectExtensionFinder(fileSystem: fs, logger: BufferLogger.test());
-        expect(await finder.findProjectExtensions(startDirectory: projectDir), isEmpty);
+      final finder = ProjectExtensionFinder(fileSystem: fs, logger: BufferLogger.test());
+      expect(await finder.findProjectExtensions(startDirectory: projectDir), isEmpty);
 
-        _writePackageConfig(projectDir, const <String, String>{
-          'app': '../',
-          'my_ext': '../../my_ext',
-        });
+      _writePackageConfig(projectDir, const <String, String>{
+        'app': '../',
+        'my_ext': '../../my_ext',
+      });
 
-        final List<DiscoveredProjectExtension> afterPubGet = await finder.findProjectExtensions(
-          startDirectory: projectDir,
-        );
-        expect(afterPubGet, hasLength(1));
-        final DiscoveredProjectExtension ext = afterPubGet.single;
-        expect(ext.name, 'my_ext');
-        expect(
-          ext.entrypointUri,
-          fs.file('/workspace/my_ext/extension/flutter_tools/extension.dart').uri,
-        );
-        expect(ext.rootUri, fs.directory('/workspace/my_ext').uri);
-        expect(ext.packageUri, fs.directory('/workspace/my_ext/lib').uri);
-        expect(ext.workspaceRootUri, fs.directory('/workspace/app').uri);
-        expect(ext, _discoveredExtension(fs));
-        expect(ext.hashCode, _discoveredExtension(fs).hashCode);
-        expect(
-          ext.toString(),
-          allOf(
-            contains('name: my_ext'),
-            contains('rootUri: file:///workspace/my_ext/'),
-            contains('packageUri: file:///workspace/my_ext/lib/'),
-            contains(
-              'entrypointUri: file:///workspace/my_ext/extension/flutter_tools/extension.dart',
-            ),
-            contains('packageConfigUri: file:///workspace/app/.dart_tool/package_config.json'),
-            contains('workspaceRootUri: file:///workspace/app/'),
+      final List<DiscoveredProjectExtension> afterPubGet = await finder.findProjectExtensions(
+        startDirectory: projectDir,
+      );
+      expect(afterPubGet, hasLength(1));
+      final DiscoveredProjectExtension ext = afterPubGet.single;
+      expect(ext.name, 'my_ext');
+      expect(
+        ext.entrypointUri,
+        fs.file('/workspace/my_ext/extension/flutter_tools/extension.dart').uri,
+      );
+      expect(ext.rootUri, fs.directory('/workspace/my_ext').uri);
+      expect(ext.packageUri, fs.directory('/workspace/my_ext/lib').uri);
+      expect(ext.workspaceRootUri, fs.directory('/workspace/app').uri);
+      expect(ext, _discoveredExtension(fs));
+      expect(ext.hashCode, _discoveredExtension(fs).hashCode);
+      expect(
+        ext.toString(),
+        allOf(
+          contains('name: my_ext'),
+          contains('rootUri: file:///workspace/my_ext/'),
+          contains('packageUri: file:///workspace/my_ext/lib/'),
+          contains(
+            'entrypointUri: file:///workspace/my_ext/extension/flutter_tools/extension.dart',
           ),
-        );
-      },
-    );
+          contains('packageConfigUri: file:///workspace/app/.dart_tool/package_config.json'),
+          contains('workspaceRootUri: file:///workspace/app/'),
+        ),
+      );
+    });
 
-    testWithoutContext('filters out transitive extensions without stating them and ignores packages without extension/flutter_tools/extension.dart', () async {
+    test('filters out transitive extensions without stating them and ignores packages without extension/flutter_tools/extension.dart', () async {
       var transitiveStatted = false;
       final fs = MemoryFileSystem.test(
         opHandle: (String context, FileSystemOp operation) {
@@ -1083,7 +1379,7 @@ dependencies:
       expect(logger.warningText, isEmpty);
     });
 
-    testWithoutContext('handles malformed or unreadable pubspec.yaml without throwing ToolExit under ErrorHandlingFileSystem', () async {
+    test('handles malformed or unreadable pubspec.yaml without throwing ToolExit under ErrorHandlingFileSystem', () async {
       var failRead = false;
       final delegateFs = MemoryFileSystem.test(
         opHandle: (String context, FileSystemOp operation) {
@@ -1124,12 +1420,10 @@ dependencies:
       expect(logger.traceText, contains('failed to read "/workspace/app/pubspec.yaml"'));
     });
 
-    testWithoutContext(
-      'unions direct dependencies from Pub workspace root and member pubspec.yaml',
-      () async {
-        final fs = MemoryFileSystem.test();
-        final Directory workspaceRoot = fs.directory('/workspace')..createSync(recursive: true);
-        workspaceRoot.childFile('pubspec.yaml').writeAsStringSync('''
+    test('unions direct dependencies from Pub workspace root and member pubspec.yaml', () async {
+      final fs = MemoryFileSystem.test();
+      final Directory workspaceRoot = fs.directory('/workspace')..createSync(recursive: true);
+      workspaceRoot.childFile('pubspec.yaml').writeAsStringSync('''
 name: my_workspace
 workspace:
   - packages/app
@@ -1137,48 +1431,47 @@ dev_dependencies:
   workspace_ext:
     path: packages/workspace_ext
 ''');
-        final Directory appDir = workspaceRoot.childDirectory('packages').childDirectory('app')
-          ..createSync(recursive: true);
-        appDir.childFile('pubspec.yaml').writeAsStringSync('''
+      final Directory appDir = workspaceRoot.childDirectory('packages').childDirectory('app')
+        ..createSync(recursive: true);
+      appDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: app
 resolution: workspace
 dependencies:
   member_ext:
     path: ../member_ext
 ''');
-        _writeExtensionPackage(
-          workspaceRoot.childDirectory('packages').childDirectory('workspace_ext'),
-          name: 'workspace_ext',
-        );
-        _writeExtensionPackage(
-          workspaceRoot.childDirectory('packages').childDirectory('member_ext'),
-          name: 'member_ext',
-        );
-        _writePackageConfig(workspaceRoot, const <String, String>{
-          'app': '../packages/app',
-          'member_ext': '../packages/member_ext',
-          'workspace_ext': '../packages/workspace_ext',
-        });
+      _writeExtensionPackage(
+        workspaceRoot.childDirectory('packages').childDirectory('workspace_ext'),
+        name: 'workspace_ext',
+      );
+      _writeExtensionPackage(
+        workspaceRoot.childDirectory('packages').childDirectory('member_ext'),
+        name: 'member_ext',
+      );
+      _writePackageConfig(workspaceRoot, const <String, String>{
+        'app': '../packages/app',
+        'member_ext': '../packages/member_ext',
+        'workspace_ext': '../packages/workspace_ext',
+      });
 
-        final finder = ProjectExtensionFinder(fileSystem: fs, logger: BufferLogger.test());
-        final List<DiscoveredProjectExtension> discovered = await finder.findProjectExtensions(
-          startDirectory: appDir,
-        );
-        expect(discovered.map((DiscoveredProjectExtension e) => e.name), const <String>[
-          'member_ext',
-          'workspace_ext',
-        ]);
-        for (final ext in discovered) {
-          expect(ext.workspaceRootUri, workspaceRoot.uri);
-        }
-      },
-    );
+      final finder = ProjectExtensionFinder(fileSystem: fs, logger: BufferLogger.test());
+      final List<DiscoveredProjectExtension> discovered = await finder.findProjectExtensions(
+        startDirectory: appDir,
+      );
+      expect(discovered.map((DiscoveredProjectExtension e) => e.name), const <String>[
+        'member_ext',
+        'workspace_ext',
+      ]);
+      for (final ext in discovered) {
+        expect(ext.workspaceRootUri, workspaceRoot.uri);
+      }
+    });
 
     for (final (FileSystemStyle style, String osName) in const <(FileSystemStyle, String)>[
       (FileSystemStyle.posix, 'linux'),
       (FileSystemStyle.windows, 'windows'),
     ]) {
-      testWithoutContext(
+      test(
         'unions workspace member dependencies at Pub workspace root when includeWorkspaceMembers is true and sorts deterministically ($osName)',
         () async {
           final delegateFs = MemoryFileSystem.test(style: style);
@@ -1291,7 +1584,7 @@ dev_dependencies:
       );
     }
 
-    testWithoutContext('discovers extensions and enforces symlink containment under ErrorHandlingFileSystem on LocalFileSystem', () async {
+    test('discovers extensions and enforces symlink containment under ErrorHandlingFileSystem on LocalFileSystem', () async {
       final localFs = LocalFileSystem.test(signals: LocalSignals.instance);
       addTearDown(localFs.dispose);
       final fs = ErrorHandlingFileSystem(delegate: localFs, platform: FakePlatform());
@@ -1415,7 +1708,7 @@ dependencies:
   });
 
   group('ExtensionKernelCompiler', () {
-    testWithoutContext('compiles extension to workspace-local .dill and invalidates via depfile or empty .dill', () async {
+    test('compiles extension to workspace-local .dill and invalidates via depfile or empty .dill', () async {
       final fs = MemoryFileSystem.test();
       _writePackageConfig(fs.directory('/workspace/app')).setLastModifiedSync(DateTime.utc(2026));
 
@@ -1502,7 +1795,7 @@ dependencies:
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('invalidates cached .dill and capabilities when an input file is modified mid-compile before extension.dill is written', () async {
+    test('invalidates cached .dill and capabilities when an input file is modified mid-compile before extension.dill is written', () async {
       final fs = MemoryFileSystem.test();
       final File packageConfigFile = _writePackageConfig(fs.directory('/workspace/app'))
         ..setLastModifiedSync(DateTime.utc(2026));
@@ -1589,7 +1882,7 @@ dependencies:
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('invalidates cached .dill when package_config.json content changes and ignores no-op mtime bumps', () async {
+    test('invalidates cached .dill when package_config.json content changes and ignores no-op mtime bumps', () async {
       final fs = MemoryFileSystem.test();
       final Directory appDir = fs.directory('/workspace/app');
       const extV1Root = '/pub-cache/hosted/pub.dev/my_ext-1.0.0';
@@ -1645,7 +1938,7 @@ dependencies:
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('invalidates cached local kernel when depfile dependency with escaped spaces changes', () async {
+    test('invalidates cached local kernel when depfile dependency with escaped spaces changes', () async {
       final fs = MemoryFileSystem.test();
       _writePackageConfig(fs.directory('/workspace/app')).setLastModifiedSync(DateTime.utc(2026));
 
@@ -1693,7 +1986,7 @@ dependencies:
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext(
+    test(
       'Dart SDK revision roll invalidates cached kernel even when revision file mtime is older',
       () async {
         final fs = MemoryFileSystem.test();
@@ -1754,7 +2047,7 @@ dependencies:
       },
     );
 
-    testWithoutContext('throws ExtensionCompileException when entrypoint, package_config.json, or bin/cache/dart-sdk/revision is missing', () async {
+    test('throws ExtensionCompileException when entrypoint, package_config.json, or bin/cache/dart-sdk/revision is missing', () async {
       final fs = MemoryFileSystem.test();
       final DiscoveredProjectExtension ext = _discoveredExtension(fs);
       final ExtensionKernelCompiler compilerMissingRevision = _createCompiler(
@@ -1801,7 +2094,7 @@ dependencies:
       );
     });
 
-    testWithoutContext('cleans up temporary files and throws ExtensionCompileException without ToolExit even if temp cleanup hits EACCES', () async {
+    test('cleans up temporary files and throws ExtensionCompileException without ToolExit even if temp cleanup hits EACCES', () async {
       const expectedDillPath =
           '/workspace/app/.dart_tool/flutter_tools/extensions/my_ext/extension.dill';
       var throwOnTempDillExists = false;
@@ -1916,7 +2209,7 @@ dependencies:
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext(
+    test(
       'deletes pre-existing stale depFile when dart compile kernel does not emit a tempDepFile',
       () async {
         final fs = MemoryFileSystem.test();
@@ -1953,137 +2246,134 @@ dependencies:
       },
     );
 
-    testWithoutContext(
-      'discovers, compiles, and reuses cached extension kernels on Windows paths',
-      () async {
-        final fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
-        const flutterRootPath = r'C:\flutter';
-        const appRootPath = r'C:\Users\Developer Name\workspace\app';
-        const localExtRootPath = r'C:\Users\Developer Name\workspace\local_ext';
-        const hostedExtRootPath =
-            r'C:\Users\Developer Name\AppData\Local\Pub\Cache\hosted\pub.dev\hosted_ext-1.2.3';
+    test('discovers, compiles, and reuses cached extension kernels on Windows paths', () async {
+      final fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      const flutterRootPath = r'C:\flutter';
+      const appRootPath = r'C:\Users\Developer Name\workspace\app';
+      const localExtRootPath = r'C:\Users\Developer Name\workspace\local_ext';
+      const hostedExtRootPath =
+          r'C:\Users\Developer Name\AppData\Local\Pub\Cache\hosted\pub.dev\hosted_ext-1.2.3';
 
-        final Directory appDir = fs.directory(appRootPath)..createSync(recursive: true);
-        appDir.childFile('pubspec.yaml').writeAsStringSync('''
+      final Directory appDir = fs.directory(appRootPath)..createSync(recursive: true);
+      appDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: app
 dev_dependencies:
   local_ext:
     path: ../local_ext
   hosted_ext: ^1.2.3
 ''');
-        _writeExtensionPackage(fs.directory(localExtRootPath), name: 'local_ext');
-        _writeExtensionPackage(fs.directory(hostedExtRootPath), name: 'hosted_ext');
-        final File localEntrypoint =
-            fs
-                .directory(localExtRootPath)
-                .childDirectory('extension')
-                .childDirectory('flutter_tools')
-                .childFile('extension.dart')
-              ..setLastModifiedSync(DateTime.utc(2026));
-        final File localHelper =
-            fs.directory(localExtRootPath).childDirectory('lib').childFile('helper.dart')
-              ..createSync(recursive: true)
-              ..writeAsStringSync('const int v = 1;')
-              ..setLastModifiedSync(DateTime.utc(2026));
-        final File hostedEntrypoint =
-            fs
-                .directory(hostedExtRootPath)
-                .childDirectory('extension')
-                .childDirectory('flutter_tools')
-                .childFile('extension.dart')
-              ..setLastModifiedSync(DateTime.utc(2026));
+      _writeExtensionPackage(fs.directory(localExtRootPath), name: 'local_ext');
+      _writeExtensionPackage(fs.directory(hostedExtRootPath), name: 'hosted_ext');
+      final File localEntrypoint =
+          fs
+              .directory(localExtRootPath)
+              .childDirectory('extension')
+              .childDirectory('flutter_tools')
+              .childFile('extension.dart')
+            ..setLastModifiedSync(DateTime.utc(2026));
+      final File localHelper =
+          fs.directory(localExtRootPath).childDirectory('lib').childFile('helper.dart')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('const int v = 1;')
+            ..setLastModifiedSync(DateTime.utc(2026));
+      final File hostedEntrypoint =
+          fs
+              .directory(hostedExtRootPath)
+              .childDirectory('extension')
+              .childDirectory('flutter_tools')
+              .childFile('extension.dart')
+            ..setLastModifiedSync(DateTime.utc(2026));
 
-        final File packageConfigFile = _writePackageConfig(appDir, const <String, String>{
-          'app': '../',
-          'local_ext': localExtRootPath,
-          'hosted_ext': hostedExtRootPath,
-        })..setLastModifiedSync(DateTime.utc(2026));
+      final File packageConfigFile = _writePackageConfig(appDir, const <String, String>{
+        'app': '../',
+        'local_ext': localExtRootPath,
+        'hosted_ext': hostedExtRootPath,
+      })..setLastModifiedSync(DateTime.utc(2026));
 
-        final finder = ProjectExtensionFinder(fileSystem: fs, logger: BufferLogger.test());
-        final List<DiscoveredProjectExtension> discovered = await finder.findProjectExtensions(
-          startDirectory: appDir,
-        );
-        expect(discovered.map((DiscoveredProjectExtension e) => e.name), const <String>[
-          'hosted_ext',
-          'local_ext',
-        ]);
-        final DiscoveredProjectExtension hostedExt = discovered[0];
-        final DiscoveredProjectExtension localExt = discovered[1];
+      final finder = ProjectExtensionFinder(fileSystem: fs, logger: BufferLogger.test());
+      final List<DiscoveredProjectExtension> discovered = await finder.findProjectExtensions(
+        startDirectory: appDir,
+      );
+      expect(discovered.map((DiscoveredProjectExtension e) => e.name), const <String>[
+        'hosted_ext',
+        'local_ext',
+      ]);
+      final DiscoveredProjectExtension hostedExt = discovered[0];
+      final DiscoveredProjectExtension localExt = discovered[1];
 
-        final windowsPlatform = FakePlatform(operatingSystem: 'windows');
-        final processManager = FakeProcessManager.empty();
-        final ExtensionKernelCompiler compiler = _createCompiler(
+      final windowsPlatform = FakePlatform(operatingSystem: 'windows');
+      final processManager = FakeProcessManager.empty();
+      final ExtensionKernelCompiler compiler = _createCompiler(
+        fs,
+        flutterRootPath: flutterRootPath,
+        platform: windowsPlatform,
+        processManager: processManager,
+      );
+
+      final File localDill = compiler.resolveDillFile(localExt);
+      final File hostedDill = compiler.resolveDillFile(hostedExt);
+      expect(
+        localDill.path,
+        r'C:\Users\Developer Name\workspace\app\.dart_tool\flutter_tools\extensions\local_ext\extension.dill',
+      );
+      expect(
+        hostedDill.path,
+        r'C:\Users\Developer Name\workspace\app\.dart_tool\flutter_tools\extensions\hosted_ext\extension.dill',
+      );
+
+      processManager.addCommands(<FakeCommand>[
+        _compileKernelCommand(
           fs,
+          entrypointPath: localEntrypoint.path,
           flutterRootPath: flutterRootPath,
+          outputDillPath: localDill.path,
+          packageConfigPath: packageConfigFile.path,
           platform: windowsPlatform,
-          processManager: processManager,
-        );
+          bytes: const <int>[1, 2],
+          depfileContent:
+              '${_escapeDepfilePath('${localDill.path}.tmp')}: '
+              '${_escapeDepfilePath(packageConfigFile.path)} '
+              '${_escapeDepfilePath(localEntrypoint.path)} '
+              '${_escapeDepfilePath(localHelper.path)}\n',
+        ),
+        _compileKernelCommand(
+          fs,
+          entrypointPath: localEntrypoint.path,
+          flutterRootPath: flutterRootPath,
+          outputDillPath: localDill.path,
+          packageConfigPath: packageConfigFile.path,
+          platform: windowsPlatform,
+          bytes: const <int>[5, 6],
+        ),
+        _compileKernelCommand(
+          fs,
+          entrypointPath: hostedEntrypoint.path,
+          flutterRootPath: flutterRootPath,
+          outputDillPath: hostedDill.path,
+          packageConfigPath: packageConfigFile.path,
+          platform: windowsPlatform,
+          bytes: const <int>[3, 4],
+        ),
+      ]);
 
-        final File localDill = compiler.resolveDillFile(localExt);
-        final File hostedDill = compiler.resolveDillFile(hostedExt);
-        expect(
-          localDill.path,
-          r'C:\Users\Developer Name\workspace\app\.dart_tool\flutter_tools\extensions\local_ext\extension.dill',
-        );
-        expect(
-          hostedDill.path,
-          r'C:\Users\Developer Name\workspace\app\.dart_tool\flutter_tools\extensions\hosted_ext\extension.dill',
-        );
+      final CompiledExtensionKernel localCompiled = await compiler.compile(localExt);
+      final CompiledExtensionKernel localCached = await compiler.compile(localExt);
+      expect(localCompiled.dillUri, localDill.uri);
+      expect(localCached.dillUri, localDill.uri);
+      expect(localCached.buildToken, localCompiled.buildToken);
 
-        processManager.addCommands(<FakeCommand>[
-          _compileKernelCommand(
-            fs,
-            entrypointPath: localEntrypoint.path,
-            flutterRootPath: flutterRootPath,
-            outputDillPath: localDill.path,
-            packageConfigPath: packageConfigFile.path,
-            platform: windowsPlatform,
-            bytes: const <int>[1, 2],
-            depfileContent:
-                '${_escapeDepfilePath('${localDill.path}.tmp')}: '
-                '${_escapeDepfilePath(packageConfigFile.path)} '
-                '${_escapeDepfilePath(localEntrypoint.path)} '
-                '${_escapeDepfilePath(localHelper.path)}\n',
-          ),
-          _compileKernelCommand(
-            fs,
-            entrypointPath: localEntrypoint.path,
-            flutterRootPath: flutterRootPath,
-            outputDillPath: localDill.path,
-            packageConfigPath: packageConfigFile.path,
-            platform: windowsPlatform,
-            bytes: const <int>[5, 6],
-          ),
-          _compileKernelCommand(
-            fs,
-            entrypointPath: hostedEntrypoint.path,
-            flutterRootPath: flutterRootPath,
-            outputDillPath: hostedDill.path,
-            packageConfigPath: packageConfigFile.path,
-            platform: windowsPlatform,
-            bytes: const <int>[3, 4],
-          ),
-        ]);
+      localHelper.setLastModifiedSync(DateTime.utc(2026, 1, 1, 2));
+      final CompiledExtensionKernel localRecompiled = await compiler.compile(localExt);
+      expect(fs.file(localRecompiled.dillUri).readAsBytesSync(), const <int>[5, 6]);
 
-        final CompiledExtensionKernel localCompiled = await compiler.compile(localExt);
-        final CompiledExtensionKernel localCached = await compiler.compile(localExt);
-        expect(localCompiled.dillUri, localDill.uri);
-        expect(localCached.dillUri, localDill.uri);
-        expect(localCached.buildToken, localCompiled.buildToken);
+      final CompiledExtensionKernel hostedCompiled = await compiler.compile(hostedExt);
+      final CompiledExtensionKernel hostedCached = await compiler.compile(hostedExt);
+      expect(hostedCompiled.dillUri, hostedDill.uri);
+      expect(hostedCached.dillUri, hostedDill.uri);
+      expect(processManager, hasNoRemainingExpectations);
+    });
 
-        localHelper.setLastModifiedSync(DateTime.utc(2026, 1, 1, 2));
-        final CompiledExtensionKernel localRecompiled = await compiler.compile(localExt);
-        expect(fs.file(localRecompiled.dillUri).readAsBytesSync(), const <int>[5, 6]);
-
-        final CompiledExtensionKernel hostedCompiled = await compiler.compile(hostedExt);
-        final CompiledExtensionKernel hostedCached = await compiler.compile(hostedExt);
-        expect(hostedCompiled.dillUri, hostedDill.uri);
-        expect(hostedCached.dillUri, hostedDill.uri);
-        expect(processManager, hasNoRemainingExpectations);
-      },
-    );
-
-    testWithoutContext('persists, round-trips, validates malformed stamps, and commits .d -> .dill -> .stamp in order', () async {
+    test('persists, round-trips, validates malformed stamps, and commits .d -> .dill -> .stamp in order', () async {
       const expectedDillPath =
           '/workspace/app/.dart_tool/flutter_tools/extensions/my_ext/extension.dill';
       var newDillPresentAndOldStampRejectedBeforeStampCommit = false;
@@ -2243,7 +2533,7 @@ dev_dependencies:
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('writeCachedCapabilities rejects stale capabilities when another compiler instance recompiles concurrently', () async {
+    test('writeCachedCapabilities rejects stale capabilities when another compiler instance recompiles concurrently', () async {
       final fs = MemoryFileSystem.test();
       final Directory appDir = fs.directory('/workspace/app');
       final Directory extDir = fs.directory('/workspace/my_ext');
@@ -2342,7 +2632,7 @@ dev_dependencies:
       expect(processManagerB, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('writeCachedCapabilities logs trace on read-only stamp write and concurrent calls preserve ErrorHandlingFileSystem ToolExit state', () async {
+    test('writeCachedCapabilities logs trace on read-only stamp write and concurrent calls preserve ErrorHandlingFileSystem ToolExit state', () async {
       var failStampTempWrite = false;
       final delegateFs = MemoryFileSystem.test(
         opHandle: (String context, FileSystemOp operation) {

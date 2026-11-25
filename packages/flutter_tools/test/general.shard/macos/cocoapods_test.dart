@@ -158,18 +158,18 @@ environement:
   }
 
   group('Evaluate installation', () {
-    testWithoutContext('detects not installed, if pod exec does not exist', () async {
+    test('detects not installed, if pod exec does not exist', () async {
       pretendPodIsNotInstalled();
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.notInstalled);
     });
 
-    testWithoutContext('detects not installed, if pod is installed but version fails', () async {
+    test('detects not installed, if pod is installed but version fails', () async {
       pretendPodIsInstalled();
       pretendPodVersionFails();
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.brokenInstall);
     });
 
-    testWithoutContext('detects installed', () async {
+    test('detects installed', () async {
       pretendPodIsInstalled();
       pretendPodVersionIs('0.0.1');
       expect(
@@ -178,7 +178,7 @@ environement:
       );
     });
 
-    testWithoutContext('detects unknown version', () async {
+    test('detects unknown version', () async {
       pretendPodIsInstalled();
       pretendPodVersionIs('Plugin loaded.\n1.5.3');
       expect(
@@ -187,7 +187,7 @@ environement:
       );
     });
 
-    testWithoutContext('detects below minimum version', () async {
+    test('detects below minimum version', () async {
       pretendPodIsInstalled();
       pretendPodVersionIs('1.9.0');
       expect(
@@ -196,7 +196,7 @@ environement:
       );
     });
 
-    testWithoutContext('detects below recommended version', () async {
+    test('detects below recommended version', () async {
       pretendPodIsInstalled();
       pretendPodVersionIs('1.12.5');
       expect(
@@ -205,13 +205,13 @@ environement:
       );
     });
 
-    testWithoutContext('detects at recommended version', () async {
+    test('detects at recommended version', () async {
       pretendPodIsInstalled();
       pretendPodVersionIs('1.16.2');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.recommended);
     });
 
-    testWithoutContext('detects above recommended version', () async {
+    test('detects above recommended version', () async {
       pretendPodIsInstalled();
       pretendPodVersionIs('1.16.3');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.recommended);

@@ -8,7 +8,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import '../../src/common.dart';
 
 void main() {
-  testWithoutContext('validateBuild does not throw on AOT supported architectures', () {
+  test('validateBuild does not throw on AOT supported architectures', () {
     expect(
       () => validateBuild(
         const AndroidBuildInfo(
@@ -20,7 +20,7 @@ void main() {
     );
   });
 
-  testWithoutContext('validateBuild throws if an invalid build number is specified', () {
+  test('validateBuild throws if an invalid build number is specified', () {
     expect(
       () => validateBuild(
         const AndroidBuildInfo(
@@ -77,7 +77,7 @@ void main() {
     );
   });
 
-  testWithoutContext('validateBuild does not throw on positive number', () {
+  test('validateBuild does not throw on positive number', () {
     expect(
       () => validateBuild(
         const AndroidBuildInfo(

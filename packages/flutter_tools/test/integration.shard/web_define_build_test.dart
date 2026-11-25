@@ -32,7 +32,7 @@ void main() {
   });
 
   for (final mode in const <String>['--debug', '--profile', '--release']) {
-    testWithoutContext('flutter build web $mode substitutes --web-define in output', () async {
+    test('flutter build web $mode substitutes --web-define in output', () async {
       final ProcessResult result = processManager.runSync(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
