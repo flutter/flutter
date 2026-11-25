@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/fl_vulkan_manager.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/shell/platform/linux/fl_linux_gtk4_debug.h"
 #include "flutter/shell/platform/linux/fl_vulkan_layer_composer.h"
 #include "flutter/shell/platform/linux/fl_vulkan_queue_sync.h"
@@ -541,6 +542,7 @@ GBytes* fl_vulkan_backing_store_read_pixels(const FlutterBackingStore* store,
                                             size_t* width,
                                             size_t* height,
                                             GError** error) {
+  TRACE_EVENT0("flutter", "VulkanReadPixels");
   auto* frame = static_cast<Frame*>(store->vulkan.user_data);
   auto& s = *frame->state;
   const size_t length = static_cast<size_t>(frame->width) * frame->height * 4;
@@ -630,14 +632,20 @@ GBytes* fl_vulkan_backing_store_read_pixels(const FlutterBackingStore* store,
       return false;
     // The fence also establishes transfer-write visibility to coherent host
     // memory. Never release a pending command buffer, even on device loss.
-    if (!check(s.WaitForFences(s.device, 1, &fence, VK_TRUE, UINT64_MAX),
-               "vkWaitForFences", error))
-      return false;
+    {
+      TRACE_EVENT0("flutter", "VulkanReadbackFenceWait");
+      if (!check(s.WaitForFences(s.device, 1, &fence, VK_TRUE, UINT64_MAX),
+                 "vkWaitForFences", error))
+        return false;
+    }
     void* mapped = nullptr;
     if (!check(s.MapMemory(s.device, memory, 0, length, 0, &mapped),
                "vkMapMemory", error))
       return false;
-    bytes = g_bytes_new(mapped, length);
+    {
+      TRACE_EVENT0("flutter", "VulkanReadbackHostCopy");
+      bytes = g_bytes_new(mapped, length);
+    }
     s.UnmapMemory(s.device, memory);
     return true;
   };
