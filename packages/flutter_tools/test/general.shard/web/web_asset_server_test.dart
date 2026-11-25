@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:flutter_tools/src/web/devfs_proxy.dart';
 import 'package:flutter_tools/src/web/web_constants.dart';
+import 'package:flutter_tools/src/web/web_debug_config.dart';
 import 'package:shelf/shelf.dart';
 
 import '../../src/common.dart';
@@ -423,9 +424,6 @@ void main() {
       final WebAssetServer server = await WebAssetServer.start(
         null,
         null,
-        false,
-        false,
-        false,
         BuildInfo.debug,
         false,
         const DartDevelopmentServiceConfiguration(enable: false),
@@ -440,10 +438,12 @@ void main() {
           logger: BufferLogger.test(),
           platform: platform,
         ),
-        crossOriginIsolation: true,
-        webDevServerConfig: const WebDevServerConfig(),
-        webRenderer: WebRendererMode.canvaskit,
-        isWasm: false,
+        webConfig: const WebDebugConfig(
+          crossOriginIsolation: true,
+          useSseForDebugBackend: false,
+          useSseForDebugProxy: false,
+          useSseForInjectedClient: false,
+        ),
         useLocalCanvasKit: false,
         testMode: true,
       );
@@ -456,9 +456,6 @@ void main() {
       final WebAssetServer server = await WebAssetServer.start(
         null,
         null,
-        false,
-        false,
-        false,
         BuildInfo.debug,
         false,
         const DartDevelopmentServiceConfiguration(enable: false),
@@ -473,10 +470,11 @@ void main() {
           logger: BufferLogger.test(),
           platform: platform,
         ),
-        crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(),
-        webRenderer: WebRendererMode.canvaskit,
-        isWasm: false,
+        webConfig: const WebDebugConfig(
+          useSseForDebugBackend: false,
+          useSseForDebugProxy: false,
+          useSseForInjectedClient: false,
+        ),
         useLocalCanvasKit: false,
         testMode: true,
       );
@@ -489,9 +487,6 @@ void main() {
       final WebAssetServer server = await WebAssetServer.start(
         null,
         null,
-        false,
-        false,
-        false,
         BuildInfo.debug,
         false,
         const DartDevelopmentServiceConfiguration(enable: false),
@@ -506,10 +501,13 @@ void main() {
           logger: BufferLogger.test(),
           platform: platform,
         ),
-        crossOriginIsolation: true,
-        webDevServerConfig: const WebDevServerConfig(),
-        webRenderer: WebRendererMode.skwasm,
-        isWasm: false,
+        webConfig: const WebDebugConfig(
+          crossOriginIsolation: true,
+          renderer: WebRendererMode.skwasm,
+          useSseForDebugBackend: false,
+          useSseForDebugProxy: false,
+          useSseForInjectedClient: false,
+        ),
         useLocalCanvasKit: false,
         testMode: true,
       );
@@ -522,9 +520,6 @@ void main() {
       final WebAssetServer server = await WebAssetServer.start(
         null,
         null,
-        false,
-        false,
-        false,
         BuildInfo.debug,
         false,
         const DartDevelopmentServiceConfiguration(enable: false),
@@ -539,10 +534,11 @@ void main() {
           logger: BufferLogger.test(),
           platform: platform,
         ),
-        crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(),
-        webRenderer: WebRendererMode.canvaskit,
-        isWasm: false,
+        webConfig: const WebDebugConfig(
+          useSseForDebugBackend: false,
+          useSseForDebugProxy: false,
+          useSseForInjectedClient: false,
+        ),
         useLocalCanvasKit: false,
         testMode: true,
       );
@@ -555,9 +551,6 @@ void main() {
       final WebAssetServer server = await WebAssetServer.start(
         null,
         null,
-        false,
-        false,
-        false,
         BuildInfo.debug,
         false,
         const DartDevelopmentServiceConfiguration(enable: false),
@@ -572,10 +565,12 @@ void main() {
           logger: BufferLogger.test(),
           platform: platform,
         ),
-        crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(baseHref: '/preview/'),
-        webRenderer: WebRendererMode.canvaskit,
-        isWasm: false,
+        webConfig: const WebDebugConfig(
+          devServerConfig: WebDevServerConfig(baseHref: '/preview/'),
+          useSseForDebugBackend: false,
+          useSseForDebugProxy: false,
+          useSseForInjectedClient: false,
+        ),
         useLocalCanvasKit: false,
         testMode: true,
       );
@@ -587,9 +582,6 @@ void main() {
       final WebAssetServer server = await WebAssetServer.start(
         null,
         null,
-        false,
-        false,
-        false,
         BuildInfo.debug,
         false,
         const DartDevelopmentServiceConfiguration(enable: false),
@@ -604,10 +596,11 @@ void main() {
           logger: BufferLogger.test(),
           platform: platform,
         ),
-        crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(),
-        webRenderer: WebRendererMode.canvaskit,
-        isWasm: false,
+        webConfig: const WebDebugConfig(
+          useSseForDebugBackend: false,
+          useSseForDebugProxy: false,
+          useSseForInjectedClient: false,
+        ),
         useLocalCanvasKit: false,
         testMode: true,
       );
@@ -619,9 +612,6 @@ void main() {
       final WebAssetServer server = await WebAssetServer.start(
         null,
         null,
-        false,
-        false,
-        false,
         BuildInfo.debug,
         false,
         const DartDevelopmentServiceConfiguration(enable: false),
@@ -636,10 +626,11 @@ void main() {
           logger: BufferLogger.test(),
           platform: platform,
         ),
-        crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(),
-        webRenderer: WebRendererMode.canvaskit,
-        isWasm: false,
+        webConfig: const WebDebugConfig(
+          useSseForDebugBackend: false,
+          useSseForDebugProxy: false,
+          useSseForInjectedClient: false,
+        ),
         useLocalCanvasKit: false,
         testMode: true,
       );
@@ -655,9 +646,6 @@ void main() {
       final WebAssetServer server2 = await WebAssetServer.start(
         null,
         null,
-        false,
-        false,
-        false,
         BuildInfo.debug,
         false,
         const DartDevelopmentServiceConfiguration(enable: false),
@@ -672,10 +660,11 @@ void main() {
           logger: BufferLogger.test(),
           platform: platform,
         ),
-        crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(),
-        webRenderer: WebRendererMode.canvaskit,
-        isWasm: false,
+        webConfig: const WebDebugConfig(
+          useSseForDebugBackend: false,
+          useSseForDebugProxy: false,
+          useSseForInjectedClient: false,
+        ),
         useLocalCanvasKit: false,
         testMode: true,
       );
@@ -697,9 +686,6 @@ void main() {
       final WebAssetServer server = await WebAssetServer.start(
         null,
         null,
-        false,
-        false,
-        false,
         BuildInfo.release,
         false,
         const DartDevelopmentServiceConfiguration(enable: false),
@@ -714,10 +700,14 @@ void main() {
           logger: BufferLogger.test(),
           platform: platform,
         ),
-        crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(),
-        webRenderer: WebRendererMode.canvaskit,
-        isWasm: true,
+        webConfig: const WebDebugConfig(
+          crossOriginIsolation: false,
+          renderer: WebRendererMode.canvaskit,
+          useSseForDebugBackend: false,
+          useSseForDebugProxy: false,
+          useSseForInjectedClient: false,
+          useWasm: true,
+        ),
         useLocalCanvasKit: false,
       );
 
@@ -751,9 +741,6 @@ void main() {
         final WebAssetServer server = await WebAssetServer.start(
           null,
           null,
-          false,
-          false,
-          false,
           BuildInfo.debug,
           false,
           const DartDevelopmentServiceConfiguration(enable: false),
@@ -768,10 +755,11 @@ void main() {
             logger: BufferLogger.test(),
             platform: platform,
           ),
-          crossOriginIsolation: false,
-          webDevServerConfig: const WebDevServerConfig(),
-          webRenderer: WebRendererMode.canvaskit,
-          isWasm: false,
+          webConfig: const WebDebugConfig(
+            useSseForDebugBackend: false,
+            useSseForDebugProxy: false,
+            useSseForInjectedClient: false,
+          ),
           useLocalCanvasKit: false,
           testMode: true,
         );
@@ -818,9 +806,6 @@ void main() {
       final WebAssetServer server = await WebAssetServer.start(
         null,
         null,
-        false,
-        false,
-        false,
         BuildInfo.debug,
         false,
         const DartDevelopmentServiceConfiguration(enable: false),
@@ -834,10 +819,11 @@ void main() {
           logger: BufferLogger.test(),
           platform: platform,
         ),
-        crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(),
-        webRenderer: WebRendererMode.canvaskit,
-        isWasm: false,
+        webConfig: const WebDebugConfig(
+          useSseForDebugBackend: false,
+          useSseForDebugProxy: false,
+          useSseForInjectedClient: false,
+        ),
         useLocalCanvasKit: false,
         testMode: true,
       );
@@ -869,9 +855,6 @@ void main() {
         final WebAssetServer server = await WebAssetServer.start(
           null,
           null,
-          false,
-          false,
-          false,
           BuildInfo.debug,
           false,
           const DartDevelopmentServiceConfiguration(enable: false),
@@ -886,10 +869,11 @@ void main() {
             logger: BufferLogger.test(),
             platform: windowsPlatform,
           ),
-          crossOriginIsolation: false,
-          webDevServerConfig: const WebDevServerConfig(),
-          webRenderer: WebRendererMode.canvaskit,
-          isWasm: false,
+          webConfig: const WebDebugConfig(
+            useSseForDebugBackend: false,
+            useSseForDebugProxy: false,
+            useSseForInjectedClient: false,
+          ),
           useLocalCanvasKit: false,
           testMode: true,
         );
@@ -1045,9 +1029,6 @@ void main() {
           server = await WebAssetServer.start(
             null,
             null,
-            false,
-            false,
-            false,
             buildInfo,
             false,
             const DartDevelopmentServiceConfiguration(enable: false),
@@ -1062,14 +1043,22 @@ void main() {
               logger: logger,
               platform: platform,
             ),
-            crossOriginIsolation: false,
-            webDevServerConfig: WebDevServerConfig(
-              proxy: <ProxyRule>[
-                PrefixProxyRule(prefix: '/get', target: 'http://localhost:${backendServer.port}/'),
-              ],
+            webConfig: WebDebugConfig(
+              crossOriginIsolation: false,
+              devServerConfig: WebDevServerConfig(
+                proxy: <ProxyRule>[
+                  PrefixProxyRule(
+                    prefix: '/get',
+                    target: 'http://localhost:${backendServer.port}/',
+                  ),
+                ],
+              ),
+              renderer: webRenderer,
+              useSseForDebugBackend: false,
+              useSseForDebugProxy: false,
+              useSseForInjectedClient: false,
+              useWasm: isWasm,
             ),
-            webRenderer: webRenderer,
-            isWasm: isWasm,
             useLocalCanvasKit: false,
           );
           server.markReady();
