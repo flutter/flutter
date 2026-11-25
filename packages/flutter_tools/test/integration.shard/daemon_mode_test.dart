@@ -27,7 +27,7 @@ void main() {
     daemonProcess.kill();
   });
 
-  testWithoutContext('startup events', () async {
+  test('startup events', () async {
     final project = BasicProject();
     await project.setUpIn(tempDir);
 
@@ -64,7 +64,7 @@ void main() {
     expect(logParams['message'], 'Device daemon started.');
   });
 
-  testWithoutContext('device.getDevices', () async {
+  test('device.getDevices', () async {
     final project = BasicProject();
     await project.setUpIn(tempDir);
 

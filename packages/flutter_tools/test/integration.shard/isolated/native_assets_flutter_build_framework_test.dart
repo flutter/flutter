@@ -40,7 +40,7 @@ void main() {
   }
 
   for (final String add2appBuildSubcommand in add2appBuildSubcommands) {
-    testWithoutContext('flutter build $add2appBuildSubcommand with native assets', () async {
+    test('flutter build $add2appBuildSubcommand with native assets', () async {
       await inTempDir((Directory tempDirectory) async {
         final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
         final Directory exampleDirectory = packageDirectory.childDirectory('example');

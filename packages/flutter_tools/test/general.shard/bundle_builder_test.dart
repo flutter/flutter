@@ -69,7 +69,7 @@ BundleBuilder createBundleBuilder({
 
 // Tests for BundleBuilder.
 void main() {
-  testWithoutContext('Copies assets to expected directory after building', () async {
+  test('Copies assets to expected directory after building', () async {
     final fileSystem = MemoryFileSystem.test();
     final BuildSystem buildSystem = TestBuildSystem.all(BuildResult(success: true), (
       Target target,
@@ -95,129 +95,120 @@ void main() {
     expect(fileSystem.file(fileSystem.path.join('example.d')).existsSync(), false);
   });
 
-  testWithoutContext(
-    'BundleBuilder propagates local engine options to build system Environment',
-    () async {
-      final fileSystem = MemoryFileSystem.test();
-      late Environment capturedEnvironment;
-      final BuildSystem buildSystem = TestBuildSystem.all(BuildResult(success: true), (
-        Target target,
-        Environment environment,
-      ) {
-        capturedEnvironment = environment;
-        environment.outputDir.childFile('kernel_blob.bin').createSync(recursive: true);
-        environment.outputDir.childFile('isolate_snapshot_data').createSync();
-        environment.outputDir.childFile('vm_snapshot_data').createSync();
-        environment.outputDir.childFile('LICENSE').createSync(recursive: true);
-      });
+  test('BundleBuilder propagates local engine options to build system Environment', () async {
+    final fileSystem = MemoryFileSystem.test();
+    late Environment capturedEnvironment;
+    final BuildSystem buildSystem = TestBuildSystem.all(BuildResult(success: true), (
+      Target target,
+      Environment environment,
+    ) {
+      capturedEnvironment = environment;
+      environment.outputDir.childFile('kernel_blob.bin').createSync(recursive: true);
+      environment.outputDir.childFile('isolate_snapshot_data').createSync();
+      environment.outputDir.childFile('vm_snapshot_data').createSync();
+      environment.outputDir.childFile('LICENSE').createSync(recursive: true);
+    });
 
-      await createBundleBuilder(
-        buildSystem: buildSystem,
+    await createBundleBuilder(
+      buildSystem: buildSystem,
+      fileSystem: fileSystem,
+      artifacts: Artifacts.testLocalEngine(
+        localEngine: 'engine/src/out/ios_debug',
+        localEngineHost: 'engine/src/out/host_debug',
         fileSystem: fileSystem,
-        artifacts: Artifacts.testLocalEngine(
-          localEngine: 'engine/src/out/ios_debug',
-          localEngineHost: 'engine/src/out/host_debug',
-          fileSystem: fileSystem,
-        ),
-      ).build(
-        platform: TargetPlatform.ios,
-        buildInfo: BuildInfo.debug,
-        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-        mainPath: fileSystem.path.join('lib', 'main.dart'),
-        assetDirPath: 'example',
-        depfilePath: 'example.d',
-        buildSystem: buildSystem,
+      ),
+    ).build(
+      platform: TargetPlatform.ios,
+      buildInfo: BuildInfo.debug,
+      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      mainPath: fileSystem.path.join('lib', 'main.dart'),
+      assetDirPath: 'example',
+      depfilePath: 'example.d',
+      buildSystem: buildSystem,
+    );
+
+    expect(capturedEnvironment.artifacts.usesLocalArtifacts, isTrue);
+    expect(capturedEnvironment.artifacts.localEngineInfo, isNotNull);
+    expect(
+      capturedEnvironment.artifacts.localEngineInfo?.targetOutPath,
+      'engine/src/out/ios_debug',
+    );
+    expect(capturedEnvironment.artifacts.localEngineInfo?.hostOutPath, 'engine/src/out/host_debug');
+    expect(capturedEnvironment.engineVersion, isNull);
+    expect(capturedEnvironment.visualStudio, isNotNull);
+  });
+
+  test('writeBundle applies transformations to any assets that have them defined', () async {
+    final fileSystem = MemoryFileSystem.test();
+    final File asset = fileSystem.file('my-asset.txt')
+      ..createSync()
+      ..writeAsBytesSync(<int>[1, 2, 3]);
+    final artifacts = Artifacts.test();
+
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <Pattern>[
+          artifacts.getArtifactPath(Artifact.engineDartBinary),
+          'run',
+          'increment',
+          '--input=/.tmp_rand0/rand0/my-asset.txt-transformOutput0.txt',
+          '--output=/.tmp_rand0/rand0/my-asset.txt-transformOutput1.txt',
+        ],
+        onRun: (List<String> command) {
+          final ArgResults argParseResults =
+              (ArgParser()
+                    ..addOption('input', mandatory: true)
+                    ..addOption('output', mandatory: true))
+                  .parse(command);
+
+          final File inputFile = fileSystem.file(argParseResults['input']);
+          final File outputFile = fileSystem.file(argParseResults['output']);
+
+          expect(inputFile, exists);
+          outputFile
+            ..createSync()
+            ..writeAsBytesSync(
+              Uint8List.fromList(inputFile.readAsBytesSync().map((int b) => b + 1).toList()),
+            );
+        },
+      ),
+    ]);
+
+    final bundle = FakeAssetBundle()
+      ..entries['my-asset.txt'] = AssetBundleEntry(
+        DevFSFileContent(asset),
+        kind: AssetKind.regular,
+        transformers: const <AssetTransformerEntry>[
+          AssetTransformerEntry(package: 'increment', args: <String>[]),
+        ],
       );
 
-      expect(capturedEnvironment.artifacts.usesLocalArtifacts, isTrue);
-      expect(capturedEnvironment.artifacts.localEngineInfo, isNotNull);
-      expect(
-        capturedEnvironment.artifacts.localEngineInfo?.targetOutPath,
-        'engine/src/out/ios_debug',
-      );
-      expect(
-        capturedEnvironment.artifacts.localEngineInfo?.hostOutPath,
-        'engine/src/out/host_debug',
-      );
-      expect(capturedEnvironment.engineVersion, isNull);
-      expect(capturedEnvironment.visualStudio, isNotNull);
-    },
-  );
+    final Directory bundleDir = fileSystem.directory(
+      getAssetBuildDirectory(Config.test(), fileSystem),
+    );
 
-  testWithoutContext(
-    'writeBundle applies transformations to any assets that have them defined',
-    () async {
-      final fileSystem = MemoryFileSystem.test();
-      final File asset = fileSystem.file('my-asset.txt')
-        ..createSync()
-        ..writeAsBytesSync(<int>[1, 2, 3]);
-      final artifacts = Artifacts.test();
+    await writeBundle(
+      bundleDir,
+      bundle.entries,
+      buildMode: BuildMode.debug,
+      impellerStatus: ImpellerStatus.platformDefault,
+      projectDir: fileSystem.currentDirectory,
+      targetPlatform: TargetPlatform.tester,
+      toolContext: FakeToolContext(
+        artifacts: artifacts,
+        fs: fileSystem,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(),
+        processManager: processManager,
+      ),
+    );
 
-      final processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: <Pattern>[
-            artifacts.getArtifactPath(Artifact.engineDartBinary),
-            'run',
-            'increment',
-            '--input=/.tmp_rand0/rand0/my-asset.txt-transformOutput0.txt',
-            '--output=/.tmp_rand0/rand0/my-asset.txt-transformOutput1.txt',
-          ],
-          onRun: (List<String> command) {
-            final ArgResults argParseResults =
-                (ArgParser()
-                      ..addOption('input', mandatory: true)
-                      ..addOption('output', mandatory: true))
-                    .parse(command);
+    final File outputAssetFile = fileSystem.file('build/flutter_assets/my-asset.txt');
+    expect(outputAssetFile, exists);
+    expect(outputAssetFile.readAsBytesSync(), orderedEquals(<int>[2, 3, 4]));
+  });
 
-            final File inputFile = fileSystem.file(argParseResults['input']);
-            final File outputFile = fileSystem.file(argParseResults['output']);
-
-            expect(inputFile, exists);
-            outputFile
-              ..createSync()
-              ..writeAsBytesSync(
-                Uint8List.fromList(inputFile.readAsBytesSync().map((int b) => b + 1).toList()),
-              );
-          },
-        ),
-      ]);
-
-      final bundle = FakeAssetBundle()
-        ..entries['my-asset.txt'] = AssetBundleEntry(
-          DevFSFileContent(asset),
-          kind: AssetKind.regular,
-          transformers: const <AssetTransformerEntry>[
-            AssetTransformerEntry(package: 'increment', args: <String>[]),
-          ],
-        );
-
-      final Directory bundleDir = fileSystem.directory(
-        getAssetBuildDirectory(Config.test(), fileSystem),
-      );
-
-      await writeBundle(
-        bundleDir,
-        bundle.entries,
-        buildMode: BuildMode.debug,
-        impellerStatus: ImpellerStatus.platformDefault,
-        projectDir: fileSystem.currentDirectory,
-        targetPlatform: TargetPlatform.tester,
-        toolContext: FakeToolContext(
-          artifacts: artifacts,
-          fs: fileSystem,
-          logger: BufferLogger.test(),
-          platform: FakePlatform(),
-          processManager: processManager,
-        ),
-      );
-
-      final File outputAssetFile = fileSystem.file('build/flutter_assets/my-asset.txt');
-      expect(outputAssetFile, exists);
-      expect(outputAssetFile.readAsBytesSync(), orderedEquals(<int>[2, 3, 4]));
-    },
-  );
-
-  testWithoutContext('Handles build system failure', () {
+  test('Handles build system failure', () {
     final fileSystem = MemoryFileSystem.test();
     final BuildSystem buildSystem = TestBuildSystem.all(BuildResult(success: false));
     expect(
@@ -234,7 +225,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Passes correct defines to build system', () async {
+  test('Passes correct defines to build system', () async {
     final fileSystem = MemoryFileSystem.test();
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final String mainPath = fileSystem.path.join('lib', 'main.dart');
@@ -289,7 +280,7 @@ void main() {
     expect(env!.defines[kDeferredComponents], 'false');
   });
 
-  testWithoutContext('--enable-experiment is removed from getDefaultCachedKernelPath hash', () {
+  test('--enable-experiment is removed from getDefaultCachedKernelPath hash', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final config = Config.test();
 
@@ -338,7 +329,7 @@ void main() {
     );
   });
 
-  testWithoutContext('TargetModel isolates getDefaultCachedKernelPath hash', () {
+  test('TargetModel isolates getDefaultCachedKernelPath hash', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final config = Config.test();
 
@@ -370,7 +361,7 @@ void main() {
     expect(pathWithDartdevc, isNot(pathWithoutTarget));
   });
 
-  testWithoutContext('Release bundle includes native assets', () async {
+  test('Release bundle includes native assets', () async {
     final fileSystem = MemoryFileSystem.test();
     final dependencies = <String>[];
     final BuildSystem buildSystem = TestBuildSystem.all(BuildResult(success: true), (
@@ -393,7 +384,7 @@ void main() {
     expect(dependencies, contains('install_code_assets'));
   });
 
-  testWithoutContext(
+  test(
     'fuchsia_asset_builder.run writes assets, manifest, and depfile without AppContext',
     () async {
       final fileSystem = MemoryFileSystem.test();
@@ -451,7 +442,7 @@ flutter:
     },
   );
 
-  testWithoutContext('forwards androidSdkBuilder lazily to Environment', () async {
+  test('forwards androidSdkBuilder lazily to Environment', () async {
     final fileSystem = MemoryFileSystem.test();
     final fakeAndroidSdk = FakeAndroidSdk();
     var sdkEvaluations = 0;

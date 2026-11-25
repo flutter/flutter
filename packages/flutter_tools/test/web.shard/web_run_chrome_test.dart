@@ -30,23 +30,20 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('flutter run works on chrome devices with a unary main function', () async {
+  test('flutter run works on chrome devices with a unary main function', () async {
     await flutter.run(
       device: GoogleChromeDevice.kChromeDeviceId,
       additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
     );
   });
 
-  testWithoutContext(
-    'flutter run --wasm --machine works on chrome devices with a unary main function',
-    () async {
-      // Regression test for https://github.com/flutter/flutter/issues/174330
-      await flutter.run(
-        device: GoogleChromeDevice.kChromeDeviceId,
-        wasm: true,
-        additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
-      );
-      expect(await flutter.stop(), 0, reason: 'Flutter tool exited unexpectedly');
-    },
-  );
+  test('flutter run --wasm --machine works on chrome devices with a unary main function', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/174330
+    await flutter.run(
+      device: GoogleChromeDevice.kChromeDeviceId,
+      wasm: true,
+      additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
+    );
+    expect(await flutter.stop(), 0, reason: 'Flutter tool exited unexpectedly');
+  });
 }

@@ -30,7 +30,7 @@ void main() {
           FakeProcess(exitCode: Future<int>.value(0), stdout: stdoutFromString(stdout));
     });
 
-    testWithoutContext('can pass data', () async {
+    test('can pass data', () async {
       final expectedResponse = <String, dynamic>{'success': true, 'message': 'some message'};
 
       final FakeProcess mockProcess = createFakeProcess('${jsonEncode(expectedResponse)}\n');
@@ -49,7 +49,7 @@ void main() {
       );
     });
 
-    testWithoutContext('can handle multiple requests', () async {
+    test('can handle multiple requests', () async {
       final expectedResponse1 = <String, dynamic>{'success': true, 'message': 'some message'};
       final expectedResponse2 = <String, dynamic>{
         'success': false,
@@ -79,7 +79,7 @@ void main() {
       );
     });
 
-    testWithoutContext('ignores anything that does not look like JSON', () async {
+    test('ignores anything that does not look like JSON', () async {
       final expectedResponse = <String, dynamic>{'success': true, 'message': 'some message'};
 
       final FakeProcess mockProcess = createFakeProcess('''

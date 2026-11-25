@@ -66,7 +66,7 @@ void _testMessageLength({
 void main() {
   group('CommandHelp', () {
     group('toString', () {
-      testWithoutContext('ends with a resetBold when it has parenthetical text', () {
+      test('ends with a resetBold when it has parenthetical text', () {
         // This is apparently required to work around bugs in some terminal clients.
         final Platform platform = FakePlatform(stdoutSupportsAnsi: true);
         final terminal = AnsiTerminal(stdio: FakeStdio(), platform: platform);
@@ -83,7 +83,7 @@ void main() {
         expect(commandHelpOption.toString(), endsWith(AnsiTerminal.resetBold));
       });
 
-      testWithoutContext('should have a bold command key', () {
+      test('should have a bold command key', () {
         final CommandHelp commandHelp = _createCommandHelp(ansi: true, wrapColumn: maxLineWidth);
 
         expect(commandHelp.I.toString(), startsWith('\x1B[1mI\x1B[22m'));
@@ -110,7 +110,7 @@ void main() {
         expect(commandHelp.w.toString(), startsWith('\x1B[1mw\x1B[22m'));
       });
 
-      testWithoutContext('commands that should have a grey bolden parenthetical text', () {
+      test('commands that should have a grey bolden parenthetical text', () {
         final CommandHelp commandHelp = _createCommandHelp(ansi: true, wrapColumn: maxLineWidth);
 
         expect(commandHelp.I.toString(), contains('\x1B[90m(debugInvertOversizedImages)\x1B[39m'));
@@ -134,29 +134,23 @@ void main() {
         expect(commandHelp.w.toString(), contains('\x1B[90m(debugDumpApp)\x1B[39m'));
       });
 
-      testWithoutContext(
-        'should not create a help text longer than maxLineWidth without ansi support',
-        () {
-          _testMessageLength(
-            stdoutSupportsAnsi: false,
-            wrapColumn: 0,
-            maxTestLineLength: maxLineWidth,
-          );
-        },
-      );
+      test('should not create a help text longer than maxLineWidth without ansi support', () {
+        _testMessageLength(
+          stdoutSupportsAnsi: false,
+          wrapColumn: 0,
+          maxTestLineLength: maxLineWidth,
+        );
+      });
 
-      testWithoutContext(
-        'should not create a help text longer than maxLineWidth with ansi support',
-        () {
-          _testMessageLength(
-            stdoutSupportsAnsi: true,
-            wrapColumn: 0,
-            maxTestLineLength: maxLineWidth,
-          );
-        },
-      );
+      test('should not create a help text longer than maxLineWidth with ansi support', () {
+        _testMessageLength(
+          stdoutSupportsAnsi: true,
+          wrapColumn: 0,
+          maxTestLineLength: maxLineWidth,
+        );
+      });
 
-      testWithoutContext('should not create a help text longer than outputPreferences.wrapColumn without ansi support', () {
+      test('should not create a help text longer than outputPreferences.wrapColumn without ansi support', () {
         _testMessageLength(
           stdoutSupportsAnsi: false,
           wrapColumn: OutputPreferences.kDefaultTerminalColumns,
@@ -164,7 +158,7 @@ void main() {
         );
       });
 
-      testWithoutContext(
+      test(
         'should not create a help text longer than outputPreferences.wrapColumn with ansi support',
         () {
           _testMessageLength(
@@ -175,7 +169,7 @@ void main() {
         },
       );
 
-      testWithoutContext('should create the correct help text with ansi support', () {
+      test('should create the correct help text with ansi support', () {
         final CommandHelp commandHelp = _createCommandHelp(ansi: true, wrapColumn: maxLineWidth);
 
         // The trailing \x1B[22m is to work around reported bugs in some terminal clients.
@@ -286,7 +280,7 @@ void main() {
         );
       });
 
-      testWithoutContext('should create the correct help text without ansi support', () {
+      test('should create the correct help text without ansi support', () {
         final CommandHelp commandHelp = _createCommandHelp(ansi: false, wrapColumn: maxLineWidth);
 
         expect(

@@ -28,6 +28,7 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/web/chrome_constants.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
+import 'package:flutter_tools/src/web/web_debug_config.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
@@ -63,7 +64,7 @@ final kChromeArgs = <String>[
 void main() {
   late FakeWebRunnerFactory fakeWebRunnerFactory;
 
-  testWithoutContext('getDesiredCapabilities Chrome with headless on', () {
+  test('getDesiredCapabilities Chrome with headless on', () {
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'chrome',
@@ -95,7 +96,7 @@ void main() {
     expect(getDesiredCapabilities(Browser.chrome, true, platform: const LocalPlatform()), expected);
   });
 
-  testWithoutContext('getDesiredCapabilities Chrome with headless off', () {
+  test('getDesiredCapabilities Chrome with headless off', () {
     const chromeBinary = 'random-binary';
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
@@ -128,7 +129,7 @@ void main() {
     );
   });
 
-  testWithoutContext('getDesiredCapabilities Chrome with browser flags', () {
+  test('getDesiredCapabilities Chrome with browser flags', () {
     const webBrowserFlags = <String>[
       '--autoplay-policy=no-user-gesture-required',
       '--incognito',
@@ -169,7 +170,7 @@ void main() {
     );
   });
 
-  testWithoutContext('getDesiredCapabilities Firefox with headless on', () {
+  test('getDesiredCapabilities Firefox with headless on', () {
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'firefox',
@@ -195,7 +196,7 @@ void main() {
     );
   });
 
-  testWithoutContext('getDesiredCapabilities Firefox with headless off', () {
+  test('getDesiredCapabilities Firefox with headless off', () {
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'firefox',
@@ -221,7 +222,7 @@ void main() {
     );
   });
 
-  testWithoutContext('getDesiredCapabilities Firefox with browser flags', () {
+  test('getDesiredCapabilities Firefox with browser flags', () {
     const webBrowserFlags = <String>['-url=https://example.com', '-private'];
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
@@ -253,13 +254,13 @@ void main() {
     );
   });
 
-  testWithoutContext('getDesiredCapabilities Edge', () {
+  test('getDesiredCapabilities Edge', () {
     final expected = <String, dynamic>{'acceptInsecureCerts': true, 'browserName': 'edge'};
 
     expect(getDesiredCapabilities(Browser.edge, false, platform: const LocalPlatform()), expected);
   });
 
-  testWithoutContext('getDesiredCapabilities macOS Safari', () {
+  test('getDesiredCapabilities macOS Safari', () {
     final expected = <String, dynamic>{'browserName': 'safari'};
 
     expect(
@@ -268,7 +269,7 @@ void main() {
     );
   });
 
-  testWithoutContext('getDesiredCapabilities iOS Safari', () {
+  test('getDesiredCapabilities iOS Safari', () {
     final expected = <String, dynamic>{
       'platformName': 'ios',
       'browserName': 'safari',
@@ -281,7 +282,7 @@ void main() {
     );
   });
 
-  testWithoutContext('getDesiredCapabilities android chrome', () {
+  test('getDesiredCapabilities android chrome', () {
     const webBrowserFlags = <String>['--autoplay-policy=no-user-gesture-required', '--incognito'];
     final expected = <String, dynamic>{
       'browserName': 'chrome',
@@ -307,7 +308,7 @@ void main() {
     );
   });
 
-  // TODO(bkonyi): Convert WebDriverService.start tests to testWithoutContext once
+  // TODO(bkonyi): Convert WebDriverService.start tests to plain `test` once
   // FlutterDevice.create no longer reads ambient residentCompilerFactory,
   // https://github.com/flutter/flutter/issues/47161.
   testUsingContext('WebDriverService starts and stops an app', () async {
@@ -343,8 +344,13 @@ void main() {
     await service.start(
       BuildInfo.profile,
       device,
-      DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
-      webDefines: <String, String>{'VERSION': 'v1.2.3'},
+      DebuggingOptions.enabled(
+        BuildInfo.profile,
+        platformOptions: const <PlatformDebuggingOptions>[
+          WebDebugConfig(webDefines: <String, String>{'VERSION': 'v1.2.3'}),
+        ],
+        ipv6: true,
+      ),
     );
     await service.stop();
     expect(fakeWebRunnerFactory.lastWebDefines, <String, String>{'VERSION': 'v1.2.3'});
@@ -359,7 +365,7 @@ void main() {
       device,
       DebuggingOptions.enabled(
         BuildInfo.profile,
-        webConfig: const WebDebugConfig(launchUrl: testUrl),
+        platformOptions: const <PlatformDebuggingOptions>[WebDebugConfig(launchUrl: testUrl)],
         ipv6: true,
       ),
     );
@@ -377,7 +383,9 @@ void main() {
       device,
       DebuggingOptions.enabled(
         BuildInfo.profile,
-        webConfig: WebDebugConfig(devServerConfig: webDevServerConfig),
+        platformOptions: <PlatformDebuggingOptions>[
+          WebDebugConfig(devServerConfig: webDevServerConfig),
+        ],
         ipv6: true,
       ),
     );
@@ -398,7 +406,9 @@ void main() {
         device,
         DebuggingOptions.enabled(
           BuildInfo.profile,
-          webConfig: const WebDebugConfig(launchUrl: invalidTestUrl),
+          platformOptions: const <PlatformDebuggingOptions>[
+            WebDebugConfig(launchUrl: invalidTestUrl),
+          ],
           ipv6: true,
         ),
       ),
@@ -424,7 +434,7 @@ void main() {
     },
   );
 
-  testWithoutContext(
+  test(
     'WebDriverService exits the tool when the WebDriver server cannot create a session',
     () async {
       // A fake WebDriver server that rejects every session request, the way
@@ -513,11 +523,10 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
     Map<String, Object?> platformArgs = const <String, Object?>{},
     String? target,
     UrlTunneller? urlTunneller,
-    Map<String, String> webDefines = const <String, String>{},
   }) {
     expect(stayResident, isTrue);
     lastPlatformArgs = platformArgs;
-    lastWebDefines = webDefines;
+    lastWebDefines = debuggingOptions.webConfig.webDefines;
     return FakeResidentRunner(
       doResolveToError: doResolveToError,
       debuggingOptions: debuggingOptions,

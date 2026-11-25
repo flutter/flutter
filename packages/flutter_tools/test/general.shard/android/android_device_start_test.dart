@@ -61,7 +61,7 @@ void main() {
     TargetPlatform.android_arm64,
     TargetPlatform.android_x64,
   ]) {
-    testWithoutContext('AndroidDevice.startApp allows release builds on $targetPlatform', () async {
+    test('AndroidDevice.startApp allows release builds on $targetPlatform', () async {
       final String arch = getCpuArchForName(targetPlatform.getName()).androidArchName;
       final device = AndroidDevice(
         '1234',
@@ -557,7 +557,7 @@ void main() {
     },
   );
 
-  testWithoutContext('AndroidDevice.startApp forwards all supported debugging options', () async {
+  test('AndroidDevice.startApp forwards all supported debugging options', () async {
     final device = AndroidDevice(
       '1234',
       modelID: 'TestModel',
@@ -703,7 +703,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('AndroidDevice.startApp fails when am start returns Error type 3', () async {
+  test('AndroidDevice.startApp fails when am start returns Error type 3', () async {
     final device = AndroidDevice(
       '1234',
       modelID: 'TestModel',
@@ -772,77 +772,74 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext(
-    'AndroidDevice.startApp fails when am start returns Security exception',
-    () async {
-      final device = AndroidDevice(
-        '1234',
-        modelID: 'TestModel',
-        fileSystem: fileSystem,
-        processManager: processManager,
-        logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        androidSdk: androidSdk,
-      );
-      final File apkFile = fileSystem.file('app-release.apk')..createSync();
-      final apk = AndroidApk(
-        id: 'FlutterApp',
-        applicationPackage: apkFile,
-        launchActivity: 'FlutterActivity',
-        versionCode: 1,
-      );
+  test('AndroidDevice.startApp fails when am start returns Security exception', () async {
+    final device = AndroidDevice(
+      '1234',
+      modelID: 'TestModel',
+      fileSystem: fileSystem,
+      processManager: processManager,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(),
+      androidSdk: androidSdk,
+    );
+    final File apkFile = fileSystem.file('app-release.apk')..createSync();
+    final apk = AndroidApk(
+      id: 'FlutterApp',
+      applicationPackage: apkFile,
+      launchActivity: 'FlutterActivity',
+      versionCode: 1,
+    );
 
-      processManager.addCommand(kAdbVersionCommand);
-      processManager.addCommand(kStartServer);
-      processManager.addCommand(
-        const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
-          stdout: '[ro.product.cpu.abi]: [arm64-v8a]',
-        ),
-      );
-      processManager.addCommand(
-        const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
-        ),
-      );
-      processManager.addCommand(
-        const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app-release.apk'],
-        ),
-      );
-      processManager.addCommand(kShaCommand);
-      processManager.addCommand(
-        const FakeCommand(
-          command: <String>[
-            'adb',
-            '-s',
-            '1234',
-            'shell',
-            'am',
-            'start',
-            '-a',
-            'android.intent.action.MAIN',
-            '-c',
-            'android.intent.category.LAUNCHER',
-            '-f',
-            '0x20000000',
-            'FlutterActivity',
-          ],
-          stdout: 'Security exception: Permission Denial: starting Intent...',
-        ),
-      );
+    processManager.addCommand(kAdbVersionCommand);
+    processManager.addCommand(kStartServer);
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
+        stdout: '[ro.product.cpu.abi]: [arm64-v8a]',
+      ),
+    );
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
+      ),
+    );
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app-release.apk'],
+      ),
+    );
+    processManager.addCommand(kShaCommand);
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>[
+          'adb',
+          '-s',
+          '1234',
+          'shell',
+          'am',
+          'start',
+          '-a',
+          'android.intent.action.MAIN',
+          '-c',
+          'android.intent.category.LAUNCHER',
+          '-f',
+          '0x20000000',
+          'FlutterActivity',
+        ],
+        stdout: 'Security exception: Permission Denial: starting Intent...',
+      ),
+    );
 
-      final LaunchResult launchResult = await device.startApp(
-        apk,
-        prebuiltApplication: true,
-        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release, enableDartProfiling: false),
-        platformArgs: <String, dynamic>{},
-      );
+    final LaunchResult launchResult = await device.startApp(
+      apk,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.disabled(BuildInfo.release, enableDartProfiling: false),
+      platformArgs: <String, dynamic>{},
+    );
 
-      expect(launchResult.started, false);
-      expect(processManager, hasNoRemainingExpectations);
-    },
-  );
+    expect(launchResult.started, false);
+    expect(processManager, hasNoRemainingExpectations);
+  });
 
   group('release mode engine shell arguments:', () {
     late FakeAndroidBuilder fakeAndroidBuilder;
@@ -1071,7 +1068,7 @@ void main() {
       },
     );
 
-    testWithoutContext('AndroidDevice.startApp does not pass debugging options via Intent when --use-application-binary is used in release mode', () async {
+    test('AndroidDevice.startApp does not pass debugging options via Intent when --use-application-binary is used in release mode', () async {
       final device = AndroidDevice(
         '1234',
         modelID: 'TestModel',
@@ -1144,7 +1141,7 @@ void main() {
       expect(fileSystem.file('android/AndroidManifest.xml').existsSync(), false);
     });
 
-    testWithoutContext('AndroidDevice.startApp does not pass intent extras (--ez, --es) in release mode even when flags, route, and startup tracing are provided', () async {
+    test('AndroidDevice.startApp does not pass intent extras (--ez, --es) in release mode even when flags, route, and startup tracing are provided', () async {
       final device = AndroidDevice(
         '1234',
         modelID: 'TestModel',

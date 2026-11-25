@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/template.dart';
 import '../../src/common.dart';
 
 void main() {
-  testWithoutContext('kotlin reserved keywords', () {
+  test('kotlin reserved keywords', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final logger = BufferLogger.test();
     final Directory rootDir = fileSystem.currentDirectory;

@@ -298,7 +298,7 @@ void main() {
       logger = BufferLogger.test();
     });
 
-    testWithoutContext('streams log lines end-to-end from extension isolate to ExtensionBackedDevice.getLogReader().logLines', () async {
+    test('streams log lines end-to-end from extension isolate to ExtensionBackedDevice.getLogReader().logLines', () async {
       final eventPort = ReceivePort();
       addTearDown(eventPort.close);
       final Stream<Map<String, Object?>> events = eventPort
@@ -362,7 +362,7 @@ void main() {
       expect(await device.getLogReader(), isA<NoOpDeviceLogReader>());
     });
 
-    testWithoutContext(
+    test(
       'filters device.logEntry notifications by deviceId so logs from other devices are ignored',
       () async {
         final eventPort = ReceivePort();
@@ -407,7 +407,7 @@ void main() {
       },
     );
 
-    testWithoutContext(
+    test(
       'calling dispose() on ExtensionDeviceLogReader triggers stopLogStream on the extension',
       () async {
         final eventPort = ReceivePort();
@@ -456,7 +456,7 @@ void main() {
       },
     );
 
-    testWithoutContext(
+    test(
       'ExtensionDeviceLogReader logs warning and closes stream when startLogStream fails',
       () async {
         final eventPort = ReceivePort();
@@ -495,48 +495,42 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'ExtensionDeviceLogReader closes logLines when extension isolate exits',
-      () async {
-        final eventPort = ReceivePort();
-        addTearDown(eventPort.close);
-        final SendPort eventSendPort = eventPort.sendPort;
+    test('ExtensionDeviceLogReader closes logLines when extension isolate exits', () async {
+      final eventPort = ReceivePort();
+      addTearDown(eventPort.close);
+      final SendPort eventSendPort = eventPort.sendPort;
 
-        void entryPoint(SendPort sendPort) {
-          unawaited(
-            ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
-              _StreamingTestDeviceService(
-                eventSendPort: eventSendPort,
-                exitAfterEmitting: true,
-                linesByDevice: const <String, List<String>>{
-                  _primaryDeviceId: <String>['line before exit'],
-                },
-              ),
-            ]),
-          );
-        }
-
-        final ExtensionConnection conn = await ExtensionConnection.spawn(
-          entryPoint,
-          logger: logger,
+      void entryPoint(SendPort sendPort) {
+        unawaited(
+          ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+            _StreamingTestDeviceService(
+              eventSendPort: eventSendPort,
+              exitAfterEmitting: true,
+              linesByDevice: const <String, List<String>>{
+                _primaryDeviceId: <String>['line before exit'],
+              },
+            ),
+          ]),
         );
-        addTearDown(conn.dispose);
+      }
 
-        final client = ExtensionDeviceClient(conn, logger: logger);
-        final ExtensionDeviceLogReader reader = await ExtensionDeviceLogReader.create(
-          connection: conn,
-          deviceId: _primaryDeviceId,
-          deviceService: client,
-          logger: logger,
-          name: 'Primary Extension Device',
-        );
-        addTearDown(reader.dispose);
+      final ExtensionConnection conn = await ExtensionConnection.spawn(entryPoint, logger: logger);
+      addTearDown(conn.dispose);
 
-        await expectLater(reader.logLines, emitsInOrder(<Object>['line before exit', emitsDone]));
-      },
-    );
+      final client = ExtensionDeviceClient(conn, logger: logger);
+      final ExtensionDeviceLogReader reader = await ExtensionDeviceLogReader.create(
+        connection: conn,
+        deviceId: _primaryDeviceId,
+        deviceService: client,
+        logger: logger,
+        name: 'Primary Extension Device',
+      );
+      addTearDown(reader.dispose);
 
-    testWithoutContext('startLogStream and stopLogStream throw INVALID_PARAMS on missing, empty, or invalid parameters', () async {
+      await expectLater(reader.logLines, emitsInOrder(<Object>['line before exit', emitsDone]));
+    });
+
+    test('startLogStream and stopLogStream throw INVALID_PARAMS on missing, empty, or invalid parameters', () async {
       final eventPort = ReceivePort();
       addTearDown(eventPort.close);
       final SendPort eventSendPort = eventPort.sendPort;
@@ -597,7 +591,7 @@ void main() {
       }
     });
 
-    testWithoutContext('multiple concurrent subscribers to logLines across getLogReader calls all receive full log output and startLogStream is called once', () async {
+    test('multiple concurrent subscribers to logLines across getLogReader calls all receive full log output and startLogStream is called once', () async {
       final eventPort = ReceivePort();
       addTearDown(eventPort.close);
       final Stream<Map<String, Object?>> events = eventPort
@@ -658,7 +652,7 @@ void main() {
       expect(startEvents.single[DeviceService.deviceIdParam], equals(_primaryDeviceId));
     });
 
-    testWithoutContext('ExtensionDevices.pollingGetDevices reuses cached ExtensionBackedDevice across polls and disposes removed devices', () async {
+    test('ExtensionDevices.pollingGetDevices reuses cached ExtensionBackedDevice across polls and disposes removed devices', () async {
       final eventPort = ReceivePort();
       addTearDown(eventPort.close);
       final Stream<Map<String, Object?>> events = eventPort
@@ -729,59 +723,50 @@ void main() {
       expect(await primaryFirst.getLogReader(), isA<NoOpDeviceLogReader>());
     });
 
-    testWithoutContext(
-      'ExtensionBackedDevice.startApp fails when no extension provides buildTarget',
-      () async {
-        final eventPort = ReceivePort();
-        addTearDown(eventPort.close);
-        final SendPort eventSendPort = eventPort.sendPort;
+    test('ExtensionBackedDevice.startApp fails when no extension provides buildTarget', () async {
+      final eventPort = ReceivePort();
+      addTearDown(eventPort.close);
+      final SendPort eventSendPort = eventPort.sendPort;
 
-        void entryPoint(SendPort sendPort) {
-          unawaited(
-            ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
-              _StreamingTestDeviceService(eventSendPort: eventSendPort),
-            ]),
-          );
-        }
-
-        final ExtensionConnection conn = await ExtensionConnection.spawn(
-          entryPoint,
-          logger: logger,
+      void entryPoint(SendPort sendPort) {
+        unawaited(
+          ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+            _StreamingTestDeviceService(eventSendPort: eventSendPort),
+          ]),
         );
-        addTearDown(conn.dispose);
+      }
 
-        final client = ExtensionDeviceClient(conn, logger: logger);
-        final device = ExtensionBackedDevice(
-          buildManager: _createBuildManager(
-            logger: logger,
-            targets: const <ExtensionBuildTarget>[],
-          ),
-          connection: conn,
-          deviceService: client,
-          fileSystem: MemoryFileSystem.test(),
-          logger: logger,
-          targetDevice: const TargetDevice(
-            buildTarget: 'custom-linux-build',
-            category: Category.desktop,
-            id: 'test_device',
-            name: 'Test Device',
-          ),
-        );
-        addTearDown(device.dispose);
+      final ExtensionConnection conn = await ExtensionConnection.spawn(entryPoint, logger: logger);
+      addTearDown(conn.dispose);
 
-        final LaunchResult result = await device.startApp(
-          null,
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        );
-        expect(result.started, isFalse);
-        expect(
-          logger.errorText,
-          contains('No tool extension provides build target "custom-linux-build" for Test Device.'),
-        );
-      },
-    );
+      final client = ExtensionDeviceClient(conn, logger: logger);
+      final device = ExtensionBackedDevice(
+        buildManager: _createBuildManager(logger: logger, targets: const <ExtensionBuildTarget>[]),
+        connection: conn,
+        deviceService: client,
+        fileSystem: MemoryFileSystem.test(),
+        logger: logger,
+        targetDevice: const TargetDevice(
+          buildTarget: 'custom-linux-build',
+          category: Category.desktop,
+          id: 'test_device',
+          name: 'Test Device',
+        ),
+      );
+      addTearDown(device.dispose);
 
-    testWithoutContext('ExtensionDeviceClient.launchApp and stopApp log error and return false on ToolExtensionException', () async {
+      final LaunchResult result = await device.startApp(
+        null,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      );
+      expect(result.started, isFalse);
+      expect(
+        logger.errorText,
+        contains('No tool extension provides build target "custom-linux-build" for Test Device.'),
+      );
+    });
+
+    test('ExtensionDeviceClient.launchApp and stopApp log error and return false on ToolExtensionException', () async {
       void domainErrorEntryPoint(SendPort sendPort) {
         unawaited(
           ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
@@ -820,7 +805,7 @@ void main() {
       );
     });
 
-    testWithoutContext('ExtensionDevices.pollingGetDevices reports ToolExtensionException via getDiagnostics without warning on every poll', () async {
+    test('ExtensionDevices.pollingGetDevices reports ToolExtensionException via getDiagnostics without warning on every poll', () async {
       void domainErrorEntryPoint(SendPort sendPort) {
         unawaited(
           ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
@@ -860,7 +845,7 @@ void main() {
       logger = BufferLogger.test();
     });
 
-    testWithoutContext('DeviceService.isValidPlatformName validates CLI platform identifiers', () {
+    test('DeviceService.isValidPlatformName validates CLI platform identifiers', () {
       for (final valid in const <String>['custom_os', 'custom-embedder-2', 'android']) {
         expect(DeviceService.isValidPlatformName(valid), isTrue, reason: valid);
       }
@@ -869,7 +854,7 @@ void main() {
       }
     });
 
-    testWithoutContext('default DeviceService returns null platform, empty emulators, and UnsupportedError or INVALID_PARAMS', () async {
+    test('default DeviceService returns null platform, empty emulators, and UnsupportedError or INVALID_PARAMS', () async {
       final ExtensionConnection conn = await ExtensionConnection.spawn(
         _deviceEntryPoint(_TestEmulatorDeviceService()),
         logger: logger,
@@ -934,7 +919,7 @@ void main() {
       }
     });
 
-    testWithoutContext(
+    test(
       'getEmulatorPlatform, getEmulators, launchEmulator, and createEmulator round-trip over RPC',
       () async {
         final verifyPort = ReceivePort();
@@ -1044,68 +1029,65 @@ void main() {
       logger = BufferLogger.test();
     });
 
-    testWithoutContext(
-      'isolates faults across extensions and queries live emulators on each read',
-      () async {
-        final queryPort = ReceivePort();
-        addTearDown(queryPort.close);
-        final SendPort querySendPort = queryPort.sendPort;
-        var queryCount = 0;
-        final StreamSubscription<Object?> sub = queryPort.listen((_) => queryCount++);
-        addTearDown(sub.cancel);
+    test('isolates faults across extensions and queries live emulators on each read', () async {
+      final queryPort = ReceivePort();
+      addTearDown(queryPort.close);
+      final SendPort querySendPort = queryPort.sendPort;
+      var queryCount = 0;
+      final StreamSubscription<Object?> sub = queryPort.listen((_) => queryCount++);
+      addTearDown(sub.cancel);
 
-        final ExtensionManager manager = _createExtensionManager(
-          logger: logger,
-          entryPoints: <ExtensionEntryPoint>[
-            _deviceEntryPoint(
-              _TestEmulatorDeviceService(
-                onGetEmulatorPlatform: () => throw StateError('Platform query failed'),
-                onGetEmulators: () => throw StateError('Discovery failed'),
-              ),
-              extensionName: 'failing_device_ext',
+      final ExtensionManager manager = _createExtensionManager(
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[
+          _deviceEntryPoint(
+            _TestEmulatorDeviceService(
+              onGetEmulatorPlatform: () => throw StateError('Platform query failed'),
+              onGetEmulators: () => throw StateError('Discovery failed'),
             ),
-            _deviceEntryPoint(
-              _TestEmulatorDeviceService(
-                onGetEmulators: () {
-                  querySendPort.send(null);
-                  return const <TargetEmulator>[
-                    TargetEmulator(
-                      id: 'healthy_emu',
-                      name: 'Healthy Emulator',
-                      category: Category.desktop,
-                      manufacturer: 'Acme',
-                    ),
-                  ];
-                },
-              ),
-              extensionName: 'healthy_device_ext',
+            extensionName: 'failing_device_ext',
+          ),
+          _deviceEntryPoint(
+            _TestEmulatorDeviceService(
+              onGetEmulators: () {
+                querySendPort.send(null);
+                return const <TargetEmulator>[
+                  TargetEmulator(
+                    id: 'healthy_emu',
+                    name: 'Healthy Emulator',
+                    category: Category.desktop,
+                    manufacturer: 'Acme',
+                  ),
+                ];
+              },
             ),
-          ],
-        );
+            extensionName: 'healthy_device_ext',
+          ),
+        ],
+      );
 
-        final discovery = ExtensionEmulators(extensionManager: manager, logger: logger);
-        expect(discovery.supportsPlatform, isTrue);
-        expect(discovery.canListAnything, isTrue);
-        expect(discovery.canLaunchAnything, isTrue);
+      final discovery = ExtensionEmulators(extensionManager: manager, logger: logger);
+      expect(discovery.supportsPlatform, isTrue);
+      expect(discovery.canListAnything, isTrue);
+      expect(discovery.canLaunchAnything, isTrue);
 
-        expect(await discovery.hasEmulatorSources(), isTrue);
-        expect(queryCount, 1);
-        final List<Emulator> emulators = await discovery.emulators;
-        expect(queryCount, 2);
-        expect(emulators, hasLength(1));
-        expect(emulators.single.id, 'healthy_emu');
-        expect(emulators.single.name, 'Healthy Emulator');
-        expect(emulators.single.manufacturer, 'Acme');
-        expect(emulators.single.category, Category.desktop);
-        expect(emulators.single.platformType, PlatformType.custom);
-        expect(logger.warningText, contains('failing_device_ext'));
+      expect(await discovery.hasEmulatorSources(), isTrue);
+      expect(queryCount, 1);
+      final List<Emulator> emulators = await discovery.emulators;
+      expect(queryCount, 2);
+      expect(emulators, hasLength(1));
+      expect(emulators.single.id, 'healthy_emu');
+      expect(emulators.single.name, 'Healthy Emulator');
+      expect(emulators.single.manufacturer, 'Acme');
+      expect(emulators.single.category, Category.desktop);
+      expect(emulators.single.platformType, PlatformType.custom);
+      expect(logger.warningText, contains('failing_device_ext'));
 
-        await discovery.emulators;
-        expect(queryCount, 3);
-      },
-    );
+      await discovery.emulators;
+      expect(queryCount, 3);
+    });
 
-    testWithoutContext(
+    test(
       'ExtensionEmulator.launch forwards coldBoot and formats RPC, domain, and local errors',
       () async {
         final launchedCalls = <(String, bool)>[];
@@ -1154,7 +1136,7 @@ void main() {
       },
     );
 
-    testWithoutContext(
+    test(
       'surfaces default SDK UnsupportedError (-32002) cleanly on launchEmulator and createEmulator',
       () async {
         // Omit `onLaunchEmulator` and `onCreateEmulator` so the real SDK default
@@ -1200,7 +1182,7 @@ void main() {
       },
     );
 
-    testWithoutContext('sorts extensions lexicographically by extensionName when deduplicating create platforms '
+    test('sorts extensions lexicographically by extensionName when deduplicating create platforms '
         'and TargetEmulator.id collisions and surfaces ToolExtensionException cleanly', () async {
       // Register `zeta_custom_ext` BEFORE `alpha_custom_ext` in `entryPoints` so
       // registration order differs from lexicographical `<package_name>` order.
@@ -1349,7 +1331,7 @@ void main() {
       );
     });
 
-    testWithoutContext(
+    test(
       'EmulatorManager does not spawn extensions when disabled, in safe mode, or omitted',
       () async {
         void shouldNotSpawnEntryPoint(SendPort sendPort) {
@@ -1386,7 +1368,7 @@ void main() {
       },
     );
 
-    testWithoutContext(
+    test(
       'EmulatorManager discovers emulators and routes createEmulator across Android and extensions',
       () async {
         final ExtensionManager extManager = _createExtensionManager(
@@ -1492,7 +1474,7 @@ void main() {
       },
     );
 
-    testWithoutContext('linuxExtensionEntryPoint does not advertise emulator sources or create platforms in production', () async {
+    test('linuxExtensionEntryPoint does not advertise emulator sources or create platforms in production', () async {
       final EmulatorManager emulatorManager = _createEmulatorManager(
         extensionManager: _createExtensionManager(
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],

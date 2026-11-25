@@ -9,7 +9,7 @@ import '../../src/fakes.dart';
 import '../../src/logging_logger.dart';
 
 void main() {
-  testWithoutContext('Test phases prints correctly', () {
+  test('Test phases prints correctly', () {
     const Duration zero = Duration.zero;
     const combinedDuration = Duration(seconds: 42);
     const wallClockDuration = Duration(seconds: 21);

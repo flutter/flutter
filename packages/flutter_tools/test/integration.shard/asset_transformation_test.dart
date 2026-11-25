@@ -55,7 +55,7 @@ class MyApp extends StatelessWidget {
 }
 
 Future<void> main() async {
-  testWithoutContext('asset is transformed when declared with a transformation', () async {
+  test('asset is transformed when declared with a transformation', () async {
     final Directory tempProjectDirectory = createResolvedTempDirectorySync(
       'asset_transformation_test.',
     );

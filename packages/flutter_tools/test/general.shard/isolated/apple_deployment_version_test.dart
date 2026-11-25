@@ -21,7 +21,7 @@ void main() {
         ('macOS', kMacOSDeploymentTarget, 13, macOSDeploymentVersion),
       ]) {
     for (final value in <String?>[null, '', ' ', '0', '12.9.9']) {
-      testWithoutContext('$platform retains its native-assets floor for "$value"', () {
+      test('$platform retains its native-assets floor for "$value"', () {
         expect(resolve(<String, String>{key: ?value}), AppleVersion(minimum));
       });
     }
@@ -36,12 +36,12 @@ void main() {
         AppleVersion(2147483647, minor: 2147483647, patch: 2147483647),
       ),
     ]) {
-      testWithoutContext('$platform preserves "$value"', () {
+      test('$platform preserves "$value"', () {
         expect(resolve(<String, String>{key: value}), expected);
       });
     }
     for (final value in <String>['invalid', '-1', '16.4beta', '16.4.1.2', '17.2.2147483648']) {
-      testWithoutContext('$platform rejects "$value" with an actionable error', () {
+      test('$platform rejects "$value" with an actionable error', () {
         expect(
           () => resolve(<String, String>{key: value}),
           throwsToolExit(message: 'Invalid $platform deployment target "$value"'),

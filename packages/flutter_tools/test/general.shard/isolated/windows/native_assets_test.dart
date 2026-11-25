@@ -123,9 +123,7 @@ void main() {
           );
           final expectedDirectory = flutterTester ? code_assets.OS.current.toString() : 'windows';
           final Uri nativeAssetsFileUri = flutterTester
-              ? projectUri.resolve(
-                  'build/native_assets/$expectedDirectory/${InstallCodeAssets.nativeAssetsFilename}',
-                )
+              ? projectUri.resolve('build/native_assets/flutter_test_native_assets.json')
               : nonFlutterTesterAssetUri;
           await installCodeAssets(
             dartHookResult: dartHookResult,
@@ -178,7 +176,7 @@ void main() {
   // This logic is mocked in the other tests to avoid having test order
   // randomization causing issues with what processes are invoked.
   // Exercise the parsing of the process output in this separate test.
-  testWithoutContext('NativeAssetsBuildRunnerImpl.cCompilerConfig', () async {
+  test('NativeAssetsBuildRunnerImpl.cCompilerConfig', () async {
     final vswhereProcessManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <Pattern>[
@@ -295,11 +293,26 @@ void main() {
       environment: <String, String>{'PROGRAMFILES(X86)': r'C:\Program Files (x86)\'},
     );
 
-    testWithoutContext(
-      'returns null when Visual Studio is not found and throwIfNotFound is false',
-      () async {
-        final CCompilerConfig? result = await cCompilerConfigWindows(
-          throwIfNotFound: false,
+    test('returns null when Visual Studio is not found and throwIfNotFound is false', () async {
+      final CCompilerConfig? result = await cCompilerConfigWindows(
+        throwIfNotFound: false,
+        visualStudio: VisualStudio(
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            os: FakeOperatingSystemUtils(),
+            platform: windowsPlatform,
+            processManager: FakeProcessManager.any(),
+          ),
+        ),
+      );
+      expect(result, isNull);
+    });
+
+    test('throws ToolExit when Visual Studio is not found and throwIfNotFound is true', () async {
+      await expectLater(
+        cCompilerConfigWindows(
+          throwIfNotFound: true,
           visualStudio: VisualStudio(
             toolContext: FakeToolContext(
               fs: fileSystem,
@@ -309,33 +322,12 @@ void main() {
               processManager: FakeProcessManager.any(),
             ),
           ),
-        );
-        expect(result, isNull);
-      },
-    );
+        ),
+        throwsA(isA<ToolExit>()),
+      );
+    });
 
-    testWithoutContext(
-      'throws ToolExit when Visual Studio is not found and throwIfNotFound is true',
-      () async {
-        await expectLater(
-          cCompilerConfigWindows(
-            throwIfNotFound: true,
-            visualStudio: VisualStudio(
-              toolContext: FakeToolContext(
-                fs: fileSystem,
-                logger: logger,
-                os: FakeOperatingSystemUtils(),
-                platform: windowsPlatform,
-                processManager: FakeProcessManager.any(),
-              ),
-            ),
-          ),
-          throwsA(isA<ToolExit>()),
-        );
-      },
-    );
-
-    testWithoutContext(
+    test(
       'WindowsAssetTarget.setCCompilerConfig throws StateError when visualStudio is null',
       () async {
         final target = WindowsAssetTarget(
@@ -358,7 +350,7 @@ void main() {
       },
     );
 
-    testWithoutContext('runFlutterSpecificBuildHooks succeeds for data-only hooks on Windows when visualStudio is null', () async {
+    test('runFlutterSpecificBuildHooks succeeds for data-only hooks on Windows when visualStudio is null', () async {
       final (:DartHooksResult buildResult, results: _) = await runFlutterSpecificBuildHooks(
         androidSdkProvider: null,
         environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
