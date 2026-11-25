@@ -522,7 +522,7 @@ class FlutterValidator extends DoctorValidator {
       _validateRequiredBinaries(flutterRoot).forEach(messages.add);
       messages.add(_getFlutterUpstreamMessage(version));
       if (gitUrl != null) {
-        messages.add(ValidationMessage(flutterGitUrl(gitUrl)));
+        messages.add(ValidationMessage(flutterGitUrl(sanitizeGitUrl(gitUrl))));
       }
       messages.add(
         ValidationMessage(

@@ -2135,6 +2135,97 @@ void main() {
         ),
       },
     );
+
+    testWithoutContext('sanitizeGitUrl strips credentials while preserving standard remotes', () {
+      const cases = <String, String>{
+        'https://ghp_secret@github.com/flutter/flutter.git':
+            'https://github.com/flutter/flutter.git',
+        'https://x-access-token:ghs_secret@github.com/flutter/flutter.git':
+            'https://github.com/flutter/flutter.git',
+        'https://@github.com/flutter/flutter.git': 'https://github.com/flutter/flutter.git',
+        'http://user:pass@example.com:8080/flutter/flutter.git?token=secret#frag':
+            'http://example.com:8080/flutter/flutter.git',
+        'https://github.com/flutter/flutter.git?access_token=secret#frag':
+            'https://github.com/flutter/flutter.git',
+        'https://github.com/flutter/flutter.git': 'https://github.com/flutter/flutter.git',
+        'ssh://git@github.com/flutter/flutter.git': 'ssh://git@github.com/flutter/flutter.git',
+        'ssh://git:secret@github.com/flutter/flutter.git':
+            'ssh://git@github.com/flutter/flutter.git',
+        'ssh://:secret@github.com/flutter/flutter.git': 'ssh://github.com/flutter/flutter.git',
+        'git@github.com:flutter/flutter.git': 'git@github.com:flutter/flutter.git',
+        '/local/path/to/flutter': '/local/path/to/flutter',
+        'unknown source': 'unknown source',
+      };
+
+      for (final MapEntry(:String key, :String value) in cases.entries) {
+        expect(sanitizeGitUrl(key), value, reason: 'Failed for $key');
+      }
+    });
+
+    testWithoutContext(
+      'FlutterVersion sanitizes cached repositoryUrl from flutter.version.json',
+      () {
+        final Directory cacheDir =
+            fs.directory(flutterRoot).childDirectory('bin').childDirectory('cache')
+              ..createSync(recursive: true);
+        final File versionFile = cacheDir.childFile('flutter.version.json');
+        fs.directory(flutterRoot).childDirectory('.git').createSync();
+
+        versionFile.writeAsStringSync(
+          jsonEncode(<String, String>{
+            'frameworkVersion': '1.0.0',
+            'channel': 'master',
+            'repositoryUrl': 'https://ghp_leaked_token@github.com/flutter/flutter.git',
+            'frameworkRevision': 'REVISION_A',
+            'frameworkCommitDate': '2021-01-01',
+            'engineRevision': 'abc',
+            'dartSdkVersion': '1.0.0',
+            'devToolsVersion': '1.0.0',
+            'flutterVersion': '1.0.0',
+          }),
+        );
+
+        final version = FlutterVersion(
+          cache: cache,
+          fs: fs,
+          git: git,
+          flutterRoot: flutterRoot,
+          logger: testLogger,
+          platform: FakePlatform(),
+        );
+
+        expect(version.repositoryUrl, 'https://github.com/flutter/flutter.git');
+        expect(processManager, hasNoRemainingExpectations);
+      },
+    );
+
+    testWithoutContext(
+      'VersionUpstreamValidator sanitizes FLUTTER_GIT_URL in comparisons and errors',
+      () {
+        final VersionCheckError? matchError = VersionUpstreamValidator(
+          platform: FakePlatform(
+            environment: const <String, String>{
+              'FLUTTER_GIT_URL': 'https://token@github.com/my-fork/flutter.git',
+            },
+          ),
+          version: FakeFlutterVersion(repositoryUrl: 'https://github.com/my-fork/flutter.git'),
+        ).run();
+        expect(matchError, isNull);
+
+        final VersionCheckError? mismatchError = VersionUpstreamValidator(
+          platform: FakePlatform(
+            environment: const <String, String>{
+              'FLUTTER_GIT_URL': 'https://token@github.com/other-fork/flutter.git',
+            },
+          ),
+          version: FakeFlutterVersion(repositoryUrl: 'https://github.com/my-fork/flutter.git'),
+        ).run();
+        expect(mismatchError, isNotNull);
+        expect(mismatchError!.message, isNot(contains('token')));
+        expect(mismatchError.message, contains('https://github.com/my-fork/flutter.git'));
+        expect(mismatchError.message, contains('https://github.com/other-fork/flutter.git'));
+      },
+    );
   });
 }
 
