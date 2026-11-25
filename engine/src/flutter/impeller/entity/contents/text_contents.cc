@@ -156,6 +156,12 @@ void TextContents::ComputeVertexData(VS::PerVertexData* vtx_contents,
   unscaled_basis.m[0] = AttractToOne(unscaled_basis.m[0]);
   unscaled_basis.m[5] = AttractToOne(unscaled_basis.m[5]);
 
+  // The unit quad corners mapped through the unscaled basis are the same for
+  // every glyph in the frame, so compute them once rather than once per vertex.
+  const std::array<Point, 4> basis_unit_points = {
+      unscaled_basis * unit_points[0], unscaled_basis * unit_points[1],
+      unscaled_basis * unit_points[2], unscaled_basis * unit_points[3]};
+
   // Compute the device origin of the entire frame.
   Point screen_offset = (entity_offset_transform * Point(0, 0));
 
@@ -222,24 +228,32 @@ void TextContents::ComputeVertexData(VS::PerVertexData* vtx_contents,
       Point uv_size =
           SizeToPoint(frame_bounds.atlas_bounds.GetSize()) / atlas_size;
 
-      for (const Point& point : unit_points) {
+      // The glyph origin is the same for all four vertices of the glyph, so it
+      // is computed once per glyph instead of once per vertex.
+      Point screen_glyph_position;
+      Rect scaled_bounds;
+      if (is_translation_scale) {
+        Point unrounded_glyph_position =
+            // This is for RTL text.
+            unscaled_basis * frame_bounds.glyph_bounds.GetLeftTop() +
+            (basis_transform * glyph_position.position);
+
+        screen_glyph_position =
+            (screen_offset + unrounded_glyph_position + subpixel_adjustment)
+                .Floor();
+      } else {
+        scaled_bounds = frame_bounds.glyph_bounds.Scale(inverted_rounded_scale);
+      }
+
+      for (size_t corner = 0; corner < unit_points.size(); corner++) {
+        const Point& point = unit_points[corner];
         Point position;
         if (is_translation_scale) {
-          Point unrounded_glyph_position =
-              // This is for RTL text.
-              unscaled_basis * frame_bounds.glyph_bounds.GetLeftTop() +
-              (basis_transform * glyph_position.position);
-
-          Point screen_glyph_position =
-              (screen_offset + unrounded_glyph_position + subpixel_adjustment)
-                  .Floor();
           position =
-              (screen_glyph_position +
-               (unscaled_basis * point * frame_bounds.glyph_bounds.GetSize()))
+              (screen_glyph_position + (basis_unit_points[corner] *
+                                        frame_bounds.glyph_bounds.GetSize()))
                   .Round();
         } else {
-          Rect scaled_bounds =
-              frame_bounds.glyph_bounds.Scale(inverted_rounded_scale);
           position = entity_offset_transform *
                      (glyph_position.position + scaled_bounds.GetLeftTop() +
                       point * scaled_bounds.GetSize());
