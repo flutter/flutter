@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -53,6 +55,48 @@ void testMain() {
 
     tearDown(() {
       dispatcher.dispose();
+    });
+
+    test('disposal removes the exact capturing navigation focus listener', () {
+      final JSFunction add = domDocument.getProperty<JSFunction>('addEventListener'.toJS);
+      final JSFunction remove = domDocument.getProperty<JSFunction>('removeEventListener'.toJS);
+      final added = <JSFunction>[];
+      final removed = <JSFunction>[];
+      final captures = <bool>[];
+      domDocument.setProperty(
+        'addEventListener'.toJS,
+        ((JSString type, JSFunction listener, [JSAny? options]) {
+          if (type.toDart == 'click') {
+            added.add(listener);
+          }
+          add.callAsFunction(domDocument, type, listener, options);
+        }).toJS,
+      );
+      domDocument.setProperty(
+        'removeEventListener'.toJS,
+        ((JSString type, JSFunction listener, [JSAny? options]) {
+          if (type.toDart == 'click') {
+            removed.add(listener);
+            captures.add(options.dartify() == true);
+          }
+          remove.callAsFunction(domDocument, type, listener, options);
+        }).toJS,
+      );
+      addTearDown(() {
+        domDocument.delete('addEventListener'.toJS);
+        domDocument.delete('removeEventListener'.toJS);
+      });
+
+      for (var generation = 0; generation < 10; generation++) {
+        final retired = EnginePlatformDispatcher();
+        retired.dispose();
+      }
+      expect(added, hasLength(10));
+      expect(removed, hasLength(10));
+      for (var i = 0; i < added.length; i++) {
+        expect(identical(added[i], removed[i]), isTrue);
+      }
+      expect(captures, everyElement(isTrue));
     });
 
     test('reports at least one display', () {
