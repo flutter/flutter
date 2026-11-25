@@ -449,10 +449,6 @@ static void ResetAnchor(CALayer* layer) {
   self.currentCompositionParams[viewId] = flutter::EmbeddedViewParams(*params.get());
 }
 
-- (size_t)embeddedViewCount {
-  return self.compositionOrder.size();
-}
-
 - (UIView*)platformViewForId:(int64_t)viewId {
   return [self flutterTouchInterceptingViewForId:viewId].embeddedView;
 }
