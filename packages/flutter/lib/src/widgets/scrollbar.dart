@@ -2368,13 +2368,14 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   void _handlePointerScroll(PointerEvent event) {
-    assert(event is PointerScrollEvent);
+    final scrollEvent = event as PointerScrollEvent;
     _cachedController = _effectiveScrollController;
-    final double delta = _pointerSignalEventDelta(event as PointerScrollEvent);
+    final double delta = _pointerSignalEventDelta(scrollEvent);
     final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
     if (delta != 0.0 && targetScrollOffset != _cachedController!.position.pixels) {
       _cachedController!.position.pointerScroll(delta);
-      event.respond(allowPlatformDefault: false);
+      // Tell the platform that this scrollbar handled the event.
+      scrollEvent.respond(allowPlatformDefault: false);
     }
   }
 

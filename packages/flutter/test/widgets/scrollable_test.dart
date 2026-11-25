@@ -73,6 +73,23 @@ class _NonNotifyingScrollBehavior extends ScrollBehavior {
   }
 }
 
+class _InitStateScrollable extends Scrollable {
+  const _InitStateScrollable({required super.viewportBuilder, required this.onInit});
+
+  final ValueChanged<ScrollBehavior?> onInit;
+
+  @override
+  ScrollableState createState() => _InitStateScrollableState();
+}
+
+class _InitStateScrollableState extends ScrollableState {
+  @override
+  void initState() {
+    super.initState();
+    (widget as _InitStateScrollable).onInit(resolvedScrollBehavior);
+  }
+}
+
 const double dragOffset = 200.0;
 
 double getScrollOffset(WidgetTester tester, {bool last = true}) {
@@ -1611,10 +1628,17 @@ void main() {
       return Directionality(textDirection: TextDirection.ltr, child: scrollable);
     }
 
-    final ScrollableState uninitialized = Scrollable(
-      viewportBuilder: (BuildContext context, ViewportOffset position) => const SizedBox(),
-    ).createState();
-    expect(uninitialized.resolvedScrollBehavior, isNull);
+    final observedBehaviors = <ScrollBehavior?>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: _InitStateScrollable(
+          viewportBuilder: (BuildContext context, ViewportOffset position) => const SizedBox(),
+          onInit: observedBehaviors.add,
+        ),
+      ),
+    );
+    expect(observedBehaviors, <ScrollBehavior?>[null]);
 
     await tester.pumpWidget(buildFrame());
     expect(key.currentState!.resolvedScrollBehavior, const ScrollBehavior());
@@ -1673,6 +1697,7 @@ void main() {
     await tester.pumpWidget(buildFrame(equivalentBehavior));
     expect(notifications, 1);
     expect(key.currentState!.position, same(position));
+    expect(key.currentState!.resolvedScrollBehavior, same(behavior));
 
     const ScrollBehavior differentType = NoScrollbarBehavior();
     await tester.pumpWidget(buildFrame(differentType));

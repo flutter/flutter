@@ -582,6 +582,10 @@ class ScrollableState extends State<Scrollable>
   /// are first resolved. The behavior configures gestures, physics,
   /// and pointer scroll handling (see [ScrollBehavior.pointerAxisModifiers]).
   ///
+  /// When the widget is rebuilt with another [Scrollable.scrollBehavior] of
+  /// the same type, the resolved behavior can retain the previous instance
+  /// unless [ScrollBehavior.shouldNotify] returns true.
+  ///
   /// [RawScrollbar] uses this to match the scrollable's mouse wheel handling
   /// when the pointer is over the scrollbar.
   ///
