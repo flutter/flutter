@@ -414,10 +414,16 @@ void runTests() {
     }
   }
 
-  ImageStreamCompleter loadCompleter(String key, {ui.Codec? codec, bool keepAlive = true}) {
-    if (codec != null) {
-      _TestBinding.instance.overrideCodec = codec;
-    }
+  ImageStreamListener disposingListener({ImageErrorListener? onError, bool reportErrors = true}) {
+    return ImageStreamListener(
+      (ImageInfo info, bool _) => info.dispose(),
+      onError: onError,
+      reportErrors: reportErrors,
+    );
+  }
+
+  ImageStreamCompleter loadCompleter(String key, {required ui.Codec codec, bool keepAlive = true}) {
+    _TestBinding.instance.overrideCodec = codec;
     final provider = NetworkImage(_uniqueUrl(key));
     final ImageStreamCompleter completer = provider.loadImage(
       provider,
@@ -530,21 +536,16 @@ void runTests() {
   testWidgets(
     'NetworkImage with no listeners when its load finishes does not decode frames until one is added',
     (WidgetTester tester) async {
-      addTearDown(imageCache.clear);
       setUpHttpRequest();
       final codec = _LoopingCodec();
-      _TestBinding.instance.overrideCodec = codec;
-      final provider = NetworkImage(_uniqueUrl(tester.testDescription));
-
-      final ImageStreamCompleter completer = provider.loadImage(
-        provider,
-        _TestBinding.instance.instantiateImageCodecWithSize,
+      final ImageStreamCompleter completer = loadCompleter(
+        tester.testDescription,
+        codec: codec,
+        keepAlive: false,
       );
       ImageStreamCompleterHandle? handle = completer.keepAlive();
       addTearDown(() => handle?.dispose());
-      final earlyListener = ImageStreamListener((ImageInfo info, bool _) {
-        info.dispose();
-      });
+      final ImageStreamListener earlyListener = disposingListener();
       completer.addListener(earlyListener);
       completer.removeListener(earlyListener);
 
@@ -598,33 +599,25 @@ void runTests() {
   testWidgets(
     'Re-attaching a listener with onError after a decode error does not report an unhandled error',
     (WidgetTester tester) async {
-      addTearDown(imageCache.clear);
       setUpHttpRequest();
-      _TestBinding.instance.overrideCodec = _LoopingCodec(
-        onFrame: (int frameNumber) {
-          if (frameNumber == 0) {
-            throw StateError('decode failed');
-          }
-          return Completer<void>().future;
-        },
-      );
-      final provider = NetworkImage(_uniqueUrl(tester.testDescription));
-
-      final ImageStreamCompleter completer = provider.loadImage(
-        provider,
-        _TestBinding.instance.instantiateImageCodecWithSize,
+      final ImageStreamCompleter completer = loadCompleter(
+        tester.testDescription,
+        codec: _LoopingCodec(
+          onFrame: (int frameNumber) {
+            if (frameNumber == 0) {
+              throw StateError('decode failed');
+            }
+            return Completer<void>().future;
+          },
+        ),
+        keepAlive: false,
       );
       ImageStreamCompleterHandle? handle = completer.keepAlive();
       addTearDown(() => handle?.dispose());
 
       final errorsA = <Object>[];
-      final listenerA = ImageStreamListener(
-        (ImageInfo info, bool _) {
-          info.dispose();
-        },
-        onError: (Object error, StackTrace? _) {
-          errorsA.add(error);
-        },
+      final ImageStreamListener listenerA = disposingListener(
+        onError: (Object e, _) => errorsA.add(e),
       );
       completer.addListener(listenerA);
       await tester.pump();
@@ -634,13 +627,8 @@ void runTests() {
       completer.removeListener(listenerA);
 
       final errorsB = <Object>[];
-      final listenerB = ImageStreamListener(
-        (ImageInfo info, bool _) {
-          info.dispose();
-        },
-        onError: (Object error, StackTrace? _) {
-          errorsB.add(error);
-        },
+      final ImageStreamListener listenerB = disposingListener(
+        onError: (Object e, _) => errorsB.add(e),
       );
       completer.addListener(listenerB);
       expect(errorsB, <Matcher>[isStateError]);
@@ -667,17 +655,14 @@ void runTests() {
           _ => Completer<void>().future,
         },
       );
-      _TestBinding.instance.overrideCodec = preFrameCodec;
-      final provider1 = NetworkImage(_uniqueUrl('${tester.testDescription}_1'));
-      final ImageStreamCompleter completer = provider1.loadImage(
-        provider1,
-        _TestBinding.instance.instantiateImageCodecWithSize,
+      final ImageStreamCompleter completer = loadCompleter(
+        '${tester.testDescription}_1',
+        codec: preFrameCodec,
+        keepAlive: false,
       );
       ImageStreamCompleterHandle? handle = completer.keepAlive();
       addTearDown(() => handle?.dispose());
-      final listener = ImageStreamListener((ImageInfo info, bool _) {
-        info.dispose();
-      }, reportErrors: false);
+      final ImageStreamListener listener = disposingListener(reportErrors: false);
       completer.addListener(listener);
       await tester.pump();
       expect(preFrameCodec.framesDecoded, 1);
@@ -775,28 +760,32 @@ void runTests() {
     WidgetTester tester,
   ) async {
     setUpHttpRequest();
-    final noop = ImageStreamListener((ImageInfo info, bool _) => info.dispose());
+    final ImageStreamListener listener = disposingListener();
 
     final resolvedCodec = _LoopingCodec();
     final ImageStreamCompleter resolved = loadCompleter(
-      'd1',
+      '${tester.testDescription}_resolved',
       codec: resolvedCodec,
       keepAlive: false,
     );
     final ImageStreamCompleterHandle handle = resolved.keepAlive();
-    resolved.addListener(noop);
+    resolved.addListener(listener);
     await pumpFor(tester, 2);
-    resolved.removeListener(noop);
+    resolved.removeListener(listener);
     handle.dispose();
     expect(resolvedCodec.disposed, isTrue);
-    expect(() => resolved.addListener(noop), throwsStateError);
+    expect(() => resolved.addListener(listener), throwsStateError);
     expect(resolved.keepAlive, throwsStateError);
 
     final earlyCodec = _LoopingCodec();
-    final ImageStreamCompleter early = loadCompleter('d3', codec: earlyCodec, keepAlive: false);
-    early.addListener(noop);
-    early.removeListener(noop);
-    expect(() => early.addListener(noop), throwsStateError);
+    final ImageStreamCompleter unresolved = loadCompleter(
+      '${tester.testDescription}_unresolved',
+      codec: earlyCodec,
+      keepAlive: false,
+    );
+    unresolved.addListener(listener);
+    unresolved.removeListener(listener);
+    expect(() => unresolved.addListener(listener), throwsStateError);
     await pumpFor(tester, 3);
     expect(earlyCodec.framesDecoded, 0);
   });
@@ -807,8 +796,8 @@ void runTests() {
       setUpHttpRequest();
       final codec = _LoopingCodec();
       final ImageStreamCompleter completer = loadCompleter(tester.testDescription, codec: codec);
-      final listener1 = ImageStreamListener((ImageInfo info, bool _) => info.dispose());
-      final listener2 = ImageStreamListener((ImageInfo info, bool _) => info.dispose());
+      final ImageStreamListener listener1 = disposingListener();
+      final ImageStreamListener listener2 = disposingListener();
       completer.addListener(listener1);
       completer.addListener(listener2);
       await pumpFor(tester, 3);
@@ -841,45 +830,47 @@ void runTests() {
     'Ephemeral error listener on a paused NetworkImage receives in-flight and prior decode errors',
     (WidgetTester tester) async {
       setUpHttpRequest();
-      final noop = ImageStreamListener((ImageInfo info, bool _) => info.dispose());
+      final ImageStreamListener listener = disposingListener();
 
       final frame0 = Completer<void>();
-      final ImageStreamCompleter c1 = loadCompleter(
-        'e1',
+      final ImageStreamCompleter priorCompleter = loadCompleter(
+        '${tester.testDescription}_prior',
         codec: _LoopingCodec(onFrame: (int n) => n == 0 ? frame0.future : Completer<void>().future),
       );
-      c1.addListener(noop);
+      priorCompleter.addListener(listener);
       await tester.pump();
-      final errors1 = <Object>[], errors2 = <Object>[];
-      c1.addEphemeralErrorListener((Object e, StackTrace? _) => errors1.add(e));
-      c1.removeListener(noop);
+      final errors1 = <Object>[];
+      final errors2 = <Object>[];
+      priorCompleter.addEphemeralErrorListener((Object e, StackTrace? _) => errors1.add(e));
+      priorCompleter.removeListener(listener);
       frame0.completeError(StateError('decode failed'));
       await tester.pump();
       expect(errors1, <Matcher>[isStateError]);
       expect(tester.takeException(), isNull);
-      c1.addEphemeralErrorListener((Object e, StackTrace? _) => errors2.add(e));
+      priorCompleter.addEphemeralErrorListener((Object e, StackTrace? _) => errors2.add(e));
       expect(errors2, <Matcher>[isStateError]);
 
       final inFlight = Completer<void>();
-      final ImageStreamCompleter c2 = loadCompleter(
-        'e2',
+      final ImageStreamCompleter inFlightCompleter = loadCompleter(
+        '${tester.testDescription}_in_flight',
         codec: _LoopingCodec(
           onFrame: (int n) => n == 0 ? inFlight.future : Completer<void>().future,
         ),
       );
-      c2.addListener(noop);
+      inFlightCompleter.addListener(listener);
       await tester.pump();
-      c2.removeListener(noop);
+      inFlightCompleter.removeListener(listener);
       final errors3 = <Object>[];
-      c2.addEphemeralErrorListener((Object e, StackTrace? _) => errors3.add(e));
+      inFlightCompleter.addEphemeralErrorListener((Object e, StackTrace? _) => errors3.add(e));
       inFlight.completeError(StateError('decode failed'));
       await tester.pump();
       expect(errors3, <Matcher>[isStateError]);
       expect(tester.takeException(), isNull);
 
-      final postFrame0 = Completer<void>(), postFrame1 = Completer<void>();
-      final ImageStreamCompleter c3 = loadCompleter(
-        'e3',
+      final postFrame0 = Completer<void>();
+      final postFrame1 = Completer<void>();
+      final ImageStreamCompleter postFrameCompleter = loadCompleter(
+        '${tester.testDescription}_post_frame',
         codec: _LoopingCodec(
           onFrame: (int n) => switch (n) {
             0 => postFrame0.future,
@@ -888,24 +879,21 @@ void runTests() {
           },
         ),
       );
-      final suppress = ImageStreamListener(
-        (ImageInfo info, bool _) => info.dispose(),
-        reportErrors: false,
-      );
-      c3.addListener(suppress);
+      final ImageStreamListener suppressListener = disposingListener(reportErrors: false);
+      postFrameCompleter.addListener(suppressListener);
       await tester.pump();
       postFrame0.complete();
       await tester.pump(const Duration(milliseconds: 100));
-      c3.removeListener(suppress);
+      postFrameCompleter.removeListener(suppressListener);
       postFrame1.completeError(StateError('post-frame decode failed'));
       await tester.pump();
 
       var lastListenerRemovedCount = 0;
-      c3.addOnLastListenerRemovedCallback(() {
+      postFrameCompleter.addOnLastListenerRemovedCallback(() {
         lastListenerRemovedCount += 1;
       });
       final errors4 = <Object>[];
-      c3.addEphemeralErrorListener((Object e, StackTrace? _) => errors4.add(e));
+      postFrameCompleter.addEphemeralErrorListener((Object e, StackTrace? _) => errors4.add(e));
       expect(errors4, <Matcher>[isStateError]);
       expect(lastListenerRemovedCount, 0);
       expect(tester.takeException(), isNull);
@@ -923,13 +911,12 @@ void runTests() {
           onFrame: (int n) => n < frames.length ? frames[n].future : Completer<void>().future,
         ),
       );
-      ImageStreamListener errorListener(List<Object> sink) => ImageStreamListener(
-        (ImageInfo info, bool _) => info.dispose(),
-        onError: (Object e, StackTrace? _) => sink.add(e),
-        reportErrors: false,
-      );
+      ImageStreamListener errorListener(List<Object> sink) {
+        return disposingListener(onError: (Object e, _) => sink.add(e), reportErrors: false);
+      }
 
-      final errorsA = <Object>[], errorsC = <Object>[];
+      final errorsA = <Object>[];
+      final errorsC = <Object>[];
       final ImageStreamListener listenerA = errorListener(errorsA);
       completer.addListener(listenerA);
       await tester.pump();
