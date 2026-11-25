@@ -80,6 +80,11 @@ class PlatformViewAndroid final : public PlatformView {
   // |PlatformView|
   void NotifyDestroyed() override;
 
+  // Arms or disarms yielding this engine's next NDK choreographer vsync
+  // callback to the main looper so a pending Android view traversal can run
+  // ahead of Flutter's next frame.
+  void SetYieldNextVsync(bool should_yield);
+
   void DispatchPlatformMessage(JNIEnv* env,
                                std::string name,
                                jobject message_data,
@@ -150,11 +155,12 @@ class PlatformViewAndroid final : public PlatformView {
   // outlive this object.
   const std::shared_ptr<std::atomic<uint64_t>> surface_generation_ =
       std::make_shared<std::atomic<uint64_t>>(0);
-  // Set on the platform thread each time the first frame has been rendered into
-  // a new surface, and cleared by this engine's vsync waiter when its next
-  // vsync callback arrives or when the surface is destroyed. Shared with the
-  // waiter because the shell, not this object, owns it. See
-  // |VsyncWaiterAndroid|.
+  // Armed by the Android embedding when Flutter renders its first frame while
+  // the first Android view draw is still delayed, and cleared by the embedding
+  // once that draw runs (or the view is destroyed), by this engine's vsync
+  // waiter when its next vsync callback arrives, or when the surface is
+  // destroyed. Shared with the waiter because the shell, not this object, owns
+  // it. See |VsyncWaiterAndroid|.
   const std::shared_ptr<std::atomic<bool>> yield_next_vsync_ =
       std::make_shared<std::atomic<bool>>(false);
   bool android_meets_hcpp_criteria_ = false;

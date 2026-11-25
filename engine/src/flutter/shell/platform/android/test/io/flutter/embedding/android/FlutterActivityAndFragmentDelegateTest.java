@@ -13,11 +13,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
@@ -75,6 +77,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.robolectric.Robolectric;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
@@ -1565,9 +1568,106 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     listenerCaptor.getValue().onFlutterUiDisplayed();
 
-    verify(mockHost, times(1)).onFlutterUiDisplayed();
+    InOrder inOrder = inOrder(mockFlutterEngine.getRenderer(), mockHost);
+    inOrder.verify(mockFlutterEngine.getRenderer()).setYieldNextVsync(true);
+    inOrder.verify(mockHost).onFlutterUiDisplayed();
+    inOrder.verify(mockFlutterEngine.getRenderer()).setYieldNextVsync(false);
     assertTrue(preDrawAllowedDuringHostCallback[0]);
     assertNull(delegate.activePreDrawListener);
+  }
+
+  @Test
+  public void itArmsYieldNextVsyncOnFirstFrameAndDisarmsOnFirstPreDraw() {
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    delegate.onAttach(ctx);
+    delegate.onCreateView(null, null, null, 0, /*shouldDelayFirstAndroidViewDraw=*/ true);
+
+    final OnPreDrawListener preDrawListener = delegate.activePreDrawListener;
+    assertNotNull(preDrawListener);
+    assertFalse(preDrawListener.onPreDraw());
+    verify(mockFlutterEngine.getRenderer(), never()).setYieldNextVsync(anyBoolean());
+
+    ArgumentCaptor<FlutterUiDisplayListener> listenerCaptor =
+        ArgumentCaptor.forClass(FlutterUiDisplayListener.class);
+    verify(mockFlutterEngine.getRenderer(), times(1))
+        .addIsDisplayingFlutterUiListener(listenerCaptor.capture());
+    final FlutterUiDisplayListener uiDisplayListener = listenerCaptor.getValue();
+
+    // Flutter's first frame arms yielding until ViewRootImpl runs onPreDraw.
+    uiDisplayListener.onFlutterUiDisplayed();
+    verify(mockFlutterEngine.getRenderer(), times(1)).setYieldNextVsync(true);
+    verify(mockFlutterEngine.getRenderer(), never()).setYieldNextVsync(false);
+
+    // Even if Flutter goes idle after the first frame, the first allowed Android view draw disarms
+    // the flag so a later user-driven frame does not yield unnecessarily.
+    assertTrue(preDrawListener.onPreDraw());
+    verify(mockFlutterEngine.getRenderer(), times(1)).setYieldNextVsync(false);
+    assertNull(delegate.activePreDrawListener);
+
+    // Subsequent first-frame notifications (such as after surface recreation) do not re-arm
+    // yielding once the initial pre-draw listener has finished.
+    uiDisplayListener.onFlutterUiDisplayed();
+    verify(mockFlutterEngine.getRenderer(), times(1)).setYieldNextVsync(true);
+  }
+
+  @Test
+  public void itDoesNotYieldNextVsyncWhenFirstDrawIsNotDelayed() {
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    delegate.onAttach(ctx);
+    delegate.onCreateView(null, null, null, 0, /*shouldDelayFirstAndroidViewDraw=*/ false);
+
+    ArgumentCaptor<FlutterUiDisplayListener> listenerCaptor =
+        ArgumentCaptor.forClass(FlutterUiDisplayListener.class);
+    verify(mockFlutterEngine.getRenderer(), times(1))
+        .addIsDisplayingFlutterUiListener(listenerCaptor.capture());
+
+    listenerCaptor.getValue().onFlutterUiDisplayed();
+
+    verify(mockFlutterEngine.getRenderer(), never()).setYieldNextVsync(anyBoolean());
+  }
+
+  @Test
+  public void itDisarmsYieldNextVsyncWhenViewDestroyedBeforePreDraw() {
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    delegate.onAttach(ctx);
+    delegate.onCreateView(null, null, null, 0, /*shouldDelayFirstAndroidViewDraw=*/ true);
+
+    ArgumentCaptor<FlutterUiDisplayListener> listenerCaptor =
+        ArgumentCaptor.forClass(FlutterUiDisplayListener.class);
+    verify(mockFlutterEngine.getRenderer(), times(1))
+        .addIsDisplayingFlutterUiListener(listenerCaptor.capture());
+
+    listenerCaptor.getValue().onFlutterUiDisplayed();
+    verify(mockFlutterEngine.getRenderer(), times(1)).setYieldNextVsync(true);
+    verify(mockFlutterEngine.getRenderer(), never()).setYieldNextVsync(false);
+
+    delegate.onDestroyView();
+
+    verify(mockFlutterEngine.getRenderer(), times(1)).setYieldNextVsync(false);
+    assertNull(delegate.activePreDrawListener);
+  }
+
+  @Test
+  public void itDisarmsYieldNextVsyncWhenUiNoLongerDisplayedBeforePreDraw() {
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    delegate.onAttach(ctx);
+    delegate.onCreateView(null, null, null, 0, /*shouldDelayFirstAndroidViewDraw=*/ true);
+
+    final OnPreDrawListener preDrawListener = delegate.activePreDrawListener;
+    assertNotNull(preDrawListener);
+
+    ArgumentCaptor<FlutterUiDisplayListener> listenerCaptor =
+        ArgumentCaptor.forClass(FlutterUiDisplayListener.class);
+    verify(mockFlutterEngine.getRenderer(), times(1))
+        .addIsDisplayingFlutterUiListener(listenerCaptor.capture());
+    final FlutterUiDisplayListener uiDisplayListener = listenerCaptor.getValue();
+
+    uiDisplayListener.onFlutterUiDisplayed();
+    verify(mockFlutterEngine.getRenderer(), times(1)).setYieldNextVsync(true);
+
+    uiDisplayListener.onFlutterUiNoLongerDisplayed();
+    verify(mockFlutterEngine.getRenderer(), times(1)).setYieldNextVsync(false);
+    assertFalse(preDrawListener.onPreDraw());
   }
 
   @Test

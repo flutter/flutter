@@ -450,6 +450,26 @@ public class FlutterJNITest {
     assertEquals(Arrays.asList("async", "deferred"), order);
   }
 
+  @Test
+  public void setYieldNextVsync_forwardsToNativeWhenAttached() {
+    FlutterJNITester flutterJNI = new FlutterJNITester(/*attached=*/ true);
+
+    flutterJNI.setYieldNextVsync(true);
+    flutterJNI.setYieldNextVsync(false);
+
+    assertEquals(Arrays.asList(true, false), flutterJNI.yieldNextVsyncCalls);
+  }
+
+  @Test
+  public void setYieldNextVsync_isNoOpWhenDetached() {
+    FlutterJNITester flutterJNI = new FlutterJNITester(/*attached=*/ false);
+
+    flutterJNI.setYieldNextVsync(true);
+    flutterJNI.setYieldNextVsync(false);
+
+    assertTrue(flutterJNI.yieldNextVsyncCalls.isEmpty());
+  }
+
   static class FlutterJNITester extends FlutterJNI {
     FlutterJNITester(boolean attached) {
       this.isAttached = attached;
@@ -458,6 +478,7 @@ public class FlutterJNITest {
     final boolean isAttached;
     boolean semanticsEnabled = false;
     int flags = 0;
+    final List<Boolean> yieldNextVsyncCalls = new ArrayList<>();
 
     @Override
     public boolean isAttached() {
@@ -472,6 +493,11 @@ public class FlutterJNITest {
     @Override
     public void setAccessibilityFeaturesInNative(int flags) {
       this.flags = flags;
+    }
+
+    @Override
+    public void setYieldNextVsyncInNative(boolean shouldYield) {
+      yieldNextVsyncCalls.add(shouldYield);
     }
   }
 }

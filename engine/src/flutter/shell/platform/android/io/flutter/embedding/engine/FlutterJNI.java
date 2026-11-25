@@ -349,6 +349,25 @@ public class FlutterJNI {
   }
 
   /**
+   * Arms or disarms yielding this engine's next NDK choreographer vsync callback to a main-looper
+   * message so a pending Android view traversal can run ahead of Flutter's next frame.
+   */
+  @UiThread
+  public void setYieldNextVsync(boolean shouldYield) {
+    ensureRunningOnMainThread();
+    if (isAttached()) {
+      setYieldNextVsyncInNative(shouldYield);
+    }
+  }
+
+  @VisibleForTesting
+  public void setYieldNextVsyncInNative(boolean shouldYield) {
+    nativeSetYieldNextVsync(nativeShellHolderId, shouldYield);
+  }
+
+  private native void nativeSetYieldNextVsync(long nativeShellHolderId, boolean shouldYield);
+
+  /**
    * Queues {@code runnable} behind the messages already pending on the main looper when called on
    * the main thread. Otherwise, or if it cannot be queued, runs it immediately, so that it always
    * runs exactly once.

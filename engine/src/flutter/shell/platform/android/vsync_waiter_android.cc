@@ -25,7 +25,7 @@ static std::atomic_uint g_refresh_rate_ = 60;
 namespace {
 
 struct DeferredVsyncCallback {
-  std::weak_ptr<VsyncWaiter>* weak_this;
+  std::weak_ptr<VsyncWaiter>* weak_this = nullptr;
   fml::TimePoint frame_start_time;
   fml::TimePoint frame_target_time;
 };
@@ -94,7 +94,8 @@ void VsyncWaiterAndroid::OnVsyncFromNDK(int64_t frame_nanos, void* data) {
                    target_time.ToEpochDelta().ToMicroseconds());
 
   auto* weak_this = reinterpret_cast<std::weak_ptr<VsyncWaiter>*>(data);
-  if (ShouldYieldVsync(*weak_this)) {
+  if (ShouldYieldVsync(*weak_this) && g_vsync_waiter_class != nullptr &&
+      g_post_vsync_to_main_looper_method_ != nullptr) {
     // Hand the callback to Java to post as a main-looper message. A task
     // posted to the platform task runner would not work here: it is delivered
     // from a native looper callback, which is not held back by the sync barrier
@@ -115,9 +116,6 @@ void VsyncWaiterAndroid::OnVsyncFromNDK(int64_t frame_nanos, void* data) {
 // static
 bool VsyncWaiterAndroid::ShouldYieldVsync(
     const std::weak_ptr<VsyncWaiter>& weak_waiter) {
-  if (g_post_vsync_to_main_looper_method_ == nullptr) {
-    return false;
-  }
   auto waiter = weak_waiter.lock();
   if (!waiter) {
     return false;

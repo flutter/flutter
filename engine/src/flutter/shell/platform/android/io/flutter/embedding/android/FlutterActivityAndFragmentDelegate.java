@@ -106,6 +106,9 @@ import java.util.List;
         public void onFlutterUiDisplayed() {
           isFlutterUiDisplayed = true;
           isFirstFrameRendered = true;
+          if (activePreDrawListener != null && flutterEngine != null) {
+            flutterEngine.getRenderer().setYieldNextVsync(true);
+          }
           host.onFlutterUiDisplayed();
         }
 
@@ -113,6 +116,9 @@ import java.util.List;
         public void onFlutterUiNoLongerDisplayed() {
           host.onFlutterUiNoLongerDisplayed();
           isFlutterUiDisplayed = false;
+          if (activePreDrawListener != null && flutterEngine != null) {
+            flutterEngine.getRenderer().setYieldNextVsync(false);
+          }
         }
       };
 
@@ -559,6 +565,9 @@ import java.util.List;
             if (isFlutterUiDisplayed && activePreDrawListener != null) {
               flutterView.getViewTreeObserver().removeOnPreDrawListener(this);
               activePreDrawListener = null;
+              if (flutterEngine != null) {
+                flutterEngine.getRenderer().setYieldNextVsync(false);
+              }
             }
             return isFlutterUiDisplayed;
           }
@@ -679,6 +688,9 @@ import java.util.List;
     if (activePreDrawListener != null) {
       flutterView.getViewTreeObserver().removeOnPreDrawListener(activePreDrawListener);
       activePreDrawListener = null;
+      if (flutterEngine != null) {
+        flutterEngine.getRenderer().setYieldNextVsync(false);
+      }
     }
 
     // flutterView can be null in instances where a delegate.onDestroyView is called without

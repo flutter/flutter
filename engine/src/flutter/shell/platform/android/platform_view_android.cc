@@ -259,6 +259,10 @@ void PlatformViewAndroid::NotifyDestroyed() {
   }
 }
 
+void PlatformViewAndroid::SetYieldNextVsync(bool should_yield) {
+  yield_next_vsync_->store(should_yield, std::memory_order_release);
+}
+
 void PlatformViewAndroid::NotifyChanged(const DlISize& size) {
   if (!android_surface_) {
     return;
@@ -596,7 +600,6 @@ void PlatformViewAndroid::InstallFirstFrameCallback() {
 }
 
 void PlatformViewAndroid::FireFirstFrameCallback() {
-  yield_next_vsync_->store(true, std::memory_order_release);
   jni_facade_->FlutterViewOnFirstFrame();
 }
 
