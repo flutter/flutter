@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/convert.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 void main() {
   late FileSystem fileSystem;
@@ -76,6 +77,7 @@ void main() {
     environment = Environment.test(
       fileSystem.currentDirectory,
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -93,6 +95,7 @@ void main() {
       fileSystem.currentDirectory,
       buildDir: buildDir,
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -509,7 +512,7 @@ void main() {
     barTarget.dependencies.add(fooTarget);
     fooTarget.dependencies.add(barTarget);
 
-    expect(() => checkCycles(barTarget), throwsA(isA<CycleException>()));
+    expect(() => checkCycles(barTarget, environment), throwsA(isA<CycleException>()));
   });
 
   testWithoutContext(
@@ -563,6 +566,7 @@ void main() {
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('a'),
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -571,6 +575,7 @@ void main() {
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('b'),
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -583,6 +588,7 @@ void main() {
     final environmentA = Environment.test(
       fileSystem.currentDirectory,
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -591,6 +597,7 @@ void main() {
     final environmentB = Environment.test(
       fileSystem.currentDirectory,
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -654,6 +661,7 @@ void main() {
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('a/b/c/d'),
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -794,6 +802,7 @@ void main() {
         outputDir: fileSystem.directory('output'),
         defines: <String, String>{'config': 'debug'},
         artifacts: Artifacts.test(),
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
         logger: BufferLogger.test(),
         fileSystem: fileSystem,
@@ -803,6 +812,7 @@ void main() {
         outputDir: fileSystem.directory('output'),
         defines: <String, String>{'config': 'profile'},
         artifacts: Artifacts.test(),
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
         logger: BufferLogger.test(),
         fileSystem: fileSystem,
@@ -920,6 +930,7 @@ void main() {
       final environment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: Artifacts.test(),
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
@@ -968,6 +979,42 @@ void main() {
       expect(sharedHookOutputFile, exists);
     },
   );
+
+  testWithoutContext('Environment resolves relative and symlinked projectDir and outputDir paths without mutating raw fields', () {
+    final fileSystem = MemoryFileSystem.test();
+    fileSystem.directory('/private/tmp/real_proj').createSync(recursive: true);
+    fileSystem.directory('/private/tmp/real_base/rel_nested/out').createSync(recursive: true);
+    fileSystem.link('/tmp_proj').createSync('/private/tmp/real_proj');
+    fileSystem.link('/tmp_base').createSync('/private/tmp/real_base');
+    fileSystem.currentDirectory = fileSystem.directory('/tmp_base');
+
+    final env = Environment.test(
+      fileSystem.currentDirectory,
+      projectDir: fileSystem.directory('/tmp_proj'),
+      outputDir: fileSystem.directory('rel_nested/out'),
+      artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+
+    expect(env.projectDir.path, '/tmp_proj');
+    expect(env.outputDir.path, 'rel_nested/out');
+    expect(env.resolvedProjectDir.path, '/private/tmp/real_proj');
+    expect(env.resolvedOutputDir.path, '/private/tmp/real_base/rel_nested/out');
+
+    final Environment copied = env.copyWith(outputDir: fileSystem.directory('uncreated_out'));
+    expect(copied.outputDir.path, 'uncreated_out');
+    expect(copied.resolvedOutputDir.path, '/private/tmp/real_base/uncreated_out');
+
+    fileSystem.link('/tmp_uncreated_out').createSync('/private/tmp/real_base/new_out');
+    final Environment dangling = env.copyWith(
+      outputDir: fileSystem.directory('/tmp_uncreated_out'),
+    );
+    expect(dangling.outputDir.path, '/tmp_uncreated_out');
+    expect(dangling.resolvedOutputDir.path, '/tmp_uncreated_out');
+  });
 }
 
 BuildSystem setUpBuildSystem(FileSystem fileSystem, {FakePlatform? platform, Logger? logger}) {

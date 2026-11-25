@@ -8,6 +8,9 @@ import 'json_utils.dart';
 
 /// Severity level for structured log messages emitted by a tool extension.
 enum ExtensionLogLevel {
+  /// Verbose diagnostic trace log message.
+  trace,
+
   /// Standard informational status log message.
   info,
 
@@ -15,10 +18,7 @@ enum ExtensionLogLevel {
   warning,
 
   /// Error log message.
-  error,
-
-  /// Verbose diagnostic trace log message.
-  trace;
+  error;
 
   /// Resolves an [ExtensionLogLevel] from its wire [name].
   ///
@@ -85,11 +85,11 @@ final class ExtensionLogMessage {
         (other is ExtensionLogMessage &&
             other.level == level &&
             other.message == message &&
-            other.timestamp == timestamp);
+            other.timestamp?.microsecondsSinceEpoch == timestamp?.microsecondsSinceEpoch);
   }
 
   @override
-  int get hashCode => Object.hash(level, message, timestamp);
+  int get hashCode => Object.hash(level, message, timestamp?.microsecondsSinceEpoch);
 
   @override
   String toString() =>

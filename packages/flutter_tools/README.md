@@ -58,12 +58,10 @@ change needs an exception, say why in a comment at the site.
 
 #### Dependency injection
 
-- Do not add new uses of `globals.*` (`globals.fs`, `globals.logger`,
-  `globals.processManager`, `globals.platform`, `globals.analytics`) or
-  of the Zone-based `AppContext`. Pass `FileSystem`, `Logger`,
-  `ProcessManager`, `Platform`, `Analytics`, and similar dependencies in
-  through the constructor or as method parameters. New files must not
-  import `globals.dart`.
+- Do not reintroduce ambient global singletons or add new `context.get<T>()`
+  lookups on the Zone-based `AppContext` in `lib/`. Pass `FileSystem`,
+  `Logger`, `ProcessManager`, `Platform`, `Analytics`, and similar
+  dependencies in through the constructor or as method parameters.
 - Use `testWithoutContext` unless the code under test still reads from
   the `AppContext`. If a test for new code needs `overrides:`, inject the
   dependency instead.
