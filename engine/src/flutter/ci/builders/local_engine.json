@@ -673,8 +673,7 @@
         "arm64",
         "--no-stripped",
         "--no-lto",
-        "--rbe",
-        "--no-goma"
+        "--rbe"
       ],
       "name": "windows/host_debug_unopt_arm64",
       "description": "Builds an unoptimized debug mode engine for a Windows host on arm64.",
