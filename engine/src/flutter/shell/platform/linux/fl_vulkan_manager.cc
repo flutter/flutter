@@ -564,9 +564,17 @@ GBytes* fl_vulkan_backing_store_read_pixels(const FlutterBackingStore* store,
     s.GetBufferMemoryRequirements(s.device, buffer, &requirements);
     VkMemoryAllocateInfo allocation = {VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
     allocation.allocationSize = requirements.size;
-    allocation.memoryTypeIndex = s.memory_type(
-        requirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                                         VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    // The CPU reads the entire staging allocation after the transfer fence.
+    constexpr VkMemoryPropertyFlags required =
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+    allocation.memoryTypeIndex =
+        s.memory_type(requirements.memoryTypeBits,
+                      required | VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
+    if (allocation.memoryTypeIndex == UINT32_MAX) {
+      allocation.memoryTypeIndex =
+          s.memory_type(requirements.memoryTypeBits, required);
+    }
     if (allocation.memoryTypeIndex == UINT32_MAX) {
       g_set_error_literal(error, error_quark(), 0,
                           "No coherent readback memory");
