@@ -324,6 +324,7 @@ void main() {
 
     test('uses the error handling file system', () async {
       final ToolDependencies toolDependencies = await ToolDependencies.bootstrap(
+        analytics: fakeAnalytics,
         cache: cache,
         flutterVersion: FakeFlutterVersion(),
         fs: fileSystem,
