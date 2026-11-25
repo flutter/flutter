@@ -302,7 +302,11 @@ class CkPathBuilder implements BackendPathBuilder {
       toSkPathOp(operation),
     );
 
-    final combined = CkPathBuilder.fromSkPath(combinedSkPath, path1.fillType);
+    // Path operations may change the fill rule needed to represent the result.
+    final combined = CkPathBuilder.fromSkPath(
+      combinedSkPath,
+      fromSkFillType(combinedSkPath.getFillType()),
+    );
     combinedSkPath.delete();
     return combined;
   }

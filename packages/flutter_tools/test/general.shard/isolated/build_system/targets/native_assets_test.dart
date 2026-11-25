@@ -13,7 +13,10 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
+import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
+import 'package:flutter_tools/src/web/compiler_config.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../../../src/common.dart';
 import '../../../../src/context.dart';
@@ -454,6 +457,101 @@ void main() {
       expect((testRunner as FlutterNativeAssetsBuildRunnerImpl).includeDevDependencies, isTrue);
     },
   );
+
+  testWithoutContext('Web LinkHooks tracks only active compileTargets recordedUsesFileNames and invalidates across compiler transitions', () async {
+    writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+    final webEnv = Environment.test(
+      fileSystem.currentDirectory,
+      defines: <String, String>{kBuildMode: BuildMode.release.cliName},
+      artifacts: artifacts,
+      featureFlags: TestFeatureFlags(isRecordUseEnabled: true),
+      processManager: processManager,
+      fileSystem: fileSystem,
+      logger: logger,
+    );
+    webEnv.buildDir.createSync(recursive: true);
+    final File wasmUses = webEnv.buildDir.childFile(LinkHooks.recordedUsesWasmFileName);
+    final File jsUses = webEnv.buildDir.childFile(LinkHooks.recordedUsesJsFileName);
+
+    expect(const LinkHooks().buildKey, isNull);
+
+    // Required inputs are non-optional even before the compiler writes them.
+    final LinkHooks wasmLinkHooks = WebReleaseBundle(
+      const <WebCompilerConfig>[WasmCompilerConfig(), JsCompilerConfig()],
+      const NoOpAnalytics(),
+      engineRevision: 'rev',
+    ).dependencies.whereType<LinkHooks>().single;
+    expect(
+      _resolvedInputs(wasmLinkHooks, webEnv),
+      containsAll(<String>[wasmUses.path, jsUses.path]),
+    );
+
+    wasmUses.writeAsStringSync('{"wasm":true}');
+    jsUses.writeAsStringSync('{"js":true}');
+    expect(wasmLinkHooks.getRecordedUsesFile(webEnv, BuildMode.release)?.path, wasmUses.path);
+
+    // Default JS build (dryRun: true) ignores stale recorded_uses_wasm.json.
+    final LinkHooks dryRunLinkHooks = WebReleaseBundle(
+      const <WebCompilerConfig>[JsCompilerConfig(), WasmCompilerConfig(dryRun: true)],
+      const NoOpAnalytics(),
+      engineRevision: 'rev',
+    ).dependencies.whereType<LinkHooks>().single;
+    expect(_resolvedInputs(dryRunLinkHooks, webEnv), contains(jsUses.path));
+    expect(_resolvedInputs(dryRunLinkHooks, webEnv), isNot(contains(wasmUses.path)));
+    expect(dryRunLinkHooks.getRecordedUsesFile(webEnv, BuildMode.release)?.path, jsUses.path);
+
+    // --no-wasm-dry-run (Dart2WasmTarget omitted) also ignores stale recorded_uses_wasm.json.
+    final LinkHooks jsOnlyLinkHooks = WebReleaseBundle(
+      const <WebCompilerConfig>[JsCompilerConfig()],
+      const NoOpAnalytics(),
+      engineRevision: 'rev',
+    ).dependencies.whereType<LinkHooks>().single;
+    expect(_resolvedInputs(jsOnlyLinkHooks, webEnv), contains(jsUses.path));
+    expect(_resolvedInputs(jsOnlyLinkHooks, webEnv), isNot(contains(wasmUses.path)));
+    expect(jsOnlyLinkHooks.getRecordedUsesFile(webEnv, BuildMode.release)?.path, jsUses.path);
+
+    // Verify FlutterBuildSystem invalidates link_hooks when dropping recorded_uses_wasm.json.
+    final buildRunner = FakeFlutterNativeAssetsBuildRunner();
+    final buildSystem = FlutterBuildSystem(
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: webEnv.platform,
+    );
+    await BuildHooks(platform: HookPlatform.web, buildRunner: buildRunner).build(webEnv);
+
+    final BuildResult wasmBuild = await buildSystem.build(
+      LinkHooks(
+        platform: HookPlatform.web,
+        recordedUsesFileNames: wasmLinkHooks.recordedUsesFileNames,
+        buildRunner: buildRunner,
+      ),
+      webEnv,
+    );
+    expect(wasmBuild.success, isTrue);
+    expect(wasmBuild.performance['link_hooks']!.skipped, isFalse);
+
+    final BuildResult jsTransitionBuild = await buildSystem.build(
+      LinkHooks(
+        platform: HookPlatform.web,
+        recordedUsesFileNames: dryRunLinkHooks.recordedUsesFileNames,
+        buildRunner: buildRunner,
+      ),
+      webEnv,
+    );
+    expect(jsTransitionBuild.success, isTrue);
+    expect(jsTransitionBuild.performance['link_hooks']!.skipped, isFalse);
+
+    final BuildResult jsRepeatBuild = await buildSystem.build(
+      LinkHooks(
+        platform: HookPlatform.web,
+        recordedUsesFileNames: dryRunLinkHooks.recordedUsesFileNames,
+        buildRunner: buildRunner,
+      ),
+      webEnv,
+    );
+    expect(jsRepeatBuild.success, isTrue);
+    expect(jsRepeatBuild.performance['link_hooks']!.skipped, isTrue);
+  });
 }
 
 List<String> _resolvedOutputs(Target target, Environment environment) {
