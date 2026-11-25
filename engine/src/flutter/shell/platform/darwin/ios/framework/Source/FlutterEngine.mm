@@ -1435,6 +1435,10 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
               message:(NSData*)message
           binaryReply:(FlutterBinaryReply)callback {
   NSParameterAssert(channel);
+  if (self.destroyed) {
+    // Drop any messages after the engine has been destroyed via destroyContext.
+    return;
+  }
   NSAssert(_shell && _shell->IsSetup(),
            @"Sending a message before the FlutterEngine has been run.");
   fml::RefPtr<flutter::PlatformMessageResponseDarwin> response =
@@ -1469,6 +1473,10 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
           binaryMessageHandler:(FlutterBinaryMessageHandler)handler
                      taskQueue:(NSObject<FlutterTaskQueue>* _Nullable)taskQueue {
   NSParameterAssert(channel);
+  if (self.destroyed) {
+    // Ignore any handlers set after the engine has been destroyed via destroyContext.
+    return [FlutterConnectionCollection makeErrorConnectionWithErrorCode:-1L];
+  }
   if (_shell && _shell->IsSetup()) {
     self.platformView->GetPlatformMessageHandlerIos()->SetMessageHandler(channel.UTF8String,
                                                                          handler, taskQueue);
