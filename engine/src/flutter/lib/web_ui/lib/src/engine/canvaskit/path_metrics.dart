@@ -67,7 +67,11 @@ class CkContourMeasure implements BackendPathMetric {
   @override
   CkPathBuilder extractPath(double start, double end, {bool startWithMoveTo = true}) {
     final SkPath skPath = skiaObject.getSegment(start, end, startWithMoveTo);
-    return CkPathBuilder.fromSkPath(skPath, _fillType);
+    try {
+      return CkPathBuilder.fromSkPath(skPath, _fillType);
+    } finally {
+      skPath.delete();
+    }
   }
 
   @override
