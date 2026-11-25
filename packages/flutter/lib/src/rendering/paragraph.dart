@@ -407,7 +407,9 @@ class RenderParagraph extends RenderBox
       ..textDirection = _textPainter.textDirection
       ..textScaler = _textPainter.textScaler
       ..maxLines = _maxLines
-      ..ellipsis = _textPainter.ellipsis
+      ..ellipsis = _overflow == TextOverflow.ellipsis && !(_maxLines == null && softWrap)
+          ? _kEllipsis
+          : null
       ..locale = _textPainter.locale
       ..strutStyle = _textPainter.strutStyle
       ..textWidthBasis = _textPainter.textWidthBasis
@@ -936,6 +938,7 @@ class RenderParagraph extends RenderBox
       if (effectiveMaxLines < lines.length) {
         painter
           ..maxLines = effectiveMaxLines
+          ..ellipsis = _kEllipsis
           ..layout(minWidth: constraints.minWidth, maxWidth: maxWidth);
       }
     }
@@ -1001,7 +1004,11 @@ class RenderParagraph extends RenderBox
       ChildLayoutHelper.layoutChild,
       ChildLayoutHelper.getBaseline,
     );
-    _textPainter.maxLines = _maxLines;
+    _textPainter
+      ..maxLines = _maxLines
+      ..ellipsis = _overflow == TextOverflow.ellipsis && !(_maxLines == null && softWrap)
+          ? _kEllipsis
+          : null;
     _layoutTextWithConstraints(constraints);
     positionInlineChildren(_textPainter.inlinePlaceholderBoxes!);
 
