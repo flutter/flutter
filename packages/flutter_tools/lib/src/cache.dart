@@ -488,31 +488,29 @@ class Cache {
       _logger.printTrace('Failed to parse DevTools version file: $e');
     }
 
-    final Directory cacheDir = getRoot();
-    final bool invalidated = invalidateDartSdkStampsAt(cacheDir, logger: _logger);
-    throwToolExit(
-      formatDartSdkCacheCorruptionMessage(
-        cacheDir: cacheDir,
-        invalidated: invalidated,
-        message: 'Could not read the DevTools version from ${versionFile.path}.',
-      ),
+    invalidateDartSdkAndThrowToolExit(
+      cacheDir: getRoot(),
+      logger: _logger,
+      message: 'Could not read the DevTools version from ${versionFile.path}.',
     );
   }
 
   static const _kEngineDartSdkStamp = 'engine-dart-sdk';
   static const _kFlutterToolsStamp = 'flutter_tools';
 
-  /// Invalidates the Dart SDK cache stamps in [cacheDir].
+  /// Invalidates the Dart SDK cache stamps in [cacheDir] and throws a [ToolExit]
+  /// with recovery instructions.
   ///
   /// Deletes both `engine-dart-sdk.stamp` (checked by `shared.bat`) and
   /// `flutter_tools.stamp` (checked by `shared.sh`) so the next invocation
   /// re-downloads the Dart SDK. Does not delete `dart-sdk/` in-process, as
   /// the running Dart binary lives there and `update_dart_sdk.{sh,ps1}`
   /// safely moves the existing directory aside.
-  ///
-  /// Returns `true` if at least one stamp file was deleted and both stamp files
-  /// are absent after the operation.
-  static bool invalidateDartSdkStampsAt(Directory cacheDir, {required Logger logger}) {
+  static Never invalidateDartSdkAndThrowToolExit({
+    required Directory cacheDir,
+    required Logger logger,
+    required String message,
+  }) {
     final stamps = <File>[
       cacheDir.childFile('$_kEngineDartSdkStamp.stamp'),
       cacheDir.childFile('$_kFlutterToolsStamp.stamp'),
@@ -529,26 +527,21 @@ class Cache {
         logger.printTrace('Failed to delete ${stamp.basename}: $e');
       }
     }
-    return deletedAny && !stamps.any((File stamp) => stamp.existsSync());
-  }
-
-  /// Formats a consistent, actionable message for a missing, corrupted, or
-  /// incomplete Dart SDK cache.
-  static String formatDartSdkCacheCorruptionMessage({
-    required Directory cacheDir,
-    required bool invalidated,
-    required String message,
-  }) {
+    final bool invalidated = deletedAny && !stamps.any((File stamp) => stamp.existsSync());
     if (invalidated) {
-      return '''
+      throwToolExit(
+        '''
 $message
 The Dart SDK cache appears to be incomplete (often caused by antivirus software quarantining files) and has been invalidated.
-Please re-run your command to automatically re-download the Dart SDK. If this issue persists, add your Flutter SDK directory to your antivirus exclusions.''';
+Please re-run your command to automatically re-download the Dart SDK. If this issue persists, add your Flutter SDK directory to your antivirus exclusions.''',
+      );
     }
-    return '''
+    throwToolExit(
+      '''
 $message
 The Dart SDK cache appears to be incomplete or corrupted (often caused by antivirus software quarantining files).
-Please delete ${cacheDir.path} and re-run your command to re-download the Dart SDK. If this issue persists, add your Flutter SDK directory to your antivirus exclusions.''';
+Please delete ${cacheDir.path} and re-run your command to re-download the Dart SDK. If this issue persists, add your Flutter SDK directory to your antivirus exclusions.''',
+    );
   }
 
   /// The current version of Dart used to build Flutter and run the tool.

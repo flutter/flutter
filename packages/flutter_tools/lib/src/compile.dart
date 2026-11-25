@@ -460,14 +460,10 @@ List<String> _commandToStartFrontendServer({
     // Derive the cache directory from the Dart SDK path's parent so that the
     // public Artifacts interface does not require changes.
     final String dartSdkDir = artifacts.getArtifactPath(Artifact.engineDartSdkPath);
-    final Directory cacheDir = fileSystem.directory(dartSdkDir).parent;
-    final bool invalidated = Cache.invalidateDartSdkStampsAt(cacheDir, logger: logger);
-    throwToolExit(
-      Cache.formatDartSdkCacheCorruptionMessage(
-        cacheDir: cacheDir,
-        invalidated: invalidated,
-        message: 'Unable to find dartaotruntime binary at $engineDartAotRuntimePath.',
-      ),
+    Cache.invalidateDartSdkAndThrowToolExit(
+      cacheDir: fileSystem.directory(dartSdkDir).parent,
+      logger: logger,
+      message: 'Unable to find dartaotruntime binary at $engineDartAotRuntimePath.',
     );
   }
   return <String>[
