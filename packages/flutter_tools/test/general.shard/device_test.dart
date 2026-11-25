@@ -20,7 +20,6 @@ import 'package:flutter_tools/src/web/web_debug_config.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fake_devices.dart';
 
 void main() {
@@ -300,7 +299,7 @@ void main() {
       connectionInterface: DeviceConnectionInterface.wireless,
     );
 
-    testUsingContext('chooses ephemeral device', () async {
+    test('chooses ephemeral device', () async {
       final devices = <Device>[ephemeralOne, nonEphemeralOne, nonEphemeralTwo];
 
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
@@ -308,9 +307,9 @@ void main() {
       final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
 
       expect(ephemeralDevice, ephemeralOne);
-    }, overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()});
+    });
 
-    testUsingContext('returns null when multiple non ephemeral devices are found', () async {
+    test('returns null when multiple non ephemeral devices are found', () async {
       final devices = <Device>[ephemeralOne, ephemeralTwo, nonEphemeralOne, nonEphemeralTwo];
 
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
@@ -318,9 +317,9 @@ void main() {
       final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
 
       expect(ephemeralDevice, isNull);
-    }, overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()});
+    });
 
-    testUsingContext('return null when hasSpecifiedDeviceId is true', () async {
+    test('return null when hasSpecifiedDeviceId is true', () async {
       final devices = <Device>[ephemeralOne, nonEphemeralOne, nonEphemeralTwo];
 
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
@@ -329,9 +328,9 @@ void main() {
       final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
 
       expect(ephemeralDevice, isNull);
-    }, overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()});
+    });
 
-    testUsingContext('returns null when no ephemeral devices are found', () async {
+    test('returns null when no ephemeral devices are found', () async {
       final devices = <Device>[nonEphemeralOne, nonEphemeralTwo];
 
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
@@ -339,7 +338,7 @@ void main() {
       final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
 
       expect(ephemeralDevice, isNull);
-    }, overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()});
+    });
 
     test('Unsupported devices listed in all devices', () async {
       final devices = <Device>[unsupported, unsupportedForProject];
@@ -350,7 +349,7 @@ void main() {
       expect(filtered, <Device>[unsupported, unsupportedForProject]);
     });
 
-    testUsingContext('Removes unsupported devices', () async {
+    test('Removes unsupported devices', () async {
       final devices = <Device>[unsupported, unsupportedForProject];
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
       final List<Device> filtered = await deviceManager.getDevices(
@@ -360,7 +359,7 @@ void main() {
       expect(filtered, <Device>[]);
     });
 
-    testUsingContext(
+    test(
       'Retains devices unsupported by the project if includeDevicesUnsupportedByProject is true',
       () async {
         final devices = <Device>[unsupported, unsupportedForProject];
@@ -378,7 +377,7 @@ void main() {
       },
     );
 
-    testUsingContext('Removes web and fuchsia from --all', () async {
+    test('Removes web and fuchsia from --all', () async {
       final devices = <Device>[webDevice, fuchsiaDevice];
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
       deviceManager.specifiedDeviceId = 'all';
@@ -390,7 +389,7 @@ void main() {
       expect(filtered, <Device>[]);
     });
 
-    testUsingContext('Removes devices unsupported by the project from --all', () async {
+    test('Removes devices unsupported by the project from --all', () async {
       final devices = <Device>[
         nonEphemeralOne,
         nonEphemeralTwo,
@@ -407,7 +406,7 @@ void main() {
       expect(filtered, <Device>[nonEphemeralOne, nonEphemeralTwo]);
     });
 
-    testUsingContext('Returns device with the specified id', () async {
+    test('Returns device with the specified id', () async {
       final devices = <Device>[nonEphemeralOne, nonEphemeralTwo];
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
       deviceManager.specifiedDeviceId = nonEphemeralOne.id;
@@ -419,22 +418,19 @@ void main() {
       expect(filtered, <Device>[nonEphemeralOne]);
     });
 
-    testUsingContext(
-      'Returns multiple devices when multiple devices matches the specified id',
-      () async {
-        final devices = <Device>[nonEphemeralOne, nonEphemeralTwo];
-        final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
-        deviceManager.specifiedDeviceId = 'nonEphemeral'; // This prefix matches both devices
+    test('Returns multiple devices when multiple devices matches the specified id', () async {
+      final devices = <Device>[nonEphemeralOne, nonEphemeralTwo];
+      final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
+      deviceManager.specifiedDeviceId = 'nonEphemeral'; // This prefix matches both devices
 
-        final List<Device> filtered = await deviceManager.getDevices(
-          filter: DeviceDiscoveryFilter(supportFilter: deviceManager.deviceSupportFilter()),
-        );
+      final List<Device> filtered = await deviceManager.getDevices(
+        filter: DeviceDiscoveryFilter(supportFilter: deviceManager.deviceSupportFilter()),
+      );
 
-        expect(filtered, <Device>[nonEphemeralOne, nonEphemeralTwo]);
-      },
-    );
+      expect(filtered, <Device>[nonEphemeralOne, nonEphemeralTwo]);
+    });
 
-    testUsingContext('Returns empty when device of specified id is not found', () async {
+    test('Returns empty when device of specified id is not found', () async {
       final devices = <Device>[nonEphemeralOne];
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
       deviceManager.specifiedDeviceId = nonEphemeralTwo.id;
@@ -461,7 +457,7 @@ void main() {
       expect(filtered, <Device>[unsupportedForProject]);
     });
 
-    testUsingContext('Unconnected devices filtered out by default', () async {
+    test('Unconnected devices filtered out by default', () async {
       final devices = <Device>[unconnectedDevice];
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
 
@@ -470,7 +466,7 @@ void main() {
       expect(filtered, <Device>[]);
     });
 
-    testUsingContext('Return unconnected devices when filter allows', () async {
+    test('Return unconnected devices when filter allows', () async {
       final devices = <Device>[unconnectedDevice];
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
       final filter = DeviceDiscoveryFilter(excludeDisconnected: false);
@@ -480,7 +476,7 @@ void main() {
       expect(filtered, <Device>[unconnectedDevice]);
     });
 
-    testUsingContext('Filter to only include wireless devices', () async {
+    test('Filter to only include wireless devices', () async {
       final devices = <Device>[ephemeralOne, wirelessDevice];
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
       final filter = DeviceDiscoveryFilter(
@@ -492,7 +488,7 @@ void main() {
       expect(filtered, <Device>[wirelessDevice]);
     });
 
-    testUsingContext('Filter to only include attached devices', () async {
+    test('Filter to only include attached devices', () async {
       final devices = <Device>[ephemeralOne, wirelessDevice];
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
       final filter = DeviceDiscoveryFilter(

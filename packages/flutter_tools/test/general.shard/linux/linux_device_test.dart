@@ -17,7 +17,7 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 
@@ -217,69 +217,62 @@ void main() {
       fileSystem = MemoryFileSystem.test();
     });
 
-    testUsingContext(
-      'sends timing events to analytics',
-      () async {
-        fileSystem.file('pubspec.yaml').createSync();
-        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
-        fileSystem.file(fileSystem.path.join('linux', 'CMakeLists.txt'))
-          ..createSync(recursive: true)
-          ..writeAsStringSync('set(BINARY_NAME "test_app")');
-        final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+    test('sends timing events to analytics', () async {
+      fileSystem.file('pubspec.yaml').createSync();
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      fileSystem.file(fileSystem.path.join('linux', 'CMakeLists.txt'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('set(BINARY_NAME "test_app")');
+      final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'cmake',
+            '-G',
+            'Ninja',
+            '-DCMAKE_BUILD_TYPE=Debug',
+            '-DFLUTTER_TARGET_PLATFORM=linux-x64',
+            '/linux',
+          ],
+          workingDirectory: '/build/linux/x64/debug',
+        ),
+        const FakeCommand(command: <String>['ninja', '-C', '/build/linux/x64/debug', 'install']),
+      ]);
+      final device = LinuxDevice(
+        analytics: fakeAnalytics,
+        featureFlags: TestFeatureFlags(isLinuxEnabled: true),
+        toolContext: FakeToolContext(
+          cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
           fs: fileSystem,
-          fakeFlutterVersion: FakeFlutterVersion(),
-        );
-        final processManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>[
-              'cmake',
-              '-G',
-              'Ninja',
-              '-DCMAKE_BUILD_TYPE=Debug',
-              '-DFLUTTER_TARGET_PLATFORM=linux-x64',
-              '/linux',
-            ],
-            workingDirectory: '/build/linux/x64/debug',
-          ),
-          const FakeCommand(command: <String>['ninja', '-C', '/build/linux/x64/debug', 'install']),
-        ]);
-        final device = LinuxDevice(
-          analytics: fakeAnalytics,
-          featureFlags: TestFeatureFlags(isLinuxEnabled: true),
-          toolContext: FakeToolContext(
-            cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
-            fs: fileSystem,
-            logger: BufferLogger.test(),
-            os: FakeOperatingSystemUtils(),
-            processManager: processManager,
-          ),
-        );
+          logger: BufferLogger.test(),
+          os: FakeOperatingSystemUtils(),
+          processManager: processManager,
+        ),
+      );
 
-        await device.buildForDevice(buildInfo: BuildInfo.debug);
+      await device.buildForDevice(buildInfo: BuildInfo.debug);
 
-        expect(processManager.hasRemainingExpectations, isFalse);
-        expect(
-          analyticsTimingEventExists(
-            sentEvents: fakeAnalytics.sentEvents,
-            workflow: 'build',
-            variableName: 'cmake-linux',
-          ),
-          true,
-        );
-        expect(
-          analyticsTimingEventExists(
-            sentEvents: fakeAnalytics.sentEvents,
-            workflow: 'build',
-            variableName: 'linux-ninja',
-          ),
-          true,
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.empty(),
-      },
-    );
+      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'build',
+          variableName: 'cmake-linux',
+        ),
+        true,
+      );
+      expect(
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'build',
+          variableName: 'linux-ninja',
+        ),
+        true,
+      );
+    });
   });
 }
 
