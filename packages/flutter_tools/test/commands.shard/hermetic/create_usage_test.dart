@@ -12,19 +12,18 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/doctor.dart';
-import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/test_flutter_command_runner.dart';
-import '../../src/testbed.dart';
+import '../../src/throwing_pub.dart';
 
 class FakePub extends Fake implements Pub {
   int calledGetOffline = 0;
@@ -56,7 +55,6 @@ class FakePub extends Fake implements Pub {
 
 void main() {
   group('usageValues', () {
-    late TestBed testbed;
     late FakePub fakePub;
     late MemoryFileSystem fs;
     late BufferLogger logger;
@@ -163,24 +161,15 @@ void main() {
         }),
       );
       flutterManifest.writeAsStringSync('{"files":[]}');
-
-      testbed = TestBed(
-        overrides: <Type, Generator>{
-          Cache: () => cache,
-          Config: () => config,
-          DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
-          FileSystem: () => fs,
-          Logger: () => logger,
-          Platform: () => platform,
-          ProcessManager: () => processManager,
-        },
-      );
     });
 
-    CreateCommand createCreateCommand({Pub? pub}) {
+    CreateCommand createCreateCommand({FeatureFlags? featureFlags, Pub? pub}) {
       return CreateCommand(
         androidContext: FakeAndroidContext(),
         appleContext: FakeAppleContext(),
+        featureFlags: featureFlags ?? TestFeatureFlags(isNativeAssetsEnabled: true),
+        pub: pub ?? const ThrowingPub(),
+        templatePathProvider: TemplatePathProvider(flutterRoot: cache.flutterRoot),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: FakeToolContext(
           fs: fs,
@@ -192,109 +181,91 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           projectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger, config: config),
         ),
-        pub: pub,
       );
     }
 
-    testUsingContext(
-      'set template type as usage value',
-      () => testbed.run(() async {
-        final CreateCommand command = createCreateCommand();
-        final CommandRunner<void> runner = createTestCommandRunner(command);
+    test('set template type as usage value', () async {
+      final CreateCommand command = createCreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
 
-        await runner.run(<String>['create', '--no-pub', '--template=module', 'testy']);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createProjectType'],
-          'module',
-        );
-        await runner.run(<String>['create', '--no-pub', '--template=app', 'testy1']);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createProjectType'],
-          'app',
-        );
-        await runner.run(<String>['create', '--no-pub', '--template=package', 'testy3']);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createProjectType'],
-          'package',
-        );
-        await runner.run(<String>['create', '--no-pub', '--template=plugin', 'testy4']);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createProjectType'],
-          'plugin',
-        );
-        await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', 'testy5']);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createProjectType'],
-          'plugin_ffi',
-        );
-        await runner.run(<String>['create', '--no-pub', '--template=package_ffi', 'testy6']);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createProjectType'],
-          'package_ffi',
-        );
-      }),
-    );
+      await runner.run(<String>['create', '--no-pub', '--template=module', 'testy']);
+      expect(
+        (await command.unifiedAnalyticsUsageValues('create')).eventData['createProjectType'],
+        'module',
+      );
+      await runner.run(<String>['create', '--no-pub', '--template=app', 'testy1']);
+      expect(
+        (await command.unifiedAnalyticsUsageValues('create')).eventData['createProjectType'],
+        'app',
+      );
+      await runner.run(<String>['create', '--no-pub', '--template=package', 'testy3']);
+      expect(
+        (await command.unifiedAnalyticsUsageValues('create')).eventData['createProjectType'],
+        'package',
+      );
+      await runner.run(<String>['create', '--no-pub', '--template=plugin', 'testy4']);
+      expect(
+        (await command.unifiedAnalyticsUsageValues('create')).eventData['createProjectType'],
+        'plugin',
+      );
+      await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', 'testy5']);
+      expect(
+        (await command.unifiedAnalyticsUsageValues('create')).eventData['createProjectType'],
+        'plugin_ffi',
+      );
+      await runner.run(<String>['create', '--no-pub', '--template=package_ffi', 'testy6']);
+      expect(
+        (await command.unifiedAnalyticsUsageValues('create')).eventData['createProjectType'],
+        'package_ffi',
+      );
+    });
 
-    testUsingContext(
-      'set Android host language type as usage value',
-      () => testbed.run(() async {
-        final CreateCommand command = createCreateCommand();
-        final CommandRunner<void> runner = createTestCommandRunner(command);
+    test('set Android host language type as usage value', () async {
+      final CreateCommand command = createCreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
 
-        await runner.run(<String>['create', '--no-pub', '--template=app', 'testy']);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createAndroidLanguage'],
-          'kotlin',
-        );
+      await runner.run(<String>['create', '--no-pub', '--template=app', 'testy']);
+      expect(
+        (await command.unifiedAnalyticsUsageValues('create')).eventData['createAndroidLanguage'],
+        'kotlin',
+      );
 
-        await runner.run(<String>[
-          'create',
-          '--no-pub',
-          '--template=app',
-          '--android-language=java',
-          'testy',
-        ]);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createAndroidLanguage'],
-          'java',
-        );
-      }),
-    );
+      await runner.run(<String>[
+        'create',
+        '--no-pub',
+        '--template=app',
+        '--android-language=java',
+        'testy',
+      ]);
+      expect(
+        (await command.unifiedAnalyticsUsageValues('create')).eventData['createAndroidLanguage'],
+        'java',
+      );
+    });
 
-    testUsingContext(
-      'create --offline',
-      () => testbed.run(() async {
-        final CreateCommand command = createCreateCommand(pub: fakePub);
-        final CommandRunner<void> runner = createTestCommandRunner(command);
-        writePackageConfigFiles(directory: fs.directory('testy'), mainLibName: 'my_app');
-        await runner.run(<String>['create', 'testy', '--offline']);
+    test('create --offline', () async {
+      final CreateCommand command = createCreateCommand(pub: fakePub);
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      writePackageConfigFiles(directory: fs.directory('testy'), mainLibName: 'my_app');
+      await runner.run(<String>['create', 'testy', '--offline']);
 
-        expect(command.argParser.options.containsKey('offline'), true);
-        expect(command.shouldUpdateCache, true);
-      }),
-    );
+      expect(command.argParser.options.containsKey('offline'), true);
+      expect(command.shouldUpdateCache, true);
+    });
 
-    testUsingContext(
-      'package_ffi template not enabled',
-      () async {
-        final CreateCommand command = createCreateCommand();
-        final CommandRunner<void> runner = createTestCommandRunner(command);
+    test('package_ffi template not enabled', () async {
+      final CreateCommand command = createCreateCommand(featureFlags: TestFeatureFlags());
+      final CommandRunner<void> runner = createTestCommandRunner(command);
 
-        expect(
-          runner.run(<String>['create', '--no-pub', '--template=package_ffi', 'my_ffi_package']),
-          throwsUsageException(
-            message: '"package_ffi" is not an allowed value for option "--template"',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(
-          isNativeAssetsEnabled: false, // ignore: avoid_redundant_argument_values, If we graduate the feature to true by default, don't break this test.
+      expect(
+        runner.run(<String>['create', '--no-pub', '--template=package_ffi', 'my_ffi_package']),
+        throwsUsageException(
+          message: '"package_ffi" is not an allowed value for option "--template"',
         ),
-      },
-    );
+      );
+    });
 
-    testUsingContext('plugin_ffi template is marked as deprecated in help', () {
+    test('plugin_ffi template is marked as deprecated in help', () {
       final CreateCommand command = createCreateCommand();
       final String? templateHelp =
           command.argParser.options['template']?.allowedHelp?['plugin_ffi'];
@@ -302,12 +273,4 @@ void main() {
       expect(templateHelp, contains('Use "package_ffi" instead.'));
     });
   });
-}
-
-class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
-  @override
-  List<DoctorValidator> get validators => <DoctorValidator>[];
-
-  @override
-  List<Workflow> get workflows => <Workflow>[];
 }

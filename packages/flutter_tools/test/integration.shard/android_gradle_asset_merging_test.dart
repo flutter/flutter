@@ -120,7 +120,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('Flutter assets, directory assets, resolution variants, and native Android assets coexist in APK', () async {
+  test('Flutter assets, directory assets, resolution variants, and native Android assets coexist in APK', () async {
     final Directory projectDir = await createApp(tempDir);
 
     // Every file this test packages is declared in one of the two tables below. To cover a new
@@ -163,6 +163,20 @@ void main() {
             pubspecEntry: null,
             apkEntry: 'assets/flutter_assets/assets/4.0x/image.png',
             contents: 'flutter_image_4x_content',
+          ),
+          // AGP's default `ignoreAssetsPattern` drops files whose name starts with `.` and
+          // directories whose name starts with `_`, but Flutter assets must not be filtered.
+          (
+            source: '.env',
+            pubspecEntry: '.env',
+            apkEntry: 'assets/flutter_assets/.env',
+            contents: 'flutter_dotfile_content',
+          ),
+          (
+            source: 'assets/_private/underscore_dir_asset.txt',
+            pubspecEntry: 'assets/_private/',
+            apkEntry: 'assets/flutter_assets/assets/_private/underscore_dir_asset.txt',
+            contents: 'flutter_underscore_dir_content',
           ),
         ];
 
@@ -210,7 +224,7 @@ void main() {
   // that produced a correct APK would also satisfy this test, and that is the
   // intended contract: the assertion is about stale output never surviving into
   // the artifact, which is the regression `FileSystemOperations.sync` prevents.
-  testWithoutContext('assets removed from pubspec are pruned from the APK on rebuild', () async {
+  test('assets removed from pubspec are pruned from the APK on rebuild', () async {
     final Directory projectDir = await createApp(tempDir);
 
     writeFlutterAsset(projectDir, 'assets/asset1.txt', 'asset_one_initial');
@@ -253,24 +267,10 @@ void main() {
     );
   });
 
-  // Asserts a documented AGP guarantee, not incidental merge ordering.
-  //
-  // `SourceDirectories.addGeneratedSourceDirectory` places the directory in the
-  // "Variant" overlay. Per the AGP API docs on `SourceDirectories`:
-  //
-  //   "Adding directories is always added to the 'Variant' overlay and will
-  //    therefore carry the highest possible priority among all directories for
-  //    the source type."
-  //
-  // and on `addGeneratedSourceDirectory` itself:
-  //
-  //   "The [Directory] is added last to the variant's list of source
-  //    directories. In case there is merging for the source type, the
-  //    [Directory] will have the highest priority."
-  //
-  // So on a path collision the generated Flutter assets win over
-  // `src/main/assets`, and the build must not fail.
-  testWithoutContext('generated Flutter assets take precedence over static src/main/assets on path collision without build failure', () async {
+  // `CopyFlutterAssetsTask` transforms AGP's merged assets (`SingleArtifact.ASSETS`)
+  // by copying `flutter_assets/` over them. So on a path collision the Flutter
+  // assets win over `src/main/assets`, and the build must not fail.
+  test('generated Flutter assets take precedence over static src/main/assets on path collision without build failure', () async {
     final Directory projectDir = await createApp(tempDir);
 
     writeFlutterAsset(projectDir, 'assets/collision.txt', 'flutter_version');
@@ -292,9 +292,8 @@ void main() {
       'assets/flutter_assets/assets/collision.txt',
       'flutter_version',
       reason:
-          'Per the AGP SourceDirectories contract, addGeneratedSourceDirectory adds to '
-          'the Variant overlay, giving it the highest possible priority during merge '
-          'over src/main/assets',
+          'CopyFlutterAssetsTask copies flutter_assets over the merged assets, so Flutter '
+          'assets take precedence over src/main/assets',
     );
   });
 
@@ -302,7 +301,7 @@ void main() {
   // flavor (`src/<flavor>/assets`) and build type (`src/<buildType>/assets`).
   // Both are asserted against a single `freeDebug` build so this costs one
   // Gradle invocation rather than two.
-  testWithoutContext('flavor-specific and buildType-specific native assets are packaged into the matching variant APK', () async {
+  test('flavor-specific and buildType-specific native assets are packaged into the matching variant APK', () async {
     final Directory projectDir = await createApp(tempDir);
 
     // Add product flavors to build.gradle.kts.

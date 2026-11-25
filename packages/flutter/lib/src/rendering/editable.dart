@@ -725,6 +725,7 @@ class RenderEditable extends RenderBox
   }
 
   void _setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
+    var updatedNextSelection = nextSelection;
     if (nextSelection.isValid) {
       // The nextSelection is calculated based on plainText, which can be out
       // of sync with the textSelectionDelegate.textEditingValue by one frame.
@@ -735,13 +736,13 @@ class RenderEditable extends RenderBox
       //
       // If this happens, we need to make sure the new selection is still valid.
       final int textLength = textSelectionDelegate.textEditingValue.text.length;
-      nextSelection = nextSelection.copyWith(
+      updatedNextSelection = nextSelection.copyWith(
         baseOffset: math.min(nextSelection.baseOffset, textLength),
         extentOffset: math.min(nextSelection.extentOffset, textLength),
       );
     }
     _setTextEditingValue(
-      textSelectionDelegate.textEditingValue.copyWith(selection: nextSelection),
+      textSelectionDelegate.textEditingValue.copyWith(selection: updatedNextSelection),
       cause,
     );
   }

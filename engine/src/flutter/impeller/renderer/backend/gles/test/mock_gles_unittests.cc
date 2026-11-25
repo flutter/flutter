@@ -26,10 +26,10 @@ TEST(MockGLES, CanCallUnmockedFunction) {
   auto mock_gles = MockGLES::Init();
 
   auto& gl = mock_gles->GetProcTable();
-  gl.DeleteFramebuffers(1, nullptr);
+  gl.DeleteRenderbuffers(1, nullptr);
 
   // Test should still complete.
-  // If we end up mocking DeleteFramebuffers, delete this test.
+  // If we end up mocking DeleteRenderbuffers, call another unmocked function.
 }
 
 }  // namespace testing

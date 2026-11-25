@@ -9,7 +9,7 @@ import 'package:flutter_tools/src/commands/attach.dart';
 import '../../src/common.dart';
 
 void main() {
-  testWithoutContext('streamWithCallbackOnFirstItem only calls the callback once', () async {
+  test('streamWithCallbackOnFirstItem only calls the callback once', () async {
     var calledTimes = 0;
     final Stream<int> stream = Stream.fromIterable([1, 2, 3]);
     final Stream<int> newStream = streamWithCallbackOnFirstItem(stream, () {

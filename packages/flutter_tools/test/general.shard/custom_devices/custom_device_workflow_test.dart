@@ -8,18 +8,15 @@ import '../../src/common.dart';
 import '../../src/fakes.dart';
 
 void main() {
-  testWithoutContext(
-    'CustomDeviceWorkflow reports false when custom devices feature is disabled',
-    () {
-      final workflow = CustomDeviceWorkflow(featureFlags: TestFeatureFlags());
-      expect(workflow.appliesToHostPlatform, false);
-      expect(workflow.canLaunchDevices, false);
-      expect(workflow.canListDevices, false);
-      expect(workflow.canListEmulators, false);
-    },
-  );
+  test('CustomDeviceWorkflow reports false when custom devices feature is disabled', () {
+    final workflow = CustomDeviceWorkflow(featureFlags: TestFeatureFlags());
+    expect(workflow.appliesToHostPlatform, false);
+    expect(workflow.canLaunchDevices, false);
+    expect(workflow.canListDevices, false);
+    expect(workflow.canListEmulators, false);
+  });
 
-  testWithoutContext('CustomDeviceWorkflow reports true for everything except canListEmulators when custom devices feature is enabled', () {
+  test('CustomDeviceWorkflow reports true for everything except canListEmulators when custom devices feature is enabled', () {
     final workflow = CustomDeviceWorkflow(
       featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
     );

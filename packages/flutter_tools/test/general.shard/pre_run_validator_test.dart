@@ -32,31 +32,28 @@ void main() {
       );
     });
 
-    testWithoutContext(
-      'succeeds when packages/flutter_tools exists with custom cache.flutterRoot',
-      () {
-        final String flutterRoot = fs.path.join('custom', 'flutter', 'root');
-        final Directory toolsDir = fs.directory(
-          fs.path.join(flutterRoot, 'packages', 'flutter_tools'),
-        );
-        toolsDir.createSync(recursive: true);
+    test('succeeds when packages/flutter_tools exists with custom cache.flutterRoot', () {
+      final String flutterRoot = fs.path.join('custom', 'flutter', 'root');
+      final Directory toolsDir = fs.directory(
+        fs.path.join(flutterRoot, 'packages', 'flutter_tools'),
+      );
+      toolsDir.createSync(recursive: true);
 
-        final validator = PreRunValidator(
+      final validator = PreRunValidator(
+        fileSystem: fs,
+        cache: Cache.test(
           fileSystem: fs,
-          cache: Cache.test(
-            fileSystem: fs,
-            processManager: FakeProcessManager.any(),
-            logger: logger,
-            platform: platform,
-            flutterRoot: flutterRoot,
-          ),
-        );
+          processManager: FakeProcessManager.any(),
+          logger: logger,
+          platform: platform,
+          flutterRoot: flutterRoot,
+        ),
+      );
 
-        expect(() => validator.validate(), returnsNormally);
-      },
-    );
+      expect(() => validator.validate(), returnsNormally);
+    });
 
-    testWithoutContext('succeeds when packages/flutter_tools exists with cache.flutterRoot', () {
+    test('succeeds when packages/flutter_tools exists with cache.flutterRoot', () {
       final String flutterRoot = cache.flutterRoot;
       final Directory toolsDir = fs.directory(
         fs.path.join(flutterRoot, 'packages', 'flutter_tools'),
@@ -68,7 +65,7 @@ void main() {
       expect(() => validator.validate(), returnsNormally);
     });
 
-    testWithoutContext('throws ToolExit when packages/flutter_tools does not exist', () {
+    test('throws ToolExit when packages/flutter_tools does not exist', () {
       final String flutterRoot = cache.flutterRoot;
       final Directory toolsDir = fs.directory(
         fs.path.join(flutterRoot, 'packages', 'flutter_tools'),

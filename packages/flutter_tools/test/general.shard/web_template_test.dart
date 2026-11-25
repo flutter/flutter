@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/web_template.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 
 const htmlSample1 = '''
 <!DOCTYPE html>
@@ -492,7 +491,7 @@ _flutter.loader.load({
     expect(result, contains('debugMode: false'));
   });
 
-  testUsingContext('logs warning when user defined web-define variable is missing', () {
+  test('logs warning when user defined web-define variable is missing', () {
     const htmlWithMissingVar = '''
 <!DOCTYPE html>
 <html>
@@ -507,20 +506,21 @@ _flutter.loader.load({
 </body>
 </html>''';
 
+    final logger = BufferLogger.test();
     const indexHtml = WebTemplate(htmlWithMissingVar);
     final String result = indexHtml.withSubstitutions(
       baseHref: '/',
       flutterJsFile: flutterJs,
       webDefines: <String, String>{}, // Missing API_URL
-      logger: testLogger,
+      logger: logger,
     );
 
-    expect(testLogger.warningText, contains('Missing web-define variable: API_URL'));
+    expect(logger.warningText, contains('Missing web-define variable: API_URL'));
     // Verify the placeholder is preserved
     expect(result, contains("const apiUrl = '{{API_URL}}';"));
   });
 
-  testUsingContext('logs warning with multiple missing user defined variables', () {
+  test('logs warning with multiple missing user defined variables', () {
     const htmlWithMultipleMissingVars = '''
 <!DOCTYPE html>
 <html>
@@ -539,23 +539,22 @@ _flutter.loader.load({
 </body>
 </html>''';
 
+    final logger = BufferLogger.test();
     const indexHtml = WebTemplate(htmlWithMultipleMissingVars);
     final String result = indexHtml.withSubstitutions(
       baseHref: '/',
       flutterJsFile: flutterJs,
       webDefines: <String, String>{'API_URL': 'test'}, // Missing ENV, VERSION
-      logger: testLogger,
+      logger: logger,
     );
 
-    expect(testLogger.warningText, contains('Missing web-define variables: ENV, VERSION'));
+    expect(logger.warningText, contains('Missing web-define variables: ENV, VERSION'));
     expect(result, contains("env: '{{ENV}}'"));
     expect(result, contains("version: '{{VERSION}}'"));
   });
 
-  testUsingContext(
-    'ignores Flutter built-in variables and logs warning for missing user variables',
-    () {
-      const htmlWithBuiltInVars = '''
+  test('ignores Flutter built-in variables and logs warning for missing user variables', () {
+    const htmlWithBuiltInVars = '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -571,19 +570,19 @@ _flutter.loader.load({
 </body>
 </html>''';
 
-      const indexHtml = WebTemplate(htmlWithBuiltInVars);
-      final String result = indexHtml.withSubstitutions(
-        baseHref: '/',
-        flutterJsFile: flutterJs,
-        buildConfig: 'test config',
-        webDefines: <String, String>{}, // Missing CUSTOM_VAR but built-in vars should be ignored
-        logger: testLogger,
-      );
+    final logger = BufferLogger.test();
+    const indexHtml = WebTemplate(htmlWithBuiltInVars);
+    final String result = indexHtml.withSubstitutions(
+      baseHref: '/',
+      flutterJsFile: flutterJs,
+      buildConfig: 'test config',
+      webDefines: <String, String>{}, // Missing CUSTOM_VAR but built-in vars should be ignored
+      logger: logger,
+    );
 
-      expect(testLogger.warningText, contains('Missing web-define variable: CUSTOM_VAR'));
-      expect(result, contains("const customVar = '{{CUSTOM_VAR}}';"));
-    },
-  );
+    expect(logger.warningText, contains('Missing web-define variable: CUSTOM_VAR'));
+    expect(result, contains("const customVar = '{{CUSTOM_VAR}}';"));
+  });
 
   test('allows empty web-define variables', () {
     const htmlWithEmptyVar = '''

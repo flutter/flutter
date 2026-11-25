@@ -6,8 +6,6 @@
 library;
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/android/android_sdk.dart';
-import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart' as gradle_utils;
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/config.dart';
@@ -20,7 +18,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
@@ -29,6 +26,7 @@ import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -37,7 +35,6 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fakes.dart';
 import '../src/package_config.dart';
-import '../src/throwing_pub.dart';
 
 void main() {
   // TODO(zanderso): remove once FlutterProject is fully refactored.
@@ -46,7 +43,7 @@ void main() {
 
   group('Project', () {
     group('construction', () {
-      testWithoutContext('invalid utf8 throws a tool exit', () {
+      test('invalid utf8 throws a tool exit', () {
         final FileSystem fileSystem = MemoryFileSystem.test();
         final projectFactory = FlutterProjectFactory(
           fileSystem: fileSystem,
@@ -60,7 +57,7 @@ void main() {
         expect(() => projectFactory.fromDirectory(fileSystem.currentDirectory), throwsToolExit());
       });
 
-      testWithoutContext('fails on invalid pubspec.yaml', () {
+      test('fails on invalid pubspec.yaml', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -70,7 +67,7 @@ void main() {
         expect(() => FlutterProject.fromDirectory(directory, logger: logger), throwsToolExit());
       });
 
-      testWithoutContext('fails on pubspec.yaml parse failure', () {
+      test('fails on pubspec.yaml parse failure', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -80,7 +77,7 @@ void main() {
         expect(() => FlutterProject.fromDirectory(directory, logger: logger), throwsToolExit());
       });
 
-      testWithoutContext('fails on invalid example/pubspec.yaml', () {
+      test('fails on invalid example/pubspec.yaml', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childDirectory('example').childFile('pubspec.yaml')
@@ -90,13 +87,13 @@ void main() {
         expect(() => FlutterProject.fromDirectory(directory, logger: logger), throwsToolExit());
       });
 
-      testWithoutContext('treats missing pubspec.yaml as empty', () {
+      test('treats missing pubspec.yaml as empty', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject')..createSync(recursive: true);
         expect(FlutterProject.fromDirectory(directory, logger: logger).manifest.isEmpty, true);
       });
 
-      testWithoutContext('reads valid pubspec.yaml', () {
+      test('reads valid pubspec.yaml', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -105,7 +102,7 @@ void main() {
         expect(FlutterProject.fromDirectory(directory, logger: logger).manifest.appName, 'hello');
       });
 
-      testWithoutContext('reads dependencies from pubspec.yaml', () {
+      test('reads dependencies from pubspec.yaml', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -117,7 +114,7 @@ void main() {
         );
       });
 
-      testWithoutContext('sets up location', () {
+      test('sets up location', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         expect(
@@ -134,7 +131,7 @@ void main() {
         );
       });
 
-      testWithoutContext('buildDirectory uses configured build-dir', () {
+      test('buildDirectory uses configured build-dir', () {
         final config = Config.test();
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
@@ -398,7 +395,7 @@ dependencies:
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
 
-      testWithoutContext('determines dev dependencies', () async {
+      test('determines dev dependencies', () async {
         final toolContext = FakeToolContext(logger: logger);
         // Create a plugin.
         await aPluginProject(legacy: false, toolContext: toolContext);
@@ -418,7 +415,7 @@ dependencies:
         );
       });
 
-      testWithoutContext('releaseMode: false retains dev plugins', () async {
+      test('releaseMode: false retains dev plugins', () async {
         final toolContext = FakeToolContext(logger: logger);
         // Create a plugin.
         await aPluginProject(includeAndroidMain: true, legacy: false, toolContext: toolContext);
@@ -436,7 +433,7 @@ dependencies:
         );
       });
 
-      testWithoutContext('releaseMode: true omits dev plugins', () async {
+      test('releaseMode: true omits dev plugins', () async {
         final toolContext = FakeToolContext(logger: logger);
         // Create a plugin.
         await aPluginProject(includeAndroidMain: true, legacy: false, toolContext: toolContext);
@@ -454,7 +451,7 @@ dependencies:
         );
       });
 
-      testWithoutContext('injects plugins for macOS', () async {
+      test('injects plugins for macOS', () async {
         final fs = MemoryFileSystem.test();
         final macOSFeatureFlags = TestFeatureFlags(isMacOSEnabled: true);
         final toolContext = FakeToolContext(
@@ -477,7 +474,7 @@ dependencies:
         );
         expectExists(project.macos.pluginRegistrantImplementation);
       });
-      testWithoutContext('generates Xcode configuration for macOS', () async {
+      test('generates Xcode configuration for macOS', () async {
         final fs = MemoryFileSystem.test();
         final macOSFeatureFlags = TestFeatureFlags(isMacOSEnabled: true);
         final toolContext = FakeToolContext(
@@ -500,7 +497,7 @@ dependencies:
         );
         expectExists(project.macos.generatedXcodePropertiesFile);
       });
-      testWithoutContext('injects plugins for Linux', () async {
+      test('injects plugins for Linux', () async {
         final fs = MemoryFileSystem.test();
         final linuxFeatureFlags = TestFeatureFlags(isLinuxEnabled: true);
         final toolContext = FakeToolContext(
@@ -524,7 +521,7 @@ dependencies:
         expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.h'));
         expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.cc'));
       });
-      testWithoutContext('injects plugins for Windows', () async {
+      test('injects plugins for Windows', () async {
         final fs = MemoryFileSystem.test();
         final windowsFeatureFlags = TestFeatureFlags(isWindowsEnabled: true);
         final toolContext = FakeToolContext(
@@ -579,7 +576,7 @@ dependencies:
         expectExists(pluginRegistrantClasses.childFile('GeneratedPluginRegistrant.m'));
       });
 
-      testWithoutContext('Version.json info is correct', () {
+      test('Version.json info is correct', () {
         final fileSystem = MemoryFileSystem.test();
         final FlutterManifest manifest = FlutterManifest.createFromString('''
     name: test
@@ -674,101 +671,62 @@ dependencies {
       // be placed in their own group to avoid test pollution. This is
       // especially important for filesystem.
       group('_', () {
-        final FakeProcessManager processManager;
-        final Java java;
-        final AndroidStudio androidStudio;
-        final FakeAndroidSdkWithDir androidSdk;
-        final FileSystem fileSystem = getFileSystemForPlatform();
-        java = FakeJava(version: Version(17, 0, 2));
-        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand('1.9.20')]);
-        androidStudio = FakeAndroidStudio();
-        androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
-        fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
-        _testInMemory(
-          'flamingo values are compatible',
-          (ToolContext toolContext, _) async {
-            final FlutterProject? project = await configureGradleAgpForTest(
-              gradleV: '8.0',
-              agpV: '7.4.2',
-              toolContext: toolContext,
-            );
-            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
-              java: java,
-              logger: logger,
-              processManager: processManager,
-            );
-            expect(value.success, isTrue);
-          },
-          java: java,
-          androidStudio: androidStudio,
-          processManager: processManager,
-          androidSdk: androidSdk,
-        );
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          createKgpVersionCommand('1.9.20'),
+        ]);
+        final Java java = FakeJava(version: Version(17, 0, 2));
+        _testInMemory('flamingo values are compatible', (ToolContext toolContext, _) async {
+          final FlutterProject? project = await configureGradleAgpForTest(
+            gradleV: '8.0',
+            agpV: '7.4.2',
+            toolContext: toolContext,
+          );
+          final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+            java: java,
+            logger: logger,
+            processManager: processManager,
+          );
+          expect(value.success, isTrue);
+        }, processManager: processManager);
       });
       group('_', () {
-        final FakeProcessManager processManager;
-        final Java java;
-        final AndroidStudio androidStudio;
-        final FakeAndroidSdkWithDir androidSdk;
-        final FileSystem fileSystem = getFileSystemForPlatform();
-        java = FakeJava(version: const Version.withText(1, 8, 0, '1.8.0_242'));
-        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand('1.7.20')]);
-        androidStudio = FakeAndroidStudio();
-        androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
-        fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
-        _testInMemory(
-          'java 8 era values are compatible',
-          (ToolContext toolContext, _) async {
-            final FlutterProject? project = await configureGradleAgpForTest(
-              gradleV: '6.7.1',
-              agpV: '4.2.0',
-              toolContext: toolContext,
-            );
-            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
-              java: java,
-              logger: logger,
-              processManager: processManager,
-            );
-            expect(value.success, isTrue);
-          },
-          java: java,
-          androidStudio: androidStudio,
-          processManager: processManager,
-          androidSdk: androidSdk,
-        );
+        final Java java = FakeJava(version: const Version.withText(1, 8, 0, '1.8.0_242'));
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          createKgpVersionCommand('1.7.20'),
+        ]);
+        _testInMemory('java 8 era values are compatible', (ToolContext toolContext, _) async {
+          final FlutterProject? project = await configureGradleAgpForTest(
+            gradleV: '6.7.1',
+            agpV: '4.2.0',
+            toolContext: toolContext,
+          );
+          final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+            java: java,
+            logger: logger,
+            processManager: processManager,
+          );
+          expect(value.success, isTrue);
+        }, processManager: processManager);
       });
 
       group('_', () {
-        final FakeProcessManager processManager;
-        final Java java;
-        final AndroidStudio androidStudio;
-        final FakeAndroidSdkWithDir androidSdk;
-        final FileSystem fileSystem = getFileSystemForPlatform();
-        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand('1.9.1')]);
-        java = FakeJava(version: Version(11, 0, 14));
-        androidStudio = FakeAndroidStudio();
-        androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
-        fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
-        _testInMemory(
-          'electric eel era values are compatible',
-          (ToolContext toolContext, _) async {
-            final FlutterProject? project = await configureGradleAgpForTest(
-              gradleV: '7.3.3',
-              agpV: '7.2.0',
-              toolContext: toolContext,
-            );
-            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
-              java: java,
-              logger: logger,
-              processManager: processManager,
-            );
-            expect(value.success, isTrue);
-          },
-          java: java,
-          androidStudio: androidStudio,
-          processManager: processManager,
-          androidSdk: androidSdk,
-        );
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          createKgpVersionCommand('1.9.1'),
+        ]);
+        final Java java = FakeJava(version: Version(11, 0, 14));
+        _testInMemory('electric eel era values are compatible', (ToolContext toolContext, _) async {
+          final FlutterProject? project = await configureGradleAgpForTest(
+            gradleV: '7.3.3',
+            agpV: '7.2.0',
+            toolContext: toolContext,
+          );
+          final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+            java: java,
+            logger: logger,
+            processManager: processManager,
+          );
+          expect(value.success, isTrue);
+        }, processManager: processManager);
       });
       group('_', () {
         const javaV = '17.0.2';
@@ -776,58 +734,45 @@ dependencies {
         const agpV = '7.2.0';
         const kgpV = '2.1.0';
 
-        final FakeProcessManager processManager;
-        final Java java;
-        final AndroidStudio androidStudio;
-        final FakeAndroidSdkWithDir androidSdk;
-        final FileSystem fileSystem = getFileSystemForPlatform();
-        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand(kgpV)]);
-        java = FakeJava(version: Version.parse(javaV));
-        androidStudio = FakeAndroidStudio();
-        androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
-        fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
-        _testInMemory(
-          'incompatible everything',
-          (ToolContext toolContext, _) async {
-            final FlutterProject? project = await configureGradleAgpForTest(
-              gradleV: gradleV,
-              agpV: agpV,
-              toolContext: toolContext,
-            );
-            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
-              java: java,
-              logger: logger,
-              processManager: processManager,
-            );
-            expect(value.success, isFalse);
-            // Should not have the valid string
-            expect(
-              value.description,
-              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
-            );
-            // On gradle/agp error print help url and gradle and agp versions.
-            expect(value.description, contains(RegExp(AndroidProject.gradleAgpCompatUrl)));
-            expect(value.description, contains(RegExp(gradleV)));
-            expect(value.description, contains(RegExp(agpV)));
-            // On gradle/agp error print help url and java and gradle versions.
-            expect(value.description, contains(RegExp(AndroidProject.javaGradleCompatUrl)));
-            expect(value.description, contains(RegExp(javaV)));
-            expect(value.description, contains(RegExp(gradleV)));
-            // On kgp/gradle eror print help url and kgp versions
-            expect(value.description, contains(RegExp(kgpV)));
-            expect(value.description, contains(RegExp('KGP/Gradle')));
-            expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
-            // On agp/kgp error print help url and agp and kgp versions
-            expect(value.description, contains(RegExp(agpV)));
-            expect(value.description, contains(RegExp(kgpV)));
-            expect(value.description, contains(RegExp('AGP/KGP')));
-            expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
-          },
-          java: java,
-          androidStudio: androidStudio,
-          processManager: processManager,
-          androidSdk: androidSdk,
-        );
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          createKgpVersionCommand(kgpV),
+        ]);
+        final Java java = FakeJava(version: Version.parse(javaV));
+        _testInMemory('incompatible everything', (ToolContext toolContext, _) async {
+          final FlutterProject? project = await configureGradleAgpForTest(
+            gradleV: gradleV,
+            agpV: agpV,
+            toolContext: toolContext,
+          );
+          final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+            java: java,
+            logger: logger,
+            processManager: processManager,
+          );
+          expect(value.success, isFalse);
+          // Should not have the valid string
+          expect(
+            value.description,
+            isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
+          );
+          // On gradle/agp error print help url and gradle and agp versions.
+          expect(value.description, contains(RegExp(AndroidProject.gradleAgpCompatUrl)));
+          expect(value.description, contains(RegExp(gradleV)));
+          expect(value.description, contains(RegExp(agpV)));
+          // On gradle/agp error print help url and java and gradle versions.
+          expect(value.description, contains(RegExp(AndroidProject.javaGradleCompatUrl)));
+          expect(value.description, contains(RegExp(javaV)));
+          expect(value.description, contains(RegExp(gradleV)));
+          // On kgp/gradle eror print help url and kgp versions
+          expect(value.description, contains(RegExp(kgpV)));
+          expect(value.description, contains(RegExp('KGP/Gradle')));
+          expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
+          // On agp/kgp error print help url and agp and kgp versions
+          expect(value.description, contains(RegExp(agpV)));
+          expect(value.description, contains(RegExp(kgpV)));
+          expect(value.description, contains(RegExp('AGP/KGP')));
+          expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
+        }, processManager: processManager);
       });
       group('_', () {
         const javaV = '17.0.2';
@@ -835,221 +780,152 @@ dependencies {
         const agpV = '4.2.0';
         const kgpV = '1.7.22';
 
-        final FakeProcessManager processManager;
-        final Java java;
-        final AndroidStudio androidStudio;
-        final FakeAndroidSdkWithDir androidSdk;
-        final FileSystem fileSystem = getFileSystemForPlatform();
-        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand(kgpV)]);
-        java = FakeJava(version: Version(17, 0, 2));
-        androidStudio = FakeAndroidStudio();
-        androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
-        fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
-        _testInMemory(
-          'incompatible java/gradle only',
-          (ToolContext toolContext, _) async {
-            final FlutterProject? project = await configureGradleAgpForTest(
-              gradleV: gradleV,
-              agpV: agpV,
-              toolContext: toolContext,
-            );
-            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
-              java: java,
-              logger: logger,
-              processManager: processManager,
-            );
-            expect(value.success, isFalse);
-            // Should not have the valid string.
-            expect(
-              value.description,
-              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
-            );
-            // On gradle/agp error print help url and java and gradle versions.
-            expect(value.description, contains(RegExp(AndroidProject.javaGradleCompatUrl)));
-            expect(value.description, contains(RegExp(javaV)));
-            expect(value.description, contains(RegExp(gradleV)));
-          },
-          java: java,
-          androidStudio: androidStudio,
-          processManager: processManager,
-          androidSdk: androidSdk,
-        );
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          createKgpVersionCommand(kgpV),
+        ]);
+        final Java java = FakeJava(version: Version(17, 0, 2));
+        _testInMemory('incompatible java/gradle only', (ToolContext toolContext, _) async {
+          final FlutterProject? project = await configureGradleAgpForTest(
+            gradleV: gradleV,
+            agpV: agpV,
+            toolContext: toolContext,
+          );
+          final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+            java: java,
+            logger: logger,
+            processManager: processManager,
+          );
+          expect(value.success, isFalse);
+          // Should not have the valid string.
+          expect(
+            value.description,
+            isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
+          );
+          // On gradle/agp error print help url and java and gradle versions.
+          expect(value.description, contains(RegExp(AndroidProject.javaGradleCompatUrl)));
+          expect(value.description, contains(RegExp(javaV)));
+          expect(value.description, contains(RegExp(gradleV)));
+        }, processManager: processManager);
       });
       group('_', () {
-        final FakeProcessManager processManager;
-        final Java java;
-        final AndroidStudio androidStudio;
-        final FakeAndroidSdkWithDir androidSdk;
-        final FileSystem fileSystem = getFileSystemForPlatform();
-        java = FakeJava(version: Version(11, 0, 2));
-        processManager = FakeProcessManager.any();
-        androidStudio = FakeAndroidStudio();
-        androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
-        fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
-        _testInMemory(
-          'incompatible gradle/agp only',
-          (ToolContext toolContext, _) async {
-            const gradleV = '7.0.3';
-            const agpV = '7.1.0';
-            final FlutterProject? project = await configureGradleAgpForTest(
-              gradleV: gradleV,
-              agpV: agpV,
-              toolContext: toolContext,
-            );
-            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
-              java: java,
-              logger: logger,
-              processManager: processManager,
-            );
-            expect(value.success, isFalse);
-            // Should not have the valid string.
-            expect(
-              value.description,
-              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
-            );
-            // On gradle/agp error print help url and gradle and agp versions.
-            expect(value.description, contains(RegExp(AndroidProject.gradleAgpCompatUrl)));
-            expect(value.description, contains(RegExp(gradleV)));
-            expect(value.description, contains(RegExp(agpV)));
-          },
-          java: java,
-          androidStudio: androidStudio,
-          processManager: processManager,
-          androidSdk: androidSdk,
-        );
+        final Java java = FakeJava(version: Version(11, 0, 2));
+        final processManager = FakeProcessManager.any();
+        _testInMemory('incompatible gradle/agp only', (ToolContext toolContext, _) async {
+          const gradleV = '7.0.3';
+          const agpV = '7.1.0';
+          final FlutterProject? project = await configureGradleAgpForTest(
+            gradleV: gradleV,
+            agpV: agpV,
+            toolContext: toolContext,
+          );
+          final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+            java: java,
+            logger: logger,
+            processManager: processManager,
+          );
+          expect(value.success, isFalse);
+          // Should not have the valid string.
+          expect(
+            value.description,
+            isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
+          );
+          // On gradle/agp error print help url and gradle and agp versions.
+          expect(value.description, contains(RegExp(AndroidProject.gradleAgpCompatUrl)));
+          expect(value.description, contains(RegExp(gradleV)));
+          expect(value.description, contains(RegExp(agpV)));
+        }, processManager: processManager);
       });
       group('_', () {
         const gradleV = '8.11';
         const agpV = '8.7.2';
         const kgpV = '2.1.10';
 
-        final FakeProcessManager processManager;
-        final Java java;
-        final AndroidStudio androidStudio;
-        final FakeAndroidSdkWithDir androidSdk;
-        final FileSystem fileSystem = getFileSystemForPlatform();
-        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand(kgpV)]);
-        java = FakeJava(version: Version(17, 0, 2));
-        androidStudio = FakeAndroidStudio();
-        androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
-        fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
-        _testInMemory(
-          'incompatible kgp/gradle only',
-          (ToolContext toolContext, _) async {
-            final FlutterProject? project = await configureGradleAgpForTest(
-              gradleV: gradleV,
-              agpV: agpV,
-              toolContext: toolContext,
-            );
-            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
-              java: java,
-              logger: logger,
-              processManager: processManager,
-            );
-            expect(value.success, isFalse);
-            // Should not have the valid string.
-            expect(
-              value.description,
-              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
-            );
-            // On gradle/agp error print help url and java and gradle versions.
-            expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
-            expect(value.description, contains(RegExp(kgpV)));
-            expect(value.description, contains(RegExp(gradleV)));
-          },
-          java: java,
-          androidStudio: androidStudio,
-          processManager: processManager,
-          androidSdk: androidSdk,
-        );
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          createKgpVersionCommand(kgpV),
+        ]);
+        final Java java = FakeJava(version: Version(17, 0, 2));
+        _testInMemory('incompatible kgp/gradle only', (ToolContext toolContext, _) async {
+          final FlutterProject? project = await configureGradleAgpForTest(
+            gradleV: gradleV,
+            agpV: agpV,
+            toolContext: toolContext,
+          );
+          final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+            java: java,
+            logger: logger,
+            processManager: processManager,
+          );
+          expect(value.success, isFalse);
+          // Should not have the valid string.
+          expect(
+            value.description,
+            isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
+          );
+          // On gradle/agp error print help url and java and gradle versions.
+          expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
+          expect(value.description, contains(RegExp(kgpV)));
+          expect(value.description, contains(RegExp(gradleV)));
+        }, processManager: processManager);
       });
       group('_', () {
         const gradleV = '8.9';
         const agpV = '8.7.2';
         const kgpV = '2.0.20';
 
-        final FakeProcessManager processManager;
-        final Java java;
-        final AndroidStudio androidStudio;
-        final FakeAndroidSdkWithDir androidSdk;
-        final FileSystem fileSystem = getFileSystemForPlatform();
-        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand(kgpV)]);
-        java = FakeJava(version: Version(17, 0, 2));
-        androidStudio = FakeAndroidStudio();
-        androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
-        fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
-        _testInMemory(
-          'incompatible agp/kgp only',
-          (ToolContext toolContext, _) async {
-            final FlutterProject? project = await configureGradleAgpForTest(
-              gradleV: gradleV,
-              agpV: agpV,
-              toolContext: toolContext,
-            );
-            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
-              java: java,
-              logger: logger,
-              processManager: processManager,
-            );
-            expect(value.success, isFalse);
-            // Should not have the valid string.
-            expect(
-              value.description,
-              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
-            );
-            // On gradle/agp error print help url and java and gradle versions.
-            expect(value.description, contains(RegExp(kgpV)));
-            expect(value.description, contains(RegExp(agpV)));
-            expect(value.description, contains(RegExp('AGP/KGP')));
-            expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
-          },
-          java: java,
-          androidStudio: androidStudio,
-          processManager: processManager,
-          androidSdk: androidSdk,
-        );
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          createKgpVersionCommand(kgpV),
+        ]);
+        final Java java = FakeJava(version: Version(17, 0, 2));
+        _testInMemory('incompatible agp/kgp only', (ToolContext toolContext, _) async {
+          final FlutterProject? project = await configureGradleAgpForTest(
+            gradleV: gradleV,
+            agpV: agpV,
+            toolContext: toolContext,
+          );
+          final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+            java: java,
+            logger: logger,
+            processManager: processManager,
+          );
+          expect(value.success, isFalse);
+          // Should not have the valid string.
+          expect(
+            value.description,
+            isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
+          );
+          // On gradle/agp error print help url and java and gradle versions.
+          expect(value.description, contains(RegExp(kgpV)));
+          expect(value.description, contains(RegExp(agpV)));
+          expect(value.description, contains(RegExp('AGP/KGP')));
+          expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
+        }, processManager: processManager);
       });
       group('_', () {
-        final FakeProcessManager processManager;
-        final Java java;
-        final AndroidStudio androidStudio;
-        final FakeAndroidSdkWithDir androidSdk;
-        final FileSystem fileSystem = getFileSystemForPlatform();
-        java = FakeJava(version: Version(11, 0, 2));
-        processManager = FakeProcessManager.any();
-        androidStudio = FakeAndroidStudio();
-        androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
-        fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
-        _testInMemory(
-          'null agp only',
-          (ToolContext toolContext, _) async {
-            const gradleV = '7.0.3';
-            final FlutterProject? project = await configureGradleAgpForTest(
-              gradleV: gradleV,
-              agpV: '',
-              toolContext: toolContext,
-            );
-            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
-              java: java,
-              logger: logger,
-              processManager: processManager,
-            );
-            expect(value.success, isFalse);
-            // Should not have the valid string.
-            expect(
-              value.description,
-              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
-            );
-            // On gradle/agp error print help url null value for agp.
-            expect(value.description, contains(RegExp(AndroidProject.gradleAgpCompatUrl)));
-            expect(value.description, contains(RegExp(gradleV)));
-            expect(value.description, contains(RegExp('null')));
-          },
-          java: java,
-          androidStudio: androidStudio,
-          processManager: processManager,
-          androidSdk: androidSdk,
-        );
+        final Java java = FakeJava(version: Version(11, 0, 2));
+        final processManager = FakeProcessManager.any();
+        _testInMemory('null agp only', (ToolContext toolContext, _) async {
+          const gradleV = '7.0.3';
+          final FlutterProject? project = await configureGradleAgpForTest(
+            gradleV: gradleV,
+            agpV: '',
+            toolContext: toolContext,
+          );
+          final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+            java: java,
+            logger: logger,
+            processManager: processManager,
+          );
+          expect(value.success, isFalse);
+          // Should not have the valid string.
+          expect(
+            value.description,
+            isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
+          );
+          // On gradle/agp error print help url null value for agp.
+          expect(value.description, contains(RegExp(AndroidProject.gradleAgpCompatUrl)));
+          expect(value.description, contains(RegExp(gradleV)));
+          expect(value.description, contains(RegExp('null')));
+        }, processManager: processManager);
       });
     });
 
@@ -1076,12 +952,12 @@ dependencies {
         );
       });
 
-      testWithoutContext('default host app language', () async {
+      test('default host app language', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
         expect(project.android.isKotlin, isFalse);
       });
 
-      testWithoutContext('kotlin host app language', () async {
+      test('kotlin host app language', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
 
         addAndroidGradleFile(
@@ -1096,7 +972,7 @@ apply plugin: 'kotlin-android'
         expect(project.android.isKotlin, isTrue);
       });
 
-      testWithoutContext('kotlin host app language with Gradle Kotlin DSL', () async {
+      test('kotlin host app language with Gradle Kotlin DSL', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
 
         addAndroidGradleFile(
@@ -1115,29 +991,26 @@ plugins {
         expect(project.android.isKotlin, isTrue);
       });
 
-      testWithoutContext(
-        'kotlin host app language with Gradle Kotlin DSL and typesafe plugin id',
-        () async {
-          final FlutterProject project = await someProject(toolContext: toolContext);
+      test('kotlin host app language with Gradle Kotlin DSL and typesafe plugin id', () async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
 
-          addAndroidGradleFile(
-            project.directory,
-            kotlinDsl: true,
-            gradleFileContent: () {
-              return '''
+        addAndroidGradleFile(
+          project.directory,
+          kotlinDsl: true,
+          gradleFileContent: () {
+            return '''
 plugins {
     id "com.android.application"
     id "kotlin-android"
     dev.flutter.`flutter-gradle-plugin`
 }
 ''';
-            },
-          );
-          expect(project.android.isKotlin, isTrue);
-        },
-      );
+          },
+        );
+        expect(project.android.isKotlin, isTrue);
+      });
 
-      testWithoutContext('Gradle Groovy files are preferred to Gradle Kotlin files', () async {
+      test('Gradle Groovy files are preferred to Gradle Kotlin files', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
 
         addAndroidGradleFile(
@@ -1170,7 +1043,7 @@ plugins {
 
       group('_kotlinCompilerOptionsPattern', () {
         void testRegex(String description, String content, {bool expected = true}) {
-          testWithoutContext(description, () async {
+          test(description, () async {
             final FlutterProject project = await someProject(toolContext: toolContext);
             addAndroidGradleFile(project.directory, gradleFileContent: () => content);
             expect(project.android.isKotlin, expected);
@@ -1224,7 +1097,7 @@ android {
 ''', expected: false);
       });
 
-      testWithoutContext('isKotlin is true if src/main/kotlin directory exists', () async {
+      test('isKotlin is true if src/main/kotlin directory exists', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
         project.android.hostAppGradleRoot
             .childDirectory('app')
@@ -1235,7 +1108,7 @@ android {
         expect(project.android.isKotlin, isTrue);
       });
 
-      testWithoutContext('isKotlin is false if src/main/kotlin directory does not exist', () async {
+      test('isKotlin is false if src/main/kotlin directory does not exist', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
         project.android.hostAppGradleRoot
             .childDirectory('app')
@@ -1272,7 +1145,7 @@ android {
       });
 
       void testWithMocks(String description, Future<void> Function() testMethod) {
-        testWithoutContext(description, testMethod);
+        test(description, testMethod);
       }
 
       group('universal link', () {
@@ -1663,12 +1536,12 @@ android {
         toolContext = FakeToolContext(fs: fs, logger: logger, projectFactory: projectFactory);
       });
 
-      testWithoutContext('app product name defaults to Runner', () async {
+      test('app product name defaults to Runner', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
         expect(await project.ios.productName(null), 'Runner');
       });
 
-      testWithoutContext('app product name xcodebuild settings', () async {
+      test('app product name xcodebuild settings', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
         project.ios.xcodeProject.createSync();
         const buildContext = XcodeProjectBuildContext(scheme: 'Runner');
@@ -1804,7 +1677,7 @@ android {
     });
 
     group('Android project file getters', () {
-      testWithoutContext('Project.android.gradleWrapperPropertiesFile resolves to gradle/wrapper/gradle-wrapper.properties', () {
+      test('Project.android.gradleWrapperPropertiesFile resolves to gradle/wrapper/gradle-wrapper.properties', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_project_test');
         final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
@@ -1821,7 +1694,7 @@ android {
 
         expect(project.android.gradleWrapperPropertiesFile.path, expected.path);
       });
-      testWithoutContext('Project.android.appGradleFile resolves to app/build.gradle', () {
+      test('Project.android.appGradleFile resolves to app/build.gradle', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync(
           'flutter_project_build_files',
@@ -1835,7 +1708,7 @@ android {
 
         expect(project.android.appGradleFile.path, expected.path);
       });
-      testWithoutContext('Project.android.appGradleFile resolves to app/build.gradle.kts', () {
+      test('Project.android.appGradleFile resolves to app/build.gradle.kts', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync(
           'flutter_project_build_files',
@@ -1849,25 +1722,22 @@ android {
 
         expect(project.android.appGradleFile.path, expected.path);
       });
-      testWithoutContext(
-        'Project.android.appGradleFile prefers app/build.gradle over app/build.gradle.kts',
-        () {
-          final FileSystem fs = getFileSystemForPlatform();
-          final Directory tempDir = fs.systemTempDirectory.createTempSync(
-            'flutter_project_build_files',
-          );
-          final Directory androidDir = tempDir.childDirectory('android').childDirectory('app')
-            ..createSync(recursive: true);
-          androidDir.childFile('build.gradle.kts').createSync(recursive: true);
-          final File expected = androidDir.childFile('build.gradle')..createSync(recursive: true);
+      test('Project.android.appGradleFile prefers app/build.gradle over app/build.gradle.kts', () {
+        final FileSystem fs = getFileSystemForPlatform();
+        final Directory tempDir = fs.systemTempDirectory.createTempSync(
+          'flutter_project_build_files',
+        );
+        final Directory androidDir = tempDir.childDirectory('android').childDirectory('app')
+          ..createSync(recursive: true);
+        androidDir.childFile('build.gradle.kts').createSync(recursive: true);
+        final File expected = androidDir.childFile('build.gradle')..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
-          expect(project.android.appGradleFile.path, expected.path);
-        },
-      );
+        expect(project.android.appGradleFile.path, expected.path);
+      });
 
-      testWithoutContext('Project.android.hostAppGradleFile resolves to android/build.gradle ', () {
+      test('Project.android.hostAppGradleFile resolves to android/build.gradle ', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync(
           'flutter_project_build_files',
@@ -1880,25 +1750,20 @@ android {
 
         expect(project.android.hostAppGradleFile.path, expected.path);
       });
-      testWithoutContext(
-        'Project.android.hostAppGradleFile resolves to android/build.gradle.kts',
-        () {
-          final FileSystem fs = getFileSystemForPlatform();
-          final Directory tempDir = fs.systemTempDirectory.createTempSync(
-            'flutter_project_build_files',
-          );
-          final Directory androidDir = tempDir.childDirectory('android')
-            ..createSync(recursive: true);
+      test('Project.android.hostAppGradleFile resolves to android/build.gradle.kts', () {
+        final FileSystem fs = getFileSystemForPlatform();
+        final Directory tempDir = fs.systemTempDirectory.createTempSync(
+          'flutter_project_build_files',
+        );
+        final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
-          final File expected = androidDir.childFile('build.gradle.kts')
-            ..createSync(recursive: true);
+        final File expected = androidDir.childFile('build.gradle.kts')..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
-          expect(project.android.hostAppGradleFile.path, expected.path);
-        },
-      );
-      testWithoutContext('Project.android.hostAppGradleFile prefers android/build.gradle over android/build.gradle.kts', () {
+        expect(project.android.hostAppGradleFile.path, expected.path);
+      });
+      test('Project.android.hostAppGradleFile prefers android/build.gradle over android/build.gradle.kts', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync(
           'flutter_project_build_files',
@@ -1911,43 +1776,34 @@ android {
 
         expect(project.android.hostAppGradleFile.path, expected.path);
       });
-      testWithoutContext(
-        'Project.android.settingsGradleFile resolves to android/settings.gradle',
-        () {
-          final FileSystem fs = getFileSystemForPlatform();
-          final Directory tempDir = fs.systemTempDirectory.createTempSync(
-            'flutter_project_build_files',
-          );
-          final Directory androidDir = tempDir.childDirectory('android')
-            ..createSync(recursive: true);
+      test('Project.android.settingsGradleFile resolves to android/settings.gradle', () {
+        final FileSystem fs = getFileSystemForPlatform();
+        final Directory tempDir = fs.systemTempDirectory.createTempSync(
+          'flutter_project_build_files',
+        );
+        final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
-          final File expected = androidDir.childFile('settings.gradle')
-            ..createSync(recursive: true);
+        final File expected = androidDir.childFile('settings.gradle')..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
-          expect(project.android.settingsGradleFile.path, expected.path);
-        },
-      );
-      testWithoutContext(
-        'Project.android.settingsGradleFile resolves to android/settings.gradle.kts',
-        () {
-          final FileSystem fs = getFileSystemForPlatform();
-          final Directory tempDir = fs.systemTempDirectory.createTempSync(
-            'flutter_project_build_files',
-          );
-          final Directory androidDir = tempDir.childDirectory('android')
-            ..createSync(recursive: true);
+        expect(project.android.settingsGradleFile.path, expected.path);
+      });
+      test('Project.android.settingsGradleFile resolves to android/settings.gradle.kts', () {
+        final FileSystem fs = getFileSystemForPlatform();
+        final Directory tempDir = fs.systemTempDirectory.createTempSync(
+          'flutter_project_build_files',
+        );
+        final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
-          final File expected = androidDir.childFile('settings.gradle.kts')
-            ..createSync(recursive: true);
+        final File expected = androidDir.childFile('settings.gradle.kts')
+          ..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
-          expect(project.android.settingsGradleFile.path, expected.path);
-        },
-      );
-      testWithoutContext('Project.android.settingsGradleFile prefers android/settings.gradle over android/settings.gradle.kts', () {
+        expect(project.android.settingsGradleFile.path, expected.path);
+      });
+      test('Project.android.settingsGradleFile prefers android/settings.gradle over android/settings.gradle.kts', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync(
           'flutter_project_build_files',
@@ -1960,7 +1816,7 @@ android {
 
         expect(project.android.settingsGradleFile.path, expected.path);
       });
-      testWithoutContext('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when build.gradle exists', () {
+      test('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when build.gradle exists', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_project_test');
         final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
@@ -1979,7 +1835,7 @@ android {
 
         expect(project.android.appManifestFile.path, expected.path);
       });
-      testWithoutContext('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when build.gradle.kts exists', () {
+      test('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when build.gradle.kts exists', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_project_test');
         final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
@@ -1998,7 +1854,7 @@ android {
 
         expect(project.android.appManifestFile.path, expected.path);
       });
-      testWithoutContext('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when both build.gradle and build.gradle.kts exists', () {
+      test('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when both build.gradle and build.gradle.kts exists', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_project_test');
         final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
@@ -2018,7 +1874,7 @@ android {
 
         expect(project.android.appManifestFile.path, expected.path);
       });
-      testWithoutContext('Project.android.appManifestFile resolves to android/AndroidManifest.xml when not using Gradle', () {
+      test('Project.android.appManifestFile resolves to android/AndroidManifest.xml when not using Gradle', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_project_test');
         final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
@@ -2030,26 +1886,21 @@ android {
 
         expect(project.android.appManifestFile.path, expected.path);
       });
-      testWithoutContext(
-        'Project.android.localPropertiesFile resolves to android/local.properties',
-        () {
-          final FileSystem fs = getFileSystemForPlatform();
-          final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_project_test');
-          final Directory androidDir = tempDir.childDirectory('android')
-            ..createSync(recursive: true);
+      test('Project.android.localPropertiesFile resolves to android/local.properties', () {
+        final FileSystem fs = getFileSystemForPlatform();
+        final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_project_test');
+        final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
-          final File expected = androidDir.childFile('local.properties')
-            ..createSync(recursive: true);
+        final File expected = androidDir.childFile('local.properties')..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
-          expect(project.android.localPropertiesFile.path, expected.path);
-        },
-      );
+        expect(project.android.localPropertiesFile.path, expected.path);
+      });
     });
 
     group('workspaces', () {
-      testWithoutContext('fails on invalid pubspec.yaml', () {
+      test('fails on invalid pubspec.yaml', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -2092,7 +1943,7 @@ resolution: workspace
         );
       });
 
-      testWithoutContext('supports glob patterns in workspace entries', () {
+      test('supports glob patterns in workspace entries', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -2126,7 +1977,7 @@ resolution: workspace
         );
       });
 
-      testWithoutContext('supports recursive glob pattern ** in workspace entries', () {
+      test('supports recursive glob pattern ** in workspace entries', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -2164,7 +2015,7 @@ resolution: workspace
         );
       });
 
-      testWithoutContext('handles empty workspace entries gracefully', () {
+      test('handles empty workspace entries gracefully', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -2178,7 +2029,7 @@ workspace:
         expect(FlutterProject.fromDirectory(directory, logger: logger).workspaceProjects, isEmpty);
       });
 
-      testWithoutContext('handles Windows backslash separators in workspace entries', () {
+      test('handles Windows backslash separators in workspace entries', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -2213,7 +2064,7 @@ resolution: workspace
         );
       });
 
-      testWithoutContext('ignores build and .dart_tool directories during workspace discovery', () {
+      test('ignores build and .dart_tool directories during workspace discovery', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -2262,7 +2113,7 @@ resolution: workspace
         );
       });
 
-      testWithoutContext('workspaceRoot returns root project for member projects', () {
+      test('workspaceRoot returns root project for member projects', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -2295,7 +2146,7 @@ resolution: workspace
         expect(parentProject.workspaceRoot, null);
       });
 
-      testWithoutContext('workspaceRoot works with relative paths', () {
+      test('workspaceRoot works with relative paths', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject')..createSync(recursive: true);
         directory.childFile('pubspec.yaml').writeAsStringSync('''
@@ -2327,51 +2178,48 @@ resolution: workspace
         }
       });
 
-      testWithoutContext(
-        'workspaceRoot is resilient to malformed sibling packages in workspace',
-        () {
-          final FileSystem fs = getFileSystemForPlatform();
-          final Directory directory = fs.directory('myproject');
-          directory.childFile('pubspec.yaml')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
+      test('workspaceRoot is resilient to malformed sibling packages in workspace', () {
+        final FileSystem fs = getFileSystemForPlatform();
+        final Directory directory = fs.directory('myproject');
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
 name: parent
 flutter:
 workspace:
 - pkgs/*
 ''');
-          final Directory validChildDir = directory
-              .childDirectory('pkgs')
-              .childDirectory('valid_child');
-          validChildDir.childFile('pubspec.yaml')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
+        final Directory validChildDir = directory
+            .childDirectory('pkgs')
+            .childDirectory('valid_child');
+        validChildDir.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
 name: valid_child
 flutter:
 resolution: workspace
 ''');
-          final Directory brokenChildDir = directory
-              .childDirectory('pkgs')
-              .childDirectory('broken_child');
-          brokenChildDir.childFile('pubspec.yaml')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('invalid: yaml: [broken');
+        final Directory brokenChildDir = directory
+            .childDirectory('pkgs')
+            .childDirectory('broken_child');
+        brokenChildDir.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('invalid: yaml: [broken');
 
-          final FlutterProject parentProject = FlutterProject.fromDirectory(
-            directory,
-            logger: logger,
-          );
-          final FlutterProject childProject = FlutterProject.fromDirectory(
-            validChildDir,
-            logger: logger,
-          );
+        final FlutterProject parentProject = FlutterProject.fromDirectory(
+          directory,
+          logger: logger,
+        );
+        final FlutterProject childProject = FlutterProject.fromDirectory(
+          validChildDir,
+          logger: logger,
+        );
 
-          expect(
-            fs.path.canonicalize(childProject.workspaceRoot!.directory.path),
-            fs.path.canonicalize(parentProject.directory.path),
-          );
-        },
-      );
+        expect(
+          fs.path.canonicalize(childProject.workspaceRoot!.directory.path),
+          fs.path.canonicalize(parentProject.directory.path),
+        );
+      });
     });
   });
 
@@ -2399,7 +2247,7 @@ resolution: workspace
       };
     });
 
-    testWithoutContext('cannot find bundle identifier', () async {
+    test('cannot find bundle identifier', () async {
       final FlutterProject project = await someProject(toolContext: toolContext);
       final projectInfo = XcodeProjectInfo(<String>['WatchTarget'], <String>[], <String>[], logger);
       expect(
@@ -2422,7 +2270,7 @@ resolution: workspace
         );
       });
 
-      testWithoutContext('no Info.plist in target', () async {
+      test('no Info.plist in target', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
         expect(
           await project.ios.containsWatchCompanion(
@@ -2434,50 +2282,44 @@ resolution: workspace
         );
       });
 
-      testWithoutContext(
-        'Info.plist in target does not contain WKCompanionAppBundleIdentifier',
-        () async {
-          final FlutterProject project = await someProject(toolContext: toolContext);
-          project.ios.hostAppRoot
-              .childDirectory('WatchTarget')
-              .childFile('Info.plist')
-              .createSync(recursive: true);
+      test('Info.plist in target does not contain WKCompanionAppBundleIdentifier', () async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        project.ios.hostAppRoot
+            .childDirectory('WatchTarget')
+            .childFile('Info.plist')
+            .createSync(recursive: true);
 
-          expect(
-            await project.ios.containsWatchCompanion(
-              projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
-              buildInfo: BuildInfo.debug,
-              deviceId: '123',
-            ),
-            isFalse,
-          );
-        },
-      );
+        expect(
+          await project.ios.containsWatchCompanion(
+            projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
+            buildInfo: BuildInfo.debug,
+            deviceId: '123',
+          ),
+          isFalse,
+        );
+      });
 
-      testWithoutContext(
-        'target WKCompanionAppBundleIdentifier is not project bundle identifier',
-        () async {
-          final FlutterProject project = await someProject(toolContext: toolContext);
-          project.ios.hostAppRoot
-              .childDirectory('WatchTarget')
-              .childFile('Info.plist')
-              .createSync(recursive: true);
-          testPlistParser.setProperty(
-            'WKCompanionAppBundleIdentifier',
-            'io.flutter.someOTHERproject',
-          );
-          expect(
-            await project.ios.containsWatchCompanion(
-              projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
-              buildInfo: BuildInfo.debug,
-              deviceId: '123',
-            ),
-            isFalse,
-          );
-        },
-      );
+      test('target WKCompanionAppBundleIdentifier is not project bundle identifier', () async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        project.ios.hostAppRoot
+            .childDirectory('WatchTarget')
+            .childFile('Info.plist')
+            .createSync(recursive: true);
+        testPlistParser.setProperty(
+          'WKCompanionAppBundleIdentifier',
+          'io.flutter.someOTHERproject',
+        );
+        expect(
+          await project.ios.containsWatchCompanion(
+            projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
+            buildInfo: BuildInfo.debug,
+            deviceId: '123',
+          ),
+          isFalse,
+        );
+      });
 
-      testWithoutContext('has watch companion in plist', () async {
+      test('has watch companion in plist', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
         project.ios.xcodeProject.createSync();
         project.ios.hostAppRoot
@@ -2496,7 +2338,7 @@ resolution: workspace
         );
       });
 
-      testWithoutContext('has watch companion in plist with xcode variable', () async {
+      test('has watch companion in plist with xcode variable', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
         project.ios.xcodeProject.createSync();
         const buildContext = XcodeProjectBuildContext(
@@ -2525,7 +2367,7 @@ resolution: workspace
         );
       });
 
-      testWithoutContext('has watch companion in other scheme build settings', () async {
+      test('has watch companion in other scheme build settings', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
         project.ios.xcodeProject.createSync();
         project.ios.xcodeProjectInfoFile.writeAsStringSync('''
@@ -2552,39 +2394,36 @@ resolution: workspace
         );
       });
 
-      testWithoutContext(
-        'has watch companion in other scheme build settings with xcode variable',
-        () async {
-          final FlutterProject project = await someProject(toolContext: toolContext);
-          project.ios.xcodeProject.createSync();
-          project.ios.xcodeProjectInfoFile.writeAsStringSync(r'''
+      test('has watch companion in other scheme build settings with xcode variable', () async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        project.ios.xcodeProject.createSync();
+        project.ios.xcodeProjectInfoFile.writeAsStringSync(r'''
         Build settings for action build and target "WatchTarget":
             INFOPLIST_KEY_WKCompanionAppBundleIdentifier = $(PRODUCT_BUNDLE_IDENTIFIER)
 ''');
 
-          const watchBuildContext = XcodeProjectBuildContext(
-            scheme: 'WatchScheme',
-            sdk: XcodeSdk.WatchOS,
-          );
-          mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] =
-              <String, String>{
-                IosProject.kProductBundleIdKey: 'io.flutter.someProject',
-                'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': r'$(PRODUCT_BUNDLE_IDENTIFIER)',
-              };
+        const watchBuildContext = XcodeProjectBuildContext(
+          scheme: 'WatchScheme',
+          sdk: XcodeSdk.WatchOS,
+        );
+        mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] =
+            <String, String>{
+              IosProject.kProductBundleIdKey: 'io.flutter.someProject',
+              'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': r'$(PRODUCT_BUNDLE_IDENTIFIER)',
+            };
 
-          expect(
-            await project.ios.containsWatchCompanion(
-              projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
-              buildInfo: BuildInfo.debug,
-              deviceId: '123',
-            ),
-            isTrue,
-          );
-        },
-      );
+        expect(
+          await project.ios.containsWatchCompanion(
+            projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
+            buildInfo: BuildInfo.debug,
+            deviceId: '123',
+          ),
+          isTrue,
+        );
+      });
     });
 
-    testWithoutContext('FlutterProjectFactory lazily evaluates featureFlagsBuilder', () {
+    test('FlutterProjectFactory lazily evaluates featureFlagsBuilder', () {
       final fs = MemoryFileSystem.test();
       final Directory projectDir = fs.directory('app');
       projectDir.childFile('pubspec.yaml')
@@ -2639,6 +2478,7 @@ Future<void> regeneratePlatformSpecificTooling(
     ),
     plistParser: FakePlistParser(),
     releaseMode: releaseMode,
+    templatePathProvider: TemplatePathProvider(flutterRoot: cache.flutterRoot),
     templateRenderer: const MustacheTemplateRenderer(),
   );
 }
@@ -2798,10 +2638,7 @@ void _testInMemory(
   String description,
   Future<void> Function(ToolContext toolContext, BufferLogger logger) testMethod, {
   FileSystem? fileSystem,
-  Java? java,
-  AndroidStudio? androidStudio,
   ProcessManager? processManager,
-  AndroidSdk? androidSdk,
 }) {
   final String flutterRoot = getFlutterRoot();
   final FileSystem testFileSystem = fileSystem ?? getFileSystemForPlatform();
@@ -2813,6 +2650,7 @@ void _testInMemory(
   final ProcessManager testProcessManager = processManager ?? FakeProcessManager.any();
   final cache = Cache(
     flutterRoot: flutterRoot,
+    isLocalEngineBuilder: () => false,
     logger: testBufferLogger,
     fileSystem: testFileSystem,
     osUtils: osUtils,
@@ -2853,23 +2691,9 @@ void _testInMemory(
     },
   );
 
-  testUsingContext(
-    description,
-    () async {
-      await testMethod(toolContext, testBufferLogger);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => testFileSystem,
-      ProcessManager: () => testProcessManager,
-      Java: () => java,
-      AndroidStudio: () => androidStudio ?? FakeAndroidStudio(),
-      // Intentionally null if not set. Some ios tests fail if this is a fake.
-      AndroidSdk: () => androidSdk,
-      Cache: () => cache,
-      Logger: () => testBufferLogger,
-      Pub: ThrowingPub.new,
-    },
-  );
+  test(description, () async {
+    await testMethod(toolContext, testBufferLogger);
+  });
 }
 
 /// Transfers files and folders from the local file system's Flutter
@@ -3074,13 +2898,4 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
   @override
   Version? version;
-}
-
-class FakeAndroidSdkWithDir extends Fake implements AndroidSdk {
-  FakeAndroidSdkWithDir(this._directory);
-
-  final Directory _directory;
-
-  @override
-  Directory get directory => _directory;
 }

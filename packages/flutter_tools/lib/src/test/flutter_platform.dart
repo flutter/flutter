@@ -11,6 +11,7 @@ import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import 'package:vm_service/vm_service.dart';
 
+import '../application_package.dart';
 import '../base/async_guard.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -60,6 +61,7 @@ FlutterPlatform installHook({
   required String flutterTesterBinPath,
   required TemplateRenderer templateRenderer,
   required ToolContext toolContext,
+  ApplicationPackageFactory? applicationPackageFactory,
   bool enableVmService = false,
   FlutterProject? flutterProject,
   String? icudtlPath,
@@ -95,6 +97,7 @@ FlutterPlatform installHook({
     flutterTesterBinPath: flutterTesterBinPath,
     templateRenderer: templateRenderer,
     toolContext: toolContext,
+    applicationPackageFactory: applicationPackageFactory,
     enableVmService: enableVmService,
     flutterProject: flutterProject,
     host: _kHosts[serverType],
@@ -306,6 +309,7 @@ class FlutterPlatform extends PlatformPlugin {
     required this.flutterTesterBinPath,
     required this._templateRenderer,
     required this._toolContext,
+    this._applicationPackageFactory,
     this.enableVmService,
     this.flutterProject,
     this.host,
@@ -320,6 +324,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.testAssetDirectory,
     this.testTimeRecorder,
     this.updateGoldens,
+    @visibleForTesting this._vmServiceConnector = connectToVmService,
     this.watcher,
   }) {
     _testGoldenComparator = TestGoldenComparator(
@@ -337,8 +342,10 @@ class FlutterPlatform extends PlatformPlugin {
     );
   }
 
+  final ApplicationPackageFactory? _applicationPackageFactory;
   final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
+  final VMServiceConnector _vmServiceConnector;
 
   final String flutterTesterBinPath;
   final DebuggingOptions debuggingOptions;
@@ -484,12 +491,14 @@ class FlutterPlatform extends PlatformPlugin {
   TestDevice _createTestDevice(int ourTestCount) {
     if (_isIntegrationTest) {
       return IntegrationTestTestDevice(
+        applicationPackageFactory: _applicationPackageFactory!,
         id: ourTestCount,
         device: integrationTestDevice!,
         debuggingOptions: debuggingOptions,
         userIdentifier: integrationTestUserIdentifier,
         compileExpression: _compileExpressionService,
         toolContext: _toolContext,
+        vmServiceConnector: _vmServiceConnector,
       );
     }
     return FlutterTesterTestDevice(
@@ -529,7 +538,7 @@ class FlutterPlatform extends PlatformPlugin {
     final ToolContext(:FlutterVersion flutterVersion, :Logger logger, :Platform platform) =
         _toolContext;
     final goldensBaseUri = Uri.file(testPath, windows: platform.isWindows);
-    final FlutterVmService vmService = await connectToVmService(
+    final FlutterVmService vmService = await _vmServiceConnector(
       uri,
       flutterVersion: flutterVersion,
       logger: logger,

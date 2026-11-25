@@ -33,7 +33,7 @@ void main() {
     return projectDir;
   }
 
-  testWithoutContext('resolves SDK packages vendored under bin/cache/pkg', () {
+  test('resolves SDK packages vendored under bin/cache/pkg', () {
     // `flutter` lives under packages/, while `flutter_gpu` is vendored into
     // bin/cache/pkg. Both must be resolved without throwing.
     writeSdkPackagePubspec('/flutter/packages/flutter/pubspec.yaml', 'flutter');
@@ -52,7 +52,7 @@ void main() {
     expect(getDependencies(projectDir), contains('vector_math'));
   });
 
-  testWithoutContext('skips an SDK package whose pubspec cannot be found', () {
+  test('skips an SDK package whose pubspec cannot be found', () {
     writeSdkPackagePubspec('/flutter/packages/flutter/pubspec.yaml', 'flutter');
 
     final Directory projectDir = writeProject(
@@ -68,7 +68,7 @@ void main() {
     expect(getDependencies(projectDir), contains('vector_math'));
   });
 
-  testWithoutContext('skips an SDK package whose directory exists but has no pubspec', () {
+  test('skips an SDK package whose directory exists but has no pubspec', () {
     writeSdkPackagePubspec('/flutter/packages/flutter/pubspec.yaml', 'flutter');
     // The package directory exists, but does not contain a pubspec.yaml.
     fileSystem.directory('/flutter/bin/cache/pkg/empty_pkg').createSync(recursive: true);
@@ -86,18 +86,18 @@ void main() {
     expect(getDependencies(projectDir), contains('vector_math'));
   });
 
-  testWithoutContext('throws ToolExit if project pubspec.yaml is empty', () {
+  test('throws ToolExit if project pubspec.yaml is empty', () {
     final Directory projectDir = writeProject('');
     expect(() => getDependencies(projectDir), throwsA(isA<ToolExit>()));
   });
 
-  testWithoutContext('does not throw if project pubspec.yaml has no dependencies', () {
+  test('does not throw if project pubspec.yaml has no dependencies', () {
     final Directory projectDir = writeProject('name: my_app\n');
     expect(() => getDependencies(projectDir), returnsNormally);
     expect(getDependencies(projectDir), isEmpty);
   });
 
-  testWithoutContext('throws ToolExit if project pubspec.yaml is malformed', () {
+  test('throws ToolExit if project pubspec.yaml is malformed', () {
     final Directory projectDir = writeProject('malformed: yaml: check');
     expect(() => getDependencies(projectDir), throwsA(isA<ToolExit>()));
   });

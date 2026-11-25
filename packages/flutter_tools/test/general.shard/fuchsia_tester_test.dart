@@ -28,7 +28,7 @@ import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
 
 void main() {
-  testWithoutContext(
+  test(
     'ToolDependencies.bootstrap routes cache and artifacts under overridden flutterRoot',
     () async {
       const flutterRoot = '/fuchsia_temp_root';
@@ -52,76 +52,72 @@ void main() {
     },
   );
 
-  testWithoutContext(
-    'fuchsia_tester.run executes hermetically without an ambient AppContext zone',
-    () async {
-      final fs = MemoryFileSystem.test();
-      final artifacts = Artifacts.test(fileSystem: fs);
-      final toolContext = FakeToolContext(
-        artifacts: artifacts,
-        fs: fs,
-        platform: FakePlatform(numberOfProcessors: 4),
-      );
-      final testWrapper = _FakeTestWrapper();
+  test('fuchsia_tester.run executes hermetically without an ambient AppContext zone', () async {
+    final fs = MemoryFileSystem.test();
+    final artifacts = Artifacts.test(fileSystem: fs);
+    final toolContext = FakeToolContext(
+      artifacts: artifacts,
+      fs: fs,
+      platform: FakePlatform(numberOfProcessors: 4),
+    );
+    final testWrapper = _FakeTestWrapper();
 
-      final Directory workDir = fs.currentDirectory.childDirectory('fuchsia_test');
-      final File packagesFile =
-          workDir.childDirectory('.dart_tool').childFile('package_config.json')
-            ..createSync(recursive: true);
-      final File shellFile = workDir.childFile('flutter_tester')..createSync(recursive: true);
-      final Directory sdkRootDir = workDir.childDirectory('sdk_root')..createSync(recursive: true);
-      final File strongDillFile = sdkRootDir.childFile('platform_strong.dill')..createSync();
-      final File icudtlFile = workDir.childFile('icudtl.dat')..createSync();
-      final File testSourceFile = workDir.childFile('widget_test.dart')..createSync();
-      final File testDillFile = workDir.childFile('widget_test.dart.dill')..createSync();
-      final File testsManifestFile = workDir.childFile('tests.json')
-        ..writeAsStringSync(
-          jsonEncode(<Map<String, String>>[
-            <String, String>{'source': testSourceFile.path, 'dill': testDillFile.path},
-          ]),
-        );
-
-      await fuchsia_tester.run(
-        _testerArgs(
-          icudtl: icudtlFile.path,
-          packages: packagesFile.path,
-          sdkRoot: sdkRootDir.path,
-          shell: shellFile.path,
-          tests: testsManifestFile.path,
-        ),
-        toolContext: toolContext,
-        testWrapper: testWrapper,
-      );
-
-      final Link testerLink = fs.link(artifacts.getArtifactPath(Artifact.flutterTester));
-      expect(testerLink.existsSync(), isTrue);
-      expect(testerLink.targetSync(), fs.path.absolute(shellFile.path));
-
-      final Directory patchedSdkDir = fs.directory(
-        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-      );
-      expect(
-        fs.link(patchedSdkDir.childFile('platform_strong.dill').path).targetSync(),
-        strongDillFile.path,
-      );
-      expect(
-        fs.link(patchedSdkDir.childFile('platform.dill').path).targetSync(),
-        'platform_strong.dill',
-      );
-
-      expect(testWrapper.registeredRuntimes, contains(Runtime.vm));
-      expect(
-        testWrapper.lastArgs,
-        containsAll(<String>[
-          '--concurrency=2',
-          '--chain-stack-traces',
-          Uri.file(testSourceFile.resolveSymbolicLinksSync()).toString(),
+    final Directory workDir = fs.currentDirectory.childDirectory('fuchsia_test');
+    final File packagesFile = workDir.childDirectory('.dart_tool').childFile('package_config.json')
+      ..createSync(recursive: true);
+    final File shellFile = workDir.childFile('flutter_tester')..createSync(recursive: true);
+    final Directory sdkRootDir = workDir.childDirectory('sdk_root')..createSync(recursive: true);
+    final File strongDillFile = sdkRootDir.childFile('platform_strong.dill')..createSync();
+    final File icudtlFile = workDir.childFile('icudtl.dat')..createSync();
+    final File testSourceFile = workDir.childFile('widget_test.dart')..createSync();
+    final File testDillFile = workDir.childFile('widget_test.dart.dill')..createSync();
+    final File testsManifestFile = workDir.childFile('tests.json')
+      ..writeAsStringSync(
+        jsonEncode(<Map<String, String>>[
+          <String, String>{'source': testSourceFile.path, 'dill': testDillFile.path},
         ]),
       );
-    },
-  );
 
-  testWithoutContext(
+    await fuchsia_tester.run(
+      _testerArgs(
+        icudtl: icudtlFile.path,
+        packages: packagesFile.path,
+        sdkRoot: sdkRootDir.path,
+        shell: shellFile.path,
+        tests: testsManifestFile.path,
+      ),
+      toolContext: toolContext,
+      testWrapper: testWrapper,
+    );
+
+    final Link testerLink = fs.link(artifacts.getArtifactPath(Artifact.flutterTester));
+    expect(testerLink.existsSync(), isTrue);
+    expect(testerLink.targetSync(), fs.path.absolute(shellFile.path));
+
+    final Directory patchedSdkDir = fs.directory(
+      artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+    );
+    expect(
+      fs.link(patchedSdkDir.childFile('platform_strong.dill').path).targetSync(),
+      strongDillFile.path,
+    );
+    expect(
+      fs.link(patchedSdkDir.childFile('platform.dill').path).targetSync(),
+      'platform_strong.dill',
+    );
+
+    expect(testWrapper.registeredRuntimes, contains(Runtime.vm));
+    expect(
+      testWrapper.lastArgs,
+      containsAll(<String>[
+        '--concurrency=2',
+        '--chain-stack-traces',
+        Uri.file(testSourceFile.resolveSymbolicLinksSync()).toString(),
+      ]),
+    );
+  });
+
+  test(
     'fuchsia_tester.run collects coverage hermetically using ToolContext.projectFactory',
     () async {
       const appName = 'fuchsia_coverage_app';
@@ -214,70 +210,64 @@ void main() {
     },
   );
 
-  testWithoutContext(
-    'fuchsia_tester.run throws ToolExit when shell binary is not a file',
-    () async {
-      final fs = MemoryFileSystem.test();
-      final toolContext = FakeToolContext(
-        artifacts: Artifacts.test(fileSystem: fs),
-        fs: fs,
-      );
-      final Directory workDir = fs.currentDirectory.childDirectory('invalid_inputs')
-        ..createSync(recursive: true);
-      final File packagesFile = workDir.childFile('package_config.json')..createSync();
-      final Directory shellAsDir = workDir.childDirectory('not_a_file')..createSync();
-      final Directory sdkRootDir = workDir.childDirectory('sdk_root')..createSync();
-      final File icudtlFile = workDir.childFile('icudtl.dat')..createSync();
-      final File testsManifestFile = workDir.childFile('tests.json')..writeAsStringSync('[]');
+  test('fuchsia_tester.run throws ToolExit when shell binary is not a file', () async {
+    final fs = MemoryFileSystem.test();
+    final toolContext = FakeToolContext(
+      artifacts: Artifacts.test(fileSystem: fs),
+      fs: fs,
+    );
+    final Directory workDir = fs.currentDirectory.childDirectory('invalid_inputs')
+      ..createSync(recursive: true);
+    final File packagesFile = workDir.childFile('package_config.json')..createSync();
+    final Directory shellAsDir = workDir.childDirectory('not_a_file')..createSync();
+    final Directory sdkRootDir = workDir.childDirectory('sdk_root')..createSync();
+    final File icudtlFile = workDir.childFile('icudtl.dat')..createSync();
+    final File testsManifestFile = workDir.childFile('tests.json')..writeAsStringSync('[]');
 
-      await expectLater(
-        fuchsia_tester.run(
-          _testerArgs(
-            icudtl: icudtlFile.path,
-            packages: packagesFile.path,
-            sdkRoot: sdkRootDir.path,
-            shell: shellAsDir.path,
-            tests: testsManifestFile.path,
-          ),
-          toolContext: toolContext,
-          testWrapper: _FakeTestWrapper(),
+    await expectLater(
+      fuchsia_tester.run(
+        _testerArgs(
+          icudtl: icudtlFile.path,
+          packages: packagesFile.path,
+          sdkRoot: sdkRootDir.path,
+          shell: shellAsDir.path,
+          tests: testsManifestFile.path,
         ),
-        throwsToolExit(message: 'Cannot find Flutter shell at'),
-      );
-    },
-  );
+        toolContext: toolContext,
+        testWrapper: _FakeTestWrapper(),
+      ),
+      throwsToolExit(message: 'Cannot find Flutter shell at'),
+    );
+  });
 
-  testWithoutContext(
-    'fuchsia_tester.run throws ToolExit when sdk-root directory is missing',
-    () async {
-      final fs = MemoryFileSystem.test();
-      final toolContext = FakeToolContext(
-        artifacts: Artifacts.test(fileSystem: fs),
-        fs: fs,
-      );
-      final Directory workDir = fs.currentDirectory.childDirectory('invalid_inputs')
-        ..createSync(recursive: true);
-      final File packagesFile = workDir.childFile('package_config.json')..createSync();
-      final File shellFile = workDir.childFile('flutter_tester')..createSync();
-      final File icudtlFile = workDir.childFile('icudtl.dat')..createSync();
-      final File testsManifestFile = workDir.childFile('tests.json')..writeAsStringSync('[]');
+  test('fuchsia_tester.run throws ToolExit when sdk-root directory is missing', () async {
+    final fs = MemoryFileSystem.test();
+    final toolContext = FakeToolContext(
+      artifacts: Artifacts.test(fileSystem: fs),
+      fs: fs,
+    );
+    final Directory workDir = fs.currentDirectory.childDirectory('invalid_inputs')
+      ..createSync(recursive: true);
+    final File packagesFile = workDir.childFile('package_config.json')..createSync();
+    final File shellFile = workDir.childFile('flutter_tester')..createSync();
+    final File icudtlFile = workDir.childFile('icudtl.dat')..createSync();
+    final File testsManifestFile = workDir.childFile('tests.json')..writeAsStringSync('[]');
 
-      await expectLater(
-        fuchsia_tester.run(
-          _testerArgs(
-            icudtl: icudtlFile.path,
-            packages: packagesFile.path,
-            sdkRoot: workDir.childDirectory('missing_sdk').path,
-            shell: shellFile.path,
-            tests: testsManifestFile.path,
-          ),
-          toolContext: toolContext,
-          testWrapper: _FakeTestWrapper(),
+    await expectLater(
+      fuchsia_tester.run(
+        _testerArgs(
+          icudtl: icudtlFile.path,
+          packages: packagesFile.path,
+          sdkRoot: workDir.childDirectory('missing_sdk').path,
+          shell: shellFile.path,
+          tests: testsManifestFile.path,
         ),
-        throwsToolExit(message: 'Cannot find SDK files at'),
-      );
-    },
-  );
+        toolContext: toolContext,
+        testWrapper: _FakeTestWrapper(),
+      ),
+      throwsToolExit(message: 'Cannot find SDK files at'),
+    );
+  });
 }
 
 List<String> _testerArgs({
