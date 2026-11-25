@@ -246,6 +246,18 @@ class Canvas {
                      Point position,
                      const Paint& paint);
 
+  /// @brief Get the path that DrawTextFrame renders `text_frame` with instead
+  ///        of the glyph atlas.
+  ///
+  /// Text that is too large under `transform` is rendered as a path when one
+  /// is available. Such text doesn't need to be added to the glyph atlas.
+  ///
+  /// @return The path, or `std::nullopt` if `text_frame` is rendered with the
+  ///         glyph atlas.
+  static std::optional<flutter::DlPath> GetTextFramePath(
+      const TextFrame& text_frame,
+      const Matrix& transform);
+
   void DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
                     BlendMode blend_mode,
                     const Paint& paint);

@@ -2244,20 +2244,32 @@ bool Canvas::AttemptBlurredTextOptimization(
 // fidelity rendering. This is a somewhat arbitrary cutoff
 static constexpr Scalar kMaxTextScale = 250;
 
+std::optional<flutter::DlPath> Canvas::GetTextFramePath(
+    const TextFrame& text_frame,
+    const Matrix& transform) {
+  Scalar max_scale = transform.GetMaxBasisLengthXY();
+  if (max_scale * text_frame.GetRuns()[0].GetFont().GetMetrics().point_size <=
+      kMaxTextScale) {
+    return std::nullopt;
+  }
+  absl::StatusOr<flutter::DlPath> path = text_frame.GetPath();
+  if (!path.ok()) {
+    return std::nullopt;
+  }
+  return std::move(path).value();
+}
+
 void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
                            Point position,
                            const Paint& paint) {
-  Scalar max_scale = GetCurrentTransform().GetMaxBasisLengthXY();
-  if (max_scale * text_frame->GetRuns()[0].GetFont().GetMetrics().point_size >
-      kMaxTextScale) {
-    absl::StatusOr<flutter::DlPath> path = text_frame->GetPath();
-    if (path.ok()) {
-      Save(1);
-      Concat(Matrix::MakeTranslation(position));
-      DrawPath(path.value(), paint);
-      Restore();
-      return;
-    }
+  std::optional<flutter::DlPath> path =
+      GetTextFramePath(*text_frame, GetCurrentTransform());
+  if (path.has_value()) {
+    Save(1);
+    Concat(Matrix::MakeTranslation(position));
+    DrawPath(path.value(), paint);
+    Restore();
+    return;
   }
 
   Entity entity;
