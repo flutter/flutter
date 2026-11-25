@@ -45,7 +45,7 @@ FlutterReservedRegionInfo Occlusion(bool active) {
 
 - (void)testPartiallyOpenDivisionBecomesHalfOpenedFold {
   FlutterDisplayFeatureList features =
-      FlutterDisplayFeaturesFromRegions(FlutterHingeStatusPartiallyOpen, {Division(40, true)});
+      FLTDisplayFeaturesFromRegions(FlutterHingeStatusPartiallyOpen, {Division(40, true)});
 
   XCTAssertEqual(features.types.size(), 1u);
   XCTAssertEqual(features.types[0], FlutterDisplayFeatureTypeFold);
@@ -63,13 +63,13 @@ FlutterReservedRegionInfo Occlusion(bool active) {
   // still reads active, and nothing follows to correct it. A 40pt postureFlat
   // fold would split every dialog on a device lying flat.
   FlutterDisplayFeatureList features =
-      FlutterDisplayFeaturesFromRegions(FlutterHingeStatusFullyOpen, {Division(40, true)});
+      FLTDisplayFeaturesFromRegions(FlutterHingeStatusFullyOpen, {Division(40, true)});
 
   XCTAssertTrue(features.types.empty());
 }
 
 - (void)testFullyOpenStillReportsAnActiveOcclusion {
-  FlutterDisplayFeatureList features = FlutterDisplayFeaturesFromRegions(
+  FlutterDisplayFeatureList features = FLTDisplayFeaturesFromRegions(
       FlutterHingeStatusFullyOpen, {Division(40, true), Occlusion(true)});
 
   XCTAssertEqual(features.types.size(), 1u);
@@ -79,7 +79,7 @@ FlutterReservedRegionInfo Occlusion(bool active) {
 - (void)testClosedReportsNothing {
   // The view is on the cover display, which has no fold, and dart:ui has no
   // closed posture to describe it with.
-  FlutterDisplayFeatureList features = FlutterDisplayFeaturesFromRegions(
+  FlutterDisplayFeatureList features = FLTDisplayFeaturesFromRegions(
       FlutterHingeStatusClosed, {Division(40, true), Occlusion(true)});
 
   XCTAssertTrue(features.bounds.empty());
@@ -89,7 +89,7 @@ FlutterReservedRegionInfo Occlusion(bool active) {
 
 - (void)testInactiveDivisionIsDropped {
   FlutterDisplayFeatureList features =
-      FlutterDisplayFeaturesFromRegions(FlutterHingeStatusFullyOpen, {Division(40, false)});
+      FLTDisplayFeaturesFromRegions(FlutterHingeStatusFullyOpen, {Division(40, false)});
 
   XCTAssertTrue(features.types.empty());
 }
@@ -99,14 +99,14 @@ FlutterReservedRegionInfo Occlusion(bool active) {
   // DisplayFeatureSubScreen.avoidBounds treats a zero-width feature as an
   // obstruction when its state is postureHalfOpened.
   FlutterDisplayFeatureList features =
-      FlutterDisplayFeaturesFromRegions(FlutterHingeStatusPartiallyOpen, {Division(0, true)});
+      FLTDisplayFeaturesFromRegions(FlutterHingeStatusPartiallyOpen, {Division(0, true)});
 
   XCTAssertTrue(features.types.empty());
 }
 
 - (void)testOcclusionBecomesCutoutWithUnknownState {
   FlutterDisplayFeatureList features =
-      FlutterDisplayFeaturesFromRegions(FlutterHingeStatusPartiallyOpen, {Occlusion(true)});
+      FLTDisplayFeaturesFromRegions(FlutterHingeStatusPartiallyOpen, {Occlusion(true)});
 
   XCTAssertEqual(features.types.size(), 1u);
   XCTAssertEqual(features.types[0], FlutterDisplayFeatureTypeCutout);
@@ -116,13 +116,13 @@ FlutterReservedRegionInfo Occlusion(bool active) {
 
 - (void)testInactiveOcclusionIsDropped {
   FlutterDisplayFeatureList features =
-      FlutterDisplayFeaturesFromRegions(FlutterHingeStatusFullyOpen, {Occlusion(false)});
+      FLTDisplayFeaturesFromRegions(FlutterHingeStatusFullyOpen, {Occlusion(false)});
 
   XCTAssertTrue(features.types.empty());
 }
 
 - (void)testMixedRegionsKeepOrderAndParallelVectors {
-  FlutterDisplayFeatureList features = FlutterDisplayFeaturesFromRegions(
+  FlutterDisplayFeatureList features = FLTDisplayFeaturesFromRegions(
       FlutterHingeStatusPartiallyOpen, {Division(40, true), Occlusion(true), Division(0, true)});
 
   XCTAssertEqual(features.types.size(), 2u);
@@ -134,7 +134,7 @@ FlutterReservedRegionInfo Occlusion(bool active) {
 
 - (void)testUnknownStatusReportsNoFold {
   FlutterDisplayFeatureList features =
-      FlutterDisplayFeaturesFromRegions(FlutterHingeStatusUnknown, {Division(40, true)});
+      FLTDisplayFeaturesFromRegions(FlutterHingeStatusUnknown, {Division(40, true)});
 
   XCTAssertTrue(features.types.empty());
 }
@@ -160,8 +160,8 @@ FlutterReservedRegionInfo Occlusion(bool active) {
   id mockVC = OCMPartialMock([self viewControllerWithMockEngine]);
   OCMExpect([mockVC updateViewportMetricsIfNeeded]);
 
-  [mockVC applyDisplayFeatures:FlutterDisplayFeaturesFromRegions(FlutterHingeStatusPartiallyOpen,
-                                                                 {Division(40, true)})];
+  [mockVC applyDisplayFeatures:FLTDisplayFeaturesFromRegions(FlutterHingeStatusPartiallyOpen,
+                                                             {Division(40, true)})];
 
   OCMVerifyAll(mockVC);
 }
@@ -169,7 +169,7 @@ FlutterReservedRegionInfo Occlusion(bool active) {
 - (void)testApplyingUnchangedDisplayFeaturesDoesNotResend {
   id mockVC = OCMPartialMock([self viewControllerWithMockEngine]);
   FlutterDisplayFeatureList features =
-      FlutterDisplayFeaturesFromRegions(FlutterHingeStatusPartiallyOpen, {Division(40, true)});
+      FLTDisplayFeaturesFromRegions(FlutterHingeStatusPartiallyOpen, {Division(40, true)});
   [mockVC applyDisplayFeatures:features];
 
   // Layout passes call refresh often; identical features must not flood the
@@ -182,14 +182,14 @@ FlutterReservedRegionInfo Occlusion(bool active) {
 
 - (void)testApplyingEmptyAfterNonEmptyResendsToClear {
   id mockVC = OCMPartialMock([self viewControllerWithMockEngine]);
-  [mockVC applyDisplayFeatures:FlutterDisplayFeaturesFromRegions(FlutterHingeStatusPartiallyOpen,
-                                                                 {Division(40, true)})];
+  [mockVC applyDisplayFeatures:FLTDisplayFeaturesFromRegions(FlutterHingeStatusPartiallyOpen,
+                                                             {Division(40, true)})];
 
   // Folding shut: the platform reports closed and the features must go away,
   // which is a change and therefore has to be sent.
   OCMExpect([mockVC updateViewportMetricsIfNeeded]);
-  [mockVC applyDisplayFeatures:FlutterDisplayFeaturesFromRegions(FlutterHingeStatusClosed,
-                                                                 {Division(40, true)})];
+  [mockVC applyDisplayFeatures:FLTDisplayFeaturesFromRegions(FlutterHingeStatusClosed,
+                                                             {Division(40, true)})];
 
   OCMVerifyAll(mockVC);
 }

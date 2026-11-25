@@ -13,26 +13,32 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// Mirrors the index order of `dart:ui`'s `DisplayFeatureType`.
 typedef NS_ENUM(NSInteger, FlutterDisplayFeatureType) {
+  // NOLINTBEGIN(readability-identifier-naming)
   FlutterDisplayFeatureTypeUnknown = 0,
   FlutterDisplayFeatureTypeFold = 1,
   FlutterDisplayFeatureTypeHinge = 2,
   FlutterDisplayFeatureTypeCutout = 3,
+  // NOLINTEND(readability-identifier-naming)
 };
 
 /// Mirrors the index order of `dart:ui`'s `DisplayFeatureState`.
 typedef NS_ENUM(NSInteger, FlutterDisplayFeatureState) {
+  // NOLINTBEGIN(readability-identifier-naming)
   FlutterDisplayFeatureStateUnknown = 0,
   FlutterDisplayFeatureStatePostureFlat = 1,
   FlutterDisplayFeatureStatePostureHalfOpened = 2,
+  // NOLINTEND(readability-identifier-naming)
 };
 
 /// Mirrors the raw values of `UIHingeStatus` (iOS 27.1), so the mapping below
 /// can be exercised without the SDK that declares the real enum.
 typedef NS_ENUM(NSInteger, FlutterHingeStatus) {
+  // NOLINTBEGIN(readability-identifier-naming)
   FlutterHingeStatusUnknown = 0,
   FlutterHingeStatusClosed = 1,
   FlutterHingeStatusPartiallyOpen = 2,
   FlutterHingeStatusFullyOpen = 3,
+  // NOLINTEND(readability-identifier-naming)
 };
 
 /// A reserved region as read from `UIView.reservedRegions(kind:options:)`,
@@ -77,7 +83,7 @@ struct FlutterDisplayFeatureList {
 /// * Occlusions become `cutout` with state `unknown`, which `dart:ui` asserts.
 /// * Divisions become `fold`, not `hinge`: the inner display is one continuous
 ///   panel with no physical gap between two separate screens.
-FlutterDisplayFeatureList FlutterDisplayFeaturesFromRegions(
+FlutterDisplayFeatureList FLTDisplayFeaturesFromRegions(
     FlutterHingeStatus status,
     const std::vector<FlutterReservedRegionInfo>& regions);
 

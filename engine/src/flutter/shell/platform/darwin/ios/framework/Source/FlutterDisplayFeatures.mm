@@ -8,7 +8,7 @@
 
 FLUTTER_ASSERT_ARC
 
-FlutterDisplayFeatureList FlutterDisplayFeaturesFromRegions(
+FlutterDisplayFeatureList FLTDisplayFeaturesFromRegions(
     FlutterHingeStatus status,
     const std::vector<FlutterReservedRegionInfo>& regions) {
   FlutterDisplayFeatureList result;
@@ -134,7 +134,7 @@ FlutterDisplayFeatureList FlutterDisplayFeaturesFromRegions(
   // cannot release the block while it is running.
   FlutterDisplayFeaturesUpdateBlock onUpdate = self.onUpdate;
   if (onUpdate) {
-    onUpdate(FlutterDisplayFeaturesFromRegions(self.status, regions));
+    onUpdate(FLTDisplayFeaturesFromRegions(self.status, regions));
   }
 }
 
