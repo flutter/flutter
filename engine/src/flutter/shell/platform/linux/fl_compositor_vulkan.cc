@@ -78,15 +78,20 @@ static gboolean present_layers(FlCompositor* compositor,
   const bool gpu_composed =
       count > 1 && fl_vulkan_composition_draw(&self->composition, layers, count,
                                               width, height, &composed);
-  if (try_export &&
-      (gpu_composed ||
-       (count == 1 && layers[0]->offset.x == 0 && layers[0]->offset.y == 0 &&
-        layers[0]->size.width == width && layers[0]->size.height == height))) {
+  const FlutterBackingStore* frame = nullptr;
+  if (gpu_composed) {
+    frame = &composed;
+  } else if (count == 1 && layers[0]->offset.x == 0 &&
+             layers[0]->offset.y == 0 && layers[0]->size.width == width &&
+             layers[0]->size.height == height &&
+             fl_vulkan_backing_store_matches_size(layers[0]->backing_store,
+                                                  width, height)) {
+    frame = layers[0]->backing_store;
+  }
+  if (try_export && frame) {
     g_autoptr(GError) error = nullptr;
-    auto snapshot = fl_vulkan_backing_store_snapshot(
-        gpu_composed ? &composed : layers[0]->backing_store, &error);
-    if (snapshot && snapshot->descriptor().width == width &&
-        snapshot->descriptor().height == height) {
+    auto snapshot = fl_vulkan_backing_store_snapshot(frame, &error);
+    if (snapshot) {
       g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&self->frame_mutex);
       g_clear_pointer(&self->pixels, g_bytes_unref);
       g_clear_object(&self->texture);
@@ -107,10 +112,10 @@ static gboolean present_layers(FlCompositor* compositor,
           error ? error->message : "DMA-BUF export unavailable");
     }
   }
-  if (gpu_composed) {
+  if (frame) {
     g_autoptr(GError) error = nullptr;
     GBytes* rgba =
-        fl_vulkan_backing_store_read_pixels(&composed, &width, &height, &error);
+        fl_vulkan_backing_store_read_pixels(frame, &width, &height, &error);
     if (!rgba) {
       g_warning("Vulkan composite readback failed: %s", error->message);
       return FALSE;

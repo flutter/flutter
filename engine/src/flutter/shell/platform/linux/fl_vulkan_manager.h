@@ -45,6 +45,10 @@ G_END_DECLS
 flutter::FlVulkanDeviceContext fl_vulkan_manager_get_device_context(
     FlVulkanManager* self);
 
+bool fl_vulkan_backing_store_matches_size(const FlutterBackingStore* store,
+                                          size_t width,
+                                          size_t height);
+
 // Raster thread: returns a completed immutable GPU snapshot when the device
 // supports DMA-BUF export, or nullptr to select the readback fallback.
 std::shared_ptr<flutter::FlVulkanSnapshot> fl_vulkan_backing_store_snapshot(

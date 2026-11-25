@@ -655,6 +655,13 @@ GBytes* fl_vulkan_backing_store_read_pixels(const FlutterBackingStore* store,
   return bytes;
 }
 
+bool fl_vulkan_backing_store_matches_size(const FlutterBackingStore* store,
+                                          size_t width,
+                                          size_t height) {
+  const auto* frame = static_cast<const Frame*>(store->vulkan.user_data);
+  return frame->width == width && frame->height == height;
+}
+
 std::shared_ptr<flutter::FlVulkanSnapshot> fl_vulkan_backing_store_snapshot(
     const FlutterBackingStore* store,
     GError** error) {
