@@ -277,6 +277,33 @@ static void BM_DlRegion_GetRects(benchmark::State& state, int maxSize) {
   RunGetRectsBenchmark<DlRegionAdapter>(state, maxSize);
 }
 
+static void BM_DlRegion_GetRects_Deband(benchmark::State& state,
+                                        int numRects,
+                                        int maxSize) {
+  std::seed_seq seed{2, 1, 3};
+  std::mt19937 rng(seed);
+
+  std::uniform_int_distribution pos(0, 4000);
+  std::uniform_int_distribution size(1, maxSize);
+
+  std::vector<DlIRect> rects;
+  rects.reserve(numRects);
+  for (int i = 0; i < numRects; ++i) {
+    int32_t x = pos(rng);
+    int32_t y = pos(rng);
+    int32_t w = size(rng);
+    int32_t h = size(rng);
+    rects.push_back(DlIRect::MakeXYWH(x, y, w, h));
+  }
+
+  DlRegion region(rects);
+
+  while (state.KeepRunning()) {
+    auto vec2 = region.getRects(true);
+    benchmark::DoNotOptimize(vec2);
+  }
+}
+
 static void BM_SkRegion_GetRects(benchmark::State& state, int maxSize) {
   RunGetRectsBenchmark<SkRegionAdapter>(state, maxSize);
 }
@@ -715,6 +742,17 @@ BENCHMARK_CAPTURE(BM_SkRegion_GetRects, Medium, 400)
 BENCHMARK_CAPTURE(BM_DlRegion_GetRects, Large, 1500)
     ->Unit(benchmark::kMicrosecond);
 BENCHMARK_CAPTURE(BM_SkRegion_GetRects, Large, 1500)
+    ->Unit(benchmark::kMicrosecond);
+
+BENCHMARK_CAPTURE(BM_DlRegion_GetRects_Deband, FewRects, 8, 400)
+    ->Unit(benchmark::kNanosecond);
+BENCHMARK_CAPTURE(BM_DlRegion_GetRects_Deband, Tiny, 2000, 30)
+    ->Unit(benchmark::kMicrosecond);
+BENCHMARK_CAPTURE(BM_DlRegion_GetRects_Deband, Small, 2000, 100)
+    ->Unit(benchmark::kMicrosecond);
+BENCHMARK_CAPTURE(BM_DlRegion_GetRects_Deband, Medium, 2000, 400)
+    ->Unit(benchmark::kMicrosecond);
+BENCHMARK_CAPTURE(BM_DlRegion_GetRects_Deband, Large, 2000, 1500)
     ->Unit(benchmark::kMicrosecond);
 
 }  // namespace flutter

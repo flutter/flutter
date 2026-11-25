@@ -166,6 +166,102 @@ TEST(DisplayListRegion, Deband) {
       DlIRect::MakeXYWH(90, 20, 50, 30),
   };
   EXPECT_EQ(rects_without_deband, expected_without_deband);
+
+  // Single-scanline multi-span region (fast path).
+  DlRegion single_band({
+      DlIRect::MakeXYWH(0, 0, 10, 20),
+      DlIRect::MakeXYWH(20, 0, 10, 20),
+  });
+  EXPECT_EQ(single_band.getRects(true),
+            (std::vector<DlIRect>{DlIRect::MakeXYWH(0, 0, 10, 20),
+                                  DlIRect::MakeXYWH(20, 0, 10, 20)}));
+
+  // Staggered columns exercising new spans left of active spans, exact
+  // continuation, and trailing active-span flushes.
+  DlRegion staggered({
+      DlIRect::MakeLTRB(20, 0, 40, 20),
+      DlIRect::MakeLTRB(60, 0, 80, 10),
+      DlIRect::MakeLTRB(0, 10, 15, 20),
+  });
+  EXPECT_EQ(staggered.getRects(true), (std::vector<DlIRect>{
+                                          DlIRect::MakeLTRB(60, 0, 80, 10),
+                                          DlIRect::MakeLTRB(0, 10, 15, 20),
+                                          DlIRect::MakeLTRB(20, 0, 40, 20),
+                                      }));
+
+  // Wide multi-span region exceeding the inline active-buffer threshold (>16).
+  std::vector<DlIRect> wide_input;
+  std::vector<DlIRect> wide_expected;
+  for (int i = 0; i < 20; ++i) {
+    int32_t left = i * 20;
+    if (i % 2 == 0) {
+      wide_input.push_back(DlIRect::MakeLTRB(left, 0, left + 10, 20));
+    } else {
+      wide_input.push_back(DlIRect::MakeLTRB(left, 0, left + 10, 10));
+      wide_expected.push_back(DlIRect::MakeLTRB(left, 0, left + 10, 10));
+    }
+  }
+  for (int i = 0; i < 20; i += 2) {
+    int32_t left = i * 20;
+    wide_expected.push_back(DlIRect::MakeLTRB(left, 0, left + 10, 20));
+  }
+  DlRegion wide_region(wide_input);
+  EXPECT_EQ(wide_region.getRects(true), wide_expected);
+}
+
+TEST(DisplayListRegion, DebandOrderParity) {
+  auto reference_deband = [](const std::vector<DlIRect>& non_debanded) {
+    std::vector<DlIRect> rects;
+    size_t previous_span_end = 0;
+    bool has_top = false;
+    int32_t cur_top = 0;
+    for (const auto& r : non_debanded) {
+      if (!has_top || cur_top != r.GetTop()) {
+        previous_span_end = rects.size();
+        cur_top = r.GetTop();
+        has_top = true;
+      }
+      int32_t top = r.GetTop();
+      auto iter = rects.begin() + previous_span_end;
+      while (iter != rects.begin()) {
+        --iter;
+        if (iter->GetBottom() < top) {
+          break;
+        }
+        if (iter->GetLeft() == r.GetLeft() &&
+            iter->GetRight() == r.GetRight()) {
+          top = iter->GetTop();
+          rects.erase(iter);
+          --previous_span_end;
+          break;
+        }
+      }
+      rects.push_back(
+          DlIRect::MakeLTRB(r.GetLeft(), top, r.GetRight(), r.GetBottom()));
+    }
+    return rects;
+  };
+
+  std::seed_seq seed{42, 7, 13};
+  std::mt19937 rng(seed);
+  std::uniform_int_distribution<int32_t> pos(0, 60);
+  std::uniform_int_distribution<int32_t> size(1, 20);
+
+  for (int trial = 0; trial < 100; ++trial) {
+    std::vector<DlIRect> input;
+    input.reserve(40);
+    for (int i = 0; i < 40; ++i) {
+      int32_t x = pos(rng);
+      int32_t y = pos(rng);
+      int32_t w = size(rng);
+      int32_t h = size(rng);
+      input.push_back(DlIRect::MakeXYWH(x, y, w, h));
+    }
+    DlRegion region(input);
+    auto non_debanded = region.getRects(false);
+    auto debanded = region.getRects(true);
+    EXPECT_EQ(debanded, reference_deband(non_debanded));
+  }
 }
 
 TEST(DisplayListRegion, Intersects1) {

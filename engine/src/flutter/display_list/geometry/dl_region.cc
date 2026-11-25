@@ -4,6 +4,9 @@
 
 #include "flutter/display_list/geometry/dl_region.h"
 
+#include <algorithm>
+#include <array>
+
 #include "flutter/fml/logging.h"
 
 namespace flutter {
@@ -567,42 +570,97 @@ std::vector<DlIRect> DlRegion::getRects(bool deband) const {
   }
 
   size_t rect_count = 0;
-  size_t previous_span_end = 0;
+  size_t max_line_spans = 0;
   for (const auto& line : lines_) {
-    rect_count += span_buffer_.getChunkSize(line.chunk_handle);
+    size_t chunk_size = span_buffer_.getChunkSize(line.chunk_handle);
+    rect_count += chunk_size;
+    max_line_spans = std::max(max_line_spans, chunk_size);
   }
   rects.reserve(rect_count);
 
+  if (!deband || lines_.size() == 1) {
+    for (const auto& line : lines_) {
+      const Span *span_begin, *span_end;
+      span_buffer_.getSpans(line.chunk_handle, span_begin, span_end);
+      for (const auto* span = span_begin; span < span_end; ++span) {
+        rects.push_back(
+            DlIRect::MakeLTRB(span->left, line.top, span->right, line.bottom));
+      }
+    }
+    return rects;
+  }
+
+  // Merge vertically contiguous spans with identical [left, right) bounds in
+  // O(N) time using a two-pointer sweep over the active previous-band spans,
+  // emitting rectangles as they terminate to preserve exact (bottom, left)
+  // ordering.
+  constexpr size_t kInlineActiveCapacity = 16;
+  std::array<DlIRect, kInlineActiveCapacity> inline_buf_a;
+  std::array<DlIRect, kInlineActiveCapacity> inline_buf_b;
+  std::vector<DlIRect> heap_buf;
+
+  DlIRect* active_buf = inline_buf_a.data();
+  DlIRect* next_buf = inline_buf_b.data();
+  if (max_line_spans > kInlineActiveCapacity) {
+    heap_buf.resize(max_line_spans * 2);
+    active_buf = heap_buf.data();
+    next_buf = active_buf + max_line_spans;
+  }
+  size_t active_size = 0;
+  int32_t prev_bottom = 0;
+
+  auto flush_range = [&rects](const DlIRect* begin, const DlIRect* end) {
+    for (const DlIRect* it = begin; it != end; ++it) {
+      rects.push_back(*it);
+    }
+  };
+
   for (const auto& line : lines_) {
+    if (active_size > 0 && prev_bottom != line.top) {
+      flush_range(active_buf, active_buf + active_size);
+      active_size = 0;
+    }
+
     const Span *span_begin, *span_end;
     span_buffer_.getSpans(line.chunk_handle, span_begin, span_end);
-    for (const auto* span = span_begin; span < span_end; ++span) {
-      int32_t top = line.top;
-      if (deband) {
-        auto iter = rects.begin() + previous_span_end;
-        // If there is rectangle previously in rects on which this one is a
-        // vertical continuation, remove the previous rectangle and expand
-        // this one vertically to cover the area.
-        while (iter != rects.begin()) {
-          --iter;
-          if (iter->GetBottom() < top) {
-            // Went all the way to previous span line.
-            break;
-          } else if (iter->GetLeft() == span->left &&
-                     iter->GetRight() == span->right) {
-            FML_DCHECK(iter->GetBottom() == top);
-            top = iter->GetTop();
-            rects.erase(iter);
-            --previous_span_end;
-            break;
-          }
-        }
+
+    size_t next_size = 0;
+    const DlIRect* a_it = active_buf;
+    const DlIRect* a_end = active_buf + active_size;
+    const Span* s_it = span_begin;
+
+    while (a_it != a_end && s_it != span_end) {
+      if (a_it->GetLeft() < s_it->left) {
+        rects.push_back(*a_it++);
+        continue;
       }
-      rects.push_back(
-          DlIRect::MakeLTRB(span->left, top, span->right, line.bottom));
+      int32_t top = line.top;
+      if (a_it->GetLeft() == s_it->left) {
+        if (a_it->GetRight() == s_it->right) {
+          top = a_it->GetTop();
+        } else {
+          rects.push_back(*a_it);
+        }
+        ++a_it;
+      }
+      next_buf[next_size++] =
+          DlIRect::MakeLTRB(s_it->left, top, s_it->right, line.bottom);
+      ++s_it;
     }
-    previous_span_end = rects.size();
+
+    flush_range(a_it, a_end);
+    for (; s_it != span_end; ++s_it) {
+      next_buf[next_size++] =
+          DlIRect::MakeLTRB(s_it->left, line.top, s_it->right, line.bottom);
+    }
+
+    FML_DCHECK(next_size <= max_line_spans);
+    std::swap(active_buf, next_buf);
+    active_size = next_size;
+    prev_bottom = line.bottom;
   }
+
+  flush_range(active_buf, active_buf + active_size);
   return rects;
 }
 
