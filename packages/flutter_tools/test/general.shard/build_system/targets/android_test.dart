@@ -33,7 +33,7 @@ void main() {
     artifacts = Artifacts.test();
   });
 
-  testWithoutContext('Android AOT targets has analyticsName', () {
+  test('Android AOT targets has analyticsName', () {
     expect(androidArmProfile.analyticsName, 'android_aot');
   });
 
@@ -122,7 +122,7 @@ void main() {
     );
   });
 
-  testWithoutContext('profile bundle contains expected resources', () async {
+  test('profile bundle contains expected resources', () async {
     final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
@@ -143,7 +143,7 @@ void main() {
     expect(fileSystem.file(fileSystem.path.join('out', 'app.so')).existsSync(), true);
   });
 
-  testWithoutContext('release bundle contains expected resources', () async {
+  test('release bundle contains expected resources', () async {
     final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
@@ -164,7 +164,7 @@ void main() {
     expect(fileSystem.file(fileSystem.path.join('out', 'app.so')).existsSync(), true);
   });
 
-  testWithoutContext('AndroidAot can build provided target platform', () async {
+  test('AndroidAot can build provided target platform', () async {
     processManager = FakeProcessManager.empty();
     final environment = Environment.test(
       fileSystem.currentDirectory,
@@ -201,71 +201,65 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext(
-    'AndroidAot throws ToolExit on Linux arm64 hosts when gen_snapshot is missing',
-    () async {
-      processManager = FakeProcessManager.empty();
-      final environment = Environment.test(
-        fileSystem.currentDirectory,
-        outputDir: fileSystem.directory('out')..createSync(),
-        defines: <String, String>{kBuildMode: 'release'},
-        artifacts: _LinuxArm64GenSnapshotArtifacts(artifacts),
-        featureFlags: TestFeatureFlags(),
-        processManager: processManager,
-        fileSystem: fileSystem,
-        logger: logger,
-      );
-      environment.buildDir.createSync(recursive: true);
-      environment.buildDir.childFile('app.dill').createSync();
-      environment.buildDir.childFile('native_assets.json').createSync();
-      const androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+  test('AndroidAot throws ToolExit on Linux arm64 hosts when gen_snapshot is missing', () async {
+    processManager = FakeProcessManager.empty();
+    final environment = Environment.test(
+      fileSystem.currentDirectory,
+      outputDir: fileSystem.directory('out')..createSync(),
+      defines: <String, String>{kBuildMode: 'release'},
+      artifacts: _LinuxArm64GenSnapshotArtifacts(artifacts),
+      featureFlags: TestFeatureFlags(),
+      processManager: processManager,
+      fileSystem: fileSystem,
+      logger: logger,
+    );
+    environment.buildDir.createSync(recursive: true);
+    environment.buildDir.childFile('app.dill').createSync();
+    environment.buildDir.childFile('native_assets.json').createSync();
+    const androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
 
-      await expectLater(
-        androidAot.build(environment),
-        throwsToolExit(message: 'not supported on Linux arm64 hosts'),
-      );
-      expect(processManager, hasNoRemainingExpectations);
-    },
-  );
+    await expectLater(
+      androidAot.build(environment),
+      throwsToolExit(message: 'not supported on Linux arm64 hosts'),
+    );
+    expect(processManager, hasNoRemainingExpectations);
+  });
 
-  testWithoutContext(
-    'AndroidAot runs gen_snapshot on Linux arm64 hosts when it is present',
-    () async {
-      processManager = FakeProcessManager.empty();
-      final environment = Environment.test(
-        fileSystem.currentDirectory,
-        outputDir: fileSystem.directory('out')..createSync(),
-        defines: <String, String>{kBuildMode: 'release'},
-        artifacts: _LinuxArm64GenSnapshotArtifacts(artifacts),
-        featureFlags: TestFeatureFlags(),
-        processManager: processManager,
-        fileSystem: fileSystem,
-        logger: logger,
-      );
-      fileSystem.file(_LinuxArm64GenSnapshotArtifacts.genSnapshotPath).createSync(recursive: true);
-      processManager.addCommand(
-        FakeCommand(
-          command: <String>[
-            _LinuxArm64GenSnapshotArtifacts.genSnapshotPath,
-            '--deterministic',
-            '--snapshot_kind=app-aot-elf',
-            '--elf=${environment.buildDir.childDirectory('arm64-v8a').childFile('app.so').path}',
-            environment.buildDir.childFile('app.dill').path,
-          ],
-        ),
-      );
-      environment.buildDir.createSync(recursive: true);
-      environment.buildDir.childFile('app.dill').createSync();
-      environment.buildDir.childFile('native_assets.json').createSync();
-      const androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+  test('AndroidAot runs gen_snapshot on Linux arm64 hosts when it is present', () async {
+    processManager = FakeProcessManager.empty();
+    final environment = Environment.test(
+      fileSystem.currentDirectory,
+      outputDir: fileSystem.directory('out')..createSync(),
+      defines: <String, String>{kBuildMode: 'release'},
+      artifacts: _LinuxArm64GenSnapshotArtifacts(artifacts),
+      featureFlags: TestFeatureFlags(),
+      processManager: processManager,
+      fileSystem: fileSystem,
+      logger: logger,
+    );
+    fileSystem.file(_LinuxArm64GenSnapshotArtifacts.genSnapshotPath).createSync(recursive: true);
+    processManager.addCommand(
+      FakeCommand(
+        command: <String>[
+          _LinuxArm64GenSnapshotArtifacts.genSnapshotPath,
+          '--deterministic',
+          '--snapshot_kind=app-aot-elf',
+          '--elf=${environment.buildDir.childDirectory('arm64-v8a').childFile('app.so').path}',
+          environment.buildDir.childFile('app.dill').path,
+        ],
+      ),
+    );
+    environment.buildDir.createSync(recursive: true);
+    environment.buildDir.childFile('app.dill').createSync();
+    environment.buildDir.childFile('native_assets.json').createSync();
+    const androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
 
-      await androidAot.build(environment);
+    await androidAot.build(environment);
 
-      expect(processManager, hasNoRemainingExpectations);
-    },
-  );
+    expect(processManager, hasNoRemainingExpectations);
+  });
 
-  testWithoutContext('AndroidAot provide code size information.', () async {
+  test('AndroidAot provide code size information.', () async {
     processManager = FakeProcessManager.empty();
     final environment = Environment.test(
       fileSystem.currentDirectory,
@@ -304,7 +298,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('kExtraGenSnapshotOptions passes values to gen_snapshot', () async {
+  test('kExtraGenSnapshotOptions passes values to gen_snapshot', () async {
     processManager = FakeProcessManager.empty();
     final environment = Environment.test(
       fileSystem.currentDirectory,
@@ -389,7 +383,7 @@ void main() {
     },
   );
 
-  testWithoutContext('android aot bundle copies so from abi directory', () async {
+  test('android aot bundle copies so from abi directory', () async {
     final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),

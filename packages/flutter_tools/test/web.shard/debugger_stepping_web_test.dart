@@ -21,7 +21,7 @@ void main() {
     tempDirectory = createResolvedTempDirectorySync('debugger_stepping_test.');
   });
 
-  testWithoutContext('Web debugger can step over statements', () async {
+  test('Web debugger can step over statements', () async {
     final project = WebSteppingProject();
     await project.setUpIn(tempDirectory);
 

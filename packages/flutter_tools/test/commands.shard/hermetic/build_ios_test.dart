@@ -1690,36 +1690,33 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       );
     }
 
-    testWithoutContext(
-      'Do not crash if temporary build directory is deleted before cleanup.',
-      () async {
-        final BuildCommand command = createTestBuildCommand(
-          fileSystem: fileSystem,
-          logger: logger,
-          osUtils: FakeOperatingSystemUtils(),
-        );
-        processManager.addCommands(<FakeCommand>[
-          setUpFakeXcodeBuildHandler(
-            simulator: true,
-            exitCode: 1,
-            onRun: (_) {
-              final Directory tempDir = fileSystem.directory(_xcBundleDirectoryPath).parent;
-              expect(tempDir, exists);
-              tempDir.deleteSync(recursive: true);
-            },
-          ),
-        ]);
+    test('Do not crash if temporary build directory is deleted before cleanup.', () async {
+      final BuildCommand command = createTestBuildCommand(
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+      );
+      processManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          simulator: true,
+          exitCode: 1,
+          onRun: (_) {
+            final Directory tempDir = fileSystem.directory(_xcBundleDirectoryPath).parent;
+            expect(tempDir, exists);
+            tempDir.deleteSync(recursive: true);
+          },
+        ),
+      ]);
 
-        createMinimalMockProjectFiles();
+      createMinimalMockProjectFiles();
 
-        await expectLater(
-          createTestCommandRunner(command)
-              .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
-          throwsToolExit(message: 'Encountered error while building for simulator.'),
-        );
-        expect(processManager.hasRemainingExpectations, isFalse);
-      },
-    );
+      await expectLater(
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
+        throwsToolExit(message: 'Encountered error while building for simulator.'),
+      );
+      expect(processManager.hasRemainingExpectations, isFalse);
+    });
 
     Future<void> runTerminalBuildWithDeletedTempDir({
       required void Function(Directory tempDir, File pipeFile) onXcodeRun,
@@ -1763,7 +1760,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       expect(processManager.hasRemainingExpectations, isFalse);
     }
 
-    testWithoutContext(
+    test(
       'Do not crash if temporary build directory is deleted before cleanup in terminal session.',
       () async {
         await runTerminalBuildWithDeletedTempDir(
@@ -1774,7 +1771,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       },
     );
 
-    testWithoutContext(
+    test(
       'Do not crash if temporary build directory is deleted during pipe write in terminal session.',
       () async {
         // POSIX errno for ENOENT (No such file or directory).
@@ -1804,7 +1801,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       },
     );
 
-    testWithoutContext('Do not crash if temporary build directory is deleted between existsSync and reading pipe in terminal session.', () async {
+    test('Do not crash if temporary build directory is deleted between existsSync and reading pipe in terminal session.', () async {
       var deleteOnNextPipeRead = false;
       fileSystem = MemoryFileSystem.test(
         opHandle: (String path, FileSystemOp op) {

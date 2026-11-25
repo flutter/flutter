@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/version.dart';
 import '../src/common.dart';
 
 void main() {
-  testWithoutContext('state can be set and persists', () {
+  test('state can be set and persists', () {
     final fileSystem = MemoryFileSystem.test();
     final Directory directory = fileSystem.directory('state_dir');
     directory.createSync();
@@ -28,7 +28,7 @@ void main() {
     expect(state2.shouldRedisplayWelcomeMessage, false);
   });
 
-  testWithoutContext('channel versions can be cached and stored', () {
+  test('channel versions can be cached and stored', () {
     final fileSystem = MemoryFileSystem.test();
     final Directory directory = fileSystem.directory('state_dir')..createSync();
     final state1 = PersistentToolState.test(directory: directory, logger: BufferLogger.test());

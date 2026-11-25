@@ -10,7 +10,7 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
 void main() {
-  testWithoutContext('IProxy resolves iproxyPath lazily from Artifacts', () async {
+  test('IProxy resolves iproxyPath lazily from Artifacts', () async {
     final artifacts = Artifacts.test();
     final processManager = FakeProcessManager.empty();
     final logger = BufferLogger.test();
@@ -25,7 +25,7 @@ void main() {
     expect(iproxy.iproxyPath, artifacts.getHostArtifact(HostArtifact.iproxy).path);
   });
 
-  testWithoutContext('IProxy.fromPath uses specified path', () async {
+  test('IProxy.fromPath uses specified path', () async {
     final processManager = FakeProcessManager.empty();
     final logger = BufferLogger.test();
 
@@ -39,7 +39,7 @@ void main() {
     expect(iproxy.iproxyPath, '/custom/path/to/iproxy');
   });
 
-  testWithoutContext('IProxy.test uses default test configuration', () async {
+  test('IProxy.test uses default test configuration', () async {
     final processManager = FakeProcessManager.empty();
     final logger = BufferLogger.test();
 
@@ -48,7 +48,7 @@ void main() {
     expect(iproxy.iproxyPath, 'iproxy');
   });
 
-  testWithoutContext('IProxy.forward invokes iproxy process with expected arguments', () async {
+  test('IProxy.forward invokes iproxy process with expected arguments', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['iproxy', '4200:4200', '--udid', '12345'],

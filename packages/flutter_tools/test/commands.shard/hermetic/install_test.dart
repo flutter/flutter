@@ -151,7 +151,7 @@ void main() {
       },
     );
 
-    testWithoutContext('installApp uninstalls old version if already installed', () async {
+    test('installApp uninstalls old version if already installed', () async {
       final testLogger = BufferLogger.test();
       final device = FakeAndroidDevice(appInstalled: true);
       final app = FakeAndroidApk();
@@ -162,7 +162,7 @@ void main() {
       expect(testLogger.statusText, contains('Uninstalling old version...'));
     });
 
-    testWithoutContext('installApp logs warning if uninstalling old version fails', () async {
+    test('installApp logs warning if uninstalling old version fails', () async {
       final testLogger = BufferLogger.test();
       final device = FakeAndroidDevice(appInstalled: true, uninstallSucceeds: false);
       final app = FakeAndroidApk();
@@ -172,7 +172,7 @@ void main() {
       expect(testLogger.warningText, contains('Warning: uninstalling old version failed'));
     });
 
-    testWithoutContext('installApp logs error when ProcessException is thrown', () async {
+    test('installApp logs error when ProcessException is thrown', () async {
       final testLogger = BufferLogger.test();
       final device = _ThrowingDevice();
       final app = FakeAndroidApk();

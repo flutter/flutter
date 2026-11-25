@@ -45,7 +45,7 @@ class ProjectValidatorTaskImpl extends ProjectValidator {
 
 void main() {
   group('ProjectValidatorResult', () {
-    testWithoutContext('success status', () {
+    test('success status', () {
       const result = ProjectValidatorResult(
         name: 'name',
         value: 'value',
@@ -55,7 +55,7 @@ void main() {
       expect(result.status, StatusProjectValidator.success);
     });
 
-    testWithoutContext('success status with warning', () {
+    test('success status with warning', () {
       const result = ProjectValidatorResult(
         name: 'name',
         value: 'value',
@@ -66,7 +66,7 @@ void main() {
       expect(result.status, StatusProjectValidator.success);
     });
 
-    testWithoutContext('error status', () {
+    test('error status', () {
       const result = ProjectValidatorResult(
         name: 'name',
         value: 'my error',
@@ -84,7 +84,7 @@ void main() {
       task = ProjectValidatorTaskImpl();
     });
 
-    testWithoutContext('error status', () async {
+    test('error status', () async {
       final fs = MemoryFileSystem.test();
       final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
       final List<ProjectValidatorResult> results = await task.start(project);

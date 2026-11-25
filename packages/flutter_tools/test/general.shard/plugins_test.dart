@@ -2648,7 +2648,7 @@ flutter:
           ..writeAsStringSync(yamlString);
       }
 
-      testWithoutContext('validatePubspecForPlugin works', () async {
+      test('validatePubspecForPlugin works', () async {
         const pluginYaml = '''
   flutter:
     plugin:
@@ -2976,7 +2976,7 @@ iosPrefix: FLT
         expect(map.isEmpty, true);
       });
 
-      testWithoutContext('Platform plugin parseFromYaml methods perform validation', () {
+      test('Platform plugin parseFromYaml methods perform validation', () {
         final invalidYaml = YamlMap.wrap(<String, Object?>{'pluginClass': 123});
         expect(
           AndroidPlugin.parseFromYaml('foo', invalidYaml, pluginPath: ''),
@@ -2994,7 +2994,7 @@ iosPrefix: FLT
     });
 
     group('Plugin files', () {
-      testWithoutContext('for SwiftPM and podspec paths for iOS and macOS plugins', () async {
+      test('for SwiftPM and podspec paths for iOS and macOS plugins', () async {
         final fs = MemoryFileSystem.test();
         final plugin = Plugin(
           name: 'test',
@@ -3040,7 +3040,7 @@ iosPrefix: FLT
         );
       });
 
-      testWithoutContext('for SwiftPM and podspec paths for darwin plugins', () async {
+      test('for SwiftPM and podspec paths for darwin plugins', () async {
         final fs = MemoryFileSystem.test();
         final plugin = Plugin(
           name: 'test',
@@ -3094,7 +3094,7 @@ iosPrefix: FLT
         );
       });
 
-      testWithoutContext('for SwiftPM and podspec paths for non darwin plugins', () async {
+      test('for SwiftPM and podspec paths for non darwin plugins', () async {
         final fs = MemoryFileSystem.test();
         final plugin = Plugin(
           name: 'test',
@@ -3120,7 +3120,7 @@ iosPrefix: FLT
         expect(plugin.pluginPodspecPath(fs, WindowsPlugin.kConfigKey), isNull);
       });
 
-      testWithoutContext('supportSwiftPackageManagerForPlatform if manifest exists', () {
+      test('supportSwiftPackageManagerForPlatform if manifest exists', () {
         final fs = MemoryFileSystem.test();
         final plugin = Plugin(
           name: 'test',
@@ -3190,7 +3190,7 @@ iosPrefix: FLT
       });
     });
 
-    testWithoutContext(
+    test(
       'Symlink failures give developer mode instructions on recent versions of Windows',
       () async {
         final Platform platform = FakePlatform(operatingSystem: 'windows');
@@ -3211,46 +3211,41 @@ iosPrefix: FLT
       },
     );
 
-    testWithoutContext(
-      'Symlink ERROR_ACCESS_DENIED failures show developers paths that were used',
-      () async {
-        final handle = FileExceptionHandler();
-        final fileSystem = ErrorHandlingFileSystem(
-          platform: FakePlatform(operatingSystem: 'windows'),
-          delegate: MemoryFileSystem.test(
-            style: FileSystemStyle.windows,
-            opHandle: handle.opHandle,
-          ),
-        );
-        const pluginSymlinkPath = r'C:\app\windows\flutter\ephemeral\.plugin_symlinks\some_plugin';
-        handle.addError(
-          fileSystem.link(pluginSymlinkPath),
-          FileSystemOp.create,
-          const FileSystemException('', '', OSError('', 5)),
-        );
+    test('Symlink ERROR_ACCESS_DENIED failures show developers paths that were used', () async {
+      final handle = FileExceptionHandler();
+      final fileSystem = ErrorHandlingFileSystem(
+        platform: FakePlatform(operatingSystem: 'windows'),
+        delegate: MemoryFileSystem.test(style: FileSystemStyle.windows, opHandle: handle.opHandle),
+      );
+      const pluginSymlinkPath = r'C:\app\windows\flutter\ephemeral\.plugin_symlinks\some_plugin';
+      handle.addError(
+        fileSystem.link(pluginSymlinkPath),
+        FileSystemOp.create,
+        const FileSystemException('', '', OSError('', 5)),
+      );
 
-        final flutterProject = FakeFlutterProject()
-          ..directory = fileSystem.currentDirectory.childDirectory('app');
-        final Directory windowsManagedDirectory = flutterProject.directory
-            .childDirectory('windows')
-            .childDirectory('flutter');
-        final windowsProject = FakeWindowsProject()
-          ..managedDirectory = windowsManagedDirectory
-          ..pluginSymlinkDirectory = windowsManagedDirectory
-              .childDirectory('ephemeral')
-              .childDirectory('.plugin_symlinks')
-          ..exists = true;
+      final flutterProject = FakeFlutterProject()
+        ..directory = fileSystem.currentDirectory.childDirectory('app');
+      final Directory windowsManagedDirectory = flutterProject.directory
+          .childDirectory('windows')
+          .childDirectory('flutter');
+      final windowsProject = FakeWindowsProject()
+        ..managedDirectory = windowsManagedDirectory
+        ..pluginSymlinkDirectory = windowsManagedDirectory
+            .childDirectory('ephemeral')
+            .childDirectory('.plugin_symlinks')
+        ..exists = true;
 
-        final File dependenciesFile = flutterProject.directory.childFile(
-          '.flutter-plugins-dependencies',
-        );
-        flutterProject
-          ..flutterPluginsDependenciesFile = dependenciesFile
-          ..windows = windowsProject;
+      final File dependenciesFile = flutterProject.directory.childFile(
+        '.flutter-plugins-dependencies',
+      );
+      flutterProject
+        ..flutterPluginsDependenciesFile = dependenciesFile
+        ..windows = windowsProject;
 
-        writePackageConfigFiles(directory: flutterProject.directory, mainLibName: 'my_app');
+      writePackageConfigFiles(directory: flutterProject.directory, mainLibName: 'my_app');
 
-        const dependenciesFileContents = r'''
+      const dependenciesFileContents = r'''
 {
   "plugins": {
     "windows": [
@@ -3262,26 +3257,25 @@ iosPrefix: FLT
   }
 }
 ''';
-        dependenciesFile.writeAsStringSync(dependenciesFileContents);
+      dependenciesFile.writeAsStringSync(dependenciesFileContents);
 
-        const expectedMessage =
-            'ERROR_ACCESS_DENIED file system exception thrown while trying to '
-            r'create a symlink from C:\some_plugin to '
-            r'C:\app\windows\flutter\ephemeral\.plugin_symlinks\some_plugin';
+      const expectedMessage =
+          'ERROR_ACCESS_DENIED file system exception thrown while trying to '
+          r'create a symlink from C:\some_plugin to '
+          r'C:\app\windows\flutter\ephemeral\.plugin_symlinks\some_plugin';
 
-        expect(
-          () => createPluginSymlinks(
-            flutterProject,
-            featureFlags: TestFeatureFlags(isWindowsEnabled: true),
-            os: os,
-            platform: FakePlatform(operatingSystem: 'windows'),
-          ),
-          throwsToolExit(message: expectedMessage),
-        );
-      },
-    );
+      expect(
+        () => createPluginSymlinks(
+          flutterProject,
+          featureFlags: TestFeatureFlags(isWindowsEnabled: true),
+          os: os,
+          platform: FakePlatform(operatingSystem: 'windows'),
+        ),
+        throwsToolExit(message: expectedMessage),
+      );
+    });
 
-    testWithoutContext(
+    test(
       'Symlink failures instruct developers to run as administrator on older versions of Windows',
       () async {
         final Platform platform = FakePlatform(operatingSystem: 'windows');
@@ -3302,7 +3296,7 @@ iosPrefix: FLT
       },
     );
 
-    testWithoutContext(
+    test(
       'Symlink failures instruct developers to have their project on the same drive as their SDK',
       () async {
         final Platform platform = FakePlatform(operatingSystem: 'windows');
@@ -3325,7 +3319,7 @@ iosPrefix: FLT
       },
     );
 
-    testWithoutContext('Symlink failures only give instructions for specific errors', () async {
+    test('Symlink failures only give instructions for specific errors', () async {
       final Platform platform = FakePlatform(operatingSystem: 'windows');
       final os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14393]');
 
@@ -3639,7 +3633,7 @@ iosPrefix: FLT
     });
   });
 
-  testWithoutContext('exits tool when deleting .plugin_symlinks fails', () async {
+  test('exits tool when deleting .plugin_symlinks fails', () async {
     final handle = FileExceptionHandler();
     final fileSystem = ErrorHandlingFileSystem(
       platform: FakePlatform(operatingSystem: 'windows'),
@@ -3705,7 +3699,7 @@ iosPrefix: FLT
   });
 
   group('resolvePluginImplementationsForPlatform', () {
-    testWithoutContext('filters plugins based on platformKey', () {
+    test('filters plugins based on platformKey', () {
       final iosPlugin = Plugin(
         name: 'ios_plugin',
         path: '',
@@ -3749,7 +3743,7 @@ iosPrefix: FLT
       expect(macosResolved, isNot(contains(iosPlugin)));
     });
 
-    testWithoutContext('ensures the correct federated implementation is selected', () {
+    test('ensures the correct federated implementation is selected', () {
       final appFacingPlugin = Plugin(
         name: 'foo',
         path: '',

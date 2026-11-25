@@ -6,7 +6,7 @@ import '../src/common.dart';
 import 'transition_test_utils.dart';
 
 void main() {
-  testWithoutContext('runFlutter forcefully kills a hung process on timeout', () async {
+  test('runFlutter forcefully kills a hung process on timeout', () async {
     final stopwatch = Stopwatch()..start();
 
     // We run 'daemon' which will hang indefinitely because it does not exit

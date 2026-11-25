@@ -23,7 +23,7 @@ import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 
 void main() {
-  testWithoutContext('WindowsDevice defaults', () async {
+  test('WindowsDevice defaults', () async {
     final WindowsDevice windowsDevice = setUpWindowsDevice();
     final File dummyFile = MemoryFileSystem.test().file('dummy');
     final windowsApp = PrebuiltWindowsApp(executable: 'foo', applicationPackage: dummyFile);
@@ -42,30 +42,27 @@ void main() {
     expect(windowsDevice.supportsRuntimeMode(BuildMode.jitRelease), false);
   });
 
-  testWithoutContext(
-    'WindowsDevices does not list devices if the workflow is unsupported',
-    () async {
-      expect(
-        await WindowsDevices(
-          analytics: const NoOpAnalytics(),
+  test('WindowsDevices does not list devices if the workflow is unsupported', () async {
+    expect(
+      await WindowsDevices(
+        analytics: const NoOpAnalytics(),
+        featureFlags: TestFeatureFlags(),
+        windowsWorkflow: WindowsWorkflow(
           featureFlags: TestFeatureFlags(),
-          windowsWorkflow: WindowsWorkflow(
-            featureFlags: TestFeatureFlags(),
-            platform: FakePlatform(operatingSystem: 'windows'),
-          ),
-          toolContext: FakeToolContext(
-            fs: MemoryFileSystem.test(),
-            logger: BufferLogger.test(),
-            os: FakeOperatingSystemUtils(),
-            processManager: FakeProcessManager.any(),
-          ),
-        ).devices(),
-        <Device>[],
-      );
-    },
-  );
+          platform: FakePlatform(operatingSystem: 'windows'),
+        ),
+        toolContext: FakeToolContext(
+          fs: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          os: FakeOperatingSystemUtils(),
+          processManager: FakeProcessManager.any(),
+        ),
+      ).devices(),
+      <Device>[],
+    );
+  });
 
-  testWithoutContext('WindowsDevices lists a devices if the workflow is supported', () async {
+  test('WindowsDevices lists a devices if the workflow is supported', () async {
     expect(
       await WindowsDevices(
         analytics: const NoOpAnalytics(),
@@ -85,7 +82,7 @@ void main() {
     );
   });
 
-  testWithoutContext('isSupportedForProject is true with editable host app', () async {
+  test('isSupportedForProject is true with editable host app', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final WindowsDevice windowsDevice = setUpWindowsDevice(fileSystem: fileSystem);
     fileSystem.file('pubspec.yaml').createSync();
@@ -96,7 +93,7 @@ void main() {
     expect(windowsDevice.isSupportedForProject(flutterProject), true);
   });
 
-  testWithoutContext('isSupportedForProject is false with no host app', () async {
+  test('isSupportedForProject is false with no host app', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final WindowsDevice windowsDevice = setUpWindowsDevice(fileSystem: fileSystem);
     fileSystem.file('pubspec.yaml').createSync();
@@ -105,7 +102,7 @@ void main() {
     expect(windowsDevice.isSupportedForProject(flutterProject), false);
   });
 
-  testWithoutContext('isSupportedForProject is false with no build file', () async {
+  test('isSupportedForProject is false with no build file', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final WindowsDevice windowsDevice = setUpWindowsDevice(fileSystem: fileSystem);
     fileSystem.file('pubspec.yaml').createSync();
@@ -115,7 +112,7 @@ void main() {
     expect(windowsDevice.isSupportedForProject(flutterProject), false);
   });
 
-  testWithoutContext('executablePathForDevice uses the correct package executable', () async {
+  test('executablePathForDevice uses the correct package executable', () async {
     final WindowsDevice windowsDevice = setUpWindowsDevice();
     final fakeApp = FakeWindowsApp();
 

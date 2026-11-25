@@ -41,7 +41,7 @@ void main() {
     });
 
     group('resolvePlatformImplementation', () {
-      testWithoutContext('selects uncontested implementation from direct dependency', () async {
+      test('selects uncontested implementation from direct dependency', () async {
         final directDependencies = <String>{'url_launcher_linux', 'url_launcher_macos'};
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
           <Plugin>[
@@ -99,7 +99,7 @@ void main() {
         );
       });
 
-      testWithoutContext('selects uncontested implementation from direct dependency with additional native implementation', () async {
+      test('selects uncontested implementation from direct dependency with additional native implementation', () async {
         final directDependencies = <String>{'url_launcher_linux', 'url_launcher_macos'};
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
           <Plugin>[
@@ -151,7 +151,7 @@ void main() {
         );
       });
 
-      testWithoutContext('selects uncontested implementation from transitive dependency', () async {
+      test('selects uncontested implementation from transitive dependency', () async {
         final directDependencies = <String>{'url_launcher_macos'};
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
           <Plugin>[
@@ -209,7 +209,7 @@ void main() {
         );
       });
 
-      testWithoutContext('selects inline implementation on mobile', () async {
+      test('selects inline implementation on mobile', () async {
         final directDependencies = <String>{};
 
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
@@ -254,7 +254,7 @@ void main() {
       });
 
       // See https://github.com/flutter/flutter/issues/87862 for details.
-      testWithoutContext('does not select inline implementation on desktop for '
+      test('does not select inline implementation on desktop for '
           'missing min Flutter SDK constraint', () async {
         final directDependencies = <String>{};
 
@@ -283,7 +283,7 @@ void main() {
       });
 
       // See https://github.com/flutter/flutter/issues/87862 for details.
-      testWithoutContext('does not select inline implementation on desktop for '
+      test('does not select inline implementation on desktop for '
           'min Flutter SDK constraint < 2.11', () async {
         final directDependencies = <String>{};
 
@@ -311,7 +311,7 @@ void main() {
         expect(resolutions.length, equals(0));
       });
 
-      testWithoutContext('selects inline implementation on desktop for '
+      test('selects inline implementation on desktop for '
           'min Flutter SDK requirement of at least 2.11', () async {
         final directDependencies = <String>{};
 
@@ -362,7 +362,7 @@ void main() {
         );
       });
 
-      testWithoutContext('selects default implementation', () async {
+      test('selects default implementation', () async {
         final directDependencies = <String>{};
 
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
@@ -443,58 +443,55 @@ void main() {
         );
       });
 
-      testWithoutContext(
-        'selects default implementation if interface is direct dependency',
-        () async {
-          final directDependencies = <String>{'url_launcher'};
+      test('selects default implementation if interface is direct dependency', () async {
+        final directDependencies = <String>{'url_launcher'};
 
-          final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
-            <Plugin>[
-              Plugin.fromYaml(
-                'url_launcher',
-                '',
-                YamlMap.wrap(<String, dynamic>{
-                  'platforms': <String, dynamic>{
-                    'linux': <String, dynamic>{'default_package': 'url_launcher_linux'},
-                  },
-                }),
-                null,
-                <String>[],
-                isDevDependency: false,
-                appDependencies: directDependencies,
-              ),
-              Plugin.fromYaml(
-                'url_launcher_linux',
-                '',
-                YamlMap.wrap(<String, dynamic>{
-                  'implements': 'url_launcher',
-                  'platforms': <String, dynamic>{
-                    'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux'},
-                  },
-                }),
-                null,
-                <String>[],
-                isDevDependency: false,
-                appDependencies: directDependencies,
-              ),
-            ],
-            logger: BufferLogger.test(),
-            selectDartPluginsOnly: true,
-          );
-          expect(resolutions.length, equals(1));
-          expect(
-            resolutions[0].toMap(),
-            equals(<String, String>{
-              'pluginName': 'url_launcher_linux',
-              'dartClass': 'UrlLauncherPluginLinux',
-              'platform': 'linux',
-              'dartFileName': 'url_launcher_linux.dart',
-            }),
-          );
-        },
-      );
+        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
+          <Plugin>[
+            Plugin.fromYaml(
+              'url_launcher',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{'default_package': 'url_launcher_linux'},
+                },
+              }),
+              null,
+              <String>[],
+              isDevDependency: false,
+              appDependencies: directDependencies,
+            ),
+            Plugin.fromYaml(
+              'url_launcher_linux',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'implements': 'url_launcher',
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux'},
+                },
+              }),
+              null,
+              <String>[],
+              isDevDependency: false,
+              appDependencies: directDependencies,
+            ),
+          ],
+          logger: BufferLogger.test(),
+          selectDartPluginsOnly: true,
+        );
+        expect(resolutions.length, equals(1));
+        expect(
+          resolutions[0].toMap(),
+          equals(<String, String>{
+            'pluginName': 'url_launcher_linux',
+            'dartClass': 'UrlLauncherPluginLinux',
+            'platform': 'linux',
+            'dartFileName': 'url_launcher_linux.dart',
+          }),
+        );
+      });
 
-      testWithoutContext('user-selected implementation overrides default implementation', () async {
+      test('user-selected implementation overrides default implementation', () async {
         final directDependencies = <String>{
           'user_selected_url_launcher_implementation',
           'url_launcher',
@@ -559,7 +556,7 @@ void main() {
         );
       });
 
-      testWithoutContext('user-selected implementation overrides inline implementation', () async {
+      test('user-selected implementation overrides inline implementation', () async {
         final directDependencies = <String>{
           'user_selected_url_launcher_implementation',
           'url_launcher',
