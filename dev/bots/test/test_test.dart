@@ -191,6 +191,21 @@ void main() {
       });
     }
 
+    for (final (String subshard, bool runsApps) in <(String, bool)>[
+      ('1_15', true),
+      ('2_15', false),
+      ('10_15', false),
+    ]) {
+      test('tool_integration_tests $subshard app tests', () async {
+        final ProcessResult result = await runScript(
+          <String, String>{'SHARD': 'tool_integration_tests', 'SUBSHARD': subshard},
+          <String>['--dry-run'],
+        );
+        expectExitCode(result, 0);
+        expect(result.stdout, runsApps ? contains('link_hook') : isNot(contains('link_hook')));
+      });
+    }
+
     test('exits with code 255 when invalid SUBSHARD name', () async {
       final ProcessResult result = await runScript(<String, String>{
         'SHARD': kTestHarnessShardName,
