@@ -288,7 +288,9 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
         _completerHandle = completer.keepAlive();
         if (hasListeners) {
           _subscribeToCompleter();
-        } else if (_hadOuterErrorListener || _hasEphemeralErrorListener) {
+        } else if (_hasEphemeralErrorListener) {
+          _attachInnerEphemeralErrorForwarder();
+        } else if (_hadOuterErrorListener) {
           completer.addEphemeralErrorListener(_noopErrorListener);
         }
       },
@@ -317,6 +319,7 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
   bool _hadOuterErrorListener = false;
   bool _propagatedErrorSuppression = false;
   bool _hasEphemeralErrorListener = false;
+  bool _innerEphemeralForwarderAttached = false;
   bool _disposed = false;
 
   static void _disposeImage(ImageInfo image, bool synchronousCall) {
@@ -353,11 +356,56 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
     },
   );
 
+  void _onInnerEphemeralError(Object exception, StackTrace? stackTrace) {
+    _innerEphemeralForwarderAttached = false;
+    if (_deferInnerErrors) {
+      if (!identical(exception, _lastError)) {
+        _pendingError = (exception: exception, stackTrace: stackTrace);
+      }
+      return;
+    }
+    if (_disposed || _subscribed) {
+      return;
+    }
+    reportError(exception: exception, stack: stackTrace);
+  }
+
+  void _attachInnerEphemeralErrorForwarder({bool deferErrors = false}) {
+    if (!resolved || _subscribed || _disposed || _innerEphemeralForwarderAttached) {
+      return;
+    }
+    if (!_hasImage) {
+      _innerEphemeralForwarderAttached = true;
+    }
+    final bool previousDefer = _deferInnerErrors;
+    _deferInnerErrors = deferErrors;
+    try {
+      completer.addEphemeralErrorListener(_onInnerEphemeralError);
+    } finally {
+      _deferInnerErrors = previousDefer;
+    }
+  }
+
+  void _recordSilentInnerError(Object exception, StackTrace? stackTrace) {
+    if (_lastError == null && !_hasImage) {
+      super.addEphemeralErrorListener(_noopErrorListener);
+      reportError(exception: exception, stack: stackTrace);
+      return;
+    }
+    super.addListener(_suppressDuplicateReportListener);
+    try {
+      reportError(exception: exception, stack: stackTrace);
+    } finally {
+      super.removeListener(_suppressDuplicateReportListener);
+    }
+  }
+
   @protected
   @override
   void setImage(ImageInfo image) {
     _hasImage = true;
     _hasEphemeralErrorListener = false;
+    _innerEphemeralForwarderAttached = false;
     super.setImage(image);
   }
 
@@ -382,6 +430,14 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
 
   @override
   void addEphemeralErrorListener(ImageErrorListener listener) {
+    if (!_disposed && resolved && !_subscribed) {
+      _attachInnerEphemeralErrorForwarder(deferErrors: true);
+      final ({Object exception, StackTrace? stackTrace})? pendingError = _pendingError;
+      _pendingError = null;
+      if (pendingError != null) {
+        _recordSilentInnerError(pendingError.exception, pendingError.stackTrace);
+      }
+    }
     super.addEphemeralErrorListener(listener);
     if (_lastError == null && !_hasImage) {
       _hasEphemeralErrorListener = true;
@@ -397,32 +453,35 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
       // Subscribe before adding, so the child's synchronous replay of its
       // current frame lands in setImage while this completer has no listeners
       // yet. The new listener then receives exactly one frame, from
-      // super.addListener's own replay. Defer inner error reporting until
-      // after super.addListener registers this listener and its reportErrors
-      // setting.
+      // super.addListener's own replay. Defer inner error reporting so any
+      // unseen inner error updates _currentError before super.addListener
+      // replays it to listener.
       if (!hasListeners) {
         _subscribeToCompleter(deferErrors: true);
       }
     }
-    super.addListener(listener);
     final ({Object exception, StackTrace? stackTrace})? pendingError = _pendingError;
     _pendingError = null;
-    if (pendingError != null && !_disposed) {
-      // Temporarily attach a reportErrors: true listener so reportError
-      // populates _currentError and notifies listener.onError without
-      // calling FlutterError.reportError a second time (the inner completer
-      // already reported or suppressed the error when it occurred while
-      // unsubscribed).
+    if (pendingError != null) {
+      // Temporarily attach a reportErrors: true listener with onError set so
+      // reportError updates _currentError without calling
+      // FlutterError.reportError a second time (the inner completer already
+      // reported or suppressed the error when it occurred while unsubscribed),
+      // then register listener so super.addListener replays only the latest
+      // _currentError.
       super.addListener(_suppressDuplicateReportListener);
       try {
         reportError(exception: pendingError.exception, stack: pendingError.stackTrace);
+        super.addListener(listener);
       } finally {
         super.removeListener(_suppressDuplicateReportListener);
         if (!hasListeners) {
           _unsubscribeFromCompleter();
         }
       }
+      return;
     }
+    super.addListener(listener);
   }
 
   @override
@@ -471,11 +530,11 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
       return;
     }
     _propagateErrorSuppression();
-    if (_hasEphemeralErrorListener) {
-      completer.addEphemeralErrorListener(_noopErrorListener);
-    }
     _subscribed = false;
     completer.removeListener(_innerListener);
+    if (_hasEphemeralErrorListener) {
+      _attachInnerEphemeralErrorForwarder();
+    }
   }
 
   @override
