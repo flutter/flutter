@@ -59,6 +59,29 @@ void main() {
     );
   });
 
+  testWithoutContext('flutter test reports a compilation diagnostic once', () async {
+    final Directory testDirectory = createResolvedTempDirectorySync('test_compile_error.');
+    addTearDown(() => tryToDelete(testDirectory));
+    testDirectory.childFile('compilation_error_test.dart').writeAsStringSync('''
+void main() {
+  MissingWidgetType value;
+}
+''');
+
+    final ProcessResult result = await _runFlutterTest(
+      'compilation_error',
+      flutterTestDirectory,
+      testDirectory.path,
+    );
+
+    const diagnostic = "Error: 'MissingWidgetType' isn't a type.";
+    expect(result.exitCode, isNonZero);
+    expect(result.stdout, contains('Failed to load'));
+    expect(result.stdout, contains('compilation_error_test.dart:2:3: $diagnostic'));
+    expect(diagnostic.allMatches(result.stdout as String), hasLength(1));
+    expect(result.stderr, isNot(contains(diagnostic)));
+  });
+
   testWithoutContext('integration test should not have extraneous error messages', () async {
     return _testFile(
       'trivial_widget',

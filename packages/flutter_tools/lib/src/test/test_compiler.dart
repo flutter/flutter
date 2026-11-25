@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
@@ -111,6 +112,9 @@ class TestCompiler {
   /// compiler.
   ///
   /// If [testTimeRecorder] is passed, times will be recorded in it.
+  ///
+  /// Set `reportCompilationFailure` to false when the caller reports
+  /// diagnostics from [TestCompilerFailure].
   TestCompiler(
     BuildInfo buildInfo,
     this.flutterProject, {
@@ -118,6 +122,7 @@ class TestCompiler {
     required ToolContext toolContext,
     String? precompiledDillPath,
     this.testTimeRecorder,
+    this._reportCompilationFailure = true,
   }) : _toolContext = toolContext,
        testFilePath =
            precompiledDillPath ?? _computeTestFilePath(toolContext, flutterProject, buildInfo),
@@ -175,6 +180,7 @@ class TestCompiler {
   final ResidentCompilerFactory residentCompilerFactory = const ResidentCompilerFactory();
 
   final TemplateRenderer templateRenderer;
+  final bool _reportCompilationFailure;
   final ToolContext _toolContext;
 
   ResidentCompiler? compiler;
@@ -293,6 +299,7 @@ class TestCompiler {
         outputPath: outputDill.path,
         packageConfig: buildInfo.packageConfig,
         projectRootPath: flutterProject?.directory.absolute.path,
+        suppressErrors: !_reportCompilationFailure,
         checkDartPluginRegistry: true,
         fs: fs,
       );
@@ -311,6 +318,12 @@ class TestCompiler {
         );
         await _shutdown();
       } else {
+        // The caller only reports diagnostics when compilation fails.
+        // Verbose logging already shows the buffered diagnostics as traces.
+        if (compilerOutput.errorMessage case final String diagnostics
+            when !_reportCompilationFailure && !logger.isVerbose) {
+          LineSplitter.split(diagnostics).forEach(logger.printError);
+        }
         if (shouldCopyDillFile) {
           final String path = request.mainUri.toFilePath(windows: platform.isWindows);
           final File outputFile = fs.file(outputPath);

@@ -670,6 +670,7 @@ class FlutterPlatform extends PlatformPlugin {
             templateRenderer: _templateRenderer,
             toolContext: _toolContext,
             testTimeRecorder: testTimeRecorder,
+            reportCompilationFailure: false,
           );
           switch (await compiler!.compile(fs.file(mainDart).uri)) {
             case TestCompilerComplete(:final String outputPath):
