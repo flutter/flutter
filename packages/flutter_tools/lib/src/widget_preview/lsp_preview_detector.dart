@@ -194,13 +194,27 @@ class LspPreviewDetector {
     FlutterWidgetPreviews? result;
     try {
       await waitForAnalysis();
+      // Timing out does not cancel workspace resolution. A previous request can still
+      // return valid previews while the detector is retrying.
+      final firstResponse = Completer<FlutterWidgetPreviews>();
       var retries = 5;
       while (retries > 0) {
         if (_disposed || shutdownHooks.isShuttingDown) {
           break;
         }
+        if (firstResponse.isCompleted) {
+          result = await firstResponse.future;
+          break;
+        }
         try {
-          result = await dtd.getFlutterWidgetPreviews().timeout(const Duration(seconds: 5));
+          final Future<FlutterWidgetPreviews> request = dtd.getFlutterWidgetPreviews();
+          request.then((FlutterWidgetPreviews previews) {
+            if (!firstResponse.isCompleted) {
+              firstResponse.complete(previews);
+            }
+          }).ignore();
+          result = await Future.any(<Future<FlutterWidgetPreviews>>[firstResponse.future, request])
+              .timeout(const Duration(seconds: 5));
           break;
         } catch (e) {
           retries--;
