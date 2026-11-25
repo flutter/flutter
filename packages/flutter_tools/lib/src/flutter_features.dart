@@ -97,6 +97,16 @@ interface class FlutterFeatureFlags extends FeatureFlags with FlutterFeatureFlag
   @protected
   final Platform platform;
 
+  /// Returns a [FlutterFeatureFlags] that evaluates channel settings against
+  /// [flutterVersion] while preserving the same configuration and platform.
+  FlutterFeatureFlags withFlutterVersion(FlutterVersion flutterVersion) {
+    return FlutterFeatureFlags(
+      flutterVersion: flutterVersion,
+      featuresConfig: _featuresConfig,
+      platform: platform,
+    );
+  }
+
   @override
   bool isEnabled(Feature feature) {
     final String currentChannel = _flutterVersion.channel;

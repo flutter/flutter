@@ -131,8 +131,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface FlutterPlatformViewsController (Testing)
 
-- (size_t)embeddedViewCount;
-
 // Returns the `FlutterPlatformView`'s `view` object associated with the view_id.
 //
 // If the `PlatformViewsController` does not contain any `FlutterPlatformView` object or

@@ -36,6 +36,7 @@ import '../project.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
+import '../web/web_debug_config.dart';
 import '../web/web_device.dart';
 import '../widget_preview/analytics.dart';
 import '../widget_preview/dependency_graph.dart';
@@ -673,10 +674,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             useLocalCanvasKit: true,
             includeUnsupportedPlatformLibraryStubs: true,
           ),
-          webConfig: WebDebugConfig(
-            enableExpressionEvaluation: true,
-            runHeadless: boolArg(kHeadless),
-          ),
+          platformOptions: <PlatformDebuggingOptions>[
+            WebDebugConfig(enableExpressionEvaluation: true, runHeadless: boolArg(kHeadless)),
+          ],
           devToolsServerAddress: devToolsServerAddress,
         );
         final String target = widgetPreviewScaffoldProject.directory
