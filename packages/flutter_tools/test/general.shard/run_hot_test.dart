@@ -29,7 +29,7 @@ import '../src/test_build_system.dart';
 import 'hot_shared.dart';
 
 void main() {
-  testWithoutContext('defaultReloadSourcesHelper() handles empty DeviceReloadReports)', () {
+  test('defaultReloadSourcesHelper() handles empty DeviceReloadReports)', () {
     defaultReloadSourcesHelper(
       _FakeHotRunner(),
       <FlutterDevice?>[_FakeFlutterDevice()],

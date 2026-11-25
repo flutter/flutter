@@ -163,7 +163,7 @@ void main() {
       Cache.enableLocking();
     });
 
-    testWithoutContext('error handling crash report (synchronous crash)', () async {
+    test('error handling crash report (synchronous crash)', () async {
       final completer = Completer<void>();
       final ToolDependencies toolDependencies = await _bootstrapForTest(
         analytics: fakeAnalytics,
@@ -211,7 +211,7 @@ void main() {
       expect(fakeAnalytics.sentEvents, contains(Event.exception(exception: '_Exception')));
     });
 
-    testWithoutContext('error handling crash report (local engine)', () async {
+    test('error handling crash report (local engine)', () async {
       fileSystem
           .directory('engine')
           .childDirectory('src')
@@ -267,7 +267,7 @@ void main() {
 
     // The artifacts commands are built with are chosen before the command line
     // is parsed, so they have to be rebuilt once a local engine is found.
-    testWithoutContext('builds commands with the local engine the command line asks for', () async {
+    test('builds commands with the local engine the command line asks for', () async {
       fileSystem
           .directory('engine')
           .childDirectory('src')
@@ -323,7 +323,7 @@ void main() {
       expect(artifacts?.localEngineInfo?.targetOutPath, endsWith('engine/src/out/host_debug'));
     });
 
-    testWithoutContext('error handling crash report (bot)', () async {
+    test('error handling crash report (bot)', () async {
       final completer = Completer<void>();
       final ToolDependencies toolDependencies = await _bootstrapForTest(
         analytics: fakeAnalytics,
@@ -382,7 +382,7 @@ void main() {
     // does, this test might fail to catch a regression of
     // https://github.com/flutter/flutter/issues/56406.
     final commandCompleter = Completer<void>();
-    testWithoutContext('error handling crash report (asynchronous crash)', () async {
+    test('error handling crash report (asynchronous crash)', () async {
       final completer = Completer<void>();
       final ToolDependencies toolDependencies = await _bootstrapForTest(
         artifacts: Artifacts.test(),
@@ -426,7 +426,7 @@ void main() {
       await completer.future;
     });
 
-    testWithoutContext("doesn't send multiple events for additional asynchronous exceptions "
+    test("doesn't send multiple events for additional asynchronous exceptions "
         'thrown during shutdown', () async {
       // Regression test for https://github.com/flutter/flutter/issues/178318.
       var exceptionCount = 0;
@@ -496,7 +496,7 @@ void main() {
       expect(exceptionEvents, hasLength(1));
     });
 
-    testWithoutContext('create local report', () async {
+    test('create local report', () async {
       // Since crash reporting calls the doctor, which checks for the devtools
       // version file in the cache, write a version file to the memory fs.
       final Directory devtoolsDir = fileSystem.directory(
@@ -610,7 +610,7 @@ void main() {
         inTestSetup = false;
       });
 
-      testWithoutContext('create local report in temporary directory', () async {
+      test('create local report in temporary directory', () async {
         // Since crash reporting calls the doctor, which checks for the devtools
         // version file in the cache, write a version file to the memory fs.
         final Directory devtoolsDir = fileSystem.directory(
@@ -711,7 +711,7 @@ void main() {
       Cache.enableLocking();
     });
 
-    testWithoutContext("catches ProcessException calling git because it's not available", () async {
+    test("catches ProcessException calling git because it's not available", () async {
       final logger = BufferLogger.test();
       final ToolDependencies toolDependencies = await _bootstrapForTest(
         artifacts: Artifacts.test(),
@@ -740,39 +740,36 @@ void main() {
       );
     });
 
-    testWithoutContext(
-      'handles ProcessException calling git when ProcessManager.canRun fails',
-      () async {
-        final logger = BufferLogger.test();
-        final ToolDependencies toolDependencies = await _bootstrapForTest(
-          artifacts: Artifacts.test(),
-          fs: fs,
-          logger: logger,
-          processManager: _ErrorOnCanRunFakeProcessManager(),
-        );
-        await runner.run(
-          <String>[_GitNotFoundFlutterCommand.commandName],
-          (ToolDependencies toolDependencies) => <FlutterCommand>[
-            _GitNotFoundFlutterCommand(toolContext: toolDependencies.toolContext),
-          ],
-          // This flutterVersion disables crash reporting.
-          flutterVersion: '[user-branch]/',
-          reportCrashes: false,
-          toolDependencies: toolDependencies,
-        );
+    test('handles ProcessException calling git when ProcessManager.canRun fails', () async {
+      final logger = BufferLogger.test();
+      final ToolDependencies toolDependencies = await _bootstrapForTest(
+        artifacts: Artifacts.test(),
+        fs: fs,
+        logger: logger,
+        processManager: _ErrorOnCanRunFakeProcessManager(),
+      );
+      await runner.run(
+        <String>[_GitNotFoundFlutterCommand.commandName],
+        (ToolDependencies toolDependencies) => <FlutterCommand>[
+          _GitNotFoundFlutterCommand(toolContext: toolDependencies.toolContext),
+        ],
+        // This flutterVersion disables crash reporting.
+        flutterVersion: '[user-branch]/',
+        reportCrashes: false,
+        toolDependencies: toolDependencies,
+      );
 
-        expect(
-          logger.errorText,
-          'Failed to find "git" in the search path.\n'
-          '\n'
-          'An error was encountered when trying to run git.\n'
-          "Please ensure git is installed and available in your system's search path. "
-          'See https://docs.flutter.dev/get-started for instructions on installing git for your platform.\n',
-        );
-      },
-    );
+      expect(
+        logger.errorText,
+        'Failed to find "git" in the search path.\n'
+        '\n'
+        'An error was encountered when trying to run git.\n'
+        "Please ensure git is installed and available in your system's search path. "
+        'See https://docs.flutter.dev/get-started for instructions on installing git for your platform.\n',
+      );
+    });
 
-    testWithoutContext('do not print welcome on bots', () async {
+    test('do not print welcome on bots', () async {
       final logger = BufferLogger.test();
       final ToolDependencies toolDependencies = await _bootstrapForTest(
         botDetector: const FakeBotDetector(true),
@@ -790,7 +787,7 @@ void main() {
       expect(logger.traceText, isNot(contains('Showed analytics consent message.')));
     });
 
-    testWithoutContext('do not print download messages when --machine is provided', () async {
+    test('do not print download messages when --machine is provided', () async {
       // Regression test for https://github.com/flutter/flutter/issues/154119.
       final stdio = FakeStdio();
       final platform = FakePlatform(
@@ -840,30 +837,27 @@ void main() {
       expect(stdio.writtenToStderr.join(), isNot(contains('Downloading')));
     });
 
-    testWithoutContext(
-      'binds bootstrapped DeviceManager into context for command execution',
-      () async {
-        late final _DeviceManagerRecordingFlutterCommand command;
-        final ToolDependencies toolDependencies = await _bootstrapForTest(fs: fs);
-        await runner.run(
-          <String>[_DeviceManagerRecordingFlutterCommand.commandName],
-          (ToolDependencies toolDependencies) {
-            command = _DeviceManagerRecordingFlutterCommand(
-              toolContext: toolDependencies.toolContext,
-            );
-            return <FlutterCommand>[command];
-          },
-          // This flutterVersion disables crash reporting.
-          flutterVersion: '[user-branch]/',
-          toolDependencies: toolDependencies,
-        );
+    test('binds bootstrapped DeviceManager into context for command execution', () async {
+      late final _DeviceManagerRecordingFlutterCommand command;
+      final ToolDependencies toolDependencies = await _bootstrapForTest(fs: fs);
+      await runner.run(
+        <String>[_DeviceManagerRecordingFlutterCommand.commandName],
+        (ToolDependencies toolDependencies) {
+          command = _DeviceManagerRecordingFlutterCommand(
+            toolContext: toolDependencies.toolContext,
+          );
+          return <FlutterCommand>[command];
+        },
+        // This flutterVersion disables crash reporting.
+        flutterVersion: '[user-branch]/',
+        toolDependencies: toolDependencies,
+      );
 
-        expect(toolDependencies.deviceManager, isA<FlutterDeviceManager>());
-        expect(command.deviceManager, same(toolDependencies.deviceManager));
-      },
-    );
+      expect(toolDependencies.deviceManager, isA<FlutterDeviceManager>());
+      expect(command.deviceManager, same(toolDependencies.deviceManager));
+    });
 
-    testWithoutContext('does not eagerly evaluate AndroidSdk, AndroidStudio, or Java during bootstrap or generateCommands', () async {
+    test('does not eagerly evaluate AndroidSdk, AndroidStudio, or Java during bootstrap or generateCommands', () async {
       fs.directory('/sdk/packages/flutter_tools').createSync(recursive: true);
       fs.directory('/opt/android-studio/jbr/bin').createSync(recursive: true);
       final strictProcessManager = FakeProcessManager.empty();
@@ -915,48 +909,43 @@ void main() {
       expect(strictProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext(
-      'does not eagerly evaluate XCDevice during bootstrap or generateCommands',
-      () async {
-        final shutdownHooks = ShutdownHooks();
-        late final _DeviceManagerRecordingFlutterCommand command;
-        final ToolDependencies toolDependencies = await _bootstrapForTest(
-          fs: fs,
-          shutdownHooks: shutdownHooks,
-        );
-        final int hooksAfterBootstrap = shutdownHooks.registeredHooks.length;
-        final int exitCode = await runner.run(
-          <String>[_DeviceManagerRecordingFlutterCommand.commandName],
-          (ToolDependencies toolDependencies) {
-            command = _DeviceManagerRecordingFlutterCommand(
-              toolContext: toolDependencies.toolContext,
-            );
-            return <FlutterCommand>[
-              ...generateCommands(
-                toolDependencies: toolDependencies,
-                verbose: false,
-                verboseHelp: false,
-              ),
-              command,
-            ];
-          },
-          // This flutterVersion disables crash reporting.
-          flutterVersion: '[user-branch]/',
-          toolDependencies: toolDependencies,
-        );
+    test('does not eagerly evaluate XCDevice during bootstrap or generateCommands', () async {
+      final shutdownHooks = ShutdownHooks();
+      late final _DeviceManagerRecordingFlutterCommand command;
+      final ToolDependencies toolDependencies = await _bootstrapForTest(
+        fs: fs,
+        shutdownHooks: shutdownHooks,
+      );
+      final int hooksAfterBootstrap = shutdownHooks.registeredHooks.length;
+      final int exitCode = await runner.run(
+        <String>[_DeviceManagerRecordingFlutterCommand.commandName],
+        (ToolDependencies toolDependencies) {
+          command = _DeviceManagerRecordingFlutterCommand(
+            toolContext: toolDependencies.toolContext,
+          );
+          return <FlutterCommand>[
+            ...generateCommands(
+              toolDependencies: toolDependencies,
+              verbose: false,
+              verboseHelp: false,
+            ),
+            command,
+          ];
+        },
+        // This flutterVersion disables crash reporting.
+        flutterVersion: '[user-branch]/',
+        toolDependencies: toolDependencies,
+      );
 
-        expect(exitCode, 0);
-        expect(shutdownHooks.registeredHooks, hasLength(hooksAfterBootstrap));
+      expect(exitCode, 0);
+      expect(shutdownHooks.registeredHooks, hasLength(hooksAfterBootstrap));
 
-        final XCDevice xcdevice = toolDependencies.appleContext.xcdevice;
-        expect(shutdownHooks.registeredHooks, hasLength(hooksAfterBootstrap + 1));
-        expect(toolDependencies.appleContext.xcdevice, same(xcdevice));
-        expect(shutdownHooks.registeredHooks, hasLength(hooksAfterBootstrap + 1));
-      },
-    );
+      final XCDevice xcdevice = toolDependencies.appleContext.xcdevice;
+      expect(shutdownHooks.registeredHooks, hasLength(hooksAfterBootstrap + 1));
+      expect(toolDependencies.appleContext.xcdevice, same(xcdevice));
+      expect(shutdownHooks.registeredHooks, hasLength(hooksAfterBootstrap + 1));
+    });
 
-    // Uses plain `test` because it checks the zone values that `runner.run`
-    // registers, and `_NoContext.run` drops them.
     test(
       'binds AppleContext, AndroidContext, workflows, and runners into inner AppContext',
       () async {
@@ -1005,33 +994,30 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'applies FeatureFlags to AnsiTerminal and honors enablePreRunValidator',
-      () async {
-        final ToolDependencies toolDependencies = await _bootstrapForTest(
-          deviceManager: FakeDeviceManager(),
-          enablePreRunValidator: true,
-          featureFlags: TestFeatureFlags(),
-          fs: fs,
-        );
-        final int exitCode = await runner.run(
-          <String>[_DeviceManagerRecordingFlutterCommand.commandName],
-          (ToolDependencies toolDependencies) => <FlutterCommand>[
-            _DeviceManagerRecordingFlutterCommand(toolContext: toolDependencies.toolContext),
-          ],
-          flutterVersion: '[user-branch]/',
-          toolDependencies: toolDependencies,
-        );
+    test('applies FeatureFlags to AnsiTerminal and honors enablePreRunValidator', () async {
+      final ToolDependencies toolDependencies = await _bootstrapForTest(
+        deviceManager: FakeDeviceManager(),
+        enablePreRunValidator: true,
+        featureFlags: TestFeatureFlags(),
+        fs: fs,
+      );
+      final int exitCode = await runner.run(
+        <String>[_DeviceManagerRecordingFlutterCommand.commandName],
+        (ToolDependencies toolDependencies) => <FlutterCommand>[
+          _DeviceManagerRecordingFlutterCommand(toolContext: toolDependencies.toolContext),
+        ],
+        flutterVersion: '[user-branch]/',
+        toolDependencies: toolDependencies,
+      );
 
-        final ToolContext(:Logger logger, :AnsiTerminal terminal) = toolDependencies.toolContext;
-        expect(terminal.isCliAnimationEnabled, isTrue);
-        expect(exitCode, 1);
-        expect(
-          (logger as BufferLogger).errorText,
-          contains('Flutter SDK installation appears corrupted'),
-        );
-      },
-    );
+      final ToolContext(:Logger logger, :AnsiTerminal terminal) = toolDependencies.toolContext;
+      expect(terminal.isCliAnimationEnabled, isTrue);
+      expect(exitCode, 1);
+      expect(
+        (logger as BufferLogger).errorText,
+        contains('Flutter SDK installation appears corrupted'),
+      );
+    });
   });
 
   group('unified_analytics', () {
@@ -1047,7 +1033,7 @@ void main() {
       );
     });
 
-    testWithoutContext('runner disable telemetry with flag', () async {
+    test('runner disable telemetry with flag', () async {
       setExitFunctionForTests((int exitCode) {});
 
       expect(fakeAnalytics.telemetryEnabled, true);
@@ -1070,46 +1056,39 @@ void main() {
       expect(fakeAnalytics.telemetryEnabled, false);
     });
 
-    testWithoutContext(
-      '--enable-analytics and --disable-analytics enables/disables telemetry',
-      () async {
-        setExitFunctionForTests((int exitCode) {});
+    test('--enable-analytics and --disable-analytics enables/disables telemetry', () async {
+      setExitFunctionForTests((int exitCode) {});
 
-        expect(fakeAnalytics.telemetryEnabled, true);
+      expect(fakeAnalytics.telemetryEnabled, true);
 
-        final ToolDependencies firstDependencies = await _bootstrapForTest(
-          analytics: fakeAnalytics,
-          fs: fs,
-          platform: FakePlatform(
-            environment: <String, String>{'FLUTTER_ROOT': '/sdk', 'HOME': '/'},
-          ),
-        );
-        await runner.run(
-          <String>['--disable-analytics'],
-          (ToolDependencies toolDependencies) => <FlutterCommand>[],
-          toolDependencies: firstDependencies,
-        );
+      final ToolDependencies firstDependencies = await _bootstrapForTest(
+        analytics: fakeAnalytics,
+        fs: fs,
+        platform: FakePlatform(environment: <String, String>{'FLUTTER_ROOT': '/sdk', 'HOME': '/'}),
+      );
+      await runner.run(
+        <String>['--disable-analytics'],
+        (ToolDependencies toolDependencies) => <FlutterCommand>[],
+        toolDependencies: firstDependencies,
+      );
 
-        expect(fakeAnalytics.telemetryEnabled, false);
+      expect(fakeAnalytics.telemetryEnabled, false);
 
-        final ToolDependencies secondDependencies = await _bootstrapForTest(
-          analytics: fakeAnalytics,
-          fs: fs,
-          platform: FakePlatform(
-            environment: <String, String>{'FLUTTER_ROOT': '/sdk', 'HOME': '/'},
-          ),
-        );
-        await runner.run(
-          <String>['--enable-analytics'],
-          (ToolDependencies toolDependencies) => <FlutterCommand>[],
-          toolDependencies: secondDependencies,
-        );
+      final ToolDependencies secondDependencies = await _bootstrapForTest(
+        analytics: fakeAnalytics,
+        fs: fs,
+        platform: FakePlatform(environment: <String, String>{'FLUTTER_ROOT': '/sdk', 'HOME': '/'}),
+      );
+      await runner.run(
+        <String>['--enable-analytics'],
+        (ToolDependencies toolDependencies) => <FlutterCommand>[],
+        toolDependencies: secondDependencies,
+      );
 
-        expect(fakeAnalytics.telemetryEnabled, true);
-      },
-    );
+      expect(fakeAnalytics.telemetryEnabled, true);
+    });
 
-    testWithoutContext(
+    test(
       '--enable-analytics and --disable-analytics send an event when telemetry is enabled/disabled',
       () async {
         setExitFunctionForTests((int exitCode) {});
@@ -1149,7 +1128,7 @@ void main() {
       },
     );
 
-    testWithoutContext('--enable-analytics and --disable-analytics do not send an event when telemetry is already enabled/disabled', () async {
+    test('--enable-analytics and --disable-analytics do not send an event when telemetry is already enabled/disabled', () async {
       setExitFunctionForTests((int exitCode) {});
 
       await fakeAnalytics.setTelemetry(false);
@@ -1181,7 +1160,7 @@ void main() {
       expect(fakeAnalytics.sentEvents, isEmpty);
     });
 
-    testWithoutContext('throw error when both flags passed', () async {
+    test('throw error when both flags passed', () async {
       setExitFunctionForTests((int exitCode) {});
 
       expect(fakeAnalytics.telemetryEnabled, true);
@@ -1209,7 +1188,7 @@ void main() {
 
     for (final enable in const <bool>[true, false]) {
       final flag = enable ? '--enable-analytics' : '--disable-analytics';
-      testWithoutContext(
+      test(
         '$flag warns and does not change telemetry when DASH__SUPPRESS_ANALYTICS=true',
         () async {
           setExitFunctionForTests((int exitCode) {});

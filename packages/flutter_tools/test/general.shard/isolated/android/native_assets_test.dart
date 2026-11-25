@@ -194,7 +194,7 @@ void main() {
     );
   });
 
-  testWithoutContext('does not look up AndroidSdk when running data-only build hooks', () async {
+  test('does not look up AndroidSdk when running data-only build hooks', () async {
     final androidSdkProvider = _CountingAndroidSdkProvider(androidSdk: _FakeAndroidSdk());
     final (:DartHooksResult buildResult, results: _) = await runFlutterSpecificBuildHooks(
       androidSdkProvider: androidSdkProvider,
@@ -220,7 +220,7 @@ void main() {
     expect(androidSdkProvider.lookupCount, 0);
   });
 
-  testWithoutContext('looks up AndroidSdk when building code assets on Android', () async {
+  test('looks up AndroidSdk when building code assets on Android', () async {
     final androidSdkProvider = _CountingAndroidSdkProvider(androidSdk: _FakeAndroidSdk());
     final (:DartHooksResult buildResult, results: _) = await runFlutterSpecificBuildHooks(
       androidSdkProvider: androidSdkProvider,

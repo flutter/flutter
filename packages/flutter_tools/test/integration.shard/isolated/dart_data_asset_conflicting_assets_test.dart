@@ -19,7 +19,7 @@ void main() {
 
   group('dart data assets', () {
     for (final target in <String>[hostOs, 'web']) {
-      testWithoutContext('flutter build $target with conflicting assets', () async {
+      test('flutter build $target with conflicting assets', () async {
         final assets = <String, String>{'id1.txt': 'content1', 'id2.txt': 'content2'};
         final available = <String>['id1.txt'];
         writeAssets(assets, appRoot, subdir: '');

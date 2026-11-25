@@ -31,7 +31,7 @@ void main() {
     if (platform.isWindows) {
       return;
     }
-    testWithoutContext('should log a message to stderr when lock is not acquired', () async {
+    test('should log a message to stderr when lock is not acquired', () async {
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('cache_test.');
       final logger = BufferLogger(
         terminal: Terminal.test(),
@@ -114,7 +114,7 @@ Future<void> main(List<String> args) async {
       // aims to avoid triggering failure as a fatal warning.
       expect(logger.hadWarningOutput, isFalse);
     });
-    testWithoutContext('should log a warning message for unknown version ', () async {
+    test('should log a warning message for unknown version ', () async {
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('cache_test.');
       final logger = BufferLogger(
         terminal: Terminal.test(),
@@ -153,7 +153,7 @@ Future<void> main(List<String> args) async {
     });
   });
 
-  testWithoutContext('Dart SDK target arch matches host arch', () async {
+  test('Dart SDK target arch matches host arch', () async {
     if (platform.isWindows) {
       return;
     }
@@ -179,7 +179,7 @@ Future<void> main(List<String> args) async {
     expect(dartTargetArch, equals(unameArch));
   });
 
-  testWithoutContext('verify the dart binary arch matches the host arch', () async {
+  test('verify the dart binary arch matches the host arch', () async {
     final HostPlatform dartArch = _identifyMacBinaryArch(_dartBinary.path);
     final os = OperatingSystemUtils(
       processManager: processManager,

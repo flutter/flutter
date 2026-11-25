@@ -24,7 +24,7 @@ import '../../src/context.dart';
 import '../../src/fakes.dart' show FakeToolContext;
 
 void main() {
-  testWithoutContext(
+  test(
     'Ensure factory returns TargetDevicesWithExtendedWirelessDeviceDiscovery on MacOS',
     () async {
       final logger = BufferLogger.test();
@@ -41,7 +41,7 @@ void main() {
     },
   );
 
-  testWithoutContext('Ensure factory returns default when not on MacOS', () async {
+  test('Ensure factory returns default when not on MacOS', () async {
     final logger = BufferLogger.test();
     final Platform platform = FakePlatform();
     final deviceManager = TestDeviceManager(logger: logger, platform: platform);
@@ -107,7 +107,7 @@ void main() {
         doctor = FakeDoctor(canLaunchAnything: false);
       });
 
-      testWithoutContext('does not search for devices', () async {
+      test('does not search for devices', () async {
         final deviceManager = TestDeviceManager(logger: logger, platform: platform);
         deviceManager.androidDiscoverer.deviceList = <Device>[attachedAndroidDevice1];
 
@@ -1202,7 +1202,7 @@ target-device-6 (wireless) (mobile) • xxx • android • Android 10
         doctor = FakeDoctor(canLaunchAnything: false);
       });
 
-      testWithoutContext('does not search for devices', () async {
+      test('does not search for devices', () async {
         final deviceManager = TestDeviceManager(logger: logger, platform: platform);
         deviceManager.iosDiscoverer.deviceList = <Device>[attachedIOSDevice1];
 

@@ -38,6 +38,7 @@ import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/compiler_config.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
+import 'package:flutter_tools/src/web/web_debug_config.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:package_config/package_config.dart';
 import 'package:package_config/package_config_types.dart';
@@ -1286,7 +1287,7 @@ name: my_app
             packageConfigPath: '.dart_tool/package_config.json',
             extraFrontEndOptions: kDdcLibraryBundleFlags,
           ),
-          webConfig: const WebDebugConfig(useWasm: true),
+          platformOptions: const <PlatformDebuggingOptions>[WebDebugConfig(useWasm: true)],
         ),
       );
       fakeVmServiceHost = FakeVmServiceHost(
@@ -2401,7 +2402,9 @@ flutter:
 
       var debuggingOptions = DebuggingOptions.enabled(
         BuildInfo.debug,
-        webConfig: const WebDebugConfig(devServerConfig: webDevServerConfig),
+        platformOptions: const <PlatformDebuggingOptions>[
+          WebDebugConfig(devServerConfig: webDevServerConfig),
+        ],
       );
       ResidentRunner residentWebRunner = setUpResidentRunner(
         flutterDevice,
@@ -2412,7 +2415,9 @@ flutter:
 
       debuggingOptions = DebuggingOptions.enabled(
         BuildInfo.debug,
-        webConfig: const WebDebugConfig(devServerConfig: webDevServerConfig2),
+        platformOptions: const <PlatformDebuggingOptions>[
+          WebDebugConfig(devServerConfig: webDevServerConfig2),
+        ],
       );
       residentWebRunner = setUpResidentRunner(
         flutterDevice,
@@ -2442,7 +2447,12 @@ flutter:
             toolContext: test_fakes.FakeToolContext(fs: fileSystem),
           ),
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
+          debuggingOptions: DebuggingOptions.enabled(
+            BuildInfo.profile,
+            platformOptions: const <PlatformDebuggingOptions>[
+              WebDebugConfig(webDefines: <String, String>{'VERSION': 'v1.2.3'}),
+            ],
+          ),
           stayResident: false,
           buildSystem: TestBuildSystem.all(BuildResult(success: true), (
             Target target,
@@ -2460,7 +2470,6 @@ flutter:
           featureFlags: test_fakes.TestFeatureFlags(),
           toolContext: test_fakes.FakeToolContext(fs: fileSystem),
           analytics: fakeAnalytics,
-          webDefines: const <String, String>{'VERSION': 'v1.2.3'},
         );
 
         expect(await residentWebRunner.run(), 0);
@@ -2486,7 +2495,12 @@ flutter:
             toolContext: test_fakes.FakeToolContext(fs: fileSystem),
           ),
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
+          debuggingOptions: DebuggingOptions.enabled(
+            BuildInfo.release,
+            platformOptions: const <PlatformDebuggingOptions>[
+              WebDebugConfig(webDefines: <String, String>{'VERSION': 'v1.2.3'}),
+            ],
+          ),
           buildSystem: TestBuildSystem.all(BuildResult(success: true), (
             Target target,
             Environment environment,
@@ -2503,7 +2517,6 @@ flutter:
           featureFlags: test_fakes.TestFeatureFlags(),
           toolContext: test_fakes.FakeToolContext(fs: fileSystem),
           analytics: fakeAnalytics,
-          webDefines: const <String, String>{'VERSION': 'v1.2.3'},
         );
 
         final connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -2536,7 +2549,9 @@ flutter:
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           debuggingOptions: DebuggingOptions.enabled(
             BuildInfo.debug,
-            webConfig: const WebDebugConfig(useWasm: true),
+            platformOptions: const <PlatformDebuggingOptions>[
+              WebDebugConfig(useWasm: true, webDefines: <String, String>{'VERSION': 'v1.2.3'}),
+            ],
           ),
           stayResident: false,
           buildSystem: TestBuildSystem.all(BuildResult(success: true), (
@@ -2555,7 +2570,6 @@ flutter:
           featureFlags: test_fakes.TestFeatureFlags(),
           toolContext: test_fakes.FakeToolContext(fs: fileSystem),
           analytics: fakeAnalytics,
-          webDefines: const <String, String>{'VERSION': 'v1.2.3'},
         );
 
         expect(await residentWebRunner.run(), 0);
@@ -2589,7 +2603,7 @@ flutter:
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           debuggingOptions: DebuggingOptions.enabled(
             BuildInfo.release,
-            webConfig: const WebDebugConfig(useWasm: true),
+            platformOptions: const <PlatformDebuggingOptions>[WebDebugConfig(useWasm: true)],
           ),
           stayResident: false,
           buildSystem: TestBuildSystem.all(BuildResult(success: true), (
@@ -2653,7 +2667,7 @@ flutter:
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           debuggingOptions: DebuggingOptions.enabled(
             BuildInfo.debug,
-            webConfig: const WebDebugConfig(useWasm: true),
+            platformOptions: const <PlatformDebuggingOptions>[WebDebugConfig(useWasm: true)],
           ),
           stayResident: false,
           buildSystem: TestBuildSystem.all(BuildResult(success: true), (

@@ -25,7 +25,7 @@ void main() {
     const osTested = <String>['windows', 'macos', 'linux'];
 
     group('no env variables', () {
-      testWithoutContext('all http hosts are available', () async {
+      test('all http hosts are available', () async {
         final mockClient = FakeHttpClient.any();
 
         // Run the check for all operating systems one by one
@@ -44,7 +44,7 @@ void main() {
         }
       });
 
-      testWithoutContext('all http hosts are not available', () async {
+      test('all http hosts are not available', () async {
         // Run the check for all operating systems one by one
         for (final os in osTested) {
           final Platform platform = FakePlatform(operatingSystem: os);
@@ -88,7 +88,7 @@ void main() {
         }
       });
 
-      testWithoutContext('one http host is not available', () async {
+      test('one http host is not available', () async {
         // Run the check for all operating systems one by one
         for (final os in osTested) {
           final Platform platform = FakePlatform(operatingSystem: os);
@@ -118,7 +118,7 @@ void main() {
     });
 
     group('with env variables', () {
-      testWithoutContext('all http hosts are available', () async {
+      test('all http hosts are available', () async {
         final mockClient = FakeHttpClient.any();
 
         // Run the check for all operating systems one by one
@@ -137,7 +137,7 @@ void main() {
         }
       });
 
-      testWithoutContext('all http hosts are not available', () async {
+      test('all http hosts are not available', () async {
         // Run the check for all operating systems one by one
         for (final os in osTested) {
           final Platform platform = FakePlatform(
@@ -179,7 +179,7 @@ void main() {
         }
       });
 
-      testWithoutContext('one http host is not available', () async {
+      test('one http host is not available', () async {
         // Run the check for all operating systems one by one
         for (final os in osTested) {
           final Platform platform = FakePlatform(
@@ -213,7 +213,7 @@ void main() {
         }
       });
 
-      testWithoutContext('does not throw on unparseable user-defined host uri', () async {
+      test('does not throw on unparseable user-defined host uri', () async {
         final httpHostValidator = HttpHostValidator(
           platform: FakePlatform(
             environment: <String, String>{
@@ -240,7 +240,7 @@ void main() {
         );
       });
 
-      testWithoutContext('does not throw on invalid user-defined host', () async {
+      test('does not throw on invalid user-defined host', () async {
         final httpHostValidator = HttpHostValidator(
           platform: FakePlatform(
             environment: <String, String>{
@@ -269,7 +269,7 @@ void main() {
     });
 
     group('specific os disabled', () {
-      testWithoutContext('all http hosts are available - android disabled', () async {
+      test('all http hosts are available - android disabled', () async {
         // Run the check for all operating systems one by one
         for (final os in osTested) {
           final httpHostValidator = HttpHostValidator(
@@ -291,7 +291,7 @@ void main() {
         }
       });
 
-      testWithoutContext('all http hosts are available - iOS disabled', () async {
+      test('all http hosts are available - iOS disabled', () async {
         // Run the check for all operating systems one by one
         for (final os in osTested) {
           final Platform platform = FakePlatform(operatingSystem: os);
@@ -314,7 +314,7 @@ void main() {
         }
       });
 
-      testWithoutContext('all http hosts are available - android, iOS disabled', () async {
+      test('all http hosts are available - android, iOS disabled', () async {
         // Run the check for all operating systems one by one
         for (final os in osTested) {
           final httpHostValidator = HttpHostValidator(
@@ -337,7 +337,7 @@ void main() {
     });
   });
 
-  testWithoutContext('Does not throw on HandshakeException', () async {
+  test('Does not throw on HandshakeException', () async {
     const handshakeMessage = '''
 Handshake error in client (OS Error:
         BLOCK_TYPE_IS_NOT_01(../../third_party/boringssl/src/crypto/fipsmodule/rsa/padding.c:108)

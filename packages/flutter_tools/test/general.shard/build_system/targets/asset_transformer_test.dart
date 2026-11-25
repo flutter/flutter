@@ -16,7 +16,7 @@ import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
 
 void main() {
-  testWithoutContext('Invokes dart properly', () async {
+  test('Invokes dart properly', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final logger = BufferLogger.test();
     final artifacts = Artifacts.test();
@@ -82,7 +82,7 @@ void main() {
     );
   });
 
-  testWithoutContext('logs useful error information when transformation process returns a nonzero exit code', () async {
+  test('logs useful error information when transformation process returns a nonzero exit code', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final artifacts = Artifacts.test();
 
@@ -152,7 +152,7 @@ void main() {
     );
   });
 
-  testWithoutContext('prints error message when the transformer does not produce an output file', () async {
+  test('prints error message when the transformer does not produce an output file', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final artifacts = Artifacts.test();
 
@@ -215,7 +215,7 @@ void main() {
     );
   });
 
-  testWithoutContext('correctly chains transformations when there are multiple of them', () async {
+  test('correctly chains transformations when there are multiple of them', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final artifacts = Artifacts.test();
 
@@ -307,7 +307,7 @@ void main() {
     );
   });
 
-  testWithoutContext("prints an error when a transformer in a chain (that's not the first) does not produce an output", () async {
+  test("prints an error when a transformer in a chain (that's not the first) does not produce an output", () async {
     final FileSystem fileSystem = MemoryFileSystem();
     final artifacts = Artifacts.test();
 
@@ -399,7 +399,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Parses depfile and returns dependencies', () async {
+  test('Parses depfile and returns dependencies', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final logger = BufferLogger.test();
     final artifacts = Artifacts.test();

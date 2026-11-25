@@ -36,7 +36,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('flutter run on web respects --dds-port', () async {
+  test('flutter run on web respects --dds-port', () async {
     // Regression test for https://github.com/flutter/flutter/issues/159157
     Future<int> getFreePort() async {
       final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
@@ -62,7 +62,7 @@ void main() {
   });
 
   group('Clients of flutter run on web with DDS enabled', () {
-    testWithoutContext('can validate flutter version', () async {
+    test('can validate flutter version', () async {
       await flutter.run(
         withDebugger: true,
         device: GoogleChromeDevice.kChromeDeviceId,
@@ -75,7 +75,7 @@ void main() {
       await validateFlutterVersion(client);
     });
 
-    testWithoutContext('can validate flutter version in parallel', () async {
+    test('can validate flutter version in parallel', () async {
       await flutter.run(
         withDebugger: true,
         device: GoogleChromeDevice.kChromeDeviceId,
@@ -107,7 +107,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    testWithoutContext('can validate flutter version', () async {
+    test('can validate flutter version', () async {
       await flutter.run(
         withDebugger: true,
         device: GoogleChromeDevice.kChromeDeviceId,

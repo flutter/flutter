@@ -47,7 +47,7 @@ void main() {
 
   group('Project', () {
     group('construction', () {
-      testWithoutContext('invalid utf8 throws a tool exit', () {
+      test('invalid utf8 throws a tool exit', () {
         final FileSystem fileSystem = MemoryFileSystem.test();
         final projectFactory = FlutterProjectFactory(
           fileSystem: fileSystem,
@@ -61,7 +61,7 @@ void main() {
         expect(() => projectFactory.fromDirectory(fileSystem.currentDirectory), throwsToolExit());
       });
 
-      testWithoutContext('fails on invalid pubspec.yaml', () {
+      test('fails on invalid pubspec.yaml', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -71,7 +71,7 @@ void main() {
         expect(() => FlutterProject.fromDirectory(directory, logger: logger), throwsToolExit());
       });
 
-      testWithoutContext('fails on pubspec.yaml parse failure', () {
+      test('fails on pubspec.yaml parse failure', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -81,7 +81,7 @@ void main() {
         expect(() => FlutterProject.fromDirectory(directory, logger: logger), throwsToolExit());
       });
 
-      testWithoutContext('fails on invalid example/pubspec.yaml', () {
+      test('fails on invalid example/pubspec.yaml', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childDirectory('example').childFile('pubspec.yaml')
@@ -91,13 +91,13 @@ void main() {
         expect(() => FlutterProject.fromDirectory(directory, logger: logger), throwsToolExit());
       });
 
-      testWithoutContext('treats missing pubspec.yaml as empty', () {
+      test('treats missing pubspec.yaml as empty', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject')..createSync(recursive: true);
         expect(FlutterProject.fromDirectory(directory, logger: logger).manifest.isEmpty, true);
       });
 
-      testWithoutContext('reads valid pubspec.yaml', () {
+      test('reads valid pubspec.yaml', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -106,7 +106,7 @@ void main() {
         expect(FlutterProject.fromDirectory(directory, logger: logger).manifest.appName, 'hello');
       });
 
-      testWithoutContext('reads dependencies from pubspec.yaml', () {
+      test('reads dependencies from pubspec.yaml', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -118,7 +118,7 @@ void main() {
         );
       });
 
-      testWithoutContext('sets up location', () {
+      test('sets up location', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         expect(
@@ -135,7 +135,7 @@ void main() {
         );
       });
 
-      testWithoutContext('buildDirectory uses configured build-dir', () {
+      test('buildDirectory uses configured build-dir', () {
         final config = Config.test();
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
@@ -399,7 +399,7 @@ dependencies:
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
 
-      testWithoutContext('determines dev dependencies', () async {
+      test('determines dev dependencies', () async {
         final toolContext = FakeToolContext(logger: logger);
         // Create a plugin.
         await aPluginProject(legacy: false, toolContext: toolContext);
@@ -419,7 +419,7 @@ dependencies:
         );
       });
 
-      testWithoutContext('releaseMode: false retains dev plugins', () async {
+      test('releaseMode: false retains dev plugins', () async {
         final toolContext = FakeToolContext(logger: logger);
         // Create a plugin.
         await aPluginProject(includeAndroidMain: true, legacy: false, toolContext: toolContext);
@@ -437,7 +437,7 @@ dependencies:
         );
       });
 
-      testWithoutContext('releaseMode: true omits dev plugins', () async {
+      test('releaseMode: true omits dev plugins', () async {
         final toolContext = FakeToolContext(logger: logger);
         // Create a plugin.
         await aPluginProject(includeAndroidMain: true, legacy: false, toolContext: toolContext);
@@ -455,7 +455,7 @@ dependencies:
         );
       });
 
-      testWithoutContext('injects plugins for macOS', () async {
+      test('injects plugins for macOS', () async {
         final fs = MemoryFileSystem.test();
         final macOSFeatureFlags = TestFeatureFlags(isMacOSEnabled: true);
         final toolContext = FakeToolContext(
@@ -478,7 +478,7 @@ dependencies:
         );
         expectExists(project.macos.pluginRegistrantImplementation);
       });
-      testWithoutContext('generates Xcode configuration for macOS', () async {
+      test('generates Xcode configuration for macOS', () async {
         final fs = MemoryFileSystem.test();
         final macOSFeatureFlags = TestFeatureFlags(isMacOSEnabled: true);
         final toolContext = FakeToolContext(
@@ -501,7 +501,7 @@ dependencies:
         );
         expectExists(project.macos.generatedXcodePropertiesFile);
       });
-      testWithoutContext('injects plugins for Linux', () async {
+      test('injects plugins for Linux', () async {
         final fs = MemoryFileSystem.test();
         final linuxFeatureFlags = TestFeatureFlags(isLinuxEnabled: true);
         final toolContext = FakeToolContext(
@@ -525,7 +525,7 @@ dependencies:
         expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.h'));
         expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.cc'));
       });
-      testWithoutContext('injects plugins for Windows', () async {
+      test('injects plugins for Windows', () async {
         final fs = MemoryFileSystem.test();
         final windowsFeatureFlags = TestFeatureFlags(isWindowsEnabled: true);
         final toolContext = FakeToolContext(
@@ -580,7 +580,7 @@ dependencies:
         expectExists(pluginRegistrantClasses.childFile('GeneratedPluginRegistrant.m'));
       });
 
-      testWithoutContext('Version.json info is correct', () {
+      test('Version.json info is correct', () {
         final fileSystem = MemoryFileSystem.test();
         final FlutterManifest manifest = FlutterManifest.createFromString('''
     name: test
@@ -1077,12 +1077,12 @@ dependencies {
         );
       });
 
-      testWithoutContext('default host app language', () async {
+      test('default host app language', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
         expect(project.android.isKotlin, isFalse);
       });
 
-      testWithoutContext('kotlin host app language', () async {
+      test('kotlin host app language', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
 
         addAndroidGradleFile(
@@ -1097,7 +1097,7 @@ apply plugin: 'kotlin-android'
         expect(project.android.isKotlin, isTrue);
       });
 
-      testWithoutContext('kotlin host app language with Gradle Kotlin DSL', () async {
+      test('kotlin host app language with Gradle Kotlin DSL', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
 
         addAndroidGradleFile(
@@ -1116,29 +1116,26 @@ plugins {
         expect(project.android.isKotlin, isTrue);
       });
 
-      testWithoutContext(
-        'kotlin host app language with Gradle Kotlin DSL and typesafe plugin id',
-        () async {
-          final FlutterProject project = await someProject(toolContext: toolContext);
+      test('kotlin host app language with Gradle Kotlin DSL and typesafe plugin id', () async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
 
-          addAndroidGradleFile(
-            project.directory,
-            kotlinDsl: true,
-            gradleFileContent: () {
-              return '''
+        addAndroidGradleFile(
+          project.directory,
+          kotlinDsl: true,
+          gradleFileContent: () {
+            return '''
 plugins {
     id "com.android.application"
     id "kotlin-android"
     dev.flutter.`flutter-gradle-plugin`
 }
 ''';
-            },
-          );
-          expect(project.android.isKotlin, isTrue);
-        },
-      );
+          },
+        );
+        expect(project.android.isKotlin, isTrue);
+      });
 
-      testWithoutContext('Gradle Groovy files are preferred to Gradle Kotlin files', () async {
+      test('Gradle Groovy files are preferred to Gradle Kotlin files', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
 
         addAndroidGradleFile(
@@ -1171,7 +1168,7 @@ plugins {
 
       group('_kotlinCompilerOptionsPattern', () {
         void testRegex(String description, String content, {bool expected = true}) {
-          testWithoutContext(description, () async {
+          test(description, () async {
             final FlutterProject project = await someProject(toolContext: toolContext);
             addAndroidGradleFile(project.directory, gradleFileContent: () => content);
             expect(project.android.isKotlin, expected);
@@ -1225,7 +1222,7 @@ android {
 ''', expected: false);
       });
 
-      testWithoutContext('isKotlin is true if src/main/kotlin directory exists', () async {
+      test('isKotlin is true if src/main/kotlin directory exists', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
         project.android.hostAppGradleRoot
             .childDirectory('app')
@@ -1236,7 +1233,7 @@ android {
         expect(project.android.isKotlin, isTrue);
       });
 
-      testWithoutContext('isKotlin is false if src/main/kotlin directory does not exist', () async {
+      test('isKotlin is false if src/main/kotlin directory does not exist', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
         project.android.hostAppGradleRoot
             .childDirectory('app')
@@ -1273,7 +1270,7 @@ android {
       });
 
       void testWithMocks(String description, Future<void> Function() testMethod) {
-        testWithoutContext(description, testMethod);
+        test(description, testMethod);
       }
 
       group('universal link', () {
@@ -1664,12 +1661,12 @@ android {
         toolContext = FakeToolContext(fs: fs, logger: logger, projectFactory: projectFactory);
       });
 
-      testWithoutContext('app product name defaults to Runner', () async {
+      test('app product name defaults to Runner', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
         expect(await project.ios.productName(null), 'Runner');
       });
 
-      testWithoutContext('app product name xcodebuild settings', () async {
+      test('app product name xcodebuild settings', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
         project.ios.xcodeProject.createSync();
         const buildContext = XcodeProjectBuildContext(scheme: 'Runner');
@@ -1805,7 +1802,7 @@ android {
     });
 
     group('Android project file getters', () {
-      testWithoutContext('Project.android.gradleWrapperPropertiesFile resolves to gradle/wrapper/gradle-wrapper.properties', () {
+      test('Project.android.gradleWrapperPropertiesFile resolves to gradle/wrapper/gradle-wrapper.properties', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_project_test');
         final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
@@ -1822,7 +1819,7 @@ android {
 
         expect(project.android.gradleWrapperPropertiesFile.path, expected.path);
       });
-      testWithoutContext('Project.android.appGradleFile resolves to app/build.gradle', () {
+      test('Project.android.appGradleFile resolves to app/build.gradle', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync(
           'flutter_project_build_files',
@@ -1836,7 +1833,7 @@ android {
 
         expect(project.android.appGradleFile.path, expected.path);
       });
-      testWithoutContext('Project.android.appGradleFile resolves to app/build.gradle.kts', () {
+      test('Project.android.appGradleFile resolves to app/build.gradle.kts', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync(
           'flutter_project_build_files',
@@ -1850,25 +1847,22 @@ android {
 
         expect(project.android.appGradleFile.path, expected.path);
       });
-      testWithoutContext(
-        'Project.android.appGradleFile prefers app/build.gradle over app/build.gradle.kts',
-        () {
-          final FileSystem fs = getFileSystemForPlatform();
-          final Directory tempDir = fs.systemTempDirectory.createTempSync(
-            'flutter_project_build_files',
-          );
-          final Directory androidDir = tempDir.childDirectory('android').childDirectory('app')
-            ..createSync(recursive: true);
-          androidDir.childFile('build.gradle.kts').createSync(recursive: true);
-          final File expected = androidDir.childFile('build.gradle')..createSync(recursive: true);
+      test('Project.android.appGradleFile prefers app/build.gradle over app/build.gradle.kts', () {
+        final FileSystem fs = getFileSystemForPlatform();
+        final Directory tempDir = fs.systemTempDirectory.createTempSync(
+          'flutter_project_build_files',
+        );
+        final Directory androidDir = tempDir.childDirectory('android').childDirectory('app')
+          ..createSync(recursive: true);
+        androidDir.childFile('build.gradle.kts').createSync(recursive: true);
+        final File expected = androidDir.childFile('build.gradle')..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
-          expect(project.android.appGradleFile.path, expected.path);
-        },
-      );
+        expect(project.android.appGradleFile.path, expected.path);
+      });
 
-      testWithoutContext('Project.android.hostAppGradleFile resolves to android/build.gradle ', () {
+      test('Project.android.hostAppGradleFile resolves to android/build.gradle ', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync(
           'flutter_project_build_files',
@@ -1881,25 +1875,20 @@ android {
 
         expect(project.android.hostAppGradleFile.path, expected.path);
       });
-      testWithoutContext(
-        'Project.android.hostAppGradleFile resolves to android/build.gradle.kts',
-        () {
-          final FileSystem fs = getFileSystemForPlatform();
-          final Directory tempDir = fs.systemTempDirectory.createTempSync(
-            'flutter_project_build_files',
-          );
-          final Directory androidDir = tempDir.childDirectory('android')
-            ..createSync(recursive: true);
+      test('Project.android.hostAppGradleFile resolves to android/build.gradle.kts', () {
+        final FileSystem fs = getFileSystemForPlatform();
+        final Directory tempDir = fs.systemTempDirectory.createTempSync(
+          'flutter_project_build_files',
+        );
+        final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
-          final File expected = androidDir.childFile('build.gradle.kts')
-            ..createSync(recursive: true);
+        final File expected = androidDir.childFile('build.gradle.kts')..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
-          expect(project.android.hostAppGradleFile.path, expected.path);
-        },
-      );
-      testWithoutContext('Project.android.hostAppGradleFile prefers android/build.gradle over android/build.gradle.kts', () {
+        expect(project.android.hostAppGradleFile.path, expected.path);
+      });
+      test('Project.android.hostAppGradleFile prefers android/build.gradle over android/build.gradle.kts', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync(
           'flutter_project_build_files',
@@ -1912,43 +1901,34 @@ android {
 
         expect(project.android.hostAppGradleFile.path, expected.path);
       });
-      testWithoutContext(
-        'Project.android.settingsGradleFile resolves to android/settings.gradle',
-        () {
-          final FileSystem fs = getFileSystemForPlatform();
-          final Directory tempDir = fs.systemTempDirectory.createTempSync(
-            'flutter_project_build_files',
-          );
-          final Directory androidDir = tempDir.childDirectory('android')
-            ..createSync(recursive: true);
+      test('Project.android.settingsGradleFile resolves to android/settings.gradle', () {
+        final FileSystem fs = getFileSystemForPlatform();
+        final Directory tempDir = fs.systemTempDirectory.createTempSync(
+          'flutter_project_build_files',
+        );
+        final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
-          final File expected = androidDir.childFile('settings.gradle')
-            ..createSync(recursive: true);
+        final File expected = androidDir.childFile('settings.gradle')..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
-          expect(project.android.settingsGradleFile.path, expected.path);
-        },
-      );
-      testWithoutContext(
-        'Project.android.settingsGradleFile resolves to android/settings.gradle.kts',
-        () {
-          final FileSystem fs = getFileSystemForPlatform();
-          final Directory tempDir = fs.systemTempDirectory.createTempSync(
-            'flutter_project_build_files',
-          );
-          final Directory androidDir = tempDir.childDirectory('android')
-            ..createSync(recursive: true);
+        expect(project.android.settingsGradleFile.path, expected.path);
+      });
+      test('Project.android.settingsGradleFile resolves to android/settings.gradle.kts', () {
+        final FileSystem fs = getFileSystemForPlatform();
+        final Directory tempDir = fs.systemTempDirectory.createTempSync(
+          'flutter_project_build_files',
+        );
+        final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
-          final File expected = androidDir.childFile('settings.gradle.kts')
-            ..createSync(recursive: true);
+        final File expected = androidDir.childFile('settings.gradle.kts')
+          ..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
-          expect(project.android.settingsGradleFile.path, expected.path);
-        },
-      );
-      testWithoutContext('Project.android.settingsGradleFile prefers android/settings.gradle over android/settings.gradle.kts', () {
+        expect(project.android.settingsGradleFile.path, expected.path);
+      });
+      test('Project.android.settingsGradleFile prefers android/settings.gradle over android/settings.gradle.kts', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync(
           'flutter_project_build_files',
@@ -1961,7 +1941,7 @@ android {
 
         expect(project.android.settingsGradleFile.path, expected.path);
       });
-      testWithoutContext('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when build.gradle exists', () {
+      test('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when build.gradle exists', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_project_test');
         final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
@@ -1980,7 +1960,7 @@ android {
 
         expect(project.android.appManifestFile.path, expected.path);
       });
-      testWithoutContext('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when build.gradle.kts exists', () {
+      test('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when build.gradle.kts exists', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_project_test');
         final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
@@ -1999,7 +1979,7 @@ android {
 
         expect(project.android.appManifestFile.path, expected.path);
       });
-      testWithoutContext('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when both build.gradle and build.gradle.kts exists', () {
+      test('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when both build.gradle and build.gradle.kts exists', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_project_test');
         final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
@@ -2019,7 +1999,7 @@ android {
 
         expect(project.android.appManifestFile.path, expected.path);
       });
-      testWithoutContext('Project.android.appManifestFile resolves to android/AndroidManifest.xml when not using Gradle', () {
+      test('Project.android.appManifestFile resolves to android/AndroidManifest.xml when not using Gradle', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_project_test');
         final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
@@ -2031,26 +2011,21 @@ android {
 
         expect(project.android.appManifestFile.path, expected.path);
       });
-      testWithoutContext(
-        'Project.android.localPropertiesFile resolves to android/local.properties',
-        () {
-          final FileSystem fs = getFileSystemForPlatform();
-          final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_project_test');
-          final Directory androidDir = tempDir.childDirectory('android')
-            ..createSync(recursive: true);
+      test('Project.android.localPropertiesFile resolves to android/local.properties', () {
+        final FileSystem fs = getFileSystemForPlatform();
+        final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_project_test');
+        final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
-          final File expected = androidDir.childFile('local.properties')
-            ..createSync(recursive: true);
+        final File expected = androidDir.childFile('local.properties')..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir, logger: logger);
 
-          expect(project.android.localPropertiesFile.path, expected.path);
-        },
-      );
+        expect(project.android.localPropertiesFile.path, expected.path);
+      });
     });
 
     group('workspaces', () {
-      testWithoutContext('fails on invalid pubspec.yaml', () {
+      test('fails on invalid pubspec.yaml', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -2093,7 +2068,7 @@ resolution: workspace
         );
       });
 
-      testWithoutContext('supports glob patterns in workspace entries', () {
+      test('supports glob patterns in workspace entries', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -2127,7 +2102,7 @@ resolution: workspace
         );
       });
 
-      testWithoutContext('supports recursive glob pattern ** in workspace entries', () {
+      test('supports recursive glob pattern ** in workspace entries', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -2165,7 +2140,7 @@ resolution: workspace
         );
       });
 
-      testWithoutContext('handles empty workspace entries gracefully', () {
+      test('handles empty workspace entries gracefully', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -2179,7 +2154,7 @@ workspace:
         expect(FlutterProject.fromDirectory(directory, logger: logger).workspaceProjects, isEmpty);
       });
 
-      testWithoutContext('handles Windows backslash separators in workspace entries', () {
+      test('handles Windows backslash separators in workspace entries', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -2214,7 +2189,7 @@ resolution: workspace
         );
       });
 
-      testWithoutContext('ignores build and .dart_tool directories during workspace discovery', () {
+      test('ignores build and .dart_tool directories during workspace discovery', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -2263,7 +2238,7 @@ resolution: workspace
         );
       });
 
-      testWithoutContext('workspaceRoot returns root project for member projects', () {
+      test('workspaceRoot returns root project for member projects', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -2296,7 +2271,7 @@ resolution: workspace
         expect(parentProject.workspaceRoot, null);
       });
 
-      testWithoutContext('workspaceRoot works with relative paths', () {
+      test('workspaceRoot works with relative paths', () {
         final FileSystem fs = getFileSystemForPlatform();
         final Directory directory = fs.directory('myproject')..createSync(recursive: true);
         directory.childFile('pubspec.yaml').writeAsStringSync('''
@@ -2328,51 +2303,48 @@ resolution: workspace
         }
       });
 
-      testWithoutContext(
-        'workspaceRoot is resilient to malformed sibling packages in workspace',
-        () {
-          final FileSystem fs = getFileSystemForPlatform();
-          final Directory directory = fs.directory('myproject');
-          directory.childFile('pubspec.yaml')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
+      test('workspaceRoot is resilient to malformed sibling packages in workspace', () {
+        final FileSystem fs = getFileSystemForPlatform();
+        final Directory directory = fs.directory('myproject');
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
 name: parent
 flutter:
 workspace:
 - pkgs/*
 ''');
-          final Directory validChildDir = directory
-              .childDirectory('pkgs')
-              .childDirectory('valid_child');
-          validChildDir.childFile('pubspec.yaml')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
+        final Directory validChildDir = directory
+            .childDirectory('pkgs')
+            .childDirectory('valid_child');
+        validChildDir.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
 name: valid_child
 flutter:
 resolution: workspace
 ''');
-          final Directory brokenChildDir = directory
-              .childDirectory('pkgs')
-              .childDirectory('broken_child');
-          brokenChildDir.childFile('pubspec.yaml')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('invalid: yaml: [broken');
+        final Directory brokenChildDir = directory
+            .childDirectory('pkgs')
+            .childDirectory('broken_child');
+        brokenChildDir.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('invalid: yaml: [broken');
 
-          final FlutterProject parentProject = FlutterProject.fromDirectory(
-            directory,
-            logger: logger,
-          );
-          final FlutterProject childProject = FlutterProject.fromDirectory(
-            validChildDir,
-            logger: logger,
-          );
+        final FlutterProject parentProject = FlutterProject.fromDirectory(
+          directory,
+          logger: logger,
+        );
+        final FlutterProject childProject = FlutterProject.fromDirectory(
+          validChildDir,
+          logger: logger,
+        );
 
-          expect(
-            fs.path.canonicalize(childProject.workspaceRoot!.directory.path),
-            fs.path.canonicalize(parentProject.directory.path),
-          );
-        },
-      );
+        expect(
+          fs.path.canonicalize(childProject.workspaceRoot!.directory.path),
+          fs.path.canonicalize(parentProject.directory.path),
+        );
+      });
     });
   });
 
@@ -2400,7 +2372,7 @@ resolution: workspace
       };
     });
 
-    testWithoutContext('cannot find bundle identifier', () async {
+    test('cannot find bundle identifier', () async {
       final FlutterProject project = await someProject(toolContext: toolContext);
       final projectInfo = XcodeProjectInfo(<String>['WatchTarget'], <String>[], <String>[], logger);
       expect(
@@ -2423,7 +2395,7 @@ resolution: workspace
         );
       });
 
-      testWithoutContext('no Info.plist in target', () async {
+      test('no Info.plist in target', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
         expect(
           await project.ios.containsWatchCompanion(
@@ -2435,50 +2407,44 @@ resolution: workspace
         );
       });
 
-      testWithoutContext(
-        'Info.plist in target does not contain WKCompanionAppBundleIdentifier',
-        () async {
-          final FlutterProject project = await someProject(toolContext: toolContext);
-          project.ios.hostAppRoot
-              .childDirectory('WatchTarget')
-              .childFile('Info.plist')
-              .createSync(recursive: true);
+      test('Info.plist in target does not contain WKCompanionAppBundleIdentifier', () async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        project.ios.hostAppRoot
+            .childDirectory('WatchTarget')
+            .childFile('Info.plist')
+            .createSync(recursive: true);
 
-          expect(
-            await project.ios.containsWatchCompanion(
-              projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
-              buildInfo: BuildInfo.debug,
-              deviceId: '123',
-            ),
-            isFalse,
-          );
-        },
-      );
+        expect(
+          await project.ios.containsWatchCompanion(
+            projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
+            buildInfo: BuildInfo.debug,
+            deviceId: '123',
+          ),
+          isFalse,
+        );
+      });
 
-      testWithoutContext(
-        'target WKCompanionAppBundleIdentifier is not project bundle identifier',
-        () async {
-          final FlutterProject project = await someProject(toolContext: toolContext);
-          project.ios.hostAppRoot
-              .childDirectory('WatchTarget')
-              .childFile('Info.plist')
-              .createSync(recursive: true);
-          testPlistParser.setProperty(
-            'WKCompanionAppBundleIdentifier',
-            'io.flutter.someOTHERproject',
-          );
-          expect(
-            await project.ios.containsWatchCompanion(
-              projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
-              buildInfo: BuildInfo.debug,
-              deviceId: '123',
-            ),
-            isFalse,
-          );
-        },
-      );
+      test('target WKCompanionAppBundleIdentifier is not project bundle identifier', () async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        project.ios.hostAppRoot
+            .childDirectory('WatchTarget')
+            .childFile('Info.plist')
+            .createSync(recursive: true);
+        testPlistParser.setProperty(
+          'WKCompanionAppBundleIdentifier',
+          'io.flutter.someOTHERproject',
+        );
+        expect(
+          await project.ios.containsWatchCompanion(
+            projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
+            buildInfo: BuildInfo.debug,
+            deviceId: '123',
+          ),
+          isFalse,
+        );
+      });
 
-      testWithoutContext('has watch companion in plist', () async {
+      test('has watch companion in plist', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
         project.ios.xcodeProject.createSync();
         project.ios.hostAppRoot
@@ -2497,7 +2463,7 @@ resolution: workspace
         );
       });
 
-      testWithoutContext('has watch companion in plist with xcode variable', () async {
+      test('has watch companion in plist with xcode variable', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
         project.ios.xcodeProject.createSync();
         const buildContext = XcodeProjectBuildContext(
@@ -2526,7 +2492,7 @@ resolution: workspace
         );
       });
 
-      testWithoutContext('has watch companion in other scheme build settings', () async {
+      test('has watch companion in other scheme build settings', () async {
         final FlutterProject project = await someProject(toolContext: toolContext);
         project.ios.xcodeProject.createSync();
         project.ios.xcodeProjectInfoFile.writeAsStringSync('''
@@ -2553,39 +2519,36 @@ resolution: workspace
         );
       });
 
-      testWithoutContext(
-        'has watch companion in other scheme build settings with xcode variable',
-        () async {
-          final FlutterProject project = await someProject(toolContext: toolContext);
-          project.ios.xcodeProject.createSync();
-          project.ios.xcodeProjectInfoFile.writeAsStringSync(r'''
+      test('has watch companion in other scheme build settings with xcode variable', () async {
+        final FlutterProject project = await someProject(toolContext: toolContext);
+        project.ios.xcodeProject.createSync();
+        project.ios.xcodeProjectInfoFile.writeAsStringSync(r'''
         Build settings for action build and target "WatchTarget":
             INFOPLIST_KEY_WKCompanionAppBundleIdentifier = $(PRODUCT_BUNDLE_IDENTIFIER)
 ''');
 
-          const watchBuildContext = XcodeProjectBuildContext(
-            scheme: 'WatchScheme',
-            sdk: XcodeSdk.WatchOS,
-          );
-          mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] =
-              <String, String>{
-                IosProject.kProductBundleIdKey: 'io.flutter.someProject',
-                'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': r'$(PRODUCT_BUNDLE_IDENTIFIER)',
-              };
+        const watchBuildContext = XcodeProjectBuildContext(
+          scheme: 'WatchScheme',
+          sdk: XcodeSdk.WatchOS,
+        );
+        mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] =
+            <String, String>{
+              IosProject.kProductBundleIdKey: 'io.flutter.someProject',
+              'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': r'$(PRODUCT_BUNDLE_IDENTIFIER)',
+            };
 
-          expect(
-            await project.ios.containsWatchCompanion(
-              projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
-              buildInfo: BuildInfo.debug,
-              deviceId: '123',
-            ),
-            isTrue,
-          );
-        },
-      );
+        expect(
+          await project.ios.containsWatchCompanion(
+            projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
+            buildInfo: BuildInfo.debug,
+            deviceId: '123',
+          ),
+          isTrue,
+        );
+      });
     });
 
-    testWithoutContext('FlutterProjectFactory lazily evaluates featureFlagsBuilder', () {
+    test('FlutterProjectFactory lazily evaluates featureFlagsBuilder', () {
       final fs = MemoryFileSystem.test();
       final Directory projectDir = fs.directory('app');
       projectDir.childFile('pubspec.yaml')
