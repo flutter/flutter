@@ -1895,6 +1895,8 @@ void Canvas::SaveLayer(const Paint& paint,
               subpass_coverage.GetLeftTop().y -
                   std::floor(subpass_coverage.GetLeftTop().y));
   }
+  const Rect adjusted_subpass_coverage =
+      subpass_coverage.Shift(-coverage_origin_adjustment);
   if (subpass_size.IsEmpty()) {
     return SkipUntilMatchingRestore(total_content_depth);
   }
@@ -1910,11 +1912,8 @@ void Canvas::SaveLayer(const Paint& paint,
   std::shared_ptr<FilterContents> backdrop_filter_contents;
   Point local_position = Point(0, 0);
   if (backdrop_filter) {
-    // Match the rounded-out origin of the subpass texture.
-    // See https://github.com/flutter/flutter/issues/194846
     local_position =
-        subpass_coverage.Shift(-coverage_origin_adjustment).GetOrigin() -
-        GetGlobalPassPosition();
+        adjusted_subpass_coverage.GetOrigin() - GetGlobalPassPosition();
 
     std::shared_ptr<Texture> input_texture;
 
@@ -2028,8 +2027,8 @@ void Canvas::SaveLayer(const Paint& paint,
                                              subpass_size,              //
                                              Color::BlackTransparent()  //
                                              )));
-  save_layer_state_.push_back(SaveLayerState{
-      paint_copy, subpass_coverage.Shift(-coverage_origin_adjustment)});
+  save_layer_state_.push_back(
+      SaveLayerState{paint_copy, adjusted_subpass_coverage});
 
   CanvasStackEntry entry;
   entry.transform = transform_stack_.back().transform;
