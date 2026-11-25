@@ -45,6 +45,7 @@ import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../vmservice.dart';
+import '../web/web_debug_config.dart';
 import '../web/web_runner.dart';
 
 const protocolVersion = '0.6.1';
@@ -903,7 +904,6 @@ class AppDomain extends Domain {
     String? route,
     DebuggingOptions options,
     bool enableHotReload, {
-    Map<String, String> webDefines = const <String, String>{},
     File? applicationBinary,
     required bool trackWidgetCreation,
     String? projectRootPath,
@@ -955,7 +955,6 @@ class AppDomain extends Domain {
         target: target,
         toolContext: toolContext,
         urlTunneller: options.webConfig.enableExposeUrl ? daemon.daemonDomain.exposeUrl : null,
-        webDefines: webDefines,
       );
     } else if (enableHotReload) {
       runner = HotRunner(
@@ -1501,6 +1500,7 @@ class DeviceDomain extends Domain {
         castStringKeyedMap(args['debuggingOptions'])!,
         // We are using prebuilts, build info does not matter here.
         BuildInfo.dummy,
+        platformOptionParsers: const <PlatformDebuggingOptionsParser>[WebDebugConfig.tryFromJson],
       ),
       mainPath: _getStringArg(args, 'mainPath'),
       route: _getStringArg(args, 'route'),

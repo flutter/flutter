@@ -18,7 +18,7 @@ void main() {
     toolContext = FakeToolContext(logger: logger);
   });
 
-  testWithoutContext('generate command prints deprecation error and returns fail', () async {
+  test('generate command prints deprecation error and returns fail', () async {
     final command = GenerateCommand(toolContext: toolContext);
     final FlutterCommandResult result = await command.runCommand();
     expect(result.exitStatus, ExitStatus.fail);
@@ -28,7 +28,7 @@ void main() {
     );
   });
 
-  testWithoutContext('generate command is hidden', () {
+  test('generate command is hidden', () {
     final command = GenerateCommand(toolContext: toolContext);
     expect(command.hidden, isTrue);
   });

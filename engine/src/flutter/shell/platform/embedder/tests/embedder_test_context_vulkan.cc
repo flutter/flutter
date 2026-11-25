@@ -63,7 +63,8 @@ EmbedderTestContextVulkan::EmbedderTestContextVulkan(std::string assets_path)
 EmbedderTestContextVulkan::~EmbedderTestContextVulkan() {}
 
 EmbedderTestContextType EmbedderTestContextVulkan::GetContextType() const {
-  return EmbedderTestContextType::kVulkanContext;
+  return enable_impeller_ ? EmbedderTestContextType::kVulkanImpellerContext
+                          : EmbedderTestContextType::kVulkanContext;
 }
 
 void EmbedderTestContextVulkan::SetVulkanInstanceProcAddressCallback(

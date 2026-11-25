@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/cache.dart';
 import '../../src/common.dart';
 
 void main() {
-  testWithoutContext('Cache can initialize flutter root from environment variable', () {
+  test('Cache can initialize flutter root from environment variable', () {
     final String defaultFlutterRoot = Cache.defaultFlutterRoot(
       fileSystem: MemoryFileSystem.test(),
       userMessages: UserMessages(),
@@ -21,7 +21,7 @@ void main() {
     expect(defaultFlutterRoot, '/path/to/flutter');
   });
 
-  testWithoutContext('Cache can initialize flutter root data-scheme platform script', () {
+  test('Cache can initialize flutter root data-scheme platform script', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     // For data-uri, the root is initialized to ../.. and then normalized. Change the
     // current directory to verify this.
@@ -40,7 +40,7 @@ void main() {
     expect(defaultFlutterRoot, '/foo');
   });
 
-  testWithoutContext('Cache can initialize flutter root package-scheme platform script', () {
+  test('Cache can initialize flutter root package-scheme platform script', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final String defaultFlutterRoot = Cache.defaultFlutterRoot(
       fileSystem: fileSystem,
@@ -55,7 +55,7 @@ void main() {
     expect(defaultFlutterRoot, '/flutter');
   });
 
-  testWithoutContext('Cache can initialize flutter root from snapshot location', () {
+  test('Cache can initialize flutter root from snapshot location', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final String defaultFlutterRoot = Cache.defaultFlutterRoot(
       fileSystem: fileSystem,
@@ -69,7 +69,7 @@ void main() {
     expect(defaultFlutterRoot, '/flutter');
   });
 
-  testWithoutContext('Cache can initialize flutter root from script file', () {
+  test('Cache can initialize flutter root from script file', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final String defaultFlutterRoot = Cache.defaultFlutterRoot(
       fileSystem: fileSystem,
@@ -83,7 +83,7 @@ void main() {
     expect(defaultFlutterRoot, '/flutter');
   });
 
-  testWithoutContext('Cache will default to current directory if there are no matches', () {
+  test('Cache will default to current directory if there are no matches', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final String defaultFlutterRoot = Cache.defaultFlutterRoot(
       fileSystem: fileSystem,

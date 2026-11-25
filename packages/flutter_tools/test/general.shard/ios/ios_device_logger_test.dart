@@ -41,7 +41,7 @@ void main() {
   });
 
   group('syslog stream', () {
-    testWithoutContext('decodeSyslog decodes a syslog-encoded line', () {
+    test('decodeSyslog decodes a syslog-encoded line', () {
       final String decoded = decodeSyslog(
         r'I \M-b\M^]\M-$\M-o\M-8\M^O syslog '
         r'\M-B\M-/\134_(\M-c\M^C\M^D)_/\M-B\M-/ \M-l\M^F\240!',
@@ -50,78 +50,72 @@ void main() {
       expect(decoded, r'I ❤️ syslog ¯\_(ツ)_/¯ 솠!');
     });
 
-    testWithoutContext('decodeSyslog passes through un-decodeable lines as-is', () {
+    test('decodeSyslog passes through un-decodeable lines as-is', () {
       final String decoded = decodeSyslog(r'I \M-b\M^O syslog!');
 
       expect(decoded, r'I \M-b\M^O syslog!');
     });
 
-    testWithoutContext(
-      'IOSDeviceLogReader suppresses non-Flutter lines from output with syslog',
-      () async {
-        processManager.addCommand(
-          FakeCommand(
-            command: <String>[ideviceSyslogPath, '-u', '1234'],
-            stdout: '''
+    test('IOSDeviceLogReader suppresses non-Flutter lines from output with syslog', () async {
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[ideviceSyslogPath, '-u', '1234'],
+          stdout: '''
 Runner(Flutter)[297] <Notice>: A is for ari
 Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestaltSupport.m:153: pid 123 (Runner) does not have sandbox access for frZQaeyWLUvLjeuEK43hmg and IS NOT appropriately entitled
 Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestalt.c:550: no access to InverseDeviceID (see <rdar://problem/11744455>)
 Runner(Flutter)[297] <Notice>: I is for ichigo
 Runner(UIKit)[297] <Notice>: E is for enpitsu"
 ''',
-          ),
-        );
-        final DeviceLogReader logReader = IOSDeviceLogReader.test(
-          iMobileDevice: IMobileDevice(
-            artifacts: artifacts,
-            processManager: processManager,
-            cache: fakeCache,
-            logger: logger,
-          ),
-          xcode: FakeXcode(),
-        );
-        final List<String> lines = await logReader.logLines.toList();
+        ),
+      );
+      final DeviceLogReader logReader = IOSDeviceLogReader.test(
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        xcode: FakeXcode(),
+      );
+      final List<String> lines = await logReader.logLines.toList();
 
-        expect(lines, <String>['A is for ari', 'I is for ichigo']);
-      },
-    );
+      expect(lines, <String>['A is for ari', 'I is for ichigo']);
+    });
 
-    testWithoutContext(
-      'IOSDeviceLogReader includes multi-line Flutter logs in the output with syslog',
-      () async {
-        processManager.addCommand(
-          FakeCommand(
-            command: <String>[ideviceSyslogPath, '-u', '1234'],
-            stdout: '''
+    test('IOSDeviceLogReader includes multi-line Flutter logs in the output with syslog', () async {
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[ideviceSyslogPath, '-u', '1234'],
+          stdout: '''
 Runner(Flutter)[297] <Notice>: This is a multi-line message,
   with another Flutter message following it.
 Runner(Flutter)[297] <Notice>: This is a multi-line message,
   with a non-Flutter log message following it.
 Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 ''',
-          ),
-        );
-        final DeviceLogReader logReader = IOSDeviceLogReader.test(
-          iMobileDevice: IMobileDevice(
-            artifacts: artifacts,
-            processManager: processManager,
-            cache: fakeCache,
-            logger: logger,
-          ),
-          xcode: FakeXcode(),
-        );
-        final List<String> lines = await logReader.logLines.toList();
+        ),
+      );
+      final DeviceLogReader logReader = IOSDeviceLogReader.test(
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        xcode: FakeXcode(),
+      );
+      final List<String> lines = await logReader.logLines.toList();
 
-        expect(lines, <String>[
-          'This is a multi-line message,',
-          '  with another Flutter message following it.',
-          'This is a multi-line message,',
-          '  with a non-Flutter log message following it.',
-        ]);
-      },
-    );
+      expect(lines, <String>[
+        'This is a multi-line message,',
+        '  with another Flutter message following it.',
+        'This is a multi-line message,',
+        '  with a non-Flutter log message following it.',
+      ]);
+    });
 
-    testWithoutContext('includes multi-line Flutter logs in the output', () async {
+    test('includes multi-line Flutter logs in the output', () async {
       processManager.addCommand(
         FakeCommand(
           command: <String>[ideviceSyslogPath, '-u', '1234'],
@@ -156,7 +150,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
   });
 
   group('VM service', () {
-    testWithoutContext('IOSDeviceLogReader can listen to VM Service logs', () async {
+    test('IOSDeviceLogReader can listen to VM Service logs', () async {
       final stdoutEvent = Event(
         kind: 'Stdout',
         timestamp: 0,
@@ -207,7 +201,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       );
     });
 
-    testWithoutContext('IOSDeviceLogReader ignores VM Service logs when attached to and received flutter logs from debugger', () async {
+    test('IOSDeviceLogReader ignores VM Service logs when attached to and received flutter logs from debugger', () async {
       final stdoutEvent = Event(
         kind: 'Stdout',
         timestamp: 0,
@@ -264,7 +258,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
   });
 
   group('debugger stream', () {
-    testWithoutContext('IOSDeviceLogReader removes metadata prefix from lldb output', () async {
+    test('IOSDeviceLogReader removes metadata prefix from lldb output', () async {
       final debuggingLogs = Stream<String>.fromIterable(<String>[
         '2020-09-15 19:15:10.931434-0700 Runner[541:226276] Did finish launching.',
         '2020-09-15 19:15:10.931434-0700 Runner[541:226276] [Category] Did finish launching from logging category.',
@@ -295,7 +289,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       ]);
     });
 
-    testWithoutContext('errors on debugger stream closes log stream', () async {
+    test('errors on debugger stream closes log stream', () async {
       final debuggingLogs = Stream<String>.error('ios-deploy error');
       final logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
@@ -316,7 +310,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       await streamComplete.future;
     });
 
-    testWithoutContext('detaches debugger', () async {
+    test('detaches debugger', () async {
       final logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
@@ -334,7 +328,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(iosDeployDebugger.detached, true);
     });
 
-    testWithoutContext('Does not throw if debuggerStream set after logReader closed', () async {
+    test('Does not throw if debuggerStream set after logReader closed', () async {
       final debuggingLogs = Stream<String>.fromIterable(<String>[
         '2020-09-15 19:15:10.931434-0700 Runner[541:226276] Did finish launching.',
         '2020-09-15 19:15:10.931434-0700 Runner[541:226276] [Category] Did finish launching from logging category.',
@@ -372,7 +366,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
   });
 
   group('Determine which loggers to use', () {
-    testWithoutContext('for physically attached CoreDevice', () {
+    test('for physically attached CoreDevice', () {
       final logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
@@ -393,7 +387,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.unifiedLogging);
     });
 
-    testWithoutContext('for wirelessly attached CoreDevice', () {
+    test('for wirelessly attached CoreDevice', () {
       final logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
@@ -415,7 +409,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.logSources.fallbackSource, isNull);
     });
 
-    testWithoutContext('for iOS 12 or less device', () {
+    test('for iOS 12 or less device', () {
       final logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
@@ -435,30 +429,27 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.logSources.fallbackSource, isNull);
     });
 
-    testWithoutContext(
-      'for iOS 13 or greater non-CoreDevice and _iosDeployDebugger not attached',
-      () {
-        final logReader = IOSDeviceLogReader.test(
-          iMobileDevice: IMobileDevice(
-            artifacts: artifacts,
-            processManager: processManager,
-            cache: fakeCache,
-            logger: logger,
-          ),
-          xcode: FakeXcode(),
-          majorSdkVersion: 13,
-        );
+    test('for iOS 13 or greater non-CoreDevice and _iosDeployDebugger not attached', () {
+      final logReader = IOSDeviceLogReader.test(
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        xcode: FakeXcode(),
+        majorSdkVersion: 13,
+      );
 
-        expect(logReader.useSyslogLogging, isFalse);
-        expect(logReader.useUnifiedLogging, isTrue);
-        expect(logReader.useIOSDeployLogging, isTrue);
-        expect(logReader.useCoreDeviceLogging, isFalse);
-        expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
-        expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.unifiedLogging);
-      },
-    );
+      expect(logReader.useSyslogLogging, isFalse);
+      expect(logReader.useUnifiedLogging, isTrue);
+      expect(logReader.useIOSDeployLogging, isTrue);
+      expect(logReader.useCoreDeviceLogging, isFalse);
+      expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
+      expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.unifiedLogging);
+    });
 
-    testWithoutContext(
+    test(
       'for iOS 13 or greater non-CoreDevice, _iosDeployDebugger not attached, and VM is connected',
       () async {
         final logReader = IOSDeviceLogReader.test(
@@ -500,53 +491,50 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       },
     );
 
-    testWithoutContext(
-      'for iOS 13 or greater non-CoreDevice and _iosDeployDebugger is attached',
-      () async {
-        final logReader = IOSDeviceLogReader.test(
-          iMobileDevice: IMobileDevice(
-            artifacts: artifacts,
-            processManager: processManager,
-            cache: fakeCache,
-            logger: logger,
+    test('for iOS 13 or greater non-CoreDevice and _iosDeployDebugger is attached', () async {
+      final logReader = IOSDeviceLogReader.test(
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        xcode: FakeXcode(),
+        majorSdkVersion: 13,
+      );
+
+      final iosDeployDebugger = FakeIOSDeployDebugger();
+      iosDeployDebugger.debuggerAttached = true;
+      logReader.debuggerStream = iosDeployDebugger;
+
+      final FlutterVmService vmService = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Debug'},
           ),
-          xcode: FakeXcode(),
-          majorSdkVersion: 13,
-        );
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Stdout'},
+          ),
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Stderr'},
+          ),
+        ],
+      ).vmService;
 
-        final iosDeployDebugger = FakeIOSDeployDebugger();
-        iosDeployDebugger.debuggerAttached = true;
-        logReader.debuggerStream = iosDeployDebugger;
+      await logReader.provideVmService(vmService);
 
-        final FlutterVmService vmService = FakeVmServiceHost(
-          requests: <VmServiceExpectation>[
-            const FakeVmServiceRequest(
-              method: 'streamListen',
-              args: <String, Object>{'streamId': 'Debug'},
-            ),
-            const FakeVmServiceRequest(
-              method: 'streamListen',
-              args: <String, Object>{'streamId': 'Stdout'},
-            ),
-            const FakeVmServiceRequest(
-              method: 'streamListen',
-              args: <String, Object>{'streamId': 'Stderr'},
-            ),
-          ],
-        ).vmService;
+      expect(logReader.useSyslogLogging, isFalse);
+      expect(logReader.useUnifiedLogging, isTrue);
+      expect(logReader.useIOSDeployLogging, isTrue);
+      expect(logReader.useCoreDeviceLogging, isFalse);
+      expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
+      expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.unifiedLogging);
+    });
 
-        await logReader.provideVmService(vmService);
-
-        expect(logReader.useSyslogLogging, isFalse);
-        expect(logReader.useUnifiedLogging, isTrue);
-        expect(logReader.useIOSDeployLogging, isTrue);
-        expect(logReader.useCoreDeviceLogging, isFalse);
-        expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
-        expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.unifiedLogging);
-      },
-    );
-
-    testWithoutContext('for iOS 16 or greater non-CoreDevice', () {
+    test('for iOS 16 or greater non-CoreDevice', () {
       final logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
@@ -570,7 +558,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.unifiedLogging);
     });
 
-    testWithoutContext('for iOS 16 or greater non-CoreDevice in CI', () {
+    test('for iOS 16 or greater non-CoreDevice in CI', () {
       final logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
@@ -591,7 +579,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.idevicesyslog);
     });
 
-    testWithoutContext('for CoreDevice and Xcode 26', () {
+    test('for CoreDevice and Xcode 26', () {
       final logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
@@ -613,7 +601,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
     });
 
     group('when useSyslogLogging', () {
-      testWithoutContext('is true syslog sends flutter messages to stream', () async {
+      test('is true syslog sends flutter messages to stream', () async {
         processManager.addCommand(
           FakeCommand(
             command: <String>[ideviceSyslogPath, '-u', '1234'],
@@ -647,7 +635,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         ]);
       });
 
-      testWithoutContext('is false syslog does not send flutter messages to stream', () async {
+      test('is false syslog does not send flutter messages to stream', () async {
         final logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
@@ -672,7 +660,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
     });
 
     group('when useIOSDeployLogging', () {
-      testWithoutContext('is true ios-deploy sends flutter messages to stream', () async {
+      test('is true ios-deploy sends flutter messages to stream', () async {
         final logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
@@ -698,7 +686,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         expect(lines, <String>['flutter: Message from debugger']);
       });
 
-      testWithoutContext('is false ios-deploy does not send flutter messages to stream', () async {
+      test('is false ios-deploy does not send flutter messages to stream', () async {
         final logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
@@ -726,7 +714,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
     });
 
     group('when useUnifiedLogging', () {
-      testWithoutContext('is true Dart VM sends flutter messages to stream', () async {
+      test('is true Dart VM sends flutter messages to stream', () async {
         final stdoutEvent = Event(
           kind: 'Stdout',
           timestamp: 0,
@@ -779,7 +767,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         );
       });
 
-      testWithoutContext('is false Dart VM does not send flutter messages to stream', () async {
+      test('is false Dart VM does not send flutter messages to stream', () async {
         final stdoutEvent = Event(
           kind: 'Stdout',
           timestamp: 0,
@@ -830,7 +818,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
     });
 
     group('when useCoreDeviceLogging', () {
-      testWithoutContext('is true devicectl and lldb sends messages to stream', () async {
+      test('is true devicectl and lldb sends messages to stream', () async {
         final logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
@@ -859,7 +847,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         );
       });
 
-      testWithoutContext('is false devicectl and lldb do not sends messages to stream', () async {
+      test('is false devicectl and lldb do not sends messages to stream', () async {
         final logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
@@ -890,7 +878,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
     });
 
     group('and when to exclude logs:', () {
-      testWithoutContext(
+      test(
         'all primary messages are included except if fallback sent flutter message first',
         () async {
           final logReader = IOSDeviceLogReader.test(
@@ -942,7 +930,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         },
       );
 
-      testWithoutContext('all primary messages are included when there is no fallback', () async {
+      test('all primary messages are included when there is no fallback', () async {
         final logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
@@ -988,7 +976,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         );
       });
 
-      testWithoutContext('primary messages are not added if fallback already added them, otherwise duplicates are allowed', () async {
+      test('primary messages are not added if fallback already added them, otherwise duplicates are allowed', () async {
         final logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
@@ -1040,7 +1028,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         );
       });
 
-      testWithoutContext(
+      test(
         'flutter fallback messages are included until a primary flutter message is received',
         () async {
           final logReader = IOSDeviceLogReader.test(
@@ -1101,7 +1089,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         },
       );
 
-      testWithoutContext('non-flutter fallback messages are not included', () async {
+      test('non-flutter fallback messages are not included', () async {
         final logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,

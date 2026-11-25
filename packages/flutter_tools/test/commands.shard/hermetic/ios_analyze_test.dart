@@ -56,7 +56,7 @@ void main() {
       runner = createTestCommandRunner(command);
     });
 
-    testWithoutContext('can output json file', () async {
+    test('can output json file', () async {
       final ios = FakeIosProject();
       final project = FakeFlutterProject(ios);
       const expectedConfig = 'someConfig';
@@ -75,7 +75,7 @@ void main() {
       expect(ios.outputTarget, expectedTarget);
     });
 
-    testWithoutContext('can list build options', () async {
+    test('can list build options', () async {
       final ios = FakeIosProject();
       final project = FakeFlutterProject(ios);
       const targets = <String>['target1', 'target2'];

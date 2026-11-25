@@ -115,7 +115,7 @@ FakeCommand attachDebuggerCommand({
 }
 
 void main() {
-  testWithoutContext('disposing device disposes the portForwarder and logReader', () async {
+  test('disposing device disposes the portForwarder and logReader', () async {
     final IOSDevice device = setUpIOSDevice();
     final devicePortForwarder = FakeDevicePortForwarder();
     final deviceLogReader = FakeDeviceLogReader();
@@ -134,53 +134,50 @@ void main() {
     expect(devicePortForwarder.disposed, true);
   });
 
-  testWithoutContext(
-    'IOSDevice.startApp attaches in debug mode via log reading on iOS 13+',
-    () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final processManager = FakeProcessManager.list(<FakeCommand>[attachDebuggerCommand()]);
-      final fakeAnalytics = FakeAnalytics();
-      final IOSDevice device = setUpIOSDevice(
-        processManager: processManager,
-        fileSystem: fileSystem,
-        analytics: fakeAnalytics,
-      );
-      final IOSApp iosApp = PrebuiltIOSApp(
-        projectBundleId: 'app',
-        bundleName: 'Runner',
-        uncompressedBundle: fileSystem.currentDirectory,
-        applicationPackage: fileSystem.currentDirectory,
-      );
-      final deviceLogReader = FakeDeviceLogReader();
+  test('IOSDevice.startApp attaches in debug mode via log reading on iOS 13+', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final processManager = FakeProcessManager.list(<FakeCommand>[attachDebuggerCommand()]);
+    final fakeAnalytics = FakeAnalytics();
+    final IOSDevice device = setUpIOSDevice(
+      processManager: processManager,
+      fileSystem: fileSystem,
+      analytics: fakeAnalytics,
+    );
+    final IOSApp iosApp = PrebuiltIOSApp(
+      projectBundleId: 'app',
+      bundleName: 'Runner',
+      uncompressedBundle: fileSystem.currentDirectory,
+      applicationPackage: fileSystem.currentDirectory,
+    );
+    final deviceLogReader = FakeDeviceLogReader();
 
-      device.portForwarder = const NoOpDevicePortForwarder();
-      device.setLogReader(iosApp, deviceLogReader);
+    device.portForwarder = const NoOpDevicePortForwarder();
+    device.setLogReader(iosApp, deviceLogReader);
 
-      // Start writing messages to the log reader.
-      Timer.run(() {
-        deviceLogReader.addLine('Foo');
-        deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
-      });
+    // Start writing messages to the log reader.
+    Timer.run(() {
+      deviceLogReader.addLine('Foo');
+      deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
+    });
 
-      final LaunchResult launchResult = await device.startApp(
-        iosApp,
-        prebuiltApplication: true,
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        platformArgs: <String, dynamic>{},
-      );
+    final LaunchResult launchResult = await device.startApp(
+      iosApp,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      platformArgs: <String, dynamic>{},
+    );
 
-      expect(launchResult.started, true);
-      expect(launchResult.hasVmService, true);
-      expect(await device.stopApp(iosApp), false);
-      expect(fakeAnalytics.sentEvents, [
-        Event.appleUsageEvent(
-          workflow: 'ios-physical-deployment',
-          parameter: IOSDeploymentMethod.iosDeployLaunchAndAttach.name,
-          result: 'debugging success',
-        ),
-      ]);
-    },
-  );
+    expect(launchResult.started, true);
+    expect(launchResult.hasVmService, true);
+    expect(await device.stopApp(iosApp), false);
+    expect(fakeAnalytics.sentEvents, [
+      Event.appleUsageEvent(
+        workflow: 'ios-physical-deployment',
+        parameter: IOSDeploymentMethod.iosDeployLaunchAndAttach.name,
+        result: 'debugging success',
+      ),
+    ]);
+  });
 
   testUsingContext(
     'IOSDevice.startApp twice in a row where ios-deploy fails the first time',
@@ -248,56 +245,53 @@ void main() {
     },
   );
 
-  testWithoutContext(
-    'IOSDevice.startApp launches in debug mode via log reading on <iOS 13',
-    () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final processManager = FakeProcessManager.list(<FakeCommand>[kLaunchDebugCommand]);
-      final fakeAnalytics = FakeAnalytics();
-      final IOSDevice device = setUpIOSDevice(
-        sdkVersion: '12.4.4',
-        processManager: processManager,
-        fileSystem: fileSystem,
-        analytics: fakeAnalytics,
-      );
-      final IOSApp iosApp = PrebuiltIOSApp(
-        projectBundleId: 'app',
-        bundleName: 'Runner',
-        uncompressedBundle: fileSystem.currentDirectory,
-        applicationPackage: fileSystem.currentDirectory,
-      );
-      final deviceLogReader = FakeDeviceLogReader();
+  test('IOSDevice.startApp launches in debug mode via log reading on <iOS 13', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final processManager = FakeProcessManager.list(<FakeCommand>[kLaunchDebugCommand]);
+    final fakeAnalytics = FakeAnalytics();
+    final IOSDevice device = setUpIOSDevice(
+      sdkVersion: '12.4.4',
+      processManager: processManager,
+      fileSystem: fileSystem,
+      analytics: fakeAnalytics,
+    );
+    final IOSApp iosApp = PrebuiltIOSApp(
+      projectBundleId: 'app',
+      bundleName: 'Runner',
+      uncompressedBundle: fileSystem.currentDirectory,
+      applicationPackage: fileSystem.currentDirectory,
+    );
+    final deviceLogReader = FakeDeviceLogReader();
 
-      device.portForwarder = const NoOpDevicePortForwarder();
-      device.setLogReader(iosApp, deviceLogReader);
+    device.portForwarder = const NoOpDevicePortForwarder();
+    device.setLogReader(iosApp, deviceLogReader);
 
-      // Start writing messages to the log reader.
-      Timer.run(() {
-        deviceLogReader.addLine('Foo');
-        deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
-      });
+    // Start writing messages to the log reader.
+    Timer.run(() {
+      deviceLogReader.addLine('Foo');
+      deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
+    });
 
-      final LaunchResult launchResult = await device.startApp(
-        iosApp,
-        prebuiltApplication: true,
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        platformArgs: <String, dynamic>{},
-      );
+    final LaunchResult launchResult = await device.startApp(
+      iosApp,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      platformArgs: <String, dynamic>{},
+    );
 
-      expect(launchResult.started, true);
-      expect(launchResult.hasVmService, true);
-      expect(await device.stopApp(iosApp), false);
-      expect(fakeAnalytics.sentEvents, [
-        Event.appleUsageEvent(
-          workflow: 'ios-physical-deployment',
-          parameter: IOSDeploymentMethod.iosDeployLaunch.name,
-          result: 'debugging success',
-        ),
-      ]);
-    },
-  );
+    expect(launchResult.started, true);
+    expect(launchResult.hasVmService, true);
+    expect(await device.stopApp(iosApp), false);
+    expect(fakeAnalytics.sentEvents, [
+      Event.appleUsageEvent(
+        workflow: 'ios-physical-deployment',
+        parameter: IOSDeploymentMethod.iosDeployLaunch.name,
+        result: 'debugging success',
+      ),
+    ]);
+  });
 
-  testWithoutContext('IOSDevice.startApp prints warning message if discovery takes longer than configured timeout for wired device', () async {
+  test('IOSDevice.startApp prints warning message if discovery takes longer than configured timeout for wired device', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final logger = BufferLogger.test();
     final stdin = CompleterIOSink();
@@ -571,7 +565,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('IOSDevice.startApp forwards all supported debugging options', () async {
+  test('IOSDevice.startApp forwards all supported debugging options', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final fakeAnalytics = FakeAnalytics();
     final processManager = FakeProcessManager.list(<FakeCommand>[
@@ -685,7 +679,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('startApp using route', () async {
+  test('startApp using route', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final fakeAnalytics = FakeAnalytics();
     final processManager = FakeProcessManager.list(<FakeCommand>[
@@ -761,7 +755,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('startApp using trace-startup', () async {
+  test('startApp using trace-startup', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final fakeAnalytics = FakeAnalytics();
     final processManager = FakeProcessManager.list(<FakeCommand>[
@@ -1344,7 +1338,7 @@ void main() {
       );
 
       group('IOSDevice warnIfSlowWirelessDebugging', () {
-        testWithoutContext('prints warning for slow wireless debugging on iOS 26+', () async {
+        test('prints warning for slow wireless debugging on iOS 26+', () async {
           final logger = BufferLogger.test();
           final IOSDevice device = setUpIOSDevice(
             sdkVersion: '26.0.0',
@@ -1375,52 +1369,43 @@ void main() {
             }),
           );
         });
-        testWithoutContext(
-          'does not print slow wireless debugging warning on iOS less than 26',
-          () async {
-            final logger = BufferLogger.test();
-            final IOSDevice device = setUpIOSDevice(
-              sdkVersion: '25.0',
-              logger: logger,
-              interfaceType: DeviceConnectionInterface.wireless,
-            );
+        test('does not print slow wireless debugging warning on iOS less than 26', () async {
+          final logger = BufferLogger.test();
+          final IOSDevice device = setUpIOSDevice(
+            sdkVersion: '25.0',
+            logger: logger,
+            interfaceType: DeviceConnectionInterface.wireless,
+          );
 
-            device.warnIfSlowWirelessDebugging(DebuggingOptions.enabled(BuildInfo.debug));
+          device.warnIfSlowWirelessDebugging(DebuggingOptions.enabled(BuildInfo.debug));
 
-            expect(logger.warningText, isEmpty);
-            expect(logger.eventText, isEmpty);
-          },
-        );
+          expect(logger.warningText, isEmpty);
+          expect(logger.eventText, isEmpty);
+        });
 
-        testWithoutContext(
-          'does not print slow wireless debugging warning for wired device',
-          () async {
-            final logger = BufferLogger.test();
-            final IOSDevice device = setUpIOSDevice(sdkVersion: '26.0', logger: logger);
+        test('does not print slow wireless debugging warning for wired device', () async {
+          final logger = BufferLogger.test();
+          final IOSDevice device = setUpIOSDevice(sdkVersion: '26.0', logger: logger);
 
-            device.warnIfSlowWirelessDebugging(DebuggingOptions.enabled(BuildInfo.debug));
+          device.warnIfSlowWirelessDebugging(DebuggingOptions.enabled(BuildInfo.debug));
 
-            expect(logger.warningText, isEmpty);
-            expect(logger.eventText, isEmpty);
-          },
-        );
+          expect(logger.warningText, isEmpty);
+          expect(logger.eventText, isEmpty);
+        });
 
-        testWithoutContext(
-          'does not print slow wireless debugging warning for release mode',
-          () async {
-            final logger = BufferLogger.test();
-            final IOSDevice device = setUpIOSDevice(
-              sdkVersion: '26.0',
-              logger: logger,
-              interfaceType: DeviceConnectionInterface.wireless,
-            );
+        test('does not print slow wireless debugging warning for release mode', () async {
+          final logger = BufferLogger.test();
+          final IOSDevice device = setUpIOSDevice(
+            sdkVersion: '26.0',
+            logger: logger,
+            interfaceType: DeviceConnectionInterface.wireless,
+          );
 
-            device.warnIfSlowWirelessDebugging(DebuggingOptions.disabled(BuildInfo.release));
+          device.warnIfSlowWirelessDebugging(DebuggingOptions.disabled(BuildInfo.release));
 
-            expect(logger.warningText, isEmpty);
-            expect(logger.eventText, isEmpty);
-          },
-        );
+          expect(logger.warningText, isEmpty);
+          expect(logger.eventText, isEmpty);
+        });
       });
 
       group('IOSDevice.startApp attaches in debug mode via device logging', () {
