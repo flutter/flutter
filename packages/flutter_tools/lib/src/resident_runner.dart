@@ -73,6 +73,7 @@ class FlutterDevice {
     required ToolContext toolContext,
     required BuildInfo buildInfo,
     required String? target,
+    ResidentCompilerFactory residentCompilerFactory = const ResidentCompilerFactory(),
     TargetModel? targetModelOverride,
     String? userIdentifier,
   }) async {
@@ -100,7 +101,7 @@ class FlutterDevice {
       logger: logger,
     );
 
-    final ResidentCompiler generator = const ResidentCompilerFactory().create(
+    final ResidentCompiler generator = residentCompilerFactory.create(
       artifacts: artifacts,
       processManager: processManager,
       logger: logger,
