@@ -10,6 +10,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/config.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/fingerprint.dart';
 import '../base/io.dart';
@@ -20,6 +21,7 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../device.dart';
 import '../features.dart';
@@ -476,7 +478,24 @@ Future<XcodeBuildResult> buildXcodeProject({
       globals.os.makePipe(scriptOutputPipeFile.path);
 
       Future<void> listenToScriptOutputLine() async {
-        final List<String> lines = await scriptOutputPipeFile!.readAsLines();
+        // The temporary directory may have been deleted mid-build (e.g. by
+        // fatal-signal temp cleanup), so there's nothing left to listen to.
+        if (!scriptOutputPipeFile!.existsSync()) {
+          return;
+        }
+        final List<String> lines;
+        try {
+          // Use openRead() instead of readAsLines() so ErrorHandlingFile does
+          // not convert ENOENT into a ToolExit if the pipe is deleted between
+          // existsSync() and opening the stream.
+          lines = await scriptOutputPipeFile
+              .openRead()
+              .transform(utf8AllowMalformed.decoder)
+              .transform(const LineSplitter())
+              .toList();
+        } on FileSystemException {
+          return;
+        }
         var inWarningBlock = false;
         var inNoteBlock = false;
         for (final line in lines) {
@@ -556,8 +575,15 @@ Future<XcodeBuildResult> buildXcodeProject({
 
     buildResult = await _runBuildWithRetries(buildCommands, app, resultBundleDirectory);
 
-    // Notifies listener that no more output is coming.
-    scriptOutputPipeFile?.writeAsStringSync('all done');
+    // Notifies listener that no more output is coming. The temporary directory
+    // may have been deleted mid-build (e.g. by fatal-signal temp cleanup).
+    try {
+      ErrorHandlingFileSystem.noExitOnFailure(
+        () => scriptOutputPipeFile?.writeAsStringSync('all done'),
+      );
+    } on FileSystemException {
+      // Ignore if the temporary directory or pipe was deleted mid-build.
+    }
     buildSubStatus?.stop();
     buildSubStatus = null;
     initialBuildStatus?.cancel();
@@ -599,7 +625,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       }
     }
   } finally {
-    tempDir.deleteSync(recursive: true);
+    ErrorHandlingFileSystem.deleteIfExists(tempDir, recursive: true);
   }
   if (buildResult != null && buildResult.exitCode != 0) {
     globals.printStatus('Failed to build iOS app');
