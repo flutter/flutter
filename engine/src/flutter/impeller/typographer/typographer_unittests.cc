@@ -569,7 +569,7 @@ TEST_P(TypographerTest, FailedAtlasGrowthDoesNotCorruptLaterGlyphs) {
   ASSERT_EQ(atlas->GetGlyphCount(), 3u);
 
   // Frame 2: a glyph that is wider than the atlas (4096px) at any height, so
-  // the atlas can't grow to fit it.
+  // the atlas can't grow to fit it. The last atlas is still used.
   SkFont huge_font = flutter::testing::CreateTestFontOfSize(200);
   auto huge_blob = SkTextBlob::MakeFromString("W", huge_font);
   ASSERT_TRUE(huge_blob);
@@ -577,7 +577,8 @@ TEST_P(TypographerTest, FailedAtlasGrowthDoesNotCorruptLaterGlyphs) {
       *GetContext(), context.get(), *data_host_buffer,
       GlyphAtlas::Type::kAlphaBitmap, Matrix::MakeScale({48.0f, 48.0f, 1.0f}),
       atlas_context, MakeTextFrameFromTextBlobSkia(huge_blob));
-  ASSERT_EQ(failed_atlas, nullptr);
+  EXPECT_EQ(failed_atlas, atlas);
+  EXPECT_EQ(failed_atlas->GetGlyphCount(), 3u);
 
   // Frame 3: draw glyphs that weren't in the atlas before.
   auto second_blob = SkTextBlob::MakeFromString("xyz", sk_font);

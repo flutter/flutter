@@ -118,13 +118,14 @@ Scalar AttractToOne(Scalar x) {
 
 }  // namespace
 
-void TextContents::ComputeVertexData(VS::PerVertexData* vtx_contents,
-                                     const Matrix& entity_offset_transform,
-                                     const std::shared_ptr<TextFrame>& frame,
-                                     Point position,
-                                     const Matrix& screen_transform,
-                                     GlyphProperties glyph_properties,
-                                     const std::shared_ptr<GlyphAtlas>& atlas) {
+size_t TextContents::ComputeVertexData(
+    VS::PerVertexData* vtx_contents,
+    const Matrix& entity_offset_transform,
+    const std::shared_ptr<TextFrame>& frame,
+    Point position,
+    const Matrix& screen_transform,
+    GlyphProperties glyph_properties,
+    const std::shared_ptr<GlyphAtlas>& atlas) {
   // Common vertex information for all glyphs.
   // All glyphs are given the same vertex information in the form of a
   // unit-sized quad. The size of the glyph is specified in per instance data
@@ -203,12 +204,12 @@ void TextContents::ComputeVertexData(VS::PerVertexData* vtx_contents,
           font_atlas->FindGlyphBounds(subpixel_glyph).value_or(FrameBounds{});
 
       // If frame_bounds.is_placeholder is true, either this set of attributes
-      // were not captured by the FirstPass dispatcher or this is the first
+      // were not captured by the FirstPass dispatcher, this is the first
       // frame the glyph has been rendered and so its atlas position was not
-      // known when the glyph was recorded. Perform a slow lookup into the
-      // glyph atlas hash table.
+      // known when the glyph was recorded, or the glyph didn't fit in the
+      // atlas. The glyph is skipped.
       if (frame_bounds.is_placeholder) {
-        VALIDATION_LOG << "Frame bounds are not present in the atlas "
+        FML_DLOG(INFO) << "Frame bounds are not present in the atlas "
                        << font_atlas;
         continue;
       }
@@ -250,6 +251,7 @@ void TextContents::ComputeVertexData(VS::PerVertexData* vtx_contents,
       }
     }
   }
+  return i / unit_points.size();
 }
 
 bool TextContents::Render(const ContentContext& renderer,
@@ -356,26 +358,34 @@ bool TextContents::Render(const ContentContext& renderer,
     glyph_count += run.GetGlyphPositions().size();
   }
   size_t vertex_count = glyph_count * 4;
-  size_t index_count = glyph_count * 6;
 
-  BufferView buffer_view = data_host_buffer.Emplace(
-      vertex_count * sizeof(VS::PerVertexData), alignof(VS::PerVertexData),
-      [&](uint8_t* data) {
-        VS::PerVertexData* vtx_contents =
-            reinterpret_cast<VS::PerVertexData*>(data);
-        ComputeVertexData(/*vtx_contents=*/vtx_contents,
-                          /*entity_transform=*/entity.GetTransform(),
-                          /*frame=*/frame_,
-                          /*position=*/position_,
-                          /*screen_transform=*/screen_transform_,
-                          /*glyph_properties=*/properties_,
-                          /*atlas=*/atlas);
-      });
+  // Glyphs that aren't in the atlas are skipped, so fewer glyphs than
+  // `glyph_count` may be written. Only the written glyphs may be drawn, the
+  // rest of the vertex buffer is uninitialized.
+  size_t written_glyph_count = 0;
+  BufferView buffer_view =
+      data_host_buffer.Emplace(vertex_count * sizeof(VS::PerVertexData),
+                               alignof(VS::PerVertexData), [&](uint8_t* data) {
+                                 VS::PerVertexData* vtx_contents =
+                                     reinterpret_cast<VS::PerVertexData*>(data);
+                                 written_glyph_count = ComputeVertexData(
+                                     /*vtx_contents=*/vtx_contents,
+                                     /*entity_transform=*/entity.GetTransform(),
+                                     /*frame=*/frame_,
+                                     /*position=*/position_,
+                                     /*screen_transform=*/screen_transform_,
+                                     /*glyph_properties=*/properties_,
+                                     /*atlas=*/atlas);
+                               });
+  if (written_glyph_count == 0) {
+    return true;
+  }
+  size_t index_count = written_glyph_count * 6;
   BufferView index_buffer_view = indexes_host_buffer.Emplace(
       index_count * sizeof(uint16_t), alignof(uint16_t), [&](uint8_t* data) {
         uint16_t* indices = reinterpret_cast<uint16_t*>(data);
         size_t j = 0;
-        for (auto i = 0u; i < glyph_count; i++) {
+        for (auto i = 0u; i < written_glyph_count; i++) {
           size_t base = i * 4;
           indices[j++] = base + 0;
           indices[j++] = base + 1;

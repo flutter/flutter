@@ -87,9 +87,13 @@ class TextContents final : public Contents {
   ///                    DrawTextFrame call, optionally and only if they
   ///                    should come into play for rendering the glyphs.
   /// atlas              The glyph atlas containing the glyph texture and
-  ///                    placement metrics for all of the glyphs that
-  ///                    appear in the TextFrame.
-  static void ComputeVertexData(
+  ///                    placement metrics for the glyphs that appear in the
+  ///                    TextFrame. Glyphs that aren't in the atlas are
+  ///                    skipped.
+  ///
+  /// Returns the number of glyphs written to `vtx_contents`, each of which is
+  /// 4 vertices. The written glyphs are packed at the start of `vtx_contents`.
+  static size_t ComputeVertexData(
       GlyphAtlasPipeline::VertexShader::PerVertexData* vtx_contents,
       const Matrix& entity_transform,
       const std::shared_ptr<TextFrame>& frame,

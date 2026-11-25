@@ -743,8 +743,10 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
   if (!next_atlas_size.ok()) {
     FML_DLOG(INFO) << "Failed to grow glyph atlas: "
                    << next_atlas_size.status().message();
+    // Keep rendering from the last atlas. Glyphs that couldn't be added are
+    // skipped.
     restore_atlas_context();
-    return nullptr;
+    return last_atlas;
   }
   const ISize atlas_size = next_atlas_size.value();
   atlas_context->UpdateGlyphAtlas(new_atlas, atlas_size, height_adjustment);
@@ -766,8 +768,10 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
   std::shared_ptr<Texture> new_texture =
       context.GetResourceAllocator()->CreateTexture(descriptor);
   if (!new_texture) {
+    // Keep rendering from the last atlas. Glyphs that couldn't be added are
+    // skipped.
     restore_atlas_context();
-    return nullptr;
+    return last_atlas;
   }
 
   new_texture->SetLabel("GlyphAtlas");
