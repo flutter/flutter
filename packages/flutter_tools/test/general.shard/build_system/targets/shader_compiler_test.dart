@@ -1379,5 +1379,48 @@ void main() {
         ],
       );
     });
+
+    testWithoutContext(
+      'impellerc failure with "Could not write file to" in stderr adds write failure hint',
+      () async {
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              impellerc,
+              '--sksl',
+              '--iplr',
+              '--json',
+              '--sl=$outputPath',
+              '--spirv=$outputSpirvPath',
+              '--input=$notFragPath',
+              '--input-type=frag',
+              '--include=$fragDir',
+              '--include=$shaderLibDir',
+            ],
+            exitCode: 1,
+            stderr: 'Could not write file to "$outputPath"',
+          ),
+        ]);
+        final shaderCompiler = ShaderCompiler(
+          processManager: processManager,
+          logger: logger,
+          fileSystem: fileSystem,
+          artifacts: artifacts,
+          platform: FakePlatform(),
+        );
+
+        await expectShaderCompilerException(
+          shaderCompiler: shaderCompiler,
+          inputPath: notFragPath,
+          outputPath: outputPath,
+          matchers: <Matcher>[
+            contains('The shader compiler (impellerc) failed to write the output file.'),
+            contains(
+              'Ensure the build/ directory is writable and concurrent flutter test runs are not racing on it.',
+            ),
+          ],
+        );
+      },
+    );
   });
 }
