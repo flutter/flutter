@@ -365,6 +365,7 @@ class RenderParagraph extends RenderBox
          'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
        ),
        _overflow = overflow,
+       _maxLines = maxLines,
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -389,6 +390,7 @@ class RenderParagraph extends RenderBox
   );
 
   final TextPainter _textPainter;
+  int? _maxLines;
 
   // Currently, computing min/max intrinsic width/height will destroy state
   // inside the painter. Instead of calling _layout again to get back the correct
@@ -404,7 +406,7 @@ class RenderParagraph extends RenderBox
       ..textAlign = _textPainter.textAlign
       ..textDirection = _textPainter.textDirection
       ..textScaler = _textPainter.textScaler
-      ..maxLines = _textPainter.maxLines
+      ..maxLines = _maxLines
       ..ellipsis = _textPainter.ellipsis
       ..locale = _textPainter.locale
       ..strutStyle = _textPainter.strutStyle
@@ -692,15 +694,16 @@ class RenderParagraph extends RenderBox
   /// An optional maximum number of lines for the text to span, wrapping if
   /// necessary. If the text exceeds the given number of lines, it will be
   /// truncated according to [overflow] and [softWrap].
-  int? get maxLines => _textPainter.maxLines;
+  int? get maxLines => _maxLines;
 
   /// The value may be null. If it is not null, then it must be greater than
   /// zero.
   set maxLines(int? value) {
     assert(value == null || value > 0);
-    if (_textPainter.maxLines == value) {
+    if (_maxLines == value) {
       return;
     }
+    _maxLines = value;
     _textPainter.maxLines = value;
     _overflowShader = null;
     markNeedsLayout();
@@ -913,30 +916,49 @@ class RenderParagraph extends RenderBox
     return softWrap || overflow == TextOverflow.ellipsis ? maxWidth : double.infinity;
   }
 
+  void _layoutTextPainter(TextPainter painter, BoxConstraints constraints) {
+    final double maxWidth = _adjustMaxWidth(constraints.maxWidth);
+    painter.layout(minWidth: constraints.minWidth, maxWidth: maxWidth);
+
+    if (_overflow == TextOverflow.ellipsis &&
+        constraints.hasBoundedHeight &&
+        painter.height > constraints.maxHeight) {
+      final List<ui.LineMetrics> lines = painter.computeLineMetrics();
+      var fittingLines = 0;
+      for (final ui.LineMetrics line in lines) {
+        if (line.baseline + line.descent <= constraints.maxHeight) {
+          fittingLines++;
+        } else {
+          break;
+        }
+      }
+      final int effectiveMaxLines = math.max(1, fittingLines);
+      if (effectiveMaxLines < lines.length) {
+        painter
+          ..maxLines = effectiveMaxLines
+          ..layout(minWidth: constraints.minWidth, maxWidth: maxWidth);
+      }
+    }
+  }
+
   void _layoutTextWithConstraints(BoxConstraints constraints) {
-    _textPainter
-      ..setPlaceholderDimensions(_placeholderDimensions)
-      ..layout(minWidth: constraints.minWidth, maxWidth: _adjustMaxWidth(constraints.maxWidth));
+    _textPainter.setPlaceholderDimensions(_placeholderDimensions);
+    _layoutTextPainter(_textPainter, constraints);
   }
 
   @override
   @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
-    final Size size =
-        (_textIntrinsics
-              ..setPlaceholderDimensions(
-                layoutInlineChildren(
-                  constraints.maxWidth,
-                  ChildLayoutHelper.dryLayoutChild,
-                  ChildLayoutHelper.getDryBaseline,
-                ),
-              )
-              ..layout(
-                minWidth: constraints.minWidth,
-                maxWidth: _adjustMaxWidth(constraints.maxWidth),
-              ))
-            .size;
-    return constraints.constrain(size);
+    final TextPainter painter = _textIntrinsics
+      ..setPlaceholderDimensions(
+        layoutInlineChildren(
+          constraints.maxWidth,
+          ChildLayoutHelper.dryLayoutChild,
+          ChildLayoutHelper.getDryBaseline,
+        ),
+      );
+    _layoutTextPainter(painter, constraints);
+    return constraints.constrain(painter.size);
   }
 
   @override
@@ -979,6 +1001,7 @@ class RenderParagraph extends RenderBox
       ChildLayoutHelper.layoutChild,
       ChildLayoutHelper.getBaseline,
     );
+    _textPainter.maxLines = _maxLines;
     _layoutTextWithConstraints(constraints);
     positionInlineChildren(_textPainter.inlinePlaceholderBoxes!);
 
