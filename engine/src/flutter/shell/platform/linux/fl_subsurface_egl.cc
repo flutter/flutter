@@ -48,15 +48,14 @@ struct _FlSubsurfaceEGL {
   // multiple of this.
   gint scale;
 
-  // The size egl_window has been resized to. The buffer for the next frame is
-  // acquired when the current one is swapped, so this is the size that buffer
-  // will be, not the size of the buffer being drawn into now.
+  // The size egl_window has been resized to. A buffer acquired after it was
+  // resized is this size.
   size_t window_width;
   size_t window_height;
 
-  // The size of the buffer the next frame is drawn into. eglQuerySurface()
-  // reports the size of the buffer that was last swapped rather than this one,
-  // so the size is tracked here instead.
+  // The size of the buffer the next frame is drawn into, if that buffer was
+  // acquired when the last one was swapped. A driver that acquires it later
+  // may give one the size of the window instead, see has_buffer_of_size().
   size_t buffer_width;
   size_t buffer_height;
 };
@@ -69,6 +68,29 @@ G_DEFINE_TYPE(FlSubsurfaceEGL, fl_subsurface_egl, G_TYPE_OBJECT)
 // e.g. a single pixel frame on a display with a scale of two.
 static size_t round_to_scale(size_t size, gint scale) {
   return ((size + scale - 1) / scale) * scale;
+}
+
+// Checks if the buffer the next frame is drawn into has the given size, in
+// pixels. Must be called with the context current.
+//
+// The size is only known for a driver that acquires the buffer when it is
+// first used rather than when the previous one is swapped, as Mesa does: the
+// surface then already has the size of the window. One that acquired it at
+// the swap reports the size of that buffer, which is the size the window had
+// then.
+static gboolean has_buffer_of_size(FlSubsurfaceEGL* self,
+                                   size_t width,
+                                   size_t height) {
+  EGLint buffer_width = 0;
+  EGLint buffer_height = 0;
+  EGLDisplay egl_display = fl_opengl_manager_get_display(self->opengl_manager);
+  return eglQuerySurface(egl_display, self->egl_surface, EGL_WIDTH,
+                         &buffer_width) &&
+         eglQuerySurface(egl_display, self->egl_surface, EGL_HEIGHT,
+                         &buffer_height) &&
+         buffer_width > 0 && buffer_height > 0 &&
+         static_cast<size_t>(buffer_width) == width &&
+         static_cast<size_t>(buffer_height) == height;
 }
 
 // Gets the EGL display the engine renders to. The subsurface shares this
@@ -254,6 +276,18 @@ void fl_subsurface_egl_present(FlSubsurfaceEGL* self,
                                FlGLFence* fence) {
   g_return_if_fail(FL_IS_SUBSURFACE_EGL(self));
 
+  size_t target_width = round_to_scale(width, self->scale);
+  size_t target_height = round_to_scale(height, self->scale);
+
+  // Resize the window before the surface is used, so a driver that hasn't yet
+  // acquired the buffer for this frame acquires one of the right size.
+  if (self->egl_window != nullptr && (self->window_width != target_width ||
+                                      self->window_height != target_height)) {
+    wl_egl_window_resize(self->egl_window, target_width, target_height, 0, 0);
+    self->window_width = target_width;
+    self->window_height = target_height;
+  }
+
   // Present the composited frame to the subsurface window surface using the
   // subsurface's own EGL context.
   EGLDisplay egl_display = get_display(self);
@@ -268,25 +302,22 @@ void fl_subsurface_egl_present(FlSubsurfaceEGL* self,
     fl_gl_fence_wait(fence);
   }
 
-  size_t target_width = round_to_scale(width, self->scale);
-  size_t target_height = round_to_scale(height, self->scale);
-
-  if (self->egl_window != nullptr && (self->window_width != target_width ||
-                                      self->window_height != target_height)) {
-    wl_egl_window_resize(self->egl_window, target_width, target_height, 0, 0);
-    self->window_width = target_width;
-    self->window_height = target_height;
-  }
-
   if (self->egl_window != nullptr && (self->buffer_width != target_width ||
                                       self->buffer_height != target_height)) {
-    // The buffer a frame is drawn into is acquired when the previous frame is
-    // swapped, so resizing the window doesn't reach the buffer this frame
-    // would be drawn into. Swap that buffer away unused so this frame is drawn
-    // into one of the size it was rendered at. A window sized to its content
-    // only produces one frame at each size, so leaving this until the next
-    // frame would leave it showing a buffer that was never painted.
-    eglSwapBuffers(egl_display, self->egl_surface);
+    // A driver may acquire the buffer a frame is drawn into when the previous
+    // frame is swapped, in which case resizing the window didn't reach the
+    // buffer this frame would be drawn into. Swap that buffer away unused so
+    // this frame is drawn into one of the size it was rendered at. A window
+    // sized to its content only produces one frame at each size, so leaving
+    // this until the next frame would leave it showing a buffer that was never
+    // painted.
+    //
+    // This commits a buffer that is then replaced without being shown, which
+    // is costly while the subsurface is synchronized (see
+    // FlViewRendererSubsurface), so only do it for a driver that needs it.
+    if (!has_buffer_of_size(self, target_width, target_height)) {
+      eglSwapBuffers(egl_display, self->egl_surface);
+    }
     self->buffer_width = self->window_width;
     self->buffer_height = self->window_height;
   }

@@ -19,6 +19,10 @@
 // Maximum time to wait for a frame to be ready before giving up and rendering.
 static constexpr gint64 kRenderTimeoutMicroseconds = 100000;  // 100ms
 
+// Maximum time to hold a frame back for GTK to paint the window it belongs to
+// before showing it anyway.
+static constexpr guint kSynchronizeTimeoutMilliseconds = 100;
+
 struct _FlViewRendererSubsurface {
   FlViewRenderer parent_instance;
 
@@ -62,16 +66,52 @@ struct _FlViewRendererSubsurface {
   // Task runner used to wait for frames while resizing.
   FlTaskRunner* task_runner;
 
-  // Ensure Flutter and GTK can access the frame stored in the compositor.
+  // Ensure Flutter and GTK can access the frame stored in the compositor, and
+  // the state below.
   GMutex frame_mutex;
 
   // TRUE while the subsurface is synchronized with the parent surface, which
-  // is done from the widget being resized until GTK has next painted. See
-  // begin_synchronized_resize().
+  // holds a frame back until the window has been resized to match it. See
+  // start_synchronization().
   gboolean synchronized;
 
-  // The frame clock being watched for the end of the synchronized resize, and
-  // the handler connected to it. NULL and zero when not synchronized.
+  // TRUE if a frame has been presented while synchronized, so the compositor
+  // is holding one back. Only one frame is held at a time: replacing it would
+  // leave the compositor with a buffer it has never shown, which it can't be
+  // relied on to give back before the parent surface is committed.
+  gboolean frame_held;
+
+  // TRUE if a frame was dropped while synchronized, in which case another one
+  // is asked for once the subsurface is desynchronized.
+  gboolean frame_dropped;
+
+  // Size of the frame the GTK thread is resizing the window for, in pixels.
+  // Zero if the frame being held is the one that set the size.
+  size_t awaited_width;
+  size_t awaited_height;
+
+  // TRUE once the GTK thread has asked for the window to be painted with the
+  // held frame, and TRUE once it has been. GTK commits the parent surface
+  // after painting, which shows the held frame.
+  gboolean paint_requested;
+  gboolean painted;
+
+  // TRUE if GTK didn't paint the window in time for the last held frame, e.g.
+  // because the compositor isn't asking for frames for a window that can't be
+  // seen. Frames aren't held back for the size of the window to change while
+  // this is the case, as nothing would show them.
+  gboolean paint_stalled;
+
+  // Source that stops holding a frame back if GTK doesn't paint the window.
+  guint synchronize_timeout_id;
+
+  // TRUE while the raster thread is presenting a frame to the subsurface,
+  // which it does without holding the frame mutex. Signalled when it is done.
+  gboolean presenting;
+  GCond present_cond;
+
+  // The frame clock being watched for GTK painting the window, and the handler
+  // connected to it. NULL and zero when the widget isn't realized.
   GdkFrameClock* frame_clock;
   gulong after_paint_handler;
 };
@@ -131,63 +171,217 @@ static uint32_t get_surface_id(struct wl_surface* surface) {
              : wl_proxy_get_id(reinterpret_cast<struct wl_proxy*>(surface));
 }
 
-// Desynchronize the subsurface from the parent surface again, so frames are
-// shown as soon as they are presented. Any frame held back while synchronized
-// is shown now.
-static void end_synchronized_resize(FlViewRendererSubsurface* self) {
-  if (self->frame_clock != nullptr) {
-    g_signal_handler_disconnect(self->frame_clock, self->after_paint_handler);
-    self->after_paint_handler = 0;
-    g_clear_object(&self->frame_clock);
-  }
-
-  if (self->synchronized && self->subsurface != nullptr) {
-    fl_subsurface_set_desync(self->subsurface);
-  }
-  self->synchronized = FALSE;
-}
-
-// Called after GTK has painted and committed the parent surface, which also
-// applied the frame held back by the subsurface being synchronized.
-static void after_paint_cb(FlViewRendererSubsurface* self) {
-  end_synchronized_resize(self);
-}
-
-// Synchronize the subsurface with the parent surface until GTK has next
-// painted. The frame of the new size presented while synchronized is held back
-// and applied when GTK commits the resized parent surface, so both change size
-// in the same compositor update. The parent surface is only committed when GTK
-// paints, so a redraw is queued to make sure that happens.
-//
-// Outside a resize the subsurface is desynchronized, so frames are shown as
-// soon as the raster thread presents them and the GTK thread doesn't have to
-// redraw the window for each one.
-static void begin_synchronized_resize(FlViewRendererSubsurface* self) {
-  // A view sized to its content keeps the subsurface synchronized, see
-  // create_subsurface().
-  if (self->subsurface == nullptr || self->synchronized ||
-      self->sized_to_content) {
+// Commits the surface of the window this widget is in, which shows anything
+// held back in the subsurface. The surface belongs to GTK, which commits it
+// itself after painting; this is for when it isn't going to.
+static void commit_parent_surface(FlViewRendererSubsurface* self) {
+  // GTK may have replaced or destroyed the surface since the subsurface was
+  // made, see update_parent_surface().
+  struct wl_surface* parent_surface = get_parent_surface(GTK_WIDGET(self));
+  if (parent_surface == nullptr || parent_surface != self->parent_surface ||
+      get_surface_id(parent_surface) != self->parent_surface_id) {
     return;
   }
 
-  GtkWidget* widget = GTK_WIDGET(self);
-  GdkFrameClock* frame_clock = gtk_widget_get_frame_clock(widget);
-  if (frame_clock == nullptr) {
+  wl_surface_commit(parent_surface);
+}
+
+// Desynchronize the subsurface from the parent surface again, so frames are
+// shown as soon as they are presented. Any frame held back while synchronized
+// is shown now.
+static void stop_synchronization(FlViewRendererSubsurface* self) {
+  g_mutex_lock(&self->frame_mutex);
+
+  if (self->synchronize_timeout_id != 0) {
+    g_source_remove(self->synchronize_timeout_id);
+    self->synchronize_timeout_id = 0;
+  }
+
+  gboolean frame_dropped = FALSE;
+  if (self->synchronized) {
+    if (self->subsurface != nullptr) {
+      // GTK commits the parent surface after painting, which has already
+      // shown the held frame. If it didn't paint, or didn't commit what it
+      // painted, do that here so the frame isn't left with the compositor.
+      if (self->frame_held) {
+        commit_parent_surface(self);
+      }
+      fl_subsurface_set_desync(self->subsurface);
+      frame_dropped = self->frame_dropped;
+    }
+    self->synchronized = FALSE;
+    self->frame_held = FALSE;
+    self->frame_dropped = FALSE;
+    self->awaited_width = 0;
+    self->awaited_height = 0;
+    self->paint_requested = FALSE;
+    self->painted = FALSE;
+  }
+
+  g_mutex_unlock(&self->frame_mutex);
+
+  // Frames presented while one was being held were dropped, so what is being
+  // shown may be out of date.
+  if (frame_dropped) {
+    fl_engine_schedule_frame(self->engine);
+  }
+}
+
+// Called if GTK hasn't painted the window in time to show a held frame.
+static gboolean synchronize_timeout_cb(gpointer user_data) {
+  FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(user_data);
+
+  g_mutex_lock(&self->frame_mutex);
+  // The source is removed when the subsurface is desynchronized, but may have
+  // been dispatched before the raster thread synchronized it again.
+  guint id = g_source_get_id(g_main_current_source());
+  gboolean current = self->synchronize_timeout_id == id;
+  if (current) {
+    self->synchronize_timeout_id = 0;
+    self->paint_stalled = TRUE;
+  }
+  g_mutex_unlock(&self->frame_mutex);
+
+  if (current) {
+    stop_synchronization(self);
+  }
+
+  return G_SOURCE_REMOVE;
+}
+
+// Synchronize the subsurface with the parent surface, so the next frame
+// presented is held back by the compositor until the parent surface is
+// committed. This is used to change the size of the window and its contents
+// in the same compositor update: the frame of the new size is held until GTK
+// has painted the resized window, which is when it commits the parent surface.
+//
+// Otherwise the subsurface is desynchronized, so frames are shown as soon as
+// the raster thread presents them and the GTK thread doesn't have to redraw
+// the window for each one.
+//
+// A held frame is only shown if the parent surface is committed, and the
+// compositor keeps its buffer until then, so this must always be followed by
+// stop_synchronization(). That happens once GTK has painted, or after a
+// timeout if it doesn't.
+//
+// Must be called with the frame mutex held, from either thread.
+static void start_synchronization(FlViewRendererSubsurface* self) {
+  if (self->synchronized) {
     return;
   }
 
   fl_subsurface_set_sync(self->subsurface);
   self->synchronized = TRUE;
+  self->frame_held = FALSE;
+  self->frame_dropped = FALSE;
+  self->paint_requested = FALSE;
+  self->painted = FALSE;
+  self->synchronize_timeout_id = g_timeout_add_full(
+      G_PRIORITY_DEFAULT, kSynchronizeTimeoutMilliseconds,
+      synchronize_timeout_cb, g_object_ref(self), g_object_unref);
+}
+
+// Called after GTK has painted and committed the parent surface, which also
+// showed any frame held back by the subsurface being synchronized.
+static void after_paint_cb(FlViewRendererSubsurface* self) {
+  g_mutex_lock(&self->frame_mutex);
+  // Only a paint of this widget that was asked for once the frame was being
+  // held shows it: GTK doesn't commit the parent surface unless it painted,
+  // and the frame clock also runs for other reasons.
+  gboolean shown = self->synchronized && self->paint_requested && self->painted;
+  g_mutex_unlock(&self->frame_mutex);
+
+  if (shown) {
+    stop_synchronization(self);
+  }
+}
+
+// Watch the frame clock of the window this widget is in, to know when GTK has
+// painted it.
+static void connect_frame_clock(FlViewRendererSubsurface* self) {
+  if (self->frame_clock != nullptr) {
+    return;
+  }
+
+  GdkFrameClock* frame_clock = gtk_widget_get_frame_clock(GTK_WIDGET(self));
+  if (frame_clock == nullptr) {
+    return;
+  }
+
   self->frame_clock = GDK_FRAME_CLOCK(g_object_ref(frame_clock));
   // GTK commits the parent surface from its own handler for this signal, so
-  // connect after it to desynchronize once that commit has been made. GTK
-  // skips the commit while the window is waiting for its initial configure
-  // event, but the window isn't visible then so nothing is shown early.
+  // connect after it to desynchronize once that commit has been made.
   self->after_paint_handler = g_signal_connect_data(
       frame_clock, "after-paint", G_CALLBACK(after_paint_cb), self, nullptr,
       static_cast<GConnectFlags>(G_CONNECT_AFTER | G_CONNECT_SWAPPED));
+}
 
-  gtk_widget_queue_draw(widget);
+static void disconnect_frame_clock(FlViewRendererSubsurface* self) {
+  if (self->frame_clock == nullptr) {
+    return;
+  }
+
+  g_signal_handler_disconnect(self->frame_clock, self->after_paint_handler);
+  self->after_paint_handler = 0;
+  g_clear_object(&self->frame_clock);
+}
+
+// Hold back the frame of the given size, in pixels, until GTK has painted the
+// window it is being resized to. This has to be requested before the new
+// window metrics reach the engine, so the frame it renders in response is the
+// one held.
+static void begin_synchronized_resize(FlViewRendererSubsurface* self,
+                                      size_t width,
+                                      size_t height) {
+  // A view sized to its content is resized by the frames it is given, see
+  // fl_view_renderer_subsurface_present_layers().
+  if (self->subsurface == nullptr || self->sized_to_content) {
+    return;
+  }
+
+  connect_frame_clock(self);
+
+  g_mutex_lock(&self->frame_mutex);
+
+  // A frame the raster thread is part way through presenting would be held
+  // back if it is committed after the subsurface is synchronized, in place of
+  // the frame the window is being resized for. Let it finish first.
+  gint64 expiry_time = g_get_monotonic_time() + kRenderTimeoutMicroseconds;
+  while (self->presenting && !self->synchronized) {
+    if (!g_cond_wait_until(&self->present_cond, &self->frame_mutex,
+                           expiry_time)) {
+      break;
+    }
+  }
+  // Nothing to resize if the subsurface was replaced or removed meanwhile.
+  if (self->subsurface == nullptr) {
+    g_mutex_unlock(&self->frame_mutex);
+    return;
+  }
+  gboolean was_synchronized = self->synchronized;
+
+  start_synchronization(self);
+  if (!was_synchronized && self->presenting) {
+    // Gave up waiting, so assume the compositor ends up holding that frame.
+    self->frame_held = TRUE;
+  }
+  if (self->frame_held &&
+      (width != self->awaited_width || height != self->awaited_height)) {
+    // The window has been resized again before GTK painted it, which happens
+    // when it is first shown. The frame being held is for a size the window
+    // no longer has, so show it to make way for one that is.
+    commit_parent_surface(self);
+    self->frame_held = FALSE;
+  }
+  self->awaited_width = width;
+  self->awaited_height = height;
+  self->paint_requested = TRUE;
+  self->painted = FALSE;
+  g_mutex_unlock(&self->frame_mutex);
+
+  // The parent surface is only committed when GTK paints, so make sure that
+  // happens.
+  gtk_widget_queue_draw(GTK_WIDGET(self));
 }
 
 // Move the subsurface to match the position of the widget in the toplevel.
@@ -229,16 +423,12 @@ static void create_subsurface(FlViewRendererSubsurface* self,
   update_subsurface_position(self);
 
   // A new subsurface is synchronized with its parent, which holds back every
-  // frame until the parent (GTK) surface is redrawn and committed. A view sized
-  // to its content relies on that, as it resizes the window to fit each frame
-  // and redraws the window for each one, see frame_presented_cb(). Otherwise
-  // desynchronize it so frames are shown as soon as they are committed, which
-  // leaves the GTK thread idle while Flutter is animating.
-  if (self->sized_to_content) {
-    fl_subsurface_set_sync(self->subsurface);
-  } else {
-    fl_subsurface_set_desync(self->subsurface);
-  }
+  // frame until the parent (GTK) surface is redrawn and committed.
+  // Desynchronize it so frames are shown as soon as they are committed, which
+  // leaves the GTK thread idle while Flutter is animating. It is only
+  // synchronized while the size of the window is being changed, see
+  // start_synchronization().
+  fl_subsurface_set_desync(self->subsurface);
 
   self->subsurface_scale = gtk_widget_get_scale_factor(widget);
 }
@@ -263,7 +453,7 @@ static void update_parent_surface(FlViewRendererSubsurface* self) {
   // Drop the old subsurface. The surface it was on may already be destroyed,
   // in which case there is nothing to replace it with until the window is
   // shown again.
-  end_synchronized_resize(self);
+  stop_synchronization(self);
   g_mutex_lock(&self->frame_mutex);
   clear_subsurface(self);
   self->parent_surface = parent_surface;
@@ -296,19 +486,31 @@ static gboolean frame_presented_cb(gpointer user_data) {
   fl_view_renderer_notify_frame(FL_VIEW_RENDERER(self));
 
   if (self->sized_to_content) {
+    connect_frame_clock(self);
+
     size_t frame_width, frame_height;
     g_mutex_lock(&self->frame_mutex);
     frame_width = self->presented_width;
     frame_height = self->presented_height;
+    // A frame of a new size is held back until the window has been resized to
+    // fit it, which is asked for below. A paint from before this point isn't
+    // of the resized window.
+    gboolean frame_held = self->synchronized && self->frame_held;
+    if (frame_held && !self->paint_requested) {
+      self->paint_requested = TRUE;
+      self->painted = FALSE;
+    }
     g_mutex_unlock(&self->frame_mutex);
     if (fl_view_renderer_resize_to_frame(FL_VIEW_RENDERER(self), frame_width,
                                          frame_height)) {
       return G_SOURCE_REMOVE;
     }
 
-    // The subsurface is synchronized, so the frame is shown when the window
-    // is next committed; redraw it to make that happen.
-    gtk_widget_queue_draw(GTK_WIDGET(self));
+    // The window is already the size of the held frame, which is shown when
+    // the window is next committed; redraw it to make that happen.
+    if (frame_held) {
+      gtk_widget_queue_draw(GTK_WIDGET(self));
+    }
   }
 
   return G_SOURCE_REMOVE;
@@ -342,7 +544,8 @@ static void fl_view_renderer_subsurface_realize(GtkWidget* widget) {
 static void fl_view_renderer_subsurface_unrealize(GtkWidget* widget) {
   FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(widget);
 
-  end_synchronized_resize(self);
+  stop_synchronization(self);
+  disconnect_frame_clock(self);
 
   // Hold frame_mutex while releasing these objects so the raster thread cannot
   // be using them in present_layers concurrently. The raster thread releases
@@ -369,6 +572,13 @@ static gboolean fl_view_renderer_subsurface_draw(GtkWidget* widget,
                                                  cairo_t* cr) {
   FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(widget);
 
+  // GTK commits the parent surface once it has painted, which shows a frame
+  // being held back for it. See after_paint_cb().
+  g_mutex_lock(&self->frame_mutex);
+  self->painted = TRUE;
+  self->paint_stalled = FALSE;
+  g_mutex_unlock(&self->frame_mutex);
+
   // Flutter content is shown directly by the subsurface; only paint the
   // background behind it. The composited frame is blitted to the subsurface in
   // present_layers, not here.
@@ -393,7 +603,9 @@ static void fl_view_renderer_subsurface_size_allocate(
   // parent surface. This has to be requested before the new window metrics
   // reach the engine (FlView sends them from its size-allocate handler, which
   // runs after this), so the frame it renders in response is held back.
-  begin_synchronized_resize(self);
+  gint scale_factor = gtk_widget_get_scale_factor(widget);
+  begin_synchronized_resize(self, allocation->width * scale_factor,
+                            allocation->height * scale_factor);
 }
 
 // Runs after the size_allocate default handler and, crucially, after FlView has
@@ -474,6 +686,34 @@ static void fl_view_renderer_subsurface_present_layers(
   }
 
   if (width > 0 && height > 0) {
+    if (self->synchronized) {
+      // Only the frame the window is being resized for is held back, and only
+      // one: the compositor keeps the buffer of a held frame until the parent
+      // surface is committed, and replacing it leaves the buffer of a frame
+      // that was never shown with it too. A driver with no buffers left blocks
+      // this thread, which every view is rendered on, until GTK commits a
+      // surface it may have no reason to. Drop the frame instead; another one
+      // is asked for when the subsurface is desynchronized.
+      gboolean awaited =
+          self->awaited_width == 0 ||
+          (width == self->awaited_width && height == self->awaited_height);
+      if (self->frame_held || !awaited) {
+        self->frame_dropped = TRUE;
+        g_mutex_unlock(&self->frame_mutex);
+        return;
+      }
+    } else if (self->sized_to_content && !self->paint_stalled &&
+               self->presented_width > 0 &&
+               (width != self->presented_width ||
+                height != self->presented_height)) {
+      // The window is resized to fit this frame once it has been presented,
+      // see frame_presented_cb(). Hold the frame back until then.
+      start_synchronization(self);
+    }
+    if (self->synchronized) {
+      self->frame_held = TRUE;
+    }
+
     // Recreate the framebuffer if the frame size has changed. The subsurface's
     // EGL context shares resources with the engine, so the frame texture is
     // read directly and doesn't need to be shareable or copied via CPU memory.
@@ -513,9 +753,10 @@ static void fl_view_renderer_subsurface_present_layers(
   }
 
   // Keep a reference to the subsurface in case GTK replaces it. Presenting can
-  // block until GTK commits the parent surface, so release the mutex first.
+  // block in the driver, so release the mutex first.
   g_autoptr(FlSubsurface) subsurface =
       FL_SUBSURFACE(g_object_ref(self->subsurface));
+  self->presenting = TRUE;
   gint scale = self->subsurface_scale;
   GLuint texture_id = self->framebuffer != nullptr
                           ? fl_framebuffer_get_texture_id(self->framebuffer)
@@ -546,6 +787,8 @@ static void fl_view_renderer_subsurface_present_layers(
     self->presented_width = width;
     self->presented_height = height;
   }
+  self->presenting = FALSE;
+  g_cond_broadcast(&self->present_cond);
   g_mutex_unlock(&self->frame_mutex);
   fl_task_runner_stop_wait(self->task_runner);
 
@@ -556,7 +799,8 @@ static void fl_view_renderer_subsurface_present_layers(
 static void fl_view_renderer_subsurface_dispose(GObject* object) {
   FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(object);
 
-  end_synchronized_resize(self);
+  stop_synchronization(self);
+  disconnect_frame_clock(self);
 
   G_OBJECT_CLASS(fl_view_renderer_subsurface_parent_class)->dispose(object);
 }
@@ -577,6 +821,7 @@ static void fl_view_renderer_subsurface_finalize(GObject* object) {
   g_clear_object(&self->engine);
   g_clear_object(&self->task_runner);
   g_mutex_clear(&self->frame_mutex);
+  g_cond_clear(&self->present_cond);
 
   G_OBJECT_CLASS(fl_view_renderer_subsurface_parent_class)->finalize(object);
 }
@@ -600,6 +845,7 @@ static void fl_view_renderer_subsurface_class_init(
 
 static void fl_view_renderer_subsurface_init(FlViewRendererSubsurface* self) {
   g_mutex_init(&self->frame_mutex);
+  g_cond_init(&self->present_cond);
 
   // Connected after the default handler so this runs once FlView has sent the
   // new window metrics to the engine, allowing the frame of the new size to be

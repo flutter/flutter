@@ -13,6 +13,8 @@
 #include <mutex>
 #include <thread>
 
+#include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
+#include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
 #include "flutter/shell/platform/linux/fl_view_renderer.h"
 #include "flutter/shell/platform/linux/testing/fl_test_gtk_logs.h"
@@ -79,6 +81,15 @@ class FlViewRendererSubsurfaceTest : public flutter::testing::LinuxTest {
         .size = {static_cast<double>(width), static_cast<double>(height)}};
     const FlutterLayer* layers[1] = {&layer};
     fl_view_renderer_present_layers(FL_VIEW_RENDERER(renderer), layers, 1);
+  }
+
+  // Runs the main loop until [done] is set, or a second has passed.
+  void RunUntil(const bool& done) {
+    gint64 expiry_time = g_get_monotonic_time() + G_USEC_PER_SEC;
+    while (!done && g_get_monotonic_time() < expiry_time) {
+      g_main_context_iteration(nullptr, FALSE);
+      g_usleep(1000);
+    }
   }
 
   // GTK queries the window state when widgets are realized.
@@ -277,4 +288,203 @@ TEST_F(FlViewRendererSubsurfaceTest, PresentAfterWindowDestroyed) {
   }
 
   g_object_unref(renderer);
+}
+
+// While the window is being resized the frame of the new size is held back by
+// the compositor until GTK commits the window. The compositor keeps the buffer
+// of a held frame until then, and of any frame it is replaced with, so only
+// one is presented: a driver that runs out of buffers blocks the raster thread
+// until a commit that GTK may have no reason to make.
+TEST_F(FlViewRendererSubsurfaceTest, ResizeHoldsOneFrame) {
+  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+  ::testing::NiceMock<flutter::testing::MockWayland> wayland;
+  UseWayland();
+
+  StartEngine(engine);
+  bool frame_scheduled = false;
+  fl_engine_get_embedder_api(engine)->ScheduleFrame =
+      MOCK_ENGINE_PROC(ScheduleFrame, ([&frame_scheduled](auto engine) {
+                         frame_scheduled = true;
+                         return kSuccess;
+                       }));
+
+  GtkWidget* toplevel;
+  FlViewRendererSubsurface* renderer =
+      CreateRenderer(FALSE, 100, 100, &toplevel);
+  Present(renderer, 100, 100);
+
+  // The driver gives a buffer of the size the window was resized to.
+  epoxy.egl_surface_width = 200;
+  epoxy.egl_surface_height = 100;
+
+  // Present frames from a raster thread once the resize has synchronized the
+  // subsurface: one of the old size, then two of the new size.
+  std::mutex mutex;
+  std::condition_variable cond;
+  bool synchronized = false;
+  bool desynchronized = false;
+  ON_CALL(wayland,
+          Request(::testing::StrEq("wl_subsurface"), WL_SUBSURFACE_SET_SYNC))
+      .WillByDefault([&]() {
+        std::lock_guard<std::mutex> lock(mutex);
+        synchronized = true;
+        cond.notify_all();
+      });
+  ON_CALL(wayland,
+          Request(::testing::StrEq("wl_subsurface"), WL_SUBSURFACE_SET_DESYNC))
+      .WillByDefault([&]() { desynchronized = true; });
+  int swap_count = 0;
+  ON_CALL(epoxy, eglSwapBuffers()).WillByDefault([&]() { swap_count++; });
+  std::thread raster_thread([&]() {
+    {
+      std::unique_lock<std::mutex> lock(mutex);
+      cond.wait(lock, [&]() { return synchronized; });
+    }
+    Present(renderer, 100, 100);
+    Present(renderer, 200, 100);
+    Present(renderer, 200, 100);
+  });
+
+  // Resize the view. This waits for the frame of the new size.
+  GtkAllocation allocation = {.x = 0, .y = 0, .width = 200, .height = 100};
+  g_signal_emit_by_name(renderer, "size-allocate", &allocation);
+  raster_thread.join();
+
+  // Only the first frame of the new size was presented.
+  EXPECT_EQ(swap_count, 1);
+
+  // The frame stops being held back once GTK has painted the window: the
+  // window is committed to show it, and another frame is asked for in place of
+  // the ones that were dropped.
+  bool window_committed = false;
+  ON_CALL(wayland, Request(::testing::StrEq("wl_surface"), WL_SURFACE_COMMIT))
+      .WillByDefault([&]() { window_committed = true; });
+  RunUntil(desynchronized);
+  EXPECT_TRUE(desynchronized);
+  EXPECT_TRUE(window_committed);
+  EXPECT_TRUE(frame_scheduled);
+
+  // Frames are presented as they arrive again.
+  Present(renderer, 200, 100);
+  EXPECT_EQ(swap_count, 2);
+
+  // Process the notifications of the presented frames.
+  while (g_main_context_iteration(nullptr, FALSE)) {
+  }
+
+  fl_gtk_widget_destroy(toplevel);
+}
+
+// A view sized to its content is resized to fit the frames it is given. Only a
+// frame that changes the size is held back for the window to be resized;
+// others are shown as soon as they are presented, without GTK having to commit
+// the window for each one.
+TEST_F(FlViewRendererSubsurfaceTest, SizedToContentHoldsFrameOfNewSize) {
+  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+  ::testing::NiceMock<flutter::testing::MockWayland> wayland;
+  UseWayland();
+
+  int sync_count = 0;
+  bool desynchronized = false;
+  ON_CALL(wayland,
+          Request(::testing::StrEq("wl_subsurface"), WL_SUBSURFACE_SET_SYNC))
+      .WillByDefault([&]() { sync_count++; });
+  int swap_count = 0;
+  ON_CALL(epoxy, eglSwapBuffers()).WillByDefault([&]() { swap_count++; });
+
+  GtkWidget* toplevel;
+  FlViewRendererSubsurface* renderer =
+      CreateRenderer(TRUE, 100, 100, &toplevel);
+
+  // Frames of the same size aren't held back.
+  Present(renderer, 100, 100);
+  Present(renderer, 100, 100);
+  EXPECT_EQ(sync_count, 0);
+  EXPECT_EQ(swap_count, 2);
+
+  // A frame of a new size is, and frames after it are dropped until it has
+  // been shown.
+  epoxy.egl_surface_width = 150;
+  epoxy.egl_surface_height = 100;
+  Present(renderer, 150, 100);
+  EXPECT_EQ(sync_count, 1);
+  EXPECT_EQ(swap_count, 3);
+  Present(renderer, 150, 100);
+  EXPECT_EQ(swap_count, 3);
+
+  // The frame is shown once GTK has resized and painted the window.
+  ON_CALL(wayland,
+          Request(::testing::StrEq("wl_subsurface"), WL_SUBSURFACE_SET_DESYNC))
+      .WillByDefault([&]() { desynchronized = true; });
+  RunUntil(desynchronized);
+  EXPECT_TRUE(desynchronized);
+
+  // Frames of that size aren't held back, but one of another size is.
+  Present(renderer, 150, 100);
+  EXPECT_EQ(sync_count, 1);
+  EXPECT_EQ(swap_count, 4);
+  epoxy.egl_surface_width = 180;
+  Present(renderer, 180, 100);
+  EXPECT_EQ(sync_count, 2);
+  EXPECT_EQ(swap_count, 5);
+
+  // Process the notifications of the presented frames.
+  while (g_main_context_iteration(nullptr, FALSE)) {
+  }
+
+  fl_gtk_widget_destroy(toplevel);
+}
+
+// A held frame is only shown when the window is committed, which GTK does
+// after painting it. GTK doesn't paint a window that isn't visible, or that
+// the compositor isn't asking for frames for, so the frame is shown after a
+// timeout instead and no more are held back until GTK paints again. The
+// compositor would otherwise be left holding the frame, and its buffer.
+TEST_F(FlViewRendererSubsurfaceTest, HeldFrameShownIfWindowNotPainted) {
+  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+  ::testing::NiceMock<flutter::testing::MockWayland> wayland;
+  UseWayland();
+
+  int sync_count = 0;
+  bool desynchronized = false;
+  bool window_committed = false;
+  ON_CALL(wayland,
+          Request(::testing::StrEq("wl_subsurface"), WL_SUBSURFACE_SET_SYNC))
+      .WillByDefault([&]() { sync_count++; });
+  int swap_count = 0;
+  ON_CALL(epoxy, eglSwapBuffers()).WillByDefault([&]() { swap_count++; });
+
+  // GTK doesn't paint a window that is hidden.
+  GtkWidget* toplevel;
+  FlViewRendererSubsurface* renderer =
+      CreateRenderer(TRUE, 100, 100, &toplevel);
+  gtk_widget_hide(toplevel);
+
+  Present(renderer, 100, 100);
+  epoxy.egl_surface_width = 150;
+  epoxy.egl_surface_height = 100;
+  Present(renderer, 150, 100);
+  EXPECT_EQ(sync_count, 1);
+  EXPECT_EQ(swap_count, 2);
+
+  ON_CALL(wayland,
+          Request(::testing::StrEq("wl_subsurface"), WL_SUBSURFACE_SET_DESYNC))
+      .WillByDefault([&]() { desynchronized = true; });
+  ON_CALL(wayland, Request(::testing::StrEq("wl_surface"), WL_SURFACE_COMMIT))
+      .WillByDefault([&]() { window_committed = true; });
+  RunUntil(desynchronized);
+  EXPECT_TRUE(desynchronized);
+  EXPECT_TRUE(window_committed);
+
+  // A frame of another size is no longer held back.
+  epoxy.egl_surface_width = 180;
+  Present(renderer, 180, 100);
+  EXPECT_EQ(sync_count, 1);
+  EXPECT_EQ(swap_count, 3);
+
+  // Process the notifications of the presented frames.
+  while (g_main_context_iteration(nullptr, FALSE)) {
+  }
+
+  fl_gtk_widget_destroy(toplevel);
 }
