@@ -70,6 +70,65 @@ Future<void> main() async {
     result = await processManager.run(<String>[flutterBatch.path, '--version']);
     expect(result.stderr, isNot(contains('Building flutter tool...')));
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/197389.
+  test('dart.bat adds bundled mingit to PATH and checks for git', () async {
+    final Directory tempDir = createResolvedTempDirectorySync('batch_entrypoint_test.');
+    addTearDown(() => tryToDelete(tempDir));
+
+    // Copy the real dart.bat into a temp directory acting as FLUTTER_ROOT so we
+    // can test with and without bin\mingit and without modifying the real
+    // Flutter repo checkout.
+    final String tempDartBatchPath = fileSystem.path.join(tempDir.path, 'bin', 'dart.bat');
+    writeFile(tempDartBatchPath, dartBatch.readAsStringSync());
+
+    // Stub shared.bat to verify git is on PATH.
+    writeFile(
+      fileSystem.path.join(tempDir.path, 'bin', 'internal', 'shared.bat'),
+      '@ECHO off\r\nWHERE git\r\nEXIT %ERRORLEVEL%\r\n',
+    );
+
+    // Strip PATH down to System32 and WindowsPowerShell so any git installed
+    // on the local system doesn't affect the results (but WHERE and
+    // powershell.exe are still available).
+    final String systemRoot = platform.environment['SystemRoot'] ?? r'C:\Windows';
+    final environment = <String, String>{
+      for (final MapEntry<String, String> entry in platform.environment.entries)
+        if (entry.key.toUpperCase() != 'PATH') entry.key: entry.value,
+      'PATH': <String>[
+        fileSystem.path.join(systemRoot, 'System32'),
+        fileSystem.path.join(systemRoot, 'System32', 'WindowsPowerShell', 'v1.0'),
+      ].join(';'),
+    };
+
+    /// A helper to run bin/dart.bat with the reduced PATH.
+    Future<ProcessResult> runDartWithReducedPath() {
+      return processManager.run(
+        <String>[tempDartBatchPath],
+        workingDirectory: tempDir.path,
+        environment: environment,
+        includeParentEnvironment: false,
+      );
+    }
+
+    // Without bundled mingit, dart.bat fails with a clear error (this verifies
+    // the test isn't false-passing due to a system git).
+    expect(
+      await runDartWithReducedPath(),
+      const ProcessResultMatcher(
+        exitCode: 1,
+        stdoutPattern: 'Error: Unable to find git in your PATH.',
+      ),
+    );
+
+    // Create a stub mingit.
+    final String mingitPath = fileSystem.path.join(tempDir.path, 'bin', 'mingit', 'cmd', 'git.bat');
+    writeFile(mingitPath, '@ECHO off\r\n');
+
+    // With mingit, dart.bat should run without any error and including the path
+    // to the bundled mingit.
+    expect(await runDartWithReducedPath(), ProcessResultMatcher(stdoutPattern: mingitPath));
+  });
 }
 
 Future<String> runDartBatch() async {
