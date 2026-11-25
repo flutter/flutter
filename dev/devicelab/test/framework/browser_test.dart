@@ -371,22 +371,35 @@ void main() {
       expect(summary.averageTotalUIFrameTime, const Duration(microseconds: 2400));
     });
 
+    test('accumulates large microsecond durations without 53-bit double rounding', () {
+      const int base = 1 << 52;
+      final BlinkTraceSummary summary = BlinkTraceSummary.fromJson(<Map<String, dynamic>>[
+        ...buildFrames(1, beginFrame: base + 2, updateLifecycle: 200),
+        ...buildFrames(1, beginFrame: base + 1, updateLifecycle: 200),
+      ])!;
+
+      expect(summary.averageBeginFrameTime, const Duration(microseconds: base + 1));
+    });
+
     test('throws FormatException when measured frames lack beginFrame events', () {
-      final io.IOOverrides parentOverrides = io.IOOverrides.current!;
       final io.Directory tempDir = io.Directory.systemTemp.createTempSync(
         'blink_trace_summary_test.',
       );
       addTearDown(() => tempDir.deleteSync(recursive: true));
       final String tracePath = tempDir.uri.resolve('chrome-trace.json').toFilePath();
 
-      io.IOOverrides.runZoned(
-        () => expect(
+      void parseInvalidTrace() {
+        final Zone parentZone = Zone.current;
+        io.IOOverrides.runZoned(
           () => BlinkTraceSummary.fromJson(buildFrames(3, updateLifecycle: 200)),
-          throwsFormatException,
-        ),
-        createFile: (String filePath) =>
-            parentOverrides.createFile(filePath == './chrome-trace.json' ? tracePath : filePath),
-      );
+          createFile: (String filePath) => parentZone.run(
+            () => io.File(filePath == './chrome-trace.json' ? tracePath : filePath),
+          ),
+        );
+      }
+
+      expect(parseInvalidTrace, throwsFormatException);
+      expect(() => Zone.root.run(parseInvalidTrace), throwsFormatException);
     });
   });
 }

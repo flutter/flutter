@@ -511,7 +511,7 @@ Duration _computeAverageDuration(List<BlinkTraceEvent> events) {
   if (events.isEmpty) {
     throw const FormatException('Cannot compute average duration of an empty event list.');
   }
-  final double sum = events.fold(0.0, (double previousValue, BlinkTraceEvent event) {
+  final int sum = events.fold(0, (int previousValue, BlinkTraceEvent event) {
     final int? duration = event.tdur ?? event.dur;
     if (duration == null) {
       throw FormatException('Trace event lacks "tdur" and "dur" fields: $event');
