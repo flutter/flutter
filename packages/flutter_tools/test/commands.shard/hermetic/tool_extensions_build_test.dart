@@ -103,6 +103,7 @@ final class _TestAssembleTarget extends AssembleTarget {
     required super.description,
     required this.name,
     this.dependencies = const <String>[],
+    this.depfiles = const <String>[],
     this.errorMessage,
     this.shouldSucceed = true,
     super.targetPlatform = 'linux-x64',
@@ -113,6 +114,9 @@ final class _TestAssembleTarget extends AssembleTarget {
 
   @override
   final List<String> dependencies;
+
+  @override
+  final List<String> depfiles;
 
   final String? errorMessage;
   final bool shouldSucceed;
@@ -132,6 +136,12 @@ final class _SucceedingBuildService extends BuildService {
       description: 'Hermetic custom build target.',
       name: 'custom-hermetic-build',
       outputDir: '${BuiltInPlaceholders.outputDir}/hermetic/${BuiltInPlaceholders.buildMode}',
+    ),
+    _TestBuildTarget(
+      description: 'Hermetic platform-agnostic build target.',
+      name: 'custom-agnostic-build',
+      outputDir: '${BuiltInPlaceholders.outputDir}/agnostic/${BuiltInPlaceholders.buildMode}',
+      targetPlatform: null,
     ),
   ];
 
@@ -181,6 +191,7 @@ final class _FailingAndConflictingBuildService extends BuildService {
     _TestAssembleTarget(
       description: 'Succeeding custom assemble target.',
       name: 'custom-assemble-target',
+      depfiles: <String>['custom_assemble.d'],
     ),
     _TestAssembleTarget(
       description: 'Assemble target with unknown dependency.',
@@ -805,8 +816,10 @@ void main() {
         final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
         await commandRunner.run(<String>['build', 'custom-hermetic-build', '--no-pub']);
+        await commandRunner.run(<String>['build', 'custom-agnostic-build', '--no-pub']);
 
         expect(command.subcommands.containsKey('custom-hermetic-build'), isTrue);
+        expect(command.subcommands.containsKey('custom-agnostic-build'), isTrue);
         expect(command.subcommands.containsKey('custom-hermetic-assemble-only'), isFalse);
 
         await manager.dispose();
@@ -1112,6 +1125,12 @@ void main() {
             Environment environment,
           ) {
             target.dependencies;
+            if (target is CompositeTarget) {
+              final Target customTarget = target.dependencies.firstWhere(
+                (Target t) => t.name == 'custom-assemble-target',
+              );
+              expect(customTarget.depfiles, equals(<String>['custom_assemble.d']));
+            }
           }),
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
