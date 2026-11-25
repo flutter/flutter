@@ -49,8 +49,10 @@ project or engine switches. This is not a new framework context override.
   device lease, independently of engine teardown and GTK's release callback.
 - `fl_compositor_vulkan` publishes snapshots on the raster thread and imports
   them through the existing GTK 4.14 runtime bindings on the GTK thread. It caches
-  the resulting texture. Unsupported exports and multi-layer scenes use readback
-  and Cairo composition. Failed GTK imports use host-accessible snapshot memory
+  the resulting texture. Pixel-aligned multi-layer frames use a Vulkan render pass
+  with premultiplied source-over blending and per-layer scissor rectangles.
+  The reusable target feeds the same export pool or a single RGBA readback.
+  Fractional placement or clipping and failed GPU composition use Cairo. Failed GTK imports use host-accessible snapshot memory
   for the same frame, then disable further export attempts for that compositor.
   Resize waits remain bounded; empty frames clear the previous contents.
 - `fl_vulkan_device_context` leases the device to snapshot and upload helpers;
@@ -82,7 +84,7 @@ set `FLUTTER_GTK4_ENABLE_GRAPHICS_OFFLOAD=1` to request that separately.
 Pixel-buffer plugin textures work with Vulkan. GL-only plugin textures are
 rejected at registration; they require OpenGL. A native Vulkan plugin API is not
 provided. Platform-view layers are rejected. Allocation pooling, modifier-aware
-image export, GPU multi-layer composition, finer completion synchronization,
+image export, finer completion synchronization,
 device-loss recovery and broader multi-window/driver coverage remain follow-up
 work. No automatic GLES retry is implemented.
 
@@ -105,7 +107,17 @@ xvfb-run -a dbus-run-session -- \
   --gtest_filter='FlVulkan*:FlEngineTest.SelectVulkanWithoutInitializingDriver'
 ```
 
-GTK graphics are disabled here because this unit-test binary mocks EGL. This
+To require actual import for a multi-layer frame on a DMA-BUF-capable Wayland
+display, run the same test binary with:
+
+```sh
+FLUTTER_TEST_VULKAN=1 FLUTTER_TEST_VULKAN_GTK_IMPORT=1 GDK_BACKEND=wayland \
+GSK_RENDERER=cairo GDK_DISABLE=gl GTK_A11Y=none \
+  engine/src/out/host_debug_unopt/flutter_linux_gtk4_unittests \
+  --gtest_filter=FlVulkanIntegrationTest.ComposeLayersAndClearFrame
+```
+
+In the Xvfb command GTK graphics are disabled because this unit-test binary mocks EGL. This
 does not disable Vulkan in the manager. Without `FLUTTER_TEST_VULKAN=1`, cases
 requiring a Vulkan driver skip explicitly. Set `FLUTTER_TEST_VULKAN_DMABUF=1`
 to require export support rather than allowing the export case to skip.

@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/linux/fl_vulkan_manager.h"
 #include "flutter/shell/platform/linux/fl_linux_gtk4_debug.h"
+#include "flutter/shell/platform/linux/fl_vulkan_layer_composer.h"
 #include "flutter/shell/platform/linux/fl_vulkan_queue_sync.h"
 #include "flutter/shell/platform/linux/fl_vulkan_snapshot_pool.h"
 
@@ -460,23 +461,14 @@ gboolean fl_vulkan_manager_initialize(FlVulkanManager* self,
   return TRUE;
 }
 
-gboolean fl_vulkan_manager_create_backing_store(
-    FlVulkanManager* self,
-    const FlutterBackingStoreConfig* config,
-    FlutterBackingStore* backing_store) {
-  g_return_val_if_fail(FL_IS_VULKAN_MANAGER(self), FALSE);
-  const double width = config->size.width;
-  const double height = config->size.height;
-  if (!*self->state || !std::isfinite(width) || !std::isfinite(height) ||
-      width < 1 || height < 1 || width > (*self->state)->max_image_dimension ||
-      height > (*self->state)->max_image_dimension || width != floor(width) ||
-      height != floor(height) ||
-      width * height > std::numeric_limits<size_t>::max() / 4) {
-    return FALSE;
-  }
+static std::unique_ptr<Frame> allocate_frame(
+    const std::shared_ptr<State>& state_ref,
+    const std::shared_ptr<flutter::FlVulkanSnapshotPool>& snapshots,
+    uint32_t width,
+    uint32_t height) {
   auto frame = std::make_unique<Frame>();
-  frame->state = *self->state;
-  frame->snapshots = *self->snapshots;
+  frame->state = state_ref;
+  frame->snapshots = snapshots;
   frame->width = width;
   frame->height = height;
   auto& state = *frame->state;
@@ -493,7 +485,7 @@ gboolean fl_vulkan_manager_create_backing_store(
                VK_IMAGE_USAGE_TRANSFER_DST_BIT;
   if (state.CreateImage(state.device, &info, nullptr, &frame->image) !=
       VK_SUCCESS) {
-    return FALSE;
+    return nullptr;
   }
   VkMemoryRequirements requirements;
   state.GetImageMemoryRequirements(state.device, frame->image, &requirements);
@@ -506,11 +498,31 @@ gboolean fl_vulkan_manager_create_backing_store(
                            &frame->memory) != VK_SUCCESS ||
       state.BindImageMemory(state.device, frame->image, frame->memory, 0) !=
           VK_SUCCESS) {
-    return FALSE;
+    return nullptr;
   }
   frame->flutter_image = {sizeof(FlutterVulkanImage),
                           reinterpret_cast<uint64_t>(frame->image),
                           VK_FORMAT_R8G8B8A8_UNORM};
+  return frame;
+}
+
+gboolean fl_vulkan_manager_create_backing_store(
+    FlVulkanManager* self,
+    const FlutterBackingStoreConfig* config,
+    FlutterBackingStore* backing_store) {
+  g_return_val_if_fail(FL_IS_VULKAN_MANAGER(self), FALSE);
+  const double width = config->size.width;
+  const double height = config->size.height;
+  if (!*self->state || !std::isfinite(width) || !std::isfinite(height) ||
+      width < 1 || height < 1 || width > (*self->state)->max_image_dimension ||
+      height > (*self->state)->max_image_dimension || width != floor(width) ||
+      height != floor(height) ||
+      width * height > std::numeric_limits<size_t>::max() / 4) {
+    return FALSE;
+  }
+  auto frame = allocate_frame(*self->state, *self->snapshots, width, height);
+  if (!frame)
+    return FALSE;
   backing_store->type = kFlutterBackingStoreTypeVulkan;
   backing_store->vulkan.struct_size = sizeof(FlutterVulkanBackingStore);
   backing_store->vulkan.image = &frame->flutter_image;
@@ -667,4 +679,73 @@ flutter::FlVulkanDeviceContext fl_vulkan_manager_get_device_context(
           s.memory_properties,
           device_proc,
           fl_vulkan_queue_submit};
+}
+
+struct FlVulkanComposition {
+  VkDevice device;
+  std::unique_ptr<Frame> target;
+  flutter::FlVulkanLayerComposer composer;
+  explicit FlVulkanComposition(const std::shared_ptr<State>& state)
+      : device(state->device),
+        composer({state, state->device, state->queue, state->queue_family,
+                  state->max_image_dimension, state->memory_properties,
+                  device_proc, fl_vulkan_queue_submit}) {}
+};
+
+void fl_vulkan_composition_free(FlVulkanComposition* composition) {
+  delete composition;
+}
+
+bool fl_vulkan_composition_draw(FlVulkanComposition** cache,
+                                const FlutterLayer** layers,
+                                size_t count,
+                                size_t width,
+                                size_t height,
+                                FlutterBackingStore* output) {
+  if (!count || count > UINT32_MAX)
+    return false;
+  const auto* first =
+      static_cast<Frame*>(layers[0]->backing_store->vulkan.user_data);
+  if (width > first->state->max_image_dimension ||
+      height > first->state->max_image_dimension)
+    return false;
+  std::vector<flutter::FlVulkanLayer> inputs;
+  inputs.reserve(count);
+  for (size_t i = 0; i < count; i++) {
+    const auto& layer = *layers[i];
+    auto* frame = static_cast<Frame*>(layer.backing_store->vulkan.user_data);
+    // Preserve Cairo's subpixel coverage for fractional geometry.
+    if (frame->state != first->state ||
+        floor(layer.offset.x) != layer.offset.x ||
+        floor(layer.offset.y) != layer.offset.y ||
+        floor(layer.size.width) != layer.size.width ||
+        floor(layer.size.height) != layer.size.height)
+      return false;
+    inputs.push_back(
+        {frame->image,
+         {{static_cast<int32_t>(layer.offset.x),
+           static_cast<int32_t>(layer.offset.y)},
+          {std::min(frame->width, static_cast<uint32_t>(layer.size.width)),
+           std::min(frame->height,
+                    static_cast<uint32_t>(layer.size.height))}}});
+  }
+  if (*cache && (*cache)->device != first->state->device) {
+    delete *cache;
+    *cache = nullptr;
+  }
+  if (!*cache)
+    *cache = new FlVulkanComposition(first->state);
+  auto& target = (*cache)->target;
+  if (!target || target->width != width || target->height != height) {
+    target = allocate_frame(first->state, first->snapshots, width, height);
+  }
+  if (!target || !(*cache)->composer.Draw(
+                     target->image, {target->width, target->height}, inputs))
+    return false;
+  output->struct_size = sizeof(FlutterBackingStore);
+  output->vulkan.struct_size = sizeof(FlutterVulkanBackingStore);
+  output->vulkan.image = &target->flutter_image;
+  output->type = kFlutterBackingStoreTypeVulkan;
+  output->vulkan.user_data = target.get();
+  return true;
 }

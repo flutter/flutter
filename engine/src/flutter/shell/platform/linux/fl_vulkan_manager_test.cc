@@ -50,7 +50,11 @@ class FlVulkanIntegrationTest : public flutter::testing::LinuxTest {
 
   // Fill a real optimal-tiling image, mirroring the engine's final GENERAL
   // attachment layout. The manager must preserve these pixels across readback.
-  void Clear(FlutterBackingStore* store, float red, float green, float blue) {
+  void Clear(FlutterBackingStore* store,
+             float red,
+             float green,
+             float blue,
+             float alpha = 1) {
     VkDevice device = static_cast<VkDevice>(config.device);
     VkCommandPoolCreateInfo pool_info = {
         VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};
@@ -86,7 +90,7 @@ class FlVulkanIntegrationTest : public flutter::testing::LinuxTest {
     pipeline_barrier(command, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
                      VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr,
                      1, &barrier);
-    VkClearColorValue color = {{red, green, blue, 1.0f}};
+    VkClearColorValue color = {{red, green, blue, alpha}};
     proc<PFN_vkCmdClearColorImage>("vkCmdClearColorImage")(
         command, barrier.image, VK_IMAGE_LAYOUT_GENERAL, &color, 1,
         &barrier.subresourceRange);
@@ -220,11 +224,20 @@ TEST_F(FlVulkanIntegrationTest, ComposeLayersAndClearFrame) {
       fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers, 2));
   fl_vulkan_manager_collect_backing_store(&red);
   fl_vulkan_manager_collect_backing_store(&blue);
-  // Create the GTK texture on the main thread from the immutable readback.
+  // Require real GTK import when testing on a DMA-BUF capable display.
+  std::unique_ptr<GdkSurface, decltype(&gdk_surface_destroy)> surface(
+      nullptr, gdk_surface_destroy);
+  if (g_strcmp0(g_getenv("FLUTTER_TEST_VULKAN_GTK_IMPORT"), "1") == 0) {
+    ASSERT_NE(gdk_display_get_default(), nullptr);
+    surface.reset(gdk_surface_new_toplevel(gdk_display_get_default()));
+  }
   auto* klass = FL_COMPOSITOR_GET_CLASS(compositor);
   g_autoptr(GdkTexture) texture = klass->acquire_texture(
-      FL_COMPOSITOR(compositor), nullptr, nullptr, 8, 8, FALSE);
+      FL_COMPOSITOR(compositor), surface.get(), nullptr, 8, 8, FALSE);
   ASSERT_NE(texture, nullptr);
+  if (surface) {
+    EXPECT_STREQ(G_OBJECT_TYPE_NAME(texture), "GdkDmabufTexture");
+  }
   uint32_t pixels[64];
   gdk_texture_download(texture, reinterpret_cast<guchar*>(pixels), 8 * 4);
   EXPECT_EQ(pixels[0], 0xffff0000u);
@@ -241,6 +254,51 @@ TEST_F(FlVulkanIntegrationTest, ComposeLayersAndClearFrame) {
   // An already acquired texture remains valid after clearing the compositor.
   gdk_texture_download(texture, reinterpret_cast<guchar*>(pixels), 8 * 4);
   EXPECT_EQ(pixels[3 * 8 + 2], 0xff0000ffu);
+}
+
+TEST_F(FlVulkanIntegrationTest, GpuCompositeClipsAndBlendsPremultipliedLayers) {
+  auto red = Create(8, 8);
+  auto blue = Create(3, 3);
+  Clear(&red, 1, 0, 0);
+  Clear(&blue, 0, 0, 0.5, 0.5);
+  FlutterLayer background = {};
+  background.type = kFlutterLayerContentTypeBackingStore;
+  background.backing_store = &red;
+  background.size = {7, 7};
+  FlutterLayer overlay = background;
+  overlay.backing_store = &blue;
+  overlay.offset = {2, 3};
+  overlay.size = {2, 3};
+  const FlutterLayer* layers[] = {&background, &overlay};
+  FlVulkanComposition* cache = nullptr;
+  FlutterBackingStore output = {};
+  for (size_t width : {8u, 8u, 10u}) {
+    ASSERT_TRUE(
+        fl_vulkan_composition_draw(&cache, layers, 2, width, 8, &output));
+    size_t w, h;
+    g_autoptr(GError) error = nullptr;
+    g_autoptr(GBytes) rgba =
+        fl_vulkan_backing_store_read_pixels(&output, &w, &h, &error);
+    ASSERT_NE(rgba, nullptr) << error->message;
+    ASSERT_EQ(w, width);
+    ASSERT_EQ(h, 8u);
+    const auto* bytes =
+        static_cast<const uint8_t*>(g_bytes_get_data(rgba, nullptr));
+    for (size_t y = 0; y < h; y++) {
+      for (size_t x = 0; x < w; x++) {
+        const auto* pixel = bytes + 4 * (y * w + x);
+        bool covered = x < 7 && y < 7;
+        bool blended = x >= 2 && x < 4 && y >= 3 && y < 6;
+        EXPECT_EQ(pixel[0], blended ? 127 : covered ? 255 : 0);
+        EXPECT_EQ(pixel[1], 0);
+        EXPECT_EQ(pixel[2], blended ? 128 : 0);
+        EXPECT_EQ(pixel[3], covered ? 255 : 0);
+      }
+    }
+  }
+  fl_vulkan_composition_free(cache);
+  fl_vulkan_manager_collect_backing_store(&red);
+  fl_vulkan_manager_collect_backing_store(&blue);
 }
 
 TEST_F(FlVulkanIntegrationTest, ExportSnapshotSurvivesReuseAndEngineTeardown) {

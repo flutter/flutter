@@ -375,6 +375,8 @@ source_set("flutter_linux_sources_gtk4") {
     "fl_view_rendering_gtk4.cc",
     "fl_vsync_timing.cc",
     "fl_vulkan_device_context.h",
+    "fl_vulkan_layer_composer.cc",
+    "fl_vulkan_layer_composer.h",
     "fl_vulkan_manager.cc",
     "fl_vulkan_manager.h",
     "fl_vulkan_queue_sync.cc",

@@ -51,4 +51,14 @@ std::shared_ptr<flutter::FlVulkanSnapshot> fl_vulkan_backing_store_snapshot(
     const FlutterBackingStore* backing_store,
     GError** error);
 
+struct FlVulkanComposition;
+void fl_vulkan_composition_free(FlVulkanComposition* composition);
+// The resulting store borrows the reusable target until the next draw.
+bool fl_vulkan_composition_draw(FlVulkanComposition** cache,
+                                const FlutterLayer** layers,
+                                size_t count,
+                                size_t width,
+                                size_t height,
+                                FlutterBackingStore* output);
+
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_VULKAN_MANAGER_H_

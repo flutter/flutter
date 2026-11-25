@@ -43,7 +43,7 @@ for ownership, recovery behavior, benchmark requirements, and limitations.
 | Path | GTK | Pixel transfer | Synchronization | Notes |
 | --- | --- | --- | --- | --- |
 | Memory texture/readback | GTK4 | `glReadPixels`, RGBA-to-BGRA swizzle, `GdkMemoryTexture` | Readback synchronizes | Most compatible GTK4 fallback; highest CPU cost. |
-| Impeller Vulkan readback | GTK4 | Optimal-tiling Vulkan image copied to coherent host memory, composed into `GdkMemoryTexture` | Engine host completion, transfer barriers and a readback fence | Enables Flutter GPU compute. Currently has CPU copies and no Vulkan DMA-BUF export; experimental and opt-in. |
+| Impeller Vulkan | GTK4 | Vulkan backing stores presented via DMA-BUF or host readback | Queue barriers and completion fences | Enables Flutter GPU compute; experimental and opt-in. |
 | Shared GL texture | GTK4 | EGLImage import into a sibling framebuffer, then `GdkGLTexture` | EGL fence; GPU wait when GDK has a compatible EGL context | CPU-copy-free and usually no GPU pixel copy. Falls back to a client wait for GLX/non-EGL consumers, or `glFinish()` when fences are unavailable. |
 | Exported DMA-BUF texture | GTK4 | Render framebuffer is GPU-blitted to an EGLImage-backed export snapshot; GDK imports its DMA-BUF | Native fence handoff, with completion fallback | CPU-copy-free and cross-renderer-oriented. Current implementation is **not** strict zero-copy because of the snapshot blit. |
 | GTK graphics offload | GTK4, 4.14+ runtime | Optional `GtkGraphicsOffload` wrapper around the texture widget; suitable DMA-BUFs can be handed to the Wayland compositor | Existing texture ownership and synchronization | GTK decides acceptance per scene and uses ordinary composition when unavailable. Independent of Flutter's subsurface renderer and of compositor direct scanout. |
@@ -178,7 +178,10 @@ selecting GLES. Flutter GPU must also be enabled to use its compute API.
 graphics offload do not change Flutter's backend. The Vulkan implementation owns
 its device/queue independently of GTK. A single origin-aligned Flutter layer is
 copied on the GPU into an immutable linear DMA-BUF and imported by GTK 4.14 or
-newer. Export/import capability failures and multi-layer scenes use readback.
+newer. For multiple pixel-aligned Vulkan backing stores, a render pass blends
+them in order into a reusable image. GTK receives one exported texture, or one
+readback of the composed image when DMA-BUF is unavailable. Fractional layer
+geometry and GPU composition failures retain the Cairo fallback.
 `FLUTTER_GTK4_ENABLE_DMABUF=0` forces readback; unlike the OpenGL path, Vulkan
 attempts DMA-BUF by default. Debug logs identify the selected presentation path.
 The export completes before publication and stays alive until GTK releases it,

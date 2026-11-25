@@ -16,6 +16,8 @@ struct _FlCompositorVulkan {
   FlTaskRunner* task_runner;
   GMutex frame_mutex;
   GBytes* pixels;
+  GdkMemoryFormat pixel_format;
+  FlVulkanComposition* composition;
   std::shared_ptr<flutter::FlVulkanSnapshot>* snapshot;
   GdkTexture* texture;
   gboolean dmabuf_disabled;
@@ -72,16 +74,19 @@ static gboolean present_layers(FlCompositor* compositor,
     g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&self->frame_mutex);
     try_export = !self->dmabuf_disabled;
   }
-  // A normal Flutter scene is a single backing store. Copy it on the GPU to a
-  // separate immutable allocation so engine caching cannot overwrite GTK's
-  // current frame. Multi-layer scenes retain the composition fallback below.
-  if (try_export && count == 1 && layers[0]->offset.x == 0 &&
-      layers[0]->offset.y == 0) {
+  FlutterBackingStore composed = {};
+  const bool gpu_composed =
+      count > 1 && fl_vulkan_composition_draw(&self->composition, layers, count,
+                                              width, height, &composed);
+  if (try_export &&
+      (gpu_composed ||
+       (count == 1 && layers[0]->offset.x == 0 && layers[0]->offset.y == 0 &&
+        layers[0]->size.width == width && layers[0]->size.height == height))) {
     g_autoptr(GError) error = nullptr;
-    auto snapshot =
-        fl_vulkan_backing_store_snapshot(layers[0]->backing_store, &error);
-    if (snapshot && snapshot->descriptor().width == layers[0]->size.width &&
-        snapshot->descriptor().height == layers[0]->size.height) {
+    auto snapshot = fl_vulkan_backing_store_snapshot(
+        gpu_composed ? &composed : layers[0]->backing_store, &error);
+    if (snapshot && snapshot->descriptor().width == width &&
+        snapshot->descriptor().height == height) {
       g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&self->frame_mutex);
       g_clear_pointer(&self->pixels, g_bytes_unref);
       g_clear_object(&self->texture);
@@ -101,6 +106,25 @@ static gboolean present_layers(FlCompositor* compositor,
           "vulkan-presentation", "path=readback reason=%s",
           error ? error->message : "DMA-BUF export unavailable");
     }
+  }
+  if (gpu_composed) {
+    g_autoptr(GError) error = nullptr;
+    GBytes* rgba =
+        fl_vulkan_backing_store_read_pixels(&composed, &width, &height, &error);
+    if (!rgba) {
+      g_warning("Vulkan composite readback failed: %s", error->message);
+      return FALSE;
+    }
+    g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&self->frame_mutex);
+    self->snapshot->reset();
+    g_clear_object(&self->texture);
+    g_clear_pointer(&self->pixels, g_bytes_unref);
+    self->pixels = rgba;
+    self->pixel_format = GDK_MEMORY_R8G8B8A8_PREMULTIPLIED;
+    self->width = width;
+    self->height = height;
+    fl_task_runner_stop_wait(self->task_runner);
+    return TRUE;
   }
   // Composite immutable readbacks in layer order. Cairo's native ARGB32 layout
   // differs from Vulkan RGBA8; convert explicitly rather than assuming
@@ -161,6 +185,7 @@ static gboolean present_layers(FlCompositor* compositor,
     self->snapshot->reset();
     g_clear_object(&self->texture);
     self->pixels = g_bytes_ref(pixels);
+    self->pixel_format = GDK_MEMORY_DEFAULT;
     self->width = width;
     self->height = height;
     fl_task_runner_stop_wait(self->task_runner);
@@ -224,7 +249,7 @@ static GdkTexture* acquire_texture(FlCompositor* compositor,
       self->snapshot->reset();
   } else if (self->pixels) {
     self->texture =
-        gdk_memory_texture_new(self->width, self->height, GDK_MEMORY_DEFAULT,
+        gdk_memory_texture_new(self->width, self->height, self->pixel_format,
                                self->pixels, self->width * 4);
     if (self->last_path != 2) {
       flutter_linux_gtk4_dbg(
@@ -246,6 +271,7 @@ static void dispose(GObject* object) {
 }
 
 static void finalize(GObject* object) {
+  fl_vulkan_composition_free(FL_COMPOSITOR_VULKAN(object)->composition);
   delete FL_COMPOSITOR_VULKAN(object)->snapshot;
   g_mutex_clear(&FL_COMPOSITOR_VULKAN(object)->frame_mutex);
   G_OBJECT_CLASS(fl_compositor_vulkan_parent_class)->finalize(object);
