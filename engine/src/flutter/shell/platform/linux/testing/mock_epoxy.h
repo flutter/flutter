@@ -127,6 +127,9 @@ class MockEpoxy {
               (GLint x, GLint y, GLsizei width, GLsizei height));
   MOCK_METHOD(void, eglSwapBuffers, ());
 
+  // The context last made current with eglMakeCurrent(), on any thread.
+  EGLContext egl_current_context = EGL_NO_CONTEXT;
+
   // The size reported for EGL surfaces. Zero by default, so anything drawing
   // to a mock surface sees a size change on its first frame.
   EGLint egl_surface_width = 0;
