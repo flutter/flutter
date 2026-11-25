@@ -515,11 +515,10 @@ def to_gn_args(args):
     # There is no point in enabling LTO in unoptimized builds.
     enable_lto = False
 
-  if not sys.platform.startswith('win'):
-    # The GN arg is not available in the windows toolchain.
-    gn_args['enable_lto'] = enable_lto
-    if enable_lto:
-      gn_args['use_thin_lto'] = args.thin_lto
+  # On Windows only ThinLTO is supported; full LTO is a no-op there.
+  gn_args['enable_lto'] = enable_lto
+  if enable_lto:
+    gn_args['use_thin_lto'] = args.thin_lto
 
   # Set OS, CPU arch for host or target build.
   if is_host_build(args):
