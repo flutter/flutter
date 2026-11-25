@@ -7,6 +7,11 @@ surface/Wayland-surface and swapchain extensions currently required by Impeller.
 The GTK presentation renderer is independent: `GSK_RENDERER=vulkan` alone does
 not select Impeller Vulkan.
 
+Set `FLUTTER_LINUX_RENDERER=auto` to try Vulkan during engine construction.
+If device initialization fails or Impeller is explicitly disabled, the engine
+selects OpenGL before creating any view compositor and logs the reason once.
+Later embedder startup and plugin import errors remain visible on the selected backend.
+
 An explicit Vulkan request enables Impeller. `--enable-impeller=false` is an
 error, and loader/device failures fail startup rather than silently running GLES.
 Flutter GPU additionally requires `--enable-flutter-gpu`, supplied by the Dart

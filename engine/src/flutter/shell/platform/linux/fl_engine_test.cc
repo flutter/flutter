@@ -308,6 +308,10 @@ TEST_F(FlEngineTest, VulkanRejectsExplicitlyDisabledImpeller) {
   g_setenv("FLUTTER_ENGINE_SWITCHES", "1", TRUE);
   g_setenv("FLUTTER_ENGINE_SWITCH_1", "enable-impeller=false", TRUE);
   g_autoptr(FlEngine) vulkan_engine = fl_engine_new(project);
+  g_setenv("FLUTTER_LINUX_RENDERER", "auto", TRUE);
+  g_autoptr(FlEngine) auto_engine = fl_engine_new(project);
+  EXPECT_EQ(fl_engine_get_renderer_type(auto_engine), kOpenGL);
+  EXPECT_EQ(fl_engine_get_vulkan_manager(auto_engine), nullptr);
   g_autoptr(GError) error = nullptr;
   gboolean started = fl_engine_start(vulkan_engine, &error);
   auto restore = [](const char* key, const char* previous) {

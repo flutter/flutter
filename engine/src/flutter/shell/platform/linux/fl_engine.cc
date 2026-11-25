@@ -6,6 +6,7 @@
 
 #include <epoxy/egl.h>
 #include <gmodule.h>
+#include <optional>
 
 #include <cstring>
 #include <string>
@@ -849,6 +850,19 @@ static void fl_engine_init(FlEngine* self) {
   self->texture_registrar = fl_texture_registrar_new(self);
 }
 
+static std::optional<bool> get_impeller_override(
+    const std::vector<std::string>& switches) {
+  std::optional<bool> result;
+  for (const auto& value : switches) {
+    if (value == "--enable-impeller" || value == "--enable-impeller=true") {
+      result = true;
+    } else if (value == "--enable-impeller=false") {
+      result = false;
+    }
+  }
+  return result;
+}
+
 static FlEngine* fl_engine_new_full(FlDartProject* project,
                                     FlBinaryMessenger* binary_messenger) {
   g_return_val_if_fail(FL_IS_DART_PROJECT(project), nullptr);
@@ -866,6 +880,29 @@ static FlEngine* fl_engine_new_full(FlDartProject* project,
         "To switch back to the default renderer, unset the "
         "FLUTTER_LINUX_RENDERER environment variable.");
 #if FLUTTER_LINUX_GTK4
+  } else if (g_strcmp0(renderer, "auto") == 0) {
+    // Resolve once for all views, before any view chooses its compositor.
+    self->renderer_type = kOpenGL;
+    g_autoptr(GError) error = nullptr;
+    if (get_impeller_override(flutter::GetSwitchesFromEnvironment()) == false) {
+      g_message(
+          "Flutter renderer fallback: requested=auto attempted=vulkan "
+          "selected=opengl "
+          "reason=Impeller explicitly disabled");
+    } else {
+      g_autoptr(FlVulkanManager) manager = fl_vulkan_manager_new();
+      FlutterVulkanRendererConfig config = {};
+      if (fl_vulkan_manager_initialize(manager, &config, &error)) {
+        self->vulkan_manager = FL_VULKAN_MANAGER(g_steal_pointer(&manager));
+        self->renderer_type = kVulkan;
+      } else {
+        g_message(
+            "Flutter renderer fallback: requested=auto attempted=vulkan "
+            "selected=opengl "
+            "reason=%s",
+            error->message);
+      }
+    }
   } else if (g_strcmp0(renderer, "vulkan") == 0) {
     self->renderer_type = kVulkan;
     self->vulkan_manager = fl_vulkan_manager_new();
@@ -1025,18 +1062,10 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   const std::vector<std::string> env_switches =
       flutter::GetSwitchesFromEnvironment();
 
-  gboolean enable_impeller = fl_dart_project_get_enable_impeller(self->project);
-  gboolean has_enable_impeller = FALSE;
-  for (const auto& env_switch : env_switches) {
-    if (env_switch == "--enable-impeller" ||
-        env_switch == "--enable-impeller=true") {
-      enable_impeller = TRUE;
-      has_enable_impeller = TRUE;
-    } else if (env_switch == "--enable-impeller=false") {
-      enable_impeller = FALSE;
-      has_enable_impeller = TRUE;
-    }
-  }
+  auto impeller_override = get_impeller_override(env_switches);
+  gboolean has_enable_impeller = impeller_override.has_value();
+  gboolean enable_impeller = impeller_override.value_or(
+      fl_dart_project_get_enable_impeller(self->project));
 
   if (self->renderer_type == kVulkan) {
     if (has_enable_impeller && !enable_impeller) {

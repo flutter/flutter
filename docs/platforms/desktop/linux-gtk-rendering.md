@@ -167,12 +167,18 @@ runners can use `GSK_RENDERER=gl` at launch to try the same configuration.
 Available renderer names depend on the installed GTK version. `GSK_RENDERER`
 selects GTK's renderer, not Flutter's rendering backend.
 
-OpenGL remains the default Flutter backend. On GTK4,
-`FLUTTER_LINUX_RENDERER=vulkan` selects the experimental Impeller Vulkan backend;
-it requires a Vulkan 1.1 graphics/compute device and an engine built with Vulkan
-support. Impeller is enabled for this selection; explicitly disabling Impeller
-fails startup. Device initialization failures are reported without silently
-selecting GLES. Flutter GPU must also be enabled to use its compute API.
+GTK4 uses OpenGL by default. Set `FLUTTER_LINUX_RENDERER` to select a startup policy.
+
+| Value | Behavior |
+|---|---|
+| `opengl` | Use OpenGL. |
+| `auto` | Try Vulkan before creating the view compositor. If Vulkan initialization fails or Impeller is explicitly disabled, select OpenGL and log the reason once per engine. |
+| `vulkan` | Require Impeller Vulkan. An explicit Impeller disable or Vulkan initialization failure stops startup. |
+| `software` | Use software rendering. |
+
+Vulkan requires a Vulkan-enabled engine and a Vulkan 1.1 device with a queue
+supporting graphics and compute. Applications using Flutter GPU compute must
+also enable Flutter GPU.
 
 `GSK_RENDERER=vulkan` alone still selects only GTK presentation. DMA-BUF and
 graphics offload do not change Flutter's backend. The Vulkan implementation owns
@@ -200,7 +206,11 @@ processing and GTK upload when import succeeds, but is not zero-copy rendering.
 The optional graphics-offload wrapper can consume the exported texture; actual
 compositor handoff must still be verified. It uses neither EGL export nor the
 Wayland EGL path above. Pixel-buffer plugins use a Vulkan upload and work with
-their existing RGBA callback. GL-only plugins require the OpenGL renderer.
+their existing RGBA callback. For GL-only plugins, Vulkan offers an opt-in
+texture bridge (`FLUTTER_GTK4_VULKAN_GL_TEXTURES=1`). It copies a readable
+`GL_TEXTURE_2D` into a shared DMA-BUF image for Vulkan to sample. Startup
+fallback applies during backend selection. A later plugin import failure leaves
+the engine on its selected backend.
 
 See [Vulkan architecture and validation](../../../engine/src/flutter/shell/platform/linux/testing/VULKAN.md)
 and the [compute investigation](../../../engine/src/flutter/shell/platform/linux/testing/COMPUTE.md).
