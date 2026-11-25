@@ -16,6 +16,7 @@ import logging
 import os
 import sys
 
+from pathlib import Path
 from typing import Any, Iterable, List, Mapping, Set
 
 # The import is coming from vpython wheel and pylint cannot find it.
@@ -46,12 +47,8 @@ OUT_DIR = os.path.join(DIR_SRC_ROOT, 'out', VARIANT)
 
 
 def _force_symlink(src: str, dst: str) -> None:
-  try:
-    # Remove the old one if it exists, usually happen on the devbox, so
-    # ignore the FileNotFoundError.
-    os.remove(dst)
-  except FileNotFoundError:
-    pass
+  # Remove the old one if it exists, usually happens on the devbox.
+  Path(dst).unlink(missing_ok=True)
   os.symlink(src, dst)
 
 
