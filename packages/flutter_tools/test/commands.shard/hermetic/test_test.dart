@@ -28,6 +28,7 @@ import 'package:flutter_tools/src/test/test_time_recorder.dart';
 import 'package:flutter_tools/src/test/test_wrapper.dart';
 import 'package:flutter_tools/src/test/watcher.dart';
 import 'package:flutter_tools/src/web/compile.dart';
+import 'package:flutter_tools/src/web/web_debug_config.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart';

@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
+import 'package:flutter_tools/src/web/web_debug_config.dart';
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -52,26 +53,28 @@ WebDevFS createWebDevFS({
   return WebDevFS(
     packagesFilePath: packagesFilePath,
     urlTunneller: urlTunneller,
-    useSseForDebugProxy: useSseForDebugProxy,
-    useSseForDebugBackend: useSseForDebugBackend,
-    useSseForInjectedClient: useSseForInjectedClient,
     buildInfo: buildInfo,
     enableDwds: enableDwds,
     ddsConfig: ddsConfig,
     entrypoint: entrypoint ?? fs.file('lib/main.dart').uri,
     expressionCompiler: expressionCompiler,
     chromiumLauncher: chromiumLauncher,
-    nativeNullAssertions: nativeNullAssertions,
-    webDevServerConfig: webDevServerConfig,
-    webRenderer: webRenderer,
-    isWasm: isWasm,
     useLocalCanvasKit: useLocalCanvasKit,
     rootDirectory: rootDirectory ?? fs.currentDirectory,
     useDwdsWebSocketConnection: useDwdsWebSocketConnection,
-    webCrossOriginIsolation: webCrossOriginIsolation,
     toolContext: toolContext,
     testMode: testMode,
-    webDefines: webDefines,
+    webConfig: WebDebugConfig(
+      useSseForDebugProxy: useSseForDebugProxy,
+      useSseForDebugBackend: useSseForDebugBackend,
+      useSseForInjectedClient: useSseForInjectedClient,
+      nativeNullAssertions: nativeNullAssertions,
+      devServerConfig: webDevServerConfig,
+      renderer: webRenderer,
+      useWasm: isWasm,
+      crossOriginIsolation: webCrossOriginIsolation,
+      webDefines: webDefines,
+    ),
   );
 }
 

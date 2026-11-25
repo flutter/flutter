@@ -5,10 +5,13 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/flutter_features.dart';
+import 'package:flutter_tools/src/flutter_features_config.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:test/fake.dart';
@@ -305,6 +308,69 @@ void main() {
       ),
     );
   });
+
+  test(
+    'FlutterValidator evaluates feature flags and config overrides for refreshed version',
+    () async {
+      final staleMasterVersion = FakeFlutterVersion(frameworkVersion: '3.50.0');
+      final refreshedStableVersion = FakeFlutterVersion(
+        frameworkVersion: '3.50.0',
+        branch: 'stable',
+      );
+      final Platform platform = FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8');
+      final config = Config.test()
+        ..setValue('enable-custom-devices', true)
+        ..setValue('enable-web', false)
+        ..setValue('enable-fuchsia', true);
+      final featureFlags = FlutterFeatureFlags(
+        flutterVersion: staleMasterVersion,
+        featuresConfig: FlutterFeaturesConfig(
+          globalConfig: config,
+          platform: platform,
+          projectManifest: null,
+        ),
+        platform: platform,
+      );
+      final flutterValidator = FlutterValidator(
+        platform: platform,
+        flutterVersion: () => refreshedStableVersion,
+        devToolsVersion: () => '2.8.0',
+        artifacts: Artifacts.test(),
+        fileSystem: MemoryFileSystem.test(),
+        processManager: FakeProcessManager.any(),
+        operatingSystemUtils: FakeOperatingSystemUtils(name: 'Windows'),
+        flutterRoot: () => '/sdk/flutter',
+        featureFlags: featureFlags,
+      );
+
+      final ValidationResult result = await flutterValidator.validate();
+      expect(result.type, ValidationType.success);
+      expect(result.statusInfo, 'Channel stable, 3.50.0, on Windows, locale en_US.UTF-8');
+      final ValidationMessage featureFlagsMessage = result.messages.singleWhere(
+        (ValidationMessage m) => m.message.startsWith('Feature flags: '),
+      );
+      final List<String> reportedFlags = featureFlagsMessage.message
+          .substring('Feature flags: '.length)
+          .split(', ');
+      // Unconfigured flag enabled by default on stable.
+      expect(reportedFlags, contains('enable-android'));
+      // Unconfigured flag that defaults on for master and off for stable; update
+      // if it graduates to enabled-by-default on stable.
+      expect(riscv64.master.enabledByDefault, isTrue);
+      expect(riscv64.stable.enabledByDefault, isFalse);
+      expect(reportedFlags, isNot(contains('enable-riscv64')));
+      expect(reportedFlags, isNot(contains('no-enable-riscv64')));
+      // Configured overrides preserved for flags available on stable.
+      expect(reportedFlags, contains('enable-custom-devices'));
+      expect(reportedFlags, contains('no-enable-web'));
+      expect(reportedFlags, isNot(contains('enable-web')));
+      // Master-only flag ignored on stable even when enabled in config.
+      expect(flutterFuchsiaFeature.master.available, isTrue);
+      expect(flutterFuchsiaFeature.stable.available, isFalse);
+      expect(reportedFlags, isNot(contains('enable-fuchsia')));
+      expect(reportedFlags, isNot(contains('no-enable-fuchsia')));
+    },
+  );
 
   test(
     'FlutterValidator shows FLUTTER_GIT_URL when set and fails if upstream is not the same',
