@@ -683,11 +683,12 @@ class ExtensionBackedDevice extends Device {
           );
     final String owningExtensionName =
         _buildManager.tryExtensionNameForBuildTarget(buildTargetName) ?? connection.extensionName;
+    final String? targetPlatform = target.targetPlatform;
     final Map<String, ResolvedExtensionArtifact> extensionArtifacts = await _artifactManager
         .ensureArtifactsDownloaded(
           artifactNames: customArtifactNamesForBuildTarget(target),
           extensionName: owningExtensionName,
-          targetPlatforms: <String>{target.targetPlatform},
+          targetPlatforms: targetPlatform != null ? <String>{targetPlatform} : null,
         );
     final Map<String, String> resolvedArtifacts = _artifacts != null
         ? resolveExtensionBuildTargetArtifacts(

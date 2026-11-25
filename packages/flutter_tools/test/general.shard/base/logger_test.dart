@@ -313,6 +313,27 @@ void main() {
       expect(mockLogger.errorText, endsWith('$lastLine\n\n'));
     });
 
+    testWithoutContext('non-fatal warnings are not fatal', () async {
+      final mockLogger = BufferLogger.test(outputPreferences: OutputPreferences.test());
+      final verboseLogger = VerboseLogger(
+        mockLogger,
+        stopwatchFactory: FakeStopwatchFactory(stopwatch: fakeStopWatch),
+      );
+      verboseLogger.fatalWarnings = true;
+
+      verboseLogger.printWarning('Not fatal', fatal: false);
+
+      expect(mockLogger.warningText, contains('Not fatal'));
+      expect(verboseLogger.hadWarningOutput, isFalse);
+      expect(verboseLogger.checkForFatalLogs, returnsNormally);
+
+      verboseLogger.printWarning('Fatal');
+      verboseLogger.printWarning('Not fatal either', fatal: false);
+
+      expect(verboseLogger.hadWarningOutput, isTrue);
+      expect(verboseLogger.checkForFatalLogs, throwsToolExit());
+    });
+
     testWithoutContext('ANSI colored errors', () async {
       final mockLogger = BufferLogger(
         terminal: AnsiTerminal(

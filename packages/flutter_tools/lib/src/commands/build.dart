@@ -302,11 +302,12 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final String? targetPlatform = target.targetPlatform;
     final Map<String, ResolvedExtensionArtifact> extensionArtifacts = await _artifactManager
         .ensureArtifactsDownloaded(
           artifactNames: customArtifactNamesForBuildTarget(target),
           extensionName: _buildManager.extensionNameForBuildTarget(target.name),
-          targetPlatforms: <String>{target.targetPlatform},
+          targetPlatforms: targetPlatform != null ? <String>{targetPlatform} : null,
         );
     final ToolContext(:Artifacts artifacts, :Cache cache, :Config config, :FileSystem fs) =
         toolContext;
