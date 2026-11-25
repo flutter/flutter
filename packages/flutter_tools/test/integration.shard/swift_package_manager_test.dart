@@ -915,6 +915,53 @@ void main() {
     expect(generatedManifest, contains(emptyDependencies));
     expect(cocoaPodsPluginFramework, exists);
   }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
+
+  test('Build fails with guided error when plugin target is outside the package root', () async {
+    final Directory workingDirectory = fileSystem.systemTempDirectory.createTempSync(
+      'swift_package_manager_target_outside_package_root.',
+    );
+    final String workingDirectoryPath = workingDirectory.path;
+
+    addTearDown(() async {
+      await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
+      ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
+    });
+
+    await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
+
+    final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
+      flutterBin,
+      workingDirectoryPath,
+      platform: 'ios',
+      usesSwiftPackageManager: true,
+      options: <String>['--platforms=ios'],
+    );
+
+    // Create a plugin whose Package.swift target uses `path: "../Classes"`.
+    final SwiftPackageManagerPlugin plugin = await SwiftPackageManagerUtils.createPlugin(
+      flutterBin,
+      workingDirectoryPath,
+      platform: 'ios',
+      usesSwiftPackageManager: true,
+    );
+    SwiftPackageManagerUtils.moveSourcesOutsidePackageRoot(plugin, platform: 'ios');
+
+    SwiftPackageManagerUtils.addDependency(appDirectoryPath: appDirectoryPath, plugin: plugin);
+
+    final guidedError =
+        'Flutter plugin "${plugin.pluginName}" has an incorrectly configured Package.swift file: '
+        'target "${plugin.pluginName}" uses a path outside of the package root.';
+    await SwiftPackageManagerUtils.buildApp(
+      flutterBin,
+      appDirectoryPath,
+      options: <String>['ios', '--config-only', '-v'],
+      expectFailure: true,
+      expectedLines: <Pattern>[
+        "target '${plugin.pluginName}' in package '${plugin.pluginName}' is outside the package root",
+        guidedError,
+      ],
+    );
+  }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
 }
 
 void validateFrameworkConfiguration(Directory buildDir, String configuration, String platformName) {

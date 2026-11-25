@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
+import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/template.dart';
 import 'package:test/fake.dart';
@@ -739,9 +740,60 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
             processUtils: processUtils,
             logger: testLogger,
           ),
-          throwsToolExit(),
+          throwsToolExit(message: 'Xcode failed to resolve Swift Package Manager dependencies'),
         );
       });
+
+      testWithoutContext(
+        'throws guided message when a plugin target is outside the package root',
+        () async {
+          final fs = MemoryFileSystem.test();
+          final testLogger = BufferLogger.test();
+          const projectPath = 'path/to/project';
+          final Directory buildDirectory = fs.directory('$projectPath/build/ios');
+          const stderr =
+              'xcodebuild: error: Could not resolve package dependencies:\n'
+              "  target 'plugin_a' in package 'plugin_a' is outside the package root";
+          final fakeProcessManager = FakeProcessManager.empty();
+          fakeProcessManager.addCommands(<FakeCommand>[
+            FakeCommand(
+              command: <String>[
+                'xcrun',
+                'xcodebuild',
+                '-clonedSourcePackagesDirPath',
+                '/${buildDirectory.path}/SourcePackages',
+                '-resolvePackageDependencies',
+              ],
+              exitCode: 1,
+              stderr: stderr,
+            ),
+          ]);
+          final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
+
+          final iosProject = FakeIosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+          iosProject.plugins.add(FakePlugin('plugin_a'));
+          await expectLater(
+            iosProject.prefetchSwiftPackages(
+              xcodebuildProjectCommandArguments: <String>[
+                'xcrun',
+                'xcodebuild',
+                '-clonedSourcePackagesDirPath',
+                '/${buildDirectory.path}/SourcePackages',
+              ],
+              processUtils: processUtils,
+              logger: testLogger,
+            ),
+            throwsToolExit(
+              message:
+                  'Flutter plugin "plugin_a" has an incorrectly configured Package.swift file: '
+                  'target "plugin_a" uses a path outside of the package root.',
+            ),
+          );
+          // The raw Xcode error is still surfaced for context.
+          expect(testLogger.errorText, contains(stderr));
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        },
+      );
 
       testWithoutContext('prefetchSwiftPackages can run for both platforms', () async {
         final fs = MemoryFileSystem.test();
@@ -897,21 +949,38 @@ class FakeCache extends Fake implements Cache {
 class FakeIosProject extends IosProject {
   FakeIosProject.fromFlutter(super.parent) : super.fromFlutter();
 
+  final plugins = <Plugin>[];
+
   @override
   bool usesSwiftPackageManager = true;
 
   @override
   bool flutterPluginSwiftPackageInProjectSettings = true;
+
+  @override
+  Future<List<Plugin>> getPlugins() async => plugins;
 }
 
 class FakeMacOSProject extends MacOSProject {
   FakeMacOSProject.fromFlutter(super.parent) : super.fromFlutter();
 
+  final plugins = <Plugin>[];
+
   @override
   bool usesSwiftPackageManager = true;
 
   @override
   bool flutterPluginSwiftPackageInProjectSettings = true;
+
+  @override
+  Future<List<Plugin>> getPlugins() async => plugins;
+}
+
+class FakePlugin extends Fake implements Plugin {
+  FakePlugin(this.name);
+
+  @override
+  final String name;
 }
 
 class FakeIosProjectWithCustomFlags extends IosProject {
