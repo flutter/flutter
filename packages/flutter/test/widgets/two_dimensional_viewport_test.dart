@@ -3049,7 +3049,6 @@ void main() {
     testWidgets('TwoDimensionalViewport clips the semantics rect of an overflowing child', (
       WidgetTester tester,
     ) async {
-      final SemanticsHandle handle = tester.ensureSemantics();
       final delegate = TwoDimensionalChildBuilderDelegate(
         maxXIndex: 0,
         maxYIndex: 1,
@@ -3091,8 +3090,107 @@ void main() {
         tester.getSemantics(find.bySemanticsLabel('target')).rect,
         const Rect.fromLTRB(0, 0, 200, 200),
       );
+    });
 
-      handle.dispose();
+    testWidgets('TwoDimensionalViewport keeps children in the cache extent in the semantics tree', (
+      WidgetTester tester,
+    ) async {
+      final delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 2,
+        maxYIndex: 2,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          return Semantics(
+            label: '${vicinity.xIndex},${vicinity.yIndex}',
+            container: true,
+            child: const SizedBox(width: 200, height: 200),
+          );
+        },
+      );
+      addTearDown(delegate.dispose);
+
+      Future<void> pumpViewport(double cacheExtent, CacheExtentStyle style) {
+        return tester.pumpWidget(
+          TestWidgetsApp(
+            home: Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                width: 200,
+                height: 200,
+                child: SimpleBuilderTableView(
+                  cacheExtent: cacheExtent,
+                  cacheExtentStyle: style,
+                  useCacheExtent: true,
+                  delegate: delegate,
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      Matcher isHiddenNode(bool hidden) => isA<SemanticsNode>().having(
+        (SemanticsNode node) => node.flagsCollection.isHidden,
+        'isHidden',
+        hidden,
+      );
+      SemanticsNode nodeFor(String label) => tester.getSemantics(find.bySemanticsLabel(label));
+
+      for (final (double cacheExtent, CacheExtentStyle style) in <(double, CacheExtentStyle)>[
+        (100, CacheExtentStyle.pixel),
+        (0.5, CacheExtentStyle.viewport),
+      ]) {
+        await pumpViewport(cacheExtent, style);
+        expect(nodeFor('0,0'), isHiddenNode(false));
+        // Only the part of each child inside the cache extent is included.
+        expect(nodeFor('1,0'), isHiddenNode(true));
+        expect(nodeFor('1,0').rect, const Rect.fromLTRB(0, 0, 100, 200));
+        expect(nodeFor('0,1'), isHiddenNode(true));
+        expect(nodeFor('0,1').rect, const Rect.fromLTRB(0, 0, 200, 100));
+        expect(nodeFor('1,1'), isHiddenNode(true));
+        expect(nodeFor('1,1').rect, const Rect.fromLTRB(0, 0, 100, 100));
+      }
+    });
+
+    testWidgets('TwoDimensionalViewport only reports a paint clip when children overflow', (
+      WidgetTester tester,
+    ) async {
+      final delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 0,
+        maxYIndex: 1,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          return SizedBox(
+            key: vicinity.yIndex == 0 ? const Key('child') : null,
+            width: 200,
+            height: 200,
+          );
+        },
+      );
+      addTearDown(delegate.dispose);
+
+      Future<Rect?> paintClipForHeight(double height) async {
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: Align(
+              alignment: Alignment.topLeft,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: 200, maxHeight: height),
+                child: SimpleBuilderTableView(delegate: delegate),
+              ),
+            ),
+          ),
+        );
+        final RenderTwoDimensionalViewport viewport = getViewport(tester, const Key('child'));
+        RenderObject directChild = tester.renderObject(find.byKey(const Key('child')));
+        while (directChild.parent != viewport) {
+          directChild = directChild.parent!;
+        }
+        return viewport.describeApproximatePaintClip(directChild);
+      }
+
+      expect(await paintClipForHeight(400), isNull);
+      expect(await paintClipForHeight(300), const Rect.fromLTRB(0, 0, 200, 300));
+      // The overflow is reset once the children fit again.
+      expect(await paintClipForHeight(400), isNull);
     });
   });
 }

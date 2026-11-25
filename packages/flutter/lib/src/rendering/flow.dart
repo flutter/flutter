@@ -223,13 +223,20 @@ class RenderFlow extends RenderBox
         newDelegate.shouldRelayout(oldDelegate)) {
       markNeedsLayout();
     } else if (newDelegate.shouldRepaint(oldDelegate)) {
-      markNeedsPaint();
+      _handleRepaint();
     }
 
     if (attached) {
-      oldDelegate._repaint?.removeListener(markNeedsPaint);
-      newDelegate._repaint?.addListener(markNeedsPaint);
+      oldDelegate._repaint?.removeListener(_handleRepaint);
+      newDelegate._repaint?.addListener(_handleRepaint);
     }
+  }
+
+  // The delegate sets the transforms of the children during paint, so a repaint
+  // can also change the semantics geometry of the children.
+  void _handleRepaint() {
+    markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   /// {@macro flutter.material.Material.clipBehavior}
@@ -248,12 +255,12 @@ class RenderFlow extends RenderBox
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    _delegate._repaint?.addListener(markNeedsPaint);
+    _delegate._repaint?.addListener(_handleRepaint);
   }
 
   @override
   void detach() {
-    _delegate._repaint?.removeListener(markNeedsPaint);
+    _delegate._repaint?.removeListener(_handleRepaint);
     super.detach();
   }
 

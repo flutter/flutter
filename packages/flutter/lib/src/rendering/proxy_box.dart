@@ -2807,6 +2807,7 @@ class RenderFittedBox extends RenderProxyBox {
   void _markNeedResolution() {
     _resolvedAlignment = null;
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   bool _fitAffectsLayout(BoxFit fit) {
@@ -2837,6 +2838,7 @@ class RenderFittedBox extends RenderProxyBox {
     } else {
       _clearPaintData();
       markNeedsPaint();
+      markNeedsSemanticsUpdate();
     }
   }
 

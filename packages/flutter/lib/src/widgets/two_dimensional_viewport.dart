@@ -1323,6 +1323,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
 
   @override
   void performLayout() {
+    _hasVisualOverflow = false;
     _firstChild = null;
     _lastChild = null;
     _activeChildrenForLayoutPass.clear();
@@ -1533,7 +1534,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     // visual overflow.
     _hasVisualOverflow =
         _hasVisualOverflow ||
-        childParentData.layoutOffset != childParentData._paintExtent ||
+        child.size != childParentData._paintExtent ||
         !childParentData.isVisible;
   }
 
@@ -1819,6 +1820,26 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       case Clip.antiAliasWithSaveLayer:
         return _hasVisualOverflow ? Offset.zero & viewportDimension : null;
     }
+  }
+
+  @override
+  Rect? describeSemanticsClip(RenderObject? child) {
+    // Children in the cache extent are kept in the semantics tree, marked as
+    // hidden, so that they can be reached by implicit accessibility scrolling.
+    final ScrollCacheExtent(:double value, :CacheExtentStyle style) = scrollCacheExtent;
+    final (double horizontal, double vertical) = switch (style) {
+      CacheExtentStyle.pixel => (value, value),
+      CacheExtentStyle.viewport => (
+        viewportDimension.width * value,
+        viewportDimension.height * value,
+      ),
+    };
+    return Rect.fromLTRB(
+      semanticBounds.left - horizontal,
+      semanticBounds.top - vertical,
+      semanticBounds.right + horizontal,
+      semanticBounds.bottom + vertical,
+    );
   }
 }
 

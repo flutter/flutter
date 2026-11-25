@@ -505,8 +505,6 @@ void main() {
   testWidgets('AnimatedSize clips the semantics rect of an overflowing child', (
     WidgetTester tester,
   ) async {
-    final SemanticsHandle handle = tester.ensureSemantics();
-
     Widget buildAnimatedSize({required bool grown, required Clip clipBehavior}) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -547,7 +545,28 @@ void main() {
       tester.getSemantics(find.bySemanticsLabel('target')).rect,
       const Rect.fromLTRB(0, 0, 100, 100),
     );
+  });
 
-    handle.dispose();
+  testWidgets('AnimatedSize does not report a paint clip when its child does not overflow', (
+    WidgetTester tester,
+  ) async {
+    const childKey = Key('child');
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: AnimatedSize(
+            duration: Duration(seconds: 1),
+            child: SizedBox(key: childKey, width: 100, height: 100),
+          ),
+        ),
+      ),
+    );
+    final RenderAnimatedSize renderObject = tester.renderObject<RenderAnimatedSize>(
+      find.byType(AnimatedSize),
+    );
+    final RenderObject child = tester.renderObject(find.byKey(childKey));
+    expect(renderObject.describeApproximatePaintClip(child), isNull);
   });
 }

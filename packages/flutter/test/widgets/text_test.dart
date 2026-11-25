@@ -1902,8 +1902,6 @@ void main() {
   testWidgets('Text clips the semantics rect of an overflowing inline widget', (
     WidgetTester tester,
   ) async {
-    final SemanticsHandle handle = tester.ensureSemantics();
-
     Widget buildText(TextOverflow overflow) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -1945,8 +1943,31 @@ void main() {
       tester.getSemantics(find.bySemanticsLabel('target')).rect,
       const Rect.fromLTRB(0, 0, 100, 100),
     );
+  });
 
-    handle.dispose();
+  testWidgets('Text does not report a paint clip when its child does not overflow', (
+    WidgetTester tester,
+  ) async {
+    const childKey = Key('child');
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: Text.rich(
+              WidgetSpan(child: SizedBox(key: childKey, width: 100, height: 100)),
+              overflow: TextOverflow.clip,
+            ),
+          ),
+        ),
+      ),
+    );
+    final RenderParagraph renderObject = tester.renderObject<RenderParagraph>(find.byType(Text));
+    final RenderObject child = tester.renderObject(find.byKey(childKey));
+    expect(renderObject.describeApproximatePaintClip(child), isNull);
   });
 }
 

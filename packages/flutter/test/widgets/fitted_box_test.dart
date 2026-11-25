@@ -571,8 +571,6 @@ void main() {
   testWidgets('FittedBox clips the semantics rect of an overflowing child', (
     WidgetTester tester,
   ) async {
-    final SemanticsHandle handle = tester.ensureSemantics();
-
     Widget buildFittedBox(Clip clipBehavior) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -614,8 +612,88 @@ void main() {
       tester.getSemantics(find.bySemanticsLabel('target')).rect,
       const Rect.fromLTRB(0, 0, 100, 100),
     );
+  });
 
-    handle.dispose();
+  testWidgets('FittedBox does not report a paint clip when its child does not overflow', (
+    WidgetTester tester,
+  ) async {
+    const childKey = Key('child');
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: FittedBox(
+              fit: BoxFit.none,
+              clipBehavior: Clip.hardEdge,
+              child: SizedBox(key: childKey, width: 100, height: 100),
+            ),
+          ),
+        ),
+      ),
+    );
+    final RenderFittedBox renderObject = tester.renderObject<RenderFittedBox>(
+      find.byType(FittedBox),
+    );
+    final RenderObject child = tester.renderObject(find.byKey(childKey));
+    expect(renderObject.describeApproximatePaintClip(child), isNull);
+  });
+
+  testWidgets('FittedBox updates semantics when fit, alignment, or textDirection changes', (
+    WidgetTester tester,
+  ) async {
+    // Reuse the same child, so that only the FittedBox is updated.
+    final Widget child = Semantics(
+      label: 'target',
+      container: true,
+      child: const SizedBox(width: 200, height: 200),
+    );
+
+    Widget buildFittedBox({
+      required BoxFit fit,
+      AlignmentGeometry alignment = AlignmentDirectional.topStart,
+      TextDirection textDirection = TextDirection.ltr,
+    }) {
+      return Directionality(
+        textDirection: textDirection,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: FittedBox(
+              fit: fit,
+              alignment: alignment,
+              clipBehavior: Clip.hardEdge,
+              child: child,
+            ),
+          ),
+        ),
+      );
+    }
+
+    Rect targetRect() => tester.getSemantics(find.bySemanticsLabel('target')).rect;
+
+    await tester.pumpWidget(buildFittedBox(fit: BoxFit.contain));
+    expect(targetRect(), const Rect.fromLTRB(0, 0, 200, 200));
+
+    await tester.pumpWidget(buildFittedBox(fit: BoxFit.none));
+    expect(targetRect(), const Rect.fromLTRB(0, 0, 100, 100));
+
+    await tester.pumpWidget(buildFittedBox(fit: BoxFit.none, textDirection: TextDirection.rtl));
+    expect(targetRect(), const Rect.fromLTRB(100, 0, 200, 100));
+
+    await tester.pumpWidget(
+      buildFittedBox(
+        fit: BoxFit.none,
+        alignment: Alignment.bottomLeft,
+        textDirection: TextDirection.rtl,
+      ),
+    );
+    expect(targetRect(), const Rect.fromLTRB(0, 100, 100, 200));
   });
 }
 
