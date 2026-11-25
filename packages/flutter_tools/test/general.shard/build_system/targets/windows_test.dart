@@ -16,7 +16,7 @@ import 'package:flutter_tools/src/build_system/targets/windows.dart';
 import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 
@@ -147,34 +147,27 @@ void main() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
   });
 
-  testUsingContext(
-    'DebugBundleWindowsAssets creates correct bundle structure',
-    () async {
-      final environment = Environment.test(
-        fileSystem.currentDirectory,
-        artifacts: Artifacts.test(),
-        featureFlags: TestFeatureFlags(),
-        processManager: FakeProcessManager.any(),
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        defines: <String, String>{kBuildMode: 'debug'},
-        engineVersion: '2',
-      );
+  test('DebugBundleWindowsAssets creates correct bundle structure', () async {
+    final environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      defines: <String, String>{kBuildMode: 'debug'},
+      engineVersion: '2',
+    );
 
-      environment.buildDir.childFile('app.dill').createSync(recursive: true);
-      environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
+    environment.buildDir.childFile('app.dill').createSync(recursive: true);
+    environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
 
-      await const DebugBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
+    await const DebugBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
 
-      // Depfile is created and dill is copied.
-      expect(environment.buildDir.childFile('flutter_assets.d'), exists);
-      expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin'), exists);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+    // Depfile is created and dill is copied.
+    expect(environment.buildDir.childFile('flutter_assets.d'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin'), exists);
+  });
 
   test('DebugBundleWindowsAssets bundles assets for the selected flavor', () async {
     final FileSystem flavorFileSystem = MemoryFileSystem.test();
@@ -227,71 +220,55 @@ flutter:
     expect(assetManifest.containsKey('assets/vanilla/ice-cream.png'), isFalse);
   });
 
-  testUsingContext(
-    'ProfileBundleWindowsAssets creates correct bundle structure',
-    () async {
-      final environment = Environment.test(
-        fileSystem.currentDirectory,
-        artifacts: Artifacts.test(),
-        featureFlags: TestFeatureFlags(),
-        processManager: FakeProcessManager.any(),
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        defines: <String, String>{kBuildMode: 'profile'},
-      );
+  test('ProfileBundleWindowsAssets creates correct bundle structure', () async {
+    final environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      defines: <String, String>{kBuildMode: 'profile'},
+    );
 
-      environment.buildDir.childFile('app.so').createSync(recursive: true);
-      environment.buildDir.childFile('app.pdb').createSync(recursive: true);
-      environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
+    environment.buildDir.childFile('app.so').createSync(recursive: true);
+    environment.buildDir.childFile('app.pdb').createSync(recursive: true);
+    environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
 
-      await const WindowsAotBundle(AotSnapshotProfile(TargetPlatform.windows_x64))
-          .build(environment);
-      await const ProfileBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
+    await const WindowsAotBundle(AotSnapshotProfile(TargetPlatform.windows_x64)).build(environment);
+    await const ProfileBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
 
-      // Depfile is created and so is copied.
-      expect(environment.buildDir.childFile('flutter_assets.d'), exists);
-      expect(fileSystem.file(r'C:\windows\app.so'), exists);
-      expect(fileSystem.file(r'C:\windows\app.pdb'), isNot(exists));
-      expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+    // Depfile is created and so is copied.
+    expect(environment.buildDir.childFile('flutter_assets.d'), exists);
+    expect(fileSystem.file(r'C:\windows\app.so'), exists);
+    expect(fileSystem.file(r'C:\windows\app.pdb'), isNot(exists));
+    expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
+  });
 
-  testUsingContext(
-    'ReleaseBundleWindowsAssets creates correct bundle structure',
-    () async {
-      final environment = Environment.test(
-        fileSystem.currentDirectory,
-        artifacts: Artifacts.test(),
-        featureFlags: TestFeatureFlags(),
-        processManager: FakeProcessManager.any(),
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        defines: <String, String>{kBuildMode: 'release'},
-      );
+  test('ReleaseBundleWindowsAssets creates correct bundle structure', () async {
+    final environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      defines: <String, String>{kBuildMode: 'release'},
+    );
 
-      environment.buildDir.childFile('app.so').createSync(recursive: true);
-      environment.buildDir.childFile('app.pdb').createSync(recursive: true);
-      environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
+    environment.buildDir.childFile('app.so').createSync(recursive: true);
+    environment.buildDir.childFile('app.pdb').createSync(recursive: true);
+    environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
 
-      await const WindowsAotBundle(AotSnapshotRelease(TargetPlatform.windows_x64))
-          .build(environment);
-      await const ReleaseBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
+    await const WindowsAotBundle(AotSnapshotRelease(TargetPlatform.windows_x64)).build(environment);
+    await const ReleaseBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
 
-      // Depfile is created and so is copied.
-      expect(environment.buildDir.childFile('flutter_assets.d'), exists);
-      expect(fileSystem.file(r'C:\windows\app.so'), exists);
-      expect(fileSystem.file(r'C:\windows\app.pdb'), isNot(exists));
-      expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+    // Depfile is created and so is copied.
+    expect(environment.buildDir.childFile('flutter_assets.d'), exists);
+    expect(fileSystem.file(r'C:\windows\app.so'), exists);
+    expect(fileSystem.file(r'C:\windows\app.pdb'), isNot(exists));
+    expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
+  });
 
   test('AotSnapshotRelease throws StateError when visualStudio is null on windows_x64', () async {
     final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);

@@ -6,14 +6,12 @@ import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/config.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fakes.dart';
 import '../src/test_build_system.dart';
 
@@ -199,91 +197,77 @@ void main() {
     }
   });
 
-  testUsingContext(
-    'defaultIOSArchsForEnvironment',
-    () {
-      expect(
-        defaultIOSArchsForEnvironment(
-          EnvironmentType.physical,
-          Artifacts.testLocalEngine(
-            localEngineHost: 'host_debug_unopt',
-            localEngine: 'ios_debug_unopt',
-          ),
-        ).single,
-        CpuArch.arm64,
-      );
+  test('defaultIOSArchsForEnvironment', () {
+    expect(
+      defaultIOSArchsForEnvironment(
+        EnvironmentType.physical,
+        Artifacts.testLocalEngine(
+          localEngineHost: 'host_debug_unopt',
+          localEngine: 'ios_debug_unopt',
+        ),
+      ).single,
+      CpuArch.arm64,
+    );
 
-      expect(
-        defaultIOSArchsForEnvironment(
-          EnvironmentType.simulator,
-          Artifacts.testLocalEngine(
-            localEngineHost: 'host_debug_unopt',
-            localEngine: 'ios_debug_sim_unopt',
-          ),
-        ).single,
-        CpuArch.x64,
-      );
+    expect(
+      defaultIOSArchsForEnvironment(
+        EnvironmentType.simulator,
+        Artifacts.testLocalEngine(
+          localEngineHost: 'host_debug_unopt',
+          localEngine: 'ios_debug_sim_unopt',
+        ),
+      ).single,
+      CpuArch.x64,
+    );
 
-      expect(
-        defaultIOSArchsForEnvironment(
-          EnvironmentType.simulator,
-          Artifacts.testLocalEngine(
-            localEngineHost: 'host_debug_unopt',
-            localEngine: 'ios_debug_sim_unopt_arm64',
-          ),
-        ).single,
-        CpuArch.arm64,
-      );
+    expect(
+      defaultIOSArchsForEnvironment(
+        EnvironmentType.simulator,
+        Artifacts.testLocalEngine(
+          localEngineHost: 'host_debug_unopt',
+          localEngine: 'ios_debug_sim_unopt_arm64',
+        ),
+      ).single,
+      CpuArch.arm64,
+    );
 
-      expect(
-        defaultIOSArchsForEnvironment(EnvironmentType.physical, Artifacts.test()).single,
-        CpuArch.arm64,
-      );
+    expect(
+      defaultIOSArchsForEnvironment(EnvironmentType.physical, Artifacts.test()).single,
+      CpuArch.arm64,
+    );
 
-      expect(defaultIOSArchsForEnvironment(EnvironmentType.simulator, Artifacts.test()), <CpuArch>[
-        CpuArch.x64,
-        CpuArch.arm64,
-      ]);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+    expect(defaultIOSArchsForEnvironment(EnvironmentType.simulator, Artifacts.test()), <CpuArch>[
+      CpuArch.x64,
+      CpuArch.arm64,
+    ]);
+  });
 
-  testUsingContext(
-    'defaultMacOSArchsForEnvironment',
-    () {
-      expect(
-        defaultMacOSArchsForEnvironment(
-          Artifacts.testLocalEngine(
-            localEngineHost: 'host_debug_unopt',
-            localEngine: 'host_debug_unopt',
-          ),
-        ).single,
-        CpuArch.x64,
-      );
+  test('defaultMacOSArchsForEnvironment', () {
+    expect(
+      defaultMacOSArchsForEnvironment(
+        Artifacts.testLocalEngine(
+          localEngineHost: 'host_debug_unopt',
+          localEngine: 'host_debug_unopt',
+        ),
+      ).single,
+      CpuArch.x64,
+    );
 
-      expect(
-        defaultMacOSArchsForEnvironment(
-          Artifacts.testLocalEngine(
-            localEngineHost: 'host_debug_unopt',
-            localEngine: 'host_debug_unopt_arm64',
-          ),
-        ).single,
-        CpuArch.arm64,
-      );
+    expect(
+      defaultMacOSArchsForEnvironment(
+        Artifacts.testLocalEngine(
+          localEngineHost: 'host_debug_unopt',
+          localEngine: 'host_debug_unopt_arm64',
+        ),
+      ).single,
+      CpuArch.arm64,
+    );
 
-      expect(defaultMacOSArchsForEnvironment(Artifacts.test()), <CpuArch>[
-        CpuArch.x64,
-        CpuArch.arm64,
-      ]);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+    expect(defaultMacOSArchsForEnvironment(Artifacts.test()), <CpuArch>[
+      CpuArch.x64,
+      CpuArch.arm64,
+    ]);
+  });
 
   test('getCpuArchForName on Darwin and Android arches', () {
     expect(getCpuArchForName('armv7'), CpuArch.armv7);

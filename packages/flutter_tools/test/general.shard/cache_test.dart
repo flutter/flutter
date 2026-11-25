@@ -271,7 +271,7 @@ void main() {
       expect(await cache.isUpToDate(), isTrue);
     });
 
-    testUsingContext('should update cached artifacts which are not up to date', () async {
+    test('should update cached artifacts which are not up to date', () async {
       final artifact1 = FakeSecondaryCachedArtifact()..upToDate = true;
       final artifact2 = FakeSecondaryCachedArtifact()..upToDate = false;
       final FileSystem fileSystem = MemoryFileSystem.test();
@@ -348,7 +348,7 @@ void main() {
       },
     );
 
-    testUsingContext('failed storage.googleapis.com download shows China warning', () async {
+    test('failed storage.googleapis.com download shows China warning', () async {
       final InternetAddress address = (await InternetAddress.lookup('storage.googleapis.com'))
           .first;
       final artifact1 = FakeSecondaryCachedArtifact()..upToDate = false;
@@ -452,7 +452,7 @@ void main() {
     expect(artifact.downloadCount, 1);
   });
 
-  testUsingContext('Cache.updateAll calculates progress only for downloading artifacts', () async {
+  test('Cache.updateAll calculates progress only for downloading artifacts', () async {
     final fileSystem = MemoryFileSystem.test();
     final logger = BufferLogger.test();
     final artifactUpdater = _FakeProgressRecordingArtifactUpdater();
@@ -485,7 +485,7 @@ void main() {
     ]);
   });
 
-  testUsingContext('Cache.updateAll succeeds when all artifacts are non-downloading', () async {
+  test('Cache.updateAll succeeds when all artifacts are non-downloading', () async {
     final fileSystem = MemoryFileSystem.test();
     final artifactUpdater = _FakeProgressRecordingArtifactUpdater();
     final artifact1 = _FakeArtifactSet(name: 'non_downloading_1')..upToDate = false;

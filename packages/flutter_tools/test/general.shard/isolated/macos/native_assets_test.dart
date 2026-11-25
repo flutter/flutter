@@ -24,7 +24,6 @@ import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:hooks/hooks.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 import '../fake_native_assets_build_runner.dart';
@@ -81,7 +80,7 @@ void main() {
       signPathBuz = '/build/native_assets/macos/buz.framework';
     }
     for (final buildMode in <BuildMode>[BuildMode.debug, if (!flutterTester) BuildMode.release]) {
-      testUsingContext('build with assets $buildMode$testName', () async {
+      test('build with assets $buildMode$testName', () async {
         if (const LocalPlatform().isWindows) {
           return; // Backslashes in commands, but we will never run these commands on Windows.
         }
