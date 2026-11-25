@@ -507,6 +507,7 @@ void runTests() {
       expect(synchronousCalls.length, greaterThan(1));
       stream.removeListener(listenerB);
       imageCache.clear();
+      SchedulerBinding.instance.scheduleFrame();
       await tester.pump();
     },
   );
@@ -573,6 +574,7 @@ void runTests() {
     expect(codec.disposed, isFalse);
 
     expect(imageCache.evict(provider), isTrue);
+    SchedulerBinding.instance.scheduleFrame();
     await tester.pump();
     expect(codec.disposed, isTrue);
     expect(imageCache.statusForKey(provider).untracked, isTrue);
