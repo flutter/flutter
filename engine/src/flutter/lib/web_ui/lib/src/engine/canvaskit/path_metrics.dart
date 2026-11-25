@@ -66,6 +66,8 @@ class CkContourMeasure implements BackendPathMetric {
 
   @override
   CkPathBuilder extractPath(double start, double end, {bool startWithMoveTo = true}) {
+    // `getSegment` allocates a new WASM-heap SkPath; `CkPathBuilder.fromSkPath`
+    // copies its geometry into a new SkPathBuilder without taking ownership.
     final SkPath skPath = skiaObject.getSegment(start, end, startWithMoveTo);
     try {
       return CkPathBuilder.fromSkPath(skPath, _fillType);

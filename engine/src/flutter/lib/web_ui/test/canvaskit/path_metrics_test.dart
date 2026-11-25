@@ -16,6 +16,9 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
+/// Intercepts `flutterCanvasKit.ContourMeasure.prototype.getSegment` to record
+/// every WASM-heap `SkPath` returned during the current test, restoring the
+/// original prototype method in [addTearDown].
 List<JSObject> _spyOnGetSegment() {
   final canvasKit = globalContext['flutterCanvasKit']! as JSObject;
   final contourMeasure = canvasKit['ContourMeasure']! as JSObject;
@@ -42,6 +45,7 @@ List<JSObject> _spyOnGetSegment() {
   return segments;
 }
 
+/// Returns whether Emscripten's `isDeleted()` reports [skObject] as freed.
 bool _isDeleted(JSObject skObject) {
   return skObject.callMethod<JSBoolean>('isDeleted'.toJS).toDart;
 }
@@ -166,7 +170,7 @@ void testMain() {
       expect(_isDeleted(segments.single), isTrue);
     });
 
-    test('extractPath segments survive Path.combine and Canvas rasterization after temporary SkPath deletion', () async {
+    test('extractPath segments survive Path.combine and Canvas rasterization', () async {
       final List<JSObject> segments = _spyOnGetSegment();
 
       final multiContour = ui.Path()
@@ -188,17 +192,19 @@ void testMain() {
 
       final recorder = ui.PictureRecorder();
       final canvas = ui.Canvas(recorder);
+      // Draw `leftSegment` twice to materialize it once and verify cached `CkPath` reuse.
       canvas.drawPath(leftSegment, ui.Paint()..color = const ui.Color(0xFF00FF00));
       canvas.drawPath(leftSegment, ui.Paint()..color = const ui.Color(0xFF0000FF));
       canvas.drawPath(overlap, ui.Paint()..color = const ui.Color(0xFFFF0000));
 
       final ui.Picture picture = recorder.endRecording();
+      addTearDown(picture.dispose);
       final ui.Image image = picture.toImageSync(30, 20);
+      addTearDown(image.dispose);
       final ByteData bytes = (await image.toByteData())!;
-      image.dispose();
-      picture.dispose();
 
-      // RGBA big-endian: (5, 10) is leftSegment-only (blue), (15, 10) is overlap (red), (25, 10) is empty.
+      // RGBA big-endian: (5, 10) is leftSegment-only (blue), (15, 10) is
+      // overlap (red), and (25, 10) is empty.
       expect(bytes.getUint32((10 * 30 + 5) * 4), 0x0000FFFF);
       expect(bytes.getUint32((10 * 30 + 15) * 4), 0xFF0000FF);
       expect(bytes.getUint32((10 * 30 + 25) * 4), 0x00000000);
