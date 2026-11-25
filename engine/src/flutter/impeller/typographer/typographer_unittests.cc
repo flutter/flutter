@@ -540,6 +540,75 @@ TEST_P(TypographerTest, GlyphAtlasTextureWillGrowTilMaxTextureSize) {
   GTEST_FAIL() << "Test did not encounter an atlas growth situation";
 }
 
+// Regression test for https://github.com/flutter/flutter/issues/190519 and
+// https://github.com/flutter/flutter/issues/197306.
+//
+// When the atlas fails to grow because a glyph can't fit (here, a glyph wider
+// than the atlas), glyphs added on later frames must not be placed on top of
+// glyphs that are already in the atlas.
+TEST_P(TypographerTest, FailedAtlasGrowthDoesNotCorruptLaterGlyphs) {
+  auto data_host_buffer = HostBuffer::Create(
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+  auto context = TypographerContextSkia::Make();
+  auto atlas_context =
+      context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
+  ASSERT_TRUE(context && context->IsValid());
+
+  SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
+
+  // Frame 1: populate the atlas with a few glyphs.
+  auto first_blob = SkTextBlob::MakeFromString("abc", sk_font);
+  ASSERT_TRUE(first_blob);
+  auto atlas =
+      CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
+                       GlyphAtlas::Type::kAlphaBitmap, Matrix(), atlas_context,
+                       MakeTextFrameFromTextBlobSkia(first_blob));
+  ASSERT_NE(atlas, nullptr);
+  ASSERT_NE(atlas->GetTexture(), nullptr);
+  ASSERT_EQ(atlas->GetGlyphCount(), 3u);
+
+  // Frame 2: a glyph that is wider than the atlas (4096px) at any height, so
+  // the atlas can't grow to fit it.
+  SkFont huge_font = flutter::testing::CreateTestFontOfSize(200);
+  auto huge_blob = SkTextBlob::MakeFromString("W", huge_font);
+  ASSERT_TRUE(huge_blob);
+  auto failed_atlas = CreateGlyphAtlas(
+      *GetContext(), context.get(), *data_host_buffer,
+      GlyphAtlas::Type::kAlphaBitmap, Matrix::MakeScale({48.0f, 48.0f, 1.0f}),
+      atlas_context, MakeTextFrameFromTextBlobSkia(huge_blob));
+  ASSERT_EQ(failed_atlas, nullptr);
+
+  // Frame 3: draw glyphs that weren't in the atlas before.
+  auto second_blob = SkTextBlob::MakeFromString("xyz", sk_font);
+  ASSERT_TRUE(second_blob);
+  atlas =
+      CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
+                       GlyphAtlas::Type::kAlphaBitmap, Matrix(), atlas_context,
+                       MakeTextFrameFromTextBlobSkia(second_blob));
+  ASSERT_NE(atlas, nullptr);
+  ASSERT_NE(atlas->GetTexture(), nullptr);
+
+  // Every glyph in the atlas must have its own region inside the texture.
+  Rect texture_bounds = Rect::MakeSize(atlas->GetTexture()->GetSize());
+  std::vector<Rect> glyph_rects;
+  atlas->IterateGlyphs([&](const ScaledFont& scaled_font,
+                           const SubpixelGlyph& glyph, const Rect& rect) {
+    glyph_rects.push_back(rect);
+    return true;
+  });
+  EXPECT_GE(glyph_rects.size(), 3u);
+  for (size_t i = 0; i < glyph_rects.size(); i++) {
+    EXPECT_TRUE(texture_bounds.Contains(glyph_rects[i]))
+        << "Glyph " << glyph_rects[i] << " is outside of the atlas texture "
+        << texture_bounds;
+    for (size_t j = i + 1; j < glyph_rects.size(); j++) {
+      EXPECT_FALSE(glyph_rects[i].IntersectsWithRect(glyph_rects[j]))
+          << "Glyph " << glyph_rects[i] << " overlaps glyph " << glyph_rects[j];
+    }
+  }
+}
+
 TEST_P(TypographerTest, InvalidAtlasForcesRepopulation) {
   SkFont font = flutter::testing::CreateTestFontOfSize(12);
   auto blob = SkTextBlob::MakeFromString(
