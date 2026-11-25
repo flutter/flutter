@@ -121,6 +121,81 @@ void main() {
         expect(actualUri, timeoutUri);
       });
 
+      for (final interleavedLineCount in <int>[0, 1, 3]) {
+        testWithoutContext('uri throws if the VM service fails to start, '
+            'with $interleavedLineCount interleaved lines from other processes', () async {
+          final Future<Uri?> uriFuture = discoverer.uri;
+          logReader.addLine('I/flutter ( 4369): Could not start Dart VM service HTTP server:');
+          for (var index = 0; index < interleavedLineCount; index++) {
+            logReader.addLine('W/System.err( 1234): Unrelated line $index');
+          }
+          logReader.addLine(
+            'I/flutter ( 4369): SocketException: Failed to create server socket '
+            '(OS Error: Operation not permitted, errno = 1), address = 127.0.0.1, port = 0',
+          );
+          logReader.addLine(
+            'I/flutter ( 4369): #0      _NativeSocket.bind (dart:io-patch/socket_patch.dart:1248:7)',
+          );
+
+          await expectLater(
+            uriFuture,
+            throwsA(
+              isA<VmServiceStartException>().having(
+                (VmServiceStartException exception) => exception.reason,
+                'reason',
+                'SocketException: Failed to create server socket '
+                    '(OS Error: Operation not permitted, errno = 1), address = 127.0.0.1, port = 0',
+              ),
+            ),
+          );
+        });
+      }
+
+      testWithoutContext(
+        'uri throws without a reason if the VM service fails to start and the reason never arrives',
+        () {
+          const kFailureReasonTimeout = Duration(seconds: 5);
+          final deviceLogReader = FakeDeviceLogReader();
+          addTearDown(deviceLogReader.dispose);
+
+          FakeAsync().run((FakeAsync time) {
+            final protocolDiscovery = ProtocolDiscovery.vmService(
+              deviceLogReader,
+              ipv6: false,
+              failureReasonTimeout: kFailureReasonTimeout,
+              logger: BufferLogger.test(),
+            );
+            addTearDown(protocolDiscovery.cancel);
+
+            Object? discoveryError;
+            protocolDiscovery.uris.listen(
+              null,
+              onError: (Object error) {
+                discoveryError = error;
+              },
+            );
+
+            deviceLogReader.addLine(
+              'I/flutter ( 4369): Could not start Dart VM service HTTP server:',
+            );
+            deviceLogReader.addLine('W/System.err( 1234): Unrelated line');
+
+            time.elapse(kFailureReasonTimeout - const Duration(milliseconds: 1));
+            expect(discoveryError, isNull);
+
+            time.elapse(const Duration(milliseconds: 1));
+            expect(
+              discoveryError,
+              isA<VmServiceStartException>().having(
+                (VmServiceStartException exception) => exception.reason,
+                'reason',
+                isNull,
+              ),
+            );
+          });
+        },
+      );
+
       testWithoutContext('discovers uri if log line contains Android prefix', () async {
         logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:52584');
         final Uri uri = (await discoverer.uri)!;
