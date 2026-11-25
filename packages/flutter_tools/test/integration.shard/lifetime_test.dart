@@ -33,13 +33,13 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('flutter run does not terminate when a debugger is attached', () async {
+  test('flutter run does not terminate when a debugger is attached', () async {
     await flutter.run(withDebugger: true);
     await Future<void>.delayed(requiredLifespan);
     expect(flutter.hasExited, equals(false));
   });
 
-  testWithoutContext(
+  test(
     'flutter run does not terminate when a debugger is attached and pause-on-exceptions',
     () async {
       await flutter.run(withDebugger: true, pauseOnExceptions: true);

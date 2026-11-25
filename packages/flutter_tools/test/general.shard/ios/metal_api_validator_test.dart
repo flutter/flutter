@@ -13,7 +13,7 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 
 void main() {
-  testWithoutContext('Adds Metal API setting to matching file', () {
+  test('Adds Metal API setting to matching file', () {
     final FileSystem fs = MemoryFileSystem.test();
 
     final File file = fs.file('test_file')
@@ -45,7 +45,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Adds Metal API setting to matching file and crazy indentation', () {
+  test('Adds Metal API setting to matching file and crazy indentation', () {
     final FileSystem fs = MemoryFileSystem.test();
 
     final File file = fs.file('test_file')
@@ -77,7 +77,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Skips modifying file that already references Metal API setting', () {
+  test('Skips modifying file that already references Metal API setting', () {
     final FileSystem fs = MemoryFileSystem.test();
 
     final File file = fs.file('test_file')
@@ -105,7 +105,7 @@ void main() {
     expect(file.readAsStringSync(), initialContents);
   });
 
-  testWithoutContext('No-op on file with no match', () {
+  test('No-op on file with no match', () {
     final FileSystem fs = MemoryFileSystem.test();
 
     final File file = fs.file('does_not_exist')
@@ -119,7 +119,7 @@ void main() {
     expect(file.readAsStringSync(), 'NO_OP');
   });
 
-  testWithoutContext('No-op on missing file', () async {
+  test('No-op on missing file', () async {
     final FileSystem fs = MemoryFileSystem.test();
     final project = FakeIosProject(fs.file('does_not_exist'));
     final validator = MetalAPIValidationMigrator.ios(project, BufferLogger.test());

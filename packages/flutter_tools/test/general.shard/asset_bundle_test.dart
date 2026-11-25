@@ -21,7 +21,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
+import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 import '../src/package_config.dart';
 
@@ -35,7 +35,7 @@ void main() {
     AssetBundle createBundle() => AssetBundleFactory.defaultInstance(
       fileSystem: testFileSystem,
       flutterRoot: getFlutterRoot(),
-      logger: testLogger,
+      logger: BufferLogger.test(),
       platform: platform,
     ).createBundle();
 
@@ -47,109 +47,83 @@ void main() {
       platform = FakePlatform();
     });
 
-    testUsingContext(
-      'nonempty',
-      () async {
-        final AssetBundle ab = createBundle();
-        expect(
-          await ab.build(
-            packageConfigPath: '.dart_tool/package_config.json',
-            targetPlatform: TargetPlatform.tester,
-          ),
-          0,
-        );
-        expect(ab.entries.length, greaterThan(0));
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        Platform: () => platform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
-
-    testUsingContext(
-      'empty pubspec',
-      () async {
-        testFileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync('');
-
-        final AssetBundle bundle = createBundle();
-        await bundle.build(
+    test('nonempty', () async {
+      final AssetBundle ab = createBundle();
+      expect(
+        await ab.build(
           packageConfigPath: '.dart_tool/package_config.json',
           targetPlatform: TargetPlatform.tester,
-        );
-        expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.bin']));
-        const expectedBinAssetManifest = <Object, Object>{};
-        expect(
-          const StandardMessageCodec().decodeMessage(
-            ByteData.sublistView(
-              Uint8List.fromList(await bundle.entries['AssetManifest.bin']!.contentsAsBytes()),
-            ),
-          ),
-          expectedBinAssetManifest,
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        Platform: () => platform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+        ),
+        0,
+      );
+      expect(ab.entries.length, greaterThan(0));
+    });
 
-    testUsingContext(
-      'empty pubspec with data assets from hook',
-      () async {
-        writePackageConfigFiles(directory: testFileSystem.currentDirectory, mainLibName: 'my_app');
-        testFileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync('');
-        final File dataAssetFile = testFileSystem.file('data/foo.txt')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('hello');
+    test('empty pubspec', () async {
+      testFileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync('');
 
-        final AssetBundle bundle = createBundle();
-        await bundle.build(
-          packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
-          flutterHookResult: FlutterHookResult(
-            buildStart: DateTime.now(),
-            buildEnd: DateTime.now(),
-            dataAssets: <HookAsset>[
-              HookAsset(file: dataAssetFile.uri, name: 'data/foo.txt', package: 'my_app'),
-            ],
-            dependencies: <Uri>[dataAssetFile.uri],
+      final AssetBundle bundle = createBundle();
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        targetPlatform: TargetPlatform.tester,
+      );
+      expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.bin']));
+      const expectedBinAssetManifest = <Object, Object>{};
+      expect(
+        const StandardMessageCodec().decodeMessage(
+          ByteData.sublistView(
+            Uint8List.fromList(await bundle.entries['AssetManifest.bin']!.contentsAsBytes()),
           ),
-        );
-        expect(bundle.entries.keys, contains('packages/my_app/data/foo.txt'));
-        expect(
-          const StandardMessageCodec().decodeMessage(
-            ByteData.sublistView(
-              Uint8List.fromList(await bundle.entries['AssetManifest.bin']!.contentsAsBytes()),
-            ),
-          ),
-          <Object?, Object?>{
-            'packages/my_app/data/foo.txt': <Object?>[
-              <Object?, Object?>{'asset': 'packages/my_app/data/foo.txt'},
-            ],
-          },
-        );
-        expect(bundle.needsBuild(), isFalse);
-        dataAssetFile.deleteSync();
-        expect(bundle.needsBuild(), isTrue);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        Platform: () => platform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+        ),
+        expectedBinAssetManifest,
+      );
+    });
 
-    testUsingContext(
-      'wildcard directories do not include subdirectories',
-      () async {
-        writePackageConfigFiles(directory: testFileSystem.currentDirectory, mainLibName: 'my_app');
-        testFileSystem.file('pubspec.yaml').writeAsStringSync('''
+    test('empty pubspec with data assets from hook', () async {
+      writePackageConfigFiles(directory: testFileSystem.currentDirectory, mainLibName: 'my_app');
+      testFileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync('');
+      final File dataAssetFile = testFileSystem.file('data/foo.txt')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('hello');
+
+      final AssetBundle bundle = createBundle();
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        targetPlatform: TargetPlatform.tester,
+        flutterHookResult: FlutterHookResult(
+          buildStart: DateTime.now(),
+          buildEnd: DateTime.now(),
+          dataAssets: <HookAsset>[
+            HookAsset(file: dataAssetFile.uri, name: 'data/foo.txt', package: 'my_app'),
+          ],
+          dependencies: <Uri>[dataAssetFile.uri],
+        ),
+      );
+      expect(bundle.entries.keys, contains('packages/my_app/data/foo.txt'));
+      expect(
+        const StandardMessageCodec().decodeMessage(
+          ByteData.sublistView(
+            Uint8List.fromList(await bundle.entries['AssetManifest.bin']!.contentsAsBytes()),
+          ),
+        ),
+        <Object?, Object?>{
+          'packages/my_app/data/foo.txt': <Object?>[
+            <Object?, Object?>{'asset': 'packages/my_app/data/foo.txt'},
+          ],
+        },
+      );
+      expect(bundle.needsBuild(), isFalse);
+      dataAssetFile.deleteSync();
+      expect(bundle.needsBuild(), isTrue);
+    });
+
+    test('wildcard directories do not include subdirectories', () async {
+      writePackageConfigFiles(directory: testFileSystem.currentDirectory, mainLibName: 'my_app');
+      testFileSystem.file('pubspec.yaml').writeAsStringSync('''
 name: my_app
 dependencies:
   flutter:
@@ -160,219 +134,189 @@ flutter:
     - assets/bar/lizard.png
 ''');
 
-        final assets = <String>[
+      final assets = <String>[
+        'assets/foo/dog.png',
+        'assets/foo/sub/cat.png',
+        'assets/bar/lizard.png',
+        'assets/bar/sheep.png',
+      ];
+
+      for (final asset in assets) {
+        final File assetFile = testFileSystem.file(testFileSystem.path.joinAll(asset.split('/')));
+        assetFile.createSync(recursive: true);
+      }
+
+      final AssetBundle bundle = createBundle();
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        targetPlatform: TargetPlatform.tester,
+      );
+
+      expect(
+        bundle.entries.keys,
+        unorderedEquals(<String>[
+          'AssetManifest.bin',
+          'FontManifest.json',
+          'NOTICES.Z',
           'assets/foo/dog.png',
-          'assets/foo/sub/cat.png',
           'assets/bar/lizard.png',
-          'assets/bar/sheep.png',
-        ];
+        ]),
+      );
+    });
 
-        for (final asset in assets) {
-          final File assetFile = testFileSystem.file(testFileSystem.path.joinAll(asset.split('/')));
-          assetFile.createSync(recursive: true);
-        }
+    test('wildcard directories are updated when filesystem changes', () async {
+      final File packageFile = writePackageConfigFiles(
+        directory: testFileSystem.currentDirectory,
+        mainLibName: 'my_app',
+      );
 
-        final AssetBundle bundle = createBundle();
-        await bundle.build(
-          packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
-        );
-
-        expect(
-          bundle.entries.keys,
-          unorderedEquals(<String>[
-            'AssetManifest.bin',
-            'FontManifest.json',
-            'NOTICES.Z',
-            'assets/foo/dog.png',
-            'assets/bar/lizard.png',
-          ]),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        Platform: () => platform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
-
-    testUsingContext(
-      'wildcard directories are updated when filesystem changes',
-      () async {
-        final File packageFile = writePackageConfigFiles(
-          directory: testFileSystem.currentDirectory,
-          mainLibName: 'my_app',
-        );
-
-        testFileSystem
-            .file(testFileSystem.path.join('assets', 'foo', 'bar.txt'))
-            .createSync(recursive: true);
-        testFileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync(r'''
+      testFileSystem
+          .file(testFileSystem.path.join('assets', 'foo', 'bar.txt'))
+          .createSync(recursive: true);
+      testFileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
 name: my_app
 flutter:
   assets:
     - assets/foo/
 ''');
-        final AssetBundle bundle = createBundle();
-        await bundle.build(
-          packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
-        );
-        expect(
-          bundle.entries.keys,
-          unorderedEquals(<String>[
-            'AssetManifest.bin',
-            'FontManifest.json',
-            'NOTICES.Z',
-            'assets/foo/bar.txt',
-          ]),
-        );
-        // Simulate modifying the files by updating the filestat time manually.
-        testFileSystem.file(testFileSystem.path.join('assets', 'foo', 'fizz.txt'))
-          ..createSync(recursive: true)
-          ..setLastModifiedSync(packageFile.lastModifiedSync().add(const Duration(hours: 1)));
+      final AssetBundle bundle = createBundle();
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        targetPlatform: TargetPlatform.tester,
+      );
+      expect(
+        bundle.entries.keys,
+        unorderedEquals(<String>[
+          'AssetManifest.bin',
+          'FontManifest.json',
+          'NOTICES.Z',
+          'assets/foo/bar.txt',
+        ]),
+      );
+      // Simulate modifying the files by updating the filestat time manually.
+      testFileSystem.file(testFileSystem.path.join('assets', 'foo', 'fizz.txt'))
+        ..createSync(recursive: true)
+        ..setLastModifiedSync(packageFile.lastModifiedSync().add(const Duration(hours: 1)));
 
-        expect(bundle.needsBuild(), true);
-        await bundle.build(
-          packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
-        );
-        expect(
-          bundle.entries.keys,
-          unorderedEquals(<String>[
-            'AssetManifest.bin',
-            'FontManifest.json',
-            'NOTICES.Z',
-            'assets/foo/bar.txt',
-            'assets/foo/fizz.txt',
-          ]),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        Platform: () => platform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(bundle.needsBuild(), true);
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        targetPlatform: TargetPlatform.tester,
+      );
+      expect(
+        bundle.entries.keys,
+        unorderedEquals(<String>[
+          'AssetManifest.bin',
+          'FontManifest.json',
+          'NOTICES.Z',
+          'assets/foo/bar.txt',
+          'assets/foo/fizz.txt',
+        ]),
+      );
+    });
 
-    testUsingContext(
-      'handle removal of wildcard directories',
-      () async {
-        testFileSystem
-            .file(testFileSystem.path.join('assets', 'foo', 'bar.txt'))
-            .createSync(recursive: true);
-        final File pubspec = testFileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync(r'''
+    test('handle removal of wildcard directories', () async {
+      testFileSystem
+          .file(testFileSystem.path.join('assets', 'foo', 'bar.txt'))
+          .createSync(recursive: true);
+      final File pubspec = testFileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
 name: my_app
 flutter:
   assets:
     - assets/foo/
 ''');
-        final File packageConfig = writePackageConfigFiles(
-          directory: testFileSystem.currentDirectory,
-          mainLibName: 'my_app',
-        );
-        final AssetBundle bundle = createBundle();
-        await bundle.build(
-          packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
-        );
-        expect(
-          bundle.entries.keys,
-          unorderedEquals(<String>[
-            'AssetManifest.bin',
-            'FontManifest.json',
-            'NOTICES.Z',
-            'assets/foo/bar.txt',
-          ]),
-        );
-        expect(bundle.needsBuild(), false);
+      final File packageConfig = writePackageConfigFiles(
+        directory: testFileSystem.currentDirectory,
+        mainLibName: 'my_app',
+      );
+      final AssetBundle bundle = createBundle();
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        targetPlatform: TargetPlatform.tester,
+      );
+      expect(
+        bundle.entries.keys,
+        unorderedEquals(<String>[
+          'AssetManifest.bin',
+          'FontManifest.json',
+          'NOTICES.Z',
+          'assets/foo/bar.txt',
+        ]),
+      );
+      expect(bundle.needsBuild(), false);
 
-        // Delete the wildcard directory and update pubspec file.
-        final DateTime modifiedTime = pubspec.lastModifiedSync().add(const Duration(hours: 1));
-        testFileSystem
-            .directory(testFileSystem.path.join('assets', 'foo'))
-            .deleteSync(recursive: true);
-        testFileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync(r'''
+      // Delete the wildcard directory and update pubspec file.
+      final DateTime modifiedTime = pubspec.lastModifiedSync().add(const Duration(hours: 1));
+      testFileSystem
+          .directory(testFileSystem.path.join('assets', 'foo'))
+          .deleteSync(recursive: true);
+      testFileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
 name: my_app''')
-          ..setLastModifiedSync(modifiedTime);
+        ..setLastModifiedSync(modifiedTime);
 
-        // touch the package config to make sure its change time is after pubspec.yaml's
-        packageConfig.setLastModifiedSync(modifiedTime);
+      // touch the package config to make sure its change time is after pubspec.yaml's
+      packageConfig.setLastModifiedSync(modifiedTime);
 
-        // Even though the previous file was removed, it is left in the
-        // asset manifest and not updated. This is due to the devfs not
-        // supporting file deletion.
-        expect(bundle.needsBuild(), true);
-        await bundle.build(
-          packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
-        );
-        expect(
-          bundle.entries.keys,
-          unorderedEquals(<String>[
-            'AssetManifest.bin',
-            'FontManifest.json',
-            'NOTICES.Z',
-            'assets/foo/bar.txt',
-          ]),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        Platform: () => platform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      // Even though the previous file was removed, it is left in the
+      // asset manifest and not updated. This is due to the devfs not
+      // supporting file deletion.
+      expect(bundle.needsBuild(), true);
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        targetPlatform: TargetPlatform.tester,
+      );
+      expect(
+        bundle.entries.keys,
+        unorderedEquals(<String>[
+          'AssetManifest.bin',
+          'FontManifest.json',
+          'NOTICES.Z',
+          'assets/foo/bar.txt',
+        ]),
+      );
+    });
 
     // https://github.com/flutter/flutter/issues/42723
-    testUsingContext(
-      'Test regression for mistyped file',
-      () async {
-        testFileSystem
-            .file(testFileSystem.path.join('assets', 'foo', 'bar.txt'))
-            .createSync(recursive: true);
-        // Create a directory in the same path to test that we're only looking at File
-        // objects.
-        testFileSystem.directory(testFileSystem.path.join('assets', 'foo', 'bar')).createSync();
-        testFileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync(r'''
+    test('Test regression for mistyped file', () async {
+      testFileSystem
+          .file(testFileSystem.path.join('assets', 'foo', 'bar.txt'))
+          .createSync(recursive: true);
+      // Create a directory in the same path to test that we're only looking at File
+      // objects.
+      testFileSystem.directory(testFileSystem.path.join('assets', 'foo', 'bar')).createSync();
+      testFileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
 name: my_app
 flutter:
   assets:
     - assets/foo/
 ''');
-        writePackageConfigFiles(directory: testFileSystem.currentDirectory, mainLibName: 'my_app');
-        final AssetBundle bundle = createBundle();
-        await bundle.build(
-          packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
-        );
-        expect(
-          bundle.entries.keys,
-          unorderedEquals(<String>[
-            'AssetManifest.bin',
-            'FontManifest.json',
-            'NOTICES.Z',
-            'assets/foo/bar.txt',
-          ]),
-        );
-        expect(bundle.needsBuild(), false);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        Platform: () => platform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      writePackageConfigFiles(directory: testFileSystem.currentDirectory, mainLibName: 'my_app');
+      final AssetBundle bundle = createBundle();
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        targetPlatform: TargetPlatform.tester,
+      );
+      expect(
+        bundle.entries.keys,
+        unorderedEquals(<String>[
+          'AssetManifest.bin',
+          'FontManifest.json',
+          'NOTICES.Z',
+          'assets/foo/bar.txt',
+        ]),
+      );
+      expect(bundle.needsBuild(), false);
+    });
 
-    testWithoutContext('deferred assets are parsed', () async {
+    test('deferred assets are parsed', () async {
       writePackageConfigFiles(directory: testFileSystem.currentDirectory, mainLibName: 'my_app');
       testFileSystem
           .file(testFileSystem.path.join('assets', 'foo', 'bar.txt'))
@@ -422,22 +366,20 @@ flutter:
       expect(bundle.needsBuild(), false);
     });
 
-    testUsingContext(
-      'deferred assets are parsed regularly when splitDeferredAssets Disabled',
-      () async {
-        writePackageConfigFiles(directory: testFileSystem.currentDirectory, mainLibName: 'my_app');
-        testFileSystem
-            .file(testFileSystem.path.join('assets', 'foo', 'bar.txt'))
-            .createSync(recursive: true);
-        testFileSystem
-            .file(testFileSystem.path.join('assets', 'bar', 'barbie.txt'))
-            .createSync(recursive: true);
-        testFileSystem
-            .file(testFileSystem.path.join('assets', 'wild', 'dash.txt'))
-            .createSync(recursive: true);
-        testFileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync(r'''
+    test('deferred assets are parsed regularly when splitDeferredAssets Disabled', () async {
+      writePackageConfigFiles(directory: testFileSystem.currentDirectory, mainLibName: 'my_app');
+      testFileSystem
+          .file(testFileSystem.path.join('assets', 'foo', 'bar.txt'))
+          .createSync(recursive: true);
+      testFileSystem
+          .file(testFileSystem.path.join('assets', 'bar', 'barbie.txt'))
+          .createSync(recursive: true);
+      testFileSystem
+          .file(testFileSystem.path.join('assets', 'wild', 'dash.txt'))
+          .createSync(recursive: true);
+      testFileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
 name: my_app
 flutter:
   assets:
@@ -448,33 +390,27 @@ flutter:
         - assets/bar/barbie.txt
         - assets/wild/
 ''');
-        final AssetBundle bundle = createBundle();
-        await bundle.build(
-          packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
-        );
-        expect(
-          bundle.entries.keys,
-          unorderedEquals(<String>[
-            'assets/foo/bar.txt',
-            'assets/bar/barbie.txt',
-            'assets/wild/dash.txt',
-            'AssetManifest.bin',
-            'FontManifest.json',
-            'NOTICES.Z',
-          ]),
-        );
-        expect(bundle.deferredComponentsEntries.isEmpty, true);
-        expect(bundle.needsBuild(), false);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        Platform: () => platform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      final AssetBundle bundle = createBundle();
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        targetPlatform: TargetPlatform.tester,
+      );
+      expect(
+        bundle.entries.keys,
+        unorderedEquals(<String>[
+          'assets/foo/bar.txt',
+          'assets/bar/barbie.txt',
+          'assets/wild/dash.txt',
+          'AssetManifest.bin',
+          'FontManifest.json',
+          'NOTICES.Z',
+        ]),
+      );
+      expect(bundle.deferredComponentsEntries.isEmpty, true);
+      expect(bundle.needsBuild(), false);
+    });
 
-    testWithoutContext('deferred assets wildcard parsed', () async {
+    test('deferred assets wildcard parsed', () async {
       final File packageFile = writePackageConfigFiles(
         directory: testFileSystem.currentDirectory,
         mainLibName: 'my_app',
@@ -553,7 +489,7 @@ flutter:
   });
 
   group('AssetBundle.build', () {
-    testWithoutContext('throws ToolExit when directory entry has an invalid scheme', () async {
+    test('throws ToolExit when directory entry has an invalid scheme', () async {
       final fileSystem = MemoryFileSystem(style: FileSystemStyle.windows);
       final logger = BufferLogger.test();
       final platform = FakePlatform(operatingSystem: 'windows');
@@ -594,7 +530,7 @@ flutter:
       );
     });
 
-    testWithoutContext('throws ToolExit when file entry has an invalid scheme', () async {
+    test('throws ToolExit when file entry has an invalid scheme', () async {
       final FileSystem fileSystem = MemoryFileSystem(style: FileSystemStyle.windows);
       final logger = BufferLogger.test();
       final platform = FakePlatform(operatingSystem: 'windows');
@@ -634,7 +570,7 @@ flutter:
       );
     });
 
-    testWithoutContext("AssetBundleEntry::content::isModified is true when an asset's transformers change in between builds", () async {
+    test("AssetBundleEntry::content::isModified is true when an asset's transformers change in between builds", () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
 
       fileSystem.file('my-asset.txt').createSync();
@@ -707,7 +643,7 @@ flutter:
     AssetBundle createWebBundle() => AssetBundleFactory.defaultInstance(
       fileSystem: testFileSystem,
       flutterRoot: getFlutterRoot(),
-      logger: testLogger,
+      logger: BufferLogger.test(),
       platform: testPlatform,
     ).createBundle();
 
@@ -719,40 +655,27 @@ flutter:
       testPlatform = FakePlatform();
     });
 
-    testUsingContext(
-      'empty pubspec',
-      () async {
-        testFileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync('');
+    test('empty pubspec', () async {
+      testFileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync('');
 
-        final AssetBundle bundle = createWebBundle();
-        await bundle.build(
-          packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.web_javascript,
-        );
+      final AssetBundle bundle = createWebBundle();
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        targetPlatform: TargetPlatform.web_javascript,
+      );
 
-        expect(
-          bundle.entries.keys,
-          unorderedEquals(<String>['AssetManifest.bin', 'AssetManifest.bin.json']),
-        );
-        expect(
-          utf8.decode(await bundle.entries['AssetManifest.bin.json']!.contentsAsBytes()),
-          '""',
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        Platform: () => testPlatform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(
+        bundle.entries.keys,
+        unorderedEquals(<String>['AssetManifest.bin', 'AssetManifest.bin.json']),
+      );
+      expect(utf8.decode(await bundle.entries['AssetManifest.bin.json']!.contentsAsBytes()), '""');
+    });
 
-    testUsingContext(
-      'pubspec contains an asset',
-      () async {
-        writePackageConfigFiles(directory: testFileSystem.currentDirectory, mainLibName: 'my_app');
-        testFileSystem.file('pubspec.yaml').writeAsStringSync(r'''
+    test('pubspec contains an asset', () async {
+      writePackageConfigFiles(directory: testFileSystem.currentDirectory, mainLibName: 'my_app');
+      testFileSystem.file('pubspec.yaml').writeAsStringSync(r'''
 name: my_app
 dependencies:
   flutter:
@@ -761,52 +684,45 @@ flutter:
   assets:
     - assets/bar/lizard.png
 ''');
-        testFileSystem
-            .file(testFileSystem.path.joinAll(<String>['assets', 'bar', 'lizard.png']))
-            .createSync(recursive: true);
+      testFileSystem
+          .file(testFileSystem.path.joinAll(<String>['assets', 'bar', 'lizard.png']))
+          .createSync(recursive: true);
 
-        final AssetBundle bundle = createWebBundle();
-        await bundle.build(
-          packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.web_javascript,
-        );
+      final AssetBundle bundle = createWebBundle();
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        targetPlatform: TargetPlatform.web_javascript,
+      );
 
-        expect(
-          bundle.entries.keys,
-          unorderedEquals(<String>[
-            'AssetManifest.bin',
-            'AssetManifest.bin.json',
-            'FontManifest.json',
-            'NOTICES', // not .Z
-            'assets/bar/lizard.png',
-          ]),
-        );
+      expect(
+        bundle.entries.keys,
+        unorderedEquals(<String>[
+          'AssetManifest.bin',
+          'AssetManifest.bin.json',
+          'FontManifest.json',
+          'NOTICES', // not .Z
+          'assets/bar/lizard.png',
+        ]),
+      );
 
-        final Uint8List manifestBinJsonBytes = base64.decode(
-          json.decode(
-            utf8.decode(await bundle.entries['AssetManifest.bin.json']!.contentsAsBytes()),
-          ) as String,
-        );
+      final Uint8List manifestBinJsonBytes = base64.decode(
+        json.decode(utf8.decode(await bundle.entries['AssetManifest.bin.json']!.contentsAsBytes()))
+            as String,
+      );
 
-        final manifestBinBytes = Uint8List.fromList(
-          await bundle.entries['AssetManifest.bin']!.contentsAsBytes(),
-        );
+      final manifestBinBytes = Uint8List.fromList(
+        await bundle.entries['AssetManifest.bin']!.contentsAsBytes(),
+      );
 
-        expect(
-          manifestBinJsonBytes,
-          equals(manifestBinBytes),
-          reason: 'JSON-encoded binary content should be identical to BIN file.',
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        Platform: () => testPlatform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(
+        manifestBinJsonBytes,
+        equals(manifestBinBytes),
+        reason: 'JSON-encoded binary content should be identical to BIN file.',
+      );
+    });
   });
 
-  testWithoutContext('Failed directory delete shows message', () async {
+  test('Failed directory delete shows message', () async {
     final handler = FileExceptionHandler();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
     final logger = BufferLogger.test();
@@ -831,45 +747,42 @@ flutter:
     expect(logger.warningText, contains('Expected Error Text'));
   });
 
-  testWithoutContext(
-    'does not unnecessarily recreate asset manifest, font manifest, license',
-    () async {
-      final fs = MemoryFileSystem.test();
-      writePackageConfigFiles(directory: fs.currentDirectory, mainLibName: 'my_app');
-      fs.file(fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
-      fs.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync(r'''
+  test('does not unnecessarily recreate asset manifest, font manifest, license', () async {
+    final fs = MemoryFileSystem.test();
+    writePackageConfigFiles(directory: fs.currentDirectory, mainLibName: 'my_app');
+    fs.file(fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
+    fs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
 name: my_app
 flutter:
 assets:
   - assets/foo/bar.txt
 ''');
-      final bundle = ManifestAssetBundle(
-        logger: BufferLogger.test(),
-        fileSystem: fs,
-        platform: FakePlatform(),
-        flutterRoot: getFlutterRoot(),
-      );
-      await bundle.build(
-        packageConfigPath: '.dart_tool/package_config.json',
-        targetPlatform: TargetPlatform.tester,
-      );
+    final bundle = ManifestAssetBundle(
+      logger: BufferLogger.test(),
+      fileSystem: fs,
+      platform: FakePlatform(),
+      flutterRoot: getFlutterRoot(),
+    );
+    await bundle.build(
+      packageConfigPath: '.dart_tool/package_config.json',
+      targetPlatform: TargetPlatform.tester,
+    );
 
-      final AssetBundleEntry? fontManifest = bundle.entries['FontManifest.json'];
-      final AssetBundleEntry? license = bundle.entries['NOTICES'];
+    final AssetBundleEntry? fontManifest = bundle.entries['FontManifest.json'];
+    final AssetBundleEntry? license = bundle.entries['NOTICES'];
 
-      await bundle.build(
-        packageConfigPath: '.dart_tool/package_config.json',
-        targetPlatform: TargetPlatform.tester,
-      );
+    await bundle.build(
+      packageConfigPath: '.dart_tool/package_config.json',
+      targetPlatform: TargetPlatform.tester,
+    );
 
-      expect(fontManifest, bundle.entries['FontManifest.json']);
-      expect(license, bundle.entries['NOTICES']);
-    },
-  );
+    expect(fontManifest, bundle.entries['FontManifest.json']);
+    expect(license, bundle.entries['NOTICES']);
+  });
 
-  testWithoutContext('inserts dummy file into additionalDependencies when '
+  test('inserts dummy file into additionalDependencies when '
       'wildcards are used', () async {
     final fs = MemoryFileSystem.test();
     writePackageConfigFiles(directory: fs.currentDirectory, mainLibName: 'my_app');
@@ -902,7 +815,7 @@ flutter:
     );
   });
 
-  testWithoutContext('Does not insert dummy file into additionalDependencies '
+  test('Does not insert dummy file into additionalDependencies '
       'when wildcards are not used', () async {
     final fs = MemoryFileSystem.test();
     writePackageConfigFiles(directory: fs.currentDirectory, mainLibName: 'my_app');
@@ -955,7 +868,7 @@ flutter:
       fileSystem.file(shaderPath).createSync(recursive: true);
     });
 
-    testWithoutContext('Including a shader triggers the shader compiler', () async {
+    test('Including a shader triggers the shader compiler', () async {
       final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>[
@@ -1020,7 +933,7 @@ flutter:
       expect(processManager.hasRemainingExpectations, false);
     });
 
-    testWithoutContext('Included shaders are compiled for the web', () async {
+    test('Included shaders are compiled for the web', () async {
       final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>[
@@ -1083,7 +996,7 @@ flutter:
       expect(processManager.hasRemainingExpectations, false);
     });
 
-    testWithoutContext('Material shaders are compiled for the web', () async {
+    test('Material shaders are compiled for the web', () async {
       writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
 
       final String materialIconsPath = fileSystem.path.join(
@@ -1225,7 +1138,7 @@ flutter:
     });
   });
 
-  testWithoutContext('Does not insert dummy file into additionalDependencies '
+  test('Does not insert dummy file into additionalDependencies '
       'when wildcards are used by dependencies', () async {
     final fs = MemoryFileSystem.test();
     writePackageConfigFiles(
@@ -1268,7 +1181,7 @@ flutter:
     expect(bundle.additionalDependencies, isEmpty);
   });
 
-  testWithoutContext('does not track wildcard directories from dependencies', () async {
+  test('does not track wildcard directories from dependencies', () async {
     final fs = MemoryFileSystem.test();
     writePackageConfigFiles(
       directory: fs.currentDirectory,
@@ -1322,7 +1235,7 @@ flutter:
     expect(bundle.needsBuild(), false);
   });
 
-  testWithoutContext('reports package that causes asset bundle error when it is '
+  test('reports package that causes asset bundle error when it is '
       'a dependency', () async {
     final fs = MemoryFileSystem.test();
     final logger = BufferLogger.test();
@@ -1365,7 +1278,7 @@ flutter:
     expect(logger.errorText, contains('This asset was included from package foo'));
   });
 
-  testWithoutContext('does not report package that causes asset bundle error '
+  test('does not report package that causes asset bundle error '
       'when it is from own pubspec', () async {
     final fs = MemoryFileSystem.test();
     final logger = BufferLogger.test();
@@ -1399,7 +1312,7 @@ flutter:
     expect(logger.errorText, isNot(contains('This asset was included from')));
   });
 
-  testWithoutContext('does not include Material Design assets if uses-material-design: true is '
+  test('does not include Material Design assets if uses-material-design: true is '
       'specified only by a dependency', () async {
     final fs = MemoryFileSystem.test();
     final logger = BufferLogger.test();
@@ -1444,7 +1357,7 @@ flutter:
     expect(logger.errorText, contains('package:foo has `uses-material-design: true` set'));
   });
 
-  testWithoutContext('does not include assets in project directories as asset variants', () async {
+  test('does not include assets in project directories as asset variants', () async {
     final fs = MemoryFileSystem.test();
     writePackageConfigFiles(directory: fs.currentDirectory, mainLibName: 'my_app');
     fs.file('pubspec.yaml')
@@ -1491,14 +1404,12 @@ flutter:
     );
   });
 
-  testWithoutContext(
-    'deferred and regular assets are included in manifest alphabetically',
-    () async {
-      final fs = MemoryFileSystem.test();
-      writePackageConfigFiles(directory: fs.currentDirectory, mainLibName: 'my_app');
-      fs.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync(r'''
+  test('deferred and regular assets are included in manifest alphabetically', () async {
+    final fs = MemoryFileSystem.test();
+    writePackageConfigFiles(directory: fs.currentDirectory, mainLibName: 'my_app');
+    fs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
 name: my_app
 
 flutter:
@@ -1512,27 +1423,26 @@ flutter:
         - assets/bar.jpg
         - assets/apple.jpg
 ''');
-      fs.file('assets/foo.jpg').createSync(recursive: true);
-      fs.file('assets/bar.jpg').createSync();
-      fs.file('assets/apple.jpg').createSync();
-      fs.file('assets/zebra.jpg').createSync();
-      final bundle = ManifestAssetBundle(
-        logger: BufferLogger.test(),
-        fileSystem: fs,
-        platform: FakePlatform(),
-        flutterRoot: getFlutterRoot(),
-      );
+    fs.file('assets/foo.jpg').createSync(recursive: true);
+    fs.file('assets/bar.jpg').createSync();
+    fs.file('assets/apple.jpg').createSync();
+    fs.file('assets/zebra.jpg').createSync();
+    final bundle = ManifestAssetBundle(
+      logger: BufferLogger.test(),
+      fileSystem: fs,
+      platform: FakePlatform(),
+      flutterRoot: getFlutterRoot(),
+    );
 
-      expect(
-        await bundle.build(
-          packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
-        ),
-        0,
-      );
-      expect((bundle.entries['FontManifest.json']!.content as DevFSStringContent).string, '[]');
-    },
-  );
+    expect(
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        targetPlatform: TargetPlatform.tester,
+      ),
+      0,
+    );
+    expect((bundle.entries['FontManifest.json']!.content as DevFSStringContent).string, '[]');
+  });
 
   group('reports error for absolute paths', () {
     Future<void> testCase({
@@ -1586,7 +1496,7 @@ flutter:
           platform.isWindows ? r'c:\asset\path.json' : '/asset/path.json',
           windows: platform.isWindows,
         );
-        testWithoutContext('standard assets', () async {
+        test('standard assets', () async {
           await testCase(
             pubspecContents:
                 '''
@@ -1601,7 +1511,7 @@ flutter:
           );
         });
 
-        testWithoutContext('font assets', () async {
+        test('font assets', () async {
           await testCase(
             pubspecContents:
                 '''
@@ -1618,7 +1528,7 @@ flutter:
           );
         });
 
-        testWithoutContext('shader assets', () async {
+        test('shader assets', () async {
           await testCase(
             pubspecContents:
                 '''

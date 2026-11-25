@@ -35,7 +35,7 @@ void main() {
     for (final platform in supportedPlatforms) {
       group('for ${platform.name}', () {
         group('generatePluginsSwiftPackage', () {
-          testWithoutContext('skip if no dependencies and not already migrated', () async {
+          test('skip if no dependencies and not already migrated', () async {
             final fs = MemoryFileSystem();
             final processManager = FakeProcessManager.any();
             final logger = BufferLogger.test();
@@ -55,7 +55,7 @@ void main() {
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isFalse);
           });
 
-          testWithoutContext('generate if no dependencies and already migrated', () async {
+          test('generate if no dependencies and already migrated', () async {
             final fs = MemoryFileSystem();
             final processManager = FakeProcessManager.any();
             final logger = BufferLogger.test();
@@ -146,7 +146,7 @@ $_doubleIndent
             );
           });
 
-          testWithoutContext(
+          test(
             'generate if no dependencies, no Flutter dependency, and already migrated',
             () async {
               final fs = MemoryFileSystem();
@@ -208,7 +208,7 @@ $_doubleIndent
             },
           );
 
-          testWithoutContext('generate with single dependency', () async {
+          test('generate with single dependency', () async {
             final fs = MemoryFileSystem();
             final processManager = FakeProcessManager.any();
             final logger = BufferLogger.test();
@@ -278,7 +278,7 @@ let package = Package(
 ''');
           });
 
-          testWithoutContext('generate with multiple dependencies', () async {
+          test('generate with multiple dependencies', () async {
             final fs = MemoryFileSystem();
             final processManager = FakeProcessManager.any();
             final logger = BufferLogger.test();
@@ -390,7 +390,7 @@ let package = Package(
 ''');
           });
 
-          testWithoutContext('generate with plugin with dependency on plugin', () async {
+          test('generate with plugin with dependency on plugin', () async {
             final fs = MemoryFileSystem();
             final logger = BufferLogger.test();
             final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
@@ -578,7 +578,7 @@ let package = Package(
             expect(processManager, hasNoRemainingExpectations);
           });
 
-          testWithoutContext('generate with plugin whose basename does not match its name', () async {
+          test('generate with plugin whose basename does not match its name', () async {
             final fs = MemoryFileSystem();
             final logger = BufferLogger.test();
             final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
@@ -681,7 +681,7 @@ let package = Package(
           });
 
           group('robust symlink creation', () {
-            testWithoutContext('directory already exists at symlink path', () async {
+            test('directory already exists at symlink path', () async {
               final fs = MemoryFileSystem();
               final processManager = FakeProcessManager.any();
               final logger = BufferLogger.test();
@@ -724,7 +724,7 @@ let package = Package(
               );
             });
 
-            testWithoutContext('file already exists at symlink path', () async {
+            test('file already exists at symlink path', () async {
               final fs = MemoryFileSystem();
               final processManager = FakeProcessManager.any();
               final logger = BufferLogger.test();
@@ -767,7 +767,7 @@ let package = Package(
               );
             });
 
-            testWithoutContext('broken symlink already exists at symlink path', () async {
+            test('broken symlink already exists at symlink path', () async {
               final fs = MemoryFileSystem();
               final processManager = FakeProcessManager.any();
               final logger = BufferLogger.test();
@@ -811,7 +811,7 @@ let package = Package(
               );
             });
 
-            testWithoutContext(
+            test(
               'parallel build concurrently creates correct symlink and throws OS error 17',
               () async {
                 final delegateFs = MemoryFileSystem();
@@ -895,7 +895,7 @@ let package = Package(
             );
           });
 
-          testWithoutContext('acquires and releases lock successfully', () async {
+          test('acquires and releases lock successfully', () async {
             project.xcodeProjectInfoFile.createSync(recursive: true);
             project.xcodeProjectInfoFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
 
@@ -906,7 +906,7 @@ let package = Package(
             expect(trackingFs.lockAttempts, 1);
           });
 
-          testWithoutContext('retries lock on FileSystemException and eventually succeeds', () async {
+          test('retries lock on FileSystemException and eventually succeeds', () async {
             project.xcodeProjectInfoFile.createSync(recursive: true);
             project.xcodeProjectInfoFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
 
@@ -928,7 +928,7 @@ let package = Package(
             );
           });
 
-          testWithoutContext('proceeds without lock on UnimplementedError', () async {
+          test('proceeds without lock on UnimplementedError', () async {
             project.xcodeProjectInfoFile.createSync(recursive: true);
             project.xcodeProjectInfoFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
 
@@ -941,7 +941,7 @@ let package = Package(
             expect(trackingFs.lockAttempts, 1); // 1 attempt that threw
           });
 
-          testWithoutContext(
+          test(
             'non-destructive symlink update: preserves active, creates new, deletes obsolete',
             () async {
               project.xcodeProjectInfoFile.createSync(recursive: true);
@@ -1005,34 +1005,31 @@ let package = Package(
             },
           );
 
-          testWithoutContext(
-            'optimizes Package.swift generation: does not rewrite if identical',
-            () async {
-              project.xcodeProjectInfoFile.createSync(recursive: true);
-              project.xcodeProjectInfoFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
+          test('optimizes Package.swift generation: does not rewrite if identical', () async {
+            project.xcodeProjectInfoFile.createSync(recursive: true);
+            project.xcodeProjectInfoFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
 
-              final plugin1 = FakePlugin(
-                name: 'plugin_1',
-                platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
-              );
-              trackingFs
-                  .file('${plugin1.path}/${platform.name}/${plugin1.name}/Package.swift')
-                  .createSync(recursive: true);
+            final plugin1 = FakePlugin(
+              name: 'plugin_1',
+              platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+            );
+            trackingFs
+                .file('${plugin1.path}/${platform.name}/${plugin1.name}/Package.swift')
+                .createSync(recursive: true);
 
-              // Reset write count after setup to only track writes during SPM generation
-              trackingFs.writeCount = 0;
+            // Reset write count after setup to only track writes during SPM generation
+            trackingFs.writeCount = 0;
 
-              // First run: generates Package.swift and placeholders
-              await spm.generatePluginsSwiftPackage(<Plugin>[plugin1], platform, project);
-              expect(trackingFs.writeCount, 4); // 2 Package.swift + 2 placeholder .swift files
+            // First run: generates Package.swift and placeholders
+            await spm.generatePluginsSwiftPackage(<Plugin>[plugin1], platform, project);
+            expect(trackingFs.writeCount, 4); // 2 Package.swift + 2 placeholder .swift files
 
-              trackingFs.writeCount = 0;
+            trackingFs.writeCount = 0;
 
-              // Second run with same plugin: should skip writing everything
-              await spm.generatePluginsSwiftPackage(<Plugin>[plugin1], platform, project);
-              expect(trackingFs.writeCount, 0); // All skipped!
-            },
-          );
+            // Second run with same plugin: should skip writing everything
+            await spm.generatePluginsSwiftPackage(<Plugin>[plugin1], platform, project);
+            expect(trackingFs.writeCount, 0); // All skipped!
+          });
         });
       });
     }

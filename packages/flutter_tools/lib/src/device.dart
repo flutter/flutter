@@ -20,8 +20,6 @@ import 'device_port_forwarder.dart';
 import 'device_vm_service_discovery_for_attach.dart';
 import 'project.dart';
 import 'vmservice.dart';
-import 'web/compile.dart';
-import 'web/devfs_config.dart';
 
 /// The user-visible category of a [Device].
 typedef Category = tools_core.Category;
@@ -938,110 +936,17 @@ enum ImpellerStatus {
   final bool? asBool;
 }
 
-/// Configuration options for web debugging and the web development server.
-@immutable
-class WebDebugConfig {
-  /// Creates a [WebDebugConfig] with the given options.
-  const WebDebugConfig({
-    this.enableExposeUrl = false,
-    this.useSseForDebugProxy = true,
-    this.useSseForDebugBackend = true,
-    this.useSseForInjectedClient = true,
-    this.runHeadless = false,
-    this.browserDebugPort,
-    this.browserFlags = const <String>[],
-    this.enableExpressionEvaluation = false,
-    this.launchUrl,
-    bool? crossOriginIsolation,
-    WebRendererMode? renderer,
-    this.useWasm = false,
-    this.devServerConfig,
-  }) : crossOriginIsolation = crossOriginIsolation ?? useWasm,
-       renderer =
-           renderer ?? (useWasm ? WebRendererMode.defaultForWasm : WebRendererMode.defaultForJs);
-
-  /// Creates a [WebDebugConfig] from a serialized JSON [json] map.
-  factory WebDebugConfig.fromJson(Map<String, Object?> json) => WebDebugConfig(
-    enableExposeUrl: json['webEnableExposeUrl'] as bool? ?? false,
-    useSseForDebugProxy: json['webUseSseForDebugProxy']! as bool,
-    useSseForDebugBackend: json['webUseSseForDebugBackend']! as bool,
-    useSseForInjectedClient: json['webUseSseForInjectedClient']! as bool,
-    runHeadless: json['webRunHeadless']! as bool,
-    browserDebugPort: json['webBrowserDebugPort'] as int?,
-    browserFlags: (json['webBrowserFlags']! as List<dynamic>).cast<String>(),
-    enableExpressionEvaluation: json['webEnableExpressionEvaluation']! as bool,
-    launchUrl: json['webLaunchUrl'] as String?,
-    crossOriginIsolation: json['webCrossOriginIsolation']! as bool,
-    renderer: WebRendererMode.values.byName(json['webRenderer']! as String),
-    useWasm: json['webUseWasm']! as bool,
-    devServerConfig: WebDevServerConfig(
-      port: json['port'] is int ? json['port']! as int : 8080,
-      host: json['hostname'] is String ? json['hostname']! as String : 'localhost',
-      https: HttpsConfig.parse(json['tlsCertPath'], json['tlsCertKeyPath']),
-      headers: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
-    ),
-  );
-
-  /// Whether to enable exposing URLs via the daemon URL tunneller.
-  final bool enableExposeUrl;
-
-  /// Whether to use Server-Sent Events (SSE) for the debug proxy.
-  final bool useSseForDebugProxy;
-
-  /// Whether to use Server-Sent Events (SSE) for the debug backend.
-  final bool useSseForDebugBackend;
-
-  /// Whether to use Server-Sent Events (SSE) for the injected client.
-  final bool useSseForInjectedClient;
-
-  /// Whether to run the browser in headless mode.
-  final bool runHeadless;
-
-  /// The debug port for the browser, or `null` to use the default port.
-  final int? browserDebugPort;
-
-  /// Additional command-line flags to pass to the browser when launching.
-  final List<String> browserFlags;
-
-  /// Whether expression evaluation is enabled in the web debugger.
-  final bool enableExpressionEvaluation;
-
-  /// A custom URL to launch in the browser instead of the default serving URL.
-  final String? launchUrl;
-
-  /// Whether Cross-Origin Isolation headers are enabled on the web dev server.
-  final bool crossOriginIsolation;
-
-  /// The web rendering backend mode to use.
-  final WebRendererMode renderer;
-
-  /// Whether to compile the application to WebAssembly (Wasm).
-  final bool useWasm;
-
-  /// Configuration for the local web development server.
-  final WebDevServerConfig? devServerConfig;
-
-  /// Serializes this configuration into a JSON-compatible map.
-  Map<String, Object?> toJson() => <String, Object?>{
-    'port': devServerConfig?.port,
-    'hostname': devServerConfig?.host,
-    'tlsCertPath': devServerConfig?.https?.certPath,
-    'tlsCertKeyPath': devServerConfig?.https?.certKeyPath,
-    'webEnableExposeUrl': enableExposeUrl,
-    'webUseSseForDebugProxy': useSseForDebugProxy,
-    'webUseSseForDebugBackend': useSseForDebugBackend,
-    'webUseSseForInjectedClient': useSseForInjectedClient,
-    'webRunHeadless': runHeadless,
-    'webBrowserDebugPort': browserDebugPort,
-    'webBrowserFlags': browserFlags,
-    'webEnableExpressionEvaluation': enableExpressionEvaluation,
-    'webLaunchUrl': launchUrl,
-    'webCrossOriginIsolation': crossOriginIsolation,
-    'webHeaders': devServerConfig?.headers ?? <String, String>{},
-    'webRenderer': renderer.name,
-    'webUseWasm': useWasm,
-  };
+/// Platform-specific debugging configuration attached to [DebuggingOptions].
+abstract interface class PlatformDebuggingOptions {
+  /// Serializes these platform-specific options into a JSON-compatible map.
+  Map<String, Object?> toJson();
 }
+
+/// Parser callback that extracts a [PlatformDebuggingOptions] entry from a
+/// serialized [DebuggingOptions] JSON map, returning `null` if absent.
+typedef PlatformDebuggingOptionsParser = PlatformDebuggingOptions? Function(
+  Map<String, Object?> json,
+);
 
 class DebuggingOptions {
   DebuggingOptions.enabled(
@@ -1070,9 +975,8 @@ class DebuggingOptions {
     this.deviceVmServicePort,
     this.ddsPort,
     this.devToolsServerAddress,
-    this.webConfig = const WebDebugConfig(),
+    this.platformOptions = const <PlatformDebuggingOptions>[],
     this.vmserviceOutFile,
-    this.nativeNullAssertions = false,
     this.enableImpeller = ImpellerStatus.platformDefault,
     this.enableFlutterGpu = false,
     this.enableVulkanValidation = false,
@@ -1096,7 +1000,7 @@ class DebuggingOptions {
   DebuggingOptions.disabled(
     this.buildInfo, {
     this.dartEntrypointArgs = const <String>[],
-    this.webConfig = const WebDebugConfig(),
+    this.platformOptions = const <PlatformDebuggingOptions>[],
     this.traceAllowlist,
     this.enableImpeller = ImpellerStatus.platformDefault,
     this.enableFlutterGpu = false,
@@ -1136,7 +1040,6 @@ class DebuggingOptions {
        ddsPort = null,
        devToolsServerAddress = null,
        vmserviceOutFile = null,
-       nativeNullAssertions = false,
        enableDevTools = false,
        ipv6 = false,
        google3WorkspaceRoot = null,
@@ -1169,9 +1072,8 @@ class DebuggingOptions {
     required this.disablePortPublication,
     required this.ddsPort,
     required this.devToolsServerAddress,
-    required this.webConfig,
+    required this.platformOptions,
     required this.vmserviceOutFile,
-    required this.nativeNullAssertions,
     required this.enableImpeller,
     required this.enableFlutterGpu,
     required this.enableVulkanValidation,
@@ -1219,8 +1121,12 @@ class DebuggingOptions {
   final int? ddsPort;
   final Uri? devToolsServerAddress;
 
-  /// Configuration options for web debugging and the web development server.
-  final WebDebugConfig webConfig;
+  /// Platform-specific debugging configuration entries attached to this session.
+  final List<PlatformDebuggingOptions> platformOptions;
+
+  /// Returns the first entry in [platformOptions] of type [T], or `null` if none is present.
+  T? platformOption<T extends PlatformDebuggingOptions>() =>
+      platformOptions.whereType<T>().firstOrNull;
 
   final ImpellerStatus enableImpeller;
   final bool enableFlutterGpu;
@@ -1261,12 +1167,6 @@ class DebuggingOptions {
 
   /// A file where the VM Service URL should be written after the application is started.
   final String? vmserviceOutFile;
-
-  /// Additional null runtime checks inserted for web applications.
-  ///
-  /// See also:
-  ///   * https://github.com/dart-lang/sdk/blob/main/sdk/lib/html/doc/NATIVE_NULL_ASSERTIONS.md
-  final bool nativeNullAssertions;
 
   List<String> getIOSLaunchArguments(
     EnvironmentType environmentType,
@@ -1344,9 +1244,8 @@ class DebuggingOptions {
     'disablePortPublication': disablePortPublication,
     'ddsPort': ddsPort,
     'devToolsServerAddress': devToolsServerAddress.toString(),
-    ...webConfig.toJson(),
+    for (final PlatformDebuggingOptions options in platformOptions) ...options.toJson(),
     'vmserviceOutFile': vmserviceOutFile,
-    'nativeNullAssertions': nativeNullAssertions,
     'enableImpeller': enableImpeller.asBool,
     'enableFlutterGpu': enableFlutterGpu,
     'enableVulkanValidation': enableVulkanValidation,
@@ -1356,75 +1255,69 @@ class DebuggingOptions {
     'profileStartup': profileStartup,
     'enableEmbedderApi': enableEmbedderApi,
     'usingCISystem': usingCISystem,
-    // TODO(bkonyi): remove once fg3 is updated.
-    'fastStart': false,
     'debugLogsDirectoryPath': debugLogsDirectoryPath,
     'enableDevTools': enableDevTools,
     'ipv6': ipv6,
     'google3WorkspaceRoot': google3WorkspaceRoot,
     'printDtd': printDtd,
     'adbLogFiltering': adbLogFiltering,
-    // TODO(jsimmons): This field is required for backward compatibility with
-    // the flutter_tools binary that is currently checked into Google3.
-    // Remove this when that binary has been updated.
-    'webUseLocalCanvaskit': false,
-    // See above: these fields are required for backwards compatibility
-    // with the google3 checked in binary.
-    'dumpSkpOnShaderCompilation': false,
-    'cacheSkSL': false,
   };
 
-  static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
-      DebuggingOptions._(
-        buildInfo: buildInfo,
-        debuggingEnabled: json['debuggingEnabled']! as bool,
-        iosProfileDebugger: json['iosProfileDebugger'] as bool?,
-        startPaused: json['startPaused']! as bool,
-        dartFlags: json['dartFlags']! as String,
-        dartEntrypointArgs: (json['dartEntrypointArgs']! as List<dynamic>).cast<String>(),
-        disableServiceAuthCodes: json['disableServiceAuthCodes']! as bool,
-        disableServiceOriginCheck: json['disableServiceOriginCheck'] as bool? ?? false,
-        enableDds: json['enableDds']! as bool,
-        cacheStartupProfile: json['cacheStartupProfile']! as bool,
-        enableSoftwareRendering: json['enableSoftwareRendering']! as bool,
-        skiaDeterministicRendering: json['skiaDeterministicRendering']! as bool,
-        traceSkia: json['traceSkia']! as bool,
-        traceAllowlist: json['traceAllowlist'] as String?,
-        traceSkiaAllowlist: json['traceSkiaAllowlist'] as String?,
-        traceSystrace: json['traceSystrace']! as bool,
-        traceToFile: json['traceToFile'] as String?,
-        endlessTraceBuffer: json['endlessTraceBuffer']! as bool,
-        profileMicrotasks: json['profileMicrotasks']! as bool,
-        purgePersistentCache: json['purgePersistentCache']! as bool,
-        useTestFonts: json['useTestFonts']! as bool,
-        verboseSystemLogs: json['verboseSystemLogs']! as bool,
-        hostVmServicePort: json['hostVmServicePort'] as int?,
-        deviceVmServicePort: json['deviceVmServicePort'] as int?,
-        disablePortPublication: json['disablePortPublication']! as bool,
-        ddsPort: json['ddsPort'] as int?,
-        devToolsServerAddress: json['devToolsServerAddress'] != null
-            ? Uri.parse(json['devToolsServerAddress']! as String)
-            : null,
-        webConfig: WebDebugConfig.fromJson(json),
-        vmserviceOutFile: json['vmserviceOutFile'] as String?,
-        nativeNullAssertions: json['nativeNullAssertions']! as bool,
-        enableImpeller: ImpellerStatus.fromBool(json['enableImpeller'] as bool?),
-        enableFlutterGpu: json['enableFlutterGpu']! as bool,
-        enableVulkanValidation: (json['enableVulkanValidation'] as bool?) ?? false,
-        uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
-        uninstallApp: (json['uninstallApp'] as bool?) ?? true,
-        enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
-        enableHcpp: json['enableHcpp'] as bool?,
-        profileStartup: (json['profileStartup'] as bool?) ?? false,
-        enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
-        usingCISystem: (json['usingCISystem'] as bool?) ?? false,
-        debugLogsDirectoryPath: json['debugLogsDirectoryPath'] as String?,
-        enableDevTools: (json['enableDevTools'] as bool?) ?? true,
-        ipv6: (json['ipv6'] as bool?) ?? false,
-        google3WorkspaceRoot: json['google3WorkspaceRoot'] as String?,
-        printDtd: (json['printDtd'] as bool?) ?? false,
-        adbLogFiltering: (json['adbLogFiltering'] as bool?) ?? true,
-      );
+  static DebuggingOptions fromJson(
+    Map<String, Object?> json,
+    BuildInfo buildInfo, {
+    required List<PlatformDebuggingOptionsParser> platformOptionParsers,
+  }) => DebuggingOptions._(
+    buildInfo: buildInfo,
+    debuggingEnabled: json['debuggingEnabled']! as bool,
+    iosProfileDebugger: json['iosProfileDebugger'] as bool?,
+    startPaused: json['startPaused']! as bool,
+    dartFlags: json['dartFlags']! as String,
+    dartEntrypointArgs: (json['dartEntrypointArgs']! as List<Object?>).cast<String>(),
+    disableServiceAuthCodes: json['disableServiceAuthCodes']! as bool,
+    disableServiceOriginCheck: json['disableServiceOriginCheck'] as bool? ?? false,
+    enableDds: json['enableDds']! as bool,
+    cacheStartupProfile: json['cacheStartupProfile']! as bool,
+    enableSoftwareRendering: json['enableSoftwareRendering']! as bool,
+    skiaDeterministicRendering: json['skiaDeterministicRendering']! as bool,
+    traceSkia: json['traceSkia']! as bool,
+    traceAllowlist: json['traceAllowlist'] as String?,
+    traceSkiaAllowlist: json['traceSkiaAllowlist'] as String?,
+    traceSystrace: json['traceSystrace']! as bool,
+    traceToFile: json['traceToFile'] as String?,
+    endlessTraceBuffer: json['endlessTraceBuffer']! as bool,
+    profileMicrotasks: json['profileMicrotasks']! as bool,
+    purgePersistentCache: json['purgePersistentCache']! as bool,
+    useTestFonts: json['useTestFonts']! as bool,
+    verboseSystemLogs: json['verboseSystemLogs']! as bool,
+    hostVmServicePort: json['hostVmServicePort'] as int?,
+    deviceVmServicePort: json['deviceVmServicePort'] as int?,
+    disablePortPublication: json['disablePortPublication']! as bool,
+    ddsPort: json['ddsPort'] as int?,
+    devToolsServerAddress: json['devToolsServerAddress'] != null
+        ? Uri.parse(json['devToolsServerAddress']! as String)
+        : null,
+    platformOptions: <PlatformDebuggingOptions>[
+      for (final PlatformDebuggingOptionsParser parser in platformOptionParsers) ?parser(json),
+    ],
+    vmserviceOutFile: json['vmserviceOutFile'] as String?,
+    enableImpeller: ImpellerStatus.fromBool(json['enableImpeller'] as bool?),
+    enableFlutterGpu: json['enableFlutterGpu']! as bool,
+    enableVulkanValidation: (json['enableVulkanValidation'] as bool?) ?? false,
+    uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
+    uninstallApp: (json['uninstallApp'] as bool?) ?? true,
+    enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
+    enableHcpp: json['enableHcpp'] as bool?,
+    profileStartup: (json['profileStartup'] as bool?) ?? false,
+    enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
+    usingCISystem: (json['usingCISystem'] as bool?) ?? false,
+    debugLogsDirectoryPath: json['debugLogsDirectoryPath'] as String?,
+    enableDevTools: (json['enableDevTools'] as bool?) ?? true,
+    ipv6: (json['ipv6'] as bool?) ?? false,
+    google3WorkspaceRoot: json['google3WorkspaceRoot'] as String?,
+    printDtd: (json['printDtd'] as bool?) ?? false,
+    adbLogFiltering: (json['adbLogFiltering'] as bool?) ?? true,
+  );
 
   Map<String, Object?> _getAndroidEngineConfig() {
     return <String, Object?>{

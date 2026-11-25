@@ -226,7 +226,7 @@ void main() {
     });
 
     // This new version string appears in SimulatorApp-850 CoreSimulator-518.16 beta.
-    testWithoutContext('can be parsed from iOS-11-3', () async {
+    test('can be parsed from iOS-11-3', () async {
       final device = IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
@@ -251,7 +251,7 @@ void main() {
       expect(await device.sdkMajorVersion, 11);
     });
 
-    testWithoutContext('can be parsed from iOS 11.2', () async {
+    test('can be parsed from iOS 11.2', () async {
       final device = IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
@@ -276,7 +276,7 @@ void main() {
       expect(await device.sdkMajorVersion, 11);
     });
 
-    testWithoutContext('Has a simulator category', () async {
+    test('Has a simulator category', () async {
       final device = IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
@@ -615,7 +615,7 @@ void main() {
   });
 
   group('Simulator screenshot', () {
-    testWithoutContext('supports screenshots', () async {
+    test('supports screenshots', () async {
       final xcode = Xcode.test(
         toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
       );
@@ -1483,7 +1483,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       );
     });
 
-    testWithoutContext('getConnectedDevices succeeds', () async {
+    test('getConnectedDevices succeeds', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted', 'iOS', '--json'],
@@ -1510,7 +1510,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('IOSSimulatorUtils.getAttachedDevices succeeds', () async {
+    test('IOSSimulatorUtils.getAttachedDevices succeeds', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted', 'iOS', '--json'],
@@ -1537,7 +1537,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('getConnectedDevices handles bad simctl output', () async {
+    test('getConnectedDevices handles bad simctl output', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted', 'iOS', '--json'],
@@ -1551,7 +1551,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('getConnectedDevices handles simctl not properly installed', () async {
+    test('getConnectedDevices handles simctl not properly installed', () async {
       final List<BootedSimDevice> devices = await simControlBadSimctl.getConnectedDevices();
 
       expect(devices, isEmpty);
@@ -1562,7 +1562,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('getConnectedDevices handles simctl process exception', () async {
+    test('getConnectedDevices handles simctl process exception', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted', 'iOS', '--json'],
@@ -1580,7 +1580,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('getConnectedDevices handles simctl file system exception', () async {
+    test('getConnectedDevices handles simctl file system exception', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted', 'iOS', '--json'],
@@ -1596,17 +1596,14 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext(
-      'IOSSimulatorUtils.getAttachedDevices handles simctl not properly installed',
-      () async {
-        final List<IOSSimulator> devices = await simulatorUtilsBadSimctl.getAttachedDevices();
+    test('IOSSimulatorUtils.getAttachedDevices handles simctl not properly installed', () async {
+      final List<IOSSimulator> devices = await simulatorUtilsBadSimctl.getAttachedDevices();
 
-        expect(devices, isEmpty);
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      },
-    );
+      expect(devices, isEmpty);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
 
-    testWithoutContext('sdkMajorVersion defaults to 11 when sdkNameAndVersion is junk', () async {
+    test('sdkMajorVersion defaults to 11 when sdkNameAndVersion is junk', () async {
       final iosSimulatorA = IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
@@ -1631,7 +1628,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(await iosSimulatorA.sdkMajorVersion, 11);
     });
 
-    testWithoutContext('.install() handles exceptions', () async {
+    test('.install() handles exceptions', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'install', deviceId, appId],
@@ -1645,7 +1642,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       );
     });
 
-    testWithoutContext('.uninstall() handles exceptions', () async {
+    test('.uninstall() handles exceptions', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'uninstall', deviceId, appId],
@@ -1659,7 +1656,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       );
     });
 
-    testWithoutContext('.launch() handles exceptions', () async {
+    test('.launch() handles exceptions', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'launch', deviceId, appId],
@@ -1673,7 +1670,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       );
     });
 
-    testWithoutContext('.stopApp() handles exceptions', () async {
+    test('.stopApp() handles exceptions', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'terminate', deviceId, appId],
@@ -1688,7 +1685,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('simulator stopApp handles null app package', () async {
+    test('simulator stopApp handles null app package', () async {
       final iosSimulator = IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
@@ -1713,7 +1710,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(await iosSimulator.stopApp(null), isFalse);
     });
 
-    testWithoutContext('listAvailableIOSRuntimes succeeds', () async {
+    test('listAvailableIOSRuntimes succeeds', () async {
       const validRuntimesOutput = '''
 {
   "runtimes" : [
@@ -1857,7 +1854,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(runtime3.name, 'iOS 17.0');
     });
 
-    testWithoutContext('listAvailableIOSRuntimes handles bad simctl output', () async {
+    test('listAvailableIOSRuntimes handles bad simctl output', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'list', 'runtimes', 'available', 'iOS', '--json'],
@@ -1872,7 +1869,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext(
+    test(
       'IOSSimulatorUtils.getAvailableIOSRuntimes handles simctl not properly installed',
       () async {
         final List<IOSSimulatorRuntime> runtimes = await simulatorUtilsBadSimctl
@@ -1899,57 +1896,54 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       logger = BufferLogger.test();
     });
 
-    testWithoutContext(
-      "startApp uses compiled app's Info.plist to find CFBundleIdentifier",
-      () async {
-        final device = IOSSimulator(
-          'x',
-          cpuArch: CpuArch.x64,
-          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
-          name: 'iPhone SE',
-          simulatorCategory: 'iOS 11.2',
-          simControl: simControl,
+    test("startApp uses compiled app's Info.plist to find CFBundleIdentifier", () async {
+      final device = IOSSimulator(
+        'x',
+        cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+        name: 'iPhone SE',
+        simulatorCategory: 'iOS 11.2',
+        simControl: simControl,
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
           analytics: const NoOpAnalytics(),
-          cocoaPods: FakeCocoaPods(),
-          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
-            analytics: const NoOpAnalytics(),
-            logger: logger,
-            platform: osx,
-          ),
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-          plistParser: testPlistParser,
-          templateRenderer: FakeTemplateRenderer(),
-          toolContext: FakeToolContext(
-            fs: fileSystem,
-            logger: logger,
-            processManager: FakeProcessManager.any(),
-          ),
-          xcode: xcode,
-        );
-        testPlistParser.setProperty('CFBundleIdentifier', 'correct');
+          logger: logger,
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: testPlistParser,
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          processManager: FakeProcessManager.any(),
+        ),
+        xcode: xcode,
+      );
+      testPlistParser.setProperty('CFBundleIdentifier', 'correct');
 
-        final Directory mockDir = fileSystem.currentDirectory;
-        final IOSApp package = PrebuiltIOSApp(
-          projectBundleId: 'incorrect',
-          bundleName: 'name',
-          uncompressedBundle: mockDir,
-          applicationPackage: mockDir,
-        );
+      final Directory mockDir = fileSystem.currentDirectory;
+      final IOSApp package = PrebuiltIOSApp(
+        projectBundleId: 'incorrect',
+        bundleName: 'name',
+        uncompressedBundle: mockDir,
+        applicationPackage: mockDir,
+      );
 
-        const mockInfo = BuildInfo(
-          BuildMode.debug,
-          'flavor',
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        );
-        final mockOptions = DebuggingOptions.disabled(mockInfo);
-        await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
+      const mockInfo = BuildInfo(
+        BuildMode.debug,
+        'flavor',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      );
+      final mockOptions = DebuggingOptions.disabled(mockInfo);
+      await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
 
-        expect(simControl.requests.single.appIdentifier, 'correct');
-      },
-    );
+      expect(simControl.requests.single.appIdentifier, 'correct');
+    });
 
-    testWithoutContext('startApp fails when cannot find CFBundleIdentifier', () async {
+    test('startApp fails when cannot find CFBundleIdentifier', () async {
       final device = IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
@@ -2004,7 +1998,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       );
     });
 
-    testWithoutContext('startApp forwards all supported debugging options', () async {
+    test('startApp forwards all supported debugging options', () async {
       final device = IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
@@ -2096,7 +2090,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       );
     });
 
-    testWithoutContext('startApp using route', () async {
+    test('startApp using route', () async {
       final device = IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
@@ -2201,7 +2195,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         applicationPackage: fileSystem.currentDirectory,
       );
 
-      testWithoutContext('startApp waits for the log stream to be ready before each launch', () {
+      test('startApp waits for the log stream to be ready before each launch', () {
         // Regression test for https://github.com/flutter/flutter/issues/181771.
         fakeAsync((FakeAsync async) {
           final firstLogProcess = FakeStreamingProcess();
@@ -2251,7 +2245,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         });
       });
 
-      testWithoutContext(
+      test(
         'startApp finds the VM Service when the log reader is listened to before startApp',
         () async {
           // `flutter run` listens to the log reader to echo logs before it calls startApp.
@@ -2289,32 +2283,29 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         },
       );
 
-      testWithoutContext(
-        'startApp warns and keeps waiting if the log stream is slow to become ready',
-        () {
-          fakeAsync((FakeAsync async) {
-            final logProcess = FakeStreamingProcess();
-            processManager.addCommand(FakeCommand(command: logStreamCommand, process: logProcess));
+      test('startApp warns and keeps waiting if the log stream is slow to become ready', () {
+        fakeAsync((FakeAsync async) {
+          final logProcess = FakeStreamingProcess();
+          processManager.addCommand(FakeCommand(command: logStreamCommand, process: logProcess));
 
-            buildDevice().startApp(
-              buildPackage(),
-              prebuiltApplication: true,
-              debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-            );
-            async.elapse(const Duration(seconds: 30));
-            expect(
-              logger.errorText,
-              contains('The iOS simulator log stream did not start after 30 seconds.'),
-            );
-            expect(simControl.requests, isEmpty);
+          buildDevice().startApp(
+            buildPackage(),
+            prebuiltApplication: true,
+            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+          );
+          async.elapse(const Duration(seconds: 30));
+          expect(
+            logger.errorText,
+            contains('The iOS simulator log stream did not start after 30 seconds.'),
+          );
+          expect(simControl.requests, isEmpty);
 
-            logProcess.write('Filtering the log data using "type == 1024"\n');
-            async.flushMicrotasks();
-            expect(simControl.requests, hasLength(1));
-            expect(processManager, hasNoRemainingExpectations);
-          });
-        },
-      );
+          logProcess.write('Filtering the log data using "type == 1024"\n');
+          async.flushMicrotasks();
+          expect(simControl.requests, hasLength(1));
+          expect(processManager, hasNoRemainingExpectations);
+        });
+      });
     });
   });
 
@@ -2325,7 +2316,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       simControl = FakeSimControl();
     });
 
-    testWithoutContext('is true on module project', () async {
+    test('is true on module project', () async {
       fileSystem.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
@@ -2361,7 +2352,7 @@ flutter:
       expect(simulator.isSupportedForProject(flutterProject), true);
     });
 
-    testWithoutContext('is true with editable host app', () async {
+    test('is true with editable host app', () async {
       fileSystem.file('pubspec.yaml').createSync();
       fileSystem.directory('ios').createSync();
       final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
@@ -2391,7 +2382,7 @@ flutter:
       expect(simulator.isSupportedForProject(flutterProject), true);
     });
 
-    testWithoutContext('is false with no host app and no module', () async {
+    test('is false with no host app and no module', () async {
       fileSystem.file('pubspec.yaml').createSync();
       final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
         fileSystem.currentDirectory,

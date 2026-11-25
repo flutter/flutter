@@ -31,7 +31,7 @@ void main() {
       mockProject = FakeFlutterProject(fileSystem: memoryFileSystem);
     });
 
-    testWithoutContext('skipped if .gitignore file is missing', () async {
+    test('skipped if .gitignore file is missing', () async {
       final migration = WidgetPreviewGitignoreMigration(mockProject, testLogger);
       await migration.migrate();
       expect(gitignoreFile.existsSync(), isFalse);
@@ -43,7 +43,7 @@ void main() {
       expect(testLogger.warningText, isEmpty);
     });
 
-    testWithoutContext('skipped if already migrated', () async {
+    test('skipped if already migrated', () async {
       const gitignoreFileContents = '''
 .DS_Store
 .widget_preview/
@@ -61,7 +61,7 @@ void main() {
       expect(testLogger.warningText, isEmpty);
     });
 
-    testWithoutContext('migrates project to ignore .widget_preview directory', () async {
+    test('migrates project to ignore .widget_preview directory', () async {
       gitignoreFile.writeAsStringSync(
         '.DS_Store\n'
         '.atom/\n',

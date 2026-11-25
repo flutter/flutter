@@ -52,7 +52,7 @@ void main() {
     return createTestCommandRunner(command, null, toolContext);
   }
 
-  testWithoutContext('can auto-migrate a user from dev to beta', () async {
+  test('can auto-migrate a user from dev to beta', () async {
     final CommandRunner<void> runner = createRunner(
       flutterVersion: FakeFlutterVersion(branch: 'dev'),
     );
@@ -135,7 +135,7 @@ void main() {
   const latestUpstreamTag = '3.1.0';
   const upstreamHeadRevision = '5765737420536964652053746f7279';
 
-  testWithoutContext('can push people from master to beta', () async {
+  test('can push people from master to beta', () async {
     final CommandRunner<void> runner = createRunner(
       flutterVersion: FakeFlutterVersion(frameworkVersion: startingTag, engineRevision: 'engine'),
     );
@@ -218,7 +218,7 @@ void main() {
     );
   });
 
-  testWithoutContext('do not push people from beta to anything else', () async {
+  test('do not push people from beta to anything else', () async {
     final CommandRunner<void> runner = createRunner(
       flutterVersion: FakeFlutterVersion(
         branch: 'beta',
@@ -303,57 +303,54 @@ void main() {
       'Took 0.0s\n',
     );
   });
-  testWithoutContext(
-    'allows upgrading if the only local modifications are pubspec.lock files',
-    () async {
-      final CommandRunner<void> runner = createRunner(
-        flutterVersion: FakeFlutterVersion(frameworkVersion: startingTag, engineRevision: 'engine'),
-      );
-      final reEntryCompleter = Completer<void>();
+  test('allows upgrading if the only local modifications are pubspec.lock files', () async {
+    final CommandRunner<void> runner = createRunner(
+      flutterVersion: FakeFlutterVersion(frameworkVersion: startingTag, engineRevision: 'engine'),
+    );
+    final reEntryCompleter = Completer<void>();
 
-      Future<void> reEnterTool(List<String> args) async {
-        reEntryCompleter.complete();
-      }
+    Future<void> reEnterTool(List<String> args) async {
+      reEntryCompleter.complete();
+    }
 
-      processManager.addCommands(<FakeCommand>[
-        const FakeCommand(
-          command: <String>['git', 'tag', '--points-at', 'HEAD'],
-          stdout: startingTag,
-        ),
-        const FakeCommand(command: <String>['git', 'fetch', '--tags']),
-        const FakeCommand(
-          command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
-          stdout: upstreamHeadRevision,
-        ),
-        const FakeCommand(
-          command: <String>['git', 'tag', '--points-at', upstreamHeadRevision],
-          stdout: latestUpstreamTag,
-        ),
-        const FakeCommand(
-          command: <String>['git', 'status', '-s'],
-          stdout: ' M packages/flutter/pubspec.lock\n M packages/flutter_tools/pubspec.lock\n',
-        ),
-        const FakeCommand(command: <String>['git', 'reset', '--hard', upstreamHeadRevision]),
-        FakeCommand(
-          command: const <String>[
-            '/path/to/flutter/bin/flutter',
-            'upgrade',
-            '--continue',
-            '--continue-started-at',
-            '2026-01-01T00:00:00.000Z',
-            '--no-version-check',
-          ],
-          onRun: reEnterTool,
-          completer: reEntryCompleter,
-        ),
-      ]);
+    processManager.addCommands(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['git', 'tag', '--points-at', 'HEAD'],
+        stdout: startingTag,
+      ),
+      const FakeCommand(command: <String>['git', 'fetch', '--tags']),
+      const FakeCommand(
+        command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
+        stdout: upstreamHeadRevision,
+      ),
+      const FakeCommand(
+        command: <String>['git', 'tag', '--points-at', upstreamHeadRevision],
+        stdout: latestUpstreamTag,
+      ),
+      const FakeCommand(
+        command: <String>['git', 'status', '-s'],
+        stdout: ' M packages/flutter/pubspec.lock\n M packages/flutter_tools/pubspec.lock\n',
+      ),
+      const FakeCommand(command: <String>['git', 'reset', '--hard', upstreamHeadRevision]),
+      FakeCommand(
+        command: const <String>[
+          '/path/to/flutter/bin/flutter',
+          'upgrade',
+          '--continue',
+          '--continue-started-at',
+          '2026-01-01T00:00:00.000Z',
+          '--no-version-check',
+        ],
+        onRun: reEnterTool,
+        completer: reEntryCompleter,
+      ),
+    ]);
 
-      await runner.run(<String>['upgrade']);
-      expect(processManager, hasNoRemainingExpectations);
-    },
-  );
+    await runner.run(<String>['upgrade']);
+    expect(processManager, hasNoRemainingExpectations);
+  });
 
-  testWithoutContext('fails upgrading on stable if pubspec.lock files are modified', () async {
+  test('fails upgrading on stable if pubspec.lock files are modified', () async {
     final CommandRunner<void> runner = createRunner(
       flutterVersion: FakeFlutterVersion(
         branch: 'stable',

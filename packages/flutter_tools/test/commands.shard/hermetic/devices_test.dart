@@ -34,24 +34,21 @@ void main() {
         fakeLogger = FakeBufferLogger();
       });
 
-      testWithoutContext(
-        'returns DevicesCommandOutputWithExtendedWirelessDeviceDiscovery on MacOS',
-        () async {
-          final Platform platform = FakePlatform(operatingSystem: 'macos');
-          final devicesCommandOutput = DevicesCommandOutput(
-            platform: platform,
-            logger: fakeLogger,
-            deviceManager: _FakeDeviceManager(),
-          );
+      test('returns DevicesCommandOutputWithExtendedWirelessDeviceDiscovery on MacOS', () async {
+        final Platform platform = FakePlatform(operatingSystem: 'macos');
+        final devicesCommandOutput = DevicesCommandOutput(
+          platform: platform,
+          logger: fakeLogger,
+          deviceManager: _FakeDeviceManager(),
+        );
 
-          expect(
-            devicesCommandOutput is DevicesCommandOutputWithExtendedWirelessDeviceDiscovery,
-            true,
-          );
-        },
-      );
+        expect(
+          devicesCommandOutput is DevicesCommandOutputWithExtendedWirelessDeviceDiscovery,
+          true,
+        );
+      });
 
-      testWithoutContext('returns default when not on MacOS', () async {
+      test('returns default when not on MacOS', () async {
         final Platform platform = FakePlatform();
         final devicesCommandOutput = DevicesCommandOutput(
           platform: platform,
@@ -71,7 +68,7 @@ void main() {
         platform = FakePlatform();
       });
 
-      testWithoutContext('returns 0 when called', () async {
+      test('returns 0 when called', () async {
         final command = DevicesCommand(
           deviceManager: _FakeDeviceManager(),
           doctor: _FakeDoctor(),
@@ -80,7 +77,7 @@ void main() {
         await createTestCommandRunner(command).run(<String>['devices']);
       });
 
-      testWithoutContext('throws ToolExit when Doctor cannot list anything', () async {
+      test('throws ToolExit when Doctor cannot list anything', () async {
         final command = DevicesCommand(
           deviceManager: _FakeDeviceManager(),
           doctor: _FakeDoctor(canListAnything: false),
@@ -94,7 +91,7 @@ void main() {
         );
       });
 
-      testWithoutContext('no error when no connected devices', () async {
+      test('no error when no connected devices', () async {
         final logger = BufferLogger.test();
         final command = DevicesCommand(
           deviceManager: NoDevicesManager(),
@@ -120,7 +117,7 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
           deviceList = <FakeDeviceJsonData>[fakeDevices[0], fakeDevices[1], fakeDevices[2]];
         });
 
-        testWithoutContext("get devices' platform types", () async {
+        test("get devices' platform types", () async {
           final deviceManager = _FakeDeviceManager(devices: deviceList);
           final List<String> platformTypes = Device.devicesPlatformTypes(
             await deviceManager.getAllDevices(),
@@ -129,7 +126,7 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
         });
 
         group('with --machine flag', () {
-          testWithoutContext('Outputs parsable JSON', () async {
+          test('Outputs parsable JSON', () async {
             final logger = BufferLogger.test();
             final command = DevicesCommand(
               deviceManager: _FakeDeviceManager(devices: deviceList),
@@ -145,7 +142,7 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
           });
 
           group('when deviceConnectionInterface', () {
-            testWithoutContext('filtered to attached', () async {
+            test('filtered to attached', () async {
               final logger = BufferLogger.test();
               final command = DevicesCommand(
                 deviceManager: _FakeDeviceManager(devices: deviceList),
@@ -160,7 +157,7 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
               ]);
             });
 
-            testWithoutContext('filtered to wireless', () async {
+            test('filtered to wireless', () async {
               final logger = BufferLogger.test();
               final command = DevicesCommand(
                 deviceManager: _FakeDeviceManager(devices: deviceList),
@@ -174,7 +171,7 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
           });
         });
 
-        testWithoutContext('available devices and diagnostics', () async {
+        test('available devices and diagnostics', () async {
           final logger = BufferLogger.test();
           final command = DevicesCommand(
             deviceManager: _FakeDeviceManager(devices: deviceList),
@@ -199,7 +196,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
         });
 
         group('when deviceConnectionInterface', () {
-          testWithoutContext('filtered to attached', () async {
+          test('filtered to attached', () async {
             final logger = BufferLogger.test();
             final command = DevicesCommand(
               deviceManager: _FakeDeviceManager(devices: deviceList),
@@ -221,7 +218,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
 ''');
           });
 
-          testWithoutContext('filtered to wireless', () async {
+          test('filtered to wireless', () async {
             final logger = BufferLogger.test();
             final command = DevicesCommand(
               deviceManager: _FakeDeviceManager(devices: deviceList),
@@ -250,7 +247,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
           deviceList = <FakeDeviceJsonData>[fakeDevices[0], fakeDevices[1]];
         });
 
-        testWithoutContext('available devices and diagnostics', () async {
+        test('available devices and diagnostics', () async {
           final logger = BufferLogger.test();
           final command = DevicesCommand(
             deviceManager: _FakeDeviceManager(devices: deviceList),
@@ -278,7 +275,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
           deviceList = <FakeDeviceJsonData>[fakeDevices[2]];
         });
 
-        testWithoutContext('available devices and diagnostics', () async {
+        test('available devices and diagnostics', () async {
           final logger = BufferLogger.test();
           final command = DevicesCommand(
             deviceManager: _FakeDeviceManager(devices: deviceList),
@@ -305,7 +302,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
         platform = FakePlatform(operatingSystem: 'macos');
       });
 
-      testWithoutContext('returns 0 when called', () async {
+      test('returns 0 when called', () async {
         final command = DevicesCommand(
           deviceManager: _FakeDeviceManager(),
           doctor: _FakeDoctor(),
@@ -315,7 +312,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
       });
 
       group('when no connected devices', () {
-        testWithoutContext('no error', () async {
+        test('no error', () async {
           final logger = BufferLogger.test();
           final command = DevicesCommand(
             deviceManager: NoDevicesManager(),
@@ -338,7 +335,7 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
         });
 
         group('when deviceConnectionInterface', () {
-          testWithoutContext('filtered to attached', () async {
+          test('filtered to attached', () async {
             final logger = BufferLogger.test();
             final command = DevicesCommand(
               deviceManager: NoDevicesManager(),
@@ -356,7 +353,7 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
 ''');
           });
 
-          testWithoutContext('filtered to wireless', () async {
+          test('filtered to wireless', () async {
             final logger = BufferLogger.test();
             final command = DevicesCommand(
               deviceManager: NoDevicesManager(),
@@ -389,7 +386,7 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
           ];
         });
 
-        testWithoutContext("get devices' platform types", () async {
+        test("get devices' platform types", () async {
           final deviceManager = _FakeDeviceManager(devices: deviceList);
           final List<String> platformTypes = Device.devicesPlatformTypes(
             await deviceManager.getAllDevices(),
@@ -398,7 +395,7 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
         });
 
         group('with --machine flag', () {
-          testWithoutContext('Outputs parsable JSON', () async {
+          test('Outputs parsable JSON', () async {
             final logger = BufferLogger.test();
             final command = DevicesCommand(
               deviceManager: _FakeDeviceManager(devices: deviceList),
@@ -415,7 +412,7 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
           });
 
           group('when deviceConnectionInterface', () {
-            testWithoutContext('filtered to attached', () async {
+            test('filtered to attached', () async {
               final logger = BufferLogger.test();
               final command = DevicesCommand(
                 deviceManager: _FakeDeviceManager(devices: deviceList),
@@ -430,7 +427,7 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
               ]);
             });
 
-            testWithoutContext('filtered to wireless', () async {
+            test('filtered to wireless', () async {
               final logger = BufferLogger.test();
               final command = DevicesCommand(
                 deviceManager: _FakeDeviceManager(devices: deviceList),
@@ -447,7 +444,7 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
           });
         });
 
-        testWithoutContext('available devices and diagnostics', () async {
+        test('available devices and diagnostics', () async {
           final logger = BufferLogger.test();
           final command = DevicesCommand(
             deviceManager: _FakeDeviceManager(devices: deviceList),
@@ -490,7 +487,7 @@ Checking for wireless devices...
 ''';
           });
 
-          testWithoutContext('available devices and diagnostics', () async {
+          test('available devices and diagnostics', () async {
             final command = DevicesCommand(
               deviceManager: _FakeDeviceManager(devices: deviceList, logger: fakeLogger),
               doctor: _FakeDoctor(),
@@ -527,7 +524,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
             fakeLogger = FakeBufferLogger(verbose: true);
           });
 
-          testWithoutContext('available devices and diagnostics', () async {
+          test('available devices and diagnostics', () async {
             final command = DevicesCommand(
               deviceManager: _FakeDeviceManager(devices: deviceList, logger: fakeLogger),
               doctor: _FakeDoctor(),
@@ -558,7 +555,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
 ''');
           });
 
-          testWithoutContext('when deviceConnectionInterface filtered to wireless', () async {
+          test('when deviceConnectionInterface filtered to wireless', () async {
             final command = DevicesCommand(
               deviceManager: _FakeDeviceManager(devices: deviceList),
               doctor: _FakeDoctor(),
@@ -589,7 +586,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
           deviceList = <FakeDeviceJsonData>[fakeDevices[0], fakeDevices[1]];
         });
 
-        testWithoutContext('available devices and diagnostics', () async {
+        test('available devices and diagnostics', () async {
           final logger = BufferLogger.test();
           final command = DevicesCommand(
             deviceManager: _FakeDeviceManager(devices: deviceList),
@@ -630,7 +627,7 @@ Checking for wireless devices...
 ''';
           });
 
-          testWithoutContext('available devices and diagnostics', () async {
+          test('available devices and diagnostics', () async {
             final command = DevicesCommand(
               deviceManager: _FakeDeviceManager(devices: deviceList, logger: fakeLogger),
               doctor: _FakeDoctor(),
@@ -665,7 +662,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
             fakeLogger = FakeBufferLogger(verbose: true);
           });
 
-          testWithoutContext('available devices and diagnostics', () async {
+          test('available devices and diagnostics', () async {
             final command = DevicesCommand(
               deviceManager: _FakeDeviceManager(devices: deviceList, logger: fakeLogger),
               doctor: _FakeDoctor(),
@@ -702,7 +699,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
           deviceList = <FakeDeviceJsonData>[fakeDevices[2], fakeDevices[3]];
         });
 
-        testWithoutContext('available devices and diagnostics', () async {
+        test('available devices and diagnostics', () async {
           final logger = BufferLogger.test();
           final command = DevicesCommand(
             deviceManager: _FakeDeviceManager(devices: deviceList),
@@ -737,7 +734,7 @@ No devices found yet. Checking for wireless devices...
 ''';
           });
 
-          testWithoutContext('available devices and diagnostics', () async {
+          test('available devices and diagnostics', () async {
             final command = DevicesCommand(
               deviceManager: _FakeDeviceManager(devices: deviceList, logger: fakeLogger),
               doctor: _FakeDoctor(),
@@ -770,7 +767,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
             fakeLogger = FakeBufferLogger(verbose: true);
           });
 
-          testWithoutContext('available devices and diagnostics', () async {
+          test('available devices and diagnostics', () async {
             final command = DevicesCommand(
               deviceManager: _FakeDeviceManager(devices: deviceList, logger: fakeLogger),
               doctor: _FakeDoctor(),

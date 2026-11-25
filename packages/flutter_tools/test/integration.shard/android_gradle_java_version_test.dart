@@ -20,7 +20,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('gradle task exists named javaVersion that prints jdk version', () async {
+  test('gradle task exists named javaVersion that prints jdk version', () async {
     // Create a new flutter project.
     ProcessResult result = await processManager.run(<String>[
       flutterBin,

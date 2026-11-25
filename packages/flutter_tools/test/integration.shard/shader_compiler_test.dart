@@ -57,7 +57,7 @@ void main() {
     );
   }
 
-  testWithoutContext('impellerc .iplr output has correct permissions', () async {
+  test('impellerc .iplr output has correct permissions', () async {
     if (platform.isWindows) {
       return;
     }
@@ -109,7 +109,7 @@ void main() {
     }
     ''';
 
-    testWithoutContext('fails SkSL compilation', () async {
+    test('fails SkSL compilation', () async {
       await expectLater(
         () => testCompileShader(kShaderWithInput, targetSkslOnly: true),
         throwsA(isA<ShaderCompilerException>()),
@@ -117,7 +117,7 @@ void main() {
       expect(logger.errorText, contains('SkSL does not support inputs'));
     });
 
-    testWithoutContext('succeeds with non-SkSL compilation', () async {
+    test('succeeds with non-SkSL compilation', () async {
       final bool compileResult = await testCompileShader(kShaderWithInput, targetSkslOnly: false);
       expect(compileResult, true);
       expect(
@@ -145,7 +145,7 @@ void main() {
 }
 ''';
 
-    testWithoutContext('fails SkSL compilation', () async {
+    test('fails SkSL compilation', () async {
       await expectLater(
         () => testCompileShader(kShaderWithUbo, targetSkslOnly: true),
         throwsA(isA<ShaderCompilerException>()),
@@ -153,7 +153,7 @@ void main() {
       expect(logger.errorText, contains('SkSL does not support UBOs or SSBOs'));
     });
 
-    testWithoutContext('succeeds with non-SkSL compilation', () async {
+    test('succeeds with non-SkSL compilation', () async {
       final bool compileResult = await testCompileShader(kShaderWithUbo, targetSkslOnly: false);
       expect(compileResult, true);
       expect(
@@ -179,7 +179,7 @@ void main() {
 }
 ''';
 
-    testWithoutContext('fails SkSL compilation', () async {
+    test('fails SkSL compilation', () async {
       await expectLater(
         () => testCompileShader(kShaderWithTextureArguments, targetSkslOnly: true),
         throwsA(isA<ShaderCompilerException>()),
@@ -190,7 +190,7 @@ void main() {
       );
     });
 
-    testWithoutContext('succeeds with non-SkSL compilation', () async {
+    test('succeeds with non-SkSL compilation', () async {
       final bool compileResult = await testCompileShader(
         kShaderWithTextureArguments,
         targetSkslOnly: false,
@@ -218,7 +218,7 @@ void main() {
   void main() {}
   ''';
 
-    testWithoutContext('fails SkSL compilation', () async {
+    test('fails SkSL compilation', () async {
       await expectLater(
         () => testCompileShader(kShaderWithUint8Uniforms, targetSkslOnly: true),
         throwsA(isA<ShaderCompilerException>()),
@@ -226,7 +226,7 @@ void main() {
       expect(logger.errorText, contains('SkSL does not support unsigned integers'));
     });
 
-    testWithoutContext('fails with non-SkSL compilation', () async {
+    test('fails with non-SkSL compilation', () async {
       await expectLater(
         () => testCompileShader(kShaderWithUint8Uniforms, targetSkslOnly: false),
         throwsA(isA<ShaderCompilerException>()),
@@ -245,7 +245,7 @@ void main() {
 }
 ''';
 
-    testWithoutContext('fails SkSL compilation', () async {
+    test('fails SkSL compilation', () async {
       await expectLater(
         () => testCompileShader(kShaderWithArrayInitializer, targetSkslOnly: true),
         throwsA(isA<ShaderCompilerException>()),
@@ -253,7 +253,7 @@ void main() {
       expect(logger.errorText, contains('SkSL does not support array initializers'));
     });
 
-    testWithoutContext('succeeds with non-SkSL compilation', () async {
+    test('succeeds with non-SkSL compilation', () async {
       final bool compilationResult = await testCompileShader(
         kShaderWithArrayInitializer,
         targetSkslOnly: false,
