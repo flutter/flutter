@@ -9,7 +9,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/config.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -20,7 +19,6 @@ import 'package:flutter_tools/src/commands/build_bundle.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
@@ -28,7 +26,7 @@ import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -420,46 +418,48 @@ void main() {
       },
     );
 
-    testUsingContext(
-      'BuildCommand does not include custom subcommands when feature flag disabled',
-      () async {
-        final featureFlags = TestFeatureFlags();
-        final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
-          entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
-          featureFlags: featureFlags,
-        );
-        final buildManager = ExtensionBuildManager(
-          extensionManager: manager,
-          featureFlags: featureFlags,
-          logger: testLogger,
-        );
+    test('BuildCommand does not include custom subcommands when feature flag disabled', () async {
+      final logger = BufferLogger.test();
+      final featureFlags = TestFeatureFlags();
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+        featureFlags: featureFlags,
+      );
+      final buildManager = ExtensionBuildManager(
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        logger: logger,
+      );
 
-        final command = BuildCommand(
-          androidContext: FakeAndroidContext(),
-          appleContext: FakeAppleContext(),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          extensionBuildManager: buildManager,
-          featureFlags: featureFlags,
-          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
-          templateRenderer: FakeTemplateRenderer(),
-          toolContext: FakeToolContext(fs: MemoryFileSystem.test(), logger: testLogger),
-        );
+      final command = BuildCommand(
+        androidContext: FakeAndroidContext(),
+        appleContext: FakeAppleContext(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        extensionBuildManager: buildManager,
+        featureFlags: featureFlags,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(fs: MemoryFileSystem.test(), logger: logger),
+      );
 
-        final CommandRunner<void> commandRunner = createTestCommandRunner(command);
-        try {
-          await commandRunner.run(<String>['build', '-h']);
-        } on ToolExit {
-          // Expected to exit or print help.
-        }
+      final CommandRunner<void> commandRunner = createTestCommandRunner(
+        command,
+        null,
+        null,
+        featureFlags,
+      );
+      try {
+        await commandRunner.run(<String>['build', '-h']);
+      } on ToolExit {
+        // Expected to exit or print help.
+      }
 
-        expect(command.subcommands.containsKey('custom-linux-build'), isFalse);
+      expect(command.subcommands.containsKey('custom-linux-build'), isFalse);
 
-        await manager.dispose();
-      },
-      overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
-    );
+      await manager.dispose();
+    });
   });
 
   group('Tool Extensions Build Integration - Enabled', () {
@@ -781,20 +781,21 @@ void main() {
       },
     );
 
-    testUsingContext(
+    test(
       'BuildCommand includes custom subcommand and can run it when feature flag enabled',
       () async {
+        final logger = BufferLogger.test();
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
+          logger: logger,
           entryPoints: <ExtensionEntryPoint>[_succeedingBuildExtensionEntryPoint],
           featureFlags: featureFlags,
         );
         final buildManager = ExtensionBuildManager(
           extensionManager: manager,
           featureFlags: featureFlags,
-          logger: testLogger,
+          logger: logger,
         );
 
         final command = BuildCommand(
@@ -809,11 +810,17 @@ void main() {
             artifacts: Artifacts.test(fileSystem: fs),
             cache: cache,
             fs: fs,
-            logger: testLogger,
+            logger: logger,
+            processManager: FakeProcessManager.any(),
           ),
         );
 
-        final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+        final CommandRunner<void> commandRunner = createTestCommandRunner(
+          command,
+          null,
+          null,
+          featureFlags,
+        );
 
         await commandRunner.run(<String>['build', 'custom-hermetic-build', '--no-pub']);
         await commandRunner.run(<String>['build', 'custom-agnostic-build', '--no-pub']);
@@ -823,11 +830,6 @@ void main() {
         expect(command.subcommands.containsKey('custom-hermetic-assemble-only'), isFalse);
 
         await manager.dispose();
-      },
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
       },
     );
 
@@ -965,46 +967,35 @@ void main() {
       await manager.dispose();
     });
 
-    testUsingContext(
-      'ExtensionBuildSubCommand forwards flutterRoot, outputDir, and resolvedArtifacts in build parameters',
-      () async {
-        final fakeBuildManager = _RecordingExtensionBuildManager();
-        final target = ExtensionBuildTarget(
-          description: 'Custom hermetic build target.',
-          name: 'custom-hermetic-build',
-          outputDir:
-              '${BuiltInPlaceholders.outputDir}/custom/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}',
-          targetPlatform: 'linux-x64',
-        );
+    test('ExtensionBuildSubCommand forwards flutterRoot, outputDir, and resolvedArtifacts in build parameters', () async {
+      final fakeBuildManager = _RecordingExtensionBuildManager();
+      final target = ExtensionBuildTarget(
+        description: 'Custom hermetic build target.',
+        name: 'custom-hermetic-build',
+        outputDir:
+            '${BuiltInPlaceholders.outputDir}/custom/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}',
+        targetPlatform: 'linux-x64',
+      );
 
-        final subCommand = ExtensionBuildSubCommand(
-          buildManager: fakeBuildManager,
-          target: target,
-          toolContext: FakeToolContext(cache: cache, fs: fs, logger: testLogger),
-          verboseHelp: false,
-        );
+      final subCommand = ExtensionBuildSubCommand(
+        buildManager: fakeBuildManager,
+        target: target,
+        toolContext: FakeToolContext(cache: cache, fs: fs, logger: BufferLogger.test()),
+        verboseHelp: false,
+      );
 
-        final FlutterCommandResult result = await subCommand.runCommand();
-        expect(result.exitStatus, ExitStatus.success);
+      final FlutterCommandResult result = await subCommand.runCommand();
+      expect(result.exitStatus, ExitStatus.success);
 
-        expect(fakeBuildManager.lastBuildArgs, isNotNull);
-        expect(fakeBuildManager.lastBuildArgs!['targetName'], equals('custom-hermetic-build'));
-        expect(
-          fakeBuildManager.lastBuildArgs!['flutterRoot'],
-          equals(fs.directory('/flutter').uri),
-        );
-        expect(
-          fakeBuildManager.lastBuildArgs!['outputDir'],
-          equals(fs.directory('/build/custom/linux-x64/release').uri),
-        );
-        expect(fakeBuildManager.lastBuildArgs!['resolvedArtifacts'], isA<Map<String, String>>());
-      },
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(fakeBuildManager.lastBuildArgs, isNotNull);
+      expect(fakeBuildManager.lastBuildArgs!['targetName'], equals('custom-hermetic-build'));
+      expect(fakeBuildManager.lastBuildArgs!['flutterRoot'], equals(fs.directory('/flutter').uri));
+      expect(
+        fakeBuildManager.lastBuildArgs!['outputDir'],
+        equals(fs.directory('/build/custom/linux-x64/release').uri),
+      );
+      expect(fakeBuildManager.lastBuildArgs!['resolvedArtifacts'], isA<Map<String, String>>());
+    });
 
     test('ExtensionBuildSubCommand resolves {OUTPUT_DIR} using custom build-dir from Config', () async {
       final buildManager = _RecordingExtensionBuildManager();
@@ -1062,175 +1053,178 @@ void main() {
       },
     );
 
-    testUsingContext(
-      'BuildCommand preserves built-in subcommands on collision and throws ToolExit on failed extension build',
-      () async {
-        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
-        final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
-          entryPoints: <ExtensionEntryPoint>[_failingBuildExtensionEntryPoint],
-          featureFlags: featureFlags,
-        );
-        final buildManager = ExtensionBuildManager(
-          extensionManager: manager,
-          featureFlags: featureFlags,
-          logger: testLogger,
-        );
+    test('BuildCommand preserves built-in subcommands on collision and throws ToolExit on failed extension build', () async {
+      final logger = BufferLogger.test();
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[_failingBuildExtensionEntryPoint],
+        featureFlags: featureFlags,
+      );
+      final buildManager = ExtensionBuildManager(
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        logger: logger,
+      );
 
-        final command = BuildCommand(
-          androidContext: FakeAndroidContext(),
-          appleContext: FakeAppleContext(),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          extensionBuildManager: buildManager,
-          featureFlags: featureFlags,
-          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
-          templateRenderer: FakeTemplateRenderer(),
-          toolContext: FakeToolContext(
-            artifacts: Artifacts.test(fileSystem: fs),
-            cache: cache,
-            fs: fs,
-            logger: testLogger,
-          ),
-        );
+      final command = BuildCommand(
+        androidContext: FakeAndroidContext(),
+        appleContext: FakeAppleContext(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        extensionBuildManager: buildManager,
+        featureFlags: featureFlags,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(fileSystem: fs),
+          cache: cache,
+          fs: fs,
+          logger: logger,
+          processManager: FakeProcessManager.any(),
+        ),
+      );
 
-        final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(
+        command,
+        null,
+        null,
+        featureFlags,
+      );
 
-        await expectLater(
-          () => commandRunner.run(<String>['build', 'failing-build', '--no-pub']),
-          throwsToolExit(message: 'Build failed: Custom build compilation error.'),
-        );
+      await expectLater(
+        () => commandRunner.run(<String>['build', 'failing-build', '--no-pub']),
+        throwsToolExit(message: 'Build failed: Custom build compilation error.'),
+      );
 
-        await commandRunner.run(<String>['build', 'custom-platform-build', '--no-pub']);
+      await commandRunner.run(<String>['build', 'custom-platform-build', '--no-pub']);
 
-        await expectLater(
-          () => commandRunner.run(<String>['build', 'unsupported-artifact-build', '--no-pub']),
-          throwsToolExit(
-            message: 'Unsupported artifact "unsupported-artifact" requested by a tool extension.',
-          ),
-        );
+      await expectLater(
+        () => commandRunner.run(<String>['build', 'unsupported-artifact-build', '--no-pub']),
+        throwsToolExit(
+          message: 'Unsupported artifact "unsupported-artifact" requested by a tool extension.',
+        ),
+      );
 
-        expect(
-          testLogger.warningText,
-          contains(
-            'Skipping custom build target "bundle" from extension "failing_extension" because a subcommand with that name already exists.',
-          ),
-        );
-        expect(command.subcommands['bundle'], isA<BuildBundleCommand>());
+      expect(
+        logger.warningText,
+        contains(
+          'Skipping custom build target "bundle" from extension "failing_extension" because a subcommand with that name already exists.',
+        ),
+      );
+      expect(command.subcommands['bundle'], isA<BuildBundleCommand>());
 
-        final assembleCommand = AssembleCommand(
-          androidContext: FakeAndroidContext(),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
-            Target target,
-            Environment environment,
-          ) {
-            target.dependencies;
-            if (target is CompositeTarget) {
-              final Target customTarget = target.dependencies.firstWhere(
-                (Target t) => t.name == 'custom-assemble-target',
-              );
-              expect(customTarget.depfiles, equals(<String>['custom_assemble.d']));
-            }
-          }),
-          extensionBuildManager: buildManager,
-          featureFlags: featureFlags,
-          toolContext: FakeToolContext(
-            artifacts: Artifacts.test(fileSystem: fs),
-            cache: Cache.test(processManager: FakeProcessManager.any()),
-            fs: fs,
-            logger: testLogger,
-            processManager: FakeProcessManager.any(),
-          ),
-          xcode: null,
-        );
-        final CommandRunner<void> assembleRunner = createTestCommandRunner(assembleCommand);
-        await assembleRunner.run(<String>[
+      final assembleCommand = AssembleCommand(
+        androidContext: FakeAndroidContext(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+          Target target,
+          Environment environment,
+        ) {
+          target.dependencies;
+          if (target is CompositeTarget) {
+            final Target customTarget = target.dependencies.firstWhere(
+              (Target t) => t.name == 'custom-assemble-target',
+            );
+            expect(customTarget.depfiles, equals(<String>['custom_assemble.d']));
+          }
+        }),
+        extensionBuildManager: buildManager,
+        featureFlags: featureFlags,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(fileSystem: fs),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
+          fs: fs,
+          logger: logger,
+          processManager: FakeProcessManager.any(),
+        ),
+        xcode: null,
+      );
+      final CommandRunner<void> assembleRunner = createTestCommandRunner(
+        assembleCommand,
+        null,
+        null,
+        featureFlags,
+      );
+      await assembleRunner.run(<String>[
+        'assemble',
+        '-o',
+        '/out',
+        '-d',
+        'BuildMode=debug',
+        'copy_assets',
+        'custom-assemble-target',
+      ]);
+      expect(
+        logger.warningText,
+        contains(
+          'Skipping custom assemble target "copy_assets" from extension "failing_extension" because a target with that name already exists.',
+        ),
+      );
+
+      await expectLater(
+        () => assembleRunner.run(<String>[
           'assemble',
           '-o',
           '/out',
           '-d',
           'BuildMode=debug',
-          'copy_assets',
-          'custom-assemble-target',
-        ]);
-        expect(
-          testLogger.warningText,
-          contains(
-            'Skipping custom assemble target "copy_assets" from extension "failing_extension" because a target with that name already exists.',
-          ),
-        );
+          'unknown-dep-assemble-target',
+        ]),
+        throwsToolExit(
+          message:
+              'Target "non-existent-dep" required by "unknown-dep-assemble-target" from extension "failing_extension" not found. '
+              'It might not be registered.',
+        ),
+      );
 
-        await expectLater(
-          () => assembleRunner.run(<String>[
-            'assemble',
-            '-o',
-            '/out',
-            '-d',
-            'BuildMode=debug',
-            'unknown-dep-assemble-target',
-          ]),
-          throwsToolExit(
-            message:
-                'Target "non-existent-dep" required by "unknown-dep-assemble-target" from extension "failing_extension" not found. '
-                'It might not be registered.',
-          ),
-        );
+      await manager.dispose();
+    });
 
-        await manager.dispose();
-      },
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+    test('BuildCommand includes custom subcommand in help when feature flag enabled', () async {
+      final logger = BufferLogger.test();
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+        featureFlags: featureFlags,
+      );
+      final buildManager = ExtensionBuildManager(
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        logger: logger,
+      );
 
-    testUsingContext(
-      'BuildCommand includes custom subcommand in help when feature flag enabled',
-      () async {
-        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
-        final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
-          entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
-          featureFlags: featureFlags,
-        );
-        final buildManager = ExtensionBuildManager(
-          extensionManager: manager,
-          featureFlags: featureFlags,
-          logger: testLogger,
-        );
+      final command = BuildCommand(
+        androidContext: FakeAndroidContext(),
+        appleContext: FakeAppleContext(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        extensionBuildManager: buildManager,
+        featureFlags: featureFlags,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(fileSystem: fs),
+          cache: cache,
+          fs: fs,
+          logger: logger,
+          processManager: FakeProcessManager.any(),
+        ),
+      );
 
-        final command = BuildCommand(
-          androidContext: FakeAndroidContext(),
-          appleContext: FakeAppleContext(),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          extensionBuildManager: buildManager,
-          featureFlags: featureFlags,
-          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
-          templateRenderer: FakeTemplateRenderer(),
-          toolContext: FakeToolContext(
-            artifacts: Artifacts.test(fileSystem: fs),
-            cache: cache,
-            fs: fs,
-            logger: testLogger,
-          ),
-        );
+      final CommandRunner<void> commandRunner = createTestCommandRunner(
+        command,
+        null,
+        null,
+        featureFlags,
+      );
 
-        final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+      await commandRunner.run(<String>['build', '-h']);
 
-        await commandRunner.run(<String>['build', '-h']);
+      expect(command.subcommands.containsKey('custom-linux-build'), isTrue);
 
-        expect(command.subcommands.containsKey('custom-linux-build'), isTrue);
-
-        await manager.dispose();
-      },
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      await manager.dispose();
+    });
 
     test('ExtensionBuildManager.build returns failed ExtensionBuildResult when build target throws ToolExtensionException', () async {
       final logger = BufferLogger.test();
