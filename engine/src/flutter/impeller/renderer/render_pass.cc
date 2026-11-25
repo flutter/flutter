@@ -77,19 +77,14 @@ bool RenderPass::AddCommand(Command&& command) {
 
 bool RenderPass::EncodeCommands() const {
   const bool encoded = OnEncodeCommands(*context_);
-#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
-    FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
   if (auto library = context_->GetPipelineLibrary()) {
     pipeline_uses_.Flush(*library);
   }
-#endif
   return encoded;
 }
 
 void RenderPass::CountPipelineUse(PipelineRef pipeline) {
-  if (pipeline) {
-    pipeline_uses_.Count(pipeline.get());
-  }
+  pipeline_uses_.Count(pipeline);
 }
 
 const std::shared_ptr<const Context>& RenderPass::GetContext() const {

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <memory>
+
 #include "impeller/renderer/pipeline_use_counter.h"
 #include "impeller/renderer/testing/mocks.h"
 
@@ -101,14 +103,16 @@ TEST(MockPipelineLibrary, PipelineUseCounterReportsTotalsOnFlush) {
   desc_a.SetLabel("pipeline_a");
   PipelineDescriptor desc_b;
   desc_b.SetLabel("pipeline_b");
-  TestPipeline pipeline_a(desc_a);
-  TestPipeline pipeline_b(desc_b);
+  std::shared_ptr<Pipeline<PipelineDescriptor>> pipeline_a =
+      std::make_shared<TestPipeline>(desc_a);
+  std::shared_ptr<Pipeline<PipelineDescriptor>> pipeline_b =
+      std::make_shared<TestPipeline>(desc_b);
 
   PipelineUseCounter counter;
-  counter.Count(&pipeline_a);
-  counter.Count(&pipeline_a);
-  counter.Count(&pipeline_b);
-  counter.Count(&pipeline_a);
+  counter.Count(PipelineRef(pipeline_a));
+  counter.Count(PipelineRef(pipeline_a));
+  counter.Count(PipelineRef(pipeline_b));
+  counter.Count(PipelineRef(pipeline_a));
   EXPECT_TRUE(pipeline_library.GetPipelineUsage().empty());
 
   counter.Flush(pipeline_library);

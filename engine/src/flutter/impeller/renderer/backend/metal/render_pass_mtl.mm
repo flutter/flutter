@@ -230,17 +230,17 @@ static bool Bind(PassBindingsCacheMTL& pass,
 
 // |RenderPass|
 void RenderPassMTL::SetPipeline(PipelineRef pipeline) {
-  CountPipelineUse(pipeline);
   if (!pipeline) {
     has_valid_pipeline_ = false;
-    bound_pipeline_ = nullptr;
+    bound_pipeline_ = PipelineRef();
     return;
   }
+  CountPipelineUse(pipeline);
   has_valid_pipeline_ = true;
-  if (pipeline.get() == bound_pipeline_) {
+  if (pipeline == bound_pipeline_) {
     return;
   }
-  bound_pipeline_ = pipeline.get();
+  bound_pipeline_ = pipeline;
 
   const PipelineDescriptor& pipeline_desc = pipeline->GetDescriptor();
   primitive_type_ = pipeline_desc.GetPrimitiveType();

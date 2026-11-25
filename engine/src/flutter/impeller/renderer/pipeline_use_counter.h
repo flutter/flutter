@@ -24,42 +24,20 @@ class PipelineLibrary;
 ///
 class PipelineUseCounter {
  public:
-  void Count(const Pipeline<PipelineDescriptor>* pipeline) {
-#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
-    FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
-    if (!pipeline) {
-      return;
-    }
-    if (!entries_.empty() && entries_.back().pipeline == pipeline) {
-      entries_.back().count++;
-      return;
-    }
-    for (auto& entry : entries_) {
-      if (entry.pipeline == pipeline) {
-        entry.count++;
-        return;
-      }
-    }
-    entries_.push_back({.pipeline = pipeline,
-                        .descriptor = pipeline->GetDescriptor(),
-                        .count = 1});
-#endif
-  }
+  /// Counts a use of [pipeline].
+  void Count(PipelineRef pipeline);
 
   /// Reports the uses counted since the last flush to [library].
   void Flush(PipelineLibrary& library);
 
  private:
-#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
-    FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
   struct Entry {
-    const Pipeline<PipelineDescriptor>* pipeline = nullptr;
+    PipelineRef pipeline;
     // Copied, so a pipeline evicted before the flush still reports.
     PipelineDescriptor descriptor{};
     int count = 0;
   };
   std::vector<Entry> entries_;
-#endif
 };
 
 }  // namespace impeller
