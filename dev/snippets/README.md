@@ -58,12 +58,11 @@ existing applications.
 
 This uses the skeleton for `snippet` snippets when generating the HTML to put
 into the Dart docs. You can find this [template in the Flutter
-repo](https://github.com/flutter/flutter/blob/main/dev/snippets/config/skeletons/snippet.html).
+repo](config/skeletons/snippet.html).
 
 #### Analysis
 
-The
-[`analyze_snippet_code.dart`](https://github.com/flutter/flutter/blob/main/dev/bots/analyze_snippet_code.dart)
+The [`analyze_snippet_code.dart`](../bots/analyze_snippet_code.dart)
 script finds code inside the `@tool
 snippet` sections and uses the Dart analyzer to check them.
 
@@ -109,7 +108,7 @@ demonstrate the API's functionality in a sample application, or used with the
 `dartpad` samples are embedded into the API docs web page and are live
 applications in the API documentation.
 
-This uses the skeleton for [application](https://github.com/flutter/flutter/blob/main/dev/snippets/config/skeletons/sample.html)
+This uses the skeleton for [application](config/skeletons/sample.html)
 snippets in the Flutter repo.
 
 The `sample` and `dartpad` tools also allow for quick Flutter app generation
@@ -133,11 +132,11 @@ A skeleton (concerning this tool) is an HTML template into which the Dart
 code blocks and descriptions are interpolated.
 
 There is currently one skeleton for
-[application](https://github.com/flutter/flutter/blob/main/dev/snippets/config/skeletons/sample.html)
+[application](config/skeletons/sample.html)
 samples, one for
-[dartpad](https://github.com/flutter/flutter/blob/main/dev/snippets/config/skeletons/dartpad-sample.html),
+[dartpad](config/skeletons/dartpad-sample.html),
 and one for
-[snippet](https://github.com/flutter/flutter/blob/main/dev/snippets/config/skeletons/snippet.html)
+[snippet](config/skeletons/snippet.html)
 code samples, but there could be more.
 
 Skeletons use mustache notation (e.g. `{{code}}`) to mark where components will
