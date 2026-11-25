@@ -49,6 +49,7 @@ import 'run_cold.dart';
 import 'run_hot.dart';
 import 'version.dart';
 import 'vmservice.dart';
+import 'web/web_debug_config.dart';
 import 'windows/visual_studio.dart';
 
 class FlutterDevice {

@@ -518,7 +518,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
         processManager: FakeProcessManager.empty(),
         nativeAssetsFileUri:
             nativeAssetsFileUri ??
-            targetDirectory.childFile(InstallCodeAssets.nativeAssetsFilename).uri,
+            targetDirectory.parent.childFile(InstallCodeAssets.nativeAssetsFilename).uri,
         targetUri: targetDirectory.uri,
       );
     }
@@ -534,7 +534,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
       final Directory targetDirectory = errorHandlingFs.directory(
         '/project/build/native_assets/macos',
       )..createSync(recursive: true);
-      final File existingManifest = targetDirectory.childFile(
+      final File existingManifest = targetDirectory.parent.childFile(
         InstallCodeAssets.nativeAssetsFilename,
       )..writeAsStringSync('{"stale": true}');
       final File staleDylib = targetDirectory.childFile('libstale.dylib')
@@ -563,29 +563,21 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
       expect(existingManifest.readAsStringSync(), isNot(contains('"stale"')));
     });
 
-    test('replaces native_assets.json if it is a directory or symlink on disk', () async {
+    test('asserts when nativeAssetsFileUri is inside targetUri', () async {
       final FileSystem fs = MemoryFileSystem.test();
       final Directory targetDirectory = fs.directory('/project/build/native_assets/macos')
         ..createSync(recursive: true);
-      final File manifestFile = targetDirectory.childFile(InstallCodeAssets.nativeAssetsFilename);
 
-      // Case 1: native_assets.json is unexpectedly a non-empty directory.
-      targetDirectory
-          .childDirectory(InstallCodeAssets.nativeAssetsFilename)
-          .childFile('unexpected.txt')
-          .createSync(recursive: true);
-
-      await runInstall(fileSystem: fs, targetDirectory: targetDirectory);
-      expect(fs.typeSync(manifestFile.path, followLinks: false), FileSystemEntityType.file);
-
-      // Case 2: native_assets.json is a symlink.
-      manifestFile.deleteSync();
-      final File linkTarget = fs.file('/project/other.json')..writeAsStringSync('{}');
-      targetDirectory.childLink(InstallCodeAssets.nativeAssetsFilename).createSync(linkTarget.path);
-
-      await runInstall(fileSystem: fs, targetDirectory: targetDirectory);
-      expect(fs.typeSync(manifestFile.path, followLinks: false), FileSystemEntityType.file);
-      expect(linkTarget.readAsStringSync(), '{}');
+      await expectLater(
+        () => runInstall(
+          fileSystem: fs,
+          targetDirectory: targetDirectory,
+          nativeAssetsFileUri: targetDirectory
+              .childFile(InstallCodeAssets.nativeAssetsFilename)
+              .uri,
+        ),
+        throwsAssertionError,
+      );
     });
 
     test('throws ToolExit when deleting a stale asset fails with EXDEV', () async {
@@ -886,6 +878,12 @@ environment:
       );
       expect(nativeAssetsManifest, isNotNull);
       expect(hostFileSystem.file(nativeAssetsManifest).existsSync(), isTrue);
+      expect(
+        hostFileSystem.file(nativeAssetsManifest).path,
+        endsWith(
+          hostFileSystem.path.join('build', 'native_assets', 'flutter_test_native_assets.json'),
+        ),
+      );
     });
 
     test('logs warning and returns null gracefully when no package can be resolved', () async {
