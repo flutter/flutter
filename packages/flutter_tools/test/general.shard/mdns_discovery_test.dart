@@ -53,7 +53,7 @@ void main() {
         );
 
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: emptyClient,
+          mdnsClientFactory: () => emptyClient,
           preliminaryMDnsClient: client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -84,7 +84,7 @@ void main() {
           );
 
           final portDiscovery = MDnsVmServiceDiscovery(
-            mdnsClient: client,
+            mdnsClientFactory: () => client,
             preliminaryMDnsClient: emptyClient,
             logger: BufferLogger.test(),
             analytics: const NoOpAnalytics(),
@@ -113,7 +113,7 @@ void main() {
         );
 
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: emptyClient,
+          mdnsClientFactory: () => emptyClient,
           preliminaryMDnsClient: client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -137,7 +137,7 @@ void main() {
         );
 
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: emptyClient,
+          mdnsClientFactory: () => emptyClient,
           preliminaryMDnsClient: client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -165,7 +165,7 @@ void main() {
         );
 
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: emptyClient,
+          mdnsClientFactory: () => emptyClient,
           preliminaryMDnsClient: client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -177,7 +177,7 @@ void main() {
 
       testWithoutContext('No ports available', () async {
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: emptyClient,
+          mdnsClientFactory: () => emptyClient,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -198,7 +198,7 @@ void main() {
             fakeFlutterVersion: FakeFlutterVersion(),
           );
           final portDiscovery = MDnsVmServiceDiscovery(
-            mdnsClient: emptyClient,
+            mdnsClientFactory: () => emptyClient,
             preliminaryMDnsClient: emptyClient,
             logger: logger,
             analytics: fakeAnalytics,
@@ -225,7 +225,7 @@ void main() {
         );
 
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: client,
+          mdnsClientFactory: () => client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -249,7 +249,7 @@ void main() {
         );
 
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: client,
+          mdnsClientFactory: () => client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -277,7 +277,7 @@ void main() {
         );
 
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: client,
+          mdnsClientFactory: () => client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -306,7 +306,7 @@ void main() {
         );
 
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: client,
+          mdnsClientFactory: () => client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -324,7 +324,7 @@ void main() {
         );
 
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: client,
+          mdnsClientFactory: () => client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -341,7 +341,7 @@ void main() {
         );
 
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: client,
+          mdnsClientFactory: () => client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -372,7 +372,7 @@ You can check which processes are using port 5353 by running:
           );
 
           final portDiscovery = MDnsVmServiceDiscovery(
-            mdnsClient: client,
+            mdnsClientFactory: () => client,
             preliminaryMDnsClient: emptyClient,
             logger: BufferLogger.test(),
             analytics: const NoOpAnalytics(),
@@ -391,7 +391,7 @@ You can check which processes are using port 5353 by running:
 
         final logger = BufferLogger.test();
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: client,
+          mdnsClientFactory: () => client,
           preliminaryMDnsClient: emptyClient,
           logger: logger,
           analytics: const NoOpAnalytics(),
@@ -418,7 +418,7 @@ You can check which processes are using port 5353 by running:
 
         final device = FakeIOSDevice();
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: client,
+          mdnsClientFactory: () => client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -456,7 +456,7 @@ You can check which processes are using port 5353 by running:
 
         final device = FakeIOSDevice();
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: client,
+          mdnsClientFactory: () => client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -494,7 +494,7 @@ You can check which processes are using port 5353 by running:
 
         final device = FakeIOSDevice();
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: client,
+          mdnsClientFactory: () => client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -552,7 +552,7 @@ You can check which processes are using port 5353 by running:
           );
           final device = FakeIOSDevice();
           final portDiscovery = MDnsVmServiceDiscovery(
-            mdnsClient: client,
+            mdnsClientFactory: () => client,
             preliminaryMDnsClient: emptyClient,
             logger: BufferLogger.test(),
             analytics: const NoOpAnalytics(),
@@ -585,7 +585,7 @@ You can check which processes are using port 5353 by running:
         );
         final device = FakeIOSDevice();
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: client,
+          mdnsClientFactory: () => client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -595,6 +595,35 @@ You can check which processes are using port 5353 by running:
           portDiscovery.getVMServiceUriForAttach('srv-asdf', device),
           throwsToolExit(message: 'Did not find a Dart VM Service advertised for srv-asdf.'),
         );
+      });
+
+      testWithoutContext('queryForAttach uses mdnsClientFactory for preliminary and main queries when preliminaryMDnsClient is omitted', () async {
+        final preliminaryClient = FakeMDnsClient(
+          <PtrResourceRecord>[],
+          <String, List<SrvResourceRecord>>{},
+        );
+        final mainClient = FakeMDnsClient(
+          <PtrResourceRecord>[PtrResourceRecord('foo', future, domainName: 'bar')],
+          <String, List<SrvResourceRecord>>{
+            'bar': <SrvResourceRecord>[
+              SrvResourceRecord('bar', future, port: 123, weight: 1, priority: 1, target: 'appId'),
+            ],
+          },
+        );
+
+        final clients = <MDnsClient>[preliminaryClient, mainClient];
+        var clientIndex = 0;
+
+        final portDiscovery = MDnsVmServiceDiscovery(
+          mdnsClientFactory: () => clients[clientIndex++],
+          logger: BufferLogger.test(),
+          analytics: const NoOpAnalytics(),
+          platform: FakePlatform(),
+        );
+
+        final MDnsVmServiceDiscoveryResult? result = await portDiscovery.queryForAttach();
+        expect(result?.port, 123);
+        expect(clientIndex, 2);
       });
     });
 
@@ -606,7 +635,7 @@ You can check which processes are using port 5353 by running:
         );
 
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: client,
+          mdnsClientFactory: () => client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
           platform: FakePlatform(),
@@ -625,7 +654,7 @@ You can check which processes are using port 5353 by running:
         );
 
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: client,
+          mdnsClientFactory: () => client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
           platform: FakePlatform(),
@@ -648,7 +677,7 @@ You can check which processes are using port 5353 by running:
           );
           final logger = BufferLogger.test();
           final portDiscovery = MDnsVmServiceDiscovery(
-            mdnsClient: client,
+            mdnsClientFactory: () => client,
             logger: logger,
             analytics: const NoOpAnalytics(),
             platform: FakePlatform(),
@@ -672,7 +701,7 @@ You can check which processes are using port 5353 by running:
         );
 
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: client,
+          mdnsClientFactory: () => client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
           platform: FakePlatform(),
@@ -697,7 +726,7 @@ You can check which processes are using port 5353 by running:
           );
 
           final portDiscovery = MDnsVmServiceDiscovery(
-            mdnsClient: client,
+            mdnsClientFactory: () => client,
             logger: BufferLogger.test(),
             analytics: const NoOpAnalytics(),
             platform: FakePlatform(operatingSystem: 'macos'),
@@ -731,7 +760,7 @@ You can check which processes are using port 5353 by running:
         );
 
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: client,
+          mdnsClientFactory: () => client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
           platform: FakePlatform(operatingSystem: 'macos'),
@@ -763,7 +792,7 @@ You can check which processes are using port 5353 by running:
         final logger = BufferLogger.test();
 
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: client,
+          mdnsClientFactory: () => client,
           logger: logger,
           analytics: const NoOpAnalytics(),
           platform: FakePlatform(operatingSystem: 'macos'),
@@ -790,7 +819,7 @@ You can check which processes are using port 5353 by running:
 
         final device = FakeIOSDevice();
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: client,
+          mdnsClientFactory: () => client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
           platform: FakePlatform(),
@@ -828,7 +857,7 @@ You can check which processes are using port 5353 by running:
 
         final device = FakeIOSDevice();
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: client,
+          mdnsClientFactory: () => client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
           platform: FakePlatform(),
@@ -866,7 +895,7 @@ You can check which processes are using port 5353 by running:
 
         final device = FakeIOSDevice();
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: client,
+          mdnsClientFactory: () => client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
           platform: FakePlatform(),
@@ -924,7 +953,7 @@ You can check which processes are using port 5353 by running:
           );
           final device = FakeIOSDevice();
           final portDiscovery = MDnsVmServiceDiscovery(
-            mdnsClient: client,
+            mdnsClientFactory: () => client,
             logger: BufferLogger.test(),
             analytics: const NoOpAnalytics(),
             platform: FakePlatform(),
@@ -960,7 +989,7 @@ You can check which processes are using port 5353 by running:
         );
         final device = FakeIOSDevice(name: 'My Phone');
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: client,
+          mdnsClientFactory: () => client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
           platform: FakePlatform(),
@@ -994,7 +1023,7 @@ You can check which processes are using port 5353 by running:
           );
           final device = FakeIOSDevice(name: 'My Phone');
           final portDiscovery = MDnsVmServiceDiscovery(
-            mdnsClient: client,
+            mdnsClientFactory: () => client,
             logger: BufferLogger.test(),
             analytics: const NoOpAnalytics(),
             platform: FakePlatform(),
@@ -1005,12 +1034,71 @@ You can check which processes are using port 5353 by running:
           );
         },
       );
+
+      testWithoutContext(
+        'Consecutive queryForLaunch calls use fresh client instances without stale cache',
+        () async {
+          final client1 = FakeMDnsClient(
+            <PtrResourceRecord>[PtrResourceRecord('foo', future, domainName: 'srv-bar')],
+            <String, List<SrvResourceRecord>>{
+              'srv-bar': <SrvResourceRecord>[
+                SrvResourceRecord(
+                  'srv-bar',
+                  future,
+                  port: 111,
+                  weight: 1,
+                  priority: 1,
+                  target: 'appId',
+                ),
+              ],
+            },
+          );
+          final client2 = FakeMDnsClient(
+            <PtrResourceRecord>[PtrResourceRecord('foo', future, domainName: 'srv-bar')],
+            <String, List<SrvResourceRecord>>{
+              'srv-bar': <SrvResourceRecord>[
+                SrvResourceRecord(
+                  'srv-bar',
+                  future,
+                  port: 222,
+                  weight: 1,
+                  priority: 1,
+                  target: 'appId',
+                ),
+              ],
+            },
+          );
+
+          final clients = <MDnsClient>[client1, client2];
+          var clientIndex = 0;
+
+          final portDiscovery = MDnsVmServiceDiscovery(
+            mdnsClientFactory: () => clients[clientIndex++],
+            logger: BufferLogger.test(),
+            analytics: const NoOpAnalytics(),
+            platform: FakePlatform(),
+          );
+
+          final MDnsVmServiceDiscoveryResult? result1 = await portDiscovery.queryForLaunch(
+            applicationId: 'srv-bar',
+            deviceVmservicePort: 111,
+          );
+          expect(result1?.port, 111);
+
+          final MDnsVmServiceDiscoveryResult? result2 = await portDiscovery.queryForLaunch(
+            applicationId: 'srv-bar',
+            deviceVmservicePort: 222,
+          );
+          expect(result2?.port, 222);
+        },
+      );
     });
 
     group('deviceNameMatchesTargetName', () {
       testWithoutContext('compares case insensitive and without spaces, hyphens, .local', () {
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+          mdnsClientFactory: () =>
+              FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
           platform: FakePlatform(),
@@ -1021,7 +1109,8 @@ You can check which processes are using port 5353 by running:
 
       testWithoutContext('includes numbers in comparison', () {
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+          mdnsClientFactory: () =>
+              FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
           platform: FakePlatform(),
@@ -1074,7 +1163,7 @@ You can check which processes are using port 5353 by running:
         );
 
         final portDiscovery = MDnsVmServiceDiscovery(
-          mdnsClient: client,
+          mdnsClientFactory: () => client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
           platform: FakePlatform(),
@@ -1136,7 +1225,7 @@ You can check which processes are using port 5353 by running:
       );
 
       final portDiscovery = MDnsVmServiceDiscovery(
-        mdnsClient: client,
+        mdnsClientFactory: () => client,
         logger: BufferLogger.test(),
         analytics: const NoOpAnalytics(),
         platform: FakePlatform(),
@@ -1175,7 +1264,7 @@ You can check which processes are using port 5353 by running:
       );
 
       final portDiscovery = MDnsVmServiceDiscovery(
-        mdnsClient: client,
+        mdnsClientFactory: () => client,
         logger: BufferLogger.test(),
         analytics: const NoOpAnalytics(),
         platform: FakePlatform(),
@@ -1220,7 +1309,7 @@ You can check which processes are using port 5353 by running:
       );
 
       final portDiscovery = MDnsVmServiceDiscovery(
-        mdnsClient: client,
+        mdnsClientFactory: () => client,
         logger: BufferLogger.test(),
         analytics: const NoOpAnalytics(),
         platform: FakePlatform(),
@@ -1267,7 +1356,7 @@ You can check which processes are using port 5353 by running:
       );
 
       final portDiscovery = MDnsVmServiceDiscovery(
-        mdnsClient: client,
+        mdnsClientFactory: () => client,
         logger: BufferLogger.test(),
         analytics: const NoOpAnalytics(),
         platform: FakePlatform(),

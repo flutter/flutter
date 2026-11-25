@@ -42,24 +42,26 @@ You can check which processes are using port 5353 by running:
 $err
 ''';
 
+/// Callback type to create an [MDnsClient].
+typedef MDnsClientFactory = MDnsClient Function();
+
 /// A wrapper around [MDnsClient] to find a Dart VM Service instance.
 class MDnsVmServiceDiscovery {
-  /// Creates a new [MDnsVmServiceDiscovery] object.
-  ///
-  /// The [_client] parameter will be defaulted to a new [MDnsClient] if null.
+  /// [mdnsClientFactory] is invoked once per mDNS query so cached records do
+  /// not persist across queries.
   MDnsVmServiceDiscovery({
     required this._analytics,
     required this._logger,
     required this._platform,
-    MDnsClient? mdnsClient,
+    MDnsClientFactory mdnsClientFactory = MDnsClient.new,
     MDnsClient? preliminaryMDnsClient,
-  }) : _client = mdnsClient ?? MDnsClient(),
+  }) : _clientFactory = mdnsClientFactory,
        _preliminaryClient = preliminaryMDnsClient;
 
-  final MDnsClient _client;
+  final MDnsClientFactory _clientFactory;
 
-  // Used when discovering VM services with `queryForAttach` to do a preliminary
-  // check for already running services so that results are not cached in _client.
+  // Overrides `_clientFactory` for the initial running-service check in
+  // `queryForAttach`.
   final MDnsClient? _preliminaryClient;
 
   final Logger _logger;
@@ -109,12 +111,12 @@ class MDnsVmServiceDiscovery {
     bool useDeviceIPAsHost = false,
   }) async {
     // Poll for 5 seconds to see if there are already services running.
-    // Use a new instance of MDnsClient so results don't get cached in _client.
+    // Use a separate MDnsClient instance so cached records do not carry over to the main query.
     // If no results are found, poll for a longer duration to wait for connections.
     // If more than 1 result is found, throw an error since it can't be determined which to pick.
     // If only one is found, return it.
     final List<MDnsVmServiceDiscoveryResult> results = await _pollingVmService(
-      _preliminaryClient ?? MDnsClient(),
+      _preliminaryClient ?? _clientFactory(),
       applicationId: applicationId,
       deviceVmServicePort: deviceVmservicePort,
       ipv6: ipv6,
@@ -124,7 +126,7 @@ class MDnsVmServiceDiscovery {
     );
     if (results.isEmpty) {
       return firstMatchingVmService(
-        _client,
+        _clientFactory(),
         applicationId: applicationId,
         deviceVmservicePort: deviceVmservicePort,
         ipv6: ipv6,
@@ -189,7 +191,7 @@ class MDnsVmServiceDiscovery {
 
     // Query for a specific application matching on either device port or device name.
     return firstMatchingVmService(
-      _client,
+      _clientFactory(),
       applicationId: applicationId,
       deviceName: deviceName,
       deviceVmservicePort: deviceVmservicePort,
