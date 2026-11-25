@@ -104,7 +104,7 @@ void main() {
       processManager = FakeProcessManager.empty();
     });
 
-    testWithoutContext('discovers Android Studio >=4.1 location', () {
+    test('discovers Android Studio >=4.1 location', () {
       final String studioInApplicationPlistFolder = fileSystem.path.join(
         '/',
         'Application',
@@ -163,7 +163,7 @@ void main() {
       expect(studio.validationMessages, <String>['Java version 123']);
     });
 
-    testWithoutContext('discovers Android Studio >=2020.3 location', () {
+    test('discovers Android Studio >=2020.3 location', () {
       final String studioInApplicationPlistFolder = fileSystem.path.join(
         '/',
         'Application',
@@ -221,7 +221,7 @@ void main() {
       expect(studio.validationMessages, <String>['Java version 123']);
     });
 
-    testWithoutContext('discovers Android Studio <4.1 location', () {
+    test('discovers Android Studio <4.1 location', () {
       final String studioInApplicationPlistFolder = fileSystem.path.join(
         '/',
         'Application',
@@ -272,7 +272,7 @@ void main() {
       expect(studio.validationMessages, <String>['Java version 123']);
     });
 
-    testWithoutContext('pluginsPath returns null when version is unknown on macOS', () {
+    test('pluginsPath returns null when version is unknown on macOS', () {
       const installPath = '/Applications/Android Studio.app/Contents';
       fileSystem.directory(installPath).createSync(recursive: true);
       final studio = AndroidStudio(
@@ -288,7 +288,7 @@ void main() {
       expect(studio.pluginsPath, isNull);
     });
 
-    testWithoutContext('discovers Android Studio EAP location', () {
+    test('discovers Android Studio EAP location', () {
       final String studioInApplicationPlistFolder = fileSystem.path.join(
         '/',
         'Application',
@@ -346,7 +346,7 @@ void main() {
       expect(studio.validationMessages, <String>['Java version 123']);
     });
 
-    testWithoutContext('does not discover Android Studio with JetBrainsToolboxApp wrapper', () {
+    test('does not discover Android Studio with JetBrainsToolboxApp wrapper', () {
       final String applicationPlistFolder = fileSystem.path.join(
         '/',
         'Applications',
@@ -391,7 +391,7 @@ void main() {
       );
     });
 
-    testWithoutContext('discovers installation from Spotlight query', () {
+    test('discovers installation from Spotlight query', () {
       // One in expected location.
       final String studioInApplication = fileSystem.path.join(
         '/',
@@ -461,7 +461,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('installation detection on MacOS gracefully handles unresponsive Spotlight query (issue #189177)', () {
+    test('installation detection on MacOS gracefully handles unresponsive Spotlight query (issue #189177)', () {
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(command: <String>['sh', '-c', kSpotlightMdfindCommand], exitCode: 137),
       ]);
@@ -482,7 +482,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('finds latest valid install', () {
+    test('finds latest valid install', () {
       final String applicationPlistFolder = fileSystem.path.join(
         '/',
         'Applications',
@@ -539,7 +539,7 @@ void main() {
       );
     });
 
-    testWithoutContext('extracts custom paths for directly downloaded Android Studio', () {
+    test('extracts custom paths for directly downloaded Android Studio', () {
       final String studioInApplicationPlistFolder = fileSystem.path.join(
         '/',
         'Application',
@@ -570,7 +570,7 @@ void main() {
       );
     });
 
-    testWithoutContext('finds Android Studio 2020.3 bundled Java version', () {
+    test('finds Android Studio 2020.3 bundled Java version', () {
       final String studioInApplicationPlistFolder = fileSystem.path.join(
         '/',
         'Application',
@@ -617,7 +617,7 @@ void main() {
       );
     });
 
-    testWithoutContext('finds Android Studio 2022.1 bundled Java version', () {
+    test('finds Android Studio 2022.1 bundled Java version', () {
       final String studioInApplicationPlistFolder = fileSystem.path.join(
         '/',
         'Application',
@@ -664,7 +664,7 @@ void main() {
       );
     });
 
-    testWithoutContext('finds bundled Java version when Android Studio version is unknown by assuming the latest version', () {
+    test('finds bundled Java version when Android Studio version is unknown by assuming the latest version', () {
       final String studioInApplicationPlistFolder = fileSystem.path.join(
         '/',
         'Application',
@@ -709,7 +709,7 @@ void main() {
       expect(studio.javaPath, jdkPath);
     });
 
-    testWithoutContext('when given an Android Studio newer than any known version, finds Java version by assuming latest known Android Studio version', () {
+    test('when given an Android Studio newer than any known version, finds Java version by assuming latest known Android Studio version', () {
       final String studioInApplicationPlistFolder = fileSystem.path.join(
         '/',
         'Application',
@@ -748,7 +748,7 @@ void main() {
       expect(studio.javaPath, jdkPathFor2022);
     });
 
-    testWithoutContext('discovers explicitly configured Android Studio', () {
+    test('discovers explicitly configured Android Studio', () {
       final String extractedDownloadZip = fileSystem.path.join(
         '/',
         'Users',
@@ -807,7 +807,7 @@ void main() {
       logger = BufferLogger.test();
     });
 
-    testWithoutContext('discovers Android Studio 4.1 location', () {
+    test('discovers Android Studio 4.1 location', () {
       fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.1\.home')
         ..createSync(recursive: true)
         ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
@@ -827,7 +827,7 @@ void main() {
       expect(studio.studioAppName, 'Android Studio');
     });
 
-    testWithoutContext('discovers Android Studio 4.2 location', () {
+    test('discovers Android Studio 4.2 location', () {
       fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.2\.home')
         ..createSync(recursive: true)
         ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
@@ -847,7 +847,7 @@ void main() {
       expect(studio.studioAppName, 'Android Studio');
     });
 
-    testWithoutContext('discovers Android Studio 2020.3 location', () {
+    test('discovers Android Studio 2020.3 location', () {
       fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2020.3\.home')
         ..createSync(recursive: true)
         ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
@@ -867,7 +867,7 @@ void main() {
       expect(studio.studioAppName, 'Android Studio');
     });
 
-    testWithoutContext('does not discover Android Studio 4.1 location if LOCALAPPDATA is null', () {
+    test('does not discover Android Studio 4.1 location if LOCALAPPDATA is null', () {
       fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.1\.home')
         ..createSync(recursive: true)
         ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
@@ -890,7 +890,7 @@ void main() {
       );
     });
 
-    testWithoutContext('does not discover Android Studio 4.2 location if LOCALAPPDATA is null', () {
+    test('does not discover Android Studio 4.2 location if LOCALAPPDATA is null', () {
       fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.2\.home')
         ..createSync(recursive: true)
         ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
@@ -913,33 +913,30 @@ void main() {
       );
     });
 
-    testWithoutContext(
-      'does not discover Android Studio 2020.3 location if LOCALAPPDATA is null',
-      () {
-        fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2020.3\.home')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
-        fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
+    test('does not discover Android Studio 2020.3 location if LOCALAPPDATA is null', () {
+      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2020.3\.home')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
+      fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
 
-        expect(
-          AndroidStudio.allInstalled(
-            toolContext: FakeToolContext(
-              config: config,
-              fs: fileSystem,
-              logger: logger,
-              platform: FakePlatform(
-                operatingSystem: 'windows',
-                environment: <String, String>{}, // Does not include LOCALAPPDATA
-              ),
-              processManager: FakeProcessManager.any(),
+      expect(
+        AndroidStudio.allInstalled(
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            platform: FakePlatform(
+              operatingSystem: 'windows',
+              environment: <String, String>{}, // Does not include LOCALAPPDATA
             ),
+            processManager: FakeProcessManager.any(),
           ),
-          isEmpty,
-        );
-      },
-    );
+        ),
+        isEmpty,
+      );
+    });
 
-    testWithoutContext('finds Android Studio 2020.3 bundled Java version', () {
+    test('finds Android Studio 2020.3 bundled Java version', () {
       fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2020.3\.home')
         ..createSync(recursive: true)
         ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
@@ -958,7 +955,7 @@ void main() {
       expect(studio.javaPath, equals(r'C:\Program Files\AndroidStudio\jre'));
     });
 
-    testWithoutContext('finds Android Studio 2022.1 bundled Java version', () {
+    test('finds Android Studio 2022.1 bundled Java version', () {
       fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2022.1\.home')
         ..createSync(recursive: true)
         ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
@@ -977,7 +974,7 @@ void main() {
       expect(studio.javaPath, equals(r'C:\Program Files\AndroidStudio\jbr'));
     });
 
-    testWithoutContext('finds bundled Java version when Android Studio version is unknown by assuming the latest version', () {
+    test('finds bundled Java version when Android Studio version is unknown by assuming the latest version', () {
       fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio\.home')
         ..createSync(recursive: true)
         ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
@@ -999,7 +996,7 @@ void main() {
       expect(studio.javaPath, equals(r'C:\Program Files\AndroidStudio\jbr'));
     });
 
-    testWithoutContext('when given an Android Studio newer than any known version, finds Java version by assuming latest known Android Studio version', () {
+    test('when given an Android Studio newer than any known version, finds Java version by assuming latest known Android Studio version', () {
       fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio99999.99.99\.home')
         ..createSync(recursive: true)
         ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
@@ -1022,7 +1019,7 @@ void main() {
       expect(studio.javaPath, equals(expectedJdkLocationFor2022));
     });
 
-    testWithoutContext('discovers explicitly configured Android Studio', () {
+    test('discovers explicitly configured Android Studio', () {
       const androidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
       config.setValue('android-studio-dir', androidStudioDir);
       fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2022.1\.home')
@@ -1061,7 +1058,7 @@ void main() {
       logger = BufferLogger.test();
     });
 
-    testWithoutContext('discovers Android Studio <4.1', () {
+    test('discovers Android Studio <4.1', () {
       const studioHomeFilePath = '$homeLinux/.AndroidStudio4.0/system/.home';
       const studioInstallPath = '$homeLinux/AndroidStudio';
 
@@ -1086,7 +1083,7 @@ void main() {
       expect(studio.pluginsPath, '/home/me/.AndroidStudio4.0/config/plugins');
     });
 
-    testWithoutContext('discovers Android Studio >=4.1', () {
+    test('discovers Android Studio >=4.1', () {
       const studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio4.1/.home';
       const studioInstallPath = '$homeLinux/AndroidStudio';
 
@@ -1111,7 +1108,7 @@ void main() {
       expect(studio.pluginsPath, '/home/me/.local/share/Google/AndroidStudio4.1');
     });
 
-    testWithoutContext('discovers when installed with Toolbox', () {
+    test('discovers when installed with Toolbox', () {
       const studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio4.1/.home';
       const studioInstallPath =
           '$homeLinux/.local/share/JetBrains/Toolbox/apps/AndroidStudio/ch-0/201.7042882';
@@ -1139,7 +1136,7 @@ void main() {
       expect(studio.pluginsPath, pluginsInstallPath);
     });
 
-    testWithoutContext('finds Android Studio 2020.3 bundled Java version', () {
+    test('finds Android Studio 2020.3 bundled Java version', () {
       const studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio2020.3/.home';
       const studioInstallPath = '$homeLinux/AndroidStudio';
 
@@ -1162,7 +1159,7 @@ void main() {
       expect(studio.javaPath, equals('$studioInstallPath/jre'));
     });
 
-    testWithoutContext('finds Android Studio 2022.1 bundled Java version', () {
+    test('finds Android Studio 2022.1 bundled Java version', () {
       const studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio2022.1/.home';
       const studioInstallPath = '$homeLinux/AndroidStudio';
 
@@ -1185,7 +1182,7 @@ void main() {
       expect(studio.javaPath, equals('$studioInstallPath/jbr'));
     });
 
-    testWithoutContext('finds bundled Java version when Android Studio version is unknown by assuming the latest version', () {
+    test('finds bundled Java version when Android Studio version is unknown by assuming the latest version', () {
       const configuredStudioInstallPath = '$homeLinux/AndroidStudio';
       config.setValue('android-studio-dir', configuredStudioInstallPath);
 
@@ -1211,7 +1208,7 @@ void main() {
       expect(studio.javaPath, equals('$configuredStudioInstallPath/jbr'));
     });
 
-    testWithoutContext('when given an Android Studio newer than any known version, finds Java version by assuming latest known Android Studio version', () {
+    test('when given an Android Studio newer than any known version, finds Java version by assuming latest known Android Studio version', () {
       const studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio99999.99.99/.home';
       const studioInstallPath = '$homeLinux/AndroidStudio';
 
@@ -1243,7 +1240,7 @@ void main() {
       expect(studio.javaPath, equals('$studioInstallPath/jbr'));
     });
 
-    testWithoutContext('pluginsPath extracts custom paths from home dir', () {
+    test('pluginsPath extracts custom paths from home dir', () {
       const installPath = '/opt/android-studio-with-cheese-5.0';
       const studioHome = '$homeLinux/.AndroidStudioWithCheese5.0';
       const homeFile = '$studioHome/system/.home';
@@ -1264,7 +1261,7 @@ void main() {
       expect(studio.pluginsPath, equals('/home/me/.AndroidStudioWithCheese5.0/config/plugins'));
     });
 
-    testWithoutContext(
+    test(
       'pluginsPath returns null when version is unknown and no toolbox path (no 0.0 fallback)',
       () {
         const installPath = '/opt/android-studio-unknown';
@@ -1283,7 +1280,7 @@ void main() {
       },
     );
 
-    testWithoutContext('pluginsPath returns toolbox path when version is unknown on Linux', () {
+    test('pluginsPath returns toolbox path when version is unknown on Linux', () {
       const installPath = '/opt/android-studio-unknown';
       const toolboxPluginsPath = '$installPath.plugins';
       fileSystem.directory(installPath).createSync(recursive: true);
@@ -1301,7 +1298,7 @@ void main() {
       expect(studio.pluginsPath, equals(toolboxPluginsPath));
     });
 
-    testWithoutContext('discovers explicitly configured Android Studio', () {
+    test('discovers explicitly configured Android Studio', () {
       const androidStudioDir = '/Users/Dash/Desktop/android-studio';
       config.setValue('android-studio-dir', androidStudioDir);
       const studioHome = '$homeLinux/.cache/Google/AndroidStudio2022.3/.home';
@@ -1342,7 +1339,7 @@ void main() {
       logger = BufferLogger.test();
     });
 
-    testWithoutContext('chooses the install with the latest version', () {
+    test('chooses the install with the latest version', () {
       const versions = <String>['4.0', '2022.0', '3.1'];
 
       for (final version in versions) {
@@ -1380,48 +1377,45 @@ void main() {
       );
     });
 
-    testWithoutContext(
-      'prefers installs with known versions over installs with unknown versions',
-      () {
-        const versions = <String>['3.0', 'unknown'];
+    test('prefers installs with known versions over installs with unknown versions', () {
+      const versions = <String>['3.0', 'unknown'];
 
-        for (final version in versions) {
-          fileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio$version\\.home')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
-          fileSystem
-              .directory('C:\\Program Files\\AndroidStudio$version')
-              .createSync(recursive: true);
-        }
+      for (final version in versions) {
+        fileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio$version\\.home')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
+        fileSystem
+            .directory('C:\\Program Files\\AndroidStudio$version')
+            .createSync(recursive: true);
+      }
 
-        expect(
-          AndroidStudio.allInstalled(
-            toolContext: FakeToolContext(
-              config: config,
-              fs: fileSystem,
-              logger: logger,
-              platform: platform,
-              processManager: FakeProcessManager.any(),
-            ),
-          ).length,
-          2,
-        );
-        expect(
-          AndroidStudio.latestValid(
-            toolContext: FakeToolContext(
-              config: config,
-              fs: fileSystem,
-              logger: logger,
-              platform: platform,
-              processManager: FakeProcessManager.any(),
-            ),
-          )!.version,
-          Version(3, 0, 0),
-        );
-      },
-    );
+      expect(
+        AndroidStudio.allInstalled(
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: FakeProcessManager.any(),
+          ),
+        ).length,
+        2,
+      );
+      expect(
+        AndroidStudio.latestValid(
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: FakeProcessManager.any(),
+          ),
+        )!.version,
+        Version(3, 0, 0),
+      );
+    });
 
-    testWithoutContext('chooses install with lexicographically greatest directory if no installs have known versions', () {
+    test('chooses install with lexicographically greatest directory if no installs have known versions', () {
       const versions = <String>['Apple', 'Zucchini', 'Banana'];
 
       for (final version in versions) {
@@ -1459,7 +1453,7 @@ void main() {
       );
     });
 
-    testWithoutContext('chooses install with lexicographically greatest directory if all installs have the same version', () {
+    test('chooses install with lexicographically greatest directory if all installs have the same version', () {
       fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudioPreview4.0\.home')
         ..createSync(recursive: true)
         ..writeAsStringSync(r'C:\Program Files\AndroidStudioPreview4.0');
@@ -1496,7 +1490,7 @@ void main() {
       );
     });
 
-    testWithoutContext('always chooses the install configured by --android-studio-dir, even if the install is invalid', () {
+    test('always chooses the install configured by --android-studio-dir, even if the install is invalid', () {
       final processManager = FakeProcessManager.empty();
       const configuredAndroidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
       config.setValue('android-studio-dir', configuredAndroidStudioDir);
@@ -1545,7 +1539,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext(
+    test(
       'throws a ToolExit if --android-studio-dir is configured but the directory does not exist',
       () async {
         const configuredAndroidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
@@ -1573,7 +1567,7 @@ void main() {
       },
     );
 
-    testWithoutContext('handles file system exception when checking for explicitly configured Android Studio install', () {
+    test('handles file system exception when checking for explicitly configured Android Studio install', () {
       const androidStudioDir = '/Users/Dash/Desktop/android-studio';
       config.setValue('android-studio-dir', androidStudioDir);
 
@@ -1593,7 +1587,7 @@ void main() {
       );
     });
 
-    testWithoutContext('does not execute validation during constructor instantiation', () {
+    test('does not execute validation during constructor instantiation', () {
       final processManager = FakeProcessManager.empty();
       final studio = AndroidStudio(
         r'C:\Program Files\AndroidStudio',
@@ -1611,160 +1605,139 @@ void main() {
       expect(studio.directory, r'C:\Program Files\AndroidStudio');
     });
 
-    testWithoutContext(
-      'evaluates isValid, javaPath, and validationMessages lazily on first access',
-      () {
-        final processManager = FakeProcessManager.empty();
-        const studioDir = r'C:\Program Files\AndroidStudio4.0';
-        fileSystem.directory(studioDir).createSync(recursive: true);
-        final String javaBinary = fileSystem.path.join(studioDir, 'jre', 'bin', 'java');
-        fileSystem.file(javaBinary).createSync(recursive: true);
+    test('evaluates isValid, javaPath, and validationMessages lazily on first access', () {
+      final processManager = FakeProcessManager.empty();
+      const studioDir = r'C:\Program Files\AndroidStudio4.0';
+      fileSystem.directory(studioDir).createSync(recursive: true);
+      final String javaBinary = fileSystem.path.join(studioDir, 'jre', 'bin', 'java');
+      fileSystem.file(javaBinary).createSync(recursive: true);
 
-        final toolContext = FakeToolContext(
+      final toolContext = FakeToolContext(
+        config: config,
+        fs: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      );
+
+      // Accessing isValid triggers validation.
+      final studio1 = AndroidStudio(studioDir, toolContext: toolContext, version: Version(4, 0, 0));
+      expect(processManager, hasNoRemainingExpectations);
+      processManager.addCommand(
+        FakeCommand(command: <String>[fileSystem.path.join(javaBinary), '-version']),
+      );
+      expect(studio1.isValid, true);
+      expect(processManager, hasNoRemainingExpectations);
+
+      // Accessing javaPath triggers validation.
+      final studio2 = AndroidStudio(studioDir, toolContext: toolContext, version: Version(4, 0, 0));
+      expect(processManager, hasNoRemainingExpectations);
+      processManager.addCommand(
+        FakeCommand(command: <String>[fileSystem.path.join(javaBinary), '-version']),
+      );
+      expect(studio2.javaPath, fileSystem.path.join(studioDir, 'jre'));
+      expect(processManager, hasNoRemainingExpectations);
+
+      // Accessing validationMessages triggers validation.
+      final studio3 = AndroidStudio(studioDir, toolContext: toolContext, version: Version(4, 0, 0));
+      expect(processManager, hasNoRemainingExpectations);
+      processManager.addCommand(
+        FakeCommand(command: <String>[fileSystem.path.join(javaBinary), '-version']),
+      );
+      expect(studio3.validationMessages, contains(contains('Java version')));
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    test('latestValid short-circuits candidate validation once a valid install is found', () {
+      final processManager = FakeProcessManager.empty();
+      // Create 2 candidate installs: 4.0 and 3.0.
+      const versions = <String>['4.0', '3.0'];
+      for (final version in versions) {
+        fileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio$version\\.home')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
+        fileSystem
+            .directory('C:\\Program Files\\AndroidStudio$version')
+            .createSync(recursive: true);
+        fileSystem
+            .file('C:\\Program Files\\AndroidStudio$version\\jre\\bin\\java')
+            .createSync(recursive: true);
+      }
+
+      // Only add command for the newer (4.0) installation. The older (3.0)
+      // should never be validated because latestValid stops at the first valid one.
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            fileSystem.path.join(r'C:\Program Files\AndroidStudio4.0', 'jre', 'bin', 'java'),
+            '-version',
+          ],
+        ),
+      );
+
+      final AndroidStudio? latest = AndroidStudio.latestValid(
+        toolContext: FakeToolContext(
           config: config,
           fs: fileSystem,
           logger: logger,
           platform: platform,
           processManager: processManager,
-        );
+        ),
+      );
 
-        // Accessing isValid triggers validation.
-        final studio1 = AndroidStudio(
-          studioDir,
-          toolContext: toolContext,
-          version: Version(4, 0, 0),
-        );
-        expect(processManager, hasNoRemainingExpectations);
-        processManager.addCommand(
-          FakeCommand(command: <String>[fileSystem.path.join(javaBinary), '-version']),
-        );
-        expect(studio1.isValid, true);
-        expect(processManager, hasNoRemainingExpectations);
+      expect(latest, isNotNull);
+      expect(latest!.version, Version(4, 0, 0));
+      expect(processManager, hasNoRemainingExpectations);
+    });
 
-        // Accessing javaPath triggers validation.
-        final studio2 = AndroidStudio(
-          studioDir,
-          toolContext: toolContext,
-          version: Version(4, 0, 0),
-        );
-        expect(processManager, hasNoRemainingExpectations);
-        processManager.addCommand(
-          FakeCommand(command: <String>[fileSystem.path.join(javaBinary), '-version']),
-        );
-        expect(studio2.javaPath, fileSystem.path.join(studioDir, 'jre'));
-        expect(processManager, hasNoRemainingExpectations);
+    test('latestValid falls back to older candidate when newer install is invalid', () {
+      final processManager = FakeProcessManager.empty();
+      // Create 2 candidate installs: 4.0 and 3.0.
+      const versions = <String>['4.0', '3.0'];
+      for (final version in versions) {
+        fileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio$version\\.home')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
+        fileSystem
+            .directory('C:\\Program Files\\AndroidStudio$version')
+            .createSync(recursive: true);
+        fileSystem
+            .file('C:\\Program Files\\AndroidStudio$version\\jre\\bin\\java')
+            .createSync(recursive: true);
+      }
 
-        // Accessing validationMessages triggers validation.
-        final studio3 = AndroidStudio(
-          studioDir,
-          toolContext: toolContext,
-          version: Version(4, 0, 0),
-        );
-        expect(processManager, hasNoRemainingExpectations);
-        processManager.addCommand(
-          FakeCommand(command: <String>[fileSystem.path.join(javaBinary), '-version']),
-        );
-        expect(studio3.validationMessages, contains(contains('Java version')));
-        expect(processManager, hasNoRemainingExpectations);
-      },
-    );
+      // 4.0 fails java validation (exit code 1).
+      // 3.0 succeeds.
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            fileSystem.path.join(r'C:\Program Files\AndroidStudio4.0', 'jre', 'bin', 'java'),
+            '-version',
+          ],
+          exitCode: 1,
+        ),
+        FakeCommand(
+          command: <String>[
+            fileSystem.path.join(r'C:\Program Files\AndroidStudio3.0', 'jre', 'bin', 'java'),
+            '-version',
+          ],
+        ),
+      ]);
 
-    testWithoutContext(
-      'latestValid short-circuits candidate validation once a valid install is found',
-      () {
-        final processManager = FakeProcessManager.empty();
-        // Create 2 candidate installs: 4.0 and 3.0.
-        const versions = <String>['4.0', '3.0'];
-        for (final version in versions) {
-          fileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio$version\\.home')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
-          fileSystem
-              .directory('C:\\Program Files\\AndroidStudio$version')
-              .createSync(recursive: true);
-          fileSystem
-              .file('C:\\Program Files\\AndroidStudio$version\\jre\\bin\\java')
-              .createSync(recursive: true);
-        }
+      final AndroidStudio? latest = AndroidStudio.latestValid(
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
+      );
 
-        // Only add command for the newer (4.0) installation. The older (3.0)
-        // should never be validated because latestValid stops at the first valid one.
-        processManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              fileSystem.path.join(r'C:\Program Files\AndroidStudio4.0', 'jre', 'bin', 'java'),
-              '-version',
-            ],
-          ),
-        );
-
-        final AndroidStudio? latest = AndroidStudio.latestValid(
-          toolContext: FakeToolContext(
-            config: config,
-            fs: fileSystem,
-            logger: logger,
-            platform: platform,
-            processManager: processManager,
-          ),
-        );
-
-        expect(latest, isNotNull);
-        expect(latest!.version, Version(4, 0, 0));
-        expect(processManager, hasNoRemainingExpectations);
-      },
-    );
-
-    testWithoutContext(
-      'latestValid falls back to older candidate when newer install is invalid',
-      () {
-        final processManager = FakeProcessManager.empty();
-        // Create 2 candidate installs: 4.0 and 3.0.
-        const versions = <String>['4.0', '3.0'];
-        for (final version in versions) {
-          fileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio$version\\.home')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
-          fileSystem
-              .directory('C:\\Program Files\\AndroidStudio$version')
-              .createSync(recursive: true);
-          fileSystem
-              .file('C:\\Program Files\\AndroidStudio$version\\jre\\bin\\java')
-              .createSync(recursive: true);
-        }
-
-        // 4.0 fails java validation (exit code 1).
-        // 3.0 succeeds.
-        processManager.addCommands(<FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              fileSystem.path.join(r'C:\Program Files\AndroidStudio4.0', 'jre', 'bin', 'java'),
-              '-version',
-            ],
-            exitCode: 1,
-          ),
-          FakeCommand(
-            command: <String>[
-              fileSystem.path.join(r'C:\Program Files\AndroidStudio3.0', 'jre', 'bin', 'java'),
-              '-version',
-            ],
-          ),
-        ]);
-
-        final AndroidStudio? latest = AndroidStudio.latestValid(
-          toolContext: FakeToolContext(
-            config: config,
-            fs: fileSystem,
-            logger: logger,
-            platform: platform,
-            processManager: processManager,
-          ),
-        );
-
-        expect(latest, isNotNull);
-        expect(latest!.version, Version(3, 0, 0));
-        expect(processManager, hasNoRemainingExpectations);
-      },
-    );
+      expect(latest, isNotNull);
+      expect(latest!.version, Version(3, 0, 0));
+      expect(processManager, hasNoRemainingExpectations);
+    });
   });
 }
 

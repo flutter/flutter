@@ -29,21 +29,21 @@ void main() {
       );
     });
 
-    testWithoutContext('generates bash initialization script to stdout', () async {
+    test('generates bash initialization script to stdout', () async {
       final command = ShellCompletionCommand(toolContext: toolContext);
       await createTestCommandRunner(command).run(<String>['bash-completion']);
       expect(fakeStdio.writtenToStdout.length, equals(1));
       expect(fakeStdio.writtenToStdout.first, contains('__flutter_completion'));
     });
 
-    testWithoutContext('generates bash initialization script to stdout with arg', () async {
+    test('generates bash initialization script to stdout with arg', () async {
       final command = ShellCompletionCommand(toolContext: toolContext);
       await createTestCommandRunner(command).run(<String>['bash-completion', '-']);
       expect(fakeStdio.writtenToStdout.length, equals(1));
       expect(fakeStdio.writtenToStdout.first, contains('__flutter_completion'));
     });
 
-    testWithoutContext('generates bash initialization script to output file', () async {
+    test('generates bash initialization script to output file', () async {
       final command = ShellCompletionCommand(toolContext: toolContext);
       const outputFile = 'bash-setup.sh';
       await createTestCommandRunner(command).run(<String>['bash-completion', outputFile]);
@@ -51,7 +51,7 @@ void main() {
       expect(fs.file(outputFile).readAsStringSync(), contains('__flutter_completion'));
     });
 
-    testWithoutContext("won't overwrite existing output file", () async {
+    test("won't overwrite existing output file", () async {
       final command = ShellCompletionCommand(toolContext: toolContext);
       const outputFile = 'bash-setup.sh';
       fs.file(outputFile).createSync();
@@ -67,7 +67,7 @@ void main() {
       expect(fs.file(outputFile).readAsStringSync(), isEmpty);
     });
 
-    testWithoutContext('will overwrite existing output file if given --overwrite', () async {
+    test('will overwrite existing output file if given --overwrite', () async {
       final command = ShellCompletionCommand(toolContext: toolContext);
       const outputFile = 'bash-setup.sh';
       fs.file(outputFile).createSync();

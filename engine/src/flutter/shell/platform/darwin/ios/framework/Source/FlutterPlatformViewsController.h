@@ -51,49 +51,38 @@ NS_ASSUME_NONNULL_BEGIN
     gestureRecognizersBlockingPolicy:
         (FlutterPlatformViewGestureRecognizersBlockingPolicy)gestureRecognizerBlockingPolicy;
 
-/// @brief Mark the beginning of a frame and record the size of the onscreen and the device pixel
-/// ratio (the number of physical pixels per point).
-- (void)beginFrameWithSize:(flutter::DlISize)frameSize devicePixelRatio:(CGFloat)devicePixelRatio;
-
-/// @brief Cancel the current frame, indicating that no platform views are composited.
-///
-/// Additionally, reverts the composition order to its original state at the beginning of the
-/// frame.
-- (void)cancelFrame;
-
-/// @brief Record a platform view in the layer tree to be rendered, along with the positioning and
-///        mutator parameters.
-///
-/// Called from the raster thread.
-- (void)prerollCompositeEmbeddedView:(int64_t)viewId
-                          withParams:(std::unique_ptr<flutter::EmbeddedViewParams>)params;
-
 /// @brief Returns the`FlutterTouchInterceptingView` with the provided view_id.
 ///
 /// Returns nil if there is no platform view with the provided id. Called
 /// from the platform thread.
 - (FlutterTouchInterceptingView*)flutterTouchInterceptingViewForId:(int64_t)viewId;
 
-/// @brief Returns the Canvas for the overlay slice for the given platform view.
-///
-/// Called from the raster thread.
-- (flutter::DlCanvas*)compositeEmbeddedViewWithId:(int64_t)viewId;
-
 /// @brief Discards all platform view instances and removes their views from the Flutter view.
 ///
 /// `PlatformViewIOS::OnPreEngineRestart` calls this on the platform thread during hot restart.
 ///
 /// This method doesn't clear the state of the frame being built (composition order, slices,
-/// composition params, visited views). That state is only accessed on the raster thread and is
-/// cleared in `beginFrameWithSize:devicePixelRatio:` at the start of the next frame.
+/// composition params, visited views). That state is managed by `IOSExternalViewEmbedder` on the
+/// raster thread and is cleared in `IOSExternalViewEmbedder::PrepareFlutterView` at the start of
+/// the next frame.
 - (void)reset;
 
 /// @brief Encode rendering for the Flutter overlay views and queue up perform platform view
 /// mutations.
 ///
+/// `compositionOrder` is the IDs of the platform views in the frame, in composition order.
+/// `compositionParams` and `slices` are keyed by view ID.
+///
 /// Called from the raster thread.
 - (void)submitFrame:(std::unique_ptr<flutter::SurfaceFrame>)frame
-     withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext;
+       withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext
+            frameSize:(flutter::DlISize)frameSize
+     devicePixelRatio:(CGFloat)devicePixelRatio
+     compositionOrder:(const std::vector<int64_t>&)compositionOrder
+    compositionParams:
+        (const std::unordered_map<int64_t, flutter::EmbeddedViewParams>&)compositionParams
+               slices:(std::unordered_map<int64_t, std::unique_ptr<flutter::EmbedderViewSlice>>&)
+                          slices;
 
 /// @brief Handler for platform view message channels.
 - (void)onMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
@@ -104,34 +93,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// Returns -1 if no such platform view is found.
 - (long)firstResponderPlatformViewId;
 
-/// @brief Pushes backdrop filter mutation to the mutator stack of each visited platform view.
-- (void)pushFilterToVisitedPlatformViews:(const std::shared_ptr<flutter::DlImageFilter>&)filter
-                                withRect:(const flutter::DlRect&)filterRect;
-
-/// @brief Pushes the view id of a visted platform view to the list of visied platform views.
-- (void)pushVisitedPlatformViewId:(int64_t)viewId;
-
-/// @brief Pushes the outstanding rectangular clips to the mutator stack of each visited platform
-/// view
-- (void)pushClipRectToVisitedPlatformViews:(const flutter::DlRect&)clipRect;
-
-/// @brief Pushes the outstanding rounded rectangular clips to the mutator stack of each visited
-/// platform view
-- (void)pushClipRRectToVisitedPlatformViews:(const flutter::DlRoundRect&)clipRRect;
-
-/// @brief Pushes the outstanding round super elliptical clips to the mutator stack of each visited
-/// platform view
-- (void)pushClipRSuperellipseToVisitedPlatformViews:(const flutter::DlRoundSuperellipse&)clipRse;
-
-/// @brief Pushes the outstanding path clips to the mutator stack of each visited platform
-/// view
-- (void)pushClipPathToVisitedPlatformViews:(const flutter::DlPath&)clipPath;
-
 @end
 
 @interface FlutterPlatformViewsController (Testing)
-
-- (size_t)embeddedViewCount;
 
 // Returns the `FlutterPlatformView`'s `view` object associated with the view_id.
 //

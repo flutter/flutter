@@ -130,7 +130,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    testWithoutContext("doesn't touch existing files without --overwrite", () async {
+    test("doesn't touch existing files without --overwrite", () async {
       final Map<String, String> templateManifest = getManifest(
         intellijDir,
         'template',
@@ -143,7 +143,7 @@ void main() {
       return updateIdeConfig(expectedContents: expectedContents);
     });
 
-    testWithoutContext('creates non-existent files', () async {
+    test('creates non-existent files', () async {
       final Map<String, String> templateManifest = getManifest(
         intellijDir,
         'template',
@@ -155,7 +155,7 @@ void main() {
       return updateIdeConfig(expectedContents: expectedContents);
     });
 
-    testWithoutContext('overwrites existing files with --overwrite', () async {
+    test('overwrites existing files with --overwrite', () async {
       final Map<String, String> templateManifest = getManifest(
         intellijDir,
         'template',
@@ -169,7 +169,7 @@ void main() {
       return updateIdeConfig(args: <String>['--overwrite'], expectedContents: expectedContents);
     });
 
-    testWithoutContext('only adds new templates without --overwrite', () async {
+    test('only adds new templates without --overwrite', () async {
       final Map<String, String> templateManifest = getManifest(
         intellijDir,
         'template',
@@ -194,7 +194,7 @@ void main() {
       );
     });
 
-    testWithoutContext('update all templates with --overwrite', () async {
+    test('update all templates with --overwrite', () async {
       final Map<String, String> templateManifest = getManifest(
         intellijDir,
         'template',
@@ -215,7 +215,7 @@ void main() {
       );
     });
 
-    testWithoutContext('removes deleted imls with --overwrite', () async {
+    test('removes deleted imls with --overwrite', () async {
       final Map<String, String> templateManifest = getManifest(
         intellijDir,
         'template',
@@ -245,38 +245,35 @@ void main() {
       );
     });
 
-    testWithoutContext(
-      'removes deleted imls with --overwrite, including empty parent dirs',
-      () async {
-        final Map<String, String> templateManifest = getManifest(
-          intellijDir,
-          'template',
-          isTemplate: true,
-        );
-        populateDir(templateManifest);
-        final Map<String, String> flutterManifest = getManifest(tempDir, 'existing');
-        flutterManifest.remove(fs.path.join('packages', 'new', 'deep.iml'));
-        populateDir(flutterManifest);
-        final Map<String, String> updatedTemplates = getManifest(
-          intellijDir,
-          'existing',
-          isTemplate: true,
-        );
-        String deepIml = fs.path.join('packages', 'flutter_tools', 'ide_templates', 'intellij');
-        // Remove the all the dir entries too.
-        updatedTemplates.remove(deepIml);
-        deepIml = fs.path.join(deepIml, 'packages');
-        updatedTemplates.remove(deepIml);
-        deepIml = fs.path.join(deepIml, 'new');
-        updatedTemplates.remove(deepIml);
-        deepIml = fs.path.join(deepIml, 'deep.iml');
-        updatedTemplates.remove(deepIml);
-        final expectedContents = <String, String>{...flutterManifest, ...updatedTemplates};
-        return updateIdeConfig(
-          args: <String>['--update-templates', '--overwrite'],
-          expectedContents: expectedContents,
-        );
-      },
-    );
+    test('removes deleted imls with --overwrite, including empty parent dirs', () async {
+      final Map<String, String> templateManifest = getManifest(
+        intellijDir,
+        'template',
+        isTemplate: true,
+      );
+      populateDir(templateManifest);
+      final Map<String, String> flutterManifest = getManifest(tempDir, 'existing');
+      flutterManifest.remove(fs.path.join('packages', 'new', 'deep.iml'));
+      populateDir(flutterManifest);
+      final Map<String, String> updatedTemplates = getManifest(
+        intellijDir,
+        'existing',
+        isTemplate: true,
+      );
+      String deepIml = fs.path.join('packages', 'flutter_tools', 'ide_templates', 'intellij');
+      // Remove the all the dir entries too.
+      updatedTemplates.remove(deepIml);
+      deepIml = fs.path.join(deepIml, 'packages');
+      updatedTemplates.remove(deepIml);
+      deepIml = fs.path.join(deepIml, 'new');
+      updatedTemplates.remove(deepIml);
+      deepIml = fs.path.join(deepIml, 'deep.iml');
+      updatedTemplates.remove(deepIml);
+      final expectedContents = <String, String>{...flutterManifest, ...updatedTemplates};
+      return updateIdeConfig(
+        args: <String>['--update-templates', '--overwrite'],
+        expectedContents: expectedContents,
+      );
+    });
   });
 }

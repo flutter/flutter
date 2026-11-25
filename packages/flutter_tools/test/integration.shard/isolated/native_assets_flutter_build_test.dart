@@ -43,7 +43,7 @@ void main() {
 
   for (final String buildSubcommand in buildSubcommands) {
     for (final String buildMode in buildModes) {
-      testWithoutContext('flutter build $buildSubcommand with native assets $buildMode', () async {
+      test('flutter build $buildSubcommand with native assets $buildMode', () async {
         await inTempDir((Directory tempDirectory) async {
           final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
           final Directory exampleDirectory = packageDirectory.childDirectory('example');

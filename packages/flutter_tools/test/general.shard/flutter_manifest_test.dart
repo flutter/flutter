@@ -19,7 +19,7 @@ void main() {
     logger = BufferLogger.test();
   });
 
-  testWithoutContext('FlutterManifest is empty when the pubspec.yaml file is empty', () async {
+  test('FlutterManifest is empty when the pubspec.yaml file is empty', () async {
     final FlutterManifest flutterManifest = FlutterManifest.createFromString('', logger: logger)!;
 
     expect(flutterManifest.isEmpty, true);
@@ -32,37 +32,34 @@ void main() {
     expect(flutterManifest.defaultFlavor, null);
   });
 
-  testWithoutContext('FlutterManifest is null when the pubspec.yaml file is not a map', () async {
+  test('FlutterManifest is null when the pubspec.yaml file is not a map', () async {
     expect(FlutterManifest.createFromString('Not a map', logger: logger), isNull);
 
     expect(logger.errorText, contains('Expected YAML map'));
   });
 
-  testWithoutContext(
-    'FlutterManifest has no fonts or assets when the "flutter" section is empty',
-    () async {
-      const manifest = '''
+  test('FlutterManifest has no fonts or assets when the "flutter" section is empty', () async {
+    const manifest = '''
 name: test
 dependencies:
   flutter:
     sdk: flutter
 ''';
-      final FlutterManifest flutterManifest = FlutterManifest.createFromString(
-        manifest,
-        logger: logger,
-      )!;
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    )!;
 
-      expect(flutterManifest, isNotNull);
-      expect(flutterManifest.isEmpty, false);
-      expect(flutterManifest.appName, 'test');
-      expect(flutterManifest.usesMaterialDesign, false);
-      expect(flutterManifest.fontsDescriptor, isEmpty);
-      expect(flutterManifest.fonts, isEmpty);
-      expect(flutterManifest.assets, isEmpty);
-    },
-  );
+    expect(flutterManifest, isNotNull);
+    expect(flutterManifest.isEmpty, false);
+    expect(flutterManifest.appName, 'test');
+    expect(flutterManifest.usesMaterialDesign, false);
+    expect(flutterManifest.fontsDescriptor, isEmpty);
+    expect(flutterManifest.fonts, isEmpty);
+    expect(flutterManifest.assets, isEmpty);
+  });
 
-  testWithoutContext('FlutterManifest knows if Material Design is used', () async {
+  test('FlutterManifest knows if Material Design is used', () async {
     const manifest = '''
 name: test
 dependencies:
@@ -79,7 +76,7 @@ flutter:
     expect(flutterManifest.usesMaterialDesign, true);
   });
 
-  testWithoutContext('FlutterManifest knows if generate is provided', () async {
+  test('FlutterManifest knows if generate is provided', () async {
     const manifest = '''
 name: test
 dependencies:
@@ -96,7 +93,7 @@ flutter:
     expect(flutterManifest.generateLocalizations, true);
   });
 
-  testWithoutContext('FlutterManifest can parse invalid generate key', () async {
+  test('FlutterManifest can parse invalid generate key', () async {
     const manifest = '''
 name: test
 dependencies:
@@ -113,7 +110,7 @@ flutter:
     expect(flutterManifest.generateLocalizations, false);
   });
 
-  testWithoutContext('FlutterManifest knows if generate is disabled', () async {
+  test('FlutterManifest knows if generate is disabled', () async {
     const manifest = '''
 name: test
 dependencies:
@@ -130,7 +127,7 @@ flutter:
     expect(flutterManifest.generateLocalizations, false);
   });
 
-  testWithoutContext('FlutterManifest has one font family with one asset', () async {
+  test('FlutterManifest has one font family with one asset', () async {
     const manifest = '''
 name: test
 dependencies:
@@ -165,7 +162,7 @@ flutter:
     );
   });
 
-  testWithoutContext('FlutterManifest has one font family with a simple asset '
+  test('FlutterManifest has one font family with a simple asset '
       'and one with weight', () async {
     const manifest = '''
 name: test
@@ -207,7 +204,7 @@ flutter:
     );
   });
 
-  testWithoutContext('FlutterManifest has one font family with a simple asset '
+  test('FlutterManifest has one font family with a simple asset '
       'and one with weight and style', () {
     const manifest = '''
 name: test
@@ -250,7 +247,7 @@ flutter:
     );
   });
 
-  testWithoutContext('FlutterManifest has two font families, each with one '
+  test('FlutterManifest has two font families, each with one '
       'simple asset and one with weight and style', () {
     const manifest = '''
 name: test
@@ -315,7 +312,7 @@ flutter:
     );
   });
 
-  testWithoutContext('FlutterManifest.fontsDescriptor combines descriptors from '
+  test('FlutterManifest.fontsDescriptor combines descriptors from '
       'individual fonts', () {
     const manifest = '''
 name: test
@@ -362,7 +359,7 @@ flutter:
     ]);
   });
 
-  testWithoutContext('FlutterManifest has only one of two font families when '
+  test('FlutterManifest has only one of two font families when '
       'one declaration is missing the "family" option', () async {
     const manifest = '''
 name: test
@@ -412,7 +409,7 @@ flutter:
     );
   });
 
-  testWithoutContext('FlutterManifest has only one of two font families when '
+  test('FlutterManifest has only one of two font families when '
       'one declaration is missing the "fonts" option', () async {
     const manifest = '''
 name: test
@@ -458,7 +455,7 @@ flutter:
     );
   });
 
-  testWithoutContext('FlutterManifest has no font family when declaration is '
+  test('FlutterManifest has no font family when declaration is '
       'missing the "asset" option', () async {
     const manifest = '''
 name: test
@@ -482,7 +479,7 @@ flutter:
     expect(flutterManifest.fonts, isEmpty);
   });
 
-  testWithoutContext('FlutterManifest allows a blank flutter section', () {
+  test('FlutterManifest allows a blank flutter section', () {
     const manifest = '''
 name: test
 dependencies:
@@ -503,7 +500,7 @@ flutter:
     expect(flutterManifest.usesAndroidX, false);
   });
 
-  testWithoutContext('FlutterManifest allows a module declaration', () {
+  test('FlutterManifest allows a module declaration', () {
     const manifest = '''
 name: test
 flutter:
@@ -522,7 +519,7 @@ flutter:
     expect(flutterManifest.usesAndroidX, true);
   });
 
-  testWithoutContext('FlutterManifest allows a legacy plugin declaration', () {
+  test('FlutterManifest allows a legacy plugin declaration', () {
     const manifest = '''
 name: test
 flutter:
@@ -539,7 +536,7 @@ flutter:
     expect(flutterManifest.androidPackage, 'com.example');
   });
 
-  testWithoutContext('FlutterManifest allows a multi-plat plugin declaration '
+  test('FlutterManifest allows a multi-plat plugin declaration '
       'with android only', () {
     const manifest = '''
 name: test
@@ -560,7 +557,7 @@ flutter:
     expect(flutterManifest.androidPackage, 'com.example');
   });
 
-  testWithoutContext('FlutterManifest allows a multi-plat plugin declaration '
+  test('FlutterManifest allows a multi-plat plugin declaration '
       'with ios only', () {
     const manifest = '''
 name: test
@@ -580,7 +577,7 @@ flutter:
     expect(flutterManifest.androidPackage, isNull);
   });
 
-  testWithoutContext('sharedDarwinSource is parsed correctly from plugin config', () {
+  test('sharedDarwinSource is parsed correctly from plugin config', () {
     const manifest = '''
 name: test
 flutter:
@@ -614,7 +611,7 @@ flutter:
     });
   });
 
-  testWithoutContext('sharedDarwinSource is false when not present in plugin config', () {
+  test('sharedDarwinSource is false when not present in plugin config', () {
     const manifest = '''
 name: test
 flutter:
@@ -638,7 +635,7 @@ flutter:
     expect(validSupportedPlatforms['macos'], isNull);
   });
 
-  testWithoutContext('FlutterManifest handles an invalid plugin declaration', () {
+  test('FlutterManifest handles an invalid plugin declaration', () {
     const manifest = '''
 name: test
 flutter:
@@ -654,7 +651,7 @@ flutter:
     expect(logger.errorText, contains('Expected "plugin" to be an object, but got null'));
   });
 
-  testWithoutContext('FlutterManifest parses major.minor.patch+build version clause 1', () {
+  test('FlutterManifest parses major.minor.patch+build version clause 1', () {
     const manifest = '''
 name: test
 version: 1.0.0+2
@@ -675,7 +672,7 @@ flutter:
     );
   });
 
-  testWithoutContext('FlutterManifest parses major.minor.patch with no build version', () {
+  test('FlutterManifest parses major.minor.patch with no build version', () {
     const manifest = '''
 name: test
 version: 0.0.1
@@ -693,7 +690,7 @@ flutter:
     expect(flutterManifest, matchesManifest(appVersion: '0.0.1', buildName: '0.0.1'));
   });
 
-  testWithoutContext('FlutterManifest parses major.minor.patch+build version clause 2', () {
+  test('FlutterManifest parses major.minor.patch+build version clause 2', () {
     const manifest = '''
 name: test
 version: 1.0.0-beta+exp.sha.5114f85
@@ -718,7 +715,7 @@ flutter:
     );
   });
 
-  testWithoutContext('FlutterManifest parses major.minor+build version clause', () {
+  test('FlutterManifest parses major.minor+build version clause', () {
     const manifest = '''
 name: test
 version: 1.0.0+2
@@ -739,7 +736,7 @@ flutter:
     );
   });
 
-  testWithoutContext('FlutterManifest parses empty version clause', () {
+  test('FlutterManifest parses empty version clause', () {
     const manifest = '''
 name: test
 version:
@@ -757,7 +754,7 @@ flutter:
     expect(flutterManifest, matchesManifest());
   });
 
-  testWithoutContext('FlutterManifest parses no version clause', () {
+  test('FlutterManifest parses no version clause', () {
     const manifest = '''
 name: test
 dependencies:
@@ -775,7 +772,7 @@ flutter:
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/31764
-  testWithoutContext('FlutterManifest returns proper error when font detail is malformed', () {
+  test('FlutterManifest returns proper error when font detail is malformed', () {
     const manifest = '''
 name: test
 dependencies:
@@ -797,7 +794,7 @@ flutter:
     expect(logger.errorText, contains('Expected "fonts" to either be null or a list.'));
   });
 
-  testWithoutContext('FlutterManifest ignores empty list of fonts', () {
+  test('FlutterManifest ignores empty list of fonts', () {
     const manifest = '''
 name: test
 dependencies:
@@ -816,7 +813,7 @@ flutter:
     expect(flutterManifest!.fonts.length, 0);
   });
 
-  testWithoutContext('FlutterManifest returns proper error when font detail is '
+  test('FlutterManifest returns proper error when font detail is '
       'not a list of maps', () {
     const manifest = '''
 name: test
@@ -839,7 +836,7 @@ flutter:
     expect(logger.errorText, contains('Expected "fonts" to be a list of maps.'));
   });
 
-  testWithoutContext('FlutterManifest returns proper error when font is a map '
+  test('FlutterManifest returns proper error when font is a map '
       'instead of a list', () {
     const manifest = '''
 name: test
@@ -862,7 +859,7 @@ flutter:
     expect(logger.errorText, contains('Expected "fonts" to be a list'));
   });
 
-  testWithoutContext('FlutterManifest returns proper error when second font '
+  test('FlutterManifest returns proper error when second font '
       'family is invalid', () {
     const manifest = '''
 name: test
@@ -887,7 +884,7 @@ flutter:
     expect(logger.errorText, contains('Expected a map.'));
   });
 
-  testWithoutContext('FlutterManifest returns proper error when flutter is a '
+  test('FlutterManifest returns proper error when flutter is a '
       'list instead of a map', () {
     const manifest = '''
 name: test
@@ -913,7 +910,7 @@ flutter:
     );
   });
 
-  testWithoutContext('FlutterManifest can parse manifest on posix filesystem', () {
+  test('FlutterManifest can parse manifest on posix filesystem', () {
     const manifest = '''
 name: test
 dependencies:
@@ -933,7 +930,7 @@ flutter:
     expect(flutterManifest.isEmpty, false);
   });
 
-  testWithoutContext('FlutterManifest can parse manifest on windows filesystem', () {
+  test('FlutterManifest can parse manifest on windows filesystem', () {
     const manifest = '''
 name: test
 dependencies:
@@ -954,27 +951,24 @@ flutter:
     expect(flutterManifest.isEmpty, false);
   });
 
-  testWithoutContext(
-    'FlutterManifest getSupportedPlatforms return null if runs on legacy format',
-    () {
-      const manifest = '''
+  test('FlutterManifest getSupportedPlatforms return null if runs on legacy format', () {
+    const manifest = '''
 name: test
 flutter:
   plugin:
     androidPackage: com.example
 ''';
 
-      final FlutterManifest flutterManifest = FlutterManifest.createFromString(
-        manifest,
-        logger: logger,
-      )!;
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    )!;
 
-      expect(flutterManifest.isPlugin, true);
-      expect(flutterManifest.supportedPlatforms, null);
-    },
-  );
+    expect(flutterManifest.isPlugin, true);
+    expect(flutterManifest.supportedPlatforms, null);
+  });
 
-  testWithoutContext(
+  test(
     'FlutterManifest validSupportedPlatforms return null if the platform keys are not valid',
     () {
       const manifest = '''
@@ -996,7 +990,7 @@ flutter:
     },
   );
 
-  testWithoutContext('FlutterManifest validSupportedPlatforms only returns valid platforms', () {
+  test('FlutterManifest validSupportedPlatforms only returns valid platforms', () {
     const manifest = '''
 name: test
 flutter:
@@ -1019,7 +1013,7 @@ flutter:
     expect(validSupportedPlatforms['some_platform'], isNull);
   });
 
-  testWithoutContext('FlutterManifest getSupportedPlatforms returns valid platforms.', () {
+  test('FlutterManifest getSupportedPlatforms returns valid platforms.', () {
     const manifest = '''
 name: test
 flutter:
@@ -1046,7 +1040,7 @@ flutter:
     });
   });
 
-  testWithoutContext('FlutterManifest validates a platform section that is a list '
+  test('FlutterManifest validates a platform section that is a list '
       'instead of a map', () {
     const manifest = '''
 name: test
@@ -1068,7 +1062,7 @@ flutter:
     );
   });
 
-  testWithoutContext('FlutterManifest validates plugin format not support.', () {
+  test('FlutterManifest validates plugin format not support.', () {
     const manifest = '''
 name: test
 flutter:
@@ -1092,7 +1086,7 @@ flutter:
     );
   });
 
-  testWithoutContext('FlutterManifest validates web plugin section and reports package name', () {
+  test('FlutterManifest validates web plugin section and reports package name', () {
     const manifest = '''
 name: my_web_plugin
 flutter:
@@ -1116,7 +1110,7 @@ flutter:
     );
   });
 
-  testWithoutContext('FlutterManifest handles empty licenses list', () async {
+  test('FlutterManifest handles empty licenses list', () async {
     const manifest = '''
 name: test
 dependencies:
@@ -1135,7 +1129,7 @@ flutter:
     expect(flutterManifest!.additionalLicenses.length, 0);
   });
 
-  testWithoutContext('FlutterManifest can specify additional LICENSE files', () async {
+  test('FlutterManifest can specify additional LICENSE files', () async {
     const manifest = '''
 name: test
 dependencies:
@@ -1154,7 +1148,7 @@ flutter:
     expect(flutterManifest.additionalLicenses, <String>['foo.txt']);
   });
 
-  testWithoutContext('FlutterManifest can validate incorrect licenses key', () async {
+  test('FlutterManifest can validate incorrect licenses key', () async {
     const manifest = '''
 name: test
 dependencies:
@@ -1176,7 +1170,7 @@ flutter:
     );
   });
 
-  testWithoutContext('FlutterManifest validates individual list items', () async {
+  test('FlutterManifest validates individual list items', () async {
     const manifest = '''
 name: test
 dependencies:
@@ -1201,7 +1195,7 @@ flutter:
     );
   });
 
-  testWithoutContext('FlutterManifest parses single deferred components', () async {
+  test('FlutterManifest parses single deferred components', () async {
     const manifest = '''
 name: test
 dependencies:
@@ -1231,7 +1225,7 @@ flutter:
     expect(deferredComponents[0].assets[0].uri.path, 'path/to/asset.jpg');
   });
 
-  testWithoutContext('FlutterManifest parses multiple deferred components', () async {
+  test('FlutterManifest parses multiple deferred components', () async {
     const manifest = '''
 name: test
 dependencies:
@@ -1274,7 +1268,7 @@ flutter:
     expect(deferredComponents[1].assets[0].uri.path, 'path/to/asset2.jpg');
   });
 
-  testWithoutContext('FlutterManifest parses empty deferred components', () async {
+  test('FlutterManifest parses empty deferred components', () async {
     const manifest = '''
 name: test
 dependencies:
@@ -1293,7 +1287,7 @@ flutter:
     expect(flutterManifest.deferredComponents!.length, 0);
   });
 
-  testWithoutContext('FlutterManifest deferred component requires name', () async {
+  test('FlutterManifest deferred component requires name', () async {
     const manifest = '''
 name: test
 dependencies:
@@ -1317,7 +1311,7 @@ flutter:
     );
   });
 
-  testWithoutContext('FlutterManifest deferred component is list', () async {
+  test('FlutterManifest deferred component is list', () async {
     const manifest = '''
 name: test
 dependencies:
@@ -1339,7 +1333,7 @@ flutter:
     );
   });
 
-  testWithoutContext('FlutterManifest deferred component libraries is list', () async {
+  test('FlutterManifest deferred component libraries is list', () async {
     const manifest = '''
 name: test
 dependencies:
@@ -1365,7 +1359,7 @@ flutter:
     );
   });
 
-  testWithoutContext('FlutterManifest deferred component libraries is string', () async {
+  test('FlutterManifest deferred component libraries is string', () async {
     const manifest = '''
 name: test
 dependencies:
@@ -1392,7 +1386,7 @@ flutter:
     );
   });
 
-  testWithoutContext('FlutterManifest deferred component assets is string', () async {
+  test('FlutterManifest deferred component assets is string', () async {
     const manifest = '''
 name: test
 dependencies:
@@ -1417,7 +1411,7 @@ flutter:
     );
   });
 
-  testWithoutContext('FlutterManifest deferred component multiple assets is string', () async {
+  test('FlutterManifest deferred component multiple assets is string', () async {
     const manifest = '''
 name: test
 dependencies:
@@ -1444,7 +1438,7 @@ flutter:
     );
   });
 
-  testWithoutContext('FlutterManifest multiple deferred components assets is string', () async {
+  test('FlutterManifest multiple deferred components assets is string', () async {
     const manifest = '''
 name: test
 dependencies:
@@ -1474,7 +1468,7 @@ flutter:
     );
   });
 
-  testWithoutContext('FlutterManifest deferred component assets is list', () async {
+  test('FlutterManifest deferred component assets is list', () async {
     const manifest = '''
 name: test
 dependencies:
@@ -1495,7 +1489,7 @@ flutter:
     expect(logger.errorText, 'Expected "assets" to be a list, but got blah (String).\n');
   });
 
-  testWithoutContext('FlutterManifest parses asset-only deferred components', () async {
+  test('FlutterManifest parses asset-only deferred components', () async {
     const manifest = '''
 name: test
 dependencies:
@@ -1526,7 +1520,7 @@ flutter:
     expect(deferredComponents[0].assets[2].uri.path, 'path/to/asset3.jpg');
   });
 
-  testWithoutContext('FlutterManifest can parse empty dependencies', () async {
+  test('FlutterManifest can parse empty dependencies', () async {
     const manifest = '''
 name: test
 ''';
@@ -1539,7 +1533,7 @@ name: test
     expect(flutterManifest!.dependencies, isEmpty);
   });
 
-  testWithoutContext(
+  test(
     'FlutterManifest provides a guided error to migrate disable-swift-package-manager',
     () async {
       const manifest = '''
@@ -1562,7 +1556,7 @@ flutter:
     },
   );
 
-  testWithoutContext('FlutterManifest can parse default flavor', () async {
+  test('FlutterManifest can parse default flavor', () async {
     const manifest = '''
 name: test
 flutter:
@@ -1577,7 +1571,7 @@ flutter:
     expect(flutterManifest!.defaultFlavor, 'prod');
   });
 
-  testWithoutContext('FlutterManifest fails on invalid default flavor', () async {
+  test('FlutterManifest fails on invalid default flavor', () async {
     const manifest = '''
 name: test
 flutter:
@@ -1593,7 +1587,7 @@ flutter:
     expect(logger.errorText, 'Expected "default-flavor" to be a string, but got 3 (int).\n');
   });
 
-  testWithoutContext('FlutterManifest parses asset with platforms', () async {
+  test('FlutterManifest parses asset with platforms', () async {
     const manifest = '''
 name: test
 dependencies:
@@ -1618,10 +1612,8 @@ flutter:
     expect(entry.platforms, containsAll(<String>['web', 'android']));
   });
 
-  testWithoutContext(
-    'FlutterManifest fails when platforms contains invalid platform name',
-    () async {
-      const manifest = '''
+  test('FlutterManifest fails when platforms contains invalid platform name', () async {
+    const manifest = '''
 name: test
 flutter:
   assets:
@@ -1631,17 +1623,16 @@ flutter:
         - windows
 ''';
 
-      final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
-        manifest,
-        logger: logger,
-      );
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
 
-      expect(flutterManifest, isNull);
-      expect(logger.errorText, contains('Invalid platform'));
-    },
-  );
+    expect(flutterManifest, isNull);
+    expect(logger.errorText, contains('Invalid platform'));
+  });
 
-  testWithoutContext('FlutterManifest supports empty platforms list', () async {
+  test('FlutterManifest supports empty platforms list', () async {
     const manifest = '''
 name: test
 flutter:
@@ -1661,7 +1652,7 @@ flutter:
     expect(entry.platforms, isEmpty);
   });
 
-  testWithoutContext('FlutterManifest parses shaders with transformers', () async {
+  test('FlutterManifest parses shaders with transformers', () async {
     const manifest = '''
 name: test
 flutter:
@@ -1685,7 +1676,7 @@ flutter:
     expect(shader.transformers.single.args, <String>['--foo', 'bar']);
   });
 
-  testWithoutContext('FlutterManifest.copyWith generates a valid manifest', () async {
+  test('FlutterManifest.copyWith generates a valid manifest', () async {
     const manifest = '''
 name: test
 dependencies:
@@ -1781,7 +1772,7 @@ flutter:
                 - deferredComponentArg''');
   });
 
-  testWithoutContext('FlutterManifest can parse workspace', () async {
+  test('FlutterManifest can parse workspace', () async {
     const manifest = '''
 name: test
 workspace:
@@ -1797,7 +1788,7 @@ workspace:
     expect(flutterManifest!.workspace, <String>['pkgs/bar', 'pkgs/foo']);
   });
 
-  testWithoutContext('FlutterManifest can parse empty workspace', () async {
+  test('FlutterManifest can parse empty workspace', () async {
     const manifest = '''
 name: test
 ''';

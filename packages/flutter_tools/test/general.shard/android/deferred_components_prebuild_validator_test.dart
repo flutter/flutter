@@ -30,7 +30,7 @@ void main() {
     platform = FakePlatform();
   });
 
-  testWithoutContext('No checks passes', () async {
+  test('No checks passes', () async {
     final validator = DeferredComponentsPrebuildValidator(
       projectDir,
       templatePathProvider: const TemplatePathProvider(flutterRoot: '/flutter_root'),
@@ -44,7 +44,7 @@ void main() {
     expect(logger.statusText, 'test check passed.\n');
   });
 
-  testWithoutContext('clearTempDir passes', () async {
+  test('clearTempDir passes', () async {
     final validator = DeferredComponentsPrebuildValidator(
       projectDir,
       templatePathProvider: const TemplatePathProvider(flutterRoot: '/flutter_root'),
@@ -59,7 +59,7 @@ void main() {
     expect(logger.statusText, 'test check passed.\n');
   });
 
-  testWithoutContext('androidComponentSetup build.gradle does not exist', () async {
+  test('androidComponentSetup build.gradle does not exist', () async {
     final Directory templatesDir = fileSystem.directory('/templates');
     final Directory deferredComponentDir = templatesDir
         .childDirectory('module')
@@ -132,7 +132,7 @@ void main() {
     );
   });
 
-  testWithoutContext('androidComponentSetup AndroidManifest.xml does not exist', () async {
+  test('androidComponentSetup AndroidManifest.xml does not exist', () async {
     final Directory templatesDir = flutterRootDir.childDirectory('templates');
     final Directory deferredComponentDir = templatesDir
         .childDirectory('module')
@@ -191,7 +191,7 @@ void main() {
     );
   });
 
-  testWithoutContext('androidComponentSetup all files exist passes', () async {
+  test('androidComponentSetup all files exist passes', () async {
     final Directory templatesDir = flutterRootDir
         .childDirectory('templates')
         .childDirectory('deferred_component');
@@ -252,7 +252,7 @@ void main() {
     expect(logger.statusText, 'test check passed.\n');
   });
 
-  testWithoutContext('androidStringMapping creates new file', () async {
+  test('androidStringMapping creates new file', () async {
     final validator = DeferredComponentsPrebuildValidator(
       projectDir,
       templatePathProvider: const TemplatePathProvider(flutterRoot: '/flutter_root'),
@@ -346,7 +346,7 @@ void main() {
     );
   });
 
-  testWithoutContext('androidStringMapping modifies strings file', () async {
+  test('androidStringMapping modifies strings file', () async {
     final validator = DeferredComponentsPrebuildValidator(
       projectDir,
       templatePathProvider: const TemplatePathProvider(flutterRoot: '/flutter_root'),

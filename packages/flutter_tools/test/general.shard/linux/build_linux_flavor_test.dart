@@ -5,7 +5,6 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -13,12 +12,11 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/cmake.dart';
 import 'package:flutter_tools/src/cmake_project.dart';
 import 'package:flutter_tools/src/commands/build.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_build_command.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/test_build_system.dart';
@@ -80,33 +78,26 @@ void main() {
       featureFlags: TestFeatureFlags(isLinuxEnabled: true),
       fileSystem: fileSystem,
       logger: logger,
+      osUtils: FakeOperatingSystemUtils(),
+      platform: linuxPlatform,
+      processManager: processManager,
     );
   }
 
-  testUsingContext(
-    'Linux build with --flavor uses a flavor-specific build dir',
-    () async {
-      final BuildCommand command = makeBuildCommand();
-      processManager.addCommands(<FakeCommand>[
-        cmakeFlavorCommand('release', 'apple'),
-        ninjaFlavorCommand('release', 'apple'),
-      ]);
-      setUpMockProjectFilesForBuild();
+  test('Linux build with --flavor uses a flavor-specific build dir', () async {
+    final BuildCommand command = makeBuildCommand();
+    processManager.addCommands(<FakeCommand>[
+      cmakeFlavorCommand('release', 'apple'),
+      ninjaFlavorCommand('release', 'apple'),
+    ]);
+    setUpMockProjectFilesForBuild();
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'linux', '--no-pub', '--flavor', 'apple']);
+    await createTestCommandRunner(command)
+        .run(const <String>['build', 'linux', '--no-pub', '--flavor', 'apple']);
 
-      expect(processManager.hasRemainingExpectations, isFalse);
-      expect(logger.statusText, contains('✓ Built build/linux/x64/apple/release/bundle'));
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () => FakeOperatingSystemUtils(),
-    },
-  );
+    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(logger.statusText, contains('✓ Built build/linux/x64/apple/release/bundle'));
+  });
 
   test('getCmakeExecutableName returns the binary name without a flavor suffix', () {
     final fs = MemoryFileSystem.test();

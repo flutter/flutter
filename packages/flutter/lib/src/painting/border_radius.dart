@@ -204,9 +204,9 @@ abstract class BorderRadiusGeometry {
     if (identical(a, b)) {
       return a;
     }
-    a ??= BorderRadius.zero;
-    b ??= BorderRadius.zero;
-    return a.add((b.subtract(a)) * t);
+    final BorderRadiusGeometry firstBorderRadius = a ?? BorderRadius.zero;
+    final BorderRadiusGeometry secondBorderRadius = b ?? BorderRadius.zero;
+    return firstBorderRadius.add((secondBorderRadius.subtract(firstBorderRadius)) * t);
   }
 
   /// Convert this instance into a [BorderRadius], so that the radii are
