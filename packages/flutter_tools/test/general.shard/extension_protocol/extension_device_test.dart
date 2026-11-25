@@ -371,7 +371,7 @@ void main() {
       logger = BufferLogger.test();
     });
 
-    testWithoutContext('streams log lines end-to-end, forwards appId, and recreates log reader after dispose or appId change', () async {
+    test('streams log lines end-to-end, forwards appId, and recreates log reader after dispose or appId change', () async {
       final eventPort = ReceivePort();
       addTearDown(eventPort.close);
       final Stream<Map<String, Object?>> events = eventPort
@@ -452,7 +452,7 @@ void main() {
       expect(await device.getLogReader(), isA<NoOpDeviceLogReader>());
     });
 
-    testWithoutContext(
+    test(
       'filters device.logEntry notifications by deviceId so logs from other devices are ignored',
       () async {
         final eventPort = ReceivePort();
@@ -496,7 +496,7 @@ void main() {
       },
     );
 
-    testWithoutContext(
+    test(
       'calling dispose() on ExtensionDeviceLogReader triggers stopLogStream on the extension',
       () async {
         final eventPort = ReceivePort();
@@ -545,7 +545,7 @@ void main() {
       },
     );
 
-    testWithoutContext(
+    test(
       'ExtensionDeviceLogReader logs warning and closes stream when startLogStream fails',
       () async {
         final eventPort = ReceivePort();
@@ -584,48 +584,42 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'ExtensionDeviceLogReader closes logLines when extension isolate exits',
-      () async {
-        final eventPort = ReceivePort();
-        addTearDown(eventPort.close);
-        final SendPort eventSendPort = eventPort.sendPort;
+    test('ExtensionDeviceLogReader closes logLines when extension isolate exits', () async {
+      final eventPort = ReceivePort();
+      addTearDown(eventPort.close);
+      final SendPort eventSendPort = eventPort.sendPort;
 
-        void entryPoint(SendPort sendPort) {
-          unawaited(
-            ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
-              _StreamingTestDeviceService(
-                eventSendPort: eventSendPort,
-                exitAfterEmitting: true,
-                linesByDevice: const <String, List<String>>{
-                  _primaryDeviceId: <String>['line before exit'],
-                },
-              ),
-            ]),
-          );
-        }
-
-        final ExtensionConnection conn = await ExtensionConnection.spawn(
-          entryPoint,
-          logger: logger,
+      void entryPoint(SendPort sendPort) {
+        unawaited(
+          ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+            _StreamingTestDeviceService(
+              eventSendPort: eventSendPort,
+              exitAfterEmitting: true,
+              linesByDevice: const <String, List<String>>{
+                _primaryDeviceId: <String>['line before exit'],
+              },
+            ),
+          ]),
         );
-        addTearDown(conn.dispose);
+      }
 
-        final client = ExtensionDeviceClient(conn, logger: logger);
-        final ExtensionDeviceLogReader reader = await ExtensionDeviceLogReader.create(
-          connection: conn,
-          deviceId: _primaryDeviceId,
-          deviceService: client,
-          logger: logger,
-          name: 'Primary Extension Device',
-        );
-        addTearDown(reader.dispose);
+      final ExtensionConnection conn = await ExtensionConnection.spawn(entryPoint, logger: logger);
+      addTearDown(conn.dispose);
 
-        await expectLater(reader.logLines, emitsInOrder(<Object>['line before exit', emitsDone]));
-      },
-    );
+      final client = ExtensionDeviceClient(conn, logger: logger);
+      final ExtensionDeviceLogReader reader = await ExtensionDeviceLogReader.create(
+        connection: conn,
+        deviceId: _primaryDeviceId,
+        deviceService: client,
+        logger: logger,
+        name: 'Primary Extension Device',
+      );
+      addTearDown(reader.dispose);
 
-    testWithoutContext('startLogStream, stopLogStream, and stopApp throw INVALID_PARAMS on missing, empty, or invalid parameters', () async {
+      await expectLater(reader.logLines, emitsInOrder(<Object>['line before exit', emitsDone]));
+    });
+
+    test('startLogStream, stopLogStream, and stopApp throw INVALID_PARAMS on missing, empty, or invalid parameters', () async {
       final eventPort = ReceivePort();
       addTearDown(eventPort.close);
       final SendPort eventSendPort = eventPort.sendPort;
@@ -693,7 +687,7 @@ void main() {
       }
     });
 
-    testWithoutContext('multiple concurrent subscribers to logLines across getLogReader calls all receive full log output and startLogStream is called once', () async {
+    test('multiple concurrent subscribers to logLines across getLogReader calls all receive full log output and startLogStream is called once', () async {
       final eventPort = ReceivePort();
       addTearDown(eventPort.close);
       final Stream<Map<String, Object?>> events = eventPort
@@ -753,7 +747,7 @@ void main() {
       expect(startEvents.single[DeviceService.deviceIdParam], equals(_primaryDeviceId));
     });
 
-    testWithoutContext('ExtensionDevices.pollingGetDevices reuses cached ExtensionBackedDevice across polls and disposes removed devices', () async {
+    test('ExtensionDevices.pollingGetDevices reuses cached ExtensionBackedDevice across polls and disposes removed devices', () async {
       final eventPort = ReceivePort();
       addTearDown(eventPort.close);
       final Stream<Map<String, Object?>> events = eventPort
@@ -823,58 +817,49 @@ void main() {
       expect(await primaryFirst.getLogReader(), isA<NoOpDeviceLogReader>());
     });
 
-    testWithoutContext(
-      'ExtensionBackedDevice.startApp fails when no extension provides buildTarget',
-      () async {
-        final eventPort = ReceivePort();
-        addTearDown(eventPort.close);
-        final SendPort eventSendPort = eventPort.sendPort;
+    test('ExtensionBackedDevice.startApp fails when no extension provides buildTarget', () async {
+      final eventPort = ReceivePort();
+      addTearDown(eventPort.close);
+      final SendPort eventSendPort = eventPort.sendPort;
 
-        void entryPoint(SendPort sendPort) {
-          unawaited(
-            ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
-              _StreamingTestDeviceService(eventSendPort: eventSendPort),
-            ]),
-          );
-        }
-
-        final ExtensionConnection conn = await ExtensionConnection.spawn(
-          entryPoint,
-          logger: logger,
+      void entryPoint(SendPort sendPort) {
+        unawaited(
+          ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+            _StreamingTestDeviceService(eventSendPort: eventSendPort),
+          ]),
         );
-        addTearDown(conn.dispose);
+      }
 
-        final client = ExtensionDeviceClient(conn, logger: logger);
-        final device = ExtensionBackedDevice(
-          buildManager: _createBuildManager(
-            logger: logger,
-            targets: const <ExtensionBuildTarget>[],
-          ),
-          connection: conn,
-          deviceService: client,
-          targetDevice: const TargetDevice(
-            buildTarget: 'custom-linux-build',
-            category: Category.desktop,
-            id: 'test_device',
-            name: 'Test Device',
-          ),
-          toolContext: _createToolContext(logger: logger),
-        );
-        addTearDown(device.dispose);
+      final ExtensionConnection conn = await ExtensionConnection.spawn(entryPoint, logger: logger);
+      addTearDown(conn.dispose);
 
-        final LaunchResult result = await device.startApp(
-          null,
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        );
-        expect(result.started, isFalse);
-        expect(
-          logger.errorText,
-          contains('No tool extension provides build target "custom-linux-build" for Test Device.'),
-        );
-      },
-    );
+      final client = ExtensionDeviceClient(conn, logger: logger);
+      final device = ExtensionBackedDevice(
+        buildManager: _createBuildManager(logger: logger, targets: const <ExtensionBuildTarget>[]),
+        connection: conn,
+        deviceService: client,
+        targetDevice: const TargetDevice(
+          buildTarget: 'custom-linux-build',
+          category: Category.desktop,
+          id: 'test_device',
+          name: 'Test Device',
+        ),
+        toolContext: _createToolContext(logger: logger),
+      );
+      addTearDown(device.dispose);
 
-    testWithoutContext('ExtensionDeviceClient.launchApp and stopApp log error and return false on ToolExtensionException', () async {
+      final LaunchResult result = await device.startApp(
+        null,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      );
+      expect(result.started, isFalse);
+      expect(
+        logger.errorText,
+        contains('No tool extension provides build target "custom-linux-build" for Test Device.'),
+      );
+    });
+
+    test('ExtensionDeviceClient.launchApp and stopApp log error and return false on ToolExtensionException', () async {
       void domainErrorEntryPoint(SendPort sendPort) {
         unawaited(
           ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
@@ -913,7 +898,7 @@ void main() {
       );
     });
 
-    testWithoutContext('ExtensionDevices.pollingGetDevices reports ToolExtensionException via getDiagnostics without warning on every poll', () async {
+    test('ExtensionDevices.pollingGetDevices reports ToolExtensionException via getDiagnostics without warning on every poll', () async {
       void domainErrorEntryPoint(SendPort sendPort) {
         unawaited(
           ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
@@ -946,7 +931,7 @@ void main() {
   });
 
   group('TargetDevice install and capture capabilities', () {
-    testWithoutContext('serializes and deserializes supportsInstall, supportsScreenshot, and supportsScreenRecording', () {
+    test('serializes and deserializes supportsInstall, supportsScreenshot, and supportsScreenRecording', () {
       const device = TargetDevice(
         category: Category.mobile,
         id: 'capture_device',
@@ -977,7 +962,7 @@ void main() {
       );
     });
 
-    testWithoutContext('defaults supportsInstall, supportsScreenshot, and supportsScreenRecording to false when omitted', () {
+    test('defaults supportsInstall, supportsScreenshot, and supportsScreenRecording to false when omitted', () {
       final parsed = TargetDevice.fromJson(const <String, Object?>{
         TargetDevice.categoryKey: 'desktop',
         TargetDevice.idKey: 'default_device',
@@ -989,7 +974,7 @@ void main() {
       expect(parsed.supportsScreenRecording, isFalse);
     });
 
-    testWithoutContext('throws FormatException when supportsInstall, supportsScreenshot, or supportsScreenRecording is not bool', () {
+    test('throws FormatException when supportsInstall, supportsScreenshot, or supportsScreenRecording is not bool', () {
       expect(
         () =>
             TargetDevice.fromJson(const <String, Object?>{TargetDevice.supportsInstallKey: 'yes'}),
@@ -1017,7 +1002,7 @@ void main() {
       logger = BufferLogger.test();
     });
 
-    testWithoutContext(
+    test(
       'handles resolveApplication, installApp, uninstallApp, and isAppInstalled over RPC',
       () async {
         final events = <Map<String, Object?>>[];
@@ -1155,7 +1140,7 @@ void main() {
       },
     );
 
-    testWithoutContext(
+    test(
       'handles takeScreenshot, startScreenRecording, and stopScreenRecording over RPC',
       () async {
         final events = <Map<String, Object?>>[];
@@ -1256,7 +1241,7 @@ void main() {
       },
     );
 
-    testWithoutContext('default DeviceService returns null from resolveApplication and throws UnsupportedError for install and capture', () async {
+    test('default DeviceService returns null from resolveApplication and throws UnsupportedError for install and capture', () async {
       void entryPoint(SendPort sendPort) {
         unawaited(
           ToolExtensionEntryPoint.run(
@@ -1318,7 +1303,7 @@ void main() {
       );
     });
 
-    testWithoutContext('surfaces clean ToolExtensionException (-32001) messages across resolveApplication, install, and capture RPCs', () async {
+    test('surfaces clean ToolExtensionException (-32001) messages across resolveApplication, install, and capture RPCs', () async {
       void domainErrorEntryPoint(SendPort sendPort) {
         unawaited(
           ToolExtensionEntryPoint.run(
@@ -1418,271 +1403,162 @@ void main() {
       );
     });
 
-    testWithoutContext(
-      'returns INVALID_PARAMS (-32602) on missing or invalid RPC parameters',
-      () async {
-        void entryPoint(SendPort sendPort) {
-          unawaited(
-            ToolExtensionEntryPoint.run(
-              sendPort,
-              <ToolExtensionService>[_TestDeviceService()],
-              supportedPlatforms: const <String>{'linux'},
-            ),
-          );
-        }
+    test('returns INVALID_PARAMS (-32602) on missing or invalid RPC parameters', () async {
+      void entryPoint(SendPort sendPort) {
+        unawaited(
+          ToolExtensionEntryPoint.run(
+            sendPort,
+            <ToolExtensionService>[_TestDeviceService()],
+            supportedPlatforms: const <String>{'linux'},
+          ),
+        );
+      }
 
-        final ExtensionConnection conn = await ExtensionConnection.spawn(
-          entryPoint,
-          logger: logger,
-        );
-        addTearDown(conn.dispose);
+      final ExtensionConnection conn = await ExtensionConnection.spawn(entryPoint, logger: logger);
+      addTearDown(conn.dispose);
 
-        const validProjectMap = <String, Object?>{
-          ExtensionFlutterProject.appNameKey: 'my_app',
-          ExtensionFlutterProject.buildDirectoryKey: 'file:///tmp/my_app/build/',
-          ExtensionFlutterProject.directoryKey: 'file:///tmp/my_app/',
-        };
+      const validProjectMap = <String, Object?>{
+        ExtensionFlutterProject.appNameKey: 'my_app',
+        ExtensionFlutterProject.buildDirectoryKey: 'file:///tmp/my_app/build/',
+        ExtensionFlutterProject.directoryKey: 'file:///tmp/my_app/',
+      };
 
-        // resolveApplication: missing deviceId, empty deviceId, invalid buildMode, invalid applicationBinaryUri, empty flavor.
-        await expectLater(
-          conn.sendRequest(
-            DeviceService.resolveApplicationMethod,
-            params: <String, Object?>{
-              ExtensionApplicationResolutionContext.buildModeKey: 'debug',
-              ExtensionApplicationResolutionContext.projectKey: validProjectMap,
-            },
-          ),
-          throwsA(_isInvalidParamsRpcException()),
-        );
-        await expectLater(
-          conn.sendRequest(
-            DeviceService.resolveApplicationMethod,
-            params: <String, Object?>{
-              ExtensionApplicationResolutionContext.buildModeKey: 'debug',
-              ExtensionApplicationResolutionContext.deviceIdKey: '',
-              ExtensionApplicationResolutionContext.projectKey: validProjectMap,
-            },
-          ),
-          throwsA(_isInvalidParamsRpcException()),
-        );
-        await expectLater(
-          conn.sendRequest(
-            DeviceService.resolveApplicationMethod,
-            params: <String, Object?>{
-              ExtensionApplicationResolutionContext.buildModeKey: 'invalid_mode',
-              ExtensionApplicationResolutionContext.deviceIdKey: 'device-1',
-              ExtensionApplicationResolutionContext.projectKey: validProjectMap,
-            },
-          ),
-          throwsA(_isInvalidParamsRpcException()),
-        );
-        await expectLater(
-          conn.sendRequest(
-            DeviceService.resolveApplicationMethod,
-            params: <String, Object?>{
-              ExtensionApplicationResolutionContext.applicationBinaryUriKey: 'relative/app.pkg',
-              ExtensionApplicationResolutionContext.buildModeKey: 'debug',
-              ExtensionApplicationResolutionContext.deviceIdKey: 'device-1',
-              ExtensionApplicationResolutionContext.projectKey: validProjectMap,
-            },
-          ),
-          throwsA(_isInvalidParamsRpcException()),
-        );
-        await expectLater(
-          conn.sendRequest(
-            DeviceService.resolveApplicationMethod,
-            params: <String, Object?>{
-              ExtensionApplicationResolutionContext.buildModeKey: 'debug',
-              ExtensionApplicationResolutionContext.deviceIdKey: 'device-1',
-              ExtensionApplicationResolutionContext.flavorKey: '',
-              ExtensionApplicationResolutionContext.projectKey: validProjectMap,
-            },
-          ),
-          throwsA(_isInvalidParamsRpcException()),
-        );
+      // resolveApplication: missing deviceId, empty deviceId, invalid buildMode, invalid applicationBinaryUri, empty flavor.
+      await expectLater(
+        conn.sendRequest(
+          DeviceService.resolveApplicationMethod,
+          params: <String, Object?>{
+            ExtensionApplicationResolutionContext.buildModeKey: 'debug',
+            ExtensionApplicationResolutionContext.projectKey: validProjectMap,
+          },
+        ),
+        throwsA(_isInvalidParamsRpcException()),
+      );
+      await expectLater(
+        conn.sendRequest(
+          DeviceService.resolveApplicationMethod,
+          params: <String, Object?>{
+            ExtensionApplicationResolutionContext.buildModeKey: 'debug',
+            ExtensionApplicationResolutionContext.deviceIdKey: '',
+            ExtensionApplicationResolutionContext.projectKey: validProjectMap,
+          },
+        ),
+        throwsA(_isInvalidParamsRpcException()),
+      );
+      await expectLater(
+        conn.sendRequest(
+          DeviceService.resolveApplicationMethod,
+          params: <String, Object?>{
+            ExtensionApplicationResolutionContext.buildModeKey: 'invalid_mode',
+            ExtensionApplicationResolutionContext.deviceIdKey: 'device-1',
+            ExtensionApplicationResolutionContext.projectKey: validProjectMap,
+          },
+        ),
+        throwsA(_isInvalidParamsRpcException()),
+      );
+      await expectLater(
+        conn.sendRequest(
+          DeviceService.resolveApplicationMethod,
+          params: <String, Object?>{
+            ExtensionApplicationResolutionContext.applicationBinaryUriKey: 'relative/app.pkg',
+            ExtensionApplicationResolutionContext.buildModeKey: 'debug',
+            ExtensionApplicationResolutionContext.deviceIdKey: 'device-1',
+            ExtensionApplicationResolutionContext.projectKey: validProjectMap,
+          },
+        ),
+        throwsA(_isInvalidParamsRpcException()),
+      );
+      await expectLater(
+        conn.sendRequest(
+          DeviceService.resolveApplicationMethod,
+          params: <String, Object?>{
+            ExtensionApplicationResolutionContext.buildModeKey: 'debug',
+            ExtensionApplicationResolutionContext.deviceIdKey: 'device-1',
+            ExtensionApplicationResolutionContext.flavorKey: '',
+            ExtensionApplicationResolutionContext.projectKey: validProjectMap,
+          },
+        ),
+        throwsA(_isInvalidParamsRpcException()),
+      );
 
-        // installApp: empty deviceId, relative bundleUri, non-file bundleUri, trailing-slash directory bundleUri, non-bool prebuiltApplication.
+      // installApp: empty deviceId, relative bundleUri, non-file bundleUri, trailing-slash directory bundleUri, non-bool prebuiltApplication.
+      await expectLater(
+        conn.sendRequest(
+          DeviceService.installAppMethod,
+          params: <String, Object?>{
+            DeviceService.deviceIdParam: '',
+            DeviceService.bundleUriParam: 'file:///tmp/app.bundle',
+          },
+        ),
+        throwsA(_isInvalidParamsRpcException()),
+      );
+      await expectLater(
+        conn.sendRequest(
+          DeviceService.installAppMethod,
+          params: <String, Object?>{
+            DeviceService.deviceIdParam: 'device-1',
+            DeviceService.bundleUriParam: 'relative/path/app.bundle',
+          },
+        ),
+        throwsA(_isInvalidParamsRpcException()),
+      );
+      await expectLater(
+        conn.sendRequest(
+          DeviceService.installAppMethod,
+          params: <String, Object?>{
+            DeviceService.deviceIdParam: 'device-1',
+            DeviceService.bundleUriParam: 'https://example.com/app.bundle',
+          },
+        ),
+        throwsA(_isInvalidParamsRpcException()),
+      );
+      await expectLater(
+        conn.sendRequest(
+          DeviceService.installAppMethod,
+          params: <String, Object?>{
+            DeviceService.deviceIdParam: 'device-1',
+            DeviceService.bundleUriParam: 'file:///',
+          },
+        ),
+        throwsA(_isInvalidParamsRpcException()),
+      );
+      await expectLater(
+        conn.sendRequest(
+          DeviceService.installAppMethod,
+          params: <String, Object?>{
+            DeviceService.deviceIdParam: 'device-1',
+            DeviceService.bundleUriParam: 'file:///tmp/app.bundle',
+            DeviceService.prebuiltApplicationParam: 'yes',
+          },
+        ),
+        throwsA(_isInvalidParamsRpcException()),
+      );
+
+      // uninstallApp & isAppInstalled: empty deviceId, missing appId, empty appId, non-String appId.
+      for (final method in const <String>[
+        DeviceService.uninstallAppMethod,
+        DeviceService.isAppInstalledMethod,
+      ]) {
         await expectLater(
           conn.sendRequest(
-            DeviceService.installAppMethod,
+            method,
             params: <String, Object?>{
               DeviceService.deviceIdParam: '',
-              DeviceService.bundleUriParam: 'file:///tmp/app.bundle',
+              DeviceService.appIdParam: 'com.example.app',
             },
           ),
           throwsA(_isInvalidParamsRpcException()),
         );
         await expectLater(
           conn.sendRequest(
-            DeviceService.installAppMethod,
-            params: <String, Object?>{
-              DeviceService.deviceIdParam: 'device-1',
-              DeviceService.bundleUriParam: 'relative/path/app.bundle',
-            },
+            method,
+            params: <String, Object?>{DeviceService.deviceIdParam: 'device-1'},
           ),
           throwsA(_isInvalidParamsRpcException()),
         );
         await expectLater(
           conn.sendRequest(
-            DeviceService.installAppMethod,
-            params: <String, Object?>{
-              DeviceService.deviceIdParam: 'device-1',
-              DeviceService.bundleUriParam: 'https://example.com/app.bundle',
-            },
-          ),
-          throwsA(_isInvalidParamsRpcException()),
-        );
-        await expectLater(
-          conn.sendRequest(
-            DeviceService.installAppMethod,
-            params: <String, Object?>{
-              DeviceService.deviceIdParam: 'device-1',
-              DeviceService.bundleUriParam: 'file:///',
-            },
-          ),
-          throwsA(_isInvalidParamsRpcException()),
-        );
-        await expectLater(
-          conn.sendRequest(
-            DeviceService.installAppMethod,
-            params: <String, Object?>{
-              DeviceService.deviceIdParam: 'device-1',
-              DeviceService.bundleUriParam: 'file:///tmp/app.bundle',
-              DeviceService.prebuiltApplicationParam: 'yes',
-            },
-          ),
-          throwsA(_isInvalidParamsRpcException()),
-        );
-
-        // uninstallApp & isAppInstalled: empty deviceId, missing appId, empty appId, non-String appId.
-        for (final method in const <String>[
-          DeviceService.uninstallAppMethod,
-          DeviceService.isAppInstalledMethod,
-        ]) {
-          await expectLater(
-            conn.sendRequest(
-              method,
-              params: <String, Object?>{
-                DeviceService.deviceIdParam: '',
-                DeviceService.appIdParam: 'com.example.app',
-              },
-            ),
-            throwsA(_isInvalidParamsRpcException()),
-          );
-          await expectLater(
-            conn.sendRequest(
-              method,
-              params: <String, Object?>{DeviceService.deviceIdParam: 'device-1'},
-            ),
-            throwsA(_isInvalidParamsRpcException()),
-          );
-          await expectLater(
-            conn.sendRequest(
-              method,
-              params: <String, Object?>{
-                DeviceService.deviceIdParam: 'device-1',
-                DeviceService.appIdParam: '',
-              },
-            ),
-            throwsA(_isInvalidParamsRpcException()),
-          );
-          await expectLater(
-            conn.sendRequest(
-              method,
-              params: <String, Object?>{
-                DeviceService.deviceIdParam: 'device-1',
-                DeviceService.appIdParam: 42,
-              },
-            ),
-            throwsA(_isInvalidParamsRpcException()),
-          );
-        }
-
-        // takeScreenshot: empty deviceId, invalid outputFileUri.
-        await expectLater(
-          conn.sendRequest(
-            DeviceService.takeScreenshotMethod,
-            params: <String, Object?>{
-              DeviceService.deviceIdParam: '',
-              DeviceService.outputFileUriParam: 'file:///tmp/screenshot.png',
-            },
-          ),
-          throwsA(_isInvalidParamsRpcException()),
-        );
-        await expectLater(
-          conn.sendRequest(
-            DeviceService.takeScreenshotMethod,
-            params: <String, Object?>{
-              DeviceService.deviceIdParam: 'device-1',
-              DeviceService.outputFileUriParam: 'relative/screenshot.png',
-            },
-          ),
-          throwsA(_isInvalidParamsRpcException()),
-        );
-
-        // startScreenRecording: empty deviceId, invalid outputFileUri, negative durationMs, wrong type durationMs.
-        await expectLater(
-          conn.sendRequest(
-            DeviceService.startScreenRecordingMethod,
-            params: <String, Object?>{
-              DeviceService.deviceIdParam: '',
-              DeviceService.outputFileUriParam: 'file:///tmp/recording.mp4',
-            },
-          ),
-          throwsA(_isInvalidParamsRpcException()),
-        );
-        await expectLater(
-          conn.sendRequest(
-            DeviceService.startScreenRecordingMethod,
-            params: <String, Object?>{
-              DeviceService.deviceIdParam: 'device-1',
-              DeviceService.outputFileUriParam: 'http://example.com/recording.mp4',
-            },
-          ),
-          throwsA(_isInvalidParamsRpcException()),
-        );
-        await expectLater(
-          conn.sendRequest(
-            DeviceService.startScreenRecordingMethod,
-            params: <String, Object?>{
-              DeviceService.deviceIdParam: 'device-1',
-              DeviceService.outputFileUriParam: 'file:///tmp/recording.mp4',
-              DeviceService.durationMsParam: -100,
-            },
-          ),
-          throwsA(_isInvalidParamsRpcException()),
-        );
-        await expectLater(
-          conn.sendRequest(
-            DeviceService.startScreenRecordingMethod,
-            params: <String, Object?>{
-              DeviceService.deviceIdParam: 'device-1',
-              DeviceService.outputFileUriParam: 'file:///tmp/recording.mp4',
-              DeviceService.durationMsParam: '5000',
-            },
-          ),
-          throwsA(_isInvalidParamsRpcException()),
-        );
-
-        // waitForScreenRecording & stopScreenRecording: empty deviceId, missing deviceId.
-        for (final method in const <String>[
-          DeviceService.waitForScreenRecordingMethod,
-          DeviceService.stopScreenRecordingMethod,
-        ]) {
-          await expectLater(
-            conn.sendRequest(method, params: <String, Object?>{DeviceService.deviceIdParam: ''}),
-            throwsA(_isInvalidParamsRpcException()),
-          );
-          await expectLater(
-            conn.sendRequest(method, params: const <String, Object?>{}),
-            throwsA(_isInvalidParamsRpcException()),
-          );
-        }
-
-        // stopApp: empty appId is rejected with INVALID_PARAMS.
-        await expectLater(
-          conn.sendRequest(
-            DeviceService.stopAppMethod,
+            method,
             params: <String, Object?>{
               DeviceService.deviceIdParam: 'device-1',
               DeviceService.appIdParam: '',
@@ -1690,8 +1566,111 @@ void main() {
           ),
           throwsA(_isInvalidParamsRpcException()),
         );
-      },
-    );
+        await expectLater(
+          conn.sendRequest(
+            method,
+            params: <String, Object?>{
+              DeviceService.deviceIdParam: 'device-1',
+              DeviceService.appIdParam: 42,
+            },
+          ),
+          throwsA(_isInvalidParamsRpcException()),
+        );
+      }
+
+      // takeScreenshot: empty deviceId, invalid outputFileUri.
+      await expectLater(
+        conn.sendRequest(
+          DeviceService.takeScreenshotMethod,
+          params: <String, Object?>{
+            DeviceService.deviceIdParam: '',
+            DeviceService.outputFileUriParam: 'file:///tmp/screenshot.png',
+          },
+        ),
+        throwsA(_isInvalidParamsRpcException()),
+      );
+      await expectLater(
+        conn.sendRequest(
+          DeviceService.takeScreenshotMethod,
+          params: <String, Object?>{
+            DeviceService.deviceIdParam: 'device-1',
+            DeviceService.outputFileUriParam: 'relative/screenshot.png',
+          },
+        ),
+        throwsA(_isInvalidParamsRpcException()),
+      );
+
+      // startScreenRecording: empty deviceId, invalid outputFileUri, negative durationMs, wrong type durationMs.
+      await expectLater(
+        conn.sendRequest(
+          DeviceService.startScreenRecordingMethod,
+          params: <String, Object?>{
+            DeviceService.deviceIdParam: '',
+            DeviceService.outputFileUriParam: 'file:///tmp/recording.mp4',
+          },
+        ),
+        throwsA(_isInvalidParamsRpcException()),
+      );
+      await expectLater(
+        conn.sendRequest(
+          DeviceService.startScreenRecordingMethod,
+          params: <String, Object?>{
+            DeviceService.deviceIdParam: 'device-1',
+            DeviceService.outputFileUriParam: 'http://example.com/recording.mp4',
+          },
+        ),
+        throwsA(_isInvalidParamsRpcException()),
+      );
+      await expectLater(
+        conn.sendRequest(
+          DeviceService.startScreenRecordingMethod,
+          params: <String, Object?>{
+            DeviceService.deviceIdParam: 'device-1',
+            DeviceService.outputFileUriParam: 'file:///tmp/recording.mp4',
+            DeviceService.durationMsParam: -100,
+          },
+        ),
+        throwsA(_isInvalidParamsRpcException()),
+      );
+      await expectLater(
+        conn.sendRequest(
+          DeviceService.startScreenRecordingMethod,
+          params: <String, Object?>{
+            DeviceService.deviceIdParam: 'device-1',
+            DeviceService.outputFileUriParam: 'file:///tmp/recording.mp4',
+            DeviceService.durationMsParam: '5000',
+          },
+        ),
+        throwsA(_isInvalidParamsRpcException()),
+      );
+
+      // waitForScreenRecording & stopScreenRecording: empty deviceId, missing deviceId.
+      for (final method in const <String>[
+        DeviceService.waitForScreenRecordingMethod,
+        DeviceService.stopScreenRecordingMethod,
+      ]) {
+        await expectLater(
+          conn.sendRequest(method, params: <String, Object?>{DeviceService.deviceIdParam: ''}),
+          throwsA(_isInvalidParamsRpcException()),
+        );
+        await expectLater(
+          conn.sendRequest(method, params: const <String, Object?>{}),
+          throwsA(_isInvalidParamsRpcException()),
+        );
+      }
+
+      // stopApp: empty appId is rejected with INVALID_PARAMS.
+      await expectLater(
+        conn.sendRequest(
+          DeviceService.stopAppMethod,
+          params: <String, Object?>{
+            DeviceService.deviceIdParam: 'device-1',
+            DeviceService.appIdParam: '',
+          },
+        ),
+        throwsA(_isInvalidParamsRpcException()),
+      );
+    });
   });
 
   group('ExtensionBackedDevice resolveApplicationPackage and delegation', () {
@@ -1704,7 +1683,7 @@ void main() {
       logger = BufferLogger.test();
     });
 
-    testWithoutContext('resolves application via resolveApplication, falls back on null and METHOD_NOT_FOUND (-32601), and delegates install/uninstall/capture without building during install', () async {
+    test('resolves application via resolveApplication, falls back on null and METHOD_NOT_FOUND (-32601), and delegates install/uninstall/capture without building during install', () async {
       final receivedInstalls = <({Uri bundleUri, bool prebuiltApplication})>[];
       final receivedStops = <String?>[];
       final eventsPort = ReceivePort();
@@ -1938,7 +1917,7 @@ void main() {
       expect(savedRecordingUri, equals(recordingFile.absolute.uri));
     });
 
-    testWithoutContext('getLogReader preserves active subscribers across scope changes and deduplicates concurrent callers after dispose', () async {
+    test('getLogReader preserves active subscribers across scope changes and deduplicates concurrent callers after dispose', () async {
       final startedLogAppIds = <String?>[];
       final eventsPort = ReceivePort();
       addTearDown(eventsPort.close);
@@ -2035,7 +2014,7 @@ void main() {
       );
     });
 
-    testWithoutContext('handles !supportsInstall no-op semantics, catches RPC and peer-exit exceptions with printError, and propagates host errors', () async {
+    test('handles !supportsInstall no-op semantics, catches RPC and peer-exit exceptions with printError, and propagates host errors', () async {
       void failingEntryPoint(SendPort sendPort) {
         unawaited(
           ToolExtensionEntryPoint.run(

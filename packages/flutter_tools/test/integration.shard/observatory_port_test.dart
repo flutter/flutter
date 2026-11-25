@@ -53,7 +53,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('flutter run --vm-service-port', () async {
+  test('flutter run --vm-service-port', () async {
     final int port = await getFreePort();
     // If only --vm-service-port is provided, --vm-service-port will be used by DDS
     // and the VM service will bind to a random port.
@@ -72,7 +72,7 @@ void main() {
     await process.exitCode;
   });
 
-  testWithoutContext('flutter run --dds-port --vm-service-port', () async {
+  test('flutter run --dds-port --vm-service-port', () async {
     final int vmServicePort = await getFreePort();
     int ddsPort = await getFreePort();
     while (ddsPort == vmServicePort) {
@@ -94,7 +94,7 @@ void main() {
     await process.exitCode;
   });
 
-  testWithoutContext('flutter run --dds-port', () async {
+  test('flutter run --dds-port', () async {
     final int ddsPort = await getFreePort();
     // If only --dds-port is provided, --dds-port will be used by DDS and the VM service
     // will bind to a random port.

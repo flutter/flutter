@@ -222,7 +222,7 @@ void main() {
   });
 
   group('Tool Extensions Safe Mode', () {
-    testWithoutContext('FLUTTER_NO_EXTENSIONS=1 overrides FLUTTER_TOOL_EXTENSIONS=true', () {
+    test('FLUTTER_NO_EXTENSIONS=1 overrides FLUTTER_TOOL_EXTENSIONS=true', () {
       final logger = BufferLogger.test();
       final platform = FakePlatform(
         environment: const <String, String>{
@@ -246,100 +246,94 @@ void main() {
       expect(flags.isToolExtensionsEnabled, isFalse);
     });
 
-    testWithoutContext(
-      'ConfigCommand skips extension settings when --no-extensions is passed',
-      () async {
-        const args = <String>['--no-extensions', 'config', '--list'];
-        final logger = BufferLogger.test();
-        final platform = FakePlatform(
-          environment: const <String, String>{'FLUTTER_TOOL_EXTENSIONS': 'true'},
-        );
-        final featureFlags = FlutterFeatureFlags(
-          flutterVersion: FakeFlutterVersion(),
-          featuresConfig: FlutterFeaturesConfig(
-            globalConfig: Config.test(logger: logger),
-            platform: platform,
-            projectManifest: null,
-          ),
+    test('ConfigCommand skips extension settings when --no-extensions is passed', () async {
+      const args = <String>['--no-extensions', 'config', '--list'];
+      final logger = BufferLogger.test();
+      final platform = FakePlatform(
+        environment: const <String, String>{'FLUTTER_TOOL_EXTENSIONS': 'true'},
+      );
+      final featureFlags = FlutterFeatureFlags(
+        flutterVersion: FakeFlutterVersion(),
+        featuresConfig: FlutterFeaturesConfig(
+          globalConfig: Config.test(logger: logger),
           platform: platform,
-        );
-        final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
-          entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
-          featureFlags: featureFlags,
-        );
-        final toolContext = FakeToolContext(logger: logger);
-        final configCommand = ConfigCommand(
-          androidContext: FakeAndroidContext(),
-          toolContext: toolContext,
-          featureFlags: featureFlags,
-          extensionManager: manager,
-        );
-        final runner = TestFlutterCommandRunner(
-          toolContext: toolContext,
-          featureFlags: featureFlags,
-          extensionManager: manager,
-        )..addCommand(configCommand);
+          projectManifest: null,
+        ),
+        platform: platform,
+      );
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+        featureFlags: featureFlags,
+      );
+      final toolContext = FakeToolContext(logger: logger);
+      final configCommand = ConfigCommand(
+        androidContext: FakeAndroidContext(),
+        toolContext: toolContext,
+        featureFlags: featureFlags,
+        extensionManager: manager,
+      );
+      final runner = TestFlutterCommandRunner(
+        toolContext: toolContext,
+        featureFlags: featureFlags,
+        extensionManager: manager,
+      )..addCommand(configCommand);
 
-        await runner.run(args);
-        expect(logger.statusText, isNot(contains('Extension Settings:')));
-        expect(manager.connections, isEmpty);
+      await runner.run(args);
+      expect(logger.statusText, isNot(contains('Extension Settings:')));
+      expect(manager.connections, isEmpty);
 
-        await manager.dispose();
-      },
-    );
+      await manager.dispose();
+    });
 
-    testWithoutContext(
-      'disables ExtensionDevices discovery when --no-extensions is passed',
-      () async {
-        final logger = BufferLogger.test();
-        final platform = FakePlatform(
-          environment: const <String, String>{'FLUTTER_TOOL_EXTENSIONS': 'true'},
-        );
-        final featureFlags = FlutterFeatureFlags(
-          flutterVersion: FakeFlutterVersion(),
-          featuresConfig: FlutterFeaturesConfig(
-            globalConfig: Config.test(logger: logger),
-            platform: platform,
-            projectManifest: null,
-          ),
+    test('disables ExtensionDevices discovery when --no-extensions is passed', () async {
+      final logger = BufferLogger.test();
+      final platform = FakePlatform(
+        environment: const <String, String>{'FLUTTER_TOOL_EXTENSIONS': 'true'},
+      );
+      final featureFlags = FlutterFeatureFlags(
+        flutterVersion: FakeFlutterVersion(),
+        featuresConfig: FlutterFeaturesConfig(
+          globalConfig: Config.test(logger: logger),
           platform: platform,
-        );
-        final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
-          entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
-          featureFlags: featureFlags,
-        );
-        final toolContext = FakeToolContext(logger: logger);
-        final buildManager = ExtensionBuildManager(
-          extensionManager: manager,
-          featureFlags: featureFlags,
-          logger: logger,
-        );
-        final discovery = ExtensionDevices(
-          extensionBuildManager: buildManager,
-          extensionManager: manager,
-          toolContext: toolContext,
-        );
-        final probeCommand = _ExtensionDevicesProbeCommand(
-          toolContext: toolContext,
-          discovery: discovery,
-        );
-        final runner = TestFlutterCommandRunner(
-          toolContext: toolContext,
-          featureFlags: featureFlags,
-          extensionManager: manager,
-        )..addCommand(probeCommand);
+          projectManifest: null,
+        ),
+        platform: platform,
+      );
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+        featureFlags: featureFlags,
+      );
+      final toolContext = FakeToolContext(logger: logger);
+      final buildManager = ExtensionBuildManager(
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        logger: logger,
+      );
+      final discovery = ExtensionDevices(
+        extensionBuildManager: buildManager,
+        extensionManager: manager,
+        toolContext: toolContext,
+      );
+      final probeCommand = _ExtensionDevicesProbeCommand(
+        toolContext: toolContext,
+        discovery: discovery,
+      );
+      final runner = TestFlutterCommandRunner(
+        toolContext: toolContext,
+        featureFlags: featureFlags,
+        extensionManager: manager,
+      )..addCommand(probeCommand);
 
-        await runner.run(const <String>['--no-extensions', 'probe-devices']);
-        expect(probeCommand.discoveredDevices, isEmpty);
-        expect(manager.connections, isEmpty);
+      await runner.run(const <String>['--no-extensions', 'probe-devices']);
+      expect(probeCommand.discoveredDevices, isEmpty);
+      expect(manager.connections, isEmpty);
 
-        await manager.dispose();
-      },
-    );
+      await manager.dispose();
+    });
   });
 }
 

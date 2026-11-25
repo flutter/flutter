@@ -4,7 +4,9 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/windows/application_package.dart';
@@ -27,7 +29,7 @@ void main() {
       toolContext = FakeToolContext(fs: fileSystem, logger: logger, os: os);
     });
 
-    testWithoutContext('Error on non-existing exe file', () {
+    test('Error on non-existing exe file', () {
       final windowsApp = WindowsApp.fromPrebuiltApp(
         fileSystem.file('not_existing.exe'),
         toolContext: toolContext,
@@ -37,7 +39,7 @@ void main() {
       expect(logger.errorText, contains('File "not_existing.exe" does not exist.'));
     });
 
-    testWithoutContext('Success on exe file', () {
+    test('Success on exe file', () {
       fileSystem.file('file.exe').createSync();
       final windowsApp =
           WindowsApp.fromPrebuiltApp(fileSystem.file('file.exe'), toolContext: toolContext)!
@@ -46,7 +48,7 @@ void main() {
       expect(windowsApp.name, 'file.exe');
     });
 
-    testWithoutContext('Error on non-existing zip file', () {
+    test('Error on non-existing zip file', () {
       final windowsApp = WindowsApp.fromPrebuiltApp(
         fileSystem.file('not_existing.zip'),
         toolContext: toolContext,
@@ -56,7 +58,7 @@ void main() {
       expect(logger.errorText, contains('File "not_existing.zip" does not exist.'));
     });
 
-    testWithoutContext('Bad zipped app, no payload dir', () {
+    test('Bad zipped app, no payload dir', () {
       fileSystem.file('app.zip').createSync();
       final windowsApp = WindowsApp.fromPrebuiltApp(
         fileSystem.file('app.zip'),
@@ -67,7 +69,38 @@ void main() {
       expect(logger.errorText, contains('Cannot find .exe files in the zip archive.'));
     });
 
-    testWithoutContext('Bad zipped app, two .exe files', () {
+    test('Bad zipped app, unzip throws ProcessException', () {
+      fileSystem.file('app.zip').createSync();
+      os.unzipOverride = (File zipFile, Directory targetDirectory) {
+        throw const ProcessException('tar.exe', <String>['-xf', 'app.zip'], 'Corrupt archive');
+      };
+      final WindowsApp? windowsApp = WindowsApp.fromPrebuiltApp(
+        fileSystem.file('app.zip'),
+        toolContext: toolContext,
+      );
+
+      expect(windowsApp, isNull);
+      expect(
+        logger.errorText,
+        contains('Invalid prebuilt Windows app. Unable to extract from archive.'),
+      );
+    });
+
+    test('Bad zipped app, unzip throws ToolExit', () {
+      fileSystem.file('app.zip').createSync();
+      os.unzipOverride = (File zipFile, Directory targetDirectory) {
+        throwToolExit(r'Unable to find "C:\Windows\System32\tar.exe". Unable to extract app.zip.');
+      };
+
+      expect(
+        () => WindowsApp.fromPrebuiltApp(fileSystem.file('app.zip'), toolContext: toolContext),
+        throwsToolExit(
+          message: r'Unable to find "C:\Windows\System32\tar.exe". Unable to extract app.zip.',
+        ),
+      );
+    });
+
+    test('Bad zipped app, two .exe files', () {
       fileSystem.file('app.zip').createSync();
       os.unzipOverride = (File zipFile, Directory targetDirectory) {
         if (zipFile.path != 'app.zip') {
@@ -87,7 +120,7 @@ void main() {
       expect(logger.errorText, contains('Archive "app.zip" contains more than one .exe files.'));
     });
 
-    testWithoutContext('Success with zipped app', () {
+    test('Success with zipped app', () {
       fileSystem.file('app.zip').createSync();
       String? exePath;
       os.unzipOverride = (File zipFile, Directory targetDirectory) {
@@ -106,7 +139,7 @@ void main() {
       expect(windowsApp.applicationPackage.path, 'app.zip');
     });
 
-    testWithoutContext('Error on unknown file type', () {
+    test('Error on unknown file type', () {
       fileSystem.file('not_existing.app').createSync();
       final windowsApp = WindowsApp.fromPrebuiltApp(
         fileSystem.file('not_existing.app'),

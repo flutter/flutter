@@ -235,7 +235,8 @@ TEST(GPUSurfaceVulkanImpeller,
       .WillRepeatedly([&]() -> std::unique_ptr<impeller::Surface> {
         std::shared_ptr<impeller::TextureSourceVK> wrapped =
             impeller::WrapTextureSourceVK(
-                context, desc, impeller::vk::Image(test_surface->GetImage()));
+                impeller::ContextVK::Cast(*context), desc,
+                impeller::vk::Image(test_surface->GetImage()));
         return impeller::SurfaceVK::WrapSwapchainImage(transients, wrapped,
                                                        []() { return true; });
       });
@@ -260,6 +261,46 @@ TEST(GPUSurfaceVulkanImpeller,
   frame->set_submit_info({.frame_boundary = true});
   ASSERT_TRUE(frame->Submit());
   EXPECT_EQ(data_host_buffer.GetStateForTest().current_frame, 2u);
+}
+
+// WrapTextureSourceVK owns the cleanup it is given: it runs once whether or
+// not a source could be made.
+TEST(GPUSurfaceVulkanImpeller, WrapTextureSourceVKRunsCleanupOnce) {
+  impeller::ContextVK::Settings context_settings;
+  context_settings.proc_address_callback = vkGetInstanceProcAddr;
+  context_settings.shader_libraries_data = ShaderLibraryMappings();
+  std::shared_ptr<impeller::ContextVK> context =
+      impeller::ContextVK::Create(std::move(context_settings));
+  ASSERT_NE(context, nullptr);
+
+  const DlISize size(100, 100);
+  impeller::TextureDescriptor desc;
+  desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+  desc.size = impeller::ISize(size.width, size.height);
+  desc.storage_mode = impeller::StorageMode::kDevicePrivate;
+  desc.usage = impeller::TextureUsage::kRenderTarget;
+
+  int failure_cleanups = 0;
+  EXPECT_EQ(impeller::WrapTextureSourceVK(*context, desc, impeller::vk::Image(),
+                                          [&]() { failure_cleanups++; }),
+            nullptr);
+  EXPECT_EQ(failure_cleanups, 1);
+
+  fml::RefPtr<TestVulkanContext> test_context =
+      fml::MakeRefCounted<TestVulkanContext>();
+  std::unique_ptr<TestVulkanSurface> test_surface =
+      TestVulkanSurface::Create(*test_context, size);
+  ASSERT_NE(test_surface, nullptr);
+
+  int cleanups = 0;
+  std::shared_ptr<impeller::TextureSourceVK> wrapped =
+      impeller::WrapTextureSourceVK(
+          *context, desc, impeller::vk::Image(test_surface->GetImage()),
+          [&]() { cleanups++; });
+  ASSERT_NE(wrapped, nullptr);
+  EXPECT_EQ(cleanups, 0);
+  wrapped.reset();
+  EXPECT_EQ(cleanups, 1);
 }
 
 }  // namespace testing

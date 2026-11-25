@@ -31,7 +31,7 @@ void main() {
   }
 
   for (final String device in devices) {
-    testWithoutContext('flutter test integration_test $device native assets', () async {
+    test('flutter test integration_test $device native assets', () async {
       await inTempDir((Directory tempDirectory) async {
         final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
 
