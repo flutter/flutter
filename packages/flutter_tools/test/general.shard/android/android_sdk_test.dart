@@ -657,10 +657,26 @@ void main() {
         ar = binDir.childFile('llvm-ar$extension')..createSync();
         ld = binDir.childFile('ld.lld$extension')..createSync();
       }
-      // Check the last NDK version is used.
+      // Check the last NDK version is used by default.
       expect(sdk.getNdkClangPath(), clang.path);
       expect(sdk.getNdkArPath(), ar.path);
       expect(sdk.getNdkLdPath(), ld.path);
+
+      // Check requested NDK version is respected when present.
+      final String firstVersionClangPath = sdk.directory
+          .childDirectory('ndk')
+          .childDirectory('22.1.7171670')
+          .childDirectory('toolchains')
+          .childDirectory('llvm')
+          .childDirectory('prebuilt')
+          .childDirectory(llvmHostDirectoryName[operatingSystem]!)
+          .childDirectory('bin')
+          .childFile('clang$extension')
+          .path;
+      expect(sdk.getNdkClangPath(ndkVersion: '22.1.7171670'), firstVersionClangPath);
+
+      // Check fallback to newest when requested version is not found.
+      expect(sdk.getNdkClangPath(ndkVersion: 'nonexistent'), clang.path);
     });
 
     for (final envVar in <String>[kAndroidNdkHome, kAndroidNdkPath, kAndroidNdkRoot]) {

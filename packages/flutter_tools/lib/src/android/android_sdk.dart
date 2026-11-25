@@ -384,9 +384,9 @@ class AndroidSdk {
   /// 3. If the environment variable `ANDROID_NDK_PATH` is defined, use that.
   /// 4. If the environment variable `ANDROID_NDK_ROOT` is defined, use that.
   /// 5. Look for the default install location inside the Android SDK:
-  ///    [directory]/ndk/\<version\>/. If multiple versions exist, use the
-  ///    newest.
-  Iterable<Directory> getNdkDirectoriesInResolutionOrder() {
+  ///    [directory]/ndk/\<version\>/. If [ndkVersion] is specified and exists,
+  ///    use that first. If multiple versions exist, use the newest.
+  Iterable<Directory> getNdkDirectoriesInResolutionOrder({String? ndkVersion}) {
     final ToolContext(:Config config, :Platform platform) = _toolContext;
     final ndkDirectories = <Directory>[];
     String? androidNdkHomeDir;
@@ -409,6 +409,12 @@ class AndroidSdk {
     if (!ndk.existsSync()) {
       return ndkDirectories;
     }
+    if (ndkVersion != null) {
+      final Directory requestedNdkDir = ndk.childDirectory(ndkVersion);
+      if (requestedNdkDir.existsSync()) {
+        ndkDirectories.add(requestedNdkDir);
+      }
+    }
     final ndkVersions = <Version>[
       ...ndk.listSync().map((FileSystemEntity entity) {
         try {
@@ -419,15 +425,20 @@ class AndroidSdk {
       }).whereType<Version>(),
       // Use latest NDK first.
     ]..sort((Version a, Version b) => -a.compareTo(b));
-    for (final ndkVersion in ndkVersions) {
-      ndkDirectories.add(ndk.childDirectory(ndkVersion.toString()));
+    for (final version in ndkVersions) {
+      if (ndkVersion != null && version.toString() == ndkVersion) {
+        continue;
+      }
+      ndkDirectories.add(ndk.childDirectory(version.toString()));
     }
     return ndkDirectories;
   }
 
-  String? getNdkBinaryPath(String binaryName) {
+  String? getNdkBinaryPath(String binaryName, {String? ndkVersion}) {
     final Platform platform = _toolContext.platform;
-    for (final Directory androidNdkHomeDir in getNdkDirectoriesInResolutionOrder()) {
+    for (final Directory androidNdkHomeDir in getNdkDirectoriesInResolutionOrder(
+      ndkVersion: ndkVersion,
+    )) {
       final File executable = androidNdkHomeDir
           .childDirectory('toolchains')
           .childDirectory('llvm')
@@ -443,19 +454,19 @@ class AndroidSdk {
     return null;
   }
 
-  String? getNdkClangPath() {
+  String? getNdkClangPath({String? ndkVersion}) {
     final Platform platform = _toolContext.platform;
-    return getNdkBinaryPath(platform.isWindows ? 'clang.exe' : 'clang');
+    return getNdkBinaryPath(platform.isWindows ? 'clang.exe' : 'clang', ndkVersion: ndkVersion);
   }
 
-  String? getNdkArPath() {
+  String? getNdkArPath({String? ndkVersion}) {
     final Platform platform = _toolContext.platform;
-    return getNdkBinaryPath(platform.isWindows ? 'llvm-ar.exe' : 'llvm-ar');
+    return getNdkBinaryPath(platform.isWindows ? 'llvm-ar.exe' : 'llvm-ar', ndkVersion: ndkVersion);
   }
 
-  String? getNdkLdPath() {
+  String? getNdkLdPath({String? ndkVersion}) {
     final Platform platform = _toolContext.platform;
-    return getNdkBinaryPath(platform.isWindows ? 'ld.lld.exe' : 'ld.lld');
+    return getNdkBinaryPath(platform.isWindows ? 'ld.lld.exe' : 'ld.lld', ndkVersion: ndkVersion);
   }
 
   /// Sets up various paths used internally.

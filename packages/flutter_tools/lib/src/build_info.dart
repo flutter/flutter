@@ -1045,6 +1045,11 @@ const kAndroidArchs = 'AndroidArchs';
 /// https://developer.android.com/ndk/guides/other_build_systems#overview
 const kMinSdkVersion = 'MinSdkVersion';
 
+/// The define to control what Android NDK version is built for.
+///
+/// This is passed in by the Flutter Gradle plugin's invocation of `flutter assemble`.
+const kNdkVersion = 'NdkVersion';
+
 /// Path to the SDK root to be used as the isysroot.
 const kSdkRoot = 'SdkRoot';
 

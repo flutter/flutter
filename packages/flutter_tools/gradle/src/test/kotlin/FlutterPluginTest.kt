@@ -741,6 +741,7 @@ class FlutterPluginTest {
 
         verify { mockFlutterTask.buildMode = "debug" }
         verify { mockFlutterTask.minSdkVersion = 24 }
+        verify { mockFlutterTask.ndkVersion = null }
         verify { mockFlutterTask.flavor = "free" }
         verify { mockFlutterTask.trackWidgetCreation = false }
         verify { mockFlutterTask.dartObfuscation = true }

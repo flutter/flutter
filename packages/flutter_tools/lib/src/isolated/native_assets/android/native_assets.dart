@@ -88,14 +88,18 @@ Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsAndroi
 /// Returns `null` if the NDK cannot be found.
 ///
 /// Typically the Flutter Gradle Plugin will install an NDK. This method will
-/// return the newest NDK if multiple NDKs are found on the system.
-Future<CCompilerConfig?> cCompilerConfigAndroid({required AndroidSdk? androidSdk}) async {
+/// return the configured [ndkVersion] if specified and found, or the newest NDK
+/// if multiple NDKs are found on the system.
+Future<CCompilerConfig?> cCompilerConfigAndroid({
+  required AndroidSdk? androidSdk,
+  String? ndkVersion,
+}) async {
   if (androidSdk == null) {
     throwToolExit('Android SDK could not be found.');
   }
-  final Uri? compiler = _toOptionalFileUri(androidSdk.getNdkClangPath());
-  final Uri? archiver = _toOptionalFileUri(androidSdk.getNdkArPath());
-  final Uri? linker = _toOptionalFileUri(androidSdk.getNdkLdPath());
+  final Uri? compiler = _toOptionalFileUri(androidSdk.getNdkClangPath(ndkVersion: ndkVersion));
+  final Uri? archiver = _toOptionalFileUri(androidSdk.getNdkArPath(ndkVersion: ndkVersion));
+  final Uri? linker = _toOptionalFileUri(androidSdk.getNdkLdPath(ndkVersion: ndkVersion));
   if (compiler == null || archiver == null || linker == null) {
     return null;
   }
