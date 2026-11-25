@@ -49,6 +49,8 @@ void main() {
     bool enableDds = true,
     bool enableImpeller = false,
     bool enableFlutterGpu = false,
+    bool? enableSkoretext,
+    bool? enableSkunicodeApple,
     bool startPaused = false,
     FlutterProject? flutterProject,
     FontConfigManager? fontConfigManager,
@@ -62,6 +64,8 @@ void main() {
     dartEntrypointArgs: dartEntrypointArgs,
     enableImpeller: enableImpeller,
     enableFlutterGpu: enableFlutterGpu,
+    enableSkoretext: enableSkoretext,
+    enableSkunicodeApple: enableSkunicodeApple,
     startPaused: startPaused,
     flutterProject: flutterProject,
     fontConfigManager: fontConfigManager,
@@ -117,6 +121,150 @@ void main() {
 
       await device.start('example.dill');
 
+      expect(processManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    },
+  );
+
+  testUsingContext(
+    'Flutter tester passes through enable-skoretext flag when explicitly set.',
+    () async {
+      processManager = FakeProcessManager.list(<FakeCommand>[]);
+      device = createDevice(enableSkoretext: true);
+      processManager.addCommand(
+        FakeCommand(
+          command: const <String>[
+            '/',
+            '--disable-vm-service',
+            '--ipv6',
+            '--enable-checked-mode',
+            '--verify-entry-points',
+            '--enable-software-rendering',
+            '--skia-deterministic-rendering',
+            '--enable-skoretext=true',
+            '--enable-dart-profiling',
+            '--non-interactive',
+            '--use-test-fonts',
+            '--disable-asset-fonts',
+            '--packages=.dart_tool/package_config.json',
+            'example.dill',
+          ],
+          environment: <String, String>{
+            'FLUTTER_TEST': 'true',
+            'FONTCONFIG_FILE': device.fontConfigManager.fontConfigFile.path,
+            'SERVER_PORT': '0',
+            'APP_NAME': '',
+          },
+        ),
+      );
+
+      await device.start('example.dill');
+      expect(processManager, hasNoRemainingExpectations);
+
+      device = createDevice(enableSkoretext: false);
+      processManager.addCommand(
+        FakeCommand(
+          command: const <String>[
+            '/',
+            '--disable-vm-service',
+            '--ipv6',
+            '--enable-checked-mode',
+            '--verify-entry-points',
+            '--enable-software-rendering',
+            '--skia-deterministic-rendering',
+            '--enable-skoretext=false',
+            '--enable-dart-profiling',
+            '--non-interactive',
+            '--use-test-fonts',
+            '--disable-asset-fonts',
+            '--packages=.dart_tool/package_config.json',
+            'example.dill',
+          ],
+          environment: <String, String>{
+            'FLUTTER_TEST': 'true',
+            'FONTCONFIG_FILE': device.fontConfigManager.fontConfigFile.path,
+            'SERVER_PORT': '0',
+            'APP_NAME': '',
+          },
+        ),
+      );
+
+      await device.start('example.dill');
+      expect(processManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    },
+  );
+
+  testUsingContext(
+    'Flutter tester passes through enable-skunicode-apple flag when explicitly set.',
+    () async {
+      processManager = FakeProcessManager.list(<FakeCommand>[]);
+      device = createDevice(enableSkunicodeApple: true);
+      processManager.addCommand(
+        FakeCommand(
+          command: const <String>[
+            '/',
+            '--disable-vm-service',
+            '--ipv6',
+            '--enable-checked-mode',
+            '--verify-entry-points',
+            '--enable-software-rendering',
+            '--skia-deterministic-rendering',
+            '--enable-skunicode-apple=true',
+            '--enable-dart-profiling',
+            '--non-interactive',
+            '--use-test-fonts',
+            '--disable-asset-fonts',
+            '--packages=.dart_tool/package_config.json',
+            'example.dill',
+          ],
+          environment: <String, String>{
+            'FLUTTER_TEST': 'true',
+            'FONTCONFIG_FILE': device.fontConfigManager.fontConfigFile.path,
+            'SERVER_PORT': '0',
+            'APP_NAME': '',
+          },
+        ),
+      );
+
+      await device.start('example.dill');
+      expect(processManager, hasNoRemainingExpectations);
+
+      device = createDevice(enableSkunicodeApple: false);
+      processManager.addCommand(
+        FakeCommand(
+          command: const <String>[
+            '/',
+            '--disable-vm-service',
+            '--ipv6',
+            '--enable-checked-mode',
+            '--verify-entry-points',
+            '--enable-software-rendering',
+            '--skia-deterministic-rendering',
+            '--enable-skunicode-apple=false',
+            '--enable-dart-profiling',
+            '--non-interactive',
+            '--use-test-fonts',
+            '--disable-asset-fonts',
+            '--packages=.dart_tool/package_config.json',
+            'example.dill',
+          ],
+          environment: <String, String>{
+            'FLUTTER_TEST': 'true',
+            'FONTCONFIG_FILE': device.fontConfigManager.fontConfigFile.path,
+            'SERVER_PORT': '0',
+            'APP_NAME': '',
+          },
+        ),
+      );
+
+      await device.start('example.dill');
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
@@ -436,6 +584,8 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     required List<String> dartEntrypointArgs,
     required bool enableImpeller,
     required bool enableFlutterGpu,
+    bool? enableSkoretext,
+    bool? enableSkunicodeApple,
     bool enableDds = true,
     bool startPaused = false,
     super.flutterProject,
@@ -465,6 +615,8 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
            dartEntrypointArgs: dartEntrypointArgs,
            enableImpeller: enableImpeller ? ImpellerStatus.enabled : ImpellerStatus.platformDefault,
            enableFlutterGpu: enableFlutterGpu,
+           enableSkoretext: enableSkoretext,
+           enableSkunicodeApple: enableSkunicodeApple,
          ),
          machine: false,
          host: InternetAddress.loopbackIPv6,

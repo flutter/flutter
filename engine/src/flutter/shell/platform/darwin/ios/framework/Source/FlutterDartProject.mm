@@ -238,6 +238,31 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
     settings.enable_flutter_gpu = enableFlutterGPU.boolValue;
   }
 
+  if (!command_line.HasOption(flutter::FlagForSwitch(flutter::Switch::kEnableSkoretext))) {
+    NSNumber* enableSkoreText = (hasExplicitBundle && bundle != nil)
+                                    ? [bundle objectForInfoDictionaryKey:@"FLTEnableSkoreText"]
+                                    : nil;
+    if (enableSkoreText == nil) {
+      enableSkoreText = [mainBundle objectForInfoDictionaryKey:@"FLTEnableSkoreText"];
+    }
+    if (enableSkoreText != nil) {
+      settings.enable_skoretext = enableSkoreText.boolValue;
+    }
+  }
+
+  if (!command_line.HasOption(flutter::FlagForSwitch(flutter::Switch::kEnableSkunicodeApple))) {
+    NSNumber* enableSkUnicodeApple =
+        (hasExplicitBundle && bundle != nil)
+            ? [bundle objectForInfoDictionaryKey:@"FLTEnableSkUnicodeApple"]
+            : nil;
+    if (enableSkUnicodeApple == nil) {
+      enableSkUnicodeApple = [mainBundle objectForInfoDictionaryKey:@"FLTEnableSkUnicodeApple"];
+    }
+    if (enableSkUnicodeApple != nil) {
+      settings.enable_skunicode_apple = enableSkUnicodeApple.boolValue;
+    }
+  }
+
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
   // There are no ownership concerns here as all mappings are owned by the
   // embedder and not the engine.

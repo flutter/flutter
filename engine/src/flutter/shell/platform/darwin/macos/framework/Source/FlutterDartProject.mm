@@ -96,6 +96,24 @@ static NSString* const kAppBundleIdentifier = @"io.flutter.flutter.app";
   return NO;
 }
 
+- (BOOL)enableSkoreText {
+  NSNumber* enableSkoreText =
+      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTEnableSkoreText"];
+  if (enableSkoreText != nil) {
+    return enableSkoreText.boolValue;
+  }
+  return YES;
+}
+
+- (BOOL)enableSkUnicodeApple {
+  NSNumber* enableSkUnicodeApple =
+      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTEnableSkUnicodeApple"];
+  if (enableSkUnicodeApple != nil) {
+    return enableSkUnicodeApple.boolValue;
+  }
+  return NO;
+}
+
 - (BOOL)enableSDFs {
   return YES;
 }

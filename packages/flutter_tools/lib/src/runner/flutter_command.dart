@@ -167,6 +167,8 @@ abstract final class FlutterOptions {
   static const kWebResourcesCdnFlag = 'web-resources-cdn';
   static const kWebWasmFlag = 'wasm';
   static const kEnableImpeller = 'enable-impeller';
+  static const kEnableSkoretext = 'enable-skoretext';
+  static const kEnableSkunicodeApple = 'enable-skunicode-apple';
   static const kCodesignIdentity = 'codesign-identity';
   static const kCodesign = 'codesign';
   static const kAdbLogFiltering = 'adb-log-filtering';
@@ -587,6 +589,26 @@ abstract class FlutterCommand extends Command<void> {
   /// not set `io.flutter.embedding.android.EnableHcpp` at all, so an entry in
   /// the manifest wins over it. [explicitEnableHcpp] in turn wins over both.
   bool get enableHcpp => explicitEnableHcpp ?? runner?.featureFlags.isHcppEnabled ?? false;
+
+  /// The explicit `--[no-]enable-skoretext` value, or null when the flag was
+  /// not passed (or the command does not define it).
+  bool? get enableSkoretext {
+    if (!hasOption(DebuggingOptionDescriptors.enableSkoretext) ||
+        !wasParsed(DebuggingOptionDescriptors.enableSkoretext)) {
+      return null;
+    }
+    return getValue(DebuggingOptionDescriptors.enableSkoretext);
+  }
+
+  /// The explicit `--[no-]enable-skunicode-apple` value, or null when the flag
+  /// was not passed (or the command does not define it).
+  bool? get enableSkunicodeApple {
+    if (!hasOption(DebuggingOptionDescriptors.enableSkunicodeApple) ||
+        !wasParsed(DebuggingOptionDescriptors.enableSkunicodeApple)) {
+      return null;
+    }
+    return getValue(DebuggingOptionDescriptors.enableSkunicodeApple);
+  }
 
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.

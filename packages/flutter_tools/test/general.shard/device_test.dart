@@ -669,6 +669,8 @@ void main() {
         deviceVmServicePort: 1234,
         enableImpeller: ImpellerStatus.enabled,
         enableFlutterGpu: true,
+        enableSkoretext: true,
+        enableSkunicodeApple: true,
         enableDartProfiling: false,
         enableEmbedderApi: true,
         platformOptions: const <PlatformDebuggingOptions>[
@@ -716,6 +718,8 @@ void main() {
       expect(deserialized.deviceVmServicePort, original.deviceVmServicePort);
       expect(deserialized.enableImpeller, original.enableImpeller);
       expect(deserialized.enableFlutterGpu, original.enableFlutterGpu);
+      expect(deserialized.enableSkoretext, original.enableSkoretext);
+      expect(deserialized.enableSkunicodeApple, original.enableSkunicodeApple);
       expect(deserialized.enableDartProfiling, original.enableDartProfiling);
       expect(deserialized.enableEmbedderApi, original.enableEmbedderApi);
 
@@ -1070,6 +1074,55 @@ void main() {
         <String>['--enable-checked-mode', '--verify-entry-points'].join(' '),
       );
     });
+
+    testWithoutContext('Forwards --enable-skoretext=true and --enable-skoretext=false', () {
+      final enabledOptions = DebuggingOptions.enabled(BuildInfo.debug, enableSkoretext: true);
+      final List<String> enabledArgs = enabledOptions.getIOSLaunchArguments(
+        EnvironmentType.simulator,
+        null,
+        <String, Object?>{},
+      );
+      expect(enabledArgs, contains('--enable-skoretext=true'));
+      expect(enabledArgs, isNot(contains('--enable-skoretext=false')));
+
+      final disabledOptions = DebuggingOptions.enabled(BuildInfo.debug, enableSkoretext: false);
+      final List<String> disabledArgs = disabledOptions.getIOSLaunchArguments(
+        EnvironmentType.simulator,
+        null,
+        <String, Object?>{},
+      );
+      expect(disabledArgs, contains('--enable-skoretext=false'));
+      expect(disabledArgs, isNot(contains('--enable-skoretext=true')));
+    });
+
+    testWithoutContext(
+      'Forwards --enable-skunicode-apple=true and --enable-skunicode-apple=false',
+      () {
+        final enabledOptions = DebuggingOptions.enabled(
+          BuildInfo.debug,
+          enableSkunicodeApple: true,
+        );
+        final List<String> enabledArgs = enabledOptions.getIOSLaunchArguments(
+          EnvironmentType.simulator,
+          null,
+          <String, Object?>{},
+        );
+        expect(enabledArgs, contains('--enable-skunicode-apple=true'));
+        expect(enabledArgs, isNot(contains('--enable-skunicode-apple=false')));
+
+        final disabledOptions = DebuggingOptions.enabled(
+          BuildInfo.debug,
+          enableSkunicodeApple: false,
+        );
+        final List<String> disabledArgs = disabledOptions.getIOSLaunchArguments(
+          EnvironmentType.simulator,
+          null,
+          <String, Object?>{},
+        );
+        expect(disabledArgs, contains('--enable-skunicode-apple=false'));
+        expect(disabledArgs, isNot(contains('--enable-skunicode-apple=true')));
+      },
+    );
   });
 
   group('Get Android launch arguments from DebuggingOptions', () {
