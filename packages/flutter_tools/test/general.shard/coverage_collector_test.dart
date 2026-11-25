@@ -14,7 +14,6 @@ import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
 import '../src/logging_logger.dart';

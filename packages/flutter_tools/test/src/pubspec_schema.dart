@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:yaml/yaml.dart';
 
 import 'common.dart';
-import 'context.dart' show FakeSignals;
+import 'fakes.dart' show FakeSignals;
 
 /// Check if the pubspec.yaml file under the `projectDir` is valid for a plugin project.
 void validatePubspecForPlugin({

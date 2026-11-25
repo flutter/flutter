@@ -41,16 +41,12 @@ void main() {
     }
   });
 
-  test('no imports of removed global singletons or legacy context runner', () {
-    final libAndBinForbidden = RegExp(
-      r'^\s*import\b.*(?:globals(?:_null_migrated)?|context_runner)\.dart',
-    );
-    final testForbidden = RegExp(
-      r'^\s*import\b.*(?:globals(?:_null_migrated)?\.dart|package:flutter_tools/src/context_runner\.dart)',
+  test('no imports of removed global singletons or legacy AppContext', () {
+    final forbiddenImport = RegExp(
+      r'^\s*import\b.*(?:globals(?:_null_migrated)?|context_runner|base/context|src/context|src/testbed)\.dart',
     );
 
     for (final dirName in const <String>['lib', 'bin', 'test']) {
-      final forbiddenImport = dirName == 'test' ? testForbidden : libAndBinForbidden;
       final Iterable<File> files = fileSystem
           .directory(fileSystem.path.join(flutterTools, dirName))
           .listSync(recursive: true)
@@ -61,8 +57,7 @@ void main() {
           if (forbiddenImport.hasMatch(line)) {
             final String relativePath = fileSystem.path.relative(file.path, from: flutterTools);
             fail(
-              '$relativePath imports a removed global singleton library or '
-              'package:flutter_tools/src/context_runner.dart: $line',
+              '$relativePath imports a removed global singleton or legacy context library: $line',
             );
           }
         }

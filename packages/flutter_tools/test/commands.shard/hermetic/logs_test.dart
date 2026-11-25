@@ -16,7 +16,6 @@ import 'package:flutter_tools/src/commands/logs.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';

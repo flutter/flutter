@@ -25,7 +25,6 @@ import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import 'common.dart' show ToolExit, throwToolExit;
-import 'context.dart';
 import 'platform.dart';
 
 // The Flutter tool hits file system and process errors that only the end-user can address.
@@ -1212,18 +1211,7 @@ class ErrorHandlingProcessManager extends ProcessManager {
   Map<String, String>? _propagateAnalyticsEnvironment(Map<String, String>? environment) {
     // Create a mutable copy of the environment map upfront to avoid redundant allocations later.
     final environmentResult = <String, String>{...?environment};
-    Analytics? analytics;
-    try {
-      analytics = _analytics();
-    } on ContextDependencyCycleException {
-      // This exception is thrown during early startup bootstrapping of the Flutter CLI.
-      // Specifically, `FlutterVersion` runs a synchronous `git log` command during its own
-      // construction to resolve version metadata. Because process execution is intercepted
-      // by this manager, looking up `Analytics` (which in turn depends on `FlutterVersion`)
-      // triggers a circular dependency cycle (`FlutterVersion -> Process -> Analytics -> FlutterVersion`).
-      // Catching `ContextDependencyCycleException` breaks this cycle, allowing us to safely
-      // skip analytics environment propagation for these early initialization commands.
-    }
+    final Analytics analytics = _analytics();
 
     // Propagate the unified analytics suppression flag.
     //
@@ -1247,7 +1235,7 @@ class ErrorHandlingProcessManager extends ProcessManager {
         _platform.environment[suppressKey] == 'true' || environmentResult[suppressKey] == 'true';
     if (suppressionRequested) {
       environmentResult[suppressKey] = 'true';
-    } else if (analytics != null) {
+    } else {
       environmentResult[suppressKey] = (!analytics.okToSend).toString();
     }
 

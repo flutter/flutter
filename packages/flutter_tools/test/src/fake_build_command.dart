@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/config.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -63,88 +62,16 @@ BuildCommand createFakeBuildCommand({
   Xcode? xcode,
   XcodeProjectInterpreter? xcodeProjectInterpreter,
 }) {
-  var resolvedFileSystem = fileSystem;
-  if (resolvedFileSystem == null) {
-    try {
-      resolvedFileSystem = context.get<FileSystem>();
-    } on Object {
-      // No active AppContext or not provided.
-    }
-  }
-  final FileSystem fs = resolvedFileSystem ?? MemoryFileSystem.test();
-
-  var resolvedPlatform = platform;
-  if (resolvedPlatform == null) {
-    try {
-      resolvedPlatform = context.get<Platform>();
-    } on Object {
-      // No active AppContext or not provided.
-    }
-  }
-  final Platform targetPlatform = resolvedPlatform ?? FakePlatform();
-
-  var resolvedFeatureFlags = featureFlags;
-  if (resolvedFeatureFlags == null) {
-    try {
-      resolvedFeatureFlags = context.get<FeatureFlags>();
-    } on Object {
-      // No active AppContext or not provided.
-    }
-  }
-
-  var resolvedLogger = logger;
-  if (resolvedLogger == null) {
-    try {
-      resolvedLogger = context.get<Logger>();
-    } on Object {
-      // No active AppContext or not provided.
-    }
-  }
-  final Logger targetLogger = resolvedLogger ?? BufferLogger.test();
-
-  var resolvedProcessManager = processManager;
-  if (resolvedProcessManager == null) {
-    try {
-      resolvedProcessManager = context.get<ProcessManager>();
-    } on Object {
-      // No active AppContext or not provided.
-    }
-  }
-  final ProcessManager targetProcessManager = resolvedProcessManager ?? FakeProcessManager.any();
-
-  var resolvedOsUtils = osUtils;
-  if (resolvedOsUtils == null) {
-    try {
-      resolvedOsUtils = context.get<OperatingSystemUtils>();
-    } on Object {
-      // No active AppContext or not provided.
-    }
-  }
-  final OperatingSystemUtils targetOsUtils = resolvedOsUtils ?? FakeOperatingSystemUtils();
-
-  var resolvedPlistParser = plistParser;
-  if (resolvedPlistParser == null) {
-    try {
-      resolvedPlistParser = context.get<PlistParser>();
-    } on Object {
-      // No active AppContext or not provided.
-    }
-  }
-
-  var resolvedXcodeProjectInterpreter = xcodeProjectInterpreter;
-  if (resolvedXcodeProjectInterpreter == null) {
-    try {
-      resolvedXcodeProjectInterpreter = context.get<XcodeProjectInterpreter>();
-    } on Object {
-      // No active AppContext or not provided.
-    }
-  }
-
-  final FeatureFlags targetFeatureFlags = resolvedFeatureFlags ?? TestFeatureFlags();
+  final FileSystem fs = fileSystem ?? MemoryFileSystem.test();
+  final Platform targetPlatform = platform ?? FakePlatform();
+  final Logger targetLogger = logger ?? BufferLogger.test();
+  final ProcessManager targetProcessManager = processManager ?? FakeProcessManager.any();
+  final OperatingSystemUtils targetOsUtils = osUtils ?? FakeOperatingSystemUtils();
+  final FeatureFlags targetFeatureFlags = featureFlags ?? TestFeatureFlags();
   final appleCtx = FakeAppleContext(
-    plistParser: resolvedPlistParser ?? FakePlistParser(),
+    plistParser: plistParser ?? FakePlistParser(),
     xcode: xcode ?? FakeXcode(),
-    xcodeProjectInterpreter: resolvedXcodeProjectInterpreter,
+    xcodeProjectInterpreter: xcodeProjectInterpreter,
   );
   final Cache targetCache = cache ?? FakeCache();
   final TemplatePathProvider targetTemplatePathProvider =

@@ -36,7 +36,6 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';

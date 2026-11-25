@@ -18,8 +18,6 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/config.dart';
-import 'package:flutter_tools/src/base/context.dart';
-import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -74,12 +72,11 @@ import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
-import 'package:process/process.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import 'common.dart';
-import 'context.dart';
+import 'fake_process_manager.dart';
 import 'throwing_pub.dart';
 
 class FakeDyldEnvironmentArtifact extends ArtifactSet {
@@ -1641,215 +1638,247 @@ class FakeToolContext extends Fake implements ToolContext {
       _fileSystemUtils ?? FileSystemUtils(fileSystem: fs, platform: platform);
 }
 
-LocalFileSystem? _fallbackLocalFileSystemInstance;
-BotDetector? _fallbackBotDetector;
-AnsiTerminal? _fallbackTerminal;
+class FakeDeviceManager implements DeviceManager {
+  List<Device> attachedDevices = <Device>[];
+  List<Device> wirelessDevices = <Device>[];
 
-/// Disposes any fallback host [LocalFileSystem] and resets cached fallbacks on [DelegatingToolContext].
-Future<void> disposeFallbackLocalFileSystem() async {
-  await _fallbackLocalFileSystemInstance?.dispose();
-  _fallbackLocalFileSystemInstance = null;
-  _fallbackBotDetector = null;
-  _fallbackTerminal = null;
+  String? _specifiedDeviceId;
+
+  @override
+  String? get specifiedDeviceId {
+    if (_specifiedDeviceId == null || _specifiedDeviceId == 'all') {
+      return null;
+    }
+    return _specifiedDeviceId;
+  }
+
+  @override
+  void stopExtendedWirelessDeviceDiscoverers() {}
+
+  @override
+  set specifiedDeviceId(String? id) {
+    _specifiedDeviceId = id;
+  }
+
+  @override
+  bool get hasSpecifiedDeviceId => specifiedDeviceId != null;
+
+  @override
+  bool get hasSpecifiedAllDevices {
+    return _specifiedDeviceId != null && _specifiedDeviceId == 'all';
+  }
+
+  @override
+  Future<List<Device>> getAllDevices({DeviceDiscoveryFilter? filter}) async =>
+      filteredDevices(filter);
+
+  @override
+  Future<List<Device>> refreshAllDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async => filteredDevices(filter);
+
+  @override
+  Future<List<Device>> refreshExtendedWirelessDeviceDiscoverers({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async => filteredDevices(filter);
+
+  @override
+  Future<List<Device>> getDevicesById(
+    String deviceId, {
+    DeviceDiscoveryFilter? filter,
+    bool waitForDeviceToConnect = false,
+  }) async {
+    return filteredDevices(filter).where((Device device) {
+      return device.id == deviceId || device.id.startsWith(deviceId);
+    }).toList();
+  }
+
+  @override
+  Future<List<Device>> getDevices({
+    DeviceDiscoveryFilter? filter,
+    bool waitForDeviceToConnect = false,
+  }) {
+    return hasSpecifiedDeviceId
+        ? getDevicesById(specifiedDeviceId!, filter: filter)
+        : getAllDevices(filter: filter);
+  }
+
+  void addAttachedDevice(Device device) => attachedDevices.add(device);
+  void addWirelessDevice(Device device) => wirelessDevices.add(device);
+
+  @override
+  bool get canListAnything => true;
+
+  @override
+  Future<List<String>> getDeviceDiagnostics() async => <String>[];
+
+  @override
+  List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
+
+  @override
+  DeviceDiscoverySupportFilter deviceSupportFilter({
+    bool includeDevicesUnsupportedByProject = false,
+    FlutterProject? flutterProject,
+  }) {
+    return TestDeviceDiscoverySupportFilter();
+  }
+
+  @override
+  Device? getSingleEphemeralDevice(List<Device> devices) => null;
+
+  List<Device> filteredDevices(DeviceDiscoveryFilter? filter) {
+    return switch (filter?.deviceConnectionInterface) {
+      DeviceConnectionInterface.attached => attachedDevices,
+      DeviceConnectionInterface.wireless => wirelessDevices,
+      null => attachedDevices + wirelessDevices,
+    };
+  }
 }
 
-/// A [ToolContext] that dynamically delegates to [AppContext] for use in [testUsingContext].
-class DelegatingToolContext with Fake implements ToolContext {
-  const DelegatingToolContext({
-    this._artifacts,
-    this._botDetector,
-    this._cache,
-    this._config,
-    this._customDevicesConfig,
-    this._flutterVersion,
-    this._fs,
-    this._git,
-    this._localEngineLocator,
-    this._logger,
-    this._nativeAssetsBuilder,
-    this._os,
-    this._outputPreferences,
-    this._persistentToolState,
-    this._platform,
-    this._preRunValidator,
-    this._processInfo,
-    this._processManager,
-    this._processUtils,
-    this._projectFactory,
-    this._shutdownHooks,
-    this._signals,
-    this._stdio,
-    this._systemClock,
-    this._terminal,
-    this._userMessages,
+class TestDeviceDiscoverySupportFilter extends Fake implements DeviceDiscoverySupportFilter {
+  TestDeviceDiscoverySupportFilter();
+}
+
+class FakeAndroidLicenseValidator extends Fake implements AndroidLicenseValidator {
+  @override
+  Future<LicensesAccepted> get licensesAccepted async => LicensesAccepted.all;
+}
+
+class NoopIOSSimulatorUtils implements IOSSimulatorUtils {
+  const NoopIOSSimulatorUtils();
+
+  @override
+  Future<List<IOSSimulator>> getAttachedDevices() async => <IOSSimulator>[];
+
+  @override
+  Future<List<IOSSimulatorRuntime>> getAvailableIOSRuntimes() async => <IOSSimulatorRuntime>[];
+}
+
+class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
+  FakeXcodeProjectInterpreter({
+    this._isInstalled = true,
+    this._versionText = 'Xcode 15',
+    this._version = const Version.withText(15, 0, 0, '15.0.0'),
+    this._build = '15A240D',
   });
 
-  static Stdio? _fallbackStdio;
-
-  final Artifacts? _artifacts;
-  final BotDetector? _botDetector;
-  final Cache? _cache;
-  final Config? _config;
-  final CustomDevicesConfig? _customDevicesConfig;
-  final FlutterVersion? _flutterVersion;
-  final FileSystem? _fs;
-  final Git? _git;
-  final LocalEngineLocator? _localEngineLocator;
-  final Logger? _logger;
-  final TestCompilerNativeAssetsBuilder? _nativeAssetsBuilder;
-  final OperatingSystemUtils? _os;
-  final OutputPreferences? _outputPreferences;
-  final PersistentToolState? _persistentToolState;
-  final Platform? _platform;
-  final PreRunValidator? _preRunValidator;
-  final ProcessInfo? _processInfo;
-  final ProcessManager? _processManager;
-  final ProcessUtils? _processUtils;
-  final FlutterProjectFactory? _projectFactory;
-  final ShutdownHooks? _shutdownHooks;
-  final Signals? _signals;
-  final Stdio? _stdio;
-  final SystemClock? _systemClock;
-  final AnsiTerminal? _terminal;
-  final UserMessages? _userMessages;
+  final bool _isInstalled;
+  final String? _versionText;
+  final Version? _version;
+  final String? _build;
 
   @override
-  Artifacts get artifacts => _artifacts ?? context.get<Artifacts>() ?? Artifacts.test();
+  bool get isInstalled => _isInstalled;
 
   @override
-  BotDetector get botDetector =>
-      _botDetector ??
-      context.get<BotDetector>() ??
-      (_fallbackBotDetector ??= BotDetector(platform: platform));
+  String? get versionText => _versionText;
 
   @override
-  Cache get cache => _cache ?? context.get<Cache>()!;
+  Version? get version => _version;
 
   @override
-  Config get config => _config ?? context.get<Config>()!;
+  String? get build => _build;
 
   @override
-  CustomDevicesConfig get customDevicesConfig =>
-      _customDevicesConfig ?? context.get<CustomDevicesConfig>()!;
+  Future<Map<String, String>> getBuildSettings(
+    XcodeBasedProject xcodeProject, {
+    required XcodeProjectBuildContext buildContext,
+    Duration timeout = const Duration(minutes: 1),
+  }) async {
+    return <String, String>{};
+  }
 
   @override
-  FlutterVersion get flutterVersion => _flutterVersion ?? context.get<FlutterVersion>()!;
+  Future<String> pluginsBuildSettingsOutput(
+    Directory podXcodeProject, {
+    Duration timeout = const Duration(minutes: 1),
+  }) async {
+    return '';
+  }
 
   @override
-  FileSystem get fs =>
-      _fs ??
-      ErrorHandlingFileSystem(
-        delegate:
-            context.get<FileSystem>() ??
-            (_fallbackLocalFileSystemInstance ??= LocalFileSystem.test(signals: FakeSignals())),
-        platform: platform,
-      );
+  Future<void> cleanWorkspace(
+    XcodeBasedProject xcodeProject,
+    String workspacePath,
+    String scheme, {
+    required Directory buildDirectory,
+    bool verbose = false,
+  }) async {}
 
   @override
-  Git get git => _git ?? context.get<Git>()!;
+  Future<XcodeProjectInfo?> getInfo(
+    XcodeBasedProject xcodeProject, {
+    String? projectFilename,
+    required Directory buildDirectory,
+  }) async {
+    return XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>[
+      'Runner',
+    ], BufferLogger.test());
+  }
 
   @override
-  LocalEngineLocator get localEngineLocator =>
-      _localEngineLocator ??
-      context.get<LocalEngineLocator>() ??
-      LocalEngineLocator(
-        fileSystem: fs,
-        flutterRoot: cache.flutterRoot,
-        logger: logger,
-        platform: platform,
-        userMessages: userMessages,
-      );
+  List<String> xcrunCommand() => <String>['xcrun'];
 
   @override
-  Logger get logger => _logger ?? context.get<Logger>()!;
+  Future<void> prefetchSwiftPackagesForProject(
+    XcodeBasedProject xcodeProject, {
+    required Directory buildDirectory,
+  }) async {}
 
   @override
-  TestCompilerNativeAssetsBuilder? get nativeAssetsBuilder =>
-      _nativeAssetsBuilder ?? context.get<TestCompilerNativeAssetsBuilder>();
+  Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
+    XcodeBasedProject xcodeProject,
+    Directory buildDirectory, {
+    bool skipPackageValidation = true,
+  }) async {
+    return <String>['xcrun', 'xcodebuild'];
+  }
 
   @override
-  OperatingSystemUtils get os => _os ?? context.get<OperatingSystemUtils>()!;
+  String swiftPackageCachePath(Directory buildDirectory) {
+    return '';
+  }
+}
+
+/// Prevent test crashes from being reported to the crash backend.
+class NoopCrashReporter implements CrashReporter {
+  const NoopCrashReporter();
 
   @override
-  OutputPreferences get outputPreferences =>
-      _outputPreferences ??
-      context.get<OutputPreferences>() ??
-      OutputPreferences(
-        wrapText: stdio.hasTerminal,
-        showColor: platform.stdoutSupportsAnsi,
-        stdio: stdio,
-      );
+  Future<void> informUser(CrashDetails details, File crashFile) async {}
+}
+
+class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
+  // Use [FakeSignals] so developers running the test suite can kill the test
+  // runner.
+  LocalFileSystemBlockingSetCurrentDirectory() : super.test(signals: FakeSignals());
 
   @override
-  PersistentToolState get persistentToolState =>
-      _persistentToolState ??
-      context.get<PersistentToolState>() ??
-      PersistentToolState.test(
-        directory: fs.systemTempDirectory.createTempSync('persistent_tool_state'),
-        logger: logger,
-      );
+  set currentDirectory(Object? value) {
+    throw Exception(
+      'FileSystem.currentDirectory should not be set on the local file system during '
+      'tests as this can cause race conditions with concurrent tests. '
+      'Consider using a MemoryFileSystem for testing if possible or refactor '
+      'code to not require setting FileSystem.currentDirectory.',
+    );
+  }
+}
+
+class FakeSignals implements Signals {
+  @override
+  Object addHandler(ProcessSignal signal, SignalHandler handler) {
+    return const Object();
+  }
 
   @override
-  Platform get platform => _platform ?? context.get<Platform>() ?? const LocalPlatform();
+  Future<bool> removeHandler(ProcessSignal signal, Object token) async {
+    return true;
+  }
 
   @override
-  PreRunValidator get preRunValidator =>
-      _preRunValidator ?? context.get<PreRunValidator>() ?? const NoOpPreRunValidator();
-
-  @override
-  ProcessInfo get processInfo => _processInfo ?? context.get<ProcessInfo>()!;
-
-  @override
-  ProcessManager get processManager =>
-      _processManager ?? context.get<ProcessManager>() ?? const LocalProcessManager();
-
-  @override
-  ProcessUtils get processUtils => _processUtils ?? context.get<ProcessUtils>()!;
-
-  @override
-  FlutterProjectFactory get projectFactory =>
-      _projectFactory ??
-      context.get<FlutterProjectFactory>() ??
-      FlutterProjectFactory(
-        config: config,
-        featureFlagsBuilder: () => context.get<FeatureFlags>()!,
-        fileSystem: fs,
-        logger: logger,
-        plistParser:
-            context.get<PlistParser>() ??
-            PlistParser(fileSystem: fs, processManager: processManager, logger: logger),
-        xcodeBuilder: () => context.get<Xcode>(),
-        xcodeProjectInterpreterBuilder: () => context.get<XcodeProjectInterpreter>(),
-      );
-
-  @override
-  ShutdownHooks get shutdownHooks => _shutdownHooks ?? LocalSignals.instance.shutdownHooks;
-
-  @override
-  Signals get signals => _signals ?? context.get<Signals>() ?? LocalSignals.instance;
-
-  @override
-  Stdio get stdio => _stdio ?? context.get<Stdio>() ?? (_fallbackStdio ??= Stdio());
-
-  @override
-  SystemClock get systemClock => _systemClock ?? context.get<SystemClock>() ?? const SystemClock();
-
-  @override
-  AnsiTerminal get terminal =>
-      _terminal ??
-      context.get<AnsiTerminal>() ??
-      (_fallbackTerminal ??= AnsiTerminal(
-        stdio: stdio,
-        platform: platform,
-        shutdownHooks: shutdownHooks,
-      ));
-
-  @override
-  UserMessages get userMessages => _userMessages ?? context.get<UserMessages>()!;
-
-  @override
-  FileSystemUtils get fileSystemUtils =>
-      context.get<FileSystemUtils>() ?? FileSystemUtils(fileSystem: fs, platform: platform);
+  Stream<Object> get errors => const Stream<Object>.empty();
 }
 
 class FakeAndroidContext extends Fake implements AndroidContext {

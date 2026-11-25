@@ -13,7 +13,6 @@ import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/bot_detector.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -579,8 +578,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
       :UserMessages userMessages,
     ) = toolContext;
 
-    final contextOverrides = <Type, Object?>{};
-
     // If the flag for enabling or disabling telemetry is passed in,
     // we will return out
     if (topLevelResults.wasParsed(FlutterGlobalOptions.kDisableAnalyticsFlag) ||
@@ -622,11 +619,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
       wrapColumn: wrapColumn,
       wrapText: useWrapping,
     );
-    contextOverrides[OutputPreferences] = OutputPreferences(
-      wrapText: useWrapping,
-      showColor: showColor,
-      wrapColumn: wrapColumn,
-    );
 
     _updateArgParser(wrapColumn: useWrapping ? (wrapColumn ?? stdio.terminalColumns) : null);
 
@@ -654,86 +646,78 @@ class FlutterCommandRunner extends CommandRunner<void> {
         engineBuildPaths,
         toolContext: toolContext,
       );
-      contextOverrides.addAll(<Type, Object?>{Artifacts: localArtifacts});
       // Update the artifacts the commands were created with.
       if (artifacts is DeferredArtifacts) {
         artifacts.resolve(localArtifacts);
       }
     }
 
-    await context.run<void>(
-      overrides: contextOverrides.map<Type, Generator>((Type type, Object? value) {
-        return MapEntry<Type, Generator>(type, () => value);
-      }),
-      body: () async {
-        logger.quiet = (topLevelResults[FlutterGlobalOptions.kQuietFlag] as bool?) ?? false;
+    logger.quiet = (topLevelResults[FlutterGlobalOptions.kQuietFlag] as bool?) ?? false;
 
-        if (platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
-          await cache.lock();
-        }
+    if (platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
+      await cache.lock();
+    }
 
-        if ((topLevelResults[FlutterGlobalOptions.kSuppressAnalyticsFlag] as bool?) ?? false) {
-          analytics.suppressTelemetry();
-        }
+    if ((topLevelResults[FlutterGlobalOptions.kSuppressAnalyticsFlag] as bool?) ?? false) {
+      analytics.suppressTelemetry();
+    }
 
-        if (!((topLevelResults[FlutterGlobalOptions.kExtensionsFlag] as bool?) ?? true)) {
-          _extensionManager.disable();
-        }
+    if (!((topLevelResults[FlutterGlobalOptions.kExtensionsFlag] as bool?) ?? true)) {
+      _extensionManager.disable();
+    }
 
-        // Required to support `flutter --version` before artifacts are cached.
-        await cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.informative});
+    // Required to support `flutter --version` before artifacts are cached.
+    await cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.informative});
 
-        flutterVersion.ensureVersionFile();
-        if (await _shouldCheckForUpdates(topLevelResults)) {
-          await flutterVersion.checkFlutterVersionFreshness();
-        }
+    flutterVersion.ensureVersionFile();
+    if (await _shouldCheckForUpdates(topLevelResults)) {
+      await flutterVersion.checkFlutterVersionFreshness();
+    }
 
-        // See if the user specified a specific device.
-        final specifiedDeviceId = topLevelResults[FlutterGlobalOptions.kDeviceIdOption] as String?;
-        if (specifiedDeviceId != null) {
-          deviceManager.specifiedDeviceId = specifiedDeviceId;
-        }
+    // See if the user specified a specific device.
+    final specifiedDeviceId = topLevelResults[FlutterGlobalOptions.kDeviceIdOption] as String?;
+    if (specifiedDeviceId != null) {
+      deviceManager.specifiedDeviceId = specifiedDeviceId;
+    }
 
-        final bool topLevelMachineFlag =
-            topLevelResults[FlutterGlobalOptions.kMachineFlag] as bool? ?? false;
-        if ((topLevelResults[FlutterGlobalOptions.kVersionFlag] as bool?) ?? false) {
-          analytics.send(
-            Event.flutterCommandResult(
-              commandPath: 'version',
-              result: 'success',
-              commandHasTerminal: stdio.hasTerminal,
-              hostArch: os.hostPlatform.cliName,
-            ),
-          );
-          final FlutterVersion version = flutterVersion.fetchTagsAndGetVersion(clock: systemClock);
-          final String status;
-          if (topLevelMachineFlag) {
-            final Map<String, Object> jsonOut = version.toJson();
-            jsonOut['flutterRoot'] = cache.flutterRoot;
-            status = const JsonEncoder.withIndent('  ').convert(jsonOut);
-          } else {
-            status = version.toString();
-          }
-          logger.printStatus(status);
-          return;
-        }
-        if (topLevelMachineFlag && topLevelResults.command?.name != 'analyze') {
-          throwToolExit(
-            'The "--machine" flag is only valid with the "--version" flag or the "analyze --suggestions" command.',
-            exitCode: 2,
-          );
-        }
+    final bool topLevelMachineFlag =
+        topLevelResults[FlutterGlobalOptions.kMachineFlag] as bool? ?? false;
+    if ((topLevelResults[FlutterGlobalOptions.kVersionFlag] as bool?) ?? false) {
+      analytics.send(
+        Event.flutterCommandResult(
+          commandPath: 'version',
+          result: 'success',
+          commandHasTerminal: stdio.hasTerminal,
+          hostArch: os.hostPlatform.cliName,
+        ),
+      );
+      final FlutterVersion version = flutterVersion.fetchTagsAndGetVersion(clock: systemClock);
+      final String status;
+      if (topLevelMachineFlag) {
+        final Map<String, Object> jsonOut = version.toJson();
+        jsonOut['flutterRoot'] = cache.flutterRoot;
+        status = const JsonEncoder.withIndent('  ').convert(jsonOut);
+      } else {
+        status = version.toString();
+      }
+      logger.printStatus(status);
+      return;
+    }
+    if (topLevelMachineFlag && topLevelResults.command?.name != 'analyze') {
+      throwToolExit(
+        'The "--machine" flag is only valid with the "--version" flag or the "analyze --suggestions" command.',
+        exitCode: 2,
+      );
+    }
 
-        // TODO(bkonyi): can this be removed and passed solely via DebuggingOptions?
-        final bool shouldPrintDtdUri =
-            topLevelResults[FlutterGlobalOptions.kPrintDtd] as bool? ?? false;
-        if (shouldPrintDtdUri) {
-          devtoolsLauncher.printDtdUri = shouldPrintDtdUri;
-        }
+    // TODO(bkonyi): can this be removed and passed solely via DebuggingOptions?
+    final bool shouldPrintDtdUri =
+        topLevelResults[FlutterGlobalOptions.kPrintDtd] as bool? ?? false;
+    if (shouldPrintDtdUri) {
+      devtoolsLauncher.printDtdUri = shouldPrintDtdUri;
+    }
 
-        await super.runCommand(topLevelResults);
-      },
-    );
+    await super.runCommand(topLevelResults);
   }
 
   /// Get the root directories of the repo - the directories containing Dart packages.

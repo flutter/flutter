@@ -14,7 +14,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 class _WithoutRsyncProcessManager extends LocalProcessManager {
   const _WithoutRsyncProcessManager();

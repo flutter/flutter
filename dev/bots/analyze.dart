@@ -431,8 +431,8 @@ Future<void> verifyToolTestsEndInTestDart(String workingDirectory) async {
   final String toolsTestPath = path.join(workingDirectory, 'packages', 'flutter_tools', 'test');
   final violations = <String>[];
 
-  // detect files that contains calls to test() and testUsingContext()
-  final callsTestFunctionPattern = RegExp(r'^ *(test\(.*\)|testUsingContext\(.*\))');
+  // detect files that contain calls to test()
+  final callsTestFunctionPattern = RegExp(r'^ *test\(.*\)');
 
   await for (final File file in _allFiles(toolsTestPath, 'dart', minimumMatches: 300)) {
     final bool isValidTestFile = file.path.endsWith('_test.dart');

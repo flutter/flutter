@@ -17,7 +17,6 @@ import 'package:test/fake.dart';
 import 'package:watcher/watcher.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
 import '../../../src/fakes.dart';
 
 void main() {

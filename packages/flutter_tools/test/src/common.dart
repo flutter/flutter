@@ -179,9 +179,7 @@ void expectAcceptsDeprecatedJsInteropFlag(Command<void> command) {
   expect(valueFor(<String>['--no-deprecated-js-interop']), isFalse);
 }
 
-/// The tool overrides `test` to ensure that files created under the
-/// system temporary directory are deleted after each test by calling
-/// `LocalFileSystem.dispose()`.
+/// The tool overrides `test` to wrap execution in [FSGuardIOOverrides].
 @isTest
 void test(
   String description,
@@ -195,8 +193,6 @@ void test(
   test_package.test(
     description,
     () async {
-      addTearDown(disposeFallbackLocalFileSystem);
-
       return io.IOOverrides.runWithIOOverrides(() => body(), FSGuardIOOverrides());
     },
     skip: skip,
