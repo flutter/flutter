@@ -326,6 +326,156 @@ void main() {
       expect(process4.wasKilled, isTrue);
     });
   });
+
+  group('BlinkTraceSummary', () {
+    void expectAverages(
+      List<Map<String, dynamic>> trace, {
+      required int beginFrame,
+      required int updateLifecycle,
+    }) {
+      final BlinkTraceSummary summary = BlinkTraceSummary.fromJson(trace)!;
+      expect(
+        <Duration>[
+          summary.averageBeginFrameTime,
+          summary.averageUpdateLifecyclePhasesTime,
+          summary.averageTotalUIFrameTime,
+        ],
+        <Duration>[
+          Duration(microseconds: beginFrame),
+          Duration(microseconds: updateLifecycle),
+          Duration(microseconds: beginFrame + updateLifecycle),
+        ],
+      );
+    }
+
+    test('averages over all measured frames when more than 10 are present', () {
+      final trace = _BlinkTraceBuilder()
+        ..addFrames(2, beginFrame: 50000, updateLifecycle: 10000, measured: false)
+        ..addFrames(10, beginFrame: 1000, updateLifecycle: 200)
+        ..addFrames(10, beginFrame: 3000, updateLifecycle: 600);
+
+      expectAverages(trace.events, beginFrame: 2000, updateLifecycle: 400);
+    });
+
+    test('averages over all 100 measured frames after 200 warm-up frames', () {
+      final trace = _BlinkTraceBuilder()
+        ..addFrames(200, beginFrame: 50000, updateLifecycle: 10000, measured: false)
+        ..addFrames(90, beginFrame: 1000, updateLifecycle: 500)
+        ..addFrames(10, beginFrame: 11000, updateLifecycle: 1500);
+
+      expectAverages(trace.events, beginFrame: 2000, updateLifecycle: 600);
+    });
+
+    test('falls back to dur when tdur is null across more than 10 measured frames', () {
+      final trace = _BlinkTraceBuilder()
+        ..addFrames(5, beginFrame: 600, updateLifecycle: 300, durationKey: 'dur')
+        ..addFrames(10, beginFrame: 1200, updateLifecycle: 600, durationKey: 'dur');
+
+      expectAverages(trace.events, beginFrame: 1000, updateLifecycle: 500);
+    });
+
+    test(
+      'handles single and fewer than 10 measured frames with truncating microsecond division',
+      () {
+        final single = _BlinkTraceBuilder()..addFrames(1, beginFrame: 420, updateLifecycle: 180);
+        expectAverages(single.events, beginFrame: 420, updateLifecycle: 180);
+
+        final few = _BlinkTraceBuilder()
+          ..addFrames(1, beginFrame: 100, updateLifecycle: 50)
+          ..addFrames(2, beginFrame: 101, updateLifecycle: 51);
+        expectAverages(few.events, beginFrame: 100, updateLifecycle: 50);
+      },
+    );
+
+    test('ignores unrelated pid events and throws on missing duration, empty frame events, or missing measured frames', () {
+      final interleaved = _BlinkTraceBuilder();
+      for (var i = 0; i < 6; i++) {
+        interleaved
+          ..addFrames(1, beginFrame: 1000 + i * 100, updateLifecycle: 200)
+          ..addFrames(1, beginFrame: 90000, updateLifecycle: 90000, pid: 2);
+      }
+      // (1000 + 1100 + ... + 1500) ~/ 6 == 1250.
+      expectAverages(interleaved.events, beginFrame: 1250, updateLifecycle: 200);
+
+      final io.IOOverrides? parentOverrides = io.IOOverrides.current;
+      final io.Directory tempDir = io.Directory.systemTemp.createTempSync(
+        'blink_trace_summary_test.',
+      );
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+      final String redirectedTracePath = tempDir.uri.resolve('chrome-trace.json').toFilePath();
+      void expectThrows(List<Map<String, dynamic>> trace, Matcher matcher) {
+        io.IOOverrides.runZoned(
+          () => expect(() => BlinkTraceSummary.fromJson(trace), throwsA(matcher)),
+          createFile: (String filePath) => parentOverrides!.createFile(
+            filePath == './chrome-trace.json' ? redirectedTracePath : filePath,
+          ),
+        );
+      }
+
+      final missingDuration = _BlinkTraceBuilder()
+        ..addFrames(3, beginFrame: 1000, updateLifecycle: 200, durationKey: null);
+      expectThrows(missingDuration.events, isFormatException);
+
+      final missingBeginFrame = _BlinkTraceBuilder()
+        ..addFrames(3, beginFrame: 1000, updateLifecycle: 200, hasBeginFrame: false);
+      expectThrows(missingBeginFrame.events, isFormatException);
+
+      final noMeasuredFrames = _BlinkTraceBuilder()
+        ..addFrames(3, beginFrame: 1000, updateLifecycle: 200, measured: false);
+      expectThrows(noMeasuredFrames.events, isA<Exception>());
+
+      expect(io.File(redirectedTracePath).existsSync(), isTrue);
+    });
+  });
+}
+
+/// Builds synthetic Chrome trace events for [BlinkTraceSummary.fromJson].
+class _BlinkTraceBuilder {
+  final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
+  int _ts = 0;
+
+  /// Appends [count] frames, each consisting of a begin frame event (unless
+  /// [hasBeginFrame] is false) and an update lifecycle event, wrapped in
+  /// `measured_frame` markers when [measured] is true.
+  ///
+  /// Durations are stored under [durationKey] (`tdur` or `dur`), or omitted
+  /// when [durationKey] is null.
+  void addFrames(
+    int count, {
+    required int beginFrame,
+    required int updateLifecycle,
+    bool measured = true,
+    bool hasBeginFrame = true,
+    String? durationKey = 'tdur',
+    int pid = 1,
+  }) {
+    for (var i = 0; i < count; i++) {
+      if (measured) {
+        _add(pid, 'measured_frame', 'b');
+      }
+      if (hasBeginFrame) {
+        _add(pid, 'WebFrameWidgetImpl::BeginMainFrame', 'X', durationKey, beginFrame);
+      }
+      if (measured) {
+        _add(pid, 'measured_frame', 'e');
+      }
+      _add(pid, 'WebFrameWidgetImpl::UpdateLifecycle', 'X', durationKey, updateLifecycle);
+    }
+  }
+
+  void _add(int pid, String name, String ph, [String? durationKey, int? duration]) {
+    _ts += 1;
+    events.add(<String, dynamic>{
+      'args': <String, dynamic>{},
+      'cat': 'blink',
+      'name': name,
+      'ph': ph,
+      'pid': pid,
+      'tid': 1,
+      'ts': _ts,
+      if (durationKey != null && duration != null) durationKey: duration,
+    });
+  }
 }
 
 class FakeProcess implements io.Process {
