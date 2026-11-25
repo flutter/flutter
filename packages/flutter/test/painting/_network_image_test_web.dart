@@ -414,16 +414,11 @@ void runTests() {
     }
   }
 
-  ImageStreamCompleter loadCompleter(
-    String key, {
-    ui.Codec? codec,
-    WebHtmlElementStrategy strategy = WebHtmlElementStrategy.never,
-    bool keepAlive = true,
-  }) {
+  ImageStreamCompleter loadCompleter(String key, {ui.Codec? codec, bool keepAlive = true}) {
     if (codec != null) {
       _TestBinding.instance.overrideCodec = codec;
     }
-    final provider = NetworkImage(_uniqueUrl(key), webHtmlElementStrategy: strategy);
+    final provider = NetworkImage(_uniqueUrl(key));
     final ImageStreamCompleter completer = provider.loadImage(
       provider,
       _TestBinding.instance.instantiateImageCodecWithSize,
@@ -797,30 +792,13 @@ void runTests() {
     expect(() => resolved.addListener(noop), throwsStateError);
     expect(resolved.keepAlive, throwsStateError);
 
-    final testImg = TestImgElement();
-    imgElementFactory = () => testImg.getMock() as web_shim.HTMLImageElement;
-    final ImageStreamCompleter earlyImg = loadCompleter(
-      'd2',
-      strategy: WebHtmlElementStrategy.prefer,
-      keepAlive: false,
-    );
-    earlyImg.addListener(noop);
-    earlyImg.removeListener(noop);
-    await tester.runAsync(() async {
-      testImg.decodeSuccess();
-      await Future<void>.delayed(Duration.zero);
-    });
-    await tester.pump();
-    expect(tester.takeException(), isNull);
-    expect(testImg.src, isEmpty);
-
     final earlyCodec = _LoopingCodec();
     final ImageStreamCompleter early = loadCompleter('d3', codec: earlyCodec, keepAlive: false);
     early.addListener(noop);
     early.removeListener(noop);
-    await tester.pump();
-    expect(earlyCodec.disposed, isTrue);
     expect(() => early.addListener(noop), throwsStateError);
+    await pumpFor(tester, 3);
+    expect(earlyCodec.framesDecoded, 0);
   });
 
   testWidgets(
