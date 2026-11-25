@@ -227,6 +227,7 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
 
   final Signals _signals;
   final List<ProcessSignal> _fatalSignals;
+  var _registeredShutdownHook = false;
 
   void _tryToDeleteTemp() {
     _disposed = true;
@@ -247,7 +248,7 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
   // /tmp/flutter_tools.abcxyz, not the whole of /tmp.
   @override
   Directory get systemTempDirectory {
-    if (_systemTemp == null) {
+    if (_systemTemp == null || !_systemTemp!.existsSync()) {
       if (!superSystemTempDirectory.existsSync()) {
         throwToolExit(
           'Your system temp directory (${superSystemTempDirectory.path}) does not exist. '
@@ -256,17 +257,22 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
       }
       _systemTemp = superSystemTempDirectory.createTempSync('flutter_tools.')
         ..createSync(recursive: true);
-      // Make sure that the temporary directory is cleaned up if the tool is
-      // killed by a signal.
-      for (final ProcessSignal signal in _fatalSignals) {
-        final Object token = _signals.addHandler(signal, (ProcessSignal _) {
-          _tryToDeleteTemp();
-        });
-        _signalTokens[signal] = token;
+      if (_signalTokens.isEmpty) {
+        // Make sure that the temporary directory is cleaned up if the tool is
+        // killed by a signal.
+        for (final ProcessSignal signal in _fatalSignals) {
+          final Object token = _signals.addHandler(signal, (ProcessSignal _) {
+            _tryToDeleteTemp();
+          });
+          _signalTokens[signal] = token;
+        }
       }
-      // Make sure that the temporary directory is cleaned up when the tool
-      // exits normally.
-      shutdownHooks.addShutdownHook(_tryToDeleteTemp);
+      if (!_registeredShutdownHook) {
+        _registeredShutdownHook = true;
+        // Make sure that the temporary directory is cleaned up when the tool
+        // exits normally.
+        shutdownHooks.addShutdownHook(_tryToDeleteTemp);
+      }
     }
     return _systemTemp!;
   }
