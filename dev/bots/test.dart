@@ -227,6 +227,12 @@ Future<void> _runIntegrationToolTests() async {
   }
   await runDartTest(_toolsPath, forceSingleCore: true, testPaths: testPaths, collectMetrics: true);
 
+  // Unlike the files above, every subshard would run all three of these.
+  // Run them in the first subshard only.
+  final String? subshard = Platform.environment[kSubshardKey];
+  if (subshard != null && !subshard.startsWith('1_')) {
+    return;
+  }
   await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'hook_user_defines'));
   await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'link_hook'));
   await runFlutterTest(
@@ -350,7 +356,12 @@ Future<void> runForbiddenFromReleaseTests() async {
     '--forbidden-type',
     'package:flutter/src/widgets/framework.dart::Widget',
   ];
-  await runCommand(dart, smokeTestArgs, workingDirectory: flutterRoot, expectNonZeroExit: true);
+  await runCommand(
+    dart,
+    smokeTestArgs,
+    workingDirectory: flutterRoot,
+    expectedExit: ExpectedExit.nonZero,
+  );
 
   // Actual test.
   final args = <String>[
@@ -690,17 +701,12 @@ bool _allTargetsCached(File performanceFile) {
   return targets.every((Map<String, Object?> element) => element['skipped'] == true);
 }
 
-Future<void> _flutterBuildDart2js(
-  String relativePathToApplication,
-  String target, {
-  bool expectNonZeroExit = false,
-}) async {
+Future<void> _flutterBuildDart2js(String relativePathToApplication, String target) async {
   printProgress('${green}Testing Dart2JS build$reset for $cyan$relativePathToApplication$reset...');
   await runCommand(
     flutter,
     <String>['build', 'web', '-v', '--target=$target'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
-    expectNonZeroExit: expectNonZeroExit,
     environment: <String, String>{'FLUTTER_WEB': 'true'},
   );
 }

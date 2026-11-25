@@ -18,6 +18,7 @@ export 'build_system/depfile.dart';
 export 'build_system/source.dart';
 
 const _listEquality = ListEquality<Object?>();
+const _mapEquality = MapEquality<Object?, Object?>();
 const _setEquality = SetEquality<Object?>();
 
 final _upperRegex = RegExp(r'[A-Z]');
@@ -331,19 +332,19 @@ class ExtensionBuildContext {
             other.mainPath == mainPath &&
             other.outputDir == outputDir &&
             other.projectRoot == projectRoot &&
-            _mapEquals(other.resolvedArtifacts, resolvedArtifacts) &&
+            _mapEquality.equals(other.resolvedArtifacts, resolvedArtifacts) &&
             other.trackWidgetCreation == trackWidgetCreation &&
             other.treeShakeIcons == treeShakeIcons &&
-            _mapEquals(other.buildFlags, buildFlags) &&
+            _mapEquality.equals(other.buildFlags, buildFlags) &&
             other.buildName == buildName &&
             other.buildNumber == buildNumber &&
-            _mapEquals(other.buildOptions, buildOptions) &&
+            _mapEquality.equals(other.buildOptions, buildOptions) &&
             other.codeSizeDirectory == codeSizeDirectory &&
-            _mapEquals(other.configuration, configuration) &&
-            _mapEquals(other.dartDefines, dartDefines) &&
+            _mapEquality.equals(other.configuration, configuration) &&
+            _mapEquality.equals(other.dartDefines, dartDefines) &&
             other.dartObfuscation == dartObfuscation &&
-            _listEquals(other.extraFrontEndOptions, extraFrontEndOptions) &&
-            _listEquals(other.extraGenSnapshotOptions, extraGenSnapshotOptions) &&
+            _listEquality.equals(other.extraFrontEndOptions, extraFrontEndOptions) &&
+            _listEquality.equals(other.extraGenSnapshotOptions, extraGenSnapshotOptions) &&
             other.flavor == flavor &&
             other.splitDebugInfo == splitDebugInfo &&
             other.targetDeviceId == targetDeviceId &&
@@ -357,16 +358,16 @@ class ExtensionBuildContext {
     mainPath,
     outputDir,
     projectRoot,
-    _mapHash(resolvedArtifacts),
+    _mapEquality.hash(resolvedArtifacts),
     trackWidgetCreation,
     treeShakeIcons,
-    _mapHash(buildFlags),
+    _mapEquality.hash(buildFlags),
     buildName,
     buildNumber,
-    _mapHash(buildOptions),
+    _mapEquality.hash(buildOptions),
     codeSizeDirectory,
-    _mapHash(configuration),
-    _mapHash(dartDefines),
+    _mapEquality.hash(configuration),
+    _mapEquality.hash(dartDefines),
     dartObfuscation,
     Object.hashAll(extraFrontEndOptions),
     Object.hashAll(extraGenSnapshotOptions),
@@ -554,18 +555,18 @@ class ExtensionAssembleContext {
             other.mainPath == mainPath &&
             other.outputDir == outputDir &&
             other.projectRoot == projectRoot &&
-            _mapEquals(other.resolvedArtifacts, resolvedArtifacts) &&
+            _mapEquality.equals(other.resolvedArtifacts, resolvedArtifacts) &&
             other.trackWidgetCreation == trackWidgetCreation &&
             other.treeShakeIcons == treeShakeIcons &&
             other.buildName == buildName &&
             other.buildNumber == buildNumber &&
             other.codeSizeDirectory == codeSizeDirectory &&
-            _mapEquals(other.configuration, configuration) &&
-            _mapEquals(other.dartDefines, dartDefines) &&
+            _mapEquality.equals(other.configuration, configuration) &&
+            _mapEquality.equals(other.dartDefines, dartDefines) &&
             other.dartObfuscation == dartObfuscation &&
-            _mapEquals(other.extraDefines, extraDefines) &&
-            _listEquals(other.extraFrontEndOptions, extraFrontEndOptions) &&
-            _listEquals(other.extraGenSnapshotOptions, extraGenSnapshotOptions) &&
+            _mapEquality.equals(other.extraDefines, extraDefines) &&
+            _listEquality.equals(other.extraFrontEndOptions, extraFrontEndOptions) &&
+            _listEquality.equals(other.extraGenSnapshotOptions, extraGenSnapshotOptions) &&
             other.flavor == flavor &&
             other.splitDebugInfo == splitDebugInfo &&
             other.targetPlatform == targetPlatform);
@@ -579,16 +580,16 @@ class ExtensionAssembleContext {
     mainPath,
     outputDir,
     projectRoot,
-    _mapHash(resolvedArtifacts),
+    _mapEquality.hash(resolvedArtifacts),
     trackWidgetCreation,
     treeShakeIcons,
     buildName,
     buildNumber,
     codeSizeDirectory,
-    _mapHash(configuration),
-    _mapHash(dartDefines),
+    _mapEquality.hash(configuration),
+    _mapEquality.hash(dartDefines),
     dartObfuscation,
-    _mapHash(extraDefines),
+    _mapEquality.hash(extraDefines),
     Object.hashAll(extraFrontEndOptions),
     Object.hashAll(extraGenSnapshotOptions),
     flavor,
@@ -943,14 +944,20 @@ class ExtensionAssembleTarget {
   /// Names of `.d` dependency files written by this target into the build directory.
   ///
   /// Extensions that declare [depfiles] can use [Depfile.format] to write `.d`
-  /// files into their build directory and [Depfile.parse] to read them back.
+  /// files into their build directory. The host deletes any existing declared
+  /// depfiles from the build directory before invoking the target.
   ///
-  /// Each entry must match [isValidDepfileName]. Relative paths inside each
-  /// depfile are resolved against the project root directory and rewritten in
-  /// place with normalized paths by the host after a successful build. If a
-  /// declared depfile is missing or invalid after a successful build, the host
-  /// logs an error and disables incremental build caching for this target
-  /// without failing the build.
+  /// Each entry must match [isValidDepfileName]. Because all targets write
+  /// depfiles directly into the shared build directory, depfile names must be
+  /// unique across built-in Flutter tool targets and all active extensions.
+  /// Prefix depfile names with the target platform or extension name (for
+  /// example, `'linux_build.d'`) to avoid conflicts.
+  ///
+  /// Relative paths inside each depfile are resolved against the project root
+  /// directory and rewritten in place with normalized paths by the host after
+  /// a successful build. If a declared depfile is missing or invalid after a
+  /// successful build, the host logs an error and disables incremental build
+  /// caching for this target without failing the build.
   final List<String> depfiles;
 
   /// Input file patterns and artifacts.
@@ -1186,12 +1193,3 @@ Map<String, bool> _parseOptionalBoolMap(Map<String, Object?> json, String key) {
   }
   return result;
 }
-
-int _mapHash<K, V>(Map<K, V> map) => Object.hashAllUnordered(<int>[
-  for (final MapEntry(:K key, :V value) in map.entries) Object.hash(key, value),
-]);
-
-bool _listEquals<T>(List<T> a, List<T> b) => _listEquality.equals(a, b);
-
-bool _mapEquals<K, V>(Map<K, V> a, Map<K, V> b) =>
-    const MapEquality<Object?, Object?>().equals(a, b);

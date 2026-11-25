@@ -22,6 +22,7 @@ import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
@@ -672,6 +673,7 @@ void main() {
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(fs: MemoryFileSystem.test(), logger: testLogger),
         );
@@ -1064,6 +1066,7 @@ void main() {
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(fileSystem: fs),
@@ -1357,6 +1360,7 @@ void main() {
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(fileSystem: fs),
@@ -1479,6 +1483,7 @@ void main() {
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(fileSystem: fs),

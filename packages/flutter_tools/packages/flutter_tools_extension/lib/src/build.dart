@@ -114,9 +114,17 @@ abstract base class AssembleTarget {
   /// Names of `.d` dependency files written by this target into the build directory.
   ///
   /// Extensions that declare [depfiles] can use [Depfile.format] to write `.d`
-  /// files into their build directory and [Depfile.parse] to read them back.
+  /// files into [ExtensionAssembleContext.buildDir]. The host deletes any
+  /// existing declared depfiles from [ExtensionAssembleContext.buildDir]
+  /// before invoking [build].
   ///
   /// Each entry must match [ExtensionAssembleTarget.isValidDepfileName].
+  /// Because all targets write depfiles directly into the shared
+  /// [ExtensionAssembleContext.buildDir], depfile names must be unique across
+  /// built-in Flutter tool targets and all active extensions. Prefix depfile
+  /// names with the target platform or extension name (for example,
+  /// `'linux_build.d'`) to avoid conflicts.
+  ///
   /// Relative paths inside each depfile are resolved against the project root
   /// directory and rewritten in place with normalized paths by the host after
   /// a successful build. If a declared depfile is missing or invalid after a

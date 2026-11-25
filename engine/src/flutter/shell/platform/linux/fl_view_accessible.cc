@@ -30,7 +30,15 @@ struct _FlViewAccessible {
   gboolean root_node_created;
 };
 
-G_DEFINE_TYPE(FlViewAccessible, fl_view_accessible, ATK_TYPE_PLUG)
+static void fl_view_accessible_component_interface_init(
+    AtkComponentIface* iface);
+
+G_DEFINE_TYPE_WITH_CODE(
+    FlViewAccessible,
+    fl_view_accessible,
+    ATK_TYPE_PLUG,
+    G_IMPLEMENT_INTERFACE(ATK_TYPE_COMPONENT,
+                          fl_view_accessible_component_interface_init))
 
 // Enum copied from ATK 2.50, as the version we are building against doesn't
 // have this.
@@ -88,6 +96,17 @@ static FlAccessibleNode* get_node(FlViewAccessible* self,
 // Implements AtkObject::get_n_children
 static gint fl_view_accessible_get_n_children(AtkObject* accessible) {
   FlViewAccessible* self = FL_VIEW_ACCESSIBLE(accessible);
+
+  // AtkSocket and AtkPlug are designed for embedding accessibles from another
+  // process. When the plug is embedded, at-spi2-atk replaces its AtkComponent
+  // extents methods with blocking D-Bus calls to get the extents from the
+  // socket, and then calls this method. As our socket is served on this thread
+  // those calls can never be answered, and would block until they time out.
+  // Restore our implementation, which gets the extents from the socket
+  // directly.
+  fl_view_accessible_component_interface_init(
+      ATK_COMPONENT_GET_IFACE(accessible));
+
   FlAccessibleNode* node = lookup_node(self, 0);
 
   if (node == nullptr) {
@@ -119,6 +138,46 @@ static AtkStateSet* fl_view_accessible_ref_state_set(AtkObject* accessible) {
   FlViewAccessible* self = FL_VIEW_ACCESSIBLE(accessible);
   FlAccessibleNode* node = lookup_node(self, 0);
   return node != nullptr ? atk_object_ref_state_set(ATK_OBJECT(node)) : nullptr;
+}
+
+// Implements AtkComponent::get_extents
+static void fl_view_accessible_get_extents(AtkComponent* component,
+                                           gint* x,
+                                           gint* y,
+                                           gint* width,
+                                           gint* height,
+                                           AtkCoordType coord_type) {
+  AtkObject* parent = atk_object_get_parent(ATK_OBJECT(component));
+  if (parent == nullptr || !ATK_IS_COMPONENT(parent)) {
+    *x = *y = *width = *height = -1;
+    return;
+  }
+
+  atk_component_get_extents(ATK_COMPONENT(parent), x, y, width, height,
+                            coord_type);
+}
+
+// Implements AtkComponent::get_position
+static void fl_view_accessible_get_position(AtkComponent* component,
+                                            gint* x,
+                                            gint* y,
+                                            AtkCoordType coord_type) {
+  atk_component_get_extents(component, x, y, nullptr, nullptr, coord_type);
+}
+
+// Implements AtkComponent::get_size
+static void fl_view_accessible_get_size(AtkComponent* component,
+                                        gint* width,
+                                        gint* height) {
+  atk_component_get_extents(component, nullptr, nullptr, width, height,
+                            ATK_XY_WINDOW);
+}
+
+static void fl_view_accessible_component_interface_init(
+    AtkComponentIface* iface) {
+  iface->get_extents = fl_view_accessible_get_extents;
+  iface->get_position = fl_view_accessible_get_position;
+  iface->get_size = fl_view_accessible_get_size;
 }
 
 static void fl_view_accessible_dispose(GObject* object) {

@@ -6,18 +6,27 @@ import 'dart:async';
 import 'dart:io' as io;
 import 'dart:isolate';
 
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
+import 'package:stream_channel/isolate_channel.dart';
 import 'package:test/test.dart';
-import 'package:yaml/yaml.dart';
 
 void _dummyExtensionEntryPoint(SendPort sendPort) {
   unawaited(ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[]));
+}
+
+void _singleServiceEntryPoint(SendPort sendPort) {
+  unawaited(
+    ToolExtensionEntryPoint.run(
+      sendPort,
+      <ToolExtensionService>[_DummyService('test', 'ping')],
+      supportedPlatforms: const <String>{'linux', 'macos'},
+    ),
+  );
 }
 
 void _failingExtensionEntryPoint(SendPort sendPort) {
@@ -79,6 +88,99 @@ final class _NotificationTestService extends ToolExtensionService {
 void _notificationExtensionEntryPoint(SendPort sendPort) {
   unawaited(
     ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_NotificationTestService()]),
+  );
+}
+
+final class _LogTestService extends ToolExtensionService {
+  @override
+  String get namespace => 'log_test';
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    return <String, ExtensionRpcHandler>{
+      'emitAll': (Map<String, Object?> _) {
+        log('info message');
+        log('warning message', level: .warning);
+        log('error message', level: .error);
+        log('trace message', level: .trace);
+        return 'ok';
+      },
+      'emitAnsi': (Map<String, Object?> _) {
+        log('\u001B[32mGreen unclosed');
+        log('\u001B[1;33mBold yellow\u001B[m warning', level: .warning);
+        log('Plain trace', level: .trace);
+        return 'ok';
+      },
+      'emitControlSequences': (Map<String, Object?> _) {
+        log('\u001B[2K\u001B[1ACleared\r\u0007\u0008\u007F\u009B\tindented\nnext line');
+        log(
+          '\u001B]0;Window Title\u0007\u001B]8;;https://flutter.dev\u001B\\Docs\u001B]8;;\u001B\\',
+          level: .warning,
+        );
+        log('\u001B[2K\u001B[32mGreen cleared\u001B]0;Title\u0007', level: .error);
+        return 'ok';
+      },
+      'emitExplicitTimestamp': (Map<String, Object?> _) {
+        log('explicit timestamp', timestamp: DateTime(2026, 11, 18, 12, 30));
+        return 'ok';
+      },
+      'emitMalformed': (Map<String, Object?> _) {
+        sendNotification(ToolExtensionEntryPoint.logNotificationMethod, const <String, Object?>{
+          ExtensionLogMessage.levelKey: 'unknown',
+          ExtensionLogMessage.messageKey: 'bad',
+        });
+        return 'ok';
+      },
+    };
+  }
+}
+
+void _logExtensionEntryPoint(SendPort sendPort) {
+  unawaited(
+    ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+      _LogTestService(),
+    ], extensionName: 'log_ext'),
+  );
+}
+
+final class _LogInInitService extends ToolExtensionService {
+  @override
+  String get namespace => 'log_init';
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    log('init first');
+    log('init second', level: .warning);
+    return <String, ExtensionRpcHandler>{
+      'emitAfterInit': (Map<String, Object?> _) {
+        log('post-handshake');
+        return 'ok';
+      },
+    };
+  }
+}
+
+void _logInInitExtensionEntryPoint(SendPort sendPort) {
+  unawaited(
+    ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+      _LogInInitService(),
+    ], extensionName: 'init_log_ext'),
+  );
+}
+
+final class _ReservedLogMethodService extends ToolExtensionService {
+  @override
+  String get namespace => 'extension';
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    return <String, ExtensionRpcHandler>{'log': (Map<String, Object?> _) => null};
+  }
+}
+
+void _reservedLogMethodEntryPoint(SendPort sendPort) {
+  unawaited(
+    ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_ReservedLogMethodService()]),
   );
 }
 
@@ -375,69 +477,35 @@ void main() {
       );
     });
 
-    test('ExtensionConnection.spawnUri spawns extension script and completes handshake', () async {
+    test('ExtensionConnection.spawn completes handshake and matches expectedConfig', () async {
       final logger = BufferLogger.test();
-      final Uri? libUri = await Isolate.resolvePackageUri(
-        Uri.parse(
-          'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart',
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _singleServiceEntryPoint,
+        expectedConfig: ExtensionPackageConfig(
+          name: 'test_extension',
+          hostPlatforms: const <String>{'linux', 'macos'},
+          services: const <String>{'test'},
         ),
-      );
-      expect(libUri, isNotNull);
-      final Uri entrypointUri = libUri!.resolve(
-        '../bin/flutter_tools_extension_linux_prototype.dart',
-      );
-      final Uri? packageConfigUri = await Isolate.packageConfig;
-      expect(packageConfigUri, isNotNull);
-
-      final fs = LocalFileSystem.test(signals: LocalSignals.instance);
-      addTearDown(fs.dispose);
-      final Uri configUri = libUri.resolve('../extension/flutter_tools/config.yaml');
-      final rawYaml = loadYaml(fs.file(configUri).readAsStringSync()) as YamlMap;
-      final expectedConfig = ExtensionPackageConfig.fromMap(
-        rawYaml.cast<String, Object?>(),
-        packageName: 'flutter_tools_extension_linux_prototype',
-      );
-
-      final ExtensionConnection connection = await ExtensionConnection.spawnUri(
-        entrypointUri,
-        expectedConfig: expectedConfig,
         logger: logger,
-        packageConfigUri: packageConfigUri!,
-        extensionName: 'flutter_tools_extension_linux_prototype',
       );
       addTearDown(connection.dispose);
 
-      expect(connection.extensionName, 'flutter_tools_extension_linux_prototype');
-      expect(
-        connection.capabilities.services,
-        containsAll(const <String>['diagnostics', 'config', 'build', 'template']),
-      );
+      expect(connection.extensionName, 'test_extension');
+      expect(connection.capabilities.services, const <String>['test']);
+      expect(connection.capabilities.supportedPlatforms, const <String>{'linux', 'macos'});
     });
 
-    test('ExtensionConnection.spawnUri throws StateError when expectedConfig does not match capabilities', () async {
+    test('ExtensionConnection.spawn throws StateError when expectedConfig does not match capabilities', () async {
       final logger = BufferLogger.test();
-      final Uri? libUri = await Isolate.resolvePackageUri(
-        Uri.parse(
-          'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart',
-        ),
-      );
-      expect(libUri, isNotNull);
-      final Uri entrypointUri = libUri!.resolve(
-        '../bin/flutter_tools_extension_linux_prototype.dart',
-      );
-      final Uri? packageConfigUri = await Isolate.packageConfig;
-      expect(packageConfigUri, isNotNull);
-
       await expectLater(
-        ExtensionConnection.spawnUri(
-          entrypointUri,
+        ExtensionConnection.spawn(
+          _dummyExtensionEntryPoint,
           expectedConfig: ExtensionPackageConfig(
-            name: 'flutter_tools_extension_linux_prototype',
+            name: 'test_extension',
             hostPlatforms: const <String>{'linux'},
             services: const <String>{'diagnostics'},
           ),
           logger: logger,
-          packageConfigUri: packageConfigUri!,
         ),
         throwsA(
           isA<StateError>().having(
@@ -451,23 +519,76 @@ void main() {
       );
 
       await expectLater(
-        ExtensionConnection.spawnUri(
-          entrypointUri,
+        ExtensionConnection.spawn(
+          _singleServiceEntryPoint,
           expectedConfig: ExtensionPackageConfig(
-            name: 'flutter_tools_extension_linux_prototype',
-            hostPlatforms: const <String>{'macos'},
-            services: const <String>{
-              'diagnostics',
-              'config',
-              'template',
-              'device',
-              'build',
-              'clean',
-              'artifact',
-            },
+            name: 'test_extension',
+            hostPlatforms: const <String>{'linux', 'macos'},
+            services: const <String>{'other'},
           ),
           logger: logger,
-          packageConfigUri: packageConfigUri,
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains(
+              'capabilities mismatch: extension/flutter_tools/config.yaml declares services',
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(
+        ExtensionConnection.spawn(
+          _singleServiceEntryPoint,
+          expectedConfig: ExtensionPackageConfig(
+            name: 'test_extension',
+            hostPlatforms: const <String>{'linux', 'macos'},
+          ),
+          logger: logger,
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains(
+              'capabilities mismatch: extension/flutter_tools/config.yaml declares services',
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(
+        ExtensionConnection.spawn(
+          _singleServiceEntryPoint,
+          expectedConfig: ExtensionPackageConfig(
+            name: 'test_extension',
+            hostPlatforms: const <String>{'linux', 'windows'},
+            services: const <String>{'test'},
+          ),
+          logger: logger,
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains(
+              'capabilities mismatch: extension/flutter_tools/config.yaml declares host_platforms',
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(
+        ExtensionConnection.spawn(
+          _singleServiceEntryPoint,
+          expectedConfig: ExtensionPackageConfig(
+            name: 'test_extension',
+            hostPlatforms: const <String>{'linux'},
+            services: const <String>{'test'},
+          ),
+          logger: logger,
         ),
         throwsA(
           isA<StateError>().having(
@@ -752,5 +873,209 @@ void main() {
         expect(shutdownServices, const <String>['gated_service']);
       },
     );
+
+    test('routes extension.log notifications for all levels to host Logger', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _logExtensionEntryPoint,
+        logger: logger,
+      );
+      addTearDown(connection.dispose);
+
+      expect(await connection.sendRequest('log_test.emitAll'), 'ok');
+      await pumpEventQueue();
+
+      expect(logger.statusText, contains('[log_ext] info message'));
+      expect(logger.warningText, contains('[log_ext] warning message'));
+      expect(logger.errorText, contains('[log_ext] error message'));
+      expect(logger.traceText, contains('[log_ext] trace message'));
+    });
+
+    test('ToolExtensionService.log populates default UTC timestamp and normalizes explicit timestamps to UTC', () async {
+      final receivePort = ReceivePort();
+      addTearDown(receivePort.close);
+      final Isolate isolate = await Isolate.spawn(_logExtensionEntryPoint, receivePort.sendPort);
+      addTearDown(() => isolate.kill(priority: Isolate.immediate));
+
+      final hostPeer = json_rpc.Peer.withoutJson(
+        IsolateChannel<Object?>.connectReceive(receivePort),
+      );
+      addTearDown(hostPeer.close);
+      final notifications = <Map<String, Object?>>[];
+      hostPeer.registerMethod(ToolExtensionEntryPoint.logNotificationMethod, (
+        json_rpc.Parameters params,
+      ) {
+        if (params.value case final Map<String, Object?> payload) {
+          notifications.add(payload);
+        }
+      });
+      unawaited(hostPeer.listen());
+
+      final DateTime before = DateTime.now().toUtc();
+      expect(await hostPeer.sendRequest('log_test.emitAll'), 'ok');
+      expect(await hostPeer.sendRequest('log_test.emitExplicitTimestamp'), 'ok');
+      await pumpEventQueue();
+      final DateTime after = DateTime.now().toUtc();
+
+      expect(notifications, hasLength(5));
+      for (final Map<String, Object?> payload in notifications.take(4)) {
+        expect(payload[ExtensionLogMessage.timestampKey], allOf(isA<String>(), endsWith('Z')));
+        final parsed = ExtensionLogMessage.fromJson(payload);
+        expect(parsed.timestamp, isNotNull);
+        expect(parsed.timestamp!.isUtc, isTrue);
+        expect(parsed.timestamp!.isBefore(before), isFalse);
+        expect(parsed.timestamp!.isAfter(after), isFalse);
+      }
+
+      expect(
+        notifications.last[ExtensionLogMessage.timestampKey],
+        DateTime(2026, 11, 18, 12, 30).toUtc().toIso8601String(),
+      );
+
+      await hostPeer.sendRequest(ToolExtensionEntryPoint.shutdownMethod);
+    });
+
+    test(
+      'strips ANSI SGR escape sequences from extension.log when !logger.supportsColor',
+      () async {
+        final logger = BufferLogger.test();
+        expect(logger.supportsColor, isFalse);
+        final ExtensionConnection connection = await ExtensionConnection.spawn(
+          _logExtensionEntryPoint,
+          logger: logger,
+        );
+        addTearDown(connection.dispose);
+
+        expect(await connection.sendRequest('log_test.emitAnsi'), 'ok');
+        await pumpEventQueue();
+
+        expect(logger.statusText, '[log_ext] Green unclosed\n');
+        expect(logger.warningText, '[log_ext] Bold yellow warning\n');
+        expect(logger.traceText, contains('[log_ext] Plain trace\n'));
+      },
+    );
+
+    test(
+      'appends trailing ANSI reset on color terminals when extension.log contains ANSI sequences',
+      () async {
+        final logger = BufferLogger.test(terminal: Terminal.test(supportsColor: true));
+        expect(logger.supportsColor, isTrue);
+        final ExtensionConnection connection = await ExtensionConnection.spawn(
+          _logExtensionEntryPoint,
+          logger: logger,
+        );
+        addTearDown(connection.dispose);
+
+        expect(await connection.sendRequest('log_test.emitAnsi'), 'ok');
+        await pumpEventQueue();
+
+        expect(logger.statusText, '[log_ext] \u001B[32mGreen unclosed${AnsiTerminal.resetAll}\n');
+        expect(
+          logger.warningText,
+          '[log_ext] \u001B[1;33mBold yellow\u001B[m warning${AnsiTerminal.resetAll}\n',
+        );
+        expect(logger.traceText, contains('[log_ext] Plain trace\n'));
+        expect(logger.traceText, isNot(contains('[log_ext] Plain trace${AnsiTerminal.resetAll}')));
+      },
+    );
+
+    test('buffers logs emitted during ToolExtensionService.initialize and prefixes with resolved extensionName', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _logInInitExtensionEntryPoint,
+        logger: logger,
+      );
+      addTearDown(connection.dispose);
+
+      expect(connection.extensionName, 'init_log_ext');
+      expect(await connection.sendRequest('log_init.emitAfterInit'), 'ok');
+      await pumpEventQueue();
+
+      expect(logger.statusText, '[init_log_ext] init first\n[init_log_ext] post-handshake\n');
+      expect(logger.warningText, '[init_log_ext] init second\n');
+      expect(logger.statusText, isNot(contains(ExtensionConnection.defaultExtensionName)));
+      expect(logger.warningText, isNot(contains(ExtensionConnection.defaultExtensionName)));
+    });
+
+    test(
+      'strips non-SGR CSI, OSC, and C0 control sequences while preserving tabs and newlines',
+      () async {
+        final noColorLogger = BufferLogger.test();
+        final ExtensionConnection noColorConnection = await ExtensionConnection.spawn(
+          _logExtensionEntryPoint,
+          logger: noColorLogger,
+        );
+        addTearDown(noColorConnection.dispose);
+
+        expect(await noColorConnection.sendRequest('log_test.emitControlSequences'), 'ok');
+        await pumpEventQueue();
+
+        expect(noColorLogger.statusText, '[log_ext] Cleared\tindented\nnext line\n');
+        expect(noColorLogger.warningText, '[log_ext] Docs\n');
+        expect(noColorLogger.errorText, '[log_ext] Green cleared\n');
+
+        final colorLogger = BufferLogger.test(terminal: Terminal.test(supportsColor: true));
+        final ExtensionConnection colorConnection = await ExtensionConnection.spawn(
+          _logExtensionEntryPoint,
+          logger: colorLogger,
+        );
+        addTearDown(colorConnection.dispose);
+
+        expect(await colorConnection.sendRequest('log_test.emitControlSequences'), 'ok');
+        await pumpEventQueue();
+
+        expect(colorLogger.statusText, '[log_ext] Cleared\tindented\nnext line\n');
+        expect(colorLogger.warningText, '[log_ext] Docs\n');
+        expect(
+          colorLogger.errorText,
+          '[log_ext] \u001B[32mGreen cleared${AnsiTerminal.resetAll}\n',
+        );
+      },
+    );
+
+    test('logs warning on malformed extension.log notification', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _logExtensionEntryPoint,
+        logger: logger,
+      );
+      addTearDown(connection.dispose);
+
+      expect(await connection.sendRequest('log_test.emitMalformed'), 'ok');
+      await pumpEventQueue();
+
+      expect(
+        logger.warningText,
+        contains('Extension "log_ext" sent malformed "extension.log" notification'),
+      );
+    });
+
+    test('rejects registering reserved extension.log RPC method', () async {
+      final logger = BufferLogger.test();
+      await expectLater(
+        ExtensionConnection.spawn(_reservedLogMethodEntryPoint, logger: logger),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('Reserved RPC method registered: "extension.log"'),
+          ),
+        ),
+      );
+    });
+
+    test('onNotification throws ArgumentError for extension.log', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _dummyExtensionEntryPoint,
+        logger: logger,
+      );
+      addTearDown(connection.dispose);
+
+      expect(
+        () => connection.onNotification(ToolExtensionEntryPoint.logNotificationMethod),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
   });
 }

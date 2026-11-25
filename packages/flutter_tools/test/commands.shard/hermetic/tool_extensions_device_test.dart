@@ -502,7 +502,7 @@ flutter:
               ExtensionDevices(
                 extensionBuildManager: ExtensionBuildManager(
                   extensionManager: logsExtensionManager!,
-                  featureFlags: featureFlags,
+                  featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
                   logger: testLogger,
                 ),
                 extensionManager: logsExtensionManager!,

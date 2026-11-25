@@ -4,8 +4,11 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_core/json.dart';
 import 'package:meta/meta.dart';
+
+import 'provider.dart';
 
 /// Typedef for an extension RPC handler function.
 typedef ExtensionRpcHandler = FutureOr<Object?> Function(Map<String, Object?> params);
@@ -22,8 +25,9 @@ typedef ExtensionNotificationSender = void Function(String method, Map<String, O
 abstract base class ToolExtensionService {
   /// Internal JSON-RPC notification sender callback used by [sendNotification].
   ///
-  /// Wired by `ToolExtensionEntryPoint.run` before the extension peer begins
-  /// listening for RPC requests.
+  /// Wired by `ToolExtensionEntryPoint.run` prior to invoking [initialize],
+  /// queuing notifications emitted during [initialize] until the JSON-RPC
+  /// channel connects.
   @internal
   ExtensionNotificationSender? notificationSender;
 
@@ -38,8 +42,9 @@ abstract base class ToolExtensionService {
   /// Sends a fire-and-forget JSON-RPC 2.0 notification with [method] and
   /// [params] to the host tool.
   ///
-  /// Throws a [StateError] if called before this service has been attached to
-  /// an active extension peer by `ToolExtensionEntryPoint.run`.
+  /// Notifications sent during [initialize] are queued until the channel
+  /// connects. Throws a [StateError] if called before this service has been
+  /// attached by `ToolExtensionEntryPoint.run`.
   void sendNotification(String method, Map<String, Object?> params) {
     final ExtensionNotificationSender? sender = notificationSender;
     if (sender == null) {
@@ -50,13 +55,29 @@ abstract base class ToolExtensionService {
     sender(method, params);
   }
 
+  /// Sends a structured log notification to the host tool over
+  /// [ToolExtensionEntryPoint.logNotificationMethod].
+  ///
+  /// Defaults [timestamp] to the current UTC time when omitted.
+  @nonVirtual
+  void log(String message, {ExtensionLogLevel level = .info, DateTime? timestamp}) {
+    sendNotification(
+      ToolExtensionEntryPoint.logNotificationMethod,
+      ExtensionLogMessage(
+        level: level,
+        message: message,
+        timestamp: (timestamp ?? DateTime.now()).toUtc(),
+      ).toMap(),
+    );
+  }
+
   /// Cleans up resources held by the service when the extension is shut down.
   ///
   /// Invoked by `ToolExtensionEntryPoint.run` when the host tool sends an
   /// `extension.shutdown` RPC on CLI exit or connection disposal. Runs
   /// concurrently across all registered services in the isolate via
-  /// `Future.wait`, with a bounded grace period of approximately 2 seconds on
-  /// the host before the extension isolate is terminated.
+  /// `Future.wait`, with a short bounded grace period before the
+  /// extension isolate is terminated.
   Future<void> shutdown() async {}
 }
 

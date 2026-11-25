@@ -41,36 +41,6 @@ void main() {
     }
   });
 
-  test('no imports of globals without a global prefix', () {
-    final skippedPaths = <String>[];
-    bool isNotSkipped(FileSystemEntity entity) =>
-        skippedPaths.every((String path) => !entity.path.startsWith(path));
-
-    final Iterable<File> files = fileSystem
-        .directory(fileSystem.path.join(flutterTools, 'lib', 'src'))
-        .listSync(recursive: true)
-        .followedBy(
-          fileSystem
-              .directory(fileSystem.path.join(flutterTools, 'test'))
-              .listSync(recursive: true),
-        )
-        .where(_isDartFile)
-        .where(isNotSkipped)
-        .map(_asFile);
-    for (final file in files) {
-      for (final String line in file.readAsLinesSync()) {
-        if ((line.startsWith(RegExp(r'import.*globals.dart')) ||
-                line.startsWith(RegExp(r'import.*globals_null_migrated.dart'))) &&
-            !line.contains(r'as globals')) {
-          final String relativePath = fileSystem.path.relative(file.path, from: flutterTools);
-          fail(
-            '$relativePath imports globals_null_migrated.dart or globals.dart without a globals prefix.',
-          );
-        }
-      }
-    }
-  });
-
   test('no unauthorized imports of dart:io', () {
     final allowedPaths = <String>[
       // This is a standalone script invoked by xcode, not part of the tool

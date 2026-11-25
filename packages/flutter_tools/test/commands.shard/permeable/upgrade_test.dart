@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
-import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -18,6 +17,7 @@ import 'package:flutter_tools/src/version.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/context_runner.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -58,9 +58,14 @@ void main() {
         });
       processManager = FakeProcessManager.empty();
       final toolContext = DelegatingToolContext(systemClock: SystemClock.fixed(jan12026));
-      fakeCommandRunner = FakeUpgradeCommandRunner(toolContext: toolContext);
-      realCommandRunner = UpgradeCommandRunner(toolContext: toolContext)
-        ..workingDirectory = getFlutterRoot();
+      fakeCommandRunner = FakeUpgradeCommandRunner(
+        featureFlags: TestFeatureFlags(),
+        toolContext: toolContext,
+      );
+      realCommandRunner = UpgradeCommandRunner(
+        featureFlags: TestFeatureFlags(),
+        toolContext: toolContext,
+      )..workingDirectory = getFlutterRoot();
       fakeCommandRunner.willHaveUncommittedChanges = false;
     });
 
@@ -214,6 +219,7 @@ void main() {
 
         final DateTime now = DateTime.now().subtract(const Duration(minutes: 25));
         fakeCommandRunner = FakeUpgradeCommandRunner(
+          featureFlags: TestFeatureFlags(),
           toolContext: DelegatingToolContext(systemClock: SystemClock.fixed(now)),
         )..remoteVersion = latestVersion;
 
@@ -271,6 +277,7 @@ void main() {
         final now = DateTime.now();
         final DateTime before = now.subtract(const Duration(minutes: 25));
         fakeCommandRunner = FakeUpgradeCommandRunner(
+          featureFlags: TestFeatureFlags(),
           toolContext: DelegatingToolContext(systemClock: SystemClock.fixed(now)),
         )..remoteVersion = latestVersion;
 
@@ -640,6 +647,7 @@ void main() {
 
         final CommandRunner<void> runner = createTestCommandRunner(
           UpgradeCommand(
+            featureFlags: TestFeatureFlags(),
             toolContext: const DelegatingToolContext(),
             verboseHelp: false,
             commandRunner: fakeCommandRunner,
@@ -876,8 +884,12 @@ void main() {
               persistentToolState: PersistentToolState.test(directory: tempDir, logger: testLogger),
               processManager: fakeProcessManager,
             );
-            final fakeRunner = FakeUpgradeCommandRunner(toolContext: toolContext);
+            final fakeRunner = FakeUpgradeCommandRunner(
+              featureFlags: TestFeatureFlags(),
+              toolContext: toolContext,
+            );
             final upgradeCommand = UpgradeCommand(
+              featureFlags: TestFeatureFlags(),
               toolContext: toolContext,
               verboseHelp: false,
               commandRunner: fakeRunner,
@@ -909,7 +921,7 @@ void main() {
 }
 
 class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
-  FakeUpgradeCommandRunner({required super.toolContext});
+  FakeUpgradeCommandRunner({required super.featureFlags, required super.toolContext});
 
   bool willHaveUncommittedChanges = false;
   bool alreadyUpToDate = false;
