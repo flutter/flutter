@@ -537,6 +537,13 @@ Future<List<File>> installCodeAssets({
   required Uri nativeAssetsFileUri,
   required Uri targetUri,
 }) async {
+  assert(
+    !fileSystem.path.isWithin(
+      fileSystem.path.fromUri(targetUri),
+      fileSystem.path.fromUri(nativeAssetsFileUri),
+    ),
+    'nativeAssetsFileUri ($nativeAssetsFileUri) must be outside targetUri ($targetUri).',
+  );
   final OS targetOS = getNativeOSFromTargetPlatform(targetPlatform);
   final flutterTester = targetPlatform == TargetPlatform.tester;
   final BuildMode buildMode = _getBuildMode(environmentDefines, flutterTester);
@@ -558,8 +565,8 @@ Future<List<File>> installCodeAssets({
     assetTargetLocations,
     codesignIdentity,
     flutterTester,
+    iosDeploymentVersion: targetOS == OS.iOS ? iosDeploymentVersion(environmentDefines) : null,
     logger: logger,
-    nativeAssetsFileUri: nativeAssetsFileUri,
     processManager: processManager,
   );
   final manifest = NativeAssetsManifest.fromTargetLocations(assetTargetLocations);
@@ -830,8 +837,8 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
   Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocations,
   String? codesignIdentity,
   bool flutterTester, {
+  AppleVersion? iosDeploymentVersion,
   required Logger logger,
-  required Uri nativeAssetsFileUri,
   required ProcessManager processManager,
 }) async {
   // We only have to copy code assets that are bundled within the app.
@@ -848,13 +855,7 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
   if (!targetDir.existsSync()) {
     targetDir.createSync(recursive: true);
   }
-  final String nativeAssetsFilePath = fileSystem.file(nativeAssetsFileUri).path;
   for (final FileSystemEntity entity in await targetDir.list(followLinks: false).toList()) {
-    if (entity is File && fileSystem.path.equals(entity.path, nativeAssetsFilePath)) {
-      // _writeNativeAssetsJson immediately truncates and overwrites this
-      // manifest file in place, so avoid unlinking it unnecessarily.
-      continue;
-    }
     ErrorHandlingFileSystem.deleteIfExists(entity, recursive: true);
   }
 
@@ -904,6 +905,7 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
         codesignIdentity,
         buildMode,
         fileSystem,
+        deploymentVersion: iosDeploymentVersion,
         logger: logger,
         processUtils: processUtils,
       );

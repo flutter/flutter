@@ -28,6 +28,7 @@ import 'package:flutter_tools/src/test/test_time_recorder.dart';
 import 'package:flutter_tools/src/test/test_wrapper.dart';
 import 'package:flutter_tools/src/test/watcher.dart';
 import 'package:flutter_tools/src/web/compile.dart';
+import 'package:flutter_tools/src/web/web_debug_config.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart';
@@ -858,64 +859,58 @@ resolution: workspace
     },
   );
 
-  testWithoutContext(
-    '--experimental-faster-testing logs deprecation warning and runs tests',
-    () async {
-      final testRunner = FakeFlutterTestRunner(0);
-      final testCommand = TestCommand(
-        assetBundleFactory: AssetBundleFactory.defaultInstance(
-          fileSystem: fs,
-          flutterRoot: '',
-          logger: logger,
-          platform: toolContext.platform,
-        ),
-        templateRenderer: const MustacheTemplateRenderer(),
-        toolContext: toolContext,
-        testRunner: testRunner,
-      );
-      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+  test('--experimental-faster-testing logs deprecation warning and runs tests', () async {
+    final testRunner = FakeFlutterTestRunner(0);
+    final testCommand = TestCommand(
+      assetBundleFactory: AssetBundleFactory.defaultInstance(
+        fileSystem: fs,
+        flutterRoot: '',
+        logger: logger,
+        platform: toolContext.platform,
+      ),
+      templateRenderer: const MustacheTemplateRenderer(),
+      toolContext: toolContext,
+      testRunner: testRunner,
+    );
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
-      await commandRunner.run(const <String>[
-        'test',
-        '--no-pub',
-        '--no-test-assets',
-        '--experimental-faster-testing',
-      ]);
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--no-test-assets',
+      '--experimental-faster-testing',
+    ]);
 
-      expect(
-        logger.warningText,
-        contains(
-          'The "--experimental-faster-testing" flag is deprecated and no longer '
-          'has any effect. This flag will be removed in a future version of Flutter.',
-        ),
-      );
-      expect(testRunner.lastExecutionSpec, isNotNull);
-    },
-  );
+    expect(
+      logger.warningText,
+      contains(
+        'The "--experimental-faster-testing" flag is deprecated and no longer '
+        'has any effect. This flag will be removed in a future version of Flutter.',
+      ),
+    );
+    expect(testRunner.lastExecutionSpec, isNotNull);
+  });
 
-  testWithoutContext(
-    'omitting --experimental-faster-testing does not log deprecation warning',
-    () async {
-      final testRunner = FakeFlutterTestRunner(0);
-      final testCommand = TestCommand(
-        assetBundleFactory: AssetBundleFactory.defaultInstance(
-          fileSystem: fs,
-          flutterRoot: '',
-          logger: logger,
-          platform: toolContext.platform,
-        ),
-        templateRenderer: const MustacheTemplateRenderer(),
-        toolContext: toolContext,
-        testRunner: testRunner,
-      );
-      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+  test('omitting --experimental-faster-testing does not log deprecation warning', () async {
+    final testRunner = FakeFlutterTestRunner(0);
+    final testCommand = TestCommand(
+      assetBundleFactory: AssetBundleFactory.defaultInstance(
+        fileSystem: fs,
+        flutterRoot: '',
+        logger: logger,
+        platform: toolContext.platform,
+      ),
+      templateRenderer: const MustacheTemplateRenderer(),
+      toolContext: toolContext,
+      testRunner: testRunner,
+    );
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
-      await commandRunner.run(const <String>['test', '--no-pub', '--no-test-assets']);
+    await commandRunner.run(const <String>['test', '--no-pub', '--no-test-assets']);
 
-      expect(logger.warningText, isNot(contains('--experimental-faster-testing')));
-      expect(testRunner.lastExecutionSpec, isNotNull);
-    },
-  );
+    expect(logger.warningText, isNot(contains('--experimental-faster-testing')));
+    expect(testRunner.lastExecutionSpec, isNotNull);
+  });
 
   testUsingContext(
     'Verbose prints phase timings',
@@ -1805,6 +1800,56 @@ dev_dependencies:
     },
   );
 
+  testUsingContext(
+    'Rebuild the asset bundle if the asset manifest on disk does not match the newly generated asset manifest',
+    () async {
+      final testRunner = FakeFlutterTestRunner(0);
+      fs.file('asset.txt').writeAsStringSync('1');
+      fs.file('pubspec.yaml').writeAsStringSync('''
+name: my_app
+flutter:
+  assets:
+    - asset.txt
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter''');
+      final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testRunner: testRunner,
+      );
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>['test', '--no-pub']);
+
+      final File manifestFile = fs.file(
+        fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
+      );
+      expect(manifestFile, exists);
+
+      // Simulate a stale manifest on disk (e.g. from an older Flutter version with different schema/contents).
+      manifestFile.writeAsBytesSync(<int>[0, 1, 2, 3]);
+
+      await commandRunner.run(const <String>['test', '--no-pub']);
+
+      final List<int> manifestBytes = manifestFile.readAsBytesSync();
+      expect(manifestBytes, isNot(<int>[0, 1, 2, 3]));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.empty(),
+      DeviceManager: () => _FakeDeviceManager(<Device>[]),
+    },
+  );
+
   group('Fatal Logs', () {
     testUsingContext(
       "doesn't fail when --fatal-warnings is set and no warning output",
@@ -2330,57 +2375,54 @@ resolution: workspace
     },
   );
 
-  testWithoutContext(
-    'throws ToolExit when test argument contains Windows reserved characters',
-    () async {
-      final windowsFs = MemoryFileSystem(style: FileSystemStyle.windows);
-      final windowsPlatform = FakePlatform(operatingSystem: 'windows');
-      final ProcessManager windowsProcessManager = FakeProcessManager.any();
-      final Directory package = windowsFs.directory('package');
-      package.childFile('pubspec.yaml')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(_pubspecContents);
-      writePackageConfigFiles(
-        directory: package,
-        packages: <String, String>{
-          'test_api': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
-          'integration_test': 'file:///path/to/flutter/packages/integration_test',
-        },
-        mainLibName: 'my_app',
-        devDependencies: <String>['test_api', 'integration_test'],
-      );
-      windowsFs.currentDirectory = package.path;
+  test('throws ToolExit when test argument contains Windows reserved characters', () async {
+    final windowsFs = MemoryFileSystem(style: FileSystemStyle.windows);
+    final windowsPlatform = FakePlatform(operatingSystem: 'windows');
+    final ProcessManager windowsProcessManager = FakeProcessManager.any();
+    final Directory package = windowsFs.directory('package');
+    package.childFile('pubspec.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(_pubspecContents);
+    writePackageConfigFiles(
+      directory: package,
+      packages: <String, String>{
+        'test_api': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
+        'integration_test': 'file:///path/to/flutter/packages/integration_test',
+      },
+      mainLibName: 'my_app',
+      devDependencies: <String>['test_api', 'integration_test'],
+    );
+    windowsFs.currentDirectory = package.path;
 
-      final fakePackageTest = FakePackageTest();
-      final testCommand = TestCommand(
-        assetBundleFactory: AssetBundleFactory.defaultInstance(
-          fileSystem: windowsFs,
-          flutterRoot: '',
-          logger: BufferLogger.test(),
-          platform: windowsPlatform,
-        ),
-        templateRenderer: const MustacheTemplateRenderer(),
-        toolContext: FakeToolContext(
-          fs: windowsFs,
-          logger: BufferLogger.test(),
-          platform: windowsPlatform,
-          processManager: windowsProcessManager,
-        ),
-        testWrapper: fakePackageTest,
-      );
-      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+    final fakePackageTest = FakePackageTest();
+    final testCommand = TestCommand(
+      assetBundleFactory: AssetBundleFactory.defaultInstance(
+        fileSystem: windowsFs,
+        flutterRoot: '',
+        logger: BufferLogger.test(),
+        platform: windowsPlatform,
+      ),
+      templateRenderer: const MustacheTemplateRenderer(),
+      toolContext: FakeToolContext(
+        fs: windowsFs,
+        logger: BufferLogger.test(),
+        platform: windowsPlatform,
+        processManager: windowsProcessManager,
+      ),
+      testWrapper: fakePackageTest,
+    );
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
-      await expectLater(
-        () => commandRunner.run(const <String>['test', '--no-pub', r'test\foo*bar_test.dart']),
-        throwsToolExit(
-          message: r'Invalid test path "test\foo*bar_test.dart": Illegal character in path',
-        ),
-      );
-    },
-  );
+    await expectLater(
+      () => commandRunner.run(const <String>['test', '--no-pub', r'test\foo*bar_test.dart']),
+      throwsToolExit(
+        message: r'Invalid test path "test\foo*bar_test.dart": Illegal character in path',
+      ),
+    );
+  });
 
   group('TestFilterSpecification and TestExecutionSpecification', () {
-    testWithoutContext('TestFilterSpecification has expected defaults', () {
+    test('TestFilterSpecification has expected defaults', () {
       const filter = TestFilterSpecification();
       expect(filter.names, isEmpty);
       expect(filter.plainNames, isEmpty);
@@ -2392,23 +2434,20 @@ resolution: workspace
       expect(filter.totalShards, isNull);
     });
 
-    testWithoutContext(
-      'TestExecutionSpecification.toPackageTestArgs generates minimal args by default',
-      () {
-        final spec = TestExecutionSpecification(
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-          buildInfo: BuildInfo.debug,
-        );
+    test('TestExecutionSpecification.toPackageTestArgs generates minimal args by default', () {
+      final spec = TestExecutionSpecification(
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        buildInfo: BuildInfo.debug,
+      );
 
-        expect(spec.toPackageTestArgs(supportsColor: false), <String>[
-          '--no-color',
-          '--chain-stack-traces',
-        ]);
-        expect(spec.toPackageTestArgs(supportsColor: true), <String>['--chain-stack-traces']);
-      },
-    );
+      expect(spec.toPackageTestArgs(supportsColor: false), <String>[
+        '--no-color',
+        '--chain-stack-traces',
+      ]);
+      expect(spec.toPackageTestArgs(supportsColor: true), <String>['--chain-stack-traces']);
+    });
 
-    testWithoutContext(
+    test(
       'TestExecutionSpecification.toPackageTestArgs serializes all filter and execution flags',
       () {
         final spec = TestExecutionSpecification(
@@ -2463,7 +2502,7 @@ resolution: workspace
       },
     );
 
-    testWithoutContext(
+    test(
       'TestExecutionSpecification.toPackageTestArgs prefers machine json reporter over reporter',
       () {
         final spec = TestExecutionSpecification(

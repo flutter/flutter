@@ -60,7 +60,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
 ''');
     }
 
-    testWithoutContext('Only images in folders named with device pixel ratios (e.g. 2x, 3.0x) should be considered as variants of other images', () async {
+    test('Only images in folders named with device pixel ratios (e.g. 2x, 3.0x) should be considered as variants of other images', () async {
       createPubspec(assets: <String>['assets/', 'assets/notAVariant/']);
 
       const image = 'assets/image.jpg';
@@ -105,54 +105,51 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       expect(smcBinManifest, equals(expectedAssetManifest));
     });
 
-    testWithoutContext(
-      'Asset directories have their subdirectories searched for asset variants',
-      () async {
-        createPubspec(assets: <String>['assets/', 'assets/folder/']);
+    test('Asset directories have their subdirectories searched for asset variants', () async {
+      createPubspec(assets: <String>['assets/', 'assets/folder/']);
 
-        const topLevelImage = 'assets/image.jpg';
-        const secondLevelImage = 'assets/folder/secondLevel.jpg';
-        const secondLevel2xVariant = 'assets/folder/2x/secondLevel.jpg';
+      const topLevelImage = 'assets/image.jpg';
+      const secondLevelImage = 'assets/folder/secondLevel.jpg';
+      const secondLevel2xVariant = 'assets/folder/2x/secondLevel.jpg';
 
-        final assets = <String>[topLevelImage, secondLevelImage, secondLevel2xVariant];
+      final assets = <String>[topLevelImage, secondLevelImage, secondLevel2xVariant];
 
-        for (final asset in assets) {
-          final File assetFile = fs.file(asset);
-          assetFile.createSync(recursive: true);
-          assetFile.writeAsStringSync(asset);
-        }
+      for (final asset in assets) {
+        final File assetFile = fs.file(asset);
+        assetFile.createSync(recursive: true);
+        assetFile.writeAsStringSync(asset);
+      }
 
-        final bundle = ManifestAssetBundle(
-          logger: BufferLogger.test(),
-          fileSystem: fs,
-          flutterRoot: flutterRoot,
-          platform: platform,
-        );
+      final bundle = ManifestAssetBundle(
+        logger: BufferLogger.test(),
+        fileSystem: fs,
+        flutterRoot: flutterRoot,
+        platform: platform,
+      );
 
-        await bundle.build(
-          packageConfigPath: '.dart_tool/package_config.json',
-          flutterProject: FlutterProject.fromDirectoryTest(fs.currentDirectory),
-          targetPlatform: TargetPlatform.tester,
-        );
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        flutterProject: FlutterProject.fromDirectoryTest(fs.currentDirectory),
+        targetPlatform: TargetPlatform.tester,
+      );
 
-        final Map<Object?, Object?> smcBinManifest = await extractAssetManifestSmcBinFromBundle(
-          bundle,
-        );
+      final Map<Object?, Object?> smcBinManifest = await extractAssetManifestSmcBinFromBundle(
+        bundle,
+      );
 
-        final expectedAssetManifest = <String, List<Map<String, Object>>>{
-          topLevelImage: <Map<String, Object>>[
-            <String, String>{'asset': topLevelImage},
-          ],
-          secondLevelImage: <Map<String, Object>>[
-            <String, String>{'asset': secondLevelImage},
-            <String, Object>{'asset': secondLevel2xVariant, 'dpr': 2.0},
-          ],
-        };
-        expect(smcBinManifest, equals(expectedAssetManifest));
-      },
-    );
+      final expectedAssetManifest = <String, List<Map<String, Object>>>{
+        topLevelImage: <Map<String, Object>>[
+          <String, String>{'asset': topLevelImage},
+        ],
+        secondLevelImage: <Map<String, Object>>[
+          <String, String>{'asset': secondLevelImage},
+          <String, Object>{'asset': secondLevel2xVariant, 'dpr': 2.0},
+        ],
+      };
+      expect(smcBinManifest, equals(expectedAssetManifest));
+    });
 
-    testWithoutContext('Asset paths should never be URI-encoded', () async {
+    test('Asset paths should never be URI-encoded', () async {
       createPubspec(assets: <String>['assets/normalFolder/']);
 
       const image = 'assets/normalFolder/i have URI-reserved_characters.jpg';
@@ -193,7 +190,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       expect(smcBinManifest, equals(expectedAssetManifest));
     });
 
-    testWithoutContext('Main assets are not included if the file does not exist', () async {
+    test('Main assets are not included if the file does not exist', () async {
       createPubspec(assets: <String>['assets/image.png']);
 
       // We intentionally do not add a 'assets/image.png'.
@@ -260,7 +257,7 @@ flutter:
 ''');
     });
 
-    testWithoutContext('Variant detection works with windows-style filepaths', () async {
+    test('Variant detection works with windows-style filepaths', () async {
       const assets = <String>[
         r'assets\foo.jpg',
         r'assets\2x\foo.jpg',

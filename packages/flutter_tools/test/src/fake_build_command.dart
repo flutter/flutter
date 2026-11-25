@@ -68,7 +68,7 @@ BuildCommand createFakeBuildCommand({
     try {
       resolvedFileSystem = context.get<FileSystem>();
     } on Object {
-      // testWithoutContext or not provided.
+      // No active AppContext or not provided.
     }
   }
   final FileSystem fs = resolvedFileSystem ?? MemoryFileSystem.test();
@@ -78,7 +78,7 @@ BuildCommand createFakeBuildCommand({
     try {
       resolvedPlatform = context.get<Platform>();
     } on Object {
-      // testWithoutContext or not provided.
+      // No active AppContext or not provided.
     }
   }
   final Platform targetPlatform = resolvedPlatform ?? FakePlatform();
@@ -88,7 +88,7 @@ BuildCommand createFakeBuildCommand({
     try {
       resolvedFeatureFlags = context.get<FeatureFlags>();
     } on Object {
-      // testWithoutContext or not provided.
+      // No active AppContext or not provided.
     }
   }
 
@@ -97,7 +97,7 @@ BuildCommand createFakeBuildCommand({
     try {
       resolvedLogger = context.get<Logger>();
     } on Object {
-      // testWithoutContext or not provided.
+      // No active AppContext or not provided.
     }
   }
   final Logger targetLogger = resolvedLogger ?? BufferLogger.test();
@@ -107,7 +107,7 @@ BuildCommand createFakeBuildCommand({
     try {
       resolvedProcessManager = context.get<ProcessManager>();
     } on Object {
-      // testWithoutContext or not provided.
+      // No active AppContext or not provided.
     }
   }
   final ProcessManager targetProcessManager = resolvedProcessManager ?? FakeProcessManager.any();
@@ -117,7 +117,7 @@ BuildCommand createFakeBuildCommand({
     try {
       resolvedOsUtils = context.get<OperatingSystemUtils>();
     } on Object {
-      // testWithoutContext or not provided.
+      // No active AppContext or not provided.
     }
   }
   final OperatingSystemUtils targetOsUtils = resolvedOsUtils ?? FakeOperatingSystemUtils();
@@ -127,7 +127,7 @@ BuildCommand createFakeBuildCommand({
     try {
       resolvedPlistParser = context.get<PlistParser>();
     } on Object {
-      // testWithoutContext or not provided.
+      // No active AppContext or not provided.
     }
   }
 
@@ -136,7 +136,7 @@ BuildCommand createFakeBuildCommand({
     try {
       resolvedXcodeProjectInterpreter = context.get<XcodeProjectInterpreter>();
     } on Object {
-      // testWithoutContext or not provided.
+      // No active AppContext or not provided.
     }
   }
 

@@ -272,7 +272,7 @@ void main() {
         'The asset does not exist or has empty data.',
       ),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56314
+  });
 
   test('loadStructuredBinaryData correctly loads ByteData', () async {
     final bundle = TestAssetBundle();

@@ -555,12 +555,12 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
         processManager: FakeProcessManager.empty(),
         nativeAssetsFileUri:
             nativeAssetsFileUri ??
-            targetDirectory.childFile(InstallCodeAssets.nativeAssetsFilename).uri,
+            targetDirectory.parent.childFile(InstallCodeAssets.nativeAssetsFilename).uri,
         targetUri: targetDirectory.uri,
       );
     }
 
-    testWithoutContext('overwrites existing native_assets.json in place without deleting it '
+    test('overwrites existing native_assets.json in place without deleting it '
         'while still deleting stale code assets '
         '(regression test for https://github.com/flutter/flutter/issues/196121)', () async {
       final exceptionHandler = FileExceptionHandler();
@@ -571,7 +571,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
       final Directory targetDirectory = errorHandlingFs.directory(
         '/project/build/native_assets/macos',
       )..createSync(recursive: true);
-      final File existingManifest = targetDirectory.childFile(
+      final File existingManifest = targetDirectory.parent.childFile(
         InstallCodeAssets.nativeAssetsFilename,
       )..writeAsStringSync('{"stale": true}');
       final File staleDylib = targetDirectory.childFile('libstale.dylib')
@@ -600,37 +600,24 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
       expect(existingManifest.readAsStringSync(), isNot(contains('"stale"')));
     });
 
-    testWithoutContext(
-      'replaces native_assets.json if it is a directory or symlink on disk',
-      () async {
-        final FileSystem fs = MemoryFileSystem.test();
-        final Directory targetDirectory = fs.directory('/project/build/native_assets/macos')
-          ..createSync(recursive: true);
-        final File manifestFile = targetDirectory.childFile(InstallCodeAssets.nativeAssetsFilename);
+    test('asserts when nativeAssetsFileUri is inside targetUri', () async {
+      final FileSystem fs = MemoryFileSystem.test();
+      final Directory targetDirectory = fs.directory('/project/build/native_assets/macos')
+        ..createSync(recursive: true);
 
-        // Case 1: native_assets.json is unexpectedly a non-empty directory.
-        targetDirectory
-            .childDirectory(InstallCodeAssets.nativeAssetsFilename)
-            .childFile('unexpected.txt')
-            .createSync(recursive: true);
+      await expectLater(
+        () => runInstall(
+          fileSystem: fs,
+          targetDirectory: targetDirectory,
+          nativeAssetsFileUri: targetDirectory
+              .childFile(InstallCodeAssets.nativeAssetsFilename)
+              .uri,
+        ),
+        throwsAssertionError,
+      );
+    });
 
-        await runInstall(fileSystem: fs, targetDirectory: targetDirectory);
-        expect(fs.typeSync(manifestFile.path, followLinks: false), FileSystemEntityType.file);
-
-        // Case 2: native_assets.json is a symlink.
-        manifestFile.deleteSync();
-        final File linkTarget = fs.file('/project/other.json')..writeAsStringSync('{}');
-        targetDirectory
-            .childLink(InstallCodeAssets.nativeAssetsFilename)
-            .createSync(linkTarget.path);
-
-        await runInstall(fileSystem: fs, targetDirectory: targetDirectory);
-        expect(fs.typeSync(manifestFile.path, followLinks: false), FileSystemEntityType.file);
-        expect(linkTarget.readAsStringSync(), '{}');
-      },
-    );
-
-    testWithoutContext('throws ToolExit when deleting a stale asset fails with EXDEV', () async {
+    test('throws ToolExit when deleting a stale asset fails with EXDEV', () async {
       final exceptionHandler = FileExceptionHandler();
       final errorHandlingFs = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
@@ -662,7 +649,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
   });
 
   group('findRunPackageName', () {
-    testWithoutContext('prefers direct root URI match over manifestAppName', () {
+    test('prefers direct root URI match over manifestAppName', () {
       final FileSystem fs = MemoryFileSystem.test();
       final Uri projectUri = Uri.parse('file:///my_app/');
 
@@ -689,7 +676,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
       );
     });
 
-    testWithoutContext('matches package root via canonicalized path when URIs differ', () {
+    test('matches package root via canonicalized path when URIs differ', () {
       final FileSystem fs = MemoryFileSystem.test();
       // Create the physical project directory at '/real_dir' and a symlink at
       // '/symlink_dir' pointing to '/real_dir'.
@@ -720,7 +707,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
       );
     });
 
-    testWithoutContext('falls back to manifestAppName rather than first package in packageConfig '
+    test('falls back to manifestAppName rather than first package in packageConfig '
         'when no package root matches projectUri', () {
       final FileSystem fs = MemoryFileSystem.test();
       final Uri projectUri = Uri.parse('file:///unmatched_app/');
@@ -747,7 +734,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
       );
     });
 
-    testWithoutContext(
+    test(
       'returns null when no package root matches and manifestAppName is not in packageConfig',
       () {
         final FileSystem fs = MemoryFileSystem.test();
@@ -783,57 +770,51 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
       },
     );
 
-    testWithoutContext(
-      'returns null when no package root matches and manifestAppName is empty',
-      () {
-        final FileSystem fs = MemoryFileSystem.test();
+    test('returns null when no package root matches and manifestAppName is empty', () {
+      final FileSystem fs = MemoryFileSystem.test();
 
-        // 'args' does not match projectUri via Tier 1 or Tier 2, and manifestAppName
-        // is empty (e.g. a malformed or missing pubspec.yaml name field), so Tier 4
-        // returns null rather than selecting an arbitrary dependency.
-        final packageConfig = PackageConfig(<Package>[
-          Package('args', Uri.parse('file:///pub_cache/args/')),
-        ]);
+      // 'args' does not match projectUri via Tier 1 or Tier 2, and manifestAppName
+      // is empty (e.g. a malformed or missing pubspec.yaml name field), so Tier 4
+      // returns null rather than selecting an arbitrary dependency.
+      final packageConfig = PackageConfig(<Package>[
+        Package('args', Uri.parse('file:///pub_cache/args/')),
+      ]);
 
-        expect(
-          findRunPackageName(
-            fileSystem: fs,
-            manifestAppName: '',
-            packageConfig: packageConfig,
-            projectUri: Uri.parse('file:///empty_app/'),
-          ),
-          isNull,
-        );
-      },
-    );
+      expect(
+        findRunPackageName(
+          fileSystem: fs,
+          manifestAppName: '',
+          packageConfig: packageConfig,
+          projectUri: Uri.parse('file:///empty_app/'),
+        ),
+        isNull,
+      );
+    });
 
-    testWithoutContext(
-      'catches FileSystemException during symlink resolution and falls back cleanly',
-      () {
-        // Wrap the file system so directory.existsSync() is true but
-        // directory.resolveSymbolicLinksSync() throws a FileSystemException
-        // (simulating a symlink loop or broken link during Tier 2 canonicalization).
-        final FileSystem fs = _ThrowingResolveLinksFileSystem(MemoryFileSystem.test());
-        final packageConfig = PackageConfig(<Package>[
-          Package('other_pkg', Uri.parse('file:///other_dir/')),
-          Package('fallback_app', Uri.parse('file:///fallback_dir/')),
-        ]);
+    test('catches FileSystemException during symlink resolution and falls back cleanly', () {
+      // Wrap the file system so directory.existsSync() is true but
+      // directory.resolveSymbolicLinksSync() throws a FileSystemException
+      // (simulating a symlink loop or broken link during Tier 2 canonicalization).
+      final FileSystem fs = _ThrowingResolveLinksFileSystem(MemoryFileSystem.test());
+      final packageConfig = PackageConfig(<Package>[
+        Package('other_pkg', Uri.parse('file:///other_dir/')),
+        Package('fallback_app', Uri.parse('file:///fallback_dir/')),
+      ]);
 
-        // Tier 1 misses ('file:///broken_dir/' != 'file:///other_dir/').
-        // Tier 2 catches the FileSystemException during resolveSymbolicLinksSync(),
-        // falls back to the lexical path, and does not match 'other_pkg'.
-        // Tier 3 then cleanly returns 'fallback_app'.
-        expect(
-          findRunPackageName(
-            fileSystem: fs,
-            manifestAppName: 'fallback_app',
-            packageConfig: packageConfig,
-            projectUri: Uri.parse('file:///broken_dir/'),
-          ),
-          'fallback_app',
-        );
-      },
-    );
+      // Tier 1 misses ('file:///broken_dir/' != 'file:///other_dir/').
+      // Tier 2 catches the FileSystemException during resolveSymbolicLinksSync(),
+      // falls back to the lexical path, and does not match 'other_pkg'.
+      // Tier 3 then cleanly returns 'fallback_app'.
+      expect(
+        findRunPackageName(
+          fileSystem: fs,
+          manifestAppName: 'fallback_app',
+          packageConfig: packageConfig,
+          projectUri: Uri.parse('file:///broken_dir/'),
+        ),
+        'fallback_app',
+      );
+    });
   });
 
   group('testCompilerBuildNativeAssets', () {
@@ -940,6 +921,12 @@ environment:
         );
         expect(nativeAssetsManifest, isNotNull);
         expect(hostFileSystem.file(nativeAssetsManifest).existsSync(), isTrue);
+        expect(
+          hostFileSystem.file(nativeAssetsManifest).path,
+          endsWith(
+            hostFileSystem.path.join('build', 'native_assets', 'flutter_test_native_assets.json'),
+          ),
+        );
       },
     );
 

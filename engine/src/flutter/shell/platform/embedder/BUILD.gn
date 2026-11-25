@@ -179,7 +179,10 @@ template("embedder_source_set") {
           "embedder_surface_vulkan_impeller.cc",
           "embedder_surface_vulkan_impeller.h",
         ]
-        deps += [ "//flutter/impeller/display_list" ]
+        deps += [
+          "//flutter/impeller/display_list",
+          "//flutter/impeller/renderer/backend/vulkan",
+        ]
       }
 
       deps += [
@@ -259,6 +262,8 @@ test_fixtures("fixtures") {
     "fixtures/impeller_text_test.png",
     "fixtures/vk_dpr_noxform.png",
     "fixtures/vk_gradient.png",
+    "fixtures/vk_impeller_dpr_noxform.png",
+    "fixtures/vk_impeller_gradient.png",
     "fixtures/gradient_metal.png",
     "fixtures/external_texture_impeller.png",
     "fixtures/external_texture_metal.png",

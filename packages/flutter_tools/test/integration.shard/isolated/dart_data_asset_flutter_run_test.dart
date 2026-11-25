@@ -43,7 +43,7 @@ void main() {
           continue;
         }
 
-        testWithoutContext('flutter run on $device --$mode', () async {
+        test('flutter run on $device --$mode', () async {
           final performRestart = isDebug;
           final performReload = isDebug;
 

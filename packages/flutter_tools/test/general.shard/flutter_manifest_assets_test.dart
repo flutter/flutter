@@ -9,7 +9,7 @@ import '../src/common.dart';
 
 void main() {
   group('parsing of assets section in flutter manifests', () {
-    testWithoutContext('ignores empty list of assets', () {
+    test('ignores empty list of assets', () {
       final logger = BufferLogger.test();
 
       const manifest = '''
@@ -30,7 +30,7 @@ flutter:
       expect(flutterManifest!.assets, isEmpty);
     });
 
-    testWithoutContext('parses two simple asset declarations', () async {
+    test('parses two simple asset declarations', () async {
       final logger = BufferLogger.test();
       const manifest = '''
 name: test
@@ -55,7 +55,7 @@ flutter:
       ]);
     });
 
-    testWithoutContext('does not crash on empty entry', () {
+    test('does not crash on empty entry', () {
       final logger = BufferLogger.test();
       const manifest = '''
 name: test
@@ -74,7 +74,7 @@ flutter:
       expect(logger.errorText, contains('Asset manifest contains a null or empty uri.'));
     });
 
-    testWithoutContext('handles special characters in asset URIs', () {
+    test('handles special characters in asset URIs', () {
       final logger = BufferLogger.test();
 
       const manifest = '''
@@ -103,7 +103,7 @@ flutter:
       ]);
     });
 
-    testWithoutContext('parses an asset with flavors', () async {
+    test('parses an asset with flavors', () async {
       final logger = BufferLogger.test();
       const manifest = '''
 name: test
@@ -129,7 +129,7 @@ flutter:
       ]);
     });
 
-    testWithoutContext("prints an error when an asset entry's flavor is not a string", () async {
+    test("prints an error when an asset entry's flavor is not a string", () async {
       final logger = BufferLogger.test();
 
       const manifest = '''

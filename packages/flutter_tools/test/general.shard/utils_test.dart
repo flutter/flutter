@@ -15,7 +15,7 @@ import '../src/common.dart';
 
 void main() {
   group('SettingsFile', () {
-    testWithoutContext('parse', () {
+    test('parse', () {
       final file = SettingsFile.parse('''
 # ignore comment
 foo=bar
@@ -28,7 +28,7 @@ baz=qux
   });
 
   group('Version', () {
-    testWithoutContext('can parse and compare', () {
+    test('can parse and compare', () {
       expect(Version(0, null, null).toString(), equals('0'));
       expect(const Version.withText(1, 2, 3, 'versionText').toString(), 'versionText');
 
@@ -107,7 +107,7 @@ baz=qux
   });
 
   group('Misc', () {
-    testWithoutContext('snakeCase', () async {
+    test('snakeCase', () async {
       expect(snakeCase('abc'), equals('abc'));
       expect(snakeCase('abC'), equals('ab_c'));
       expect(snakeCase('aBc'), equals('a_bc'));
@@ -118,7 +118,7 @@ baz=qux
       expect(snakeCase('ABC'), equals('a_b_c'));
     });
 
-    testWithoutContext('kebabCase', () async {
+    test('kebabCase', () async {
       expect(kebabCase('abc'), equals('abc'));
       expect(kebabCase('abC'), equals('ab-c'));
       expect(kebabCase('aBc'), equals('a-bc'));
@@ -129,7 +129,7 @@ baz=qux
       expect(kebabCase('ABC'), equals('a-b-c'));
     });
 
-    testWithoutContext('sentenceCase', () async {
+    test('sentenceCase', () async {
       expect(sentenceCase('abc'), equals('Abc'));
       expect(sentenceCase('ab_c'), equals('Ab_c'));
       expect(sentenceCase('a b c'), equals('A b c'));
@@ -140,7 +140,7 @@ baz=qux
       expect(sentenceCase('a_b_c'), equals('A_b_c'));
     });
 
-    testWithoutContext('snakeCaseToTitleCase', () async {
+    test('snakeCaseToTitleCase', () async {
       expect(snakeCaseToTitleCase('abc'), equals('Abc'));
       expect(snakeCaseToTitleCase('ab_c'), equals('Ab C'));
       expect(snakeCaseToTitleCase('a_b_c'), equals('A B C'));
@@ -174,11 +174,11 @@ baz=qux
     const indentedLongLine =
         '    This is an indented long line that needs to be '
         'wrapped and indentation preserved.';
-    testWithoutContext('does not wrap by default in tests', () {
+    test('does not wrap by default in tests', () {
       expect(wrapText(longLine, columnWidth: 80, shouldWrap: true), equals(longLine));
     });
 
-    testWithoutContext('can override wrap preference if preference is off', () {
+    test('can override wrap preference if preference is off', () {
       expect(
         wrapText(longLine, columnWidth: lineLength, shouldWrap: true),
         equals('''
@@ -187,19 +187,19 @@ wrapped.'''),
       );
     });
 
-    testWithoutContext('can override wrap preference if preference is on', () {
+    test('can override wrap preference if preference is on', () {
       expect(wrapText(longLine, shouldWrap: false, columnWidth: 80), equals(longLine));
     });
 
-    testWithoutContext('does not wrap at all if not told to wrap', () {
+    test('does not wrap at all if not told to wrap', () {
       expect(wrapText(longLine, columnWidth: 80, shouldWrap: false), equals(longLine));
     });
 
-    testWithoutContext('does not wrap short lines.', () {
+    test('does not wrap short lines.', () {
       expect(wrapText(shortLine, columnWidth: lineLength, shouldWrap: true), equals(shortLine));
     });
 
-    testWithoutContext('able to wrap long lines', () {
+    test('able to wrap long lines', () {
       expect(
         wrapText(longLine, columnWidth: lineLength, shouldWrap: true),
         equals('''
@@ -208,7 +208,7 @@ wrapped.'''),
       );
     });
 
-    testWithoutContext('able to handle dynamically changing terminal column size', () {
+    test('able to handle dynamically changing terminal column size', () {
       expect(
         wrapText(longLine, columnWidth: 20, shouldWrap: true),
         equals('''
@@ -225,7 +225,7 @@ wrapped.'''),
       );
     });
 
-    testWithoutContext('wrap long lines with no whitespace', () {
+    test('wrap long lines with no whitespace', () {
       expect(
         wrapText('0123456789' * 5, columnWidth: lineLength, shouldWrap: true),
         equals('''
@@ -234,7 +234,7 @@ wrapped.'''),
       );
     });
 
-    testWithoutContext('refuses to wrap to a column smaller than 10 characters', () {
+    test('refuses to wrap to a column smaller than 10 characters', () {
       expect(
         wrapText('$longLine ${'0123456789' * 4}', columnWidth: 1, shouldWrap: true),
         equals('''
@@ -249,7 +249,7 @@ wrapped.
 0123456789'''),
       );
     });
-    testWithoutContext('preserves indentation', () {
+    test('preserves indentation', () {
       expect(
         wrapText(indentedLongLine, columnWidth: lineLength, shouldWrap: true),
         equals('''
@@ -259,7 +259,7 @@ wrapped.
       );
     });
 
-    testWithoutContext('preserves indentation and stripping trailing whitespace', () {
+    test('preserves indentation and stripping trailing whitespace', () {
       expect(
         wrapText('$indentedLongLine   ', columnWidth: lineLength, shouldWrap: true),
         equals('''
@@ -269,7 +269,7 @@ wrapped.
       );
     });
 
-    testWithoutContext('wraps text with newlines', () {
+    test('wraps text with newlines', () {
       expect(
         wrapText(longLineWithNewlines, columnWidth: lineLength, shouldWrap: true),
         equals('''
@@ -281,7 +281,7 @@ needs to be wrapped.
       );
     });
 
-    testWithoutContext('wraps text with ANSI sequences embedded', () {
+    test('wraps text with ANSI sequences embedded', () {
       expect(
         wrapText(longAnsiLineWithNewlines, columnWidth: lineLength, shouldWrap: true),
         equals('''
@@ -293,14 +293,14 @@ ${AnsiTerminal.green}0123456789${AnsiTerminal.resetAll}'''),
       );
     });
 
-    testWithoutContext('wraps text with only ANSI sequences', () {
+    test('wraps text with only ANSI sequences', () {
       expect(
         wrapText(onlyAnsiSequences, columnWidth: lineLength, shouldWrap: true),
         equals('${AnsiTerminal.red}${AnsiTerminal.resetAll}'),
       );
     });
 
-    testWithoutContext('preserves indentation in the presence of newlines', () {
+    test('preserves indentation in the presence of newlines', () {
       expect(
         wrapText(indentedLongLineWithNewlines, columnWidth: lineLength, shouldWrap: true),
         equals('''
@@ -314,7 +314,7 @@ needs to be wrapped.
       );
     });
 
-    testWithoutContext('removes trailing whitespace when wrapping', () {
+    test('removes trailing whitespace when wrapping', () {
       expect(
         wrapText('$longLine     \t', columnWidth: lineLength, shouldWrap: true),
         equals('''
@@ -323,7 +323,7 @@ wrapped.'''),
       );
     });
 
-    testWithoutContext('honors hangingIndent parameter', () {
+    test('honors hangingIndent parameter', () {
       expect(
         wrapText(longLine, columnWidth: lineLength, hangingIndent: 6, shouldWrap: true),
         equals('''
@@ -332,7 +332,7 @@ This is a long line that needs to be
       );
     });
 
-    testWithoutContext('handles hangingIndent with a single unwrapped line.', () {
+    test('handles hangingIndent with a single unwrapped line.', () {
       expect(
         wrapText(shortLine, columnWidth: lineLength, hangingIndent: 6, shouldWrap: true),
         equals('''
@@ -340,19 +340,16 @@ Short line.'''),
       );
     });
 
-    testWithoutContext(
-      'handles hangingIndent with two unwrapped lines and the second is empty.',
-      () {
-        expect(
-          wrapText('$shortLine\n', columnWidth: lineLength, hangingIndent: 6, shouldWrap: true),
-          equals('''
+    test('handles hangingIndent with two unwrapped lines and the second is empty.', () {
+      expect(
+        wrapText('$shortLine\n', columnWidth: lineLength, hangingIndent: 6, shouldWrap: true),
+        equals('''
 Short line.
 '''),
-        );
-      },
-    );
+      );
+    });
 
-    testWithoutContext('honors hangingIndent parameter on already indented line.', () {
+    test('honors hangingIndent parameter on already indented line.', () {
       expect(
         wrapText(indentedLongLine, columnWidth: lineLength, hangingIndent: 6, shouldWrap: true),
         equals('''
@@ -362,7 +359,7 @@ Short line.
       );
     });
 
-    testWithoutContext('honors hangingIndent and indent parameters at the same time.', () {
+    test('honors hangingIndent and indent parameters at the same time.', () {
       expect(
         wrapText(
           indentedLongLine,
@@ -379,7 +376,7 @@ Short line.
       );
     });
 
-    testWithoutContext('honors indent parameter on already indented line.', () {
+    test('honors indent parameter on already indented line.', () {
       expect(
         wrapText(indentedLongLine, columnWidth: lineLength, indent: 6, shouldWrap: true),
         equals('''
@@ -389,7 +386,7 @@ Short line.
       );
     });
 
-    testWithoutContext('honors hangingIndent parameter on already indented line.', () {
+    test('honors hangingIndent parameter on already indented line.', () {
       expect(
         wrapText(
           indentedLongLineWithNewlines,
@@ -408,7 +405,7 @@ needs to be wrapped.
       );
     });
 
-    testWithoutContext('', () {
+    test('', () {
       expect(
         wrapText(
           '${' ' * 7}abc def ghi',
@@ -498,7 +495,7 @@ needs to be wrapped.
     });
   });
 
-  testWithoutContext('getSizeAsMB', () async {
+  test('getSizeAsMB', () async {
     expect(
       // ignore: avoid_redundant_argument_values
       getSizeAsPlatformMB(10 * 1000 * 1000, platform: FakePlatform(operatingSystem: 'linux')),
@@ -526,7 +523,7 @@ needs to be wrapped.
     );
   });
 
-  testWithoutContext('Stream.transformWithCallSite', () async {
+  test('Stream.transformWithCallSite', () async {
     final inputController = StreamController<String>();
     const jsonMap = <String, Object?>{'foo': 123};
     const invalidJson = 'Hello world!';
@@ -569,7 +566,7 @@ needs to be wrapped.
     await errorCompleter.future;
   });
 
-  testWithoutContext('formatTable', () {
+  test('formatTable', () {
     expect(formatTable(<List<String>>[]), isEmpty);
 
     expect(() => formatTable(<List<String>>[<String>[]]), throwsException);
@@ -606,7 +603,7 @@ A | B
     );
   });
 
-  testWithoutContext('formatTable with indent', () {
+  test('formatTable with indent', () {
     expect(
       formatTable(<List<String>>[
         <String>['A', 'B'],
