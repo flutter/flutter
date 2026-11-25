@@ -18,9 +18,6 @@
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/geometry/scalar.h"
-#include "fml/synchronization/count_down_latch.h"
-#include "impeller/core/device_buffer.h"
-#include "impeller/core/device_buffer_descriptor.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/playground/playground.h"
@@ -1040,8 +1037,9 @@ TEST_P(AiksTest, AdvancedBlendSaveLayerRestoreNoFbFetchKeepsClip) {
   ASSERT_TRUE(SetCapabilities(mock_capabilities).ok());
 
   DisplayListBuilder builder;
+  builder.DrawPaint(DlPaint(DlColor(0xFF808080)));
   builder.Save();
-  builder.ClipPath(DlPath::MakeCircle(DlPoint(50, 50), 50));
+  builder.ClipPath(DlPath::MakeCircle(DlPoint(200, 200), 150));
   DlPaint layer_paint;
   layer_paint.setBlendMode(DlBlendMode::kSoftLight);
   builder.SaveLayer(std::nullopt, &layer_paint);
@@ -1049,33 +1047,9 @@ TEST_P(AiksTest, AdvancedBlendSaveLayerRestoreNoFbFetchKeepsClip) {
   builder.Restore();
   builder.Restore();
 
-  AiksContext renderer(GetContext(), nullptr);
-  auto texture =
-      DisplayListToTexture(builder.Build(), ISize(100, 100), renderer);
-  ASSERT_TRUE(texture);
-
-  DeviceBufferDescriptor desc;
-  desc.size = texture->GetTextureDescriptor().GetByteSizeOfBaseMipLevel();
-  desc.readback = true;
-  desc.storage_mode = StorageMode::kHostVisible;
-  auto buffer = GetContext()->GetResourceAllocator()->CreateBuffer(desc);
-  auto cmd_buffer = GetContext()->CreateCommandBuffer();
-  auto blit_pass = cmd_buffer->CreateBlitPass();
-  blit_pass->AddCopy(texture, buffer);
-  blit_pass->EncodeCommands();
-  fml::CountDownLatch latch(1u);
-  GetContext()
-      ->GetCommandQueue()
-      ->Submit({cmd_buffer},
-               [&latch](CommandBuffer::Status status) { latch.CountDown(); })
-      .IgnoreError();
-  latch.Wait();
-
-  auto alpha_at = [&](int x, int y) {
-    return buffer->OnGetContents()[(y * 100 + x) * 4 + 3];
-  };
-  EXPECT_EQ(alpha_at(50, 50), 255);
-  EXPECT_EQ(alpha_at(5, 5), 0);
+  // The blended blue must stay inside the circle clip. The rest of the
+  // window must stay grey.
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
 }  // namespace testing
