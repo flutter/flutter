@@ -571,6 +571,43 @@ void main() {
         ),
       );
     });
+
+    testWithoutContext('sanitizes credentials in FLUTTER_GIT_URL', () async {
+      final flutterValidator = FlutterValidator(
+        platform: FakePlatform(
+          localeName: 'en_US.UTF-8',
+          environment: const <String, String>{
+            'FLUTTER_GIT_URL': 'https://env_secret@githubmirror.com/flutter.git',
+          },
+        ),
+        flutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta'),
+        devToolsVersion: () => '2.8.0',
+        artifacts: Artifacts.test(),
+        fileSystem: MemoryFileSystem.test(),
+        processManager: FakeProcessManager.any(),
+        operatingSystemUtils: FakeOperatingSystemUtils(name: 'Linux'),
+        flutterRoot: () => '/sdk/flutter',
+        featureFlags: TestFeatureFlags(),
+      );
+
+      final ValidationResult result = await flutterValidator.validate();
+      expect(
+        result,
+        _matchDoctorValidation(
+          validationType: ValidationType.partial,
+          statusInfo: 'Channel beta, 1.0.0, on Linux, locale en_US.UTF-8',
+          messages: containsAll(const <ValidationMessage>[
+            ValidationMessage.hint(
+              'Upstream repository https://github.com/flutter/flutter.git is not the same as FLUTTER_GIT_URL',
+            ),
+            ValidationMessage('FLUTTER_GIT_URL = https://githubmirror.com/flutter.git'),
+          ]),
+        ),
+      );
+      for (final ValidationMessage message in result.messages) {
+        expect(message.message, isNot(contains('env_secret')));
+      }
+    });
   });
 
   testWithoutContext(

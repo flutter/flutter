@@ -597,7 +597,7 @@ class _FlutterVersionFromFile extends FlutterVersion {
         git: git,
         frameworkVersion: manifest['frameworkVersion']! as String,
         channel: manifest['channel']! as String,
-        repositoryUrl: manifest['repositoryUrl']! as String,
+        repositoryUrl: sanitizeGitUrl(manifest['repositoryUrl']! as String),
         frameworkRevision: manifest['frameworkRevision']! as String,
         frameworkCommitDate: manifest['frameworkCommitDate']! as String,
         engineRevision: manifest['engineRevision']! as String,
@@ -724,6 +724,7 @@ class _FlutterVersionGit extends FlutterVersion {
   @override
   String? get repositoryUrl {
     if (_repositoryUrl == null) {
+      String? url;
       final RunResult trackingResult = _git.runSync([
         'rev-parse',
         '--abbrev-ref',
@@ -741,19 +742,22 @@ class _FlutterVersionGit extends FlutterVersion {
             remote,
           ], workingDirectory: flutterRoot);
           if (remoteResult.exitCode == 0) {
-            _repositoryUrl = remoteResult.stdout.trim();
+            url = remoteResult.stdout.trim();
           }
         }
       }
-      if (_repositoryUrl == null || _repositoryUrl!.isEmpty) {
+      if (url == null || url.isEmpty) {
         final RunResult originResult = _git.runSync([
           'remote',
           'get-url',
           'origin',
         ], workingDirectory: flutterRoot);
         if (originResult.exitCode == 0) {
-          _repositoryUrl = originResult.stdout.trim();
+          url = originResult.stdout.trim();
         }
+      }
+      if (url != null) {
+        _repositoryUrl = sanitizeGitUrl(url);
       }
     }
     return _repositoryUrl;
@@ -845,7 +849,8 @@ class VersionUpstreamValidator {
   ///
   /// Returns [VersionCheckError] if the tracking remote is not standard.
   VersionCheckError? run() {
-    final String? flutterGit = platform.environment['FLUTTER_GIT_URL'];
+    final String? rawFlutterGit = platform.environment['FLUTTER_GIT_URL'];
+    final String? flutterGit = rawFlutterGit == null ? null : sanitizeGitUrl(rawFlutterGit);
     final String? repositoryUrl = version.repositoryUrl;
 
     if (repositoryUrl == null) {
@@ -1489,12 +1494,37 @@ final class FlutterEngineStampFromFile {
   }
 }
 
+/// Strips embedded credentials from [url] so they are not cached, exposed via
+/// `FLUTTER_GIT_URL`, or printed in diagnostics.
+///
+/// For `http` and `https` URLs, removes `userInfo`, `query`, and `fragment`.
+/// For other schemes with an authority (such as `ssh://`), strips only the
+/// password portion of `userInfo` so standard username-only SSH remotes like
+/// `ssh://git@github.com/flutter/flutter.git` remain unchanged.
+/// SCP-like URLs (such as `git@github.com:flutter/flutter.git`), local paths,
+/// and non-URL strings are returned unchanged.
+String sanitizeGitUrl(String url) {
+  final Uri? uri = Uri.tryParse(url);
+  if (uri == null || !uri.hasScheme || !uri.hasAuthority) {
+    return url;
+  }
+  if (uri.scheme == 'http' || uri.scheme == 'https') {
+    return Uri(scheme: uri.scheme, host: uri.host, port: uri.port, path: uri.path).toString();
+  }
+  if (uri.userInfo.contains(':')) {
+    final String user = uri.userInfo.split(':').first;
+    return uri.replace(userInfo: user).toString();
+  }
+  return url;
+}
+
 bool _isStandardRemote(String remote, {required Platform platform}) {
   final String sanitized = VersionUpstreamValidator.stripDotGit(remote);
 
   // Whitelist custom enterprise mirror or fork if specified by environment variable
   final String? customGitUrl = platform.environment['FLUTTER_GIT_URL'];
-  if (customGitUrl != null && VersionUpstreamValidator.stripDotGit(customGitUrl) == sanitized) {
+  if (customGitUrl != null &&
+      VersionUpstreamValidator.stripDotGit(sanitizeGitUrl(customGitUrl)) == sanitized) {
     return true;
   }
   for (final standard in const <String>[
