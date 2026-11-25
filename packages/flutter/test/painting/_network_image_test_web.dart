@@ -398,6 +398,8 @@ void runTests() {
     // The test passes if there are no crashes.
   });
 
+  // The tests below check that a cached animated NetworkImage only decodes
+  // frames while something is listening to it.
   void setUpHttpRequest() {
     httpRequestFactory = () {
       final testHttpRequest = TestHttpRequest()
@@ -423,23 +425,28 @@ void runTests() {
     _TestBinding.instance.overrideCodec = codec;
     final provider = NetworkImage(_uniqueUrl(tester.testDescription));
 
+    // Shown: the animation runs.
     await tester.pumpWidget(Image(image: provider));
     await tester.pump();
     await pumpFor(tester, 10);
     expect(codec.framesDecoded, greaterThan(2));
 
+    // Unmounted: still cached, but no widget shows it.
     await tester.pumpWidget(const SizedBox());
     final ImageCacheStatus status = imageCache.statusForKey(provider);
     expect(status.keepAlive, isTrue);
     expect(status.live, isFalse);
 
+    // Let an in-flight decode finish.
     await pumpFor(tester, 3);
     final int snapshot = codec.framesDecoded;
 
+    // Paused: no new frames and no scheduled frame callbacks.
     await pumpFor(tester, 10);
     expect(codec.framesDecoded, snapshot);
     expect(SchedulerBinding.instance.transientCallbackCount, 0);
 
+    // Shown again: the animation resumes.
     await tester.pumpWidget(Image(image: provider));
     await pumpFor(tester, 5);
     expect(codec.framesDecoded, greaterThan(snapshot));
@@ -465,9 +472,12 @@ void runTests() {
       await pumpFor(tester, 2);
       expect(receivedFirstImage, isTrue);
 
+      // No listeners: the animation pauses.
       stream.removeListener(listenerA);
       await pumpFor(tester, 3);
 
+      // A new listener gets the current frame once, not a second copy
+      // replayed by the inner completer.
       final synchronousCalls = <bool>[];
       final listenerB = ImageStreamListener((ImageInfo info, bool synchronousCall) {
         synchronousCalls.add(synchronousCall);
@@ -476,6 +486,7 @@ void runTests() {
       stream.addListener(listenerB);
       expect(synchronousCalls, <bool>[true]);
 
+      // The animation has resumed.
       await pumpFor(tester, 3);
       expect(synchronousCalls.length, greaterThan(1));
       stream.removeListener(listenerB);
@@ -499,10 +510,13 @@ void runTests() {
     await pumpFor(tester, 3);
     expect(codec.framesDecoded, greaterThan(0));
 
+    // Paused in the cache: the codec stays alive.
     await tester.pumpWidget(const SizedBox());
     await pumpFor(tester, 3);
     expect(codec.disposed, isFalse);
 
+    // Evicted: the codec is disposed. The cache releases its handle after the
+    // next frame.
     expect(imageCache.evict(provider), isTrue);
     SchedulerBinding.instance.scheduleFrame();
     await tester.pump();
@@ -523,6 +537,8 @@ void runTests() {
         },
       );
       final provider = NetworkImage(_uniqueUrl(tester.testDescription));
+      // Bypass the ImageCache, whose pending listener would stay attached
+      // until the first frame.
       final ImageStreamCompleter completer = provider.loadImage(
         provider,
         _TestBinding.instance.instantiateImageCodecWithSize,
@@ -542,6 +558,8 @@ void runTests() {
 
       completer.removeListener(listenerA);
 
+      // Re-subscribing replays the already forwarded error, which must not be
+      // reported again as unhandled. listenerB still gets it once.
       final errorsB = <Object>[];
       final listenerB = ImageStreamListener(
         (ImageInfo info, bool _) => info.dispose(),
@@ -581,11 +599,13 @@ void runTests() {
       await tester.pump(const Duration(milliseconds: 100));
       expect(codec.framesDecoded, 2);
 
+      // Paused: an in-flight decode fails, but nothing is reported yet.
       await tester.pumpWidget(TickerMode(enabled: false, child: Image(image: provider)));
       frame1.completeError(StateError('decode failed'));
       await tester.pump();
       expect(tester.takeException(), isNull);
 
+      // Resumed: the error is reported exactly once.
       await tester.pumpWidget(TickerMode(enabled: true, child: Image(image: provider)));
       expect(tester.takeException(), isStateError);
       await tester.pump();
