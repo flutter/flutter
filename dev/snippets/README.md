@@ -63,7 +63,7 @@ repo](https://github.com/flutter/flutter/blob/main/dev/snippets/config/skeletons
 #### Analysis
 
 The
-[`analyze_sample_code.dart`](https://github.com/flutter/flutter/blob/main/dev/bots/analyze_sample_code.dart)
+[`analyze_snippet_code.dart`](https://github.com/flutter/flutter/blob/main/dev/bots/analyze_snippet_code.dart)
 script finds code inside the `@tool
 snippet` sections and uses the Dart analyzer to check them.
 
@@ -123,7 +123,7 @@ This command is displayed as part of the sample in the API docs.
 
 #### Sample Analysis
 
-The [`../bots/analyze_sample_code.dart`](../bots/analyze_sample_code.dart)
+The [`../bots/analyze_snippet_code.dart`](../bots/analyze_snippet_code.dart)
 script finds code inside the `@tool sample` sections and uses the Dart analyzer
 to check the sample code.
 
@@ -184,7 +184,7 @@ generating the entire docs output takes a long time.
 Instead, you can run the analysis locally with this command from the Flutter root:
 
 ```bash
-TMPDIR=/tmp bin/cache/dart-sdk/bin/dart dev/bots/analyze_sample_code.dart --temp=samples
+TMPDIR=/tmp bin/cache/dart-sdk/bin/dart dev/bots/analyze_snippet_code.dart --temp=samples
 ```
 
 This will analyze the samples, and leave the generated files in `/tmp/samples`

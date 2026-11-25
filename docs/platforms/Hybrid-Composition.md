@@ -6,7 +6,7 @@
 ## Background
 
 Hybrid Composition (HC) refers to a method of composing native views (for example, a native webview) alongside Flutter widgets.
-On Android, it is one of several modes for displaying platform views; see [Android Platform Views](Android-Platform-Views.md) for an overview of modes.
+On Android, it is one of several modes for displaying platform views; see [Android Platform Views](android/Android-Platform-Views.md) for an overview of modes.
 On iOS and macOS, it is the only mode used for displaying platform views.
 
 ## Approach

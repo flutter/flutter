@@ -81,7 +81,7 @@ please avoid those when possible.
 If **Linux Analyze** fails, it's likely that one or more changes in the PR
 violated a [linter rule](https://dart.dev/lints/).\
 Consider reviewing the steps outlined in
-[setting up the framework dev environment](../../Setting-up-the-Framework-development-environment.md)
+[setting up the framework dev environment](../Setting-up-the-Framework-development-environment.md)
 so that most of these problems get caught in static analysis right away.
 
 > [!NOTE]
