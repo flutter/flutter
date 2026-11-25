@@ -15,7 +15,7 @@ import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart' show OperatingSystemUtils;
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -93,6 +93,7 @@ void main() {
       Cache? cacheOverride,
       FileSystem? fsOverride,
       FlutterVersion? flutterVersion,
+      Logger? loggerOverride,
       OperatingSystemUtils? os,
       PreRunValidator? preRunValidatorOverride,
       ProcessManager? processManagerOverride,
@@ -105,7 +106,7 @@ void main() {
         fileSystemUtils: fsOverride == null ? fileSystemUtils : null,
         flutterVersion: flutterVersion,
         fs: fsOverride ?? fileSystem,
-        logger: logger,
+        logger: loggerOverride ?? logger,
         os: os,
         platform: platform,
         preRunValidator: preRunValidatorOverride,
@@ -210,21 +211,56 @@ void main() {
       expect(logger.warningText, isEmpty);
     });
 
-    test('prints Intel Mac warning on macOS X64 once', () async {
+    test('prints Intel Mac warning on macOS X64 on every command', () async {
       final flutterCommand = DummyFlutterCommand(
         toolContext: createToolContext(os: FakeOperatingSystemUtils(hostPlatform: .darwin_x64)),
       );
 
       await flutterCommand.run();
 
-      final String warningText = logger.warningText;
-      expect(warningText, contains('Flutter is deprecating support for Intel-based Macs.'));
+      expect(logger.warningText, contains('Flutter is deprecating support for Intel-based Macs.'));
 
-      // Run the command again, the message shouldn't be printed again.
+      // Run the command again, the warning is printed every time.
       await flutterCommand.run();
 
-      // BufferLogger.clear() does not clear warnings.
-      expect(logger.warningText, equals(warningText));
+      // BufferLogger.clear() does not clear warnings, so the second run appends
+      // another copy of the warning.
+      expect(
+        'Flutter is deprecating support for Intel-based Macs.'
+            .allMatches(logger.warningText)
+            .length,
+        2,
+      );
+    });
+
+    test('Intel Mac warning on macOS X64 is not fatal', () async {
+      final flutterCommand = DummyFlutterCommand(
+        toolContext: createToolContext(os: FakeOperatingSystemUtils(hostPlatform: .darwin_x64)),
+      );
+      logger.fatalWarnings = true;
+
+      await flutterCommand.run();
+
+      expect(logger.warningText, contains('Flutter is deprecating support for Intel-based Macs.'));
+      expect(logger.hadWarningOutput, isFalse);
+      expect(logger.checkForFatalLogs, returnsNormally);
+    });
+
+    test('Intel Mac warning on macOS X64 is not fatal in verbose mode', () async {
+      final verboseLogger = VerboseLogger(logger);
+      final flutterCommand = DummyFlutterCommand(
+        toolContext: createToolContext(
+          loggerOverride: verboseLogger,
+          os: FakeOperatingSystemUtils(hostPlatform: .darwin_x64),
+        ),
+      );
+      verboseLogger.fatalWarnings = true;
+
+      await flutterCommand.run();
+
+      expect(logger.warningText, contains('Flutter is deprecating support for Intel-based Macs.'));
+      expect(verboseLogger.hadWarningOutput, isFalse);
+      expect(verboseLogger.checkForFatalLogs, returnsNormally);
     });
 
     test('prints warning when enable-impeller flag is used with release build', () async {

@@ -28,6 +28,7 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/web/chrome_constants.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
+import 'package:flutter_tools/src/web/web_debug_config.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
@@ -343,8 +344,13 @@ void main() {
     await service.start(
       BuildInfo.profile,
       device,
-      DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
-      webDefines: <String, String>{'VERSION': 'v1.2.3'},
+      DebuggingOptions.enabled(
+        BuildInfo.profile,
+        platformOptions: const <PlatformDebuggingOptions>[
+          WebDebugConfig(webDefines: <String, String>{'VERSION': 'v1.2.3'}),
+        ],
+        ipv6: true,
+      ),
     );
     await service.stop();
     expect(fakeWebRunnerFactory.lastWebDefines, <String, String>{'VERSION': 'v1.2.3'});
@@ -359,7 +365,7 @@ void main() {
       device,
       DebuggingOptions.enabled(
         BuildInfo.profile,
-        webConfig: const WebDebugConfig(launchUrl: testUrl),
+        platformOptions: const <PlatformDebuggingOptions>[WebDebugConfig(launchUrl: testUrl)],
         ipv6: true,
       ),
     );
@@ -377,7 +383,9 @@ void main() {
       device,
       DebuggingOptions.enabled(
         BuildInfo.profile,
-        webConfig: WebDebugConfig(devServerConfig: webDevServerConfig),
+        platformOptions: <PlatformDebuggingOptions>[
+          WebDebugConfig(devServerConfig: webDevServerConfig),
+        ],
         ipv6: true,
       ),
     );
@@ -398,7 +406,9 @@ void main() {
         device,
         DebuggingOptions.enabled(
           BuildInfo.profile,
-          webConfig: const WebDebugConfig(launchUrl: invalidTestUrl),
+          platformOptions: const <PlatformDebuggingOptions>[
+            WebDebugConfig(launchUrl: invalidTestUrl),
+          ],
           ipv6: true,
         ),
       ),
@@ -513,11 +523,10 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
     Map<String, Object?> platformArgs = const <String, Object?>{},
     String? target,
     UrlTunneller? urlTunneller,
-    Map<String, String> webDefines = const <String, String>{},
   }) {
     expect(stayResident, isTrue);
     lastPlatformArgs = platformArgs;
-    lastWebDefines = webDefines;
+    lastWebDefines = debuggingOptions.webConfig.webDefines;
     return FakeResidentRunner(
       doResolveToError: doResolveToError,
       debuggingOptions: debuggingOptions,
