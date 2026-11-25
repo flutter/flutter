@@ -307,6 +307,8 @@ source_set("flutter_linux_sources_gtk4") {
     "fl_event_channel.cc",
     "fl_framebuffer.cc",
     "fl_gl_fence.cc",
+    "fl_gl_texture_vulkan.cc",
+    "fl_gl_texture_vulkan.h",
     "fl_glib_compat.h",
     "fl_gnome_settings.cc",
     "fl_graphics_offload_gtk4.cc",

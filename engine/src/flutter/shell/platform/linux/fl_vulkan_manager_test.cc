@@ -24,6 +24,11 @@ TEST(FlVulkanManagerTest, UninitializedManagerRejectsAllocation) {
       fl_vulkan_manager_create_backing_store(manager, &config, &backing_store));
 }
 
+TEST(FlVulkanManagerTest, UninitializedManagerDoesNotAdvertiseGLImages) {
+  g_autoptr(FlVulkanManager) manager = fl_vulkan_manager_new();
+  EXPECT_FALSE(fl_vulkan_manager_supports_gl_images(manager));
+}
+
 class FlVulkanIntegrationTest : public flutter::testing::LinuxTest {
  protected:
   void SetUp() override {
@@ -127,6 +132,13 @@ class FlVulkanIntegrationTest : public flutter::testing::LinuxTest {
   FlVulkanManager* manager = nullptr;
   FlutterVulkanRendererConfig config = {};
 };
+
+TEST_F(FlVulkanIntegrationTest, GLImagesRequireOptIn) {
+  if (g_strcmp0(g_getenv("FLUTTER_GTK4_VULKAN_GL_TEXTURES"), "1") == 0) {
+    GTEST_SKIP() << "Run without the GL texture bridge opt-in";
+  }
+  EXPECT_FALSE(fl_vulkan_manager_supports_gl_images(manager));
+}
 
 TEST_F(FlVulkanIntegrationTest, ReadbackSurvivesResizeAndCollection) {
   for (auto width : {17u, 101u}) {

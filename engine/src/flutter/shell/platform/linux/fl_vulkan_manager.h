@@ -41,6 +41,8 @@ GBytes* fl_vulkan_backing_store_read_pixels(
 
 G_END_DECLS
 
+bool fl_vulkan_manager_supports_gl_images(FlVulkanManager* self);
+
 // Internal device lease, empty before initialization.
 flutter::FlVulkanDeviceContext fl_vulkan_manager_get_device_context(
     FlVulkanManager* self);

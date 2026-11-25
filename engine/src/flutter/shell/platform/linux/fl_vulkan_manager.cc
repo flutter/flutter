@@ -13,6 +13,7 @@
 #define VK_NO_PROTOTYPES
 #include <vulkan/vulkan.h>
 
+#include <algorithm>
 #include <cmath>
 #include <cstring>
 #include <limits>
@@ -136,6 +137,7 @@ struct State {
   VkCommandPool command_pool = VK_NULL_HANDLE;
   std::vector<const char*> extensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
   bool supports_export = false;
+  bool supports_gl_images = false;
 #define DECLARE(name) PFN_vk##name name = nullptr;
   DEVICE_FUNCTIONS(DECLARE)
 #undef DECLARE
@@ -315,6 +317,52 @@ bool initialize(State& state, GError** error) {
       state.extensions.insert(state.extensions.end(),
                               std::begin(export_extensions),
                               std::end(export_extensions));
+    }
+  }
+  if (can_export &&
+      g_strcmp0(g_getenv("FLUTTER_GTK4_VULKAN_GL_TEXTURES"), "1") == 0) {
+    auto has_extension = [&](const char* name) {
+      return std::any_of(available.begin(), available.end(),
+                         [&](const auto& ext) {
+                           return strcmp(name, ext.extensionName) == 0;
+                         });
+    };
+    if (has_extension(VK_EXT_IMAGE_DRM_FORMAT_MODIFIER_EXTENSION_NAME) &&
+        has_extension(VK_KHR_IMAGE_FORMAT_LIST_EXTENSION_NAME)) {
+      VkPhysicalDeviceExternalImageFormatInfo external = {
+          VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_IMAGE_FORMAT_INFO};
+      external.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_DMA_BUF_BIT_EXT;
+      VkPhysicalDeviceImageDrmFormatModifierInfoEXT modifier = {
+          VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_DRM_FORMAT_MODIFIER_INFO_EXT};
+      modifier.pNext = &external;
+      modifier.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+      VkPhysicalDeviceImageFormatInfo2 info = {
+          VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2};
+      info.pNext = &modifier;
+      info.type = VK_IMAGE_TYPE_2D;
+      info.format = VK_FORMAT_R8G8B8A8_UNORM;
+      info.tiling = VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT;
+      info.usage =
+          VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+      VkExternalImageFormatProperties props = {
+          VK_STRUCTURE_TYPE_EXTERNAL_IMAGE_FORMAT_PROPERTIES};
+      VkImageFormatProperties2 formats = {
+          VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2};
+      formats.pNext = &props;
+      INSTANCE(GetPhysicalDeviceImageFormatProperties2);
+      if (GetPhysicalDeviceImageFormatProperties2(state.physical_device, &info,
+                                                  &formats) == VK_SUCCESS &&
+          (props.externalMemoryProperties.externalMemoryFeatures &
+           VK_EXTERNAL_MEMORY_FEATURE_EXPORTABLE_BIT)) {
+        if (!state.supports_export)
+          state.extensions.insert(state.extensions.end(),
+                                  std::begin(export_extensions),
+                                  std::end(export_extensions));
+        state.extensions.push_back(VK_KHR_IMAGE_FORMAT_LIST_EXTENSION_NAME);
+        state.extensions.push_back(
+            VK_EXT_IMAGE_DRM_FORMAT_MODIFIER_EXTENSION_NAME);
+        state.supports_gl_images = true;
+      }
     }
   }
   VkPhysicalDeviceProperties selected_properties;
@@ -771,4 +819,8 @@ bool fl_vulkan_composition_draw(FlVulkanComposition** cache,
   output->type = kFlutterBackingStoreTypeVulkan;
   output->vulkan.user_data = target.get();
   return true;
+}
+
+bool fl_vulkan_manager_supports_gl_images(FlVulkanManager* self) {
+  return *self->state && (*self->state)->supports_gl_images;
 }

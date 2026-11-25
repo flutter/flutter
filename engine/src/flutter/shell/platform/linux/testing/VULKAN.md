@@ -81,9 +81,17 @@ set `FLUTTER_GTK4_ENABLE_GRAPHICS_OFFLOAD=1` to request that separately.
 `FLUTTER_LINUX_GTK_DEBUG=1` reports `event=vulkan-presentation path=dmabuf` or
 `path=readback`. EGL export and direct Wayland EGL rendering are independent.
 
-Pixel-buffer plugin textures work with Vulkan. GL-only plugin textures are
-rejected at registration; they require OpenGL. A native Vulkan plugin API is not
-provided. Platform-view layers are rejected. Allocation pooling, modifier-aware
+Pixel-buffer plugin textures work with Vulkan. To test GL-only plugins, set
+`FLUTTER_GTK4_VULKAN_GL_TEXTURES=1` with `FLUTTER_LINUX_RENDERER=vulkan`.
+Registration requires Vulkan export support for linear RGBA8 images. At frame
+time EGL must import the image and the plugin must supply a framebuffer-readable
+`GL_TEXTURE_2D`. The bridge blits it into a pooled DMA-BUF image, waits for GL
+completion, and transfers ownership back to Vulkan for sampling. This introduces
+a GPU copy and synchronization costs. A successfully copied image logs
+`event=vulkan-gl-texture path=dmabuf` when GTK debug logging is enabled.
+With the option disabled, Vulkan rejects GL-only textures at registration.
+
+A native Vulkan plugin API is not provided. Platform-view layers are rejected. Allocation pooling, modifier-aware
 image export, finer completion synchronization,
 device-loss recovery and broader multi-window/driver coverage remain follow-up
 work. No automatic GLES retry is implemented.

@@ -84,7 +84,9 @@ static gboolean register_texture(FlTextureRegistrar* registrar,
 
 #if FLUTTER_LINUX_GTK4
     if (fl_engine_get_vulkan_manager(engine) &&
-        !FL_IS_PIXEL_BUFFER_TEXTURE(texture)) {
+        !FL_IS_PIXEL_BUFFER_TEXTURE(texture) &&
+        !fl_vulkan_manager_supports_gl_images(
+            fl_engine_get_vulkan_manager(engine))) {
       g_warning("OpenGL plugin textures require the OpenGL renderer");
       return FALSE;
     }

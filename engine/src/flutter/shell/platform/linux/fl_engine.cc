@@ -23,6 +23,7 @@
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
 #include "flutter/shell/platform/linux/fl_pixel_buffer_texture_private.h"
 #if FLUTTER_LINUX_GTK4
+#include "flutter/shell/platform/linux/fl_gl_texture_vulkan.h"  // nogncheck
 #include "flutter/shell/platform/linux/fl_pixel_buffer_texture_vulkan.h"  // nogncheck
 #endif
 #include "flutter/shell/platform/linux/fl_gtk_frame_pacer.h"
@@ -560,6 +561,10 @@ static bool fl_engine_vulkan_external_texture_frame_callback(
     return false;
   g_autoptr(FlTexture) texture =
       fl_texture_registrar_ref_texture(self->texture_registrar, texture_id);
+  if (texture && FL_IS_TEXTURE_GL(texture))
+    return fl_gl_texture_populate_vulkan(
+        FL_TEXTURE_GL(texture), self->opengl_manager, self->vulkan_manager,
+        width, height, output);
   if (!texture || !FL_IS_PIXEL_BUFFER_TEXTURE(texture))
     return false;
   g_autoptr(GError) error = nullptr;
