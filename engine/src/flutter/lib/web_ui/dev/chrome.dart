@@ -128,6 +128,7 @@ class Chrome extends Browser {
           '--password-store=basic',
           '--use-mock-keychain',
           '--remote-debugging-port=$kDevtoolsPort',
+          '--js-flags=--expose-gc',
 
           // SwiftShader support on ARM macs is disabled until they upgrade to a newer
           // version of LLVM, see https://issuetracker.google.com/issues/165000222. In

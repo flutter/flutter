@@ -34,7 +34,6 @@ import '../doctor.dart';
 import '../features.dart';
 import '../flutter_plugins.dart';
 import '../package_graph.dart';
-import '../persistent_tool_state.dart';
 import '../pre_run_validator.dart';
 import '../project.dart';
 import '../reporting/unified_analytics.dart';
@@ -183,6 +182,7 @@ abstract final class FlutterCommandCategory {
 abstract class FlutterCommand extends Command<void> {
   FlutterCommand({
     required this.toolContext,
+    this._applicationPackages,
     this.verboseHelp = false,
     this._outputPreferences,
     DeviceManager? deviceManager,
@@ -209,7 +209,6 @@ abstract class FlutterCommand extends Command<void> {
   UserMessages get _userMessages => toolContext.userMessages;
   PreRunValidator get _preRunValidator => toolContext.preRunValidator;
   OperatingSystemUtils get _os => toolContext.os;
-  PersistentToolState? get _persistentToolState => toolContext.persistentToolState;
   Platform get _platform => toolContext.platform;
   FileSystem get _fs => toolContext.fs;
   FlutterProjectFactory get _projectFactory => toolContext.projectFactory;
@@ -1177,14 +1176,14 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
-    final PersistentToolState? persistentToolState = _persistentToolState;
-    if (_os.hostPlatform == HostPlatform.darwin_x64 &&
-        (persistentToolState?.shouldShowIntelMacWarning ?? true)) {
+    if (_os.hostPlatform == .darwin_x64) {
+      // This is about the host machine rather than the project, so it should
+      // not fail commands that treat warnings as fatal.
       _logger.printWarning(
         'Flutter is deprecating support for Intel-based Macs. '
         'A future version of Flutter will require an Apple Silicon Mac to build applications.',
+        fatal: false,
       );
-      persistentToolState?.shouldShowIntelMacWarning = false;
     }
 
     if (refreshWirelessDevices) {
@@ -1232,7 +1231,7 @@ abstract class FlutterCommand extends Command<void> {
     project.checkForDeprecation(deprecationBehavior: deprecationBehavior);
 
     if (shouldRunPub) {
-      await pub.get(
+      await runner!.pub.get(
         context: PubContext.getVerifyContext(name),
         project: project,
         checkUpToDate: cachePubGet,
@@ -1297,6 +1296,7 @@ abstract class FlutterCommand extends Command<void> {
       pubspecCache: pubspecCache,
       packageGraph: packageGraph,
       packageConfig: packageConfig,
+      templatePathProvider: commandRunner.templatePathProvider,
       templateRenderer: commandRunner.templateRenderer,
     );
   }
@@ -1401,9 +1401,8 @@ abstract class FlutterCommand extends Command<void> {
     return help;
   }
 
-  // TODO(bkonyi): Remove once commands using ApplicationPackageFactory are migrated to explicit dependency injection, https://github.com/flutter/flutter/issues/47161.
-  ApplicationPackageFactory? get applicationPackages =>
-      _applicationPackages ?? ApplicationPackageFactory.instance;
+  ApplicationPackageFactory get applicationPackages =>
+      _applicationPackages ?? runner!.applicationPackageFactory;
   set applicationPackages(ApplicationPackageFactory? value) {
     _applicationPackages = value;
   }
@@ -1452,7 +1451,7 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
       final TargetPlatform targetPlatform = await device.targetPlatform;
       final DevelopmentArtifact? developmentArtifact = artifactFromTargetPlatform(
         targetPlatform,
-        runner?.featureFlags ?? featureFlags,
+        runner!.featureFlags,
       );
       if (developmentArtifact != null) {
         artifacts.add(developmentArtifact);

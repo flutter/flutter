@@ -17,7 +17,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
@@ -49,6 +48,7 @@ void main() {
       fileSystem.currentDirectory,
       inputs: <String, String>{},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
@@ -84,7 +84,7 @@ void main() {
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
         logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
@@ -114,11 +114,7 @@ void main() {
 
   testUsingContext(
     'build with assets but not enabled',
-    overrides: <Type, Generator>{
-      // ignore: avoid_redundant_argument_values
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: false),
-      ProcessManager: () => FakeProcessManager.empty(),
-    },
+    overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
       await packageConfig.parent.create();
@@ -129,7 +125,7 @@ void main() {
           targetPlatform: TargetPlatform.windows_x64,
           projectUri: projectUri,
           fileSystem: fileSystem,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(),
           logger: testLogger,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
@@ -160,7 +156,7 @@ void main() {
         targetPlatform: TargetPlatform.windows_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
         logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
@@ -202,7 +198,7 @@ void main() {
           targetPlatform: TargetPlatform.linux_x64,
           projectUri: projectUri,
           fileSystem: fileSystem,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
           logger: testLogger,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
@@ -243,7 +239,7 @@ void main() {
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
         logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
@@ -300,7 +296,7 @@ void main() {
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
         logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
@@ -376,7 +372,7 @@ void main() {
           targetPlatform: TargetPlatform.linux_x64,
           projectUri: projectUri,
           fileSystem: fileSystem,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
           logger: testLogger,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
@@ -437,7 +433,7 @@ void main() {
       targetPlatform: TargetPlatform.tester,
       projectUri: projectUri,
       fileSystem: fileSystem,
-      featureFlags: featureFlags,
+      featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
       logger: testLogger,
       buildRunner: target,
       buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: fileSystem.directory(projectUri)),
@@ -481,7 +477,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
         targetPlatform: TargetPlatform.linux_arm64,
         projectUri: projectUri,
         fileSystem: fileSystem,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
         logger: testLogger,
         buildRunner: target,
         buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: project.childDirectory('build')),
@@ -511,7 +507,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
         targetPlatform: TargetPlatform.windows_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
         logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
@@ -559,7 +555,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
         processManager: FakeProcessManager.empty(),
         nativeAssetsFileUri:
             nativeAssetsFileUri ??
-            targetDirectory.childFile(InstallCodeAssets.nativeAssetsFilename).uri,
+            targetDirectory.parent.childFile(InstallCodeAssets.nativeAssetsFilename).uri,
         targetUri: targetDirectory.uri,
       );
     }
@@ -575,7 +571,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
       final Directory targetDirectory = errorHandlingFs.directory(
         '/project/build/native_assets/macos',
       )..createSync(recursive: true);
-      final File existingManifest = targetDirectory.childFile(
+      final File existingManifest = targetDirectory.parent.childFile(
         InstallCodeAssets.nativeAssetsFilename,
       )..writeAsStringSync('{"stale": true}');
       final File staleDylib = targetDirectory.childFile('libstale.dylib')
@@ -604,35 +600,22 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
       expect(existingManifest.readAsStringSync(), isNot(contains('"stale"')));
     });
 
-    testWithoutContext(
-      'replaces native_assets.json if it is a directory or symlink on disk',
-      () async {
-        final FileSystem fs = MemoryFileSystem.test();
-        final Directory targetDirectory = fs.directory('/project/build/native_assets/macos')
-          ..createSync(recursive: true);
-        final File manifestFile = targetDirectory.childFile(InstallCodeAssets.nativeAssetsFilename);
+    testWithoutContext('asserts when nativeAssetsFileUri is inside targetUri', () async {
+      final FileSystem fs = MemoryFileSystem.test();
+      final Directory targetDirectory = fs.directory('/project/build/native_assets/macos')
+        ..createSync(recursive: true);
 
-        // Case 1: native_assets.json is unexpectedly a non-empty directory.
-        targetDirectory
-            .childDirectory(InstallCodeAssets.nativeAssetsFilename)
-            .childFile('unexpected.txt')
-            .createSync(recursive: true);
-
-        await runInstall(fileSystem: fs, targetDirectory: targetDirectory);
-        expect(fs.typeSync(manifestFile.path, followLinks: false), FileSystemEntityType.file);
-
-        // Case 2: native_assets.json is a symlink.
-        manifestFile.deleteSync();
-        final File linkTarget = fs.file('/project/other.json')..writeAsStringSync('{}');
-        targetDirectory
-            .childLink(InstallCodeAssets.nativeAssetsFilename)
-            .createSync(linkTarget.path);
-
-        await runInstall(fileSystem: fs, targetDirectory: targetDirectory);
-        expect(fs.typeSync(manifestFile.path, followLinks: false), FileSystemEntityType.file);
-        expect(linkTarget.readAsStringSync(), '{}');
-      },
-    );
+      await expectLater(
+        () => runInstall(
+          fileSystem: fs,
+          targetDirectory: targetDirectory,
+          nativeAssetsFileUri: targetDirectory
+              .childFile(InstallCodeAssets.nativeAssetsFilename)
+              .uri,
+        ),
+        throwsAssertionError,
+      );
+    });
 
     testWithoutContext('throws ToolExit when deleting a stale asset fails with EXDEV', () async {
       final exceptionHandler = FileExceptionHandler();
@@ -928,6 +911,7 @@ environment:
           flutterHookResult: _,
         ) = await testCompilerBuildNativeAssets(
           buildInfo,
+          featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
           toolContext: FakeToolContext(
             config: Config.test(),
             fs: hostFileSystem,
@@ -943,6 +927,12 @@ environment:
         );
         expect(nativeAssetsManifest, isNotNull);
         expect(hostFileSystem.file(nativeAssetsManifest).existsSync(), isTrue);
+        expect(
+          hostFileSystem.file(nativeAssetsManifest).path,
+          endsWith(
+            hostFileSystem.path.join('build', 'native_assets', 'flutter_test_native_assets.json'),
+          ),
+        );
       },
     );
 
@@ -991,6 +981,7 @@ environment:
           flutterHookResult: _,
         ) = await testCompilerBuildNativeAssets(
           buildInfo,
+          featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
           toolContext: FakeToolContext(
             config: Config.test(),
             fs: hostFileSystem,

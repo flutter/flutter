@@ -16,7 +16,7 @@ import '../../../base/platform.dart';
 import '../../../build_info.dart';
 import '../../../cache.dart';
 import '../../../context/tool_context.dart';
-import '../../../features.dart' show featureFlags;
+import '../../../features.dart';
 import '../../../native_assets.dart';
 import '../../../project.dart';
 import '../../../windows/visual_studio.dart';
@@ -24,7 +24,7 @@ import '../dart_hook_result.dart';
 import '../native_assets.dart';
 
 const _fileScheme = 'file';
-const _nativeAssetsJsonFileName = 'native_assets.json';
+const _nativeAssetsJsonFileName = 'flutter_test_native_assets.json';
 const _pubspecYamlFileName = 'pubspec.yaml';
 
 /// Builds native assets for `flutter test` targets on the host platform.
@@ -32,14 +32,26 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
   const TestCompilerNativeAssetsBuilderImpl();
 
   @override
-  Future<Uri?> build(BuildInfo buildInfo, {required ToolContext toolContext}) async =>
-      (await buildWithHookResult(buildInfo, toolContext: toolContext)).nativeAssetsManifest;
+  Future<Uri?> build(
+    BuildInfo buildInfo, {
+    required FeatureFlags featureFlags,
+    required ToolContext toolContext,
+  }) async => (await buildWithHookResult(
+    buildInfo,
+    featureFlags: featureFlags,
+    toolContext: toolContext,
+  )).nativeAssetsManifest;
 
   @override
   Future<TestCompilerNativeAssetsBuildResult> buildWithHookResult(
     BuildInfo buildInfo, {
+    required FeatureFlags featureFlags,
     required ToolContext toolContext,
-  }) => testCompilerBuildNativeAssets(buildInfo, toolContext: toolContext);
+  }) => testCompilerBuildNativeAssets(
+    buildInfo,
+    featureFlags: featureFlags,
+    toolContext: toolContext,
+  );
 
   @override
   String windowsBuildDirectory(FlutterProject project, {required ToolContext toolContext}) {
@@ -53,14 +65,16 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
 ///
 /// Resolves the target package name for the current project and executes build
 /// and install hooks for the host test platform ([TargetPlatform.tester]),
-/// writing the generated manifest to `build/native_assets/<os>/native_assets.json`.
+/// writing the generated manifest to
+/// `build/native_assets/flutter_test_native_assets.json`.
 ///
 /// Returns the [TestCompilerNativeAssetsBuildResult] containing the [Uri] to the
-/// generated `native_assets.json` file and hook output, or `null` fields if
-/// native assets are disabled, unsupported on the host OS, or no package can
-/// be resolved.
+/// generated `flutter_test_native_assets.json` file and hook output, or `null`
+/// fields if native assets are disabled, unsupported on the host OS, or no
+/// package can be resolved.
 Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
   BuildInfo buildInfo, {
+  required FeatureFlags featureFlags,
   required ToolContext toolContext,
 }) async {
   final BuildInfo(
@@ -124,13 +138,14 @@ Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
   }
 
   // Only `flutter test` uses the
-  // `build/native_assets/<os>/native_assets.json` file which uses absolute
-  // paths to the shared libraries.
+  // `build/native_assets/flutter_test_native_assets.json` file which uses
+  // absolute paths to the shared libraries.
   final OS targetOS = getNativeOSFromTargetPlatform(TargetPlatform.tester);
   final String buildDir = getBuildDirectory(config, fileSystem);
   final String osName = targetOS.name;
-  final Uri buildUri = projectUri.resolve('$buildDir/native_assets/$osName/');
-  final Uri nativeAssetsFileUri = buildUri.resolve(_nativeAssetsJsonFileName);
+  final Uri nativeAssetsDirUri = projectUri.resolve('$buildDir/native_assets/');
+  final Uri buildUri = nativeAssetsDirUri.resolve('$osName/');
+  final Uri nativeAssetsFileUri = nativeAssetsDirUri.resolve(_nativeAssetsJsonFileName);
 
   final environmentDefines = <String, String>{kBuildMode: mode.cliName};
 

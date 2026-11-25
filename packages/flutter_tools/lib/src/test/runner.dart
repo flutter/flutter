@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -21,6 +22,7 @@ import '../native_assets.dart';
 import '../project.dart';
 import '../web/chrome.dart';
 import '../web/memory_fs.dart';
+import '../web/web_debug_config.dart';
 import 'flutter_platform.dart' as loader;
 import 'flutter_web_platform.dart';
 import 'test_time_recorder.dart';
@@ -144,9 +146,11 @@ interface class FlutterTestRunner {
     required this._analytics,
     required this._templateRenderer,
     required this._toolContext,
+    this._applicationPackageFactory,
   });
 
   final Analytics _analytics;
+  final ApplicationPackageFactory? _applicationPackageFactory;
   final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
 
@@ -246,6 +250,7 @@ interface class FlutterTestRunner {
       flutterTesterBinPath: flutterTesterBinPath,
       templateRenderer: _templateRenderer,
       toolContext: _toolContext,
+      applicationPackageFactory: _applicationPackageFactory,
       enableVmService: spec.enableVmService,
       flutterProject: flutterProject,
       icudtlPath: spec.icudtlPath,

@@ -11,6 +11,7 @@ import 'package:vm_service/vm_service.dart';
 import '../android/android_device.dart';
 import '../android/android_engine_cli_flags.dart';
 import '../android/android_workflow.dart';
+import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -26,7 +27,7 @@ import '../context/apple_context.dart';
 import '../context/tool_context.dart';
 import '../device.dart';
 import '../features.dart';
-import '../hook_runner.dart' show hookRunner;
+import '../hook_runner.dart' show FlutterHookRunner;
 import '../ios/devices.dart';
 import '../project.dart';
 import '../resident_runner.dart';
@@ -36,6 +37,7 @@ import '../runner/flutter_command.dart';
 import '../tracing.dart';
 import '../web/compile.dart';
 import '../web/devfs_config.dart';
+import '../web/web_debug_config.dart';
 import '../web/web_options.dart';
 import '../web/web_runner.dart';
 import 'daemon.dart';
@@ -43,10 +45,12 @@ import 'daemon.dart';
 /// Shared logic between `flutter run` and `flutter drive` commands.
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   RunCommandBase({
+    required this.assetBundleFactory,
     required this.buildSystem,
     required this.buildTargets,
     required super.toolContext,
     required super.verboseHelp,
+    super.applicationPackages,
     super.outputPreferences,
     super.deviceManager,
   }) {
@@ -107,8 +111,11 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     help: 'Start in a paused mode and wait for a debugger to connect.',
   );
 
+  final AssetBundleFactory assetBundleFactory;
   final BuildSystem buildSystem;
   final BuildTargets buildTargets;
+
+  FeatureFlags get _featureFlags => runner!.featureFlags;
 
   bool get traceStartup => getValue(DebuggingOptionDescriptors.traceStartup);
   bool get traceSystrace => getValue(DebuggingOptionDescriptors.traceSystrace);
@@ -154,10 +161,10 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   @protected
   Future<DebuggingOptions> createDebuggingOptions({WebDevServerConfig? webDevServerConfig}) async {
     final BuildInfo buildInfo = await getBuildInfo();
-    final int? webBrowserDebugPort = featureFlags.isWebEnabled
+    final int? webBrowserDebugPort = _featureFlags.isWebEnabled
         ? getValue(WebOptions.webBrowserDebugPort)
         : null;
-    final List<String> webBrowserFlags = featureFlags.isWebEnabled
+    final List<String> webBrowserFlags = _featureFlags.isWebEnabled
         ? getValue(WebOptions.webBrowserFlags)
         : const <String>[];
 
@@ -169,35 +176,38 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         : null;
 
     final webConfig = WebDebugConfig(
-      enableExposeUrl: featureFlags.isWebEnabled && getValue(WebOptions.webAllowExposeUrl),
+      enableExposeUrl: _featureFlags.isWebEnabled && getValue(WebOptions.webAllowExposeUrl),
       useSseForDebugProxy:
-          featureFlags.isWebEnabled && getValue(WebOptions.webServerDebugProtocol) == 'sse',
+          _featureFlags.isWebEnabled && getValue(WebOptions.webServerDebugProtocol) == 'sse',
       useSseForDebugBackend:
-          featureFlags.isWebEnabled && getValue(WebOptions.webServerDebugBackendProtocol) == 'sse',
+          _featureFlags.isWebEnabled && getValue(WebOptions.webServerDebugBackendProtocol) == 'sse',
       useSseForInjectedClient:
-          featureFlags.isWebEnabled &&
+          _featureFlags.isWebEnabled &&
           getValue(WebOptions.webServerDebugInjectedClientProtocol) == 'sse',
-      runHeadless: featureFlags.isWebEnabled && getValue(WebOptions.webRunHeadless),
+      runHeadless: _featureFlags.isWebEnabled && getValue(WebOptions.webRunHeadless),
       browserDebugPort: webBrowserDebugPort,
       browserFlags: webBrowserFlags,
       enableExpressionEvaluation:
           !buildInfo.mode.isRelease &&
-          featureFlags.isWebEnabled &&
+          _featureFlags.isWebEnabled &&
           getValue(WebOptions.webEnableExpressionEvaluation),
-      launchUrl: !buildInfo.mode.isRelease && featureFlags.isWebEnabled
+      launchUrl: !buildInfo.mode.isRelease && _featureFlags.isWebEnabled
           ? getValue(WebOptions.webLaunchUrl)
           : null,
       crossOriginIsolation: webCrossOriginIsolation,
+      nativeNullAssertions:
+          !buildInfo.mode.isRelease && getValue(CommonOptions.nativeNullAssertions),
       renderer: webRenderer,
       useWasm: useWasm,
       devServerConfig: webDevServerConfig,
+      webDefines: extractWebDefines(),
     );
 
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
         dartEntrypointArgs: getValue(DebuggingOptionDescriptors.dartEntrypointArgs),
-        webConfig: webConfig,
+        platformOptions: <PlatformDebuggingOptions>[webConfig],
         enableImpeller: enableImpeller,
         enableFlutterGpu: enableFlutterGpu,
         enableVulkanValidation: enableVulkanValidation,
@@ -247,9 +257,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         ddsPort: ddsPort,
         devToolsServerAddress: devToolsServerAddress,
         verboseSystemLogs: getValue(DebuggingOptionDescriptors.verboseSystemLogs),
-        webConfig: webConfig,
+        platformOptions: <PlatformDebuggingOptions>[webConfig],
         vmserviceOutFile: getValue(DebuggingOptionDescriptors.vmserviceOutFile),
-        nativeNullAssertions: getValue(CommonOptions.nativeNullAssertions),
         enableImpeller: enableImpeller,
         enableFlutterGpu: enableFlutterGpu,
         enableVulkanValidation: enableVulkanValidation,
@@ -332,12 +341,17 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 class RunCommand extends RunCommandBase {
   RunCommand({
     required this.appleContext,
+    required super.assetBundleFactory,
     required super.buildSystem,
     required super.buildTargets,
+    required this._devtoolsLauncher,
     required super.toolContext,
     this._androidContext,
     this._androidWorkflow,
+    super.applicationPackages,
     this.deviceManager,
+    this._flutterHookRunner,
+    this._webRunnerFactory,
     super.verboseHelp = false,
   }) : super(deviceManager: deviceManager) {
     requiresPubspecYaml();
@@ -404,6 +418,9 @@ class RunCommand extends RunCommandBase {
   final AndroidWorkflow? _androidWorkflow;
   final AppleContext appleContext;
   final DeviceManager? deviceManager;
+  final DevtoolsLauncher _devtoolsLauncher;
+  final FlutterHookRunner? _flutterHookRunner;
+  final WebRunnerFactory? _webRunnerFactory;
 
   @override
   final name = 'run';
@@ -425,7 +442,7 @@ class RunCommand extends RunCommandBase {
     // Only support "web mode" with a single web device due to resident runner
     // refactoring required otherwise.
 
-    if (featureFlags.isWebEnabled &&
+    if (_featureFlags.isWebEnabled &&
         devices != null &&
         devices!.length == 1 &&
         await devices!.single.targetPlatform == TargetPlatform.web_javascript) {
@@ -674,25 +691,31 @@ class RunCommand extends RunCommandBase {
         dillOutputPath: getValue(BuildInfoOptions.outputDill),
         stayResident: stayResident,
         analytics: this.analytics,
+        applicationPackageFactory: applicationPackages,
+        assetBundleFactory: assetBundleFactory,
         nativeAssetsYamlFile: getValue(BuildInfoOptions.nativeAssetsYamlFile),
-        dartBuilder: hookRunner,
+        dartBuilder: _flutterHookRunner,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        featureFlags: _featureFlags,
         toolContext: toolContext,
         xcode: appleContext.xcode,
       );
     } else if (webMode) {
-      return webRunnerFactory!.createWebRunner(
+      return _webRunnerFactory!.createWebRunner(
         flutterDevices.single,
         target: targetFile,
         flutterProject: flutterProject,
         debuggingOptions: debuggingOptions,
         stayResident: stayResident,
         analytics: this.analytics,
+        applicationPackageFactory: applicationPackages,
+        assetBundleFactory: assetBundleFactory,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        featureFlags: _featureFlags,
+        flutterHookRunner: _flutterHookRunner,
         toolContext: toolContext,
-        webDefines: extractWebDefines(),
       );
     }
     return ColdRunner(
@@ -703,10 +726,13 @@ class RunCommand extends RunCommandBase {
       awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
       applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
       stayResident: stayResident,
-      dartBuilder: hookRunner,
+      dartBuilder: _flutterHookRunner,
       analytics: this.analytics,
+      applicationPackageFactory: applicationPackages,
+      assetBundleFactory: assetBundleFactory,
       buildSystem: buildSystem,
       buildTargets: buildTargets,
+      featureFlags: _featureFlags,
       toolContext: toolContext,
       xcode: appleContext.xcode,
     );
@@ -716,10 +742,15 @@ class RunCommand extends RunCommandBase {
   Daemon createMachineDaemon() {
     return Daemon.createMachineDaemon(
       analytics: this.analytics,
+      applicationPackageFactory: applicationPackages,
+      assetBundleFactory: assetBundleFactory,
       buildSystem: buildSystem,
       buildTargets: buildTargets,
-      featureFlags: featureFlags,
+      devtoolsLauncher: _devtoolsLauncher,
+      featureFlags: _featureFlags,
+      flutterHookRunner: _flutterHookRunner,
       toolContext: toolContext,
+      webRunnerFactory: _webRunnerFactory,
       xcode: appleContext.xcode,
       androidSdk: _androidContext?.androidSdk,
       androidWorkflow: _androidWorkflow,
@@ -764,7 +795,6 @@ class RunCommand extends RunCommandBase {
           route,
           debuggingOptions,
           hotMode,
-          webDefines: extractWebDefines(),
           applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
           trackWidgetCreation: trackWidgetCreation,
           projectRootPath: getValue(DebuggingOptionDescriptors.projectRoot),

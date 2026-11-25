@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/project.dart';
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
+import '../../src/throwing_pub.dart';
 
 final Platform windowsPlatform = FakePlatform(operatingSystem: 'windows');
 
@@ -36,6 +37,7 @@ void main() {
     cache = FlutterCache(
       flutterRoot: '',
       fileSystem: fileSystem,
+      isLocalEngineBuilder: () => false,
       logger: logger,
       platform: platform,
       osUtils: osUtils,
@@ -44,6 +46,7 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
       ),
+      pub: () => const ThrowingPub(),
     );
     final artifacts = CachedArtifacts(
       fileSystem: fileSystem,
@@ -57,6 +60,7 @@ void main() {
       fileSystem.currentDirectory,
       outputDir: outputs,
       artifacts: artifacts, // using real artifacts
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       // engineVersion being null simulates a local engine.
@@ -223,6 +227,7 @@ void main() {
     final windowsEnvironment = Environment.test(
       windowsFileSystem.currentDirectory,
       artifacts: Artifacts.test(fileSystem: windowsFileSystem),
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: windowsFileSystem,
       logger: BufferLogger.test(),
@@ -253,6 +258,7 @@ void main() {
       final versionedEnvironment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
         fileSystem: fileSystem,
         logger: environment.logger,
