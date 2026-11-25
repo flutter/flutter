@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert' show JsonEncoder, LineSplitter, json, utf8;
 import 'dart:io' as io;
-import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
@@ -19,12 +18,6 @@ const kGcmDisabledFlags = <String>[
   '--gcm-registration-url=http://127.0.0.1',
   '--gcm-mcs-endpoint=127.0.0.1:0',
 ];
-
-/// The number of samples used to extract metrics, such as noise, means,
-/// max/min values.
-///
-/// Keep this constant in sync with the same constant defined in `dev/benchmarks/macrobenchmarks/lib/src/web/recorder.dart`.
-const int _kMeasuredSampleCount = 10;
 
 /// Options passed to Chrome when launching it.
 class ChromeOptions {
@@ -511,22 +504,21 @@ class BlinkFrame {
   BlinkTraceEvent? endMeasuredFrame;
 }
 
-/// Takes a list of events that have non-null [BlinkTraceEvent.tdur] computes
-/// their average as a [Duration] value.
+/// Takes a non-empty list of [BlinkTraceEvent]s with a non-null
+/// [BlinkTraceEvent.tdur] or [BlinkTraceEvent.dur] and computes their average
+/// as a [Duration].
 Duration _computeAverageDuration(List<BlinkTraceEvent> events) {
-  // Compute the sum of "tdur" fields of the last _kMeasuredSampleCount events.
-  final double sum = events.skip(math.max(events.length - _kMeasuredSampleCount, 0)).fold(0.0, (
-    double previousValue,
-    BlinkTraceEvent event,
-  ) {
+  if (events.isEmpty) {
+    throw const FormatException('Cannot compute average duration of an empty event list.');
+  }
+  final double sum = events.fold(0.0, (double previousValue, BlinkTraceEvent event) {
     final int? duration = event.tdur ?? event.dur;
     if (duration == null) {
       throw FormatException('Trace event lacks "tdur" and "dur" fields: $event');
     }
     return previousValue + duration;
   });
-  final int sampleCount = math.min(events.length, _kMeasuredSampleCount);
-  return Duration(microseconds: sum ~/ sampleCount);
+  return Duration(microseconds: sum ~/ events.length);
 }
 
 /// An event collected by the Blink tracer (in Chrome accessible using chrome://tracing).
