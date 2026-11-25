@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
+import 'package:flutter_tools/src/web/web_debug_config.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
@@ -666,29 +667,42 @@ void main() {
         enableFlutterGpu: true,
         enableDartProfiling: false,
         enableEmbedderApi: true,
-        webConfig: const WebDebugConfig(
-          enableExposeUrl: true,
-          useSseForDebugProxy: false,
-          useSseForDebugBackend: false,
-          useSseForInjectedClient: false,
-          runHeadless: true,
-          browserDebugPort: 9222,
-          browserFlags: <String>['--flag1', '--flag2'],
-          enableExpressionEvaluation: true,
-          launchUrl: 'http://localhost:8080/app',
-          crossOriginIsolation: true,
-          renderer: WebRendererMode.skwasm,
-          useWasm: true,
-          devServerConfig: WebDevServerConfig(
-            port: 9000,
-            host: '127.0.0.1',
-            headers: <String, String>{'k': 'v'},
+        platformOptions: const <PlatformDebuggingOptions>[
+          WebDebugConfig(
+            enableExposeUrl: true,
+            useSseForDebugProxy: false,
+            useSseForDebugBackend: false,
+            useSseForInjectedClient: false,
+            runHeadless: true,
+            browserDebugPort: 9222,
+            browserFlags: <String>['--flag1', '--flag2'],
+            enableExpressionEvaluation: true,
+            launchUrl: 'http://localhost:8080/app',
+            crossOriginIsolation: true,
+            nativeNullAssertions: true,
+            renderer: WebRendererMode.skwasm,
+            useWasm: true,
+            webDefines: <String, String>{'API_URL': 'https://example.com'},
+            devServerConfig: WebDevServerConfig(
+              port: 9000,
+              host: '127.0.0.1',
+              headers: <String, String>{'k': 'v'},
+            ),
           ),
-        ),
+        ],
       );
       final String jsonString = json.encode(original.toJson());
-      final Map<String, dynamic> decoded = castStringKeyedMap(json.decode(jsonString))!;
-      final DebuggingOptions deserialized = DebuggingOptions.fromJson(decoded, BuildInfo.debug);
+      final Map<String, Object?> decoded = castStringKeyedMap(json.decode(jsonString))!;
+      expect(decoded, isNot(contains('webUseLocalCanvaskit')));
+      expect(decoded, isNot(contains('dumpSkpOnShaderCompilation')));
+      expect(decoded, isNot(contains('cacheSkSL')));
+      expect(decoded, isNot(contains('fastStart')));
+
+      final DebuggingOptions deserialized = DebuggingOptions.fromJson(
+        decoded,
+        BuildInfo.debug,
+        platformOptionParsers: const <PlatformDebuggingOptionsParser>[WebDebugConfig.tryFromJson],
+      );
       expect(deserialized.startPaused, original.startPaused);
       expect(deserialized.disableServiceAuthCodes, original.disableServiceAuthCodes);
       expect(deserialized.disableServiceOriginCheck, original.disableServiceOriginCheck);
@@ -711,11 +725,27 @@ void main() {
       expect(deserialized.webConfig.enableExpressionEvaluation, true);
       expect(deserialized.webConfig.launchUrl, 'http://localhost:8080/app');
       expect(deserialized.webConfig.crossOriginIsolation, true);
+      expect(deserialized.webConfig.nativeNullAssertions, true);
       expect(deserialized.webConfig.renderer, WebRendererMode.skwasm);
       expect(deserialized.webConfig.useWasm, true);
+      expect(deserialized.webConfig.webDefines, <String, String>{'API_URL': 'https://example.com'});
       expect(deserialized.webConfig.devServerConfig?.port, 9000);
       expect(deserialized.webConfig.devServerConfig?.host, '127.0.0.1');
       expect(deserialized.webConfig.devServerConfig?.headers, <String, String>{'k': 'v'});
+    });
+
+    test('fromJson omits WebDebugConfig when no web keys are present', () {
+      final original = DebuggingOptions.enabled(BuildInfo.debug);
+      final String jsonString = json.encode(original.toJson());
+      final Map<String, Object?> decoded = castStringKeyedMap(json.decode(jsonString))!;
+      final DebuggingOptions deserialized = DebuggingOptions.fromJson(
+        decoded,
+        BuildInfo.debug,
+        platformOptionParsers: const <PlatformDebuggingOptionsParser>[WebDebugConfig.tryFromJson],
+      );
+      expect(deserialized.platformOptions, isEmpty);
+      expect(deserialized.platformOption<WebDebugConfig>(), isNull);
+      expect(deserialized.webConfig, const WebDebugConfig());
     });
 
     test('WebDebugConfig defaults and useWasm defaulting', () {
@@ -730,8 +760,10 @@ void main() {
       expect(defaultConfig.enableExpressionEvaluation, isFalse);
       expect(defaultConfig.launchUrl, isNull);
       expect(defaultConfig.crossOriginIsolation, isFalse);
+      expect(defaultConfig.nativeNullAssertions, isFalse);
       expect(defaultConfig.renderer, WebRendererMode.canvaskit);
       expect(defaultConfig.useWasm, isFalse);
+      expect(defaultConfig.webDefines, isEmpty);
       expect(defaultConfig.devServerConfig, isNull);
 
       const wasmConfig = WebDebugConfig(useWasm: true);
@@ -746,6 +778,27 @@ void main() {
       );
       expect(customRendererConfig.renderer, WebRendererMode.canvaskit);
       expect(customRendererConfig.crossOriginIsolation, isFalse);
+    });
+
+    test('WebDebugConfig.fromJson falls back to default renderer on unknown renderer value', () {
+      final jsConfig = WebDebugConfig.fromJson(const <String, Object?>{'webRenderer': 'html'});
+      expect(jsConfig.renderer, WebRendererMode.defaultForJs);
+
+      final wasmConfig = WebDebugConfig.fromJson(const <String, Object?>{
+        'webRenderer': 'html',
+        'webUseWasm': true,
+      });
+      expect(wasmConfig.renderer, WebRendererMode.defaultForWasm);
+    });
+
+    test('WebDebugConfig.tryFromJson returns null when only generic keys are present', () {
+      final WebDebugConfig? config = WebDebugConfig.tryFromJson(const <String, Object?>{
+        'port': 8080,
+        'hostname': 'localhost',
+        'tlsCertPath': '/cert.pem',
+        'tlsCertKeyPath': '/key.pem',
+      });
+      expect(config, isNull);
     });
   });
 
