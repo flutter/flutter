@@ -62,6 +62,7 @@ class AnalyzeOnce extends AnalyzeBase {
       alwaysTrustPlugins: alwaysTrustPlugins,
       neverTrustPlugins: neverTrustPlugins,
       withFineDependencies: false,
+      clientId: AnalysisServer.flutterAnalyzeClientId,
     );
 
     Stopwatch? timer;

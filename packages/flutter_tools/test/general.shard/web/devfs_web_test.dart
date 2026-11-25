@@ -32,6 +32,7 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:flutter_tools/src/web/module_metadata.dart';
+import 'package:flutter_tools/src/web/web_debug_config.dart';
 import 'package:flutter_tools/src/web_template.dart';
 import 'package:logging/logging.dart' as logging;
 import 'package:meta/meta.dart';
@@ -44,6 +45,7 @@ import '../../src/fake_process_manager.dart';
 import '../../src/fake_web_devfs.dart';
 import '../../src/fakes.dart';
 import '../../src/testbed.dart';
+import '../../src/throwing_pub.dart';
 
 const kTransparentImage = <int>[
   0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, //
@@ -138,10 +140,12 @@ void main() {
       final cache = FlutterCache(
         flutterRoot: '',
         fileSystem: fs,
+        isLocalEngineBuilder: () => artifacts.localEngineInfo != null,
         logger: logger,
         platform: platform,
         osUtils: os,
         projectFactory: FlutterProjectFactory(config: config, fileSystem: fs, logger: logger),
+        pub: () => const ThrowingPub(),
       );
       artifacts = overrides?[Artifacts] != null
           ? overrides![Artifacts]!() as Artifacts
@@ -1565,9 +1569,6 @@ void main() {
     final WebAssetServer webAssetServer = await WebAssetServer.start(
       null,
       null,
-      true,
-      true,
-      true,
       const BuildInfo(
         BuildMode.debug,
         '',
@@ -1587,12 +1588,9 @@ void main() {
         logger: logger,
         platform: platform,
       ),
-      webRenderer: WebRendererMode.canvaskit,
-      isWasm: false,
       useLocalCanvasKit: false,
       testMode: true,
-      webDevServerConfig: webDevServerConfig,
-      crossOriginIsolation: false,
+      webConfig: const WebDebugConfig(devServerConfig: webDevServerConfig),
     );
 
     expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
@@ -1608,9 +1606,6 @@ void main() {
     final WebAssetServer webAssetServer = await WebAssetServer.start(
       null,
       null,
-      true,
-      true,
-      true,
       const BuildInfo(
         BuildMode.debug,
         '',
@@ -1630,12 +1625,9 @@ void main() {
         logger: logger,
         platform: platform,
       ),
-      webRenderer: WebRendererMode.canvaskit,
-      isWasm: false,
       useLocalCanvasKit: false,
       testMode: true,
-      webDevServerConfig: webDevServerConfig,
-      crossOriginIsolation: false,
+      webConfig: const WebDebugConfig(devServerConfig: webDevServerConfig),
     );
 
     expect(webAssetServer.defaultResponseHeaders[extraHeaderKey], <String>[extraHeaderValue]);

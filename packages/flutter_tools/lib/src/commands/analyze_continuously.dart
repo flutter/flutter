@@ -61,6 +61,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       trustPlugins: trustPlugins,
       alwaysTrustPlugins: alwaysTrustPlugins,
       neverTrustPlugins: neverTrustPlugins,
+      clientId: AnalysisServer.flutterAnalyzeClientId,
     );
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);

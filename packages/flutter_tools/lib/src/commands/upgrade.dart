@@ -16,6 +16,7 @@ import '../base/utils.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../dart/pub.dart';
+import '../features.dart';
 import '../git.dart';
 import '../persistent_tool_state.dart';
 import '../project.dart';
@@ -28,10 +29,14 @@ const _flutterInstallDocs = 'https://flutter.dev/setup';
 
 class UpgradeCommand extends FlutterCommand {
   UpgradeCommand({
+    required FeatureFlags featureFlags,
     required super.toolContext,
     required super.verboseHelp,
     @visibleForTesting UpgradeCommandRunner? commandRunner,
-  }) : _commandRunner = commandRunner ?? UpgradeCommandRunner(toolContext: toolContext) {
+  }) : _featureFlags = featureFlags,
+       _commandRunner =
+           commandRunner ??
+           UpgradeCommandRunner(featureFlags: featureFlags, toolContext: toolContext) {
     argParser
       ..addFlag(
         'force',
@@ -71,6 +76,7 @@ class UpgradeCommand extends FlutterCommand {
       );
   }
 
+  final FeatureFlags _featureFlags;
   final UpgradeCommandRunner _commandRunner;
 
   @override
@@ -129,6 +135,7 @@ class UpgradeCommand extends FlutterCommand {
               flutterRoot: _commandRunner.workingDirectory!,
               fs: fs,
               git: git,
+              isOmitLegacyVersionFileEnabled: () => _featureFlags.isOmitLegacyVersionFileEnabled,
               logger: logger,
               platform: platform,
             ),
@@ -158,8 +165,9 @@ final class _SecondHalf implements UpgradePhase {
 
 @visibleForTesting
 class UpgradeCommandRunner {
-  UpgradeCommandRunner({required this._toolContext});
+  UpgradeCommandRunner({required this._featureFlags, required this._toolContext});
 
+  final FeatureFlags _featureFlags;
   final ToolContext _toolContext;
 
   String? workingDirectory; // set in runCommand() above
@@ -441,6 +449,7 @@ class UpgradeCommandRunner {
       frameworkRevision: revision,
       fs: fs,
       git: git,
+      isOmitLegacyVersionFileEnabled: () => _featureFlags.isOmitLegacyVersionFileEnabled,
       platform: platform,
       logger: logger,
     );
@@ -467,14 +476,18 @@ class UpgradeCommandRunner {
   /// Update the user's packages.
   @protected
   Future<void> updatePackages(FlutterVersion flutterVersion) async {
-    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
-        _toolContext;
+    final ToolContext(
+      :FileSystem fs,
+      :Logger logger,
+      :FlutterProjectFactory projectFactory,
+      :Stdio stdio,
+    ) = _toolContext;
     logger.printStatus('');
     logger.printStatus(flutterVersion.toString());
     final String? projectRoot = findProjectRoot(fs);
     if (projectRoot != null) {
       logger.printStatus('');
-      await Pub(toolContext: _toolContext, stdio: _toolContext.stdio).get(
+      await Pub(featureFlags: _featureFlags, toolContext: _toolContext, stdio: stdio).get(
         context: PubContext.pubUpgrade,
         project: projectFactory.fromDirectory(fs.directory(projectRoot)),
         upgrade: true,
