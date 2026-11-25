@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'build_system/depfile.dart';
+library;
+
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
@@ -11,7 +14,11 @@ import 'json_utils.dart';
 import 'project.dart';
 
 export 'build_system/constants.dart';
+export 'build_system/depfile.dart';
 export 'build_system/source.dart';
+
+const _listEquality = ListEquality<Object?>();
+const _setEquality = SetEquality<Object?>();
 
 final _upperRegex = RegExp(r'[A-Z]');
 
@@ -296,11 +303,12 @@ class ExtensionBuildTarget {
     required this.description,
     required this.name,
     required this.outputDir,
-    required this.targetPlatform,
+    this.targetPlatform,
     this.artifacts = const <ExtensionArtifact>{},
     this.hostArtifacts = const <ExtensionHostArtifact>{},
     this.pluginPlatformKey,
   }) : assert(isValidName(name), 'Invalid build target name "$name". $_invalidNameMessage'),
+       assert(targetPlatform == null || targetPlatform != ''),
        assert(
          pluginPlatformKey == null || isValidPluginPlatformKey(pluginPlatformKey),
          'Invalid pluginPlatformKey "$pluginPlatformKey". $_invalidPluginPlatformKeyMessage',
@@ -312,6 +320,12 @@ class ExtensionBuildTarget {
     if (!isValidName(name)) {
       throw FormatException('Invalid "$nameKey" field: "$name". $_invalidNameMessage');
     }
+    final String? targetPlatform = json.nullableField<String>(targetPlatformKey);
+    if (targetPlatform != null && targetPlatform.isEmpty) {
+      throw const FormatException(
+        'Invalid "$targetPlatformKey" in ExtensionBuildTarget: must not be empty.',
+      );
+    }
     final String? pluginPlatformKey = json.nullableField<String>(pluginPlatformKeyKey);
     if (pluginPlatformKey != null && !isValidPluginPlatformKey(pluginPlatformKey)) {
       throw FormatException(
@@ -322,7 +336,7 @@ class ExtensionBuildTarget {
       description: json.requiredField<String>(descriptionKey),
       name: name,
       outputDir: json.requiredField<String>(outputDirKey),
-      targetPlatform: json.requiredField<String>(targetPlatformKey),
+      targetPlatform: targetPlatform,
       artifacts: <ExtensionArtifact>{
         for (final String name in json.stringIterable(artifactsKey)) ExtensionArtifact(name),
       },
@@ -397,14 +411,20 @@ class ExtensionBuildTarget {
   /// Must match [isValidName].
   final String name;
 
-  /// The target platform identifier (e.g. `'linux-x64'`, `'custom-embedder-arm64'`).
+  /// The target platform identifier (e.g. `'linux-x64'`, `'custom-embedder-arm64'`),
+  /// or `null` if this target is platform-agnostic.
   ///
   /// This is an open [String] rather than an enum so that extensions for custom
   /// embedders can declare platform identifiers that are not built into Flutter.
   /// Used to substitute [BuiltInPlaceholders.targetPlatform] in [outputDir], and as the
   /// default artifact platform when it matches a built-in Flutter target platform.
-  // TODO(bkonyi): Support target-platform agnostic BuildTargets, https://github.com/flutter/flutter/issues/194810.
-  final String targetPlatform;
+  ///
+  /// When `null`, [outputDir] must not reference
+  /// [BuiltInPlaceholders.targetPlatform], and only target-platform-independent
+  /// engine artifacts ([BuiltInArtifacts.flutterPatchedSdkPath] and
+  /// [BuiltInArtifacts.icuData]) can be resolved in [artifacts].
+  // TODO(bkonyi): Replace with declared supported target platforms on BuildTarget and a selected target platform on ExtensionBuildContext, https://github.com/flutter/flutter/issues/194810.
+  final String? targetPlatform;
 
   /// Engine artifacts required by this build target, resolved for [targetPlatform]
   /// and the active [BuildMode].
@@ -420,7 +440,8 @@ class ExtensionBuildTarget {
   /// Supports [BuiltInPlaceholders.outputDir] (the project's configured build
   /// output root from `flutter config --build-dir`, defaulting to
   /// `<project>/build`), [BuiltInPlaceholders.projectDir],
-  /// [BuiltInPlaceholders.buildMode], and [BuiltInPlaceholders.targetPlatform].
+  /// [BuiltInPlaceholders.buildMode], and [BuiltInPlaceholders.targetPlatform]
+  /// (when [targetPlatform] is non-null).
   final String outputDir;
 
   /// Optional platform key under `flutter.plugin.platforms.<key>` in `pubspec.yaml`
@@ -431,7 +452,7 @@ class ExtensionBuildTarget {
   Map<String, Object?> toMap() => <String, Object?>{
     descriptionKey: description,
     nameKey: name,
-    targetPlatformKey: targetPlatform,
+    targetPlatformKey: ?targetPlatform,
     artifactsKey: artifacts.map((ExtensionArtifact a) => a.name).toList(),
     hostArtifactsKey: hostArtifacts.map((ExtensionHostArtifact a) => a.name).toList(),
     outputDirKey: outputDir,
@@ -454,8 +475,8 @@ class ExtensionBuildTarget {
             other.targetPlatform == targetPlatform &&
             other.outputDir == outputDir &&
             other.pluginPlatformKey == pluginPlatformKey &&
-            _setEquals(other.artifacts, artifacts) &&
-            _setEquals(other.hostArtifacts, hostArtifacts));
+            _setEquality.equals(other.artifacts, artifacts) &&
+            _setEquality.equals(other.hostArtifacts, hostArtifacts));
   }
 
   @override
@@ -473,26 +494,46 @@ class ExtensionBuildTarget {
 /// Representation of a custom `flutter assemble` target provided by a tool extension.
 @immutable
 class ExtensionAssembleTarget {
-  const ExtensionAssembleTarget({
+  ExtensionAssembleTarget({
     required this.description,
     required this.name,
     required this.targetPlatform,
     this.dependencies = const <String>[],
+    this.depfiles = const <String>[],
     this.inputs = const <ExtensionSource>[],
     this.outputs = const <ExtensionSource>[],
-  });
+  }) : assert(depfiles.every(isValidDepfileName), _invalidDepfileNameMessage);
 
   /// Deserializes an [ExtensionAssembleTarget] from a JSON-serializable map.
   factory ExtensionAssembleTarget.fromJson(Map<String, Object?> json) {
+    final List<String> depfiles = json.stringIterable(depfilesKey).toList();
+    for (final depfileName in depfiles) {
+      if (!isValidDepfileName(depfileName)) {
+        throw FormatException(
+          'Invalid "$depfilesKey" element "$depfileName": $_invalidDepfileNameMessage',
+        );
+      }
+    }
     return ExtensionAssembleTarget(
       description: json.requiredField<String>(descriptionKey),
       name: json.requiredField<String>(nameKey),
       targetPlatform: json.requiredField<String>(targetPlatformKey),
       dependencies: json.stringIterable(dependenciesKey).toList(),
+      depfiles: depfiles,
       inputs: _parseSources(json, inputsKey),
       outputs: _parseSources(json, outputsKey),
     );
   }
+
+  static const String _invalidDepfileNameMessage =
+      'Depfile names must be non-empty single file names without path separators.';
+
+  /// Returns whether [name] is a valid depfile file name within the build directory.
+  ///
+  /// A valid depfile name must be non-empty, must not be `'.'` or `'..'`, and
+  /// must not contain `/` or `\` path separators.
+  static bool isValidDepfileName(String name) =>
+      name.isNotEmpty && name != '.' && name != '..' && !name.contains('/') && !name.contains(r'\');
 
   static List<ExtensionSource> _parseSources(Map<String, Object?> json, String key) {
     final List<Object?> rawSources = json.optionalField<List<Object?>>(
@@ -512,6 +553,9 @@ class ExtensionAssembleTarget {
 
   /// Map key for [dependencies].
   static const String dependenciesKey = 'dependencies';
+
+  /// Map key for [depfiles].
+  static const String depfilesKey = 'depfiles';
 
   /// Map key for [description].
   static const String descriptionKey = 'description';
@@ -555,6 +599,25 @@ class ExtensionAssembleTarget {
   /// The names of other targets that this target depends on.
   final List<String> dependencies;
 
+  /// Names of `.d` dependency files written by this target into the build directory.
+  ///
+  /// Extensions that declare [depfiles] can use [Depfile.format] to write `.d`
+  /// files into their build directory. The host deletes any existing declared
+  /// depfiles from the build directory before invoking the target.
+  ///
+  /// Each entry must match [isValidDepfileName]. Because all targets write
+  /// depfiles directly into the shared build directory, depfile names must be
+  /// unique across built-in Flutter tool targets and all active extensions.
+  /// Prefix depfile names with the target platform or extension name (for
+  /// example, `'linux_build.d'`) to avoid conflicts.
+  ///
+  /// Relative paths inside each depfile are resolved against the project root
+  /// directory and rewritten in place with normalized paths by the host after
+  /// a successful build. If a declared depfile is missing or invalid after a
+  /// successful build, the host logs an error and disables incremental build
+  /// caching for this target without failing the build.
+  final List<String> depfiles;
+
   /// Input file patterns and artifacts.
   final List<ExtensionSource> inputs;
 
@@ -568,6 +631,7 @@ class ExtensionAssembleTarget {
     nameKey: name,
     targetPlatformKey: targetPlatform,
     dependenciesKey: dependencies,
+    if (depfiles.isNotEmpty) depfilesKey: depfiles,
     inputsKey: inputs.map((ExtensionSource s) => s.toMap()).toList(),
     outputsKey: outputs.map((ExtensionSource s) => s.toMap()).toList(),
   };
@@ -576,7 +640,7 @@ class ExtensionAssembleTarget {
   String toString() =>
       'ExtensionAssembleTarget(name: $name, targetPlatform: $targetPlatform, '
       'description: $description, dependencies: $dependencies, '
-      'inputs: $inputs, outputs: $outputs)';
+      'depfiles: $depfiles, inputs: $inputs, outputs: $outputs)';
 
   @override
   bool operator ==(Object other) {
@@ -585,9 +649,10 @@ class ExtensionAssembleTarget {
             other.description == description &&
             other.name == name &&
             other.targetPlatform == targetPlatform &&
-            _listEquals(other.dependencies, dependencies) &&
-            _listEquals(other.inputs, inputs) &&
-            _listEquals(other.outputs, outputs));
+            _listEquality.equals(other.dependencies, dependencies) &&
+            _listEquality.equals(other.depfiles, depfiles) &&
+            _listEquality.equals(other.inputs, inputs) &&
+            _listEquality.equals(other.outputs, outputs));
   }
 
   @override
@@ -596,6 +661,7 @@ class ExtensionAssembleTarget {
     name,
     targetPlatform,
     Object.hashAll(dependencies),
+    Object.hashAll(depfiles),
     Object.hashAll(inputs),
     Object.hashAll(outputs),
   );
@@ -673,29 +739,4 @@ class ExtensionBuildResult {
 
   @override
   int get hashCode => Object.hash(success, errorMessage, executableUri);
-}
-
-bool _listEquals<T>(List<T> a, List<T> b) {
-  if (identical(a, b)) {
-    return true;
-  }
-  if (a.length != b.length) {
-    return false;
-  }
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) {
-      return false;
-    }
-  }
-  return true;
-}
-
-bool _setEquals<T>(Set<T> a, Set<T> b) {
-  if (identical(a, b)) {
-    return true;
-  }
-  if (a.length != b.length) {
-    return false;
-  }
-  return a.containsAll(b);
 }

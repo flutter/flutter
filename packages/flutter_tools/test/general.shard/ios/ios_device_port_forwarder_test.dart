@@ -15,7 +15,7 @@ void main() {
   // By default, the .forward() method will try every port between 1024
   // and 65535; this test verifies we are killing iproxy processes when
   // we timeout on a port
-  testWithoutContext(
+  test(
     'IOSDevicePortForwarder.forward will kill iproxy processes before invoking a second',
     () async {
       final processManager = FakeProcessManager.list(<FakeCommand>[

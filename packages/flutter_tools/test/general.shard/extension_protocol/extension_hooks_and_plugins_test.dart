@@ -461,7 +461,7 @@ void main() {
   });
 
   group('CustomPlatformPlugin and resolvePluginImplementationsForPlatform', () {
-    testWithoutContext('parses non-built-in platform keys into CustomPlatformPlugin', () {
+    test('parses non-built-in platform keys into CustomPlatformPlugin', () {
       final pluginYaml = loadYaml('''
 platforms:
   custom_embedder:
@@ -515,7 +515,7 @@ platforms:
       );
     });
 
-    testWithoutContext('Plugin.fromYaml ignores non-built-in platform stanzas by default when extraPlatformKeys is omitted', () {
+    test('Plugin.fromYaml ignores non-built-in platform stanzas by default when extraPlatformKeys is omitted', () {
       final pluginYaml = loadYaml('''
 platforms:
   android:
@@ -540,7 +540,7 @@ platforms:
       expect(plugin.defaultPackagePlatforms, isEmpty);
     });
 
-    testWithoutContext('resolvePluginImplementationsForPlatform and resolveExtensionPluginsForPlatform resolve custom platform plugins without affecting built-in resolution', () {
+    test('resolvePluginImplementationsForPlatform and resolveExtensionPluginsForPlatform resolve custom platform plugins without affecting built-in resolution', () {
       const extraKeys = <String>{'custom_embedder'};
       final appFacingPlugin = Plugin.fromYaml(
         'url_launcher',
@@ -651,7 +651,7 @@ platforms:
       );
     });
 
-    testWithoutContext('Plugin.fromYaml rejects invalid custom platform keys and specifications when requested in extraPlatformKeys', () {
+    test('Plugin.fromYaml rejects invalid custom platform keys and specifications when requested in extraPlatformKeys', () {
       expect(
         () => Plugin.fromYaml(
           'my_plugin',
@@ -727,7 +727,7 @@ platforms:
       );
     });
 
-    testWithoutContext('resolveExtensionPluginsForPlatform preserves raw pubspec stanza for built-in keys and filters dev dependencies when requested', () {
+    test('resolveExtensionPluginsForPlatform preserves raw pubspec stanza for built-in keys and filters dev dependencies when requested', () {
       final defaultBuiltInPlugin = Plugin.fromYaml(
         'url_launcher_linux',
         '/pub/url_launcher_linux',
@@ -808,7 +808,7 @@ platforms:
       );
     });
 
-    testWithoutContext(
+    test(
       'resolveCustomPluginPlatformKey ignores kExtensionHookTargetOs and rejects invalid CLI keys',
       () {
         expect(
@@ -834,7 +834,7 @@ platforms:
       },
     );
 
-    testWithoutContext(
+    test(
       'DartPluginRegistrantTarget supports custom platform plugins when extension defines are set',
       () async {
         final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);
@@ -1039,7 +1039,7 @@ environment:
       );
     }
 
-    testWithoutContext('ExtensionBuildManager.resolveNativeAssetsConfig resolves filtered plugins and environmentDefinesForTarget', () async {
+    test('ExtensionBuildManager.resolveNativeAssetsConfig resolves filtered plugins and environmentDefinesForTarget', () async {
       final (
         :ExtensionBuildManager buildManager,
         :List<ExtensionPlugin> expectedCustomPlugins,
@@ -1077,7 +1077,7 @@ environment:
       );
     });
 
-    testWithoutContext(
+    test(
       'ExtensionBuildManager logs conflicting federated custom platform plugin errors',
       () async {
         final (
@@ -1166,7 +1166,7 @@ flutter:
       },
     );
 
-    testWithoutContext(
+    test(
       'ExtensionBuildManager.resolveNativeAssetsConfig throws ToolExit when extension fails',
       () async {
         final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);
@@ -1208,7 +1208,7 @@ flutter:
       },
     );
 
-    testWithoutContext('ExtensionBuildManager.build resolves and forwards filtered plugins for pluginPlatformKey and strips dev_dependencies in release mode', () async {
+    test('ExtensionBuildManager.build resolves and forwards filtered plugins for pluginPlatformKey and strips dev_dependencies in release mode', () async {
       final (
         :ExtensionBuildManager buildManager,
         :List<ExtensionPlugin> expectedCustomPlugins,
@@ -1289,41 +1289,38 @@ dev_dependencies:
       expect(pluginsEvents.current, equals(expectedCustomPlugins));
     });
 
-    testWithoutContext(
-      'ExtensionBuildSubCommand forwards filtered plugins to extension build target',
-      () async {
-        final (
-          :ExtensionBuildManager buildManager,
-          :List<ExtensionPlugin> expectedCustomPlugins,
-          extensionManager: _,
-          featureFlags: _,
-          :StreamIterator<Object?> pluginsEvents,
-          projectDir: _,
-        ) = setUpCustomPluginProject();
+    test('ExtensionBuildSubCommand forwards filtered plugins to extension build target', () async {
+      final (
+        :ExtensionBuildManager buildManager,
+        :List<ExtensionPlugin> expectedCustomPlugins,
+        extensionManager: _,
+        featureFlags: _,
+        :StreamIterator<Object?> pluginsEvents,
+        projectDir: _,
+      ) = setUpCustomPluginProject();
 
-        final List<ExtensionBuildTarget> targets = await buildManager.getBuildTargets();
-        expect(targets, hasLength(1));
+      final List<ExtensionBuildTarget> targets = await buildManager.getBuildTargets();
+      expect(targets, hasLength(1));
 
-        final cache = FakeCache(fileSystem: fileSystem, flutterRoot: '/flutter');
-        final subCommand = ExtensionBuildSubCommand(
-          buildManager: buildManager,
-          target: targets.single,
-          toolContext: FakeToolContext(
-            cache: cache,
-            fs: fileSystem,
-            logger: logger,
-            signals: FakeSignals(),
-          ),
-          verboseHelp: false,
-        );
-        final FlutterCommandResult subCommandResult = await subCommand.runCommand();
-        expect(subCommandResult.exitStatus, ExitStatus.success);
-        expect(await pluginsEvents.moveNext(), isTrue);
-        expect(pluginsEvents.current, equals(expectedCustomPlugins));
-      },
-    );
+      final cache = FakeCache(fileSystem: fileSystem, flutterRoot: '/flutter');
+      final subCommand = ExtensionBuildSubCommand(
+        buildManager: buildManager,
+        target: targets.single,
+        toolContext: FakeToolContext(
+          cache: cache,
+          fs: fileSystem,
+          logger: logger,
+          signals: FakeSignals(),
+        ),
+        verboseHelp: false,
+      );
+      final FlutterCommandResult subCommandResult = await subCommand.runCommand();
+      expect(subCommandResult.exitStatus, ExitStatus.success);
+      expect(await pluginsEvents.moveNext(), isTrue);
+      expect(pluginsEvents.current, equals(expectedCustomPlugins));
+    });
 
-    testWithoutContext(
+    test(
       'ExtensionBackedDevice.startApp forwards filtered plugins to extension build target',
       () async {
         final (
@@ -1354,7 +1351,7 @@ dev_dependencies:
       },
     );
 
-    testWithoutContext('AssembleCommand resolves nativeAssetsConfig, environmentDefinesForTarget, and assemble target plugins for custom extension targetPlatform', () async {
+    test('AssembleCommand resolves nativeAssetsConfig, environmentDefinesForTarget, and assemble target plugins for custom extension targetPlatform', () async {
       final (
         :ExtensionBuildManager buildManager,
         :List<ExtensionPlugin> expectedCustomPlugins,
@@ -1509,7 +1506,7 @@ dev_dependencies:
       );
     }
 
-    testWithoutContext('BuildService.injectPlugins runs via regeneratePlatformSpecificTooling and injectPlugins when runnerDir exists, filters dev_dependencies in releaseMode, and skips warm runs via extension_plugins.stamp', () async {
+    test('BuildService.injectPlugins runs via regeneratePlatformSpecificTooling and injectPlugins when runnerDir exists, filters dev_dependencies in releaseMode, and skips warm runs via extension_plugins.stamp', () async {
       final (:List<ExtensionPlugin> expectedCustomPlugins, :Directory projectDir) =
           writeCustomPluginProjectFiles();
 
@@ -1713,7 +1710,7 @@ dev_dependencies:
       expect(warmEvents, hasLength(5));
     });
 
-    testWithoutContext('ExtensionBuildManager.injectPlugins skips injection when runnerDir is absent and cleans up stamp unconditionally if runnerDir is removed', () async {
+    test('ExtensionBuildManager.injectPlugins skips injection when runnerDir is absent and cleans up stamp unconditionally if runnerDir is removed', () async {
       final (expectedCustomPlugins: _, :Directory projectDir) = writeCustomPluginProjectFiles();
       final (
         :ExtensionBuildManager buildManager,
@@ -1760,7 +1757,7 @@ dev_dependencies:
       expect(stampFile, isNot(exists));
     });
 
-    testWithoutContext('getPluginPlatformDirectories enforces built-in precedence, relative runnerDir validation, and lexicographical collision order', () async {
+    test('getPluginPlatformDirectories enforces built-in precedence, relative runnerDir validation, and lexicographical collision order', () async {
       final (
         :ExtensionBuildManager buildManager,
         events: _,
@@ -1809,7 +1806,7 @@ dev_dependencies:
       );
     });
 
-    testWithoutContext('ExtensionBuildManager.injectPlugins invalidates stamp when a second extension runner directory is added', () async {
+    test('ExtensionBuildManager.injectPlugins invalidates stamp when a second extension runner directory is added', () async {
       final (expectedCustomPlugins: _, :Directory projectDir) = writeCustomPluginProjectFiles();
       fileSystem.file('/camera_custom/pubspec.yaml').writeAsStringSync('''
 name: camera_custom
@@ -1853,7 +1850,7 @@ environment:
       );
     });
 
-    testWithoutContext('ExtensionBuildManager.deletePluginsStamp forces re-injection when runnerDir is deleted and re-scaffolded', () async {
+    test('ExtensionBuildManager.deletePluginsStamp forces re-injection when runnerDir is deleted and re-scaffolded', () async {
       final (:List<ExtensionPlugin> expectedCustomPlugins, :Directory projectDir) =
           writeCustomPluginProjectFiles();
       final Directory runnerDir = projectDir.childDirectory('custom_os')..createSync();
@@ -1889,7 +1886,7 @@ environment:
       expect(stampFile, exists);
     });
 
-    testWithoutContext('BuildService.injectPlugins surfaces ToolExtensionException as ToolExit without committing stamp and rejects malformed RPC params with -32602', () async {
+    test('BuildService.injectPlugins surfaces ToolExtensionException as ToolExit without committing stamp and rejects malformed RPC params with -32602', () async {
       final (expectedCustomPlugins: _, :Directory projectDir) = writeCustomPluginProjectFiles();
       projectDir.childDirectory('custom_os').createSync();
       final (
@@ -1986,7 +1983,7 @@ environment:
       await const InstallCodeAssets().build(environment);
     }
 
-    testWithoutContext('AssetBuildTarget.targetsFor resolves OS, Architecture, and CCompilerConfig for custom targetPlatform', () async {
+    test('AssetBuildTarget.targetsFor resolves OS, Architecture, and CCompilerConfig for custom targetPlatform', () async {
       final defines = <String, String>{
         kBuildMode: BuildMode.debug.cliName,
         kTargetPlatform: 'custom-embedder-riscv64',
@@ -2034,7 +2031,7 @@ environment:
       );
     });
 
-    testWithoutContext(
+    test(
       'build hooks, link hooks, and InstallCodeAssets execute with custom extension targetPlatform',
       () async {
         final testFeatureFlags = TestFeatureFlags(
@@ -2109,14 +2106,14 @@ environment:
       },
     );
 
-    testWithoutContext(
+    test(
       'CopyAssets does not depend on InstallCodeAssets and preserves web/built-in copy_assets',
       () {
         expect(const CopyAssets().dependencies, isNot(contains(isA<InstallCodeAssets>())));
       },
     );
 
-    testWithoutContext('KernelSnapshot injects FLUTTER_CUSTOM_PLATFORM and omits --target-os for custom kTargetPlatform', () async {
+    test('KernelSnapshot injects FLUTTER_CUSTOM_PLATFORM and omits --target-os for custom kTargetPlatform', () async {
       const boundaryKey = '4d2d9609-c662-4571-afde-31410f96caa6';
       writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       final processManager = FakeProcessManager.empty();
@@ -2177,7 +2174,7 @@ environment:
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('AssetBuildTarget.targetsFor and cCompilerConfigFromDefines validate compiler URIs and reject partial defines', () async {
+    test('AssetBuildTarget.targetsFor and cCompilerConfigFromDefines validate compiler URIs and reject partial defines', () async {
       final List<AssetBuildTarget> customTargets = AssetBuildTarget.targetsFor(
         androidSdkProvider: null,
         buildDirectory: fileSystem.directory('/project/build'),
@@ -2259,7 +2256,7 @@ environment:
       );
     });
 
-    testWithoutContext('unknown kTargetPlatform without extension defines throws in KernelSnapshot, DartPluginRegistrantTarget, and BuildHooks', () async {
+    test('unknown kTargetPlatform without extension defines throws in KernelSnapshot, DartPluginRegistrantTarget, and BuildHooks', () async {
       final environment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: artifacts,
@@ -2283,7 +2280,7 @@ environment:
       await expectLater(() => const BuildHooks().build(environment), throwsA(isA<Exception>()));
     });
 
-    testWithoutContext(
+    test(
       'build hooks, link hooks, and InstallCodeAssets bundle code assets for fuchsia target OS',
       () async {
         final testFeatureFlags = TestFeatureFlags(
@@ -2363,7 +2360,7 @@ environment:
       },
     );
 
-    testWithoutContext('KernelSnapshot omits --target-os and FLUTTER_CUSTOM_PLATFORM when only kExtensionHookTargetOs is set', () async {
+    test('KernelSnapshot omits --target-os and FLUTTER_CUSTOM_PLATFORM when only kExtensionHookTargetOs is set', () async {
       const boundaryKey = '4d2d9609-c662-4571-afde-31410f96caa6';
       writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       final processManager = FakeProcessManager.empty();
@@ -2422,7 +2419,7 @@ environment:
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('default resolveNativeAssetsConfig => null succeeds for hookless apps and transitive/DataAsset-only hook packages', () async {
+    test('default resolveNativeAssetsConfig => null succeeds for hookless apps and transitive/DataAsset-only hook packages', () async {
       final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);
       fileSystem.currentDirectory = projectDir;
       fileSystem.directory('/flutter').createSync(recursive: true);
@@ -2594,7 +2591,7 @@ flutter:
       expect(devFsTargets.single, isA<CustomDataAssetTarget>());
     });
 
-    testWithoutContext('parseNativeOS, parseNativeArchitecture, and CustomCodeAssetTarget validate known identifiers and real package:code_assets schema rules', () async {
+    test('parseNativeOS, parseNativeArchitecture, and CustomCodeAssetTarget validate known identifiers and real package:code_assets schema rules', () async {
       expect(
         () => parseNativeOS('../../escape'),
         throwsToolExit(message: 'Unsupported native assets target OS'),
@@ -2693,7 +2690,7 @@ flutter:
       }
     });
 
-    testWithoutContext('AssembleCommand infers owning BuildTarget for AssembleTargets on built-in linux-arm64, supports kExtensionBuildTarget, rejects ambiguous custom targetPlatform, and treats CLI compiler defines atomically', () async {
+    test('AssembleCommand infers owning BuildTarget for AssembleTargets on built-in linux-arm64, supports kExtensionBuildTarget, rejects ambiguous custom targetPlatform, and treats CLI compiler defines atomically', () async {
       final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);
       fileSystem.currentDirectory = projectDir;
       fileSystem.directory('/flutter').createSync(recursive: true);
@@ -2866,7 +2863,7 @@ flutter:
       );
     });
 
-    testWithoutContext(
+    test(
       'FlutterCommand reserves FLUTTER_CUSTOM_PLATFORM against user --dart-define overrides',
       () async {
         final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);

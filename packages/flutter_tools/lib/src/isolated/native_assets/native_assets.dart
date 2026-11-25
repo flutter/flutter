@@ -550,6 +550,13 @@ Future<List<File>> installCodeAssets({
   required Uri nativeAssetsFileUri,
   required Uri targetUri,
 }) async {
+  assert(
+    !fileSystem.path.isWithin(
+      fileSystem.path.fromUri(targetUri),
+      fileSystem.path.fromUri(nativeAssetsFileUri),
+    ),
+    'nativeAssetsFileUri ($nativeAssetsFileUri) must be outside targetUri ($targetUri).',
+  );
   final OS targetOS = getNativeOSFromTargetPlatform(
     targetPlatform,
     environmentDefines: environmentDefines,
@@ -576,7 +583,6 @@ Future<List<File>> installCodeAssets({
     flutterTester,
     iosDeploymentVersion: targetOS == OS.iOS ? iosDeploymentVersion(environmentDefines) : null,
     logger: logger,
-    nativeAssetsFileUri: nativeAssetsFileUri,
     processManager: processManager,
   );
   final manifest = NativeAssetsManifest.fromTargetLocations(assetTargetLocations);
@@ -866,7 +872,6 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
   bool flutterTester, {
   AppleVersion? iosDeploymentVersion,
   required Logger logger,
-  required Uri nativeAssetsFileUri,
   required ProcessManager processManager,
 }) async {
   // We only have to copy code assets that are bundled within the app.
@@ -883,13 +888,7 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
   if (!targetDir.existsSync()) {
     targetDir.createSync(recursive: true);
   }
-  final String nativeAssetsFilePath = fileSystem.file(nativeAssetsFileUri).path;
   for (final FileSystemEntity entity in await targetDir.list(followLinks: false).toList()) {
-    if (entity is File && fileSystem.path.equals(entity.path, nativeAssetsFilePath)) {
-      // _writeNativeAssetsJson immediately truncates and overwrites this
-      // manifest file in place, so avoid unlinking it unnecessarily.
-      continue;
-    }
     ErrorHandlingFileSystem.deleteIfExists(entity, recursive: true);
   }
 

@@ -336,6 +336,9 @@ base class ExtensionBuildManager {
       return null;
     }
 
+    if (platform == null || platform.isEmpty) {
+      return null;
+    }
     final ExtensionBuildTarget? nameMatch = buildTargets
         .where((ExtensionBuildTarget t) => t.name == platform)
         .firstOrNull;
@@ -346,7 +349,7 @@ base class ExtensionBuildManager {
         .where((ExtensionBuildTarget t) => t.targetPlatform == platform)
         .toList();
     if (platformMatches.length > 1) {
-      _throwAmbiguousTargetPlatform(platform!, platformMatches);
+      _throwAmbiguousTargetPlatform(platform, platformMatches);
     }
     return platformMatches.firstOrNull;
   }

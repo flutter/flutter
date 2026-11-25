@@ -27,7 +27,7 @@ import 'resident_runner_helpers.dart' show createHotRunner;
 
 void main() {
   group('validateReloadReport', () {
-    testWithoutContext('invalid', () {
+    test('invalid', () {
       expect(
         HotRunner.validateReloadReport(
           vm_service.ReloadReport.parse(<String, dynamic>{
@@ -139,7 +139,7 @@ void main() {
       );
     });
 
-    testWithoutContext('ReasonForCancelling toString has a hint for specific errors', () {
+    test('ReasonForCancelling toString has a hint for specific errors', () {
       final reasonForCancelling = ReasonForCancelling(message: 'Const class cannot remove fields');
 
       expect(reasonForCancelling.toString(), contains('Try performing a hot restart instead.'));

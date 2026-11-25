@@ -24,7 +24,7 @@ void main() {
     return;
   }
 
-  testWithoutContext('flutter test with native assets', () async {
+  test('flutter test with native assets', () async {
     await inTempDir((Directory tempDirectory) async {
       final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
 
@@ -42,7 +42,7 @@ void main() {
     });
   });
 
-  testWithoutContext(
+  test(
     'flutter test with a native asset whose header has no room for its path',
     () async {
       await inTempDir((Directory tempDirectory) async {

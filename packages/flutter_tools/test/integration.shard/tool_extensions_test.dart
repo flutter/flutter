@@ -55,7 +55,7 @@ void main() {
     tryToDelete(tempHome);
   });
 
-  testWithoutContext('flutter doctor executes extension validators when enabled', () async {
+  test('flutter doctor executes extension validators when enabled', () async {
     final ProcessResult result = await processManager.run(
       <String>[flutterBin, 'doctor', '-v'],
       environment: <String, String>{...baseEnv, 'FLUTTER_TOOL_EXTENSIONS': 'true'},
@@ -70,7 +70,7 @@ void main() {
     expect(result.exitCode, 0);
   });
 
-  testWithoutContext('flutter config outputs extension settings when enabled', () async {
+  test('flutter config outputs extension settings when enabled', () async {
     final ProcessResult result = await processManager.run(
       <String>[flutterBin, 'config', '--list'],
       environment: <String, String>{...baseEnv, 'FLUTTER_TOOL_EXTENSIONS': 'true'},
@@ -86,7 +86,7 @@ void main() {
     expect(result.exitCode, 0);
   });
 
-  testWithoutContext('flutter devices outputs custom extension device when enabled', () async {
+  test('flutter devices outputs custom extension device when enabled', () async {
     final ProcessResult result = await processManager.run(
       <String>[flutterBin, 'devices'],
       environment: <String, String>{...baseEnv, 'FLUTTER_TOOL_EXTENSIONS': 'true'},
@@ -100,7 +100,7 @@ void main() {
     expect(result.exitCode, 0);
   });
 
-  testWithoutContext('tool extensions are disabled by default', () async {
+  test('tool extensions are disabled by default', () async {
     final ProcessResult doctorResult = await processManager.run(<String>[
       flutterBin,
       'doctor',
@@ -124,7 +124,7 @@ void main() {
     expect(devicesResult.exitCode, 0);
   });
 
-  testWithoutContext('flutter create with custom template succeeds when enabled', () async {
+  test('flutter create with custom template succeeds when enabled', () async {
     final Directory projectDir = tempHome.childDirectory('custom_app');
     if (projectDir.existsSync()) {
       projectDir.deleteSync(recursive: true);
@@ -155,7 +155,7 @@ void main() {
     }
   });
 
-  testWithoutContext('flutter create with custom template fails when disabled', () async {
+  test('flutter create with custom template fails when disabled', () async {
     final Directory projectDir = tempHome.childDirectory('custom_app_disabled');
     if (projectDir.existsSync()) {
       projectDir.deleteSync(recursive: true);
@@ -171,7 +171,7 @@ void main() {
     expect(projectDir.existsSync(), isFalse);
   });
 
-  testWithoutContext('flutter create with custom template succeeds when enabled', () async {
+  test('flutter create with custom template succeeds when enabled', () async {
     final Directory projectDir = tempHome.childDirectory('custom_app');
     if (projectDir.existsSync()) {
       projectDir.deleteSync(recursive: true);
@@ -202,7 +202,7 @@ void main() {
     }
   });
 
-  testWithoutContext('flutter create with custom template fails when disabled', () async {
+  test('flutter create with custom template fails when disabled', () async {
     final Directory projectDir = tempHome.childDirectory('custom_app_disabled');
     if (projectDir.existsSync()) {
       projectDir.deleteSync(recursive: true);
@@ -218,26 +218,23 @@ void main() {
     expect(projectDir.existsSync(), isFalse);
   });
 
-  testWithoutContext(
-    'flutter devices -v gracefully shuts down active tool extensions on exit',
-    () async {
-      final ProcessResult result = await processManager.run(
-        <String>[flutterBin, 'devices', '-v'],
-        environment: <String, String>{...baseEnv, 'FLUTTER_TOOL_EXTENSIONS': 'true'},
+  test('flutter devices -v gracefully shuts down active tool extensions on exit', () async {
+    final ProcessResult result = await processManager.run(
+      <String>[flutterBin, 'devices', '-v'],
+      environment: <String, String>{...baseEnv, 'FLUTTER_TOOL_EXTENSIONS': 'true'},
+    );
+
+    expect(result.exitCode, 0, reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}');
+    if (isLinux) {
+      expect(
+        result.stdout,
+        contains('[ToolExtensionIsolate] Handling extension.shutdown request.'),
       );
+      expect(result.stdout, contains('ExtensionConnection disposing isolate connection.'));
+    }
+  });
 
-      expect(result.exitCode, 0, reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}');
-      if (isLinux) {
-        expect(
-          result.stdout,
-          contains('[ToolExtensionIsolate] Handling extension.shutdown request.'),
-        );
-        expect(result.stdout, contains('ExtensionConnection disposing isolate connection.'));
-      }
-    },
-  );
-
-  testWithoutContext('flutter assemble with custom TargetPlatform and ExtensionPluginPlatformKey generates custom platform Dart plugin registrant', () async {
+  test('flutter assemble with custom TargetPlatform and ExtensionPluginPlatformKey generates custom platform Dart plugin registrant', () async {
     final Directory workspaceDir = tempHome.childDirectory('custom_assemble_workspace')
       ..createSync(recursive: true);
     final Directory projectDir = workspaceDir.childDirectory('my_app')..createSync(recursive: true);
@@ -354,31 +351,28 @@ flutter:
   });
 
   // Regression tests moved from general.shard for https://github.com/flutter/flutter/issues/195966.
-  testWithoutContext(
-    'ExtensionConnection.spawnUri spawns extension script and completes handshake',
-    () async {
-      final logger = BufferLogger.test();
-      final (Uri entrypointUri, Uri packageConfigUri, ExtensionPackageConfig expectedConfig) =
-          await _resolveLinuxPrototypeExtension();
+  test('ExtensionConnection.spawnUri spawns extension script and completes handshake', () async {
+    final logger = BufferLogger.test();
+    final (Uri entrypointUri, Uri packageConfigUri, ExtensionPackageConfig expectedConfig) =
+        await _resolveLinuxPrototypeExtension();
 
-      final ExtensionConnection connection = await ExtensionConnection.spawnUri(
-        entrypointUri,
-        expectedConfig: expectedConfig,
-        extensionName: _linuxPrototypePackageName,
-        logger: logger,
-        packageConfigUri: packageConfigUri,
-      );
-      addTearDown(connection.dispose);
+    final ExtensionConnection connection = await ExtensionConnection.spawnUri(
+      entrypointUri,
+      expectedConfig: expectedConfig,
+      extensionName: _linuxPrototypePackageName,
+      logger: logger,
+      packageConfigUri: packageConfigUri,
+    );
+    addTearDown(connection.dispose);
 
-      expect(connection.extensionName, _linuxPrototypePackageName);
-      expect(
-        connection.capabilities.services,
-        containsAll(const <String>['diagnostics', 'config', 'build', 'template']),
-      );
-    },
-  );
+    expect(connection.extensionName, _linuxPrototypePackageName);
+    expect(
+      connection.capabilities.services,
+      containsAll(const <String>['diagnostics', 'config', 'build', 'template']),
+    );
+  });
 
-  testWithoutContext('ExtensionConnection.spawnUri throws StateError when expectedConfig does not match capabilities', () async {
+  test('ExtensionConnection.spawnUri throws StateError when expectedConfig does not match capabilities', () async {
     final logger = BufferLogger.test();
     final (Uri entrypointUri, Uri packageConfigUri, ExtensionPackageConfig prototypeConfig) =
         await _resolveLinuxPrototypeExtension();

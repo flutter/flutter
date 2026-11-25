@@ -21,7 +21,7 @@ void main() {
     });
 
     for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.profile, BuildMode.release]) {
-      testWithoutContext('verify ${buildMode.cliName} FlutterMacOS.xcframework artifact', () {
+      test('verify ${buildMode.cliName} FlutterMacOS.xcframework artifact', () {
         final String flutterRoot = getFlutterRoot();
 
         final String artifactDir;
@@ -124,7 +124,7 @@ void main() {
     for (final buildMode in <String>['Debug', 'Release']) {
       final String buildModeLower = buildMode.toLowerCase();
 
-      testWithoutContext('flutter build macos --$buildModeLower builds a valid app', () {
+      test('flutter build macos --$buildModeLower builds a valid app', () {
         final String workingDirectory = fileSystem.path.join(
           getFlutterRoot(),
           'dev',

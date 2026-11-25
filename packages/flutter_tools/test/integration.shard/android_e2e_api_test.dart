@@ -19,7 +19,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('build succeeds with api 33 features', () async {
+  test('build succeeds with api 33 features', () async {
     ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'create',

@@ -239,38 +239,35 @@ void main() {
     },
   );
 
-  testWithoutContext(
-    'createDirectoryHandler sets Cache-Control and cross-origin isolation headers',
-    () async {
-      final Directory dir = tempDir.childDirectory('dir')..createSync();
-      dir.childFile('index.html').writeAsStringSync('<html></html>');
-      dir.childFile('asset.js').writeAsStringSync('// asset');
+  test('createDirectoryHandler sets Cache-Control and cross-origin isolation headers', () async {
+    final Directory dir = tempDir.childDirectory('dir')..createSync();
+    dir.childFile('index.html').writeAsStringSync('<html></html>');
+    dir.childFile('asset.js').writeAsStringSync('// asset');
 
-      final shelf.Handler handler = createDirectoryHandler(dir, crossOriginIsolated: true);
+    final shelf.Handler handler = createDirectoryHandler(dir, crossOriginIsolated: true);
 
-      final shelf.Response htmlResponse = await handler(
-        shelf.Request('GET', Uri.parse('http://localhost/index.html')),
-      );
-      expect(htmlResponse.statusCode, HttpStatus.ok);
-      expect(htmlResponse.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
-      expect(
-        htmlResponse.headers[HttpHeaders.contentLengthHeader],
-        '<html></html>'.length.toString(),
-      );
-      expect(htmlResponse.headers['Cross-Origin-Opener-Policy'], 'same-origin');
-      expect(htmlResponse.headers['Cross-Origin-Embedder-Policy'], 'credentialless');
-      await htmlResponse.read().drain<void>();
+    final shelf.Response htmlResponse = await handler(
+      shelf.Request('GET', Uri.parse('http://localhost/index.html')),
+    );
+    expect(htmlResponse.statusCode, HttpStatus.ok);
+    expect(htmlResponse.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
+    expect(
+      htmlResponse.headers[HttpHeaders.contentLengthHeader],
+      '<html></html>'.length.toString(),
+    );
+    expect(htmlResponse.headers['Cross-Origin-Opener-Policy'], 'same-origin');
+    expect(htmlResponse.headers['Cross-Origin-Embedder-Policy'], 'credentialless');
+    await htmlResponse.read().drain<void>();
 
-      final shelf.Response jsResponse = await handler(
-        shelf.Request('GET', Uri.parse('http://localhost/asset.js')),
-      );
-      expect(jsResponse.statusCode, HttpStatus.ok);
-      expect(jsResponse.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
-      expect(jsResponse.headers[HttpHeaders.contentLengthHeader], '// asset'.length.toString());
-      expect(jsResponse.headers['Cross-Origin-Opener-Policy'], isNull);
-      await jsResponse.read().drain<void>();
-    },
-  );
+    final shelf.Response jsResponse = await handler(
+      shelf.Request('GET', Uri.parse('http://localhost/asset.js')),
+    );
+    expect(jsResponse.statusCode, HttpStatus.ok);
+    expect(jsResponse.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
+    expect(jsResponse.headers[HttpHeaders.contentLengthHeader], '// asset'.length.toString());
+    expect(jsResponse.headers['Cross-Origin-Opener-Policy'], isNull);
+    await jsResponse.read().drain<void>();
+  });
 
   testUsingContext(
     'FlutterWebPlatform serves the correct bootstrap files (ddc library bundle module system)',
@@ -380,7 +377,7 @@ void main() {
 
   for (final style in <FileSystemStyle>[FileSystemStyle.posix, FileSystemStyle.windows]) {
     final os = style == FileSystemStyle.windows ? 'windows' : 'linux';
-    testWithoutContext(
+    test(
       'FlutterWebPlatform sets Cache-Control headers on static and Wasm test assets ($os)',
       () async {
         final testFs = MemoryFileSystem.test(style: style);
@@ -614,7 +611,7 @@ void main() {
     );
   }
 
-  testWithoutContext('BrowserManager reports a disconnect and starts cleanup at once', () {
+  test('BrowserManager reports a disconnect and starts cleanup at once', () {
     // Regression test for https://github.com/flutter/flutter/issues/191920.
     FakeAsync().run((FakeAsync time) {
       logger = BufferLogger.test(verbose: true);
@@ -633,7 +630,7 @@ void main() {
     });
   });
 
-  testWithoutContext('BrowserManager reports an exit code delivered after cleanup starts', () {
+  test('BrowserManager reports an exit code delivered after cleanup starts', () {
     // Regression test for https://github.com/flutter/flutter/issues/191920.
     FakeAsync().run((FakeAsync time) {
       final exitCode = Completer<int>();
@@ -658,7 +655,7 @@ void main() {
     });
   });
 
-  testWithoutContext('BrowserManager reports a process exit before the connection closes', () {
+  test('BrowserManager reports a process exit before the connection closes', () {
     FakeAsync().run((FakeAsync time) {
       final exitCode = Completer<int>();
       final controller = StreamChannelController<Object?>();
@@ -676,29 +673,26 @@ void main() {
     });
   });
 
-  testWithoutContext(
-    'BrowserManager does not diagnose an intentional shutdown as a disconnect',
-    () {
-      FakeAsync().run((FakeAsync time) {
-        final exitCode = Completer<int>();
-        final controller = StreamChannelController<Object?>();
-        final BrowserManager manager = createBrowserManager(
-          controller,
-          FakeProcess(exitCode: exitCode.future),
-        );
+  test('BrowserManager does not diagnose an intentional shutdown as a disconnect', () {
+    FakeAsync().run((FakeAsync time) {
+      final exitCode = Completer<int>();
+      final controller = StreamChannelController<Object?>();
+      final BrowserManager manager = createBrowserManager(
+        controller,
+        FakeProcess(exitCode: exitCode.future),
+      );
 
-        manager.close();
-        controller.local.sink.close();
-        time.flushMicrotasks();
-        exitCode.complete(-15);
-        time.flushMicrotasks();
+      manager.close();
+      controller.local.sink.close();
+      time.flushMicrotasks();
+      exitCode.complete(-15);
+      time.flushMicrotasks();
 
-        expect(logger.errorText, isEmpty);
-      });
-    },
-  );
+      expect(logger.errorText, isEmpty);
+    });
+  });
 
-  testWithoutContext('BrowserManager does not report a clean exit after cleanup', () {
+  test('BrowserManager does not report a clean exit after cleanup', () {
     FakeAsync().run((FakeAsync time) {
       final exitCode = Completer<int>();
       final controller = StreamChannelController<Object?>();

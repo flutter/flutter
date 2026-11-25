@@ -50,8 +50,7 @@ final class _TestBuildTarget extends BuildTarget {
     this.executableUri,
     super.outputDir = '${BuiltInPlaceholders.outputDir}/custom',
     this.shouldSucceed = true,
-    super.targetPlatform = 'linux-x64',
-  });
+  }) : super(targetPlatform: 'linux-x64');
 
   @override
   final String name;
@@ -333,14 +332,12 @@ void main() {
       logsExtensionManager = null;
     });
 
-    testWithoutContext(
-      'FlutterProject.toExtensionProject extracts project and manifest metadata',
-      () async {
-        final fs = MemoryFileSystem.test();
-        final Directory tempDir = fs.systemTempDirectory.createTempSync(
-          'flutter_tool_extensions_project_test.',
-        );
-        tempDir.childFile('pubspec.yaml').writeAsStringSync('''
+    test('FlutterProject.toExtensionProject extracts project and manifest metadata', () async {
+      final fs = MemoryFileSystem.test();
+      final Directory tempDir = fs.systemTempDirectory.createTempSync(
+        'flutter_tool_extensions_project_test.',
+      );
+      tempDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: sample_app
 version: 2.1.0+5
 workspace:
@@ -354,25 +351,21 @@ flutter:
     androidX: true
 ''');
 
-        final FlutterProject project = FlutterProject.fromDirectoryTest(
-          tempDir,
-          BufferLogger.test(),
-        );
-        final ExtensionFlutterProject extProject = project.toExtensionProject();
+      final FlutterProject project = FlutterProject.fromDirectoryTest(tempDir, BufferLogger.test());
+      final ExtensionFlutterProject extProject = project.toExtensionProject();
 
-        expect(extProject.appName, 'sample_app');
-        expect(extProject.appVersion, '2.1.0+5');
-        expect(extProject.directory, project.directory.uri);
-        expect(extProject.buildDirectory, project.buildDirectory.uri);
-        expect(extProject.dependencies, <String>{'flutter', 'path'});
-        expect(extProject.isEmpty, isFalse);
-        expect(extProject.isModule, isTrue);
-        expect(extProject.isPlugin, isFalse);
-        expect(extProject.workspace, <String>['packages/sub_pkg']);
-        expect(extProject.workspace.runtimeType, <String>[].runtimeType);
-        expect(() => jsonEncode(extProject.toMap()), returnsNormally);
-      },
-    );
+      expect(extProject.appName, 'sample_app');
+      expect(extProject.appVersion, '2.1.0+5');
+      expect(extProject.directory, project.directory.uri);
+      expect(extProject.buildDirectory, project.buildDirectory.uri);
+      expect(extProject.dependencies, <String>{'flutter', 'path'});
+      expect(extProject.isEmpty, isFalse);
+      expect(extProject.isModule, isTrue);
+      expect(extProject.isPlugin, isFalse);
+      expect(extProject.workspace, <String>['packages/sub_pkg']);
+      expect(extProject.workspace.runtimeType, <String>[].runtimeType);
+      expect(() => jsonEncode(extProject.toMap()), returnsNormally);
+    });
 
     testUsingContext(
       'ExtensionDevices discovers custom device when feature flag enabled',
@@ -559,24 +552,21 @@ flutter:
         return (manager, logger, fileSystem, devices);
       }
 
-      testWithoutContext(
-        'delegates build, launch, VM service discovery, and stop via RPC',
-        () async {
-          final (_, _, _, List<Device> devices) = await setUpTestDevices();
-          final Device device = devices.firstWhere((Device d) => d.id == 'fake_test_device');
+      test('delegates build, launch, VM service discovery, and stop via RPC', () async {
+        final (_, _, _, List<Device> devices) = await setUpTestDevices();
+        final Device device = devices.firstWhere((Device d) => d.id == 'fake_test_device');
 
-          final LaunchResult launchResult = await device.startApp(
-            null,
-            mainPath: 'lib/main.dart',
-            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-          );
-          expect(launchResult.started, isTrue);
-          expect(launchResult.vmServiceUri, Uri.parse('http://127.0.0.1:8181/abcd=/'));
-          expect(await device.stopApp(null), isTrue);
-        },
-      );
+        final LaunchResult launchResult = await device.startApp(
+          null,
+          mainPath: 'lib/main.dart',
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        );
+        expect(launchResult.started, isTrue);
+        expect(launchResult.vmServiceUri, Uri.parse('http://127.0.0.1:8181/abcd=/'));
+        expect(await device.stopApp(null), isTrue);
+      });
 
-      testWithoutContext('fails when prebuiltApplication is true', () async {
+      test('fails when prebuiltApplication is true', () async {
         final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
         final Device device = devices.firstWhere((Device d) => d.id == 'fake_test_device');
 
@@ -594,7 +584,7 @@ flutter:
         );
       });
 
-      testWithoutContext('fails when device does not specify a buildTarget', () async {
+      test('fails when device does not specify a buildTarget', () async {
         final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
         final Device noTargetDevice = devices.firstWhere((Device d) => d.id == 'no_target_device');
 
@@ -609,7 +599,7 @@ flutter:
         );
       });
 
-      testWithoutContext('fails when extension build target returns failure', () async {
+      test('fails when extension build target returns failure', () async {
         final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
         final Device failingBuildDevice = devices.firstWhere(
           (Device d) => d.id == 'failing_build_device',
@@ -623,7 +613,7 @@ flutter:
         expect(logger.errorText, contains('Build failed: Simulated build error'));
       });
 
-      testWithoutContext('fails when DeviceService.launchApp returns false', () async {
+      test('fails when DeviceService.launchApp returns false', () async {
         final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
         final Device failingLaunchDevice = devices.firstWhere(
           (Device d) => d.id == 'failing_launch_device',
@@ -640,7 +630,7 @@ flutter:
         );
       });
 
-      testWithoutContext(
+      test(
         'fails without stopping app when debugging is enabled and getVmServiceUri returns null',
         () async {
           final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
