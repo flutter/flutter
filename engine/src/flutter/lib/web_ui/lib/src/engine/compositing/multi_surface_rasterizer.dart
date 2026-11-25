@@ -34,9 +34,14 @@ class MultiSurfaceRasterizer extends Rasterizer {
   final Map<EngineFlutterView, MultiSurfaceViewRasterizer> _viewRasterizers =
       <EngineFlutterView, MultiSurfaceViewRasterizer>{};
 
+  /// Removes the [view] rasterizer from the registry.
+  void _removeViewRasterizer(EngineFlutterView view) {
+    _viewRasterizers.remove(view);
+  }
+
   @override
   void dispose() {
-    for (final MultiSurfaceViewRasterizer viewRasterizer in _viewRasterizers.values) {
+    for (final viewRasterizer in List<MultiSurfaceViewRasterizer>.of(_viewRasterizers.values)) {
       viewRasterizer.dispose();
     }
     _viewRasterizers.clear();
@@ -54,24 +59,35 @@ class MultiSurfaceRasterizer extends Rasterizer {
   }
 }
 
+/// A [ViewRasterizer] for a single [EngineFlutterView] managed by a
+/// [MultiSurfaceRasterizer], rendering directly onto one or more onscreen
+/// [Surface]s.
 class MultiSurfaceViewRasterizer extends ViewRasterizer {
   MultiSurfaceViewRasterizer(super.view, this.rasterizer, this.surfaceProvider);
 
+  /// The owning [MultiSurfaceRasterizer] that tracks this view rasterizer.
   final MultiSurfaceRasterizer rasterizer;
+
+  /// The [OnscreenSurfaceProvider] used to allocate display surfaces for [view].
   final OnscreenSurfaceProvider surfaceProvider;
 
   @override
   late final DisplayCanvasFactory<OnscreenSurface> displayFactory =
       DisplayCanvasFactory<OnscreenSurface>(createCanvas: surfaceProvider.createSurface);
 
+  // Nothing to prepare. Each display surface is resized in `rasterizeToCanvas`.
   @override
-  Future<void> prepareToDraw() async {
-    await displayFactory.baseCanvas.setSize(currentFrameSize);
-  }
+  Future<void> prepareToDraw() => Future<void>.value();
 
   /// Rasterizes the given [picture] directly to the given [canvas].
   Future<void> rasterizeToCanvas(OnscreenSurface canvas, ui.Picture picture) async {
+    if (canvas.isDisposed) {
+      return;
+    }
     await canvas.setSize(currentFrameSize);
+    if (canvas.isDisposed) {
+      return;
+    }
     return canvas.rasterizeToCanvas(picture);
   }
 
@@ -90,5 +106,12 @@ class MultiSurfaceViewRasterizer extends ViewRasterizer {
     }
     await Future.wait<void>(rasterizeFutures);
     recorder?.recordRasterFinish();
+  }
+
+  @override
+  void dispose() {
+    rasterizer._removeViewRasterizer(view);
+    displayFactory.dispose();
+    super.dispose();
   }
 }
