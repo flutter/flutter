@@ -543,7 +543,7 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     final bitmaps = <DomImageBitmap>[];
     for (final picture in pictures) {
       _drawPicture(picture as CkPicture);
-      if (!_isDisposed && gl != null && gl.isContextLost()) {
+      if (!isDisposed && gl != null && gl.isContextLost()) {
         _closeBitmaps(bitmaps);
         return null;
       }
@@ -559,7 +559,7 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
   }
 
   void _handleTransferError(Object error, StackTrace stackTrace, WebGLContext? gl) {
-    if (_isDisposed || error is UnsupportedError) {
+    if (isDisposed || error is UnsupportedError) {
       Error.throwWithStackTrace(error, stackTrace);
     }
     if (gl == null || !gl.isContextLost()) {
@@ -568,7 +568,7 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
   }
 
   Future<List<DomImageBitmap>> _rasterizeViaCreateImageBitmap(List<ui.Picture> pictures) {
-    if (!_isDisposed && supportsWebGl && _webGlContextOf(canvas).isContextLost()) {
+    if (!isDisposed && supportsWebGl && _webGlContextOf(canvas).isContextLost()) {
       onContextLost();
     }
     final snapshotPromises = <Future<DomImageBitmap>>[];
