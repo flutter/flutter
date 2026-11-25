@@ -171,7 +171,7 @@ void main() {
   });
 
   // Reproduction test for https://github.com/flutter/flutter/issues/187553
-  testWithoutContext('mergeJniLibFolders runs when Dart AOT source changes with flavors', () async {
+  test('mergeJniLibFolders runs when Dart AOT source changes with flavors', () async {
     final Directory projectDir = tempDir.childDirectory('app');
 
     // 1. Create a Flutter app template.
@@ -263,7 +263,7 @@ android {
   // so `compileFlutterBuild<Variant>` is never registered. The jniLibs copy task
   // is registered only together with the compile task, so the build must not
   // fail with "Task with name 'compileFlutterBuildDebug' not found".
-  testWithoutContext('app:assembleAndroidTest builds when no Flutter compile task is configured', () async {
+  test('app:assembleAndroidTest builds when no Flutter compile task is configured', () async {
     final Directory appDir = _createApp(tempDir);
 
     // Configure Gradle without running the Flutter build (no `flutter assemble`).

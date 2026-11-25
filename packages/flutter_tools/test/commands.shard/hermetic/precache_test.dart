@@ -531,7 +531,7 @@ void main() {
     expect(cache.osUtils.hostPlatformOverride, HostPlatform.darwin_x64);
   });
 
-  testWithoutContext('precache invokes ExtensionArtifactManager with explicit platform filter when flags are provided', () async {
+  test('precache invokes ExtensionArtifactManager with explicit platform filter when flags are provided', () async {
     final fakeArtifactManager = FakeExtensionArtifactManager();
     final toolContext = FakeToolContext(cache: cache);
     final command = PrecacheCommand(
@@ -552,7 +552,7 @@ void main() {
     expect(fakeArtifactManager.requestedForce, isFalse);
   });
 
-  testWithoutContext(
+  test(
     'precache passes null targetPlatforms and forwards --force to ExtensionArtifactManager',
     () async {
       final fakeArtifactManager = FakeExtensionArtifactManager();

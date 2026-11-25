@@ -63,7 +63,7 @@ void main() {
       fileSystem = MemoryFileSystem.test();
     });
 
-    testWithoutContext('skipped based on environment.generateDartPluginRegistry', () async {
+    test('skipped based on environment.generateDartPluginRegistry', () async {
       final environment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: Artifacts.test(),
@@ -88,7 +88,7 @@ void main() {
       expect(await const DartPluginRegistrantTarget().canSkip(environment2), isFalse);
     });
 
-    testWithoutContext('skipped based on platform', () async {
+    test('skipped based on platform', () async {
       const canSkip = <String, bool>{
         'darwin-x64': false,
         'linux-x64': false,

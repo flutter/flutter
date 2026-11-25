@@ -2574,7 +2574,7 @@ _flutter.loader.load();
     }),
   );
 
-  testWithoutContext('Dart2JSTarget, Dart2WasmTarget, and LinkHooks include recorded uses files only when recordUse is enabled', () {
+  test('Dart2JSTarget, Dart2WasmTarget, and LinkHooks include recorded uses files only when recordUse is enabled', () {
     final fileSystem = MemoryFileSystem.test();
     Environment createEnv({required bool isRecordUseEnabled}) {
       final env = Environment.test(
@@ -3692,7 +3692,7 @@ _flutter.loader.load({
     }),
   );
 
-  testWithoutContext('WebReleaseBundle propagates engineRevision to Dart2JSTarget and WebTemplatedFiles', () {
+  test('WebReleaseBundle propagates engineRevision to Dart2JSTarget and WebTemplatedFiles', () {
     final fileSystem = MemoryFileSystem.test();
     final testEnvironment = Environment.test(
       fileSystem.currentDirectory,
@@ -4393,7 +4393,7 @@ _flutter.loader.load();
     );
   });
 
-  testWithoutContext('injectManifestBuildConfig drops stale manifest keys that are absent from the new hash result, including when all manifests become absent', () {
+  test('injectManifestBuildConfig drops stale manifest keys that are absent from the new hash result, including when all manifests become absent', () {
     final fileSystem = MemoryFileSystem.test();
     final Directory outputDir = fileSystem.directory('/out')..createSync(recursive: true);
     final File bootstrapFile = outputDir.childFile('flutter_bootstrap.js')
@@ -5000,7 +5000,7 @@ flutter:
     );
   });
 
-  testWithoutContext(
+  test(
     'WebCompiledArtifact.tryParse classifies hashed, unhashed, multi-dot, and negative basenames',
     () {
       const positiveCases = <(String, WebCompiledArtifact)>[

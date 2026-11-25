@@ -509,8 +509,6 @@ abstract class FlutterVersion {
       await cache.getStampFileFor(VersionCheckStamp.flutterVersionCheckStampFile).delete();
     } on FileSystemException {
       // Ignore, since we don't mind if the file didn't exist in the first place.
-    } on UnsupportedError {
-      // In testWithoutContext.
     }
   }
 }

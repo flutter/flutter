@@ -2497,7 +2497,7 @@ server:
     );
   });
 
-  testWithoutContext('RunCommand registers --flavor, --track-widget-creation, and AndroidGradleOptionsBundle without AndroidBuildOptionsBundle flags', () {
+  test('RunCommand registers --flavor, --track-widget-creation, and AndroidGradleOptionsBundle without AndroidBuildOptionsBundle flags', () {
     final command = RunCommand(
       appleContext: FakeAppleContext(),
       assetBundleFactory: _FakeAssetBundleFactory(),

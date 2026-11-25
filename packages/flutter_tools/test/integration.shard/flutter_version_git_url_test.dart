@@ -26,7 +26,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('FlutterVersion strips credentials expanded by git insteadOf config', () {
+  test('FlutterVersion strips credentials expanded by git insteadOf config', () {
     final Directory repoDir = tempDir.childDirectory('flutter')..createSync();
     repoDir.childDirectory('bin').childDirectory('cache').createSync(recursive: true);
 

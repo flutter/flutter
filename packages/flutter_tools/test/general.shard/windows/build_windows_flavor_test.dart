@@ -132,7 +132,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('getWindowsBuildDirectory', () {
-    testWithoutContext('returns legacy path when no flavor', () {
+    test('returns legacy path when no flavor', () {
       expect(
         getWindowsBuildDirectory(
           TargetPlatform.windows_x64,
@@ -143,7 +143,7 @@ void main() {
       );
     });
 
-    testWithoutContext('inserts flavor segment when flavor is set', () {
+    test('inserts flavor segment when flavor is set', () {
       expect(
         getWindowsBuildDirectory(
           TargetPlatform.windows_x64,

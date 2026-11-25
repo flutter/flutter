@@ -34,7 +34,7 @@ void main() {
     tryToDelete(parentDirectory);
   });
 
-  testWithoutContext('Can upgrade and downgrade a Flutter checkout', () async {
+  test('Can upgrade and downgrade a Flutter checkout', () async {
     final Directory testDirectory = parentDirectory.childDirectory('flutter');
     testDirectory.createSync(recursive: true);
 

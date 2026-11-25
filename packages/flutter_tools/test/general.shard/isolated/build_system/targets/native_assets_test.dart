@@ -71,12 +71,12 @@ void main() {
     androidEnvironment.buildDir.createSync(recursive: true);
   });
 
-  testWithoutContext('no dependency on KernelSnapshot', () async {
+  test('no dependency on KernelSnapshot', () async {
     const target = BuildHooks();
     expect(target.dependencies, isNot(isA<KernelSnapshot>()));
   });
 
-  testWithoutContext('NativeAssets throws error if missing target platform', () async {
+  test('NativeAssets throws error if missing target platform', () async {
     iosEnvironment.defines.remove(kTargetPlatform);
     expect(const BuildHooks().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
   });
@@ -458,7 +458,7 @@ void main() {
     },
   );
 
-  testWithoutContext('Web LinkHooks tracks only active compileTargets recordedUsesFileNames and invalidates across compiler transitions', () async {
+  test('Web LinkHooks tracks only active compileTargets recordedUsesFileNames and invalidates across compiler transitions', () async {
     writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
     final webEnv = Environment.test(
       fileSystem.currentDirectory,
