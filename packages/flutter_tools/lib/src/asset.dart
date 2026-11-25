@@ -528,25 +528,37 @@ class ManifestAssetBundle implements AssetBundle {
         );
       }
     }
-    for (final HookAsset dataAsset in flutterHookResult?.dataAssets ?? <HookAsset>[]) {
-      final Package package = packageConfig[dataAsset.package]!;
-      final Uri fileUri = dataAsset.file;
-
-      final String filePath = _fileSystem.path.fromUri(fileUri);
-
-      final asset = _Asset(
-        baseDir: _fileSystem.path.dirname(filePath),
-        relativeUri: Uri(path: _fileSystem.path.basename(filePath)),
-        entryUri: Uri.parse(_fileSystem.path.join('packages', dataAsset.package, dataAsset.name)),
-        package: package,
-      );
-      if (assetVariants.containsKey(asset)) {
-        _logger.printError(
-          'Conflicting assets: The asset "$asset" was declared in the pubspec and the hook.',
+    final List<HookAsset> dataAssets = flutterHookResult?.dataAssets ?? const <HookAsset>[];
+    if (dataAssets.isNotEmpty) {
+      // The source file can differ even when both assets have the same bundle path.
+      final pubspecAssetPaths = <String>{
+        for (final asset in assetVariants.keys) asset.entryUri.path,
+        for (final variants in assetVariants.values)
+          for (final variant in variants) variant.entryUri.path,
+      };
+      final hookAssetPaths = <String>{};
+      for (final dataAsset in dataAssets) {
+        final Package package = packageConfig[dataAsset.package]!;
+        final String filePath = _fileSystem.path.fromUri(dataAsset.file);
+        final asset = _Asset(
+          baseDir: _fileSystem.path.dirname(filePath),
+          relativeUri: Uri(path: _fileSystem.path.basename(filePath)),
+          entryUri: Uri.parse('packages/${dataAsset.package}/${dataAsset.name}'),
+          package: package,
         );
-        return 1;
+        final String bundlePath = asset.entryUri.path;
+        if (pubspecAssetPaths.contains(bundlePath)) {
+          _logger.printError(
+            'Conflicting assets: The asset "$asset" was declared in the pubspec and the hook.',
+          );
+          return 1;
+        }
+        if (!hookAssetPaths.add(bundlePath)) {
+          _logger.printError('Multiple hook assets target the same bundle path: "$bundlePath".');
+          return 1;
+        }
+        assetVariants[asset] = <_Asset>[asset];
       }
-      assetVariants[asset] = <_Asset>[asset];
     }
 
     // Save the contents of each image, image variant, and font
