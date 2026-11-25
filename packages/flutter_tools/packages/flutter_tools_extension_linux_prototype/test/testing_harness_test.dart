@@ -68,7 +68,7 @@ Directory _writeTempExtension(String prefix, String body) {
 
 void main() {
   group('ServiceTestHarness', () {
-    test('captures logs with and without explicit timestamp', () async {
+    test('captures logs with default and explicit timestamp', () async {
       final service = _FakeService();
       final harness = ServiceTestHarness<_FakeService>(service);
       addTearDown(harness.dispose);
@@ -77,17 +77,22 @@ void main() {
       final StreamSubscription<ExtensionLogMessage> sub = harness.onLog.listen(streamedLogs.add);
       addTearDown(sub.cancel);
 
+      final DateTime before = DateTime.now().toUtc();
       final explicitTime = DateTime.utc(2026, 1, 2, 3, 4, 5);
       service
         ..log('plain message')
         ..log('warning message', level: .warning, timestamp: explicitTime);
+      final DateTime after = DateTime.now().toUtc();
 
       await pumpEventQueue();
 
       expect(harness.logs, hasLength(2));
       expect(harness.logs[0].level, ExtensionLogLevel.info);
       expect(harness.logs[0].message, 'plain message');
-      expect(harness.logs[0].timestamp, isNull);
+      expect(harness.logs[0].timestamp, isNotNull);
+      expect(harness.logs[0].timestamp!.isUtc, isTrue);
+      expect(harness.logs[0].timestamp!.isBefore(before), isFalse);
+      expect(harness.logs[0].timestamp!.isAfter(after), isFalse);
       expect(harness.logs[1].level, ExtensionLogLevel.warning);
       expect(harness.logs[1].message, 'warning message');
       expect(harness.logs[1].timestamp, explicitTime);
