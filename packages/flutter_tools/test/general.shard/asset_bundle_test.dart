@@ -749,6 +749,44 @@ flutter:
     );
 
     testUsingContext(
+      'NOTICES lists the app first even when it shares a license with a dependency',
+      () async {
+        writePackageConfigFiles(
+          directory: testFileSystem.currentDirectory,
+          mainLibName: 'my_app',
+          packages: <String, String>{'alpha': 'alpha/', 'beta': 'beta/'},
+        );
+        testFileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
+        testFileSystem.file('LICENSE').writeAsStringSync('Shared license');
+        for (final name in <String>['alpha', 'beta']) {
+          testFileSystem.directory(name).createSync();
+          testFileSystem.file('$name/pubspec.yaml').writeAsStringSync('name: $name');
+        }
+        testFileSystem.file('alpha/LICENSE').writeAsStringSync('Other license');
+        testFileSystem.file('beta/LICENSE').writeAsStringSync('Shared license');
+
+        final AssetBundle bundle = createWebBundle();
+        expect(
+          await bundle.build(
+            packageConfigPath: '.dart_tool/package_config.json',
+            targetPlatform: TargetPlatform.web_javascript,
+          ),
+          0,
+        );
+        final String notices = utf8.decode(await bundle.entries['NOTICES']!.contentsAsBytes());
+        expect(notices.split('\n${'-' * 80}\n'), <String>[
+          'my_app\nbeta\n\nShared license',
+          'alpha\n\nOther license',
+        ]);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        Platform: () => testPlatform,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
       'pubspec contains an asset',
       () async {
         writePackageConfigFiles(directory: testFileSystem.currentDirectory, mainLibName: 'my_app');

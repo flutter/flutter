@@ -33,12 +33,16 @@ class LicenseCollector {
 
   /// Obtain licenses from the `packageMap` into a single result.
   ///
+  /// When present, [applicationPackage] is listed first so that the license
+  /// page can identify the application.
+  ///
   /// [additionalLicenses] should contain aggregated license files from all
   /// of the current applications dependencies.
   LicenseResult obtainLicenses(
     PackageConfig packageConfig,
-    Map<String, List<File>> additionalLicenses,
-  ) {
+    Map<String, List<File>> additionalLicenses, {
+    String? applicationPackage,
+  }) {
     final packageLicenses = <String, Set<String>>{};
     final allPackages = <String>{};
     final dependencies = <File>[];
@@ -78,13 +82,20 @@ class LicenseCollector {
       }
     }
 
-    final List<String> combinedLicensesList = packageLicenses.entries.map<String>((
-      MapEntry<String, Set<String>> entry,
-    ) {
+    final applicationLicenses = <String>[];
+    final dependencyLicenses = <String>[];
+    for (final MapEntry<String, Set<String>> entry in packageLicenses.entries) {
       final List<String> packageNames = entry.value.toList()..sort();
-      return '${packageNames.join('\n')}\n\n${entry.key}';
-    }).toList();
-    combinedLicensesList.sort();
+      final bool includesApplication =
+          applicationPackage != null && packageNames.remove(applicationPackage);
+      if (includesApplication) {
+        packageNames.insert(0, applicationPackage);
+      }
+      final licenses = includesApplication ? applicationLicenses : dependencyLicenses;
+      licenses.add('${packageNames.join('\n')}\n\n${entry.key}');
+    }
+    applicationLicenses.sort();
+    dependencyLicenses.sort();
 
     /// Append additional LICENSE files as specified in the pubspec.yaml.
     final additionalLicenseText = <String>[];
@@ -124,7 +135,8 @@ class LicenseCollector {
       );
     }
 
-    final String combinedLicenses = combinedLicensesList
+    final String combinedLicenses = applicationLicenses
+        .followedBy(dependencyLicenses)
         .followedBy(additionalLicenseText)
         .join(licenseSeparator);
 
