@@ -522,6 +522,80 @@ Uptime: 441088659 Realtime: 521464097
     expect(json, containsPair('platform', 'Android'));
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/196292.
+  testWithoutContext('Can parse adb shell dumpsys info with Pss and Rss columns', () {
+    const exampleOutput = r'''
+Applications Memory Usage (in Kilobytes):
+Uptime: 531675142 Realtime: 626068851
+
+** MEMINFO in pid 24205 [com.example.official_demo] **
+                   Pss  Private  Private  SwapPss      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap    22669    22644        4       23    24300    35148    19447    12320
+  Dalvik Heap     3038     1292       68       11     8300    27038     2462    24576
+ Dalvik Other     1292     1272        0        0     2052
+        Stack     1224     1224        0        0     1232
+       Ashmem       20        0        0        0     1664
+      Gfx dev      556      556        0        0      560
+    Other dev       25        0       24        0      812
+     .so mmap     4176      636       64        9    61020
+    .jar mmap      988        0        0        0    49988
+    .apk mmap    11417    11344        0        0    13248
+    .ttf mmap    11085        0    10808        0    12684
+    .dex mmap        9        0        0        0     1388
+    .oat mmap      222        0        0        0    14880
+    .art mmap     1121      480        8       58    16884
+   Other mmap     4843        4     4828        0     5756
+   EGL mtrack    60138    60138        0        0    60138
+    GL mtrack      768      768        0        0      768
+        Memfd        4        4        0        0        4
+      Unknown     5596     5500       88        3     6488
+        TOTAL   129295   105862    15892      104   282166    62186    21909    36896
+
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     1780                          25184
+         Native Heap:    22644                          24300
+                Code:    22868                         153224
+               Stack:     1224                           1232
+            Graphics:    61462                          61466
+       Private Other:    11776
+              System:     7541
+             Unknown:                                   16760
+
+           TOTAL PSS:   129295            TOTAL RSS:   282166       TOTAL SWAP PSS:      104
+
+ Objects
+               Views:        6         ViewRootImpl:        1
+         AppContexts:        6           Activities:        1
+              Assets:       33        AssetManagers:        0
+       Local Binders:       31        Proxy Binders:       93
+       Parcel memory:       11         Parcel count:       42
+    Death Recipients:        2             WebViews:        0
+
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+''';
+
+    final AndroidMemoryInfo result = parseMeminfoDump(exampleOutput);
+
+    // Only the Pss values are used; the Rss column is ignored.
+    expect(result.realTime, 626068851);
+    expect(result.javaHeap, 1780);
+    expect(result.nativeHeap, 22644);
+    expect(result.code, 22868);
+    expect(result.stack, 1224);
+    expect(result.graphics, 61462);
+    expect(result.privateOther, 11776);
+    expect(result.system, 7541);
+
+    // Matches the TOTAL PSS reported by dumpsys.
+    expect(result.toJson(), containsPair('Total', 129295));
+  });
+
   testWithoutContext('AndroidDevice stopApp does nothing if app is not passed', () async {
     final AndroidDevice device = setUpAndroidDevice();
 
