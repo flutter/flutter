@@ -387,6 +387,36 @@ void main() {
       },
     );
 
+    test('prefers tdur over dur, including zero tdur, when mixed with dur-only frames', () {
+      final trace = _BlinkTraceBuilder()
+        ..addFrames(5, beginFrame: 0, updateLifecycle: 300, dur: 9999)
+        ..addFrames(5, beginFrame: 1000, updateLifecycle: 100, dur: 9999)
+        ..addFrames(10, beginFrame: 2000, updateLifecycle: 500, durationKey: 'dur');
+
+      // beginFrame: (0 * 5 + 1000 * 5 + 2000 * 10) ~/ 20 == 1250.
+      // updateLifecycle: (300 * 5 + 100 * 5 + 500 * 10) ~/ 20 == 350.
+      expectAverages(trace.events, beginFrame: 1250, updateLifecycle: 350);
+    });
+
+    test('averages all 800 measured frames with truncating division', () {
+      final trace = _BlinkTraceBuilder()
+        ..addFrames(400, beginFrame: 1000, updateLifecycle: 7)
+        ..addFrames(399, beginFrame: 1001, updateLifecycle: 8)
+        ..addFrames(1, beginFrame: 1002, updateLifecycle: 9);
+
+      // beginFrame: (400 * 1000 + 399 * 1001 + 1002) ~/ 800 == 800401 ~/ 800 == 1000.
+      // updateLifecycle: (400 * 7 + 399 * 8 + 9) ~/ 800 == 6001 ~/ 800 == 7.
+      expectAverages(trace.events, beginFrame: 1000, updateLifecycle: 7);
+    });
+
+    test('averages begin frame time only over measured frames that recorded one', () {
+      final trace = _BlinkTraceBuilder()
+        ..addFrames(6, beginFrame: 1000, updateLifecycle: 200)
+        ..addFrames(6, beginFrame: 9999, updateLifecycle: 400, hasBeginFrame: false);
+
+      expectAverages(trace.events, beginFrame: 1000, updateLifecycle: 300);
+    });
+
     test('ignores unrelated pid events and throws on missing duration, empty frame events, or missing measured frames', () {
       final interleaved = _BlinkTraceBuilder();
       for (var i = 0; i < 6; i++) {
@@ -439,7 +469,8 @@ class _BlinkTraceBuilder {
   /// `measured_frame` markers when [measured] is true.
   ///
   /// Durations are stored under [durationKey] (`tdur` or `dur`), or omitted
-  /// when [durationKey] is null.
+  /// when [durationKey] is null. When [dur] is non-null, every begin frame and
+  /// update lifecycle event also records it as its `dur` field.
   void addFrames(
     int count, {
     required int beginFrame,
@@ -447,6 +478,7 @@ class _BlinkTraceBuilder {
     bool measured = true,
     bool hasBeginFrame = true,
     String? durationKey = 'tdur',
+    int? dur,
     int pid = 1,
   }) {
     for (var i = 0; i < count; i++) {
@@ -454,16 +486,16 @@ class _BlinkTraceBuilder {
         _add(pid, 'measured_frame', 'b');
       }
       if (hasBeginFrame) {
-        _add(pid, 'WebFrameWidgetImpl::BeginMainFrame', 'X', durationKey, beginFrame);
+        _add(pid, 'WebFrameWidgetImpl::BeginMainFrame', 'X', durationKey, beginFrame, dur);
       }
       if (measured) {
         _add(pid, 'measured_frame', 'e');
       }
-      _add(pid, 'WebFrameWidgetImpl::UpdateLifecycle', 'X', durationKey, updateLifecycle);
+      _add(pid, 'WebFrameWidgetImpl::UpdateLifecycle', 'X', durationKey, updateLifecycle, dur);
     }
   }
 
-  void _add(int pid, String name, String ph, [String? durationKey, int? duration]) {
+  void _add(int pid, String name, String ph, [String? durationKey, int? duration, int? dur]) {
     _ts += 1;
     events.add(<String, dynamic>{
       'args': <String, dynamic>{},
@@ -474,6 +506,7 @@ class _BlinkTraceBuilder {
       'tid': 1,
       'ts': _ts,
       if (durationKey != null && duration != null) durationKey: duration,
+      'dur': ?dur,
     });
   }
 }
