@@ -236,6 +236,20 @@ struct Settings {
 
   bool enable_flutter_gpu = false;
 
+  // Enable the CoreText paragraph layout pipeline and Apple Unicode on macOS
+  // and iOS. Ignored on other platforms.
+  bool enable_skoretext = false;
+
+  // Enable Apple Unicode (SkUnicode_apple) on macOS and iOS without enabling
+  // CoreText shaping. Automatically enabled when enable_skoretext is true.
+  // Ignored on other platforms.
+#if defined(FML_OS_MACOSX) || defined(FML_OS_IOS) || \
+    defined(FML_OS_IOS_SIMULATOR)
+  bool enable_skunicode_apple = true;
+#else
+  bool enable_skunicode_apple = false;
+#endif
+
   // Enable android surface control swapchains where supported.
   bool enable_surface_control = false;
 

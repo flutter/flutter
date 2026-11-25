@@ -7,7 +7,12 @@
 
 #include "third_party/skia/modules/skparagraph/include/ParagraphStyle.h"
 #include "third_party/skia/modules/skparagraph/include/TextStyle.h"
+#if defined(SK_UNICODE_APPLE_IMPLEMENTATION)
+#include "third_party/skia/modules/skunicode/include/SkUnicode_apple.h"
+#endif
+#if defined(SK_UNICODE_ICU_IMPLEMENTATION)
 #include "third_party/skia/modules/skunicode/include/SkUnicode_icu.h"
+#endif
 #include "txt/paragraph_style.h"
 
 namespace skt = skia::textlayout;
@@ -30,7 +35,45 @@ SkFontStyle MakeSkFontStyle(int font_weight, txt::FontStyle font_style) {
                          : SkFontStyle::Slant::kItalic_Slant);
 }
 
+bool ShouldUseSkoreText(const ParagraphStyle& style) {
+#if defined(SK_PARAGRAPH_NATIVE_CORETEXT)
+#if defined(SK_PARAGRAPH_DISABLE_HARFBUZZ)
+  return true;
+#else
+  return style.enable_skoretext;
+#endif
+#else
+  return false;
+#endif
+}
+
+sk_sp<SkUnicode> MakeUnicode(bool use_apple_unicode) {
+#if defined(SK_UNICODE_APPLE_IMPLEMENTATION)
+  if (use_apple_unicode) {
+    return SkUnicodes::Apple::Make();
+  }
+#endif
+#if defined(SK_UNICODE_ICU_IMPLEMENTATION)
+  return SkUnicodes::ICU::Make();
+#else
+  return nullptr;
+#endif
+}
+
 }  // anonymous namespace
+
+// static
+bool ParagraphBuilderSkia::ShouldUseAppleUnicode(const ParagraphStyle& style) {
+#if defined(SK_UNICODE_APPLE_IMPLEMENTATION)
+#if !defined(SK_UNICODE_ICU_IMPLEMENTATION)
+  return true;
+#else
+  return ShouldUseSkoreText(style) || style.enable_skunicode_apple;
+#endif
+#else
+  return false;
+#endif
+}
 
 ParagraphBuilderSkia::ParagraphBuilderSkia(
     const ParagraphStyle& style,
@@ -39,7 +82,7 @@ ParagraphBuilderSkia::ParagraphBuilderSkia(
     : base_style_(style.GetTextStyle()), impeller_enabled_(impeller_enabled) {
   builder_ = skt::ParagraphBuilder::make(
       TxtToSkia(style), font_collection->CreateSktFontCollection(),
-      SkUnicodes::ICU::Make());
+      MakeUnicode(ShouldUseAppleUnicode(style)));
 }
 
 ParagraphBuilderSkia::~ParagraphBuilderSkia() = default;
@@ -142,6 +185,9 @@ skt::ParagraphStyle ParagraphBuilderSkia::TxtToSkia(const ParagraphStyle& txt) {
   skia.setRenderSoftHyphens(txt.render_soft_hyphens);
   if (txt.soft_hyphen_string.has_value()) {
     skia.setSoftHyphenString(txt.soft_hyphen_string.value());
+  }
+  if (ShouldUseSkoreText(txt)) {
+    skia.setTextShapingEngine(skt::TextShapingEngine::kCoreText);
   }
 
   return skia;

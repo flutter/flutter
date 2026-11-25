@@ -984,6 +984,8 @@ class DebuggingOptions {
     this.uninstallApp = true,
     this.enableDartProfiling = true,
     this.enableHcpp,
+    this.enableSkoretext,
+    this.enableSkunicodeApple,
     this.profileStartup = false,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
@@ -1009,6 +1011,8 @@ class DebuggingOptions {
     this.uninstallApp = true,
     this.enableDartProfiling = true,
     this.enableHcpp,
+    this.enableSkoretext,
+    this.enableSkunicodeApple,
     this.profileStartup = false,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
@@ -1081,6 +1085,8 @@ class DebuggingOptions {
     required this.uninstallApp,
     required this.enableDartProfiling,
     required this.enableHcpp,
+    required this.enableSkoretext,
+    required this.enableSkunicodeApple,
     required this.profileStartup,
     required this.enableEmbedderApi,
     required this.usingCISystem,
@@ -1140,6 +1146,23 @@ class DebuggingOptions {
   /// at launch, so the `io.flutter.embedding.android.EnableHcpp` value in the
   /// manifest of the installed artifact decides.
   final bool? enableHcpp;
+
+  /// Whether SkoreText (CoreText + Apple Unicode) was explicitly enabled or
+  /// disabled with `--[no-]enable-skoretext`.
+  ///
+  /// When null the flag was not passed, and no override is sent to the device
+  /// at launch, so `FLTEnableSkoreText` in `Info.plist` (defaulting to false)
+  /// decides on iOS and macOS.
+  final bool? enableSkoretext;
+
+  /// Whether Apple Unicode (`SkUnicode_apple`) was explicitly enabled or
+  /// disabled with `--[no-]enable-skunicode-apple`.
+  ///
+  /// When null the flag was not passed, and no override is sent to the device
+  /// at launch, so `FLTEnableSkUnicodeApple` in `Info.plist` (defaulting to
+  /// false) decides on iOS and macOS. Automatically enabled when SkoreText is
+  /// enabled.
+  final bool? enableSkunicodeApple;
   final bool profileStartup;
   final bool enableEmbedderApi;
   final bool usingCISystem;
@@ -1204,6 +1227,10 @@ class DebuggingOptions {
       if (enableImpeller == ImpellerStatus.enabled) '--enable-impeller=true',
       if (enableImpeller == ImpellerStatus.disabled) '--enable-impeller=false',
       if (enableFlutterGpu) '--enable-flutter-gpu',
+      if (enableSkoretext ?? false) '--enable-skoretext=true',
+      if (enableSkoretext == false) '--enable-skoretext=false',
+      if (enableSkunicodeApple ?? false) '--enable-skunicode-apple=true',
+      if (enableSkunicodeApple == false) '--enable-skunicode-apple=false',
       if (environmentType == EnvironmentType.physical && deviceVmServicePort != null)
         '--vm-service-port=$deviceVmServicePort',
       // The simulator "device" is actually on the host machine so no ports will be forwarded.
@@ -1252,6 +1279,8 @@ class DebuggingOptions {
     'uninstallApp': uninstallApp,
     'enableDartProfiling': enableDartProfiling,
     'enableHcpp': enableHcpp,
+    'enableSkoretext': enableSkoretext,
+    'enableSkunicodeApple': enableSkunicodeApple,
     'profileStartup': profileStartup,
     'enableEmbedderApi': enableEmbedderApi,
     'usingCISystem': usingCISystem,
@@ -1308,6 +1337,8 @@ class DebuggingOptions {
     uninstallApp: (json['uninstallApp'] as bool?) ?? true,
     enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
     enableHcpp: json['enableHcpp'] as bool?,
+    enableSkoretext: json['enableSkoretext'] as bool?,
+    enableSkunicodeApple: json['enableSkunicodeApple'] as bool?,
     profileStartup: (json['profileStartup'] as bool?) ?? false,
     enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
     usingCISystem: (json['usingCISystem'] as bool?) ?? false,
