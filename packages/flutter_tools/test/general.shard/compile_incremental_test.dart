@@ -131,6 +131,85 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
+  testWithoutContext(
+    'incremental compile exits the tool when dartaotruntime cannot be run',
+    () async {
+      // Regression test for https://github.com/flutter/flutter/issues/193518.
+      fakeProcessManager.excludedExecutables.add('Artifact.engineDartAotRuntime');
+
+      await expectLater(
+        asyncGuard(
+          () => generator.recompile(
+            Uri.parse('/path/to/main.dart'),
+            null,
+            outputPath: '/build/',
+            packageConfig: PackageConfig.empty,
+            fs: MemoryFileSystem.test(),
+            projectRootPath: '',
+          ),
+        ),
+        throwsToolExit(
+          message: 'Unable to find dartaotruntime binary at Artifact.engineDartAotRuntime',
+        ),
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+  );
+
+  testWithoutContext(
+    'incremental compile runs the frontend server from source with the Dart binary '
+    'when frontendServerStarterPath is provided',
+    () async {
+      // The starter script is run with dart, so dartaotruntime is not required.
+      fakeProcessManager.excludedExecutables.add('Artifact.engineDartAotRuntime');
+      fakeProcessManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            'Artifact.engineDartBinary',
+            '/path/to/frontend_server_starter.dart',
+            ...frontendServerCommand.skip(2),
+            '--initialize-from-dill',
+            expectedCachePath,
+            '--verbosity=error',
+          ],
+          stdout: 'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0',
+          stdin: frontendServerStdIn,
+        ),
+      );
+      final generatorWithStarter = DefaultResidentCompiler(
+        'sdkroot',
+        buildInfo: const BuildInfo(
+          BuildMode.debug,
+          null,
+          trackWidgetCreation: true,
+          treeShakeIcons: false,
+          packageConfigPath: '.dart_tool/package_config.json',
+          frontendServerStarterPath: '/path/to/frontend_server_starter.dart',
+        ),
+        logger: testLogger,
+        processManager: fakeProcessManager,
+        artifacts: Artifacts.test(),
+        platform: FakePlatform(),
+        fileSystem: MemoryFileSystem.test(),
+        stdoutHandler: generatorStdoutHandler,
+        shutdownHooks: FakeShutdownHooks(),
+        config: Config.test(),
+      );
+
+      final CompilerOutput? output = await generatorWithStarter.recompile(
+        Uri.parse('/path/to/main.dart'),
+        null,
+        outputPath: '/build/',
+        packageConfig: PackageConfig.empty,
+        fs: MemoryFileSystem.test(),
+        projectRootPath: '',
+      );
+      expect(frontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
+      expect(output?.outputFilename, equals('/path/to/main.dart.dill'));
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+  );
+
   testWithoutContext('incremental compile sends correct package URI for pub workspace member package located under root lib/', () async {
     final packageConfig = PackageConfig(<Package>[
       Package(

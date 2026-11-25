@@ -783,6 +783,33 @@ void main() {
       expect(customRendererConfig.renderer, WebRendererMode.canvaskit);
       expect(customRendererConfig.crossOriginIsolation, isFalse);
     });
+
+    testWithoutContext(
+      'WebDebugConfig.fromJson falls back to default renderer on unknown renderer value',
+      () {
+        final jsConfig = WebDebugConfig.fromJson(const <String, Object?>{'webRenderer': 'html'});
+        expect(jsConfig.renderer, WebRendererMode.defaultForJs);
+
+        final wasmConfig = WebDebugConfig.fromJson(const <String, Object?>{
+          'webRenderer': 'html',
+          'webUseWasm': true,
+        });
+        expect(wasmConfig.renderer, WebRendererMode.defaultForWasm);
+      },
+    );
+
+    testWithoutContext(
+      'WebDebugConfig.tryFromJson returns null when only generic keys are present',
+      () {
+        final WebDebugConfig? config = WebDebugConfig.tryFromJson(const <String, Object?>{
+          'port': 8080,
+          'hostname': 'localhost',
+          'tlsCertPath': '/cert.pem',
+          'tlsCertKeyPath': '/key.pem',
+        });
+        expect(config, isNull);
+      },
+    );
   });
 
   group('Get iOS launch arguments from DebuggingOptions', () {

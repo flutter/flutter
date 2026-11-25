@@ -1146,14 +1146,8 @@ class DebuggingOptions {
   final List<PlatformDebuggingOptions> platformOptions;
 
   /// Returns the first entry in [platformOptions] of type [T], or `null` if none is present.
-  T? platformOption<T extends PlatformDebuggingOptions>() {
-    for (final PlatformDebuggingOptions options in platformOptions) {
-      if (options is T) {
-        return options;
-      }
-    }
-    return null;
-  }
+  T? platformOption<T extends PlatformDebuggingOptions>() =>
+      platformOptions.whereType<T>().firstOrNull;
 
   final ImpellerStatus enableImpeller;
   final bool enableFlutterGpu;
@@ -1293,8 +1287,7 @@ class DebuggingOptions {
   static DebuggingOptions fromJson(
     Map<String, Object?> json,
     BuildInfo buildInfo, {
-    List<PlatformDebuggingOptionsParser> platformOptionParsers =
-        const <PlatformDebuggingOptionsParser>[],
+    required List<PlatformDebuggingOptionsParser> platformOptionParsers,
   }) => DebuggingOptions._(
     buildInfo: buildInfo,
     debuggingEnabled: json['debuggingEnabled']! as bool,
