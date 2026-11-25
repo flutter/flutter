@@ -31,11 +31,6 @@ sys.path.insert(
     0, os.path.join(os.path.dirname(__file__), '../../tools/fuchsia/test_scripts/test/')
 )
 
-# pylint: disable=import-error, wrong-import-position
-from bundled_test_runner import run_tests, TestCase
-from common import DIR_SRC_ROOT, IMAGES_ROOT, SDK_ROOT
-from compatible_utils import force_running_unattended
-
 if len(sys.argv) == 2:
   VARIANT = sys.argv[1]
   sys.argv.pop()
@@ -43,6 +38,17 @@ elif len(sys.argv) == 1:
   VARIANT = 'fuchsia_debug_x64'
 else:
   assert False, 'Expect only one parameter as the compile output directory.'
+os.environ['FUCHSIA_ORCHESTRATE_CONFIG'] = os.path.join(
+    os.path.dirname(__file__),
+    'orchestrate_x64_arm64.json' if VARIANT.endswith(('_arm64',
+                                                      '_arm64_tester')) else 'orchestrate_x64.json',
+)
+
+# pylint: disable=import-error, wrong-import-position
+from bundled_test_runner import run_tests, TestCase
+from common import DIR_SRC_ROOT, IMAGES_ROOT, SDK_ROOT
+from compatible_utils import force_running_unattended
+
 OUT_DIR = os.path.join(DIR_SRC_ROOT, 'out', VARIANT)
 
 
@@ -97,11 +103,6 @@ def main() -> int:
   _force_symlink(IMAGES_ROOT, os.path.join(OUT_DIR, 'fuchsia-images'))
   assert VARIANT.endswith(('_arm64', '_arm64_tester', '_x64', '_x64_tester')
                          ), 'Unsupported variant ' + VARIANT
-  os.environ['FUCHSIA_ORCHESTRATE_CONFIG'] = os.path.join(
-      os.path.dirname(__file__),
-      'orchestrate_x64_arm64.json'
-      if VARIANT.endswith(('_arm64', '_arm64_tester')) else 'orchestrate_x64.json',
-  )
   sys.argv.append('--out-dir=' + OUT_DIR)
   sys.argv.append('--test-realm=/core/testing/system-tests')
   sys.argv.append('--orchestrate')

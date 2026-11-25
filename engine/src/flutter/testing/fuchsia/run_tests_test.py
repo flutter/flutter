@@ -12,6 +12,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import importlib
 import json
 import os
 import shutil
@@ -59,6 +60,7 @@ class RunTestsTest(unittest.TestCase):
     )
 
   def test_main_configures_orchestrate_and_symlinks(self):
+    orig_out_dir = run_tests.OUT_DIR
     for variant, config_name, expected_pb, expected_engine in (
         ('ci/fuchsia_debug_x64_tester', 'orchestrate_x64.json', 'fuchsia-images/terminal/x64/',
          None),
@@ -70,33 +72,47 @@ class RunTestsTest(unittest.TestCase):
            tempfile.TemporaryDirectory() as logs_dir:
         os.symlink('stale_sdk', os.path.join(temp_dir, 'fuchsia-sdk'))
         os.symlink('stale_images', os.path.join(temp_dir, 'fuchsia-images'))
-        argv = ['run_tests.py']
-        with patch.object(run_tests, 'OUT_DIR', temp_dir), \
-             patch.object(run_tests, 'VARIANT', variant), \
-             patch.object(sys, 'argv', argv), \
+        argv = ['run_tests.py', variant]
+        with patch.object(sys, 'argv', argv), \
              patch.dict(os.environ, {'FLUTTER_LOGS_DIR': logs_dir}), \
-             patch.object(run_tests, 'force_running_unattended'), \
-             patch.object(run_tests, 'run_tests', return_value=0) as mock_run_tests:
-          self.assertEqual(run_tests.main(), 0)
-          self.assertEqual(os.readlink(os.path.join(temp_dir, 'fuchsia-sdk')), run_tests.SDK_ROOT)
-          self.assertEqual(
-              os.readlink(os.path.join(temp_dir, 'fuchsia-images')), run_tests.IMAGES_ROOT
-          )
-          self.assertIn('--orchestrate', argv)
-          self.assertIn('--out-dir=' + temp_dir, argv)
-          self.assertIn('--test-realm=/core/testing/system-tests', argv)
-          self.assertIn('--logs-dir=' + logs_dir, argv)
-          self.assertFalse(any(arg.startswith('--product') for arg in argv))
-          mock_run_tests.assert_called_once()
-          expected_config = os.path.join(os.path.dirname(run_tests.__file__), config_name)
-          self.assertEqual(os.environ['FUCHSIA_ORCHESTRATE_CONFIG'], expected_config)
-          with open(expected_config, 'r') as config_file:
-            config = json.load(config_file)
-          self.assertEqual(config['experiments'], ['orchestrate-error-on-test-failure'])
-          self.assertEqual(config['emulator']['ffx_path'], 'fuchsia-sdk/tools/x64/ffx')
-          self.assertEqual(config['emulator']['local_pb'], expected_pb)
-          self.assertEqual(config['emulator']['build_ids'], ['.build-id', 'fuchsia-sdk/.build-id'])
-          self.assertEqual(config['emulator'].get('engine'), expected_engine)
+             patch.dict(sys.modules):
+          for mod in ('common', 'bundled_test_runner', 'run_test'):
+            sys.modules.pop(mod, None)
+          os.environ.pop('FUCHSIA_ORCHESTRATE_CONFIG', None)
+          try:
+            importlib.reload(run_tests)
+            expected_config = os.path.join(os.path.dirname(run_tests.__file__), config_name)
+            self.assertEqual(os.environ['FUCHSIA_ORCHESTRATE_CONFIG'], expected_config)
+            self.assertEqual(
+                sys.modules['common'].ORCHESTRATE_CONFIG, os.path.abspath(expected_config)
+            )
+            with patch.object(run_tests, 'OUT_DIR', temp_dir), \
+                 patch.object(run_tests, 'force_running_unattended'), \
+                 patch.object(run_tests, 'run_tests', return_value=0) as mock_run_tests:
+              self.assertEqual(run_tests.main(), 0)
+              self.assertEqual(
+                  os.readlink(os.path.join(temp_dir, 'fuchsia-sdk')), run_tests.SDK_ROOT
+              )
+              self.assertEqual(
+                  os.readlink(os.path.join(temp_dir, 'fuchsia-images')), run_tests.IMAGES_ROOT
+              )
+              self.assertIn('--orchestrate', argv)
+              self.assertIn('--out-dir=' + temp_dir, argv)
+              self.assertIn('--test-realm=/core/testing/system-tests', argv)
+              self.assertIn('--logs-dir=' + logs_dir, argv)
+              self.assertFalse(any(arg.startswith('--product') for arg in argv))
+              mock_run_tests.assert_called_once()
+            with open(expected_config, 'r') as config_file:
+              config = json.load(config_file)
+            self.assertEqual(config['experiments'], ['orchestrate-error-on-test-failure'])
+            self.assertEqual(config['emulator']['ffx_path'], 'fuchsia-sdk/tools/x64/ffx')
+            self.assertEqual(config['emulator']['local_pb'], expected_pb)
+            self.assertEqual(
+                config['emulator']['build_ids'], ['.build-id', 'fuchsia-sdk/.build-id']
+            )
+            self.assertEqual(config['emulator'].get('engine'), expected_engine)
+          finally:
+            run_tests.OUT_DIR = orig_out_dir
 
 
 if __name__ == '__main__':
