@@ -543,6 +543,29 @@ _flutter.loader.load();
   );
 
   test(
+    'WebReleaseBundle rejects web resources that overwrite Flutter assets',
+    () => testbed.run(() async {
+      environment.defines[kBuildMode] = 'release';
+      final Directory webResources = environment.projectDir.childDirectory('web');
+      webResources.childFile('assets/AssetManifest.bin.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('from web');
+      environment.buildDir.childFile('main.dart.js').createSync();
+      environment.buildDir.childFile('main.dart.js.info.json').createSync();
+      environment.buildDir.childFile('main.dart.js.map').createSync();
+
+      await expectLater(
+        WebReleaseBundle(
+          <WebCompilerConfig>[const JsCompilerConfig()],
+          const NoOpAnalytics(),
+          engineRevision: _kEngineRevision,
+        ).build(environment),
+        throwsToolExit(message: 'would overwrite a Flutter asset at the same path'),
+      );
+    }),
+  );
+
+  test(
     'WebReleaseBundle copies over output files when they change',
     () => testbed.run(() async {
       final Directory webResources = environment.projectDir.childDirectory('web');
