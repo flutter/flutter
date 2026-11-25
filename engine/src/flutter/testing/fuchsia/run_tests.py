@@ -38,6 +38,8 @@ elif len(sys.argv) == 1:
   VARIANT = 'fuchsia_debug_x64'
 else:
   assert False, 'Expect only one parameter as the compile output directory.'
+# with_envs.py has no knowledge of VARIANT, so set FUCHSIA_ORCHESTRATE_CONFIG
+# here before importing test_scripts (common reads it at import time).
 os.environ['FUCHSIA_ORCHESTRATE_CONFIG'] = os.path.join(
     os.path.dirname(__file__),
     'orchestrate_x64_arm64.json' if VARIANT.endswith(('_arm64',
