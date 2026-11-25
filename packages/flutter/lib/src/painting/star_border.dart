@@ -194,8 +194,7 @@ class StarBorder extends OutlinedBorder {
     if (t < split) {
       return first(t * (1 / split));
     } else {
-      t = (1 / (1.0 - split)) * (t - split);
-      return second(t);
+      return second((1 / (1.0 - split)) * (t - split));
     }
   }
 
