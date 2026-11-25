@@ -18213,6 +18213,48 @@ void main() {
     );
 
     testWidgets(
+      'rebuilding a focused field does not check the clipboard again',
+      (WidgetTester tester) async {
+        // Report a pasteable clipboard so that paste is enabled.
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          (MethodCall methodCall) async {
+            if (methodCall.method == 'Clipboard.hasStrings') {
+              calls += 1;
+              return <String, dynamic>{'value': true};
+            }
+            return null;
+          },
+        );
+
+        Widget buildWithInsets(double bottomInset) {
+          return MediaQuery(
+            data: MediaQueryData(viewInsets: EdgeInsets.only(bottom: bottomInset)),
+            child: buildField(),
+          );
+        }
+
+        await tester.pumpWidget(buildWithInsets(0));
+        focusNode.requestFocus();
+        await tester.pump();
+        expect(calls, 1);
+        final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+        expect(state.clipboardStatus.value, ClipboardStatus.pasteable);
+        expect(state.pasteEnabled, isTrue);
+
+        // Rebuild the focused field repeatedly, as happens on every frame while
+        // the software keyboard animates in or while the user is typing.
+        for (var inset = 10.0; inset <= 300.0; inset += 10.0) {
+          await tester.pumpWidget(buildWithInsets(inset));
+        }
+        controller.text = 'typed';
+        await tester.pumpWidget(buildWithInsets(300));
+        expect(calls, 1);
+      },
+      skip: kIsWeb, // [intended] web never calls hasStrings.
+    );
+
+    testWidgets(
       'the clipboard is not checked when paste is not possible',
       (WidgetTester tester) async {
         await tester.pumpWidget(buildField(readOnly: true));

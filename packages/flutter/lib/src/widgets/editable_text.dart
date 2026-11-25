@@ -3653,13 +3653,11 @@ class EditableTextState extends State<EditableText>
     if (widget.showCursor != oldWidget.showCursor) {
       _startOrStopCursorTimerIfNeeded();
     }
+    // The clipboard status is refreshed when the field gains focus, when the
+    // toolbar is shown, when the app resumes, and after a cut or copy. It is
+    // deliberately not refreshed here: rebuilding a focused field (e.g. on
+    // every frame of the keyboard animation) must not query the clipboard.
     _updateClipboardStatusListening();
-    final bool canPaste = widget.selectionControls is TextSelectionHandleControls
-        ? pasteEnabled
-        : widget.selectionControls?.canPaste(this) ?? false;
-    if (_listeningToClipboardStatus && pasteEnabled && canPaste) {
-      clipboardStatus.update();
-    }
   }
 
   void _disposeScrollNotificationObserver() {
