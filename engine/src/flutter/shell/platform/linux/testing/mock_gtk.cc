@@ -259,7 +259,26 @@ GdkDisplay* gtk_widget_get_display(GtkWidget* widget) {
         dlsym(RTLD_NEXT, "gtk_widget_get_display"));
     return original(widget);
   }
-  return nullptr;
+  if (mock == nullptr) {
+    return nullptr;
+  }
+  return mock->gtk_widget_get_display(widget);
+}
+
+struct wl_display* gdk_wayland_display_get_wl_display(GdkDisplay* display) {
+  check_thread();
+  if (mock == nullptr) {
+    return nullptr;
+  }
+  return mock->gdk_wayland_display_get_wl_display(display);
+}
+
+struct wl_surface* gdk_wayland_window_get_wl_surface(GdkWindow* window) {
+  check_thread();
+  if (mock == nullptr) {
+    return nullptr;
+  }
+  return mock->gdk_wayland_window_get_wl_surface(window);
 }
 
 gint gtk_widget_get_scale_factor(GtkWidget* widget) {

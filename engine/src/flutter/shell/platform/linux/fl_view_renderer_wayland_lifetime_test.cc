@@ -379,10 +379,11 @@ class FlViewRendererWaylandLifetimeTest : public ::testing::Test {
     ASSERT_NE(gdk_wayland_window_get_wl_surface(parent), nullptr);
     ASSERT_EQ(counts_->parent, gdk_wayland_window_get_wl_surface(parent));
     ASSERT_EQ(g_atomic_int_get(&counts_->created[kChild]), 1);
-    ASSERT_EQ(g_atomic_int_get(&counts_->created[kEGL]), 1);
+    ASSERT_EQ(g_atomic_int_get(&counts_->created[kEGL]), 0);
     ASSERT_TRUE(fl_opengl_manager_clear_current(manager_));
 
     Present();
+    ASSERT_EQ(g_atomic_int_get(&counts_->created[kEGL]), 1);
     ASSERT_GT(g_atomic_int_get(&counts_->composites), 0);
     ASSERT_GT(g_atomic_int_get(&counts_->presents), 0);
     ASSERT_GT(g_atomic_int_get(&counts_->child_contexts), 0);
@@ -396,8 +397,8 @@ class FlViewRendererWaylandLifetimeTest : public ::testing::Test {
       gtk_widget_destroy(window_);
       g_clear_object(&window_);
     }
-    // Unrealize clears the child context; framebuffer cleanup needs a shared
-    // context current through the final owner/idle release.
+    // Framebuffer cleanup in finalize needs a shared context current through
+    // the final owner or idle release.
     EGLDisplay display = MakeCurrentForFinalization();
     g_clear_object(&renderer_);
     g_clear_object(&engine_);
@@ -491,10 +492,10 @@ class FlViewRendererWaylandLifetimeTest : public ::testing::Test {
     wl_event_queue_destroy(queue);
   }
 
-  void CheckChildrenReleased() {
+  void CheckUnrealized() {
     EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kCompositor]), 1);
-    EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kEGL]), 1);
-    EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kChild]), 1);
+    EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kEGL]), 0);
+    EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kChild]), 0);
   }
 
   Counts* counts_ = nullptr;
@@ -524,15 +525,15 @@ TEST_P(FlViewRendererWaylandRaceTest, DestroyOrUnrealizeDuringPresentation) {
   RasterThread raster(counts_, renderer_, manager_, pause, without_fences,
                       FALSE);
   ASSERT_TRUE(raster.WaitForEntry()) << "Linker wrapper was not reached";
-  if (pause == Pause::kBeforeWake) {
-    // After frame_mutex unlock, the runner and fence are still in use.
-    // Defer main-context dispatch until the worker joins.
+  if (pause != Pause::kComposite) {
+    // After frame_mutex unlock, presentation, mutex re-lock, runner, and fence
+    // are still active; unrealize/destroy must not block.
     if (destroy) {
       gtk_widget_destroy(GTK_WIDGET(renderer_));
     } else {
       gtk_widget_unrealize(GTK_WIDGET(renderer_));
     }
-    CheckChildrenReleased();
+    CheckUnrealized();
     if (!destroy) {
       gtk_widget_destroy(GTK_WIDGET(renderer_));
     }
@@ -554,7 +555,7 @@ TEST_P(FlViewRendererWaylandRaceTest, DestroyOrUnrealizeDuringPresentation) {
     } else {
       gtk_widget_unrealize(GTK_WIDGET(renderer_));
     }
-    CheckChildrenReleased();
+    CheckUnrealized();
     if (!destroy) {
       // Prevent pending GTK work from re-realizing the child.
       gtk_widget_destroy(GTK_WIDGET(renderer_));
@@ -581,17 +582,21 @@ TEST_F(FlViewRendererWaylandLifetimeTest, DestroyBeforeQueuedRedraw) {
   // Keep the redraw idle pending across destruction and engine finalization.
   Present();
   gtk_widget_destroy(GTK_WIDGET(renderer_));
-  CheckChildrenReleased();
+  CheckUnrealized();
   g_clear_object(&engine_);
   EGLDisplay display = MakeCurrentForFinalization();
   g_clear_object(&renderer_);
   EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kRenderer]), 0);
   EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kManager]), 0);
   EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kRunner]), 0);
+  EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kEGL]), 0);
+  EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kChild]), 0);
   drain_main_context();
   EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kRenderer]), 1);
   EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kManager]), 1);
   EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kRunner]), 1);
+  EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kEGL]), 1);
+  EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kChild]), 1);
   EXPECT_TRUE(
       eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT));
 }
@@ -606,7 +611,7 @@ TEST_F(FlViewRendererWaylandLifetimeTest,
   // GTK maps children before replacing the toplevel surface. Allocate again
   // to detect the replacement parent.
   gtk_widget_queue_allocate(GTK_WIDGET(renderer_));
-  ASSERT_TRUE(wait_for_count(&counts_->created[kEGL], 2))
+  ASSERT_TRUE(wait_for_count(&counts_->created[kChild], 2))
       << "GTK did not recreate the subsurface after showing the window";
   struct wl_surface* parent =
       gdk_wayland_window_get_wl_surface(gtk_widget_get_window(window_));
@@ -616,11 +621,14 @@ TEST_F(FlViewRendererWaylandLifetimeTest,
             wl_proxy_get_id(reinterpret_cast<struct wl_proxy*>(parent)));
   // Addresses and protocol IDs can be reused; check resource counts instead.
   EXPECT_EQ(g_atomic_int_get(&counts_->created[kChild]), 2);
+  EXPECT_EQ(g_atomic_int_get(&counts_->created[kEGL]), 1);
+  EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kChild]), 0);
+  EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kEGL]), 0);
+  int presents = g_atomic_int_get(&counts_->presents);
+  Present();
   EXPECT_EQ(g_atomic_int_get(&counts_->created[kEGL]), 2);
   EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kChild]), 1);
   EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kEGL]), 1);
-  int presents = g_atomic_int_get(&counts_->presents);
-  Present();
   Present(TRUE, TRUE);
   EXPECT_EQ(g_atomic_int_get(&counts_->presents), presents + 2);
   CheckProtocol();
@@ -628,13 +636,31 @@ TEST_F(FlViewRendererWaylandLifetimeTest,
 
 TEST_F(FlViewRendererWaylandLifetimeTest, UnrealizedRendererDropsFrames) {
   gtk_widget_unrealize(GTK_WIDGET(renderer_));
-  CheckChildrenReleased();
+  CheckUnrealized();
   int composites = g_atomic_int_get(&counts_->composites);
   int presents = g_atomic_int_get(&counts_->presents);
   Present();
   EXPECT_EQ(g_atomic_int_get(&counts_->composites), composites);
   EXPECT_EQ(g_atomic_int_get(&counts_->presents), presents);
+  EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kEGL]), 1);
+  EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kChild]), 1);
   // Re-realization would hit a preexisting task runner reference leak.
+}
+
+TEST_F(FlViewRendererWaylandLifetimeTest,
+       DestroyedRendererReleasesEglAfterEngineFinalized) {
+  gtk_widget_destroy(GTK_WIDGET(renderer_));
+  CheckUnrealized();
+  g_clear_object(&engine_);
+  EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kEngine]), 1);
+  int composites = g_atomic_int_get(&counts_->composites);
+  int presents = g_atomic_int_get(&counts_->presents);
+  Present();
+  EXPECT_EQ(g_atomic_int_get(&counts_->composites), composites);
+  EXPECT_EQ(g_atomic_int_get(&counts_->presents), presents);
+  EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kEGL]), 1);
+  EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kChild]), 1);
+  EXPECT_EQ(g_atomic_int_get(&counts_->finalized[kManager]), 0);
 }
 
 }  // namespace
@@ -731,12 +757,12 @@ void __wrap_fl_subsurface_egl_present(FlSubsurfaceEGL* egl,
                                       FlGLFence* fence) {
   if (current_presentation != nullptr) {
     EXPECT_NE(texture, 0u);
-    EXPECT_TRUE(glIsTexture(texture));
     current_presentation->in_present = TRUE;
   }
   __real_fl_subsurface_egl_present(egl, texture, width, height, fence);
   if (current_presentation != nullptr) {
     current_presentation->in_present = FALSE;
+    EXPECT_TRUE(glIsTexture(texture));
     g_atomic_int_inc(&current_counts->presents);
     current_presentation->StopAt(Pause::kPresent);
   }

@@ -22,6 +22,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../context/android_context.dart' show AndroidSdkProvider;
 import '../convert.dart';
+import '../features.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
 import '../windows/visual_studio.dart';
@@ -144,6 +145,9 @@ abstract class Target {
   /// The dependencies of this target.
   List<Target> get dependencies;
 
+  /// Resolves the dependencies of this target for the given [environment].
+  List<Target> resolveDependencies(Environment environment) => dependencies;
+
   /// The input [Source]s which are diffed to determine if a target should run.
   List<Source> get inputs;
 
@@ -179,7 +183,9 @@ abstract class Target {
       this,
       inputsFiles.sources,
       outputFiles.sources,
-      <Node>[for (final Target target in dependencies) target._toNode(environment)],
+      <Node>[
+        for (final Target target in resolveDependencies(environment)) target._toNode(environment),
+      ],
       buildKey,
       environment,
       inputsFiles.containsNewDepfile,
@@ -238,7 +244,9 @@ abstract class Target {
     final String? key = buildKey;
     return <String, Object>{
       'name': name,
-      'dependencies': <String>[for (final Target target in dependencies) target.name],
+      'dependencies': <String>[
+        for (final Target target in resolveDependencies(environment)) target.name,
+      ],
       'inputs': <String>[for (final File file in resolveInputs(environment).sources) file.path],
       'outputs': <String>[for (final File file in resolveOutputs(environment).sources) file.path],
       'buildKey': ?key,
@@ -311,7 +319,7 @@ class CompositeTarget extends Target {
 /// directory to write an output file.
 ///
 /// ```dart
-///   globals.fs.file('build/linux/out')
+///   environment.fileSystem.file('build/linux/out')
 ///     ..createSync()
 ///     ..writeAsStringSync('output data');
 /// ```
@@ -351,6 +359,7 @@ class Environment implements AndroidSdkProvider {
     required Platform platform,
     required Analytics analytics,
     required AndroidSdk? Function()? androidSdkBuilder,
+    required FeatureFlags featureFlags,
     required FlutterProjectFactory projectFactory,
     required VisualStudio? visualStudio,
     required Xcode? xcode,
@@ -396,6 +405,7 @@ class Environment implements AndroidSdkProvider {
       processManager: processManager,
       platform: platform,
       analytics: analytics,
+      featureFlags: featureFlags,
       projectFactory: projectFactory,
       androidSdkBuilder: androidSdkBuilder,
       visualStudio: visualStudio,
@@ -412,26 +422,27 @@ class Environment implements AndroidSdkProvider {
   @visibleForTesting
   factory Environment.test(
     Directory testDirectory, {
-    Directory? projectDir,
-    String? packageConfigPath,
-    Directory? outputDir,
-    Directory? cacheDir,
-    Directory? flutterRootDir,
-    Directory? buildDir,
-    Map<String, String> defines = const <String, String>{},
-    Map<String, String> inputs = const <String, String>{},
-    String? engineVersion,
-    Platform? platform,
-    Analytics? analytics,
-    FlutterProjectFactory? projectFactory,
-    AndroidSdk? androidSdk,
-    VisualStudio? visualStudio,
-    Xcode? xcode,
-    bool generateDartPluginRegistry = false,
+    required Artifacts artifacts,
+    required FeatureFlags featureFlags,
     required FileSystem fileSystem,
     required Logger logger,
-    required Artifacts artifacts,
     required ProcessManager processManager,
+    Analytics? analytics,
+    AndroidSdk? androidSdk,
+    Directory? buildDir,
+    Directory? cacheDir,
+    Map<String, String> defines = const <String, String>{},
+    String? engineVersion,
+    Directory? flutterRootDir,
+    bool generateDartPluginRegistry = false,
+    Map<String, String> inputs = const <String, String>{},
+    Directory? outputDir,
+    String? packageConfigPath,
+    Platform? platform,
+    Directory? projectDir,
+    FlutterProjectFactory? projectFactory,
+    VisualStudio? visualStudio,
+    Xcode? xcode,
   }) {
     final Platform resolvedPlatform = platform ?? FakePlatform();
     return Environment(
@@ -449,6 +460,7 @@ class Environment implements AndroidSdkProvider {
       processManager: processManager,
       platform: resolvedPlatform,
       analytics: analytics ?? const NoOpAnalytics(),
+      featureFlags: featureFlags,
       projectFactory:
           projectFactory ??
           FlutterProjectFactory(
@@ -480,6 +492,7 @@ class Environment implements AndroidSdkProvider {
     required this.fileSystem,
     required this.artifacts,
     required this.analytics,
+    required this.featureFlags,
     required this._androidSdkBuilder,
     required this.projectFactory,
     required this.visualStudio,
@@ -489,7 +502,15 @@ class Environment implements AndroidSdkProvider {
     this.engineVersion,
   });
 
-  Environment copyWith({Directory? outputDir}) {
+  static Directory _resolveDirectory(Directory directory) {
+    try {
+      return directory.fileSystem.directory(directory.resolveSymbolicLinksSync());
+    } on FileSystemException {
+      return directory.absolute;
+    }
+  }
+
+  Environment copyWith({FeatureFlags? featureFlags, Directory? outputDir}) {
     return Environment._(
       outputDir: outputDir ?? this.outputDir,
       projectDir: projectDir,
@@ -505,6 +526,7 @@ class Environment implements AndroidSdkProvider {
       processManager: processManager,
       platform: platform,
       analytics: analytics,
+      featureFlags: featureFlags ?? this.featureFlags,
       projectFactory: projectFactory,
       androidSdkBuilder: _androidSdkBuilder,
       visualStudio: visualStudio,
@@ -603,6 +625,9 @@ class Environment implements AndroidSdkProvider {
 
   final Analytics analytics;
 
+  /// Feature flags active for this build environment.
+  final FeatureFlags featureFlags;
+
   /// The factory used by build targets to instantiate [FlutterProject]s.
   final FlutterProjectFactory projectFactory;
 
@@ -630,6 +655,14 @@ class Environment implements AndroidSdkProvider {
   final bool generateDartPluginRegistry;
 
   late final depFileService = DepfileService(logger: logger, fileSystem: fileSystem);
+
+  /// Returns [projectDir] with symlinks and relative segments resolved,
+  /// falling back to [Directory.absolute] if [projectDir] does not yet exist.
+  Directory get resolvedProjectDir => _resolveDirectory(projectDir);
+
+  /// Returns [outputDir] with symlinks and relative segments resolved,
+  /// falling back to [Directory.absolute] if [outputDir] does not yet exist.
+  Directory get resolvedOutputDir => _resolveDirectory(outputDir);
 }
 
 /// The result information from the build system.
@@ -716,7 +749,7 @@ class FlutterBuildSystem extends BuildSystem {
     final fileCache = FileStore(cacheFile: cacheFile, logger: _logger)..initialize();
 
     // Perform sanity checks on build.
-    checkCycles(target);
+    checkCycles(target, environment);
 
     final Set<String> preservedOutputFilePaths = convertSourcesToPaths(
       _preservedOutputSources,
@@ -911,14 +944,13 @@ void _deleteStaleOutputs({
   required Set<String> preservedOutputFilePaths,
   required Iterable<String> previousOutputs,
 }) {
-  String projectDirPath;
-  try {
-    projectDirPath = environment.projectDir.resolveSymbolicLinksSync();
-  } on FileSystemException {
-    projectDirPath = environment.projectDir.absolute.path;
-  }
   final String sharedHooksPath = fileSystem.path.canonicalize(
-    fileSystem.path.join(projectDirPath, '.dart_tool', 'hooks_runner', 'shared'),
+    fileSystem.path.join(
+      environment.resolvedProjectDir.path,
+      '.dart_tool',
+      'hooks_runner',
+      'shared',
+    ),
   );
   for (final previousOutput in previousOutputs) {
     if (currentOutputs.containsKey(previousOutput)) {
@@ -1114,7 +1146,7 @@ class PerformanceMeasurement {
 /// Check if there are any dependency cycles in the target.
 ///
 /// Throws a [CycleException] if one is encountered.
-void checkCycles(Target initial) {
+void checkCycles(Target initial, Environment environment) {
   void checkInternal(Target target, Set<Target> visited, Set<Target> stack) {
     if (stack.contains(target)) {
       throw CycleException(stack..add(target));
@@ -1124,7 +1156,7 @@ void checkCycles(Target initial) {
     }
     visited.add(target);
     stack.add(target);
-    for (final Target dependency in target.dependencies) {
+    for (final Target dependency in target.resolveDependencies(environment)) {
       checkInternal(dependency, visited, stack);
     }
     stack.remove(target);
