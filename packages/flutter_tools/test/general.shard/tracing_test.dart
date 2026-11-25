@@ -58,7 +58,7 @@ final vmServiceSetup = <FakeVmServiceRequest>[
 ];
 
 void main() {
-  testWithoutContext('Can trace application startup', () async {
+  test('Can trace application startup', () async {
     final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
     final fakeVmServiceHost = FakeVmServiceHost(
@@ -116,7 +116,7 @@ void main() {
     });
   });
 
-  testWithoutContext('throws tool exit if the vmservice disconnects', () async {
+  test('throws tool exit if the vmservice disconnects', () async {
     final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
     final fakeVmServiceHost = FakeVmServiceHost(
@@ -143,7 +143,7 @@ void main() {
     );
   });
 
-  testWithoutContext('throws tool exit if timeline is missing the engine start event', () async {
+  test('throws tool exit if timeline is missing the engine start event', () async {
     final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
     final fakeVmServiceHost = FakeVmServiceHost(
@@ -174,7 +174,7 @@ void main() {
     );
   });
 
-  testWithoutContext('prints when first frame is taking a long time', () async {
+  test('prints when first frame is taking a long time', () async {
     final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
     final completer = Completer<void>();
@@ -230,7 +230,7 @@ void main() {
     );
   });
 
-  testWithoutContext('throws tool exit if first frame events are missing', () async {
+  test('throws tool exit if first frame events are missing', () async {
     final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
     final fakeVmServiceHost = FakeVmServiceHost(
@@ -270,7 +270,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Can trace application startup without awaiting for first frame', () async {
+  test('Can trace application startup without awaiting for first frame', () async {
     final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
     final fakeVmServiceHost = FakeVmServiceHost(
@@ -315,7 +315,7 @@ void main() {
     });
   });
 
-  testWithoutContext('downloadStartupTrace also downloads the timeline', () async {
+  test('downloadStartupTrace also downloads the timeline', () async {
     final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
     final fakeVmServiceHost = FakeVmServiceHost(

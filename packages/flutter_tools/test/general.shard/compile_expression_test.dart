@@ -52,7 +52,7 @@ void main() {
     processManager.process.stderr = stdErrStreamController.stream.transform(utf8.encoder);
   });
 
-  testWithoutContext('compile expression fails if not previously compiled', () async {
+  test('compile expression fails if not previously compiled', () async {
     final CompilerOutput? result = await generator.compileExpression(
       '2+2',
       null,
@@ -69,7 +69,7 @@ void main() {
     expect(result, isNull);
   });
 
-  testWithoutContext('compile expression can compile single expression', () async {
+  test('compile expression can compile single expression', () async {
     final stdoutController = StreamController<List<int>>();
     processManager.process.stdout = stdoutController.stream;
 
@@ -138,7 +138,7 @@ void main() {
     await stdoutController.close();
   });
 
-  testWithoutContext('compile expression sends JSON_INPUT for multiline expressions', () async {
+  test('compile expression sends JSON_INPUT for multiline expressions', () async {
     final stdoutController = StreamController<List<int>>();
     processManager.process.stdout = stdoutController.stream;
 
@@ -208,7 +208,7 @@ void main() {
     await stdoutController.close();
   });
 
-  testWithoutContext('compile expressions without awaiting', () async {
+  test('compile expressions without awaiting', () async {
     final compileResponseCompleter = Completer<List<int>>();
     final compileExpressionResponseCompleter1 = Completer<List<int>>();
     final compileExpressionResponseCompleter2 = Completer<List<int>>();

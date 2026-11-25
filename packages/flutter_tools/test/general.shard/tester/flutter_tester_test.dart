@@ -33,7 +33,7 @@ void main() {
     fileSystem = MemoryFileSystem.test();
   });
 
-  testWithoutContext('FlutterTesterApp can be created from the current directory', () async {
+  test('FlutterTesterApp can be created from the current directory', () async {
     const projectPath = '/home/my/projects/my_project';
     await fileSystem.directory(projectPath).create(recursive: true);
     fileSystem.currentDirectory = projectPath;
@@ -48,14 +48,14 @@ void main() {
       FlutterTesterDevices.showFlutterTesterDevice = false;
     });
 
-    testWithoutContext('no device', () async {
+    test('no device', () async {
       final FlutterTesterDevices discoverer = setUpFlutterTesterDevices();
 
       final List<Device> devices = await discoverer.devices();
       expect(devices, isEmpty);
     });
 
-    testWithoutContext('has device', () async {
+    test('has device', () async {
       FlutterTesterDevices.showFlutterTesterDevice = true;
       final FlutterTesterDevices discoverer = setUpFlutterTesterDevices();
 
@@ -67,7 +67,7 @@ void main() {
       expect(device.id, 'flutter-tester');
     });
 
-    testWithoutContext('discoverDevices', () async {
+    test('discoverDevices', () async {
       FlutterTesterDevices.showFlutterTesterDevice = true;
       final FlutterTesterDevices discoverer = setUpFlutterTesterDevices();
 
@@ -118,7 +118,7 @@ void main() {
       device.getLogReader().logLines.listen(logLines.add);
     });
 
-    testWithoutContext('default settings', () async {
+    test('default settings', () async {
       expect(device.id, 'flutter-tester');
       expect(await device.isLocalEmulator, isFalse);
       expect(device.name, 'Flutter test device');
@@ -133,7 +133,7 @@ void main() {
       expect(await device.isSupported(), isTrue);
     });
 
-    testWithoutContext('does not accept profile, release, or jit-release builds', () async {
+    test('does not accept profile, release, or jit-release builds', () async {
       final LaunchResult releaseResult = await device.startApp(
         FakeApplicationPackage(),
         mainPath: mainPath,

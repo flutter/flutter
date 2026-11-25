@@ -1052,11 +1052,11 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     },
   );
 
-  testWithoutContext('hidden when not enabled on Windows host', () {
+  test('hidden when not enabled on Windows host', () {
     expect(createCommand(featureFlags: TestFeatureFlags(), platform: windowsPlatform).hidden, true);
   });
 
-  testWithoutContext('Not hidden when enabled and on Windows host', () {
+  test('Not hidden when enabled and on Windows host', () {
     expect(
       createCommand(
         featureFlags: TestFeatureFlags(isWindowsEnabled: true),
