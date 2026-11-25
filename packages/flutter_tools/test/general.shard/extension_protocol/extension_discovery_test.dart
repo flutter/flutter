@@ -335,7 +335,6 @@ void _shutdownTrackingEntryPoint(SendPort sendPort) {
 void _writeExtensionPackage(
   Directory extDir, {
   String entrypointBody = 'void main(List<String> args, Object? message) {}',
-  String? name,
 }) {
   extDir.childDirectory('extension').childDirectory('flutter_tools').childFile('extension.dart')
     ..createSync(recursive: true)
@@ -1301,7 +1300,7 @@ dev_dependencies:
   my_ext:
     path: ../my_ext
 ''');
-      _writeExtensionPackage(fs.directory('/workspace/my_ext'), name: 'my_ext');
+      _writeExtensionPackage(fs.directory('/workspace/my_ext'));
 
       final finder = ProjectExtensionFinder(fileSystem: fs, logger: BufferLogger.test());
       expect(await finder.findProjectExtensions(startDirectory: projectDir), isEmpty);
@@ -1358,8 +1357,8 @@ dependencies:
   direct_ext: ^1.0.0
   regular_pkg: ^1.0.0
 ''');
-      _writeExtensionPackage(fs.directory('/workspace/direct_ext'), name: 'direct_ext');
-      _writeExtensionPackage(fs.directory('/workspace/transitive_ext'), name: 'transitive_ext');
+      _writeExtensionPackage(fs.directory('/workspace/direct_ext'));
+      _writeExtensionPackage(fs.directory('/workspace/transitive_ext'));
       fs.directory('/workspace/regular_pkg/lib').createSync(recursive: true);
       _writePackageConfig(projectDir, const <String, String>{
         'app': '../',
@@ -1442,12 +1441,8 @@ dependencies:
 ''');
       _writeExtensionPackage(
         workspaceRoot.childDirectory('packages').childDirectory('workspace_ext'),
-        name: 'workspace_ext',
       );
-      _writeExtensionPackage(
-        workspaceRoot.childDirectory('packages').childDirectory('member_ext'),
-        name: 'member_ext',
-      );
+      _writeExtensionPackage(workspaceRoot.childDirectory('packages').childDirectory('member_ext'));
       _writePackageConfig(workspaceRoot, const <String, String>{
         'app': '../packages/app',
         'member_ext': '../packages/member_ext',
@@ -1542,7 +1537,7 @@ dev_dependencies:
             'transitive_ext',
           ]) {
             final Directory extDir = workspaceRoot.childDirectory('ext').childDirectory(extName);
-            _writeExtensionPackage(extDir, name: extName);
+            _writeExtensionPackage(extDir);
             extPaths[extName] = extDir.path;
           }
           _writePackageConfig(workspaceRoot, extPaths);
@@ -1613,7 +1608,7 @@ dependencies:
 ''');
 
       // 1. Standard valid extension.
-      _writeExtensionPackage(tempDir.childDirectory('valid_ext'), name: 'valid_ext');
+      _writeExtensionPackage(tempDir.childDirectory('valid_ext'));
 
       // 2. Symlink resolving inside <pkgRoot>.
       final Directory internalSymlinkExtDir = tempDir.childDirectory('internal_symlink_ext');
@@ -1660,7 +1655,7 @@ dependencies:
             ..createSync(tempDir.childFile('nonexistent_target.dart').path, recursive: true);
 
       // 6. Transitive extension package.
-      _writeExtensionPackage(tempDir.childDirectory('transitive_ext'), name: 'transitive_ext');
+      _writeExtensionPackage(tempDir.childDirectory('transitive_ext'));
 
       _writePackageConfig(projectDir, const <String, String>{
         'app': '../',
@@ -1713,7 +1708,7 @@ dependencies:
       _writePackageConfig(fs.directory('/workspace/app')).setLastModifiedSync(DateTime.utc(2026));
 
       final Directory extDir = fs.directory('/workspace/my_ext');
-      _writeExtensionPackage(extDir, name: 'my_ext');
+      _writeExtensionPackage(extDir);
       final File entrypointFile =
           extDir
               .childDirectory('extension')
@@ -1800,7 +1795,7 @@ dependencies:
       final File packageConfigFile = _writePackageConfig(fs.directory('/workspace/app'))
         ..setLastModifiedSync(DateTime.utc(2026));
       final Directory extDir = fs.directory('/workspace/my_ext');
-      _writeExtensionPackage(extDir, name: 'my_ext');
+      _writeExtensionPackage(extDir);
       final File entrypointFile =
           extDir
               .childDirectory('extension')
@@ -1888,7 +1883,7 @@ dependencies:
       const extV1Root = '/pub-cache/hosted/pub.dev/my_ext-1.0.0';
       const gitDepCommit1 = '/pub-cache/git/helper-1111111111111111';
       const gitDepCommit2 = '/pub-cache/git/helper-2222222222222222';
-      _writeExtensionPackage(fs.directory(extV1Root), name: 'my_ext');
+      _writeExtensionPackage(fs.directory(extV1Root));
       fs
           .file('$extV1Root/extension/flutter_tools/extension.dart')
           .setLastModifiedSync(DateTime.utc(2026));
@@ -1943,7 +1938,7 @@ dependencies:
       _writePackageConfig(fs.directory('/workspace/app')).setLastModifiedSync(DateTime.utc(2026));
 
       final Directory extDir = fs.directory('/workspace/my_ext');
-      _writeExtensionPackage(extDir, name: 'my_ext');
+      _writeExtensionPackage(extDir);
       final File entrypointFile =
           extDir
               .childDirectory('extension')
@@ -1991,7 +1986,7 @@ dependencies:
       () async {
         final fs = MemoryFileSystem.test();
         _writePackageConfig(fs.directory('/workspace/app')).setLastModifiedSync(DateTime.utc(2026));
-        _writeExtensionPackage(fs.directory('/workspace/my_ext'), name: 'my_ext');
+        _writeExtensionPackage(fs.directory('/workspace/my_ext'));
         fs
             .file('/workspace/my_ext/extension/flutter_tools/extension.dart')
             .setLastModifiedSync(DateTime.utc(2026));
@@ -2068,7 +2063,7 @@ dependencies:
       );
 
       // 2. Missing package_config.json.
-      _writeExtensionPackage(fs.directory('/workspace/my_ext'), name: 'my_ext');
+      _writeExtensionPackage(fs.directory('/workspace/my_ext'));
       await expectLater(
         compilerMissingRevision.compile(ext),
         throwsA(
@@ -2120,7 +2115,7 @@ dependencies:
       );
       final fs = ErrorHandlingFileSystem(delegate: delegateFs, platform: FakePlatform());
       _writePackageConfig(fs.directory('/workspace/app'));
-      _writeExtensionPackage(fs.directory('/workspace/my_ext'), name: 'my_ext');
+      _writeExtensionPackage(fs.directory('/workspace/my_ext'));
 
       final processManager = FakeProcessManager.list(<FakeCommand>[
         // 1. Non-zero exit code.
@@ -2214,7 +2209,7 @@ dependencies:
       () async {
         final fs = MemoryFileSystem.test();
         _writePackageConfig(fs.directory('/workspace/app')).setLastModifiedSync(DateTime.utc(2026));
-        _writeExtensionPackage(fs.directory('/workspace/my_ext'), name: 'my_ext');
+        _writeExtensionPackage(fs.directory('/workspace/my_ext'));
         fs
             .file('/workspace/my_ext/extension/flutter_tools/extension.dart')
             .setLastModifiedSync(DateTime.utc(2026));
@@ -2262,8 +2257,8 @@ dev_dependencies:
     path: ../local_ext
   hosted_ext: ^1.2.3
 ''');
-      _writeExtensionPackage(fs.directory(localExtRootPath), name: 'local_ext');
-      _writeExtensionPackage(fs.directory(hostedExtRootPath), name: 'hosted_ext');
+      _writeExtensionPackage(fs.directory(localExtRootPath));
+      _writeExtensionPackage(fs.directory(hostedExtRootPath));
       final File localEntrypoint =
           fs
               .directory(localExtRootPath)
@@ -2403,7 +2398,7 @@ dev_dependencies:
       final fs = ErrorHandlingFileSystem(delegate: delegateFs, platform: FakePlatform());
       final Directory appDir = fs.directory('/workspace/app');
       final Directory extDir = fs.directory('/workspace/my_ext');
-      _writeExtensionPackage(extDir, name: 'my_ext');
+      _writeExtensionPackage(extDir);
       final File entrypointFile =
           extDir
               .childDirectory('extension')
@@ -2537,7 +2532,7 @@ dev_dependencies:
       final fs = MemoryFileSystem.test();
       final Directory appDir = fs.directory('/workspace/app');
       final Directory extDir = fs.directory('/workspace/my_ext');
-      _writeExtensionPackage(extDir, name: 'my_ext');
+      _writeExtensionPackage(extDir);
       final File entrypointFile =
           extDir
               .childDirectory('extension')
@@ -2656,8 +2651,8 @@ dev_dependencies:
       );
       final fs = ErrorHandlingFileSystem(delegate: delegateFs, platform: FakePlatform());
       final Directory appDir = fs.directory('/workspace/app');
-      _writeExtensionPackage(fs.directory('/workspace/ext_a'), name: 'ext_a');
-      _writeExtensionPackage(fs.directory('/workspace/ext_b'), name: 'ext_b');
+      _writeExtensionPackage(fs.directory('/workspace/ext_a'));
+      _writeExtensionPackage(fs.directory('/workspace/ext_b'));
       fs
           .file('/workspace/ext_a/extension/flutter_tools/extension.dart')
           .setLastModifiedSync(DateTime.utc(2026));
