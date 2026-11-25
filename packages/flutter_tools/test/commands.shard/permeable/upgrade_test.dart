@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
-import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -18,6 +17,7 @@ import 'package:flutter_tools/src/version.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/context_runner.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';

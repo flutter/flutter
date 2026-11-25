@@ -31,6 +31,7 @@ import 'package:flutter_tools/src/macos/cocoapods_validator.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/pre_run_validator.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
@@ -80,6 +81,25 @@ void main() {
       // Create flutter root directory and pubspec.yaml to avoid exceptions during bootstrapping
       fs.directory('/flutter/packages/flutter_tools').createSync(recursive: true);
       fs.file('/pubspec.yaml').createSync();
+    });
+
+    testWithoutContext('resolves the Linux project directory at command time', () async {
+      LinuxProjectDirectory? linuxProjectDirectory;
+      final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+        fs: fs,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+        templateRenderer: FakeTemplateRenderer(),
+        linuxProjectDirectoryBuilder: () => linuxProjectDirectory,
+      );
+
+      final FlutterProject project = dependencies.toolContext.projectFactory.fromDirectory(
+        fs.currentDirectory,
+      );
+      expect(project.linux.cmakeFile.parent.basename, 'linux');
+      linuxProjectDirectory = LinuxProjectDirectory('linux-gtk4');
+      expect(project.linux.cmakeFile.parent.basename, 'linux-gtk4');
     });
 
     testUsingContext('successfully bootstraps all contexts with core overrides', () async {

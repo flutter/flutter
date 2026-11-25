@@ -9,6 +9,14 @@ set(BINARY_NAME "multiple_windows")
 # https://wiki.gnome.org/HowDoI/ChooseApplicationID
 set(APPLICATION_ID "com.example.multiple_windows")
 
+# By default, "installing" just makes a relocatable bundle in the build
+# directory. This must be done before anything that can fail, otherwise the
+# default prefix will be cached and used on the next build.
+set(BUILD_BUNDLE_DIR "${PROJECT_BINARY_DIR}/bundle")
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX "${BUILD_BUNDLE_DIR}" CACHE PATH "..." FORCE)
+endif()
+
 set(_LINUX_GTK_VARIANT "$ENV{FLUTTER_LINUX_GTK}")
 if("${_LINUX_GTK_VARIANT}" STREQUAL "")
   if(DEFINED LINUX_GTK_VARIANT)
@@ -99,13 +107,6 @@ include(flutter/generated_plugins.cmake)
 
 
 # === Installation ===
-# By default, "installing" just makes a relocatable bundle in the build
-# directory.
-set(BUILD_BUNDLE_DIR "${PROJECT_BINARY_DIR}/bundle")
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(CMAKE_INSTALL_PREFIX "${BUILD_BUNDLE_DIR}" CACHE PATH "..." FORCE)
-endif()
-
 # Start with a clean build bundle directory every time.
 install(CODE "
   file(REMOVE_RECURSE \"${BUILD_BUNDLE_DIR}/\")

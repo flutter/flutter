@@ -35,6 +35,7 @@ import 'doctor_validator.dart';
 import 'experimental/diagnostics.dart';
 import 'experimental/extension_manager.dart';
 import 'features.dart';
+import 'flutter_features.dart';
 import 'http_host_validator.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/simulators.dart';
@@ -634,18 +635,24 @@ class FlutterValidator extends DoctorValidator {
       if (storageBaseUrl != null) {
         messages.add(ValidationMessage(flutterMirrorURL(storageBaseUrl)));
       }
+      // Evaluate feature flags against the version resolved above, which may
+      // have refreshed the channel from git (e.g. via fetchTagsAndGetVersion).
+      final FeatureFlags resolvedFeatureFlags = switch (_featureFlags) {
+        final FlutterFeatureFlags flags => flags.withFlutterVersion(version),
+        _ => _featureFlags,
+      };
       // Add feature flags that are either enabled, or disabled compared to the default setting.
       final featureFlags = <String>[
-        ..._featureFlags.allConfigurableFeatures
+        ...resolvedFeatureFlags.allConfigurableFeatures
             .where((Feature f) {
-              final bool enabled = _featureFlags.isEnabled(f);
+              final bool enabled = resolvedFeatureFlags.isEnabled(f);
               final bool defaults = f.getSettingForChannel(version.channel).enabledByDefault;
               return enabled || enabled != defaults;
             })
             .map((Feature f) {
               // SAFETY: allConfigurableFeatures only returns features with a non-null configSetting
               String setting = f.configSetting!;
-              if (!_featureFlags.isEnabled(f)) {
+              if (!resolvedFeatureFlags.isEnabled(f)) {
                 setting = 'no-$setting';
               }
               return setting;

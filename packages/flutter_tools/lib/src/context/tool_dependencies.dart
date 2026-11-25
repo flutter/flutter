@@ -260,6 +260,7 @@ class ToolDependencies {
     IOSSimulatorUtils? iosSimulatorUtils,
     IOSWorkflow? iosWorkflow,
     Java? java,
+    LinuxProjectDirectory? Function()? linuxProjectDirectoryBuilder,
     LocalEngineLocator? localEngineLocator,
     Logger? logger,
     MDnsVmServiceDiscovery? mdnsVmServiceDiscovery,
@@ -418,6 +419,7 @@ class ToolDependencies {
         projectFactory ??
         FlutterProjectFactory(
           config: finalConfig,
+          linuxProjectDirectoryBuilder: linuxProjectDirectoryBuilder,
           featureFlagsBuilder: () => finalFeatureFlags,
           fileSystem: finalFS,
           logger: finalLogger,

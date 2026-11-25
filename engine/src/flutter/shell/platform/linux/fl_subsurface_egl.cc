@@ -181,7 +181,7 @@ static void fl_subsurface_egl_dispose(GObject* object) {
     EGLDisplay egl_display = get_display(self);
     if (self->egl_context != EGL_NO_CONTEXT) {
       if (self->read_framebuffer != 0) {
-        eglMakeCurrent(egl_display, self->egl_surface, self->egl_surface,
+        eglMakeCurrent(egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
                        self->egl_context);
         glDeleteFramebuffers(1, &self->read_framebuffer);
         self->read_framebuffer = 0;
