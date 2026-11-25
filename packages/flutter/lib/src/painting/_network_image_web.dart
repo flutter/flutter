@@ -314,6 +314,7 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
   bool _subscribed = false;
   bool _deferInnerErrors = false;
   Object? _lastError;
+  Object? _suppressedError;
   ({Object exception, StackTrace? stackTrace})? _pendingError;
   bool _hasImage = false;
   bool _hadOuterErrorListener = false;
@@ -333,9 +334,14 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
     reportErrors: false,
   );
 
-  static const ImageStreamListener _suppressDuplicateReportListener = ImageStreamListener(
+  late final ImageStreamListener _suppressDuplicateReportListener = ImageStreamListener(
     _disposeImage,
-    onError: _noopErrorListener,
+    onError: (Object exception, StackTrace? stackTrace) {
+      if (!identical(exception, _suppressedError)) {
+        // ignore: only_throw_errors, rethrowing verbatim per ImageStreamCompleter.onError contract.
+        throw exception;
+      }
+    },
   );
 
   late final ImageStreamListener _innerListener = ImageStreamListener(
@@ -386,20 +392,6 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
     }
   }
 
-  void _recordSilentInnerError(Object exception, StackTrace? stackTrace) {
-    if (_lastError == null && !_hasImage) {
-      super.addEphemeralErrorListener(_noopErrorListener);
-      reportError(exception: exception, stack: stackTrace);
-      return;
-    }
-    super.addListener(_suppressDuplicateReportListener);
-    try {
-      reportError(exception: exception, stack: stackTrace);
-    } finally {
-      super.removeListener(_suppressDuplicateReportListener);
-    }
-  }
-
   @protected
   @override
   void setImage(ImageInfo image) {
@@ -435,7 +427,8 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
       final ({Object exception, StackTrace? stackTrace})? pendingError = _pendingError;
       _pendingError = null;
       if (pendingError != null) {
-        _recordSilentInnerError(pendingError.exception, pendingError.stackTrace);
+        completer.addEphemeralErrorListener(listener);
+        return;
       }
     }
     super.addEphemeralErrorListener(listener);
@@ -471,7 +464,12 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
       // _currentError.
       super.addListener(_suppressDuplicateReportListener);
       try {
-        reportError(exception: pendingError.exception, stack: pendingError.stackTrace);
+        _suppressedError = pendingError.exception;
+        try {
+          reportError(exception: pendingError.exception, stack: pendingError.stackTrace);
+        } finally {
+          _suppressedError = null;
+        }
         super.addListener(listener);
       } finally {
         super.removeListener(_suppressDuplicateReportListener);

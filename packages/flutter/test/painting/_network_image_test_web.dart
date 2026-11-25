@@ -876,6 +876,39 @@ void runTests() {
       await tester.pump();
       expect(errors3, <Matcher>[isStateError]);
       expect(tester.takeException(), isNull);
+
+      final postFrame0 = Completer<void>(), postFrame1 = Completer<void>();
+      final ImageStreamCompleter c3 = loadCompleter(
+        'e3',
+        codec: _LoopingCodec(
+          onFrame: (int n) => switch (n) {
+            0 => postFrame0.future,
+            1 => postFrame1.future,
+            _ => Completer<void>().future,
+          },
+        ),
+      );
+      final suppress = ImageStreamListener(
+        (ImageInfo info, bool _) => info.dispose(),
+        reportErrors: false,
+      );
+      c3.addListener(suppress);
+      await tester.pump();
+      postFrame0.complete();
+      await tester.pump(const Duration(milliseconds: 100));
+      c3.removeListener(suppress);
+      postFrame1.completeError(StateError('post-frame decode failed'));
+      await tester.pump();
+
+      var lastListenerRemovedCount = 0;
+      c3.addOnLastListenerRemovedCallback(() {
+        lastListenerRemovedCount += 1;
+      });
+      final errors4 = <Object>[];
+      c3.addEphemeralErrorListener((Object e, StackTrace? _) => errors4.add(e));
+      expect(errors4, <Matcher>[isStateError]);
+      expect(lastListenerRemovedCount, 0);
+      expect(tester.takeException(), isNull);
     },
   );
 
