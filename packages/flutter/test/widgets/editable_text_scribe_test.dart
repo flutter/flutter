@@ -17,7 +17,7 @@ void main() {
   const textStyle = TextStyle();
   const cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
   final calls = <MethodCall>[];
-  var isFeatureAvailableReturnValue = true;
+  bool? isFeatureAvailableReturnValue = true;
   late TextEditingController controller;
   late FocusNode focusNode;
 
@@ -30,7 +30,7 @@ void main() {
       calls.add(methodCall);
 
       return switch (methodCall.method) {
-        'Scribe.isFeatureAvailable' => Future<bool>.value(isFeatureAvailableReturnValue),
+        'Scribe.isFeatureAvailable' => Future<bool?>.value(isFeatureAvailableReturnValue),
         'Scribe.startStylusHandwriting' => Future<void>.value(),
         _ => throw FlutterError('Unexpected method call: ${methodCall.method}'),
       };
@@ -77,6 +77,27 @@ void main() {
       ),
     );
   }
+
+  testWidgets(
+    'stylus taps on Android web focus the field without calling Scribe',
+    (WidgetTester tester) async {
+      isFeatureAvailableReturnValue = null;
+
+      await pumpTextSelectionGestureDetectorBuilder(tester);
+      expect(focusNode.hasFocus, isFalse);
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.stylus);
+      await gesture.down(tester.getCenter(find.byType(EditableText)));
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(calls, isEmpty);
+      expect(focusNode.hasFocus, isTrue);
+    },
+    skip: !kIsWeb, // [intended] On web, the browser handles handwriting input.
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
+  );
 
   testWidgets(
     'when Scribe is available, starts handwriting on tap down',
