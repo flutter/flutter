@@ -64,7 +64,7 @@ void exit(int returnCode) {
   Isolate.current.kill(priority: Isolate.immediate);
 }
 
-typedef _ListStringArgFunction = dynamic Function(List<String> args);
+typedef _ListStringArgFunction = void Function(List<String> args);
 
 // This function is used as the entry point for code in the dart runner and is
 // not meant to be called directly outside of that context. The code will invoke
