@@ -32,9 +32,9 @@ void main() {
 
   // Regression test: this used to crash the engine instead of throwing.
   test('loadFontFromList throws in a background isolate', () async {
-    final Object? error = await Isolate.run(() {
+    final Object? error = await Isolate.run(() async {
       try {
-        loadFontFromList(Uint8List(0));
+        await loadFontFromList(Uint8List(0));
       } catch (e) {
         return e;
       }
@@ -45,10 +45,10 @@ void main() {
 
   test('loadFontFromList throws in a registered background isolate', () async {
     final RootIsolateToken token = RootIsolateToken.instance!;
-    final Object? error = await Isolate.run(() {
+    final Object? error = await Isolate.run(() async {
       PlatformDispatcher.instance.registerBackgroundIsolate(token);
       try {
-        loadFontFromList(Uint8List(0));
+        await loadFontFromList(Uint8List(0));
       } catch (e) {
         return e;
       }
