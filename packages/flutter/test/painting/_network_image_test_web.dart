@@ -722,7 +722,7 @@ void runTests() {
   );
 
   testWidgets(
-    'Resuming Image without errorBuilder after a paused decode error does not report a duplicate FlutterError',
+    'Resuming Image without errorBuilder after a paused decode error reports the error once',
     (WidgetTester tester) async {
       addTearDown(imageCache.clear);
       setUpHttpRequest();
@@ -747,9 +747,10 @@ void runTests() {
       await tester.pumpWidget(TickerMode(enabled: false, child: Image(image: provider)));
       frame1.completeError(StateError('decode failed'));
       await tester.pump();
-      expect(tester.takeException(), isStateError);
+      expect(tester.takeException(), isNull);
 
       await tester.pumpWidget(TickerMode(enabled: true, child: Image(image: provider)));
+      expect(tester.takeException(), isStateError);
       await tester.pump();
       expect(tester.takeException(), isNull);
       expect(find.textContaining('decode failed'), findsOneWidget);
@@ -823,80 +824,6 @@ void runTests() {
       final int pausedSnapshot = codec.framesDecoded;
       await pumpFor(tester, 5);
       expect(codec.framesDecoded, pausedSnapshot);
-    },
-  );
-
-  testWidgets(
-    'Ephemeral error listener on a paused NetworkImage receives in-flight and prior decode errors',
-    (WidgetTester tester) async {
-      setUpHttpRequest();
-      final ImageStreamListener listener = disposingListener();
-
-      final frame0 = Completer<void>();
-      final ImageStreamCompleter priorCompleter = loadCompleter(
-        '${tester.testDescription}_prior',
-        codec: _LoopingCodec(onFrame: (int n) => n == 0 ? frame0.future : Completer<void>().future),
-      );
-      priorCompleter.addListener(listener);
-      await tester.pump();
-      final errors1 = <Object>[];
-      final errors2 = <Object>[];
-      priorCompleter.addEphemeralErrorListener((Object e, StackTrace? _) => errors1.add(e));
-      priorCompleter.removeListener(listener);
-      frame0.completeError(StateError('decode failed'));
-      await tester.pump();
-      expect(errors1, <Matcher>[isStateError]);
-      expect(tester.takeException(), isNull);
-      priorCompleter.addEphemeralErrorListener((Object e, StackTrace? _) => errors2.add(e));
-      expect(errors2, <Matcher>[isStateError]);
-
-      final inFlight = Completer<void>();
-      final ImageStreamCompleter inFlightCompleter = loadCompleter(
-        '${tester.testDescription}_in_flight',
-        codec: _LoopingCodec(
-          onFrame: (int n) => n == 0 ? inFlight.future : Completer<void>().future,
-        ),
-      );
-      inFlightCompleter.addListener(listener);
-      await tester.pump();
-      inFlightCompleter.removeListener(listener);
-      final errors3 = <Object>[];
-      inFlightCompleter.addEphemeralErrorListener((Object e, StackTrace? _) => errors3.add(e));
-      inFlight.completeError(StateError('decode failed'));
-      await tester.pump();
-      expect(errors3, <Matcher>[isStateError]);
-      expect(tester.takeException(), isNull);
-
-      final postFrame0 = Completer<void>();
-      final postFrame1 = Completer<void>();
-      final ImageStreamCompleter postFrameCompleter = loadCompleter(
-        '${tester.testDescription}_post_frame',
-        codec: _LoopingCodec(
-          onFrame: (int n) => switch (n) {
-            0 => postFrame0.future,
-            1 => postFrame1.future,
-            _ => Completer<void>().future,
-          },
-        ),
-      );
-      final ImageStreamListener suppressListener = disposingListener(reportErrors: false);
-      postFrameCompleter.addListener(suppressListener);
-      await tester.pump();
-      postFrame0.complete();
-      await tester.pump(const Duration(milliseconds: 100));
-      postFrameCompleter.removeListener(suppressListener);
-      postFrame1.completeError(StateError('post-frame decode failed'));
-      await tester.pump();
-
-      var lastListenerRemovedCount = 0;
-      postFrameCompleter.addOnLastListenerRemovedCallback(() {
-        lastListenerRemovedCount += 1;
-      });
-      final errors4 = <Object>[];
-      postFrameCompleter.addEphemeralErrorListener((Object e, StackTrace? _) => errors4.add(e));
-      expect(errors4, <Matcher>[isStateError]);
-      expect(lastListenerRemovedCount, 0);
-      expect(tester.takeException(), isNull);
     },
   );
 
