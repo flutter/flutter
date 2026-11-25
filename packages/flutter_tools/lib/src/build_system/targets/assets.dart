@@ -72,6 +72,11 @@ Future<Depfile> copyAssets(
     // for this pubspec file.
     pubspecFile,
     ...additionalInputs,
+    // ManifestAssetBundle records pubspec.yaml paths for packages in
+    // package_config.json even when no pubspec.yaml exists on disk, and
+    // missing files in a depfile force CopyAssets to rerun on every build.
+    for (final File file in assetBundle.inputFiles)
+      if (file.existsSync()) file,
   ];
   final outputs = <File>[];
 
@@ -270,8 +275,12 @@ Future<Depfile> copyAssets(
       }),
     );
   }
-  final depfile = Depfile(inputs + assetBundle.additionalDependencies, outputs);
-  return depfile;
+  final seenInputPaths = <String>{};
+  final depfileInputs = <File>[
+    for (final File file in inputs.followedBy(assetBundle.additionalDependencies))
+      if (seenInputPaths.add(environment.fileSystem.path.canonicalize(file.path))) file,
+  ];
+  return Depfile(depfileInputs, outputs);
 }
 
 /// Copy the assets defined in the flutter manifest into a build directory.
