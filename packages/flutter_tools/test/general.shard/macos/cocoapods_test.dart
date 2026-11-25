@@ -77,7 +77,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('''
 name: my_app
-environement:
+environment:
   sdk: '^3.5.0'
 ''');
 
