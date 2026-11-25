@@ -140,6 +140,11 @@ static GtkAccessibleRole fl_gtk4_accessible_node_get_role(
     // grouping. Named containers still need GROUP to expose their names.
     return has_label ? GTK_ACCESSIBLE_ROLE_GROUP : GTK_ACCESSIBLE_ROLE_GENERIC;
   }
+  // Some controls, including Material menu entries, reach the Linux embedder
+  // with a label and a tap action but no explicit control role.
+  if (has_label && (semantics->actions & kFlutterSemanticsActionTap)) {
+    return GTK_ACCESSIBLE_ROLE_BUTTON;
+  }
   if (has_label || (!flags->is_obscured && semantics->value != nullptr &&
                     semantics->value[0] != '\0')) {
     // Value-only leaves use the value as their name below. GENERIC prohibits

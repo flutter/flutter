@@ -319,6 +319,12 @@ TEST_F(FlViewGtk4AccessibilityTest, ScrollContainersPreserveRoleAcrossUpdates) {
   g_autoptr(GtkAccessible) label = apply();
   EXPECT_EQ(gtk_accessible_get_accessible_role(label),
             GTK_ACCESSIBLE_ROLE_LABEL);
+  root.actions = kFlutterSemanticsActionTap;
+  g_autoptr(GtkAccessible) action_only_control = apply();
+  EXPECT_EQ(gtk_accessible_get_accessible_role(action_only_control),
+            GTK_ACCESSIBLE_ROLE_BUTTON);
+  gtk_test_accessible_assert_property(
+      action_only_control, GTK_ACCESSIBLE_PROPERTY_LABEL, "Scroll region");
   root.actions = kFlutterSemanticsActionScrollDown;
   g_autoptr(GtkAccessible) container = apply();
   EXPECT_EQ(gtk_accessible_get_accessible_role(container),
