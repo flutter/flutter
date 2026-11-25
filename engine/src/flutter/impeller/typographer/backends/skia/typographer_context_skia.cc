@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <memory>
 #include <numeric>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -33,6 +34,7 @@
 #include "impeller/typographer/rectangle_packer.h"
 #include "impeller/typographer/typographer_context.h"
 
+#include "third_party/abseil-cpp/absl/status/status.h"
 #include "third_party/abseil-cpp/absl/status/statusor.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkBlendMode.h"
@@ -205,7 +207,13 @@ static size_t PairsFitInAtlasOfSize(
   return pairs.size();
 }
 
-static ISize ComputeNextAtlasSize(
+/// @brief Find the smallest atlas size that fits `extra_pairs` starting at
+///        `glyph_index_start`, and pack them into a new rect packer that is
+///        stored in `atlas_context`.
+///
+/// @return The size of the atlas, or an error if the glyphs don't fit in an
+///         atlas of `max_texture_height`.
+static absl::StatusOr<ISize> ComputeNextAtlasSize(
     const std::shared_ptr<GlyphAtlasContext>& atlas_context,
     const std::vector<FontGlyphPair>& extra_pairs,
     std::vector<Rect>& glyph_positions,
@@ -243,7 +251,24 @@ static ISize ComputeNextAtlasSize(
     }
     current_size = ISize(current_size.width, current_size.height * 2);
   }
-  return {};
+  return absl::ResourceExhaustedError(
+      "Glyphs don't fit in an atlas of the maximum height " +
+      std::to_string(max_texture_height));
+}
+
+/// Replaces the atlas in |atlas_context| with an empty one.
+///
+/// Used when glyph positions have been recorded in an atlas whose pixels could
+/// not be uploaded, so that later frames don't sample those glyphs from
+/// uninitialized texture memory.
+static void ResetAtlasContext(
+    const std::shared_ptr<GlyphAtlasContext>& atlas_context,
+    GlyphAtlas::Type type,
+    size_t generation) {
+  atlas_context->UpdateRectPacker(nullptr);
+  atlas_context->UpdateGlyphAtlas(
+      std::make_shared<GlyphAtlas>(type, /*initial_generation=*/generation),
+      /*size=*/{0, 0}, /*height_adjustment=*/0);
 }
 
 static Point SubpixelPositionToPoint(SubpixelPosition pos) {
@@ -307,13 +332,17 @@ static void DrawGlyph(SkCanvas* canvas,
 /// @brief Batch render to a single surface.
 ///
 /// This is only safe for use when updating a fresh texture.
-static bool BulkUpdateAtlasBitmap(const GlyphAtlas& atlas,
-                                  std::shared_ptr<BlitPass>& blit_pass,
-                                  HostBuffer& data_host_buffer,
-                                  const std::shared_ptr<Texture>& texture,
-                                  const std::vector<FontGlyphPair>& new_pairs,
-                                  size_t start_index,
-                                  size_t end_index) {
+///
+/// @return OK if the upload was encoded successfully. Otherwise, glyphs may
+///         have positions in `atlas` but no pixels in `texture`.
+static absl::Status BulkUpdateAtlasBitmap(
+    const GlyphAtlas& atlas,
+    std::shared_ptr<BlitPass>& blit_pass,
+    HostBuffer& data_host_buffer,
+    const std::shared_ptr<Texture>& texture,
+    const std::vector<FontGlyphPair>& new_pairs,
+    size_t start_index,
+    size_t end_index) {
   TRACE_EVENT0("impeller", __FUNCTION__);
 
   bool has_light_glyphs =
@@ -323,16 +352,17 @@ static bool BulkUpdateAtlasBitmap(const GlyphAtlas& atlas,
   bitmap.setInfo(TypographerContextSkia::GetImageInfo(
       atlas, Size(texture->GetSize()), has_light_glyphs));
   if (!bitmap.tryAllocPixels()) {
-    return false;
+    return absl::ResourceExhaustedError(
+        "Failed to allocate pixels for glyph atlas bitmap");
   }
 
   auto surface = SkSurfaces::WrapPixels(bitmap.pixmap());
   if (!surface) {
-    return false;
+    return absl::InternalError("Failed to create surface for glyph atlas");
   }
   auto canvas = surface->getCanvas();
   if (!canvas) {
-    return false;
+    return absl::InternalError("Failed to get canvas for glyph atlas");
   }
 
   for (size_t i = start_index; i < end_index; i++) {
@@ -353,12 +383,11 @@ static bool BulkUpdateAtlasBitmap(const GlyphAtlas& atlas,
   }
 
   if (has_light_glyphs) {
-    auto a8_bitmap_status = ToA8Bitmap(bitmap);
-    if (!a8_bitmap_status.ok()) {
-      VALIDATION_LOG << a8_bitmap_status.status().message();
-      return false;
+    absl::StatusOr<SkBitmap> a8_bitmap = ToA8Bitmap(bitmap);
+    if (!a8_bitmap.ok()) {
+      return a8_bitmap.status();
     }
-    bitmap = a8_bitmap_status.value();
+    bitmap = std::move(a8_bitmap).value();
   }
 
   // Writing to a malloc'd buffer and then copying to the staging buffers
@@ -370,19 +399,42 @@ static bool BulkUpdateAtlasBitmap(const GlyphAtlas& atlas,
               atlas.GetTexture()->GetTextureDescriptor().format),
       data_host_buffer.GetMinimumUniformAlignment());
 
-  return blit_pass->AddCopy(std::move(buffer_view),  //
-                            texture,                 //
-                            IRect::MakeXYWH(0, 0, texture->GetSize().width,
-                                            texture->GetSize().height));
+  if (!blit_pass->AddCopy(std::move(buffer_view),  //
+                          texture,                 //
+                          IRect::MakeXYWH(0, 0, texture->GetSize().width,
+                                          texture->GetSize().height))) {
+    return absl::InternalError("Failed to encode glyph atlas upload");
+  }
+  return absl::OkStatus();
 }
 
-static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
-                              std::shared_ptr<BlitPass>& blit_pass,
-                              HostBuffer& data_host_buffer,
-                              const std::shared_ptr<Texture>& texture,
-                              const std::vector<FontGlyphPair>& new_pairs,
-                              size_t start_index,
-                              size_t end_index) {
+/// @brief Render glyphs individually and upload them into an existing texture.
+///
+/// Each glyph in `new_pairs[start_index, end_index)` is drawn into its own
+/// bitmap, padded by 1px on each side, and copied into `texture` at the
+/// position already recorded for it in `atlas`. Glyphs without a recorded
+/// position or with empty bounds are skipped. Unlike BulkUpdateAtlasBitmap,
+/// this leaves the rest of the texture untouched, so it is safe to use for
+/// appending glyphs to an atlas that already contains glyphs.
+///
+/// @param[in] atlas            The atlas holding the glyph positions.
+/// @param[in] blit_pass        The blit pass the uploads are encoded into.
+/// @param[in] data_host_buffer The host buffer used to stage the glyph pixels.
+/// @param[in] texture          The atlas texture to upload into.
+/// @param[in] new_pairs        The glyphs to render.
+/// @param[in] start_index      The index of the first glyph to render.
+/// @param[in] end_index        One past the index of the last glyph to render.
+///
+/// @return OK if all of the uploads were encoded successfully. Otherwise, some
+///         glyphs may have positions in `atlas` but no pixels in `texture`.
+static absl::Status UpdateAtlasBitmap(
+    const GlyphAtlas& atlas,
+    std::shared_ptr<BlitPass>& blit_pass,
+    HostBuffer& data_host_buffer,
+    const std::shared_ptr<Texture>& texture,
+    const std::vector<FontGlyphPair>& new_pairs,
+    size_t start_index,
+    size_t end_index) {
   TRACE_EVENT0("impeller", __FUNCTION__);
 
   for (size_t i = start_index; i < end_index; i++) {
@@ -410,28 +462,27 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
     bitmap.setInfo(
         TypographerContextSkia::GetImageInfo(atlas, size, is_light_glyph));
     if (!bitmap.tryAllocPixels()) {
-      return false;
+      return absl::InternalError("Failed to allocate pixels for glyph bitmap");
     }
 
     auto surface = SkSurfaces::WrapPixels(bitmap.pixmap());
     if (!surface) {
-      return false;
+      return absl::InternalError("Failed to create surface for glyph bitmap");
     }
     auto canvas = surface->getCanvas();
     if (!canvas) {
-      return false;
+      return absl::InternalError("Failed to get canvas for glyph bitmap");
     }
 
     DrawGlyph(canvas, SkPoint::Make(1, 1), pair.scaled_font, pair.glyph, bounds,
               pair.glyph.properties);
 
     if (is_light_glyph) {
-      auto a8_bitmap_status = ToA8Bitmap(bitmap);
-      if (!a8_bitmap_status.ok()) {
-        VALIDATION_LOG << a8_bitmap_status.status().message();
-        return false;
+      absl::StatusOr<SkBitmap> a8_bitmap = ToA8Bitmap(bitmap);
+      if (!a8_bitmap.ok()) {
+        return a8_bitmap.status();
       }
-      bitmap = a8_bitmap_status.value();
+      bitmap = std::move(a8_bitmap).value();
     }
 
     // Writing to a malloc'd buffer and then copying to the staging buffers
@@ -454,10 +505,14 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
                             /*slice=*/0,                               //
                             /*convert_to_read=*/false                  //
                             )) {
-      return false;
+      return absl::InternalError("Failed to encode glyph upload");
     }
   }
-  return blit_pass->ConvertTextureToShaderRead(texture);
+  if (!blit_pass->ConvertTextureToShaderRead(texture)) {
+    return absl::InternalError(
+        "Failed to transition glyph atlas texture to shader read");
+  }
+  return absl::OkStatus();
 }
 
 static Rect ComputeGlyphSize(const SkFont& font,
@@ -611,9 +666,13 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
     // Step 4a: Draw new font-glyph pairs into the a host buffer and encode
     // the uploads into the blit pass.
     // ---------------------------------------------------------------------------
-    if (!UpdateAtlasBitmap(*last_atlas, blit_pass, data_host_buffer,
-                           last_atlas->GetTexture(), new_glyphs, 0,
-                           first_missing_index)) {
+    absl::Status status = UpdateAtlasBitmap(
+        *last_atlas, blit_pass, data_host_buffer, last_atlas->GetTexture(),
+        new_glyphs, 0, first_missing_index);
+    if (!status.ok()) {
+      VALIDATION_LOG << "Failed to update glyph atlas: " << status.message();
+      ResetAtlasContext(atlas_context, type,
+                        last_atlas->GetAtlasGeneration() + 1);
       return nullptr;
     }
 
@@ -622,6 +681,23 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
       return last_atlas;
     }
   }
+
+  // Growing the atlas below can fail. When it does, the atlas context is
+  // restored to this state so that it keeps describing the texture of
+  // |last_atlas|, which is still valid. Otherwise later frames would place new
+  // glyphs on top of existing glyphs or outside of the texture. The glyphs
+  // that couldn't be added are removed so that they are tried again on the
+  // next frame instead of being skipped as placeholders.
+  const ISize last_atlas_size = atlas_context->GetAtlasSize();
+  const int64_t last_height_adjustment = atlas_context->GetHeightAdjustment();
+  const std::shared_ptr<RectanglePacker> last_rect_packer =
+      atlas_context->GetRectPacker();
+  auto restore_atlas_context = [&]() {
+    last_atlas->RemovePlaceholderGlyphs();
+    atlas_context->UpdateRectPacker(last_rect_packer);
+    atlas_context->UpdateGlyphAtlas(last_atlas, last_atlas_size,
+                                    last_height_adjustment);
+  };
 
   int64_t height_adjustment = atlas_context->GetAtlasSize().height;
   const int64_t max_texture_height =
@@ -651,22 +727,27 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
 
     height_adjustment = 0;
     atlas_context->UpdateRectPacker(nullptr);
-    atlas_context->UpdateGlyphAtlas(new_atlas, {0, 0}, 0);
+    atlas_context->UpdateGlyphAtlas(new_atlas, /*size=*/{0, 0},
+                                    /*height_adjustment=*/0);
   }
 
   // A new glyph atlas must be created.
-  ISize atlas_size = ComputeNextAtlasSize(atlas_context,        //
-                                          new_glyphs,           //
-                                          glyph_positions,      //
-                                          glyph_sizes,          //
-                                          first_missing_index,  //
-                                          max_texture_height    //
-  );
-
-  atlas_context->UpdateGlyphAtlas(new_atlas, atlas_size, height_adjustment);
-  if (atlas_size.IsEmpty()) {
+  absl::StatusOr<ISize> next_atlas_size =
+      ComputeNextAtlasSize(atlas_context,        //
+                           new_glyphs,           //
+                           glyph_positions,      //
+                           glyph_sizes,          //
+                           first_missing_index,  //
+                           max_texture_height    //
+      );
+  if (!next_atlas_size.ok()) {
+    FML_DLOG(INFO) << "Failed to grow glyph atlas: "
+                   << next_atlas_size.status().message();
+    restore_atlas_context();
     return nullptr;
   }
+  const ISize atlas_size = next_atlas_size.value();
+  atlas_context->UpdateGlyphAtlas(new_atlas, atlas_size, height_adjustment);
   FML_DCHECK(new_glyphs.size() == glyph_positions.size());
 
   TextureDescriptor descriptor;
@@ -685,6 +766,7 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
   std::shared_ptr<Texture> new_texture =
       context.GetResourceAllocator()->CreateTexture(descriptor);
   if (!new_texture) {
+    restore_atlas_context();
     return nullptr;
   }
 
@@ -717,9 +799,14 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
   // Step 4a: Draw new font-glyph pairs into the a host buffer and encode
   // the uploads into the blit pass.
   // ---------------------------------------------------------------------------
-  if (!BulkUpdateAtlasBitmap(*new_atlas, blit_pass, data_host_buffer,
-                             new_atlas->GetTexture(), new_glyphs,
-                             first_missing_index, new_glyphs.size())) {
+  absl::Status status = BulkUpdateAtlasBitmap(
+      *new_atlas, blit_pass, data_host_buffer, new_atlas->GetTexture(),
+      new_glyphs, first_missing_index, new_glyphs.size());
+  if (!status.ok()) {
+    FML_DLOG(ERROR) << "Failed to populate glyph atlas: " << status.message();
+    // Glyph positions have already been recorded in |new_atlas|, which may be
+    // |last_atlas|, so neither atlas can be used anymore.
+    ResetAtlasContext(atlas_context, type, new_atlas->GetAtlasGeneration() + 1);
     return nullptr;
   }
 

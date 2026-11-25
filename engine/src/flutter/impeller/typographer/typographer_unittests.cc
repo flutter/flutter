@@ -589,7 +589,8 @@ TEST_P(TypographerTest, FailedAtlasGrowthDoesNotCorruptLaterGlyphs) {
   ASSERT_NE(atlas, nullptr);
   ASSERT_NE(atlas->GetTexture(), nullptr);
 
-  // Every glyph in the atlas must have its own region inside the texture.
+  // The glyphs from frame 1 are kept, and every glyph in the atlas has its own
+  // region inside the texture.
   Rect texture_bounds = Rect::MakeSize(atlas->GetTexture()->GetSize());
   std::vector<Rect> glyph_rects;
   atlas->IterateGlyphs([&](const ScaledFont& scaled_font,
@@ -597,7 +598,7 @@ TEST_P(TypographerTest, FailedAtlasGrowthDoesNotCorruptLaterGlyphs) {
     glyph_rects.push_back(rect);
     return true;
   });
-  EXPECT_GE(glyph_rects.size(), 3u);
+  EXPECT_EQ(glyph_rects.size(), 6u);
   for (size_t i = 0; i < glyph_rects.size(); i++) {
     EXPECT_TRUE(texture_bounds.Contains(glyph_rects[i]))
         << "Glyph " << glyph_rects[i] << " is outside of the atlas texture "

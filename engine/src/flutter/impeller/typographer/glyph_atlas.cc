@@ -75,6 +75,14 @@ void GlyphAtlas::SetAtlasGeneration(size_t generation) {
   generation_ = generation;
 }
 
+void GlyphAtlas::RemovePlaceholderGlyphs() {
+  for (auto& [scaled_font, font_glyph_atlas] : font_atlas_map_) {
+    absl::erase_if(font_glyph_atlas.positions_, [](const auto& entry) {
+      return entry.second.is_placeholder;
+    });
+  }
+}
+
 void GlyphAtlas::AddTypefaceGlyphPositionAndBounds(const FontGlyphPair& pair,
                                                    Rect position,
                                                    Rect bounds) {

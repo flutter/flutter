@@ -170,6 +170,14 @@ class GlyphAtlas {
   /// @brief      Update the atlas generation.
   void SetAtlasGeneration(size_t value);
 
+  //----------------------------------------------------------------------------
+  /// @brief      Remove all glyphs that are still placeholders, i.e. glyphs
+  ///             that were collected for the atlas but never placed in it.
+  ///
+  ///             This allows those glyphs to be added again on a later frame
+  ///             after the atlas failed to be updated.
+  void RemovePlaceholderGlyphs();
+
  private:
   const Type type_;
   std::shared_ptr<Texture> texture_;
@@ -222,7 +230,7 @@ class GlyphAtlasContext {
   /// @brief      Update the context with a newly constructed glyph atlas.
   void UpdateGlyphAtlas(std::shared_ptr<GlyphAtlas> atlas,
                         ISize size,
-                        int64_t height_adjustment_);
+                        int64_t height_adjustment);
 
   void UpdateRectPacker(std::shared_ptr<RectanglePacker> rect_packer);
 
