@@ -33,6 +33,7 @@ import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/web/web_debug_config.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:test/fake.dart';
 
@@ -644,7 +645,7 @@ void main() {
       expect(options.profileMicrotasks, true);
       expect(options.profileStartup, true);
       expect(options.verboseSystemLogs, true);
-      expect(options.nativeNullAssertions, true);
+      expect(options.webConfig.nativeNullAssertions, true);
       expect(options.enableImpeller, ImpellerStatus.enabled);
       expect(options.enableFlutterGpu, true);
       expect(options.traceSystrace, true);
@@ -1275,10 +1276,9 @@ class CapturingDriverService extends Fake implements DriverService {
     String? userIdentifier,
     String? mainPath,
     Map<String, Object> platformArgs = const <String, Object>{},
-    Map<String, String> webDefines = const <String, String>{},
   }) async {
     this.platformArgs = platformArgs;
-    this.webDefines = webDefines;
+    webDefines = debuggingOptions.webConfig.webDefines;
   }
 
   @override

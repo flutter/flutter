@@ -38,6 +38,5 @@ abstract class WebRunnerFactory {
     Map<String, Object?> platformArgs = const <String, Object?>{},
     String? target,
     UrlTunneller? urlTunneller,
-    Map<String, String> webDefines,
   });
 }
