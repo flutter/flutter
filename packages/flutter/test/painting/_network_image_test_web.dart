@@ -414,6 +414,26 @@ void runTests() {
     }
   }
 
+  ImageStreamCompleter loadCompleter(
+    String key, {
+    ui.Codec? codec,
+    WebHtmlElementStrategy strategy = WebHtmlElementStrategy.never,
+    bool keepAlive = true,
+  }) {
+    if (codec != null) {
+      _TestBinding.instance.overrideCodec = codec;
+    }
+    final provider = NetworkImage(_uniqueUrl(key), webHtmlElementStrategy: strategy);
+    final ImageStreamCompleter completer = provider.loadImage(
+      provider,
+      _TestBinding.instance.instantiateImageCodecWithSize,
+    );
+    if (keepAlive) {
+      addTearDown(completer.keepAlive().dispose);
+    }
+    return completer;
+  }
+
   testWidgets('Cached animated NetworkImage stops decoding frames when no widget shows it', (
     WidgetTester tester,
   ) async {
@@ -753,6 +773,173 @@ void runTests() {
       await tester.pump();
       expect(tester.takeException(), isNull);
       expect(find.textContaining('decode failed'), findsOneWidget);
+    },
+  );
+
+  testWidgets('Disposed NetworkImage completer rejects new listeners and disposes its resources', (
+    WidgetTester tester,
+  ) async {
+    setUpHttpRequest();
+    final noop = ImageStreamListener((ImageInfo info, bool _) => info.dispose());
+
+    final resolvedCodec = _LoopingCodec();
+    final ImageStreamCompleter resolved = loadCompleter(
+      'd1',
+      codec: resolvedCodec,
+      keepAlive: false,
+    );
+    final ImageStreamCompleterHandle handle = resolved.keepAlive();
+    resolved.addListener(noop);
+    await pumpFor(tester, 2);
+    resolved.removeListener(noop);
+    handle.dispose();
+    expect(resolvedCodec.disposed, isTrue);
+    expect(() => resolved.addListener(noop), throwsStateError);
+    expect(resolved.keepAlive, throwsStateError);
+
+    final testImg = TestImgElement();
+    imgElementFactory = () => testImg.getMock() as web_shim.HTMLImageElement;
+    final ImageStreamCompleter earlyImg = loadCompleter(
+      'd2',
+      strategy: WebHtmlElementStrategy.prefer,
+      keepAlive: false,
+    );
+    earlyImg.addListener(noop);
+    earlyImg.removeListener(noop);
+    await tester.runAsync(() async {
+      testImg.decodeSuccess();
+      await Future<void>.delayed(Duration.zero);
+    });
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(testImg.src, isEmpty);
+
+    final earlyCodec = _LoopingCodec();
+    final ImageStreamCompleter early = loadCompleter('d3', codec: earlyCodec, keepAlive: false);
+    early.addListener(noop);
+    early.removeListener(noop);
+    await tester.pump();
+    expect(earlyCodec.disposed, isTrue);
+    expect(() => early.addListener(noop), throwsStateError);
+  });
+
+  testWidgets(
+    'Removing a listener during onImage or with another listener active preserves stream lifecycle',
+    (WidgetTester tester) async {
+      setUpHttpRequest();
+      final codec = _LoopingCodec();
+      final ImageStreamCompleter completer = loadCompleter(tester.testDescription, codec: codec);
+      final listener1 = ImageStreamListener((ImageInfo info, bool _) => info.dispose());
+      final listener2 = ImageStreamListener((ImageInfo info, bool _) => info.dispose());
+      completer.addListener(listener1);
+      completer.addListener(listener2);
+      await pumpFor(tester, 3);
+      completer.removeListener(listener1);
+      final int afterFirstRemoval = codec.framesDecoded;
+      await pumpFor(tester, 4);
+      expect(codec.framesDecoded, greaterThan(afterFirstRemoval));
+
+      completer.removeListener(listener2);
+      await pumpFor(tester, 3);
+      late final ImageStreamListener selfRemoving;
+      var syncFrames = 0;
+      selfRemoving = ImageStreamListener((ImageInfo info, bool isSync) {
+        if (isSync) {
+          syncFrames += 1;
+        }
+        info.dispose();
+        completer.removeListener(selfRemoving);
+      });
+      completer.addListener(selfRemoving);
+      expect(syncFrames, 1);
+      await pumpFor(tester, 3);
+      final int pausedSnapshot = codec.framesDecoded;
+      await pumpFor(tester, 5);
+      expect(codec.framesDecoded, pausedSnapshot);
+    },
+  );
+
+  testWidgets(
+    'Ephemeral error listener on a paused NetworkImage receives in-flight and prior decode errors',
+    (WidgetTester tester) async {
+      setUpHttpRequest();
+      final noop = ImageStreamListener((ImageInfo info, bool _) => info.dispose());
+
+      final frame0 = Completer<void>();
+      final ImageStreamCompleter c1 = loadCompleter(
+        'e1',
+        codec: _LoopingCodec(onFrame: (int n) => n == 0 ? frame0.future : Completer<void>().future),
+      );
+      c1.addListener(noop);
+      await tester.pump();
+      final errors1 = <Object>[], errors2 = <Object>[];
+      c1.addEphemeralErrorListener((Object e, StackTrace? _) => errors1.add(e));
+      c1.removeListener(noop);
+      frame0.completeError(StateError('decode failed'));
+      await tester.pump();
+      expect(errors1, <Matcher>[isStateError]);
+      expect(tester.takeException(), isNull);
+      c1.addEphemeralErrorListener((Object e, StackTrace? _) => errors2.add(e));
+      expect(errors2, <Matcher>[isStateError]);
+
+      final inFlight = Completer<void>();
+      final ImageStreamCompleter c2 = loadCompleter(
+        'e2',
+        codec: _LoopingCodec(
+          onFrame: (int n) => n == 0 ? inFlight.future : Completer<void>().future,
+        ),
+      );
+      c2.addListener(noop);
+      await tester.pump();
+      c2.removeListener(noop);
+      final errors3 = <Object>[];
+      c2.addEphemeralErrorListener((Object e, StackTrace? _) => errors3.add(e));
+      inFlight.completeError(StateError('decode failed'));
+      await tester.pump();
+      expect(errors3, <Matcher>[isStateError]);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'Re-attaching a listener after a new paused decode error delivers only the latest error',
+    (WidgetTester tester) async {
+      setUpHttpRequest();
+      final frames = List<Completer<void>>.generate(3, (_) => Completer<void>());
+      final ImageStreamCompleter completer = loadCompleter(
+        tester.testDescription,
+        codec: _LoopingCodec(
+          onFrame: (int n) => n < frames.length ? frames[n].future : Completer<void>().future,
+        ),
+      );
+      ImageStreamListener errorListener(List<Object> sink) => ImageStreamListener(
+        (ImageInfo info, bool _) => info.dispose(),
+        onError: (Object e, StackTrace? _) => sink.add(e),
+        reportErrors: false,
+      );
+
+      final errorsA = <Object>[], errorsC = <Object>[];
+      final ImageStreamListener listenerA = errorListener(errorsA);
+      completer.addListener(listenerA);
+      await tester.pump();
+      frames[0].complete();
+      await tester.pump(const Duration(milliseconds: 100));
+      frames[1].completeError(StateError('first error'));
+      await tester.pump();
+      expect(errorsA, <Matcher>[isStateError]);
+      completer.removeListener(listenerA);
+
+      final ImageStreamListener listenerB = errorListener(<Object>[]);
+      completer.addListener(listenerB);
+      completer.removeListener(listenerB);
+      frames[2].completeError(StateError('second error'));
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+
+      final ImageStreamListener listenerC = errorListener(errorsC);
+      completer.addListener(listenerC);
+      expect(errorsC.map((Object e) => e.toString()), <String>['Bad state: second error']);
+      completer.removeListener(listenerC);
     },
   );
 
