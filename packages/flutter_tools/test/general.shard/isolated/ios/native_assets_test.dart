@@ -21,7 +21,6 @@ import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:hooks/hooks.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 import '../fake_native_assets_build_runner.dart';
@@ -65,7 +64,7 @@ void main() {
           (buildMode, '17.2.1', AppleVersion(17, minor: 2, patch: 1), '17.2.1'),
         ],
       ]) {
-    testUsingContext('build with assets $buildMode deployment target $deploymentTarget', () async {
+    test('build with assets $buildMode deployment target $deploymentTarget', () async {
       if (const LocalPlatform().isWindows) {
         return; // Backslashes in commands, but we will never run these commands on Windows.
       }
@@ -318,51 +317,43 @@ void main() {
     });
   }
 
-  testUsingContext(
-    'pick-first warning',
-    () async {
-      final assets = <FlutterCodeAsset>[
-        FlutterCodeAsset(
-          codeAsset: CodeAsset(
-            package: 'bar',
-            name: 'bar.dart',
-            linkMode: DynamicLoadingBundled(),
-            file: Uri.file('arm64/libbar.dylib'),
-          ),
-          os: OS.iOS,
-          architecture: Architecture.arm64,
+  test('pick-first warning', () async {
+    final assets = <FlutterCodeAsset>[
+      FlutterCodeAsset(
+        codeAsset: CodeAsset(
+          package: 'bar',
+          name: 'bar.dart',
+          linkMode: DynamicLoadingBundled(),
+          file: Uri.file('arm64/libbar.dylib'),
         ),
-        FlutterCodeAsset(
-          codeAsset: CodeAsset(
-            package: 'bar',
-            name: 'bar.dart',
-            linkMode: DynamicLoadingBundled(),
-            file: Uri.file('x64/libbar_different.dylib'),
-          ),
-          os: OS.iOS,
-          architecture: Architecture.x64,
+        os: OS.iOS,
+        architecture: Architecture.arm64,
+      ),
+      FlutterCodeAsset(
+        codeAsset: CodeAsset(
+          package: 'bar',
+          name: 'bar.dart',
+          linkMode: DynamicLoadingBundled(),
+          file: Uri.file('x64/libbar_different.dylib'),
         ),
-      ];
+        os: OS.iOS,
+        architecture: Architecture.x64,
+      ),
+    ];
 
-      fatAssetTargetLocationsIOS(assets, logger: logger);
+    fatAssetTargetLocationsIOS(assets, logger: logger);
 
-      expect(
-        logger.errorText,
-        contains(
-          'Code asset "package:bar/bar.dart" has different framework names for '
-          'different architectures. Picking "bar.framework" and '
-          'ignoring "bar_different.framework".',
-        ),
-      );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-      Logger: () => logger,
-    },
-  );
+    expect(
+      logger.errorText,
+      contains(
+        'Code asset "package:bar/bar.dart" has different framework names for '
+        'different architectures. Picking "bar.framework" and '
+        'ignoring "bar_different.framework".',
+      ),
+    );
+  });
 
-  testWithoutContext('iOS builds fail when the install name does not fit', () async {
+  test('iOS builds fail when the install name does not fit', () async {
     if (const LocalPlatform().isWindows) {
       return; // Backslashes in commands, but we will never run these commands on Windows.
     }

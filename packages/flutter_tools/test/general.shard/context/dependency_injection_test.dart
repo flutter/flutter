@@ -327,7 +327,7 @@ void main() {
       }
     });
 
-    testWithoutContext('does not eagerly evaluate AndroidStudio, Java, or AndroidSdk during bootstrap, Doctor creation, or EmulatorManager queries', () async {
+    test('does not eagerly evaluate AndroidStudio, Java, or AndroidSdk during bootstrap, Doctor creation, or EmulatorManager queries', () async {
       // A discoverable Android Studio install. Evaluating AndroidStudio runs
       // its bundled `java -version`, and evaluating Java either goes through
       // AndroidStudio or falls back to `which java`, so evaluating either one
@@ -380,7 +380,7 @@ void main() {
       expect(java?.javaHome, studio?.javaPath);
     });
 
-    testWithoutContext('respects explicit overrides for Java and GradleUtils', () async {
+    test('respects explicit overrides for Java and GradleUtils', () async {
       final mockJava = FakeJava();
       final mockGradle = FakeGradleUtils();
 
@@ -400,7 +400,7 @@ void main() {
       expect(dependencies.androidContext.gradleUtils, same(mockGradle));
     });
 
-    testWithoutContext(
+    test(
       'does not eagerly evaluate FlutterVersion.channel or enable PreRunValidator by default',
       () async {
         final emptyFs = MemoryFileSystem.test();
@@ -422,7 +422,7 @@ void main() {
       },
     );
 
-    testWithoutContext('constructs PreRunValidator when enablePreRunValidator is true', () async {
+    test('constructs PreRunValidator when enablePreRunValidator is true', () async {
       final ToolDependencies dependencies = await ToolDependencies.bootstrap(
         analytics: const NoOpAnalytics(),
         enablePreRunValidator: true,
@@ -501,7 +501,7 @@ void main() {
   });
 
   group('AndroidContext', () {
-    testWithoutContext(
+    test(
       'evaluates androidSdk, androidStudio, gradleUtils, and java lazily and memoizes results',
       () {
         var sdkEvaluations = 0;
@@ -567,7 +567,7 @@ void main() {
       },
     );
 
-    testWithoutContext('memoizes null results without re-invoking factory closures', () {
+    test('memoizes null results without re-invoking factory closures', () {
       var sdkEvaluations = 0;
       var studioEvaluations = 0;
       var javaEvaluations = 0;
@@ -603,7 +603,7 @@ void main() {
   });
 
   group('AppleContext', () {
-    testWithoutContext('evaluates all dependencies lazily and memoizes results', () {
+    test('evaluates all dependencies lazily and memoizes results', () {
       var cocoaPodsEvaluations = 0;
       var cocoapodsValidatorEvaluations = 0;
       var iosSimulatorUtilsEvaluations = 0;
@@ -703,7 +703,7 @@ void main() {
   });
 
   group('WebContext', () {
-    testWithoutContext('lazily evaluates and memoizes builders', () {
+    test('lazily evaluates and memoizes builders', () {
       var chromiumLauncherEvaluations = 0;
       var webWorkflowEvaluations = 0;
       final fakeLauncher = FakeChromiumLauncher();
@@ -732,7 +732,7 @@ void main() {
       expect(webWorkflowEvaluations, 1);
     });
 
-    testWithoutContext('ToolDependencies.bootstrap asserts if both webContext and webFlutterDeviceBuilder are provided', () async {
+    test('ToolDependencies.bootstrap asserts if both webContext and webFlutterDeviceBuilder are provided', () async {
       await expectLater(
         () => ToolDependencies.bootstrap(
           templateRenderer: FakeTemplateRenderer(),

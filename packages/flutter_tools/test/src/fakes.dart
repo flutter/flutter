@@ -1146,6 +1146,9 @@ class FakeCache extends Fake implements Cache {
   Directory getRoot() => _fileSystem.directory('/bin/cache');
 
   @override
+  File getStampFileFor(String artifactName) => getRoot().childFile('$artifactName.stamp');
+
+  @override
   Directory getCacheDir(String name, {bool shouldCreate = true}) =>
       _fileSystem.directory('/bin/cache/$name');
 
@@ -1968,12 +1971,14 @@ mixin DefaultCreateFlutterDevice on Fake {
     DebuggingOptions? debuggingOptions,
     FlutterProject? flutterProject,
     Map<String, Object?> platformArgs = const <String, Object?>{},
+    ResidentCompilerFactory residentCompilerFactory = const ResidentCompilerFactory(),
     TargetModel? targetModelOverride,
     UrlTunneller? urlTunneller,
     String? userIdentifier,
   }) => FlutterDevice.createDefault(
     this as Device,
     buildInfo: buildInfo,
+    residentCompilerFactory: residentCompilerFactory,
     targetModelOverride: targetModelOverride,
     toolContext: toolContext,
     userIdentifier: userIdentifier,

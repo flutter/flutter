@@ -56,7 +56,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    testWithoutContext('flutter build windows creates exe', () {
+    test('flutter build windows creates exe', () {
       final ProcessResult result = processManager.runSync(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
@@ -77,7 +77,7 @@ void main() {
       expect(productVersion, equals('1.0.0+1'));
     });
 
-    testWithoutContext('flutter build windows sets build name', () {
+    test('flutter build windows sets build name', () {
       final ProcessResult result = processManager.runSync(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
@@ -96,7 +96,7 @@ void main() {
       expect(productVersion, equals('1.2.3'));
     });
 
-    testWithoutContext('flutter build windows sets build name and build number', () {
+    test('flutter build windows sets build name and build number', () {
       final ProcessResult result = processManager.runSync(<String>[
         flutterBin,
         ...getLocalEngineArguments(),

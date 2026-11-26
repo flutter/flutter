@@ -22,7 +22,7 @@ void main() {
 
   group('record use', () {
     group('caching', () {
-      testWithoutContext('build twice caches all targets', () async {
+      test('build twice caches all targets', () async {
         final String device = hostOs;
 
         // First build
@@ -49,7 +49,7 @@ void main() {
         }
       });
 
-      testWithoutContext('changing Dart file reruns link hook but not build hook', () async {
+      test('changing Dart file reruns link hook but not build hook', () async {
         final String device = hostOs;
 
         // First build
@@ -83,7 +83,7 @@ void main() {
         }
       });
 
-      testWithoutContext('changing build hook reruns build and link hooks', () async {
+      test('changing build hook reruns build and link hooks', () async {
         final String device = hostOs;
 
         // First build
@@ -118,7 +118,7 @@ void main() {
         }
       });
 
-      testWithoutContext('changing build hook (no output change) skips link hook', () async {
+      test('changing build hook (no output change) skips link hook', () async {
         final String device = hostOs;
 
         // First build
@@ -150,7 +150,7 @@ void main() {
         }
       });
 
-      testWithoutContext('changing Dart code (no usage change) skips link hook', () async {
+      test('changing Dart code (no usage change) skips link hook', () async {
         final String device = hostOs;
 
         // First build

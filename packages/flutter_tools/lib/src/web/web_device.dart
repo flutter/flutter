@@ -129,6 +129,7 @@ abstract class WebDevice extends Device {
     DebuggingOptions? debuggingOptions,
     FlutterProject? flutterProject,
     Map<String, Object?> platformArgs = const <String, Object?>{},
+    ResidentCompilerFactory residentCompilerFactory = const ResidentCompilerFactory(),
     TargetModel? targetModelOverride,
     UrlTunneller? urlTunneller,
     String? userIdentifier,
@@ -140,6 +141,7 @@ abstract class WebDevice extends Device {
         debuggingOptions: debuggingOptions,
         flutterProject: flutterProject,
         platformArgs: platformArgs,
+        residentCompilerFactory: residentCompilerFactory,
         targetModelOverride: targetModelOverride,
         toolContext: toolContext,
         urlTunneller: urlTunneller,
@@ -158,6 +160,7 @@ abstract class WebDevice extends Device {
       this,
       buildInfo: buildInfo,
       createGenerator: buildInfo.isDebug && !webConfig.useWasm,
+      residentCompilerFactory: residentCompilerFactory,
       targetModelOverride: targetModelOverride,
       toolContext: toolContext,
     );

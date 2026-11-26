@@ -31,7 +31,6 @@ import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
@@ -74,7 +73,7 @@ WebDevices _createWebDevices({
 }
 
 void main() {
-  testWithoutContext('No web devices listed if feature is disabled', () async {
+  test('No web devices listed if feature is disabled', () async {
     final WebDevices webDevices = _createWebDevices(featureFlags: TestFeatureFlags());
 
     expect(await webDevices.pollingGetDevices(), isEmpty);
@@ -90,23 +89,20 @@ void main() {
     );
   }
 
-  testWithoutContext(
-    'Successive calls of ChromiumDevice.stopApp() do not try to close chrome',
-    () async {
-      final _FakeChromiumDevice chromiumDevice = getFakeChromiumDevice();
+  test('Successive calls of ChromiumDevice.stopApp() do not try to close chrome', () async {
+    final _FakeChromiumDevice chromiumDevice = getFakeChromiumDevice();
 
-      await chromiumDevice.startApp(
-        null,
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        platformArgs: <String, Object?>{'uri': '/'},
-      );
+    await chromiumDevice.startApp(
+      null,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      platformArgs: <String, Object?>{'uri': '/'},
+    );
 
-      await chromiumDevice.stopApp(null);
-      await chromiumDevice.stopApp(null);
-    },
-  );
+    await chromiumDevice.stopApp(null);
+    await chromiumDevice.stopApp(null);
+  });
 
-  testWithoutContext('GoogleChromeDevice defaults', () async {
+  test('GoogleChromeDevice defaults', () async {
     final launcher = TestChromiumLauncher();
 
     final chromeDevice = GoogleChromeDevice(
@@ -136,7 +132,7 @@ void main() {
     expect(chromeDevice.supportsRuntimeMode(BuildMode.jitRelease), false);
   });
 
-  testWithoutContext('MicrosoftEdge defaults', () async {
+  test('MicrosoftEdge defaults', () async {
     final launcher = TestChromiumLauncher();
 
     final chromeDevice = MicrosoftEdgeDevice(
@@ -165,7 +161,7 @@ void main() {
     expect(chromeDevice.supportsRuntimeMode(BuildMode.jitRelease), false);
   });
 
-  testWithoutContext('Server defaults', () async {
+  test('Server defaults', () async {
     final device = WebServerDevice(logger: BufferLogger.test());
 
     expect(device.name, 'Web Server');
@@ -187,7 +183,7 @@ void main() {
     expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
   });
 
-  testWithoutContext('ChromiumDevice accepts null package', () async {
+  test('ChromiumDevice accepts null package', () async {
     final fs = MemoryFileSystem.test();
     final platform = FakePlatform();
     final pm = FakeProcessManager.any();
@@ -218,19 +214,19 @@ void main() {
     );
   });
 
-  testWithoutContext('Chrome device is listed when Chrome can be run', () async {
+  test('Chrome device is listed when Chrome can be run', () async {
     final WebDevices webDevices = _createWebDevices();
 
     expect(await webDevices.pollingGetDevices(), contains(isA<GoogleChromeDevice>()));
   });
 
-  testWithoutContext('Has well known device ids chrome, edge, and web-server', () async {
+  test('Has well known device ids chrome, edge, and web-server', () async {
     final WebDevices webDevices = _createWebDevices();
 
     expect(webDevices.wellKnownIds, <String>['chrome', 'web-server', 'edge']);
   });
 
-  testWithoutContext('Chrome device is not listed when Chrome cannot be run', () async {
+  test('Chrome device is not listed when Chrome cannot be run', () async {
     final processManager = FakeProcessManager.empty();
     processManager.excludedExecutables = <String>{kLinuxExecutable};
     final WebDevices webDevices = _createWebDevices(processManager: processManager);
@@ -238,24 +234,21 @@ void main() {
     expect(await webDevices.pollingGetDevices(), isNot(contains(isA<GoogleChromeDevice>())));
   });
 
-  testWithoutContext('Web Server device is listed if enabled via showWebServerDevice', () async {
+  test('Web Server device is listed if enabled via showWebServerDevice', () async {
     WebServerDevice.showWebServerDevice = true;
     final WebDevices webDevices = _createWebDevices();
 
     expect(await webDevices.pollingGetDevices(), contains(isA<WebServerDevice>()));
   });
 
-  testWithoutContext(
-    'Web Server device is not listed if disabled via showWebServerDevice',
-    () async {
-      WebServerDevice.showWebServerDevice = false;
-      final WebDevices webDevices = _createWebDevices();
+  test('Web Server device is not listed if disabled via showWebServerDevice', () async {
+    WebServerDevice.showWebServerDevice = false;
+    final WebDevices webDevices = _createWebDevices();
 
-      expect(await webDevices.pollingGetDevices(), isNot(contains(isA<WebServerDevice>())));
-    },
-  );
+    expect(await webDevices.pollingGetDevices(), isNot(contains(isA<WebServerDevice>())));
+  });
 
-  testWithoutContext('Chrome invokes version command on non-Windows platforms', () async {
+  test('Chrome invokes version command on non-Windows platforms', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[kLinuxExecutable, '--version'], stdout: 'ABC'),
     ]);
@@ -273,7 +266,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('Chrome and Edge version check invokes registry query on windows.', () async {
+  test('Chrome and Edge version check invokes registry query on windows.', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
@@ -313,7 +306,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('Chrome and Edge version check handles missing registry on Windows', () async {
+  test('Chrome and Edge version check handles missing registry on Windows', () async {
     final processManager = FakeProcessManager.empty();
     processManager.excludedExecutables.add('reg');
 
@@ -351,7 +344,7 @@ void main() {
     expect(await chromeDevice.sdkNameAndVersion, 'unknown');
   });
 
-  testWithoutContext('Edge is not supported on versions less than 73', () async {
+  test('Edge is not supported on versions less than 73', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
@@ -372,7 +365,7 @@ void main() {
     expect((await webDevices.pollingGetDevices()).whereType<MicrosoftEdgeDevice>(), isEmpty);
   });
 
-  testWithoutContext('Edge is not support on non-windows platform', () async {
+  test('Edge is not support on non-windows platform', () async {
     final WebDevices webDevices = _createWebDevices(processManager: FakeProcessManager.empty());
 
     expect((await webDevices.pollingGetDevices()).whereType<MicrosoftEdgeDevice>(), isEmpty);
@@ -388,7 +381,7 @@ void main() {
   @isTest
   void testWebLaunchUrl(String description, {required String url, required Matcher matcher}) {
     // ignore: unnecessary_parenthesis – Prevent IDEs from showing a run button.
-    (testWithoutContext)(description, () async {
+    (test)(description, () async {
       final _FakeChromiumDevice chromiumDevice = getFakeChromiumDevice();
 
       await expectLater(
@@ -424,7 +417,7 @@ void main() {
   );
 
   group('WebDeviceLogReader', () {
-    testWithoutContext(
+    test(
       'provideVmService streams Stdout and Stderr preserving whitespace and cleans up on dispose',
       () async {
         final stdoutController = StreamController<vm_service.Event>.broadcast();
@@ -483,9 +476,7 @@ void main() {
   });
 
   group('WebDevice.createFlutterDevice', () {
-    // Uses testUsingContext because FlutterDevice.createCompilers reads the
-    // ambient residentCompilerFactory.
-    testUsingContext('falls back to default FlutterDevice when builder is null', () async {
+    test('falls back to default FlutterDevice when builder is null', () async {
       final toolContext = FakeToolContext(
         artifacts: Artifacts.test(),
         processManager: FakeProcessManager.any(),
@@ -502,46 +493,41 @@ void main() {
       expect(flutterDevice.generator, isNotNull);
     });
 
-    testWithoutContext(
-      'throws StateError when builder is provided without flutterProject',
-      () async {
-        final toolContext = FakeToolContext(
-          artifacts: Artifacts.test(),
-          processManager: FakeProcessManager.any(),
-        );
-        final device = WebServerDevice(
-          logger: BufferLogger.test(),
-          webFlutterDeviceBuilder: (
-            Device device, {
-            required BuildInfo buildInfo,
-            required DevelopmentShaderCompiler developmentShaderCompiler,
-            required FlutterProject flutterProject,
-            required ResidentCompiler? generator,
-            required TargetPlatform targetPlatform,
-            required ToolContext toolContext,
-            Map<String, Object?> platformArgs = const <String, Object?>{},
-            UrlTunneller? urlTunneller,
-            String? userIdentifier,
-            WebDebugConfig webConfig = const WebDebugConfig(),
-          }) => throw AssertionError('Should not be called'),
-        );
+    test('throws StateError when builder is provided without flutterProject', () async {
+      final toolContext = FakeToolContext(
+        artifacts: Artifacts.test(),
+        processManager: FakeProcessManager.any(),
+      );
+      final device = WebServerDevice(
+        logger: BufferLogger.test(),
+        webFlutterDeviceBuilder: (
+          Device device, {
+          required BuildInfo buildInfo,
+          required DevelopmentShaderCompiler developmentShaderCompiler,
+          required FlutterProject flutterProject,
+          required ResidentCompiler? generator,
+          required TargetPlatform targetPlatform,
+          required ToolContext toolContext,
+          Map<String, Object?> platformArgs = const <String, Object?>{},
+          UrlTunneller? urlTunneller,
+          String? userIdentifier,
+          WebDebugConfig webConfig = const WebDebugConfig(),
+        }) => throw AssertionError('Should not be called'),
+      );
 
-        await expectLater(
-          () => device.createFlutterDevice(buildInfo: BuildInfo.debug, toolContext: toolContext),
-          throwsA(
-            isA<StateError>().having(
-              (StateError error) => error.message,
-              'message',
-              'flutterProject is required when webFlutterDeviceBuilder is provided.',
-            ),
+      await expectLater(
+        () => device.createFlutterDevice(buildInfo: BuildInfo.debug, toolContext: toolContext),
+        throwsA(
+          isA<StateError>().having(
+            (StateError error) => error.message,
+            'message',
+            'flutterProject is required when webFlutterDeviceBuilder is provided.',
           ),
-        );
-      },
-    );
+        ),
+      );
+    });
 
-    // Uses testUsingContext because FlutterDevice.createCompilers reads the
-    // ambient residentCompilerFactory.
-    testUsingContext('invokes builder with generator and urlTunneller gated by buildMode, useWasm, and enableExposeUrl', () async {
+    test('invokes builder with generator and urlTunneller gated by buildMode, useWasm, and enableExposeUrl', () async {
       final toolContext = FakeToolContext(
         artifacts: Artifacts.test(),
         processManager: FakeProcessManager.any(),
