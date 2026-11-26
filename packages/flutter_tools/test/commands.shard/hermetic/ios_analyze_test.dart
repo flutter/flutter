@@ -20,7 +20,7 @@ import 'package:flutter_tools/src/project_validator.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -91,7 +91,7 @@ void main() {
       expect(jsonOutput['configurations'], unorderedEquals(configs));
     });
 
-    testUsingContext('throws if provide multiple path', () async {
+    test('throws if provide multiple path', () async {
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('someTemp');
       final Directory anotherTempDir = fileSystem.systemTempDirectory.createTempSync('another');
       await expectLater(
@@ -112,7 +112,7 @@ void main() {
       );
     });
 
-    testUsingContext('throws if not enough parameters', () async {
+    test('throws if not enough parameters', () async {
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('someTemp');
       await expectLater(
         runner.run(<String>['analyze', '--ios', '--output-universal-link-settings', tempDir.path]),
