@@ -286,11 +286,11 @@ typedef _CheckContext = bool Function(BuildContext context);
 /// [DecoratedBox] to ensure that the image or decoration also paints in the
 /// [Material] itself, below the ink.
 ///
-/// If this is not possible for some reason, e.g. because you are using an
-/// opaque [CustomPaint] widget, alternatively consider using a second
-/// [Material] above the opaque widget but below the [InkResponse] (as an
-/// ancestor to the ink response). The [MaterialType.transparency] material
-/// kind can be used for this purpose.
+/// If you need to keep an opaque widget such as a [CustomPaint], use a [Stack]
+/// to paint a transparent [Material] in front of it. Put the opaque widget
+/// first in [Stack.children], then add a [Positioned.fill] containing a
+/// [Material] with [MaterialType.transparency]. Place the [InkResponse] inside
+/// that [Material] so the splash paints in front of the opaque widget.
 ///
 /// See also:
 ///
@@ -1462,11 +1462,11 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 /// [DecoratedBox] to ensure that the image or decoration also paints in the
 /// [Material] itself, below the ink.
 ///
-/// If this is not possible for some reason, e.g. because you are using an
-/// opaque [CustomPaint] widget, alternatively consider using a second
-/// [Material] above the opaque widget but below the [InkWell] (as an
-/// ancestor to the ink well). The [MaterialType.transparency] material
-/// kind can be used for this purpose.
+/// If you need to keep an opaque widget such as a [CustomPaint], use a [Stack]
+/// to paint a transparent [Material] in front of it. Put the opaque widget
+/// first in [Stack.children], then add a [Positioned.fill] containing a
+/// [Material] with [MaterialType.transparency]. Place the [InkWell] inside
+/// that [Material] so the splash paints in front of the opaque widget.
 ///
 /// ### InkWell isn't clipping properly
 ///
