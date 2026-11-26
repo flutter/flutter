@@ -25,11 +25,7 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
       skPicture,
       this,
       'Picture',
-      onDispose: imageTracker == null
-          ? null
-          : (SkPicture _) {
-              imageTracker!.releaseAll();
-            },
+      onDispose: _createDisposer(imageTracker),
     );
     _initStackTrace();
   }
@@ -38,6 +34,18 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
     _ref = ref;
     ref.ref(this);
     _initStackTrace();
+  }
+
+  /// Builds the [CkCountedRef] disposal callback without capturing `this`, so
+  /// `DomFinalizationRegistry`'s strongly held `UniqueRef` does not retain
+  /// [_ref] and prevent garbage collection.
+  static void Function(SkPicture)? _createDisposer(PictureImageTracker? tracker) {
+    if (tracker == null) {
+      return null;
+    }
+    return (SkPicture _) {
+      tracker.releaseAll();
+    };
   }
 
   final bool _isClone;

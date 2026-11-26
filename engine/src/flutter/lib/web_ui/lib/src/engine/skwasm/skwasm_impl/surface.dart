@@ -81,7 +81,7 @@ typedef RenderResult = ({
   int rasterEndMicros,
 });
 
-class SkwasmSurface implements OffscreenSurface {
+class SkwasmSurface extends OffscreenSurface {
   factory SkwasmSurface(OffscreenCanvasProvider canvasProvider) {
     final SurfaceHandle handle = withStackScope<SurfaceHandle>((StackScope scope) {
       return surfaceCreate();
@@ -210,7 +210,7 @@ class SkwasmSurface implements OffscreenSurface {
   }
 
   @override
-  void dispose() {
+  void disposeResources() {
     surfaceDestroy(handle);
   }
 

@@ -33,7 +33,7 @@ void main() {
       mockProject = FakeWindowsProject(cmakeFile, resourceFile);
     });
 
-    testWithoutContext('skipped if CMake file is missing', () async {
+    test('skipped if CMake file is missing', () async {
       const resourceFileContents = 'Hello world';
 
       resourceFile.writeAsStringSync(resourceFileContents);
@@ -49,7 +49,7 @@ void main() {
       expect(testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('skipped if resource file is missing', () async {
+    test('skipped if resource file is missing', () async {
       const cmakeFileContents = 'Hello world';
 
       cmakeFile.writeAsStringSync(cmakeFileContents);
@@ -65,7 +65,7 @@ void main() {
       expect(testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('skipped if nothing to migrate', () async {
+    test('skipped if nothing to migrate', () async {
       const cmakeFileContents = 'Nothing to migrate';
       const resourceFileContents = 'Nothing to migrate';
 
@@ -86,7 +86,7 @@ void main() {
       expect(testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('skipped if already migrated', () async {
+    test('skipped if already migrated', () async {
       const cmakeFileContents =
           '# Apply the standard set of build settings. This can be removed for applications\n'
           '# that need different build settings.\n'
@@ -131,7 +131,7 @@ void main() {
       expect(testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('skipped if already migrated (CRLF)', () async {
+    test('skipped if already migrated (CRLF)', () async {
       const cmakeFileContents =
           '# Apply the standard set of build settings. This can be removed for applications\r\n'
           '# that need different build settings.\r\n'
@@ -176,7 +176,7 @@ void main() {
       expect(testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('migrates project to set version information', () async {
+    test('migrates project to set version information', () async {
       cmakeFile.writeAsStringSync(
         '# Apply the standard set of build settings. This can be removed for applications\n'
         '# that need different build settings.\n'
@@ -243,7 +243,7 @@ void main() {
       );
     });
 
-    testWithoutContext('migrates project to set version information (CRLF)', () async {
+    test('migrates project to set version information (CRLF)', () async {
       cmakeFile.writeAsStringSync(
         '# Apply the standard set of build settings. This can be removed for applications\r\n'
         '# that need different build settings.\r\n'

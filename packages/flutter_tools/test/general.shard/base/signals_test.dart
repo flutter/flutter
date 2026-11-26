@@ -29,7 +29,7 @@ void main() {
       signalUnderTest = ProcessSignal(fakeSignal);
     });
 
-    testWithoutContext('signal handler runs', () async {
+    test('signal handler runs', () async {
       final completer = Completer<void>();
       signals.addHandler(signalUnderTest, (ProcessSignal s) {
         expect(s, signalUnderTest);
@@ -40,7 +40,7 @@ void main() {
       await completer.future;
     });
 
-    testWithoutContext('signal handlers run in order', () async {
+    test('signal handlers run in order', () async {
       final completer = Completer<void>();
 
       var first = false;
@@ -60,7 +60,7 @@ void main() {
       await completer.future;
     });
 
-    testWithoutContext('signal handlers do not cause concurrent modification errors when removing handlers in a signal callback', () async {
+    test('signal handlers do not cause concurrent modification errors when removing handlers in a signal callback', () async {
       final completer = Completer<void>();
       late Object token;
       Future<void> handle(ProcessSignal s) async {
@@ -75,7 +75,7 @@ void main() {
       await completer.future;
     });
 
-    testWithoutContext('signal handler error goes on error stream', () async {
+    test('signal handler error goes on error stream', () async {
       final exn = Exception('Error');
       signals.addHandler(signalUnderTest, (ProcessSignal s) async {
         throw exn;
@@ -94,7 +94,7 @@ void main() {
       expect(errList, contains(exn));
     });
 
-    testWithoutContext('removed signal handler does not run', () async {
+    test('removed signal handler does not run', () async {
       final Object token = signals.addHandler(signalUnderTest, (ProcessSignal s) async {
         fail('Signal handler should have been removed.');
       });
@@ -112,7 +112,7 @@ void main() {
       expect(errList, isEmpty);
     });
 
-    testWithoutContext('non-removed signal handler still runs', () async {
+    test('non-removed signal handler still runs', () async {
       final completer = Completer<void>();
       signals.addHandler(signalUnderTest, (ProcessSignal s) {
         expect(s, signalUnderTest);
@@ -135,7 +135,7 @@ void main() {
       expect(errList, isEmpty);
     });
 
-    testWithoutContext('only handlers for the correct signal run', () async {
+    test('only handlers for the correct signal run', () async {
       final mockSignal2 = FakeProcessSignal();
       final otherSignal = ProcessSignal(mockSignal2);
 
@@ -160,7 +160,7 @@ void main() {
       expect(errList, isEmpty);
     });
 
-    testWithoutContext('all handlers for exiting signals are run before exit', () async {
+    test('all handlers for exiting signals are run before exit', () async {
       final signals = Signals.test(
         analytics: const NoOpAnalytics(),
         exitSignals: <ProcessSignal>[signalUnderTest],
@@ -199,7 +199,7 @@ void main() {
       expect(shutdownHooks.isShuttingDown, isTrue);
     });
 
-    testWithoutContext('ShutdownHooks run before exiting', () async {
+    test('ShutdownHooks run before exiting', () async {
       final signals = Signals.test(
         analytics: const NoOpAnalytics(),
         exitSignals: <ProcessSignal>[signalUnderTest],
@@ -221,7 +221,7 @@ void main() {
       expect(shutdownHooks.isShuttingDown, isTrue);
     });
 
-    testWithoutContext('unconfigured Signals.test exits cleanly on exiting signal', () async {
+    test('unconfigured Signals.test exits cleanly on exiting signal', () async {
       final signals = Signals.test(
         exitSignals: <ProcessSignal>[signalUnderTest],
         shutdownHooks: shutdownHooks,
@@ -241,35 +241,32 @@ void main() {
       expect(shutdownHooks.isShuttingDown, isFalse);
     });
 
-    testWithoutContext(
-      'configured Signals.test logs analytics consent and closes analytics',
-      () async {
-        final analytics = FakeAnalytics();
-        final logger = BufferLogger.test();
-        final signals = Signals.test(
-          analytics: analytics,
-          exitSignals: <ProcessSignal>[signalUnderTest],
-          logger: logger,
-          shutdownHooks: shutdownHooks,
-        );
-        final completer = Completer<void>();
+    test('configured Signals.test logs analytics consent and closes analytics', () async {
+      final analytics = FakeAnalytics();
+      final logger = BufferLogger.test();
+      final signals = Signals.test(
+        analytics: analytics,
+        exitSignals: <ProcessSignal>[signalUnderTest],
+        logger: logger,
+        shutdownHooks: shutdownHooks,
+      );
+      final completer = Completer<void>();
 
-        setExitFunctionForTests((int exitCode) {
-          expect(exitCode, 0);
-          restoreExitFunction();
-          completer.complete();
-        });
+      setExitFunctionForTests((int exitCode) {
+        expect(exitCode, 0);
+        restoreExitFunction();
+        completer.complete();
+      });
 
-        signals.addHandler(signalUnderTest, (ProcessSignal s) {});
+      signals.addHandler(signalUnderTest, (ProcessSignal s) {});
 
-        fakeSignal.controller.add(fakeSignal);
-        await completer.future;
-        expect(shutdownHooks.isShuttingDown, isTrue);
-        expect(logger.statusText, contains('fake consent message'));
-        expect(analytics.didShowMessage, isTrue);
-        expect(analytics.didClose, isTrue);
-      },
-    );
+      fakeSignal.controller.add(fakeSignal);
+      await completer.future;
+      expect(shutdownHooks.isShuttingDown, isTrue);
+      expect(logger.statusText, contains('fake consent message'));
+      expect(analytics.didShowMessage, isTrue);
+      expect(analytics.didClose, isTrue);
+    });
   });
 }
 

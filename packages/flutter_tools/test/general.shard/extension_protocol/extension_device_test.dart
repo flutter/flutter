@@ -230,7 +230,7 @@ void main() {
       logger = BufferLogger.test();
     });
 
-    testWithoutContext('streams log lines end-to-end from extension isolate to ExtensionBackedDevice.getLogReader().logLines', () async {
+    test('streams log lines end-to-end from extension isolate to ExtensionBackedDevice.getLogReader().logLines', () async {
       final eventPort = ReceivePort();
       addTearDown(eventPort.close);
       final Stream<Map<String, Object?>> events = eventPort
@@ -294,7 +294,7 @@ void main() {
       expect(await device.getLogReader(), isA<NoOpDeviceLogReader>());
     });
 
-    testWithoutContext(
+    test(
       'filters device.logEntry notifications by deviceId so logs from other devices are ignored',
       () async {
         final eventPort = ReceivePort();
@@ -339,7 +339,7 @@ void main() {
       },
     );
 
-    testWithoutContext(
+    test(
       'calling dispose() on ExtensionDeviceLogReader triggers stopLogStream on the extension',
       () async {
         final eventPort = ReceivePort();
@@ -388,7 +388,7 @@ void main() {
       },
     );
 
-    testWithoutContext(
+    test(
       'ExtensionDeviceLogReader logs warning and closes stream when startLogStream fails',
       () async {
         final eventPort = ReceivePort();
@@ -427,48 +427,42 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'ExtensionDeviceLogReader closes logLines when extension isolate exits',
-      () async {
-        final eventPort = ReceivePort();
-        addTearDown(eventPort.close);
-        final SendPort eventSendPort = eventPort.sendPort;
+    test('ExtensionDeviceLogReader closes logLines when extension isolate exits', () async {
+      final eventPort = ReceivePort();
+      addTearDown(eventPort.close);
+      final SendPort eventSendPort = eventPort.sendPort;
 
-        void entryPoint(SendPort sendPort) {
-          unawaited(
-            ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
-              _StreamingTestDeviceService(
-                eventSendPort: eventSendPort,
-                exitAfterEmitting: true,
-                linesByDevice: const <String, List<String>>{
-                  _primaryDeviceId: <String>['line before exit'],
-                },
-              ),
-            ]),
-          );
-        }
-
-        final ExtensionConnection conn = await ExtensionConnection.spawn(
-          entryPoint,
-          logger: logger,
+      void entryPoint(SendPort sendPort) {
+        unawaited(
+          ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+            _StreamingTestDeviceService(
+              eventSendPort: eventSendPort,
+              exitAfterEmitting: true,
+              linesByDevice: const <String, List<String>>{
+                _primaryDeviceId: <String>['line before exit'],
+              },
+            ),
+          ]),
         );
-        addTearDown(conn.dispose);
+      }
 
-        final client = ExtensionDeviceClient(conn, logger: logger);
-        final ExtensionDeviceLogReader reader = await ExtensionDeviceLogReader.create(
-          connection: conn,
-          deviceId: _primaryDeviceId,
-          deviceService: client,
-          logger: logger,
-          name: 'Primary Extension Device',
-        );
-        addTearDown(reader.dispose);
+      final ExtensionConnection conn = await ExtensionConnection.spawn(entryPoint, logger: logger);
+      addTearDown(conn.dispose);
 
-        await expectLater(reader.logLines, emitsInOrder(<Object>['line before exit', emitsDone]));
-      },
-    );
+      final client = ExtensionDeviceClient(conn, logger: logger);
+      final ExtensionDeviceLogReader reader = await ExtensionDeviceLogReader.create(
+        connection: conn,
+        deviceId: _primaryDeviceId,
+        deviceService: client,
+        logger: logger,
+        name: 'Primary Extension Device',
+      );
+      addTearDown(reader.dispose);
 
-    testWithoutContext('startLogStream and stopLogStream throw INVALID_PARAMS on missing, empty, or invalid parameters', () async {
+      await expectLater(reader.logLines, emitsInOrder(<Object>['line before exit', emitsDone]));
+    });
+
+    test('startLogStream and stopLogStream throw INVALID_PARAMS on missing, empty, or invalid parameters', () async {
       final eventPort = ReceivePort();
       addTearDown(eventPort.close);
       final SendPort eventSendPort = eventPort.sendPort;
@@ -529,7 +523,7 @@ void main() {
       }
     });
 
-    testWithoutContext('multiple concurrent subscribers to logLines across getLogReader calls all receive full log output and startLogStream is called once', () async {
+    test('multiple concurrent subscribers to logLines across getLogReader calls all receive full log output and startLogStream is called once', () async {
       final eventPort = ReceivePort();
       addTearDown(eventPort.close);
       final Stream<Map<String, Object?>> events = eventPort
@@ -590,7 +584,7 @@ void main() {
       expect(startEvents.single[DeviceService.deviceIdParam], equals(_primaryDeviceId));
     });
 
-    testWithoutContext('ExtensionDevices.pollingGetDevices reuses cached ExtensionBackedDevice across polls and disposes removed devices', () async {
+    test('ExtensionDevices.pollingGetDevices reuses cached ExtensionBackedDevice across polls and disposes removed devices', () async {
       final eventPort = ReceivePort();
       addTearDown(eventPort.close);
       final Stream<Map<String, Object?>> events = eventPort
@@ -661,64 +655,55 @@ void main() {
       expect(await primaryFirst.getLogReader(), isA<NoOpDeviceLogReader>());
     });
 
-    testWithoutContext(
-      'ExtensionBackedDevice.startApp fails when no extension provides buildTarget',
-      () async {
-        final eventPort = ReceivePort();
-        addTearDown(eventPort.close);
-        final SendPort eventSendPort = eventPort.sendPort;
+    test('ExtensionBackedDevice.startApp fails when no extension provides buildTarget', () async {
+      final eventPort = ReceivePort();
+      addTearDown(eventPort.close);
+      final SendPort eventSendPort = eventPort.sendPort;
 
-        void entryPoint(SendPort sendPort) {
-          unawaited(
-            ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
-              _StreamingTestDeviceService(eventSendPort: eventSendPort),
-            ]),
-          );
-        }
-
-        final ExtensionConnection conn = await ExtensionConnection.spawn(
-          entryPoint,
-          logger: logger,
+      void entryPoint(SendPort sendPort) {
+        unawaited(
+          ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+            _StreamingTestDeviceService(eventSendPort: eventSendPort),
+          ]),
         );
-        addTearDown(conn.dispose);
+      }
 
-        final client = ExtensionDeviceClient(conn, logger: logger);
-        final device = ExtensionBackedDevice(
-          buildManager: _createBuildManager(
-            logger: logger,
-            targets: const <ExtensionBuildTarget>[],
-          ),
-          connection: conn,
-          deviceService: client,
-          fileSystem: MemoryFileSystem.test(),
-          logger: logger,
-          targetDevice: const TargetDevice(
-            buildTarget: 'custom-linux-build',
-            category: Category.desktop,
-            id: 'test_device',
-            name: 'Test Device',
-          ),
-        );
-        addTearDown(device.dispose);
+      final ExtensionConnection conn = await ExtensionConnection.spawn(entryPoint, logger: logger);
+      addTearDown(conn.dispose);
 
-        await expectLater(
-          device.startApp(null, debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug)),
-          throwsStateError,
-        );
+      final client = ExtensionDeviceClient(conn, logger: logger);
+      final device = ExtensionBackedDevice(
+        buildManager: _createBuildManager(logger: logger, targets: const <ExtensionBuildTarget>[]),
+        connection: conn,
+        deviceService: client,
+        fileSystem: MemoryFileSystem.test(),
+        logger: logger,
+        targetDevice: const TargetDevice(
+          buildTarget: 'custom-linux-build',
+          category: Category.desktop,
+          id: 'test_device',
+          name: 'Test Device',
+        ),
+      );
+      addTearDown(device.dispose);
 
-        final LaunchResult result = await device.startApp(
-          ExtensionApplicationPackage(id: 'test_app'),
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        );
-        expect(result.started, isFalse);
-        expect(
-          logger.errorText,
-          contains('No tool extension provides build target "custom-linux-build" for Test Device.'),
-        );
-      },
-    );
+      await expectLater(
+        device.startApp(null, debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug)),
+        throwsStateError,
+      );
 
-    testWithoutContext('ExtensionBackedDevice.startApp and stopApp forward BuildInfo, appId, directory bundle URIs, ExtensionDebuggingOptions, and retry reuse', () async {
+      final LaunchResult result = await device.startApp(
+        ExtensionApplicationPackage(id: 'test_app'),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      );
+      expect(result.started, isFalse);
+      expect(
+        logger.errorText,
+        contains('No tool extension provides build target "custom-linux-build" for Test Device.'),
+      );
+    });
+
+    test('ExtensionBackedDevice.startApp and stopApp forward BuildInfo, appId, directory bundle URIs, ExtensionDebuggingOptions, and retry reuse', () async {
       final eventPort = ReceivePort();
       addTearDown(eventPort.close);
       final Stream<Map<String, Object?>> events = eventPort
@@ -928,7 +913,7 @@ void main() {
       expect(launchEvents, hasLength(4));
     });
 
-    testWithoutContext('ExtensionDeviceClient rethrows ToolExtensionException and ExtensionBackedDevice logs clean error and returns failure', () async {
+    test('ExtensionDeviceClient rethrows ToolExtensionException and ExtensionBackedDevice logs clean error and returns failure', () async {
       void domainErrorEntryPoint(SendPort sendPort) {
         unawaited(
           ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
@@ -1073,7 +1058,7 @@ void main() {
       );
     });
 
-    testWithoutContext('ExtensionDevices.pollingGetDevices reports ToolExtensionException via getDiagnostics without warning on every poll', () async {
+    test('ExtensionDevices.pollingGetDevices reports ToolExtensionException via getDiagnostics without warning on every poll', () async {
       void domainErrorEntryPoint(SendPort sendPort) {
         unawaited(
           ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[

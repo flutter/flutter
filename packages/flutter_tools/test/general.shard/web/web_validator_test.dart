@@ -44,13 +44,13 @@ void main() {
     );
   });
 
-  testWithoutContext('WebValidator can find executable on macOS', () async {
+  test('WebValidator can find executable on macOS', () async {
     final ValidationResult result = await webValidator.validate();
 
     expect(result.type, ValidationType.success);
   });
 
-  testWithoutContext('WebValidator Can notice missing macOS executable ', () async {
+  test('WebValidator Can notice missing macOS executable ', () async {
     fakeProcessManager.excludedExecutables.add(kMacOSExecutable);
 
     final ValidationResult result = await webValidator.validate();
@@ -58,19 +58,16 @@ void main() {
     expect(result.type, ValidationType.missing);
   });
 
-  testWithoutContext(
-    'WebValidator does not warn about CHROME_EXECUTABLE unless it cant find chrome ',
-    () async {
-      fakeProcessManager.excludedExecutables.add(kMacOSExecutable);
+  test('WebValidator does not warn about CHROME_EXECUTABLE unless it cant find chrome ', () async {
+    fakeProcessManager.excludedExecutables.add(kMacOSExecutable);
 
-      final ValidationResult result = await webValidator.validate();
+    final ValidationResult result = await webValidator.validate();
 
-      expect(result.messages, const <ValidationMessage>[
-        ValidationMessage.hint(
-          'Cannot find Chrome. Try setting CHROME_EXECUTABLE to a Chrome executable.',
-        ),
-      ]);
-      expect(result.type, ValidationType.missing);
-    },
-  );
+    expect(result.messages, const <ValidationMessage>[
+      ValidationMessage.hint(
+        'Cannot find Chrome. Try setting CHROME_EXECUTABLE to a Chrome executable.',
+      ),
+    ]);
+    expect(result.type, ValidationType.missing);
+  });
 }

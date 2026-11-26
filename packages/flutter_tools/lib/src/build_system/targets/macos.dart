@@ -192,6 +192,62 @@ class DebugUnpackMacOS extends UnpackMacOS {
   ];
 }
 
+const _kVmServiceFrameworkName = 'VMService.framework';
+const _kVmServiceExecutableName = 'VMService';
+
+/// Unpack the profile prebuilt VM service framework.
+class UnpackMacOSVmService extends UnpackDarwin {
+  const UnpackMacOSVmService();
+
+  @override
+  String get name => 'unpack_macos_vm_service';
+
+  @override
+  FlutterDarwinPlatform get darwinPlatform => .macos;
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.artifact(Artifact.vmserviceFramework, platform: .darwin, mode: .profile),
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{OUTPUT_DIR}/$_kVmServiceFrameworkName/Versions/A/$_kVmServiceExecutableName'),
+    Source.pattern('{OUTPUT_DIR}/$_kVmServiceFrameworkName/Versions/A/Resources/Info.plist'),
+  ];
+
+  @override
+  List<Target> get dependencies => const <Target>[];
+
+  @override
+  Future<void> build(Environment environment) async {
+    await copyFramework(
+      environment,
+      buildMode: .profile,
+      framework: .vmserviceFramework,
+      targetPlatform: .darwin,
+    );
+
+    final File frameworkBinary = environment.fileSystem.file(
+      environment.fileSystem.path.join(
+        environment.outputDir.path,
+        _kVmServiceFrameworkName,
+        'Versions',
+        'A',
+        _kVmServiceExecutableName,
+      ),
+    );
+    if (!frameworkBinary.existsSync()) {
+      throw Exception('Binary ${frameworkBinary.path} does not exist, cannot thin');
+    }
+    await thinFramework(
+      environment,
+      frameworkBinary.path,
+      environment.defines[kDarwinArchs] ?? 'x86_64 arm64',
+    );
+  }
+}
+
 /// Create an App.framework for debug macOS targets.
 ///
 /// This framework needs to exist for the Xcode project to link/bundle,
@@ -520,6 +576,15 @@ abstract class MacOSBundleFlutterAssets extends Target {
         environment.fileSystem
             .file(isolateSnapshotData)
             .copySync(assetDirectory.childFile('isolate_snapshot_data').path);
+
+        final String vmserviceDill = environment.artifacts.getArtifactPath(
+          Artifact.vmserviceKernelDill,
+          platform: TargetPlatform.darwin,
+          mode: BuildMode.debug,
+        );
+        environment.fileSystem
+            .file(vmserviceDill)
+            .copySync(assetDirectory.childFile('vmservice_snapshot.dill').path);
       } on Exception catch (err) {
         throw Exception('Failed to copy precompiled runtimes: $err');
       }
@@ -593,6 +658,11 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
       platform: TargetPlatform.darwin,
       mode: BuildMode.debug,
     ),
+    const Source.artifact(
+      Artifact.vmserviceKernelDill,
+      platform: TargetPlatform.darwin,
+      mode: BuildMode.debug,
+    ),
   ];
 
   @override
@@ -606,6 +676,9 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
     ),
     const Source.pattern(
       '{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data',
+    ),
+    const Source.pattern(
+      '{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/vmservice_snapshot.dill',
     ),
   ];
 }
@@ -623,6 +696,7 @@ class ProfileMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
     const CompileMacOSFramework(),
     const InstallCodeAssets(),
     const ProfileUnpackMacOS(),
+    const UnpackMacOSVmService(),
   ];
 
   @override

@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:isolate';
 
-import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -25,7 +24,6 @@ import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/template.dart';
@@ -45,7 +43,6 @@ import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_vm_services.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -59,8 +56,7 @@ final class _TestBuildTarget extends BuildTarget {
     this.executableUri,
     super.outputDir = '${BuiltInPlaceholders.outputDir}/custom',
     this.shouldSucceed = true,
-    super.targetPlatform = 'linux-x64',
-  });
+  }) : super(targetPlatform: 'linux-x64');
 
   @override
   final String name;
@@ -299,74 +295,74 @@ void main() {
   });
 
   group('Tool Extensions Device Integration - Disabled', () {
-    testUsingContext(
-      'ExtensionDevices returns empty device list when feature flag disabled',
-      () async {
-        final featureFlags = TestFeatureFlags();
-        final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
-          entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
-          featureFlags: featureFlags,
-        );
-        final discovery = ExtensionDevices(
-          extensionBuildManager: ExtensionBuildManager(
-            extensionManager: manager,
-            featureFlags: featureFlags,
-            logger: testLogger,
-          ),
+    test('ExtensionDevices returns empty device list when feature flag disabled', () async {
+      final logger = BufferLogger.test();
+      final featureFlags = TestFeatureFlags();
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+        featureFlags: featureFlags,
+      );
+      final discovery = ExtensionDevices(
+        extensionBuildManager: ExtensionBuildManager(
           extensionManager: manager,
-          fileSystem: MemoryFileSystem.test(),
-          logger: testLogger,
-        );
+          featureFlags: featureFlags,
+          logger: logger,
+        ),
+        extensionManager: manager,
+        fileSystem: MemoryFileSystem.test(),
+        logger: logger,
+      );
 
-        final List<Device> devices = await discovery.devices();
-        expect(devices, isEmpty);
+      final List<Device> devices = await discovery.devices();
+      expect(devices, isEmpty);
 
-        await manager.dispose();
-      },
-      overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
-    );
+      await manager.dispose();
+    });
 
-    testUsingContext(
+    test(
       'DevicesCommand output does not include custom extension devices when feature flag disabled',
       () async {
+        final logger = BufferLogger.test();
         final featureFlags = TestFeatureFlags();
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
+          logger: logger,
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
         final testDeviceManager = TestDeviceManager(
+          logger: logger,
           discoverers: <DeviceDiscovery>[
             ExtensionDevices(
               extensionBuildManager: ExtensionBuildManager(
                 extensionManager: manager,
                 featureFlags: featureFlags,
-                logger: testLogger,
+                logger: logger,
               ),
               extensionManager: manager,
               fileSystem: MemoryFileSystem.test(),
-              logger: testLogger,
+              logger: logger,
             ),
           ],
         );
+        final toolContext = FakeToolContext(logger: logger);
         final devicesCommand = DevicesCommand(
           deviceManager: testDeviceManager,
           doctor: FakeDoctor(),
-          toolContext: FakeToolContext(logger: testLogger),
+          toolContext: toolContext,
         );
-        final CommandRunner<void> commandRunner = createTestCommandRunner(devicesCommand);
+        final runner = TestFlutterCommandRunner(
+          deviceManager: testDeviceManager,
+          featureFlags: featureFlags,
+          toolContext: toolContext,
+        )..addCommand(devicesCommand);
 
-        await commandRunner.run(<String>['devices']);
-        expect(testLogger.statusText, isNot(contains('Linux Custom Extension Prototype Device')));
+        await runner.run(<String>['devices']);
+        expect(logger.statusText, isNot(contains('Linux Custom Extension Prototype Device')));
 
         await manager.dispose();
-      },
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(),
-        DeviceManager: () => TestDeviceManager(),
       },
     );
   });
@@ -379,14 +375,12 @@ void main() {
       logsExtensionManager = null;
     });
 
-    testWithoutContext(
-      'FlutterProject.toExtensionProject extracts project and manifest metadata',
-      () async {
-        final fs = MemoryFileSystem.test();
-        final Directory tempDir = fs.systemTempDirectory.createTempSync(
-          'flutter_tool_extensions_project_test.',
-        );
-        tempDir.childFile('pubspec.yaml').writeAsStringSync('''
+    test('FlutterProject.toExtensionProject extracts project and manifest metadata', () async {
+      final fs = MemoryFileSystem.test();
+      final Directory tempDir = fs.systemTempDirectory.createTempSync(
+        'flutter_tool_extensions_project_test.',
+      );
+      tempDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: sample_app
 version: 2.1.0+5
 workspace:
@@ -400,139 +394,161 @@ flutter:
     androidX: true
 ''');
 
-        final FlutterProject project = FlutterProject.fromDirectoryTest(
-          tempDir,
-          BufferLogger.test(),
-        );
-        final ExtensionFlutterProject extProject = project.toExtensionProject();
+      final FlutterProject project = FlutterProject.fromDirectoryTest(tempDir, BufferLogger.test());
+      final ExtensionFlutterProject extProject = project.toExtensionProject();
 
-        expect(extProject.appName, 'sample_app');
-        expect(extProject.appVersion, '2.1.0+5');
-        expect(extProject.directory, project.directory.uri);
-        expect(extProject.buildDirectory, project.buildDirectory.uri);
-        expect(extProject.dependencies, <String>{'flutter', 'path'});
-        expect(extProject.isEmpty, isFalse);
-        expect(extProject.isModule, isTrue);
-        expect(extProject.isPlugin, isFalse);
-        expect(extProject.workspace, <String>['packages/sub_pkg']);
-        expect(extProject.workspace.runtimeType, <String>[].runtimeType);
-        expect(() => jsonEncode(extProject.toMap()), returnsNormally);
-      },
-    );
+      expect(extProject.appName, 'sample_app');
+      expect(extProject.appVersion, '2.1.0+5');
+      expect(extProject.directory, project.directory.uri);
+      expect(extProject.buildDirectory, project.buildDirectory.uri);
+      expect(extProject.dependencies, <String>{'flutter', 'path'});
+      expect(extProject.isEmpty, isFalse);
+      expect(extProject.isModule, isTrue);
+      expect(extProject.isPlugin, isFalse);
+      expect(extProject.workspace, <String>['packages/sub_pkg']);
+      expect(extProject.workspace.runtimeType, <String>[].runtimeType);
+      expect(() => jsonEncode(extProject.toMap()), returnsNormally);
+    });
 
-    testUsingContext(
-      'ExtensionDevices discovers custom device when feature flag enabled',
-      () async {
-        final localFs = LocalFileSystem.test(signals: LocalSignals.instance);
-        addTearDown(localFs.dispose);
-        final Directory tempDir = localFs.systemTempDirectory.createTempSync(
-          'flutter_tool_extensions_device_test.',
-        );
+    test('ExtensionDevices discovers custom device when feature flag enabled', () async {
+      final logger = BufferLogger.test();
+      final localFs = LocalFileSystem.test(signals: LocalSignals.instance);
+      addTearDown(localFs.dispose);
+      final Directory tempDir = localFs.systemTempDirectory.createTempSync(
+        'flutter_tool_extensions_device_test.',
+      );
 
-        final projectFactory = FlutterProjectFactory(
-          fileSystem: localFs,
-          logger: testLogger,
-          config: FakeConfig(),
-        );
-        final FlutterProject project = projectFactory.fromDirectory(tempDir);
+      final projectFactory = FlutterProjectFactory(
+        fileSystem: localFs,
+        logger: logger,
+        config: FakeConfig(),
+      );
+      final FlutterProject project = projectFactory.fromDirectory(tempDir);
 
-        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
-        final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
-          entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
-          featureFlags: featureFlags,
-        );
-        final discovery = ExtensionDevices(
-          extensionBuildManager: ExtensionBuildManager(
-            extensionManager: manager,
-            featureFlags: featureFlags,
-            logger: testLogger,
-          ),
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+        featureFlags: featureFlags,
+      );
+      final discovery = ExtensionDevices(
+        extensionBuildManager: ExtensionBuildManager(
           extensionManager: manager,
-          fileSystem: MemoryFileSystem.test(),
-          logger: testLogger,
-        );
+          featureFlags: featureFlags,
+          logger: logger,
+        ),
+        extensionManager: manager,
+        fileSystem: MemoryFileSystem.test(),
+        logger: logger,
+      );
 
-        final List<Device> devices = await discovery.devices();
-        expect(devices, hasLength(1));
-        expect(devices.first.id, equals('custom_linux_device'));
-        expect(devices.first.name, equals('Linux Custom Extension Prototype Device'));
-        expect(devices.first.category, equals(Category.desktop));
-        expect(devices.first.platformType, equals(PlatformType.custom));
-        expect(await devices.first.targetPlatform, equals(TargetPlatform.linux_x64));
-        expect(await devices.first.targetPlatformDisplayName, equals('linux-x64'));
-        expect(await devices.first.sdkNameAndVersion, equals('Custom Linux 1.0.0'));
-        expect(await devices.first.isSupported(), isTrue);
-        expect(await devices.first.isSupportedForProject(project), isFalse);
+      final List<Device> devices = await discovery.devices();
+      expect(devices, hasLength(1));
+      expect(devices.first.id, equals('custom_linux_device'));
+      expect(devices.first.name, equals('Linux Custom Extension Prototype Device'));
+      expect(devices.first.category, equals(Category.desktop));
+      expect(devices.first.platformType, equals(PlatformType.custom));
+      expect(await devices.first.targetPlatform, equals(TargetPlatform.linux_x64));
+      expect(await devices.first.targetPlatformDisplayName, equals('linux-x64'));
+      expect(await devices.first.sdkNameAndVersion, equals('Custom Linux 1.0.0'));
+      expect(await devices.first.isSupported(), isTrue);
+      expect(await devices.first.isSupportedForProject(project), isFalse);
 
-        tempDir.childDirectory('linux').createSync();
-        expect(await devices.first.isSupportedForProject(project), isTrue);
+      tempDir.childDirectory('linux').createSync();
+      expect(await devices.first.isSupportedForProject(project), isTrue);
 
-        await manager.dispose();
-      },
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
-      },
-    );
+      await manager.dispose();
+    });
 
-    testUsingContext(
+    test(
       'DevicesCommand output includes custom extension device when feature flag enabled',
       () async {
+        final logger = BufferLogger.test();
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
+          logger: logger,
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
         final testDeviceManager = TestDeviceManager(
+          logger: logger,
           discoverers: <DeviceDiscovery>[
             ExtensionDevices(
               extensionBuildManager: ExtensionBuildManager(
                 extensionManager: manager,
                 featureFlags: featureFlags,
-                logger: testLogger,
+                logger: logger,
               ),
               extensionManager: manager,
               fileSystem: MemoryFileSystem.test(),
-              logger: testLogger,
+              logger: logger,
             ),
           ],
         );
+        final toolContext = FakeToolContext(logger: logger);
         final devicesCommand = DevicesCommand(
           deviceManager: testDeviceManager,
           doctor: FakeDoctor(),
-          toolContext: FakeToolContext(logger: testLogger),
+          toolContext: toolContext,
         );
-        final CommandRunner<void> commandRunner = createTestCommandRunner(devicesCommand);
+        final runner = TestFlutterCommandRunner(
+          deviceManager: testDeviceManager,
+          featureFlags: featureFlags,
+          toolContext: toolContext,
+        )..addCommand(devicesCommand);
 
-        await commandRunner.run(<String>['devices']);
-        expect(testLogger.statusText, contains('Linux Custom Extension Prototype Device'));
+        await runner.run(<String>['devices']);
+        expect(logger.statusText, contains('Linux Custom Extension Prototype Device'));
 
         await manager.dispose();
       },
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
-        DeviceManager: () => TestDeviceManager(),
-      },
     );
 
-    testUsingContext(
+    test(
       'LogsCommand streams log output from custom extension device when feature flag enabled',
       () async {
         final logger = _LogLineWaitingBufferLogger(targetLine: 'Custom device log line 2');
+        final extensionLogger = BufferLogger.test();
+        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+        logsExtensionManager = ExtensionManager(
+          entryPoints: <ExtensionEntryPoint>[_customLogStreamingExtensionEntryPoint],
+          featureFlags: featureFlags,
+          hostPlatform: HostPlatform.linux_x64,
+          logger: extensionLogger,
+        );
+        final deviceManager = TestDeviceManager(
+          logger: extensionLogger,
+          discoverers: <DeviceDiscovery>[
+            ExtensionDevices(
+              extensionBuildManager: ExtensionBuildManager(
+                extensionManager: logsExtensionManager!,
+                featureFlags: featureFlags,
+                logger: extensionLogger,
+              ),
+              extensionManager: logsExtensionManager!,
+              fileSystem: MemoryFileSystem.test(),
+              logger: extensionLogger,
+            ),
+          ],
+        );
         final intSignal = _FakeProcessSignal();
         final termSignal = _FakeProcessSignal();
+        final toolContext = FakeToolContext(logger: logger);
         final logsCommand = LogsCommand(
           applicationPackageFactory: _FakeApplicationPackageFactory(),
           sigint: intSignal,
           sigterm: termSignal,
-          toolContext: FakeToolContext(logger: logger),
+          toolContext: toolContext,
         );
-        final CommandRunner<void> commandRunner = createTestCommandRunner(logsCommand);
+        final runner = TestFlutterCommandRunner(
+          deviceManager: deviceManager,
+          featureFlags: featureFlags,
+          toolContext: toolContext,
+        )..addCommand(logsCommand);
 
-        final Future<void> commandFuture = commandRunner.run(<String>[
+        final Future<void> commandFuture = runner.run(<String>[
           'logs',
           '-d',
           _customExtensionDeviceId,
@@ -547,31 +563,6 @@ flutter:
         intSignal.send(1);
         await commandFuture;
         await logsCommand.device?.dispose();
-      },
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
-        DeviceManager: () {
-          logsExtensionManager = ExtensionManager(
-            entryPoints: <ExtensionEntryPoint>[_customLogStreamingExtensionEntryPoint],
-            featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-            hostPlatform: HostPlatform.linux_x64,
-            logger: testLogger,
-          );
-          return TestDeviceManager(
-            discoverers: <DeviceDiscovery>[
-              ExtensionDevices(
-                extensionBuildManager: ExtensionBuildManager(
-                  extensionManager: logsExtensionManager!,
-                  featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-                  logger: testLogger,
-                ),
-                extensionManager: logsExtensionManager!,
-                fileSystem: MemoryFileSystem.test(),
-                logger: testLogger,
-              ),
-            ],
-          );
-        },
       },
     );
 
@@ -607,7 +598,7 @@ flutter:
         return (manager, logger, fileSystem, devices);
       }
 
-      testWithoutContext('delegates build with full BuildInfo context, launch, VM service discovery, and stop via RPC', () async {
+      test('delegates build with full BuildInfo context, launch, VM service discovery, and stop via RPC', () async {
         final buildContextPort = ReceivePort();
         addTearDown(buildContextPort.close);
         final (_, _, MemoryFileSystem fileSystem, List<Device> devices) = await setUpTestDevices(
@@ -665,7 +656,7 @@ flutter:
         expect(await device.stopApp(appPackage), isTrue);
       });
 
-      testWithoutContext('supports prebuilt application launch when PrebuiltExtensionApplicationPackage is provided and fails when missing', () async {
+      test('supports prebuilt application launch when PrebuiltExtensionApplicationPackage is provided and fails when missing', () async {
         final (_, BufferLogger logger, MemoryFileSystem fileSystem, List<Device> devices) =
             await setUpTestDevices();
         final Device device = devices.firstWhere((Device d) => d.id == 'fake_test_device');
@@ -715,7 +706,7 @@ flutter:
         expect(await device.stopApp(prebuiltPackage), isTrue);
       });
 
-      testWithoutContext('FlutterApplicationPackageFactory resolves ExtensionApplicationPackage and PrebuiltExtensionApplicationPackage for TargetPlatform.unsupported', () async {
+      test('FlutterApplicationPackageFactory resolves ExtensionApplicationPackage and PrebuiltExtensionApplicationPackage for TargetPlatform.unsupported', () async {
         final fileSystem = MemoryFileSystem.test();
         fileSystem.currentDirectory
             .childFile('pubspec.yaml')
@@ -796,7 +787,7 @@ flutter:
         );
       });
 
-      testWithoutContext('FlutterDriverService.start launches buildable and prebuilt apps on custom TargetPlatform.unsupported extension device', () async {
+      test('FlutterDriverService.start launches buildable and prebuilt apps on custom TargetPlatform.unsupported extension device', () async {
         final (_, BufferLogger logger, MemoryFileSystem fileSystem, List<Device> devices) =
             await setUpTestDevices();
         final Device customOsDevice = devices.firstWhere(
@@ -899,7 +890,7 @@ flutter:
         expect(logger.errorText, isEmpty);
       });
 
-      testWithoutContext('fails when device does not specify a buildTarget', () async {
+      test('fails when device does not specify a buildTarget', () async {
         final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
         final Device noTargetDevice = devices.firstWhere((Device d) => d.id == 'no_target_device');
 
@@ -914,7 +905,7 @@ flutter:
         );
       });
 
-      testWithoutContext('fails when extension build target returns failure', () async {
+      test('fails when extension build target returns failure', () async {
         final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
         final Device failingBuildDevice = devices.firstWhere(
           (Device d) => d.id == 'failing_build_device',
@@ -928,30 +919,27 @@ flutter:
         expect(logger.errorText, contains('Build failed: Simulated build error'));
       });
 
-      testWithoutContext(
-        'fails when DeviceService.launchApp throws ToolExtensionException',
-        () async {
-          final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
-          final Device failingLaunchDevice = devices.firstWhere(
-            (Device d) => d.id == 'failing_launch_device',
-          );
+      test('fails when DeviceService.launchApp throws ToolExtensionException', () async {
+        final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
+        final Device failingLaunchDevice = devices.firstWhere(
+          (Device d) => d.id == 'failing_launch_device',
+        );
 
-          final LaunchResult failingLaunchResult = await failingLaunchDevice.startApp(
-            ExtensionApplicationPackage(id: 'test_app'),
-            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-          );
-          expect(failingLaunchResult.started, isFalse);
-          expect(
-            logger.errorText,
-            contains(
-              'Failed to launch application on Failing Launch Device ("fake_test_ext"): '
-              'Simulated launch failure.',
-            ),
-          );
-        },
-      );
+        final LaunchResult failingLaunchResult = await failingLaunchDevice.startApp(
+          ExtensionApplicationPackage(id: 'test_app'),
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        );
+        expect(failingLaunchResult.started, isFalse);
+        expect(
+          logger.errorText,
+          contains(
+            'Failed to launch application on Failing Launch Device ("fake_test_ext"): '
+            'Simulated launch failure.',
+          ),
+        );
+      });
 
-      testWithoutContext(
+      test(
         'fails without stopping app when debugging is enabled and getVmServiceUri returns null',
         () async {
           final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
@@ -1014,9 +1002,12 @@ class _LogLineWaitingBufferLogger extends BufferLogger {
 }
 
 class TestDeviceManager extends DeviceManager {
-  TestDeviceManager({List<DeviceDiscovery>? discoverers, FileSystem? fileSystem})
-    : deviceDiscoverers = discoverers ?? <DeviceDiscovery>[],
-      super(logger: testLogger, fileSystem: fileSystem ?? MemoryFileSystem.test());
+  TestDeviceManager({
+    required super.logger,
+    List<DeviceDiscovery>? discoverers,
+    FileSystem? fileSystem,
+  }) : deviceDiscoverers = discoverers ?? <DeviceDiscovery>[],
+       super(fileSystem: fileSystem ?? MemoryFileSystem.test());
 
   @override
   final List<DeviceDiscovery> deviceDiscoverers;

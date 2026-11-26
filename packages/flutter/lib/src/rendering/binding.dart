@@ -543,7 +543,10 @@ mixin RendererBinding
 
   void _handleWebFirstFrame(Duration _) {
     assert(kIsWeb);
-    const methodChannel = MethodChannel('flutter/service_worker');
+    // Best-effort notification: there may be no handler registered for this
+    // channel, so a missing handler is not an error. Other failures are still
+    // reported below.
+    const methodChannel = OptionalMethodChannel('flutter/service_worker');
     methodChannel
         .invokeMethod<void>('first-frame')
         .then(

@@ -21,7 +21,6 @@ import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:hooks/hooks.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 import '../fake_native_assets_build_runner.dart';
@@ -52,8 +51,20 @@ void main() {
     projectUri = environment.projectDir.uri;
   });
 
-  for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
-    testUsingContext('build with assets $buildMode', () async {
+  for (final (
+        BuildMode buildMode,
+        String? deploymentTarget,
+        AppleVersion expectedVersion,
+        String expectedMinimum,
+      )
+      in <(BuildMode, String?, AppleVersion, String)>[
+        for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) ...[
+          (buildMode, null, AppleVersion(15), '15.0'),
+          (buildMode, '16.4', AppleVersion(16, minor: 4), '16.4'),
+          (buildMode, '17.2.1', AppleVersion(17, minor: 2, patch: 1), '17.2.1'),
+        ],
+      ]) {
+    test('build with assets $buildMode deployment target $deploymentTarget', () async {
       if (const LocalPlatform().isWindows) {
         return; // Backslashes in commands, but we will never run these commands on Windows.
       }
@@ -234,21 +245,28 @@ void main() {
       ];
       final buildRunner = FakeFlutterNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <String>['bar'],
-        onBuild: (BuildInput input) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
-          codeAssets: buildMode == BuildMode.debug
-              ? codeAssets(input.config.code.targetOS, input.config.code)
-              : <CodeAsset>[],
-        ),
-        onLink: (LinkInput input) => buildMode == BuildMode.debug
-            ? null
-            : FakeFlutterNativeAssetsBuilderResult.fromAssets(
-                codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
-              ),
+        onBuild: (BuildInput input) {
+          expect(input.config.code.iOS.deploymentVersion, expectedVersion);
+          return FakeFlutterNativeAssetsBuilderResult.fromAssets(
+            codeAssets: buildMode == BuildMode.debug
+                ? codeAssets(input.config.code.targetOS, input.config.code)
+                : <CodeAsset>[],
+          );
+        },
+        onLink: (LinkInput input) {
+          expect(input.config.code.iOS.deploymentVersion, expectedVersion);
+          return buildMode == BuildMode.debug
+              ? null
+              : FakeFlutterNativeAssetsBuilderResult.fromAssets(
+                  codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
+                );
+        },
       );
       final environmentDefines = <String, String>{
         kBuildMode: buildMode.cliName,
         kSdkRoot: '.../iPhone Simulator',
         kIosArchs: 'arm64 x86_64',
+        kIosDeploymentTarget: ?deploymentTarget,
       };
       final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
         environmentDefines: environmentDefines,
@@ -287,57 +305,55 @@ void main() {
         ]),
       );
       expect(environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename), exists);
+      for (final name in <String>['bar', 'buz']) {
+        expect(
+          fileSystem.file('/build/native_assets/ios/$name.framework/Info.plist').readAsStringSync(),
+          contains('<key>MinimumOSVersion</key>\n\t<string>$expectedMinimum</string>'),
+        );
+      }
       // Two archs.
       expect(buildRunner.buildInvocations, 2);
       expect(buildRunner.linkInvocations, buildMode == BuildMode.release ? 2 : 0);
     });
   }
 
-  testUsingContext(
-    'pick-first warning',
-    () async {
-      final assets = <FlutterCodeAsset>[
-        FlutterCodeAsset(
-          codeAsset: CodeAsset(
-            package: 'bar',
-            name: 'bar.dart',
-            linkMode: DynamicLoadingBundled(),
-            file: Uri.file('arm64/libbar.dylib'),
-          ),
-          os: OS.iOS,
-          architecture: Architecture.arm64,
+  test('pick-first warning', () async {
+    final assets = <FlutterCodeAsset>[
+      FlutterCodeAsset(
+        codeAsset: CodeAsset(
+          package: 'bar',
+          name: 'bar.dart',
+          linkMode: DynamicLoadingBundled(),
+          file: Uri.file('arm64/libbar.dylib'),
         ),
-        FlutterCodeAsset(
-          codeAsset: CodeAsset(
-            package: 'bar',
-            name: 'bar.dart',
-            linkMode: DynamicLoadingBundled(),
-            file: Uri.file('x64/libbar_different.dylib'),
-          ),
-          os: OS.iOS,
-          architecture: Architecture.x64,
+        os: OS.iOS,
+        architecture: Architecture.arm64,
+      ),
+      FlutterCodeAsset(
+        codeAsset: CodeAsset(
+          package: 'bar',
+          name: 'bar.dart',
+          linkMode: DynamicLoadingBundled(),
+          file: Uri.file('x64/libbar_different.dylib'),
         ),
-      ];
+        os: OS.iOS,
+        architecture: Architecture.x64,
+      ),
+    ];
 
-      fatAssetTargetLocationsIOS(assets, logger: logger);
+    fatAssetTargetLocationsIOS(assets, logger: logger);
 
-      expect(
-        logger.errorText,
-        contains(
-          'Code asset "package:bar/bar.dart" has different framework names for '
-          'different architectures. Picking "bar.framework" and '
-          'ignoring "bar_different.framework".',
-        ),
-      );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-      Logger: () => logger,
-    },
-  );
+    expect(
+      logger.errorText,
+      contains(
+        'Code asset "package:bar/bar.dart" has different framework names for '
+        'different architectures. Picking "bar.framework" and '
+        'ignoring "bar_different.framework".',
+      ),
+    );
+  });
 
-  testWithoutContext('iOS builds fail when the install name does not fit', () async {
+  test('iOS builds fail when the install name does not fit', () async {
     if (const LocalPlatform().isWindows) {
       return; // Backslashes in commands, but we will never run these commands on Windows.
     }

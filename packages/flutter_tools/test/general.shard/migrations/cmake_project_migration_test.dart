@@ -33,7 +33,7 @@ void main() {
         mockCmakeProject = FakeCmakeProject(managedCmakeFile);
       });
 
-      testWithoutContext('skipped if files are missing', () async {
+      test('skipped if files are missing', () async {
         final cmakeProjectMigration = CmakeCustomCommandMigration(mockCmakeProject, testLogger);
         await cmakeProjectMigration.migrate();
         expect(managedCmakeFile.existsSync(), isFalse);
@@ -45,7 +45,7 @@ void main() {
         expect(testLogger.statusText, isEmpty);
       });
 
-      testWithoutContext('skipped if nothing to migrate', () async {
+      test('skipped if nothing to migrate', () async {
         const contents = 'Nothing to migrate';
         managedCmakeFile.writeAsStringSync(contents);
         final DateTime projectLastModified = managedCmakeFile.lastModifiedSync();
@@ -59,7 +59,7 @@ void main() {
         expect(testLogger.statusText, isEmpty);
       });
 
-      testWithoutContext('skipped if already migrated', () async {
+      test('skipped if already migrated', () async {
         const contents = r'''
 add_custom_command(
   OUTPUT ${FLUTTER_LIBRARY} ${FLUTTER_LIBRARY_HEADERS}
@@ -83,7 +83,7 @@ add_custom_command(
         expect(testLogger.statusText, isEmpty);
       });
 
-      testWithoutContext('is migrated to use VERBATIM', () async {
+      test('is migrated to use VERBATIM', () async {
         managedCmakeFile.writeAsStringSync(r'''
 add_custom_command(
   OUTPUT ${FLUTTER_LIBRARY} ${FLUTTER_LIBRARY_HEADERS}
@@ -116,7 +116,7 @@ add_custom_command(
         );
       });
 
-      testWithoutContext('is migrated to use FLUTTER_TARGET_PLATFORM', () async {
+      test('is migrated to use FLUTTER_TARGET_PLATFORM', () async {
         managedCmakeFile.writeAsStringSync(r'''
 add_custom_command(
   OUTPUT ${FLUTTER_LIBRARY} ${FLUTTER_LIBRARY_HEADERS}
@@ -169,7 +169,7 @@ add_custom_command(
         mockCmakeProject = FakeCmakeProject(managedCmakeFile);
       });
 
-      testWithoutContext('skipped if files are missing', () async {
+      test('skipped if files are missing', () async {
         final cmakeProjectMigration = CmakeNativeAssetsMigration(
           mockCmakeProject,
           'linux',
@@ -185,7 +185,7 @@ add_custom_command(
         expect(testLogger.statusText, isEmpty);
       });
 
-      testWithoutContext('skipped if nothing to migrate', () async {
+      test('skipped if nothing to migrate', () async {
         const contents = 'Nothing to migrate';
         managedCmakeFile.writeAsStringSync(contents);
         final DateTime projectLastModified = managedCmakeFile.lastModifiedSync();
@@ -203,7 +203,7 @@ add_custom_command(
         expect(testLogger.statusText, isEmpty);
       });
 
-      testWithoutContext('skipped if already migrated', () async {
+      test('skipped if already migrated', () async {
         const contents = r'''
 # Copy the native assets provided by the hook/build.dart from all packages.
 set(NATIVE_ASSETS_DIR "${PROJECT_BUILD_DIR}native_assets/linux/")
@@ -228,7 +228,7 @@ install(DIRECTORY "${NATIVE_ASSETS_DIR}"
       });
 
       for (final os in <String>['linux', 'windows']) {
-        testWithoutContext('is migrated to copy native assets', () async {
+        test('is migrated to copy native assets', () async {
           managedCmakeFile.writeAsStringSync(r'''
 foreach(bundled_library ${PLUGIN_BUNDLED_LIBRARIES})
   install(FILES "${bundled_library}"

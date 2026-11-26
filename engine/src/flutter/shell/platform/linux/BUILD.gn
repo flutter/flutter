@@ -275,6 +275,7 @@ executable("flutter_linux_unittests") {
     "fl_scrolling_manager_test.cc",
     "fl_settings_handler_test.cc",
     "fl_settings_portal_test.cc",
+    "fl_socket_accessible_test.cc",
     "fl_standard_message_codec_test.cc",
     "fl_standard_method_codec_test.cc",
     "fl_string_codec_test.cc",
@@ -371,6 +372,13 @@ zip_bundle("flutter_gtk") {
     ":publish_headers_linux",
     "$dart_src/runtime/bin:gen_snapshot",
   ]
+  if (flutter_runtime_mode == "profile") {
+    deps += [ "//flutter/shell/vmservice:vmservice_snapshot" ]
+  } else if (flutter_runtime_mode == "debug" ||
+             flutter_runtime_mode == "debug_unopt") {
+    deps += [ "//flutter/shell/vmservice:vmservice_snapshot_dill" ]
+  }
+
   sources = get_target_outputs(":publish_headers_linux")
   tmp_files = []
   foreach(source, sources) {
@@ -391,5 +399,21 @@ zip_bundle("flutter_gtk") {
       destination = "gen_snapshot"
     },
   ]
+  if (flutter_runtime_mode == "profile") {
+    tmp_files += [
+      {
+        source = "$root_build_dir/libvmservice_snapshot.so"
+        destination = "libvmservice_snapshot.so"
+      },
+    ]
+  } else if (flutter_runtime_mode == "debug" ||
+             flutter_runtime_mode == "debug_unopt") {
+    tmp_files += [
+      {
+        source = "$root_build_dir/vmservice_snapshot.dill"
+        destination = "vmservice_snapshot.dill"
+      },
+    ]
+  }
   files = tmp_files
 }

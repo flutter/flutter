@@ -123,7 +123,7 @@ flutter:
     return effectiveCommand;
   }
 
-  testWithoutContext('bundle getUsage indicate that project is a module', () async {
+  test('bundle getUsage indicate that project is a module', () async {
     setUpMockProjectFiles(isModule: true);
 
     await runCommandIn(fileSystem.currentDirectory.path);
@@ -141,7 +141,7 @@ flutter:
     );
   });
 
-  testWithoutContext('bundle getUsage indicate that project is not a module', () async {
+  test('bundle getUsage indicate that project is not a module', () async {
     setUpMockProjectFiles();
 
     await runCommandIn(fileSystem.currentDirectory.path);
@@ -159,7 +159,7 @@ flutter:
     );
   });
 
-  testWithoutContext('bundle getUsage indicate the target platform', () async {
+  test('bundle getUsage indicate the target platform', () async {
     setUpMockProjectFiles();
 
     final BuildBundleCommand command = await runCommandIn(fileSystem.currentDirectory.path);
@@ -170,7 +170,7 @@ flutter:
     );
   });
 
-  testWithoutContext('bundle fails to build for Windows if feature is disabled', () async {
+  test('bundle fails to build for Windows if feature is disabled', () async {
     setUpMockProjectFiles();
     final BuildBundleCommand command = createBuildBundleCommand(featureFlags: TestFeatureFlags());
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -181,7 +181,7 @@ flutter:
     );
   });
 
-  testWithoutContext('bundle fails to build for Linux if feature is disabled', () async {
+  test('bundle fails to build for Linux if feature is disabled', () async {
     setUpMockProjectFiles();
     final BuildBundleCommand command = createBuildBundleCommand(featureFlags: TestFeatureFlags());
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -192,7 +192,7 @@ flutter:
     );
   });
 
-  testWithoutContext('bundle fails to build for macOS if feature is disabled', () async {
+  test('bundle fails to build for macOS if feature is disabled', () async {
     setUpMockProjectFiles();
     final BuildBundleCommand command = createBuildBundleCommand(featureFlags: TestFeatureFlags());
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -203,7 +203,7 @@ flutter:
     );
   });
 
-  testWithoutContext('bundle --tree-shake-icons fails', () async {
+  test('bundle --tree-shake-icons fails', () async {
     setUpMockProjectFiles();
     final BuildBundleCommand command = createBuildBundleCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -214,7 +214,7 @@ flutter:
     );
   });
 
-  testWithoutContext('bundle can build for Windows if feature is enabled', () async {
+  test('bundle can build for Windows if feature is enabled', () async {
     setUpMockProjectFiles();
     final BuildBundleCommand command = createBuildBundleCommand(
       featureFlags: TestFeatureFlags(isWindowsEnabled: true),
@@ -224,7 +224,7 @@ flutter:
     await runner.run(<String>['bundle', '--no-pub', '--target-platform=windows-x64']);
   });
 
-  testWithoutContext('bundle can build for Linux if feature is enabled', () async {
+  test('bundle can build for Linux if feature is enabled', () async {
     setUpMockProjectFiles();
     final BuildBundleCommand command = createBuildBundleCommand(
       featureFlags: TestFeatureFlags(isLinuxEnabled: true),
@@ -234,7 +234,7 @@ flutter:
     await runner.run(<String>['bundle', '--no-pub', '--target-platform=linux-x64']);
   });
 
-  testWithoutContext('bundle can build for macOS if feature is enabled', () async {
+  test('bundle can build for macOS if feature is enabled', () async {
     setUpMockProjectFiles();
     final BuildBundleCommand command = createBuildBundleCommand(
       featureFlags: TestFeatureFlags(isMacOSEnabled: true),
@@ -244,7 +244,7 @@ flutter:
     await runner.run(<String>['bundle', '--no-pub', '--target-platform=darwin']);
   });
 
-  testWithoutContext('passes track widget creation through', () async {
+  test('passes track widget creation through', () async {
     setUpMockProjectFiles();
 
     final BuildBundleCommand command = createBuildBundleCommand(
@@ -276,7 +276,7 @@ flutter:
     ]);
   });
 
-  testWithoutContext('passes dart-define through', () async {
+  test('passes dart-define through', () async {
     setUpMockProjectFiles();
 
     final BuildBundleCommand command = createBuildBundleCommand(
@@ -308,7 +308,7 @@ flutter:
     ]);
   });
 
-  testWithoutContext('passes filesystem-scheme through', () async {
+  test('passes filesystem-scheme through', () async {
     setUpMockProjectFiles();
 
     final BuildBundleCommand command = createBuildBundleCommand(
@@ -340,7 +340,7 @@ flutter:
     ]);
   });
 
-  testWithoutContext('passes filesystem-roots through', () async {
+  test('passes filesystem-roots through', () async {
     setUpMockProjectFiles();
 
     final BuildBundleCommand command = createBuildBundleCommand(
@@ -373,7 +373,7 @@ flutter:
     ]);
   });
 
-  testWithoutContext('passes extra frontend-options through', () async {
+  test('passes extra frontend-options through', () async {
     setUpMockProjectFiles();
 
     final BuildBundleCommand command = createBuildBundleCommand(
@@ -406,7 +406,7 @@ flutter:
     ]);
   });
 
-  testWithoutContext('passes extra gen_snapshot-options through', () async {
+  test('passes extra gen_snapshot-options through', () async {
     setUpMockProjectFiles();
 
     final BuildBundleCommand command = createBuildBundleCommand(
@@ -439,7 +439,7 @@ flutter:
     ]);
   });
 
-  testWithoutContext('passes profile options through', () async {
+  test('passes profile options through', () async {
     setUpMockProjectFiles();
 
     final BuildBundleCommand command = createBuildBundleCommand(
@@ -479,7 +479,7 @@ flutter:
     ]);
   });
 
-  testWithoutContext('passes release options through', () async {
+  test('passes release options through', () async {
     setUpMockProjectFiles();
 
     final BuildBundleCommand command = createBuildBundleCommand(
@@ -519,7 +519,7 @@ flutter:
     ]);
   });
 
-  testWithoutContext('forwards AndroidContext.androidSdk lazily to Environment', () async {
+  test('forwards AndroidContext.androidSdk lazily to Environment', () async {
     setUpMockProjectFiles();
 
     final fakeAndroidSdk = FakeAndroidSdk();
