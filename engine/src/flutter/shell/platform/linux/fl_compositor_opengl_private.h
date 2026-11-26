@@ -39,6 +39,8 @@ struct _FlCompositorOpenGL {
 #if FLUTTER_LINUX_GTK4
   // Published EGL image storage must not be overwritten while GDK retains it.
   gboolean framebuffer_published;
+  // Only GTK-bound frames have the synchronization required for acquisition.
+  gboolean frame_for_subsurface;
   Gtk4DmabufSnapshot dmabuf_snapshots[kGtk4DmabufSnapshotCount];
   // Fence for a shareable framebuffer handed to GDK through a different GL
   // context. DMA-BUF textures have their own native fence.

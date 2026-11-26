@@ -6,6 +6,7 @@
 
 #include <gdk/wayland/gdkwayland.h>
 
+#include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_gtk.h"
 #include "flutter/shell/platform/linux/fl_view_private.h"
 
@@ -35,6 +36,37 @@ static void test_subsurface_resize() {
   gtk_widget_allocate(view->render_area, 64, 48, -1, nullptr);
   fl_view_gtk4_resize_subsurface(view, 64, 48);
   g_assert_cmpint(view->subsurface_egl != nullptr, ==, requested);
+  // Exercise the view's selection with a live destination, then again while
+  // the requested surface is unavailable and after recreating it.
+  FlOpenGLManager* manager = fl_engine_get_opengl_manager(view->engine);
+  g_assert_true(fl_opengl_manager_make_current(manager));
+  auto* compositor = fl_compositor_opengl_new(
+      fl_engine_get_task_runner(view->engine), manager, TRUE);
+  view->compositor = FL_COMPOSITOR(compositor);
+  g_autoptr(FlFramebuffer) source = fl_framebuffer_new(GL_RGBA, 64, 48, FALSE);
+  FlutterBackingStore store = {
+      .type = kFlutterBackingStoreTypeOpenGL,
+      .open_gl = {.framebuffer = {.user_data = source}}};
+  FlutterLayer layer = {.type = kFlutterLayerContentTypeBackingStore,
+                        .backing_store = &store,
+                        .size = {64, 48}};
+  const FlutterLayer* layers[] = {&layer};
+  fl_view_gtk4_present_layers(view, layers, 1);
+  g_assert_cmpint(compositor->frame_for_subsurface, ==, requested);
+  if (requested) {
+    g_assert_true(compositor->native_texture_sync == EGL_NO_SYNC_KHR);
+    g_assert_cmpint(compositor->dmabuf_published_snapshot, ==, -1);
+    fl_view_gtk4_clear_subsurface(view);
+    g_assert_true(fl_opengl_manager_make_current(manager));
+    fl_view_gtk4_present_layers(view, layers, 1);
+    g_assert_false(compositor->frame_for_subsurface);
+    fl_view_gtk4_resize_subsurface(view, 64, 48);
+    g_assert_true(fl_opengl_manager_make_current(manager));
+    fl_view_gtk4_present_layers(view, layers, 1);
+    g_assert_true(compositor->frame_for_subsurface);
+  }
+  while (g_main_context_iteration(nullptr, FALSE)) {
+  }
   gtk_window_destroy(window);
 }
 

@@ -183,18 +183,13 @@ void fl_view_gtk4_setup_rendering(FlView* self) {
   }
 }
 
-// Called on the raster thread after compositing the frame.
-static void present_subsurface(FlView* self) {
-  g_autoptr(FlSubsurfaceEGL) subsurface_egl = nullptr;
-  g_mutex_lock(&self->subsurface_mutex);
-  if (self->subsurface_egl != nullptr) {
-    subsurface_egl = FL_SUBSURFACE_EGL(g_object_ref(self->subsurface_egl));
-  }
-  g_mutex_unlock(&self->subsurface_mutex);
-  if (subsurface_egl != nullptr && FL_IS_COMPOSITOR_OPENGL(self->compositor)) {
-    fl_compositor_opengl_present_to_subsurface(
-        FL_COMPOSITOR_OPENGL(self->compositor), subsurface_egl);
-  }
+// Hold the selected destination across composition and submission. The GTK
+// thread can replace its own reference during a scale change.
+static FlSubsurfaceEGL* ref_subsurface(FlView* self) {
+  g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&self->subsurface_mutex);
+  return self->subsurface_egl != nullptr
+             ? FL_SUBSURFACE_EGL(g_object_ref(self->subsurface_egl))
+             : nullptr;
 }
 
 static gboolean retry_native_texture_cb(gpointer user_data);
@@ -211,6 +206,40 @@ static void schedule_native_texture_retry(FlView* self) {
     self->native_texture_retry_source_id =
         g_timeout_add_full(G_PRIORITY_DEFAULT, 16, retry_native_texture_cb,
                            g_object_ref(self), g_object_unref);
+  }
+}
+
+// Imports the composited frame into the context used by the GTK widget.
+static void publish_gtk_texture(FlView* self, size_t width, size_t height) {
+  g_autoptr(GdkTexture) texture = nullptr;
+  FlGdkSurface* surface =
+      fl_gtk_widget_get_surface(GTK_WIDGET(self->render_area));
+  if (surface != nullptr) {
+    GdkGLContext* old_gl_context = gdk_gl_context_get_current();
+    if (self->render_context != nullptr) {
+      gdk_gl_context_make_current(self->render_context);
+    }
+
+    texture = fl_compositor_acquire_texture(
+        self->compositor, surface, self->render_context, width, height,
+        !self->sized_to_content || !self->native_texture_ready);
+
+    if (gdk_gl_context_get_current() != old_gl_context) {
+      gdk_gl_context_clear_current();
+    }
+
+    if (texture != nullptr && FL_IS_RENDER_TEXTURE_GTK4(self->render_area)) {
+      fl_render_texture_gtk4_set_flip_y(
+          FL_RENDER_TEXTURE_GTK4(self->render_area),
+          self->render_context != nullptr);
+      fl_render_texture_gtk4_set_texture(
+          FL_RENDER_TEXTURE_GTK4(self->render_area), texture);
+      self->native_texture_ready = TRUE;
+      fl_view_notify_first_frame(self);
+      fl_view_gtk4_cancel_native_texture_retry(self);
+    } else if (!self->native_texture_ready) {
+      schedule_native_texture_retry(self);
+    }
   }
 }
 
@@ -272,36 +301,7 @@ static gboolean redraw_cb(gpointer user_data) {
     }
   }
 
-  g_autoptr(GdkTexture) texture = nullptr;
-  FlGdkSurface* surface =
-      fl_gtk_widget_get_surface(GTK_WIDGET(self->render_area));
-  if (surface != nullptr) {
-    GdkGLContext* old_gl_context = gdk_gl_context_get_current();
-    if (self->render_context != nullptr) {
-      gdk_gl_context_make_current(self->render_context);
-    }
-
-    texture = fl_compositor_acquire_texture(
-        self->compositor, surface, self->render_context, width, height,
-        !self->sized_to_content || !self->native_texture_ready);
-
-    if (gdk_gl_context_get_current() != old_gl_context) {
-      gdk_gl_context_clear_current();
-    }
-
-    if (texture != nullptr && FL_IS_RENDER_TEXTURE_GTK4(self->render_area)) {
-      fl_render_texture_gtk4_set_flip_y(
-          FL_RENDER_TEXTURE_GTK4(self->render_area),
-          self->render_context != nullptr);
-      fl_render_texture_gtk4_set_texture(
-          FL_RENDER_TEXTURE_GTK4(self->render_area), texture);
-      self->native_texture_ready = TRUE;
-      fl_view_notify_first_frame(self);
-      fl_view_gtk4_cancel_native_texture_retry(self);
-    } else if (!self->native_texture_ready) {
-      schedule_native_texture_retry(self);
-    }
-  }
+  publish_gtk_texture(self, width, height);
 
   return G_SOURCE_REMOVE;
 }
@@ -328,10 +328,14 @@ void fl_view_gtk4_present_layers(FlView* self,
     return;
   }
 
-  fl_compositor_present_layers(self->compositor, layers, layers_count);
-
-  if (self->subsurface_requested) {
-    present_subsurface(self);
+  g_autoptr(FlSubsurfaceEGL) subsurface =
+      self->subsurface_requested ? ref_subsurface(self) : nullptr;
+  if (subsurface != nullptr) {
+    fl_compositor_opengl_present_to_subsurface(
+        FL_COMPOSITOR_OPENGL(self->compositor), subsurface, layers,
+        layers_count);
+  } else {
+    fl_compositor_present_layers(self->compositor, layers, layers_count);
   }
 
   // Perform the redraw in the GTK thread.

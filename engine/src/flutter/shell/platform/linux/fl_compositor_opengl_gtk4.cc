@@ -573,6 +573,11 @@ GdkTexture* fl_compositor_opengl_acquire_texture(FlCompositor* compositor,
     g_mutex_lock(&self->frame_mutex);
   }
 
+  if (self->frame_for_subsurface) {
+    g_mutex_unlock(&self->frame_mutex);
+    return nullptr;
+  }
+
   GdkTexture* texture = nullptr;
   if (fl_framebuffer_get_shareable(self->framebuffer)) {
     if (self->dmabuf_published_snapshot >= 0) {

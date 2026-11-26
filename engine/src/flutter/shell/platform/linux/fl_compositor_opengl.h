@@ -45,12 +45,14 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlTaskRunner* task_runner,
                                              FlOpenGLManager* opengl_manager,
                                              gboolean shareable);
 
-// Presents the most recently composited frame directly to a Wayland
+// Composites the supplied layers and presents them directly to a Wayland
 // subsurface. This must only be used with an EGL context that shares the
 // engine's OpenGL resources.
 gboolean fl_compositor_opengl_present_to_subsurface(
     FlCompositorOpenGL* compositor,
-    FlSubsurfaceEGL* subsurface_egl);
+    FlSubsurfaceEGL* subsurface_egl,
+    const FlutterLayer** layers,
+    size_t layers_count);
 
 G_END_DECLS
 

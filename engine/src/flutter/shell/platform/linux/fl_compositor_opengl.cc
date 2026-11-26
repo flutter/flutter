@@ -278,11 +278,12 @@ static void paint_readback_framebuffer(FlCompositorOpenGL* self,
   glBindTexture(GL_TEXTURE_2D, saved_texture_binding);
 }
 
-static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
-                                                    const FlutterLayer** layers,
-                                                    size_t layers_count) {
-  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
-
+// Both destinations use the same layer composition and GL state restoration.
+template <typename FinishFrame>
+static gboolean composite_frame(FlCompositorOpenGL* self,
+                                const FlutterLayer** layers,
+                                size_t layers_count,
+                                FinishFrame finish_frame) {
   g_mutex_lock(&self->frame_mutex);
   if (layers_count == 0) {
     g_mutex_unlock(&self->frame_mutex);
@@ -421,11 +422,7 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
     }
   }
   glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-#if FLUTTER_LINUX_GTK4
-  fl_compositor_opengl_gtk4_finish_present(self, general_format, width, height);
-#else
-  glFlush();
-#endif
+  finish_frame(general_format, width, height);
 
   glDeleteVertexArrays(1, &vao);
 
@@ -462,6 +459,23 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
   fl_task_runner_stop_wait(self->task_runner);
 
   return TRUE;
+}
+
+static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
+                                                    const FlutterLayer** layers,
+                                                    size_t layers_count) {
+  auto* self = FL_COMPOSITOR_OPENGL(compositor);
+  return composite_frame(self, layers, layers_count,
+                         [self](GLint format, size_t width, size_t height) {
+#if FLUTTER_LINUX_GTK4
+                           self->frame_for_subsurface = FALSE;
+                           fl_compositor_opengl_gtk4_finish_present(
+                               self, format, width, height);
+#else
+    (void)self;
+    glFlush();
+#endif
+                         });
 }
 
 #if !FLUTTER_LINUX_GTK4
@@ -717,30 +731,35 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlTaskRunner* task_runner,
 #if FLUTTER_LINUX_GTK4
 gboolean fl_compositor_opengl_present_to_subsurface(
     FlCompositorOpenGL* self,
-    FlSubsurfaceEGL* subsurface_egl) {
-  g_return_val_if_fail(FL_IS_COMPOSITOR_OPENGL(self), FALSE);
+    FlSubsurfaceEGL* subsurface_egl,
+    const FlutterLayer** layers,
+    size_t layers_count) {
   g_return_val_if_fail(FL_IS_SUBSURFACE_EGL(subsurface_egl), FALSE);
+  auto submit = [self, subsurface_egl]() {
+    self->frame_for_subsurface = TRUE;
+    g_autoptr(FlGLFence) fence = nullptr;
+    if (self->can_fence) {
+      fence = fl_gl_fence_new(self->opengl_manager);
+    } else {
+      // The subsurface samples this texture from another EGL context.
+      glFinish();
+    }
 
-  g_mutex_lock(&self->frame_mutex);
-  if (self->framebuffer == nullptr) {
-    g_mutex_unlock(&self->frame_mutex);
-    return FALSE;
+    fl_subsurface_egl_present(
+        subsurface_egl, fl_framebuffer_get_texture_id(self->framebuffer),
+        fl_framebuffer_get_width(self->framebuffer),
+        fl_framebuffer_get_height(self->framebuffer), fence);
+  };
+  // Empty layer lists retain the previous frame.
+  if (layers_count == 0) {
+    g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&self->frame_mutex);
+    if (self->framebuffer != nullptr) {
+      submit();
+    }
+    return TRUE;
   }
-
-  g_autoptr(FlGLFence) fence = nullptr;
-  if (self->can_fence) {
-    fence = fl_gl_fence_new(self->opengl_manager);
-  } else {
-    // The subsurface samples this texture from another EGL context.
-    glFinish();
-  }
-
-  fl_subsurface_egl_present(
-      subsurface_egl, fl_framebuffer_get_texture_id(self->framebuffer),
-      fl_framebuffer_get_width(self->framebuffer),
-      fl_framebuffer_get_height(self->framebuffer), fence);
-  g_mutex_unlock(&self->frame_mutex);
-  return TRUE;
+  return composite_frame(self, layers, layers_count,
+                         [&](GLint, size_t, size_t) { submit(); });
 }
 #endif
 
