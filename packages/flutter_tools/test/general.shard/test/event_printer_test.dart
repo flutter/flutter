@@ -19,7 +19,7 @@ void main() {
       eventPrinter = EventPrinter(out: output);
     });
 
-    testWithoutContext('handles a null parent', () {
+    test('handles a null parent', () {
       final device = FakeDevice();
 
       expect(() => eventPrinter.handleFinishedTest(device), returnsNormally);
@@ -29,7 +29,7 @@ void main() {
     });
 
     group('handleStartedDevice', () {
-      testWithoutContext('with non-null VM Service', () {
+      test('with non-null VM Service', () {
         eventPrinter.handleStartedDevice(vmServiceUri);
 
         expect(
@@ -40,7 +40,7 @@ void main() {
         );
       });
 
-      testWithoutContext('with null VM Service', () {
+      test('with null VM Service', () {
         eventPrinter.handleStartedDevice(null);
 
         expect(

@@ -595,7 +595,11 @@ Future<void> encodeImageProducesExternalUint8List() async {
 }
 
 @pragma('vm:external-name', 'EncodeImage')
-external void _encodeImage(Image i, int format, void Function(Uint8List result, String? error));
+external void _encodeImage(
+  Image i,
+  int format,
+  void Function(Uint8List result, String? error) callback,
+);
 @pragma('vm:external-name', 'ValidateExternal')
 external void _validateExternal(Uint8List result);
 @pragma('vm:external-name', 'ValidateError')

@@ -11,7 +11,6 @@ import 'package:meta/meta.dart' show visibleForTesting;
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/common.dart';
-import 'base/context.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/utils.dart';
@@ -47,8 +46,7 @@ final kVMServiceMessageRegExp = RegExp(
   r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)',
 );
 
-/// Override `WebSocketConnector` in [context] to use a different constructor
-/// for [io.WebSocket]s (used by tests).
+/// A function that opens a [io.WebSocket] connection to [url].
 typedef WebSocketConnector = Future<io.WebSocket> Function(
   String url, {
   io.CompressionOptions compression,
@@ -100,6 +98,7 @@ Future<io.WebSocket> _defaultOpenChannel(
   String url, {
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   required Logger logger,
+  WebSocketConnector? webSocketConnector,
 }) async {
   var delay = const Duration(milliseconds: 100);
   var attempts = 0;
@@ -138,7 +137,7 @@ Future<io.WebSocket> _defaultOpenChannel(
   }
 
   final WebSocketConnector constructor =
-      context.get<WebSocketConnector>() ??
+      webSocketConnector ??
       (
         String url, {
         io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
@@ -156,8 +155,7 @@ Future<io.WebSocket> _defaultOpenChannel(
   return socket;
 }
 
-/// Override `VMServiceConnector` in [context] to return a different
-/// [vm_service.VmService] from [connectToVmService] (used by tests).
+/// A function that connects to a Dart VM Service at [httpUri].
 typedef VMServiceConnector = Future<FlutterVmService> Function(
   Uri httpUri, {
   ReloadSources? reloadSources,
@@ -352,32 +350,47 @@ Future<FlutterVmService> connectToVmService(
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   Device? device,
   required Logger logger,
+  @visibleForTesting WebSocketConnector? webSocketConnector,
 }) async {
-  final VMServiceConnector connector = context.get<VMServiceConnector>() ?? _connect;
-  return connector(
-    httpUri,
+  final Uri wsUri = httpUri.replace(scheme: 'ws', path: urlContext.join(httpUri.path, 'ws'));
+  final vm_service.VmService delegateService = await createVmServiceDelegate(
+    wsUri,
+    compression: compression,
+    logger: logger,
+    webSocketConnector: webSocketConnector,
+  );
+
+  final vm_service.VmService service = await setUpVmService(
     reloadSources: reloadSources,
     restart: restart,
     compileExpression: compileExpression,
-    compression: compression,
     device: device,
     flutterProject: flutterProject,
     flutterVersion: flutterVersion,
     printStructuredErrorLogMethod: printStructuredErrorLogMethod,
-    logger: logger,
+    vmService: delegateService,
   );
+
+  // This call is to ensure we are able to establish a connection instead of
+  // keeping on trucking and failing farther down the process.
+  await delegateService.getVersion();
+  return FlutterVmService(service, httpAddress: httpUri, wsAddress: wsUri);
 }
 
 Future<vm_service.VmService> createVmServiceDelegate(
   Uri wsUri, {
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   required Logger logger,
+  @visibleForTesting WebSocketConnector? webSocketConnector,
 }) async {
-  final io.WebSocket channel = await _openChannel(
-    wsUri.toString(),
-    compression: compression,
-    logger: logger,
-  );
+  final io.WebSocket channel = webSocketConnector != null
+      ? await _defaultOpenChannel(
+          wsUri.toString(),
+          compression: compression,
+          logger: logger,
+          webSocketConnector: webSocketConnector,
+        )
+      : await _openChannel(wsUri.toString(), compression: compression, logger: logger);
   // Guard against unhandled socket errors on the WebSocket's `done` future.
   // When a socket reset or low-level connection reset occurs, `channel.done`
   // can complete with an unhandled SocketException or WebSocketException.
@@ -428,42 +441,6 @@ Future<vm_service.VmService> createVmServiceDelegate(
       }
     },
   );
-}
-
-Future<FlutterVmService> _connect(
-  Uri httpUri, {
-  ReloadSources? reloadSources,
-  Restart? restart,
-  CompileExpression? compileExpression,
-  FlutterProject? flutterProject,
-  FlutterVersion? flutterVersion,
-  PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-  io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
-  Device? device,
-  required Logger logger,
-}) async {
-  final Uri wsUri = httpUri.replace(scheme: 'ws', path: urlContext.join(httpUri.path, 'ws'));
-  final vm_service.VmService delegateService = await createVmServiceDelegate(
-    wsUri,
-    compression: compression,
-    logger: logger,
-  );
-
-  final vm_service.VmService service = await setUpVmService(
-    reloadSources: reloadSources,
-    restart: restart,
-    compileExpression: compileExpression,
-    device: device,
-    flutterProject: flutterProject,
-    flutterVersion: flutterVersion,
-    printStructuredErrorLogMethod: printStructuredErrorLogMethod,
-    vmService: delegateService,
-  );
-
-  // This call is to ensure we are able to establish a connection instead of
-  // keeping on trucking and failing farther down the process.
-  await delegateService.getVersion();
-  return FlutterVmService(service, httpAddress: httpUri, wsAddress: wsUri);
 }
 
 String _validateRpcStringParam(String methodName, Map<String, Object?> params, String paramName) {

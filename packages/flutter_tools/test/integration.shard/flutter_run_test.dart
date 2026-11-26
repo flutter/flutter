@@ -30,7 +30,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('flutter run reports an error if an invalid device is supplied', () async {
+  test('flutter run reports an error if an invalid device is supplied', () async {
     // This test forces flutter to check for all possible devices to catch issues
     // like https://github.com/flutter/flutter/issues/21418 which were skipped
     // over because other integration tests run using flutter-tester which short-cuts
@@ -52,19 +52,19 @@ void main() {
     }
   });
 
-  testWithoutContext('flutter run outputs DTD and DevTools events', () async {
+  test('flutter run outputs DTD and DevTools events', () async {
     await flutter.run(startPaused: true, withDebugger: true);
     expect(flutter.devToolsUri, isNotNull);
     expect(flutter.dtdUri, isNotNull);
   });
 
-  testWithoutContext('flutter run does not output DTD and DevTools events', () async {
+  test('flutter run does not output DTD and DevTools events', () async {
     await flutter.run(startPaused: true, withDebugger: true, noDevtools: true);
     expect(flutter.devToolsUri, isNull);
     expect(flutter.dtdUri, isNull);
   });
 
-  testWithoutContext('sets activeDevToolsServerAddress extension', () async {
+  test('sets activeDevToolsServerAddress extension', () async {
     await flutter.run(
       startPaused: true,
       withDebugger: true,
@@ -85,7 +85,7 @@ void main() {
     );
   });
 
-  testWithoutContext('reports deviceId and mode in app.start event', () async {
+  test('reports deviceId and mode in app.start event', () async {
     await flutter.run();
     expect(flutter.currentRunningDeviceId, 'flutter-tester');
     expect(flutter.currentRunningMode, 'debug');

@@ -15,7 +15,7 @@ import '../../src/common.dart';
 
 void main() {
   group('UISceneMigration', () {
-    testWithoutContext('fails if Info.plist is not found', () async {
+    test('fails if Info.plist is not found', () async {
       final logger = BufferLogger.test();
       final fileSystem = MemoryFileSystem.test();
       final plistParser = FakePlistParser();
@@ -40,7 +40,7 @@ void main() {
       );
     });
 
-    testWithoutContext('skips if already migrated', () async {
+    test('skips if already migrated', () async {
       final logger = BufferLogger.test();
       final fileSystem = MemoryFileSystem.test();
       final plistParser = FakePlistParser();
@@ -57,7 +57,7 @@ void main() {
       expect(logger.errorText, isEmpty);
     });
 
-    testWithoutContext('skips if feature disabled', () async {
+    test('skips if feature disabled', () async {
       final logger = BufferLogger.test();
       final fileSystem = MemoryFileSystem.test();
       final plistParser = FakePlistParser();
@@ -74,7 +74,7 @@ void main() {
       expect(logger.errorText, isEmpty);
     });
 
-    testWithoutContext('Fails if unable to find storyboard', () async {
+    test('Fails if unable to find storyboard', () async {
       final logger = BufferLogger.test();
       final fileSystem = MemoryFileSystem.test();
       final plistParser = FakePlistParser(storyboardName: null);
@@ -98,7 +98,7 @@ void main() {
       );
     });
 
-    testWithoutContext('fails if storyboard does not match default', () async {
+    test('fails if storyboard does not match default', () async {
       final logger = BufferLogger.test();
       final fileSystem = MemoryFileSystem.test();
       final plistParser = FakePlistParser(storyboardName: 'notMain');
@@ -123,7 +123,7 @@ void main() {
     });
 
     group('for Swift', () {
-      testWithoutContext('fails if AppDelegate.swift is not exact match', () async {
+      test('fails if AppDelegate.swift is not exact match', () async {
         final logger = BufferLogger.test();
         final fileSystem = MemoryFileSystem.test();
         final plistParser = FakePlistParser();
@@ -154,7 +154,7 @@ void main() {
         );
       });
 
-      testWithoutContext('replaces if AppDelegate.swift is exact match', () async {
+      test('replaces if AppDelegate.swift is exact match', () async {
         final logger = BufferLogger.test();
         final fileSystem = MemoryFileSystem.test();
         final plistParser = FakePlistParser();
@@ -180,7 +180,7 @@ void main() {
     });
 
     group('for ObjC', () {
-      testWithoutContext('fails if AppDelegate.h is not exact match', () async {
+      test('fails if AppDelegate.h is not exact match', () async {
         final logger = BufferLogger.test();
         final fileSystem = MemoryFileSystem.test();
         final plistParser = FakePlistParser();
@@ -212,7 +212,7 @@ void main() {
         );
       });
 
-      testWithoutContext('fails if AppDelegate.m is not exact match', () async {
+      test('fails if AppDelegate.m is not exact match', () async {
         final logger = BufferLogger.test();
         final fileSystem = MemoryFileSystem.test();
         final plistParser = FakePlistParser();
@@ -244,7 +244,7 @@ void main() {
         );
       });
 
-      testWithoutContext('replaces if AppDelegate.h and AppDelegate.m is exact match', () async {
+      test('replaces if AppDelegate.h and AppDelegate.m is exact match', () async {
         final logger = BufferLogger.test();
         final fileSystem = MemoryFileSystem.test();
         final plistParser = FakePlistParser();
@@ -280,7 +280,7 @@ void main() {
       });
     });
 
-    testWithoutContext("fails if can't insert into Info.plist", () async {
+    test("fails if can't insert into Info.plist", () async {
       final logger = BufferLogger.test();
       final fileSystem = MemoryFileSystem.test();
       final plistParser = FakePlistParser(insertKeySucceeds: false);
