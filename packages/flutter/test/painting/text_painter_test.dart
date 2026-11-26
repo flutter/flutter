@@ -2206,10 +2206,20 @@ void main() {
               ellipsis: '\u2026',
             )..layout(maxWidth: maxWidth);
 
-            final ui.LineMetrics line = painter.computeLineMetrics().single;
+            final List<ui.LineMetrics> lines = painter.computeLineMetrics();
+            final ui.LineMetrics line = lines.single;
             expect(painter.width, 40, reason: '$direction $align maxWidth=$maxWidth');
             expect(line.width, 30, reason: '$direction $align maxWidth=$maxWidth');
             expect(line.left, 0, reason: '$direction $align maxWidth=$maxWidth');
+
+            // Repeated layout with the same maxWidth must hit the layout cache
+            // (including infinite maxWidth for non-left-aligned/RTL text).
+            painter.layout(maxWidth: maxWidth);
+            expect(
+              identical(painter.computeLineMetrics(), lines),
+              isTrue,
+              reason: '$direction $align maxWidth=$maxWidth cache hit',
+            );
             painter.dispose();
           }
         }
@@ -2235,6 +2245,20 @@ void main() {
         painter.layout();
         expect(painter.width, 40, reason: '$direction $align');
         expect(painter.computeLineMetrics().single.width, 30, reason: '$direction $align');
+
+        // Repeated infinite layout hits the cache even after a finite->infinite transition.
+        final List<ui.LineMetrics> cachedLines = painter.computeLineMetrics();
+        painter.layout();
+        expect(identical(painter.computeLineMetrics(), cachedLines), isTrue);
+
+        // Infinite minWidth -> finite minWidth still re-computes layout, then caches again.
+        painter.layout(minWidth: double.infinity);
+        expect(painter.width, double.infinity);
+        painter.layout();
+        expect(painter.width, 40);
+        final List<ui.LineMetrics> postInfLines = painter.computeLineMetrics();
+        painter.layout();
+        expect(identical(painter.computeLineMetrics(), postInfLines), isTrue);
         painter.dispose();
       }
     });

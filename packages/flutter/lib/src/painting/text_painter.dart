@@ -434,15 +434,21 @@ class _TextPainterLayoutCacheWithOffset {
     this.layout,
     this.textAlignment,
     this.layoutMaxWidth,
-    this.contentWidth,
-  ) : assert(textAlignment >= 0.0 && textAlignment <= 1.0),
-      assert(!layoutMaxWidth.isNaN),
-      assert(!contentWidth.isNaN);
+    this.contentWidth, {
+    this.hasInfiniteMaxWidth = false,
+  }) : assert(textAlignment >= 0.0 && textAlignment <= 1.0),
+       assert(!layoutMaxWidth.isNaN),
+       assert(!contentWidth.isNaN);
 
   final _TextLayout layout;
 
   // The input width used to lay out the paragraph.
   final double layoutMaxWidth;
+
+  // Whether the `layout` call that produced this cache had an infinite
+  // `maxWidth` (even if the paragraph was re-laid out at a finite width to
+  // avoid an infinite paint offset).
+  final bool hasInfiniteMaxWidth;
 
   // The content width the text painter should report in TextPainter.width.
   // This is also used to compute `paintOffset`.
@@ -511,6 +517,7 @@ class _TextPainterLayoutCacheWithOffset {
         maxWidth ==
             layoutMaxWidth // Same input max width so relayout is unnecessary.
             ||
+        (hasInfiniteMaxWidth && maxWidth.isInfinite) ||
         (!layout._mayEllipsize &&
             (paragraph.width - maxIntrinsicWidth) > -precisionErrorTolerance &&
             (maxWidth - maxIntrinsicWidth) > -precisionErrorTolerance);
@@ -1334,6 +1341,7 @@ class TextPainter {
         paintOffsetAlignment,
         newInputWidth,
         contentWidth,
+        hasInfiniteMaxWidth: true,
       );
     } else {
       newLayoutCache = _TextPainterLayoutCacheWithOffset(
@@ -1341,6 +1349,7 @@ class TextPainter {
         paintOffsetAlignment,
         layoutMaxWidth,
         contentWidth,
+        hasInfiniteMaxWidth: maxWidth.isInfinite,
       );
     }
     _layoutCache = newLayoutCache;
