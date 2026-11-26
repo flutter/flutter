@@ -39,7 +39,7 @@ void main() {
     await restoreFlutterToolsSnapshot();
   });
 
-  testWithoutContext('generated plugin registrant passes analysis', () async {
+  test('generated plugin registrant passes analysis', () async {
     await _createProject(projectDir, <String>[]);
     // We need a dependency so the plugin registrant is not completely empty.
     await _editPubspecFile(
@@ -74,7 +74,7 @@ void main() {
     expect(contents, contains('registrar.registerMessageHandler();'));
   });
 
-  testWithoutContext('generated plugin registrant passes analysis with null safety', () async {
+  test('generated plugin registrant passes analysis with null safety', () async {
     await _createProject(projectDir, <String>[]);
     // We need a dependency so the plugin registrant is not completely empty.
     await _editPubspecFile(
@@ -117,7 +117,7 @@ void main() {
     expect(contents, contains('registrar.registerMessageHandler();'));
   });
 
-  testWithoutContext('(no-op) generated plugin registrant passes analysis', () async {
+  test('(no-op) generated plugin registrant passes analysis', () async {
     await _createProject(projectDir, <String>[]);
     // No dependencies on web plugins this time!
     await _buildWebProject(projectDir);
@@ -141,7 +141,7 @@ void main() {
   });
 
   // See: https://github.com/dart-lang/dart-services/pull/874
-  testWithoutContext('generated plugin registrant for dartpad is created on pub get', () async {
+  test('generated plugin registrant for dartpad is created on pub get', () async {
     await _createProject(projectDir, <String>[]);
     await _editPubspecFile(
       projectDir,
@@ -163,7 +163,7 @@ void main() {
     expect(buildDir, isNot(exists));
   });
 
-  testWithoutContext('generated plugin registrant ignores lines longer than 80 chars', () async {
+  test('generated plugin registrant ignores lines longer than 80 chars', () async {
     await _createProject(projectDir, <String>[]);
     await _addAnalysisOptions(projectDir, <String>['lines_longer_than_80_chars']);
     await _createProject(tempDir.childDirectory('test_plugin'), <String>[

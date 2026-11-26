@@ -324,6 +324,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.testAssetDirectory,
     this.testTimeRecorder,
     this.updateGoldens,
+    @visibleForTesting this._vmServiceConnector = connectToVmService,
     this.watcher,
   }) {
     _testGoldenComparator = TestGoldenComparator(
@@ -344,6 +345,7 @@ class FlutterPlatform extends PlatformPlugin {
   final ApplicationPackageFactory? _applicationPackageFactory;
   final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
+  final VMServiceConnector _vmServiceConnector;
 
   final String flutterTesterBinPath;
   final DebuggingOptions debuggingOptions;
@@ -496,6 +498,7 @@ class FlutterPlatform extends PlatformPlugin {
         userIdentifier: integrationTestUserIdentifier,
         compileExpression: _compileExpressionService,
         toolContext: _toolContext,
+        vmServiceConnector: _vmServiceConnector,
       );
     }
     return FlutterTesterTestDevice(
@@ -535,7 +538,7 @@ class FlutterPlatform extends PlatformPlugin {
     final ToolContext(:FlutterVersion flutterVersion, :Logger logger, :Platform platform) =
         _toolContext;
     final goldensBaseUri = Uri.file(testPath, windows: platform.isWindows);
-    final FlutterVmService vmService = await connectToVmService(
+    final FlutterVmService vmService = await _vmServiceConnector(
       uri,
       flutterVersion: flutterVersion,
       logger: logger,

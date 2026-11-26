@@ -290,7 +290,7 @@ void main() {
       );
     });
 
-    testWithoutContext('updates packages - only runs pub get', () async {
+    test('updates packages - only runs pub get', () async {
       final command = UpdatePackagesCommand(
         toolContext: toolContext,
         httpClientFactory: FakeHttpClient.any,
@@ -309,7 +309,7 @@ void main() {
       expect(pub.recordedPubGets[2].enforceLockfile, isFalse);
     });
 
-    testWithoutContext('updates packages --offline passes offline flag to pub get', () async {
+    test('updates packages --offline passes offline flag to pub get', () async {
       final command = UpdatePackagesCommand(
         toolContext: toolContext,
         httpClientFactory: FakeHttpClient.any,
@@ -328,7 +328,7 @@ void main() {
       expect(pub.recordedPubGets[2].enforceLockfile, isFalse);
     });
 
-    testWithoutContext('--force-upgrade updates packages', () async {
+    test('--force-upgrade updates packages', () async {
       expect(
         Pubspec.parse(kFlutterToolsPubspecYaml).dependencies['test_api'],
         HostedDependency(version: VersionConstraint.parse('0.7.4')),
@@ -370,7 +370,7 @@ void main() {
       );
     });
 
-    testWithoutContext('--cherry-pick-package', () async {
+    test('--cherry-pick-package', () async {
       final command = UpdatePackagesCommand(
         toolContext: toolContext,
         httpClientFactory: FakeHttpClient.any,
@@ -389,7 +389,7 @@ void main() {
       );
     });
 
-    testWithoutContext('--cherry-pick-package with caret', () async {
+    test('--cherry-pick-package with caret', () async {
       final command = UpdatePackagesCommand(
         toolContext: toolContext,
         httpClientFactory: FakeHttpClient.any,
@@ -408,7 +408,7 @@ void main() {
       );
     });
 
-    testWithoutContext('--cherry-pick-package multiple', () async {
+    test('--cherry-pick-package multiple', () async {
       final command = UpdatePackagesCommand(
         toolContext: toolContext,
         httpClientFactory: FakeHttpClient.any,
@@ -428,7 +428,7 @@ void main() {
       );
     });
 
-    testWithoutContext('--force-upgrade', () async {
+    test('--force-upgrade', () async {
       final command = UpdatePackagesCommand(
         toolContext: toolContext,
         httpClientFactory: FakeHttpClient.any,
@@ -438,7 +438,7 @@ void main() {
       await createTestCommandRunner(command).run(<String>['update-packages', '--force-upgrade']);
     });
 
-    testWithoutContext(
+    test(
       '--force-upgrade succeeds when flutter_tools has workspace subpackages and path dependencies',
       () async {
         const subpackagePubspecYaml = r'''

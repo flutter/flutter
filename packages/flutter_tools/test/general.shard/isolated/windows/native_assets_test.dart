@@ -25,7 +25,7 @@ import 'package:flutter_tools/src/isolated/native_assets/windows/native_assets.d
 import 'package:flutter_tools/src/windows/visual_studio.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 import '../fake_native_assets_build_runner.dart';
@@ -71,112 +71,108 @@ void main() {
         continue;
       }
 
-      testUsingContext(
-        'build with assets $buildMode$testName',
-        overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
-        () async {
-          writePackageConfigFiles(directory: environment.projectDir, mainLibName: 'my_app');
-          final Uri nonFlutterTesterAssetUri = environment.buildDir
-              .childFile(InstallCodeAssets.nativeAssetsFilename)
-              .uri;
-          final File dylibAfterCompiling = fileSystem.file('bar.dll');
-          // The mock doesn't create the file, so create it here.
-          await dylibAfterCompiling.create();
+      test('build with assets $buildMode$testName', () async {
+        writePackageConfigFiles(directory: environment.projectDir, mainLibName: 'my_app');
+        final Uri nonFlutterTesterAssetUri = environment.buildDir
+            .childFile(InstallCodeAssets.nativeAssetsFilename)
+            .uri;
+        final File dylibAfterCompiling = fileSystem.file('bar.dll');
+        // The mock doesn't create the file, so create it here.
+        await dylibAfterCompiling.create();
 
-          final codeAssets = <CodeAsset>[
-            CodeAsset(
-              package: 'bar',
-              name: 'bar.dart',
-              linkMode: DynamicLoadingBundled(),
-              file: dylibAfterCompiling.uri,
-            ),
-          ];
-          final buildRunner = FakeFlutterNativeAssetsBuildRunner(
-            packagesWithNativeAssetsResult: <String>['bar'],
-            buildResult: buildMode == BuildMode.debug
-                ? FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets)
-                : FakeFlutterNativeAssetsBuilderResult.fromAssets(
-                    codeAssetsForLinking: <String, List<CodeAsset>>{'package:bar': codeAssets},
-                  ),
-            linkResult: buildMode == BuildMode.debug
-                ? null
-                : FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
-          );
-          final environmentDefines = <String, String>{kBuildMode: buildMode.cliName};
-          final TargetPlatform targetPlatform = flutterTester
-              ? TargetPlatform.tester
-              : TargetPlatform.windows_x64;
-          final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
-            environmentDefines: environmentDefines,
-            targetPlatform: targetPlatform,
-            projectUri: projectUri,
-            fileSystem: fileSystem,
-            featureFlags: TestFeatureFlags(
-              isNativeAssetsEnabled: true,
-              isDartDataAssetsEnabled: true,
-            ),
-            logger: logger,
-            buildRunner: buildRunner,
-            buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
-            buildDataAssets: true,
-            recordedUsesFile: null,
-          );
-          final expectedDirectory = flutterTester ? code_assets.OS.current.toString() : 'windows';
-          final Uri nativeAssetsFileUri = flutterTester
-              ? projectUri.resolve('build/native_assets/flutter_test_native_assets.json')
-              : nonFlutterTesterAssetUri;
-          await installCodeAssets(
-            dartHookResult: dartHookResult,
-            environmentDefines: environmentDefines,
-            targetPlatform: targetPlatform,
-            projectUri: projectUri,
-            fileSystem: fileSystem,
-            logger: logger,
-            processManager: processManager,
-            nativeAssetsFileUri: nativeAssetsFileUri,
-            targetUri: projectUri.resolve(
-              '${getBuildDirectory(Config.test(), fileSystem)}/native_assets/windows/',
-            ),
-          );
-          final expectedOS = flutterTester ? OS.current.toString() : 'windows';
-          final expectedArch = flutterTester ? Architecture.current.toString() : 'x64';
-          expect(
-            logger.traceText,
-            stringContainsInOrder(<String>[
-              'Running build hooks for ${expectedOS}_$expectedArch.',
-              'Running build hooks for ${expectedOS}_$expectedArch done.',
-              if (buildMode == BuildMode.release) ...<String>[
-                'Running link hooks for ${expectedOS}_$expectedArch.',
-                'Running link hooks for ${expectedOS}_$expectedArch done.',
-              ],
-            ]),
-          );
-          expect(
-            await fileSystem.file(nativeAssetsFileUri).readAsString(),
-            stringContainsInOrder(<String>[
-              'package:bar/bar.dart',
-              if (flutterTester)
-                // Tests run on host system, so the have the full path on the system.
-                projectUri
-                    .resolve('build/native_assets/$expectedDirectory/bar.dll')
-                    .toFilePath()
-                    .replaceAll(r'\', r'\\') // Undo JSON string escaping.
-              else
-                // Apps are a bundle with the dylibs on their dlopen path.
-                'bar.dll',
-            ]),
-          );
-          expect(buildRunner.buildInvocations, 1);
-          expect(buildRunner.linkInvocations, buildMode == BuildMode.release ? 1 : 0);
-        },
-      );
+        final codeAssets = <CodeAsset>[
+          CodeAsset(
+            package: 'bar',
+            name: 'bar.dart',
+            linkMode: DynamicLoadingBundled(),
+            file: dylibAfterCompiling.uri,
+          ),
+        ];
+        final buildRunner = FakeFlutterNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <String>['bar'],
+          buildResult: buildMode == BuildMode.debug
+              ? FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets)
+              : FakeFlutterNativeAssetsBuilderResult.fromAssets(
+                  codeAssetsForLinking: <String, List<CodeAsset>>{'package:bar': codeAssets},
+                ),
+          linkResult: buildMode == BuildMode.debug
+              ? null
+              : FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
+        );
+        final environmentDefines = <String, String>{kBuildMode: buildMode.cliName};
+        final TargetPlatform targetPlatform = flutterTester
+            ? TargetPlatform.tester
+            : TargetPlatform.windows_x64;
+        final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
+          environmentDefines: environmentDefines,
+          targetPlatform: targetPlatform,
+          projectUri: projectUri,
+          fileSystem: fileSystem,
+          featureFlags: TestFeatureFlags(
+            isNativeAssetsEnabled: true,
+            isDartDataAssetsEnabled: true,
+          ),
+          logger: logger,
+          buildRunner: buildRunner,
+          buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
+          buildDataAssets: true,
+          recordedUsesFile: null,
+        );
+        final expectedDirectory = flutterTester ? code_assets.OS.current.toString() : 'windows';
+        final Uri nativeAssetsFileUri = flutterTester
+            ? projectUri.resolve('build/native_assets/flutter_test_native_assets.json')
+            : nonFlutterTesterAssetUri;
+        await installCodeAssets(
+          dartHookResult: dartHookResult,
+          environmentDefines: environmentDefines,
+          targetPlatform: targetPlatform,
+          projectUri: projectUri,
+          fileSystem: fileSystem,
+          logger: logger,
+          processManager: processManager,
+          nativeAssetsFileUri: nativeAssetsFileUri,
+          targetUri: projectUri.resolve(
+            '${getBuildDirectory(Config.test(), fileSystem)}/native_assets/windows/',
+          ),
+        );
+        final expectedOS = flutterTester ? OS.current.toString() : 'windows';
+        final expectedArch = flutterTester ? Architecture.current.toString() : 'x64';
+        expect(
+          logger.traceText,
+          stringContainsInOrder(<String>[
+            'Running build hooks for ${expectedOS}_$expectedArch.',
+            'Running build hooks for ${expectedOS}_$expectedArch done.',
+            if (buildMode == BuildMode.release) ...<String>[
+              'Running link hooks for ${expectedOS}_$expectedArch.',
+              'Running link hooks for ${expectedOS}_$expectedArch done.',
+            ],
+          ]),
+        );
+        expect(
+          await fileSystem.file(nativeAssetsFileUri).readAsString(),
+          stringContainsInOrder(<String>[
+            'package:bar/bar.dart',
+            if (flutterTester)
+              // Tests run on host system, so the have the full path on the system.
+              projectUri
+                  .resolve('build/native_assets/$expectedDirectory/bar.dll')
+                  .toFilePath()
+                  .replaceAll(r'\', r'\\') // Undo JSON string escaping.
+            else
+              // Apps are a bundle with the dylibs on their dlopen path.
+              'bar.dll',
+          ]),
+        );
+        expect(buildRunner.buildInvocations, 1);
+        expect(buildRunner.linkInvocations, buildMode == BuildMode.release ? 1 : 0);
+      });
     }
   }
 
   // This logic is mocked in the other tests to avoid having test order
   // randomization causing issues with what processes are invoked.
   // Exercise the parsing of the process output in this separate test.
-  testWithoutContext('NativeAssetsBuildRunnerImpl.cCompilerConfig', () async {
+  test('NativeAssetsBuildRunnerImpl.cCompilerConfig', () async {
     final vswhereProcessManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <Pattern>[
@@ -293,11 +289,26 @@ void main() {
       environment: <String, String>{'PROGRAMFILES(X86)': r'C:\Program Files (x86)\'},
     );
 
-    testWithoutContext(
-      'returns null when Visual Studio is not found and throwIfNotFound is false',
-      () async {
-        final CCompilerConfig? result = await cCompilerConfigWindows(
-          throwIfNotFound: false,
+    test('returns null when Visual Studio is not found and throwIfNotFound is false', () async {
+      final CCompilerConfig? result = await cCompilerConfigWindows(
+        throwIfNotFound: false,
+        visualStudio: VisualStudio(
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            os: FakeOperatingSystemUtils(),
+            platform: windowsPlatform,
+            processManager: FakeProcessManager.any(),
+          ),
+        ),
+      );
+      expect(result, isNull);
+    });
+
+    test('throws ToolExit when Visual Studio is not found and throwIfNotFound is true', () async {
+      await expectLater(
+        cCompilerConfigWindows(
+          throwIfNotFound: true,
           visualStudio: VisualStudio(
             toolContext: FakeToolContext(
               fs: fileSystem,
@@ -307,33 +318,12 @@ void main() {
               processManager: FakeProcessManager.any(),
             ),
           ),
-        );
-        expect(result, isNull);
-      },
-    );
+        ),
+        throwsA(isA<ToolExit>()),
+      );
+    });
 
-    testWithoutContext(
-      'throws ToolExit when Visual Studio is not found and throwIfNotFound is true',
-      () async {
-        await expectLater(
-          cCompilerConfigWindows(
-            throwIfNotFound: true,
-            visualStudio: VisualStudio(
-              toolContext: FakeToolContext(
-                fs: fileSystem,
-                logger: logger,
-                os: FakeOperatingSystemUtils(),
-                platform: windowsPlatform,
-                processManager: FakeProcessManager.any(),
-              ),
-            ),
-          ),
-          throwsA(isA<ToolExit>()),
-        );
-      },
-    );
-
-    testWithoutContext(
+    test(
       'WindowsAssetTarget.setCCompilerConfig throws StateError when visualStudio is null',
       () async {
         final target = WindowsAssetTarget(
@@ -356,7 +346,7 @@ void main() {
       },
     );
 
-    testWithoutContext('runFlutterSpecificBuildHooks succeeds for data-only hooks on Windows when visualStudio is null', () async {
+    test('runFlutterSpecificBuildHooks succeeds for data-only hooks on Windows when visualStudio is null', () async {
       final (:DartHooksResult buildResult, results: _) = await runFlutterSpecificBuildHooks(
         androidSdkProvider: null,
         environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},

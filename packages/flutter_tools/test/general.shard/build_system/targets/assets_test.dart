@@ -62,7 +62,7 @@ flutter:
 ''');
   });
 
-  testWithoutContext('includes LICENSE file inputs in dependencies', () async {
+  test('includes LICENSE file inputs in dependencies', () async {
     writePackageConfigFiles(
       directory: fileSystem.currentDirectory,
       mainLibName: 'example',
@@ -86,7 +86,7 @@ flutter:
     );
   });
 
-  testWithoutContext('Copies files to correct asset directory', () async {
+  test('Copies files to correct asset directory', () async {
     writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
     await const CopyAssets().build(environment);
 
@@ -110,7 +110,7 @@ flutter:
   group(
     "Only copies assets with a flavor if the assets' flavor matches the flavor in the environment",
     () {
-      testWithoutContext('When the environment does not have a flavor defined', () async {
+      test('When the environment does not have a flavor defined', () async {
         fileSystem.file('pubspec.yaml')
           ..createSync()
           ..writeAsStringSync('''
@@ -160,7 +160,7 @@ flutter:
         );
       });
 
-      testWithoutContext('When the environment has a flavor defined', () async {
+      test('When the environment has a flavor defined', () async {
         environment.defines[kFlavor] = 'strawberry';
         fileSystem.file('pubspec.yaml')
           ..createSync()
@@ -210,7 +210,7 @@ flutter:
   );
 
   group("Only compiles shaders with a flavor if the shaders' flavor matches the flavor in the environment", () {
-    testWithoutContext('When the environment does not have a flavor defined', () async {
+    test('When the environment does not have a flavor defined', () async {
       // Re-create the environment with the correct process manager for this test.
       environment = Environment.test(
         fileSystem.currentDirectory,
@@ -260,7 +260,7 @@ flutter:
       );
     });
 
-    testWithoutContext('When the environment has a matching flavor defined', () async {
+    test('When the environment has a matching flavor defined', () async {
       // Re-create the environment with the correct process manager for this test.
       environment = Environment.test(
         fileSystem.currentDirectory,
@@ -314,7 +314,7 @@ flutter:
       );
     });
 
-    testWithoutContext('When the environment has a mismatching flavor defined', () async {
+    test('When the environment has a mismatching flavor defined', () async {
       // Re-create the environment with the correct process manager for this test.
       environment = Environment.test(
         fileSystem.currentDirectory,
@@ -366,7 +366,7 @@ flutter:
     });
   });
 
-  testWithoutContext('transforms assets declared with transformers', () async {
+  test('transforms assets declared with transformers', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <Pattern>[
@@ -440,7 +440,7 @@ flutter:
     expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/input.txt'), exists);
   });
 
-  testWithoutContext('transforms shaders declared with transformers before compilation', () async {
+  test('transforms shaders declared with transformers before compilation', () async {
     final artifacts = Artifacts.test();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
@@ -541,7 +541,7 @@ flutter:
     );
   });
 
-  testWithoutContext('exits tool if an asset transformation fails', () async {
+  test('exits tool if an asset transformation fails', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <Pattern>[
@@ -592,57 +592,55 @@ flutter:
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext(
-    'asset transformation, per each asset, uses unique paths for temporary files',
-    () async {
-      final inputFilePaths = <String>[];
-      final outputFilePaths = <String>[];
+  test('asset transformation, per each asset, uses unique paths for temporary files', () async {
+    final inputFilePaths = <String>[];
+    final outputFilePaths = <String>[];
 
-      final transformerCommand = FakeCommand(
-        command: <Pattern>[
-          Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
-          'run',
-          'my_capitalizer_transformer',
-          RegExp('--input=.*'),
-          RegExp('--output=.*'),
-        ],
-        onRun: (List<String> args) {
-          final ArgResults parsedArgs =
-              (ArgParser()
-                    ..addOption('input')
-                    ..addOption('output'))
-                  .parse(args);
+    final transformerCommand = FakeCommand(
+      command: <Pattern>[
+        Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
+        'run',
+        'my_capitalizer_transformer',
+        RegExp('--input=.*'),
+        RegExp('--output=.*'),
+      ],
+      onRun: (List<String> args) {
+        final ArgResults parsedArgs =
+            (ArgParser()
+                  ..addOption('input')
+                  ..addOption('output'))
+                .parse(args);
 
-          final input = parsedArgs['input'] as String;
-          final output = parsedArgs['output'] as String;
+        final input = parsedArgs['input'] as String;
+        final output = parsedArgs['output'] as String;
 
-          inputFilePaths.add(input);
-          outputFilePaths.add(output);
+        inputFilePaths.add(input);
+        outputFilePaths.add(output);
 
-          fileSystem.file(output)
-            ..createSync()
-            ..writeAsStringSync('foo');
-        },
-      );
+        fileSystem.file(output)
+          ..createSync()
+          ..writeAsStringSync('foo');
+      },
+    );
 
-      final processManager = FakeProcessManager.list(<FakeCommand>[
-        transformerCommand,
-        transformerCommand,
-      ]);
-      final environment = Environment.test(
-        fileSystem.currentDirectory,
-        processManager: processManager,
-        artifacts: Artifacts.test(),
-        featureFlags: TestFeatureFlags(),
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: FakePlatform(numberOfProcessors: 64),
-        defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
-      );
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      transformerCommand,
+      transformerCommand,
+    ]);
+    final environment = Environment.test(
+      fileSystem.currentDirectory,
+      processManager: processManager,
+      artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: FakePlatform(numberOfProcessors: 64),
+      defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+    );
 
-      fileSystem.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync('''
+    fileSystem.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync('''
   name: example
   flutter:
     assets:
@@ -651,23 +649,22 @@ flutter:
           - package: my_capitalizer_transformer
   ''');
 
-      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
+    writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
-      fileSystem.file('input.txt')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('abc');
+    fileSystem.file('input.txt')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('abc');
 
-      fileSystem.directory('2x').childFile('input.txt')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('def');
+    fileSystem.directory('2x').childFile('input.txt')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('def');
 
-      await const CopyAssets().build(environment);
+    await const CopyAssets().build(environment);
 
-      expect(inputFilePaths.toSet(), hasLength(inputFilePaths.length));
-      expect(outputFilePaths.toSet(), hasLength(outputFilePaths.length));
-      expect(processManager, hasNoRemainingExpectations);
-    },
-  );
+    expect(inputFilePaths.toSet(), hasLength(inputFilePaths.length));
+    expect(outputFilePaths.toSet(), hasLength(outputFilePaths.length));
+    expect(processManager, hasNoRemainingExpectations);
+  });
 
   group('platform-specific assets', () {
     /// All supported platforms that should be validated.
@@ -715,7 +712,7 @@ flutter:
 
     group('includes assets only for matching platform', () {
       for (final platform in kValidPluginPlatforms) {
-        testWithoutContext(platform, () async {
+        test(platform, () async {
           final TargetPlatform targetPlatform = targetFor(platform);
           final bool didInclude = await setupAndBuildPlatformAsset(platform, targetPlatform);
 
@@ -726,7 +723,7 @@ flutter:
 
     group('skips assets for non-matching platform', () {
       for (final platform in kValidPluginPlatforms) {
-        testWithoutContext(platform, () async {
+        test(platform, () async {
           final TargetPlatform targetPlatform = platform == 'android'
               ? TargetPlatform.ios
               : TargetPlatform.android;
@@ -744,7 +741,7 @@ flutter:
 
     group('includes assets for all platforms when no restriction is set', () {
       for (final platform in kValidPluginPlatforms) {
-        testWithoutContext(platform, () async {
+        test(platform, () async {
           final TargetPlatform targetPlatform = targetFor(platform);
           final bool didInclude = await setupAndBuildPlatformAsset('', targetPlatform);
 
@@ -760,7 +757,7 @@ flutter:
 
     group('includes assets only for declared multiple platforms', () {
       for (final platform in kValidPluginPlatforms) {
-        testWithoutContext(platform, () async {
+        test(platform, () async {
           const filePath = 'assets/test-multi.txt';
           final targetPlatforms = <String>['android', 'ios'];
 
@@ -797,7 +794,7 @@ flutter:
     });
   });
 
-  testWithoutContext('Uses processors~/2 to transform assets', () async {
+  test('Uses processors~/2 to transform assets', () async {
     const assetsToTransform = 5;
 
     final inputFilePaths = <String>[];
@@ -886,7 +883,7 @@ flutter:
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('Throws exception if pubspec contains missing files', () async {
+  test('Throws exception if pubspec contains missing files', () async {
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('''
@@ -905,7 +902,7 @@ flutter:
   group('dependency pubspec changes', () {
     for (final style in <FileSystemStyle>[FileSystemStyle.posix, FileSystemStyle.windows]) {
       final styleName = style == FileSystemStyle.windows ? 'windows' : 'posix';
-      testWithoutContext(
+      test(
         'rebuilds asset bundle when a dependency pubspec adds an asset between builds ($styleName)',
         () async {
           final testFileSystem = MemoryFileSystem.test(style: style);
@@ -1022,55 +1019,52 @@ flutter:
     }
   });
 
-  testWithoutContext(
-    'deduplicates mixed-case Windows input paths while preserving wildcard sentinels',
-    () async {
-      final winFs = MemoryFileSystem.test(style: FileSystemStyle.windows);
-      final winEnv = Environment.test(
-        winFs.currentDirectory,
-        processManager: FakeProcessManager.any(),
-        artifacts: Artifacts.test(),
-        featureFlags: TestFeatureFlags(),
-        fileSystem: winFs,
-        logger: logger,
-        platform: FakePlatform(operatingSystem: 'windows'),
-        defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
-      );
-      winFs.file(r'assets\wildcard\item.png').createSync(recursive: true);
-      winFs.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync('''
+  test('deduplicates mixed-case Windows input paths while preserving wildcard sentinels', () async {
+    final winFs = MemoryFileSystem.test(style: FileSystemStyle.windows);
+    final winEnv = Environment.test(
+      winFs.currentDirectory,
+      processManager: FakeProcessManager.any(),
+      artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
+      fileSystem: winFs,
+      logger: logger,
+      platform: FakePlatform(operatingSystem: 'windows'),
+      defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+    );
+    winFs.file(r'assets\wildcard\item.png').createSync(recursive: true);
+    winFs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync('''
 name: example
 flutter:
   assets:
     - assets/wildcard/
 ''');
-      writePackageConfigFiles(directory: winFs.currentDirectory, mainLibName: 'example');
+    writePackageConfigFiles(directory: winFs.currentDirectory, mainLibName: 'example');
 
-      final Directory outputDir = winEnv.buildDir.childDirectory('flutter_assets')
-        ..createSync(recursive: true);
-      final Depfile depfile = await copyAssets(
-        winEnv,
-        outputDir,
-        dartHookResult: DartHooksResult.empty(),
-        targetPlatform: TargetPlatform.windows_x64,
-        buildMode: BuildMode.debug,
-        additionalInputs: <File>[winFs.file(r'C:\PUBSPEC.YAML')],
-      );
+    final Directory outputDir = winEnv.buildDir.childDirectory('flutter_assets')
+      ..createSync(recursive: true);
+    final Depfile depfile = await copyAssets(
+      winEnv,
+      outputDir,
+      dartHookResult: DartHooksResult.empty(),
+      targetPlatform: TargetPlatform.windows_x64,
+      buildMode: BuildMode.debug,
+      additionalInputs: <File>[winFs.file(r'C:\PUBSPEC.YAML')],
+    );
 
-      final List<String> canonicalInputs = depfile.inputs
-          .map((File file) => winFs.path.canonicalize(file.path))
-          .toList();
-      expect(
-        canonicalInputs.where((String p) => p == winFs.path.canonicalize('pubspec.yaml')),
-        hasLength(1),
-      );
-      expect(
-        depfile.inputs.any((File file) => file.path.contains('DOES_NOT_EXIST_RERUN_FOR_WILDCARD')),
-        isTrue,
-      );
-    },
-  );
+    final List<String> canonicalInputs = depfile.inputs
+        .map((File file) => winFs.path.canonicalize(file.path))
+        .toList();
+    expect(
+      canonicalInputs.where((String p) => p == winFs.path.canonicalize('pubspec.yaml')),
+      hasLength(1),
+    );
+    expect(
+      depfile.inputs.any((File file) => file.path.contains('DOES_NOT_EXIST_RERUN_FOR_WILDCARD')),
+      isTrue,
+    );
+  });
 }
 
 // Runs CopyAssets in isolation without LinkHooks/KernelSnapshot dependencies
