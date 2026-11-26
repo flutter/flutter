@@ -22,13 +22,18 @@ To find out which Dart SDK sha is contained in a particular Flutter SDK commit:
 
 To find the published Flutter versions that contain any given commit in `flutter/flutter`:
 
-1. Navigate to the page for that commit.  You can do this by either:
-  - clicking on the merged commit on a PR page
+1. Open the commit in the `flutter/flutter` repository.
 
-    <img width="583" alt="merge commit message" src="https://user-images.githubusercontent.com/6655696/224098265-dd368be5-ae2c-4cb0-a30c-efc8c0503d6f.png">
+   - If you are starting from a merged PR, open its **Conversation** tab. Find
+     the event that says the PR was merged and click the commit SHA in that
+     event. For example, [PR #162667] was merged via the queue with
+     commit [`a8a61a1`]. Use the SHA from this event because a squash merge
+     creates a new commit.
+   - If you already know the SHA, open
+     `https://github.com/flutter/flutter/commit/<sha>` with that SHA.
 
-  - clicking on the commit from https://github.com/flutter/flutter/commits
-  - constructing the URL manually: the URL format is `https://github.com/flutter/flutter/commit/<sha>`.
+   [PR #162667]: https://github.com/flutter/flutter/pull/162667
+   [`a8a61a1`]: https://github.com/flutter/flutter/commit/a8a61a1c06a6ddb65892bd6cf767c99ef4f7fec8
 
 1. Look in the lower left corner of the commit description box for a list of version tags.  For example:
 
