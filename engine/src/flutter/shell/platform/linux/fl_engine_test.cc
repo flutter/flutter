@@ -288,6 +288,21 @@ TEST_F(FlEngineShutdownTest, WorkerAdmissionRacesShutdown) {
 }
 
 #if FLUTTER_LINUX_GTK4
+#ifndef SHELL_ENABLE_VULKAN
+TEST_F(FlEngineTest, AutoSkipsVulkanInOpenGLBuild) {
+  g_autofree gchar* previous = g_strdup(g_getenv("FLUTTER_LINUX_RENDERER"));
+  g_setenv("FLUTTER_LINUX_RENDERER", "auto", TRUE);
+  g_autoptr(FlEngine) selected = fl_engine_new(project);
+  if (previous) {
+    g_setenv("FLUTTER_LINUX_RENDERER", previous, TRUE);
+  } else {
+    g_unsetenv("FLUTTER_LINUX_RENDERER");
+  }
+  EXPECT_EQ(fl_engine_get_renderer_type(selected), kOpenGL);
+  EXPECT_EQ(fl_engine_get_vulkan_manager(selected), nullptr);
+}
+#endif
+
 TEST_F(FlEngineTest, SelectVulkanWithoutInitializingDriver) {
   g_autofree gchar* previous = g_strdup(g_getenv("FLUTTER_LINUX_RENDERER"));
   g_setenv("FLUTTER_LINUX_RENDERER", "vulkan", TRUE);

@@ -275,6 +275,7 @@ source_set("flutter_linux_sources_gtk4") {
            ]
 
   configs += [
+    "//flutter/shell/platform/embedder:embedder_gpu_configuration_config",
     "//flutter/shell/platform/linux/config:gtk4",
     "//flutter/shell/platform/linux/config:wayland_client",
     "//flutter/shell/platform/linux/config:wayland_egl",
@@ -681,6 +682,7 @@ executable("flutter_linux_gtk4_unittests") {
   public_configs = [ "//flutter:config" ]
 
   configs += [
+    "//flutter/shell/platform/embedder:embedder_gpu_configuration_config",
     "//flutter/shell/platform/linux/config:epoxy",
     "//flutter/shell/platform/linux/config:gtk4",
     "//flutter/testing:dynamic_symbols",

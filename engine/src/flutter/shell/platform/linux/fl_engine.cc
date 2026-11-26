@@ -863,6 +863,20 @@ static std::optional<bool> get_impeller_override(
   return result;
 }
 
+#if FLUTTER_LINUX_GTK4
+static gboolean initialize_vulkan_renderer(FlVulkanManager* manager,
+                                           FlutterVulkanRendererConfig* config,
+                                           GError** error) {
+#ifdef SHELL_ENABLE_VULKAN
+  return fl_vulkan_manager_initialize(manager, config, error);
+#else
+  g_set_error_literal(error, fl_engine_error_quark(), FL_ENGINE_ERROR_FAILED,
+                      "Embedder built without Vulkan rendering");
+  return FALSE;
+#endif
+}
+#endif
+
 static FlEngine* fl_engine_new_full(FlDartProject* project,
                                     FlBinaryMessenger* binary_messenger) {
   g_return_val_if_fail(FL_IS_DART_PROJECT(project), nullptr);
@@ -892,7 +906,7 @@ static FlEngine* fl_engine_new_full(FlDartProject* project,
     } else {
       g_autoptr(FlVulkanManager) manager = fl_vulkan_manager_new();
       FlutterVulkanRendererConfig config = {};
-      if (fl_vulkan_manager_initialize(manager, &config, &error)) {
+      if (initialize_vulkan_renderer(manager, &config, &error)) {
         self->vulkan_manager = FL_VULKAN_MANAGER(g_steal_pointer(&manager));
         self->renderer_type = kVulkan;
       } else {
@@ -1076,8 +1090,8 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
     }
     enable_impeller = TRUE;
 #if FLUTTER_LINUX_GTK4
-    if (!fl_vulkan_manager_initialize(self->vulkan_manager, &config.vulkan,
-                                      error)) {
+    if (!initialize_vulkan_renderer(self->vulkan_manager, &config.vulkan,
+                                    error)) {
       return FALSE;
     }
     config.vulkan.external_texture_frame_callback =
