@@ -328,7 +328,14 @@ void fl_view_gtk4_setup(FlView* view) {
       g_strcmp0(g_getenv("FLUTTER_GTK4_ENABLE_DMABUF"), "0") != 0;
   GtkWidget* presentation = fl_graphics_offload_gtk4_wrap(
       view->render_area, nullptr, can_offload && renderer == kVulkan);
-  if (is_wayland && renderer == kOpenGL && !view->subsurface_requested) {
+  const bool uses_gtk_gl_texture =
+      is_wayland && renderer == kOpenGL && !view->subsurface_requested;
+  const bool uses_vulkan_offload =
+      can_offload && renderer == kVulkan && presentation != view->render_area;
+  // These paths publish a texture for GTK's paint phase. Starting the first
+  // frame after idle before the GTK tick gives it a chance to make that paint.
+  // Once animation is active, the pacer returns to ordinary GTK ticks.
+  if (uses_gtk_gl_texture || uses_vulkan_offload) {
     fl_gtk_frame_pacer_enable_idle_start(GTK_WIDGET(view));
   }
   gtk_box_append(GTK_BOX(view), presentation);

@@ -19,13 +19,13 @@ An explicit selection writes `Flutter Linux frame pacer: engine` or
 `Flutter Linux frame pacer: gtk` to the application log. Invalid values,
 including an empty string, fail engine startup rather than silently selecting a
 benchmark policy. Changes to the environment after startup do not change the
-running engine's policy. When the GTK4 view configures Wayland graphics offload for OpenGL,
-the GTK pacer can deliver the first mapped frame request immediately after
-idle. It uses the frame clock's refresh prediction so GTK can paint the new
-texture in its upcoming frame. An active tick subscription or a request within
-the following refresh opportunity keeps animation requests on ordinary ticks.
-The view configures this behavior when it creates the offload widget. GTK
-decides whether each texture can actually be offloaded.
+running engine's policy. On Wayland, the GTK4 pacer can deliver the first
+mapped frame request immediately after idle for GTK-managed OpenGL textures
+and for Vulkan views configured for DMA-BUF graphics offload. It uses the
+frame clock's refresh prediction so GTK can paint the new texture in its
+upcoming frame. An active tick subscription or a request within the following
+refresh opportunity keeps animation requests on ordinary ticks. GTK decides
+whether each Vulkan texture can actually be offloaded.
 
 ## Ownership and boundaries
 
