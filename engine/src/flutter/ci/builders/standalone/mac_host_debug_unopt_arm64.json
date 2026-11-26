@@ -20,7 +20,6 @@
         "--mac-cpu",
         "arm64",
         "--rbe",
-        "--no-goma",
         "--xcode-symlinks",
         "--use-glfw-swiftshader"
     ],
@@ -33,15 +32,51 @@
     "tests": [
         {
             "language": "python3",
-            "name": "Host Tests for host_debug_unopt_arm64",
+            "name": "Engine unit tests for host_debug_unopt_arm64",
             "script": "flutter/testing/run_tests.py",
             "test_timeout_secs": 3600,
             "parameters": [
                 "--variant",
                 "ci/host_debug_unopt_arm64",
                 "--type",
-                "dart,dart-host,engine,impeller-golden",
-                "--engine-capture-core-dump",
+                "engine",
+                "--engine-capture-core-dump"
+            ]
+        },
+        {
+            "language": "python3",
+            "name": "Dart tests for host_debug_unopt_arm64",
+            "script": "flutter/testing/run_tests.py",
+            "test_timeout_secs": 3600,
+            "parameters": [
+                "--variant",
+                "ci/host_debug_unopt_arm64",
+                "--type",
+                "dart"
+            ]
+        },
+        {
+            "language": "python3",
+            "name": "Dart host tests for host_debug_unopt_arm64",
+            "script": "flutter/testing/run_tests.py",
+            "test_timeout_secs": 3600,
+            "parameters": [
+                "--variant",
+                "ci/host_debug_unopt_arm64",
+                "--type",
+                "dart-host"
+            ]
+        },
+        {
+            "language": "python3",
+            "name": "Impeller golden tests for host_debug_unopt_arm64",
+            "script": "flutter/testing/run_tests.py",
+            "test_timeout_secs": 3600,
+            "parameters": [
+                "--variant",
+                "ci/host_debug_unopt_arm64",
+                "--type",
+                "impeller-golden",
                 "--no-skia-gold"
             ]
         },

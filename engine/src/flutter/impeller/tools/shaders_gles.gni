@@ -67,6 +67,7 @@ template("impeller_shaders_gles") {
 
     malioc_analyze_shaders(analyze_lib) {
       shaders = gles_shaders
+      require_framebuffer_fetch = require_framebuffer_fetch
       if (defined(invoker.gles_language_version)) {
         gles_language_version = invoker.gles_language_version
       }

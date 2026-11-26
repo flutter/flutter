@@ -29,7 +29,7 @@ import 'binding.dart';
 import 'controller.dart';
 import 'finders.dart';
 import 'goldens.dart';
-import 'widget_tester.dart' show WidgetTester;
+import 'widget_tester.dart' show WidgetTester, testWidgets;
 
 /// Asserts that the [FinderBase] matches nothing in the available candidates.
 ///
@@ -648,16 +648,14 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 ///
 /// To retrieve the semantics data of a widget, use [SemanticsController.find]
 /// with a [FinderBase] that returns a single widget. Semantics must be enabled
-/// in order to use this method.
+/// in order to use this method; [testWidgets] enables semantics by default.
 ///
 /// ## Sample code
 ///
 /// ```dart
 /// testWidgets('matchesSemantics', (WidgetTester tester) async {
-///   final SemanticsHandle handle = tester.ensureSemantics();
 ///   // ...
 ///   expect(tester.getSemantics(find.text('hello')), matchesSemantics(label: 'hello'));
-///   handle.dispose();
 /// });
 /// ```
 ///
@@ -854,7 +852,7 @@ Matcher matchesSemantics({
 ///
 /// To retrieve the semantics data of a widget, use [SemanticsController.find]
 /// with a [FinderBase] that returns a single widget. Semantics must be enabled
-/// in order to use this method.
+/// in order to use this method; [testWidgets] enables semantics by default.
 ///
 /// See also:
 ///
@@ -1051,16 +1049,14 @@ Matcher containsSemantics({
 ///
 /// To retrieve the semantics data of a widget, use [SemanticsController.find]
 /// with a [FinderBase] that returns a single widget. Semantics must be enabled
-/// in order to use this method.
+/// in order to use this method; [testWidgets] enables semantics by default.
 ///
 /// ## Sample code
 ///
 /// ```dart
 /// testWidgets('isSemantics', (WidgetTester tester) async {
-///   final SemanticsHandle handle = tester.ensureSemantics();
 ///   // ...
 ///   expect(tester.getSemantics(find.text('hello')), isSemantics(label: 'hello'));
-///   handle.dispose();
 /// });
 /// ```
 ///
@@ -1281,16 +1277,14 @@ Matcher isAccessibilityAnnouncement(
 /// `guideline`.
 ///
 /// This matcher requires the result to be awaited and for semantics to be
-/// enabled first.
+/// enabled first. [testWidgets] enables semantics by default.
 ///
 /// ## Sample code
 ///
 /// ```dart
-/// testWidgets('isSemantics', (WidgetTester tester) async {
-///   final SemanticsHandle handle = tester.ensureSemantics();
+/// testWidgets('meetsGuideline', (WidgetTester tester) async {
 ///   // ...
 ///   await expectLater(tester, meetsGuideline(textContrastGuideline));
-///   handle.dispose();
 /// });
 /// ```
 ///

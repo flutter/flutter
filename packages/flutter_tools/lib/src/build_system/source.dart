@@ -216,6 +216,12 @@ class SourceVisitor implements ResolvedFiles {
 
     sources.add(environment.fileSystem.file(path));
   }
+
+  void visitEnvironmentSources(EnvironmentSourceBuilder builder) {
+    for (final Source source in builder(environment)) {
+      source.accept(this);
+    }
+  }
 }
 
 /// A description of an input or output of a [Target].
@@ -251,6 +257,9 @@ abstract class Source {
   /// ```
   const factory Source.fromProject(ProjectSourceBuilder sourceBuilder, {bool optional}) =
       _ProjectSource;
+
+  /// Sources resolved dynamically from the build [Environment].
+  const factory Source.fromEnvironment(EnvironmentSourceBuilder sourceBuilder) = _EnvironmentSource;
 
   /// Visit the particular source type.
   void accept(SourceVisitor visitor);
@@ -314,6 +323,20 @@ class _ProjectSource implements Source {
 
   @override
   void accept(SourceVisitor visitor) => visitor.visitProjectSource(builder, optional);
+
+  @override
+  bool get implicit => false;
+}
+
+typedef EnvironmentSourceBuilder = List<Source> Function(Environment);
+
+class _EnvironmentSource implements Source {
+  const _EnvironmentSource(this.builder);
+
+  final EnvironmentSourceBuilder builder;
+
+  @override
+  void accept(SourceVisitor visitor) => visitor.visitEnvironmentSources(builder);
 
   @override
   bool get implicit => false;

@@ -727,7 +727,9 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   Size computeDryLayout(covariant BoxConstraints constraints) {
     return switch (fit) {
       OverflowBoxFit.max => constraints.biggest,
-      OverflowBoxFit.deferToChild => child?.getDryLayout(constraints) ?? constraints.smallest,
+      OverflowBoxFit.deferToChild => constraints.constrain(
+        child?.getDryLayout(_getInnerConstraints(constraints)) ?? constraints.smallest,
+      ),
     };
   }
 

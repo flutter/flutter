@@ -59,6 +59,7 @@ class AnalyzeOnce extends AnalyzeBase {
       protocolTrafficLog: protocolTrafficLog,
       usePlugins: usePlugins,
       withFineDependencies: false,
+      clientId: AnalysisServer.flutterAnalyzeClientId,
     );
 
     Stopwatch? timer;

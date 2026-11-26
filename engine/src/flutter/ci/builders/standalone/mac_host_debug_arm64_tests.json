@@ -21,7 +21,6 @@
         "--build-embedder-examples",
         "--use-glfw-swiftshader",
         "--rbe",
-        "--no-goma",
         "--xcode-symlinks"
     ],
     "name": "ci/host_debug_arm64_tests",
@@ -33,14 +32,47 @@
     "tests": [
         {
             "language": "python3",
-            "name": "Host Tests for host_debug",
+            "name": "Engine unit tests for host_debug",
             "script": "flutter/testing/run_tests.py",
             "parameters": [
                 "--variant",
                 "ci/host_debug_arm64_tests",
                 "--type",
-                "dart,dart-host,engine,font-subset",
+                "engine",
                 "--engine-capture-core-dump"
+            ]
+        },
+        {
+            "language": "python3",
+            "name": "Dart tests for host_debug",
+            "script": "flutter/testing/run_tests.py",
+            "parameters": [
+                "--variant",
+                "ci/host_debug_arm64_tests",
+                "--type",
+                "dart"
+            ]
+        },
+        {
+            "language": "python3",
+            "name": "Dart host tests for host_debug",
+            "script": "flutter/testing/run_tests.py",
+            "parameters": [
+                "--variant",
+                "ci/host_debug_arm64_tests",
+                "--type",
+                "dart-host"
+            ]
+        },
+        {
+            "language": "python3",
+            "name": "Font subset tests for host_debug",
+            "script": "flutter/testing/run_tests.py",
+            "parameters": [
+                "--variant",
+                "ci/host_debug_arm64_tests",
+                "--type",
+                "font-subset"
             ]
         }
     ]

@@ -15,22 +15,11 @@ class FastScrollLargeImagesMemoryTest extends MemoryTest {
         '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
         'test_memory/large_images.dart',
         kPackageName,
+        requiresTapToStart: true,
       );
 
   @override
-  AndroidDevice? get device => super.device as AndroidDevice?;
-
-  @override
   int get iterationCount => 5;
-
-  @override
-  Future<void> useMemory() async {
-    await launchApp();
-    await recordStart();
-    await device!.shellExec('input', <String>['swipe', '0 1500 0 0 50']);
-    await Future<void>.delayed(const Duration(milliseconds: 15000));
-    await recordEnd();
-  }
 }
 
 Future<void> main() async {

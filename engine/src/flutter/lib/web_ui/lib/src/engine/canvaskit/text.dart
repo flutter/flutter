@@ -86,6 +86,10 @@ SkParagraphStyle _toSkParagraphStyle(EngineParagraphStyle style, CkFontCollectio
   properties.applyRoundingHack = false;
   // Like the native engine, render soft hyphens unless they are hidden.
   properties.renderSoftHyphens = style.hyphens != ui.Hyphens.hidden;
+  final String? hyphenCharacter = style.hyphenCharacter;
+  if (hyphenCharacter != null) {
+    properties.softHyphenString = hyphenCharacter;
+  }
 
   return canvasKit.ParagraphStyle(properties);
 }
@@ -107,8 +111,8 @@ SkTextStyleProperties _toSkTextStyleProperties(
   final double? wordSpacing = style.wordSpacing;
   final double? height = style.height;
   final ui.Locale? locale = style.locale;
-  final background = style.background as CkPaint?;
-  final foreground = style.foreground as CkPaint?;
+  final ui.Paint? background = style.background;
+  final ui.Paint? foreground = style.foreground;
   final List<ui.Shadow>? shadows = style.shadows;
   final List<ui.FontFeature>? fontFeatures = style.fontFeatures;
 
@@ -475,33 +479,32 @@ class CkParagraphBuilder implements BackendParagraphBuilder {
     _paragraphBuilder.pop();
   }
 
-  static SkPaint _createForegroundPaint(EngineTextStyle style) {
+  static CkPaint _createForegroundPaint(EngineTextStyle style) {
     final ui.Paint? foreground = style.foreground;
     if (foreground != null) {
-      return (foreground as CkPaint).toSkPaint();
+      return (foreground as EnginePaint).createBackendPaint() as CkPaint;
     }
-    final skPaint = SkPaint();
-    skPaint.setColorInt(style.color?.value ?? 0xFF000000);
-    return skPaint;
+    return (EnginePaint()..color = style.color ?? const ui.Color(0xFF000000)).createBackendPaint()
+        as CkPaint;
   }
 
-  static SkPaint _createBackgroundPaint(EngineTextStyle style) {
+  static CkPaint _createBackgroundPaint(EngineTextStyle style) {
     final ui.Paint? background = style.background;
     if (background != null) {
-      return (background as CkPaint).toSkPaint();
+      return (background as EnginePaint).createBackendPaint() as CkPaint;
     }
-    return SkPaint()..setColorInt(0x00000000);
+    return (EnginePaint()..color = const ui.Color(0x00000000)).createBackendPaint() as CkPaint;
   }
 
   @override
   void pushStyle(EngineTextStyle mergedStyle) {
     final SkTextStyle skTextStyle = _toSkTextStyle(mergedStyle, _fontCollection);
     if (mergedStyle.foreground != null || mergedStyle.background != null) {
-      final SkPaint foreground = _createForegroundPaint(mergedStyle);
-      final SkPaint background = _createBackgroundPaint(mergedStyle);
-      _paragraphBuilder.pushPaintStyle(skTextStyle, foreground, background);
-      foreground.delete();
-      background.delete();
+      final CkPaint foreground = _createForegroundPaint(mergedStyle);
+      final CkPaint background = _createBackgroundPaint(mergedStyle);
+      _paragraphBuilder.pushPaintStyle(skTextStyle, foreground.skiaObject, background.skiaObject);
+      foreground.dispose();
+      background.dispose();
     } else {
       _paragraphBuilder.pushStyle(skTextStyle);
     }

@@ -294,7 +294,7 @@ enum BlendMode {
 enum Clip { none, hardEdge, antiAlias, antiAliasWithSaveLayer }
 
 abstract class Paint {
-  factory Paint() => engine.renderer.createPaint();
+  factory Paint() => engine.EnginePaint();
 
   factory Paint.from(Paint other) {
     final paint = Paint();

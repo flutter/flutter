@@ -28,7 +28,7 @@ const String _kGeneratedConfigCmake = 'generated_config.cmake';
 
 /// Top-level Linux build target contributed by the prototype extension.
 // TODO(bkonyi): Support target-platform agnostic BuildTargets, https://github.com/flutter/flutter/issues/194810.
-class CustomLinuxBuildTarget extends BuildTarget {
+final class CustomLinuxBuildTarget extends BuildTarget {
   const CustomLinuxBuildTarget()
     : super(
         description: 'A custom Linux build target from prototype extension.',
@@ -142,7 +142,7 @@ list(APPEND FLUTTER_TOOL_ENVIRONMENT
 }
 
 /// Assemble-only Linux debug bundle target contributed by the prototype extension.
-class CustomLinuxAssembleOnlyDebug extends AssembleTarget {
+final class CustomLinuxAssembleOnlyDebug extends AssembleTarget {
   const CustomLinuxAssembleOnlyDebug()
     : super(
         description: 'A custom Linux assemble-only debug target.',

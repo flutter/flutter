@@ -11,8 +11,6 @@ import 'package:file/file.dart';
 ///
 /// Also writes a `.dart_tool/package_graph.json` file.
 ///
-/// If directory is not specified, it will be `globals.fs.currentDirectory`;
-///
 /// `package_config.json` will contain a package entry for [mainLibName] with `rootUri` at
 /// [directory].
 ///

@@ -7,7 +7,6 @@ import 'package:data_assets/data_assets.dart';
 import 'package:file/file.dart' show Directory, FileSystem;
 import 'package:hooks/hooks.dart';
 
-import '../../android/android_sdk.dart';
 import '../../base/common.dart' show throwToolExit;
 import '../../base/process.dart' show ProcessUtils;
 import '../../build_info.dart'
@@ -22,13 +21,14 @@ import '../../build_info.dart'
         kIosArchs,
         kSdkRoot;
 import '../../build_system/exceptions.dart' show MissingDefineException;
+import '../../context/android_context.dart' show AndroidSdkProvider;
 import '../../macos/xcode.dart' as xcode show environmentTypeFromSdkroot;
 import '../../windows/visual_studio.dart';
 import 'android/native_assets.dart'
     show cCompilerConfigAndroid, getNativeAndroidArchitecture, targetAndroidNdkApi;
-import 'ios/native_assets.dart' show getIOSSdk, getNativeIOSArchitecture, targetIOSVersion;
+import 'ios/native_assets.dart' show getIOSSdk, getNativeIOSArchitecture, iosDeploymentVersion;
 import 'linux/native_assets.dart';
-import 'macos/native_assets.dart' show getNativeMacOSArchitecture, targetMacOSVersion;
+import 'macos/native_assets.dart' show getNativeMacOSArchitecture, macOSDeploymentVersion;
 import 'macos/native_assets_host.dart';
 import 'native_assets.dart';
 import 'windows/native_assets.dart';
@@ -69,7 +69,7 @@ sealed class AssetBuildTarget {
     required FileSystem fileSystem,
     required List<SupportedAssetTypes> supportedAssetTypes,
     required Directory? buildDirectory,
-    required AndroidSdk? Function()? androidSdkBuilder,
+    required AndroidSdkProvider? androidSdkProvider,
     required VisualStudio? visualStudio,
   }) {
     switch (targetPlatform) {
@@ -93,7 +93,7 @@ sealed class AssetBuildTarget {
           targetPlatform,
           environmentDefines,
           supportedAssetTypes,
-          androidSdk: androidSdkBuilder?.call(),
+          androidSdkProvider: androidSdkProvider,
         );
       case TargetPlatform.ios:
         return _iosTargets(environmentDefines, fileSystem, supportedAssetTypes);
@@ -155,6 +155,7 @@ sealed class AssetBuildTarget {
           (Architecture architecture) => MacOSAssetTarget(
             architecture: architecture,
             supportedAssetTypes: supportedAssetTypes,
+            environmentDefines: environmentDefines,
           ),
         )
         .toList();
@@ -164,13 +165,13 @@ sealed class AssetBuildTarget {
     TargetPlatform targetPlatform,
     Map<String, String> environmentDefines,
     List<SupportedAssetTypes> supportedAssetTypes, {
-    required AndroidSdk? androidSdk,
+    required AndroidSdkProvider? androidSdkProvider,
   }) {
     return _androidArchs(targetPlatform, environmentDefines[kAndroidArchs])
         .map(getNativeAndroidArchitecture)
         .map(
           (Architecture architecture) => AndroidAssetTarget(
-            androidSdk: androidSdk,
+            androidSdkProvider: androidSdkProvider,
             architecture: architecture,
             supportedAssetTypes: supportedAssetTypes,
             environmentDefines: environmentDefines,
@@ -359,7 +360,10 @@ final class IOSAssetTarget extends CodeAssetTarget {
       throw MissingDefineException(kSdkRoot, 'native_assets');
     }
     final EnvironmentType environmentType = xcode.environmentTypeFromSdkroot(sdkRoot, fileSystem);
-    return IOSCodeConfig(targetVersion: targetIOSVersion, targetSdk: getIOSSdk(environmentType));
+    return IOSCodeConfig(
+      deploymentVersion: iosDeploymentVersion(environmentDefines),
+      targetSdk: getIOSSdk(environmentType),
+    );
   }
 
   @override
@@ -379,8 +383,13 @@ final class IOSAssetTarget extends CodeAssetTarget {
 }
 
 final class MacOSAssetTarget extends CodeAssetTarget {
-  MacOSAssetTarget({required super.supportedAssetTypes, required super.architecture})
-    : super(os: OS.macOS);
+  MacOSAssetTarget({
+    required super.supportedAssetTypes,
+    required super.architecture,
+    required this.environmentDefines,
+  }) : super(os: OS.macOS);
+
+  final Map<String, String> environmentDefines;
 
   @override
   List<ProtocolExtension> get extensions {
@@ -391,7 +400,7 @@ final class MacOSAssetTarget extends CodeAssetTarget {
           linkModePreference: LinkModePreference.dynamic,
           cCompiler: cCompilerConfigSync,
           targetOS: OS.macOS,
-          macOS: MacOSCodeConfig(targetVersion: targetMacOSVersion),
+          macOS: MacOSCodeConfig(deploymentVersion: macOSDeploymentVersion(environmentDefines)),
         ),
       ...dataAssetExtensions,
     ];
@@ -409,7 +418,7 @@ final class MacOSAssetTarget extends CodeAssetTarget {
 
 final class AndroidAssetTarget extends CodeAssetTarget {
   AndroidAssetTarget({
-    required this.androidSdk,
+    required this._androidSdkProvider,
     required super.architecture,
     required Map<String, String> environmentDefines,
     required super.supportedAssetTypes,
@@ -418,14 +427,16 @@ final class AndroidAssetTarget extends CodeAssetTarget {
        ),
        super(os: OS.android);
 
-  final AndroidSdk? androidSdk;
+  final AndroidSdkProvider? _androidSdkProvider;
   final AndroidCodeConfig? _androidCodeConfig;
 
   @override
   Future<void> setCCompilerConfig({
     required ProcessUtils processUtils,
     bool mustMatchAppBuild = true,
-  }) async => cCompilerConfigSync = await cCompilerConfigAndroid(androidSdk: androidSdk);
+  }) async => cCompilerConfigSync = await cCompilerConfigAndroid(
+    androidSdk: _androidSdkProvider?.androidSdk,
+  );
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
@@ -460,6 +471,7 @@ final class FlutterTesterAssetTarget extends CodeAssetTarget {
       OS.macOS => MacOSAssetTarget(
         supportedAssetTypes: supportedAssetTypes,
         architecture: architecture,
+        environmentDefines: const <String, String>{},
       ),
       OS() => throw UnsupportedError('Flutter tester supports only Linux, Windows and MacOS.'),
     };

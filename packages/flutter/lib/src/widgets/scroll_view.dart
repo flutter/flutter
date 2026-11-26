@@ -1281,6 +1281,64 @@ abstract class BoxScrollView extends ScrollView {
 /// ** See code in examples/api/lib/widgets/scroll_view/list_view.0.dart **
 /// {@end-tool}
 ///
+/// ## Troubleshooting
+///
+/// ### Using a ListView inside a Column
+///
+/// A [ListView] that does not [shrinkWrap] expands to fill the available space
+/// in its [scrollDirection]. A [Column] gives its non-flex children unbounded
+/// height constraints, so a vertical [ListView] placed directly inside a
+/// [Column] has no maximum height to expand to, and fails during layout with a
+/// "Vertical viewport was given unbounded height" error.
+///
+/// There are several ways to give the [ListView] a bounded height:
+///
+///  * Wrap the [ListView] in an [Expanded], so that it fills the space left
+///    over by the other children of the [Column]. This is usually the best
+///    choice, because the [ListView] keeps its lazy building and scrolling
+///    behavior. It requires the [Column] itself to have a bounded height.
+///  * Wrap the [ListView] in a [SizedBox] with a fixed height, or in a
+///    [ConstrainedBox] with a [BoxConstraints.maxHeight] (without
+///    [shrinkWrap], the [ListView] expands to that maximum height even when
+///    its contents are shorter).
+///  * Set [shrinkWrap] to true, so that the [ListView] sizes itself to its
+///    contents. Directly inside a [Column] the list has no maximum height, so
+///    it lays out every child: lazy building is lost, and long lists are
+///    expensive. If the contents are taller than the [Column], the [Column]
+///    overflows instead of the list scrolling. When the [Column] itself has a
+///    bounded height, wrapping the shrink-wrapped [ListView] in a [Flexible]
+///    gives it a maximum height, so it scrolls and builds lazily again, but it
+///    still pays the extra layout cost described at [shrinkWrap]. Prefer
+///    [Expanded] unless the list must shrink to fit when it has only a few
+///    items.
+///
+/// The same applies to a horizontal [ListView] inside a [Row], which needs a
+/// bounded width. To make a [ListView] scroll together with other widgets,
+/// consider using a [CustomScrollView] instead.
+///
+/// {@tool snippet}
+///
+/// Example of a [ListView] that fills the space below a header in a [Column]:
+///
+/// ```dart
+/// Column(
+///   children: <Widget>[
+///     const Text('Header'),
+///     Expanded(
+///       child: ListView.builder(
+///         itemCount: 100,
+///         itemBuilder: (BuildContext context, int index) {
+///           return ListTile(
+///             title: Text('Item ${index + 1}'),
+///           );
+///         },
+///       ),
+///     ),
+///   ],
+/// )
+/// ```
+/// {@end-tool}
+///
 /// {@macro flutter.widgets.BoxScroll.scrollBehaviour}
 ///
 /// {@macro flutter.widgets.ScrollView.PageStorage}
@@ -1299,6 +1357,8 @@ abstract class BoxScrollView extends ScrollView {
 ///  * [ScrollNotification] and [NotificationListener], which can be used to watch
 ///    the scroll position without using a [ScrollController].
 ///  * The [catalog of layout widgets](https://docs.flutter.dev/ui/widgets/layout).
+///  * [Common Flutter errors: Vertical viewport was given unbounded height](https://docs.flutter.dev/testing/common-errors#vertical-viewport-was-given-unbounded-height),
+///    which illustrates this layout error and how to resolve it.
 ///  * Cookbook: [Use lists](https://docs.flutter.dev/cookbook/lists/basic-list)
 ///  * Cookbook: [Work with long lists](https://docs.flutter.dev/cookbook/lists/long-lists)
 ///  * Cookbook: [Create a horizontal list](https://docs.flutter.dev/cookbook/lists/horizontal-list)
@@ -1683,6 +1743,9 @@ class ListView extends BoxScrollView {
   ///
   /// To map the interleaved child index to the semantic item index (for example,
   /// to look up the extent in a data list), divide it by 2 (`index ~/ 2`).
+  ///
+  /// The extents returned by this builder are cached during each layout pass
+  /// for performance.
   ///
   /// See also:
   ///

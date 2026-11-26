@@ -69,6 +69,18 @@ const _kDevToolsServerFailure = 'Cannot start http server for devtools';
 @visibleForTesting
 const kDevToolsListeningTimeout = Duration(seconds: 30);
 
+/// How long to wait for each step of the graceful shutdown of Chromium before
+/// giving up on a clean shutdown and escalating to SIGTERM/SIGKILL.
+///
+/// The `Browser.close` reply is raced against the process exit, so a Chrome
+/// that already exited returns immediately; this timeout covers a Chrome that
+/// is alive but never answers. Chrome can block at any step of the shutdown,
+/// so without a bound [Chromium.close] would hang forever.
+///
+/// See: https://github.com/flutter/flutter/issues/196191
+@visibleForTesting
+const kBrowserCloseTimeout = Duration(seconds: 5);
+
 /// Filters out non-fatal D-Bus connection error messages emitted by Chromium.
 ///
 /// Headless Linux Chrome attempts to query Linux D-Bus desktop services (such as
@@ -205,6 +217,17 @@ class ChromiumLauncher {
         return userDataDir;
       }
     }
+    // WARNING: `flutter test --platform chrome` depends on this directory being
+    // new for every launch. The test server in `FlutterWebPlatform` sends
+    // `Cache-Control: max-age` with no validator (`ETag` or `Last-Modified`),
+    // so Chrome serves cached test assets without asking the server. A fresh
+    // directory means an empty HTTP cache, which limits that to one invocation.
+    //
+    // If this directory (or its `Cache` and `Code Cache` subdirectories) is
+    // ever reused across invocations, a later run that binds the same port can
+    // load stale compiled test code from an earlier run. Before reusing it,
+    // either add a per-invocation validator to those responses or put a
+    // per-invocation token in the asset URLs.
     return _fileSystem.systemTempDirectory.createTempSync('flutter_tools_chrome_device.');
   }
 
@@ -315,7 +338,7 @@ class ChromiumLauncher {
       url,
     ];
 
-    final _SpawnResult(:Process process, :int port, :String host, :List<String> logBuffer) =
+    final _SpawnResult(:Process process, :int port, :String host, :Iterable<String> logBuffer) =
         await _spawnChromiumProcess(buildArgs, debugPort);
 
     // When the process exits, copy the user settings back to the provided data-dir.
@@ -470,7 +493,7 @@ class ChromiumLauncher {
 
       if (!hitGlibcBug && !shouldRetry && boundAddress != null) {
         final (:String host, :int port) = boundAddress;
-        return _SpawnResult(process, port, host, logBuffer.toList());
+        return _SpawnResult(process, port, host, logBuffer);
       }
 
       retry += 1;
@@ -576,7 +599,11 @@ class ChromiumLauncher {
     }
   }
 
-  // Cache, Code Cache, and GPUCache are nearly 1GB of data
+  // Cache, Code Cache, and GPUCache are nearly 1GB of data.
+  //
+  // Skipping `Cache` and `Code Cache` also keeps Chrome's HTTP cache from
+  // outliving a launch, which `flutter test --platform chrome` depends on. See
+  // the warning in [_createUserDataDirectory].
   bool _isNotCacheDirectory(Directory directory) {
     return !directory.path.endsWith('Cache') &&
         !directory.path.endsWith('Code Cache') &&
@@ -635,7 +662,7 @@ class Chromium {
   final ChromeConnection chromeConnection;
   final ChromiumLauncher _chromiumLauncher;
   final Logger _logger;
-  final List<String> _logBuffer;
+  final Iterable<String> _logBuffer;
   var _hasValidChromeConnection = false;
   var _didClose = false;
 
@@ -713,13 +740,23 @@ class Chromium {
           chromeConnection,
           (_) => true,
           retryFor: const Duration(seconds: 1),
-        );
+        ).timeout(kBrowserCloseTimeout);
         if (tab != null) {
-          final WipConnection wipConnection = await tab.connect();
-          await wipConnection.sendCommand('Browser.close');
+          final WipConnection wipConnection = await tab.connect().timeout(kBrowserCloseTimeout);
+          // Chrome may exit before its reply arrives, so race the reply
+          // against process exit to avoid waiting out the timeout.
+          await Future.any<void>(<Future<void>>[
+            wipConnection.sendCommand('Browser.close'),
+            _process.exitCode,
+          ]).timeout(kBrowserCloseTimeout);
           await wipConnection.close();
           sigtermDelay = const Duration(seconds: 1);
         }
+      } on TimeoutException {
+        _logger.printTrace(
+          'Chrome did not complete a graceful shutdown within '
+          '${kBrowserCloseTimeout.inSeconds}s. Falling back to SIGTERM.',
+        );
       } on IOException catch (_) {
         // Chrome is not responding to the debug protocol and probably has
         // already been closed.
@@ -799,5 +836,5 @@ class _SpawnResult {
   final Process process;
   final int port;
   final String host;
-  final List<String> logBuffer;
+  final Iterable<String> logBuffer;
 }

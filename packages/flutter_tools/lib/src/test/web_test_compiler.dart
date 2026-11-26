@@ -129,7 +129,7 @@ class WebTestCompiler {
       fileSystem: fs,
       config: config,
     );
-    final ResidentCompiler residentCompiler = residentCompilerFactory.create(
+    final ResidentCompiler residentCompiler = const ResidentCompilerFactory().create(
       buildInfo: buildInfo.copyWith(
         fileSystemRoots: <String>[projectDirectory.childDirectory('test').path, testOutputDir],
         initializeFromDill: cachedKernelPath,

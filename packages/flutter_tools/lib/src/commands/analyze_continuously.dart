@@ -58,6 +58,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       toolContext: toolContext,
       protocolTrafficLog: protocolTrafficLog,
       usePlugins: usePlugins,
+      clientId: AnalysisServer.flutterAnalyzeClientId,
     );
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);

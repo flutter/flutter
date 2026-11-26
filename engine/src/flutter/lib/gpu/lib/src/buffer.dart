@@ -128,6 +128,11 @@ base class DeviceBuffer extends NativeFieldWrapperClass1 {
   /// If performing this copy would result in an out of bounds write to the
   /// buffer, then the write will not be attempted and will fail.
   ///
+  /// The write happens immediately, but the GPU reads the buffer when it reaches
+  /// the work that uses it, which can be well after [CommandBuffer.submit]
+  /// returns. Write new data somewhere the work in flight isn't reading, as
+  /// [HostBuffer] does, rather than over data that was already submitted.
+  ///
   /// Returns [true] if the write was successful, or [false] if the write
   /// failed due to an internal error.
   bool overwrite(ByteData sourceBytes, {int destinationOffsetInBytes = 0}) {

@@ -23,6 +23,8 @@ bool SupportsNormalOffscreenMSAA(const impeller::Context& context);
 /// Flutter GPU implements its whole compute contract on the backend.
 bool SupportsCompute(const impeller::Context& context);
 
+class ReplayQueue;
+
 class Context : public RefCountedDartWrappable<Context> {
   DEFINE_WRAPPERTYPEINFO();
   FML_FRIEND_MAKE_REF_COUNTED(Context);
@@ -42,6 +44,11 @@ class Context : public RefCountedDartWrappable<Context> {
 
   std::shared_ptr<impeller::Context>& GetContextShared();
 
+  /// Where this context's work is encoded and submitted.
+  const std::shared_ptr<ReplayQueue>& GetReplayQueue() const {
+    return replay_queue_;
+  }
+
  private:
   /// An Impeller context that takes precedent over the IO state context when
   /// set. This is used to inject the context when running with the Impeller
@@ -49,6 +56,7 @@ class Context : public RefCountedDartWrappable<Context> {
   static std::shared_ptr<impeller::Context> default_context_;
 
   std::shared_ptr<impeller::Context> context_;
+  std::shared_ptr<ReplayQueue> replay_queue_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Context);
 };
@@ -89,6 +97,11 @@ extern int InternalFlutterGpu_Context_GetMinimumUniformByteAlignment(
 FLUTTER_GPU_EXPORT
 extern int InternalFlutterGpu_Context_GetMinimumStorageBufferAlignment(
     flutter::gpu::Context* wrapper);
+
+FLUTTER_GPU_EXPORT
+extern uint32_t InternalFlutterGpu_Context_GetMaximumRenderTargetSize(
+    flutter::gpu::Context* wrapper,
+    int dimension);
 
 FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_Context_GetSupportsCompute(

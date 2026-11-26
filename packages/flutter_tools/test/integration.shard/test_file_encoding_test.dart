@@ -86,72 +86,18 @@ void main() {
 void main() {
   late Directory tempRoot;
   late Directory projectDir;
-  late String dartBin;
-  late String flutterToolsPackageConfig;
-  late String flutterToolsDill;
 
   Future<ProcessResult> runFlutterTool(List<String> args) {
-    return processManager.run(
-      <String>[
-        dartBin,
-        '--packages=$flutterToolsPackageConfig',
-        flutterToolsDill,
-        '--no-version-check',
-        '--suppress-analytics',
-        ...getLocalEngineArguments(),
-        ...args,
-      ],
-      workingDirectory: projectDir.path,
-      environment: <String, String>{
-        ...platform.environment,
-        'FLUTTER_ROOT': getFlutterRoot(),
-        'BOT': 'true',
-      },
-    );
+    return processManager.run(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      ...args,
+    ], workingDirectory: projectDir.path);
   }
 
   setUpAll(() async {
     tempRoot = createResolvedTempDirectorySync('test_file_encoding.');
     projectDir = tempRoot.childDirectory('app')..createSync(recursive: true);
-
-    final String flutterRoot = getFlutterRoot();
-    dartBin = fileSystem.path.join(
-      flutterRoot,
-      'bin',
-      'cache',
-      'dart-sdk',
-      'bin',
-      platform.isWindows ? 'dart.exe' : 'dart',
-    );
-    flutterToolsPackageConfig = fileSystem.path.join(
-      flutterRoot,
-      'packages',
-      'flutter_tools',
-      '.dart_tool',
-      'package_config.json',
-    );
-    final String flutterToolsScript = fileSystem.path.join(
-      flutterRoot,
-      'packages',
-      'flutter_tools',
-      'bin',
-      'flutter_tools.dart',
-    );
-    flutterToolsDill = fileSystem.path.join(tempRoot.path, 'flutter_tools.dill');
-
-    final ProcessResult snapshotResult = await processManager.run(<String>[
-      dartBin,
-      '--snapshot=$flutterToolsDill',
-      '--snapshot-kind=kernel',
-      '--packages=$flutterToolsPackageConfig',
-      flutterToolsScript,
-    ]);
-    if (snapshotResult.exitCode != 0) {
-      fail(
-        'Failed to compile flutter_tools kernel:\n'
-        '${snapshotResult.stdout}\n${snapshotResult.stderr}',
-      );
-    }
 
     writeFile(fileSystem.path.join(projectDir.path, 'pubspec.yaml'), _pubspecContents);
     final ProcessResult pubGetResult = await runFlutterTool(const <String>['pub', 'get']);
@@ -172,29 +118,26 @@ void main() {
     testDir.createSync(recursive: true);
   });
 
-  testWithoutContext(
-    'flutter test ignores binary AppleDouble sidecar files during discovery',
-    () async {
-      writeFile(
-        fileSystem.path.join(projectDir.path, 'test', 'widget_test.dart'),
-        _passingWidgetTestContents,
-      );
-      writeBytesFile(
-        fileSystem.path.join(projectDir.path, 'test', '._a_test.dart'),
-        _appleDoubleBytes,
-      );
-      writeBytesFile(
-        fileSystem.path.join(projectDir.path, 'test', '._widget_test.dart'),
-        _appleDoubleBytes,
-      );
+  test('flutter test ignores binary AppleDouble sidecar files during discovery', () async {
+    writeFile(
+      fileSystem.path.join(projectDir.path, 'test', 'widget_test.dart'),
+      _passingWidgetTestContents,
+    );
+    writeBytesFile(
+      fileSystem.path.join(projectDir.path, 'test', '._a_test.dart'),
+      _appleDoubleBytes,
+    );
+    writeBytesFile(
+      fileSystem.path.join(projectDir.path, 'test', '._widget_test.dart'),
+      _appleDoubleBytes,
+    );
 
-      final ProcessResult result = await runFlutterTool(const <String>['test', '--no-pub']);
+    final ProcessResult result = await runFlutterTool(const <String>['test', '--no-pub']);
 
-      expect(result, const ProcessResultMatcher(stdoutPattern: 'All tests passed!'));
-    },
-  );
+    expect(result, const ProcessResultMatcher(stdoutPattern: 'All tests passed!'));
+  });
 
-  testWithoutContext(
+  test(
     'flutter test exits gracefully without crashing when test files are not UTF-8 encoded',
     () async {
       writeFile(
@@ -226,7 +169,7 @@ void main() {
     },
   );
 
-  testWithoutContext(
+  test(
     'flutter test exits gracefully when a binary or AppleDouble file is passed explicitly',
     () async {
       final String appleDoublePath = fileSystem.path.join('test', '._widget_test.dart');
