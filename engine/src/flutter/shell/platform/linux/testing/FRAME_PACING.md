@@ -108,8 +108,9 @@ Set `FLUTTER_LINUX_FRAME_TIMINGS=1` before launch and capture a Flutter engine
 trace (for example, with the engine's startup tracing options). With the `gtk`
 pacer, `LinuxFrameTiming` instant events contain a JSON `sample` argument:
 `clock`, `frame`, `result`, `complete`, `frame_time_us`, `predicted_us`,
-`presentation_us`, and `refresh_interval_us`. Times are GDK monotonic
-microseconds; the trace event timestamp is the observation time, not presentation.
+`presentation_us`, and `refresh_interval_us`. The collector records GDK's
+values in microseconds. The trace event timestamp is when the collector
+observed the sample.
 
 The optional GTK 4.24 `gdk_frame_timings_get_result` symbol is resolved at runtime,
 independently of build headers. GTK3 and older GTK4 report `result=-1` (unknown),
@@ -136,8 +137,17 @@ counts of unknown and pending frames. Compute presentation intervals only from
 result 6 with nonzero timestamps, within the same clock. Do not treat skipped,
 empty, or unavailable feedback as missed frames.
 
+Before subtracting a GTK presentation timestamp from a Flutter event or a
+client-side Wayland commit, verify the clock against Wayland presentation
+feedback. GTK 4.24.2 returned the compositor's presentation timestamps in
+`CLOCK_MONOTONIC_RAW` on headless Weston and in `CLOCK_MONOTONIC` on niri.
+Convert the compositor clock to the trace clock before computing latency.
+Successive timestamps from the same compositor clock can still measure cadence.
+
 This is GTK surface feedback, not a one-to-one mapping to Flutter frames or proof
-of direct scanout. Sampling adds no timer or extra requested frames. Consequently,
+of direct scanout. A direct Wayland EGL subsurface can present even while the
+GTK parent reports skipped frames. Measure that child with per-surface feedback.
+Sampling adds no timer or extra requested frames. Consequently,
 feedback arriving after the last tick, or falling out of GTK's bounded history,
 can remain unresolved. Report this coverage limitation, exclude benchmark edges,
 and do not compare engine-pacer runs using this collector (they have no GTK pacer
