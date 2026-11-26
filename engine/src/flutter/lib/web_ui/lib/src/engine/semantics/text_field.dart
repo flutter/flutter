@@ -286,8 +286,12 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     // moved into the form (that regressed a11y tab traversal, see
     // flutter/flutter#180652). Link it to the form via the `form` attribute
     // instead. See [EngineAutofillForm.wakeUp].
-    inputConfiguration.autofillGroup!.wakeUp(activeDomElement, inputConfiguration.autofill!);
+    final EditingState? dormantAutofill = inputConfiguration.autofillGroup!.wakeUp(
+      activeDomElement,
+      inputConfiguration.autofill!,
+    );
     _formIsActive = true;
+    handleDormantAutofill(dormantAutofill);
   }
 
   @override

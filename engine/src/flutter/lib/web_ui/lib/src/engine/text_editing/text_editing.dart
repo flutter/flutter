@@ -206,7 +206,16 @@ class EngineAutofillForm {
     required this.formIdentifier,
     required this.focusedElementId,
     this.associateFocusedElementByAttribute = false,
-  });
+    int? generation,
+  }) : _generation = generation ?? _nextGeneration++;
+
+  /// The order in which the framework messages of forms were received.
+  ///
+  /// A form created from a framework message gets a new, higher value. A copy
+  /// made with [copyWith] keeps the value of the message it was copied from.
+  final int _generation;
+
+  static int _nextGeneration = 0;
 
   DomHTMLFormElement? formElement;
 
@@ -214,7 +223,20 @@ class EngineAutofillForm {
 
   final Map<String, String> _lastSentAutofillText = <String, String>{};
 
+  /// For each field, the value of [_nextGeneration] when its last autofill
+  /// was sent to the framework.
+  ///
+  /// A form with a [_generation] at least this high was created from a
+  /// framework message that already carries that autofill.
+  final Map<String, int> _lastSentGeneration = <String, int>{};
+
   final Map<String, String> _lastFrameworkText = <String, String>{};
+
+  /// The text of each field when the form last went dormant, for the fields
+  /// whose text the framework is known to have at that moment.
+  ///
+  /// See [goDormant].
+  final Map<String, String> _textWhenDormant = <String, String>{};
 
   final Map<String, FieldItem> items;
 
@@ -341,6 +363,8 @@ class EngineAutofillForm {
       focusedElementId: focusedElementId,
       associateFocusedElementByAttribute:
           associateFocusedElementByAttribute ?? this.associateFocusedElementByAttribute,
+      // The copy carries the same framework values, so it keeps their order.
+      generation: _generation,
     );
   }
 
@@ -366,7 +390,13 @@ class EngineAutofillForm {
   /// Instead it is linked to the form via the HTML `form` attribute, and any
   /// synthetic placeholder previously created for that field is removed so the
   /// field is represented in the form exactly once.
-  void wakeUp(DomHTMLElement focusedElement, AutofillInfo focusedAutofill) {
+  ///
+  /// Returns the value the browser autofilled into the focused field while
+  /// the form was dormant, or null if there is none. The element that held it
+  /// is replaced by [focusedElement], so the caller must apply the value to
+  /// [focusedElement] and report it to the framework.
+  /// See https://github.com/flutter/flutter/issues/196974.
+  EditingState? wakeUp(DomHTMLElement focusedElement, AutofillInfo focusedAutofill) {
     // Since we're disabling pointer events on the form to fix Safari autofill,
     // we need to explicitly set pointer events on the active input element in
     // order to calculate the correct pointer event offsets.
@@ -400,18 +430,32 @@ class EngineAutofillForm {
         // autofill.
         _lastFrameworkText.addAll(existingForm._lastFrameworkText);
         _lastSentAutofillText.addAll(existingForm._lastSentAutofillText);
+        _lastSentGeneration.addAll(existingForm._lastSentGeneration);
+        // Compare the framework values in this form with what the fields held
+        // when the form went dormant. Skip a field when this form's framework
+        // message predates the last autofill sent for it, for example the
+        // message each activation in semantics mode copies with [copyWith].
+        // That message's value is older than the autofill, so the tracking
+        // above is kept for the field.
+        existingForm._textWhenDormant.forEach((String id, String text) {
+          if (_generation >= (_lastSentGeneration[id] ?? 0)) {
+            _lastFrameworkText[id] = text;
+          }
+        });
       } else {
         formElement = _createFormElementAndFields(focusedElement, focusedAutofill);
         _insertEditingElementInView(formElement!, viewId);
       }
     }
 
+    EditingState? dormantAutofill;
     if (associateFocusedElementByAttribute) {
       // Promote the focused field to its real (semantics-owned) element: drop
       // any synthetic placeholder so the field is not submitted twice, then
       // link the real element to the form by attribute.
-      final DomElement? synthetic = elements[focusedAutofill.uniqueIdentifier];
+      final DomHTMLElement? synthetic = elements[focusedAutofill.uniqueIdentifier];
       if (synthetic != null && synthetic != focusedElement) {
+        dormantAutofill = _dormantAutofillOf(synthetic, focusedAutofill);
         synthetic.remove();
       }
       elements.remove(focusedAutofill.uniqueIdentifier);
@@ -425,12 +469,32 @@ class EngineAutofillForm {
       // could break things.
       //
       // Find the matching element and replace it with the new focused element.
-      final DomElement oldFocusedElement = elements[focusedAutofill.uniqueIdentifier]!;
+      final DomHTMLElement oldFocusedElement = elements[focusedAutofill.uniqueIdentifier]!;
+      dormantAutofill = _dormantAutofillOf(oldFocusedElement, focusedAutofill);
       elements[focusedAutofill.uniqueIdentifier] = focusedElement;
       oldFocusedElement.replaceWith(focusedElement);
     }
 
     _updateFieldValues();
+    return dormantAutofill;
+  }
+
+  /// Returns the value the browser autofilled into [element] while the form
+  /// was dormant, or null if it holds no such value.
+  ///
+  /// [element] is the dormant form's element for the field described by
+  /// [autofill], which is about to be replaced by the newly focused element.
+  /// The rule is the same as for the non-focused fields in
+  /// [_updateFieldValues]: the DOM value is an autofill only when the
+  /// framework value has not changed since this form last saw it.
+  EditingState? _dormantAutofillOf(DomHTMLElement element, AutofillInfo autofill) {
+    final String domText = EditingState.fromDomElement(element).text;
+    final String frameworkText = autofill.editingState.text;
+    final String lastFrameworkText = _lastFrameworkText[autofill.uniqueIdentifier] ?? frameworkText;
+    if (frameworkText != lastFrameworkText || domText.isEmpty || domText == frameworkText) {
+      return null;
+    }
+    return EditingState(text: domText, baseOffset: domText.length, extentOffset: domText.length);
   }
 
   /// Demotes a field that is losing focus in semantics mode back to a synthetic
@@ -500,6 +564,25 @@ class EngineAutofillForm {
   /// 2. Allow submitting the form later.
   void goDormant() {
     assert(formElement != null);
+
+    // Remember the text the framework has for each field, so that waking up
+    // can tell a browser autofill while dormant apart from a later framework
+    // update. The connection was live until now, so the focused field is in
+    // sync with the framework. Another field is only known to be in sync when
+    // it holds the framework's value or an autofill already sent to it.
+    _textWhenDormant.clear();
+    elements.forEach((String id, DomHTMLElement element) {
+      final String text = EditingState.fromDomElement(element).text;
+      if (id == focusedElementId ||
+          text == _lastFrameworkText[id] ||
+          text == _lastSentAutofillText[id]) {
+        _textWhenDormant[id] = text;
+      }
+    });
+    final String? focusedText = _textWhenDormant[focusedElementId];
+    if (focusedText != null) {
+      _lastFrameworkText[focusedElementId] = focusedText;
+    }
 
     dormantForms[formIdentifier] = this;
     _styleAutofillElements(formElement!, isOffScreen: true);
@@ -656,6 +739,7 @@ class EngineAutofillForm {
   /// Sends the 'TextInputClient.updateEditingStateWithTag' message to the framework.
   void _sendAutofillEditingState(String tag, EditingState editingState) {
     _lastSentAutofillText[tag] = editingState.text;
+    _lastSentGeneration[tag] = _nextGeneration;
     EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
       'flutter/textinput',
       const JSONMethodCodec().encodeMethodCall(
@@ -1764,6 +1848,8 @@ abstract class DefaultTextEditingStrategy
     assert(isEnabled);
     _pendingBlurConnectionCloseTimer?.cancel();
     _pendingBlurConnectionCloseTimer = null;
+    _isEnableComplete = false;
+    _pendingDormantAutofill = null;
 
     // Preserve the internal scroll position.
     if (geometry != null && lastEditingState != null) {
@@ -1818,8 +1904,69 @@ abstract class DefaultTextEditingStrategy
   }
 
   void placeForm() {
-    inputConfiguration.autofillGroup!.wakeUp(activeDomElement, inputConfiguration.autofill!);
+    final EditingState? dormantAutofill = inputConfiguration.autofillGroup!.wakeUp(
+      activeDomElement,
+      inputConfiguration.autofill!,
+    );
     _appendedToForm = true;
+    handleDormantAutofill(dormantAutofill);
+  }
+
+  /// A value the browser autofilled into this field while its autofill form
+  /// was dormant, waiting to be reported to the framework.
+  EditingState? _pendingDormantAutofill;
+
+  /// Whether [enable] has finished: the event handlers are attached and the
+  /// framework's editing state has been applied to the element.
+  ///
+  /// [isEnabled] is set earlier than that, and the form is usually woken up
+  /// while [enable] is still running.
+  bool _isEnableComplete = false;
+
+  /// Reports a value the browser autofilled into this field while its
+  /// autofill form was dormant, as returned by [EngineAutofillForm.wakeUp].
+  ///
+  /// The report waits until [enable] has finished. Otherwise [enable] would
+  /// overwrite the value with the framework's older editing state.
+  @protected
+  void handleDormantAutofill(EditingState? autofill) {
+    if (autofill == null) {
+      return;
+    }
+    _pendingDormantAutofill = autofill;
+    // [SemanticsTextEditingStrategy] detaches its element without calling
+    // `super.disable()`, which leaves [_isEnableComplete] set, so check
+    // [isEnabled] too.
+    if (_isEnableComplete && isEnabled) {
+      _reportDormantAutofill();
+    }
+  }
+
+  void _reportDormantAutofill() {
+    final EditingState? autofill = _pendingDormantAutofill;
+    _pendingDormantAutofill = null;
+    if (autofill == null) {
+      return;
+    }
+    final String oldText = lastEditingState?.text ?? '';
+    autofill.applyToDomElement(activeDomElement);
+    lastEditingState = autofill;
+    TextEditingDeltaState? deltaState;
+    if (inputConfiguration.enableDeltaModel) {
+      // The framework has not seen any part of the value, so report it as a
+      // replacement of the whole text.
+      deltaState = TextEditingDeltaState(
+        oldText: oldText,
+        deltaText: autofill.text,
+        deltaStart: 0,
+        deltaEnd: oldText.length,
+        baseOffset: autofill.baseOffset,
+        extentOffset: autofill.extentOffset,
+        composingOffset: -1,
+        composingExtent: -1,
+      );
+    }
+    onChange!(autofill, deltaState);
   }
 
   void handleChange(DomEvent event) {
@@ -2010,6 +2157,8 @@ abstract class DefaultTextEditingStrategy
     required OnActionCallback onAction,
   }) {
     assert(!isEnabled);
+    _isEnableComplete = false;
+    _pendingDormantAutofill = null;
 
     initializeTextEditing(inputConfig, onChange: onChange, onAction: onAction);
 
@@ -2027,6 +2176,12 @@ abstract class DefaultTextEditingStrategy
       final key = '${geometry!.hashCode}_${lastEditingState!.text.hashCode}';
       activeDomElement.scrollTop = _preservedScrollTops.remove(key) ?? 0.0;
     }
+
+    _isEnableComplete = true;
+    // The autofill form is usually woken up while enabling. Report a value
+    // autofilled while it was dormant now that the framework's editing state
+    // has been applied.
+    _reportDormantAutofill();
   }
 
   /// Prevent default behavior for mouse down, up and move.

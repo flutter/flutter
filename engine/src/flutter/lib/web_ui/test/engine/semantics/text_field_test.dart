@@ -967,6 +967,48 @@ void testMain() {
       expect(dormantForms[form.formIdentifier], form);
     });
 
+    // See https://github.com/flutter/flutter/issues/196974
+    test('keeps a dormant autofill of the refocused field', () {
+      final (form: EngineAutofillForm form, textField: SemanticTextField textField) =
+          activateGroup();
+
+      // The connection closes: the focused field is demoted to a synthetic
+      // placeholder and the form goes dormant.
+      strategy.disable();
+
+      // A password manager fills the dormant form.
+      final placeholder = form.elements['field1']! as DomHTMLInputElement;
+      placeholder.value = 'user@example.com';
+
+      // The user focuses the username field again. The new connection builds a
+      // new form for the same group. The framework value is still ''.
+      final List<Map<String, Object?>> fields = _autofillFields(
+        <String>['username', 'password'],
+        <String>['field1', 'field2'],
+      );
+      final focusedMap = fields.first['autofill']! as Map<String, Object?>;
+      final EngineAutofillForm wakeForm = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        focusedMap,
+        fields,
+      )!;
+      expect(wakeForm.formIdentifier, form.formIdentifier);
+      final changes = <EditingState?>[];
+      strategy.enable(
+        InputConfiguration(
+          viewId: kImplicitViewId,
+          autofill: AutofillInfo.fromFrameworkMessage(focusedMap),
+          autofillGroup: wakeForm,
+        ),
+        onChange: (EditingState? editingState, _) => changes.add(editingState),
+        onAction: (_) {},
+      );
+      createTextFieldSemantics(value: '', isFocused: true);
+
+      expect((textField.editableElement as DomHTMLInputElement).value, 'user@example.com');
+      expect(changes.last?.text, 'user@example.com');
+    });
+
     // See https://github.com/flutter/flutter/issues/195174
     test('hides synthetic autofill elements from assistive technology', () {
       final (form: EngineAutofillForm form, textField: SemanticTextField textField) =
