@@ -32,4 +32,4 @@ cd "$(script_location)"
 dart pub get
 
 # Run the cross-platform script.
-../../bin/dart run ci.dart
+../../bin/dart run ci.dart "$@"

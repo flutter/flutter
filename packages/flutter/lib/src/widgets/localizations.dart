@@ -6,6 +6,7 @@
 /// @docImport 'package:flutter_localizations/flutter_localizations.dart';
 ///
 /// @docImport 'app.dart';
+/// @docImport 'editable_text.dart';
 /// @docImport 'reorderable_list.dart';
 library;
 
@@ -349,18 +350,20 @@ class _LocalizationsScope extends InheritedWidget {
   const _LocalizationsScope({
     super.key,
     required this.locale,
+    required this.isDefaultLocale,
     required this.localizationsState,
     required this.typeToResources,
     required super.child,
   });
 
   final Locale locale;
+  final bool isDefaultLocale;
   final _LocalizationsState localizationsState;
   final Map<Type, dynamic> typeToResources;
 
   @override
   bool updateShouldNotify(_LocalizationsScope old) {
-    return typeToResources != old.typeToResources;
+    return typeToResources != old.typeToResources || isDefaultLocale != old.isDefaultLocale;
   }
 }
 
@@ -483,6 +486,7 @@ class Localizations extends StatefulWidget {
     required this.delegates,
     this.child,
     this.isApplicationLevel = false,
+    this.isDefaultLocale = false,
   }) : assert(
          delegates.any(
            (LocalizationsDelegate<dynamic> delegate) =>
@@ -514,6 +518,10 @@ class Localizations extends StatefulWidget {
   /// The `locale` and `delegates` parameters default to the [Localizations.locale]
   /// and [Localizations.delegates] values from the nearest [Localizations] ancestor.
   ///
+  /// If `locale` is null, [isDefaultLocale] is also inherited from the nearest
+  /// [Localizations] ancestor. Otherwise [isDefaultLocale] is false, since the
+  /// locale was chosen explicitly.
+  ///
   /// To override the [Localizations.locale] or [Localizations.delegates] for an
   /// entire app, specify [WidgetsApp.locale] or [WidgetsApp.localizationsDelegates]
   /// (or specify the same parameters for [MaterialApp]).
@@ -534,6 +542,7 @@ class Localizations extends StatefulWidget {
       key: key,
       locale: locale ?? Localizations.localeOf(context),
       delegates: mergedDelegates,
+      isDefaultLocale: locale == null && Localizations.isDefaultLocaleOf(context),
       child: child,
     );
   }
@@ -553,6 +562,51 @@ class Localizations extends StatefulWidget {
   /// Whether this is the main localizations widget that represents the app's
   /// locale.
   final bool isApplicationLevel;
+
+  /// Whether [locale] is a default that the app did not choose, rather than a
+  /// locale the app selected for its content.
+  ///
+  /// For example, [WidgetsApp] sets this to true when the app doesn't
+  /// configure its locales (no [WidgetsApp.locale], no locale resolution
+  /// callbacks, and the default [WidgetsApp.supportedLocales]). In that case
+  /// [locale] is always `en_US`, regardless of the user's preferred locales.
+  ///
+  /// Text widgets such as [RichText] and [EditableText] don't pass a default
+  /// locale to the text engine. The platform's default locale is used for
+  /// font fallback and shaping instead, so that, for example, Han characters
+  /// render with the glyphs the user expects.
+  ///
+  /// Defaults to false.
+  ///
+  /// See also:
+  ///
+  ///  * [isDefaultLocaleOf], which reads this value from a [BuildContext].
+  final bool isDefaultLocale;
+
+  /// Whether the locale of the nearest [Localizations] ancestor of `context`
+  /// is a default that the app did not choose.
+  ///
+  /// Widgets that render text without [RichText] or [EditableText], such as
+  /// custom render objects that use [TextPainter], can use this to pick
+  /// the locale to give to the text engine:
+  ///
+  /// ```dart
+  /// final Locale? textLocale = Localizations.isDefaultLocaleOf(context)
+  ///     ? null
+  ///     : Localizations.maybeLocaleOf(context);
+  /// ```
+  ///
+  /// Returns false if there is no [Localizations] ancestor.
+  ///
+  /// See also:
+  ///
+  ///  * [Localizations.isDefaultLocale], which describes when the locale is a
+  ///    default.
+  static bool isDefaultLocaleOf(BuildContext context) {
+    final _LocalizationsScope? scope = context
+        .dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
+    return scope?.isDefaultLocale ?? false;
+  }
 
   /// The locale of the Localizations widget for the widget tree that
   /// corresponds to [BuildContext] `context`.
@@ -629,6 +683,9 @@ class Localizations extends StatefulWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Locale>('locale', locale));
     properties.add(IterableProperty<LocalizationsDelegate<dynamic>>('delegates', delegates));
+    properties.add(
+      FlagProperty('isDefaultLocale', value: isDefaultLocale, ifTrue: 'default locale'),
+    );
   }
 }
 
@@ -643,7 +700,9 @@ class _LocalizationsState extends State<Localizations> {
     if (_locale == locale) {
       return;
     }
-    WidgetsBinding.instance.platformDispatcher.setApplicationLocale(locale!);
+    if (widget.isApplicationLevel) {
+      WidgetsBinding.instance.platformDispatcher.setApplicationLocale(locale!);
+    }
     _locale = locale;
   }
 
@@ -738,6 +797,7 @@ class _LocalizationsState extends State<Localizations> {
       child: _LocalizationsScope(
         key: _localizedResourcesScopeKey,
         locale: _locale!,
+        isDefaultLocale: widget.isDefaultLocale,
         localizationsState: this,
         typeToResources: _typeToResources,
         child: Directionality(textDirection: _textDirection, child: widget.child!),

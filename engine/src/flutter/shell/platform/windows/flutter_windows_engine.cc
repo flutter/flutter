@@ -210,11 +210,19 @@ FlutterWindowsEngine::FlutterWindowsEngine(
   }
   enable_impeller_ = enable_impeller;
 
+  const std::optional<egl::D3DFeatureLevel> max_d3d_feature_level =
+      project_->max_d3d_feature_level();
+  if (max_d3d_feature_level.has_value()) {
+    FML_LOG(WARNING) << "Capping ANGLE's D3D11 feature level to "
+                     << max_d3d_feature_level->major << "_"
+                     << max_d3d_feature_level->minor << ".";
+  }
+
   // Only Impeller knows how to render into a top-left origin default
   // framebuffer. The Skia path still expects OpenGL's bottom-left origin.
   egl_manager_ = egl::Manager::Create(
       static_cast<egl::GpuPreference>(project_->gpu_preference()),
-      /*allow_inverted_surface=*/enable_impeller_);
+      /*allow_inverted_surface=*/enable_impeller_, max_d3d_feature_level);
   window_proc_delegate_manager_ = std::make_unique<WindowProcDelegateManager>();
 
   display_manager_ = std::make_shared<DisplayManagerWin32>(this);

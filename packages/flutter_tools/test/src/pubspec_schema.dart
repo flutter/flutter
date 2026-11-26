@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/error_handling_io.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:yaml/yaml.dart';
 
 import 'common.dart';
+import 'context.dart' show FakeSignals;
 
 /// Check if the pubspec.yaml file under the `projectDir` is valid for a plugin project.
 void validatePubspecForPlugin({
@@ -16,13 +20,20 @@ void validatePubspecForPlugin({
   required List<String> expectedPlatforms,
   List<String> unexpectedPlatforms = const <String>[],
   String? androidIdentifier,
+  FileSystem? fileSystem,
+  Logger? logger,
   String? webFileName,
 }) {
   assert(pluginClass != null || ffiPlugin);
   final FlutterManifest manifest = FlutterManifest.createFromPath(
     '$projectDir/pubspec.yaml',
-    fileSystem: globals.fs,
-    logger: globals.logger,
+    fileSystem:
+        fileSystem ??
+        ErrorHandlingFileSystem(
+          delegate: LocalFileSystem.test(signals: FakeSignals()),
+          platform: const LocalPlatform(),
+        ),
+    logger: logger ?? BufferLogger.test(),
   )!;
   final platformMaps = YamlMap.wrap(manifest.supportedPlatforms!);
   for (final platform in expectedPlatforms) {

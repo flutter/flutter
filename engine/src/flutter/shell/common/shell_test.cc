@@ -286,7 +286,8 @@ void ShellTest::DispatchFakePointerData(Shell* shell, double x) {
 void ShellTest::DispatchPointerData(Shell* shell,
                                     std::unique_ptr<PointerDataPacket> packet) {
   fml::AutoResetWaitableEvent latch;
-  shell->GetTaskRunners().GetPlatformTaskRunner()->PostTask(
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetPlatformTaskRunner(),
       [&latch, shell, &packet]() {
         // Goes through PlatformView to ensure packet is corrected converted.
         shell->GetPlatformView()->DispatchPointerDataPacket(std::move(packet));
@@ -311,6 +312,12 @@ void ShellTest::StorePersistentCache(PersistentCache* cache,
                                      const SkData& key,
                                      const SkData& value) {
   cache->store(key, value);
+}
+
+rapidjson::Value ShellTest::MakePipelineUsageJson(
+    const impeller::PipelineLibrary& pipeline_library,
+    rapidjson::Document::AllocatorType& allocator) {
+  return Shell::MakePipelineUsageJson(pipeline_library, allocator);
 }
 
 void ShellTest::OnServiceProtocol(

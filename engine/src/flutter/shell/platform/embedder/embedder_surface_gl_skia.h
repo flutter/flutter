@@ -50,6 +50,9 @@ class EmbedderSurfaceGLSkia final : public EmbedderSurface,
   // |EmbedderSurface|
   sk_sp<GrDirectContext> CreateResourceContext() const override;
 
+  // |EmbedderSurface|
+  void ReleaseResourceContext() const override;
+
   // |GPUSurfaceGLDelegate|
   std::unique_ptr<GLContextResult> GLContextMakeCurrent() override;
 

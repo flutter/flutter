@@ -150,6 +150,9 @@ class StandardCapabilities final : public Capabilities {
     return needs_partitioned_host_buffer_;
   }
 
+  // |Capabilities|
+  ComputeLimits GetComputeLimits() const override { return compute_limits_; }
+
  private:
   StandardCapabilities(bool supports_offscreen_msaa,
                        bool supports_ssbo,
@@ -173,7 +176,8 @@ class StandardCapabilities final : public Capabilities {
                        bool supports_texture_compression_bc,
                        bool supports_texture_compression_etc2,
                        bool supports_texture_compression_astc,
-                       bool supports_texture_compression_astc_hdr)
+                       bool supports_texture_compression_astc_hdr,
+                       const ComputeLimits& compute_limits)
       : supports_offscreen_msaa_(supports_offscreen_msaa),
         supports_ssbo_(supports_ssbo),
         supports_texture_to_texture_blits_(supports_texture_to_texture_blits),
@@ -199,7 +203,8 @@ class StandardCapabilities final : public Capabilities {
         supports_texture_compression_etc2_(supports_texture_compression_etc2),
         supports_texture_compression_astc_(supports_texture_compression_astc),
         supports_texture_compression_astc_hdr_(
-            supports_texture_compression_astc_hdr) {}
+            supports_texture_compression_astc_hdr),
+        compute_limits_(compute_limits) {}
 
   friend class CapabilitiesBuilder;
 
@@ -226,6 +231,7 @@ class StandardCapabilities final : public Capabilities {
   bool supports_texture_compression_etc2_ = false;
   bool supports_texture_compression_astc_ = false;
   bool supports_texture_compression_astc_hdr_ = false;
+  ComputeLimits compute_limits_;
 
   StandardCapabilities(const StandardCapabilities&) = delete;
 
@@ -366,6 +372,12 @@ CapabilitiesBuilder& CapabilitiesBuilder::SetNeedsPartitionedHostBuffer(
   return *this;
 }
 
+CapabilitiesBuilder& CapabilitiesBuilder::SetComputeLimits(
+    const ComputeLimits& value) {
+  compute_limits_ = value;
+  return *this;
+}
+
 std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
   // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
   return std::unique_ptr<StandardCapabilities>(new StandardCapabilities(   //
@@ -391,7 +403,8 @@ std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
       supports_texture_compression_bc_,                                    //
       supports_texture_compression_etc2_,                                  //
       supports_texture_compression_astc_,                                  //
-      supports_texture_compression_astc_hdr_                               //
+      supports_texture_compression_astc_hdr_,                              //
+      compute_limits_                                                      //
       ));
 }
 

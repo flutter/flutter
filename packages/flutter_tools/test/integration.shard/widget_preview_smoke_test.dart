@@ -10,12 +10,10 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:flutter_tools/src/devtools_launcher.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fakes.dart';
 import 'test_data/basic_project.dart';
 import 'test_utils.dart';
@@ -47,11 +45,11 @@ void main() {
   });
 
   group('flutter widget-preview start', () {
-    testWithoutContext('smoke test', () async {
+    test('smoke test', () async {
       await runWidgetPreview(tempDir: tempDir, expectedMessages: firstLaunchMessagesWeb);
     });
 
-    testWithoutContext('--web-server starts a web server instance', () async {
+    test('--web-server starts a web server instance', () async {
       await runWidgetPreview(
         tempDir: tempDir,
         expectedMessages: firstLaunchMessagesWebServer,
@@ -59,7 +57,7 @@ void main() {
       );
     });
 
-    testWithoutContext('runs flutter pub get in widget_preview_scaffold if '
+    test('runs flutter pub get in widget_preview_scaffold if '
         "widget_preview_scaffold/.dart_tool doesn't exist", () async {
       // Regression test for https://github.com/flutter/flutter/issues/178660
       // Generate the widget preview scaffold, but don't bother launching it.
@@ -88,7 +86,7 @@ void main() {
       await runWidgetPreview(tempDir: tempDir, expectedMessages: subsequentLaunchMessagesWeb);
     });
 
-    testWithoutContext('does not recreate project on subsequent runs', () async {
+    test('does not recreate project on subsequent runs', () async {
       // The first run of 'flutter widget-preview start' should generate a new preview scaffold
       await runWidgetPreview(tempDir: tempDir, expectedMessages: firstLaunchMessagesWeb);
 
@@ -96,11 +94,11 @@ void main() {
       await runWidgetPreview(tempDir: tempDir, expectedMessages: subsequentLaunchMessagesWeb);
     });
 
-    testUsingContext('can connect to an existing DTD instance', () async {
+    test('can connect to an existing DTD instance', () async {
       dtdLauncher = DtdLauncher(
         logger: logger!,
-        artifacts: globals.artifacts!,
-        processManager: globals.processManager,
+        artifacts: createWidgetPreviewTestArtifacts(logger: logger),
+        processManager: processManager,
       );
 
       // Start a DTD instance.
@@ -130,12 +128,12 @@ void main() {
       await completer.future;
     });
 
-    testUsingContext('can connect to an existing DevTools instance', () async {
+    test('can connect to an existing DevTools instance', () async {
       devtoolsLauncher = DevtoolsServerLauncher(
         processManager: processManager,
         logger: logger!,
         botDetector: const FakeBotDetector(true),
-        artifacts: globals.artifacts!,
+        artifacts: createWidgetPreviewTestArtifacts(logger: logger),
       );
 
       // Start a DevTools instance.
@@ -151,12 +149,12 @@ void main() {
       );
     });
 
-    testUsingContext("doesn't crash on flutter clean", () async {
+    test("doesn't crash on flutter clean", () async {
       // Regression test for https://github.com/flutter/flutter/issues/175058.
       dtdLauncher = DtdLauncher(
         logger: logger!,
-        artifacts: globals.artifacts!,
-        processManager: globals.processManager,
+        artifacts: createWidgetPreviewTestArtifacts(logger: logger),
+        processManager: processManager,
       );
 
       // Start a DTD instance.

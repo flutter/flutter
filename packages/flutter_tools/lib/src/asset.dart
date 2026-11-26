@@ -9,14 +9,12 @@ import 'package:package_config/package_config.dart';
 import 'package:standard_message_codec/standard_message_codec.dart';
 
 import 'base/common.dart';
-import 'base/context.dart';
 import 'base/deferred_component.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'cache.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
@@ -72,8 +70,8 @@ class FlutterHookResult {
 
   static bool _wasAnyFileModifiedSince(FileSystem fileSystem, DateTime since, List<Uri> uris) {
     for (final uri in uris) {
-      final DateTime modified = fileSystem.statSync(uri.toFilePath()).modified;
-      if (modified.isAfter(since)) {
+      final FileStat stat = fileSystem.statSync(fileSystem.path.fromUri(uri));
+      if (stat.type == FileSystemEntityType.notFound || stat.modified.isAfter(since)) {
         return true;
       }
     }
@@ -130,17 +128,16 @@ const kMaterialFonts = <Map<String, Object>>[
 
 /// Injected factory class for spawning [AssetBundle] instances.
 abstract class AssetBundleFactory {
-  /// The singleton instance, pulled from the [AppContext].
-  static AssetBundleFactory get instance => context.get<AssetBundleFactory>()!;
-
   static AssetBundleFactory defaultInstance({
-    required Logger logger,
     required FileSystem fileSystem,
+    required String flutterRoot,
+    required Logger logger,
     required Platform platform,
     bool splitDeferredAssets = false,
   }) => _ManifestAssetBundleFactory(
-    logger: logger,
     fileSystem: fileSystem,
+    flutterRoot: flutterRoot,
+    logger: logger,
     platform: platform,
     splitDeferredAssets: splitDeferredAssets,
   );
@@ -201,8 +198,9 @@ abstract class AssetBundle {
 
 class _ManifestAssetBundleFactory implements AssetBundleFactory {
   _ManifestAssetBundleFactory({
-    required this._logger,
     required this._fileSystem,
+    required this._flutterRoot,
+    required this._logger,
     required this._platform,
     this._splitDeferredAssets = false,
   });
@@ -210,6 +208,7 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
   final Logger _logger;
   final FileSystem _fileSystem;
   final Platform _platform;
+  final String _flutterRoot;
   final bool _splitDeferredAssets;
 
   @override
@@ -217,7 +216,7 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
     logger: _logger,
     fileSystem: _fileSystem,
     platform: _platform,
-    flutterRoot: Cache.flutterRoot!,
+    flutterRoot: _flutterRoot,
     splitDeferredAssets: _splitDeferredAssets,
   );
 }
@@ -323,7 +322,10 @@ class ManifestAssetBundle implements AssetBundle {
   }) async {
     if (flutterProject == null) {
       try {
-        flutterProject = FlutterProject.fromDirectory(_fileSystem.file(manifestPath).parent);
+        flutterProject = FlutterProject.fromDirectory(
+          _fileSystem.file(manifestPath).parent,
+          logger: _logger,
+        );
       } on Exception catch (e) {
         _logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
         _logger.printError('$e');
@@ -530,7 +532,7 @@ class ManifestAssetBundle implements AssetBundle {
       final Package package = packageConfig[dataAsset.package]!;
       final Uri fileUri = dataAsset.file;
 
-      final String filePath = fileUri.toFilePath();
+      final String filePath = _fileSystem.path.fromUri(fileUri);
 
       final asset = _Asset(
         baseDir: _fileSystem.path.dirname(filePath),

@@ -4,8 +4,7 @@
 
 #include "impeller/renderer/render_target.h"
 
-#include <format>
-#include <sstream>
+#include <string>
 
 #include "impeller/base/validation.h"
 #include "impeller/core/allocator.h"
@@ -13,6 +12,7 @@
 #include "impeller/core/texture.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/context.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace impeller {
 
@@ -291,27 +291,25 @@ size_t RenderTarget::GetTotalAttachmentCount() const {
 }
 
 std::string RenderTarget::ToString() const {
-  std::stringstream stream;
+  std::string result;
 
   if (color0_.has_value()) {
-    stream << std::format("Color[{}]=({})", 0,
-                          ColorAttachmentToString(color0_.value()));
+    absl::StrAppend(&result, "Color[0]=(",
+                    ColorAttachmentToString(color0_.value()), ")");
   }
   for (const auto& [index, color] : colors_) {
-    stream << std::format("Color[{}]=({})", index,
-                          ColorAttachmentToString(color));
+    absl::StrAppend(&result, "Color[", index, "]=(",
+                    ColorAttachmentToString(color), ")");
   }
   if (depth_) {
-    stream << ",";
-    stream << std::format("Depth=({})",
-                          DepthAttachmentToString(depth_.value()));
+    absl::StrAppend(&result, ",Depth=(",
+                    DepthAttachmentToString(depth_.value()), ")");
   }
   if (stencil_) {
-    stream << ",";
-    stream << std::format("Stencil=({})",
-                          StencilAttachmentToString(stencil_.value()));
+    absl::StrAppend(&result, ",Stencil=(",
+                    StencilAttachmentToString(stencil_.value()), ")");
   }
-  return stream.str();
+  return result;
 }
 
 RenderTargetConfig RenderTarget::ToConfig() const {

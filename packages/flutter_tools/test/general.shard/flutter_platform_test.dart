@@ -17,9 +17,11 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/flutter_platform.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test/fake.dart';
@@ -27,7 +29,7 @@ import 'package:test_core/backend.dart';
 import 'package:vm_service/src/vm_service.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
+import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
 void main() {
@@ -46,164 +48,135 @@ void main() {
       fakeSuitePlatform = SuitePlatform(Runtime.vm);
     });
 
-    testUsingContext(
-      'ensureConfiguration throws an error if an '
-      'explicitVmServicePort is specified and more than one test file',
-      () async {
-        final flutterPlatform = FlutterPlatform(
-          flutterTesterBinPath: '/',
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, hostVmServicePort: 1234),
-          enableVmService: false,
-          buildInfo: BuildInfo.debug,
-          toolContext: FakeToolContext(
-            fs: fileSystem,
-            logger: BufferLogger.test(),
-            artifacts: Artifacts.test(fileSystem: fileSystem),
-            config: Config.test(),
-            platform: FakePlatform(),
-            processManager: FakeProcessManager.empty(),
-            shutdownHooks: ShutdownHooks(),
+    test('ensureConfiguration throws an error if an '
+        'explicitVmServicePort is specified and more than one test file', () async {
+      final flutterPlatform = FlutterPlatform(
+        flutterTesterBinPath: '/',
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, hostVmServicePort: 1234),
+        enableVmService: false,
+        buildInfo: BuildInfo.debug,
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          artifacts: Artifacts.test(fileSystem: fileSystem),
+          config: Config.test(),
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.empty(),
+          shutdownHooks: ShutdownHooks(),
+        ),
+      );
+      flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform);
+
+      expect(() => flutterPlatform.loadChannel('test2.dart', fakeSuitePlatform), throwsToolExit());
+    });
+
+    test('ensureConfiguration throws an error if a precompiled '
+        'entrypoint is specified and more that one test file', () {
+      final flutterPlatform = FlutterPlatform(
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        flutterTesterBinPath: '/',
+        precompiledDillPath: 'example.dill',
+        enableVmService: false,
+        buildInfo: BuildInfo.debug,
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          artifacts: Artifacts.test(fileSystem: fileSystem),
+          config: Config.test(),
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.empty(),
+          shutdownHooks: ShutdownHooks(),
+        ),
+      );
+      flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform);
+
+      expect(() => flutterPlatform.loadChannel('test2.dart', fakeSuitePlatform), throwsToolExit());
+    });
+
+    test('an exception from the app not starting bubbles up to the test runner', () async {
+      final testDevice = _UnstartableDevice();
+      final logger = BufferLogger.test();
+      final flutterPlatform = FlutterPlatform(
+        applicationPackageFactory: _FakeApplicationPackageFactory(),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        flutterTesterBinPath: '/',
+        enableVmService: false,
+        integrationTestDevice: testDevice,
+        flutterProject: _FakeFlutterProject(directory: fileSystem.directory('/project')),
+        host: InternetAddress.anyIPv4,
+        updateGoldens: false,
+        buildInfo: BuildInfo.debug,
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          artifacts: Artifacts.test(fileSystem: fileSystem),
+          config: Config.test(),
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.empty(),
+          shutdownHooks: ShutdownHooks(),
+        ),
+      );
+
+      await expectLater(
+        () => flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform).stream.drain<void>(),
+        // we intercept the actual exception and throw a string for the test runner to catch
+        throwsA(
+          isA<String>().having(
+            (String msg) => msg,
+            'string',
+            'Unable to start the app on the device.',
           ),
-        );
-        flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform);
+        ),
+      );
+      expect(logger.traceText, contains('test 0: error caught during test;'));
+    });
 
-        expect(
-          () => flutterPlatform.loadChannel('test2.dart', fakeSuitePlatform),
-          throwsToolExit(),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+    test('a shutdown signal terminates the test device', () async {
+      final testDevice = _WorkingDevice();
+      final logger = BufferLogger.test();
 
-    testUsingContext(
-      'ensureConfiguration throws an error if a precompiled '
-      'entrypoint is specified and more that one test file',
-      () {
-        final flutterPlatform = FlutterPlatform(
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-          flutterTesterBinPath: '/',
-          precompiledDillPath: 'example.dill',
-          enableVmService: false,
-          buildInfo: BuildInfo.debug,
-          toolContext: FakeToolContext(
-            fs: fileSystem,
-            logger: BufferLogger.test(),
-            artifacts: Artifacts.test(fileSystem: fileSystem),
-            config: Config.test(),
-            platform: FakePlatform(),
-            processManager: FakeProcessManager.empty(),
-            shutdownHooks: ShutdownHooks(),
-          ),
-        );
-        flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform);
+      final shutdownHooks = ShutdownHooks();
+      final flutterPlatform = FlutterPlatform(
+        applicationPackageFactory: _FakeApplicationPackageFactory(),
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        flutterTesterBinPath: '/',
+        enableVmService: false,
+        integrationTestDevice: testDevice,
+        flutterProject: _FakeFlutterProject(directory: fileSystem.directory('/project')),
+        host: InternetAddress.anyIPv4,
+        updateGoldens: false,
+        buildInfo: BuildInfo.debug,
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          artifacts: Artifacts.test(fileSystem: fileSystem),
+          config: Config.test(),
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.empty(),
+          shutdownHooks: shutdownHooks,
+        ),
+      );
 
-        expect(
-          () => flutterPlatform.loadChannel('test2.dart', fakeSuitePlatform),
-          throwsToolExit(),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      await expectLater(
+        () => flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform).stream.drain<void>(),
+        returnsNormally,
+      );
 
-    testUsingContext(
-      'an exception from the app not starting bubbles up to the test runner',
-      () async {
-        final testDevice = _UnstartableDevice();
-        final logger = BufferLogger.test();
-        final flutterPlatform = FlutterPlatform(
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-          flutterTesterBinPath: '/',
-          enableVmService: false,
-          integrationTestDevice: testDevice,
-          flutterProject: _FakeFlutterProject(),
-          host: InternetAddress.anyIPv4,
-          updateGoldens: false,
-          buildInfo: BuildInfo.debug,
-          toolContext: FakeToolContext(
-            fs: fileSystem,
-            logger: logger,
-            artifacts: Artifacts.test(fileSystem: fileSystem),
-            config: Config.test(),
-            platform: FakePlatform(),
-            processManager: FakeProcessManager.empty(),
-            shutdownHooks: ShutdownHooks(),
-          ),
-        );
+      await shutdownHooks.runShutdownHooks(logger);
+      expect(logger.traceText, contains('test 0: ensuring test device is terminated.'));
+    });
 
-        await expectLater(
-          () => flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform).stream.drain<void>(),
-          // we intercept the actual exception and throw a string for the test runner to catch
-          throwsA(
-            isA<String>().having(
-              (String msg) => msg,
-              'string',
-              'Unable to start the app on the device.',
-            ),
-          ),
-        );
-        expect(logger.traceText, contains('test 0: error caught during test;'));
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        ApplicationPackageFactory: () => _FakeApplicationPackageFactory(),
-      },
-    );
-
-    testUsingContext(
-      'a shutdown signal terminates the test device',
-      () async {
-        final testDevice = _WorkingDevice();
-        final logger = BufferLogger.test();
-
-        final shutdownHooks = ShutdownHooks();
-        final flutterPlatform = FlutterPlatform(
-          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
-          flutterTesterBinPath: '/',
-          enableVmService: false,
-          integrationTestDevice: testDevice,
-          flutterProject: _FakeFlutterProject(),
-          host: InternetAddress.anyIPv4,
-          updateGoldens: false,
-          buildInfo: BuildInfo.debug,
-          toolContext: FakeToolContext(
-            fs: fileSystem,
-            logger: logger,
-            artifacts: Artifacts.test(fileSystem: fileSystem),
-            config: Config.test(),
-            platform: FakePlatform(),
-            processManager: FakeProcessManager.empty(),
-            shutdownHooks: shutdownHooks,
-          ),
-        );
-
-        await expectLater(
-          () => flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform).stream.drain<void>(),
-          returnsNormally,
-        );
-
-        await shutdownHooks.runShutdownHooks(logger);
-        expect(logger.traceText, contains('test 0: ensuring test device is terminated.'));
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        ApplicationPackageFactory: () => _FakeApplicationPackageFactory(),
-      },
-    );
-
-    testUsingContext('installHook creates a FlutterPlatform', () {
+    test('installHook creates a FlutterPlatform', () {
       expect(
         () => installHook(
           flutterTesterBinPath: 'abc',
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
           buildInfo: BuildInfo.debug,
+          templateRenderer: const MustacheTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: BufferLogger.test(),
@@ -226,6 +199,7 @@ void main() {
             hostVmServicePort: 123,
           ),
           buildInfo: BuildInfo.debug,
+          templateRenderer: const MustacheTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: BufferLogger.test(),
@@ -261,6 +235,7 @@ void main() {
           capturedPlatform = platform;
         },
         buildInfo: BuildInfo.debug,
+        templateRenderer: const MustacheTemplateRenderer(),
         toolContext: FakeToolContext(
           fs: fileSystem,
           logger: BufferLogger.test(),
@@ -288,51 +263,48 @@ void main() {
       expect(flutterPlatform.icudtlPath, equals('ghi'));
     });
 
-    testWithoutContext(
-      'pipeHarnessToRemote safely ignores non-JSON string and logs warning',
-      () async {
-        final harnessController = StreamChannelController<Object?>();
-        final remoteController = StreamChannelController<String>();
-        final logger = BufferLogger.test();
+    test('pipeHarnessToRemote safely ignores non-JSON string and logs warning', () async {
+      final harnessController = StreamChannelController<Object?>();
+      final remoteController = StreamChannelController<String>();
+      final logger = BufferLogger.test();
 
-        final Future<void> pipeFuture = pipeHarnessToRemote(
-          id: 0,
-          harnessChannel: harnessController.foreign,
-          remoteChannel: remoteController.foreign,
-          logger: logger,
-        );
+      final Future<void> pipeFuture = pipeHarnessToRemote(
+        id: 0,
+        harnessChannel: harnessController.foreign,
+        remoteChannel: remoteController.foreign,
+        logger: logger,
+      );
 
-        final receivedFromRemote = <Object?>[];
-        harnessController.local.stream.listen(receivedFromRemote.add);
+      final receivedFromRemote = <Object?>[];
+      harnessController.local.stream.listen(receivedFromRemote.add);
 
-        // Send non-JSON error string from remote channel followed by valid JSON.
-        remoteController.local.sink.add(
-          'Loading dynamic library failed: dlopen(/opt/homebrew/share/flutter/bin/cache/libflutter.dylib)',
-        );
-        remoteController.local.sink.add('{"valid": true}');
+      // Send non-JSON error string from remote channel followed by valid JSON.
+      remoteController.local.sink.add(
+        'Loading dynamic library failed: dlopen(/opt/homebrew/share/flutter/bin/cache/libflutter.dylib)',
+      );
+      remoteController.local.sink.add('{"valid": true}');
 
-        await pumpEventQueue();
+      await pumpEventQueue();
 
-        await remoteController.local.sink.close();
-        await harnessController.local.sink.close();
+      await remoteController.local.sink.close();
+      await harnessController.local.sink.close();
 
-        await pipeFuture;
+      await pipeFuture;
 
-        expect(
-          receivedFromRemote,
-          equals(<Object?>[
-            <String, Object?>{'valid': true},
-          ]),
-        );
-        expect(
-          logger.warningText,
-          contains(
-            'Received unexpected non-JSON output from test runner: Loading dynamic library failed: dlopen',
-          ),
-        );
-        expect(logger.traceText, contains('test 0: JSON decoding failed:'));
-      },
-    );
+      expect(
+        receivedFromRemote,
+        equals(<Object?>[
+          <String, Object?>{'valid': true},
+        ]),
+      );
+      expect(
+        logger.warningText,
+        contains(
+          'Received unexpected non-JSON output from test runner: Loading dynamic library failed: dlopen',
+        ),
+      );
+      expect(logger.traceText, contains('test 0: JSON decoding failed:'));
+    });
   });
 
   group('generateTestBootstrap', () {
@@ -425,55 +397,47 @@ void main() {
       );
     }
 
-    testUsingContext(
-      'should not listen in a non-integration test',
-      () async {
-        addFlutterTesterDeviceExpectation();
+    test('should not listen in a non-integration test', () async {
+      addFlutterTesterDeviceExpectation();
 
-        const Device? notAnIntegrationTest = null;
-        final flutterPlatform = FlutterPlatform(
-          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
-          flutterTesterBinPath: 'flutter_tester',
-          enableVmService: false,
-          // ignore: avoid_redundant_argument_values
-          integrationTestDevice: notAnIntegrationTest,
-          flutterProject: flutterProject,
-          host: InternetAddress.anyIPv4,
-          updateGoldens: false,
-          buildInfo: BuildInfo.debug,
-          toolContext: FakeToolContext(
-            fs: fileSystem,
-            logger: BufferLogger.test(),
-            artifacts: artifacts,
-            config: Config.test(),
-            platform: FakePlatform(),
-            processManager: processManager,
-            shutdownHooks: ShutdownHooks(),
-          ),
-        );
-        flutterPlatform.compiler = testCompiler;
+      const Device? notAnIntegrationTest = null;
+      final flutterPlatform = FlutterPlatform(
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        flutterTesterBinPath: 'flutter_tester',
+        enableVmService: false,
+        // ignore: avoid_redundant_argument_values
+        integrationTestDevice: notAnIntegrationTest,
+        flutterProject: flutterProject,
+        host: InternetAddress.anyIPv4,
+        updateGoldens: false,
+        buildInfo: BuildInfo.debug,
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          artifacts: artifacts,
+          config: Config.test(),
+          platform: FakePlatform(),
+          processManager: processManager,
+          shutdownHooks: ShutdownHooks(),
+        ),
+        vmServiceConnector: _fakeVmServiceConnector(() => throw UnimplementedError()),
+      );
+      flutterPlatform.compiler = testCompiler;
 
-        // Simulate the test immediately completing.
-        testCompleter.complete();
+      // Simulate the test immediately completing.
+      testCompleter.complete();
 
-        final StreamChannel<Object?> channel = flutterPlatform.loadChannel(
-          'test1.dart',
-          fakeSuitePlatform,
-        );
+      final StreamChannel<Object?> channel = flutterPlatform.loadChannel(
+        'test1.dart',
+        fakeSuitePlatform,
+      );
 
-        // Without draining, the sink will never complete.
-        unawaited(channel.stream.drain<void>());
+      // Without draining, the sink will never complete.
+      unawaited(channel.stream.drain<void>());
 
-        await expectLater(channel.sink.done, completes);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-        Logger: () => logger,
-        VMServiceConnector: () =>
-            (_) => throw UnimplementedError(),
-      },
-    );
+      await expectLater(channel.sink.done, completes);
+    });
 
     // This is not a complete test of all the possible cases supported by the
     // golden-file integration, which is a complex multi-process implementation
@@ -485,99 +449,287 @@ void main() {
     // an Android or iOS device or emulator/simulator that takes screenshots
     // and compares them with matchesGoldenFile for a full e2e-test of the
     // entire workflow.
-    testUsingContext(
-      'should listen in an integration test',
-      () async {
-        processManager.addCommand(
-          const FakeCommand(
-            command: <String>[
-              'flutter_tester',
-              '--disable-vm-service',
-              '--non-interactive',
-              'path_to_output.dill',
-            ],
-            stdout: '{"success": true}\n',
-          ),
-        );
-        addFlutterTesterDeviceExpectation();
+    test('should listen in an integration test', () async {
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'flutter_tester',
+            '--disable-vm-service',
+            '--non-interactive',
+            'path_to_output.dill',
+          ],
+          stdout: '{"success": true}\n',
+        ),
+      );
+      addFlutterTesterDeviceExpectation();
 
-        final flutterPlatform = FlutterPlatform(
-          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
-          flutterTesterBinPath: 'flutter_tester',
-          enableVmService: false,
-          flutterProject: flutterProject,
-          integrationTestDevice: _WorkingDevice(),
-          host: InternetAddress.anyIPv4,
-          updateGoldens: false,
-          buildInfo: BuildInfo.debug,
-          toolContext: FakeToolContext(
-            fs: fileSystem,
-            logger: BufferLogger.test(),
-            artifacts: artifacts,
-            config: Config.test(),
-            platform: FakePlatform(),
-            processManager: processManager,
-            shutdownHooks: ShutdownHooks(),
-          ),
-        );
-        flutterPlatform.compiler = testCompiler;
+      final flutterPlatform = FlutterPlatform(
+        applicationPackageFactory: _FakeApplicationPackageFactory(),
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        flutterTesterBinPath: 'flutter_tester',
+        enableVmService: false,
+        flutterProject: flutterProject,
+        integrationTestDevice: _WorkingDevice(),
+        host: InternetAddress.anyIPv4,
+        updateGoldens: false,
+        buildInfo: BuildInfo.debug,
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          artifacts: artifacts,
+          config: Config.test(),
+          platform: FakePlatform(),
+          processManager: processManager,
+          shutdownHooks: ShutdownHooks(),
+        ),
+        vmServiceConnector: _fakeVmServiceConnector(() => flutterVmService),
+      );
+      flutterPlatform.compiler = testCompiler;
 
-        final StreamChannel<Object?> channel = flutterPlatform.loadChannel(
-          'test1.dart',
-          fakeSuitePlatform,
-        );
+      final StreamChannel<Object?> channel = flutterPlatform.loadChannel(
+        'test1.dart',
+        fakeSuitePlatform,
+      );
 
-        // Responds to update events.
-        flutterVmService.service.onExtensionEventController.add(
-          Event(
-            extensionData: ExtensionData.parse(<String, Object?>{
-              'id': 1,
-              'path': 'foo',
-              'bytes': '',
-            }),
-            extensionKind: 'update',
-          ),
-        );
+      // Responds to update events.
+      flutterVmService.service.onExtensionEventController.add(
+        Event(
+          extensionData: ExtensionData.parse(<String, Object?>{
+            'id': 1,
+            'path': 'foo',
+            'bytes': '',
+          }),
+          extensionKind: 'update',
+        ),
+      );
 
-        // Wait for tiny async tasks to complete.
-        await pumpEventQueue();
-        await flutterVmService.service.onExtensionEventController.close();
+      // Wait for tiny async tasks to complete.
+      await pumpEventQueue();
+      await flutterVmService.service.onExtensionEventController.close();
 
-        final (String event, String? isolateId, Map<String, Object?>? data) =
-            flutterVmService.callMethodWrapperInvocation!;
-        expect(event, 'ext.integration_test.VmServiceProxyGoldenFileComparator');
-        expect(isolateId, null);
-        expect(data, <String, Object?>{'id': 1, 'result': true});
+      final (String event, String? isolateId, Map<String, Object?>? data) =
+          flutterVmService.callMethodWrapperInvocation!;
+      expect(event, 'ext.integration_test.VmServiceProxyGoldenFileComparator');
+      expect(isolateId, null);
+      expect(data, <String, Object?>{'id': 1, 'result': true});
 
-        // Without draining, the sink will never complete.
-        unawaited(channel.stream.drain<void>());
+      // Without draining, the sink will never complete.
+      unawaited(channel.stream.drain<void>());
 
-        // Allow the test to finish.
-        testCompleter.complete();
+      // Allow the test to finish.
+      testCompleter.complete();
 
-        await expectLater(channel.sink.done, completes);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-        Logger: () => logger,
-        VMServiceConnector: () =>
-            (
-              Uri httpUri, {
-              ReloadSources? reloadSources,
-              Restart? restart,
-              CompileExpression? compileExpression,
-              FlutterProject? flutterProject,
-              PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-              io.CompressionOptions? compression,
-              Device? device,
-              Logger? logger,
-            }) async => flutterVmService,
-        ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
-        Artifacts: () => artifacts,
-      },
-    );
+      await expectLater(channel.sink.done, completes);
+    });
   });
+
+  group('listener.dart generation', () {
+    late SuitePlatform fakeSuitePlatform;
+    late FakeProcessManager processManager;
+    late BufferLogger logger;
+    late FileSystem windowsFs;
+
+    setUp(() {
+      fakeSuitePlatform = SuitePlatform(Runtime.vm);
+      processManager = FakeProcessManager.empty();
+      logger = BufferLogger.test();
+      windowsFs = MemoryFileSystem.test(style: .windows);
+      windowsFs.file(r'C:\.dart_tool\package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"configVersion":2,"packages":[]}');
+    });
+
+    FlutterPlatform createPlatform({
+      required FlutterProject flutterProject,
+      required FileSystem fs,
+      Device? integrationTestDevice,
+      Platform? platform,
+    }) {
+      return FlutterPlatform(
+        applicationPackageFactory: _FakeApplicationPackageFactory(),
+        debuggingOptions: DebuggingOptions.disabled(.debug),
+        flutterTesterBinPath: 'flutter_tester',
+        enableVmService: false,
+        flutterProject: flutterProject,
+        integrationTestDevice: integrationTestDevice,
+        host: InternetAddress.anyIPv4,
+        updateGoldens: false,
+        buildInfo: .debug,
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: FakeToolContext(
+          fs: fs,
+          logger: logger,
+          artifacts: Artifacts.test(fileSystem: fs),
+          config: Config.test(),
+          platform: platform ?? FakePlatform(),
+          processManager: processManager,
+          shutdownHooks: ShutdownHooks(),
+        ),
+        vmServiceConnector: _fakeVmServiceConnector(_FakeFlutterVmService.new),
+      );
+    }
+
+    test('creates listener file in project build directory for integration tests with stable path across runs and cleans up on completion', () async {
+      final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(projectDir);
+
+      final device1 = _WorkingDevice();
+      final FlutterPlatform platform1 = createPlatform(
+        flutterProject: flutterProject,
+        fs: fileSystem,
+        integrationTestDevice: device1,
+      );
+
+      final StreamChannel<Object?> channel1 = platform1.loadChannel(
+        'test1.dart',
+        fakeSuitePlatform,
+      );
+      unawaited(channel1.stream.drain<void>());
+      await pumpEventQueue();
+
+      final String expectedPath = fileSystem.path.join(
+        projectDir.path,
+        'build',
+        'test',
+        'listener_0.dart',
+      );
+      expect(device1.lastMainPath, equals(expectedPath));
+      expect(fileSystem.file(expectedPath).existsSync(), isTrue);
+
+      // Simulate expression compiler output alongside listener file.
+      final File dillFile = fileSystem.file('$expectedPath.dill')..createSync(recursive: true);
+
+      await channel1.sink.close();
+      await pumpEventQueue();
+
+      expect(fileSystem.file(expectedPath).existsSync(), isFalse);
+      expect(dillFile.existsSync(), isFalse);
+      expect(logger.traceText, contains('test 0: deleting test listener file'));
+
+      final device2 = _WorkingDevice();
+      final FlutterPlatform platform2 = createPlatform(
+        flutterProject: flutterProject,
+        fs: fileSystem,
+        integrationTestDevice: device2,
+      );
+
+      final StreamChannel<Object?> channel2 = platform2.loadChannel(
+        'test1.dart',
+        fakeSuitePlatform,
+      );
+      unawaited(channel2.stream.drain<void>());
+      await pumpEventQueue();
+
+      expect(device2.lastMainPath, equals(expectedPath));
+      expect(fileSystem.file(expectedPath).existsSync(), isTrue);
+
+      await channel2.sink.close();
+      await pumpEventQueue();
+
+      expect(fileSystem.file(expectedPath).existsSync(), isFalse);
+    });
+
+    test('uses systemTempDirectory for non-integration tests', () async {
+      final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(projectDir);
+      final testCompleter = Completer<void>();
+      final testCompiler = _FakeTestCompiler();
+
+      processManager.addCommand(
+        FakeCommand(
+          command: const <String>[
+            'flutter_tester',
+            '--disable-vm-service',
+            '--enable-checked-mode',
+            '--verify-entry-points',
+            '--enable-software-rendering',
+            '--skia-deterministic-rendering',
+            '--enable-dart-profiling',
+            '--non-interactive',
+            '--use-test-fonts',
+            '--disable-asset-fonts',
+            '--packages=.dart_tool/package_config.json',
+            'path_to_output.dill',
+          ],
+          exitCode: -9,
+          completer: testCompleter,
+        ),
+      );
+
+      final FlutterPlatform platform = createPlatform(
+        flutterProject: flutterProject,
+        fs: fileSystem,
+      )..compiler = testCompiler;
+
+      final StreamChannel<Object?> channel = platform.loadChannel('test1.dart', fakeSuitePlatform);
+      unawaited(channel.stream.drain<void>());
+      await pumpEventQueue();
+
+      expect(testCompiler.lastMainUri, isNotNull);
+      final String listenerPath = fileSystem.path.fromUri(testCompiler.lastMainUri);
+      expect(listenerPath, startsWith(fileSystem.systemTempDirectory.path));
+      expect(fileSystem.path.basename(listenerPath), equals('listener.dart'));
+      expect(fileSystem.file(listenerPath).existsSync(), isTrue);
+      expect(projectDir.childDirectory('build').childDirectory('test').existsSync(), isFalse);
+
+      testCompleter.complete();
+      await expectLater(channel.sink.done, completes);
+
+      expect(fileSystem.file(listenerPath).existsSync(), isFalse);
+      expect(logger.traceText, contains('test 0: deleting temporary directory'));
+    });
+
+    test('creates listener file in project build directory on Windows', () async {
+      final Directory projectDir = windowsFs.directory(r'C:\custom_project')
+        ..createSync(recursive: true);
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(projectDir);
+
+      final device = _WorkingDevice();
+      final FlutterPlatform platform = createPlatform(
+        flutterProject: flutterProject,
+        fs: windowsFs,
+        integrationTestDevice: device,
+        platform: FakePlatform(operatingSystem: 'windows'),
+      );
+
+      final StreamChannel<Object?> channel = platform.loadChannel(
+        r'C:\custom_project\test1.dart',
+        fakeSuitePlatform,
+      );
+      unawaited(channel.stream.drain<void>());
+      await pumpEventQueue();
+
+      final String expectedPath = windowsFs.path.join(
+        projectDir.path,
+        'build',
+        'test',
+        'listener_0.dart',
+      );
+      expect(device.lastMainPath, equals(expectedPath));
+      expect(windowsFs.file(expectedPath).existsSync(), isTrue);
+
+      await channel.sink.close();
+      await pumpEventQueue();
+
+      expect(windowsFs.file(expectedPath).existsSync(), isFalse);
+    });
+  });
+}
+
+VMServiceConnector _fakeVmServiceConnector(FlutterVmService Function() factory) {
+  return (
+    Uri httpUri, {
+    ReloadSources? reloadSources,
+    Restart? restart,
+    CompileExpression? compileExpression,
+    FlutterProject? flutterProject,
+    FlutterVersion? flutterVersion,
+    PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+    io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+    Device? device,
+    required Logger logger,
+  }) async => factory();
 }
 
 class _FakeFlutterVmService extends Fake implements FlutterVmService {
@@ -627,8 +779,11 @@ class _FakeVmService extends Fake implements VmService {
 }
 
 class _FakeTestCompiler extends Fake implements TestCompiler {
+  Uri? lastMainUri;
+
   @override
   Future<TestCompilerResult> compile(Uri mainUri) async {
+    lastMainUri = mainUri;
     return TestCompilerComplete(outputPath: 'path_to_output.dill', mainUri: mainUri);
   }
 }
@@ -663,6 +818,8 @@ class _UnstartableDevice extends Fake implements Device {
 }
 
 class _WorkingDevice extends Fake implements Device {
+  String? lastMainPath;
+
   @override
   Future<void> dispose() async {}
 
@@ -685,11 +842,20 @@ class _WorkingDevice extends Fake implements Device {
     bool prebuiltApplication = false,
     String? userIdentifier,
   }) async {
+    lastMainPath = mainPath;
     return LaunchResult.succeeded(vmServiceUri: Uri.parse('http://127.0.0.1:12345/vmService'));
   }
 }
 
 class _FakeFlutterProject extends Fake implements FlutterProject {
+  _FakeFlutterProject({required this.directory});
+
+  @override
+  final Directory directory;
+
+  @override
+  Directory get buildDirectory => directory.childDirectory('build');
+
   @override
   FlutterManifest get manifest => FlutterManifest.empty(logger: BufferLogger.test());
 }

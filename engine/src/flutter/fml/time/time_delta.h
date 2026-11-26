@@ -103,7 +103,7 @@ class TimeDelta {
            TimeDelta::FromNanoseconds(ts.tv_nsec);
   }
   struct timespec ToTimespec() {
-    struct timespec ts;
+    struct timespec ts{};
     constexpr int64_t kNanosecondsPerSecond = 1000000000ll;
     ts.tv_sec = static_cast<time_t>(ToSeconds());
     ts.tv_nsec = delta_ % kNanosecondsPerSecond;

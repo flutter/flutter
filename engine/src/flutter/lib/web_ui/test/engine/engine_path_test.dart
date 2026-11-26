@@ -232,6 +232,9 @@ class FakePathMetricsIterator implements BackendPathMetricIterator {
 }
 
 class FakePathConstructors implements BackendPathConstructors {
+  FakePathConstructors({this.combinedFillType = PathFillType.nonZero});
+
+  final PathFillType combinedFillType;
   final List<FakePathBuilder> createdPathBuilders = [];
 
   @override
@@ -248,13 +251,52 @@ class FakePathConstructors implements BackendPathConstructors {
 
   @override
   FakePathBuilder combinePaths(PathOperation operation, BackendPath path1, BackendPath path2) {
-    final path = FakePathBuilder();
+    final path = FakePathBuilder()..fillType = combinedFillType;
     createdPathBuilders.add(path);
     return path;
   }
 }
 
 void testMain() {
+  test('Combined paths preserve the backend fill type across copies and collection', () {
+    final constructors = FakePathConstructors(combinedFillType: PathFillType.evenOdd);
+    final path = EnginePath.combined(
+      PathOperation.difference,
+      EnginePath(constructors),
+      EnginePath(constructors),
+    );
+    final copy = EnginePath.fromEnginePath(path);
+    expect(constructors.createdPathBuilders, isEmpty);
+
+    expect(path.fillType, PathFillType.evenOdd);
+    expect(constructors.createdPathBuilders.last.fillType, PathFillType.evenOdd);
+    expect(copy.fillType, PathFillType.evenOdd);
+
+    EnginePlatformDispatcher.instance.frameArena.collect();
+    path.getBounds();
+    expect(constructors.createdPathBuilders.last.fillType, PathFillType.evenOdd);
+
+    path.fillType = PathFillType.nonZero;
+    expect(constructors.createdPathBuilders.last.fillType, PathFillType.nonZero);
+    expect(copy.fillType, PathFillType.evenOdd);
+    EnginePlatformDispatcher.instance.frameArena.collect();
+  });
+
+  test('Combined paths honor an explicit fill type before building', () {
+    final constructors = FakePathConstructors(combinedFillType: PathFillType.evenOdd);
+    final path = EnginePath.combined(
+      PathOperation.difference,
+      EnginePath(constructors),
+      EnginePath(constructors),
+    )..fillType = PathFillType.nonZero;
+    expect(constructors.createdPathBuilders, isEmpty);
+
+    path.getBounds();
+    expect(path.fillType, PathFillType.nonZero);
+    expect(constructors.createdPathBuilders.last.fillType, PathFillType.nonZero);
+    EnginePlatformDispatcher.instance.frameArena.collect();
+  });
+
   test('EnginePath lifecycle', () {
     final constructors = FakePathConstructors();
     final path = EnginePath(constructors);

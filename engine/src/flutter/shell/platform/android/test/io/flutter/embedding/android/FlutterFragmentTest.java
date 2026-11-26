@@ -11,6 +11,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -22,6 +24,7 @@ import static org.mockito.Mockito.when;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Bundle;
+import android.view.View;
 import androidx.activity.BackEventCompat;
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.OnBackPressedDispatcher;
@@ -342,6 +345,49 @@ public class FlutterFragmentTest {
             fragment.setFrameworkHandlesBack(true);
             activity.getOnBackPressedDispatcher().onBackPressed();
             verify(mockDelegate, times(1)).onBackPressed();
+          });
+    }
+  }
+
+  @Test
+  @Config(sdk = {Build.API_LEVELS.API_33, Build.API_LEVELS.API_34})
+  public void itPreservesFrameworkBackStateReplayedDuringAttach() {
+    FlutterFragment fragment =
+        FlutterFragment.withCachedEngine("my_cached_engine")
+            .shouldAutomaticallyHandleOnBackPressed(true)
+            .build();
+    FlutterActivityAndFragmentDelegate mockDelegate =
+        mock(FlutterActivityAndFragmentDelegate.class);
+    when(mockDelegate.isAttached()).thenReturn(true);
+    when(mockDelegate.onCreateView(any(), any(), any(), anyInt(), anyBoolean()))
+        .thenReturn(new View(ctx));
+    doAnswer(
+            invocation -> {
+              // PlatformPlugin replays the cached engine's back state during onAttach.
+              fragment.setFrameworkHandlesBack(true);
+              return null;
+            })
+        .when(mockDelegate)
+        .onAttach(any());
+    fragment.setDelegateFactory(new TestDelegateFactory(mockDelegate));
+
+    try (ActivityScenario<FragmentActivity> scenario =
+        ActivityScenario.launch(FragmentActivity.class)) {
+      scenario.onActivity(
+          activity -> {
+            activity
+                .getSupportFragmentManager()
+                .beginTransaction()
+                .add(android.R.id.content, fragment)
+                .commitNow();
+
+            activity.getOnBackPressedDispatcher().onBackPressed();
+
+            if (android.os.Build.VERSION.SDK_INT >= Build.API_LEVELS.API_34) {
+              verify(mockDelegate).commitBackGesture();
+            } else {
+              verify(mockDelegate).onBackPressed();
+            }
           });
     }
   }

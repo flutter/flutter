@@ -48,6 +48,19 @@ struct SamplerDescriptor final {
            static_cast<uint64_t>(d.depth_address_mode) << 40 |
            static_cast<uint64_t>(d.max_anisotropy) << 48;
   }
+
+  /// The inverse of `ToKey`, apart from the label, which keys don't hold.
+  static SamplerDescriptor FromKey(uint64_t key) {
+    SamplerDescriptor d;
+    d.min_filter = static_cast<MinMagFilter>(key & 0xFF);
+    d.mag_filter = static_cast<MinMagFilter>((key >> 8) & 0xFF);
+    d.mip_filter = static_cast<MipFilter>((key >> 16) & 0xFF);
+    d.width_address_mode = static_cast<SamplerAddressMode>((key >> 24) & 0xFF);
+    d.height_address_mode = static_cast<SamplerAddressMode>((key >> 32) & 0xFF);
+    d.depth_address_mode = static_cast<SamplerAddressMode>((key >> 40) & 0xFF);
+    d.max_anisotropy = static_cast<uint8_t>((key >> 48) & 0xFF);
+    return d;
+  }
 };
 
 }  // namespace impeller

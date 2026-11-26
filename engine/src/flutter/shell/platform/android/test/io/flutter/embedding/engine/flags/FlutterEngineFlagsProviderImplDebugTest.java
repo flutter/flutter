@@ -111,6 +111,28 @@ public class FlutterEngineFlagsProviderImplDebugTest {
   }
 
   @Test
+  public void getFlags_processesEnableHcppTrueExtra() {
+    Intent intent = new Intent();
+    intent.putExtra("enable-hcpp-and-surface-control", true);
+
+    List<String> args = FlutterEngineFlagsProviderImpl.INSTANCE.getFlags(intent);
+
+    assertEquals(1, args.size());
+    assertTrue(args.contains("--enable-hcpp-and-surface-control=true"));
+  }
+
+  @Test
+  public void getFlags_processesEnableHcppFalseExtra() {
+    Intent intent = new Intent();
+    intent.putExtra("enable-hcpp-and-surface-control", false);
+
+    List<String> args = FlutterEngineFlagsProviderImpl.INSTANCE.getFlags(intent);
+
+    assertEquals(1, args.size());
+    assertTrue(args.contains("--enable-hcpp-and-surface-control=false"));
+  }
+
+  @Test
   public void getFlags_doesNotPropagateMissingExtras() {
     Intent intent = new Intent();
     List<String> args = FlutterEngineFlagsProviderImpl.INSTANCE.getFlags(intent);

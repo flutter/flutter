@@ -165,16 +165,14 @@ WebAssetHashResult hashWebAssets(Directory assetsDir) {
   final File fontManifest = assetsDir.childFile('FontManifest.json');
   if (fontManifest.existsSync()) {
     final Object? decodedJson = json.decode(fontManifest.readAsStringSync());
-    if (decodedJson is List<dynamic>) {
+    if (decodedJson is List<Object?>) {
       for (final Object? font in decodedJson) {
-        if (font is Map<String, dynamic>) {
-          final Object? fonts = font['fonts'];
-          if (fonts is List<dynamic>) {
-            for (final Object? fontAsset in fonts) {
-              if (fontAsset is Map<String, dynamic>) {
-                final Object? asset = fontAsset['asset'];
-                if (asset is String && renamedAssets.containsKey(asset)) {
-                  fontAsset['asset'] = renamedAssets[asset];
+        if (font case {'fonts': final List<Object?> fonts}) {
+          for (final fontAsset in fonts) {
+            if (fontAsset is Map<String, Object?>) {
+              if (fontAsset['asset'] case final String asset) {
+                if (renamedAssets[asset] case final String renamed) {
+                  fontAsset['asset'] = renamed;
                 }
               }
             }
@@ -190,12 +188,12 @@ WebAssetHashResult hashWebAssets(Directory assetsDir) {
   final File assetManifestJson = assetsDir.childFile('AssetManifest.json');
   if (assetManifestJson.existsSync()) {
     final Object? decodedJson = json.decode(assetManifestJson.readAsStringSync());
-    if (decodedJson is Map<String, dynamic>) {
-      final newManifest = <String, dynamic>{};
-      for (final MapEntry<String, dynamic> entry in decodedJson.entries) {
+    if (decodedJson is Map<String, Object?>) {
+      final newManifest = <String, Object?>{};
+      for (final MapEntry<String, Object?> entry in decodedJson.entries) {
         recordManifestTarget(entry.key);
         final Object? variants = entry.value;
-        if (variants is! List<dynamic>) {
+        if (variants is! List<Object?>) {
           newManifest[entry.key] = variants;
           continue;
         }
@@ -228,7 +226,7 @@ WebAssetHashResult hashWebAssets(Directory assetsDir) {
     final message = ByteData.sublistView(rawBytes);
     final Object? decoded = const StandardMessageCodec().decodeMessage(message);
     if (decoded is Map<Object?, Object?>) {
-      final newManifest = <String, dynamic>{};
+      final newManifest = <String, Object?>{};
       for (final MapEntry<Object?, Object?> entry in decoded.entries) {
         final key = entry.key.toString();
         recordManifestTarget(key);
@@ -237,13 +235,13 @@ WebAssetHashResult hashWebAssets(Directory assetsDir) {
           newManifest[key] = variantsVal;
           continue;
         }
-        final newVariants = <dynamic>[];
+        final newVariants = <Object?>[];
         for (final Object? variantObj in variantsVal) {
           if (variantObj is! Map<Object?, Object?>) {
             newVariants.add(variantObj);
             continue;
           }
-          final newVariantMap = <String, dynamic>{};
+          final newVariantMap = <String, Object?>{};
           for (final MapEntry<Object?, Object?> vEntry in variantObj.entries) {
             final vKey = vEntry.key.toString();
             if (vKey == 'asset') {
@@ -363,6 +361,12 @@ int? _findMatchingClosingBrace(String text, int openBraceIndex) {
   return null;
 }
 
+const String _kAssetManifestKey = 'assetManifest';
+const String _kFontManifestKey = 'fontManifest';
+const String _kExtraAssetsKey = 'extraAssets';
+
+const _manifestBuildConfigKeys = <String>{_kAssetManifestKey, _kFontManifestKey, _kExtraAssetsKey};
+
 String _updateBuildConfigInContent(
   String content,
   WebAssetHashResult hashResult, {
@@ -407,11 +411,11 @@ String _updateBuildConfigInContent(
         );
       }
       final updatedMap = <String, Object?>{
-        ...decoded,
-        if (hashResult.assetManifestBinJson != null)
-          'assetManifest': hashResult.assetManifestBinJson,
-        if (hashResult.fontManifestJson != null) 'fontManifest': hashResult.fontManifestJson,
-        if (hashResult.extraAssets.isNotEmpty) 'extraAssets': hashResult.extraAssets,
+        for (final MapEntry(:key, :value) in decoded.entries)
+          if (!_manifestBuildConfigKeys.contains(key)) key: value,
+        _kAssetManifestKey: ?hashResult.assetManifestBinJson,
+        _kFontManifestKey: ?hashResult.fontManifestJson,
+        if (hashResult.extraAssets.isNotEmpty) _kExtraAssetsKey: hashResult.extraAssets,
       };
       buffer.write(content.substring(cursor, match.start));
       buffer.write('_flutter.buildConfig = ${json.encode(updatedMap)};');
@@ -438,11 +442,6 @@ void injectManifestBuildConfig(Directory outputDir, WebAssetHashResult hashResul
   if (!outputDir.existsSync()) {
     return;
   }
-  if (hashResult.assetManifestBinJson == null &&
-      hashResult.fontManifestJson == null &&
-      hashResult.extraAssets.isEmpty) {
-    return;
-  }
   for (final File file in outputDir.listSync(recursive: true).whereType<File>()) {
     final String basename = file.fileSystem.path.basename(file.path);
     if (basename != 'flutter_bootstrap.js' && basename != 'index.html') {
@@ -460,9 +459,9 @@ void injectManifestBuildConfig(Directory outputDir, WebAssetHashResult hashResul
   if (hashResult.assetManifestBinJson != null) {
     final File bootstrapFile = outputDir.childFile('flutter_bootstrap.js');
     if (!bootstrapFile.existsSync() ||
-        !bootstrapFile.readAsStringSync().contains('"assetManifest"')) {
+        !bootstrapFile.readAsStringSync().contains('"$_kAssetManifestKey"')) {
       throwToolExit(
-        'Failed to inject content-hashed "assetManifest" into ${bootstrapFile.path}. '
+        'Failed to inject content-hashed "$_kAssetManifestKey" into ${bootstrapFile.path}. '
         'Ensure web/flutter_bootstrap.js contains the "{{flutter_build_config}}" placeholder.',
       );
     }

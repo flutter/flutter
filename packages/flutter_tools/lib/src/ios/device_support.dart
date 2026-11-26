@@ -4,30 +4,31 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/version.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../macos/xcode.dart';
 
 /// A class to handle preparing the device support for an iOS/iPad device.
 class IOSDeviceSupport {
   IOSDeviceSupport({
-    required this._logger,
-    required this._processUtils,
+    required this._toolContext,
     required this._xcode,
     required this._deviceId,
-    required this._homeDirectory,
     required this._modelCode,
     required this._operatingSystemVersion,
     required this._cpuArchitectureString,
+    @visibleForTesting this._homeDirectory,
   });
 
-  final Logger _logger;
-  final ProcessUtils _processUtils;
-  final Xcode? _xcode;
+  final ToolContext _toolContext;
+  final Xcode _xcode;
 
   final String _deviceId;
   final Directory? _homeDirectory;
@@ -38,11 +39,17 @@ class IOSDeviceSupport {
   /// The directory that contains iOS Device Support symbols for all devices.
   ///
   /// Return null if the $HOME directory cannot be found.
-  late final Directory? _deviceSupportDirectory = _homeDirectory
-      ?.childDirectory('Library')
-      .childDirectory('Developer')
-      .childDirectory('Xcode')
-      .childDirectory('iOS DeviceSupport');
+  late final Directory? _deviceSupportDirectory = () {
+    final ToolContext(:FileSystem fs, :FileSystemUtils fileSystemUtils) = _toolContext;
+    final String? homeDirPath = fileSystemUtils.homeDirPath;
+    final Directory? homeDirectory =
+        _homeDirectory ?? (homeDirPath == null ? null : fs.directory(homeDirPath));
+    return homeDirectory
+        ?.childDirectory('Library')
+        .childDirectory('Developer')
+        .childDirectory('Xcode')
+        .childDirectory('iOS DeviceSupport');
+  }();
 
   /// Command to copy device support symbols from device to host machine.
   List<String> get _prepareDeviceSupportCommand => [
@@ -55,7 +62,7 @@ class IOSDeviceSupport {
 
   /// Whether the prepareDeviceSupport command is available. Available on Xcode 16.3+.
   late final bool _prepareDeviceSupportCommandAvailable = () {
-    final Version? xcodeVersion = _xcode?.currentVersion;
+    final Version? xcodeVersion = _xcode.currentVersion;
     if (xcodeVersion == null || xcodeVersion < Version(16, 3, 0)) {
       return false;
     }
@@ -85,11 +92,12 @@ class IOSDeviceSupport {
       return;
     }
 
+    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
     try {
-      final Process process = await _processUtils.start(_prepareDeviceSupportCommand);
+      final Process process = await processUtils.start(_prepareDeviceSupportCommand);
 
       final timer = Timer(const Duration(seconds: 10), () {
-        _logger.printError(
+        logger.printError(
           'Xcode is taking longer than expected to start preparing Device Support symbols...\n'
           'Try closing Xcode, connecting your device via USB, and running the following command:\n'
           '  "${_prepareDeviceSupportCommand.join(' ')}"',
@@ -102,16 +110,16 @@ class IOSDeviceSupport {
           .listen((String text) {
             if (text.contains('Copying')) {
               printToTrace = false;
-              _logger.printStatus(
+              logger.printStatus(
                 'Copying Device Support symbols. This may take several minutes to complete...\n'
                 'Please do not connect or disconnect your device or open Xcode until finished.',
               );
               timer.cancel();
             }
             if (printToTrace) {
-              _logger.printTrace(text);
+              logger.printTrace(text);
             } else {
-              _logger.printStatus(text, newline: false);
+              logger.printStatus(text, newline: false);
             }
           });
 
@@ -119,7 +127,7 @@ class IOSDeviceSupport {
           .transform(utf8.decoder)
           .transform(const LineSplitter())
           .listen((String line) {
-            _logger.printError(line);
+            logger.printError(line);
           });
 
       try {
@@ -135,7 +143,7 @@ class IOSDeviceSupport {
 
         final int exitCode = await process.exitCode;
         if (exitCode != 0) {
-          _logger.printError('xcodebuild -prepareDeviceSupport exited with code $exitCode');
+          logger.printError('xcodebuild -prepareDeviceSupport exited with code $exitCode');
         }
       } finally {
         timer.cancel();
@@ -143,13 +151,11 @@ class IOSDeviceSupport {
 
       // Print an empty line so that next prints aren't inline with logs from here.
       if (!printToTrace) {
-        _logger.printStatus('');
+        logger.printStatus('');
       }
     } on ProcessException catch (exception, stackTrace) {
-      _logger.printError(
-        'Process exception running "xcodebuild -prepareDeviceSupport": $exception',
-      );
-      _logger.printTrace('$stackTrace');
+      logger.printError('Process exception running "xcodebuild -prepareDeviceSupport": $exception');
+      logger.printTrace('$stackTrace');
     }
   }
 

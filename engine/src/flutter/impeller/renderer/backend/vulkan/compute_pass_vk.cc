@@ -4,6 +4,10 @@
 
 #include "impeller/renderer/backend/vulkan/compute_pass_vk.h"
 
+#include <vector>
+
+#include "flutter/fml/closure.h"
+#include "flutter/fml/logging.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/compute_pipeline_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
@@ -12,6 +16,48 @@
 #include "vulkan/vulkan_structs.hpp"
 
 namespace impeller {
+
+// The stages in which render and blit passes access memory.
+static constexpr vk::PipelineStageFlags kGraphicsAndTransferStages =
+    vk::PipelineStageFlagBits::eDrawIndirect |
+    vk::PipelineStageFlagBits::eVertexInput |
+    vk::PipelineStageFlagBits::eVertexShader |
+    vk::PipelineStageFlagBits::eFragmentShader |
+    vk::PipelineStageFlagBits::eEarlyFragmentTests |
+    vk::PipelineStageFlagBits::eLateFragmentTests |
+    vk::PipelineStageFlagBits::eColorAttachmentOutput |
+    vk::PipelineStageFlagBits::eTransfer | vk::PipelineStageFlagBits::eHost;
+
+// The writes render and blit passes and the host can make.
+static constexpr vk::AccessFlags kGraphicsAndTransferWrites =
+    vk::AccessFlagBits::eShaderWrite |
+    vk::AccessFlagBits::eColorAttachmentWrite |
+    vk::AccessFlagBits::eDepthStencilAttachmentWrite |
+    vk::AccessFlagBits::eTransferWrite | vk::AccessFlagBits::eHostWrite;
+
+// Records a global memory barrier.
+//
+// https://github.com/KhronosGroup/Vulkan-Docs/wiki/Synchronization-Examples
+// suggests that anything more finely grained than a global memory barrier is
+// likely to be weakened into one.
+static void RecordMemoryBarrier(const vk::CommandBuffer& command_buffer,
+                                vk::PipelineStageFlags src_stage,
+                                vk::AccessFlags src_access,
+                                vk::PipelineStageFlags dst_stage,
+                                vk::AccessFlags dst_access) {
+  vk::MemoryBarrier barrier;
+  barrier.srcAccessMask = src_access;
+  barrier.dstAccessMask = dst_access;
+  command_buffer.pipelineBarrier(/*srcStageMask=*/src_stage,
+                                 /*dstStageMask=*/dst_stage,
+                                 /*dependencyFlags=*/{},
+                                 /*memoryBarrierCount=*/1,
+                                 /*pMemoryBarriers=*/&barrier,
+                                 /*bufferMemoryBarrierCount=*/0,
+                                 /*pBufferMemoryBarriers=*/nullptr,
+                                 /*imageMemoryBarrierCount=*/0,
+                                 /*pImageMemoryBarriers=*/nullptr);
+}
 
 ComputePassVK::ComputePassVK(std::shared_ptr<const Context> context,
                              std::shared_ptr<CommandBufferVK> command_buffer)
@@ -41,79 +87,132 @@ void ComputePassVK::SetCommandLabel(std::string_view label) {
 #endif  // IMPELLER_DEBUG
 }
 
-// |ComputePass|
-void ComputePassVK::SetPipeline(
-    const std::shared_ptr<Pipeline<ComputePipelineDescriptor>>& pipeline) {
-  const auto& pipeline_vk = ComputePipelineVK::Cast(*pipeline);
-  const vk::CommandBuffer& command_buffer_vk =
-      command_buffer_->GetCommandBuffer();
-  command_buffer_vk.bindPipeline(vk::PipelineBindPoint::eCompute,
-                                 pipeline_vk.GetPipeline());
-  pipeline_layout_ = pipeline_vk.GetPipelineLayout();
-
-  auto descriptor_result = command_buffer_->AllocateDescriptorSets(
-      pipeline_vk.GetDescriptorSetLayout(), pipeline_vk.GetPipelineKey(),
-      ContextVK::Cast(*context_));
-  if (!descriptor_result.ok()) {
-    return;
-  }
-  descriptor_set_ = descriptor_result.value();
-  pipeline_valid_ = true;
-}
-
-// |ComputePass|
-fml::Status ComputePassVK::Compute(std::array<uint32_t, 3> workgroup_count) {
-  if (workgroup_count[0] == 0u || workgroup_count[1] == 0u ||
-      workgroup_count[2] == 0u || !pipeline_valid_) {
-    bound_image_offset_ = 0u;
-    bound_buffer_offset_ = 0u;
-    descriptor_write_offset_ = 0u;
-    has_label_ = false;
-    pipeline_valid_ = false;
-    return fml::Status(fml::StatusCode::kCancelled,
-                       "Invalid pipeline or empty workgroup count.");
-  }
-
-  const ContextVK& context_vk = ContextVK::Cast(*context_);
-  for (auto i = 0u; i < descriptor_write_offset_; i++) {
-    write_workspace_[i].dstSet = descriptor_set_;
-  }
-
-  context_vk.GetDevice().updateDescriptorSets(descriptor_write_offset_,
-                                              write_workspace_.data(), 0u, {});
-  const vk::CommandBuffer& command_buffer_vk =
-      command_buffer_->GetCommandBuffer();
-
-  command_buffer_vk.bindDescriptorSets(
-      vk::PipelineBindPoint::eCompute,  // bind point
-      pipeline_layout_,                 // layout
-      0,                                // first set
-      1,                                // set count
-      &descriptor_set_,                 // sets
-      0,                                // offset count
-      nullptr                           // offsets
-  );
-
-  // The arguments are workgroup counts. The per-workgroup invocation count (the
-  // local size) is baked into the shader module, so dispatch the counts
-  // directly.
-  command_buffer_vk.dispatch(workgroup_count[0], workgroup_count[1],
-                             workgroup_count[2]);
-
+void ComputePassVK::PopCommandLabel() {
 #ifdef IMPELLER_DEBUG
   if (has_label_) {
     command_buffer_->PopDebugGroup();
   }
   has_label_ = false;
 #endif  // IMPELLER_DEBUG
+}
 
-  bound_image_offset_ = 0u;
-  bound_buffer_offset_ = 0u;
-  descriptor_write_offset_ = 0u;
-  has_label_ = false;
-  pipeline_valid_ = false;
+// |ComputePass|
+void ComputePassVK::SetPipeline(
+    const std::shared_ptr<Pipeline<ComputePipelineDescriptor>>& pipeline) {
+  FML_DCHECK(pipeline) << "A compute pass must not be given a null pipeline.";
+  const auto& pipeline_vk = ComputePipelineVK::Cast(*pipeline);
+  command_buffer_->GetCommandBuffer().bindPipeline(
+      vk::PipelineBindPoint::eCompute, pipeline_vk.GetPipeline());
+  pipeline_ = pipeline;
+  descriptor_set_dirty_ = true;
+}
 
-  return fml::Status();
+absl::Status ComputePassVK::BindDescriptorSet() {
+  const ContextVK& context_vk = ContextVK::Cast(*context_);
+  const auto& pipeline_vk = ComputePipelineVK::Cast(*pipeline_);
+
+  auto descriptor_result = command_buffer_->AllocateDescriptorSets(
+      pipeline_vk.GetDescriptorSetLayout(), pipeline_vk.GetPipelineKey(),
+      context_vk);
+  if (!descriptor_result.ok()) {
+    return descriptor_result.status();
+  }
+  vk::DescriptorSet descriptor_set = descriptor_result.value();
+
+  // Write every binding the pipeline declares that the pass has a resource
+  // for. Bindings made for another pipeline in the pass are kept for later
+  // dispatches but not written here.
+  std::vector<vk::WriteDescriptorSet> writes;
+  for (const DescriptorSetLayout& layout :
+       pipeline_->GetDescriptor().GetDescriptorSetLayouts()) {
+    auto found = bindings_.find(layout.binding);
+    if (found == bindings_.end() ||
+        found->second.type != layout.descriptor_type) {
+      continue;
+    }
+    const BoundResource& resource = found->second;
+    vk::WriteDescriptorSet write_set;
+    write_set.dstSet = descriptor_set;
+    write_set.dstBinding = layout.binding;
+    write_set.descriptorCount = 1u;
+    write_set.descriptorType = ToVKDescriptorType(resource.type);
+    if (resource.image_info.has_value()) {
+      write_set.pImageInfo = &resource.image_info.value();
+    } else if (resource.buffer_info.has_value()) {
+      write_set.pBufferInfo = &resource.buffer_info.value();
+    } else {
+      continue;
+    }
+    writes.push_back(write_set);
+  }
+
+  context_vk.GetDevice().updateDescriptorSets(writes.size(), writes.data(), 0u,
+                                              {});
+  command_buffer_->GetCommandBuffer().bindDescriptorSets(
+      /*pipelineBindPoint=*/vk::PipelineBindPoint::eCompute,
+      /*layout=*/pipeline_vk.GetPipelineLayout(),
+      /*firstSet=*/0,
+      /*descriptorSetCount=*/1,
+      /*pDescriptorSets=*/&descriptor_set,
+      /*dynamicOffsetCount=*/0,
+      /*pDynamicOffsets=*/nullptr);
+  descriptor_set_dirty_ = false;
+  return absl::OkStatus();
+}
+
+// |ComputePass|
+absl::Status ComputePassVK::Compute(std::array<uint32_t, 3> workgroup_count) {
+  // The label set by `SetCommandLabel` applies to this dispatch only.
+  fml::ScopedCleanupClosure pop_label([this]() { PopCommandLabel(); });
+
+  // A dispatch with no workgroups does nothing, like a draw with no vertices.
+  if (workgroup_count[0] == 0u || workgroup_count[1] == 0u ||
+      workgroup_count[2] == 0u) {
+    return absl::OkStatus();
+  }
+
+  if (!pipeline_) {
+    return absl::Status(absl::StatusCode::kCancelled,
+                        "No compute pipeline is bound.");
+  }
+
+  if (descriptor_set_dirty_) {
+    if (absl::Status status = BindDescriptorSet(); !status.ok()) {
+      return status;
+    }
+  }
+
+  if (has_dispatched_) {
+    // Make the writes of earlier dispatches in the pass visible to this one,
+    // and order this dispatch's writes after their reads and writes.
+    RecordMemoryBarrier(
+        command_buffer_->GetCommandBuffer(),
+        vk::PipelineStageFlagBits::eComputeShader,
+        vk::AccessFlagBits::eShaderWrite,
+        vk::PipelineStageFlagBits::eComputeShader,
+        vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eShaderWrite);
+  } else {
+    // Make the writes of earlier render and blit passes visible to the first
+    // dispatch, and order its writes after their reads and writes. Recording
+    // this here, rather than in the render and blit passes, means only
+    // command buffers that use compute pay for it. The shader-read layout
+    // transitions those passes record complete before the fragment shader
+    // stage, which is in this barrier's source scope, so the transitions are
+    // ordered too.
+    RecordMemoryBarrier(
+        command_buffer_->GetCommandBuffer(), kGraphicsAndTransferStages,
+        kGraphicsAndTransferWrites, vk::PipelineStageFlagBits::eComputeShader,
+        vk::AccessFlagBits::eUniformRead | vk::AccessFlagBits::eShaderRead |
+            vk::AccessFlagBits::eShaderWrite);
+  }
+  has_dispatched_ = true;
+
+  // The arguments are workgroup counts. The per-workgroup invocation count (the
+  // local size) is baked into the shader module, so dispatch the counts
+  // directly.
+  command_buffer_->GetCommandBuffer().dispatch(
+      workgroup_count[0], workgroup_count[1], workgroup_count[2]);
+  return absl::OkStatus();
 }
 
 // |ResourceBinder|
@@ -132,10 +231,7 @@ bool ComputePassVK::BindResource(ShaderStage stage,
                                  const ShaderMetadata* metadata,
                                  std::shared_ptr<const Texture> texture,
                                  raw_ptr<const Sampler> sampler) {
-  if (bound_image_offset_ >= kMaxBindings) {
-    return false;
-  }
-  if (!texture->IsValid() || !sampler) {
+  if (!texture || !texture->IsValid() || !sampler) {
     return false;
   }
   const TextureVK& texture_vk = TextureVK::Cast(*texture);
@@ -149,25 +245,19 @@ bool ComputePassVK::BindResource(ShaderStage stage,
   image_info.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
   image_info.sampler = sampler_vk.GetSampler();
   image_info.imageView = texture_vk.GetSampledImageView();
-  image_workspace_[bound_image_offset_++] = image_info;
 
-  vk::WriteDescriptorSet write_set;
-  write_set.dstBinding = slot.binding;
-  write_set.descriptorCount = 1u;
-  write_set.descriptorType = ToVKDescriptorType(type);
-  write_set.pImageInfo = &image_workspace_[bound_image_offset_ - 1];
-
-  write_workspace_[descriptor_write_offset_++] = write_set;
+  bindings_[static_cast<uint32_t>(slot.binding)] = {.type = type,
+                                                    .image_info = image_info};
+  descriptor_set_dirty_ = true;
   return true;
 }
 
 bool ComputePassVK::BindResource(size_t binding,
                                  DescriptorType type,
                                  BufferView view) {
-  if (bound_buffer_offset_ >= kMaxBindings) {
+  if (!view.GetBuffer()) {
     return false;
   }
-
   auto buffer = DeviceBufferVK::Cast(*view.GetBuffer()).GetBuffer();
   if (!buffer) {
     return false;
@@ -178,71 +268,65 @@ bool ComputePassVK::BindResource(size_t binding,
     return false;
   }
 
-  uint32_t offset = view.GetRange().offset;
-
   vk::DescriptorBufferInfo buffer_info;
   buffer_info.buffer = buffer;
-  buffer_info.offset = offset;
+  buffer_info.offset = view.GetRange().offset;
   buffer_info.range = view.GetRange().length;
-  buffer_workspace_[bound_buffer_offset_++] = buffer_info;
 
-  vk::WriteDescriptorSet write_set;
-  write_set.dstBinding = binding;
-  write_set.descriptorCount = 1u;
-  write_set.descriptorType = ToVKDescriptorType(type);
-  write_set.pBufferInfo = &buffer_workspace_[bound_buffer_offset_ - 1];
-
-  write_workspace_[descriptor_write_offset_++] = write_set;
+  bindings_[static_cast<uint32_t>(binding)] = {.type = type,
+                                               .buffer_info = buffer_info};
+  descriptor_set_dirty_ = true;
   return true;
 }
 
-// Note:
-// https://github.com/KhronosGroup/Vulkan-Docs/wiki/Synchronization-Examples
-// Seems to suggest that anything more finely grained than a global memory
-// barrier is likely to be weakened into a global barrier. Confirming this on
-// mobile devices will require some experimentation.
-
 // |ComputePass|
 void ComputePassVK::AddBufferMemoryBarrier() {
-  vk::MemoryBarrier barrier;
-  barrier.srcAccessMask = vk::AccessFlagBits::eShaderWrite;
-  barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
-
-  command_buffer_->GetCommandBuffer().pipelineBarrier(
-      vk::PipelineStageFlagBits::eComputeShader,
-      vk::PipelineStageFlagBits::eComputeShader, {}, 1, &barrier, 0, {}, 0, {});
+  RecordMemoryBarrier(command_buffer_->GetCommandBuffer(),
+                      vk::PipelineStageFlagBits::eComputeShader,
+                      vk::AccessFlagBits::eShaderWrite,
+                      vk::PipelineStageFlagBits::eComputeShader,
+                      vk::AccessFlagBits::eShaderRead);
 }
 
 // |ComputePass|
 void ComputePassVK::AddTextureMemoryBarrier() {
-  vk::MemoryBarrier barrier;
-  barrier.srcAccessMask = vk::AccessFlagBits::eShaderWrite;
-  barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
-
-  command_buffer_->GetCommandBuffer().pipelineBarrier(
-      vk::PipelineStageFlagBits::eComputeShader,
-      vk::PipelineStageFlagBits::eComputeShader, {}, 1, &barrier, 0, {}, 0, {});
+  RecordMemoryBarrier(command_buffer_->GetCommandBuffer(),
+                      vk::PipelineStageFlagBits::eComputeShader,
+                      vk::AccessFlagBits::eShaderWrite,
+                      vk::PipelineStageFlagBits::eComputeShader,
+                      vk::AccessFlagBits::eShaderRead);
 }
 
 // |ComputePass|
 bool ComputePassVK::EncodeCommands() const {
-  // Since we only use global memory barrier, we don't have to worry about
-  // compute to compute dependencies across cmd buffers. Instead, we pessimize
-  // here and assume that we wrote to a storage image or buffer and that a
-  // render pass will read from it. if there are ever scenarios where we end up
-  // with compute to compute dependencies this should be revisited.
-
-  // This does not currently handle image barriers as we do not use them
-  // for anything.
-  vk::MemoryBarrier barrier;
-  barrier.srcAccessMask = vk::AccessFlagBits::eShaderWrite;
-  barrier.dstAccessMask =
-      vk::AccessFlagBits::eIndexRead | vk::AccessFlagBits::eVertexAttributeRead;
-
-  command_buffer_->GetCommandBuffer().pipelineBarrier(
+  // A pass that dispatched nothing has no writes to order.
+  if (!has_dispatched_) {
+    return true;
+  }
+  // Make the pass's writes visible to every later consumer in queue order,
+  // whether in this command buffer or a later one: draws reading vertex,
+  // index, indirect or uniform data, any shader stage, copies and host reads.
+  // Order later writes after the pass's reads and writes too.
+  //
+  // This does not currently handle image layout transitions, since compute
+  // passes do not write images.
+  RecordMemoryBarrier(
+      command_buffer_->GetCommandBuffer(),
       vk::PipelineStageFlagBits::eComputeShader,
-      vk::PipelineStageFlagBits::eVertexInput, {}, 1, &barrier, 0, {}, 0, {});
-
+      vk::AccessFlagBits::eShaderWrite,
+      vk::PipelineStageFlagBits::eDrawIndirect |
+          vk::PipelineStageFlagBits::eVertexInput |
+          vk::PipelineStageFlagBits::eVertexShader |
+          vk::PipelineStageFlagBits::eFragmentShader |
+          vk::PipelineStageFlagBits::eComputeShader |
+          vk::PipelineStageFlagBits::eTransfer |
+          vk::PipelineStageFlagBits::eHost,
+      vk::AccessFlagBits::eIndirectCommandRead |
+          vk::AccessFlagBits::eIndexRead |
+          vk::AccessFlagBits::eVertexAttributeRead |
+          vk::AccessFlagBits::eUniformRead | vk::AccessFlagBits::eShaderRead |
+          vk::AccessFlagBits::eShaderWrite | vk::AccessFlagBits::eTransferRead |
+          vk::AccessFlagBits::eTransferWrite | vk::AccessFlagBits::eHostRead);
   return true;
 }
 

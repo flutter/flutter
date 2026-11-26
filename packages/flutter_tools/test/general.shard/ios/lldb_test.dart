@@ -16,18 +16,20 @@ import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/ios/device_support.dart';
 import 'package:flutter_tools/src/ios/lldb.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart' show FakeToolContext, FakeXcode;
 
 const _deviceId = '123';
 const _appProcessId = 5678;
 const _breakpointId = 123;
 
 void main() {
-  testWithoutContext('attachAndStart fails if lldb fails', () async {
+  test('attachAndStart fails if lldb fails', () async {
     final processCompleter = Completer<void>();
     final lldbCommand = FakeLLDBCommand(
       command: const <String>['xcrun', 'lldb'],
@@ -46,7 +48,10 @@ void main() {
     final lldb = LLDB(
       logger: logger,
       processUtils: processUtils,
-      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
       deviceVersion: Version(16, 0, 0),
     );
 
@@ -64,7 +69,7 @@ void main() {
     expect(logger.traceText, contains('Process exception running lldb'));
   });
 
-  testWithoutContext('attachAndStart returns true on success', () async {
+  test('attachAndStart returns true on success', () async {
     final breakPointCompleter = Completer<List<int>>();
     final processAttachCompleter = Completer<List<int>>();
     final setupStopHooksCompleter = Completer<List<int>>();
@@ -97,7 +102,10 @@ void main() {
     final lldb = LLDB(
       logger: logger,
       processUtils: processUtils,
-      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
       deviceVersion: Version(16, 0, 0),
     );
 
@@ -137,7 +145,7 @@ void main() {
     expect(logger.errorText, isEmpty);
   });
 
-  testWithoutContext('attachAndStart returns true on success for profile mode', () async {
+  test('attachAndStart returns true on success for profile mode', () async {
     final processAttachCompleter = Completer<List<int>>();
     final setupStopHooksCompleter = Completer<List<int>>();
     final platformStatusCompleter = Completer<List<int>>();
@@ -168,7 +176,10 @@ void main() {
     final lldb = LLDB(
       logger: logger,
       processUtils: processUtils,
-      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
       deviceVersion: Version(27, 0, 0),
     );
 
@@ -208,7 +219,7 @@ void main() {
     expect(logger.errorText, isEmpty);
   });
 
-  testWithoutContext('attachAndStart returns false when stderr during log waiter', () async {
+  test('attachAndStart returns false when stderr during log waiter', () async {
     final breakPointCompleter = Completer<List<int>>();
     final errorCompleter = Completer<List<int>>();
 
@@ -234,7 +245,10 @@ void main() {
     final lldb = LLDB(
       logger: logger,
       processUtils: processUtils,
-      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
       deviceVersion: Version(16, 0, 0),
     );
 
@@ -267,7 +281,7 @@ void main() {
     expect(logger.traceText, contains(errorText));
   });
 
-  testWithoutContext('attachAndStart returns false when stderr not during log waiter', () async {
+  test('attachAndStart returns false when stderr not during log waiter', () async {
     final breakPointCompleter = Completer<List<int>>();
     final errorCompleter = Completer<List<int>>();
 
@@ -293,7 +307,10 @@ void main() {
     final lldb = LLDB(
       logger: logger,
       processUtils: processUtils,
-      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
       deviceVersion: Version(16, 0, 0),
     );
     final expectedInputs = [
@@ -326,7 +343,7 @@ void main() {
     expect(logger.traceText, contains(errorText));
   });
 
-  testWithoutContext('attachAndStart prints warning if takes too long', () async {
+  test('attachAndStart prints warning if takes too long', () async {
     final stdinController = StreamController<List<int>>();
 
     final processCompleter = Completer<void>();
@@ -345,7 +362,10 @@ void main() {
     final lldb = LLDB(
       logger: logger,
       processUtils: processUtils,
-      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
       deviceVersion: Version(16, 0, 0),
     );
 
@@ -378,7 +398,7 @@ void main() {
     );
   });
 
-  testWithoutContext('attachAndStart streams logs to LLDBLogForwarder', () async {
+  test('attachAndStart streams logs to LLDBLogForwarder', () async {
     final breakPointCompleter = Completer<List<int>>();
     final processAttachCompleter = Completer<List<int>>();
     final setupStopHooksCompleter = Completer<List<int>>();
@@ -413,7 +433,10 @@ void main() {
     final lldb = LLDB(
       logger: logger,
       processUtils: processUtils,
-      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
       deviceVersion: Version(16, 0, 0),
     );
 
@@ -463,7 +486,7 @@ void main() {
     expect(lldbLogForwarder.logs, contains(expectedForwardedLog));
   });
 
-  testWithoutContext('exit returns true and kills process', () async {
+  test('exit returns true and kills process', () async {
     final stdinController = StreamController<List<int>>();
 
     final processCompleter = Completer<void>();
@@ -482,7 +505,10 @@ void main() {
     final lldb = LLDB(
       logger: logger,
       processUtils: processUtils,
-      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
       deviceVersion: Version(16, 0, 0),
     );
 
@@ -515,7 +541,7 @@ void main() {
     expect(processManager.hasRemainingExpectations, isFalse);
   });
 
-  testWithoutContext('exit returns true if process not running', () {
+  test('exit returns true if process not running', () {
     final logger = BufferLogger.test();
 
     final processManager = FakeLLDBProcessManager([]);
@@ -523,7 +549,10 @@ void main() {
     final lldb = LLDB(
       logger: logger,
       processUtils: processUtils,
-      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
       deviceVersion: Version(16, 0, 0),
     );
     expect(lldb.isRunning, isFalse);
@@ -534,7 +563,7 @@ void main() {
   });
 
   group('addSymbolSearchPaths', () {
-    testWithoutContext('sends platform select remote-ios sysroot for arch symbol directory', () async {
+    test('sends platform select remote-ios sysroot for arch symbol directory', () async {
       final fileSystem = MemoryFileSystem.test();
       final Directory homeDir = fileSystem.directory('/Users/username');
       final Directory archSymbols =
@@ -580,7 +609,10 @@ void main() {
       final lldb = LLDB(
         logger: logger,
         processUtils: processUtils,
-        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        xcode: Xcode.test(
+          toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        ),
         deviceVersion: Version(16, 0, 0),
       );
 
@@ -623,7 +655,7 @@ void main() {
       expect(inputsAndOutputs, isEmpty);
     });
 
-    testWithoutContext('sends platform select remote-ios sysroot for non-arch symbol directory', () async {
+    test('sends platform select remote-ios sysroot for non-arch symbol directory', () async {
       final fileSystem = MemoryFileSystem.test();
       final Directory homeDir = fileSystem.directory('/Users/username');
       final Directory symbols =
@@ -668,7 +700,10 @@ void main() {
       final lldb = LLDB(
         logger: logger,
         processUtils: processUtils,
-        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        xcode: Xcode.test(
+          toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        ),
         deviceVersion: Version(16, 0, 0),
       );
 
@@ -713,7 +748,7 @@ void main() {
   });
 
   group('LLDBLogForwarder', () {
-    testWithoutContext('addLog', () async {
+    test('addLog', () async {
       const expectedLog = 'hello world';
       final expectedLogCompleter = Completer<void>();
       final lldbLogForwarder = LLDBLogForwarder();
@@ -725,7 +760,7 @@ void main() {
       await expectedLogCompleter.future;
     });
 
-    testWithoutContext('exit', () async {
+    test('exit', () async {
       final exitCompleter = Completer<void>();
       final lldbLogForwarder = LLDBLogForwarder();
       lldbLogForwarder.logLines.listen((String line) => line).onDone(() {
@@ -735,7 +770,7 @@ void main() {
       await exitCompleter.future;
     });
 
-    testWithoutContext('addLog after exit', () async {
+    test('addLog after exit', () async {
       final exitCompleter = Completer<void>();
       final lldbLogForwarder = LLDBLogForwarder();
       lldbLogForwarder.logLines.listen((String line) => line).onDone(() {
@@ -747,7 +782,7 @@ void main() {
     });
   });
 
-  testWithoutContext('Stops are handled manually for iOS 27+', () async {
+  test('Stops are handled manually for iOS 27+', () async {
     final breakPointCompleter = Completer<List<int>>();
     final processAttachCompleter = Completer<List<int>>();
     final platformStatusCompleter = Completer<List<int>>();
@@ -790,7 +825,10 @@ void main() {
     final lldb = LLDB(
       logger: logger,
       processUtils: processUtils,
-      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
       deviceVersion: Version(27, 0, 0),
     );
 
@@ -1095,11 +1133,13 @@ IOSDeviceSupport createDeviceSupport({
 }) {
   final Logger testLogger = logger ?? BufferLogger.test();
   return IOSDeviceSupport(
-    logger: testLogger,
-    processUtils:
-        processUtils ??
-        ProcessUtils(processManager: FakeProcessManager.empty(), logger: testLogger),
-    xcode: null,
+    toolContext: FakeToolContext(
+      logger: testLogger,
+      processUtils:
+          processUtils ??
+          ProcessUtils(processManager: FakeProcessManager.empty(), logger: testLogger),
+    ),
+    xcode: FakeXcode(),
     homeDirectory: homeDirectory,
     modelCode: modelCode,
     operatingSystemVersion: operatingSystemVersion,

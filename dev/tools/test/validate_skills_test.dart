@@ -60,6 +60,7 @@ void main() {
     final Configuration config = await ConfigParser.loadConfig(
       path: path.join(repoRoot.path, 'dev', 'tools', _configFileName),
     );
+    expect(config.parsingErrors, isEmpty, reason: 'Configuration should load without errors.');
     final bool isValid = await validateSkills(
       skillDirPaths: [skillsDirectory, reidbakerSkillsDirectory],
       config: config,

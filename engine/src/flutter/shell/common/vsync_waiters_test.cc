@@ -36,7 +36,8 @@ void ShellTestVsyncWaiter::AwaitVSync() {
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
   auto vsync_future = clock_->NextVSync();
 
-  auto async_wait = std::async([&vsync_future, this]() {
+  auto self = shared_from_this();
+  std::thread([self, this, vsync_future = std::move(vsync_future)]() mutable {
     vsync_future.wait();
 
     // Post the `FireCallback` to the Platform thread so earlier Platform tasks
@@ -50,10 +51,10 @@ void ShellTestVsyncWaiter::AwaitVSync() {
     // `VSyncFlush` call (which resets the `will_draw_new_frame` bit).
     //
     // For example, HandlesActualIphoneXsInputEvents will fail without this.
-    task_runners_.GetPlatformTaskRunner()->PostTask([this]() {
+    task_runners_.GetPlatformTaskRunner()->PostTask([self, this]() {
       FireCallback(fml::TimePoint::Now(), fml::TimePoint::Now());
     });
-  });
+  }).detach();
 }
 
 void ConstantFiringVsyncWaiter::AwaitVSync() {

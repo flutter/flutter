@@ -920,13 +920,21 @@ TEST(ImageDecoderTest, VerifySimpleDecoding) {
   EXPECT_EQ(result_2->image_info.size.height, 2);
 
   // If the destination size is larger than the max texture size the image
-  // is scaled down.
+  // is scaled down, keeping its aspect ratio.
   auto result_3 = ImageDecoderImpeller::DecompressTexture(
       descriptor.get(), {.target_width = 60, .target_height = 20}, {10, 10},
       /*supports_wide_gamut=*/false, capabilities, allocator);
   ASSERT_TRUE(result_3.ok());
   EXPECT_EQ(result_3->image_info.size.width, 10);
-  EXPECT_EQ(result_3->image_info.size.height, 10);
+  EXPECT_EQ(result_3->image_info.size.height, 3);
+
+  // Same for a tall destination size.
+  auto result_tall = ImageDecoderImpeller::DecompressTexture(
+      descriptor.get(), {.target_width = 20, .target_height = 60}, {10, 10},
+      /*supports_wide_gamut=*/false, capabilities, allocator);
+  ASSERT_TRUE(result_tall.ok());
+  EXPECT_EQ(result_tall->image_info.size.width, 3);
+  EXPECT_EQ(result_tall->image_info.size.height, 10);
 
   // CPU resize is forced.
   auto result_4 = ImageDecoderImpeller::DecompressTexture(
@@ -937,6 +945,27 @@ TEST(ImageDecoderTest, VerifySimpleDecoding) {
   EXPECT_EQ(result_4->image_info.size.height, 2);
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
+
+#if IMPELLER_SUPPORTS_RENDERING
+TEST(ImageDecoderTest, ClampToMaxTextureSizeKeepsAspectRatio) {
+  const impeller::ISize max_texture_size(10, 10);
+  // Sizes that already fit are unchanged.
+  EXPECT_EQ(ImageDecoderImpeller::ClampToMaxTextureSize(SkISize::Make(10, 4),
+                                                        max_texture_size),
+            SkISize::Make(10, 4));
+  // Wide and tall sizes are shrunk by a single factor.
+  EXPECT_EQ(ImageDecoderImpeller::ClampToMaxTextureSize(SkISize::Make(60, 20),
+                                                        max_texture_size),
+            SkISize::Make(10, 3));
+  EXPECT_EQ(ImageDecoderImpeller::ClampToMaxTextureSize(SkISize::Make(20, 60),
+                                                        max_texture_size),
+            SkISize::Make(3, 10));
+  // Each side stays at least one pixel.
+  EXPECT_EQ(ImageDecoderImpeller::ClampToMaxTextureSize(SkISize::Make(1000, 1),
+                                                        max_texture_size),
+            SkISize::Make(10, 1));
+}
+#endif  // IMPELLER_SUPPORTS_RENDERING
 
 TEST(ImageDecoderTest, ImagesWithTransparencyArePremulAlpha) {
   auto data = flutter::testing::OpenFixtureAsSkData("heart_end.png");
@@ -1043,7 +1072,9 @@ TEST_F(ImageDecoderFixtureTest,
         return false;
       }
 
-      codec = fml::MakeRefCounted<MultiFrameCodec>(std::move(gif_generator));
+      const SkISize gif_size = gif_generator->GetInfo().dimensions();
+      codec = fml::MakeRefCounted<MultiFrameCodec>(std::move(gif_generator),
+                                                   gif_size);
       codec->getNextFrame(closure);
       codec = nullptr;
       isolate_latch.Signal();

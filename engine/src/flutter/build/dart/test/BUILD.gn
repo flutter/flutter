@@ -16,7 +16,8 @@ gen_executable_call("gen_executable_call") {
   args = [ "Hello, World!" ]
 }
 
-# ninja -C ../out/host_debug flutter/build/dart/test:gen_executable_call_with_cwd
+# ninja -C ../out/host_debug
+# flutter/build/dart/test:gen_executable_call_with_cwd
 # ../out/host_debug/gen/flutter/build/dart/test/gen_executable_call_with_cwd
 #
 # Expected output: {varies}/flutter/build/dart/test

@@ -4,8 +4,8 @@
 
 #include "impeller/renderer/backend/gles/texture_gles.h"
 
-#include <format>
 #include <optional>
+#include <string>
 #include <utility>
 
 #include "flutter/fml/logging.h"
@@ -16,6 +16,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/gles/formats_gles.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace impeller {
 
@@ -197,8 +198,7 @@ void TextureGLES::SetLabel(std::string_view label) {
 void TextureGLES::SetLabel(std::string_view label, std::string_view trailing) {
 #ifdef IMPELLER_DEBUG
   if (reactor_->CanSetDebugLabels()) {
-    reactor_->SetDebugLabel(handle_.Get(),
-                            std::format("{} {}", label, trailing));
+    reactor_->SetDebugLabel(handle_.Get(), absl::StrCat(label, " ", trailing));
   }
 #endif  // IMPELLER_DEBUG
 }
@@ -613,13 +613,7 @@ bool TextureGLES::Bind() {
   }
   const auto& gl = reactor_->GetProcTable();
 
-  if (fence_.IsValid()) {
-    std::optional<GLsync> fence = reactor_->GetGLFence(fence_.Get());
-    if (fence.has_value()) {
-      gl.WaitSync(fence.value(), 0, GL_TIMEOUT_IGNORED);
-    }
-    fence_.Reset();
-  }
+  WaitForFence();
 
   switch (type_) {
     case Type::kTexture:
@@ -815,6 +809,7 @@ bool TextureGLES::SetAsFramebufferAttachment(GLenum target,
   if (!handle.has_value()) {
     return false;
   }
+  WaitForFence();
   const GLint level = static_cast<GLint>(mip_level);
 
   switch (ComputeTypeForBinding(target)) {
@@ -867,6 +862,17 @@ std::optional<GLuint> TextureGLES::GetFBO() const {
 void TextureGLES::SetFence(HandleGLES fence) {
   FML_DCHECK(!fence_.IsValid());
   fence_ = UniqueHandleGLES(reactor_, fence);
+}
+
+void TextureGLES::WaitForFence() {
+  if (!fence_.IsValid()) {
+    return;
+  }
+  std::optional<GLsync> fence = reactor_->GetGLFence(fence_.Get());
+  if (fence.has_value()) {
+    reactor_->GetProcTable().WaitSync(fence.value(), 0, GL_TIMEOUT_IGNORED);
+  }
+  fence_.Reset();
 }
 
 // Visible for testing.

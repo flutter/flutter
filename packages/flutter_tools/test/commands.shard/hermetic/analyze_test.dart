@@ -24,7 +24,7 @@ const _kFlutterRoot = '/data/flutter';
 const SIGABRT = -6;
 
 void main() {
-  testWithoutContext('analyze generate correct errors message', () async {
+  test('analyze generate correct errors message', () async {
     expect(
       AnalyzeBase.generateErrorsMessage(issueCount: 0, seconds: '0.1'),
       'No issues found! (ran in 0.1s)',
@@ -54,8 +54,11 @@ void main() {
       platform = FakePlatform();
       logger = BufferLogger.test();
       processManager = FakeProcessManager.empty();
+      // Setup repo roots
+      const homePath = '/home/user/flutter';
       toolContext = FakeToolContext(
         artifacts: Artifacts.test(),
+        cache: FakeCache(fileSystem: fileSystem, flutterRoot: homePath),
         fs: fileSystem,
         logger: logger,
         platform: platform,
@@ -68,15 +71,12 @@ void main() {
       );
       runner = createTestCommandRunner(command);
 
-      // Setup repo roots
-      const homePath = '/home/user/flutter';
-      Cache.flutterRoot = homePath;
       for (final dir in <String>['dev', 'examples', 'packages']) {
         fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
       }
     });
 
-    testWithoutContext('SIGABRT throws Exception', () async {
+    test('SIGABRT throws Exception', () async {
       const stderr = 'Something bad happened!';
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
@@ -88,6 +88,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
             '--no-with-fine-dependencies',
             '--suppress-analytics',
           ],
@@ -107,7 +108,7 @@ void main() {
       );
     });
 
-    testWithoutContext('Analysis server premature exit with 255 throws ToolExit', () async {
+    test('Analysis server premature exit with 255 throws ToolExit', () async {
       const stderr = 'Fatal error in analyzer';
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
@@ -118,6 +119,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
             '--no-with-fine-dependencies',
             '--suppress-analytics',
           ],
@@ -139,7 +141,7 @@ void main() {
       );
     });
 
-    testWithoutContext('--flutter-repo analyzes everything in the flutterRoot', () async {
+    test('--flutter-repo analyzes everything in the flutterRoot', () async {
       final process = MockLspServerProcess();
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
@@ -151,6 +153,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
             '--no-with-fine-dependencies',
             '--suppress-analytics',
           ],
@@ -172,7 +175,7 @@ void main() {
       );
     });
 
-    testWithoutContext('only the latest diagnostics published for a file are reported', () async {
+    test('only the latest diagnostics published for a file are reported', () async {
       final process = MockLspServerProcess();
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
@@ -183,6 +186,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
             '--no-with-fine-dependencies',
             '--suppress-analytics',
           ],
@@ -205,7 +209,7 @@ void main() {
       );
     });
 
-    testWithoutContext('--no-plugins passes --no-plugins to language-server', () async {
+    test('--no-plugins passes --no-plugins to language-server', () async {
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -215,6 +219,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
             '--no-with-fine-dependencies',
             '--no-plugins',
             '--suppress-analytics',
@@ -226,7 +231,7 @@ void main() {
       await expectLater(runner.run(<String>['analyze', '--no-plugins']), throwsA(isA<ToolExit>()));
     });
 
-    testWithoutContext('--benchmark passes --no-plugins to language-server by default', () async {
+    test('--benchmark passes --no-plugins to language-server by default', () async {
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -236,6 +241,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
             '--no-with-fine-dependencies',
             '--no-plugins',
             '--suppress-analytics',
@@ -247,7 +253,7 @@ void main() {
       await expectLater(runner.run(<String>['analyze', '--benchmark']), throwsA(isA<ToolExit>()));
     });
 
-    testWithoutContext('--benchmark with --plugins enables plugins', () async {
+    test('--benchmark with --plugins enables plugins', () async {
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -257,6 +263,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
             '--no-with-fine-dependencies',
             '--suppress-analytics',
           ],
@@ -271,39 +278,44 @@ void main() {
     });
   });
 
-  testWithoutContext('analyze inRepo', () {
+  test('analyze inRepo', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.directory(_kFlutterRoot).createSync(recursive: true);
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
       'flutter_analysis_test.',
     );
-    Cache.flutterRoot = _kFlutterRoot;
 
     // Absolute paths
-    expect(inRepo(<String>[tempDir.path], fileSystem), isFalse);
-    expect(inRepo(<String>[fileSystem.path.join(tempDir.path, 'foo')], fileSystem), isFalse);
-    expect(inRepo(<String>[Cache.flutterRoot!], fileSystem), isTrue);
-    expect(inRepo(<String>[fileSystem.path.join(Cache.flutterRoot!, 'foo')], fileSystem), isTrue);
+    expect(inRepo(<String>[tempDir.path], fileSystem, _kFlutterRoot), isFalse);
+    expect(
+      inRepo(<String>[fileSystem.path.join(tempDir.path, 'foo')], fileSystem, _kFlutterRoot),
+      isFalse,
+    );
+    expect(inRepo(<String>[_kFlutterRoot], fileSystem, _kFlutterRoot), isTrue);
+    expect(
+      inRepo(<String>[fileSystem.path.join(_kFlutterRoot, 'foo')], fileSystem, _kFlutterRoot),
+      isTrue,
+    );
 
     // Relative paths
-    fileSystem.currentDirectory = Cache.flutterRoot;
-    expect(inRepo(<String>['.'], fileSystem), isTrue);
-    expect(inRepo(<String>['foo'], fileSystem), isTrue);
+    fileSystem.currentDirectory = _kFlutterRoot;
+    expect(inRepo(<String>['.'], fileSystem, _kFlutterRoot), isTrue);
+    expect(inRepo(<String>['foo'], fileSystem, _kFlutterRoot), isTrue);
     fileSystem.currentDirectory = tempDir.path;
-    expect(inRepo(<String>['.'], fileSystem), isFalse);
-    expect(inRepo(<String>['foo'], fileSystem), isFalse);
+    expect(inRepo(<String>['.'], fileSystem, _kFlutterRoot), isFalse);
+    expect(inRepo(<String>['foo'], fileSystem, _kFlutterRoot), isFalse);
 
     // Ensure no exceptions
-    inRepo(null, fileSystem);
-    inRepo(<String>[], fileSystem);
+    inRepo(null, fileSystem, _kFlutterRoot);
+    inRepo(<String>[], fileSystem, _kFlutterRoot);
   });
 }
 
-bool inRepo(List<String>? fileList, FileSystem fileSystem) {
+bool inRepo(List<String>? fileList, FileSystem fileSystem, String flutterRoot) {
   if (fileList == null || fileList.isEmpty) {
     fileList = <String>[fileSystem.path.current];
   }
-  final String root = fileSystem.path.normalize(fileSystem.path.absolute(Cache.flutterRoot!));
+  final String root = fileSystem.path.normalize(fileSystem.path.absolute(flutterRoot));
   final String prefix = root + fileSystem.path.separator;
   for (String file in fileList) {
     file = fileSystem.path.normalize(fileSystem.path.absolute(file));

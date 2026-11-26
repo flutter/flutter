@@ -321,7 +321,7 @@ class RenderEditable extends RenderBox
     Offset cursorOffset = Offset.zero,
     this._devicePixelRatio = 1.0,
     ui.BoxHeightStyle selectionHeightStyle = ui.BoxHeightStyle.max,
-    ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.max,
+    ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.tight,
     this._enableInteractiveSelection,
     this.floatingCursorAddedMargin = const EdgeInsets.fromLTRB(4, 4, 4, 5),
     TextRange? promptRectRange,
@@ -596,6 +596,8 @@ class RenderEditable extends RenderBox
 
   /// Controls how wide the selection highlight boxes are computed to be.
   ///
+  /// Defaults to [ui.BoxWidthStyle.tight].
+  ///
   /// See [ui.BoxWidthStyle] for details on available styles.
   ui.BoxWidthStyle get selectionWidthStyle => _selectionPainter.selectionWidthStyle;
   set selectionWidthStyle(ui.BoxWidthStyle value) {
@@ -723,6 +725,7 @@ class RenderEditable extends RenderBox
   }
 
   void _setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
+    var updatedNextSelection = nextSelection;
     if (nextSelection.isValid) {
       // The nextSelection is calculated based on plainText, which can be out
       // of sync with the textSelectionDelegate.textEditingValue by one frame.
@@ -733,13 +736,13 @@ class RenderEditable extends RenderBox
       //
       // If this happens, we need to make sure the new selection is still valid.
       final int textLength = textSelectionDelegate.textEditingValue.text.length;
-      nextSelection = nextSelection.copyWith(
+      updatedNextSelection = nextSelection.copyWith(
         baseOffset: math.min(nextSelection.baseOffset, textLength),
         extentOffset: math.min(nextSelection.extentOffset, textLength),
       );
     }
     _setTextEditingValue(
-      textSelectionDelegate.textEditingValue.copyWith(selection: nextSelection),
+      textSelectionDelegate.textEditingValue.copyWith(selection: updatedNextSelection),
       cause,
     );
   }

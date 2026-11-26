@@ -56,8 +56,8 @@ class AndroidSurfaceSoftware final : public AndroidSurface,
  private:
   sk_sp<SkSurface> sk_surface_;
   fml::RefPtr<AndroidNativeWindow> native_window_;
-  SkColorType target_color_type_;
-  SkAlphaType target_alpha_type_;
+  SkColorType target_color_type_ = kUnknown_SkColorType;
+  SkAlphaType target_alpha_type_ = kUnknown_SkAlphaType;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceSoftware);
 };

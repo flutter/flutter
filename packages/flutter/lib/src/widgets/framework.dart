@@ -999,9 +999,11 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// {@endtemplate}
   ///
   /// You should not use [BuildContext.dependOnInheritedWidgetOfExactType] from this
-  /// method. However, [didChangeDependencies] will be called immediately
-  /// following this method, and [BuildContext.dependOnInheritedWidgetOfExactType] can
-  /// be used there.
+  /// method: the framework calls this method only once for each [State] object
+  /// and does not call it again when an inherited widget changes, so a value
+  /// read here from an inherited widget is never updated. However,
+  /// [didChangeDependencies] will be called immediately following this method,
+  /// and [BuildContext.dependOnInheritedWidgetOfExactType] can be used there.
   ///
   /// Implementations of this method should start with a call to the inherited
   /// method, as in `super.initState()`.
@@ -1301,7 +1303,22 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// {@macro flutter.widgets.State.initState}
   ///
   /// Implementations of this method should end with a call to the inherited
-  /// method, as in `super.dispose()`.
+  /// method, as in `super.dispose()`. The framework does not wait for any
+  /// [Future] returned by this method, and checks that `super.dispose()` was
+  /// called as soon as this method returns, so this method should not be
+  /// asynchronous. Asynchronous cleanup can be started, without being awaited,
+  /// before calling `super.dispose()`. Any such cleanup continues after the
+  /// [State] is unmounted, so it must not access [context] or call [setState]
+  /// after an asynchronous gap, and it should handle its own errors.
+  ///
+  /// {@tool dartpad}
+  /// This example shows a [StatefulWidget] that listens to a [Stream]. Its
+  /// [State] cancels the subscription in [dispose] without awaiting the
+  /// returned [Future], and resubscribes in [didUpdateWidget] when the
+  /// widget is given a different stream.
+  ///
+  /// ** See code in examples/api/lib/widgets/framework/state.dispose.0.dart **
+  /// {@end-tool}
   ///
   /// ## Caveats
   ///
@@ -6045,7 +6062,7 @@ class StatefulElement extends ComponentElement {
   @override
   void unmount() {
     super.unmount();
-    state.dispose();
+    final debugCheckForReturnedFuture = state.dispose() as Object?;
     assert(() {
       if (state._debugLifecycleState == _StateLifecycle.defunct) {
         return true;
@@ -6056,6 +6073,13 @@ class StatefulElement extends ComponentElement {
           'dispose() implementations must always call their superclass dispose() method, to ensure '
           'that all the resources used by the widget are fully released.',
         ),
+        if (debugCheckForReturnedFuture is Future)
+          ErrorHint(
+            '${state.runtimeType}.dispose() returned a Future, but the framework does not await '
+            'dispose(), so super.dispose() must be called synchronously, not after an await. '
+            'Consider making dispose() synchronous and starting any asynchronous cleanup '
+            'without awaiting it.',
+          ),
       ]);
     }());
     state._element = null;
@@ -6075,10 +6099,10 @@ class StatefulElement extends ComponentElement {
           ),
           ErrorDescription(
             'When an inherited widget changes, for example if the value of Theme.of() changes, '
-            "its dependent widgets are rebuilt. If the dependent widget's reference to "
-            'the inherited widget is in a constructor or an initState() method, '
-            'then the rebuilt dependent widget will not reflect the changes in the '
-            'inherited widget.',
+            'its dependent widgets are rebuilt. The framework calls initState() only once for '
+            'each State object and does not call it again for those rebuilds, so a value that '
+            'initState() reads from an inherited widget is never updated when that inherited '
+            'widget changes.',
           ),
           ErrorHint(
             'Typically references to inherited widgets should occur in widget build() methods. Alternatively, '

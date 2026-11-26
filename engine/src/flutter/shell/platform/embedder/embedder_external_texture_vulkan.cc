@@ -15,12 +15,12 @@
 #include "impeller/display_list/aiks_context.h"  // nogncheck
 #include "impeller/renderer/context.h"           // nogncheck
 #endif                                           // IMPELLER_SUPPORTS_RENDERING
-#include "include/core/SkCanvas.h"
-#include "include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkAlphaType.h"
+#include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkColorType.h"
 #include "third_party/skia/include/core/SkImage.h"
+#include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/gpu/ganesh/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/SkImageGanesh.h"

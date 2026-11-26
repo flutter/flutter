@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui show Size;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 void main() {
   internalBootstrapBrowserTest(() => doTests);
@@ -309,6 +312,98 @@ void doTests() {
 
       expect(provider.onResize.isEmpty, completion(isTrue));
       expect(completer.future, completion(isTrue));
+    });
+  });
+
+  group('on iOS', () {
+    late FullPageDimensionsProvider provider;
+    final fakes = <(JSObject, String)>[];
+
+    final JSObject visualViewport = globalContext.getProperty<JSObject>('visualViewport'.toJS);
+    final JSObject documentElement = globalContext
+        .getProperty<JSObject>('document'.toJS)
+        .getProperty<JSObject>('documentElement'.toJS);
+
+    // Shadows a read-only browser property with a fixed value until tearDown.
+    void fake(JSObject target, String name, double value) {
+      objectConstructor.defineProperty(
+        target,
+        name,
+        DomPropertyDataDescriptor(value: value, configurable: true),
+      );
+      fakes.add((target, name));
+    }
+
+    // An iPhone document in portrait with the browser toolbar expanded. Each
+    // test picks the visual viewport size.
+    void fakeIPhone({double viewportWidth = 430, required double viewportHeight}) {
+      fake(documentElement, 'clientWidth', 430);
+      fake(documentElement, 'clientHeight', 775);
+      fake(visualViewport, 'width', viewportWidth);
+      fake(visualViewport, 'height', viewportHeight);
+    }
+
+    setUp(() {
+      ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.iOs;
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2);
+      provider = FullPageDimensionsProvider();
+    });
+
+    tearDown(() {
+      provider.close();
+      for (final (JSObject target, String name) in fakes) {
+        target.delete(name.toJS);
+      }
+      fakes.clear();
+      ui_web.browser.debugOperatingSystemOverride = null;
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(null);
+    });
+
+    test('grows the view when the browser toolbar collapses', () {
+      // Collapsing the toolbar grows the visual viewport, while
+      // documentElement.clientHeight keeps the toolbar-expanded height.
+      fakeIPhone(viewportHeight: 815);
+
+      expect(provider.computePhysicalSize(), const ui.Size(430 * 2, 815 * 2));
+    });
+
+    test('reports no keyboard inset when the browser toolbar collapses', () {
+      fakeIPhone(viewportHeight: 815);
+      final double physicalHeight = provider.computePhysicalSize().height;
+
+      final ViewPadding computed = provider.computeKeyboardInsets(physicalHeight, false);
+
+      expect(computed.bottom, 0);
+    });
+
+    test('does not shrink the view for a shorter visual viewport', () {
+      // The on-screen keyboard shrinks the visual viewport.
+      fakeIPhone(viewportHeight: 426);
+
+      expect(provider.computePhysicalSize(), const ui.Size(430 * 2, 775 * 2));
+    });
+
+    test('ignores sub-pixel visual viewport growth', () {
+      fakeIPhone(viewportHeight: 775.4);
+
+      expect(provider.computePhysicalSize(), const ui.Size(430 * 2, 775 * 2));
+    });
+
+    test('reports the keyboard inset while editing', () {
+      fakeIPhone(viewportHeight: 426);
+      final double physicalHeight = provider.computePhysicalSize().height;
+
+      final ViewPadding computed = provider.computeKeyboardInsets(physicalHeight, true);
+
+      expect(computed.bottom, (775 - 426) * 2);
+    });
+
+    test('ignores a visual viewport left over from the other orientation', () {
+      // Mid-rotation, the visual viewport can still report the previous
+      // orientation's size.
+      fakeIPhone(viewportWidth: 932, viewportHeight: 853);
+
+      expect(provider.computePhysicalSize(), const ui.Size(430 * 2, 775 * 2));
     });
   });
 }

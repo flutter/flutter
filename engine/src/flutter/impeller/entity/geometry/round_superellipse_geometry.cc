@@ -105,7 +105,7 @@ class UnevenQuadrantsRearranger : public ConvexRearranger {
  private:
   Point* cache_;
   size_t segment_capacity_;
-  size_t lengths_[4];
+  size_t lengths_[4]{};
 };
 
 // A convex rearranger whose contour is concatenated from 4 identical quadrant

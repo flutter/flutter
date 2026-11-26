@@ -30,7 +30,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('flutter run works on web-server device with a unary main function', () async {
+  test('flutter run works on web-server device with a unary main function', () async {
     await flutter.run(
       device: WebServerDevice.kWebServerDeviceId,
       additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],

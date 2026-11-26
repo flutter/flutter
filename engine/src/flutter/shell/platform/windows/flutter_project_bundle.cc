@@ -4,14 +4,71 @@
 
 #include "flutter/shell/platform/windows/flutter_project_bundle.h"
 
+#include <charconv>
+#include <cstdlib>
 #include <filesystem>
+#include <string_view>
 
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/string_conversion.h"
 #include "flutter/shell/platform/common/engine_switches.h"  // nogncheck
 #include "flutter/shell/platform/common/path_utils.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace flutter {
+
+namespace {
+
+// Parses a feature level written as "<major>_<minor>", such as "10_0".
+absl::StatusOr<egl::D3DFeatureLevel> ParseD3DFeatureLevel(
+    std::string_view value) {
+  const absl::Status invalid_status =
+      absl::InvalidArgumentError("expected a feature level such as 10_0");
+  const size_t separator = value.find('_');
+  if (separator == std::string_view::npos) {
+    return invalid_status;
+  }
+  const char* major_begin = value.data();
+  const char* major_end = major_begin + separator;
+  const char* minor_begin = major_end + 1;
+  const char* minor_end = value.data() + value.size();
+
+  int major = 0;
+  int minor = 0;
+  auto major_result = std::from_chars(major_begin, major_end, major);
+  auto minor_result = std::from_chars(minor_begin, minor_end, minor);
+  if (major_result.ec != std::errc() || major_result.ptr != major_end ||
+      minor_result.ec != std::errc() || minor_result.ptr != minor_end) {
+    return invalid_status;
+  }
+  return egl::D3DFeatureLevel{major, minor};
+}
+
+// Returns the D3D11 feature level cap from the environment, if set. The cap
+// lets tests emulate older GPUs, where ANGLE may only create OpenGL ES 2.0
+// contexts.
+std::optional<egl::D3DFeatureLevel> GetMaxD3DFeatureLevelFromEnvironment() {
+  // Like engine switches, only read the environment in debug and profile.
+#ifndef FLUTTER_RELEASE
+  constexpr char kKey[] = "FLUTTER_WINDOWS_MAX_D3D_FEATURE_LEVEL";
+  const char* value = std::getenv(kKey);
+  if (value == nullptr || value[0] == '\0') {
+    return std::nullopt;
+  }
+  absl::StatusOr<egl::D3DFeatureLevel> level = ParseD3DFeatureLevel(value);
+  if (!level.ok()) {
+    FML_LOG(WARNING) << "Ignoring " << kKey << "=" << value << ": "
+                     << level.status().message();
+    return std::nullopt;
+  }
+  return level.value();
+#else
+  return std::nullopt;
+#endif  // !FLUTTER_RELEASE
+}
+
+}  // namespace
 
 FlutterProjectBundle::FlutterProjectBundle(
     const FlutterDesktopEngineProperties& properties)
@@ -43,6 +100,8 @@ FlutterProjectBundle::FlutterProjectBundle(
       static_cast<FlutterImpellerSwitch>(properties.impeller_switch);
 
   enable_flutter_gpu_ = properties.enable_flutter_gpu;
+
+  max_d3d_feature_level_ = GetMaxD3DFeatureLevelFromEnvironment();
 
   // Resolve any relative paths.
   if (assets_path_.is_relative() || icu_path_.is_relative() ||
@@ -84,8 +143,13 @@ UniqueAotDataPtr FlutterProjectBundle::LoadAotData(
   }
   std::string path_string = fml::PathToUtf8(aot_library_path_);
   FlutterEngineAOTDataSource source = {};
+#if FML_ARCH_CPU_X86_64
+  source.type = kFlutterEngineAOTDataSourceTypeDllPath;
+  source.dll_path = path_string.c_str();
+#else
   source.type = kFlutterEngineAOTDataSourceTypeElfPath;
   source.elf_path = path_string.c_str();
+#endif
   FlutterEngineAOTData data = nullptr;
   auto result = engine_procs.CreateAOTData(&source, &data);
   if (result != kSuccess) {

@@ -263,6 +263,11 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
 - (NSArray<NSScreen*>*)screens;
 
 /**
+ * The unique identifier for this engine.
+ */
+@property(nonatomic, readonly) int64_t engineIdentifier;
+
+/**
  * Returns engine for the identifier. The identifier must be valid for an engine
  * that is currently running, otherwise the behavior is undefined.
  *

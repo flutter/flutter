@@ -20,8 +20,7 @@
                 "--runtime-mode",
                 "profile",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/fuchsia_profile_arm64_tester",
             "description": "Builds profile mode tests of arm64 Fuchsia.",
@@ -65,8 +64,7 @@
                 "--runtime-mode",
                 "release",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/fuchsia_release_arm64_tester",
             "description": "Builds release mode tests of arm64 Fuchsia.",
@@ -110,8 +108,7 @@
                 "--runtime-mode",
                 "debug",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/fuchsia_debug_arm64_tester",
             "description": "Builds debug mode tests of arm64 Fuchsia.",
@@ -156,8 +153,7 @@
                 "--runtime-mode",
                 "profile",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/fuchsia_profile_x64_tester",
             "description": "Builds profile mode tests of x64 Fuchsia.",
@@ -202,8 +198,7 @@
                 "--runtime-mode",
                 "release",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/fuchsia_release_x64_tester",
             "description": "Builds release mode tests of x64 Fuchsia.",
@@ -248,8 +243,7 @@
                 "--runtime-mode",
                 "debug",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/fuchsia_debug_x64_tester",
             "description": "Builds debug mode tests of x64 Fuchsia.",

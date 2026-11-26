@@ -13,7 +13,6 @@ import 'package:uuid/uuid.dart';
 import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/config.dart';
-import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
@@ -28,10 +27,23 @@ import 'dart/package_map.dart';
 /// Opt-in changes to the dart compilers.
 const kDartCompilerExperiments = <String>[];
 
+/// Whether DDC canary features are enabled.
+///
+/// This is the single source of truth for DDC canary mode. It controls both
+/// the flags passed to the frontend server when compiling with DDC (see
+/// [kDdcLibraryBundleFlags]) and which precompiled artifacts are served at
+/// runtime. Keeping these in sync is required: code compiled with canary
+/// features must be loaded alongside an SDK compiled the same way.
+///
+/// This must stay `true` until DDC emits the library bundle format without
+/// `--dartdevc-canary`. Until then, `--dartdevc-module-format=ddc` without
+/// canary selects the legacy DDC module format, which is no longer supported.
+const kDdcCanaryFeatures = true;
+
 // Flags passed when compiling with DDC.
 const kDdcLibraryBundleFlags = <String>[
   '--dartdevc-module-format=ddc',
-  '--dartdevc-canary',
+  if (kDdcCanaryFeatures) '--dartdevc-canary',
   '--no-js-strongly-connected-components',
 ];
 
@@ -43,7 +55,7 @@ const kDdcLibraryBundleFlags = <String>[
 /// kernel for DDC must use them to compute the same path as the compiler.
 List<String> ddcFrontEndOptions(BuildInfo buildInfo) => <String>[
   ...buildInfo.extraFrontEndOptions,
-  if (buildInfo.webEnableHotReload) ...kDdcLibraryBundleFlags,
+  ...kDdcLibraryBundleFlags,
   ...deprecatedJsInteropCompilerFlags(buildInfo.deprecatedJsInterop),
 ];
 
@@ -85,9 +97,9 @@ class TargetModel {
 
   /// Infers the appropriate [TargetModel] from a given [TargetPlatform].
   static TargetModel fromTargetPlatform(TargetPlatform? platform) {
-    return switch (platform) {
-      TargetPlatform.web_javascript => TargetModel.dartdevc,
-      TargetPlatform.fuchsia_arm64 || TargetPlatform.fuchsia_x64 => TargetModel.flutterRunner,
+    return switch (platform?.os) {
+      .web => TargetModel.dartdevc,
+      .fuchsia => TargetModel.flutterRunner,
       _ => TargetModel.flutter,
     };
   }
@@ -337,32 +349,12 @@ class KernelCompiler {
           );
     }
 
-    final List<String> commandToStartFrontendServer;
-    if (frontendServerStarterPath != null && frontendServerStarterPath.isNotEmpty) {
-      final String engineDartPath = _artifacts.getArtifactPath(
-        Artifact.engineDartBinary,
-        platform: platform,
-      );
-      if (!_processManager.canRun(engineDartPath)) {
-        throwToolExit('Unable to find Dart binary at $engineDartPath');
-      }
-      commandToStartFrontendServer = <String>[engineDartPath, frontendServerStarterPath];
-    } else {
-      final String engineDartAotRuntimePath = _artifacts.getArtifactPath(
-        Artifact.engineDartAotRuntime,
-        platform: platform,
-      );
-      if (!_processManager.canRun(engineDartAotRuntimePath)) {
-        throwToolExit('Unable to find dartaotruntime binary at $engineDartAotRuntimePath');
-      }
-      commandToStartFrontendServer = <String>[
-        engineDartAotRuntimePath,
-        _artifacts.getArtifactPath(
-          Artifact.frontendServerSnapshotForEngineDartSdk,
-          platform: platform,
-        ),
-      ];
-    }
+    final List<String> commandToStartFrontendServer = _commandToStartFrontendServer(
+      artifacts: _artifacts,
+      processManager: _processManager,
+      frontendServerStarterPath: frontendServerStarterPath,
+      platform: platform,
+    );
 
     final List<String> command =
         commandToStartFrontendServer +
@@ -423,6 +415,39 @@ class KernelCompiler {
     }
     return null;
   }
+}
+
+/// Returns the command used to start the frontend server.
+///
+/// When [frontendServerStarterPath] is provided, the frontend server is run
+/// from source with the Dart binary. Otherwise its AOT snapshot is run with
+/// `dartaotruntime`, which must be present in the Flutter cache. If it is not
+/// (for example because the cache is corrupted, partially downloaded, or
+/// quarantined by antivirus software), the tool exits with an actionable
+/// message instead of crashing when the process fails to start.
+List<String> _commandToStartFrontendServer({
+  required Artifacts artifacts,
+  required ProcessManager processManager,
+  required String? frontendServerStarterPath,
+  required TargetPlatform? platform,
+}) {
+  if (frontendServerStarterPath != null && frontendServerStarterPath.isNotEmpty) {
+    return <String>[
+      artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform),
+      frontendServerStarterPath,
+    ];
+  }
+  final String engineDartAotRuntimePath = artifacts.getArtifactPath(
+    Artifact.engineDartAotRuntime,
+    platform: platform,
+  );
+  if (!processManager.canRun(engineDartAotRuntimePath)) {
+    throwToolExit('Unable to find dartaotruntime binary at $engineDartAotRuntimePath');
+  }
+  return <String>[
+    engineDartAotRuntimePath,
+    artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk, platform: platform),
+  ];
 }
 
 /// Class that allows to serialize compilation requests to the compiler.
@@ -528,9 +553,6 @@ class _RejectRequest extends _CompilationRequest {
   @override
   Future<CompilerOutput?> _run(DefaultResidentCompiler compiler) async => compiler._reject();
 }
-
-ResidentCompilerFactory get residentCompilerFactory =>
-    context.get<ResidentCompilerFactory>() ?? const ResidentCompilerFactory();
 
 /// A factory for generating [ResidentCompiler] instances.
 class ResidentCompilerFactory {
@@ -945,21 +967,12 @@ class DefaultResidentCompiler implements ResidentCompiler {
     final TargetPlatform? platform = (targetModel == TargetModel.dartdevc)
         ? TargetPlatform.web_javascript
         : null;
-    late final List<String> commandToStartFrontendServer;
-    if (frontendServerStarterPath != null && frontendServerStarterPath!.isNotEmpty) {
-      commandToStartFrontendServer = <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform),
-        frontendServerStarterPath!,
-      ];
-    } else {
-      commandToStartFrontendServer = <String>[
-        artifacts.getArtifactPath(Artifact.engineDartAotRuntime, platform: platform),
-        artifacts.getArtifactPath(
-          Artifact.frontendServerSnapshotForEngineDartSdk,
-          platform: platform,
-        ),
-      ];
-    }
+    final List<String> commandToStartFrontendServer = _commandToStartFrontendServer(
+      artifacts: artifacts,
+      processManager: _processManager,
+      frontendServerStarterPath: frontendServerStarterPath,
+      platform: platform,
+    );
 
     final command = <String>[
       ...commandToStartFrontendServer,

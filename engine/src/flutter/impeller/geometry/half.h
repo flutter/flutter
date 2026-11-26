@@ -54,6 +54,9 @@ struct Half {
   constexpr bool operator==(const Half& v) const { return v.x == x; }
 };
 
+// cppcoreguidelines-pro-type-member-init doesn't understand that the
+// anonymous struct and `e` share storage in the union below.
+// NOLINTBEGIN(cppcoreguidelines-pro-type-member-init)
 /// @brief A storage only class for half precision floating point vector 4.
 struct HalfVector4 {
   union {
@@ -94,7 +97,11 @@ struct HalfVector4 {
     return v.x != x || v.y != y || v.z != z || v.w != w;
   }
 };
+// NOLINTEND(cppcoreguidelines-pro-type-member-init)
 
+// cppcoreguidelines-pro-type-member-init doesn't understand that the
+// anonymous struct and `e` share storage in the union below.
+// NOLINTBEGIN(cppcoreguidelines-pro-type-member-init)
 /// @brief A storage only class for half precision floating point vector 3.
 struct HalfVector3 {
   union {
@@ -122,7 +129,11 @@ struct HalfVector3 {
     return v.x != x || v.y != y || v.z != z;
   }
 };
+// NOLINTEND(cppcoreguidelines-pro-type-member-init)
 
+// cppcoreguidelines-pro-type-member-init doesn't understand that the
+// anonymous struct and `e` share storage in the union below.
+// NOLINTBEGIN(cppcoreguidelines-pro-type-member-init)
 /// @brief A storage only class for half precision floating point vector 2.
 struct HalfVector2 {
   union {
@@ -148,6 +159,7 @@ struct HalfVector2 {
     return v.x != x || v.y != y;
   }
 };
+// NOLINTEND(cppcoreguidelines-pro-type-member-init)
 
 static_assert(sizeof(Half) == sizeof(uint16_t));
 static_assert(sizeof(HalfVector2) == 2 * sizeof(Half));
