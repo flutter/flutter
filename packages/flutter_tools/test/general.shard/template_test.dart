@@ -14,7 +14,7 @@ import 'package:flutter_tools/src/template.dart';
 import '../src/common.dart';
 
 void main() {
-  testWithoutContext('Template constructor throws ToolExit when source directory is missing', () {
+  test('Template constructor throws ToolExit when source directory is missing', () {
     final handler = FileExceptionHandler();
     final fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
 
@@ -30,7 +30,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Template.render throws ToolExit when FileSystem exception is raised', () {
+  test('Template.render throws ToolExit when FileSystem exception is raised', () {
     final handler = FileExceptionHandler();
     final fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
     final template = Template(
@@ -50,7 +50,7 @@ void main() {
     const flutterRoot = '/flutter';
     const templatePathProvider = TemplatePathProvider(flutterRoot: flutterRoot);
 
-    testWithoutContext(
+    test(
       'templatePathProvider.imageDirectory returns parent template directory if passed null name',
       () async {
         final fileSystem = MemoryFileSystem.test();
@@ -85,7 +85,7 @@ void main() {
       },
     );
 
-    testWithoutContext('templatePathProvider.imageDirectory returns the directory containing the `name` template directory', () async {
+    test('templatePathProvider.imageDirectory returns the directory containing the `name` template directory', () async {
       final fileSystem = MemoryFileSystem.test();
       final logger = BufferLogger.test();
       final String packageConfigPath = fileSystem.path.join(
@@ -144,7 +144,7 @@ void main() {
       );
     });
 
-    testWithoutContext('overwrites .img.tmpl files with files from the image source', () {
+    test('overwrites .img.tmpl files with files from the image source', () {
       expect(template.render(destination, <String, Object>{}), 1);
 
       final File destinationImage = destination.childFile(imageName);
@@ -164,7 +164,7 @@ void main() {
       expect(logger.statusText, contains('${destinationImage.path} (overwritten)'));
     });
 
-    testWithoutContext('does not overwrite .img.tmpl files with files from the image source', () {
+    test('does not overwrite .img.tmpl files with files from the image source', () {
       expect(template.render(destination, <String, Object>{}), 1);
 
       final File destinationImage = destination.childFile(imageName);
@@ -182,7 +182,7 @@ void main() {
       expect(logger.statusText, isEmpty);
     });
 
-    testWithoutContext('can suppress file printing', () {
+    test('can suppress file printing', () {
       template.render(destination, <String, Object>{}, printStatusWhenWriting: false);
 
       final File destinationImage = destination.childFile(imageName);
@@ -193,7 +193,7 @@ void main() {
     });
   });
 
-  testWithoutContext('escapeYamlString', () {
+  test('escapeYamlString', () {
     expect(escapeYamlString(''), r'""');
     expect(escapeYamlString('\x00\n\r\t\b'), r'"\0\n\r\t\x08"');
     expect(escapeYamlString('test'), r'"test"');

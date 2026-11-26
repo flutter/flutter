@@ -17,7 +17,7 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 
@@ -25,7 +25,7 @@ final linux = FakePlatform();
 final windows = FakePlatform(operatingSystem: 'windows');
 
 void main() {
-  testWithoutContext('LinuxDevice defaults', () async {
+  test('LinuxDevice defaults', () async {
     final device = LinuxDevice(
       analytics: const NoOpAnalytics(),
       featureFlags: TestFeatureFlags(isLinuxEnabled: true),
@@ -53,7 +53,7 @@ void main() {
     expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
   });
 
-  testWithoutContext('LinuxDevice on arm64 hosts is arm64', () async {
+  test('LinuxDevice on arm64 hosts is arm64', () async {
     final deviceArm64Host = LinuxDevice(
       analytics: const NoOpAnalytics(),
       featureFlags: TestFeatureFlags(isLinuxEnabled: true),
@@ -67,7 +67,7 @@ void main() {
     expect(await deviceArm64Host.targetPlatform, TargetPlatform.linux_arm64);
   });
 
-  testWithoutContext('LinuxDevice: no devices listed if platform unsupported', () async {
+  test('LinuxDevice: no devices listed if platform unsupported', () async {
     expect(
       await LinuxDevices(
         analytics: const NoOpAnalytics(),
@@ -84,7 +84,7 @@ void main() {
     );
   });
 
-  testWithoutContext('LinuxDevice: no devices listed if Linux feature flag disabled', () async {
+  test('LinuxDevice: no devices listed if Linux feature flag disabled', () async {
     expect(
       await LinuxDevices(
         analytics: const NoOpAnalytics(),
@@ -101,7 +101,7 @@ void main() {
     );
   });
 
-  testWithoutContext('LinuxDevice: devices', () async {
+  test('LinuxDevice: devices', () async {
     expect(
       await LinuxDevices(
         analytics: const NoOpAnalytics(),
@@ -118,7 +118,7 @@ void main() {
     );
   });
 
-  testWithoutContext('LinuxDevice has well known id "linux"', () async {
+  test('LinuxDevice has well known id "linux"', () async {
     expect(
       LinuxDevices(
         analytics: const NoOpAnalytics(),
@@ -135,7 +135,7 @@ void main() {
     );
   });
 
-  testWithoutContext('LinuxDevice: discoverDevices', () async {
+  test('LinuxDevice: discoverDevices', () async {
     // Timeout ignored.
     final List<Device> devices = await LinuxDevices(
       analytics: const NoOpAnalytics(),
@@ -151,7 +151,7 @@ void main() {
     expect(devices, hasLength(1));
   });
 
-  testWithoutContext('LinuxDevice.isSupportedForProject is true with editable host app', () async {
+  test('LinuxDevice.isSupportedForProject is true with editable host app', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.directory('linux').createSync();
@@ -172,7 +172,7 @@ void main() {
     );
   });
 
-  testWithoutContext('LinuxDevice.isSupportedForProject is false with no host app', () async {
+  test('LinuxDevice.isSupportedForProject is false with no host app', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
     final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
@@ -192,26 +192,23 @@ void main() {
     );
   });
 
-  testWithoutContext(
-    'LinuxDevice.executablePathForDevice uses the correct package executable',
-    () async {
-      final mockApp = FakeLinuxApp();
-      final device = LinuxDevice(
-        analytics: const NoOpAnalytics(),
-        featureFlags: TestFeatureFlags(isLinuxEnabled: true),
-        toolContext: FakeToolContext(
-          fs: MemoryFileSystem.test(),
-          logger: BufferLogger.test(),
-          os: FakeOperatingSystemUtils(),
-          processManager: FakeProcessManager.any(),
-        ),
-      );
+  test('LinuxDevice.executablePathForDevice uses the correct package executable', () async {
+    final mockApp = FakeLinuxApp();
+    final device = LinuxDevice(
+      analytics: const NoOpAnalytics(),
+      featureFlags: TestFeatureFlags(isLinuxEnabled: true),
+      toolContext: FakeToolContext(
+        fs: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
+        processManager: FakeProcessManager.any(),
+      ),
+    );
 
-      expect(device.executablePathForDevice(mockApp, BuildInfo.debug), 'debug/executable');
-      expect(device.executablePathForDevice(mockApp, BuildInfo.profile), 'profile/executable');
-      expect(device.executablePathForDevice(mockApp, BuildInfo.release), 'release/executable');
-    },
-  );
+    expect(device.executablePathForDevice(mockApp, BuildInfo.debug), 'debug/executable');
+    expect(device.executablePathForDevice(mockApp, BuildInfo.profile), 'profile/executable');
+    expect(device.executablePathForDevice(mockApp, BuildInfo.release), 'release/executable');
+  });
 
   group('LinuxDevice.buildForDevice', () {
     late MemoryFileSystem fileSystem;
@@ -220,69 +217,62 @@ void main() {
       fileSystem = MemoryFileSystem.test();
     });
 
-    testUsingContext(
-      'sends timing events to analytics',
-      () async {
-        fileSystem.file('pubspec.yaml').createSync();
-        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
-        fileSystem.file(fileSystem.path.join('linux', 'CMakeLists.txt'))
-          ..createSync(recursive: true)
-          ..writeAsStringSync('set(BINARY_NAME "test_app")');
-        final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+    test('sends timing events to analytics', () async {
+      fileSystem.file('pubspec.yaml').createSync();
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      fileSystem.file(fileSystem.path.join('linux', 'CMakeLists.txt'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('set(BINARY_NAME "test_app")');
+      final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'cmake',
+            '-G',
+            'Ninja',
+            '-DCMAKE_BUILD_TYPE=Debug',
+            '-DFLUTTER_TARGET_PLATFORM=linux-x64',
+            '/linux',
+          ],
+          workingDirectory: '/build/linux/x64/debug',
+        ),
+        const FakeCommand(command: <String>['ninja', '-C', '/build/linux/x64/debug', 'install']),
+      ]);
+      final device = LinuxDevice(
+        analytics: fakeAnalytics,
+        featureFlags: TestFeatureFlags(isLinuxEnabled: true),
+        toolContext: FakeToolContext(
+          cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
           fs: fileSystem,
-          fakeFlutterVersion: FakeFlutterVersion(),
-        );
-        final processManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>[
-              'cmake',
-              '-G',
-              'Ninja',
-              '-DCMAKE_BUILD_TYPE=Debug',
-              '-DFLUTTER_TARGET_PLATFORM=linux-x64',
-              '/linux',
-            ],
-            workingDirectory: '/build/linux/x64/debug',
-          ),
-          const FakeCommand(command: <String>['ninja', '-C', '/build/linux/x64/debug', 'install']),
-        ]);
-        final device = LinuxDevice(
-          analytics: fakeAnalytics,
-          featureFlags: TestFeatureFlags(isLinuxEnabled: true),
-          toolContext: FakeToolContext(
-            cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
-            fs: fileSystem,
-            logger: BufferLogger.test(),
-            os: FakeOperatingSystemUtils(),
-            processManager: processManager,
-          ),
-        );
+          logger: BufferLogger.test(),
+          os: FakeOperatingSystemUtils(),
+          processManager: processManager,
+        ),
+      );
 
-        await device.buildForDevice(buildInfo: BuildInfo.debug);
+      await device.buildForDevice(buildInfo: BuildInfo.debug);
 
-        expect(processManager.hasRemainingExpectations, isFalse);
-        expect(
-          analyticsTimingEventExists(
-            sentEvents: fakeAnalytics.sentEvents,
-            workflow: 'build',
-            variableName: 'cmake-linux',
-          ),
-          true,
-        );
-        expect(
-          analyticsTimingEventExists(
-            sentEvents: fakeAnalytics.sentEvents,
-            workflow: 'build',
-            variableName: 'linux-ninja',
-          ),
-          true,
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.empty(),
-      },
-    );
+      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'build',
+          variableName: 'cmake-linux',
+        ),
+        true,
+      );
+      expect(
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'build',
+          variableName: 'linux-ninja',
+        ),
+        true,
+      );
+    });
   });
 }
 

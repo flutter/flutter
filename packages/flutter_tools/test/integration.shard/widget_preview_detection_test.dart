@@ -37,7 +37,7 @@ void main() {
   });
 
   group('widget-preview detection', () {
-    testWithoutContext('Newly added previews are detected (LSP)', () async {
+    test('Newly added previews are detected (LSP)', () async {
       dtdLauncher = DtdLauncher(
         logger: logger!,
         artifacts: createWidgetPreviewTestArtifacts(logger: logger),
@@ -82,7 +82,7 @@ Widget myNewPreview() => Container();
       await waitForPreviews(dtdConnection);
     });
 
-    testWithoutContext('Removed previews are detected (LSP)', () async {
+    test('Removed previews are detected (LSP)', () async {
       dtdLauncher = DtdLauncher(
         logger: logger!,
         artifacts: createWidgetPreviewTestArtifacts(logger: logger),
@@ -156,7 +156,7 @@ Widget myRemovePreview() => Container();
       );
     });
 
-    testWithoutContext('Modified previews are detected (LSP)', () async {
+    test('Modified previews are detected (LSP)', () async {
       dtdLauncher = DtdLauncher(
         logger: logger!,
         artifacts: createWidgetPreviewTestArtifacts(logger: logger),
@@ -231,7 +231,7 @@ Widget myModifyPreview() => Container();
       );
     });
 
-    testWithoutContext('Previews within libraries with parts are detected (LSP)', () async {
+    test('Previews within libraries with parts are detected (LSP)', () async {
       dtdLauncher = DtdLauncher(
         logger: logger!,
         artifacts: createWidgetPreviewTestArtifacts(logger: logger),

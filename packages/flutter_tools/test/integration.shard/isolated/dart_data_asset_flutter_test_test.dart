@@ -16,7 +16,7 @@ void main() {
   tearDown(tearDownDataAssets);
 
   group('dart data assets', () {
-    testWithoutContext('flutter test', () async {
+    test('flutter test', () async {
       final ProcessTestResult result = await runFlutter(
         <String>['test', '-v'],
         appRoot.path,

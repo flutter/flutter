@@ -20,7 +20,7 @@ import '../src/fake_process_manager.dart';
 import '../src/fakes.dart' hide FakeProcess;
 
 void main() {
-  testWithoutContext('StdoutHandler can produce output message', () async {
+  test('StdoutHandler can produce output message', () async {
     final stdoutHandler = StdoutHandler(
       logger: BufferLogger.test(),
       fileSystem: MemoryFileSystem.test(),
@@ -35,7 +35,7 @@ void main() {
     expect(output?.expressionData, null);
   });
 
-  testWithoutContext('StdoutHandler can read output bytes', () async {
+  test('StdoutHandler can read output bytes', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final stdoutHandler = StdoutHandler(logger: BufferLogger.test(), fileSystem: fileSystem);
     fileSystem.file('message').writeAsBytesSync(<int>[1, 2, 3, 4]);
@@ -52,7 +52,7 @@ void main() {
     expect(output?.expressionData, <int>[1, 2, 3, 4]);
   });
 
-  testWithoutContext('StdoutHandler reads output bytes if errorCount > 0', () async {
+  test('StdoutHandler reads output bytes if errorCount > 0', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final stdoutHandler = StdoutHandler(logger: BufferLogger.test(), fileSystem: fileSystem);
     fileSystem.file('message').writeAsBytesSync(<int>[1, 2, 3, 4]);
@@ -69,7 +69,7 @@ void main() {
     expect(output?.expressionData, <int>[1, 2, 3, 4]);
   });
 
-  testWithoutContext('TargetModel values', () {
+  test('TargetModel values', () {
     expect(TargetModel('vm'), TargetModel.vm);
     expect(TargetModel.vm.toString(), 'vm');
 
@@ -85,7 +85,7 @@ void main() {
     expect(() => TargetModel('foobar'), throwsException);
   });
 
-  testWithoutContext('toMultiRootPath maps different URIs', () async {
+  test('toMultiRootPath maps different URIs', () async {
     expect(
       toMultiRootPath(Uri.parse('file:///a/b/c'), 'scheme', <String>['/a/b'], false),
       'scheme:///c',
@@ -109,31 +109,28 @@ void main() {
     );
   });
 
-  testWithoutContext('buildModeOptions removes matching product define', () {
+  test('buildModeOptions removes matching product define', () {
     expect(buildModeOptions(BuildMode.debug, <String>['dart.vm.product=true']), <String>[
       '-Ddart.vm.profile=false',
       '--enable-asserts',
     ]);
   });
 
-  testWithoutContext('buildModeOptions removes matching profile define in debug mode', () {
+  test('buildModeOptions removes matching profile define in debug mode', () {
     expect(buildModeOptions(BuildMode.debug, <String>['dart.vm.profile=true']), <String>[
       '-Ddart.vm.product=false',
       '--enable-asserts',
     ]);
   });
 
-  testWithoutContext(
-    'buildModeOptions removes both matching profile and release define in debug mode',
-    () {
-      expect(
-        buildModeOptions(BuildMode.debug, <String>['dart.vm.profile=true', 'dart.vm.product=true']),
-        <String>['--enable-asserts'],
-      );
-    },
-  );
+  test('buildModeOptions removes both matching profile and release define in debug mode', () {
+    expect(
+      buildModeOptions(BuildMode.debug, <String>['dart.vm.profile=true', 'dart.vm.product=true']),
+      <String>['--enable-asserts'],
+    );
+  });
 
-  testWithoutContext('buildModeOptions removes matching profile define in profile mode', () {
+  test('buildModeOptions removes matching profile define in profile mode', () {
     expect(buildModeOptions(BuildMode.profile, <String>['dart.vm.profile=true']), <String>[
       '-Ddart.vm.product=false',
       '--delete-tostring-package-uri=dart:ui',
@@ -141,144 +138,133 @@ void main() {
     ]);
   });
 
-  testWithoutContext(
-    'buildModeOptions removes both matching profile and release define in profile mode',
-    () {
-      expect(
-        buildModeOptions(BuildMode.profile, <String>[
-          'dart.vm.profile=false',
-          'dart.vm.product=true',
-        ]),
-        <String>[
-          '--delete-tostring-package-uri=dart:ui',
-          '--delete-tostring-package-uri=package:flutter',
-        ],
-      );
-    },
-  );
+  test('buildModeOptions removes both matching profile and release define in profile mode', () {
+    expect(
+      buildModeOptions(BuildMode.profile, <String>[
+        'dart.vm.profile=false',
+        'dart.vm.product=true',
+      ]),
+      <String>[
+        '--delete-tostring-package-uri=dart:ui',
+        '--delete-tostring-package-uri=package:flutter',
+      ],
+    );
+  });
 
-  testWithoutContext(
-    'includeUnsupportedPlatformLibraryStubs is only valid for Target.dartdevc',
-    () {
-      // Initializing the compiler with includeUnsupportedPlatformLibraryStubs for targets other
-      // than DDC is not currently supported as it's limited for use with the widget previewer.
-      for (final TargetPlatform target in TargetPlatform.values.where(
-        (e) => e != .web_javascript,
-      )) {
-        try {
-          const ResidentCompilerFactory().create(
-            targetPlatform: target,
-            buildInfo: BuildInfo.debug.copyWith(includeUnsupportedPlatformLibraryStubs: true),
-            logger: BufferLogger.test(),
-            processManager: FakeProcessManager.any(),
-            artifacts: Artifacts.test(),
-            platform: FakePlatform(),
-            fileSystem: MemoryFileSystem.test(),
-            shutdownHooks: FakeShutdownHooks(),
-            config: Config.test(),
-          );
-          fail('Unsupported target did not throw.');
-        } on StateError catch (e) {
-          expect(
-            e.message,
-            'includeUnsupportedPlatformLibraryStubs should only be used by the widget-preview '
-            'command.',
-          );
-        }
+  test('includeUnsupportedPlatformLibraryStubs is only valid for Target.dartdevc', () {
+    // Initializing the compiler with includeUnsupportedPlatformLibraryStubs for targets other
+    // than DDC is not currently supported as it's limited for use with the widget previewer.
+    for (final TargetPlatform target in TargetPlatform.values.where((e) => e != .web_javascript)) {
+      try {
+        const ResidentCompilerFactory().create(
+          targetPlatform: target,
+          buildInfo: BuildInfo.debug.copyWith(includeUnsupportedPlatformLibraryStubs: true),
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.any(),
+          artifacts: Artifacts.test(),
+          platform: FakePlatform(),
+          fileSystem: MemoryFileSystem.test(),
+          shutdownHooks: FakeShutdownHooks(),
+          config: Config.test(),
+        );
+        fail('Unsupported target did not throw.');
+      } on StateError catch (e) {
+        expect(
+          e.message,
+          'includeUnsupportedPlatformLibraryStubs should only be used by the widget-preview '
+          'command.',
+        );
       }
+    }
 
-      // Initializing the compiler with includeUnsupportedPlatformLibraryStubs for DDC is
-      // supported.
-      const ResidentCompilerFactory().create(
-        targetPlatform: .web_javascript,
-        buildInfo: BuildInfo.debug.copyWith(includeUnsupportedPlatformLibraryStubs: true),
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
-        artifacts: Artifacts.test(),
-        platform: FakePlatform(),
-        fileSystem: MemoryFileSystem.test(),
-        shutdownHooks: FakeShutdownHooks(),
-        config: Config.test(),
-      );
-    },
-  );
+    // Initializing the compiler with includeUnsupportedPlatformLibraryStubs for DDC is
+    // supported.
+    const ResidentCompilerFactory().create(
+      targetPlatform: .web_javascript,
+      buildInfo: BuildInfo.debug.copyWith(includeUnsupportedPlatformLibraryStubs: true),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      artifacts: Artifacts.test(),
+      platform: FakePlatform(),
+      fileSystem: MemoryFileSystem.test(),
+      shutdownHooks: FakeShutdownHooks(),
+      config: Config.test(),
+    );
+  });
 
-  testWithoutContext(
-    'Strips --include-unsupported-platform-library-stubs from extraFrontEndOptions',
-    () async {
-      final completer = Completer<void>();
-      final processManager = FakeProcessManager.list([
-        FakeCommand(
-          command: const <String>[
-            'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
-            'Artifact.frontendServerSnapshotForEngineDartSdk.TargetPlatform.web_javascript',
-            '--sdk-root',
-            'sdkroot/',
-            '--incremental',
-            '--target=dartdevc',
-            '--experimental-emit-debug-metadata',
-            '--output-dill',
-            'foo.dill',
-            '--packages',
-            '.dart_tool/package_config.json',
-            '-Ddart.vm.profile=false',
-            '-Ddart.vm.product=false',
-            '--enable-asserts',
-            '--track-creation-locations',
-            '--initialize-from-dill',
-            'build/0ca43a24517cbfd39e8c3fdfd86bd8d9.cache.dill.track.dill',
-            '--verbosity=error',
-            '--extra-flag',
-          ],
-          onRun: (_) => completer.complete(),
-        ),
-      ]);
-      final compiler = DefaultResidentCompiler(
-        'sdkroot',
-        buildInfo: BuildInfo.debug.copyWith(
-          // Don't explicitly enable includeUnsupportedPlatformLibraryStubs to ensure it's not
-          // included in the argument list.
-          includeUnsupportedPlatformLibraryStubs: false,
-          extraFrontEndOptions: [
-            '--include-unsupported-platform-library-stubs',
-            // Include a random extra flag to ensure not all extra options are stripped.
-            '--extra-flag',
-          ],
-        ),
-        logger: BufferLogger.test(),
-        processManager: processManager,
-        artifacts: Artifacts.test(),
-        platform: FakePlatform(),
-        fileSystem: MemoryFileSystem.test(),
-        shutdownHooks: FakeShutdownHooks(),
-        targetModel: TargetModel.dartdevc,
-        config: Config.test(),
-      );
+  test('Strips --include-unsupported-platform-library-stubs from extraFrontEndOptions', () async {
+    final completer = Completer<void>();
+    final processManager = FakeProcessManager.list([
+      FakeCommand(
+        command: const <String>[
+          'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
+          'Artifact.frontendServerSnapshotForEngineDartSdk.TargetPlatform.web_javascript',
+          '--sdk-root',
+          'sdkroot/',
+          '--incremental',
+          '--target=dartdevc',
+          '--experimental-emit-debug-metadata',
+          '--output-dill',
+          'foo.dill',
+          '--packages',
+          '.dart_tool/package_config.json',
+          '-Ddart.vm.profile=false',
+          '-Ddart.vm.product=false',
+          '--enable-asserts',
+          '--track-creation-locations',
+          '--initialize-from-dill',
+          'build/0ca43a24517cbfd39e8c3fdfd86bd8d9.cache.dill.track.dill',
+          '--verbosity=error',
+          '--extra-flag',
+        ],
+        onRun: (_) => completer.complete(),
+      ),
+    ]);
+    final compiler = DefaultResidentCompiler(
+      'sdkroot',
+      buildInfo: BuildInfo.debug.copyWith(
+        // Don't explicitly enable includeUnsupportedPlatformLibraryStubs to ensure it's not
+        // included in the argument list.
+        includeUnsupportedPlatformLibraryStubs: false,
+        extraFrontEndOptions: [
+          '--include-unsupported-platform-library-stubs',
+          // Include a random extra flag to ensure not all extra options are stripped.
+          '--extra-flag',
+        ],
+      ),
+      logger: BufferLogger.test(),
+      processManager: processManager,
+      artifacts: Artifacts.test(),
+      platform: FakePlatform(),
+      fileSystem: MemoryFileSystem.test(),
+      shutdownHooks: FakeShutdownHooks(),
+      targetModel: TargetModel.dartdevc,
+      config: Config.test(),
+    );
 
-      await runZonedGuarded(
-        () {
-          // This throws ToolExit as the FakeProcess immediately closes stdout and stderr.
-          compiler.recompile(
-            Uri.file('foo.dart'),
-            [],
-            outputPath: 'foo.dill',
-            packageConfig: PackageConfig.empty,
-          );
-        },
-        (e, st) {
-          if (e is! ToolExit) {
-            completer.completeError(e, st);
-          }
-        },
-      );
+    await runZonedGuarded(
+      () {
+        // This throws ToolExit as the FakeProcess immediately closes stdout and stderr.
+        compiler.recompile(
+          Uri.file('foo.dart'),
+          [],
+          outputPath: 'foo.dill',
+          packageConfig: PackageConfig.empty,
+        );
+      },
+      (e, st) {
+        if (e is! ToolExit) {
+          completer.completeError(e, st);
+        }
+      },
+    );
 
-      // Fail if the command isn't run. This can happen when the commands actual arguments don't
-      // match.
-      await completer.future.timeout(const Duration(seconds: 5));
-    },
-  );
+    // Fail if the command isn't run. This can happen when the commands actual arguments don't
+    // match.
+    await completer.future.timeout(const Duration(seconds: 5));
+  });
 
-  testWithoutContext('--include-unsupported-platform-library-stubs when includeUnsupportedPlatformLibraryStubs is set', () async {
+  test('--include-unsupported-platform-library-stubs when includeUnsupportedPlatformLibraryStubs is set', () async {
     final completer = Completer<void>();
     final processManager = FakeProcessManager.list([
       FakeCommand(
@@ -350,7 +336,7 @@ void main() {
     await completer.future.timeout(const Duration(seconds: 5));
   });
 
-  testWithoutContext('ResidentCompilerFactory configures DDC library bundle flags', () {
+  test('ResidentCompilerFactory configures DDC library bundle flags', () {
     final compiler = const ResidentCompilerFactory().create(
       targetPlatform: .web_javascript,
       buildInfo: const BuildInfo(
@@ -400,13 +386,13 @@ void main() {
       '--no-deprecated-js-interop',
     ];
 
-    testWithoutContext('passes no flag to DDC by default', () {
+    test('passes no flag to DDC by default', () {
       final DefaultResidentCompiler compiler = createCompiler(targetPlatform: .web_javascript);
 
       expect(compiler.extraFrontEndOptions, isNot(anyElement(isIn(deprecatedJsInteropFlags))));
     });
 
-    testWithoutContext('forwards the flag to DDC', () {
+    test('forwards the flag to DDC', () {
       expect(
         createCompiler(
           targetPlatform: .web_javascript,
@@ -423,7 +409,7 @@ void main() {
       );
     });
 
-    testWithoutContext('does not forward the flag to non-web targets', () {
+    test('does not forward the flag to non-web targets', () {
       final DefaultResidentCompiler compiler = createCompiler(
         targetPlatform: .android_arm64,
         deprecatedJsInterop: false,
@@ -432,7 +418,7 @@ void main() {
       expect(compiler.extraFrontEndOptions, isNot(anyElement(isIn(deprecatedJsInteropFlags))));
     });
 
-    testWithoutContext('uses a different cached kernel for each flag value', () {
+    test('uses a different cached kernel for each flag value', () {
       final initializeFromDillPaths = <String?>{
         for (final bool? value in <bool?>[null, true, false])
           createCompiler(
