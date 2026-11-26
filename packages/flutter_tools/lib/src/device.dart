@@ -723,6 +723,9 @@ abstract class Device {
   }
 
   /// Creates a [FlutterDevice] configured to run a Flutter application on this device.
+  ///
+  /// Subclasses may use [debuggingOptions], [flutterProject], [platformArgs],
+  /// and [urlTunneller] to construct platform-specific devices.
   Future<FlutterDevice> createFlutterDevice({
     required BuildInfo buildInfo,
     required ToolContext toolContext,

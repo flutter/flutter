@@ -75,17 +75,17 @@ class WebDeviceLogReader extends DeviceLogReader {
     }
     _stdoutSubscription = connectedVmService.service.onStdoutEvent.listen(_onLogEvent);
     _stderrSubscription = connectedVmService.service.onStderrEvent.listen(_onLogEvent);
-    try {
-      await connectedVmService.service.streamListen(vm_service.EventStreams.kStdout);
-    } on vm_service.RPCError {
-      // It is safe to ignore this error because we expect an error to be
-      // thrown if we're already subscribed.
-    }
-    try {
-      await connectedVmService.service.streamListen(vm_service.EventStreams.kStderr);
-    } on vm_service.RPCError {
-      // It is safe to ignore this error because we expect an error to be
-      // thrown if we're already subscribed.
+    for (final streamId in const <String>[
+      vm_service.EventStreams.kStdout,
+      vm_service.EventStreams.kStderr,
+    ]) {
+      try {
+        await connectedVmService.service.streamListen(streamId);
+      } on vm_service.RPCError catch (e) {
+        if (e.code != vm_service.RPCErrorKind.kStreamAlreadySubscribed.code) {
+          rethrow;
+        }
+      }
     }
   }
 

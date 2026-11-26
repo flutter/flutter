@@ -32,6 +32,7 @@ import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
 import '../macos/xcode.dart';
 import '../mdns_discovery.dart';
+import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
@@ -364,6 +365,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   ResidentCompilerFactory get residentCompilerFactory => const ResidentCompilerFactory();
 
   Future<ResidentRunner> _discoverVmServiceAndCreateResidentRunner({required Device device}) async {
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
     final Future<Uri> vmServiceUri = _discoverVmService(device: device);
     vmServiceUri.ignore();
 
@@ -371,6 +373,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     final FlutterDevice flutterDevice = await device.createFlutterDevice(
       buildInfo: buildInfo,
+      flutterProject: projectFactory.fromDirectory(fs.currentDirectory),
       residentCompilerFactory: residentCompilerFactory,
       targetModelOverride: TargetModel(getValue(DebuggingOptionDescriptors.fuchsiaTargetModel)),
       toolContext: toolContext,

@@ -428,9 +428,13 @@ void main() {
           onStderrEvent: stderrController.stream,
           onStreamListen: (String streamId) {
             listenedStreams.add(streamId);
-            if (streamId == vm_service.EventStreams.kStderr) {
-              // Verify RPCError when already subscribed is ignored.
-              throw vm_service.RPCError('streamListen', 103, 'Stream already subscribed');
+            if (streamId == vm_service.EventStreams.kStdout) {
+              // Verify RPCError when already subscribed is ignored and subscription continues.
+              throw vm_service.RPCError(
+                'streamListen',
+                vm_service.RPCErrorKind.kStreamAlreadySubscribed.code,
+                'Stream already subscribed',
+              );
             }
           },
         );
@@ -473,6 +477,38 @@ void main() {
         await stderrController.close();
       },
     );
+
+    test('provideVmService rethrows non-already-subscribed RPCError', () async {
+      final stdoutController = StreamController<vm_service.Event>.broadcast();
+      final stderrController = StreamController<vm_service.Event>.broadcast();
+      final vmService = _FakeVmService(
+        onStdoutEvent: stdoutController.stream,
+        onStderrEvent: stderrController.stream,
+        onStreamListen: (String streamId) {
+          throw vm_service.RPCError(
+            'streamListen',
+            vm_service.RPCErrorKind.kInternalError.code,
+            'Internal error',
+          );
+        },
+      );
+      final logReader = WebDeviceLogReader('test-app');
+
+      await expectLater(
+        () => logReader.provideVmService(_FakeFlutterVmService(vmService)),
+        throwsA(
+          isA<vm_service.RPCError>().having(
+            (vm_service.RPCError error) => error.code,
+            'code',
+            vm_service.RPCErrorKind.kInternalError.code,
+          ),
+        ),
+      );
+
+      await logReader.dispose();
+      await stdoutController.close();
+      await stderrController.close();
+    });
   });
 
   group('WebDevice.createFlutterDevice', () {
