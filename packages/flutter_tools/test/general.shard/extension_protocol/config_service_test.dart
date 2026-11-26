@@ -95,7 +95,7 @@ void _domainErrorConfigEntryPoint(SendPort sendPort) {
 
 void main() {
   group('ExtensionConfiguration Host Integration', () {
-    testWithoutContext(
+    test(
       'ExtensionConfiguration fetches feature flags and config options from single extension',
       () async {
         final logger = BufferLogger.test();
@@ -131,7 +131,7 @@ void main() {
       },
     );
 
-    testWithoutContext('ExtensionConfiguration aggregates feature flags and config options across multiple extensions', () async {
+    test('ExtensionConfiguration aggregates feature flags and config options across multiple extensions', () async {
       final logger = BufferLogger.test();
       final manager = ExtensionManager(
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
@@ -167,7 +167,7 @@ void main() {
       await manager.dispose();
     });
 
-    testWithoutContext('ConfigCommand settingsText incorporates extension flags and options grouped by extension title', () async {
+    test('ConfigCommand settingsText incorporates extension flags and options grouped by extension title', () async {
       final logger = BufferLogger.test();
       final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
       final manager = ExtensionManager(
@@ -198,7 +198,7 @@ void main() {
       await manager.dispose();
     });
 
-    testWithoutContext('ExtensionConfiguration handles failing extensions gracefully without failing other extensions', () async {
+    test('ExtensionConfiguration handles failing extensions gracefully without failing other extensions', () async {
       final logger = BufferLogger.test();
       final config = ExtensionConfiguration(
         extensions: <ConfigurationExtension>[
@@ -221,30 +221,27 @@ void main() {
       expect(groups.first.title, 'Secondary Configuration Extension');
     });
 
-    testWithoutContext(
-      'ConfigurationExtensionClient handles null and invalid responses gracefully',
-      () async {
-        final logger = BufferLogger.test();
-        final clientWithNull = ConfigurationExtensionClient(
-          _FakeExtensionConnection(),
-          logger: logger,
-        );
+    test('ConfigurationExtensionClient handles null and invalid responses gracefully', () async {
+      final logger = BufferLogger.test();
+      final clientWithNull = ConfigurationExtensionClient(
+        _FakeExtensionConnection(),
+        logger: logger,
+      );
 
-        expect(await clientWithNull.fetchTitle(), 'Tool Extension Configuration');
-        expect(await clientWithNull.getFeatureFlags(), isEmpty);
-        expect(await clientWithNull.getConfigurations(), isEmpty);
+      expect(await clientWithNull.fetchTitle(), 'Tool Extension Configuration');
+      expect(await clientWithNull.getFeatureFlags(), isEmpty);
+      expect(await clientWithNull.getConfigurations(), isEmpty);
 
-        final clientWithInvalid = ConfigurationExtensionClient(
-          _FakeExtensionConnection(response: 'not-a-list'),
-          logger: logger,
-        );
+      final clientWithInvalid = ConfigurationExtensionClient(
+        _FakeExtensionConnection(response: 'not-a-list'),
+        logger: logger,
+      );
 
-        expect(await clientWithInvalid.getFeatureFlags(), isEmpty);
-        expect(await clientWithInvalid.getConfigurations(), isEmpty);
-      },
-    );
+      expect(await clientWithInvalid.getFeatureFlags(), isEmpty);
+      expect(await clientWithInvalid.getConfigurations(), isEmpty);
+    });
 
-    testWithoutContext('ExtensionConfiguration logs warning with extension name and skips extension on ToolExtensionException', () async {
+    test('ExtensionConfiguration logs warning with extension name and skips extension on ToolExtensionException', () async {
       final logger = BufferLogger.test();
       final manager = ExtensionManager(
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),

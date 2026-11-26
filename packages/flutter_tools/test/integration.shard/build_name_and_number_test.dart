@@ -27,7 +27,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('Reads "version" build name and number in "flutter test"', () async {
+  test('Reads "version" build name and number in "flutter test"', () async {
     await flutter.test();
 
     // Without an assertion, this test always passes.

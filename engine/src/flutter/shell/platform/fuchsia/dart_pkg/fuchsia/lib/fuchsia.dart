@@ -64,8 +64,7 @@ void exit(int returnCode) {
   Isolate.current.kill(priority: Isolate.immediate);
 }
 
-// ignore: always_declare_return_types, prefer_generic_function_type_aliases
-typedef _ListStringArgFunction(List<String> args);
+typedef _ListStringArgFunction = void Function(List<String> args);
 
 // This function is used as the entry point for code in the dart runner and is
 // not meant to be called directly outside of that context. The code will invoke
