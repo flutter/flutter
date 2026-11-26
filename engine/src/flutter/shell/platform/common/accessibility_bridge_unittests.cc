@@ -73,6 +73,48 @@ TEST(AccessibilityBridgeTest, BasicTest) {
   EXPECT_EQ(child2_node->GetName(), "child 2");
 }
 
+TEST(AccessibilityBridgeTest, PublishesOnlyDefinedCustomActions) {
+  auto bridge = std::make_shared<TestAccessibilityBridge>();
+  FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
+  const int32_t ids[] = {7, 12, 3};
+  root.actions = static_cast<FlutterSemanticsAction>(
+      kFlutterSemanticsActionTap | kFlutterSemanticsActionCustomAction);
+  root.custom_accessibility_actions_count = 3;
+  root.custom_accessibility_actions = ids;
+
+  FlutterSemanticsCustomAction2 expand{};
+  expand.id = 3;
+  expand.label = "Expand";
+  FlutterSemanticsCustomAction2 collapse{};
+  collapse.id = 7;
+  collapse.label = "Collapse";
+  bridge->AddFlutterSemanticsCustomActionUpdate(expand);
+  bridge->AddFlutterSemanticsCustomActionUpdate(collapse);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+  bridge->CommitUpdates();
+
+  auto node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  ASSERT_NE(node, nullptr);
+  const auto action_ids = ax::mojom::IntListAttribute::kCustomActionIds;
+  const auto action_descriptions =
+      ax::mojom::StringListAttribute::kCustomActionDescriptions;
+  EXPECT_TRUE(node->GetData().HasAction(ax::mojom::Action::kCustomAction));
+  EXPECT_THAT(node->GetData().GetIntListAttribute(action_ids),
+              ::testing::ElementsAre(7, 3));
+  EXPECT_THAT(node->GetData().GetStringListAttribute(action_descriptions),
+              ::testing::ElementsAre("Collapse", "Expand"));
+  EXPECT_TRUE(node->GetData().HasAction(ax::mojom::Action::kDoDefault));
+
+  // A later update cannot publish labels from an earlier batch.
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+  bridge->CommitUpdates();
+  EXPECT_FALSE(node->GetData().HasAction(ax::mojom::Action::kCustomAction));
+  EXPECT_TRUE(node->GetData().GetIntListAttribute(action_ids).empty());
+  EXPECT_TRUE(
+      node->GetData().GetStringListAttribute(action_descriptions).empty());
+  EXPECT_TRUE(node->GetData().HasAction(ax::mojom::Action::kDoDefault));
+}
+
 // Flutter used to assume that the accessibility root had ID 0.
 // In a multi-view world, each view has its own accessibility root
 // with a globally unique node ID.
