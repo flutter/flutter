@@ -15,6 +15,7 @@ import 'test_utils.dart';
 void main() {
   late Directory tempDir;
   late Directory projectRoot;
+  late Directory profileDir;
   late Directory releaseDir;
   late File exeFile;
 
@@ -45,6 +46,9 @@ void main() {
         arch = 'x64';
       }
 
+      profileDir = fileSystem.directory(
+        fileSystem.path.join(projectRoot.path, 'build', 'windows', arch, 'runner', 'Profile'),
+      );
       releaseDir = fileSystem.directory(
         fileSystem.path.join(projectRoot.path, 'build', 'windows', arch, 'runner', 'Release'),
       );
@@ -54,6 +58,22 @@ void main() {
 
     tearDownAll(() {
       tryToDelete(tempDir);
+    });
+
+    test('flutter build windows --profile bundles libvmservice_snapshot.dll', () {
+      final ProcessResult result = processManager.runSync(<String>[
+        flutterBin,
+        ...getLocalEngineArguments(),
+        'build',
+        'windows',
+        '--profile',
+        '--no-pub',
+      ], workingDirectory: projectRoot.path);
+      expect(result, const ProcessResultMatcher());
+
+      expect(profileDir, exists);
+      expect(profileDir.childFile('hello.exe'), exists);
+      expect(profileDir.childDirectory('data').childFile('libvmservice_snapshot.dll'), exists);
     });
 
     test('flutter build windows creates exe', () {
@@ -68,6 +88,10 @@ void main() {
 
       expect(releaseDir, exists);
       expect(exeFile, exists);
+      expect(
+        releaseDir.childDirectory('data').childFile('libvmservice_snapshot.dll'),
+        isNot(exists),
+      );
 
       // Default exe has build name 1.0.0 and build number 1.
       final String fileVersion = _getFileVersion(exeFile);
