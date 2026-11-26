@@ -68,9 +68,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// Presents the Flutter content of the frame.
 ///
-/// `submitFrame:` encodes the GPU work for the frame's surfaces before it builds the frame, and
-/// this block presents them. `FlutterPlatformViewsController` calls this block in the same
-/// `CATransaction` in which it updates the platform views and overlays.
+/// `IOSExternalViewEmbedder` encodes the GPU work for the frame's surfaces before it builds the
+/// frame, and this block presents them. `FlutterPlatformViewsController` calls this block in the
+/// same `CATransaction` in which it updates the platform views and overlays.
 @property(nonatomic, readonly, copy) void (^present)(void);
 
 - (instancetype)init NS_UNAVAILABLE;

@@ -26,7 +26,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('deferred components assets are not missing on clean build', () async {
+  test('deferred components assets are not missing on clean build', () async {
     final project = DeferredComponentsProject(BasicDeferredComponentsConfig());
     await project.setUpIn(tempDir);
 

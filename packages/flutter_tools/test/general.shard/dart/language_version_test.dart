@@ -20,7 +20,7 @@ void setUpLanguageVersion(FileSystem fileSystem, [String version = testVersionSt
 }
 
 void main() {
-  testWithoutContext('detects language version in comment', () {
+  test('detects language version in comment', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
     final File file = fileSystem.file('example.dart')
@@ -33,7 +33,7 @@ void main() {
     expect(determineLanguageVersion(file, null, flutterRoot), LanguageVersion(2, 9));
   });
 
-  testWithoutContext('detects language version in comment without spacing', () {
+  test('detects language version in comment without spacing', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
     final File file = fileSystem.file('example.dart')
@@ -46,7 +46,7 @@ void main() {
     expect(determineLanguageVersion(file, null, flutterRoot), LanguageVersion(2, 9));
   });
 
-  testWithoutContext('detects language version in comment with more numbers', () {
+  test('detects language version in comment with more numbers', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
     final File file = fileSystem.file('example.dart')
@@ -59,7 +59,7 @@ void main() {
     expect(determineLanguageVersion(file, null, flutterRoot), LanguageVersion(2, 12));
   });
 
-  testWithoutContext('does not detect invalid language version', () {
+  test('does not detect invalid language version', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
     final File file = fileSystem.file('example.dart')
@@ -72,7 +72,7 @@ void main() {
     expect(determineLanguageVersion(file, null, flutterRoot), testCurrentLanguageVersion);
   });
 
-  testWithoutContext('detects language version with leading whitespace', () {
+  test('detects language version with leading whitespace', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File file = fileSystem.file('example.dart')
       ..writeAsStringSync('''
@@ -84,7 +84,7 @@ void main() {
     expect(determineLanguageVersion(file, null, flutterRoot), LanguageVersion(2, 9));
   });
 
-  testWithoutContext('detects language version with tabs', () {
+  test('detects language version with tabs', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File file = fileSystem.file('example.dart')
       ..writeAsStringSync('''
@@ -96,7 +96,7 @@ void main() {
     expect(determineLanguageVersion(file, null, flutterRoot), LanguageVersion(2, 9));
   });
 
-  testWithoutContext('detects language version with tons of whitespace', () {
+  test('detects language version with tons of whitespace', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File file = fileSystem.file('example.dart')
       ..writeAsStringSync('''
@@ -108,7 +108,7 @@ void main() {
     expect(determineLanguageVersion(file, null, flutterRoot), LanguageVersion(2, 23));
   });
 
-  testWithoutContext('does not detect language version in dartdoc', () {
+  test('does not detect language version in dartdoc', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
     final File file = fileSystem.file('example.dart')
@@ -121,7 +121,7 @@ void main() {
     expect(determineLanguageVersion(file, null, flutterRoot), testCurrentLanguageVersion);
   });
 
-  testWithoutContext('does not detect language version in block comment', () {
+  test('does not detect language version in block comment', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
     final File file = fileSystem.file('example.dart')
@@ -136,7 +136,7 @@ void main() {
     expect(determineLanguageVersion(file, null, flutterRoot), testCurrentLanguageVersion);
   });
 
-  testWithoutContext('does not detect language version in nested block comment', () {
+  test('does not detect language version in nested block comment', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
     final File file = fileSystem.file('example.dart')
@@ -153,7 +153,7 @@ void main() {
     expect(determineLanguageVersion(file, null, flutterRoot), testCurrentLanguageVersion);
   });
 
-  testWithoutContext('detects language version after nested block comment', () {
+  test('detects language version after nested block comment', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File file = fileSystem.file('example.dart')
       ..writeAsStringSync('''
@@ -168,7 +168,7 @@ void main() {
     expect(determineLanguageVersion(file, null, flutterRoot), LanguageVersion(2, 9));
   });
 
-  testWithoutContext('does not crash with unbalanced opening block comments', () {
+  test('does not crash with unbalanced opening block comments', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
     final File file = fileSystem.file('example.dart')
@@ -184,7 +184,7 @@ void main() {
     expect(determineLanguageVersion(file, null, flutterRoot), testCurrentLanguageVersion);
   });
 
-  testWithoutContext('does not crash with unbalanced closing block comments', () {
+  test('does not crash with unbalanced closing block comments', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
     final File file = fileSystem.file('example.dart')
@@ -200,7 +200,7 @@ void main() {
     expect(determineLanguageVersion(file, null, flutterRoot), testCurrentLanguageVersion);
   });
 
-  testWithoutContext('does not detect language version in single line block comment', () {
+  test('does not detect language version in single line block comment', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
     final File file = fileSystem.file('example.dart')
@@ -213,7 +213,7 @@ void main() {
     expect(determineLanguageVersion(file, null, flutterRoot), testCurrentLanguageVersion);
   });
 
-  testWithoutContext('does not detect language version after import declaration', () {
+  test('does not detect language version after import declaration', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
     final File file = fileSystem.file('example.dart')
@@ -228,7 +228,7 @@ import 'dart:ui' as ui;
     expect(determineLanguageVersion(file, null, flutterRoot), testCurrentLanguageVersion);
   });
 
-  testWithoutContext('does not detect language version after part declaration', () {
+  test('does not detect language version after part declaration', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
     final File file = fileSystem.file('example.dart')
@@ -243,7 +243,7 @@ part of 'foo.dart';
     expect(determineLanguageVersion(file, null, flutterRoot), testCurrentLanguageVersion);
   });
 
-  testWithoutContext('does not detect language version after library declaration', () {
+  test('does not detect language version after library declaration', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
     final File file = fileSystem.file('example.dart')
@@ -258,7 +258,7 @@ library funstuff;
     expect(determineLanguageVersion(file, null, flutterRoot), testCurrentLanguageVersion);
   });
 
-  testWithoutContext('looks up language version from package if not found in file', () {
+  test('looks up language version from package if not found in file', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File file = fileSystem.file('example.dart')
       ..writeAsStringSync('''
@@ -273,7 +273,7 @@ library funstuff;
     expect(determineLanguageVersion(file, package, flutterRoot), LanguageVersion(2, 7));
   });
 
-  testWithoutContext('defaults to current version if package lookup returns null', () {
+  test('defaults to current version if package lookup returns null', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
     final File file = fileSystem.file('example.dart')
@@ -285,26 +285,23 @@ library funstuff;
     expect(determineLanguageVersion(file, package, flutterRoot), testCurrentLanguageVersion);
   });
 
-  testWithoutContext(
-    'Returns null safe error if reading the file throws a FileSystemException',
-    () {
-      final handler = FileExceptionHandler();
-      final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
-      setUpLanguageVersion(fileSystem);
-      final File errorFile = fileSystem.file('foo');
-      handler.addError(errorFile, FileSystemOp.read, const FileSystemException());
+  test('Returns null safe error if reading the file throws a FileSystemException', () {
+    final handler = FileExceptionHandler();
+    final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
+    setUpLanguageVersion(fileSystem);
+    final File errorFile = fileSystem.file('foo');
+    handler.addError(errorFile, FileSystemOp.read, const FileSystemException());
 
-      final package = Package(
-        'foo',
-        Uri.parse('file://foo/'),
-        languageVersion: LanguageVersion(2, 7),
-      );
+    final package = Package(
+      'foo',
+      Uri.parse('file://foo/'),
+      languageVersion: LanguageVersion(2, 7),
+    );
 
-      expect(determineLanguageVersion(errorFile, package, flutterRoot), testCurrentLanguageVersion);
-    },
-  );
+    expect(determineLanguageVersion(errorFile, package, flutterRoot), testCurrentLanguageVersion);
+  });
 
-  testWithoutContext('Can parse Dart language version with pre/post suffix', () {
+  test('Can parse Dart language version with pre/post suffix', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem, '2.13.0-150.0.dev');
 

@@ -63,9 +63,10 @@ HotRunner createHotRunner(
   ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
   bool stayResident = true,
   StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-  ToolContext toolContext = const DelegatingToolContext(),
+  ToolContext? toolContext,
   Xcode? xcode,
 }) {
+  toolContext ??= FakeToolContext();
   final ToolContext(:Cache cache, :FileSystem fs, :Logger logger, :Platform platform) = toolContext;
   buildSystem ??= FlutterBuildSystem(fileSystem: fs, logger: logger, platform: platform);
 
@@ -127,10 +128,11 @@ ColdRunner createColdRunner(
   FeatureFlags? featureFlags,
   bool machine = false,
   bool stayResident = true,
-  ToolContext toolContext = const DelegatingToolContext(),
+  ToolContext? toolContext,
   bool traceStartup = false,
   Xcode? xcode,
 }) {
+  toolContext ??= FakeToolContext();
   final ToolContext(:Cache cache, :FileSystem fs, :Logger logger, :Platform platform) = toolContext;
   return ColdRunner(
     flutterDevices,
@@ -318,7 +320,7 @@ class FakeDartDevelopmentServiceException implements DartDevelopmentServiceExcep
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice(super.device, {Future<Uri>? vmServiceUri})
     : super(
-        toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
+        toolContext: FakeToolContext(artifacts: Artifacts.test()),
         generator: FakeResidentCompiler(),
         targetPlatform: .unsupported,
         buildInfo: BuildInfo.debug,
@@ -449,7 +451,7 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
     this.fakeDevFS, {
     Future<Uri>? vmServiceUri,
   }) : super(
-         toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
+         toolContext: FakeToolContext(artifacts: Artifacts.test()),
          targetPlatform: .unsupported,
          buildInfo: buildInfo,
          generator: residentCompiler,

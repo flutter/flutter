@@ -32,6 +32,7 @@ class IntegrationTestTestDevice extends TestDevice {
     required super.toolContext,
     required this.userIdentifier,
     this.ddsShutdownTimeout = const Duration(seconds: 5),
+    this._vmServiceConnector = connectToVmService,
   });
 
   final ApplicationPackageFactory applicationPackageFactory;
@@ -41,6 +42,7 @@ class IntegrationTestTestDevice extends TestDevice {
   final String? userIdentifier;
   final CompileExpression? compileExpression;
   final Duration ddsShutdownTimeout;
+  final VMServiceConnector _vmServiceConnector;
   late final _ddsLauncher = DartDevelopmentService(logger: toolContext.logger);
 
   ApplicationPackage? _applicationPackage;
@@ -103,7 +105,7 @@ class IntegrationTestTestDevice extends TestDevice {
 
     logger.printTrace('test $id: Connecting to vm service');
     final FlutterVmService vmService =
-        await connectToVmService(
+        await _vmServiceConnector(
           vmServiceUri!,
           compileExpression: compileExpression,
           flutterVersion: flutterVersion,

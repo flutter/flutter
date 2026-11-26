@@ -41,7 +41,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    testWithoutContext('getSupportedProtocols includes DDS', () async {
+    test('getSupportedProtocols includes DDS', () async {
       final ProtocolList protocolList = await vmService.getSupportedProtocols();
       expect(protocolList.protocols, hasLength(2));
       for (final Protocol protocol in protocolList.protocols!) {
@@ -49,7 +49,7 @@ void main() {
       }
     });
 
-    testWithoutContext('flutterVersion can be called', () async {
+    test('flutterVersion can be called', () async {
       final Response response = await vmService.callServiceExtension(
         await flutter.flutterVersionService,
       );
@@ -58,14 +58,14 @@ void main() {
       expect(response.json, containsPair('engineRevisionShort', isNotNull));
     });
 
-    testWithoutContext('flutterMemoryInfo can be called', () async {
+    test('flutterMemoryInfo can be called', () async {
       final Response response = await vmService.callServiceExtension(
         await flutter.flutterMemoryInfoService,
       );
       expect(response.type, 'Success');
     });
 
-    testWithoutContext('reloadSources can be called', () async {
+    test('reloadSources can be called', () async {
       final VM vm = await vmService.getVM();
       final IsolateRef? isolateRef = vm.isolates?.first;
       expect(isolateRef != null, true);
@@ -76,7 +76,7 @@ void main() {
       expect(response.type, 'Success');
     });
 
-    testWithoutContext('reloadSources fails on bad params', () async {
+    test('reloadSources fails on bad params', () async {
       final Future<Response> response = vmService.callMethod(
         await flutter.reloadSourcesService,
         isolateId: '',
@@ -84,7 +84,7 @@ void main() {
       expect(response, throwsA(const TypeMatcher<RPCError>()));
     });
 
-    testWithoutContext('hotRestart can be called', () async {
+    test('hotRestart can be called', () async {
       final VM vm = await vmService.getVM();
       final IsolateRef? isolateRef = vm.isolates?.first;
       expect(isolateRef != null, true);
@@ -95,7 +95,7 @@ void main() {
       expect(response.type, 'Success');
     });
 
-    testWithoutContext('hotRestart fails on bad params', () async {
+    test('hotRestart fails on bad params', () async {
       final Future<Response> response = vmService.callMethod(
         await flutter.hotRestartService,
         args: <String, dynamic>{'pause': 'not_a_bool'},
@@ -103,7 +103,7 @@ void main() {
       expect(response, throwsA(const TypeMatcher<RPCError>()));
     });
 
-    testWithoutContext('ext.flutter.brightnessOverride can toggle window brightness', () async {
+    test('ext.flutter.brightnessOverride can toggle window brightness', () async {
       final Isolate isolate = await waitForExtension(vmService, 'ext.flutter.brightnessOverride');
       final Response response = await vmService.callServiceExtension(
         'ext.flutter.brightnessOverride',
@@ -137,7 +137,7 @@ void main() {
       expect(bogusResponse.json?['value'], 'Brightness.light');
     });
 
-    testWithoutContext('ext.flutter.debugPaint can toggle debug painting', () async {
+    test('ext.flutter.debugPaint can toggle debug painting', () async {
       final Isolate isolate = await waitForExtension(vmService, 'ext.flutter.debugPaint');
       final Response response = await vmService.callServiceExtension(
         'ext.flutter.debugPaint',

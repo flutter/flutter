@@ -21,7 +21,6 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
@@ -31,7 +30,7 @@ final macOS = FakePlatform(operatingSystem: 'macos');
 final linux = FakePlatform();
 
 void main() {
-  testWithoutContext('default configuration', () async {
+  test('default configuration', () async {
     final device = MacOSDevice(
       analytics: const NoOpAnalytics(),
       appleContext: FakeAppleContext(),
@@ -55,7 +54,7 @@ void main() {
     expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
   });
 
-  testWithoutContext('Attaches to log reader when running in release mode', () async {
+  test('Attaches to log reader when running in release mode', () async {
     final completer = Completer<void>();
     final device = MacOSDevice(
       analytics: const NoOpAnalytics(),
@@ -89,7 +88,7 @@ void main() {
     completer.complete();
   });
 
-  testWithoutContext('No devices listed if platform is unsupported', () async {
+  test('No devices listed if platform is unsupported', () async {
     final featureFlags = TestFeatureFlags(isMacOSEnabled: true);
     expect(
       await MacOSDevices(
@@ -104,24 +103,21 @@ void main() {
     );
   });
 
-  testWithoutContext(
-    'No devices listed if platform is supported and feature is disabled',
-    () async {
-      final featureFlags = TestFeatureFlags();
-      final macOSDevices = MacOSDevices(
-        analytics: const NoOpAnalytics(),
-        appleContext: FakeAppleContext(),
-        featureFlags: featureFlags,
-        macOSWorkflow: MacOSWorkflow(featureFlags: featureFlags, platform: macOS),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(platform: macOS),
-      );
+  test('No devices listed if platform is supported and feature is disabled', () async {
+    final featureFlags = TestFeatureFlags();
+    final macOSDevices = MacOSDevices(
+      analytics: const NoOpAnalytics(),
+      appleContext: FakeAppleContext(),
+      featureFlags: featureFlags,
+      macOSWorkflow: MacOSWorkflow(featureFlags: featureFlags, platform: macOS),
+      templateRenderer: FakeTemplateRenderer(),
+      toolContext: FakeToolContext(platform: macOS),
+    );
 
-      expect(await macOSDevices.devices(), isEmpty);
-    },
-  );
+    expect(await macOSDevices.devices(), isEmpty);
+  });
 
-  testWithoutContext('devices listed if platform is supported and feature is enabled', () async {
+  test('devices listed if platform is supported and feature is enabled', () async {
     final featureFlags = TestFeatureFlags(isMacOSEnabled: true);
     final macOSDevices = MacOSDevices(
       analytics: const NoOpAnalytics(),
@@ -135,7 +131,7 @@ void main() {
     expect(await macOSDevices.devices(), hasLength(1));
   });
 
-  testWithoutContext('has a well known device id macos', () async {
+  test('has a well known device id macos', () async {
     final featureFlags = TestFeatureFlags(isMacOSEnabled: true);
     final macOSDevices = MacOSDevices(
       analytics: const NoOpAnalytics(),
@@ -149,7 +145,7 @@ void main() {
     expect(macOSDevices.wellKnownIds, <String>['macos']);
   });
 
-  testWithoutContext('can discover devices with a provided timeout', () async {
+  test('can discover devices with a provided timeout', () async {
     final featureFlags = TestFeatureFlags(isMacOSEnabled: true);
     final macOSDevices = MacOSDevices(
       analytics: const NoOpAnalytics(),
@@ -168,7 +164,7 @@ void main() {
     expect(devices, hasLength(1));
   });
 
-  testWithoutContext('isSupportedForProject is true with editable host app', () async {
+  test('isSupportedForProject is true with editable host app', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final device = MacOSDevice(
       analytics: const NoOpAnalytics(),
@@ -185,7 +181,7 @@ void main() {
     expect(device.isSupportedForProject(flutterProject), true);
   });
 
-  testWithoutContext('target platform display name on x86_64', () async {
+  test('target platform display name on x86_64', () async {
     final fakeOperatingSystemUtils = FakeOperatingSystemUtils();
     fakeOperatingSystemUtils.hostPlatform = HostPlatform.darwin_x64;
     final device = MacOSDevice(
@@ -199,7 +195,7 @@ void main() {
     expect(await device.targetPlatformDisplayName, 'darwin-x64');
   });
 
-  testWithoutContext('target platform display name on ARM', () async {
+  test('target platform display name on ARM', () async {
     final fakeOperatingSystemUtils = FakeOperatingSystemUtils();
     fakeOperatingSystemUtils.hostPlatform = HostPlatform.darwin_arm64;
     final device = MacOSDevice(
@@ -213,7 +209,7 @@ void main() {
     expect(await device.targetPlatformDisplayName, 'darwin-arm64');
   });
 
-  testWithoutContext('isSupportedForProject is false with no host app', () async {
+  test('isSupportedForProject is false with no host app', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final device = MacOSDevice(
       analytics: const NoOpAnalytics(),
@@ -228,7 +224,7 @@ void main() {
     expect(device.isSupportedForProject(flutterProject), false);
   });
 
-  testWithoutContext('executablePathForDevice uses the correct package executable', () async {
+  test('executablePathForDevice uses the correct package executable', () async {
     final package = FakeMacOSApp();
     final device = MacOSDevice(
       analytics: const NoOpAnalytics(),
@@ -258,7 +254,7 @@ void main() {
       'processID == 10000 AND eventMessage CONTAINS "${MacOSDevice.kMacOSPrivacyCrashPattern}"',
     ];
 
-    testWithoutContext(
+    test(
       'detects privacy crash via log show on SIGABRT (-6) exit and awaits check on dispose',
       () async {
         final logger = BufferLogger.test();
@@ -346,7 +342,7 @@ void main() {
       },
     );
 
-    testWithoutContext('detects privacy crash with alternative phrasing', () async {
+    test('detects privacy crash with alternative phrasing', () async {
       final logger = BufferLogger.test();
       final processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
@@ -397,66 +393,61 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext(
-      'detects privacy crash without key name and prints fallback diagnostic',
-      () async {
-        final logger = BufferLogger.test();
-        final processManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>['release/executable'],
-            exitCode: MacOSDevice.kSigabrtExitCode,
-          ),
-          FakeCommand(
-            command: logShowCommand,
-            stdout: jsonEncode(<String, Object?>{
-              'processID': 10000,
-              'eventMessage': '${MacOSDevice.kMacOSPrivacyCrashPattern}.',
-            }),
-          ),
-        ]);
-        final device = MacOSDevice(
-          analytics: const NoOpAnalytics(),
-          appleContext: FakeAppleContext(),
-          featureFlags: TestFeatureFlags(),
-          templateRenderer: FakeTemplateRenderer(),
-          toolContext: FakeToolContext(logger: logger, processManager: processManager),
-        );
-        final package = FakeMacOSApp();
+    test('detects privacy crash without key name and prints fallback diagnostic', () async {
+      final logger = BufferLogger.test();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['release/executable'],
+          exitCode: MacOSDevice.kSigabrtExitCode,
+        ),
+        FakeCommand(
+          command: logShowCommand,
+          stdout: jsonEncode(<String, Object?>{
+            'processID': 10000,
+            'eventMessage': '${MacOSDevice.kMacOSPrivacyCrashPattern}.',
+          }),
+        ),
+      ]);
+      final device = MacOSDevice(
+        analytics: const NoOpAnalytics(),
+        appleContext: FakeAppleContext(),
+        featureFlags: TestFeatureFlags(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(logger: logger, processManager: processManager),
+      );
+      final package = FakeMacOSApp();
 
-        await device.startApp(
-          package,
-          debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-          prebuiltApplication: true,
-        );
-        await pumpEventQueue();
-        await device.dispose();
+      await device.startApp(
+        package,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+        prebuiltApplication: true,
+      );
+      await pumpEventQueue();
+      await device.dispose();
 
-        expect(logger.errorText, contains('macOS Privacy Permission Crash Detected'));
-        expect(logger.errorText, contains('access to protected resources.'));
-        expect(logger.errorText, isNot(contains('requiring')));
-        expect(
-          logger.errorText,
-          contains(
-            'Even if the usage description key is already present in macos/Runner/Info.plist',
-          ),
-        );
-        expect(
-          logger.errorText,
-          contains(
-            '1. Ensure the required usage description key is present in macos/Runner/Info.plist.',
-          ),
-        );
-        expect(
-          logger.errorText,
-          contains(
-            "2. Run the project directly from Xcode, or 'flutter run' using the default macOS Terminal app.",
-          ),
-        );
-        expect(processManager, hasNoRemainingExpectations);
-      },
-    );
+      expect(logger.errorText, contains('macOS Privacy Permission Crash Detected'));
+      expect(logger.errorText, contains('access to protected resources.'));
+      expect(logger.errorText, isNot(contains('requiring')));
+      expect(
+        logger.errorText,
+        contains('Even if the usage description key is already present in macos/Runner/Info.plist'),
+      );
+      expect(
+        logger.errorText,
+        contains(
+          '1. Ensure the required usage description key is present in macos/Runner/Info.plist.',
+        ),
+      );
+      expect(
+        logger.errorText,
+        contains(
+          "2. Run the project directly from Xcode, or 'flutter run' using the default macOS Terminal app.",
+        ),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
 
-    testWithoutContext(
+    test(
       'does not print diagnostic on SIGABRT (-6) when log show finds no matching TCC entry',
       () async {
         final logger = BufferLogger.test();
@@ -499,7 +490,7 @@ void main() {
       },
     );
 
-    testWithoutContext('does not run log show on normal exit (0)', () async {
+    test('does not run log show on normal exit (0)', () async {
       final logger = BufferLogger.test();
       final processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>['release/executable']),
@@ -525,7 +516,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('does not run log show on non-SIGABRT signal (-9)', () async {
+    test('does not run log show on non-SIGABRT signal (-9)', () async {
       final logger = BufferLogger.test();
       final processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>['release/executable'], exitCode: -9),
@@ -551,7 +542,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('skips log show when /usr/bin/log cannot be executed', () async {
+    test('skips log show when /usr/bin/log cannot be executed', () async {
       final logger = BufferLogger.test();
       final processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
@@ -580,7 +571,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('handles log show ProcessException gracefully', () async {
+    test('handles log show ProcessException gracefully', () async {
       final logger = BufferLogger.test();
       final processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
@@ -621,53 +612,42 @@ void main() {
       fileSystem = MemoryFileSystem.test();
     });
 
-    testUsingContext(
-      'forwards analytics to buildMacOS',
-      () async {
-        fileSystem
-            .directory(fileSystem.path.join('macos', 'Runner.xcodeproj'))
-            .createSync(recursive: true);
-        fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
-        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+    test('forwards analytics to buildMacOS', () async {
+      fileSystem
+          .directory(fileSystem.path.join('macos', 'Runner.xcodeproj'))
+          .createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
 
-        final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
-          fs: fileSystem,
-          fakeFlutterVersion: FakeFlutterVersion(),
-        );
-        final fakeOperatingSystemUtils = FakeOperatingSystemUtils()
-          ..hostPlatform = HostPlatform.darwin_arm64;
-        final featureFlags = TestFeatureFlags(isMacOSEnabled: true);
-        final macOSDevices = MacOSDevices(
-          analytics: fakeAnalytics,
-          appleContext: FakeAppleContext(),
-          featureFlags: featureFlags,
-          macOSWorkflow: MacOSWorkflow(featureFlags: featureFlags, platform: macOS),
-          templateRenderer: FakeTemplateRenderer(),
-          toolContext: FakeToolContext(
-            fs: fileSystem,
-            os: fakeOperatingSystemUtils,
-            platform: macOS,
-          ),
-        );
-        final List<Device> devices = await macOSDevices.devices();
-        final device = devices.single as MacOSDevice;
+      final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
+      final fakeOperatingSystemUtils = FakeOperatingSystemUtils()
+        ..hostPlatform = HostPlatform.darwin_arm64;
+      final featureFlags = TestFeatureFlags(isMacOSEnabled: true);
+      final macOSDevices = MacOSDevices(
+        analytics: fakeAnalytics,
+        appleContext: FakeAppleContext(),
+        featureFlags: featureFlags,
+        macOSWorkflow: MacOSWorkflow(featureFlags: featureFlags, platform: macOS),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(fs: fileSystem, os: fakeOperatingSystemUtils, platform: macOS),
+      );
+      final List<Device> devices = await macOSDevices.devices();
+      final device = devices.single as MacOSDevice;
 
-        await device.buildForDevice(buildInfo: BuildInfo.debug);
+      await device.buildForDevice(buildInfo: BuildInfo.debug);
 
-        expect(
-          analyticsTimingEventExists(
-            sentEvents: fakeAnalytics.sentEvents,
-            workflow: 'build',
-            variableName: 'xcode-macos',
-          ),
-          true,
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.empty(),
-      },
-    );
+      expect(
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'build',
+          variableName: 'xcode-macos',
+        ),
+        true,
+      );
+    });
   });
 }
 

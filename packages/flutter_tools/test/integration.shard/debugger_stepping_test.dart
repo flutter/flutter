@@ -23,7 +23,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('can step over statements', () async {
+  test('can step over statements', () async {
     final project = SteppingProject();
     await project.setUpIn(tempDir);
 

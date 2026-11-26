@@ -22,7 +22,7 @@ import '../src/fakes.dart';
 import '../src/test_build_system.dart';
 
 void main() {
-  testWithoutContext(
+  test(
     'WebDriverService catches SocketExceptions cleanly and includes link to documentation',
     () async {
       final toolContext = FakeToolContext();

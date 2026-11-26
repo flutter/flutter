@@ -340,26 +340,26 @@ void main() {
   });
 
   // Check with no build-number
-  testWithoutContext('APK versionCodes after --split-per-abi (no explicit build-number) follow "(abiIndex * 1000) + 1"', () async {
+  test('APK versionCodes after --split-per-abi (no explicit build-number) follow "(abiIndex * 1000) + 1"', () async {
     await _assertSplitPerAbiVersionCodes(null, appDir, false);
   });
 
   // Check with custom buildNumber=42
-  testWithoutContext('APK versionCodes after --split-per-abi with custom build-number=42 follow "(abiIndex * 1000) + 42"', () async {
+  test('APK versionCodes after --split-per-abi with custom build-number=42 follow "(abiIndex * 1000) + 42"', () async {
     await _assertSplitPerAbiVersionCodes(42, appDir, false);
   });
 
   // Check with custom buildNumber=42 and custom gradle file which multiplies build number by 10000
-  testWithoutContext('APK versionCodes after --split-per-abi with custom build-number=42 and gradle file follow "((abiIndex * 1000) + 42) * 10000"', () async {
+  test('APK versionCodes after --split-per-abi with custom build-number=42 and gradle file follow "((abiIndex * 1000) + 42) * 10000"', () async {
     await _assertSplitPerAbiVersionCodes(42, appDir, true);
   });
 
   // Check with custom buildNumber=42 and AGP's compatibility mode off
-  testWithoutContext('APK versionCodes after --split-per-abi with custom build-number=42 and enableLegacyApi=false follow "(abiIndex * 1000) + 42"', () async {
+  test('APK versionCodes after --split-per-abi with custom build-number=42 and enableLegacyApi=false follow "(abiIndex * 1000) + 42"', () async {
     await _assertSplitPerAbiVersionCodes(42, appDir, false, compatibilityModeOff: true);
   });
 
-  testWithoutContext(
+  test(
     '--split-per-abi offsets a versionCode that the app sets in androidComponents.finalizeDsl',
     () {
       _removeDslVersionCode(appDir);
@@ -389,68 +389,62 @@ androidComponents {
       _removeDslVersionCode(appDir);
     });
 
-    testWithoutContext(
-      '--split-per-abi uses the main manifest versionCode, not a debug overlay versionCode',
-      () {
-        _addManifestAttributes(appDir, 'main', 'android:versionCode="7"');
-        // AGP writes the main manifest's versionCode into the merged manifest over this one.
-        _addManifestAttributes(
-          appDir,
-          'debug',
-          '$_toolsNamespace android:versionCode="9" tools:replace="android:versionCode"',
-        );
-        // Adds a manifest that a task writes during the build. Flutter must not read the list of
-        // manifests before that task has run.
-        final String engineShellArgs = base64Encode(
-          utf8.encode(jsonEncode(<String>['--trace-skia'])),
-        );
+    test('--split-per-abi uses the main manifest versionCode, not a debug overlay versionCode', () {
+      _addManifestAttributes(appDir, 'main', 'android:versionCode="7"');
+      // AGP writes the main manifest's versionCode into the merged manifest over this one.
+      _addManifestAttributes(
+        appDir,
+        'debug',
+        '$_toolsNamespace android:versionCode="9" tools:replace="android:versionCode"',
+      );
+      // Adds a manifest that a task writes during the build. Flutter must not read the list of
+      // manifests before that task has run.
+      final String engineShellArgs = base64Encode(
+        utf8.encode(jsonEncode(<String>['--trace-skia'])),
+      );
 
-        final ProcessResult build = _buildSplitPerAbiApks(appDir, <String>[
-          '--android-project-arg=flutter.engineShellArgs=$engineShellArgs',
-        ]);
+      final ProcessResult build = _buildSplitPerAbiApks(appDir, <String>[
+        '--android-project-arg=flutter.engineShellArgs=$engineShellArgs',
+      ]);
 
-        _expectSplitApkVersionCodes(appDir, build, base: 7);
-      },
-    );
+      _expectSplitApkVersionCodes(appDir, build, base: 7);
+    });
 
-    testWithoutContext(
-      '--split-per-abi picks up a manifest edit when Gradle reuses the configuration cache',
-      () {
-        _addManifestAttributes(appDir, 'main', 'android:versionCode="7"');
-        // problems=warn because FlutterTask still reads Task.project at execution time.
-        _addGradleProperties(
-          appDir,
-          'org.gradle.configuration-cache=true\n'
-          'org.gradle.configuration-cache.problems=warn\n'
-          'android.compatibility.enableLegacyApi=false\n'
-          'android.newDsl=true\n'
-          'android.builtInKotlin=true',
-        );
-        // -v prints whether Gradle reused the configuration cache.
-        ProcessResult build() => _buildSplitPerAbiApks(appDir, <String>['-v']);
+    test('--split-per-abi picks up a manifest edit when Gradle reuses the configuration cache', () {
+      _addManifestAttributes(appDir, 'main', 'android:versionCode="7"');
+      // problems=warn because FlutterTask still reads Task.project at execution time.
+      _addGradleProperties(
+        appDir,
+        'org.gradle.configuration-cache=true\n'
+        'org.gradle.configuration-cache.problems=warn\n'
+        'android.compatibility.enableLegacyApi=false\n'
+        'android.newDsl=true\n'
+        'android.builtInKotlin=true',
+      );
+      // -v prints whether Gradle reused the configuration cache.
+      ProcessResult build() => _buildSplitPerAbiApks(appDir, <String>['-v']);
 
-        // The first build creates flutter_build.d, which Gradle tracks, so the second build stores
-        // the configuration cache entry again. The third build reuses it.
-        _expectSplitApkVersionCodes(appDir, build(), base: 7);
-        _expectSplitApkVersionCodes(appDir, build(), base: 7);
-        ProcessResult result = build();
-        expect(result.stdout, contains('Reusing configuration cache'));
-        _expectSplitApkVersionCodes(appDir, result, base: 7);
+      // The first build creates flutter_build.d, which Gradle tracks, so the second build stores
+      // the configuration cache entry again. The third build reuses it.
+      _expectSplitApkVersionCodes(appDir, build(), base: 7);
+      _expectSplitApkVersionCodes(appDir, build(), base: 7);
+      ProcessResult result = build();
+      expect(result.stdout, contains('Reusing configuration cache'));
+      _expectSplitApkVersionCodes(appDir, result, base: 7);
 
-        final File mainManifest = _manifest(appDir, 'main');
-        mainManifest.writeAsStringSync(
-          mainManifest.readAsStringSync().replaceFirst(
-            'android:versionCode="7"',
-            'android:versionCode="6"',
-          ),
-        );
-        result = build();
-        expect(result.stdout, contains('Reusing configuration cache'));
-        _expectSplitApkVersionCodes(appDir, result, base: 6);
-      },
-    );
+      final File mainManifest = _manifest(appDir, 'main');
+      mainManifest.writeAsStringSync(
+        mainManifest.readAsStringSync().replaceFirst(
+          'android:versionCode="7"',
+          'android:versionCode="6"',
+        ),
+      );
+      result = build();
+      expect(result.stdout, contains('Reusing configuration cache'));
+      _expectSplitApkVersionCodes(appDir, result, base: 6);
+    });
 
-    testWithoutContext('--split-per-abi fails without a versionCode, with or without force-version-code-ignoring-abi', () {
+    test('--split-per-abi fails without a versionCode, with or without force-version-code-ignoring-abi', () {
       // Without a versionCode, Android reads each APK as versionCode 0, which Google Play
       // rejects and which cannot be installed over a build of the app that has a versionCode.
       for (final extraArgs in <List<String>>[

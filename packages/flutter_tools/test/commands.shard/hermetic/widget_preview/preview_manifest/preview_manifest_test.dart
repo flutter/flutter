@@ -12,10 +12,9 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/preview_manifest.dart';
-import 'package:test/test.dart';
 
 import '../../../../src/common.dart';
-import '../../../../src/context.dart';
+import '../../../../src/fake_process_manager.dart';
 
 void main() {
   group('$PreviewManifest', () {
@@ -45,7 +44,7 @@ void main() {
       );
     });
 
-    testUsingContext('generates a valid manifest', () async {
+    test('generates a valid manifest', () async {
       previewManifest.generate();
       final manifest = json.decode(
         rootProject.widgetPreviewScaffold
@@ -58,7 +57,7 @@ void main() {
       expect(manifest.containsKey(PreviewManifest.kSdkVersion), true);
     });
 
-    testUsingContext('identifies widget preview scaffold project needs to be generated', () {
+    test('identifies widget preview scaffold project needs to be generated', () {
       // The widget preview scaffold directory doesn't exist, so we should know that we need to
       // generate the project.
       expect(previewManifest.shouldGenerateProject(), true);
@@ -88,7 +87,7 @@ void main() {
       expect((modified.logger as BufferLogger).statusText, contains(sdkMismatchMessage));
     });
 
-    testUsingContext('identifies root project pubspec has changed', () {
+    test('identifies root project pubspec has changed', () {
       // The widget preview scaffold directory doesn't exist, so we should know that we need to
       // generate the project.
       expect(previewManifest.shouldGenerateProject(), true);

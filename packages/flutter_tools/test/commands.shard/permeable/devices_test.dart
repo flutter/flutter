@@ -30,7 +30,7 @@ void main() {
     logger = BufferLogger.test();
   });
 
-  testWithoutContext('devices can display no connected devices with the --machine flag', () async {
+  test('devices can display no connected devices with the --machine flag', () async {
     final command = DevicesCommand(
       deviceManager: deviceManager,
       doctor: _FakeDoctor(),
@@ -42,7 +42,7 @@ void main() {
     expect(json.decode(logger.statusText), isEmpty);
   });
 
-  testWithoutContext('devices can display via the --machine flag', () async {
+  test('devices can display via the --machine flag', () async {
     deviceManager.devices = <Device>[WebServerDevice(logger: logger)];
     final command = DevicesCommand(
       deviceManager: deviceManager,

@@ -19,56 +19,51 @@ PluginYamlParser _createParser(
 
 void main() {
   group('ParseResult', () {
-    testWithoutContext('ParseResultFail throws StateError when errors list is empty', () {
+    test('ParseResultFail throws StateError when errors list is empty', () {
       expect(() => ParseResult<int>.fail(<String>[]), throwsStateError);
     });
 
-    testWithoutContext(
-      'map and flatMap transform ParseResultPass and preserve ParseResultFail',
-      () {
-        final pass = ParseResult<int>.pass(2);
-        expect(
-          pass.map((int v) => v * 3),
-          isA<ParseResultPass<int>>().having((ParseResultPass<int> r) => r.value, 'value', 6),
-        );
-        expect(
-          pass.flatMap((int v) => ParseResult<String>.pass('v=$v')),
-          isA<ParseResultPass<String>>().having(
-            (ParseResultPass<String> r) => r.value,
-            'value',
-            'v=2',
-          ),
-        );
-        expect(
-          pass.flatMap((int v) => ParseResult<String>.fail(<String>['inner error'])),
-          isA<ParseResultFail<String>>().having(
-            (ParseResultFail<String> r) => r.errors,
-            'errors',
-            <String>['inner error'],
-          ),
-        );
+    test('map and flatMap transform ParseResultPass and preserve ParseResultFail', () {
+      final pass = ParseResult<int>.pass(2);
+      expect(
+        pass.map((int v) => v * 3),
+        isA<ParseResultPass<int>>().having((ParseResultPass<int> r) => r.value, 'value', 6),
+      );
+      expect(
+        pass.flatMap((int v) => ParseResult<String>.pass('v=$v')),
+        isA<ParseResultPass<String>>().having(
+          (ParseResultPass<String> r) => r.value,
+          'value',
+          'v=2',
+        ),
+      );
+      expect(
+        pass.flatMap((int v) => ParseResult<String>.fail(<String>['inner error'])),
+        isA<ParseResultFail<String>>().having(
+          (ParseResultFail<String> r) => r.errors,
+          'errors',
+          <String>['inner error'],
+        ),
+      );
 
-        final fail = ParseResult<int>.fail(<String>['initial error']);
-        expect(
-          fail.map((int v) => v * 3),
-          isA<ParseResultFail<int>>().having(
-            (ParseResultFail<int> r) => r.errors,
-            'errors',
-            <String>['initial error'],
-          ),
-        );
-        expect(
-          fail.flatMap((int v) => ParseResult<String>.pass('v=$v')),
-          isA<ParseResultFail<String>>().having(
-            (ParseResultFail<String> r) => r.errors,
-            'errors',
-            <String>['initial error'],
-          ),
-        );
-      },
-    );
+      final fail = ParseResult<int>.fail(<String>['initial error']);
+      expect(
+        fail.map((int v) => v * 3),
+        isA<ParseResultFail<int>>().having((ParseResultFail<int> r) => r.errors, 'errors', <String>[
+          'initial error',
+        ]),
+      );
+      expect(
+        fail.flatMap((int v) => ParseResult<String>.pass('v=$v')),
+        isA<ParseResultFail<String>>().having(
+          (ParseResultFail<String> r) => r.errors,
+          'errors',
+          <String>['initial error'],
+        ),
+      );
+    });
 
-    testWithoutContext('ParseResultRecord2 combines passes and accumulates failures', () {
+    test('ParseResultRecord2 combines passes and accumulates failures', () {
       final ParseResult<String> bothPass = (
         ParseResult<int>.pass(1),
         ParseResult<String>.pass('a'),
@@ -96,7 +91,7 @@ void main() {
       );
     });
 
-    testWithoutContext('ParseResultRecord3 combines passes and accumulates failures', () {
+    test('ParseResultRecord3 combines passes and accumulates failures', () {
       final ParseResult<String> allPass = (
         ParseResult<int>.pass(1),
         ParseResult<String>.pass('a'),
@@ -126,7 +121,7 @@ void main() {
       );
     });
 
-    testWithoutContext('ParseResultRecord4 combines passes and accumulates failures', () {
+    test('ParseResultRecord4 combines passes and accumulates failures', () {
       final ParseResult<String> allPass = (
         ParseResult<int>.pass(1),
         ParseResult<String>.pass('a'),
@@ -160,7 +155,7 @@ void main() {
   });
 
   group('Validation helpers', () {
-    testWithoutContext('isValidPluginIdentifier validates simple and dotted identifiers', () {
+    test('isValidPluginIdentifier validates simple and dotted identifiers', () {
       expect(isValidPluginIdentifier('MyPlugin'), isTrue);
       expect(isValidPluginIdentifier(r'_Private$Plugin1'), isTrue);
       expect(isValidPluginIdentifier('com.example.my_plugin'), isTrue);
@@ -171,7 +166,7 @@ void main() {
       expect(isValidPluginIdentifier('Evil(); //'), isFalse);
     });
 
-    testWithoutContext('isValidPluginDartFileName validates safe relative Dart file paths', () {
+    test('isValidPluginDartFileName validates safe relative Dart file paths', () {
       expect(isValidPluginDartFileName('my_plugin.dart'), isTrue);
       expect(isValidPluginDartFileName('src/my_plugin-web.dart'), isTrue);
 
@@ -184,99 +179,94 @@ void main() {
   });
 
   group('PluginYamlParser', () {
-    testWithoutContext(
-      'string and requiredString handle present, absent, null, and non-string values',
-      () {
-        final PluginYamlParser parser = _createParser('''
+    test('string and requiredString handle present, absent, null, and non-string values', () {
+      final PluginYamlParser parser = _createParser('''
 present: hello
 emptyKey:
 numberKey: 42
 ''');
 
-        expect(
-          parser.string('present'),
-          isA<ParseResultPass<String?>>().having(
-            (ParseResultPass<String?> r) => r.value,
-            'value',
-            'hello',
-          ),
-        );
-        expect(
-          parser.requiredString('present'),
-          isA<ParseResultPass<String>>().having(
-            (ParseResultPass<String> r) => r.value,
-            'value',
-            'hello',
-          ),
-        );
+      expect(
+        parser.string('present'),
+        isA<ParseResultPass<String?>>().having(
+          (ParseResultPass<String?> r) => r.value,
+          'value',
+          'hello',
+        ),
+      );
+      expect(
+        parser.requiredString('present'),
+        isA<ParseResultPass<String>>().having(
+          (ParseResultPass<String> r) => r.value,
+          'value',
+          'hello',
+        ),
+      );
 
-        // Absent keys pass with null for string() regardless of allowNull, but fail for requiredString().
-        expect(
-          parser.string('absent'),
-          isA<ParseResultPass<String?>>().having(
-            (ParseResultPass<String?> r) => r.value,
-            'value',
-            isNull,
-          ),
-        );
-        expect(
-          parser.string('absent', allowNull: false),
-          isA<ParseResultPass<String?>>().having(
-            (ParseResultPass<String?> r) => r.value,
-            'value',
-            isNull,
-          ),
-        );
-        expect(
-          parser.requiredString('absent'),
-          isA<ParseResultFail<String>>().having(
-            (ParseResultFail<String> r) => r.errors,
-            'errors',
-            <String>[
-              'The plugin `my_plugin` is missing the required field `absent` in pubspec.yaml',
-            ],
-          ),
-        );
+      // Absent keys pass with null for string() regardless of allowNull, but fail for requiredString().
+      expect(
+        parser.string('absent'),
+        isA<ParseResultPass<String?>>().having(
+          (ParseResultPass<String?> r) => r.value,
+          'value',
+          isNull,
+        ),
+      );
+      expect(
+        parser.string('absent', allowNull: false),
+        isA<ParseResultPass<String?>>().having(
+          (ParseResultPass<String?> r) => r.value,
+          'value',
+          isNull,
+        ),
+      );
+      expect(
+        parser.requiredString('absent'),
+        isA<ParseResultFail<String>>().having(
+          (ParseResultFail<String> r) => r.errors,
+          'errors',
+          <String>['The plugin `my_plugin` is missing the required field `absent` in pubspec.yaml'],
+        ),
+      );
 
-        // Present key with null value passes only when allowNull is true.
-        expect(
-          parser.string('emptyKey'),
-          isA<ParseResultPass<String?>>().having(
-            (ParseResultPass<String?> r) => r.value,
-            'value',
-            isNull,
-          ),
-        );
-        expect(
-          parser.string('emptyKey', allowNull: false),
-          isA<ParseResultFail<String?>>().having(
-            (ParseResultFail<String?> r) => r.errors,
-            'errors',
-            <String>['Invalid "ios" plugin specification: the "emptyKey" field must be a string.'],
-          ),
-        );
-        expect(
-          parser.requiredString('emptyKey'),
-          isA<ParseResultFail<String>>().having(
-            (ParseResultFail<String> r) => r.errors,
-            'errors',
-            <String>['Invalid "ios" plugin specification: the "emptyKey" field must be a string.'],
-          ),
-        );
+      // Present key with null value passes only when allowNull is true.
+      expect(
+        parser.string('emptyKey'),
+        isA<ParseResultPass<String?>>().having(
+          (ParseResultPass<String?> r) => r.value,
+          'value',
+          isNull,
+        ),
+      );
+      expect(
+        parser.string('emptyKey', allowNull: false),
+        isA<ParseResultFail<String?>>().having(
+          (ParseResultFail<String?> r) => r.errors,
+          'errors',
+          <String>['Invalid "ios" plugin specification: the "emptyKey" field must be a string.'],
+        ),
+      );
+      expect(
+        parser.requiredString('emptyKey'),
+        isA<ParseResultFail<String>>().having(
+          (ParseResultFail<String> r) => r.errors,
+          'errors',
+          <String>['Invalid "ios" plugin specification: the "emptyKey" field must be a string.'],
+        ),
+      );
 
-        // Non-string value fails.
-        expect(
-          parser.string('numberKey'),
-          isA<ParseResultFail<String?>>().having(
-            (ParseResultFail<String?> r) => r.errors,
-            'errors',
-            <String>['Invalid "ios" plugin specification: the "numberKey" field must be a string.'],
-          ),
-        );
-      },
-    );
+      // Non-string value fails.
+      expect(
+        parser.string('numberKey'),
+        isA<ParseResultFail<String?>>().having(
+          (ParseResultFail<String?> r) => r.errors,
+          'errors',
+          <String>['Invalid "ios" plugin specification: the "numberKey" field must be a string.'],
+        ),
+      );
+    });
 
-    testWithoutContext('identifier and requiredIdentifier validate identifier syntax', () {
+    test('identifier and requiredIdentifier validate identifier syntax', () {
       final PluginYamlParser parser = _createParser('''
 validId: com.example.MyPlugin
 invalidId: "Not An Identifier"
@@ -326,7 +316,7 @@ invalidId: "Not An Identifier"
       );
     });
 
-    testWithoutContext('dartFileName and requiredDartFileName validate relative Dart paths', () {
+    test('dartFileName and requiredDartFileName validate relative Dart paths', () {
       final PluginYamlParser parser = _createParser('''
 validFile: src/my_plugin.dart
 invalidFile: ../outside.dart
@@ -366,7 +356,7 @@ invalidFile: ../outside.dart
       );
     });
 
-    testWithoutContext('flag parses booleans and defaults absent or null to false', () {
+    test('flag parses booleans and defaults absent or null to false', () {
       final PluginYamlParser parser = _createParser('''
 enabled: true
 disabled: false
@@ -402,7 +392,7 @@ invalidFlag: "true"
       );
     });
 
-    testWithoutContext('parseDartPluginFields parses dartPluginClass and dartFileName', () {
+    test('parseDartPluginFields parses dartPluginClass and dartFileName', () {
       expect(
         _createParser('').parseDartPluginFields(displayName: 'iOS'),
         isA<ParseResultPass<({String dartPluginClass, String dartFileName})?>>().having(
