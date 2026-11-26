@@ -52,7 +52,7 @@ void main() {
     );
   }
 
-  testWithoutContext('should succeed when a golden-file comparison matched', () async {
+  test('should succeed when a golden-file comparison matched', () async {
     final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
@@ -73,7 +73,7 @@ void main() {
     expect(result, const TestGoldenComparisonDone(matched: true));
   });
 
-  testWithoutContext('should succeed when a golden-file comparison does not match', () async {
+  test('should succeed when a golden-file comparison does not match', () async {
     final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
@@ -94,7 +94,7 @@ void main() {
     expect(result, const TestGoldenComparisonDone(matched: false));
   });
 
-  testWithoutContext('should return an error when a golden-file comparison errors', () async {
+  test('should return an error when a golden-file comparison errors', () async {
     final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
@@ -115,7 +115,7 @@ void main() {
     expect(result, const TestGoldenComparisonError(error: 'Did a bad'));
   });
 
-  testWithoutContext('should succeed when a golden-file update completes', () async {
+  test('should succeed when a golden-file update completes', () async {
     final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
@@ -136,7 +136,7 @@ void main() {
     expect(result, const TestGoldenUpdateDone());
   });
 
-  testWithoutContext('should error when a golden-file update errors', () async {
+  test('should error when a golden-file update errors', () async {
     final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
@@ -157,7 +157,7 @@ void main() {
     expect(result, const TestGoldenUpdateError(error: 'Did a bad'));
   });
 
-  testWithoutContext('provides environment variables to the process', () async {
+  test('provides environment variables to the process', () async {
     final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
@@ -180,7 +180,7 @@ void main() {
     expect(result, const TestGoldenUpdateDone());
   });
 
-  testWithoutContext('reuses the process for the same test file', () async {
+  test('reuses the process for the same test file', () async {
     final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
@@ -207,7 +207,7 @@ void main() {
     expect(result2, const TestGoldenComparisonError(error: '2 Did a bad'));
   });
 
-  testWithoutContext('does not reuse the process for different test file', () async {
+  test('does not reuse the process for different test file', () async {
     final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
@@ -236,7 +236,7 @@ void main() {
     expect(result2, const TestGoldenComparisonError(error: '2 Did a bad'));
   });
 
-  testWithoutContext('deletes the temporary directory when closed', () async {
+  test('deletes the temporary directory when closed', () async {
     final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
@@ -252,7 +252,7 @@ void main() {
     expect(fileSystem.systemTempDirectory.listSync(recursive: true), isEmpty);
   });
 
-  testWithoutContext('disposes the test compiler when closed', () async {
+  test('disposes the test compiler when closed', () async {
     final testCompiler = _FakeTestCompiler();
     final comparator = TestGoldenComparator(
       compilerFactory: () => testCompiler,

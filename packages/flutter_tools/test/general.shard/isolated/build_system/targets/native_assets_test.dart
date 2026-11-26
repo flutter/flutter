@@ -19,7 +19,6 @@ import 'package:flutter_tools/src/web/compiler_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../../../src/common.dart';
-import '../../../../src/context.dart';
 import '../../../../src/fake_process_manager.dart';
 import '../../../../src/fakes.dart';
 import '../../../../src/package_config.dart';
@@ -71,63 +70,60 @@ void main() {
     androidEnvironment.buildDir.createSync(recursive: true);
   });
 
-  testWithoutContext('no dependency on KernelSnapshot', () async {
+  test('no dependency on KernelSnapshot', () async {
     const target = BuildHooks();
     expect(target.dependencies, isNot(isA<KernelSnapshot>()));
   });
 
-  testWithoutContext('NativeAssets throws error if missing target platform', () async {
+  test('NativeAssets throws error if missing target platform', () async {
     iosEnvironment.defines.remove(kTargetPlatform);
     expect(const BuildHooks().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
   });
 
-  testUsingContext(
-    'Linux GTK4 build hooks use the GTK4 CMake build directory',
-    () async {
-      final linuxEnvironment = Environment.test(
-        fileSystem.currentDirectory,
-        defines: <String, String>{
-          kBuildMode: BuildMode.debug.cliName,
-          kTargetPlatform: TargetPlatform.linux_x64.getName(),
-          'FLUTTER_LINUX_GTK': 'gtk4',
-        },
-        buildDir: fileSystem.currentDirectory.childDirectory('.dart_tool/flutter_build'),
-        outputDir: fileSystem.currentDirectory.childDirectory('ignored-output'),
-        inputs: <String, String>{},
-        artifacts: artifacts,
-        processManager: processManager,
-        fileSystem: fileSystem,
-        logger: logger,
-      );
+  test('Linux GTK4 build hooks use the GTK4 CMake build directory', () async {
+    final linuxEnvironment = Environment.test(
+      fileSystem.currentDirectory,
+      defines: <String, String>{
+        kBuildMode: BuildMode.debug.cliName,
+        kTargetPlatform: TargetPlatform.linux_x64.getName(),
+        'FLUTTER_LINUX_GTK': 'gtk4',
+      },
+      buildDir: fileSystem.currentDirectory.childDirectory('.dart_tool/flutter_build'),
+      outputDir: fileSystem.currentDirectory.childDirectory('ignored-output'),
+      inputs: <String, String>{},
+      artifacts: artifacts,
+      featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
+      processManager: processManager,
+      fileSystem: fileSystem,
+      logger: logger,
+    );
 
-      final Directory cmakeBuildDirectory = linuxEnvironment.projectDir
-          .childDirectory('build')
-          .childDirectory('linux-gtk4')
-          .childDirectory('x64')
-          .childDirectory('debug');
-      await cmakeBuildDirectory.create(recursive: true);
+    final Directory cmakeBuildDirectory = linuxEnvironment.projectDir
+        .childDirectory('build')
+        .childDirectory('linux-gtk4')
+        .childDirectory('x64')
+        .childDirectory('debug');
+    await cmakeBuildDirectory.create(recursive: true);
 
-      await fileSystem.file('/toolchain/clang++').create(recursive: true);
-      await fileSystem.file('/toolchain/clang').create(recursive: true);
-      await fileSystem.file('/toolchain/llvm-ar').create(recursive: true);
-      await fileSystem.file('/toolchain/ld.lld').create(recursive: true);
-      await cmakeBuildDirectory.childFile('CMakeCache.txt').writeAsString('''
+    await fileSystem.file('/toolchain/clang++').create(recursive: true);
+    await fileSystem.file('/toolchain/clang').create(recursive: true);
+    await fileSystem.file('/toolchain/llvm-ar').create(recursive: true);
+    await fileSystem.file('/toolchain/ld.lld').create(recursive: true);
+    await cmakeBuildDirectory.childFile('CMakeCache.txt').writeAsString('''
 CMAKE_CXX_COMPILER:FILEPATH=/toolchain/clang++
 CMAKE_AR:FILEPATH=/toolchain/llvm-ar
 CMAKE_LINKER:FILEPATH=/toolchain/ld.lld
 ''');
 
-      final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner();
-      await BuildHooks(buildRunner: buildRunner).build(linuxEnvironment);
-      await LinkHooks(buildRunner: buildRunner).build(linuxEnvironment);
+    final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner();
+    await BuildHooks(buildRunner: buildRunner).build(linuxEnvironment);
+    await LinkHooks(buildRunner: buildRunner).build(linuxEnvironment);
 
-      expect(linuxEnvironment.buildDir.childFile(BuildHooks.depFilename), exists);
-      expect(linuxEnvironment.buildDir.childFile(LinkHooks.depFilename), exists);
-    },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true)},
-  );
+    expect(linuxEnvironment.buildDir.childFile(BuildHooks.depFilename), exists);
+    expect(linuxEnvironment.buildDir.childFile(LinkHooks.depFilename), exists);
+  });
 
-  testUsingContext('NativeAssets defaults to ios archs if missing', () async {
+  test('NativeAssets defaults to ios archs if missing', () async {
     writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
     iosEnvironment.defines.remove(kIosArchs);
@@ -141,7 +137,7 @@ CMAKE_LINKER:FILEPATH=/toolchain/ld.lld
     expect(iosEnvironment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename), exists);
   });
 
-  testUsingContext('NativeAssets throws error if missing sdk root', () async {
+  test('NativeAssets throws error if missing sdk root', () async {
     writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
     final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
@@ -155,7 +151,7 @@ CMAKE_LINKER:FILEPATH=/toolchain/ld.lld
     expect(BuildHooks(buildRunner: buildRunner).build(env), throwsA(isA<MissingDefineException>()));
   });
 
-  testUsingContext('NativeAssets throws error if sdk root is unrecognized iOS SDK', () async {
+  test('NativeAssets throws error if sdk root is unrecognized iOS SDK', () async {
     writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
     final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
@@ -181,12 +177,8 @@ CMAKE_LINKER:FILEPATH=/toolchain/ld.lld
   // The caching logic depends on this.
   for (final isNativeAssetsEnabled in <bool>[true, false]) {
     final postFix = isNativeAssetsEnabled ? 'enabled' : 'disabled';
-    testUsingContext(
+    test(
       'Successful native_assets.json and native_assets.d creation with feature $postFix',
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
       () async {
         writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
@@ -218,12 +210,8 @@ CMAKE_LINKER:FILEPATH=/toolchain/ld.lld
   for (final buildMode in <BuildMode>[BuildMode.profile, BuildMode.debug]) {
     final bool linkingEnabled = nativeAssetsLinkingEnabled(buildMode);
     final testName = linkingEnabled ? 'enabled' : 'disabled';
-    testUsingContext(
+    test(
       'NativeAssets depfile filtering avoids circular cycles in Xcode when link hooks are $testName',
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
       () async {
         writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
@@ -276,7 +264,7 @@ CMAKE_LINKER:FILEPATH=/toolchain/ld.lld
     );
   }
 
-  testUsingContext('NativeAssets with an asset', () async {
+  test('NativeAssets with an asset', () async {
     processManager.addCommands(<FakeCommand>[
       // Create the framework dylib.
       FakeCommand(
@@ -433,43 +421,32 @@ CMAKE_LINKER:FILEPATH=/toolchain/ld.lld
 
   for (final hasAssets in <bool>[true, false]) {
     final withOrWithout = hasAssets ? 'with' : 'without';
-    testUsingContext(
-      'flutter build $withOrWithout native assets',
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-      () async {
-        writePackageConfigFiles(directory: androidEnvironment.projectDir, mainLibName: 'my_app');
-        await fileSystem.file('libfoo.so').create();
+    test('flutter build $withOrWithout native assets', () async {
+      writePackageConfigFiles(directory: androidEnvironment.projectDir, mainLibName: 'my_app');
+      await fileSystem.file('libfoo.so').create();
 
-        final codeAssets = <CodeAsset>[
-          if (hasAssets)
-            CodeAsset(
-              package: 'foo',
-              name: 'foo.dart',
-              linkMode: DynamicLoadingBundled(),
-              file: Uri.file('libfoo.so'),
-            ),
-        ];
-        final buildRunner = FakeFlutterNativeAssetsBuildRunner(
-          packagesWithNativeAssetsResult: <String>['foo'],
-          buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
-            dependencies: <Uri>[Uri.file('src/foo.c')],
+      final codeAssets = <CodeAsset>[
+        if (hasAssets)
+          CodeAsset(
+            package: 'foo',
+            name: 'foo.dart',
+            linkMode: DynamicLoadingBundled(),
+            file: Uri.file('libfoo.so'),
           ),
-          linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
-        );
-        await BuildHooks(buildRunner: buildRunner).build(androidEnvironment);
-      },
-    );
+      ];
+      final buildRunner = FakeFlutterNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <String>['foo'],
+        buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
+          dependencies: <Uri>[Uri.file('src/foo.c')],
+        ),
+        linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
+      );
+      await BuildHooks(buildRunner: buildRunner).build(androidEnvironment);
+    });
   }
 
-  testUsingContext(
+  test(
     'createFlutterNativeAssetsBuildRunner includes dev dependencies for release test targets',
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
     () async {
       writePackageConfigFiles(directory: androidEnvironment.projectDir, mainLibName: 'my_app');
       androidEnvironment.defines[kBuildMode] = BuildMode.release.cliName;
@@ -504,7 +481,7 @@ CMAKE_LINKER:FILEPATH=/toolchain/ld.lld
     },
   );
 
-  testWithoutContext('Web LinkHooks tracks only active compileTargets recordedUsesFileNames and invalidates across compiler transitions', () async {
+  test('Web LinkHooks tracks only active compileTargets recordedUsesFileNames and invalidates across compiler transitions', () async {
     writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
     final webEnv = Environment.test(
       fileSystem.currentDirectory,

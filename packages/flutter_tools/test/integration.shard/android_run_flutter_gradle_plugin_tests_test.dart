@@ -50,11 +50,11 @@ Future<void> runFlutterGradlePluginTests({
 }
 
 void main() {
-  testWithoutContext('Flutter Gradle Plugin unit tests pass', () async {
+  test('Flutter Gradle Plugin unit tests pass', () async {
     await runFlutterGradlePluginTests();
   });
 
-  testWithoutContext('Flutter Gradle Plugin unit tests pass against the AGP 9 line', () async {
+  test('Flutter Gradle Plugin unit tests pass against the AGP 9 line', () async {
     // The public AGP DSL is not binary-compatible between major versions everywhere (see
     // AgpCommonExtensionWrapper.kt), so the plugin must compile and pass its tests against
     // both the default AGP version in build.gradle.kts and the AGP version used by the

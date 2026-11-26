@@ -219,12 +219,6 @@ abstract class FlutterCommand extends Command<void> {
   FlutterVersion get _flutterVersion => toolContext.flutterVersion;
   FileSystemUtils get _fsUtils => toolContext.fileSystemUtils;
 
-  /// The currently executing command (or sub-command).
-
-  ///
-  /// Will be `null` until the top-most command has begun execution.
-  static FlutterCommand? get current => context.get<FlutterCommand>();
-
   /// The option name for a custom VM Service port.
   static const vmServicePortOption = 'vm-service-port';
 
@@ -923,45 +917,48 @@ abstract class FlutterCommand extends Command<void> {
   /// so that this method can record and report the overall time to analytics.
   @override
   Future<void> run() {
-    final DateTime startTime = _clock.now();
-    final overrides = <Type, Generator>{FlutterCommand: () => this};
     final String? linuxDirOverride = _linuxDirectoryOverride;
-    if (linuxDirOverride != null) {
-      overrides[LinuxProjectDirectory] = () => LinuxProjectDirectory(linuxDirOverride);
+    if (linuxDirOverride == null) {
+      return _run();
     }
-
+    // Existing project factories resolve --linux-dir when looking up the project.
     return context.run<void>(
-      name: 'command',
-      overrides: overrides,
-      body: () async {
-        if (hasOption(CommonOptions.fatalWarnings)) {
-          _logger.fatalWarnings = getValue(CommonOptions.fatalWarnings);
-        }
-        _printDeprecationWarning();
-        final String? commandPath = await usagePath;
-        if (commandPath != null) {
-          _registerSignalHandlers(commandPath, startTime);
-        }
-        var commandResult = FlutterCommandResult.fail();
-        try {
-          commandResult = await verifyThenRunCommand(commandPath);
-        } finally {
-          final DateTime endTime = _clock.now();
-          _logger.printTrace(
-            _userMessages.flutterElapsedTime(
-              name,
-              getElapsedAsMilliseconds(endTime.difference(startTime)),
-            ),
-          );
-          if (commandPath != null) {
-            _sendPostUsage(commandPath, commandResult, startTime, endTime);
-          }
-          if (hasOption(CommonOptions.fatalWarnings)) {
-            _logger.checkForFatalLogs();
-          }
-        }
+      name: 'linux project directory',
+      overrides: <Type, Generator>{
+        LinuxProjectDirectory: () => LinuxProjectDirectory(linuxDirOverride),
       },
+      body: _run,
     );
+  }
+
+  Future<void> _run() async {
+    final DateTime startTime = _clock.now();
+    if (hasOption(CommonOptions.fatalWarnings)) {
+      _logger.fatalWarnings = getValue(CommonOptions.fatalWarnings);
+    }
+    _printDeprecationWarning();
+    final String? commandPath = await usagePath;
+    if (commandPath != null) {
+      _registerSignalHandlers(commandPath, startTime);
+    }
+    var commandResult = FlutterCommandResult.fail();
+    try {
+      commandResult = await verifyThenRunCommand(commandPath);
+    } finally {
+      final DateTime endTime = _clock.now();
+      _logger.printTrace(
+        _userMessages.flutterElapsedTime(
+          name,
+          getElapsedAsMilliseconds(endTime.difference(startTime)),
+        ),
+      );
+      if (commandPath != null) {
+        _sendPostUsage(commandPath, commandResult, startTime, endTime);
+      }
+      if (hasOption(CommonOptions.fatalWarnings)) {
+        _logger.checkForFatalLogs();
+      }
+    }
   }
 
   String? get _linuxDirectoryOverride {

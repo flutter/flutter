@@ -62,13 +62,13 @@ Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
       );
     }
 
-    testWithoutContext('cannot evaluate expression if feature is disabled', () async {
+    test('cannot evaluate expression if feature is disabled', () async {
       await start(expressionEvaluation: false);
       await breakInTopLevelFunction(flutter);
       await failToEvaluateExpression(flutter);
     });
 
-    testWithoutContext('can evaluate expressions in library, top level and build method', () async {
+    test('can evaluate expressions in library, top level and build method', () async {
       await start(expressionEvaluation: true);
 
       await evaluateTrivialExpressionsInLibrary(flutter);
@@ -143,13 +143,13 @@ Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
       );
     }
 
-    testWithoutContext('cannot evaluate expressions if feature is disabled', () async {
+    test('cannot evaluate expressions if feature is disabled', () async {
       await startPaused(expressionEvaluation: false);
       await breakInMethod(flutter);
       await failToEvaluateExpression(flutter);
     });
 
-    testWithoutContext('can evaluate expressions in a test', () async {
+    test('can evaluate expressions in a test', () async {
       await startPaused(expressionEvaluation: true);
 
       await evaluateTrivialExpressionsInLibrary(flutter);
