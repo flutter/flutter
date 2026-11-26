@@ -4,23 +4,23 @@
 
 #include <chrono>
 #include <cstdlib>
+#include <string>
 #include <thread>
 
-#include "flutter/fml/closure.h"
-#include "flutter/fml/message_loop.h"
-#include "flutter/fml/message_loop_task_queues.h"
 #include "flutter/fml/synchronization/waitable_event.h"
+#include "flutter/fml/task_runner.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/testing/dart_isolate_runner.h"
 #include "flutter/testing/fixture_test.h"
 #include "third_party/dart/runtime/include/dart_api.h"
-#include "third_party/dart/runtime/include/dart_native_api.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 #include "tonic/logging/dart_invoke.h"
 
 namespace flutter {
 namespace testing {
 
+#if (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG) || \
+    (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE)
 namespace {
 
 Settings CreateVmServiceSettings(const Settings& base_settings,
@@ -131,8 +131,11 @@ void ClearPausedStateForShutdown(AutoIsolateShutdown* isolate) {
 }
 
 }  // namespace
+#endif
 
 class DartMessageHandlerTest : public FixtureTest {
+#if (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG) || \
+    (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE)
  protected:
   struct PausedIsolateSession {
     PausedIsolateSession(Settings s, fml::RefPtr<fml::TaskRunner> thread)
@@ -216,31 +219,49 @@ class DartMessageHandlerTest : public FixtureTest {
           session->main_ran.WaitWithTimeout(fml::TimeDelta::FromSeconds(30)));
     }
 
-    // Pause `kDartEventLoop` tasks on the UI queue, mirroring
-    // `VsyncWaiter::PauseDartEventLoopTasks()`.
-    const fml::TaskQueueId ui_queue_id = session->ui_thread->GetTaskQueueId();
-    fml::AutoResetWaitableEvent paused_event_loop;
+    // Hold `ui_thread` busy in a single UI task so the
+    // `DartMessageHandler::OnHandleMessage` task queued when the OOB `resume`
+    // message arrives cannot run before our embedder `Dart_Invoke` runs. This
+    // works on all platforms, including Fuchsia where `DartIsolate` posts
+    // message-handling tasks directly to the primary UI runner rather than the
+    // `kDartEventLoop` secondary queue.
+    fml::AutoResetWaitableEvent ui_task_started;
+    fml::AutoResetWaitableEvent ui_task_done;
+    bool saw_service_messages = false;
+    bool still_should_pause = true;
     session->ui_thread->PostTask([&]() {
-      fml::MessageLoopTaskQueues::GetInstance()->PauseSecondarySource(
-          ui_queue_id);
-      paused_event_loop.Signal();
-    });
-    paused_event_loop.Wait();
-
-    bool secondary_source_resumed = false;
-    auto resume_secondary_source = [&]() {
-      if (secondary_source_resumed) {
-        return;
+      ui_task_started.Signal();
+      // Wait for the OOB `resume` message to arrive on `paused_isolate` while
+      // `ui_thread` is occupied. Release the isolate scope between polls so
+      // other VM threads are not blocked.
+      for (int attempt = 0; attempt < 6000; ++attempt) {
+        (void)session->paused_isolate->RunInIsolateScope([&]() {
+          saw_service_messages = Dart_HasServiceMessages();
+          return true;
+        });
+        if (saw_service_messages) {
+          break;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
       }
-      secondary_source_resumed = true;
-      fml::AutoResetWaitableEvent resumed;
-      session->ui_thread->PostTask([&]() {
-        fml::MessageLoopTaskQueues::GetInstance()->ResumeSecondarySource(
-            ui_queue_id);
-        resumed.Signal();
-      });
-      resumed.Wait();
-    };
+      if (saw_service_messages) {
+        // Invoke a Dart callback before returning to the UI message loop (and
+        // before `DartMessageHandler::OnHandleMessage` can run). Its prologue
+        // hits `Thread::HandleInterrupts()`, draining the OOB `resume` message.
+        (void)session->paused_isolate->RunInIsolateScope([&]() {
+          Dart_Handle result = tonic::DartInvokeField(Dart_RootLibrary(),
+                                                      "embedderCallback", {});
+          EXPECT_FALSE(Dart_IsError(result));
+          still_should_pause = pause_on_start ? Dart_ShouldPauseOnStart()
+                                              : Dart_ShouldPauseOnExit();
+          EXPECT_TRUE(pause_on_start ? Dart_IsPausedOnStart()
+                                     : Dart_IsPausedOnExit());
+          return true;
+        });
+      }
+      ui_task_done.Signal();
+    });
+    ui_task_started.Wait();
 
     bool resume_succeeded = false;
     fml::ManualResetWaitableEvent resume_completed;
@@ -250,42 +271,12 @@ class DartMessageHandlerTest : public FixtureTest {
       resume_completed.Signal();
     });
 
-    fml::ScopedCleanupClosure cleanup([&]() {
-      resume_secondary_source();
-      resume_completed.Wait();
-    });
-
-    // Wait until the OOB `resume` message is queued on `paused_isolate` while
-    // `kDartEventLoop` tasks are still held back.
-    WaitUntilIsolateCondition(session->paused_isolate.get(), session->ui_thread,
-                              Dart_HasServiceMessages);
-
-    // Invoke a Dart callback directly on the primary UI queue before
-    // `DartMessageHandler::OnHandleMessage` can run. Its prologue hits
-    // `Thread::HandleInterrupts()`, draining the OOB `resume` message.
-    bool still_should_pause = true;
-    ASSERT_TRUE(session->paused_isolate->RunInIsolateScope([&]() {
-      Dart_Handle result =
-          tonic::DartInvokeField(Dart_RootLibrary(), "embedderCallback", {});
-      EXPECT_FALSE(Dart_IsError(result));
-      still_should_pause =
-          pause_on_start ? Dart_ShouldPauseOnStart() : Dart_ShouldPauseOnExit();
-      EXPECT_TRUE(pause_on_start ? Dart_IsPausedOnStart()
-                                 : Dart_IsPausedOnExit());
-      return true;
-    }));
-    // Abort early on failure so `cleanup` resumes `kDartEventLoop` before
-    // waiting on `resume_completed`, avoiding a deadlock if the interrupt did
-    // not drain the OOB `resume` message.
-    ASSERT_FALSE(still_should_pause);
-
+    ui_task_done.Wait();
     resume_completed.Wait();
-    EXPECT_TRUE(resume_succeeded);
 
-    // Now unpause `kDartEventLoop` tasks (mirroring
-    // `VsyncWaiter::ResumeDartEventLoopTasks()`) so the scheduled
-    // `DartMessageHandler::OnHandleMessage` task runs.
-    resume_secondary_source();
+    ASSERT_TRUE(saw_service_messages);
+    ASSERT_FALSE(still_should_pause);
+    EXPECT_TRUE(resume_succeeded);
 
     if (pause_on_start) {
       EXPECT_FALSE(
@@ -296,22 +287,23 @@ class DartMessageHandlerTest : public FixtureTest {
                                 []() { return !Dart_IsPausedOnExit(); });
     }
   }
+#endif
 };
 
 // Regression test for https://github.com/Dart-Code/Dart-Code/issues/6156:
-// When an isolate is paused at `PauseStart` and an embedder `Dart_Invoke` on
-// the primary UI queue (while `kDartEventLoop` secondary tasks are paused, such
-// as during `VsyncWaiter::FireCallback`) hits `Thread::HandleInterrupts()` and
-// drains the OOB `resume` service message before `DartMessageHandler` runs its
-// scheduled `OnHandleMessage` task, `DartMessageHandler` must still observe
-// that pause-on-start has been cleared and resume `main()`.
+// When an isolate is paused at `PauseStart` and an embedder `Dart_Invoke` runs
+// on the UI thread before `DartMessageHandler::OnHandleMessage` executes, its
+// prologue hits `Thread::HandleInterrupts()` and drains the OOB `resume`
+// service message. `DartMessageHandler` must still observe that pause-on-start
+// has been cleared and resume `main()`.
 TEST_F(DartMessageHandlerTest,
        PauseOnStartResumesWhenServiceResumeConsumedByInterrupt) {
-#if (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG) && \
-    (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_PROFILE)
+#if (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG) || \
+    (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE)
+  RunResumeConsumedByInterruptTest(/*pause_on_start=*/true);
+#else
   GTEST_SKIP();
 #endif
-  RunResumeConsumedByInterruptTest(/*pause_on_start=*/true);
 }
 
 // Symmetric regression test for `PauseExit`: if an embedder `Dart_Invoke`
@@ -320,11 +312,12 @@ TEST_F(DartMessageHandlerTest,
 // still clear `Dart_IsPausedOnExit()`.
 TEST_F(DartMessageHandlerTest,
        PauseOnExitResumesWhenServiceResumeConsumedByInterrupt) {
-#if (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG) && \
-    (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_PROFILE)
+#if (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG) || \
+    (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE)
+  RunResumeConsumedByInterruptTest(/*pause_on_start=*/false);
+#else
   GTEST_SKIP();
 #endif
-  RunResumeConsumedByInterruptTest(/*pause_on_start=*/false);
 }
 
 }  // namespace testing
