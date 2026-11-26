@@ -121,6 +121,7 @@ class ExtensionManager {
       _discoveredByPackageName[ext.name] = ext;
     }
     final unmodifiableFound = List<DiscoveredProjectExtension>.unmodifiable(found);
+    // Do not cache empty results so discovery re-scans after pub get populates package_config.json.
     if (found.isNotEmpty) {
       _discoveredCache[cacheKey] = unmodifiableFound;
     }
@@ -142,9 +143,9 @@ class ExtensionManager {
     bool includeWorkspaceMembers = false,
     Set<String>? requiredServices,
     Directory? startDir,
-  }) {
+  }) async {
     if (_isDisposed) {
-      return Future<void>.value();
+      return;
     }
     final Future<void>? previous = _initFuture;
     final Future<void> next = previous == null
@@ -161,7 +162,7 @@ class ExtensionManager {
             ),
           );
     _initFuture = next.then<void>((_) {}, onError: (Object _) {});
-    return next;
+    await next;
   }
 
   Future<void> _doInitialize({

@@ -306,9 +306,12 @@ class SkwasmRenderer extends Renderer {
 
   @override
   void debugResetRasterizer() {
+    // Release the WebGL context held by the previous rasterizer.
+    rasterizer.dispose();
     rasterizer = OffscreenCanvasRasterizer(
       (OffscreenCanvasProvider canvasProvider) => SkwasmSurface(canvasProvider),
     );
+    debugClear();
   }
 
   @override

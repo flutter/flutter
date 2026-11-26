@@ -4,12 +4,13 @@
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
-import 'package:yaml/yaml.dart';
 
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/terminal.dart';
 import '../dart/package_map.dart';
+import '../flutter_manifest.dart';
 import '../project.dart';
 
 /// Metadata for a project-scoped tool extension discovered via the project's
@@ -86,8 +87,6 @@ class ProjectExtensionFinder {
 
   static const String _kExtensionDirectoryName = 'extension';
   static const String _kPubspecFileName = 'pubspec.yaml';
-  static const String _kWorkspaceKey = 'workspace';
-  static const _kDependencyKeys = <String>['dependencies', 'dev_dependencies'];
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -151,14 +150,9 @@ class ProjectExtensionFinder {
           .childFile(kEntrypointFileName);
 
       if (!entrypointFile.existsSync()) {
-        final FileSystemEntityType entityType = ErrorHandlingFileSystem.noExitOnFailure(
-          () => _fileSystem.typeSync(entrypointFile.path, followLinks: false),
+        _logger.printTrace(
+          'ProjectExtensionFinder: no entrypoint at "${entrypointFile.path}" for "${pkg.name}".',
         );
-        if (entityType == FileSystemEntityType.link) {
-          _logger.printWarning(
-            'Skipping extension "${pkg.name}": broken symlink at "${entrypointFile.path}".',
-          );
-        }
         continue;
       }
 
@@ -261,56 +255,61 @@ class ProjectExtensionFinder {
         !visitedPubspecs.add(_fileSystem.path.canonicalize(pubspecFile.absolute.path))) {
       return;
     }
-    final YamlMap parsed;
+    final manifestLogger = BufferLogger(
+      outputPreferences: OutputPreferences(wrapText: false),
+      terminal: _logger.terminal,
+    );
+    final FlutterManifest? manifest;
     try {
-      final String content = ErrorHandlingFileSystem.noExitOnFailure(pubspecFile.readAsStringSync);
-      final Object? yaml = loadYaml(content);
-      if (yaml is! YamlMap) {
-        return;
-      }
-      parsed = yaml;
-    } on YamlException catch (error) {
+      manifest = ErrorHandlingFileSystem.noExitOnFailure(
+        () => FlutterManifest.createFromPath(
+          pubspecFile.path,
+          fileSystem: _fileSystem,
+          logger: manifestLogger,
+        ),
+      );
+    } on FormatException catch (error) {
       _logger.printTrace('ProjectExtensionFinder: failed to parse "${pubspecFile.path}": $error');
       return;
     } on FileSystemException catch (error) {
       _logger.printTrace('ProjectExtensionFinder: failed to read "${pubspecFile.path}": $error');
       return;
     }
-
-    for (final String key in _kDependencyKeys) {
-      if (parsed[key] case final YamlMap section) {
-        outDependencies.addAll(section.keys.whereType<String>());
-      }
+    if (manifest == null) {
+      _logger.printTrace(
+        'ProjectExtensionFinder: invalid manifest "${pubspecFile.path}": ${manifestLogger.errorText.trim()}',
+      );
+      return;
     }
-
+    outDependencies
+      ..addAll(manifest.dependencies)
+      ..addAll(manifest.devDependencies);
     if (visitedPubspecs == null) {
       return;
     }
-    if (parsed[_kWorkspaceKey] case final YamlList workspaceEntries) {
-      for (final String entry in workspaceEntries.whereType<String>()) {
-        try {
-          final List<Directory> memberDirs = ErrorHandlingFileSystem.noExitOnFailure(
-            () => FlutterProject.resolveWorkspacePattern(pubspecFile.parent, entry),
-          );
-          for (final memberDir in memberDirs) {
-            final File memberPubspec = memberDir.childFile(_kPubspecFileName);
-            if (ErrorHandlingFileSystem.noExitOnFailure(memberPubspec.existsSync)) {
-              _extractPubspecDependencies(
-                memberPubspec,
-                outDependencies,
-                visitedPubspecs: visitedPubspecs,
-              );
-            }
+    for (final String entry in manifest.workspace) {
+      try {
+        final List<Directory> memberDirs = ErrorHandlingFileSystem.noExitOnFailure(
+          () => FlutterProject.resolveWorkspacePattern(pubspecFile.parent, entry),
+        );
+        for (final memberDir in memberDirs) {
+          final File memberPubspec = memberDir.childFile(_kPubspecFileName);
+          if (ErrorHandlingFileSystem.noExitOnFailure(memberPubspec.existsSync)) {
+            _extractPubspecDependencies(
+              memberPubspec,
+              outDependencies,
+              visitedPubspecs: visitedPubspecs,
+            );
           }
-        } on FormatException catch (error) {
-          _logger.printTrace(
-            'ProjectExtensionFinder: invalid workspace pattern "$entry" in "${pubspecFile.path}": $error',
-          );
-        } on FileSystemException catch (error) {
-          _logger.printTrace(
-            'ProjectExtensionFinder: failed to resolve workspace pattern "$entry" in "${pubspecFile.path}": $error',
-          );
         }
+      } on FormatException catch (error) {
+        _logger.printTrace(
+          'ProjectExtensionFinder: invalid workspace pattern "$entry" in "${pubspecFile.path}": $error',
+        );
+      } on FileSystemException catch (error) {
+        _logger.printTrace(
+          'ProjectExtensionFinder: failed to resolve workspace pattern "$entry" in "${pubspecFile.path}": $error',
+        );
       }
     }
   }

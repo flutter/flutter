@@ -187,21 +187,11 @@ void main() {
         fs.path.join('/flutter', 'packages', 'flutter_tools', 'lib', 'templates', 'app'),
       );
 
-      final Directory protoDir = templateManager.resolveTemplateDirectory(
-        'package:flutter_tools_extension_linux_prototype/templates/custom-linux-app',
-      );
       expect(
-        protoDir.path,
-        fs.path.join(
-          '/flutter',
-          'packages',
-          'flutter_tools',
-          'packages',
-          'flutter_tools_extension_linux_prototype',
-          'lib',
-          'templates',
-          'custom-linux-app',
+        () => templateManager.resolveTemplateDirectory(
+          'package:flutter_tools_extension_linux_prototype/templates/custom-linux-app',
         ),
+        throwsArgumentError,
       );
 
       expect(

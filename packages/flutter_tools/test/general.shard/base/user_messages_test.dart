@@ -24,7 +24,7 @@ void main() {
     );
   }
 
-  testWithoutContext('Flutter tool bug instructions should end with the issue URL', () {
+  test('Flutter tool bug instructions should end with the issue URL', () {
     final userMessages = UserMessages();
     expect(
       userMessages.flutterToolBugInstructions,
@@ -32,7 +32,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Android installation instructions', () {
+  test('Android installation instructions', () {
     final userMessages = UserMessages();
     checkInstallationURL(
       (Platform platform) => userMessages.androidMissingSdkInstructions(platform),
@@ -50,7 +50,7 @@ void main() {
     checkInstallationURL((Platform platform) => userMessages.androidStudioInstallation(platform));
   });
 
-  testWithoutContext('Xcode installation instructions', () {
+  test('Xcode installation instructions', () {
     final userMessages = UserMessages();
     expect(userMessages.xcodeMissing, contains('iOS and macOS'));
     expect(userMessages.xcodeIncomplete, contains('iOS and macOS'));

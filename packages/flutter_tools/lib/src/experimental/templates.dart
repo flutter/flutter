@@ -109,8 +109,7 @@ base class ExtensionTemplateManager extends TemplateService {
 
   /// Resolves a template package URI to a local directory.
   ///
-  /// Supports `package:flutter_tools/`, discovered project extension packages,
-  /// and `package:flutter_tools_extension_linux_prototype/` URIs.
+  /// Supports `package:flutter_tools/` and discovered project extension package URIs.
   Directory resolveTemplateDirectory(String templatePath) {
     if (templatePath.startsWith('package:')) {
       final String withoutScheme = templatePath.substring('package:'.length);
@@ -147,18 +146,6 @@ base class ExtensionTemplateManager extends TemplateService {
             }
             return _fileSystem.directory(resolvedPath);
           }
-        }
-        if (packageName == 'flutter_tools_extension_linux_prototype') {
-          final String absolutePath = _fileSystem.path.join(
-            _flutterRoot,
-            'packages',
-            'flutter_tools',
-            'packages',
-            'flutter_tools_extension_linux_prototype',
-            'lib',
-            relativePath,
-          );
-          return _fileSystem.directory(absolutePath);
         }
       }
     }

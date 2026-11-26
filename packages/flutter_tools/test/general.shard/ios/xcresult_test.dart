@@ -104,7 +104,7 @@ void main() {
     return XCResultGenerator(resultPath: _tempResultPath, xcode: xcode, processUtils: processUtils);
   }
 
-  testWithoutContext('correctly parses new format (Xcode 16+) JSON with issues', () async {
+  test('correctly parses new format (Xcode 16+) JSON with issues', () async {
     final XCResultGenerator generator = setupGenerator(
       resultJson: kNewFormatResultJsonWithIssues,
       xcodeVersion: Version(16, 0, 0),
@@ -130,7 +130,7 @@ void main() {
     expect(warning.location, '/Users/m/Projects/test_create/ios/Runner/AppDelegate.swift:15:20');
   });
 
-  testWithoutContext('correctly handles new format (Xcode 16+) with invalid sourceURL', () async {
+  test('correctly handles new format (Xcode 16+) with invalid sourceURL', () async {
     final XCResultGenerator generator = setupGenerator(
       resultJson: kNewFormatResultJsonWithInvalidUrl,
       xcodeVersion: Version(16, 0, 0),
@@ -143,7 +143,7 @@ void main() {
     expect(error.warnings.first, contains('failed to be parsed'));
   });
 
-  testWithoutContext('correctly parse sample result json when there are issues.', () async {
+  test('correctly parse sample result json when there are issues.', () async {
     final XCResultGenerator generator = setupGenerator(resultJson: kSampleResultJsonWithIssues);
     final XCResult result = await generator.generate();
     expect(result.issues.length, 2);
@@ -164,34 +164,31 @@ void main() {
     expect(result.parsingErrorMessage, isNull);
   });
 
-  testWithoutContext(
-    'correctly parse sample result json when there are issues but invalid url.',
-    () async {
-      final XCResultGenerator generator = setupGenerator(
-        resultJson: kSampleResultJsonWithIssuesAndInvalidUrl,
-      );
-      final XCResult result = await generator.generate();
-      expect(result.issues.length, 2);
-      expect(result.issues.first.type, XCResultIssueType.error);
-      expect(result.issues.first.subType, 'Semantic Issue');
-      expect(result.issues.first.message, "Use of undeclared identifier 'asdas'");
-      expect(result.issues.first.location, isNull);
-      expect(
-        result.issues.first.warnings.first,
-        '(XCResult) The `url` exists but it was failed to be parsed. url: 3:00',
-      );
-      expect(result.issues.last.type, XCResultIssueType.warning);
-      expect(result.issues.last.subType, 'Warning');
-      expect(
-        result.issues.last.message,
-        "The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.0.99.",
-      );
-      expect(result.parseSuccess, isTrue);
-      expect(result.parsingErrorMessage, isNull);
-    },
-  );
+  test('correctly parse sample result json when there are issues but invalid url.', () async {
+    final XCResultGenerator generator = setupGenerator(
+      resultJson: kSampleResultJsonWithIssuesAndInvalidUrl,
+    );
+    final XCResult result = await generator.generate();
+    expect(result.issues.length, 2);
+    expect(result.issues.first.type, XCResultIssueType.error);
+    expect(result.issues.first.subType, 'Semantic Issue');
+    expect(result.issues.first.message, "Use of undeclared identifier 'asdas'");
+    expect(result.issues.first.location, isNull);
+    expect(
+      result.issues.first.warnings.first,
+      '(XCResult) The `url` exists but it was failed to be parsed. url: 3:00',
+    );
+    expect(result.issues.last.type, XCResultIssueType.warning);
+    expect(result.issues.last.subType, 'Warning');
+    expect(
+      result.issues.last.message,
+      "The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.0.99.",
+    );
+    expect(result.parseSuccess, isTrue);
+    expect(result.parsingErrorMessage, isNull);
+  });
 
-  testWithoutContext('correctly parse sample result json and discard all warnings', () async {
+  test('correctly parse sample result json and discard all warnings', () async {
     final XCResultGenerator generator = setupGenerator(resultJson: kSampleResultJsonWithIssues);
     final discarder = XCResultIssueDiscarder(typeMatcher: XCResultIssueType.warning);
     final XCResult result = await generator.generate(
@@ -209,7 +206,7 @@ void main() {
     expect(result.parsingErrorMessage, isNull);
   });
 
-  testWithoutContext('correctly parse sample result json and discard base on subType', () async {
+  test('correctly parse sample result json and discard base on subType', () async {
     final XCResultGenerator generator = setupGenerator(resultJson: kSampleResultJsonWithIssues);
     final discarder = XCResultIssueDiscarder(subTypeMatcher: RegExp(r'^Warning$'));
     final XCResult result = await generator.generate(
@@ -227,7 +224,7 @@ void main() {
     expect(result.parsingErrorMessage, isNull);
   });
 
-  testWithoutContext('correctly parse sample result json and discard base on message', () async {
+  test('correctly parse sample result json and discard base on message', () async {
     final XCResultGenerator generator = setupGenerator(resultJson: kSampleResultJsonWithIssues);
     final discarder = XCResultIssueDiscarder(
       messageMatcher: RegExp(
@@ -249,7 +246,7 @@ void main() {
     expect(result.parsingErrorMessage, isNull);
   });
 
-  testWithoutContext('correctly parse sample result json and discard base on location', () async {
+  test('correctly parse sample result json and discard base on location', () async {
     final XCResultGenerator generator = setupGenerator(resultJson: kSampleResultJsonWithIssues);
     final discarder = XCResultIssueDiscarder(
       locationMatcher: RegExp(r'/Users/m/Projects/test_create/ios/Runner/AppDelegate.m'),
@@ -268,7 +265,7 @@ void main() {
     expect(result.parsingErrorMessage, isNull);
   });
 
-  testWithoutContext('correctly parse sample result json with multiple discarders.', () async {
+  test('correctly parse sample result json with multiple discarders.', () async {
     final XCResultGenerator generator = setupGenerator(resultJson: kSampleResultJsonWithIssues);
     final discardWarnings = XCResultIssueDiscarder(typeMatcher: XCResultIssueType.warning);
     final discardSemanticIssues = XCResultIssueDiscarder(
@@ -282,7 +279,7 @@ void main() {
     expect(result.parsingErrorMessage, isNull);
   });
 
-  testWithoutContext('correctly parse sample result json when no issues.', () async {
+  test('correctly parse sample result json when no issues.', () async {
     final XCResultGenerator generator = setupGenerator(resultJson: kSampleResultJsonNoIssues);
     final XCResult result = await generator.generate();
     expect(result.issues.length, 0);
@@ -290,7 +287,7 @@ void main() {
     expect(result.parsingErrorMessage, isNull);
   });
 
-  testWithoutContext('correctly parse sample result json with action issues.', () async {
+  test('correctly parse sample result json with action issues.', () async {
     final XCResultGenerator generator = setupGenerator(
       resultJson: kSampleResultJsonWithActionIssues,
     );
@@ -309,7 +306,7 @@ void main() {
     expect(result.parsingErrorMessage, isNull);
   });
 
-  testWithoutContext('correctly parse sample result on < Xcode 16.', () async {
+  test('correctly parse sample result on < Xcode 16.', () async {
     final XCResultGenerator generator = setupGenerator(
       resultJson: kSampleResultJsonNoIssues,
       xcodeVersion: Version(15, 0, 0),
@@ -320,7 +317,7 @@ void main() {
     expect(result.parsingErrorMessage, isNull);
   });
 
-  testWithoutContext('error: `xcresulttool get` process fail should return an `XCResult` with stderr as `parsingErrorMessage`.', () async {
+  test('error: `xcresulttool get` process fail should return an `XCResult` with stderr as `parsingErrorMessage`.', () async {
     const fakeStderr = 'Fake: fail to parse result json.';
     final XCResultGenerator generator = setupGenerator(
       resultJson: '',
@@ -334,7 +331,7 @@ void main() {
     expect(result.parsingErrorMessage, fakeStderr);
   });
 
-  testWithoutContext('error: `xcresulttool get` no stdout', () async {
+  test('error: `xcresulttool get` no stdout', () async {
     final XCResultGenerator generator = setupGenerator(resultJson: '');
 
     final XCResult result = await generator.generate();
@@ -343,7 +340,7 @@ void main() {
     expect(result.parsingErrorMessage, 'xcresult parser: Unrecognized top level json format.');
   });
 
-  testWithoutContext('error: wrong top level json format.', () async {
+  test('error: wrong top level json format.', () async {
     final XCResultGenerator generator = setupGenerator(resultJson: '[]');
 
     final XCResult result = await generator.generate();
@@ -352,7 +349,7 @@ void main() {
     expect(result.parsingErrorMessage, 'xcresult parser: Unrecognized top level json format.');
   });
 
-  testWithoutContext('error: fail to parse issue map', () async {
+  test('error: fail to parse issue map', () async {
     final XCResultGenerator generator = setupGenerator(resultJson: '{}');
 
     final XCResult result = await generator.generate();
@@ -361,7 +358,7 @@ void main() {
     expect(result.parsingErrorMessage, 'xcresult parser: Failed to parse the issues map.');
   });
 
-  testWithoutContext('error: invalid issue map', () async {
+  test('error: invalid issue map', () async {
     final XCResultGenerator generator = setupGenerator(
       resultJson: kSampleResultJsonInvalidIssuesMap,
     );

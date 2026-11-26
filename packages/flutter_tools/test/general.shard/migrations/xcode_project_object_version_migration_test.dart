@@ -27,7 +27,7 @@ void main() {
       fakeProject = FakeXcodeBasedProject(fileSystem: memoryFileSystem);
     });
 
-    testWithoutContext('updates all values when below target', () async {
+    test('updates all values when below target', () async {
       fakeProject.xcodeProjectInfoFile.writeAsStringSync(
         _projectFilePart(objectVersion: '46', lastUpgradeCheck: '1400'),
       );
@@ -50,7 +50,7 @@ void main() {
       );
     });
 
-    testWithoutContext('does not update when values are already at target', () async {
+    test('does not update when values are already at target', () async {
       fakeProject.xcodeProjectInfoFile.writeAsStringSync(
         _projectFilePart(
           objectVersion: migratedObjectVersion,
@@ -78,7 +78,7 @@ void main() {
       );
     });
 
-    testWithoutContext('does not update when values are above target', () async {
+    test('does not update when values are above target', () async {
       fakeProject.xcodeProjectInfoFile.writeAsStringSync(
         _projectFilePart(objectVersion: '9999', lastUpgradeCheck: '99999'),
       );

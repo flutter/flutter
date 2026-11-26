@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/button_tester.dart';
 
 typedef SemanticsNodeUpdateObservation = ({
+  String identifier,
   String label,
   List<StringAttribute>? labelAttributes,
   String value,
@@ -791,6 +792,40 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('Semantics update is sent when only the identifier changes', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(const Placeholder(), phase: EnginePhase.build);
+    SemanticsUpdateBuilderSpy.observations.clear();
+
+    Widget build({required String identifier}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
+          container: true,
+          identifier: identifier,
+          child: const SizedBox(width: 100, height: 40),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(identifier: 'first'));
+    final int id = SemanticsUpdateBuilderSpy.observations.entries.singleWhere((
+      MapEntry<int, SemanticsNodeUpdateObservation> entry,
+    ) {
+      return entry.value.identifier == 'first';
+    }).key;
+    SemanticsUpdateBuilderSpy.observations.clear();
+
+    await tester.pumpWidget(build(identifier: 'second'));
+    expect(SemanticsUpdateBuilderSpy.observations.keys, <int>[id]);
+    expect(SemanticsUpdateBuilderSpy.observations[id]!.identifier, 'second');
+
+    SemanticsUpdateBuilderSpy.observations.clear();
+    handle.dispose();
+  });
+
   testWidgets(
     'Semantics node that moves into a merging sibling stays merged when its old ancestor stops merging',
     (WidgetTester tester) async {
@@ -1030,6 +1065,7 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
     // Makes sure we don't send the same id twice.
     assert(!observations.containsKey(id));
     observations[id] = (
+      identifier: identifier,
       label: label,
       labelAttributes: labelAttributes,
       hint: hint,

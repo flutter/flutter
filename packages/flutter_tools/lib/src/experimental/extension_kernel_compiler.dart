@@ -121,15 +121,15 @@ class ExtensionKernelCompiler {
       final File depFile = _fileSystem.file('${dillFile.path}$_kDepfileSuffix');
       final File stampFile = _fileSystem.file('${dillFile.path}$_kStampFileSuffix');
 
-      if (_tryReuseCachedDill(
-            extension,
-            depFile: depFile,
-            dillFile: dillFile,
-            entrypointFile: entrypointFile,
-            packageConfigFile: packageConfigFile,
-            stampFile: stampFile,
-          )
-          case final CompiledExtensionKernel cachedKernel) {
+      final CompiledExtensionKernel? cachedKernel = _tryReuseCachedDill(
+        extension,
+        depFile: depFile,
+        dillFile: dillFile,
+        entrypointFile: entrypointFile,
+        packageConfigFile: packageConfigFile,
+        stampFile: stampFile,
+      );
+      if (cachedKernel != null) {
         return cachedKernel;
       }
 
@@ -139,15 +139,15 @@ class ExtensionKernelCompiler {
         lockPath: '${dillFile.path}$_kLockFileSuffix',
         logger: _logger,
         scope: () async {
-          if (_tryReuseCachedDill(
-                extension,
-                depFile: depFile,
-                dillFile: dillFile,
-                entrypointFile: entrypointFile,
-                packageConfigFile: packageConfigFile,
-                stampFile: stampFile,
-              )
-              case final CompiledExtensionKernel cachedKernel) {
+          final CompiledExtensionKernel? cachedKernel = _tryReuseCachedDill(
+            extension,
+            depFile: depFile,
+            dillFile: dillFile,
+            entrypointFile: entrypointFile,
+            packageConfigFile: packageConfigFile,
+            stampFile: stampFile,
+          );
+          if (cachedKernel != null) {
             return cachedKernel;
           }
 

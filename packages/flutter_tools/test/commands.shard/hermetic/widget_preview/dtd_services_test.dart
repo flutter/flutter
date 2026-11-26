@@ -17,7 +17,6 @@ import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:test/fake.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
 
 class FakeWidgetPreviewAnalytics extends Fake implements WidgetPreviewAnalytics {
   @override
@@ -144,7 +143,7 @@ void main() {
     await fakeDtd.close();
   });
 
-  testUsingContext(
+  test(
     'concurrent calls to getFlutterWidgetPreviews do not throw stream already subscribed',
     () async {
       final Future<FlutterWidgetPreviews> future1 = dtdServices.getFlutterWidgetPreviews();
@@ -171,7 +170,7 @@ void main() {
     },
   );
 
-  testUsingContext('mixed concurrent calls to getFlutterWidgetPreviews and '
+  test('mixed concurrent calls to getFlutterWidgetPreviews and '
       'getFlutterWidgetPreviewsForFile do not throw', () async {
     final Future<FlutterWidgetPreviews> future1 = dtdServices.getFlutterWidgetPreviews();
     final Future<FlutterWidgetPreviews> future2 = dtdServices.getFlutterWidgetPreviewsForFile(
@@ -196,7 +195,7 @@ void main() {
     expect(fakeDtd.getRegisteredServicesCallCount, 1);
   });
 
-  testUsingContext('getFlutterWidgetPreviews succeeds when stream is already subscribed', () async {
+  test('getFlutterWidgetPreviews succeeds when stream is already subscribed', () async {
     // Simulate the stream already being subscribed on DTD prior to calling _waitForLspService.
     fakeDtd.subscribedStreams.add(WidgetPreviewDtdServices.kLspStream);
 
@@ -213,7 +212,7 @@ void main() {
     expect(result.previews, isEmpty);
   });
 
-  testUsingContext('waitForAnalysis calls Lsp.dart/workspace/analysis/complete over DTD', () async {
+  test('waitForAnalysis calls Lsp.dart/workspace/analysis/complete over DTD', () async {
     final Future<void> future = dtdServices.waitForAnalysis(delay: Duration.zero);
     await pumpEventQueue();
 
@@ -227,7 +226,7 @@ void main() {
     expect(fakeDtd.waitForAnalysisCallCount, 1);
   });
 
-  testUsingContext(
+  test(
     'waits for Lsp initialized event when only a subset of required Lsp methods are registered',
     () async {
       fakeDtd.registeredServicesResponse = RegisteredServicesResponse.fromDTDResponse(
@@ -268,7 +267,7 @@ void main() {
     },
   );
 
-  testUsingContext(
+  test(
     'proceeds without waiting for event when all required Lsp methods are already registered',
     () async {
       fakeDtd.registeredServicesResponse = RegisteredServicesResponse.fromDTDResponse(
@@ -293,7 +292,7 @@ void main() {
     },
   );
 
-  testUsingContext('cancels the Lsp event subscription when streamListen fails', () async {
+  test('cancels the Lsp event subscription when streamListen fails', () async {
     fakeDtd.streamListenError = RpcErrorCodes.buildRpcException(RpcErrorCodes.kConnectionFailed);
 
     await expectLater(

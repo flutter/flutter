@@ -18,8 +18,8 @@ size_t GlyphInfo::GetGraphemeClusterCodeUnitRangeEnd() const {
 
 ImpellerRect GlyphInfo::GetGraphemeClusterBounds() const {
   return ImpellerRect{
-      info_.fGraphemeLayoutBounds.y(),
       info_.fGraphemeLayoutBounds.x(),
+      info_.fGraphemeLayoutBounds.y(),
       info_.fGraphemeLayoutBounds.width(),
       info_.fGraphemeLayoutBounds.height(),
   };

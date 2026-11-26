@@ -32,7 +32,7 @@ void main() {
     await restoreFlutterToolsSnapshot();
   });
 
-  testWithoutContext('tool_backend.dart tree shakes icons successfully', () async {
+  test('tool_backend.dart tree shakes icons successfully', () async {
     final String flutterRoot = getFlutterRoot();
     final String flutterBin = fs.path.join(
       flutterRoot,

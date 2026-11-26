@@ -87,6 +87,14 @@ void sendFooMessage() {
   PlatformDispatcher.instance.sendPlatformMessage('foo', null, (ByteData? result) {});
 }
 
+@Native<Void Function(Handle)>(symbol: 'NotifyPlatformMessageResponse')
+external void notifyPlatformMessageResponse(ByteData? response);
+
+@pragma('vm:entry-point')
+void sendFooMessageAndNotifyResponse() {
+  PlatformDispatcher.instance.sendPlatformMessage('foo', null, notifyPlatformMessageResponse);
+}
+
 @Native<Void Function(Handle)>(symbol: 'NotifyEngineId')
 external void notifyEngineId(int? engineId);
 

@@ -17,7 +17,7 @@ const _allPlatforms = <String>['android', 'ios', 'web', 'windows', 'macos', 'lin
 
 void main() {
   group('Analysis options migration', () {
-    testWithoutContext('skipped if analysis_options.yaml file is missing', () async {
+    test('skipped if analysis_options.yaml file is missing', () async {
       final _TestContext context = _createTestContext();
       final migration = AnalysisOptionsMigration(context.mockProject, context.testLogger);
       await migration.migrate();
@@ -26,7 +26,7 @@ void main() {
       expect(context.testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('skipped if already migrated', () async {
+    test('skipped if already migrated', () async {
       final _TestContext context = _createTestContext();
       const analysisOptionsContents = '''
 analyzer:
@@ -50,7 +50,7 @@ include: package:flutter_lints/flutter.yaml
       expect(context.testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('skipped if not a YamlMap', () async {
+    test('skipped if not a YamlMap', () async {
       final _TestContext context = _createTestContext();
       const analysisOptionsContents = 'not a map';
       context.analysisOptionsFile.writeAsStringSync(analysisOptionsContents);
@@ -66,7 +66,7 @@ include: package:flutter_lints/flutter.yaml
       expect(context.testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('skipped if malformed YAML', () async {
+    test('skipped if malformed YAML', () async {
       final _TestContext context = _createTestContext();
       const analysisOptionsContents = 'analyzer: [unclosed list';
       context.analysisOptionsFile.writeAsStringSync(analysisOptionsContents);
@@ -79,7 +79,7 @@ include: package:flutter_lints/flutter.yaml
       expect(context.testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('migrates when analyzer section is missing', () async {
+    test('migrates when analyzer section is missing', () async {
       final _TestContext context = _createTestContext();
       const analysisOptionsContents = '''
 include: package:flutter_lints/flutter.yaml
@@ -109,7 +109,7 @@ analyzer:
       );
     });
 
-    testWithoutContext('migrates when exclude section is missing', () async {
+    test('migrates when exclude section is missing', () async {
       final _TestContext context = _createTestContext();
       const analysisOptionsContents = '''
 analyzer:
@@ -138,7 +138,7 @@ include: package:flutter_lints/flutter.yaml
       );
     });
 
-    testWithoutContext('migrates and merges excludes', () async {
+    test('migrates and merges excludes', () async {
       final _TestContext context = _createTestContext();
       const analysisOptionsContents = '''
 analyzer:
@@ -163,27 +163,24 @@ analyzer:
       expect(migratedContents, contains('- linux/**'));
     });
 
-    testWithoutContext(
-      'skipped entirely for a Dart-only package (no flutter dependency)',
-      () async {
-        final _TestContext context = _createTestContext(
-          isFlutterProject: false,
-          platforms: <String>['web'],
-        );
-        const analysisOptionsContents = '''
+    test('skipped entirely for a Dart-only package (no flutter dependency)', () async {
+      final _TestContext context = _createTestContext(
+        isFlutterProject: false,
+        platforms: <String>['web'],
+      );
+      const analysisOptionsContents = '''
 include: package:lints/recommended.yaml
 ''';
-        context.analysisOptionsFile.writeAsStringSync(analysisOptionsContents);
+      context.analysisOptionsFile.writeAsStringSync(analysisOptionsContents);
 
-        final migration = AnalysisOptionsMigration(context.mockProject, context.testLogger);
-        await migration.migrate();
+      final migration = AnalysisOptionsMigration(context.mockProject, context.testLogger);
+      await migration.migrate();
 
-        expect(context.analysisOptionsFile.readAsStringSync(), analysisOptionsContents);
-        expect(context.testLogger.statusText, isEmpty);
-      },
-    );
+      expect(context.analysisOptionsFile.readAsStringSync(), analysisOptionsContents);
+      expect(context.testLogger.statusText, isEmpty);
+    });
 
-    testWithoutContext('only excludes platform directories that actually exist', () async {
+    test('only excludes platform directories that actually exist', () async {
       final _TestContext context = _createTestContext(platforms: <String>['android', 'ios']);
       const analysisOptionsContents = '''
 include: package:flutter_lints/flutter.yaml
@@ -204,7 +201,7 @@ include: package:flutter_lints/flutter.yaml
       expect(migratedContents, isNot(contains('- linux/**')));
     });
 
-    testWithoutContext('migrates and preserves comments inside exclude list', () async {
+    test('migrates and preserves comments inside exclude list', () async {
       final _TestContext context = _createTestContext();
       const analysisOptionsContents = '''
 analyzer:
@@ -224,7 +221,7 @@ analyzer:
       expect(migratedContents, contains('- build/**'));
     });
 
-    testWithoutContext('migrates and merges excludes when list is in flow style', () async {
+    test('migrates and merges excludes when list is in flow style', () async {
       final _TestContext context = _createTestContext();
       const analysisOptionsContents = '''
 analyzer:
@@ -247,11 +244,9 @@ analyzer:
       expect(migratedContents, contains('linux/**'));
     });
 
-    testWithoutContext(
-      'migrates and merges excludes when list is in flow style with newlines',
-      () async {
-        final _TestContext context = _createTestContext();
-        const analysisOptionsContents = '''
+    test('migrates and merges excludes when list is in flow style with newlines', () async {
+      final _TestContext context = _createTestContext();
+      const analysisOptionsContents = '''
 analyzer:
   exclude:
     [
@@ -260,24 +255,23 @@ analyzer:
     ]
 ''';
 
-        context.analysisOptionsFile.writeAsStringSync(analysisOptionsContents);
+      context.analysisOptionsFile.writeAsStringSync(analysisOptionsContents);
 
-        final migration = AnalysisOptionsMigration(context.mockProject, context.testLogger);
-        await migration.migrate();
+      final migration = AnalysisOptionsMigration(context.mockProject, context.testLogger);
+      await migration.migrate();
 
-        final String migratedContents = context.analysisOptionsFile.readAsStringSync();
-        expect(migratedContents, contains('foo/**'));
-        expect(migratedContents, contains('build/**'));
-        expect(migratedContents, contains('android/**'));
-        expect(migratedContents, contains('ios/**'));
-        expect(migratedContents, contains('web/**'));
-        expect(migratedContents, contains('windows/**'));
-        expect(migratedContents, contains('macos/**'));
-        expect(migratedContents, contains('linux/**'));
-      },
-    );
+      final String migratedContents = context.analysisOptionsFile.readAsStringSync();
+      expect(migratedContents, contains('foo/**'));
+      expect(migratedContents, contains('build/**'));
+      expect(migratedContents, contains('android/**'));
+      expect(migratedContents, contains('ios/**'));
+      expect(migratedContents, contains('web/**'));
+      expect(migratedContents, contains('windows/**'));
+      expect(migratedContents, contains('macos/**'));
+      expect(migratedContents, contains('linux/**'));
+    });
 
-    testWithoutContext('skipped if exclusions are inherited via relative include', () async {
+    test('skipped if exclusions are inherited via relative include', () async {
       final _TestContext context = _createTestContext();
       const analysisOptionsContents = '''
 include: shared_options.yaml
@@ -304,7 +298,7 @@ analyzer:
       expect(context.testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('skipped if exclusions are inherited via package include', () async {
+    test('skipped if exclusions are inherited via package include', () async {
       final _TestContext context = _createTestContext();
       const analysisOptionsContents = '''
 include: package:shared_options/analysis_options.yaml
@@ -343,7 +337,7 @@ analyzer:
       expect(context.testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('skipped if exclusions are inherited via multiple includes', () async {
+    test('skipped if exclusions are inherited via multiple includes', () async {
       final _TestContext context = _createTestContext();
       const analysisOptionsContents = '''
 include:
@@ -381,7 +375,7 @@ analyzer:
       expect(context.testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('handles cyclic includes without crashing', () async {
+    test('handles cyclic includes without crashing', () async {
       final _TestContext context = _createTestContext();
       const analysisOptionsContents = '''
 include: shared_options_1.yaml
@@ -419,7 +413,7 @@ include: shared_options_1.yaml
       expect(context.testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('handles invalid exclude types without crashing', () async {
+    test('handles invalid exclude types without crashing', () async {
       final _TestContext context = _createTestContext();
       const analysisOptionsContents = '''
 analyzer:
@@ -445,7 +439,7 @@ analyzer:
       expect(context.testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('handles unreadable include file without crashing', () async {
+    test('handles unreadable include file without crashing', () async {
       final _TestContext context = _createTestContext();
       const analysisOptionsContents = '''
 include: some_dir
@@ -471,7 +465,7 @@ analyzer:
       expect(context.testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('handles cyclic includes with different casing without crashing', () async {
+    test('handles cyclic includes with different casing without crashing', () async {
       final _TestContext context = _createTestContext();
       const analysisOptionsContents = '''
 include: shared_options.yaml

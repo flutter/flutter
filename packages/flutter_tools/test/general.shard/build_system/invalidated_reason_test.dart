@@ -7,7 +7,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import '../../src/common.dart';
 
 void main() {
-  testWithoutContext('InvalidatedReason formats message per invalidation kind', () {
+  test('InvalidatedReason formats message per invalidation kind', () {
     final inputChanged = InvalidatedReason(InvalidatedReasonKind.inputChanged)..data.add('a.dart');
     final outputChanged = InvalidatedReason(InvalidatedReasonKind.outputChanged)
       ..data.add('b.dart');
