@@ -126,7 +126,7 @@ void main() {
 
     expect(builder(const PointerDownEvent()), isA<IOSScrollViewFlingVelocityTracker>());
 
-    // Regression test for https://github.com/flutter/flutter/issues/5856.
+    // Regression test for https://github.com/flutter/flutter/issues/5856
     final ScrollMetrics metrics = position.copyWith();
     expect(metrics.extentAfter, equals(400.0));
     expect(metrics.viewportDimension, equals(600.0));
