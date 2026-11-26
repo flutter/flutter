@@ -5,10 +5,11 @@
 Pod::Spec.new do |s|
   s.name             = '{{projectName}}'
   s.version          = '0.0.1'
-  s.summary          = '{{description}}'
-  s.description      = <<-DESC
+  description = <<-'DESC'
 {{description}}
-                       DESC
+  DESC
+  s.summary          = description.chomp
+  s.description      = description
   s.homepage         = 'http://example.com'
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Your Company' => 'email@example.com' }
