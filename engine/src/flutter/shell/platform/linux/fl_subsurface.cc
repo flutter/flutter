@@ -58,15 +58,26 @@ struct wl_surface* fl_subsurface_get_surface(FlSubsurface* self) {
 
 void fl_subsurface_set_position(FlSubsurface* self, gint x, gint y) {
   g_return_if_fail(FL_IS_SUBSURFACE(self));
-  wl_subsurface_set_position(self->subsurface, x, y);
+  if (self->subsurface != nullptr) {
+    wl_subsurface_set_position(self->subsurface, x, y);
+  }
 }
 
 void fl_subsurface_set_sync(FlSubsurface* self) {
   g_return_if_fail(FL_IS_SUBSURFACE(self));
-  wl_subsurface_set_sync(self->subsurface);
+  if (self->subsurface != nullptr) {
+    wl_subsurface_set_sync(self->subsurface);
+  }
 }
 
 void fl_subsurface_set_desync(FlSubsurface* self) {
   g_return_if_fail(FL_IS_SUBSURFACE(self));
-  wl_subsurface_set_desync(self->subsurface);
+  if (self->subsurface != nullptr) {
+    wl_subsurface_set_desync(self->subsurface);
+  }
+}
+
+void fl_subsurface_destroy(FlSubsurface* self) {
+  g_return_if_fail(FL_IS_SUBSURFACE(self));
+  g_clear_pointer(&self->subsurface, wl_subsurface_destroy);
 }

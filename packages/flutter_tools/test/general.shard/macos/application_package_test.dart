@@ -35,7 +35,7 @@ void main() {
       toolContext = FakeToolContext(fs: fileSystem, logger: logger, os: os);
     });
 
-    testWithoutContext('Error on non-existing file', () {
+    test('Error on non-existing file', () {
       final macosApp = MacOSApp.fromPrebuiltApp(
         fileSystem.file('not_existing.app'),
         plistParser: plistParser,
@@ -46,7 +46,7 @@ void main() {
       expect(logger.errorText, contains('File "not_existing.app" does not exist.'));
     });
 
-    testWithoutContext('Error on non-app-bundle folder', () {
+    test('Error on non-app-bundle folder', () {
       fileSystem.directory('regular_folder').createSync();
       final macosApp = MacOSApp.fromPrebuiltApp(
         fileSystem.file('regular_folder'),
@@ -58,7 +58,7 @@ void main() {
       expect(logger.errorText, contains('Folder "regular_folder" is not an app bundle.'));
     });
 
-    testWithoutContext('Error on no info.plist', () {
+    test('Error on no info.plist', () {
       fileSystem.directory('bundle.app').createSync();
       final macosApp = MacOSApp.fromPrebuiltApp(
         fileSystem.file('bundle.app'),
@@ -73,7 +73,7 @@ void main() {
       );
     });
 
-    testWithoutContext('Error on info.plist missing bundle identifier', () {
+    test('Error on info.plist missing bundle identifier', () {
       final String contentsDirectory = fileSystem.path.join('bundle.app', 'Contents');
       fileSystem.directory(contentsDirectory).createSync(recursive: true);
       fileSystem
@@ -92,7 +92,7 @@ void main() {
       );
     });
 
-    testWithoutContext('Error on info.plist missing executable', () {
+    test('Error on info.plist missing executable', () {
       final String contentsDirectory = fileSystem.path.join('bundle.app', 'Contents');
       fileSystem.directory(contentsDirectory).createSync(recursive: true);
       fileSystem
@@ -111,7 +111,7 @@ void main() {
       );
     });
 
-    testWithoutContext('Success with app bundle', () {
+    test('Success with app bundle', () {
       final String appDirectory = fileSystem.path.join('bundle.app', 'Contents', 'MacOS');
       fileSystem.directory(appDirectory).createSync(recursive: true);
       fileSystem
@@ -132,7 +132,7 @@ void main() {
       expect(macosApp.bundleName, 'bundle.app');
     });
 
-    testWithoutContext('Bad zipped app, no payload dir', () {
+    test('Bad zipped app, no payload dir', () {
       fileSystem.file('app.zip').createSync();
       final macosApp = MacOSApp.fromPrebuiltApp(
         fileSystem.file('app.zip'),
@@ -144,7 +144,7 @@ void main() {
       expect(logger.errorText, contains('Archive "app.zip" does not contain a single app bundle.'));
     });
 
-    testWithoutContext('Bad zipped app, two app bundles', () {
+    test('Bad zipped app, two app bundles', () {
       fileSystem.file('app.zip').createSync();
       os.unzipOverride = (File zipFile, Directory targetDirectory) {
         if (zipFile.path != 'app.zip') {
@@ -165,7 +165,7 @@ void main() {
       expect(logger.errorText, contains('Archive "app.zip" does not contain a single app bundle.'));
     });
 
-    testWithoutContext('Success with zipped app', () {
+    test('Success with zipped app', () {
       fileSystem.file('app.zip').createSync();
       os.unzipOverride = (File zipFile, Directory targetDirectory) {
         if (zipFile.path != 'app.zip') {
@@ -197,7 +197,7 @@ void main() {
       expect(macosApp.bundleName, endsWith('bundle.app'));
     });
 
-    testWithoutContext('Success with project', () {
+    test('Success with project', () {
       final macosApp = MacOSApp.fromMacOSProject(
         FlutterProject.fromDirectoryTest(fileSystem.currentDirectory).macos,
         plistParser: plistParser,
@@ -209,7 +209,7 @@ void main() {
       expect(macosApp.name, 'macOS');
     });
 
-    testWithoutContext('Chooses the correct directory for application.', () {
+    test('Chooses the correct directory for application.', () {
       final MacOSProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory)
           .macos;
       final macosApp = MacOSApp.fromMacOSProject(

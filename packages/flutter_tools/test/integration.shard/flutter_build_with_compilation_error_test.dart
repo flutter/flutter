@@ -46,36 +46,33 @@ int x = 'String';
   });
 
   for (final targetPlatform in targetPlatforms) {
-    testWithoutContext(
-      'flutter build $targetPlatform shows dart compilation error in non-verbose',
-      () {
-        final ProcessResult result = processManager.runSync(<String>[
-          flutterBin,
-          ...getLocalEngineArguments(),
-          'build',
-          targetPlatform,
-          '--no-pub',
-          if (targetPlatform == 'ios') '--no-codesign',
-        ], workingDirectory: projectRoot.path);
+    test('flutter build $targetPlatform shows dart compilation error in non-verbose', () {
+      final ProcessResult result = processManager.runSync(<String>[
+        flutterBin,
+        ...getLocalEngineArguments(),
+        'build',
+        targetPlatform,
+        '--no-pub',
+        if (targetPlatform == 'ios') '--no-codesign',
+      ], workingDirectory: projectRoot.path);
 
-        const errorMessage =
-            "A value of type 'String' can't be assigned to a variable of type 'int'.";
+      const errorMessage =
+          "A value of type 'String' can't be assigned to a variable of type 'int'.";
 
-        // Xcode 16 moved the xcodebuild error details from stderr to stdout.
-        // Check that it's contained in one or the other.
-        final bool matchStdout = result.stdout.toString().contains(errorMessage);
-        final bool matchStderr = result.stderr.toString().contains(errorMessage);
+      // Xcode 16 moved the xcodebuild error details from stderr to stdout.
+      // Check that it's contained in one or the other.
+      final bool matchStdout = result.stdout.toString().contains(errorMessage);
+      final bool matchStderr = result.stderr.toString().contains(errorMessage);
 
-        expect(matchStdout || matchStderr, isTrue);
-        expect(
-          result.stderr,
-          isNot(contains("Warning: The 'dart2js' entrypoint script is deprecated")),
-        );
-        expect(
-          result.stdout,
-          isNot(contains("Warning: The 'dart2js' entrypoint script is deprecated")),
-        );
-      },
-    );
+      expect(matchStdout || matchStderr, isTrue);
+      expect(
+        result.stderr,
+        isNot(contains("Warning: The 'dart2js' entrypoint script is deprecated")),
+      );
+      expect(
+        result.stdout,
+        isNot(contains("Warning: The 'dart2js' entrypoint script is deprecated")),
+      );
+    });
   }
 }

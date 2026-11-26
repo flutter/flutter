@@ -32,7 +32,7 @@ void main() {
       mockProject = FakeFlutterProject(fileSystem: memoryFileSystem);
     });
 
-    testWithoutContext('skipped if .gitignore file is missing', () {
+    test('skipped if .gitignore file is missing', () {
       final migration = SwiftPackageManagerGitignoreMigration(mockProject, testLogger);
       migration.migrate();
       expect(gitignoreFile.existsSync(), isFalse);
@@ -44,7 +44,7 @@ void main() {
       expect(testLogger.warningText, isEmpty);
     });
 
-    testWithoutContext('skipped if nothing to migrate', () {
+    test('skipped if nothing to migrate', () {
       const gitignoreFileContents = 'Nothing to migrate';
 
       gitignoreFile.writeAsStringSync(gitignoreFileContents);
@@ -59,7 +59,7 @@ void main() {
       expect(testLogger.warningText, isEmpty);
     });
 
-    testWithoutContext('skipped if already migrated', () {
+    test('skipped if already migrated', () {
       const gitignoreFileContents = '''
 .build/
 .swiftpm/
@@ -77,7 +77,7 @@ void main() {
       expect(testLogger.warningText, isEmpty);
     });
 
-    testWithoutContext('migrates project to ignore Swift Package Manager build directories', () {
+    test('migrates project to ignore Swift Package Manager build directories', () {
       gitignoreFile.writeAsStringSync(
         '.DS_Store\n'
         '.atom/\n'

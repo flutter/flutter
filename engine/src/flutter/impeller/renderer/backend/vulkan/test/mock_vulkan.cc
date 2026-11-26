@@ -99,6 +99,17 @@ class MockDevice final {
 
   MockPhysicalDevice& physical_device() { return physical_device_; }
 
+  /// Sets the callback that `vkGetPipelineCacheData` calls for this device in
+  /// place of its default implementation. Set from the
+  /// `MockVulkanContextBuilder` when the device is created.
+  void SetGetPipelineCacheDataCallback(GetPipelineCacheDataCallback callback) {
+    get_pipeline_cache_data_callback_ = std::move(callback);
+  }
+
+  const GetPipelineCacheDataCallback& get_pipeline_cache_data_callback() const {
+    return get_pipeline_cache_data_callback_;
+  }
+
   // Get the MockDevice wrapped by a VkDevice handle and check that the
   // VkDevice has not been destroyed.
   static MockDevice* Unwrap(VkDevice vk_device) {
@@ -184,6 +195,7 @@ class MockDevice final {
 
   MockQueue queue_;
   std::atomic<uint64_t> next_mock_timestamp_{1000000u};
+  GetPipelineCacheDataCallback get_pipeline_cache_data_callback_;
 };
 
 std::weak_ptr<MockDevice>* MockPhysicalDevice::CreateDevice() {
@@ -221,6 +233,7 @@ struct MockVulkanState {
       wait_for_fences_callback;
   std::function<std::remove_pointer_t<PFN_vkAcquireNextImageKHR>>
       acquire_next_image_callback;
+  GetPipelineCacheDataCallback get_pipeline_cache_data_callback;
   // When > 0, the next vkCreateImage for a fixed-rate-compressed image returns
   // VK_ERROR_COMPRESSION_EXHAUSTED_EXT and decrements (models PowerVR).
   int compression_exhausted_create_image_failures = 0;
@@ -447,6 +460,12 @@ VkResult vkCreateDevice(VkPhysicalDevice physicalDevice,
   MockPhysicalDevice* mock_physical_device =
       reinterpret_cast<MockPhysicalDevice*>(physicalDevice);
   *pDevice = reinterpret_cast<VkDevice>(mock_physical_device->CreateDevice());
+  // The mock state is thread-local, but vkGetPipelineCacheData is usually
+  // called on a worker thread, so store the callback on the device.
+  if (g_mock_vulkan_state) {
+    MockDevice::Unwrap(*pDevice)->SetGetPipelineCacheDataCallback(
+        GetMockVulkanState().get_pipeline_cache_data_callback);
+  }
   return VK_SUCCESS;
 }
 
@@ -1160,6 +1179,11 @@ VkResult vkGetPipelineCacheData(VkDevice device,
                                 VkPipelineCache pipelineCache,
                                 size_t* pDataSize,
                                 void* pData) {
+  MockDevice* mock_device = MockDevice::Unwrap(device);
+  mock_device->AddCalledFunction("vkGetPipelineCacheData");
+  if (const auto& callback = mock_device->get_pipeline_cache_data_callback()) {
+    return callback(device, pipelineCache, pDataSize, pData);
+  }
   if (pData) {
     const std::array<uint8_t, 5> cache_data{1, 2, 3, 4, 5};
     size_t dst_buffer_size = *pDataSize;
@@ -1432,6 +1456,8 @@ ContextVK::Settings MockVulkanContextBuilder::PrepareSettings() {
   g_mock_vulkan_state->acquire_next_image_callback =
       acquire_next_image_callback_;
   g_mock_vulkan_state->wait_for_fences_callback = wait_for_fences_callback_;
+  g_mock_vulkan_state->get_pipeline_cache_data_callback =
+      get_pipeline_cache_data_callback_;
   g_mock_vulkan_state->compression_exhausted_create_image_failures =
       compression_exhausted_create_image_failures_;
   settings.embedder_data = embedder_data_;

@@ -56,7 +56,9 @@ final class TestEnvironment {
     _instance = null;
   }
 
-  /// When true, the [ui.PlatformDispatcher] will ignore all platform messages.
+  /// When true, [ui.PlatformDispatcher] does not process outgoing platform
+  /// messages; instead it replies `null` to each one asynchronously through the
+  /// root zone, emulating `flutter_tester`'s reply for unhandled channels.
   final bool ignorePlatformMessages;
 
   /// When true, all text will be laid out and rendered using test fonts.
