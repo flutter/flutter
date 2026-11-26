@@ -31,7 +31,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    testWithoutContext('works before connecting a browser, '
+    test('works before connecting a browser, '
         'with a connected chrome browser '
         'and after disconnecting the browser.', () async {
       // These could all be individual test cases but are combined here to share

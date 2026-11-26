@@ -150,7 +150,7 @@ class TestFlutterDevice extends FlutterDevice {
     Future<Uri>? vmServiceUri,
   }) : super(
          device,
-         toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
+         toolContext: FakeToolContext(artifacts: Artifacts.test()),
          targetPlatform: .unsupported,
          buildInfo: BuildInfo.debug,
          generator: generator,

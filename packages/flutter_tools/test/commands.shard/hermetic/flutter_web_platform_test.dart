@@ -28,7 +28,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart' hide FakeProcess;
 import '../../src/fakes.dart';
 
 /// Thrown by [_RecordingChromiumLauncher] to terminate the browser startup early
@@ -159,228 +159,209 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testUsingContext(
-    'FlutterWebPlatform serves the correct dart_sdk.js (ddc library bundle module system) for the passed web renderer',
-    () async {
-      final chromiumLauncher = ChromiumLauncher(
-        fileSystem: fileSystem,
-        platform: platform,
-        processManager: processManager,
-        operatingSystemUtils: operatingSystemUtils,
-        browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
+  test('FlutterWebPlatform serves the correct dart_sdk.js (ddc library bundle module system) for the passed web renderer', () async {
+    final chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
+      logger: logger,
+    );
+    final server = FakeServer();
+    final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
+      'ProjectRoot',
+      buildDirectory: fileSystem.directory('build'),
+      buildInfo: const BuildInfo(
+        BuildMode.debug,
+        '',
+        packageConfigPath: '.dart_tool/package_config.json',
+        treeShakeIcons: false,
+      ),
+      chromiumLauncher: chromiumLauncher,
+      crossOriginIsolation: false,
+      flutterProject: FlutterProject.fromDirectoryTest(tempDir),
+      flutterTesterBinPath: artifacts.getArtifactPath(Artifact.flutterTester),
+      toolContext: FakeToolContext(
+        artifacts: artifacts,
+        fs: fileSystem,
         logger: logger,
-      );
-      final server = FakeServer();
-      final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
-        'ProjectRoot',
-        buildDirectory: fileSystem.directory('build'),
-        buildInfo: const BuildInfo(
-          BuildMode.debug,
-          '',
-          packageConfigPath: '.dart_tool/package_config.json',
-          treeShakeIcons: false,
-        ),
-        chromiumLauncher: chromiumLauncher,
-        crossOriginIsolation: false,
-        flutterProject: FlutterProject.fromDirectoryTest(tempDir),
-        flutterTesterBinPath: artifacts.getArtifactPath(Artifact.flutterTester),
-        toolContext: FakeToolContext(
-          artifacts: artifacts,
-          fs: fileSystem,
-          logger: logger,
-          processManager: processManager,
-        ),
-        useWasm: false,
-        webMemoryFS: WebMemoryFS(),
-        webRenderer: WebRendererMode.canvaskit,
-        serverFactory: () async => server,
-        testPackageUri: Uri.parse('test'),
-        templateRenderer: const MustacheTemplateRenderer(),
-      );
-      final shelf.Handler? handler = server.mountedHandler;
-      expect(handler, isNotNull);
-      handler!;
-      final shelf.Response response = await handler(
-        shelf.Request('GET', Uri.parse('http://localhost/dart_sdk.js')),
-      );
-      expect(response.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
-      expect(
-        response.headers[HttpHeaders.contentLengthHeader],
-        HostArtifact.webPrecompiledDDCCanarySdk.name.length.toString(),
-      );
-      final String contents = await response.readAsString();
-      expect(contents, HostArtifact.webPrecompiledDDCCanarySdk.name);
-
-      final shelf.Response sourcemapResponse = await handler(
-        shelf.Request('GET', Uri.parse('http://localhost/dart_sdk.js.map')),
-      );
-      expect(sourcemapResponse.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
-      expect(
-        sourcemapResponse.headers[HttpHeaders.contentLengthHeader],
-        HostArtifact.webPrecompiledDDCCanarySdkSourcemaps.name.length.toString(),
-      );
-      expect(
-        await sourcemapResponse.readAsString(),
-        HostArtifact.webPrecompiledDDCCanarySdkSourcemaps.name,
-      );
-
-      final shelf.Response missingWasmResponse = await handler(
-        shelf.Request('GET', Uri.parse('http://localhost/main.dart.wasm')),
-      );
-      expect(missingWasmResponse.statusCode, HttpStatus.notFound);
-      await missingWasmResponse.read().drain<void>();
-
-      await webPlatform.close();
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Logger: () => logger,
-    },
-  );
-
-  testWithoutContext(
-    'createDirectoryHandler sets Cache-Control and cross-origin isolation headers',
-    () async {
-      final Directory dir = tempDir.childDirectory('dir')..createSync();
-      dir.childFile('index.html').writeAsStringSync('<html></html>');
-      dir.childFile('asset.js').writeAsStringSync('// asset');
-
-      final shelf.Handler handler = createDirectoryHandler(dir, crossOriginIsolated: true);
-
-      final shelf.Response htmlResponse = await handler(
-        shelf.Request('GET', Uri.parse('http://localhost/index.html')),
-      );
-      expect(htmlResponse.statusCode, HttpStatus.ok);
-      expect(htmlResponse.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
-      expect(
-        htmlResponse.headers[HttpHeaders.contentLengthHeader],
-        '<html></html>'.length.toString(),
-      );
-      expect(htmlResponse.headers['Cross-Origin-Opener-Policy'], 'same-origin');
-      expect(htmlResponse.headers['Cross-Origin-Embedder-Policy'], 'credentialless');
-      await htmlResponse.read().drain<void>();
-
-      final shelf.Response jsResponse = await handler(
-        shelf.Request('GET', Uri.parse('http://localhost/asset.js')),
-      );
-      expect(jsResponse.statusCode, HttpStatus.ok);
-      expect(jsResponse.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
-      expect(jsResponse.headers[HttpHeaders.contentLengthHeader], '// asset'.length.toString());
-      expect(jsResponse.headers['Cross-Origin-Opener-Policy'], isNull);
-      await jsResponse.read().drain<void>();
-    },
-  );
-
-  testUsingContext(
-    'FlutterWebPlatform serves the correct bootstrap files (ddc library bundle module system)',
-    () async {
-      final chromiumLauncher = ChromiumLauncher(
-        fileSystem: fileSystem,
-        platform: platform,
         processManager: processManager,
-        operatingSystemUtils: operatingSystemUtils,
-        browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
+      ),
+      useWasm: false,
+      webMemoryFS: WebMemoryFS(),
+      webRenderer: WebRendererMode.canvaskit,
+      serverFactory: () async => server,
+      testPackageUri: Uri.parse('test'),
+      templateRenderer: const MustacheTemplateRenderer(),
+    );
+    final shelf.Handler? handler = server.mountedHandler;
+    expect(handler, isNotNull);
+    handler!;
+    final shelf.Response response = await handler(
+      shelf.Request('GET', Uri.parse('http://localhost/dart_sdk.js')),
+    );
+    expect(response.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
+    expect(
+      response.headers[HttpHeaders.contentLengthHeader],
+      HostArtifact.webPrecompiledDDCCanarySdk.name.length.toString(),
+    );
+    final String contents = await response.readAsString();
+    expect(contents, HostArtifact.webPrecompiledDDCCanarySdk.name);
+
+    final shelf.Response sourcemapResponse = await handler(
+      shelf.Request('GET', Uri.parse('http://localhost/dart_sdk.js.map')),
+    );
+    expect(sourcemapResponse.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
+    expect(
+      sourcemapResponse.headers[HttpHeaders.contentLengthHeader],
+      HostArtifact.webPrecompiledDDCCanarySdkSourcemaps.name.length.toString(),
+    );
+    expect(
+      await sourcemapResponse.readAsString(),
+      HostArtifact.webPrecompiledDDCCanarySdkSourcemaps.name,
+    );
+
+    final shelf.Response missingWasmResponse = await handler(
+      shelf.Request('GET', Uri.parse('http://localhost/main.dart.wasm')),
+    );
+    expect(missingWasmResponse.statusCode, HttpStatus.notFound);
+    await missingWasmResponse.read().drain<void>();
+
+    await webPlatform.close();
+  });
+
+  test('createDirectoryHandler sets Cache-Control and cross-origin isolation headers', () async {
+    final Directory dir = tempDir.childDirectory('dir')..createSync();
+    dir.childFile('index.html').writeAsStringSync('<html></html>');
+    dir.childFile('asset.js').writeAsStringSync('// asset');
+
+    final shelf.Handler handler = createDirectoryHandler(dir, crossOriginIsolated: true);
+
+    final shelf.Response htmlResponse = await handler(
+      shelf.Request('GET', Uri.parse('http://localhost/index.html')),
+    );
+    expect(htmlResponse.statusCode, HttpStatus.ok);
+    expect(htmlResponse.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
+    expect(
+      htmlResponse.headers[HttpHeaders.contentLengthHeader],
+      '<html></html>'.length.toString(),
+    );
+    expect(htmlResponse.headers['Cross-Origin-Opener-Policy'], 'same-origin');
+    expect(htmlResponse.headers['Cross-Origin-Embedder-Policy'], 'credentialless');
+    await htmlResponse.read().drain<void>();
+
+    final shelf.Response jsResponse = await handler(
+      shelf.Request('GET', Uri.parse('http://localhost/asset.js')),
+    );
+    expect(jsResponse.statusCode, HttpStatus.ok);
+    expect(jsResponse.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
+    expect(jsResponse.headers[HttpHeaders.contentLengthHeader], '// asset'.length.toString());
+    expect(jsResponse.headers['Cross-Origin-Opener-Policy'], isNull);
+    await jsResponse.read().drain<void>();
+  });
+
+  test('FlutterWebPlatform serves the correct bootstrap files (ddc library bundle module system)', () async {
+    final chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
+      logger: logger,
+    );
+    // Generating the bootstrap requires a merged metadata file written during
+    // the initial compile to build and inject the correct scripts object.
+    final server = FakeServer();
+    final webMemoryFS = WebMemoryFS();
+    final File source = fileSystem.file('source')..writeAsStringSync('main() {}');
+    final File sourcemap = fileSystem.file('sourcemap')..writeAsStringSync('{}');
+    final fakeMetadata = ModuleMetadata(
+      'main',
+      'unused',
+      'main.dart.lib.js.map',
+      'main.dart.lib.js',
+    );
+    final File metadata = fileSystem.file('metadata')
+      ..writeAsStringSync(jsonEncode(fakeMetadata.toJson()));
+    final File manifest = fileSystem.file('manifest')
+      ..writeAsStringSync(
+        '{"main.dart.lib.js":{"code":[0,${source.lengthSync()}],"sourcemap":[0,${sourcemap.lengthSync()}],"metadata":[0,${metadata.lengthSync()}]}}',
+      );
+    webMemoryFS.write(source, manifest, sourcemap, metadata);
+
+    final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
+      'ProjectRoot',
+      buildDirectory: fileSystem.directory('build'),
+      buildInfo: const BuildInfo(
+        BuildMode.debug,
+        '',
+        packageConfigPath: '.dart_tool/package_config.json',
+        treeShakeIcons: false,
+      ),
+      chromiumLauncher: chromiumLauncher,
+      crossOriginIsolation: false,
+      flutterProject: FlutterProject.fromDirectoryTest(tempDir),
+      flutterTesterBinPath: artifacts.getArtifactPath(Artifact.flutterTester),
+      toolContext: FakeToolContext(
+        artifacts: artifacts,
+        fs: fileSystem,
         logger: logger,
-      );
-      // Generating the bootstrap requires a merged metadata file written during
-      // the initial compile to build and inject the correct scripts object.
-      final server = FakeServer();
-      final webMemoryFS = WebMemoryFS();
-      final File source = fileSystem.file('source')..writeAsStringSync('main() {}');
-      final File sourcemap = fileSystem.file('sourcemap')..writeAsStringSync('{}');
-      final fakeMetadata = ModuleMetadata(
-        'main',
-        'unused',
-        'main.dart.lib.js.map',
-        'main.dart.lib.js',
-      );
-      final File metadata = fileSystem.file('metadata')
-        ..writeAsStringSync(jsonEncode(fakeMetadata.toJson()));
-      final File manifest = fileSystem.file('manifest')
-        ..writeAsStringSync(
-          '{"main.dart.lib.js":{"code":[0,${source.lengthSync()}],"sourcemap":[0,${sourcemap.lengthSync()}],"metadata":[0,${metadata.lengthSync()}]}}',
-        );
-      webMemoryFS.write(source, manifest, sourcemap, metadata);
+        processManager: processManager,
+      ),
+      useWasm: false,
+      webMemoryFS: webMemoryFS,
+      webRenderer: WebRendererMode.canvaskit,
+      serverFactory: () async => server,
+      testPackageUri: Uri.parse('test'),
+      templateRenderer: const MustacheTemplateRenderer(),
+    );
+    final shelf.Handler? handler = server.mountedHandler;
+    expect(handler, isNotNull);
+    handler!;
 
-      final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
-        'ProjectRoot',
-        buildDirectory: fileSystem.directory('build'),
-        buildInfo: const BuildInfo(
-          BuildMode.debug,
-          '',
-          packageConfigPath: '.dart_tool/package_config.json',
-          treeShakeIcons: false,
-        ),
-        chromiumLauncher: chromiumLauncher,
-        crossOriginIsolation: false,
-        flutterProject: FlutterProject.fromDirectoryTest(tempDir),
-        flutterTesterBinPath: artifacts.getArtifactPath(Artifact.flutterTester),
-        toolContext: FakeToolContext(
-          artifacts: artifacts,
-          fs: fileSystem,
-          logger: logger,
-          processManager: processManager,
-        ),
-        useWasm: false,
-        webMemoryFS: webMemoryFS,
-        webRenderer: WebRendererMode.canvaskit,
-        serverFactory: () async => server,
-        testPackageUri: Uri.parse('test'),
-        templateRenderer: const MustacheTemplateRenderer(),
-      );
-      final shelf.Handler? handler = server.mountedHandler;
-      expect(handler, isNotNull);
-      handler!;
+    final shelf.Response responseBootstrap = await handler(
+      shelf.Request('GET', Uri.parse('http://localhost/main.dart.browser_test.dart.js')),
+    );
+    expect(responseBootstrap.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
+    final String contentsBootstrap = await responseBootstrap.readAsString();
+    expect(contentsBootstrap, contains('ddc_module_loader.js'));
+    expect(contentsBootstrap, contains('dart_stack_trace_mapper.js'));
+    expect(contentsBootstrap, contains('main_module.bootstrap.js'));
 
-      final shelf.Response responseBootstrap = await handler(
-        shelf.Request('GET', Uri.parse('http://localhost/main.dart.browser_test.dart.js')),
-      );
-      expect(responseBootstrap.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
-      final String contentsBootstrap = await responseBootstrap.readAsString();
-      expect(contentsBootstrap, contains('ddc_module_loader.js'));
-      expect(contentsBootstrap, contains('dart_stack_trace_mapper.js'));
-      expect(contentsBootstrap, contains('main_module.bootstrap.js'));
+    final shelf.Response responseMainModule = await handler(
+      shelf.Request('GET', Uri.parse('http://localhost/main_module.bootstrap.js')),
+    );
+    expect(responseMainModule.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
+    final String contentsMainModule = await responseMainModule.readAsString();
+    expect(contentsMainModule, contains('on_load_end_bootstrap.js'));
+    expect(contentsMainModule, contains('org-dartlang-app:///main.dart'));
 
-      final shelf.Response responseMainModule = await handler(
-        shelf.Request('GET', Uri.parse('http://localhost/main_module.bootstrap.js')),
-      );
-      expect(responseMainModule.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
-      final String contentsMainModule = await responseMainModule.readAsString();
-      expect(contentsMainModule, contains('on_load_end_bootstrap.js'));
-      expect(contentsMainModule, contains('org-dartlang-app:///main.dart'));
+    final shelf.Response responseOnLoadEnd = await handler(
+      shelf.Request('GET', Uri.parse('http://localhost/on_load_end_bootstrap.js')),
+    );
+    expect(responseOnLoadEnd.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
+    final String contentsOnLoadEnd = await responseOnLoadEnd.readAsString();
+    expect(contentsOnLoadEnd, contains(r'window.$onLoadEndCallback();'));
 
-      final shelf.Response responseOnLoadEnd = await handler(
-        shelf.Request('GET', Uri.parse('http://localhost/on_load_end_bootstrap.js')),
-      );
-      expect(responseOnLoadEnd.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
-      final String contentsOnLoadEnd = await responseOnLoadEnd.readAsString();
-      expect(contentsOnLoadEnd, contains(r'window.$onLoadEndCallback();'));
+    final shelf.Response responseModule = await handler(
+      shelf.Request('GET', Uri.parse('http://localhost/main.dart.lib.js')),
+    );
+    expect(responseModule.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
+    expect(await responseModule.readAsString(), 'main() {}');
 
-      final shelf.Response responseModule = await handler(
-        shelf.Request('GET', Uri.parse('http://localhost/main.dart.lib.js')),
-      );
-      expect(responseModule.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
-      expect(await responseModule.readAsString(), 'main() {}');
+    final shelf.Response responseSourcemap = await handler(
+      shelf.Request('GET', Uri.parse('http://localhost/main.dart.lib.js.map')),
+    );
+    expect(responseSourcemap.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
+    expect(await responseSourcemap.readAsString(), '{}');
 
-      final shelf.Response responseSourcemap = await handler(
-        shelf.Request('GET', Uri.parse('http://localhost/main.dart.lib.js.map')),
-      );
-      expect(responseSourcemap.headers[HttpHeaders.cacheControlHeader], 'public, max-age=3600');
-      expect(await responseSourcemap.readAsString(), '{}');
-
-      await webPlatform.close();
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Logger: () => logger,
-    },
-  );
+    await webPlatform.close();
+  });
 
   for (final style in <FileSystemStyle>[FileSystemStyle.posix, FileSystemStyle.windows]) {
     final os = style == FileSystemStyle.windows ? 'windows' : 'linux';
-    testWithoutContext(
+    test(
       'FlutterWebPlatform sets Cache-Control headers on static and Wasm test assets ($os)',
       () async {
         final testFs = MemoryFileSystem.test(style: style);
@@ -523,68 +504,60 @@ void main() {
     );
   }
 
-  testUsingContext(
-    'FlutterWebPlatform launches Chrome with scale factor and window size flags for goldens alignment',
-    () async {
-      final recordingLauncher = _RecordingChromiumLauncher(
-        fileSystem: fileSystem,
-        platform: platform,
-        processManager: processManager,
-        operatingSystemUtils: operatingSystemUtils,
-        browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
+  test('FlutterWebPlatform launches Chrome with scale factor and window size flags for goldens alignment', () async {
+    final recordingLauncher = _RecordingChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
+      logger: logger,
+    );
+    final server = FakeServer();
+    final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
+      'ProjectRoot',
+      buildDirectory: fileSystem.directory('build'),
+      buildInfo: const BuildInfo(
+        BuildMode.debug,
+        '',
+        packageConfigPath: '.dart_tool/package_config.json',
+        treeShakeIcons: false,
+      ),
+      chromiumLauncher: recordingLauncher,
+      crossOriginIsolation: false,
+      flutterProject: FlutterProject.fromDirectoryTest(tempDir),
+      flutterTesterBinPath: artifacts.getArtifactPath(Artifact.flutterTester),
+      toolContext: FakeToolContext(
+        artifacts: artifacts,
+        fs: fileSystem,
         logger: logger,
-      );
-      final server = FakeServer();
-      final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
-        'ProjectRoot',
-        buildDirectory: fileSystem.directory('build'),
-        buildInfo: const BuildInfo(
-          BuildMode.debug,
-          '',
-          packageConfigPath: '.dart_tool/package_config.json',
-          treeShakeIcons: false,
-        ),
-        chromiumLauncher: recordingLauncher,
-        crossOriginIsolation: false,
-        flutterProject: FlutterProject.fromDirectoryTest(tempDir),
-        flutterTesterBinPath: artifacts.getArtifactPath(Artifact.flutterTester),
-        toolContext: FakeToolContext(
-          artifacts: artifacts,
-          fs: fileSystem,
-          logger: logger,
-          processManager: processManager,
-        ),
-        useWasm: false,
-        webMemoryFS: WebMemoryFS(),
-        webRenderer: WebRendererMode.canvaskit,
-        serverFactory: () async => server,
-        testPackageUri: Uri.parse('test'),
-        templateRenderer: const MustacheTemplateRenderer(),
-      );
+        processManager: processManager,
+      ),
+      useWasm: false,
+      webMemoryFS: WebMemoryFS(),
+      webRenderer: WebRendererMode.canvaskit,
+      serverFactory: () async => server,
+      testPackageUri: Uri.parse('test'),
+      templateRenderer: const MustacheTemplateRenderer(),
+    );
 
-      final suitePlatform = SuitePlatform(Runtime.chrome);
-      try {
-        await webPlatform.load(
-          'test/foo_test.dart',
-          suitePlatform,
-          SuiteConfiguration.empty,
-          Object(),
-        );
-      } on _TestBrowserLaunchException catch (_) {}
-
-      expect(
-        recordingLauncher.lastWebBrowserFlags,
-        containsAll(<String>['--force-device-scale-factor=3', '--window-size=800,600']),
+    final suitePlatform = SuitePlatform(Runtime.chrome);
+    try {
+      await webPlatform.load(
+        'test/foo_test.dart',
+        suitePlatform,
+        SuiteConfiguration.empty,
+        Object(),
       );
+    } on _TestBrowserLaunchException catch (_) {}
 
-      await webPlatform.close();
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Logger: () => logger,
-    },
-  );
+    expect(
+      recordingLauncher.lastWebBrowserFlags,
+      containsAll(<String>['--force-device-scale-factor=3', '--window-size=800,600']),
+    );
+
+    await webPlatform.close();
+  });
 
   BrowserManager createBrowserManager(
     StreamChannelController<Object?> controller,
@@ -614,7 +587,7 @@ void main() {
     );
   }
 
-  testWithoutContext('BrowserManager reports a disconnect and starts cleanup at once', () {
+  test('BrowserManager reports a disconnect and starts cleanup at once', () {
     // Regression test for https://github.com/flutter/flutter/issues/191920.
     FakeAsync().run((FakeAsync time) {
       logger = BufferLogger.test(verbose: true);
@@ -633,7 +606,7 @@ void main() {
     });
   });
 
-  testWithoutContext('BrowserManager reports an exit code delivered after cleanup starts', () {
+  test('BrowserManager reports an exit code delivered after cleanup starts', () {
     // Regression test for https://github.com/flutter/flutter/issues/191920.
     FakeAsync().run((FakeAsync time) {
       final exitCode = Completer<int>();
@@ -658,7 +631,7 @@ void main() {
     });
   });
 
-  testWithoutContext('BrowserManager reports a process exit before the connection closes', () {
+  test('BrowserManager reports a process exit before the connection closes', () {
     FakeAsync().run((FakeAsync time) {
       final exitCode = Completer<int>();
       final controller = StreamChannelController<Object?>();
@@ -676,29 +649,26 @@ void main() {
     });
   });
 
-  testWithoutContext(
-    'BrowserManager does not diagnose an intentional shutdown as a disconnect',
-    () {
-      FakeAsync().run((FakeAsync time) {
-        final exitCode = Completer<int>();
-        final controller = StreamChannelController<Object?>();
-        final BrowserManager manager = createBrowserManager(
-          controller,
-          FakeProcess(exitCode: exitCode.future),
-        );
+  test('BrowserManager does not diagnose an intentional shutdown as a disconnect', () {
+    FakeAsync().run((FakeAsync time) {
+      final exitCode = Completer<int>();
+      final controller = StreamChannelController<Object?>();
+      final BrowserManager manager = createBrowserManager(
+        controller,
+        FakeProcess(exitCode: exitCode.future),
+      );
 
-        manager.close();
-        controller.local.sink.close();
-        time.flushMicrotasks();
-        exitCode.complete(-15);
-        time.flushMicrotasks();
+      manager.close();
+      controller.local.sink.close();
+      time.flushMicrotasks();
+      exitCode.complete(-15);
+      time.flushMicrotasks();
 
-        expect(logger.errorText, isEmpty);
-      });
-    },
-  );
+      expect(logger.errorText, isEmpty);
+    });
+  });
 
-  testWithoutContext('BrowserManager does not report a clean exit after cleanup', () {
+  test('BrowserManager does not report a clean exit after cleanup', () {
     FakeAsync().run((FakeAsync time) {
       final exitCode = Completer<int>();
       final controller = StreamChannelController<Object?>();

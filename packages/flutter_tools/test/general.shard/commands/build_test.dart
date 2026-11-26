@@ -11,13 +11,13 @@ import 'package:flutter_tools/src/commands/build.dart';
 
 import '../../src/android_common.dart';
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_build_command.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 
 void main() {
-  testUsingContext('Include only supported sub commands', () {
+  test('Include only supported sub commands', () {
     final logger = BufferLogger.test();
     final fs = MemoryFileSystem.test();
     final BuildCommand command = createFakeBuildCommand(

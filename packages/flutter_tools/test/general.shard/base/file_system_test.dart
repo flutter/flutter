@@ -34,7 +34,7 @@ void main() {
       fsUtils = FileSystemUtils(fileSystem: fs, platform: FakePlatform());
     });
 
-    testWithoutContext('getUniqueFile creates a unique file name', () async {
+    test('getUniqueFile creates a unique file name', () async {
       final File fileA = fsUtils.getUniqueFile(fs.currentDirectory, 'foo', 'json')..createSync();
       final File fileB = fsUtils.getUniqueFile(fs.currentDirectory, 'foo', 'json');
 
@@ -42,7 +42,7 @@ void main() {
       expect(fileB.path, '/foo_02.json');
     });
 
-    testWithoutContext('getUniqueDirectory creates a unique directory name', () async {
+    test('getUniqueDirectory creates a unique directory name', () async {
       final Directory directoryA = fsUtils.getUniqueDirectory(fs.currentDirectory, 'foo')
         ..createSync();
       final Directory directoryB = fsUtils.getUniqueDirectory(fs.currentDirectory, 'foo');
@@ -55,7 +55,7 @@ void main() {
   group('copyDirectorySync', () {
     /// Test file_systems.copyDirectorySync() using MemoryFileSystem.
     /// Copies between 2 instances of file systems which is also supported by copyDirectorySync().
-    testWithoutContext('test directory copy', () async {
+    test('test directory copy', () async {
       final sourceMemoryFs = MemoryFileSystem.test();
       const sourcePath = '/some/origin';
       final Directory sourceDirectory = await sourceMemoryFs
@@ -86,7 +86,7 @@ void main() {
       expect(sourceMemoryFs.directory(sourcePath).listSync().length, 3);
     });
 
-    testWithoutContext('test directory copy with followLinks: true', () async {
+    test('test directory copy with followLinks: true', () async {
       final signals = Signals.test();
       final fileSystem = LocalFileSystem.test(signals: signals);
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
@@ -164,7 +164,7 @@ void main() {
       }
     });
 
-    testWithoutContext('test directory copy with followLinks: false', () async {
+    test('test directory copy with followLinks: false', () async {
       final signals = Signals.test();
       final fileSystem = LocalFileSystem.test(signals: signals);
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
@@ -250,7 +250,7 @@ void main() {
       }
     });
 
-    testWithoutContext('Skip files if shouldCopyFile returns false', () {
+    test('Skip files if shouldCopyFile returns false', () {
       final fileSystem = MemoryFileSystem.test();
       final Directory origin = fileSystem.directory('/origin');
       origin.createSync();
@@ -280,7 +280,7 @@ void main() {
       expect(destination.childDirectory('nested').childFile('a.txt').existsSync(), isFalse);
     });
 
-    testWithoutContext('Skip directories if shouldCopyDirectory returns false', () {
+    test('Skip directories if shouldCopyDirectory returns false', () {
       final fileSystem = MemoryFileSystem.test();
       final Directory origin = fileSystem.directory('/origin');
       origin.createSync();
@@ -307,7 +307,7 @@ void main() {
       expect(destination.childDirectory('nested').childFile('b.txt'), isNot(exists));
     });
 
-    testWithoutContext('Skip deeply nested directories if shouldCopyDirectory returns false', () {
+    test('Skip deeply nested directories if shouldCopyDirectory returns false', () {
       final fileSystem = MemoryFileSystem.test();
       final Directory origin = fileSystem.directory('/origin');
       origin.createSync();
@@ -335,7 +335,7 @@ void main() {
   });
 
   group('escapePath', () {
-    testWithoutContext('on Windows', () {
+    test('on Windows', () {
       final fileSystem = MemoryFileSystem.test();
       final fsUtils = FileSystemUtils(
         fileSystem: fileSystem,
@@ -349,7 +349,7 @@ void main() {
       expect(fsUtils.escapePath(r'a:\foo\bar\cool.dart'), r'A:\\foo\\bar\\cool.dart');
     });
 
-    testWithoutContext('on Linux', () {
+    test('on Linux', () {
       final fileSystem = MemoryFileSystem.test();
       final fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: FakePlatform());
       expect(fsUtils.escapePath('/foo/bar/cool.dart'), '/foo/bar/cool.dart');
@@ -367,7 +367,7 @@ void main() {
       signalUnderTest = ProcessSignal(fakeSignal);
     });
 
-    testWithoutContext('runs shutdown hooks', () async {
+    test('runs shutdown hooks', () async {
       final signals = Signals.test();
       final localFileSystem = LocalFileSystem.test(signals: signals);
       final Directory temp = localFileSystem.systemTempDirectory;
@@ -380,7 +380,7 @@ void main() {
       expect(logger.traceText, contains('Running 1 shutdown hook'));
     });
 
-    testWithoutContext('deletes system temp entry on a fatal signal', () async {
+    test('deletes system temp entry on a fatal signal', () async {
       final completer = Completer<void>();
       final signals = Signals.test();
       final localFileSystem = LocalFileSystem.test(
@@ -401,7 +401,7 @@ void main() {
       expect(temp.existsSync(), isFalse);
     });
 
-    testWithoutContext('throwToolExit when temp not found', () async {
+    test('throwToolExit when temp not found', () async {
       final signals = Signals.test();
       final localFileSystem = LocalFileSystemFake.test(signals: signals);
 
