@@ -16,7 +16,7 @@ import 'package:flutter_tools/src/build_system/targets/linux.dart';
 import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 
@@ -120,6 +120,34 @@ void main() {
     },
   );
 
+  test('UnpackLinux copies libvmservice_snapshot.so in profile mode', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final artifacts = Artifacts.test();
+    setUpCacheDirectory(fileSystem, artifacts, mode: BuildMode.profile);
+
+    final String desktopPathForX64 = artifacts.getArtifactPath(
+      Artifact.linuxDesktopPath,
+      platform: TargetPlatform.linux_x64,
+      mode: BuildMode.profile,
+    );
+    fileSystem.file('$desktopPathForX64/libvmservice_snapshot.so').createSync(recursive: true);
+
+    final testEnvironment = Environment.test(
+      fileSystem.currentDirectory,
+      defines: <String, String>{kBuildMode: 'profile'},
+      artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    testEnvironment.buildDir.createSync(recursive: true);
+
+    await const UnpackLinux(TargetPlatform.linux_x64).build(testEnvironment);
+
+    expect(fileSystem.file('linux/flutter/ephemeral/libvmservice_snapshot.so'), exists);
+  });
+
   // Only required for the test below that still depends on the context.
   late FileSystem fileSystem;
 
@@ -127,44 +155,46 @@ void main() {
     fileSystem = MemoryFileSystem.test();
   });
 
-  testUsingContext(
-    'DebugBundleLinuxAssets copies artifacts to out directory',
-    () async {
-      final testEnvironment = Environment.test(
-        fileSystem.currentDirectory,
-        defines: <String, String>{kBuildMode: 'debug', kBuildName: '2.0.0', kBuildNumber: '22'},
-        artifacts: Artifacts.test(),
-        featureFlags: TestFeatureFlags(),
-        processManager: FakeProcessManager.any(),
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        engineVersion: '2',
-      );
+  test('DebugBundleLinuxAssets copies artifacts to out directory', () async {
+    final testEnvironment = Environment.test(
+      fileSystem.currentDirectory,
+      defines: <String, String>{kBuildMode: 'debug', kBuildName: '2.0.0', kBuildNumber: '22'},
+      artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      engineVersion: '2',
+    );
 
-      testEnvironment.buildDir.createSync(recursive: true);
+    testEnvironment.buildDir.createSync(recursive: true);
 
-      // Create input files.
-      testEnvironment.buildDir.childFile('app.dill').createSync();
-      testEnvironment.buildDir.childFile('native_assets.json').createSync();
+    // Create input files.
+    testEnvironment.buildDir.childFile('app.dill').createSync();
+    testEnvironment.buildDir.childFile('native_assets.json').createSync();
+    fileSystem
+        .file(
+          testEnvironment.artifacts.getArtifactPath(
+            Artifact.vmserviceKernelDill,
+            mode: BuildMode.debug,
+          ),
+        )
+        .createSync();
 
-      await const DebugBundleLinuxAssets(TargetPlatform.linux_x64).build(testEnvironment);
+    await const DebugBundleLinuxAssets(TargetPlatform.linux_x64).build(testEnvironment);
 
-      final Directory output = testEnvironment.outputDir.childDirectory('flutter_assets');
+    final Directory output = testEnvironment.outputDir.childDirectory('flutter_assets');
 
-      expect(output.childFile('kernel_blob.bin'), exists);
-      expect(output.childFile('version.json'), exists);
-      final String versionFile = output.childFile('version.json').readAsStringSync();
-      expect(versionFile, contains('"version":"2.0.0"'));
-      expect(versionFile, contains('"build_number":"22"'));
+    expect(output.childFile('kernel_blob.bin'), exists);
+    expect(output.childFile('vmservice_snapshot.dill'), exists);
+    expect(output.childFile('version.json'), exists);
+    final String versionFile = output.childFile('version.json').readAsStringSync();
+    expect(versionFile, contains('"version":"2.0.0"'));
+    expect(versionFile, contains('"build_number":"22"'));
 
-      // No bundled fonts
-      expect(output.childFile('FontManifest.json'), isNot(exists));
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+    // No bundled fonts
+    expect(output.childFile('FontManifest.json'), isNot(exists));
+  });
 
   test('DebugBundleLinuxAssets bundles assets for the selected flavor', () async {
     final environment = Environment.test(
@@ -180,6 +210,14 @@ void main() {
 
     environment.buildDir.childFile('app.dill').createSync(recursive: true);
     environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
+    fileSystem
+        .file(
+          environment.artifacts.getArtifactPath(
+            Artifact.vmserviceKernelDill,
+            mode: BuildMode.debug,
+          ),
+        )
+        .createSync();
 
     fileSystem.file('pubspec.yaml')
       ..createSync()
@@ -227,41 +265,33 @@ flutter:
     );
   });
 
-  testUsingContext(
-    'ProfileBundleLinuxAssets copies artifacts to out directory',
-    () async {
-      final testEnvironment = Environment.test(
-        fileSystem.currentDirectory,
-        defines: <String, String>{kBuildMode: 'profile'},
-        artifacts: Artifacts.test(),
-        featureFlags: TestFeatureFlags(),
-        processManager: FakeProcessManager.any(),
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-      );
+  test('ProfileBundleLinuxAssets copies artifacts to out directory', () async {
+    final testEnvironment = Environment.test(
+      fileSystem.currentDirectory,
+      defines: <String, String>{kBuildMode: 'profile'},
+      artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
 
-      testEnvironment.buildDir.createSync(recursive: true);
+    testEnvironment.buildDir.createSync(recursive: true);
 
-      // Create input files.
-      testEnvironment.buildDir.childFile('app.so').createSync();
-      testEnvironment.buildDir.childFile('native_assets.json').createSync();
+    // Create input files.
+    testEnvironment.buildDir.childFile('app.so').createSync();
+    testEnvironment.buildDir.childFile('native_assets.json').createSync();
 
-      await const LinuxAotBundle(AotSnapshotProfile(TargetPlatform.linux_x64))
-          .build(testEnvironment);
-      await const ProfileBundleLinuxAssets(TargetPlatform.linux_x64).build(testEnvironment);
-      final Directory libDir = testEnvironment.outputDir.childDirectory('lib');
-      final Directory assetsDir = testEnvironment.outputDir.childDirectory('flutter_assets');
+    await const LinuxAotBundle(AotSnapshotProfile(TargetPlatform.linux_x64)).build(testEnvironment);
+    await const ProfileBundleLinuxAssets(TargetPlatform.linux_x64).build(testEnvironment);
+    final Directory libDir = testEnvironment.outputDir.childDirectory('lib');
+    final Directory assetsDir = testEnvironment.outputDir.childDirectory('flutter_assets');
 
-      expect(libDir.childFile('libapp.so'), exists);
-      expect(assetsDir.childFile('version.json'), exists);
-      // No bundled fonts
-      expect(assetsDir.childFile('FontManifest.json'), isNot(exists));
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+    expect(libDir.childFile('libapp.so'), exists);
+    expect(assetsDir.childFile('version.json'), exists);
+    // No bundled fonts
+    expect(assetsDir.childFile('FontManifest.json'), isNot(exists));
+  });
 
   test("ProfileBundleLinuxAssets' name depends on target platforms", () async {
     expect(
@@ -274,41 +304,33 @@ flutter:
     );
   });
 
-  testUsingContext(
-    'ReleaseBundleLinuxAssets copies artifacts to out directory',
-    () async {
-      final testEnvironment = Environment.test(
-        fileSystem.currentDirectory,
-        defines: <String, String>{kBuildMode: 'release'},
-        artifacts: Artifacts.test(),
-        featureFlags: TestFeatureFlags(),
-        processManager: FakeProcessManager.any(),
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-      );
+  test('ReleaseBundleLinuxAssets copies artifacts to out directory', () async {
+    final testEnvironment = Environment.test(
+      fileSystem.currentDirectory,
+      defines: <String, String>{kBuildMode: 'release'},
+      artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
 
-      testEnvironment.buildDir.createSync(recursive: true);
+    testEnvironment.buildDir.createSync(recursive: true);
 
-      // Create input files.
-      testEnvironment.buildDir.childFile('app.so').createSync();
-      testEnvironment.buildDir.childFile('native_assets.json').createSync();
+    // Create input files.
+    testEnvironment.buildDir.childFile('app.so').createSync();
+    testEnvironment.buildDir.childFile('native_assets.json').createSync();
 
-      await const LinuxAotBundle(AotSnapshotRelease(TargetPlatform.linux_x64))
-          .build(testEnvironment);
-      await const ReleaseBundleLinuxAssets(TargetPlatform.linux_x64).build(testEnvironment);
-      final Directory libDir = testEnvironment.outputDir.childDirectory('lib');
-      final Directory assetsDir = testEnvironment.outputDir.childDirectory('flutter_assets');
+    await const LinuxAotBundle(AotSnapshotRelease(TargetPlatform.linux_x64)).build(testEnvironment);
+    await const ReleaseBundleLinuxAssets(TargetPlatform.linux_x64).build(testEnvironment);
+    final Directory libDir = testEnvironment.outputDir.childDirectory('lib');
+    final Directory assetsDir = testEnvironment.outputDir.childDirectory('flutter_assets');
 
-      expect(libDir.childFile('libapp.so'), exists);
-      expect(assetsDir.childFile('version.json'), exists);
-      // No bundled fonts
-      expect(assetsDir.childFile('FontManifest.json'), isNot(exists));
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+    expect(libDir.childFile('libapp.so'), exists);
+    expect(assetsDir.childFile('version.json'), exists);
+    // No bundled fonts
+    expect(assetsDir.childFile('FontManifest.json'), isNot(exists));
+  });
 
   test("ReleaseBundleLinuxAssets' name depends on target platforms", () async {
     expect(
@@ -322,16 +344,20 @@ flutter:
   });
 }
 
-void setUpCacheDirectory(FileSystem fileSystem, Artifacts artifacts) {
+void setUpCacheDirectory(
+  FileSystem fileSystem,
+  Artifacts artifacts, {
+  BuildMode mode = BuildMode.debug,
+}) {
   final String desktopPathForX64 = artifacts.getArtifactPath(
     Artifact.linuxDesktopPath,
     platform: TargetPlatform.linux_x64,
-    mode: BuildMode.debug,
+    mode: mode,
   );
   final String desktopPathForArm64 = artifacts.getArtifactPath(
     Artifact.linuxDesktopPath,
     platform: TargetPlatform.linux_arm64,
-    mode: BuildMode.debug,
+    mode: mode,
   );
   fileSystem.file('$desktopPathForX64/unrelated-stuff').createSync(recursive: true);
   fileSystem.file('$desktopPathForX64/libflutter_linux_gtk.so').createSync(recursive: true);
@@ -341,12 +367,12 @@ void setUpCacheDirectory(FileSystem fileSystem, Artifacts artifacts) {
   final String headersPathForX64 = artifacts.getArtifactPath(
     Artifact.linuxHeaders,
     platform: TargetPlatform.linux_x64,
-    mode: BuildMode.debug,
+    mode: mode,
   );
   final String headersPathForArm64 = artifacts.getArtifactPath(
     Artifact.linuxHeaders,
     platform: TargetPlatform.linux_arm64,
-    mode: BuildMode.debug,
+    mode: mode,
   );
   fileSystem.file('$headersPathForX64/foo.h').createSync(recursive: true);
   fileSystem.file('$headersPathForArm64/foo.h').createSync(recursive: true);

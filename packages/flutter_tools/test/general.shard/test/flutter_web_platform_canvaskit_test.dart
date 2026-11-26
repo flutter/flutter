@@ -18,13 +18,13 @@ import 'package:flutter_tools/src/web/memory_fs.dart';
 import 'package:shelf/shelf.dart' as shelf;
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 void main() {
   for (final style in <FileSystemStyle>[FileSystemStyle.posix, FileSystemStyle.windows]) {
     final styleName = style == FileSystemStyle.windows ? 'Windows' : 'POSIX';
-    testUsingContext('serves local CanvasKit assets with $styleName paths', () async {
+    test('serves local CanvasKit assets with $styleName paths', () async {
       final FileSystem fileSystem = MemoryFileSystem.test(style: style);
       final logger = BufferLogger.test();
       final platform = FakePlatform(

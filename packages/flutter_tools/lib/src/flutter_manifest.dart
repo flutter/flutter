@@ -145,14 +145,23 @@ class FlutterManifest {
 
   /// Contains the name of the dependencies.
   /// These are the keys specified in the `dependency` map.
-  Set<String> get dependencies {
-    final dependencies = _descriptor['dependencies'] as YamlMap?;
-    return dependencies != null ? <String>{...dependencies.keys.cast<String>()} : <String>{};
-  }
+  Set<String> get dependencies => switch (_descriptor['dependencies']) {
+    final YamlMap map => map.keys.whereType<String>().toSet(),
+    _ => <String>{},
+  };
+
+  /// Contains the names of the development dependencies.
+  /// These are the keys specified in the `dev_dependencies` map.
+  Set<String> get devDependencies => switch (_descriptor['dev_dependencies']) {
+    final YamlMap map => map.keys.whereType<String>().toSet(),
+    _ => <String>{},
+  };
 
   /// List of all the entries in the workspace field of the `pubspec.yaml` file.
-  List<String> get workspace =>
-      (_descriptor['workspace'] as YamlList?)?.cast<String>() ?? <String>[];
+  List<String> get workspace => switch (_descriptor['workspace']) {
+    final YamlList list => list.whereType<String>().toList(),
+    _ => <String>[],
+  };
 
   // Flag to avoid printing multiple invalid version messages.
   var _hasShowInvalidVersionMsg = false;

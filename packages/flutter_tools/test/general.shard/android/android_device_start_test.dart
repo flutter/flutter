@@ -18,9 +18,8 @@ import 'package:flutter_tools/src/template.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart' show DelegatingToolContext, FakePlistParser;
+import '../../src/fakes.dart' show FakePlistParser, FakeToolContext;
 
 const kAdbVersionCommand = FakeCommand(
   command: <String>['adb', 'version'],
@@ -125,7 +124,7 @@ void main() {
         apk,
         prebuiltApplication: true,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release, enableDartProfiling: false),
-        platformArgs: <String, dynamic>{},
+        platformArgs: <String, Object?>{},
       );
 
       expect(launchResult.started, true);
@@ -133,35 +132,33 @@ void main() {
     });
   }
 
-  testUsingContext(
-    'AndroidDevice.startApp forwards Impeller and HCPP flags in release mode',
-    () async {
-      final device = AndroidDevice(
-        '1234',
-        androidBuilder: fakeAndroidBuilder,
-        applicationPackageFactory: FlutterApplicationPackageFactory(
-          androidSdkBuilder: () => androidSdk,
-          plistParserBuilder: FakePlistParser.new,
-          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
-          toolContext: DelegatingToolContext(fs: fileSystem, processManager: processManager),
-        ),
-        modelID: 'TestModel',
-        fileSystem: fileSystem,
-        processManager: processManager,
-        logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        androidSdk: androidSdk,
-      );
-      final File apkFile = fileSystem.file('app-release.apk')..createSync();
-      final apk = AndroidApk(
-        id: 'FlutterApp',
-        applicationPackage: apkFile,
-        launchActivity: 'FlutterActivity',
-        versionCode: 1,
-      );
+  test('AndroidDevice.startApp forwards Impeller and HCPP flags in release mode', () async {
+    final device = AndroidDevice(
+      '1234',
+      androidBuilder: fakeAndroidBuilder,
+      applicationPackageFactory: FlutterApplicationPackageFactory(
+        androidSdkBuilder: () => androidSdk,
+        plistParserBuilder: FakePlistParser.new,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+        toolContext: FakeToolContext(fs: fileSystem, processManager: processManager),
+      ),
+      modelID: 'TestModel',
+      fileSystem: fileSystem,
+      processManager: processManager,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(),
+      androidSdk: androidSdk,
+    );
+    final File apkFile = fileSystem.file('app-release.apk')..createSync();
+    final apk = AndroidApk(
+      id: 'FlutterApp',
+      applicationPackage: apkFile,
+      launchActivity: 'FlutterActivity',
+      versionCode: 1,
+    );
 
-      fileSystem.directory('android').createSync();
-      fileSystem.file('android/AndroidManifest.xml').writeAsStringSync('''
+    fileSystem.directory('android').createSync();
+    fileSystem.file('android/AndroidManifest.xml').writeAsStringSync('''
       <manifest package="FlutterApp">
         <application>
           <activity android:name="FlutterActivity">
@@ -174,73 +171,68 @@ void main() {
       </manifest>
       ''');
 
-      fileSystem.file('build/app-release.apk').createSync(recursive: true);
+    fileSystem.file('build/app-release.apk').createSync(recursive: true);
 
-      processManager.addCommand(kAdbVersionCommand);
-      processManager.addCommand(kStartServer);
-      processManager.addCommand(
-        const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
-          stdout: '[ro.product.cpu.abi]: [arm64-v8a]',
-        ),
-      );
-      processManager.addCommand(
-        const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
-        ),
-      );
-      processManager.addCommand(
-        const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'build/app-release.apk'],
-        ),
-      );
-      processManager.addCommand(kShaCommand);
-      processManager.addCommand(
-        const FakeCommand(
-          command: <String>[
-            'adb',
-            '-s',
-            '1234',
-            'shell',
-            'am',
-            'start',
-            '-a',
-            'android.intent.action.MAIN',
-            '-c',
-            'android.intent.category.LAUNCHER',
-            '-f',
-            '0x20000000',
-            'FlutterApp/FlutterActivity',
-          ],
-        ),
-      );
+    processManager.addCommand(kAdbVersionCommand);
+    processManager.addCommand(kStartServer);
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
+        stdout: '[ro.product.cpu.abi]: [arm64-v8a]',
+      ),
+    );
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
+      ),
+    );
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'build/app-release.apk'],
+      ),
+    );
+    processManager.addCommand(kShaCommand);
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>[
+          'adb',
+          '-s',
+          '1234',
+          'shell',
+          'am',
+          'start',
+          '-a',
+          'android.intent.action.MAIN',
+          '-c',
+          'android.intent.category.LAUNCHER',
+          '-f',
+          '0x20000000',
+          'FlutterApp/FlutterActivity',
+        ],
+      ),
+    );
 
-      final LaunchResult launchResult = await device.startApp(
-        apk,
-        debuggingOptions: DebuggingOptions.disabled(
-          BuildInfo.release,
-          enableImpeller: ImpellerStatus.enabled,
-          enableHcpp: true,
-          enableDartProfiling: false,
-        ),
-        platformArgs: <String, dynamic>{},
-      );
+    final LaunchResult launchResult = await device.startApp(
+      apk,
+      debuggingOptions: DebuggingOptions.disabled(
+        BuildInfo.release,
+        enableImpeller: ImpellerStatus.enabled,
+        enableHcpp: true,
+        enableDartProfiling: false,
+      ),
+      platformArgs: <String, Object?>{},
+    );
 
-      expect(launchResult.started, true);
-      expect(processManager, hasNoRemainingExpectations);
-      expect(fakeAndroidBuilder.lastAndroidBuildInfo, isNotNull);
-      expect(
-        fakeAndroidBuilder.lastAndroidBuildInfo!.releaseManifestEngineShellArgs,
-        containsAll(<String>['--enable-impeller=true', '--enable-hcpp-and-surface-control=true']),
-      );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    expect(launchResult.started, true);
+    expect(processManager, hasNoRemainingExpectations);
+    expect(fakeAndroidBuilder.lastAndroidBuildInfo, isNotNull);
+    expect(
+      fakeAndroidBuilder.lastAndroidBuildInfo!.releaseManifestEngineShellArgs,
+      containsAll(<String>['--enable-impeller=true', '--enable-hcpp-and-surface-control=true']),
+    );
+  });
 
-  testUsingContext(
+  test(
     'AndroidDevice.startApp forwards an explicitly disabled HCPP flag in release mode',
     () async {
       final device = AndroidDevice(
@@ -250,7 +242,7 @@ void main() {
           androidSdkBuilder: () => androidSdk,
           plistParserBuilder: FakePlistParser.new,
           templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
-          toolContext: DelegatingToolContext(fs: fileSystem, processManager: processManager),
+          toolContext: FakeToolContext(fs: fileSystem, processManager: processManager),
         ),
         modelID: 'TestModel',
         fileSystem: fileSystem,
@@ -329,7 +321,7 @@ void main() {
           enableHcpp: false,
           enableDartProfiling: false,
         ),
-        platformArgs: <String, dynamic>{},
+        platformArgs: <String, Object?>{},
       );
 
       expect(launchResult.started, true);
@@ -340,13 +332,9 @@ void main() {
         contains('--enable-hcpp-and-surface-control=false'),
       );
     },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
   );
 
-  testUsingContext(
+  test(
     'AndroidDevice.startApp sends no HCPP flag in release mode when it was not passed explicitly',
     () async {
       final device = AndroidDevice(
@@ -356,7 +344,7 @@ void main() {
           androidSdkBuilder: () => androidSdk,
           plistParserBuilder: FakePlistParser.new,
           templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
-          toolContext: DelegatingToolContext(fs: fileSystem, processManager: processManager),
+          toolContext: FakeToolContext(fs: fileSystem, processManager: processManager),
         ),
         modelID: 'TestModel',
         fileSystem: fileSystem,
@@ -431,7 +419,7 @@ void main() {
       final LaunchResult launchResult = await device.startApp(
         apk,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release, enableDartProfiling: false),
-        platformArgs: <String, dynamic>{},
+        platformArgs: <String, Object?>{},
       );
 
       expect(launchResult.started, true);
@@ -445,41 +433,35 @@ void main() {
         isFalse,
       );
     },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
   );
 
-  testUsingContext(
-    'AndroidDevice.startApp forwards traceSystrace in release mode',
-    () async {
-      final device = AndroidDevice(
-        '1234',
-        androidBuilder: fakeAndroidBuilder,
-        applicationPackageFactory: FlutterApplicationPackageFactory(
-          androidSdkBuilder: () => androidSdk,
-          plistParserBuilder: FakePlistParser.new,
-          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
-          toolContext: DelegatingToolContext(fs: fileSystem, processManager: processManager),
-        ),
-        modelID: 'TestModel',
-        fileSystem: fileSystem,
-        processManager: processManager,
-        logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        androidSdk: androidSdk,
-      );
-      final File apkFile = fileSystem.file('app-release.apk')..createSync();
-      final apk = AndroidApk(
-        id: 'FlutterApp',
-        applicationPackage: apkFile,
-        launchActivity: 'FlutterActivity',
-        versionCode: 1,
-      );
+  test('AndroidDevice.startApp forwards traceSystrace in release mode', () async {
+    final device = AndroidDevice(
+      '1234',
+      androidBuilder: fakeAndroidBuilder,
+      applicationPackageFactory: FlutterApplicationPackageFactory(
+        androidSdkBuilder: () => androidSdk,
+        plistParserBuilder: FakePlistParser.new,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+        toolContext: FakeToolContext(fs: fileSystem, processManager: processManager),
+      ),
+      modelID: 'TestModel',
+      fileSystem: fileSystem,
+      processManager: processManager,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(),
+      androidSdk: androidSdk,
+    );
+    final File apkFile = fileSystem.file('app-release.apk')..createSync();
+    final apk = AndroidApk(
+      id: 'FlutterApp',
+      applicationPackage: apkFile,
+      launchActivity: 'FlutterActivity',
+      versionCode: 1,
+    );
 
-      fileSystem.directory('android').createSync();
-      fileSystem.file('android/AndroidManifest.xml').writeAsStringSync('''
+    fileSystem.directory('android').createSync();
+    fileSystem.file('android/AndroidManifest.xml').writeAsStringSync('''
       <manifest package="FlutterApp">
         <application>
           <activity android:name="FlutterActivity">
@@ -492,70 +474,65 @@ void main() {
       </manifest>
       ''');
 
-      fileSystem.file('build/app-release.apk').createSync(recursive: true);
+    fileSystem.file('build/app-release.apk').createSync(recursive: true);
 
-      processManager.addCommand(kAdbVersionCommand);
-      processManager.addCommand(kStartServer);
-      processManager.addCommand(
-        const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
-          stdout: '[ro.product.cpu.abi]: [arm64-v8a]',
-        ),
-      );
-      processManager.addCommand(
-        const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
-        ),
-      );
-      processManager.addCommand(
-        const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'build/app-release.apk'],
-        ),
-      );
-      processManager.addCommand(kShaCommand);
-      processManager.addCommand(
-        const FakeCommand(
-          command: <String>[
-            'adb',
-            '-s',
-            '1234',
-            'shell',
-            'am',
-            'start',
-            '-a',
-            'android.intent.action.MAIN',
-            '-c',
-            'android.intent.category.LAUNCHER',
-            '-f',
-            '0x20000000',
-            'FlutterApp/FlutterActivity',
-          ],
-        ),
-      );
+    processManager.addCommand(kAdbVersionCommand);
+    processManager.addCommand(kStartServer);
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
+        stdout: '[ro.product.cpu.abi]: [arm64-v8a]',
+      ),
+    );
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
+      ),
+    );
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'build/app-release.apk'],
+      ),
+    );
+    processManager.addCommand(kShaCommand);
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>[
+          'adb',
+          '-s',
+          '1234',
+          'shell',
+          'am',
+          'start',
+          '-a',
+          'android.intent.action.MAIN',
+          '-c',
+          'android.intent.category.LAUNCHER',
+          '-f',
+          '0x20000000',
+          'FlutterApp/FlutterActivity',
+        ],
+      ),
+    );
 
-      final LaunchResult launchResult = await device.startApp(
-        apk,
-        debuggingOptions: DebuggingOptions.disabled(
-          BuildInfo.release,
-          traceSystrace: true,
-          enableDartProfiling: false,
-        ),
-        platformArgs: <String, dynamic>{},
-      );
+    final LaunchResult launchResult = await device.startApp(
+      apk,
+      debuggingOptions: DebuggingOptions.disabled(
+        BuildInfo.release,
+        traceSystrace: true,
+        enableDartProfiling: false,
+      ),
+      platformArgs: <String, Object?>{},
+    );
 
-      expect(launchResult.started, true);
-      expect(processManager, hasNoRemainingExpectations);
-      expect(fakeAndroidBuilder.lastAndroidBuildInfo, isNotNull);
-      expect(
-        fakeAndroidBuilder.lastAndroidBuildInfo!.releaseManifestEngineShellArgs,
-        contains('--trace-systrace'),
-      );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    expect(launchResult.started, true);
+    expect(processManager, hasNoRemainingExpectations);
+    expect(fakeAndroidBuilder.lastAndroidBuildInfo, isNotNull);
+    expect(
+      fakeAndroidBuilder.lastAndroidBuildInfo!.releaseManifestEngineShellArgs,
+      contains('--trace-systrace'),
+    );
+  });
 
   test('AndroidDevice.startApp forwards all supported debugging options', () async {
     final device = AndroidDevice(
@@ -694,7 +671,7 @@ void main() {
         profileStartup: true,
         enableHcpp: true,
       ),
-      platformArgs: <String, dynamic>{},
+      platformArgs: <String, Object?>{},
       userIdentifier: '10',
     );
 
@@ -765,7 +742,7 @@ void main() {
       apk,
       prebuiltApplication: true,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release, enableDartProfiling: false),
-      platformArgs: <String, dynamic>{},
+      platformArgs: <String, Object?>{},
     );
 
     expect(launchResult.started, false);
@@ -834,7 +811,7 @@ void main() {
       apk,
       prebuiltApplication: true,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release, enableDartProfiling: false),
-      platformArgs: <String, dynamic>{},
+      platformArgs: <String, Object?>{},
     );
 
     expect(launchResult.started, false);
@@ -848,35 +825,33 @@ void main() {
       fakeAndroidBuilder = FakeAndroidBuilder();
     });
 
-    testUsingContext(
-      'AndroidDevice.startApp passes route via manifest when --use-application-binary is not used in release mode',
-      () async {
-        final device = AndroidDevice(
-          '1234',
-          androidBuilder: fakeAndroidBuilder,
-          applicationPackageFactory: FlutterApplicationPackageFactory(
-            androidSdkBuilder: () => androidSdk,
-            plistParserBuilder: FakePlistParser.new,
-            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
-            toolContext: DelegatingToolContext(fs: fileSystem, processManager: processManager),
-          ),
-          modelID: 'TestModel',
-          fileSystem: fileSystem,
-          processManager: processManager,
-          logger: BufferLogger.test(),
-          platform: FakePlatform(),
-          androidSdk: androidSdk,
-        );
-        final File apkFile = fileSystem.file('app-release.apk')..createSync();
-        final apk = AndroidApk(
-          id: 'FlutterApp',
-          applicationPackage: apkFile,
-          launchActivity: 'FlutterActivity',
-          versionCode: 1,
-        );
+    test('AndroidDevice.startApp passes route via manifest when --use-application-binary is not used in release mode', () async {
+      final device = AndroidDevice(
+        '1234',
+        androidBuilder: fakeAndroidBuilder,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => androidSdk,
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: FakeToolContext(fs: fileSystem, processManager: processManager),
+        ),
+        modelID: 'TestModel',
+        fileSystem: fileSystem,
+        processManager: processManager,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(),
+        androidSdk: androidSdk,
+      );
+      final File apkFile = fileSystem.file('app-release.apk')..createSync();
+      final apk = AndroidApk(
+        id: 'FlutterApp',
+        applicationPackage: apkFile,
+        launchActivity: 'FlutterActivity',
+        versionCode: 1,
+      );
 
-        fileSystem.directory('android').createSync();
-        fileSystem.file('android/AndroidManifest.xml').writeAsStringSync('''
+      fileSystem.directory('android').createSync();
+      fileSystem.file('android/AndroidManifest.xml').writeAsStringSync('''
         <manifest package="FlutterApp">
           <application>
             <activity android:name="FlutterActivity">
@@ -889,100 +864,93 @@ void main() {
         </manifest>
         ''');
 
-        fileSystem.file('build/app-release.apk').createSync(recursive: true);
+      fileSystem.file('build/app-release.apk').createSync(recursive: true);
 
-        processManager.addCommand(kAdbVersionCommand);
-        processManager.addCommand(kStartServer);
-        processManager.addCommand(
-          const FakeCommand(
-            command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
-            stdout: '[ro.product.cpu.abi]: [arm64-v8a]',
-          ),
-        );
-        processManager.addCommand(
-          const FakeCommand(
-            command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
-          ),
-        );
-        processManager.addCommand(
-          const FakeCommand(
-            command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'build/app-release.apk'],
-          ),
-        );
-        processManager.addCommand(kShaCommand);
-        processManager.addCommand(
-          const FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'shell',
-              'am',
-              'start',
-              '-a',
-              'android.intent.action.MAIN',
-              '-c',
-              'android.intent.category.LAUNCHER',
-              '-f',
-              '0x20000000',
-              'FlutterApp/FlutterActivity',
-            ],
-          ),
-        );
+      processManager.addCommand(kAdbVersionCommand);
+      processManager.addCommand(kStartServer);
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
+          stdout: '[ro.product.cpu.abi]: [arm64-v8a]',
+        ),
+      );
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
+        ),
+      );
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'build/app-release.apk'],
+        ),
+      );
+      processManager.addCommand(kShaCommand);
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'adb',
+            '-s',
+            '1234',
+            'shell',
+            'am',
+            'start',
+            '-a',
+            'android.intent.action.MAIN',
+            '-c',
+            'android.intent.category.LAUNCHER',
+            '-f',
+            '0x20000000',
+            'FlutterApp/FlutterActivity',
+          ],
+        ),
+      );
 
-        final LaunchResult launchResult = await device.startApp(
-          apk,
-          route: '/custom/route',
-          debuggingOptions: DebuggingOptions.disabled(
-            BuildInfo.release,
-            enableImpeller: ImpellerStatus.enabled,
-            enableDartProfiling: false,
-          ),
-          platformArgs: <String, dynamic>{},
-        );
+      final LaunchResult launchResult = await device.startApp(
+        apk,
+        route: '/custom/route',
+        debuggingOptions: DebuggingOptions.disabled(
+          BuildInfo.release,
+          enableImpeller: ImpellerStatus.enabled,
+          enableDartProfiling: false,
+        ),
+        platformArgs: <String, Object?>{},
+      );
 
-        expect(launchResult.started, true);
-        expect(processManager, hasNoRemainingExpectations);
-        expect(
-          fakeAndroidBuilder.lastAndroidBuildInfo?.releaseManifestEngineShellArgs,
-          contains('--route=/custom/route'),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      expect(launchResult.started, true);
+      expect(processManager, hasNoRemainingExpectations);
+      expect(
+        fakeAndroidBuilder.lastAndroidBuildInfo?.releaseManifestEngineShellArgs,
+        contains('--route=/custom/route'),
+      );
+    });
 
-    testUsingContext(
-      'AndroidDevice.startApp passes debugging options via manifest when --use-application-binary is not used in release mode',
-      () async {
-        final device = AndroidDevice(
-          '1234',
-          androidBuilder: fakeAndroidBuilder,
-          applicationPackageFactory: FlutterApplicationPackageFactory(
-            androidSdkBuilder: () => androidSdk,
-            plistParserBuilder: FakePlistParser.new,
-            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
-            toolContext: DelegatingToolContext(fs: fileSystem, processManager: processManager),
-          ),
-          modelID: 'TestModel',
-          fileSystem: fileSystem,
-          processManager: processManager,
-          logger: BufferLogger.test(),
-          platform: FakePlatform(),
-          androidSdk: androidSdk,
-        );
-        final File apkFile = fileSystem.file('app-release.apk')..createSync();
-        final apk = AndroidApk(
-          id: 'FlutterApp',
-          applicationPackage: apkFile,
-          launchActivity: 'FlutterActivity',
-          versionCode: 1,
-        );
+    test('AndroidDevice.startApp passes debugging options via manifest when --use-application-binary is not used in release mode', () async {
+      final device = AndroidDevice(
+        '1234',
+        androidBuilder: fakeAndroidBuilder,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => androidSdk,
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: FakeToolContext(fs: fileSystem, processManager: processManager),
+        ),
+        modelID: 'TestModel',
+        fileSystem: fileSystem,
+        processManager: processManager,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(),
+        androidSdk: androidSdk,
+      );
+      final File apkFile = fileSystem.file('app-release.apk')..createSync();
+      final apk = AndroidApk(
+        id: 'FlutterApp',
+        applicationPackage: apkFile,
+        launchActivity: 'FlutterActivity',
+        versionCode: 1,
+      );
 
-        fileSystem.directory('android').createSync();
-        fileSystem.file('android/AndroidManifest.xml').writeAsStringSync('''
+      fileSystem.directory('android').createSync();
+      fileSystem.file('android/AndroidManifest.xml').writeAsStringSync('''
         <manifest package="FlutterApp">
           <application>
             <activity android:name="FlutterActivity">
@@ -995,78 +963,73 @@ void main() {
         </manifest>
         ''');
 
-        fileSystem.file('build/app-release.apk').createSync(recursive: true);
+      fileSystem.file('build/app-release.apk').createSync(recursive: true);
 
-        processManager.addCommand(kAdbVersionCommand);
-        processManager.addCommand(kStartServer);
-        processManager.addCommand(
-          const FakeCommand(
-            command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
-            stdout: '[ro.product.cpu.abi]: [arm64-v8a]',
-          ),
-        );
-        processManager.addCommand(
-          const FakeCommand(
-            command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
-          ),
-        );
-        processManager.addCommand(
-          const FakeCommand(
-            command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'build/app-release.apk'],
-          ),
-        );
-        processManager.addCommand(kShaCommand);
-        processManager.addCommand(
-          const FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'shell',
-              'am',
-              'start',
-              '-a',
-              'android.intent.action.MAIN',
-              '-c',
-              'android.intent.category.LAUNCHER',
-              '-f',
-              '0x20000000',
-              'FlutterApp/FlutterActivity',
-            ],
-          ),
-        );
+      processManager.addCommand(kAdbVersionCommand);
+      processManager.addCommand(kStartServer);
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
+          stdout: '[ro.product.cpu.abi]: [arm64-v8a]',
+        ),
+      );
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
+        ),
+      );
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'build/app-release.apk'],
+        ),
+      );
+      processManager.addCommand(kShaCommand);
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'adb',
+            '-s',
+            '1234',
+            'shell',
+            'am',
+            'start',
+            '-a',
+            'android.intent.action.MAIN',
+            '-c',
+            'android.intent.category.LAUNCHER',
+            '-f',
+            '0x20000000',
+            'FlutterApp/FlutterActivity',
+          ],
+        ),
+      );
 
-        final LaunchResult launchResult = await device.startApp(
-          apk,
-          debuggingOptions: DebuggingOptions.disabled(
-            BuildInfo.release,
-            enableImpeller: ImpellerStatus.enabled,
-            enableHcpp: true,
-            traceSystrace: true,
-            testFlag: true,
-          ),
-          platformArgs: <String, dynamic>{},
-        );
+      final LaunchResult launchResult = await device.startApp(
+        apk,
+        debuggingOptions: DebuggingOptions.disabled(
+          BuildInfo.release,
+          enableImpeller: ImpellerStatus.enabled,
+          enableHcpp: true,
+          traceSystrace: true,
+          testFlag: true,
+        ),
+        platformArgs: <String, Object?>{},
+      );
 
-        expect(launchResult.started, true);
-        expect(processManager, hasNoRemainingExpectations);
-        expect(fakeAndroidBuilder.lastAndroidBuildInfo, isNotNull);
-        expect(
-          fakeAndroidBuilder.lastAndroidBuildInfo!.releaseManifestEngineShellArgs,
-          containsAll(<String>[
-            '--enable-impeller=true',
-            '--enable-hcpp-and-surface-control=true',
-            '--enable-dart-profiling',
-            '--trace-systrace',
-            '--test-flag',
-          ]),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      expect(launchResult.started, true);
+      expect(processManager, hasNoRemainingExpectations);
+      expect(fakeAndroidBuilder.lastAndroidBuildInfo, isNotNull);
+      expect(
+        fakeAndroidBuilder.lastAndroidBuildInfo!.releaseManifestEngineShellArgs,
+        containsAll(<String>[
+          '--enable-impeller=true',
+          '--enable-hcpp-and-surface-control=true',
+          '--enable-dart-profiling',
+          '--trace-systrace',
+          '--test-flag',
+        ]),
+      );
+    });
 
     test('AndroidDevice.startApp does not pass debugging options via Intent when --use-application-binary is used in release mode', () async {
       final device = AndroidDevice(
@@ -1133,7 +1096,7 @@ void main() {
           enableImpeller: ImpellerStatus.enabled,
           enableDartProfiling: false,
         ),
-        platformArgs: <String, dynamic>{},
+        platformArgs: <String, Object?>{},
       );
 
       expect(launchResult.started, true);

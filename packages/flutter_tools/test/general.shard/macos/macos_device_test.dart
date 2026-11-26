@@ -21,7 +21,6 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
@@ -613,53 +612,42 @@ void main() {
       fileSystem = MemoryFileSystem.test();
     });
 
-    testUsingContext(
-      'forwards analytics to buildMacOS',
-      () async {
-        fileSystem
-            .directory(fileSystem.path.join('macos', 'Runner.xcodeproj'))
-            .createSync(recursive: true);
-        fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
-        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+    test('forwards analytics to buildMacOS', () async {
+      fileSystem
+          .directory(fileSystem.path.join('macos', 'Runner.xcodeproj'))
+          .createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
 
-        final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
-          fs: fileSystem,
-          fakeFlutterVersion: FakeFlutterVersion(),
-        );
-        final fakeOperatingSystemUtils = FakeOperatingSystemUtils()
-          ..hostPlatform = HostPlatform.darwin_arm64;
-        final featureFlags = TestFeatureFlags(isMacOSEnabled: true);
-        final macOSDevices = MacOSDevices(
-          analytics: fakeAnalytics,
-          appleContext: FakeAppleContext(),
-          featureFlags: featureFlags,
-          macOSWorkflow: MacOSWorkflow(featureFlags: featureFlags, platform: macOS),
-          templateRenderer: FakeTemplateRenderer(),
-          toolContext: FakeToolContext(
-            fs: fileSystem,
-            os: fakeOperatingSystemUtils,
-            platform: macOS,
-          ),
-        );
-        final List<Device> devices = await macOSDevices.devices();
-        final device = devices.single as MacOSDevice;
+      final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
+      final fakeOperatingSystemUtils = FakeOperatingSystemUtils()
+        ..hostPlatform = HostPlatform.darwin_arm64;
+      final featureFlags = TestFeatureFlags(isMacOSEnabled: true);
+      final macOSDevices = MacOSDevices(
+        analytics: fakeAnalytics,
+        appleContext: FakeAppleContext(),
+        featureFlags: featureFlags,
+        macOSWorkflow: MacOSWorkflow(featureFlags: featureFlags, platform: macOS),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(fs: fileSystem, os: fakeOperatingSystemUtils, platform: macOS),
+      );
+      final List<Device> devices = await macOSDevices.devices();
+      final device = devices.single as MacOSDevice;
 
-        await device.buildForDevice(buildInfo: BuildInfo.debug);
+      await device.buildForDevice(buildInfo: BuildInfo.debug);
 
-        expect(
-          analyticsTimingEventExists(
-            sentEvents: fakeAnalytics.sentEvents,
-            workflow: 'build',
-            variableName: 'xcode-macos',
-          ),
-          true,
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.empty(),
-      },
-    );
+      expect(
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'build',
+          variableName: 'xcode-macos',
+        ),
+        true,
+      );
+    });
   });
 }
 

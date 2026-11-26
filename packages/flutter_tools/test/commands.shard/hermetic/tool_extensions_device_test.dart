@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:isolate';
 
-import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/config.dart';
@@ -14,6 +13,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -47,7 +47,7 @@ import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fake_vm_services.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -397,7 +397,8 @@ void main() {
           featureFlags: featureFlags,
         );
         addTearDown(manager.dispose);
-        final deviceManager = TestDeviceManager(
+        final testDeviceManager = TestDeviceManager(
+          logger: logger,
           discoverers: <DeviceDiscovery>[
             ExtensionDevices(
               extensionBuildManager: ExtensionBuildManager(
@@ -409,15 +410,14 @@ void main() {
               toolContext: toolContext,
             ),
           ],
-          logger: logger,
         );
         final devicesCommand = DevicesCommand(
-          deviceManager: deviceManager,
+          deviceManager: testDeviceManager,
           doctor: FakeDoctor(),
           toolContext: toolContext,
         );
         final runner = TestFlutterCommandRunner(
-          deviceManager: deviceManager,
+          deviceManager: testDeviceManager,
           featureFlags: featureFlags,
           toolContext: toolContext,
         )..addCommand(devicesCommand);
@@ -466,7 +466,7 @@ flutter:
 
     test('ExtensionDevices discovers custom device when feature flag enabled', () async {
       final logger = BufferLogger.test();
-      final localFs = LocalFileSystem.test(signals: FakeSignals());
+      final localFs = LocalFileSystem.test(signals: LocalSignals.instance);
       addTearDown(localFs.dispose);
       final Directory tempDir = localFs.systemTempDirectory.createTempSync(
         'flutter_tool_extensions_device_test.',
@@ -526,7 +526,8 @@ flutter:
           featureFlags: featureFlags,
         );
         addTearDown(manager.dispose);
-        final deviceManager = TestDeviceManager(
+        final testDeviceManager = TestDeviceManager(
+          logger: logger,
           discoverers: <DeviceDiscovery>[
             ExtensionDevices(
               extensionBuildManager: ExtensionBuildManager(
@@ -538,15 +539,14 @@ flutter:
               toolContext: toolContext,
             ),
           ],
-          logger: logger,
         );
         final devicesCommand = DevicesCommand(
-          deviceManager: deviceManager,
+          deviceManager: testDeviceManager,
           doctor: FakeDoctor(),
           toolContext: toolContext,
         );
         final runner = TestFlutterCommandRunner(
-          deviceManager: deviceManager,
+          deviceManager: testDeviceManager,
           featureFlags: featureFlags,
           toolContext: toolContext,
         )..addCommand(devicesCommand);
@@ -793,7 +793,7 @@ flutter:
           await extensionManager.dispose();
         });
 
-        CommandRunner<void> createRunnerWith(FlutterCommand command) {
+        TestFlutterCommandRunner createRunnerWith(FlutterCommand command) {
           return TestFlutterCommandRunner(
             deviceManager: deviceManager,
             doctor: FakeDoctor(),
@@ -809,7 +809,7 @@ flutter:
             toolContext: toolContext,
             verboseHelp: false,
           );
-          final CommandRunner<void> runner = createRunnerWith(command);
+          final TestFlutterCommandRunner runner = createRunnerWith(command);
 
           await runner.run(<String>[
             'install',
@@ -902,7 +902,7 @@ flutter:
             toolContext: toolContext,
             verboseHelp: false,
           );
-          final CommandRunner<void> runner = createRunnerWith(command);
+          final TestFlutterCommandRunner runner = createRunnerWith(command);
 
           // Pre-install an app so we can prove a missing non-prebuilt bundle does NOT uninstall it!
           await runner.run(<String>[
@@ -974,7 +974,7 @@ flutter:
               toolContext: toolContext,
               verboseHelp: false,
             );
-            final CommandRunner<void> runner = createRunnerWith(command);
+            final TestFlutterCommandRunner runner = createRunnerWith(command);
 
             await expectLater(
               runner.run(<String>['install', '-d', 'no_target_device']),
@@ -986,7 +986,7 @@ flutter:
         test('ScreenshotCommand captures screenshot when supportsScreenshot is true and rejects unsupported devices', () async {
           final File outputFile = fileSystem.file('shot.png')..writeAsBytesSync(<int>[1, 2, 3, 4]);
           final command = ScreenshotCommand(toolContext: toolContext);
-          final CommandRunner<void> runner = createRunnerWith(command);
+          final TestFlutterCommandRunner runner = createRunnerWith(command);
 
           await runner.run(<String>[
             'screenshot',
@@ -1199,12 +1199,12 @@ class _LogLineWaitingBufferLogger extends BufferLogger {
 }
 
 class TestDeviceManager extends DeviceManager {
-  TestDeviceManager({List<DeviceDiscovery>? discoverers, FileSystem? fileSystem, Logger? logger})
-    : deviceDiscoverers = discoverers ?? <DeviceDiscovery>[],
-      super(
-        logger: logger ?? BufferLogger.test(),
-        fileSystem: fileSystem ?? MemoryFileSystem.test(),
-      );
+  TestDeviceManager({
+    required super.logger,
+    List<DeviceDiscovery>? discoverers,
+    FileSystem? fileSystem,
+  }) : deviceDiscoverers = discoverers ?? <DeviceDiscovery>[],
+       super(fileSystem: fileSystem ?? MemoryFileSystem.test());
 
   @override
   final List<DeviceDiscovery> deviceDiscoverers;

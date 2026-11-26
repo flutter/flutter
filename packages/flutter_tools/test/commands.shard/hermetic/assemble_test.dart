@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/assemble.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -67,6 +66,30 @@ void main() {
 
     expect(logger.traceText, contains('build succeeded.'));
   });
+
+  for (final targetName in <String>['unpack_ios_vm_service', 'unpack_macos_vm_service']) {
+    test('flutter assemble recognizes $targetName', () async {
+      Target? builtTarget;
+      final CommandRunner<void> commandRunner = createTestCommandRunner(
+        AssembleCommand(
+          androidContext: FakeAndroidContext(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+            Target target,
+            Environment environment,
+          ) {
+            builtTarget = target;
+          }),
+          featureFlags: TestFeatureFlags(),
+          toolContext: toolContext,
+          xcode: null,
+        ),
+      );
+      await commandRunner.run(<String>['assemble', '-o Output', targetName]);
+
+      expect(builtTarget?.name, targetName);
+      expect(logger.traceText, contains('build succeeded.'));
+    });
+  }
 
   test('flutter assemble can parse defines whose values contain =', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
@@ -637,8 +660,7 @@ void main() {
 }
 
 final class _StubCommand extends FlutterCommand {
-  _StubCommand({ToolContext? toolContext})
-    : super(toolContext: toolContext ?? const DelegatingToolContext());
+  _StubCommand({required super.toolContext});
 
   @override
   String get description => 'This is a stub';

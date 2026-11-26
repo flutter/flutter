@@ -36,7 +36,6 @@ import 'package:unified_analytics/unified_analytics.dart';
 import 'package:webdriver/sync_io.dart' as sync_io;
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 
@@ -311,7 +310,7 @@ void main() {
   // TODO(bkonyi): Convert WebDriverService.start tests to plain `test` once
   // FlutterDevice.create no longer reads ambient residentCompilerFactory,
   // https://github.com/flutter/flutter/issues/47161.
-  testUsingContext('WebDriverService starts and stops an app', () async {
+  test('WebDriverService starts and stops an app', () async {
     final WebDriverService service = setUpDriverService(webRunnerFactory: FakeWebRunnerFactory());
     final device = FakeDevice();
     await service.start(
@@ -323,7 +322,7 @@ void main() {
     expect(FakeResidentRunner.instance.callLog, <String>['run', 'exitApp', 'cleanupAtFinish']);
   });
 
-  testUsingContext('WebDriverService forwards platform args to the web runner', () async {
+  test('WebDriverService forwards platform args to the web runner', () async {
     fakeWebRunnerFactory = FakeWebRunnerFactory();
     final WebDriverService service = setUpDriverService(webRunnerFactory: fakeWebRunnerFactory);
     final device = FakeDevice();
@@ -337,7 +336,7 @@ void main() {
     expect(fakeWebRunnerFactory.lastPlatformArgs, <String, Object?>{'no-launch-chrome': true});
   });
 
-  testUsingContext('WebDriverService forwards web-defines to the web runner', () async {
+  test('WebDriverService forwards web-defines to the web runner', () async {
     fakeWebRunnerFactory = FakeWebRunnerFactory();
     final WebDriverService service = setUpDriverService(webRunnerFactory: fakeWebRunnerFactory);
     final device = FakeDevice();
@@ -356,7 +355,7 @@ void main() {
     expect(fakeWebRunnerFactory.lastWebDefines, <String, String>{'VERSION': 'v1.2.3'});
   });
 
-  testUsingContext('WebDriverService can start an app with a launch url provided', () async {
+  test('WebDriverService can start an app with a launch url provided', () async {
     final WebDriverService service = setUpDriverService(webRunnerFactory: FakeWebRunnerFactory());
     final device = FakeDevice();
     const testUrl = 'http://localhost:1234/test';
@@ -373,7 +372,7 @@ void main() {
     expect(service.webUri, Uri.parse(testUrl));
   });
 
-  testUsingContext('WebDriverService starts an app with provided web headers', () async {
+  test('WebDriverService starts an app with provided web headers', () async {
     final WebDriverService service = setUpDriverService(webRunnerFactory: FakeWebRunnerFactory());
     final device = FakeDevice();
     final webHeaders = <String, String>{'test-header': 'test-value'};
@@ -396,7 +395,7 @@ void main() {
     );
   });
 
-  testUsingContext('WebDriverService will throw when an invalid launch url is provided', () async {
+  test('WebDriverService will throw when an invalid launch url is provided', () async {
     final WebDriverService service = setUpDriverService(webRunnerFactory: FakeWebRunnerFactory());
     final device = FakeDevice();
     const invalidTestUrl = '::INVALID_URL::';
@@ -416,23 +415,20 @@ void main() {
     );
   });
 
-  testUsingContext(
-    'WebDriverService forwards exception when run future fails before app starts',
-    () async {
-      final WebDriverService service = setUpDriverService(
-        webRunnerFactory: FakeWebRunnerFactory(doResolveToError: true),
-      );
-      final Device device = FakeDevice();
-      await expectLater(
-        service.start(
-          BuildInfo.profile,
-          device,
-          DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
-        ),
-        throwsA('This is a test error'),
-      );
-    },
-  );
+  test('WebDriverService forwards exception when run future fails before app starts', () async {
+    final WebDriverService service = setUpDriverService(
+      webRunnerFactory: FakeWebRunnerFactory(doResolveToError: true),
+    );
+    final Device device = FakeDevice();
+    await expectLater(
+      service.start(
+        BuildInfo.profile,
+        device,
+        DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
+      ),
+      throwsA('This is a test error'),
+    );
+  });
 
   test(
     'WebDriverService exits the tool when the WebDriver server cannot create a session',
@@ -581,7 +577,7 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
 }
 
 WebDriverService setUpDriverService({WebRunnerFactory? webRunnerFactory}) {
-  const ToolContext toolContext = DelegatingToolContext();
+  final ToolContext toolContext = FakeToolContext();
   final ToolContext(:FileSystem fs, :Logger logger, :Platform platform) = toolContext;
   return WebDriverService(
     analytics: const NoOpAnalytics(),

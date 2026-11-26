@@ -23,7 +23,6 @@ import 'package:flutter_tools/src/xcode_project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
@@ -54,46 +53,35 @@ void main() {
   });
 
   group('build ios-framework', () {
-    testUsingContext(
-      'prints migration warning',
-      () async {
-        memoryFileSystem.currentDirectory
-            .childFile('pubspec.yaml')
-            .writeAsStringSync('name: project');
-        memoryFileSystem.currentDirectory
-            .childDirectory('lib')
-            .childFile('main.dart')
-            .createSync(recursive: true);
-        final logger = BufferLogger.test();
-        final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
-          fileSystem: memoryFileSystem,
-          logger: logger,
-          platform: fakePlatform,
-        );
-        final CommandRunner<void> runner = createTestCommandRunner(command);
+    test('prints migration warning', () async {
+      memoryFileSystem.currentDirectory
+          .childFile('pubspec.yaml')
+          .writeAsStringSync('name: project');
+      memoryFileSystem.currentDirectory
+          .childDirectory('lib')
+          .childFile('main.dart')
+          .createSync(recursive: true);
+      final logger = BufferLogger.test();
+      final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        fileSystem: memoryFileSystem,
+        logger: logger,
+        platform: fakePlatform,
+      );
+      final CommandRunner<void> runner = createTestCommandRunner(command);
 
-        await expectLater(
-          () => runner.run(<String>['ios-framework', '--no-pub']),
-          throwsToolExit(message: 'Project does not support iOS'),
-        );
-        expect(
-          logger.warningText,
-          contains(
-            'The "flutter build ios-framework" command is deprecated and has been replaced by '
-            '"flutter build swift-package --platform ios".',
-          ),
-        );
-        expect(
-          logger.warningText,
-          contains('https://docs.flutter.dev/add-to-app/ios/project-setup'),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => memoryFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Artifacts: () => Artifacts.test(fileSystem: memoryFileSystem),
-      },
-    );
+      await expectLater(
+        () => runner.run(<String>['ios-framework', '--no-pub']),
+        throwsToolExit(message: 'Project does not support iOS'),
+      );
+      expect(
+        logger.warningText,
+        contains(
+          'The "flutter build ios-framework" command is deprecated and has been replaced by '
+          '"flutter build swift-package --platform ios".',
+        ),
+      );
+      expect(logger.warningText, contains('https://docs.flutter.dev/add-to-app/ios/project-setup'));
+    });
 
     group('podspec', () {
       const engineRevision = '0123456789abcdef';
@@ -375,220 +363,196 @@ void main() {
       );
     });
 
-    testUsingContext(
-      'throws if simulator contains extra assets',
-      () async {
-        final Directory projectDir = memoryFileSystem.directory('project')..createSync();
-        projectDir.childDirectory('ios').createSync();
-        projectDir.childDirectory('ios').childDirectory('Pods').createSync();
-        projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
-        projectDir.childDirectory('.dart_tool').childFile('package_config.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(
-            '{"configVersion": 2, "packages": [{"name": "project", "rootUri": "../", "packageUri": "lib/", "languageVersion": "3.0"}]}',
+    test('throws if simulator contains extra assets', () async {
+      final Directory projectDir = memoryFileSystem.directory('project')..createSync();
+      projectDir.childDirectory('ios').createSync();
+      projectDir.childDirectory('ios').childDirectory('Pods').createSync();
+      projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
+      projectDir.childDirectory('.dart_tool').childFile('package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(
+          '{"configVersion": 2, "packages": [{"name": "project", "rootUri": "../", "packageUri": "lib/", "languageVersion": "3.0"}]}',
+        );
+      projectDir
+          .childDirectory('.dart_tool')
+          .childFile('package_graph.json')
+          .writeAsStringSync(
+            '{"configVersion": 1, "packages": [{"name": "project", "rootUri": "..", "packageUri": "lib/", "dependencies": []}]}',
           );
-        projectDir
-            .childDirectory('.dart_tool')
-            .childFile('package_graph.json')
-            .writeAsStringSync(
-              '{"configVersion": 1, "packages": [{"name": "project", "rootUri": "..", "packageUri": "lib/", "dependencies": []}]}',
+      projectDir.childFile('pubspec.yaml').writeAsStringSync('name: project');
+      projectDir.childFile('.metadata').createSync();
+      memoryFileSystem.currentDirectory = projectDir;
+
+      final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        artifacts: Artifacts.test(fileSystem: memoryFileSystem),
+        fileSystem: memoryFileSystem,
+        logger: BufferLogger.test(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+          Target target,
+          Environment environment,
+        ) {
+          final Directory output = environment.outputDir;
+          output.childDirectory('App.framework').childFile('App').createSync(recursive: true);
+          final File manifest = output
+              .childDirectory('App.framework')
+              .childDirectory('flutter_assets')
+              .childFile('NativeAssetsManifest.json');
+          manifest.createSync(recursive: true);
+          if (output.path.contains('iphoneos')) {
+            manifest.writeAsStringSync('{"format-version": [1, 0, 0], "native-assets": {}}');
+          } else {
+            manifest.writeAsStringSync(
+              '{"format-version": [1, 0, 0], "native-assets": {"ios_x64": {"package:project/asset1": ["absolute", "Foo.framework/Foo"]}}}',
             );
-        projectDir.childFile('pubspec.yaml').writeAsStringSync('name: project');
-        projectDir.childFile('.metadata').createSync();
-        memoryFileSystem.currentDirectory = projectDir;
+          }
+        }),
+        platform: fakePlatform,
+        flutterVersion: fakeFlutterVersion,
+        cache: cache,
+        codesign: FakeDarwinAddToAppCodesigning(),
+      );
 
-        final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
-          artifacts: Artifacts.test(fileSystem: memoryFileSystem),
-          fileSystem: memoryFileSystem,
-          logger: BufferLogger.test(),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
-            Target target,
-            Environment environment,
-          ) {
-            final Directory output = environment.outputDir;
-            output.childDirectory('App.framework').childFile('App').createSync(recursive: true);
-            final File manifest = output
-                .childDirectory('App.framework')
-                .childDirectory('flutter_assets')
-                .childFile('NativeAssetsManifest.json');
-            manifest.createSync(recursive: true);
-            if (output.path.contains('iphoneos')) {
-              manifest.writeAsStringSync('{"format-version": [1, 0, 0], "native-assets": {}}');
-            } else {
-              manifest.writeAsStringSync(
-                '{"format-version": [1, 0, 0], "native-assets": {"ios_x64": {"package:project/asset1": ["absolute", "Foo.framework/Foo"]}}}',
-              );
-            }
-          }),
-          platform: fakePlatform,
-          flutterVersion: fakeFlutterVersion,
-          cache: cache,
-          codesign: FakeDarwinAddToAppCodesigning(),
+      // Mock engine artifacts. _TestArtifacts uses a string like this for getArtifactPath.
+      memoryFileSystem
+          .directory('Artifact.flutterXcframework.TargetPlatform.ios.debug')
+          .createSync(recursive: true);
+
+      final Directory buildDir =
+          projectDir.childDirectory('.dart_tool').childDirectory('flutter_build')
+            ..createSync(recursive: true);
+      buildDir
+          .childFile('link_hooks_result.json')
+          .writeAsStringSync('{"codeAssets": [], "dataAssets": [], "dependencies": []}');
+
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await expectLater(
+        () => runner.run(<String>[
+          'ios-framework',
+          '--no-pub',
+          '--no-plugins',
+          '--no-profile',
+          '--no-release',
+        ]),
+        throwsToolExit(
+          message: 'The simulator build contains a code asset "package:project/asset1" that is not present in the physical device build.',
+        ),
+      );
+    });
+
+    test('throws if framework names are inconsistent', () async {
+      final Directory projectDir = memoryFileSystem.directory('project')..createSync();
+      projectDir.childDirectory('ios').createSync();
+      projectDir.childDirectory('ios').childDirectory('Pods').createSync();
+      projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
+      projectDir.childDirectory('.dart_tool').childFile('package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(
+          '{"configVersion": 2, "packages": [{"name": "project", "rootUri": "../", "packageUri": "lib/", "languageVersion": "3.0"}]}',
         );
-
-        // Mock engine artifacts. _TestArtifacts uses a string like this for getArtifactPath.
-        memoryFileSystem
-            .directory('Artifact.flutterXcframework.TargetPlatform.ios.debug')
-            .createSync(recursive: true);
-
-        final Directory buildDir =
-            projectDir.childDirectory('.dart_tool').childDirectory('flutter_build')
-              ..createSync(recursive: true);
-        buildDir
-            .childFile('link_hooks_result.json')
-            .writeAsStringSync('{"codeAssets": [], "dataAssets": [], "dependencies": []}');
-
-        final CommandRunner<void> runner = createTestCommandRunner(command);
-        await expectLater(
-          () => runner.run(<String>[
-            'ios-framework',
-            '--no-pub',
-            '--no-plugins',
-            '--no-profile',
-            '--no-release',
-          ]),
-          throwsToolExit(
-            message: 'The simulator build contains a code asset "package:project/asset1" that is not present in the physical device build.',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => memoryFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Artifacts: () => Artifacts.test(fileSystem: memoryFileSystem),
-      },
-    );
-
-    testUsingContext(
-      'throws if framework names are inconsistent',
-      () async {
-        final Directory projectDir = memoryFileSystem.directory('project')..createSync();
-        projectDir.childDirectory('ios').createSync();
-        projectDir.childDirectory('ios').childDirectory('Pods').createSync();
-        projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
-        projectDir.childDirectory('.dart_tool').childFile('package_config.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(
-            '{"configVersion": 2, "packages": [{"name": "project", "rootUri": "../", "packageUri": "lib/", "languageVersion": "3.0"}]}',
+      projectDir
+          .childDirectory('.dart_tool')
+          .childFile('package_graph.json')
+          .writeAsStringSync(
+            '{"configVersion": 1, "packages": [{"name": "project", "rootUri": "..", "packageUri": "lib/", "dependencies": []}]}',
           );
-        projectDir
-            .childDirectory('.dart_tool')
-            .childFile('package_graph.json')
-            .writeAsStringSync(
-              '{"configVersion": 1, "packages": [{"name": "project", "rootUri": "..", "packageUri": "lib/", "dependencies": []}]}',
+      projectDir.childFile('pubspec.yaml').writeAsStringSync('name: project');
+      projectDir.childFile('.metadata').createSync();
+      memoryFileSystem.currentDirectory = projectDir;
+
+      final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        artifacts: Artifacts.test(fileSystem: memoryFileSystem),
+        fileSystem: memoryFileSystem,
+        logger: BufferLogger.test(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+          Target target,
+          Environment environment,
+        ) {
+          final Directory output = environment.outputDir;
+          output.childDirectory('App.framework').childFile('App').createSync(recursive: true);
+          final File manifest = output
+              .childDirectory('App.framework')
+              .childDirectory('flutter_assets')
+              .childFile('NativeAssetsManifest.json');
+          manifest.createSync(recursive: true);
+          if (output.path.contains('iphoneos')) {
+            manifest.writeAsStringSync(
+              '{"format-version": [1, 0, 0], "native-assets": {"ios_arm64": {"package:project/asset1": ["absolute", "Foo.framework/Foo"]}}}',
             );
-        projectDir.childFile('pubspec.yaml').writeAsStringSync('name: project');
-        projectDir.childFile('.metadata').createSync();
-        memoryFileSystem.currentDirectory = projectDir;
+          } else {
+            manifest.writeAsStringSync(
+              '{"format-version": [1, 0, 0], "native-assets": {"ios_x64": {"package:project/asset1": ["absolute", "Bar.framework/Bar"]}}}',
+            );
+          }
+        }),
+        platform: fakePlatform,
+        flutterVersion: fakeFlutterVersion,
+        cache: cache,
+        codesign: FakeDarwinAddToAppCodesigning(),
+      );
 
-        final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
-          artifacts: Artifacts.test(fileSystem: memoryFileSystem),
-          fileSystem: memoryFileSystem,
-          logger: BufferLogger.test(),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
-            Target target,
-            Environment environment,
-          ) {
-            final Directory output = environment.outputDir;
-            output.childDirectory('App.framework').childFile('App').createSync(recursive: true);
-            final File manifest = output
-                .childDirectory('App.framework')
-                .childDirectory('flutter_assets')
-                .childFile('NativeAssetsManifest.json');
-            manifest.createSync(recursive: true);
-            if (output.path.contains('iphoneos')) {
-              manifest.writeAsStringSync(
-                '{"format-version": [1, 0, 0], "native-assets": {"ios_arm64": {"package:project/asset1": ["absolute", "Foo.framework/Foo"]}}}',
-              );
-            } else {
-              manifest.writeAsStringSync(
-                '{"format-version": [1, 0, 0], "native-assets": {"ios_x64": {"package:project/asset1": ["absolute", "Bar.framework/Bar"]}}}',
-              );
-            }
-          }),
-          platform: fakePlatform,
-          flutterVersion: fakeFlutterVersion,
-          cache: cache,
-          codesign: FakeDarwinAddToAppCodesigning(),
-        );
+      // Mock engine artifacts
+      memoryFileSystem
+          .directory('Artifact.flutterXcframework.TargetPlatform.ios.debug')
+          .createSync(recursive: true);
 
-        // Mock engine artifacts
-        memoryFileSystem
-            .directory('Artifact.flutterXcframework.TargetPlatform.ios.debug')
-            .createSync(recursive: true);
+      final Directory buildDir =
+          projectDir.childDirectory('.dart_tool').childDirectory('flutter_build')
+            ..createSync(recursive: true);
+      buildDir
+          .childFile('link_hooks_result.json')
+          .writeAsStringSync('{"codeAssets": [], "dataAssets": [], "dependencies": []}');
 
-        final Directory buildDir =
-            projectDir.childDirectory('.dart_tool').childDirectory('flutter_build')
-              ..createSync(recursive: true);
-        buildDir
-            .childFile('link_hooks_result.json')
-            .writeAsStringSync('{"codeAssets": [], "dataAssets": [], "dependencies": []}');
-
-        final CommandRunner<void> runner = createTestCommandRunner(command);
-        await expectLater(
-          () => runner.run(<String>[
-            'ios-framework',
-            '--no-pub',
-            '--no-plugins',
-            '--no-profile',
-            '--no-release',
-          ]),
-          throwsToolExit(
-            message:
-                'Consistent code asset framework names are required for XCFramework creation.\n'
-                'The asset "package:project/asset1" has different framework paths across platforms:',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => memoryFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Artifacts: () => Artifacts.test(fileSystem: memoryFileSystem),
-      },
-    );
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await expectLater(
+        () => runner.run(<String>[
+          'ios-framework',
+          '--no-pub',
+          '--no-plugins',
+          '--no-profile',
+          '--no-release',
+        ]),
+        throwsToolExit(
+          message:
+              'Consistent code asset framework names are required for XCFramework creation.\n'
+              'The asset "package:project/asset1" has different framework paths across platforms:',
+        ),
+      );
+    });
   });
 
   group('build macos-framework', () {
-    testUsingContext(
-      'prints migration warning',
-      () async {
-        memoryFileSystem.currentDirectory
-            .childFile('pubspec.yaml')
-            .writeAsStringSync('name: project');
-        memoryFileSystem.currentDirectory
-            .childDirectory('lib')
-            .childFile('main.dart')
-            .createSync(recursive: true);
-        final logger = BufferLogger.test();
-        final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
-          fileSystem: memoryFileSystem,
-          logger: logger,
-          platform: fakePlatform,
-        );
-        final CommandRunner<void> runner = createTestCommandRunner(command);
+    test('prints migration warning', () async {
+      memoryFileSystem.currentDirectory
+          .childFile('pubspec.yaml')
+          .writeAsStringSync('name: project');
+      memoryFileSystem.currentDirectory
+          .childDirectory('lib')
+          .childFile('main.dart')
+          .createSync(recursive: true);
+      final logger = BufferLogger.test();
+      final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+        fileSystem: memoryFileSystem,
+        logger: logger,
+        platform: fakePlatform,
+      );
+      final CommandRunner<void> runner = createTestCommandRunner(command);
 
-        await expectLater(
-          () => runner.run(<String>['macos-framework', '--no-pub']),
-          throwsToolExit(message: 'Project does not support macOS'),
-        );
-        expect(
-          logger.warningText,
-          contains(
-            'The "flutter build macos-framework" command is deprecated and has been replaced by '
-            '"flutter build swift-package --platform macos".',
-          ),
-        );
-        expect(
-          logger.warningText,
-          contains('https://docs.flutter.dev/add-to-app/macos/project-setup'),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => memoryFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Artifacts: () => Artifacts.test(fileSystem: memoryFileSystem),
-      },
-    );
+      await expectLater(
+        () => runner.run(<String>['macos-framework', '--no-pub']),
+        throwsToolExit(message: 'Project does not support macOS'),
+      );
+      expect(
+        logger.warningText,
+        contains(
+          'The "flutter build macos-framework" command is deprecated and has been replaced by '
+          '"flutter build swift-package --platform macos".',
+        ),
+      );
+      expect(
+        logger.warningText,
+        contains('https://docs.flutter.dev/add-to-app/macos/project-setup'),
+      );
+    });
 
     group('podspec', () {
       const engineRevision = '0123456789abcdef';
