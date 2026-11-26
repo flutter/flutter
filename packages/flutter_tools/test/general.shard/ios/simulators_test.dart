@@ -19,19 +19,20 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
-import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
+import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart' show FakeLogger, FakePlistParser, FakeToolContext;
+import '../../src/fakes.dart' hide FakeProcess;
 
 final Platform macosPlatform = FakePlatform(
   operatingSystem: 'macos',
@@ -47,83 +48,82 @@ void main() {
     exitCode: 1,
   );
   late FakePlatform osx;
-  late FileSystemUtils fsUtils;
   late MemoryFileSystem fileSystem;
-  final Logger logger = FakeLogger();
+  final Logger logger = BufferLogger.test();
 
   setUp(() {
     osx = FakePlatform(environment: <String, String>{}, operatingSystem: 'macos');
     fileSystem = MemoryFileSystem.test();
-    fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: osx);
   });
 
   group('_IOSSimulatorDevicePortForwarder', () {
     late FakeSimControl simControl;
-    late Xcode xcode;
 
     setUp(() {
       simControl = FakeSimControl();
-      xcode = Xcode.test(
-        processManager: FakeProcessManager.any(),
-        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
-      );
     });
 
-    testUsingContext(
-      'dispose() does not throw an exception',
-      () async {
-        final simulator = IOSSimulator(
-          '123',
-          cpuArch: CpuArch.x64,
-          name: 'iPhone 11',
-          simControl: simControl,
-          simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
-          logger: logger,
-        );
-        final DevicePortForwarder portForwarder = simulator.portForwarder;
-        await portForwarder.forward(123);
-        await portForwarder.forward(124);
-        expect(portForwarder.forwardedPorts.length, 2);
-        try {
-          await portForwarder.dispose();
-        } on Exception catch (e) {
-          fail('Encountered exception: $e');
-        }
-        expect(portForwarder.forwardedPorts.length, 0);
-      },
-      overrides: <Type, Generator>{
-        Platform: () => osx,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Xcode: () => xcode,
-      },
-      testOn: 'posix',
-    );
-  });
-
-  testUsingContext(
-    'simulators only support debug mode',
-    () async {
+    test('dispose() does not throw an exception', () async {
       final simulator = IOSSimulator(
         '123',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'iPhone 11',
-        simControl: FakeSimControl(),
+        simControl: simControl,
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
-        logger: logger,
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+        xcode: FakeXcode(),
       );
+      final DevicePortForwarder portForwarder = simulator.portForwarder;
+      await portForwarder.forward(123);
+      await portForwarder.forward(124);
+      expect(portForwarder.forwardedPorts.length, 2);
+      try {
+        await portForwarder.dispose();
+      } on Exception catch (e) {
+        fail('Encountered exception: $e');
+      }
+      expect(portForwarder.forwardedPorts.length, 0);
+    }, testOn: 'posix');
+  });
 
-      expect(simulator.supportsRuntimeMode(BuildMode.debug), true);
-      expect(simulator.supportsRuntimeMode(BuildMode.profile), false);
-      expect(simulator.supportsRuntimeMode(BuildMode.release), false);
-      expect(simulator.supportsRuntimeMode(BuildMode.jitRelease), false);
-    },
-    overrides: <Type, Generator>{
-      Platform: () => osx,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+  test('simulators only support debug mode', () async {
+    final simulator = IOSSimulator(
+      '123',
+      cpuArch: CpuArch.x64,
+      featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+      name: 'iPhone 11',
+      simControl: FakeSimControl(),
+      simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
+      analytics: const NoOpAnalytics(),
+      cocoaPods: FakeCocoaPods(),
+      mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+        analytics: const NoOpAnalytics(),
+        logger: logger,
+        platform: osx,
+      ),
+      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      plistParser: FakePlistParser(),
+      templateRenderer: FakeTemplateRenderer(),
+      toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+      xcode: FakeXcode(),
+    );
+
+    expect(simulator.supportsRuntimeMode(BuildMode.debug), true);
+    expect(simulator.supportsRuntimeMode(BuildMode.profile), false);
+    expect(simulator.supportsRuntimeMode(BuildMode.release), false);
+    expect(simulator.supportsRuntimeMode(BuildMode.jitRelease), false);
+  });
 
   group('logFilePath', () {
     late FakeSimControl simControl;
@@ -132,51 +132,56 @@ void main() {
       simControl = FakeSimControl();
     });
 
-    testUsingContext(
-      'defaults to rooted from HOME',
-      () {
-        osx.environment['HOME'] = '/foo/bar';
-        final simulator = IOSSimulator(
-          '123',
-          cpuArch: CpuArch.x64,
-          name: 'iPhone 11',
-          simControl: simControl,
-          simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
+    test('defaults to rooted from HOME', () {
+      osx.environment['HOME'] = '/foo/bar';
+      final simulator = IOSSimulator(
+        '123',
+        cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+        name: 'iPhone 11',
+        simControl: simControl,
+        simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
           logger: logger,
-        );
-        expect(simulator.logFilePath, '/foo/bar/Library/Logs/CoreSimulator/123/system.log');
-      },
-      overrides: <Type, Generator>{
-        Platform: () => osx,
-        FileSystemUtils: () => fsUtils,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-      testOn: 'posix',
-    );
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: osx),
+        xcode: FakeXcode(),
+      );
+      expect(simulator.logFilePath, '/foo/bar/Library/Logs/CoreSimulator/123/system.log');
+    }, testOn: 'posix');
 
-    testUsingContext(
-      'respects IOS_SIMULATOR_LOG_FILE_PATH',
-      () {
-        osx.environment['HOME'] = '/foo/bar';
-        osx.environment['IOS_SIMULATOR_LOG_FILE_PATH'] = '/baz/qux/%{id}/system.log';
-        final simulator = IOSSimulator(
-          '456',
-          cpuArch: CpuArch.x64,
-          name: 'iPhone 11',
-          simControl: simControl,
-          simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
+    test('respects IOS_SIMULATOR_LOG_FILE_PATH', () {
+      osx.environment['HOME'] = '/foo/bar';
+      osx.environment['IOS_SIMULATOR_LOG_FILE_PATH'] = '/baz/qux/%{id}/system.log';
+      final simulator = IOSSimulator(
+        '456',
+        cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+        name: 'iPhone 11',
+        simControl: simControl,
+        simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
           logger: logger,
-        );
-        expect(simulator.logFilePath, '/baz/qux/456/system.log');
-      },
-      overrides: <Type, Generator>{
-        Platform: () => osx,
-        FileSystemUtils: () => fsUtils,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: osx),
+        xcode: FakeXcode(),
+      );
+      expect(simulator.logFilePath, '/baz/qux/456/system.log');
+    });
   });
 
   group('sdkMajorVersion', () {
@@ -187,40 +192,76 @@ void main() {
     });
 
     // This new version string appears in SimulatorApp-850 CoreSimulator-518.16 beta.
-    testWithoutContext('can be parsed from iOS-11-3', () async {
+    test('can be parsed from iOS-11-3', () async {
       final device = IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'iPhone SE',
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
         simControl: simControl,
-        logger: logger,
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+        xcode: FakeXcode(),
       );
 
       expect(await device.sdkMajorVersion, 11);
     });
 
-    testWithoutContext('can be parsed from iOS 11.2', () async {
+    test('can be parsed from iOS 11.2', () async {
       final device = IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'iPhone SE',
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
-        logger: logger,
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+        xcode: FakeXcode(),
       );
 
       expect(await device.sdkMajorVersion, 11);
     });
 
-    testWithoutContext('Has a simulator category', () async {
+    test('Has a simulator category', () async {
       final device = IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'iPhone SE',
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
-        logger: logger,
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+        xcode: FakeXcode(),
       );
 
       expect(device.category, Category.mobile);
@@ -234,207 +275,242 @@ void main() {
       simControl = FakeSimControl();
     });
 
-    testUsingContext(
-      'Apple TV is unsupported',
-      () async {
-        final simulator = IOSSimulator(
+    test('Apple TV is unsupported', () async {
+      final simulator = IOSSimulator(
+        'x',
+        cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+        name: 'Apple TV',
+        simControl: simControl,
+        simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.tvOS-14-5',
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: osx),
+        xcode: FakeXcode(),
+      );
+      expect(await simulator.isSupported(), false);
+    });
+
+    test('Apple Watch is unsupported', () async {
+      expect(
+        await IOSSimulator(
           'x',
           cpuArch: CpuArch.x64,
-          name: 'Apple TV',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+          name: 'Apple Watch',
           simControl: simControl,
-          simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.tvOS-14-5',
-          logger: logger,
-        );
-        expect(await simulator.isSupported(), false);
-      },
-      overrides: <Type, Generator>{
-        Platform: () => osx,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
-
-    testUsingContext(
-      'Apple Watch is unsupported',
-      () async {
-        expect(
-          await IOSSimulator(
-            'x',
-            cpuArch: CpuArch.x64,
-            name: 'Apple Watch',
-            simControl: simControl,
-            simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.watchOS-8-0',
+          simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.watchOS-8-0',
+          analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
             logger: logger,
-          ).isSupported(),
-          false,
-        );
-      },
-      overrides: <Type, Generator>{
-        Platform: () => osx,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+            platform: osx,
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+          plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: osx),
+          xcode: FakeXcode(),
+        ).isSupported(),
+        false,
+      );
+    });
 
-    testUsingContext(
-      'iPad 2 is supported',
-      () async {
-        expect(
-          await IOSSimulator(
-            'x',
-            cpuArch: CpuArch.x64,
-            name: 'iPad 2',
-            simControl: simControl,
-            simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+    test('iPad 2 is supported', () async {
+      expect(
+        await IOSSimulator(
+          'x',
+          cpuArch: CpuArch.x64,
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+          name: 'iPad 2',
+          simControl: simControl,
+          simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+          analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
             logger: logger,
-          ).isSupported(),
-          true,
-        );
-      },
-      overrides: <Type, Generator>{
-        Platform: () => osx,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+            platform: osx,
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+          plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: osx),
+          xcode: FakeXcode(),
+        ).isSupported(),
+        true,
+      );
+    });
 
-    testUsingContext(
-      'iPad Retina is supported',
-      () async {
-        expect(
-          await IOSSimulator(
-            'x',
-            cpuArch: CpuArch.x64,
-            name: 'iPad Retina',
-            simControl: simControl,
-            simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+    test('iPad Retina is supported', () async {
+      expect(
+        await IOSSimulator(
+          'x',
+          cpuArch: CpuArch.x64,
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+          name: 'iPad Retina',
+          simControl: simControl,
+          simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+          analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
             logger: logger,
-          ).isSupported(),
-          true,
-        );
-      },
-      overrides: <Type, Generator>{
-        Platform: () => osx,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+            platform: osx,
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+          plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: osx),
+          xcode: FakeXcode(),
+        ).isSupported(),
+        true,
+      );
+    });
 
-    testUsingContext(
-      'iPhone 5 is supported',
-      () async {
-        expect(
-          await IOSSimulator(
-            'x',
-            cpuArch: CpuArch.x64,
-            name: 'iPhone 5',
-            simControl: simControl,
-            simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+    test('iPhone 5 is supported', () async {
+      expect(
+        await IOSSimulator(
+          'x',
+          cpuArch: CpuArch.x64,
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+          name: 'iPhone 5',
+          simControl: simControl,
+          simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+          analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
             logger: logger,
-          ).isSupported(),
-          true,
-        );
-      },
-      overrides: <Type, Generator>{
-        Platform: () => osx,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+            platform: osx,
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+          plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: osx),
+          xcode: FakeXcode(),
+        ).isSupported(),
+        true,
+      );
+    });
 
-    testUsingContext(
-      'iPhone 5s is supported',
-      () async {
-        expect(
-          await IOSSimulator(
-            'x',
-            cpuArch: CpuArch.x64,
-            name: 'iPhone 5s',
-            simControl: simControl,
-            simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+    test('iPhone 5s is supported', () async {
+      expect(
+        await IOSSimulator(
+          'x',
+          cpuArch: CpuArch.x64,
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+          name: 'iPhone 5s',
+          simControl: simControl,
+          simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+          analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
             logger: logger,
-          ).isSupported(),
-          true,
-        );
-      },
-      overrides: <Type, Generator>{
-        Platform: () => osx,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+            platform: osx,
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+          plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: osx),
+          xcode: FakeXcode(),
+        ).isSupported(),
+        true,
+      );
+    });
 
-    testUsingContext(
-      'iPhone SE is supported',
-      () async {
-        expect(
-          await IOSSimulator(
-            'x',
-            cpuArch: CpuArch.x64,
-            name: 'iPhone SE',
-            simControl: simControl,
-            simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+    test('iPhone SE is supported', () async {
+      expect(
+        await IOSSimulator(
+          'x',
+          cpuArch: CpuArch.x64,
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+          name: 'iPhone SE',
+          simControl: simControl,
+          simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+          analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
             logger: logger,
-          ).isSupported(),
-          true,
-        );
-      },
-      overrides: <Type, Generator>{
-        Platform: () => osx,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+            platform: osx,
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+          plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: osx),
+          xcode: FakeXcode(),
+        ).isSupported(),
+        true,
+      );
+    });
 
-    testUsingContext(
-      'iPhone 7 Plus is supported',
-      () async {
-        expect(
-          await IOSSimulator(
-            'x',
-            cpuArch: CpuArch.x64,
-            name: 'iPhone 7 Plus',
-            simControl: simControl,
-            simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+    test('iPhone 7 Plus is supported', () async {
+      expect(
+        await IOSSimulator(
+          'x',
+          cpuArch: CpuArch.x64,
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+          name: 'iPhone 7 Plus',
+          simControl: simControl,
+          simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+          analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
             logger: logger,
-          ).isSupported(),
-          true,
-        );
-      },
-      overrides: <Type, Generator>{
-        Platform: () => osx,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+            platform: osx,
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+          plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: osx),
+          xcode: FakeXcode(),
+        ).isSupported(),
+        true,
+      );
+    });
 
-    testUsingContext(
-      'iPhone X is supported',
-      () async {
-        expect(
-          await IOSSimulator(
-            'x',
-            cpuArch: CpuArch.x64,
-            name: 'iPhone X',
-            simControl: simControl,
-            simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+    test('iPhone X is supported', () async {
+      expect(
+        await IOSSimulator(
+          'x',
+          cpuArch: CpuArch.x64,
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+          name: 'iPhone X',
+          simControl: simControl,
+          simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+          analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
             logger: logger,
-          ).isSupported(),
-          true,
-        );
-      },
-      overrides: <Type, Generator>{
-        Platform: () => osx,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+            platform: osx,
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+          plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: osx),
+          xcode: FakeXcode(),
+        ).isSupported(),
+        true,
+      );
+    });
   });
 
   group('Simulator screenshot', () {
-    testWithoutContext('supports screenshots', () async {
+    test('supports screenshots', () async {
       final xcode = Xcode.test(
-        processManager: FakeProcessManager.any(),
         toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
       );
       final Logger logger = BufferLogger.test();
@@ -454,10 +530,22 @@ void main() {
       final deviceUnderTest = IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'iPhone SE',
         simControl: simControl,
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-        logger: logger,
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+        xcode: FakeXcode(),
       );
 
       final File screenshot = MemoryFileSystem.test().file('screenshot.png');
@@ -475,125 +563,151 @@ void main() {
       simControl = FakeSimControl();
     });
 
-    testUsingContext(
-      'syslog uses tail',
-      () async {
-        final device = IOSSimulator(
-          'x',
-          cpuArch: CpuArch.x64,
-          name: 'iPhone SE',
-          simulatorCategory: 'iOS 9.3',
-          simControl: simControl,
+    test('syslog uses tail', () async {
+      final device = IOSSimulator(
+        'x',
+        cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+        name: 'iPhone SE',
+        simulatorCategory: 'iOS 9.3',
+        simControl: simControl,
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
           logger: logger,
-        );
-        fakeProcessManager.addCommand(
-          const FakeCommand(
-            command: <String>['tail', '-n', '0', '-F', '/Library/Logs/CoreSimulator/x/system.log'],
-          ),
-        );
-        await launchDeviceSystemLogTool(device);
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => fakeProcessManager,
-        FileSystem: () => fileSystem,
-        Platform: () => macosPlatform,
-        FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
-      },
-    );
-
-    testUsingContext(
-      'unified logging with app name',
-      () async {
-        final device = IOSSimulator(
-          'x',
-          cpuArch: CpuArch.x64,
-          name: 'iPhone SE',
-          simulatorCategory: 'iOS 11.0',
-          simControl: simControl,
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
           logger: logger,
-        );
-        const expectedPredicate =
-            'eventType = logEvent AND '
-            'processImagePath ENDSWITH "My Super Awesome App" AND '
-            '(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID '
-            'OR eventMessage CONTAINS "UIScene life cycle is required" '
-            'OR eventMessage CONTAINS "`UIScene` lifecycle will soon be required" '
-            'OR eventMessage CONTAINS "This process does not adopt UIScene lifecycle.") AND '
-            'NOT(eventMessage CONTAINS ": could not find icon for representation -> com.apple.") AND '
-            'NOT(eventMessage BEGINSWITH "assertion failed: ") AND '
-            'NOT(eventMessage CONTAINS " libxpc.dylib ")';
-        fakeProcessManager.addCommand(
-          const FakeCommand(
-            command: <String>[
-              'xcrun',
-              'simctl',
-              'spawn',
-              'x',
-              'log',
-              'stream',
-              '--style',
-              'json',
-              '--predicate',
-              expectedPredicate,
-            ],
-          ),
-        );
+          platform: macosPlatform,
+          processManager: fakeProcessManager,
+        ),
+        xcode: FakeXcode(),
+      );
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <String>['tail', '-n', '0', '-F', '/Library/Logs/CoreSimulator/x/system.log'],
+        ),
+      );
+      await launchDeviceSystemLogTool(device);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
 
-        await launchDeviceUnifiedLogging(device, 'My Super Awesome App');
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => fakeProcessManager,
-        FileSystem: () => fileSystem,
-      },
-    );
-
-    testUsingContext(
-      'unified logging without app name',
-      () async {
-        final device = IOSSimulator(
-          'x',
-          cpuArch: CpuArch.x64,
-          name: 'iPhone SE',
-          simulatorCategory: 'iOS 11.0',
-          simControl: simControl,
+    test('unified logging with app name', () async {
+      final device = IOSSimulator(
+        'x',
+        cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+        name: 'iPhone SE',
+        simulatorCategory: 'iOS 11.0',
+        simControl: simControl,
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
           logger: logger,
-        );
-        const expectedPredicate =
-            'eventType = logEvent AND '
-            '(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID '
-            'OR eventMessage CONTAINS "UIScene life cycle is required" '
-            'OR eventMessage CONTAINS "`UIScene` lifecycle will soon be required" '
-            'OR eventMessage CONTAINS "This process does not adopt UIScene lifecycle.") AND '
-            'NOT(eventMessage CONTAINS ": could not find icon for representation -> com.apple.") AND '
-            'NOT(eventMessage BEGINSWITH "assertion failed: ") AND '
-            'NOT(eventMessage CONTAINS " libxpc.dylib ")';
-        fakeProcessManager.addCommand(
-          const FakeCommand(
-            command: <String>[
-              'xcrun',
-              'simctl',
-              'spawn',
-              'x',
-              'log',
-              'stream',
-              '--style',
-              'json',
-              '--predicate',
-              expectedPredicate,
-            ],
-          ),
-        );
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          processManager: fakeProcessManager,
+        ),
+        xcode: FakeXcode(),
+      );
+      const expectedPredicate =
+          'eventType = logEvent AND '
+          'processImagePath ENDSWITH "My Super Awesome App" AND '
+          '(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID '
+          'OR eventMessage CONTAINS "UIScene life cycle is required" '
+          'OR eventMessage CONTAINS "`UIScene` lifecycle will soon be required" '
+          'OR eventMessage CONTAINS "This process does not adopt UIScene lifecycle.") AND '
+          'NOT(eventMessage CONTAINS ": could not find icon for representation -> com.apple.") AND '
+          'NOT(eventMessage BEGINSWITH "assertion failed: ") AND '
+          'NOT(eventMessage CONTAINS " libxpc.dylib ")';
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'xcrun',
+            'simctl',
+            'spawn',
+            'x',
+            'log',
+            'stream',
+            '--style',
+            'json',
+            '--predicate',
+            expectedPredicate,
+          ],
+        ),
+      );
 
-        await launchDeviceUnifiedLogging(device, null);
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => fakeProcessManager,
-        FileSystem: () => fileSystem,
-      },
-    );
+      await launchDeviceUnifiedLogging(device, 'My Super Awesome App');
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
+    test('unified logging without app name', () async {
+      final device = IOSSimulator(
+        'x',
+        cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+        name: 'iPhone SE',
+        simulatorCategory: 'iOS 11.0',
+        simControl: simControl,
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          processManager: fakeProcessManager,
+        ),
+        xcode: FakeXcode(),
+      );
+      const expectedPredicate =
+          'eventType = logEvent AND '
+          '(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID '
+          'OR eventMessage CONTAINS "UIScene life cycle is required" '
+          'OR eventMessage CONTAINS "`UIScene` lifecycle will soon be required" '
+          'OR eventMessage CONTAINS "This process does not adopt UIScene lifecycle.") AND '
+          'NOT(eventMessage CONTAINS ": could not find icon for representation -> com.apple.") AND '
+          'NOT(eventMessage BEGINSWITH "assertion failed: ") AND '
+          'NOT(eventMessage CONTAINS " libxpc.dylib ")';
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'xcrun',
+            'simctl',
+            'spawn',
+            'x',
+            'log',
+            'stream',
+            '--style',
+            'json',
+            '--predicate',
+            expectedPredicate,
+          ],
+        ),
+      );
+
+      await launchDeviceUnifiedLogging(device, null);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
   });
 
   group('log reader', () {
@@ -607,7 +721,6 @@ void main() {
       mockIosProject = FakeIosProject();
       simControl = FakeSimControl();
       xcode = Xcode.test(
-        processManager: FakeProcessManager.any(),
         toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
       );
     });
@@ -618,113 +731,129 @@ void main() {
         osx.environment['IOS_SIMULATOR_LOG_FILE_PATH'] = syslog.path;
       });
 
-      testUsingContext(
-        'simulator can parse Xcode 8/iOS 10-style logs',
-        () async {
-          fakeProcessManager
-            ..addCommand(
-              const FakeCommand(
-                command: <String>['tail', '-n', '0', '-F', 'system.log'],
-                stdout: '''
+      test('simulator can parse Xcode 8/iOS 10-style logs', () async {
+        fakeProcessManager
+          ..addCommand(
+            const FakeCommand(
+              command: <String>['tail', '-n', '0', '-F', 'system.log'],
+              stdout: '''
 Dec 20 17:04:32 md32-11-vm1 My Super Awesome App[88374]: flutter: The Dart VM service is listening on http://127.0.0.1:64213/1Uoeu523990=/
 Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
-              ),
-            )
-            ..addCommand(
-              const FakeCommand(
-                command: <String>['tail', '-n', '0', '-F', '/private/var/log/system.log'],
-              ),
-            );
-
-          final device = IOSSimulator(
-            '123456',
-            cpuArch: CpuArch.x64,
-            name: 'iPhone 11',
-            simulatorCategory: 'iOS 10.0',
-            simControl: simControl,
-            logger: logger,
-          );
-          final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(
-              mockIosProject,
-              null,
-              toolContext: FakeToolContext(fs: fileSystem),
+            ),
+          )
+          ..addCommand(
+            const FakeCommand(
+              command: <String>['tail', '-n', '0', '-F', '/private/var/log/system.log'],
             ),
           );
 
-          final List<String> lines = await logReader.logLines.toList();
-          expect(lines, <String>[
-            'flutter: The Dart VM service is listening on http://127.0.0.1:64213/1Uoeu523990=/',
-          ]);
-          expect(fakeProcessManager, hasNoRemainingExpectations);
-        },
-        overrides: <Type, Generator>{
-          ProcessManager: () => fakeProcessManager,
-          FileSystem: () => fileSystem,
-          Platform: () => osx,
-          Xcode: () => xcode,
-        },
-      );
+        final device = IOSSimulator(
+          '123456',
+          cpuArch: CpuArch.x64,
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+          name: 'iPhone 11',
+          simulatorCategory: 'iOS 10.0',
+          simControl: simControl,
+          analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: osx,
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+          plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            platform: osx,
+            processManager: fakeProcessManager,
+          ),
+          xcode: xcode,
+        );
+        final DeviceLogReader logReader = device.getLogReader(
+          app: await BuildableIOSApp.fromProject(
+            mockIosProject,
+            null,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: FakeToolContext(fs: fileSystem),
+          ),
+        );
 
-      testUsingContext(
-        'simulator can output `)`',
-        () async {
-          fakeProcessManager
-            ..addCommand(
-              const FakeCommand(
-                command: <String>['tail', '-n', '0', '-F', 'system.log'],
-                stdout: '''
+        final List<String> lines = await logReader.logLines.toList();
+        expect(lines, <String>[
+          'flutter: The Dart VM service is listening on http://127.0.0.1:64213/1Uoeu523990=/',
+        ]);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      test('simulator can output `)`', () async {
+        fakeProcessManager
+          ..addCommand(
+            const FakeCommand(
+              command: <String>['tail', '-n', '0', '-F', 'system.log'],
+              stdout: '''
 2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) The Dart VM service is listening on http://127.0.0.1:57701/
 2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) ))))))))))
 2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) #0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)''',
-              ),
-            )
-            ..addCommand(
-              const FakeCommand(
-                command: <String>['tail', '-n', '0', '-F', '/private/var/log/system.log'],
-              ),
-            );
-
-          final device = IOSSimulator(
-            '123456',
-            cpuArch: CpuArch.x64,
-            name: 'iPhone 11',
-            simulatorCategory: 'iOS 10.3',
-            simControl: simControl,
-            logger: logger,
-          );
-          final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(
-              mockIosProject,
-              null,
-              toolContext: FakeToolContext(fs: fileSystem),
+            ),
+          )
+          ..addCommand(
+            const FakeCommand(
+              command: <String>['tail', '-n', '0', '-F', '/private/var/log/system.log'],
             ),
           );
 
-          final List<String> lines = await logReader.logLines.toList();
-          expect(lines, <String>[
-            'The Dart VM service is listening on http://127.0.0.1:57701/',
-            '))))))))))',
-            '#0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)',
-          ]);
-          expect(fakeProcessManager, hasNoRemainingExpectations);
-        },
-        overrides: <Type, Generator>{
-          ProcessManager: () => fakeProcessManager,
-          FileSystem: () => fileSystem,
-          Platform: () => osx,
-          Xcode: () => xcode,
-        },
-      );
+        final device = IOSSimulator(
+          '123456',
+          cpuArch: CpuArch.x64,
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+          name: 'iPhone 11',
+          simulatorCategory: 'iOS 10.3',
+          simControl: simControl,
+          analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: osx,
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+          plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            platform: osx,
+            processManager: fakeProcessManager,
+          ),
+          xcode: xcode,
+        );
+        final DeviceLogReader logReader = device.getLogReader(
+          app: await BuildableIOSApp.fromProject(
+            mockIosProject,
+            null,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: FakeToolContext(fs: fileSystem),
+          ),
+        );
 
-      testUsingContext(
-        'multiline messages',
-        () async {
-          fakeProcessManager
-            ..addCommand(
-              const FakeCommand(
-                command: <String>['tail', '-n', '0', '-F', 'system.log'],
-                stdout: '''
+        final List<String> lines = await logReader.logLines.toList();
+        expect(lines, <String>[
+          'The Dart VM service is listening on http://127.0.0.1:57701/',
+          '))))))))))',
+          '#0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)',
+        ]);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      test('multiline messages', () async {
+        fakeProcessManager
+          ..addCommand(
+            const FakeCommand(
+              command: <String>['tail', '-n', '0', '-F', 'system.log'],
+              stdout: '''
 2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) Single line message
 2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) Multi line message
   continues...
@@ -739,50 +868,61 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
   and goes...
 2017-09-13 15:36:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) Single line message, not the part of the above
 ''',
-              ),
-            )
-            ..addCommand(
-              const FakeCommand(
-                command: <String>['tail', '-n', '0', '-F', '/private/var/log/system.log'],
-              ),
-            );
-
-          final device = IOSSimulator(
-            '123456',
-            cpuArch: CpuArch.x64,
-            name: 'iPhone 11',
-            simulatorCategory: 'iOS 10.3',
-            simControl: simControl,
-            logger: logger,
-          );
-          final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(
-              mockIosProject,
-              null,
-              toolContext: FakeToolContext(fs: fileSystem),
+            ),
+          )
+          ..addCommand(
+            const FakeCommand(
+              command: <String>['tail', '-n', '0', '-F', '/private/var/log/system.log'],
             ),
           );
 
-          final List<String> lines = await logReader.logLines.toList();
-          expect(lines, <String>[
-            'Single line message',
-            'Multi line message',
-            '  continues...',
-            '  continues...',
-            'Multi line message again',
-            '  and it goes...',
-            '  and goes...',
-            'Single line message, not the part of the above',
-          ]);
-          expect(fakeProcessManager, hasNoRemainingExpectations);
-        },
-        overrides: <Type, Generator>{
-          ProcessManager: () => fakeProcessManager,
-          FileSystem: () => fileSystem,
-          Platform: () => osx,
-          Xcode: () => xcode,
-        },
-      );
+        final device = IOSSimulator(
+          '123456',
+          cpuArch: CpuArch.x64,
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+          name: 'iPhone 11',
+          simulatorCategory: 'iOS 10.3',
+          simControl: simControl,
+          analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: osx,
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+          plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            platform: osx,
+            processManager: fakeProcessManager,
+          ),
+          xcode: xcode,
+        );
+        final DeviceLogReader logReader = device.getLogReader(
+          app: await BuildableIOSApp.fromProject(
+            mockIosProject,
+            null,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: FakeToolContext(fs: fileSystem),
+          ),
+        );
+
+        final List<String> lines = await logReader.logLines.toList();
+        expect(lines, <String>[
+          'Single line message',
+          'Multi line message',
+          '  continues...',
+          '  continues...',
+          'Multi line message again',
+          '  and it goes...',
+          '  and goes...',
+          'Single line message, not the part of the above',
+        ]);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
     });
 
     group('unified logging', () {
@@ -792,34 +932,32 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         logger = BufferLogger.test();
       });
 
-      testUsingContext(
-        'log reader handles escaped multiline messages',
-        () async {
-          const logPredicate =
-              'eventType = logEvent AND processImagePath ENDSWITH "My Super Awesome App" '
-              'AND (senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" '
-              'OR processImageUUID == senderImageUUID '
-              'OR eventMessage CONTAINS "UIScene life cycle is required" '
-              'OR eventMessage CONTAINS "`UIScene` lifecycle will soon be required" '
-              'OR eventMessage CONTAINS "This process does not adopt UIScene lifecycle.") '
-              'AND NOT(eventMessage CONTAINS ": could not find icon '
-              'for representation -> com.apple.") AND NOT(eventMessage BEGINSWITH "assertion failed: ") '
-              'AND NOT(eventMessage CONTAINS " libxpc.dylib ")';
-          fakeProcessManager.addCommand(
-            const FakeCommand(
-              command: <String>[
-                'xcrun',
-                'simctl',
-                'spawn',
-                '123456',
-                'log',
-                'stream',
-                '--style',
-                'json',
-                '--predicate',
-                logPredicate,
-              ],
-              stdout: r'''
+      test('log reader handles escaped multiline messages', () async {
+        const logPredicate =
+            'eventType = logEvent AND processImagePath ENDSWITH "My Super Awesome App" '
+            'AND (senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" '
+            'OR processImageUUID == senderImageUUID '
+            'OR eventMessage CONTAINS "UIScene life cycle is required" '
+            'OR eventMessage CONTAINS "`UIScene` lifecycle will soon be required" '
+            'OR eventMessage CONTAINS "This process does not adopt UIScene lifecycle.") '
+            'AND NOT(eventMessage CONTAINS ": could not find icon '
+            'for representation -> com.apple.") AND NOT(eventMessage BEGINSWITH "assertion failed: ") '
+            'AND NOT(eventMessage CONTAINS " libxpc.dylib ")';
+        fakeProcessManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'xcrun',
+              'simctl',
+              'spawn',
+              '123456',
+              'log',
+              'stream',
+              '--style',
+              'json',
+              '--predicate',
+              logPredicate,
+            ],
+            stdout: r'''
 },{
   "traceID" : 37579774151491588,
   "eventMessage" : "Single line message",
@@ -833,173 +971,202 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
   "eventType" : "logEvent"
 },{
 ''',
-            ),
-          );
+          ),
+        );
 
-          final device = IOSSimulator(
-            '123456',
-            cpuArch: CpuArch.x64,
-            name: 'iPhone 11',
-            simulatorCategory: 'iOS 11.0',
-            simControl: simControl,
+        final device = IOSSimulator(
+          '123456',
+          cpuArch: CpuArch.x64,
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+          name: 'iPhone 11',
+          simulatorCategory: 'iOS 11.0',
+          simControl: simControl,
+          analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
             logger: logger,
-          );
-          final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(
-              mockIosProject,
-              null,
-              toolContext: FakeToolContext(fs: fileSystem),
-            ),
-          );
-
-          final List<String> lines = await logReader.logLines.toList();
-          expect(lines, <String>[
-            'Single line message',
-            'Multi line message\n  continues...\n  continues...',
-            'Single line message, not the part of the above',
-          ]);
-          expect(fakeProcessManager, hasNoRemainingExpectations);
-        },
-        overrides: <Type, Generator>{
-          ProcessManager: () => fakeProcessManager,
-          FileSystem: () => fileSystem,
-        },
-      );
-
-      testUsingContext(
-        'log reader throws ToolExit when UIScene error message is detected',
-        () async {
-          const logPredicate =
-              'eventType = logEvent AND processImagePath ENDSWITH "My Super Awesome App" '
-              'AND (senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" '
-              'OR processImageUUID == senderImageUUID '
-              'OR eventMessage CONTAINS "UIScene life cycle is required" '
-              'OR eventMessage CONTAINS "`UIScene` lifecycle will soon be required" '
-              'OR eventMessage CONTAINS "This process does not adopt UIScene lifecycle.") '
-              'AND NOT(eventMessage CONTAINS ": could not find icon '
-              'for representation -> com.apple.") AND NOT(eventMessage BEGINSWITH "assertion failed: ") '
-              'AND NOT(eventMessage CONTAINS " libxpc.dylib ")';
-          fakeProcessManager.addCommand(
-            const FakeCommand(
-              command: <String>[
-                'xcrun',
-                'simctl',
-                'spawn',
-                '123456',
-                'log',
-                'stream',
-                '--style',
-                'json',
-                '--predicate',
-                logPredicate,
-              ],
-              stdout:
-                  '},{\n'
-                  '  "traceID" : 37579774151491588,\n'
-                  '  "eventMessage" : "UIScene life cycle is required",\n'
-                  '  "eventType" : "logEvent"\n'
-                  '},{\n',
-            ),
-          );
-
-          final device = IOSSimulator(
-            '123456',
-            cpuArch: CpuArch.x64,
-            name: 'iPhone 11',
-            simulatorCategory: 'iOS 11.0',
-            simControl: simControl,
+            platform: osx,
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+          plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
             logger: logger,
-          );
-          final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(
-              mockIosProject,
-              null,
-              toolContext: FakeToolContext(fs: fileSystem),
-            ),
-          );
+            processManager: fakeProcessManager,
+          ),
+          xcode: xcode,
+        );
+        final DeviceLogReader logReader = device.getLogReader(
+          app: await BuildableIOSApp.fromProject(
+            mockIosProject,
+            null,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: FakeToolContext(fs: fileSystem),
+          ),
+        );
 
-          final completer = Completer<void>();
-          runZonedGuarded<void>(
-            () {
-              logReader.logLines.listen((_) {});
-            },
-            (Object error, StackTrace stack) {
-              expect(error, isA<ToolExit>());
-              expect(error.toString(), contains(kUISceneMigrationRequiredError));
-              completer.complete();
-            },
-          );
+        final List<String> lines = await logReader.logLines.toList();
+        expect(lines, <String>[
+          'Single line message',
+          'Multi line message\n  continues...\n  continues...',
+          'Single line message, not the part of the above',
+        ]);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
 
-          await completer.future;
-          expect(fakeProcessManager, hasNoRemainingExpectations);
-        },
-        overrides: <Type, Generator>{
-          ProcessManager: () => fakeProcessManager,
-          FileSystem: () => fileSystem,
-          Platform: () => osx,
-          Xcode: () => xcode,
-          Logger: () => logger,
-        },
-      );
+      test('log reader throws ToolExit when UIScene error message is detected', () async {
+        const logPredicate =
+            'eventType = logEvent AND processImagePath ENDSWITH "My Super Awesome App" '
+            'AND (senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" '
+            'OR processImageUUID == senderImageUUID '
+            'OR eventMessage CONTAINS "UIScene life cycle is required" '
+            'OR eventMessage CONTAINS "`UIScene` lifecycle will soon be required" '
+            'OR eventMessage CONTAINS "This process does not adopt UIScene lifecycle.") '
+            'AND NOT(eventMessage CONTAINS ": could not find icon '
+            'for representation -> com.apple.") AND NOT(eventMessage BEGINSWITH "assertion failed: ") '
+            'AND NOT(eventMessage CONTAINS " libxpc.dylib ")';
+        fakeProcessManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'xcrun',
+              'simctl',
+              'spawn',
+              '123456',
+              'log',
+              'stream',
+              '--style',
+              'json',
+              '--predicate',
+              logPredicate,
+            ],
+            stdout:
+                '},{\n'
+                '  "traceID" : 37579774151491588,\n'
+                '  "eventMessage" : "UIScene life cycle is required",\n'
+                '  "eventType" : "logEvent"\n'
+                '},{\n',
+          ),
+        );
 
-      testUsingContext(
-        'log reader handles bad output',
-        () async {
-          const logPredicate =
-              'eventType = logEvent AND processImagePath ENDSWITH "My Super Awesome App" '
-              'AND (senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" '
-              'OR processImageUUID == senderImageUUID '
-              'OR eventMessage CONTAINS "UIScene life cycle is required" '
-              'OR eventMessage CONTAINS "`UIScene` lifecycle will soon be required" '
-              'OR eventMessage CONTAINS "This process does not adopt UIScene lifecycle.") '
-              'AND NOT(eventMessage CONTAINS ": could not find icon '
-              'for representation -> com.apple.") AND NOT(eventMessage BEGINSWITH "assertion failed: ") '
-              'AND NOT(eventMessage CONTAINS " libxpc.dylib ")';
-          fakeProcessManager.addCommand(
-            const FakeCommand(
-              command: <String>[
-                'xcrun',
-                'simctl',
-                'spawn',
-                '123456',
-                'log',
-                'stream',
-                '--style',
-                'json',
-                '--predicate',
-                logPredicate,
-              ],
-              stdout: '"eventMessage" : "message with incorrect escaping""',
-            ),
-          );
-
-          final device = IOSSimulator(
-            '123456',
-            cpuArch: CpuArch.x64,
-            name: 'iPhone 11',
-            simulatorCategory: 'iOS 11.0',
-            simControl: simControl,
+        final device = IOSSimulator(
+          '123456',
+          cpuArch: CpuArch.x64,
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+          name: 'iPhone 11',
+          simulatorCategory: 'iOS 11.0',
+          simControl: simControl,
+          analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
             logger: logger,
-          );
-          final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(
-              mockIosProject,
-              null,
-              toolContext: FakeToolContext(fs: fileSystem),
-            ),
-          );
+            platform: osx,
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+          plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            platform: osx,
+            processManager: fakeProcessManager,
+          ),
+          xcode: xcode,
+        );
+        final DeviceLogReader logReader = device.getLogReader(
+          app: await BuildableIOSApp.fromProject(
+            mockIosProject,
+            null,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: FakeToolContext(fs: fileSystem),
+          ),
+        );
 
-          final List<String> lines = await logReader.logLines.toList();
-          expect(lines, isEmpty);
-          expect(logger.errorText, contains('Logger returned non-JSON response'));
-          expect(fakeProcessManager, hasNoRemainingExpectations);
-        },
-        overrides: <Type, Generator>{
-          ProcessManager: () => fakeProcessManager,
-          FileSystem: () => fileSystem,
-          Logger: () => logger,
-        },
-      );
+        final completer = Completer<void>();
+        runZonedGuarded<void>(
+          () {
+            logReader.logLines.listen((_) {});
+          },
+          (Object error, StackTrace stack) {
+            expect(error, isA<ToolExit>());
+            expect(error.toString(), contains(kUISceneMigrationRequiredError));
+            completer.complete();
+          },
+        );
+
+        await completer.future;
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      test('log reader handles bad output', () async {
+        const logPredicate =
+            'eventType = logEvent AND processImagePath ENDSWITH "My Super Awesome App" '
+            'AND (senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" '
+            'OR processImageUUID == senderImageUUID '
+            'OR eventMessage CONTAINS "UIScene life cycle is required" '
+            'OR eventMessage CONTAINS "`UIScene` lifecycle will soon be required" '
+            'OR eventMessage CONTAINS "This process does not adopt UIScene lifecycle.") '
+            'AND NOT(eventMessage CONTAINS ": could not find icon '
+            'for representation -> com.apple.") AND NOT(eventMessage BEGINSWITH "assertion failed: ") '
+            'AND NOT(eventMessage CONTAINS " libxpc.dylib ")';
+        fakeProcessManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'xcrun',
+              'simctl',
+              'spawn',
+              '123456',
+              'log',
+              'stream',
+              '--style',
+              'json',
+              '--predicate',
+              logPredicate,
+            ],
+            stdout: '"eventMessage" : "message with incorrect escaping""',
+          ),
+        );
+
+        final device = IOSSimulator(
+          '123456',
+          cpuArch: CpuArch.x64,
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+          name: 'iPhone 11',
+          simulatorCategory: 'iOS 11.0',
+          simControl: simControl,
+          analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: osx,
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+          plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            processManager: fakeProcessManager,
+          ),
+          xcode: xcode,
+        );
+        final DeviceLogReader logReader = device.getLogReader(
+          app: await BuildableIOSApp.fromProject(
+            mockIosProject,
+            null,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: FakeToolContext(fs: fileSystem),
+          ),
+        );
+
+        final List<String> lines = await logReader.logLines.toList();
+        expect(lines, isEmpty);
+        expect(logger.errorText, contains('Logger returned non-JSON response'));
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
     });
   });
 
@@ -1064,7 +1231,6 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
       xcode = Xcode.test(
-        processManager: FakeProcessManager.any(),
         toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
       );
 
@@ -1078,7 +1244,6 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         ),
       ]);
       xcodeBadSimctl = Xcode.test(
-        processManager: fakeProcessManagerBadSimctl,
         toolContext: FakeToolContext.macosHost(processManager: fakeProcessManagerBadSimctl),
       );
       logger = BufferLogger.test();
@@ -1089,7 +1254,17 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         xcode: xcodeBadSimctl,
       );
       simulatorUtils = IOSSimulatorUtils(
-        xcode: xcode,
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(
           fs: fileSystem,
           logger: logger,
@@ -1102,9 +1277,20 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           platform: osx,
           processManager: fakeProcessManager,
         ),
+        xcode: xcode,
       );
       simulatorUtilsBadSimctl = IOSSimulatorUtils(
-        xcode: xcodeBadSimctl,
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(
           fs: fileSystem,
           logger: logger,
@@ -1117,10 +1303,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           platform: osx,
           processManager: fakeProcessManager,
         ),
+        xcode: xcodeBadSimctl,
       );
     });
 
-    testWithoutContext('getConnectedDevices succeeds', () async {
+    test('getConnectedDevices succeeds', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted', 'iOS', '--json'],
@@ -1147,7 +1334,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('IOSSimulatorUtils.getAttachedDevices succeeds', () async {
+    test('IOSSimulatorUtils.getAttachedDevices succeeds', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted', 'iOS', '--json'],
@@ -1174,7 +1361,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('getConnectedDevices handles bad simctl output', () async {
+    test('getConnectedDevices handles bad simctl output', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted', 'iOS', '--json'],
@@ -1188,7 +1375,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('getConnectedDevices handles simctl not properly installed', () async {
+    test('getConnectedDevices handles simctl not properly installed', () async {
       final List<BootedSimDevice> devices = await simControlBadSimctl.getConnectedDevices();
 
       expect(devices, isEmpty);
@@ -1199,7 +1386,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('getConnectedDevices handles simctl process exception', () async {
+    test('getConnectedDevices handles simctl process exception', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted', 'iOS', '--json'],
@@ -1217,7 +1404,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('getConnectedDevices handles simctl file system exception', () async {
+    test('getConnectedDevices handles simctl file system exception', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted', 'iOS', '--json'],
@@ -1233,30 +1420,39 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext(
-      'IOSSimulatorUtils.getAttachedDevices handles simctl not properly installed',
-      () async {
-        final List<IOSSimulator> devices = await simulatorUtilsBadSimctl.getAttachedDevices();
+    test('IOSSimulatorUtils.getAttachedDevices handles simctl not properly installed', () async {
+      final List<IOSSimulator> devices = await simulatorUtilsBadSimctl.getAttachedDevices();
 
-        expect(devices, isEmpty);
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      },
-    );
+      expect(devices, isEmpty);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
 
-    testWithoutContext('sdkMajorVersion defaults to 11 when sdkNameAndVersion is junk', () async {
+    test('sdkMajorVersion defaults to 11 when sdkNameAndVersion is junk', () async {
       final iosSimulatorA = IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'Testo',
         simulatorCategory: 'NaN',
         simControl: simControl,
-        logger: logger,
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+        xcode: FakeXcode(),
       );
 
       expect(await iosSimulatorA.sdkMajorVersion, 11);
     });
 
-    testWithoutContext('.install() handles exceptions', () async {
+    test('.install() handles exceptions', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'install', deviceId, appId],
@@ -1270,7 +1466,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       );
     });
 
-    testWithoutContext('.uninstall() handles exceptions', () async {
+    test('.uninstall() handles exceptions', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'uninstall', deviceId, appId],
@@ -1284,7 +1480,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       );
     });
 
-    testWithoutContext('.launch() handles exceptions', () async {
+    test('.launch() handles exceptions', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'launch', deviceId, appId],
@@ -1298,7 +1494,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       );
     });
 
-    testWithoutContext('.stopApp() handles exceptions', () async {
+    test('.stopApp() handles exceptions', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'terminate', deviceId, appId],
@@ -1313,20 +1509,32 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('simulator stopApp handles null app package', () async {
+    test('simulator stopApp handles null app package', () async {
       final iosSimulator = IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'Testo',
         simulatorCategory: 'NaN',
         simControl: simControl,
-        logger: logger,
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+        xcode: FakeXcode(),
       );
 
       expect(await iosSimulator.stopApp(null), isFalse);
     });
 
-    testWithoutContext('listAvailableIOSRuntimes succeeds', () async {
+    test('listAvailableIOSRuntimes succeeds', () async {
       const validRuntimesOutput = '''
 {
   "runtimes" : [
@@ -1470,7 +1678,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(runtime3.name, 'iOS 17.0');
     });
 
-    testWithoutContext('listAvailableIOSRuntimes handles bad simctl output', () async {
+    test('listAvailableIOSRuntimes handles bad simctl output', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'list', 'runtimes', 'available', 'iOS', '--json'],
@@ -1485,7 +1693,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext(
+    test(
       'IOSSimulatorUtils.getAvailableIOSRuntimes handles simctl not properly installed',
       () async {
         final List<IOSSimulatorRuntime> runtimes = await simulatorUtilsBadSimctl
@@ -1506,231 +1714,257 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     setUp(() {
       simControl = FakeSimControl();
       xcode = Xcode.test(
-        processManager: FakeProcessManager.any(),
         toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
       );
       testPlistParser = FakePlistParser();
       logger = BufferLogger.test();
     });
 
-    testUsingContext(
-      "startApp uses compiled app's Info.plist to find CFBundleIdentifier",
-      () async {
-        final device = IOSSimulator(
-          'x',
-          cpuArch: CpuArch.x64,
-          name: 'iPhone SE',
-          simulatorCategory: 'iOS 11.2',
-          simControl: simControl,
+    test("startApp uses compiled app's Info.plist to find CFBundleIdentifier", () async {
+      final device = IOSSimulator(
+        'x',
+        cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+        name: 'iPhone SE',
+        simulatorCategory: 'iOS 11.2',
+        simControl: simControl,
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
           logger: logger,
-        );
-        testPlistParser.setProperty('CFBundleIdentifier', 'correct');
-
-        final Directory mockDir = globals.fs.currentDirectory;
-        final IOSApp package = PrebuiltIOSApp(
-          projectBundleId: 'incorrect',
-          bundleName: 'name',
-          uncompressedBundle: mockDir,
-          applicationPackage: mockDir,
-        );
-
-        const mockInfo = BuildInfo(
-          BuildMode.debug,
-          'flavor',
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        );
-        final mockOptions = DebuggingOptions.disabled(mockInfo);
-        await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
-
-        expect(simControl.requests.single.appIdentifier, 'correct');
-      },
-      overrides: <Type, Generator>{
-        PlistParser: () => testPlistParser,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Xcode: () => xcode,
-      },
-    );
-
-    testUsingContext(
-      'startApp fails when cannot find CFBundleIdentifier',
-      () async {
-        final device = IOSSimulator(
-          'x',
-          cpuArch: CpuArch.x64,
-          name: 'iPhone SE',
-          simulatorCategory: 'iOS 11.2',
-          simControl: simControl,
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: testPlistParser,
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
           logger: logger,
-        );
+          processManager: FakeProcessManager.any(),
+        ),
+        xcode: xcode,
+      );
+      testPlistParser.setProperty('CFBundleIdentifier', 'correct');
 
-        final Directory mockDir = globals.fs.currentDirectory;
-        final IOSApp package = PrebuiltIOSApp(
-          projectBundleId: 'incorrect',
-          bundleName: 'name',
-          uncompressedBundle: mockDir,
-          applicationPackage: mockDir,
-        );
+      final Directory mockDir = fileSystem.currentDirectory;
+      final IOSApp package = PrebuiltIOSApp(
+        projectBundleId: 'incorrect',
+        bundleName: 'name',
+        uncompressedBundle: mockDir,
+        applicationPackage: mockDir,
+      );
 
-        const mockInfo = BuildInfo(
-          BuildMode.debug,
-          'flavor',
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        );
-        final mockOptions = DebuggingOptions.disabled(mockInfo);
-        final LaunchResult result = await device.startApp(
-          package,
-          prebuiltApplication: true,
-          debuggingOptions: mockOptions,
-        );
+      const mockInfo = BuildInfo(
+        BuildMode.debug,
+        'flavor',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      );
+      final mockOptions = DebuggingOptions.disabled(mockInfo);
+      await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
 
-        expect(result.started, isFalse);
-        expect(simControl.requests, isEmpty);
-        expect(
-          logger.errorText,
-          contains('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier'),
-        );
-      },
-      overrides: <Type, Generator>{
-        PlistParser: () => testPlistParser,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => logger,
-        Xcode: () => xcode,
-      },
-    );
+      expect(simControl.requests.single.appIdentifier, 'correct');
+    });
 
-    testUsingContext(
-      'startApp forwards all supported debugging options',
-      () async {
-        final device = IOSSimulator(
-          'x',
-          cpuArch: CpuArch.x64,
-          name: 'iPhone SE',
-          simulatorCategory: 'iOS 11.2',
-          simControl: simControl,
+    test('startApp fails when cannot find CFBundleIdentifier', () async {
+      final device = IOSSimulator(
+        'x',
+        cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+        name: 'iPhone SE',
+        simulatorCategory: 'iOS 11.2',
+        simControl: simControl,
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
           logger: logger,
-        );
-        testPlistParser.setProperty('CFBundleIdentifier', 'correct');
-
-        final Directory mockDir = globals.fs.currentDirectory;
-        final IOSApp package = PrebuiltIOSApp(
-          projectBundleId: 'correct',
-          bundleName: 'name',
-          uncompressedBundle: mockDir,
-          applicationPackage: mockDir,
-        );
-
-        const mockInfo = BuildInfo(
-          BuildMode.debug,
-          'flavor',
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        );
-        final mockOptions = DebuggingOptions.enabled(
-          mockInfo,
-          enableSoftwareRendering: true,
-          traceSystrace: true,
-          traceToFile: 'path/to/trace.binpb',
-          startPaused: true,
-          disableServiceAuthCodes: true,
-          skiaDeterministicRendering: true,
-          useTestFonts: true,
-          traceSkia: true,
-          traceAllowlist: 'foo,bar',
-          traceSkiaAllowlist: 'skia.a,skia.b',
-          endlessTraceBuffer: true,
-          profileMicrotasks: true,
-          profileStartup: true,
-          verboseSystemLogs: true,
-          purgePersistentCache: true,
-          dartFlags: '--baz',
-          enableImpeller: ImpellerStatus.disabled,
-          hostVmServicePort: 0,
-        );
-
-        await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
-        expect(
-          simControl.requests.single.launchArgs,
-          unorderedEquals(<String>[
-            '--enable-dart-profiling',
-            '--profile-startup',
-            '--enable-checked-mode',
-            '--verify-entry-points',
-            '--enable-software-rendering',
-            '--trace-systrace',
-            '--trace-to-file="path/to/trace.binpb"',
-            '--start-paused',
-            '--disable-service-auth-codes',
-            '--skia-deterministic-rendering',
-            '--use-test-fonts',
-            '--trace-skia',
-            '--trace-allowlist="foo,bar"',
-            '--trace-skia-allowlist="skia.a,skia.b"',
-            '--endless-trace-buffer',
-            '--profile-microtasks',
-            '--verbose-logging',
-            '--purge-persistent-cache',
-            '--enable-impeller=false',
-            '--dart-flags=--baz',
-            '--vm-service-port=0',
-          ]),
-        );
-      },
-      overrides: <Type, Generator>{
-        PlistParser: () => testPlistParser,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Xcode: () => xcode,
-      },
-    );
-
-    testUsingContext(
-      'startApp using route',
-      () async {
-        final device = IOSSimulator(
-          'x',
-          cpuArch: CpuArch.x64,
-          name: 'iPhone SE',
-          simulatorCategory: 'iOS 11.2',
-          simControl: simControl,
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: testPlistParser,
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
           logger: logger,
-        );
-        testPlistParser.setProperty('CFBundleIdentifier', 'correct');
+          processManager: FakeProcessManager.any(),
+        ),
+        xcode: xcode,
+      );
 
-        final Directory mockDir = globals.fs.currentDirectory;
-        final IOSApp package = PrebuiltIOSApp(
-          projectBundleId: 'correct',
-          bundleName: 'name',
-          uncompressedBundle: mockDir,
-          applicationPackage: mockDir,
-        );
+      final Directory mockDir = fileSystem.currentDirectory;
+      final IOSApp package = PrebuiltIOSApp(
+        projectBundleId: 'incorrect',
+        bundleName: 'name',
+        uncompressedBundle: mockDir,
+        applicationPackage: mockDir,
+      );
 
-        const mockInfo = BuildInfo(
-          BuildMode.debug,
-          'flavor',
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        );
-        final mockOptions = DebuggingOptions.enabled(mockInfo, enableSoftwareRendering: true);
-        await device.startApp(
-          package,
-          prebuiltApplication: true,
-          debuggingOptions: mockOptions,
-          route: '/animation',
-        );
+      const mockInfo = BuildInfo(
+        BuildMode.debug,
+        'flavor',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      );
+      final mockOptions = DebuggingOptions.disabled(mockInfo);
+      final LaunchResult result = await device.startApp(
+        package,
+        prebuiltApplication: true,
+        debuggingOptions: mockOptions,
+      );
 
-        expect(simControl.requests.single.launchArgs, contains('--route=/animation'));
-      },
-      overrides: <Type, Generator>{
-        PlistParser: () => testPlistParser,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Xcode: () => xcode,
-      },
-    );
+      expect(result.started, isFalse);
+      expect(simControl.requests, isEmpty);
+      expect(
+        logger.errorText,
+        contains('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier'),
+      );
+    });
+
+    test('startApp forwards all supported debugging options', () async {
+      final device = IOSSimulator(
+        'x',
+        cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+        name: 'iPhone SE',
+        simulatorCategory: 'iOS 11.2',
+        simControl: simControl,
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: testPlistParser,
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          processManager: FakeProcessManager.any(),
+        ),
+        xcode: xcode,
+      );
+      testPlistParser.setProperty('CFBundleIdentifier', 'correct');
+
+      final Directory mockDir = fileSystem.currentDirectory;
+      final IOSApp package = PrebuiltIOSApp(
+        projectBundleId: 'correct',
+        bundleName: 'name',
+        uncompressedBundle: mockDir,
+        applicationPackage: mockDir,
+      );
+
+      const mockInfo = BuildInfo(
+        BuildMode.debug,
+        'flavor',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      );
+      final mockOptions = DebuggingOptions.enabled(
+        mockInfo,
+        enableSoftwareRendering: true,
+        traceSystrace: true,
+        traceToFile: 'path/to/trace.binpb',
+        startPaused: true,
+        disableServiceAuthCodes: true,
+        skiaDeterministicRendering: true,
+        useTestFonts: true,
+        traceSkia: true,
+        traceAllowlist: 'foo,bar',
+        traceSkiaAllowlist: 'skia.a,skia.b',
+        endlessTraceBuffer: true,
+        profileMicrotasks: true,
+        profileStartup: true,
+        verboseSystemLogs: true,
+        purgePersistentCache: true,
+        dartFlags: '--baz',
+        enableImpeller: ImpellerStatus.disabled,
+        hostVmServicePort: 0,
+      );
+
+      await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
+      expect(
+        simControl.requests.single.launchArgs,
+        unorderedEquals(<String>[
+          '--enable-dart-profiling',
+          '--profile-startup',
+          '--enable-checked-mode',
+          '--verify-entry-points',
+          '--enable-software-rendering',
+          '--trace-systrace',
+          '--trace-to-file="path/to/trace.binpb"',
+          '--start-paused',
+          '--disable-service-auth-codes',
+          '--skia-deterministic-rendering',
+          '--use-test-fonts',
+          '--trace-skia',
+          '--trace-allowlist="foo,bar"',
+          '--trace-skia-allowlist="skia.a,skia.b"',
+          '--endless-trace-buffer',
+          '--profile-microtasks',
+          '--verbose-logging',
+          '--purge-persistent-cache',
+          '--enable-impeller=false',
+          '--dart-flags=--baz',
+          '--vm-service-port=0',
+        ]),
+      );
+    });
+
+    test('startApp using route', () async {
+      final device = IOSSimulator(
+        'x',
+        cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+        name: 'iPhone SE',
+        simulatorCategory: 'iOS 11.2',
+        simControl: simControl,
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: testPlistParser,
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          processManager: FakeProcessManager.any(),
+        ),
+        xcode: xcode,
+      );
+      testPlistParser.setProperty('CFBundleIdentifier', 'correct');
+
+      final Directory mockDir = fileSystem.currentDirectory;
+      final IOSApp package = PrebuiltIOSApp(
+        projectBundleId: 'correct',
+        bundleName: 'name',
+        uncompressedBundle: mockDir,
+        applicationPackage: mockDir,
+      );
+
+      const mockInfo = BuildInfo(
+        BuildMode.debug,
+        'flavor',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      );
+      final mockOptions = DebuggingOptions.enabled(mockInfo, enableSoftwareRendering: true);
+      await device.startApp(
+        package,
+        prebuiltApplication: true,
+        debuggingOptions: mockOptions,
+        route: '/animation',
+      );
+
+      expect(simControl.requests.single.launchArgs, contains('--route=/animation'));
+    });
 
     group('waiting for the log stream', () {
       final logStreamCommand = <Pattern>[
@@ -1756,80 +1990,86 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       IOSSimulator buildDevice() => IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'iPhone SE',
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
-        logger: logger,
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: osx,
+        ),
+        plistParser: testPlistParser,
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          processManager: processManager,
+        ),
+        xcode: xcode,
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
       );
 
       IOSApp buildPackage() => PrebuiltIOSApp(
         projectBundleId: 'correct',
         bundleName: 'name',
-        uncompressedBundle: globals.fs.currentDirectory,
-        applicationPackage: globals.fs.currentDirectory,
+        uncompressedBundle: fileSystem.currentDirectory,
+        applicationPackage: fileSystem.currentDirectory,
       );
 
-      testUsingContext(
-        'startApp waits for the log stream to be ready before each launch',
-        () {
-          // Regression test for https://github.com/flutter/flutter/issues/181771.
-          fakeAsync((FakeAsync async) {
-            final firstLogProcess = FakeStreamingProcess();
-            final secondLogProcess = FakeStreamingProcess();
-            processManager.addCommand(
-              FakeCommand(command: logStreamCommand, process: firstLogProcess),
-            );
-            processManager.addCommand(
-              FakeCommand(command: logStreamCommand, process: secondLogProcess),
-            );
-            final IOSSimulator device = buildDevice();
-            final IOSApp package = buildPackage();
+      test('startApp waits for the log stream to be ready before each launch', () {
+        // Regression test for https://github.com/flutter/flutter/issues/181771.
+        fakeAsync((FakeAsync async) {
+          final firstLogProcess = FakeStreamingProcess();
+          final secondLogProcess = FakeStreamingProcess();
+          processManager.addCommand(
+            FakeCommand(command: logStreamCommand, process: firstLogProcess),
+          );
+          processManager.addCommand(
+            FakeCommand(command: logStreamCommand, process: secondLogProcess),
+          );
+          final IOSSimulator device = buildDevice();
+          final IOSApp package = buildPackage();
 
-            device.startApp(
-              package,
-              prebuiltApplication: true,
-              debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-            );
-            async.elapse(const Duration(seconds: 1));
-            expect(simControl.requests, isEmpty);
+          device.startApp(
+            package,
+            prebuiltApplication: true,
+            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+          );
+          async.elapse(const Duration(seconds: 1));
+          expect(simControl.requests, isEmpty);
 
-            firstLogProcess.write('Filtering the log data using "type == 1024"\n');
-            async.flushMicrotasks();
-            expect(simControl.requests, hasLength(1));
+          firstLogProcess.write('Filtering the log data using "type == 1024"\n');
+          async.flushMicrotasks();
+          expect(simControl.requests, hasLength(1));
 
-            firstLogProcess.write(
-              '"eventMessage" : "The Dart VM service is listening on http://127.0.0.1:1234/abcdef/"\n',
-            );
-            async.elapse(const Duration(seconds: 1));
+          firstLogProcess.write(
+            '"eventMessage" : "The Dart VM service is listening on http://127.0.0.1:1234/abcdef/"\n',
+          );
+          async.elapse(const Duration(seconds: 1));
 
-            // The first launch stopped the log stream, so this one starts a new one.
-            device.startApp(
-              package,
-              prebuiltApplication: true,
-              debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-            );
-            async.elapse(const Duration(seconds: 1));
-            expect(simControl.requests, hasLength(1));
+          // The first launch stopped the log stream, so this one starts a new one.
+          device.startApp(
+            package,
+            prebuiltApplication: true,
+            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+          );
+          async.elapse(const Duration(seconds: 1));
+          expect(simControl.requests, hasLength(1));
 
-            secondLogProcess.write('Filtering the log data using "type == 1024"\n');
-            async.flushMicrotasks();
-            expect(simControl.requests, hasLength(2));
+          secondLogProcess.write('Filtering the log data using "type == 1024"\n');
+          async.flushMicrotasks();
+          expect(simControl.requests, hasLength(2));
 
-            async.elapse(const Duration(seconds: 30));
-            expect(logger.errorText, isEmpty);
-            expect(processManager, hasNoRemainingExpectations);
-          });
-        },
-        overrides: <Type, Generator>{
-          PlistParser: () => testPlistParser,
-          FileSystem: () => fileSystem,
-          ProcessManager: () => processManager,
-          Logger: () => logger,
-          Xcode: () => xcode,
-        },
-      );
+          async.elapse(const Duration(seconds: 30));
+          expect(logger.errorText, isEmpty);
+          expect(processManager, hasNoRemainingExpectations);
+        });
+      });
 
-      testUsingContext(
+      test(
         'startApp finds the VM Service when the log reader is listened to before startApp',
         () async {
           // `flutter run` listens to the log reader to echo logs before it calls startApp.
@@ -1865,154 +2105,156 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           ]);
           expect(processManager, hasNoRemainingExpectations);
         },
-        overrides: <Type, Generator>{
-          PlistParser: () => testPlistParser,
-          FileSystem: () => fileSystem,
-          ProcessManager: () => processManager,
-          Logger: () => logger,
-          Xcode: () => xcode,
-        },
       );
 
-      testUsingContext(
-        'startApp warns and keeps waiting if the log stream is slow to become ready',
-        () {
-          fakeAsync((FakeAsync async) {
-            final logProcess = FakeStreamingProcess();
-            processManager.addCommand(FakeCommand(command: logStreamCommand, process: logProcess));
+      test('startApp warns and keeps waiting if the log stream is slow to become ready', () {
+        fakeAsync((FakeAsync async) {
+          final logProcess = FakeStreamingProcess();
+          processManager.addCommand(FakeCommand(command: logStreamCommand, process: logProcess));
 
-            buildDevice().startApp(
-              buildPackage(),
-              prebuiltApplication: true,
-              debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-            );
-            async.elapse(const Duration(seconds: 30));
-            expect(
-              logger.errorText,
-              contains('The iOS simulator log stream did not start after 30 seconds.'),
-            );
-            expect(simControl.requests, isEmpty);
+          buildDevice().startApp(
+            buildPackage(),
+            prebuiltApplication: true,
+            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+          );
+          async.elapse(const Duration(seconds: 30));
+          expect(
+            logger.errorText,
+            contains('The iOS simulator log stream did not start after 30 seconds.'),
+          );
+          expect(simControl.requests, isEmpty);
 
-            logProcess.write('Filtering the log data using "type == 1024"\n');
-            async.flushMicrotasks();
-            expect(simControl.requests, hasLength(1));
-            expect(processManager, hasNoRemainingExpectations);
-          });
-        },
-        overrides: <Type, Generator>{
-          PlistParser: () => testPlistParser,
-          FileSystem: () => fileSystem,
-          ProcessManager: () => processManager,
-          Logger: () => logger,
-          Xcode: () => xcode,
-        },
-      );
+          logProcess.write('Filtering the log data using "type == 1024"\n');
+          async.flushMicrotasks();
+          expect(simControl.requests, hasLength(1));
+          expect(processManager, hasNoRemainingExpectations);
+        });
+      });
     });
   });
 
   group('IOSDevice.isSupportedForProject', () {
     late FakeSimControl simControl;
-    late Xcode xcode;
 
     setUp(() {
       simControl = FakeSimControl();
-      xcode = Xcode.test(
-        processManager: FakeProcessManager.any(),
-        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
-      );
     });
 
-    testUsingContext(
-      'is true on module project',
-      () async {
-        globals.fs.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync(r'''
+    test('is true on module project', () async {
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
 name: example
 
 flutter:
   module: {}
 ''');
-        final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
-          globals.fs.currentDirectory,
-        );
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
+        fileSystem.currentDirectory,
+      );
 
-        final simulator = IOSSimulator(
-          'test',
-          cpuArch: CpuArch.x64,
-          name: 'iPhone 11',
-          simControl: simControl,
-          simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-          logger: logger,
-        );
-        expect(simulator.isSupportedForProject(flutterProject), true);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem.test(),
-        ProcessManager: () => FakeProcessManager.any(),
-        Xcode: () => xcode,
-      },
-    );
-
-    testUsingContext(
-      'is true with editable host app',
-      () async {
-        globals.fs.file('pubspec.yaml').createSync();
-        globals.fs.directory('ios').createSync();
-        final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
-          globals.fs.currentDirectory,
-        );
-
-        final simulator = IOSSimulator(
-          'test',
-          cpuArch: CpuArch.x64,
-          name: 'iPhone 11',
-          simControl: simControl,
-          simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-          logger: logger,
-        );
-        expect(simulator.isSupportedForProject(flutterProject), true);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem.test(),
-        ProcessManager: () => FakeProcessManager.any(),
-        Xcode: () => xcode,
-      },
-    );
-
-    testUsingContext(
-      'is false with no host app and no module',
-      () async {
-        globals.fs.file('pubspec.yaml').createSync();
-        final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
-          globals.fs.currentDirectory,
-        );
-
-        final simulator = IOSSimulator(
-          'test',
-          cpuArch: CpuArch.x64,
-          name: 'iPhone 11',
-          simControl: simControl,
-          simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-          logger: logger,
-        );
-        expect(simulator.isSupportedForProject(flutterProject), false);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem.test(),
-        ProcessManager: () => FakeProcessManager.any(),
-        Xcode: () => xcode,
-      },
-    );
-
-    testUsingContext('createDevFSWriter returns a LocalDevFSWriter', () {
       final simulator = IOSSimulator(
         'test',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'iPhone 11',
         simControl: simControl,
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-        logger: logger,
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+        xcode: FakeXcode(),
+      );
+      expect(simulator.isSupportedForProject(flutterProject), true);
+    });
+
+    test('is true with editable host app', () async {
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.directory('ios').createSync();
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
+        fileSystem.currentDirectory,
+      );
+
+      final simulator = IOSSimulator(
+        'test',
+        cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+        name: 'iPhone 11',
+        simControl: simControl,
+        simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+        xcode: FakeXcode(),
+      );
+      expect(simulator.isSupportedForProject(flutterProject), true);
+    });
+
+    test('is false with no host app and no module', () async {
+      fileSystem.file('pubspec.yaml').createSync();
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
+        fileSystem.currentDirectory,
+      );
+
+      final simulator = IOSSimulator(
+        'test',
+        cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+        name: 'iPhone 11',
+        simControl: simControl,
+        simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+        xcode: FakeXcode(),
+      );
+      expect(simulator.isSupportedForProject(flutterProject), false);
+    });
+
+    test('createDevFSWriter returns a LocalDevFSWriter', () {
+      final simulator = IOSSimulator(
+        'test',
+        cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+        name: 'iPhone 11',
+        simControl: simControl,
+        simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+        analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: osx,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+        xcode: FakeXcode(),
       );
 
       expect(simulator.createDevFSWriter(null, ''), isA<LocalDevFSWriter>());

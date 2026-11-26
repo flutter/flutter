@@ -38,7 +38,7 @@ void main() {
       );
     });
 
-    testWithoutContext('android_x64', () async {
+    test('android_x64', () async {
       processManager.addCommand(
         FakeCommand(
           command: <String>[
@@ -59,7 +59,7 @@ void main() {
       expect(result, 0);
     });
 
-    testWithoutContext('iOS arm64', () async {
+    test('iOS arm64', () async {
       final String genSnapshotPath = artifacts.getArtifactPath(
         Artifact.genSnapshotArm64,
         platform: TargetPlatform.ios,
@@ -77,7 +77,7 @@ void main() {
       expect(result, 0);
     });
 
-    testWithoutContext('--strip filters error output from gen_snapshot', () async {
+    test('--strip filters error output from gen_snapshot', () async {
       processManager.addCommand(
         FakeCommand(
           command: <String>[
@@ -120,17 +120,14 @@ void main() {
       snapshotter = AOTSnapshotter(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
-        xcode: Xcode.test(
-          processManager: processManager,
-          toolContext: FakeToolContext.macosHost(processManager: processManager),
-        ),
+        xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
         artifacts: artifacts,
         processManager: processManager,
         windowsLinkerPath: r'C:\VS\link.exe',
       );
     });
 
-    testWithoutContext('does not build iOS with debug build mode', () async {
+    test('does not build iOS with debug build mode', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
 
       expect(
@@ -147,7 +144,7 @@ void main() {
       );
     });
 
-    testWithoutContext('does not build android-arm with debug build mode', () async {
+    test('does not build android-arm with debug build mode', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
 
       expect(
@@ -162,7 +159,7 @@ void main() {
       );
     });
 
-    testWithoutContext('does not build android-arm64 with debug build mode', () async {
+    test('does not build android-arm64 with debug build mode', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
 
       expect(
@@ -177,7 +174,7 @@ void main() {
       );
     });
 
-    testWithoutContext('builds iOS snapshot with dwarfStackTraces', () async {
+    test('builds iOS snapshot with dwarfStackTraces', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
       final String debugPath = fileSystem.path.join('foo', 'app.ios-arm64.symbols');
       final String genSnapshotPath = artifacts.getArtifactPath(
@@ -240,7 +237,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('builds iOS snapshot with obfuscate', () async {
+    test('builds iOS snapshot with obfuscate', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
       final String genSnapshotPath = artifacts.getArtifactPath(
         Artifact.genSnapshotArm64,
@@ -299,7 +296,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('builds iOS snapshot', () async {
+    test('builds iOS snapshot', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
       final String genSnapshotPath = artifacts.getArtifactPath(
         Artifact.genSnapshotArm64,
@@ -357,7 +354,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('builds shared library for android-arm (32bit)', () async {
+    test('builds shared library for android-arm (32bit)', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
       processManager.addCommand(
         FakeCommand(
@@ -388,7 +385,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('builds shared library for android-arm with dwarf stack traces', () async {
+    test('builds shared library for android-arm with dwarf stack traces', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
       final String debugPath = fileSystem.path.join('foo', 'app.android-arm.symbols');
       processManager.addCommand(
@@ -424,7 +421,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('builds shared library for android-arm with obfuscate', () async {
+    test('builds shared library for android-arm with obfuscate', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
       processManager.addCommand(
         FakeCommand(
@@ -456,7 +453,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext(
+    test(
       'builds shared library for android-arm without dwarf stack traces due to empty string',
       () async {
         final String outputPath = fileSystem.path.join('build', 'foo');
@@ -491,7 +488,7 @@ void main() {
       },
     );
 
-    testWithoutContext('builds shared library for android-arm64', () async {
+    test('builds shared library for android-arm64', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
       processManager.addCommand(
         FakeCommand(
@@ -521,7 +518,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('builds PE library and PDB for windows-x64', () async {
+    test('builds PE library and PDB for windows-x64', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
       processManager
         ..addCommand(
@@ -571,7 +568,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('builds windows-x64 split debug info PDB outside output path', () async {
+    test('builds windows-x64 split debug info PDB outside output path', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
       final String splitDebugInfoPath = fileSystem.path.join('build', 'symbols');
       final String stalePdbPath = fileSystem.path.join(outputPath, 'app.pdb');
@@ -629,15 +626,12 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('fails when the Visual Studio linker does not exist', () async {
+    test('fails when the Visual Studio linker does not exist', () async {
       final logger = BufferLogger.test();
       final snapshotter = AOTSnapshotter(
         fileSystem: fileSystem,
         logger: logger,
-        xcode: Xcode.test(
-          processManager: processManager,
-          toolContext: FakeToolContext.macosHost(processManager: processManager),
-        ),
+        xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
         artifacts: artifacts,
         processManager: processManager,
         windowsLinkerPath: r'C:\VS\does-not-exist\link.exe',
@@ -672,7 +666,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('--no-strip in extraGenSnapshotOptions suppresses --strip', () async {
+    test('--no-strip in extraGenSnapshotOptions suppresses --strip', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
       processManager.addCommand(
         FakeCommand(

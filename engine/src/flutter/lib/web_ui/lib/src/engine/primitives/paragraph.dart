@@ -11,26 +11,33 @@ import '../font_fallback_service.dart';
 import '../native_memory.dart';
 import '../renderer.dart';
 import '../util.dart';
+import 'image_source.dart';
 
 const String _kWeightAxisTag = 'wght';
 const List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
 
-String? _computeEffectiveFontFamily(String? fontFamily) {
-  return ui_web.TestEnvironment.instance.forceTestFonts && !_testFonts.contains(fontFamily)
-      ? _testFonts.first
-      : fontFamily;
-}
-
-List<String> _computeEffectiveFontFamilies(String? fontFamily, [List<String>? fontFamilyFallback]) {
+List<String> _computeEffectiveFontFamilies(String? fontFamily, List<String>? fontFamilyFallback) {
   if (fontFamily == null && (fontFamilyFallback == null || fontFamilyFallback.isEmpty)) {
     return ui_web.TestEnvironment.instance.forceTestFonts ? _testFonts : const <String>[];
   }
-  final fontFamilies = <String>[?fontFamily, ...?fontFamilyFallback];
+  final fontFamilies = <String>[
+    ?fontFamily,
+    if (fontFamilyFallback != null)
+      ...fontFamilyFallback.where((String font) => font != fontFamily),
+  ];
   if (!ui_web.TestEnvironment.instance.forceTestFonts) {
     return fontFamilies;
   }
   final Iterable<String> filteredFonts = fontFamilies.where(_testFonts.contains);
   return filteredFonts.isEmpty ? _testFonts : filteredFonts.toList();
+}
+
+bool? _computeHalfLeading(ui.TextLeadingDistribution? leadingDistribution) {
+  return switch (leadingDistribution) {
+    null => null,
+    ui.TextLeadingDistribution.even => true,
+    ui.TextLeadingDistribution.proportional => false,
+  };
 }
 
 class EngineLineMetrics implements ui.LineMetrics {
@@ -134,7 +141,7 @@ class EngineLineMetrics implements ui.LineMetrics {
 
 @immutable
 class EngineStrutStyle implements ui.StrutStyle {
-  EngineStrutStyle({
+  const EngineStrutStyle({
     this.fontFamily,
     this.fontFamilyFallback,
     this.fontSize,
@@ -144,16 +151,10 @@ class EngineStrutStyle implements ui.StrutStyle {
     this.fontWeight,
     this.fontStyle,
     this.forceStrutHeight,
-  }) : effectiveFontFamily = _computeEffectiveFontFamily(fontFamily),
-       effectiveFontFamilyFallback = ui_web.TestEnvironment.instance.forceTestFonts
-           ? null
-           : fontFamilyFallback,
-       height = height == ui.kTextHeightNone ? null : height;
+  }) : height = height == ui.kTextHeightNone ? null : height;
 
   final String? fontFamily;
   final List<String>? fontFamilyFallback;
-  final String? effectiveFontFamily;
-  final List<String>? effectiveFontFamilyFallback;
   final double? fontSize;
   final double? height;
   final ui.TextLeadingDistribution? leadingDistribution;
@@ -164,6 +165,8 @@ class EngineStrutStyle implements ui.StrutStyle {
 
   List<String> get effectiveFontFamilies =>
       _computeEffectiveFontFamilies(fontFamily, fontFamilyFallback);
+
+  bool? get halfLeading => _computeHalfLeading(leadingDistribution);
 
   @override
   bool operator ==(Object other) {
@@ -222,7 +225,7 @@ class EngineStrutStyle implements ui.StrutStyle {
 
 @immutable
 class EngineParagraphStyle implements ui.ParagraphStyle {
-  EngineParagraphStyle({
+  const EngineParagraphStyle({
     this.textAlign,
     this.textDirection,
     this.maxLines,
@@ -236,8 +239,8 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
     this.ellipsis,
     this.locale,
     this.hyphens,
-  }) : effectiveFontFamily = _computeEffectiveFontFamily(fontFamily),
-       height = height == ui.kTextHeightNone ? null : height,
+    this.hyphenCharacter,
+  }) : height = height == ui.kTextHeightNone ? null : height,
        strutStyle = strutStyle as EngineStrutStyle?;
 
   final ui.TextAlign? textAlign;
@@ -246,7 +249,6 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
   final ui.FontStyle? fontStyle;
   final int? maxLines;
   final String? fontFamily;
-  final String? effectiveFontFamily;
   final double? fontSize;
   final double? height;
   final ui.TextHeightBehavior? textHeightBehavior;
@@ -254,8 +256,30 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
   final String? ellipsis;
   final ui.Locale? locale;
   final ui.Hyphens? hyphens;
+  final String? hyphenCharacter;
 
-  List<String> get effectiveFontFamilies => _computeEffectiveFontFamilies(fontFamily);
+  EngineStrutStyle? get effectiveStrutStyle {
+    final EngineStrutStyle? strutStyle = this.strutStyle;
+    if (strutStyle == null) {
+      return null;
+    }
+    final ui.TextLeadingDistribution? paragraphLeadingDistribution =
+        textHeightBehavior?.leadingDistribution;
+    if (strutStyle.leadingDistribution != null || paragraphLeadingDistribution == null) {
+      return strutStyle;
+    }
+    return EngineStrutStyle(
+      fontFamily: strutStyle.fontFamily,
+      fontFamilyFallback: strutStyle.fontFamilyFallback,
+      fontSize: strutStyle.fontSize,
+      height: strutStyle.height,
+      leadingDistribution: paragraphLeadingDistribution,
+      leading: strutStyle.leading,
+      fontWeight: strutStyle.fontWeight,
+      fontStyle: strutStyle.fontStyle,
+      forceStrutHeight: strutStyle.forceStrutHeight,
+    );
+  }
 
   EngineTextStyle getTextStyle() {
     return EngineTextStyle(
@@ -290,7 +314,8 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
         other.strutStyle == strutStyle &&
         other.ellipsis == ellipsis &&
         other.locale == locale &&
-        other.hyphens == hyphens;
+        other.hyphens == hyphens &&
+        other.hyphenCharacter == hyphenCharacter;
   }
 
   @override
@@ -309,6 +334,7 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
       ellipsis,
       locale,
       hyphens,
+      hyphenCharacter,
     );
   }
 
@@ -332,7 +358,8 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
           'strutStyle: ${strutStyle ?? "unspecified"}, '
           'ellipsis: ${ellipsis != null ? '"$ellipsis"' : "unspecified"}, '
           'locale: ${locale ?? "unspecified"}, '
-          'hyphens: ${hyphens ?? "unspecified"}'
+          'hyphens: ${hyphens ?? "unspecified"}, '
+          'hyphenCharacter: ${hyphenCharacter != null ? '"$hyphenCharacter"' : "unspecified"}'
           ')';
       return true;
     }());
@@ -380,11 +407,7 @@ class EngineTextStyle implements ui.TextStyle {
       fontStyle: fontStyle,
       textBaseline: textBaseline,
       fontFamily: fontFamily,
-      effectiveFontFamily: _computeEffectiveFontFamily(fontFamily),
       fontFamilyFallback: fontFamilyFallback,
-      effectiveFontFamilyFallback: ui_web.TestEnvironment.instance.forceTestFonts
-          ? null
-          : fontFamilyFallback,
       fontSize: fontSize,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
@@ -409,9 +432,7 @@ class EngineTextStyle implements ui.TextStyle {
     required this.fontStyle,
     required this.textBaseline,
     required this.fontFamily,
-    required this.effectiveFontFamily,
     required this.fontFamilyFallback,
-    required this.effectiveFontFamilyFallback,
     required this.fontSize,
     required this.letterSpacing,
     required this.wordSpacing,
@@ -434,9 +455,7 @@ class EngineTextStyle implements ui.TextStyle {
   final ui.FontStyle? fontStyle;
   final ui.TextBaseline? textBaseline;
   final String? fontFamily;
-  final String? effectiveFontFamily;
   final List<String>? fontFamilyFallback;
-  final List<String>? effectiveFontFamilyFallback;
   final double? fontSize;
   final double? letterSpacing;
   final double? wordSpacing;
@@ -451,6 +470,8 @@ class EngineTextStyle implements ui.TextStyle {
 
   List<String> get effectiveFontFamilies =>
       _computeEffectiveFontFamilies(fontFamily, fontFamilyFallback);
+
+  bool? get halfLeading => _computeHalfLeading(leadingDistribution);
 
   List<ui.FontVariation> get effectiveFontVariations {
     final List<ui.FontVariation>? fontVariations = this.fontVariations;
@@ -475,13 +496,7 @@ class EngineTextStyle implements ui.TextStyle {
       fontStyle: other.fontStyle ?? fontStyle,
       textBaseline: other.textBaseline ?? textBaseline,
       fontFamily: other.fontFamily ?? fontFamily,
-      effectiveFontFamily: other.fontFamily != null
-          ? other.effectiveFontFamily
-          : effectiveFontFamily,
       fontFamilyFallback: other.fontFamilyFallback ?? fontFamilyFallback,
-      effectiveFontFamilyFallback: other.fontFamilyFallback != null
-          ? other.effectiveFontFamilyFallback
-          : effectiveFontFamilyFallback,
       fontSize: other.fontSize ?? fontSize,
       letterSpacing: other.letterSpacing ?? letterSpacing,
       wordSpacing: other.wordSpacing ?? wordSpacing,
@@ -593,16 +608,44 @@ class EngineTextStyle implements ui.TextStyle {
 }
 
 class EngineParagraph implements ui.Paragraph {
-  EngineParagraph(BackendParagraph backendParagraph) {
+  EngineParagraph(BackendParagraph backendParagraph, {this.imageTracker}) {
     _ref = UniqueRef<BackendParagraph>(
       this,
       backendParagraph,
       'Paragraph',
-      onDispose: (BackendParagraph p) => p.dispose(),
+      onDispose: _createDisposer(imageTracker),
     );
   }
 
+  static void _disposeBackendParagraph(BackendParagraph paragraph) {
+    paragraph.dispose();
+  }
+
+  /// Builds the [UniqueRef] disposal callback without capturing `this`, so
+  /// `DomFinalizationRegistry`'s strongly held [UniqueRef] does not retain
+  /// [EngineParagraph] and prevent garbage collection.
+  static void Function(BackendParagraph) _createDisposer(PictureImageTracker? tracker) {
+    if (tracker == null) {
+      return _disposeBackendParagraph;
+    }
+    return _createTrackedDisposer(tracker);
+  }
+
+  static void Function(BackendParagraph) _createTrackedDisposer(PictureImageTracker tracker) {
+    return (BackendParagraph paragraph) {
+      try {
+        paragraph.dispose();
+      } finally {
+        tracker.releaseAll();
+      }
+    };
+  }
+
   late final UniqueRef<BackendParagraph> _ref;
+
+  /// Retained [ImageSource]s from `foreground` or `background` paints pushed
+  /// onto the [EngineParagraphBuilder] that built this paragraph.
+  final PictureImageTracker? imageTracker;
 
   BackendParagraph get backendParagraph => _ref.nativeObject;
 
@@ -755,12 +798,22 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
       this,
       renderer.createParagraphBuilder(style),
       'ParagraphBuilder',
-      onDispose: (BackendParagraphBuilder builder) => builder.dispose(),
+      onDispose: _disposeBackendParagraphBuilder,
     );
     _styleStack.add(style.getTextStyle());
   }
 
+  static void _disposeBackendParagraphBuilder(BackendParagraphBuilder builder) {
+    builder.dispose();
+  }
+
+  @visibleForTesting
+  static NativeMemoryFinalizer finalizer = NativeMemoryFinalizer((Object tracker) {
+    (tracker as PictureImageTracker).releaseAll();
+  });
+
   late final UniqueRef<BackendParagraphBuilder> _ref;
+  PictureImageTracker? _tracker;
 
   BackendParagraphBuilder get _backendBuilder => _ref.nativeObject;
 
@@ -813,6 +866,15 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
     final EngineTextStyle mergedStyle = baseStyle.mergeWith(style);
     _styleStack.add(mergedStyle);
     _backendBuilder.pushStyle(mergedStyle);
+    if (style.foreground != null || style.background != null) {
+      final PictureImageTracker tracker = _tracker ??= PictureImageTracker();
+      final bool wasEmpty = tracker.isEmpty;
+      tracker.recordPaint(style.foreground);
+      tracker.recordPaint(style.background);
+      if (wasEmpty && !tracker.isEmpty) {
+        finalizer.attach(this, tracker, detach: this);
+      }
+    }
   }
 
   @override
@@ -831,9 +893,16 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
   @override
   EngineParagraph build() {
     final BackendParagraph backendParagraph = _backendBuilder.build();
+    final PictureImageTracker? tracker = _tracker;
+    PictureImageTracker? imageTracker;
+    if (tracker != null && !tracker.isEmpty) {
+      finalizer.detach(this);
+      imageTracker = tracker;
+    }
+    _tracker = null;
     // The backend builder is single-use; release it (and detach its
     // finalizer) as soon as the paragraph is built.
     _ref.dispose();
-    return EngineParagraph(backendParagraph);
+    return EngineParagraph(backendParagraph, imageTracker: imageTracker);
   }
 }

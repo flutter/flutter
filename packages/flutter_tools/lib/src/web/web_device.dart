@@ -18,6 +18,7 @@ import '../device_port_forwarder.dart';
 import '../features.dart';
 import '../project.dart';
 import 'chrome.dart';
+import 'web_debug_config.dart';
 
 class WebApplicationPackage extends ApplicationPackage {
   WebApplicationPackage(this.flutterProject) : super(id: flutterProject.manifest.appName);
@@ -184,8 +185,7 @@ abstract class ChromiumDevice extends WebDevice {
 
   @override
   Future<void> dispose() async {
-    _logReader?.dispose();
-    await portForwarder?.dispose();
+    await Future.wait(<Future<void>>[?_logReader?.dispose(), ?portForwarder?.dispose()]);
   }
 }
 
@@ -350,7 +350,7 @@ class WebDevices extends PollingDeviceDiscovery {
   final FeatureFlags _featureFlags;
 
   @override
-  bool get canListAnything => featureFlags.isWebEnabled;
+  bool get canListAnything => _featureFlags.isWebEnabled;
 
   @override
   Future<List<Device>> pollingGetDevices({
@@ -474,7 +474,6 @@ class WebServerDevice extends WebDevice {
 
   @override
   Future<void> dispose() async {
-    _logReader?.dispose();
-    await portForwarder?.dispose();
+    await Future.wait(<Future<void>>[?_logReader?.dispose(), ?portForwarder?.dispose()]);
   }
 }

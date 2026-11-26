@@ -252,7 +252,11 @@ void testMain() {
 
     rasterizer.prepareCompleter = Completer<void>();
 
-    final Future<void> drawFuture = rasterizer.draw((scene as LayerScene).layerTree, null);
+    final Future<void> drawFuture = rasterizer.draw(
+      (scene as LayerScene).layerTree,
+      view.physicalSize,
+      null,
+    );
 
     // Now we are in the async gap of prepareToDraw.
     // Dispose the platform view.
@@ -285,7 +289,11 @@ void testMain() {
 
     rasterizer.rasterizeCompleter = Completer<void>();
 
-    final Future<void> drawFuture = rasterizer.draw((scene as LayerScene).layerTree, null);
+    final Future<void> drawFuture = rasterizer.draw(
+      (scene as LayerScene).layerTree,
+      view.physicalSize,
+      null,
+    );
 
     // Wait a bit to ensure we are in the rasterize gap.
     await Future<void>.delayed(Duration.zero);

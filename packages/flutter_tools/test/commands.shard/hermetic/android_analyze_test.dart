@@ -17,12 +17,13 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/project_validator.dart';
 import 'package:test/fake.dart';
 
-import '../../src/context.dart';
+import '../../src/common.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  testUsingContext('Android analyze command should run pub', () async {
+  test('Android analyze command should run pub', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Platform platform = FakePlatform();
     final logger = BufferLogger.test();
@@ -61,8 +62,10 @@ void main() {
       platform = FakePlatform();
       logger = BufferLogger.test();
       processManager = FakeProcessManager.empty();
+      builder = FakeAndroidBuilder();
       command = AnalyzeCommand(
         allProjectValidators: <ProjectValidator>[],
+        androidBuilder: builder,
         suppressAnalytics: true,
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
@@ -75,23 +78,15 @@ void main() {
       runner = createTestCommandRunner(command);
       tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       tempDir.childDirectory('android').createSync();
-
-      // Setup repo roots
-      const homePath = '/home/user/flutter';
-      Cache.flutterRoot = homePath;
-      for (final dir in <String>['dev', 'examples', 'packages']) {
-        fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
-      }
-      builder = FakeAndroidBuilder();
     });
 
-    testUsingContext('can list build variants', () async {
+    test('can list build variants', () async {
       builder.variants = <String>['debug', 'release'];
       await runner.run(<String>['analyze', '--android', '--list-build-variants', tempDir.path]);
       expect(logger.statusText, contains('["debug","release"]'));
-    }, overrides: <Type, Generator>{AndroidBuilder: () => builder});
+    });
 
-    testUsingContext('throw if provide multiple path', () async {
+    test('throw if provide multiple path', () async {
       final Directory anotherTempDir = fileSystem.systemTempDirectory.createTempSync('another');
       await expectLater(
         runner.run(<String>[
@@ -111,7 +106,7 @@ void main() {
       );
     });
 
-    testUsingContext('can output app link settings', () async {
+    test('can output app link settings', () async {
       const buildVariant = 'release';
       await runner.run(<String>[
         'analyze',
@@ -122,9 +117,9 @@ void main() {
       ]);
       expect(builder.outputVariant, buildVariant);
       expect(logger.statusText, contains(builder.outputPath));
-    }, overrides: <Type, Generator>{AndroidBuilder: () => builder});
+    });
 
-    testUsingContext('output app link settings throws if no build variant', () async {
+    test('output app link settings throws if no build variant', () async {
       await expectLater(
         runner.run(<String>['analyze', '--android', '--output-app-link-settings', tempDir.path]),
         throwsA(

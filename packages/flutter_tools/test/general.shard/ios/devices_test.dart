@@ -12,13 +12,11 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/core_devices.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
@@ -29,11 +27,13 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
+import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 void main() {
   final macPlatform = FakePlatform(operatingSystem: 'macos');
@@ -47,25 +47,23 @@ void main() {
     late IOSDeploy iosDeploy;
     late IMobileDevice iMobileDevice;
     late FileSystem fileSystem;
-    late FileSystemUtils fileSystemUtils;
     late IOSCoreDeviceControl coreDeviceControl;
     late IOSCoreDeviceLauncher coreDeviceLauncher;
     late XcodeDebug xcodeDebug;
-    late ProcessUtils processUtils;
 
     setUp(() {
       final artifacts = Artifacts.test();
       cache = Cache.test(processManager: FakeProcessManager.any());
       logger = BufferLogger.test();
-      processUtils = ProcessUtils(processManager: FakeProcessManager.any(), logger: logger);
       fileSystem = MemoryFileSystem.test();
-      fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: macPlatform);
       iosDeploy = IOSDeploy(
-        artifacts: artifacts,
-        cache: cache,
-        logger: logger,
-        platform: macPlatform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          artifacts: artifacts,
+          cache: cache,
+          logger: logger,
+          platform: macPlatform,
+          processManager: FakeProcessManager.any(),
+        ),
       );
       iMobileDevice = IMobileDevice(
         artifacts: artifacts,
@@ -78,16 +76,17 @@ void main() {
       xcodeDebug = FakeXcodeDebug();
     });
 
-    testWithoutContext('successfully instantiates on Mac OS', () async {
+    test('successfully instantiates on Mac OS', () async {
       final device = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: fileSystem,
-        fileSystemUtils: fileSystemUtils,
-        logger: logger,
-        platform: macPlatform,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         iosDeploy: iosDeploy,
         analytics: FakeAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        plistParser: FakePlistParser(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
         coreDeviceLauncher: coreDeviceLauncher,
@@ -100,23 +99,29 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        xcode: null,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
       );
       expect(await device.isSupported(), isTrue);
     });
 
     group('shouldAttachLLDBDebugger', () {
-      testWithoutContext('returns expected values for different BuildInfo and options', () {
+      test('returns expected values for different BuildInfo and options', () {
         final device = IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils,
-          logger: logger,
-          platform: macPlatform,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           iosDeploy: iosDeploy,
           analytics: FakeAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          plistParser: FakePlistParser(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           iMobileDevice: iMobileDevice,
           coreDeviceControl: coreDeviceControl,
           coreDeviceLauncher: coreDeviceLauncher,
@@ -129,8 +134,13 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
-          processUtils: processUtils,
-          xcode: null,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
         );
 
         expect(device.shouldAttachLLDBDebugger(DebuggingOptions.enabled(BuildInfo.debug)), isTrue);
@@ -157,15 +167,16 @@ void main() {
       });
     });
 
-    testWithoutContext('32-bit devices are unsupported', () async {
+    test('32-bit devices are unsupported', () async {
       final device = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: fileSystem,
-        fileSystemUtils: fileSystemUtils,
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
-        platform: macPlatform,
+        cocoaPods: FakeCocoaPods(),
+        plistParser: FakePlistParser(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
@@ -178,22 +189,28 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        xcode: null,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
       );
       expect(await device.isSupported(), isFalse);
     });
 
-    testWithoutContext('parses major version', () {
+    test('parses major version', () {
       expect(
         IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils,
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
-          platform: macPlatform,
+          cocoaPods: FakeCocoaPods(),
+          plistParser: FakePlistParser(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
           coreDeviceControl: coreDeviceControl,
@@ -207,20 +224,26 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
-          processUtils: processUtils,
-          xcode: null,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
         ).majorSdkVersion,
         1,
       );
       expect(
         IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils,
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
-          platform: macPlatform,
+          cocoaPods: FakeCocoaPods(),
+          plistParser: FakePlistParser(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
           coreDeviceControl: coreDeviceControl,
@@ -234,20 +257,26 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
-          processUtils: processUtils,
-          xcode: null,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
         ).majorSdkVersion,
         13,
       );
       expect(
         IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils,
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
-          platform: macPlatform,
+          cocoaPods: FakeCocoaPods(),
+          plistParser: FakePlistParser(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
           coreDeviceControl: coreDeviceControl,
@@ -261,20 +290,26 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
-          processUtils: processUtils,
-          xcode: null,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
         ).majorSdkVersion,
         10,
       );
       expect(
         IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils,
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
-          platform: macPlatform,
+          cocoaPods: FakeCocoaPods(),
+          plistParser: FakePlistParser(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
           coreDeviceControl: coreDeviceControl,
@@ -288,20 +323,26 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
-          processUtils: processUtils,
-          xcode: null,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
         ).majorSdkVersion,
         0,
       );
       expect(
         IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils,
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
-          platform: macPlatform,
+          cocoaPods: FakeCocoaPods(),
+          plistParser: FakePlistParser(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
           coreDeviceControl: coreDeviceControl,
@@ -315,22 +356,28 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
-          processUtils: processUtils,
-          xcode: null,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
         ).majorSdkVersion,
         0,
       );
     });
 
-    testWithoutContext('parses sdk version', () {
+    test('parses sdk version', () {
       Version? sdkVersion = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: fileSystem,
-        fileSystemUtils: fileSystemUtils,
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
-        platform: macPlatform,
+        cocoaPods: FakeCocoaPods(),
+        plistParser: FakePlistParser(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
@@ -344,8 +391,13 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        xcode: null,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
       ).sdkVersion;
       var expectedVersion = Version(13, 3, 1, text: '13.3.1');
       expect(sdkVersion, isNotNull);
@@ -354,12 +406,13 @@ void main() {
 
       sdkVersion = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: fileSystem,
-        fileSystemUtils: fileSystemUtils,
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
-        platform: macPlatform,
+        cocoaPods: FakeCocoaPods(),
+        plistParser: FakePlistParser(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
@@ -373,8 +426,13 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        xcode: null,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
       ).sdkVersion;
       expectedVersion = Version(13, 3, 1, text: '13.3.1 (20ADBC)');
       expect(sdkVersion, isNotNull);
@@ -383,12 +441,13 @@ void main() {
 
       sdkVersion = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: fileSystem,
-        fileSystemUtils: fileSystemUtils,
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
-        platform: macPlatform,
+        cocoaPods: FakeCocoaPods(),
+        plistParser: FakePlistParser(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
@@ -402,8 +461,13 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        xcode: null,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
       ).sdkVersion;
       expectedVersion = Version(16, 4, 1, text: '16.4.1(a) (20ADBC)');
       expect(sdkVersion, isNotNull);
@@ -412,12 +476,13 @@ void main() {
 
       sdkVersion = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: fileSystem,
-        fileSystemUtils: fileSystemUtils,
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
-        platform: macPlatform,
+        cocoaPods: FakeCocoaPods(),
+        plistParser: FakePlistParser(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
@@ -431,8 +496,13 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        xcode: null,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
       ).sdkVersion;
       expectedVersion = Version(0, 0, 0, text: '0');
       expect(sdkVersion, isNotNull);
@@ -441,12 +511,13 @@ void main() {
 
       sdkVersion = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: fileSystem,
-        fileSystemUtils: fileSystemUtils,
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
-        platform: macPlatform,
+        cocoaPods: FakeCocoaPods(),
+        plistParser: FakePlistParser(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
@@ -459,19 +530,25 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        xcode: null,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
       ).sdkVersion;
       expect(sdkVersion, isNull);
 
       sdkVersion = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: fileSystem,
-        fileSystemUtils: fileSystemUtils,
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
-        platform: macPlatform,
+        cocoaPods: FakeCocoaPods(),
+        plistParser: FakePlistParser(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
@@ -485,21 +562,27 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        xcode: null,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
       ).sdkVersion;
       expect(sdkVersion, isNull);
     });
 
-    testWithoutContext('has build number in sdkNameAndVersion', () async {
+    test('has build number in sdkNameAndVersion', () async {
       final device = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: fileSystem,
-        fileSystemUtils: fileSystemUtils,
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
-        platform: macPlatform,
+        cocoaPods: FakeCocoaPods(),
+        plistParser: FakePlistParser(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
@@ -513,22 +596,28 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        xcode: null,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
       );
 
       expect(await device.sdkNameAndVersion, 'iOS 13.3 17C54');
     });
 
-    testWithoutContext('Supports debug, profile, and release modes', () {
+    test('Supports debug, profile, and release modes', () {
       final device = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: fileSystem,
-        fileSystemUtils: fileSystemUtils,
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
-        platform: macPlatform,
+        cocoaPods: FakeCocoaPods(),
+        plistParser: FakePlistParser(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
@@ -542,8 +631,13 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        xcode: null,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
       );
 
       expect(device.supportsRuntimeMode(BuildMode.debug), true);
@@ -553,37 +647,40 @@ void main() {
     });
 
     for (final platform in unsupportedPlatforms) {
-      testWithoutContext(
-        'throws UnsupportedError exception if instantiated on ${platform.operatingSystem}',
-        () {
-          expect(() {
-            IOSDevice(
-              'device-123',
-              iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-              fileSystem: fileSystem,
-              fileSystemUtils: fileSystemUtils,
+      test('throws UnsupportedError exception if instantiated on ${platform.operatingSystem}', () {
+        expect(() {
+          IOSDevice(
+            'device-123',
+            featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+            iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+            toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: platform),
+            analytics: FakeAnalytics(),
+            cocoaPods: FakeCocoaPods(),
+            plistParser: FakePlistParser(),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+            iosDeploy: iosDeploy,
+            iMobileDevice: iMobileDevice,
+            coreDeviceControl: coreDeviceControl,
+            coreDeviceLauncher: coreDeviceLauncher,
+            xcodeDebug: xcodeDebug,
+            name: 'iPhone 1',
+            sdkVersion: '13.3',
+            cpuArch: .arm64,
+            connectionInterface: DeviceConnectionInterface.attached,
+            isConnected: true,
+            isPaired: true,
+            devModeEnabled: true,
+            isCoreDevice: false,
+            mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+              analytics: const NoOpAnalytics(),
               logger: logger,
-              analytics: FakeAnalytics(),
-              platform: platform,
-              iosDeploy: iosDeploy,
-              iMobileDevice: iMobileDevice,
-              coreDeviceControl: coreDeviceControl,
-              coreDeviceLauncher: coreDeviceLauncher,
-              xcodeDebug: xcodeDebug,
-              name: 'iPhone 1',
-              sdkVersion: '13.3',
-              cpuArch: .arm64,
-              connectionInterface: DeviceConnectionInterface.attached,
-              isConnected: true,
-              isPaired: true,
-              devModeEnabled: true,
-              isCoreDevice: false,
-              processUtils: processUtils,
-              xcode: null,
-            );
-          }, throwsAssertionError);
-        },
-      );
+              platform: macPlatform,
+            ),
+            templateRenderer: FakeTemplateRenderer(),
+            xcode: FakeXcode(),
+          );
+        }, throwsAssertionError);
+      });
     }
 
     group('.dispose()', () {
@@ -642,23 +739,26 @@ void main() {
         fileSystem = MemoryFileSystem.test();
         logger = BufferLogger.test();
         iosDeploy = IOSDeploy(
-          artifacts: Artifacts.test(),
-          cache: cache,
-          logger: logger,
-          platform: macPlatform,
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext(
+            artifacts: Artifacts.test(),
+            cache: cache,
+            logger: logger,
+            platform: macPlatform,
+            processManager: FakeProcessManager.any(),
+          ),
         );
       });
 
-      testWithoutContext('kills all log readers & port forwarders', () async {
+      test('kills all log readers & port forwarders', () async {
         device = IOSDevice(
           '123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils,
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
-          platform: macPlatform,
+          cocoaPods: FakeCocoaPods(),
+          plistParser: FakePlistParser(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
           coreDeviceControl: coreDeviceControl,
@@ -672,8 +772,13 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
-          processUtils: processUtils,
-          xcode: null,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
         );
         logReader1 = createLogReader(device, appPackage1, process1);
         logReader2 = createLogReader(device, appPackage2, process2);
@@ -700,16 +805,17 @@ void main() {
         outputFile = fileSystem.file('screenshot.png');
       });
 
-      testUsingContext('supportsScreenshot is false on CoreDevice with Xcode < 27', () async {
+      test('supportsScreenshot is false on CoreDevice with Xcode < 27', () async {
         device = IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils,
-          logger: logger,
-          platform: macPlatform,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           iosDeploy: iosDeploy,
           analytics: FakeAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          plistParser: FakePlistParser(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           iMobileDevice: iMobileDevice,
           coreDeviceControl: fakeCoreDeviceControl,
           coreDeviceLauncher: coreDeviceLauncher,
@@ -722,25 +828,32 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: true,
-          processUtils: processUtils,
-          xcode: null,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(currentVersion: Version(15, 0, 0)),
         );
 
         expect(device.supportsScreenshot, isFalse);
-      }, overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(15, 0, 0))});
+      });
 
-      testUsingContext(
+      test(
         'supportsScreenshot is true on CoreDevice with Xcode 27+ and devicectl installed',
         () async {
+          final fakeXcode = FakeXcode(currentVersion: Version(27, 0, 0));
           device = IOSDevice(
             'device-123',
+            featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
             iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-            fileSystem: fileSystem,
-            fileSystemUtils: fileSystemUtils,
-            logger: logger,
-            platform: macPlatform,
+            toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
             iosDeploy: iosDeploy,
             analytics: FakeAnalytics(),
+            cocoaPods: FakeCocoaPods(),
+            plistParser: FakePlistParser(),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             iMobileDevice: iMobileDevice,
             coreDeviceControl: fakeCoreDeviceControl,
             coreDeviceLauncher: coreDeviceLauncher,
@@ -753,30 +866,34 @@ void main() {
             isPaired: true,
             devModeEnabled: true,
             isCoreDevice: true,
-            processUtils: processUtils,
-            xcode: null,
+            mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+              analytics: const NoOpAnalytics(),
+              logger: logger,
+              platform: macPlatform,
+            ),
+            templateRenderer: FakeTemplateRenderer(),
+            xcode: fakeXcode,
           );
 
-          final fakeXcode = globals.xcode! as FakeXcode;
           fakeXcode.isDevicectlInstalled = true;
           expect(device.supportsScreenshot, isTrue);
 
           fakeXcode.isDevicectlInstalled = false;
           expect(device.supportsScreenshot, isFalse);
         },
-        overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(27, 0, 0))},
       );
 
-      testUsingContext('takeScreenshot uses devicectl on CoreDevice with Xcode 27+', () async {
+      test('takeScreenshot uses devicectl on CoreDevice with Xcode 27+', () async {
         device = IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils,
-          logger: logger,
-          platform: macPlatform,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           iosDeploy: iosDeploy,
           analytics: FakeAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          plistParser: FakePlistParser(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           iMobileDevice: iMobileDevice,
           coreDeviceControl: fakeCoreDeviceControl,
           coreDeviceLauncher: coreDeviceLauncher,
@@ -789,8 +906,13 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: true,
-          processUtils: processUtils,
-          xcode: null,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(currentVersion: Version(27, 0, 0)),
         );
 
         fakeCoreDeviceControl.takeScreenshotSuccess = true;
@@ -798,18 +920,19 @@ void main() {
 
         fakeCoreDeviceControl.takeScreenshotSuccess = false;
         expect(() => device.takeScreenshot(outputFile), throwsToolExit());
-      }, overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(27, 0, 0))});
+      });
 
-      testUsingContext('takeScreenshot throws a ToolExit with actionable message when CoreDevice is locked/unreachable', () async {
+      test('takeScreenshot throws a ToolExit with actionable message when CoreDevice is locked/unreachable', () async {
         device = IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils,
-          logger: logger,
-          platform: macPlatform,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           iosDeploy: iosDeploy,
           analytics: FakeAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          plistParser: FakePlistParser(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           iMobileDevice: iMobileDevice,
           coreDeviceControl: fakeCoreDeviceControl,
           coreDeviceLauncher: coreDeviceLauncher,
@@ -822,8 +945,13 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: true,
-          processUtils: processUtils,
-          xcode: null,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(currentVersion: Version(27, 0, 0)),
         );
 
         fakeCoreDeviceControl.takeScreenshotException = Exception(
@@ -835,18 +963,19 @@ void main() {
             message: 'Failed to establish a connection to the device. Please make sure the device is available and try again.',
           ),
         );
-      }, overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(27, 0, 0))});
+      });
 
-      testUsingContext('takeScreenshot throws ToolExit on CoreDevice with Xcode < 27', () async {
+      test('takeScreenshot throws ToolExit on CoreDevice with Xcode < 27', () async {
         device = IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils,
-          logger: logger,
-          platform: macPlatform,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           iosDeploy: iosDeploy,
           analytics: FakeAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          plistParser: FakePlistParser(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           iMobileDevice: iMobileDevice,
           coreDeviceControl: fakeCoreDeviceControl,
           coreDeviceLauncher: coreDeviceLauncher,
@@ -859,15 +988,20 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: true,
-          processUtils: processUtils,
-          xcode: null,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(currentVersion: Version(26, 0, 0)),
         );
 
         expect(
           () => device.takeScreenshot(outputFile),
           throwsToolExit(message: 'flutter screenshot requires Xcode 27 or higher.'),
         );
-      }, overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(26, 0, 0))});
+      });
     });
   });
 
@@ -893,11 +1027,13 @@ void main() {
       iosWorkflow = FakeIOSWorkflow();
       fakeProcessManager = FakeProcessManager.any();
       iosDeploy = IOSDeploy(
-        artifacts: artifacts,
-        cache: cache,
-        logger: logger,
-        platform: macPlatform,
-        processManager: fakeProcessManager,
+        toolContext: FakeToolContext(
+          artifacts: artifacts,
+          cache: cache,
+          logger: logger,
+          platform: macPlatform,
+          processManager: fakeProcessManager,
+        ),
       );
       iMobileDevice = IMobileDevice(
         artifacts: artifacts,
@@ -910,34 +1046,41 @@ void main() {
       xcodeDebug = FakeXcodeDebug();
 
       final testFileSystem = MemoryFileSystem.test();
-      final testFileSystemUtils = FileSystemUtils(
-        fileSystem: testFileSystem,
-        platform: macPlatform,
-      );
 
       device1 = IOSDevice(
         'd83d5bc53967baa0ee18626ba87b6254b2ab5418',
         name: 'Paired iPhone',
         sdkVersion: '13.3',
         cpuArch: .arm64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         iosDeploy: iosDeploy,
         analytics: FakeAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        plistParser: FakePlistParser(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
         coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
-        logger: logger,
-        platform: macPlatform,
-        fileSystem: testFileSystem,
-        fileSystemUtils: testFileSystemUtils,
+        toolContext: FakeToolContext(
+          fs: testFileSystem,
+          logger: logger,
+          platform: macPlatform,
+          processManager: fakeProcessManager,
+        ),
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        xcode: null,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
       );
 
       device2 = IOSDevice(
@@ -945,28 +1088,39 @@ void main() {
         name: 'iPad Pro',
         sdkVersion: '13.3',
         cpuArch: .arm64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         iosDeploy: iosDeploy,
         analytics: FakeAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        plistParser: FakePlistParser(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
         coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
-        logger: logger,
-        platform: macPlatform,
-        fileSystem: testFileSystem,
-        fileSystemUtils: testFileSystemUtils,
+        toolContext: FakeToolContext(
+          fs: testFileSystem,
+          logger: logger,
+          platform: macPlatform,
+          processManager: fakeProcessManager,
+        ),
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        xcode: null,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
       );
     });
 
-    testWithoutContext('start polling without Xcode', () async {
+    test('start polling without Xcode', () async {
       final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
@@ -979,7 +1133,7 @@ void main() {
       expect(xcdevice.getAvailableIOSDevicesCount, 0);
     });
 
-    testWithoutContext('start polling', () async {
+    test('start polling', () async {
       final iosDevices = TestIOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
@@ -1080,7 +1234,7 @@ void main() {
       expect(xcdevice.deviceEventController.hasListener, isFalse);
     });
 
-    testWithoutContext('polling can be restarted if stream is closed', () async {
+    test('polling can be restarted if stream is closed', () async {
       final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
@@ -1116,7 +1270,7 @@ void main() {
       expect(rescheduledStream.hasListener, isFalse);
     });
 
-    testWithoutContext('dispose cancels polling subscription', () async {
+    test('dispose cancels polling subscription', () async {
       final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
@@ -1136,7 +1290,7 @@ void main() {
 
     final unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
     for (final unsupportedPlatform in unsupportedPlatforms) {
-      testWithoutContext(
+      test(
         'pollingGetDevices throws Unsupported Operation exception on ${unsupportedPlatform.operatingSystem}',
         () async {
           final iosDevices = IOSDevices(
@@ -1153,7 +1307,7 @@ void main() {
       );
     }
 
-    testWithoutContext('pollingGetDevices returns attached devices', () async {
+    test('pollingGetDevices returns attached devices', () async {
       final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
@@ -1171,7 +1325,7 @@ void main() {
       expect(xcdevice.getAvailableIOSDevicesForWirelessDiscoveryCount, 0);
     });
 
-    testWithoutContext('pollingGetDevices returns wireless devices', () async {
+    test('pollingGetDevices returns wireless devices', () async {
       final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
@@ -1203,7 +1357,7 @@ void main() {
 
     final unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
     for (final unsupportedPlatform in unsupportedPlatforms) {
-      testWithoutContext(
+      test(
         'throws returns platform diagnostic exception on ${unsupportedPlatform.operatingSystem}',
         () async {
           final iosDevices = IOSDevices(
@@ -1221,7 +1375,7 @@ void main() {
       );
     }
 
-    testWithoutContext('returns diagnostics', () async {
+    test('returns diagnostics', () async {
       final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
@@ -1258,11 +1412,13 @@ void main() {
       iosWorkflow = FakeIOSWorkflow();
       fakeProcessManager = FakeProcessManager.any();
       iosDeploy = IOSDeploy(
-        artifacts: artifacts,
-        cache: cache,
-        logger: logger,
-        platform: macPlatform,
-        processManager: fakeProcessManager,
+        toolContext: FakeToolContext(
+          artifacts: artifacts,
+          cache: cache,
+          logger: logger,
+          platform: macPlatform,
+          processManager: fakeProcessManager,
+        ),
       );
       iMobileDevice = IMobileDevice(
         artifacts: artifacts,
@@ -1274,37 +1430,44 @@ void main() {
       coreDeviceLauncher = FakeIOSCoreDeviceLauncher();
       xcodeDebug = FakeXcodeDebug();
       final testFileSystem = MemoryFileSystem.test();
-      final testFileSystemUtils = FileSystemUtils(
-        fileSystem: testFileSystem,
-        platform: macPlatform,
-      );
       notConnected1 = IOSDevice(
         '00000001-0000000000000000',
         name: 'iPad',
         sdkVersion: '13.3',
         cpuArch: .arm64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         iosDeploy: iosDeploy,
         analytics: FakeAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        plistParser: FakePlistParser(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
         coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
-        logger: logger,
-        platform: macPlatform,
-        fileSystem: testFileSystem,
-        fileSystemUtils: testFileSystemUtils,
+        toolContext: FakeToolContext(
+          fs: testFileSystem,
+          logger: logger,
+          platform: macPlatform,
+          processManager: fakeProcessManager,
+        ),
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: false,
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        xcode: null,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
       );
     });
 
-    testWithoutContext('wait for device to connect via wifi', () async {
+    test('wait for device to connect via wifi', () async {
       final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
@@ -1325,7 +1488,7 @@ void main() {
       expect(device?.connectionInterface, DeviceConnectionInterface.wireless);
     });
 
-    testWithoutContext('wait for device to connect via usb', () async {
+    test('wait for device to connect via usb', () async {
       final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
@@ -1346,7 +1509,7 @@ void main() {
       expect(device?.connectionInterface, DeviceConnectionInterface.attached);
     });
 
-    testWithoutContext('wait for device returns null', () async {
+    test('wait for device returns null', () async {
       final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,

@@ -139,12 +139,15 @@ void main() {
 
   group('ExtensionBuildTarget', () {
     test('serializes and deserializes correctly with all fields', () {
-      const target = ExtensionBuildTarget(
+      final target = ExtensionBuildTarget(
         description: 'A custom Linux build target.',
         name: 'custom-linux-build',
         targetPlatform: 'linux-x64',
-        artifacts: <ExtensionArtifact>{BuiltInArtifacts.icuData, BuiltInArtifacts.genSnapshot},
-        hostArtifacts: <ExtensionHostArtifact>{BuiltInHostArtifacts.impellerc},
+        artifacts: const <ExtensionArtifact>{
+          BuiltInArtifacts.icuData,
+          BuiltInArtifacts.genSnapshot,
+        },
+        hostArtifacts: const <ExtensionHostArtifact>{BuiltInHostArtifacts.impellerc},
         outputDir: '{OUTPUT_DIR}/linux',
       );
 
@@ -176,6 +179,35 @@ void main() {
       expect(parsed.artifacts, isEmpty);
       expect(parsed.hostArtifacts, isEmpty);
       expect(parsed.outputDir, '{OUTPUT_DIR}/linux');
+    });
+
+    test('supports platform-agnostic target with null targetPlatform', () {
+      final target = ExtensionBuildTarget(
+        description: 'A platform-agnostic build target.',
+        name: 'custom-agnostic-build',
+        outputDir: '{OUTPUT_DIR}/agnostic',
+      );
+      expect(target.targetPlatform, isNull);
+
+      final Map<String, Object?> map = target.toMap();
+      expect(map.containsKey(ExtensionBuildTarget.targetPlatformKey), isFalse);
+
+      final parsed = ExtensionBuildTarget.fromJson(map);
+      expect(parsed, equals(target));
+      expect(parsed.targetPlatform, isNull);
+      expect(parsed.hashCode, equals(target.hashCode));
+    });
+
+    test('fromJson throws FormatException when targetPlatform is empty string', () {
+      expect(
+        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
+          'description': 'A custom build target.',
+          'name': 'custom-build',
+          'outputDir': '{OUTPUT_DIR}/custom',
+          'targetPlatform': '',
+        }),
+        throwsFormatException,
+      );
     });
 
     test('fromJson throws FormatException on missing required fields or malformed fields', () {
@@ -276,22 +308,79 @@ void main() {
       expect(ExtensionBuildTarget.listFromJson('invalid'), isEmpty);
     });
 
+    test('isValidName validates target names', () {
+      expect(ExtensionBuildTarget.isValidName('linux'), isTrue);
+      expect(ExtensionBuildTarget.isValidName('custom-apk'), isTrue);
+      expect(ExtensionBuildTarget.isValidName('target_name-123'), isTrue);
+      expect(ExtensionBuildTarget.isValidName(''), isFalse);
+      expect(ExtensionBuildTarget.isValidName('123target'), isFalse);
+      expect(ExtensionBuildTarget.isValidName('target name'), isFalse);
+      expect(ExtensionBuildTarget.isValidName('Target'), isFalse);
+      expect(ExtensionBuildTarget.isValidName('-target'), isFalse);
+      expect(ExtensionBuildTarget.isValidName('_target'), isFalse);
+    });
+
+    test('constructor asserts on invalid name', () {
+      expect(
+        () => ExtensionBuildTarget(
+          description: 'A test target',
+          name: 'Invalid-Name',
+          outputDir: '{OUTPUT_DIR}',
+          targetPlatform: 'linux-x64',
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionBuildTarget(
+          description: 'A test target',
+          name: '',
+          outputDir: '{OUTPUT_DIR}',
+          targetPlatform: 'linux-x64',
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('fromJson throws FormatException on invalid target name', () {
+      final validJson = <String, Object?>{
+        'name': 'custom-linux-build',
+        'outputDir': '{OUTPUT_DIR}/linux',
+        'targetPlatform': 'linux-x64',
+        'description': 'A custom Linux build target.',
+      };
+      expect(
+        () =>
+            ExtensionBuildTarget.fromJson(<String, Object?>{...validJson, 'name': 'Invalid Name'}),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildTarget.fromJson(<String, Object?>{...validJson, 'name': ''}),
+        throwsFormatException,
+      );
+    });
+
     test('equality and hashCode distinguish different targets and ignore artifact set order', () {
-      const target1 = ExtensionBuildTarget(
+      final target1 = ExtensionBuildTarget(
         description: 'Target 1',
         name: 'target-1',
         outputDir: '{OUTPUT_DIR}/target-1',
         targetPlatform: 'linux-x64',
-        artifacts: <ExtensionArtifact>{BuiltInArtifacts.icuData, BuiltInArtifacts.genSnapshot},
+        artifacts: const <ExtensionArtifact>{
+          BuiltInArtifacts.icuData,
+          BuiltInArtifacts.genSnapshot,
+        },
       );
-      const target1Reordered = ExtensionBuildTarget(
+      final target1Reordered = ExtensionBuildTarget(
         description: 'Target 1',
         name: 'target-1',
         outputDir: '{OUTPUT_DIR}/target-1',
         targetPlatform: 'linux-x64',
-        artifacts: <ExtensionArtifact>{BuiltInArtifacts.genSnapshot, BuiltInArtifacts.icuData},
+        artifacts: const <ExtensionArtifact>{
+          BuiltInArtifacts.genSnapshot,
+          BuiltInArtifacts.icuData,
+        },
       );
-      const target2 = ExtensionBuildTarget(
+      final target2 = ExtensionBuildTarget(
         description: 'Target 2',
         name: 'target-2',
         outputDir: '{OUTPUT_DIR}/target-2',
@@ -312,6 +401,7 @@ void main() {
         name: 'custom-linux-assemble-only-debug',
         targetPlatform: 'linux-x64',
         dependencies: const <String>[BuiltInTargets.copyAssets],
+        depfiles: const <String>['custom_linux.d'],
         inputs: <ExtensionSource>[
           ExtensionSource.pattern('{PROJECT_DIR}/pubspec.yaml'),
           const ExtensionSource.artifact(BuiltInArtifacts.icuData),
@@ -327,11 +417,13 @@ void main() {
         map[ExtensionAssembleTarget.dependenciesKey],
         equals(<String>[BuiltInTargets.copyAssets]),
       );
+      expect(map[ExtensionAssembleTarget.depfilesKey], equals(<String>['custom_linux.d']));
 
       final parsed = ExtensionAssembleTarget.fromJson(map);
       expect(parsed, equals(target));
       expect(parsed.hashCode, equals(target.hashCode));
       expect(parsed.toString(), contains('custom-linux-assemble-only-debug'));
+      expect(parsed.toString(), contains('depfiles: [custom_linux.d]'));
     });
 
     test('deserializes with defaults when optional fields are missing', () {
@@ -344,8 +436,10 @@ void main() {
       expect(parsed.targetPlatform, 'linux-x64');
       expect(parsed.description, 'A custom Linux assemble target.');
       expect(parsed.dependencies, isEmpty);
+      expect(parsed.depfiles, isEmpty);
       expect(parsed.inputs, isEmpty);
       expect(parsed.outputs, isEmpty);
+      expect(parsed.toMap().containsKey(ExtensionAssembleTarget.depfilesKey), isFalse);
     });
 
     test('fromJson throws FormatException on missing required fields or malformed fields', () {
@@ -387,6 +481,48 @@ void main() {
         () => ExtensionAssembleTarget.fromJson(<String, Object?>{
           ...validRequired,
           'dependencies': 'invalid',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionAssembleTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'depfiles': const <Object?>[123],
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionAssembleTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'depfiles': 'invalid',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionAssembleTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'depfiles': const <Object?>[''],
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionAssembleTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'depfiles': const <Object?>['../escape.d'],
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionAssembleTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'depfiles': const <Object?>['/abs/file.d'],
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionAssembleTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'depfiles': const <Object?>[r'sub\file.d'],
         }),
         throwsFormatException,
       );
@@ -439,13 +575,31 @@ void main() {
       expect(ExtensionAssembleTarget.listFromJson('invalid'), isEmpty);
     });
 
+    test('isValidDepfileName and constructor assert validate depfile names', () {
+      expect(ExtensionAssembleTarget.isValidDepfileName('custom_linux.d'), isTrue);
+      expect(ExtensionAssembleTarget.isValidDepfileName(''), isFalse);
+      expect(ExtensionAssembleTarget.isValidDepfileName('.'), isFalse);
+      expect(ExtensionAssembleTarget.isValidDepfileName('..'), isFalse);
+      expect(ExtensionAssembleTarget.isValidDepfileName('sub/file.d'), isFalse);
+      expect(ExtensionAssembleTarget.isValidDepfileName(r'sub\file.d'), isFalse);
+      expect(
+        () => ExtensionAssembleTarget(
+          description: 'Target 1',
+          name: 'target-1',
+          targetPlatform: 'linux-x64',
+          depfiles: const <String>['../escape.d'],
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
     test('equality and hashCode distinguish different targets', () {
-      const target1 = ExtensionAssembleTarget(
+      final target1 = ExtensionAssembleTarget(
         description: 'Target 1',
         name: 'target-1',
         targetPlatform: 'linux-x64',
       );
-      const target2 = ExtensionAssembleTarget(
+      final target2 = ExtensionAssembleTarget(
         description: 'Target 2',
         name: 'target-2',
         targetPlatform: 'linux-x64',
@@ -458,16 +612,21 @@ void main() {
 
   group('ExtensionBuildResult', () {
     test('serializes and deserializes successful result without errorMessage', () {
-      const result = ExtensionBuildResult(success: true);
+      final result = ExtensionBuildResult(
+        success: true,
+        executableUri: Uri.file('/path/to/bundle/app'),
+      );
 
       final Map<String, Object?> map = result.toMap();
       expect(map[ExtensionBuildResult.successKey], isTrue);
       expect(map.containsKey(ExtensionBuildResult.errorMessageKey), isFalse);
+      expect(map[ExtensionBuildResult.executableUriKey], 'file:///path/to/bundle/app');
 
       final parsed = ExtensionBuildResult.fromJson(map);
       expect(parsed, equals(result));
       expect(parsed.hashCode, equals(result.hashCode));
       expect(parsed.toString(), contains('success: true'));
+      expect(parsed.toString(), contains('file:///path/to/bundle/app'));
     });
 
     test('serializes and deserializes failed result with errorMessage', () {
@@ -476,11 +635,36 @@ void main() {
       final Map<String, Object?> map = result.toMap();
       expect(map[ExtensionBuildResult.successKey], isFalse);
       expect(map[ExtensionBuildResult.errorMessageKey], 'Compilation failed.');
+      expect(map.containsKey(ExtensionBuildResult.executableUriKey), isFalse);
 
       final parsed = ExtensionBuildResult.fromJson(map);
       expect(parsed, equals(result));
       expect(parsed.hashCode, equals(result.hashCode));
       expect(parsed.toString(), contains('Compilation failed.'));
+    });
+
+    test('fromJson validates executableUri is an absolute file URI', () {
+      expect(
+        () => ExtensionBuildResult.fromJson(const <String, Object?>{
+          'success': true,
+          'executableUri': 'relative/path/app',
+        }),
+        throwsA(isA<FormatException>()),
+      );
+      expect(
+        () => ExtensionBuildResult.fromJson(const <String, Object?>{
+          'success': true,
+          'executableUri': 'https://example.com/app',
+        }),
+        throwsA(isA<FormatException>()),
+      );
+      expect(
+        () => ExtensionBuildResult.fromJson(const <String, Object?>{
+          'success': true,
+          'executableUri': 123,
+        }),
+        throwsA(isA<FormatException>()),
+      );
     });
 
     test('equality and hashCode distinguish different results', () {

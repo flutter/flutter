@@ -18,7 +18,6 @@
                 "--target-dir",
                 "ci/host_debug_clang_tidy",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/host_debug_clang_tidy",
@@ -28,7 +27,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             }
         },
@@ -51,7 +50,6 @@
                 "--target-dir",
                 "ci/ios_debug_sim_clang_tidy",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/ios_debug_sim_clang_tidy",
@@ -61,7 +59,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             }
         }
@@ -98,7 +96,6 @@
                         "--target-dir",
                         "ci/host_debug_clang_tidy",
                         "--rbe",
-                        "--no-goma",
                         "--xcode-symlinks"
                     ]
                 },
@@ -117,7 +114,7 @@
             ],
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             }
         },
@@ -152,7 +149,6 @@
                         "--target-dir",
                         "ci/host_debug_clang_tidy",
                         "--rbe",
-                        "--no-goma",
                         "--xcode-symlinks"
                     ]
                 },
@@ -171,7 +167,7 @@
             ],
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             }
         },
@@ -206,7 +202,6 @@
                         "--target-dir",
                         "ci/host_debug_clang_tidy",
                         "--rbe",
-                        "--no-goma",
                         "--xcode-symlinks"
                     ]
                 },
@@ -225,7 +220,7 @@
             ],
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             }
         },
@@ -260,7 +255,6 @@
                         "--target-dir",
                         "ci/host_debug_clang_tidy",
                         "--rbe",
-                        "--no-goma",
                         "--xcode-symlinks"
                     ]
                 },
@@ -279,7 +273,7 @@
             ],
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             }
         },
@@ -315,7 +309,6 @@
                         "--target-dir",
                         "ci/host_debug_clang_tidy",
                         "--rbe",
-                        "--no-goma",
                         "--xcode-symlinks"
                     ]
                 },
@@ -332,7 +325,6 @@
                         "--target-dir",
                         "ci/ios_debug_sim_clang_tidy",
                         "--rbe",
-                        "--no-goma",
                         "--xcode-symlinks"
                     ]
                 },
@@ -351,7 +343,7 @@
             ],
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             }
         }

@@ -21,6 +21,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 const _doubleIndent = '        ';
 
@@ -34,24 +35,27 @@ void main() {
     for (final platform in supportedPlatforms) {
       group('for ${platform.name}', () {
         group('generatePluginsSwiftPackage', () {
-          testWithoutContext('skip if no dependencies and not already migrated', () async {
+          test('skip if no dependencies and not already migrated', () async {
             final fs = MemoryFileSystem();
             final processManager = FakeProcessManager.any();
             final logger = BufferLogger.test();
             final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
 
             final spm = SwiftPackageManager(
-              fileSystem: fs,
               templateRenderer: const MustacheTemplateRenderer(),
-              processUtils: ProcessUtils(processManager: processManager, logger: logger),
-              config: FakeConfig(),
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(processManager: processManager, logger: logger),
+              ),
             );
             await spm.generatePluginsSwiftPackage(<Plugin>[], platform, project);
 
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isFalse);
           });
 
-          testWithoutContext('generate if no dependencies and already migrated', () async {
+          test('generate if no dependencies and already migrated', () async {
             final fs = MemoryFileSystem();
             final processManager = FakeProcessManager.any();
             final logger = BufferLogger.test();
@@ -62,10 +66,13 @@ void main() {
 ''');
 
             final spm = SwiftPackageManager(
-              fileSystem: fs,
               templateRenderer: const MustacheTemplateRenderer(),
-              processUtils: ProcessUtils(processManager: processManager, logger: logger),
-              config: FakeConfig(),
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(processManager: processManager, logger: logger),
+              ),
             );
             await spm.generatePluginsSwiftPackage(<Plugin>[], platform, project);
 
@@ -139,7 +146,7 @@ $_doubleIndent
             );
           });
 
-          testWithoutContext(
+          test(
             'generate if no dependencies, no Flutter dependency, and already migrated',
             () async {
               final fs = MemoryFileSystem();
@@ -152,10 +159,13 @@ $_doubleIndent
 ''');
 
               final spm = SwiftPackageManager(
-                fileSystem: fs,
                 templateRenderer: const MustacheTemplateRenderer(),
-                processUtils: ProcessUtils(processManager: processManager, logger: logger),
-                config: FakeConfig(),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  fs: fs,
+                  logger: logger,
+                  processUtils: ProcessUtils(processManager: processManager, logger: logger),
+                ),
               );
               await spm.generatePluginsSwiftPackage(
                 <Plugin>[],
@@ -198,7 +208,7 @@ $_doubleIndent
             },
           );
 
-          testWithoutContext('generate with single dependency', () async {
+          test('generate with single dependency', () async {
             final fs = MemoryFileSystem();
             final processManager = FakeProcessManager.any();
             final logger = BufferLogger.test();
@@ -212,10 +222,13 @@ $_doubleIndent
                 .file('${validPlugin1.path}/${platform.name}/${validPlugin1.name}/Package.swift')
                 .createSync(recursive: true);
             final spm = SwiftPackageManager(
-              fileSystem: fs,
               templateRenderer: const MustacheTemplateRenderer(),
-              processUtils: ProcessUtils(processManager: processManager, logger: logger),
-              config: FakeConfig(),
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(processManager: processManager, logger: logger),
+              ),
             );
             await spm.generatePluginsSwiftPackage(<Plugin>[validPlugin1], platform, project);
 
@@ -265,7 +278,7 @@ let package = Package(
 ''');
           });
 
-          testWithoutContext('generate with multiple dependencies', () async {
+          test('generate with multiple dependencies', () async {
             final fs = MemoryFileSystem();
             final processManager = FakeProcessManager.any();
             final logger = BufferLogger.test();
@@ -301,10 +314,13 @@ let package = Package(
                 .createSync(recursive: true);
 
             final spm = SwiftPackageManager(
-              fileSystem: fs,
               templateRenderer: const MustacheTemplateRenderer(),
-              processUtils: ProcessUtils(processManager: processManager, logger: logger),
-              config: FakeConfig(),
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(processManager: processManager, logger: logger),
+              ),
             );
             await spm.generatePluginsSwiftPackage(
               <Plugin>[
@@ -374,7 +390,7 @@ let package = Package(
 ''');
           });
 
-          testWithoutContext('generate with plugin with dependency on plugin', () async {
+          test('generate with plugin with dependency on plugin', () async {
             final fs = MemoryFileSystem();
             final logger = BufferLogger.test();
             final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
@@ -479,10 +495,13 @@ let package = Package(
             ]);
 
             final spm = SwiftPackageManager(
-              fileSystem: fs,
               templateRenderer: const MustacheTemplateRenderer(),
-              processUtils: ProcessUtils(processManager: processManager, logger: logger),
-              config: FakeConfig(),
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(processManager: processManager, logger: logger),
+              ),
             );
             await spm.generatePluginsSwiftPackage(
               <Plugin>[validPlugin1, validPlugin2, validPlugin3],
@@ -559,7 +578,7 @@ let package = Package(
             expect(processManager, hasNoRemainingExpectations);
           });
 
-          testWithoutContext('generate with plugin whose basename does not match its name', () async {
+          test('generate with plugin whose basename does not match its name', () async {
             final fs = MemoryFileSystem();
             final logger = BufferLogger.test();
             final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
@@ -599,10 +618,13 @@ let package = Package(
             ]);
 
             final spm = SwiftPackageManager(
-              fileSystem: fs,
               templateRenderer: const MustacheTemplateRenderer(),
-              processUtils: ProcessUtils(processManager: processManager, logger: logger),
-              config: FakeConfig(),
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(processManager: processManager, logger: logger),
+              ),
             );
             await spm.generatePluginsSwiftPackage(<Plugin>[validPlugin1], platform, project);
 
@@ -659,7 +681,7 @@ let package = Package(
           });
 
           group('robust symlink creation', () {
-            testWithoutContext('directory already exists at symlink path', () async {
+            test('directory already exists at symlink path', () async {
               final fs = MemoryFileSystem();
               final processManager = FakeProcessManager.any();
               final logger = BufferLogger.test();
@@ -680,10 +702,13 @@ let package = Package(
               symlinkPath.createSync(recursive: true);
 
               final spm = SwiftPackageManager(
-                fileSystem: fs,
                 templateRenderer: const MustacheTemplateRenderer(),
-                processUtils: ProcessUtils(processManager: processManager, logger: logger),
-                config: FakeConfig(),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  fs: fs,
+                  logger: logger,
+                  processUtils: ProcessUtils(processManager: processManager, logger: logger),
+                ),
               );
               await spm.generatePluginsSwiftPackage(<Plugin>[validPlugin1], platform, project);
 
@@ -699,7 +724,7 @@ let package = Package(
               );
             });
 
-            testWithoutContext('file already exists at symlink path', () async {
+            test('file already exists at symlink path', () async {
               final fs = MemoryFileSystem();
               final processManager = FakeProcessManager.any();
               final logger = BufferLogger.test();
@@ -720,10 +745,13 @@ let package = Package(
               symlinkPath.createSync(recursive: true);
 
               final spm = SwiftPackageManager(
-                fileSystem: fs,
                 templateRenderer: const MustacheTemplateRenderer(),
-                processUtils: ProcessUtils(processManager: processManager, logger: logger),
-                config: FakeConfig(),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  fs: fs,
+                  logger: logger,
+                  processUtils: ProcessUtils(processManager: processManager, logger: logger),
+                ),
               );
               await spm.generatePluginsSwiftPackage(<Plugin>[validPlugin1], platform, project);
 
@@ -739,7 +767,7 @@ let package = Package(
               );
             });
 
-            testWithoutContext('broken symlink already exists at symlink path', () async {
+            test('broken symlink already exists at symlink path', () async {
               final fs = MemoryFileSystem();
               final processManager = FakeProcessManager.any();
               final logger = BufferLogger.test();
@@ -761,10 +789,13 @@ let package = Package(
               symlinkPath.createSync('/nonexistent/path');
 
               final spm = SwiftPackageManager(
-                fileSystem: fs,
                 templateRenderer: const MustacheTemplateRenderer(),
-                processUtils: ProcessUtils(processManager: processManager, logger: logger),
-                config: FakeConfig(),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  fs: fs,
+                  logger: logger,
+                  processUtils: ProcessUtils(processManager: processManager, logger: logger),
+                ),
               );
               await spm.generatePluginsSwiftPackage(<Plugin>[validPlugin1], platform, project);
 
@@ -780,7 +811,7 @@ let package = Package(
               );
             });
 
-            testWithoutContext(
+            test(
               'parallel build concurrently creates correct symlink and throws OS error 17',
               () async {
                 final delegateFs = MemoryFileSystem();
@@ -813,10 +844,13 @@ let package = Package(
                   ..createSync('${validPlugin1.path}/${platform.name}/valid_plugin_1');
 
                 final spm = SwiftPackageManager(
-                  fileSystem: fs,
                   templateRenderer: const MustacheTemplateRenderer(),
-                  processUtils: ProcessUtils(processManager: processManager, logger: logger),
-                  config: FakeConfig(),
+                  toolContext: FakeToolContext(
+                    config: FakeConfig(),
+                    fs: fs,
+                    logger: logger,
+                    processUtils: ProcessUtils(processManager: processManager, logger: logger),
+                  ),
                 );
                 await spm.generatePluginsSwiftPackage(<Plugin>[validPlugin1], platform, project);
 
@@ -851,15 +885,17 @@ let package = Package(
             project = FakeXcodeProject(platform: platform.name, fileSystem: trackingFs);
 
             spm = SwiftPackageManager(
-              fileSystem: trackingFs,
               templateRenderer: const MustacheTemplateRenderer(),
-              processUtils: ProcessUtils(processManager: processManager, logger: logger),
-              config: FakeConfig(),
-              logger: logger,
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                fs: trackingFs,
+                logger: logger,
+                processUtils: ProcessUtils(processManager: processManager, logger: logger),
+              ),
             );
           });
 
-          testWithoutContext('acquires and releases lock successfully', () async {
+          test('acquires and releases lock successfully', () async {
             project.xcodeProjectInfoFile.createSync(recursive: true);
             project.xcodeProjectInfoFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
 
@@ -870,7 +906,7 @@ let package = Package(
             expect(trackingFs.lockAttempts, 1);
           });
 
-          testWithoutContext('retries lock on FileSystemException and eventually succeeds', () async {
+          test('retries lock on FileSystemException and eventually succeeds', () async {
             project.xcodeProjectInfoFile.createSync(recursive: true);
             project.xcodeProjectInfoFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
 
@@ -892,7 +928,7 @@ let package = Package(
             );
           });
 
-          testWithoutContext('proceeds without lock on UnimplementedError', () async {
+          test('proceeds without lock on UnimplementedError', () async {
             project.xcodeProjectInfoFile.createSync(recursive: true);
             project.xcodeProjectInfoFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
 
@@ -905,7 +941,7 @@ let package = Package(
             expect(trackingFs.lockAttempts, 1); // 1 attempt that threw
           });
 
-          testWithoutContext(
+          test(
             'non-destructive symlink update: preserves active, creates new, deletes obsolete',
             () async {
               project.xcodeProjectInfoFile.createSync(recursive: true);
@@ -969,34 +1005,31 @@ let package = Package(
             },
           );
 
-          testWithoutContext(
-            'optimizes Package.swift generation: does not rewrite if identical',
-            () async {
-              project.xcodeProjectInfoFile.createSync(recursive: true);
-              project.xcodeProjectInfoFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
+          test('optimizes Package.swift generation: does not rewrite if identical', () async {
+            project.xcodeProjectInfoFile.createSync(recursive: true);
+            project.xcodeProjectInfoFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
 
-              final plugin1 = FakePlugin(
-                name: 'plugin_1',
-                platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
-              );
-              trackingFs
-                  .file('${plugin1.path}/${platform.name}/${plugin1.name}/Package.swift')
-                  .createSync(recursive: true);
+            final plugin1 = FakePlugin(
+              name: 'plugin_1',
+              platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+            );
+            trackingFs
+                .file('${plugin1.path}/${platform.name}/${plugin1.name}/Package.swift')
+                .createSync(recursive: true);
 
-              // Reset write count after setup to only track writes during SPM generation
-              trackingFs.writeCount = 0;
+            // Reset write count after setup to only track writes during SPM generation
+            trackingFs.writeCount = 0;
 
-              // First run: generates Package.swift and placeholders
-              await spm.generatePluginsSwiftPackage(<Plugin>[plugin1], platform, project);
-              expect(trackingFs.writeCount, 4); // 2 Package.swift + 2 placeholder .swift files
+            // First run: generates Package.swift and placeholders
+            await spm.generatePluginsSwiftPackage(<Plugin>[plugin1], platform, project);
+            expect(trackingFs.writeCount, 4); // 2 Package.swift + 2 placeholder .swift files
 
-              trackingFs.writeCount = 0;
+            trackingFs.writeCount = 0;
 
-              // Second run with same plugin: should skip writing everything
-              await spm.generatePluginsSwiftPackage(<Plugin>[plugin1], platform, project);
-              expect(trackingFs.writeCount, 0); // All skipped!
-            },
-          );
+            // Second run with same plugin: should skip writing everything
+            await spm.generatePluginsSwiftPackage(<Plugin>[plugin1], platform, project);
+            expect(trackingFs.writeCount, 0); // All skipped!
+          });
         });
       });
     }

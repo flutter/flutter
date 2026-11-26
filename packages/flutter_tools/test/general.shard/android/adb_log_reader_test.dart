@@ -40,7 +40,7 @@ class _FakeFlutterVmService extends Fake implements FlutterVmService {
 }
 
 void main() {
-  testWithoutContext('AdbLogReader ignores spam from SurfaceSyncer', () async {
+  test('AdbLogReader ignores spam from SurfaceSyncer', () async {
     const appPid = 1;
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
@@ -65,12 +65,12 @@ void main() {
       emittedLines.add(line);
     }, onDone: onDone.complete);
     await null;
-    logReader.dispose();
+    await logReader.dispose();
     await onDone.future;
     expect(emittedLines, const <String>['W/flutter($appPid): Hello there!']);
   });
 
-  testWithoutContext('AdbLogReader ignores spam from Samsung/Mali', () async {
+  test('AdbLogReader ignores spam from Samsung/Mali', () async {
     const appPid = 1;
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
@@ -96,13 +96,13 @@ void main() {
       emittedLines.add(line);
     }, onDone: onDone.complete);
     await null;
-    logReader.dispose();
+    await logReader.dispose();
     await onDone.future;
     expect(emittedLines, const <String>['W/flutter($appPid): Hello there!']);
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/104268
-  testWithoutContext('AdbLogReader ignores spam from FrameEvents/updateAcquireFence', () async {
+  test('AdbLogReader ignores spam from FrameEvents/updateAcquireFence', () async {
     const appPid = 1;
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
@@ -128,13 +128,13 @@ void main() {
       emittedLines.add(line);
     }, onDone: onDone.complete);
     await null;
-    logReader.dispose();
+    await logReader.dispose();
     await onDone.future;
     expect(emittedLines, const <String>['W/flutter($appPid): Hello there!']);
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/174783
-  testWithoutContext('AdbLogReader ignores spam from MotionEvent-JNI', () async {
+  test('AdbLogReader ignores spam from MotionEvent-JNI', () async {
     const appPid = 1;
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
@@ -159,12 +159,12 @@ void main() {
       emittedLines.add(line);
     }, onDone: onDone.complete);
     await null;
-    logReader.dispose();
+    await logReader.dispose();
     await onDone.future;
     expect(emittedLines, const <String>['W/flutter($appPid): Hello there!']);
   });
 
-  testWithoutContext('AdbLogReader calls adb logcat with expected flags apiVersion 21', () async {
+  test('AdbLogReader calls adb logcat with expected flags apiVersion 21', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
@@ -190,7 +190,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('AdbLogReader calls adb logcat with expected flags apiVersion < 21', () async {
+  test('AdbLogReader calls adb logcat with expected flags apiVersion < 21', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time'],
@@ -205,7 +205,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('AdbLogReader calls adb logcat with expected flags null apiVersion', () async {
+  test('AdbLogReader calls adb logcat with expected flags null apiVersion', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time'],
@@ -216,37 +216,34 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext(
-    'AdbLogReader calls adb logcat with expected flags when requesting past logs',
-    () async {
-      final processManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <String>[
-            'adb',
-            '-s',
-            '1234',
-            'shell',
-            '-x',
-            'logcat',
-            '-v',
-            'time',
-            '-s',
-            'flutter',
-          ],
-        ),
-      ]);
-      await AdbLogReader.createLogReader(
-        createFakeDevice(null),
-        processManager,
-        BufferLogger.test(),
-        includePastLogs: true,
-      );
+  test('AdbLogReader calls adb logcat with expected flags when requesting past logs', () async {
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'adb',
+          '-s',
+          '1234',
+          'shell',
+          '-x',
+          'logcat',
+          '-v',
+          'time',
+          '-s',
+          'flutter',
+        ],
+      ),
+    ]);
+    await AdbLogReader.createLogReader(
+      createFakeDevice(null),
+      processManager,
+      BufferLogger.test(),
+      includePastLogs: true,
+    );
 
-      expect(processManager, hasNoRemainingExpectations);
-    },
-  );
+    expect(processManager, hasNoRemainingExpectations);
+  });
 
-  testWithoutContext('AdbLogReader handles process early exit', () async {
+  test('AdbLogReader handles process early exit', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time'],
@@ -262,11 +259,11 @@ void main() {
     final onDone = Completer<void>.sync();
     logReader.logLines.listen((String _) {}, onDone: onDone.complete);
 
-    logReader.dispose();
+    await logReader.dispose();
     await onDone.future;
   });
 
-  testWithoutContext('AdbLogReader does not filter output from AndroidRuntime crashes', () async {
+  test('AdbLogReader does not filter output from AndroidRuntime crashes', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time'],
@@ -294,7 +291,7 @@ void main() {
       ]),
     );
 
-    logReader.dispose();
+    await logReader.dispose();
   });
 }
 

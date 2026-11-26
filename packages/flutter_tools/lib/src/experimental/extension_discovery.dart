@@ -5,23 +5,31 @@
 import 'dart:async';
 import 'dart:isolate';
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
+import 'package:meta/meta.dart';
 import 'package:stream_channel/isolate_channel.dart';
 
 import '../base/logger.dart';
+import '../base/terminal.dart';
 
-/// Typedef for an extension isolate entrypoint function.
+/// Typedef for an in-process extension isolate entrypoint function.
+///
+/// Used by unit tests to spawn lightweight in-process extension isolates via
+/// [ExtensionConnection.spawn] without compiling a `.dill` kernel file, and
+/// during transitional bootstrap before dynamic project discovery is wired via
+/// [ExtensionConnection.spawnUri].
 typedef ExtensionEntryPoint = void Function(SendPort sendPort);
 
 /// Represents an active host-side connection to a running tool extension isolate.
 class ExtensionConnection {
   ExtensionConnection._({
     required this.capabilities,
-    required this.extensionName,
     required this._errorPort,
     required this._exitPort,
-    required Isolate this._isolate,
+    required this.extensionName,
+    required this._isolate,
     required this._logger,
     required this._peer,
     required this._receivePort,
@@ -29,6 +37,19 @@ class ExtensionConnection {
 
   /// Fallback extension name used when an extension does not report one in its capabilities.
   static const defaultExtensionName = 'unknown_extension';
+
+  static final _ansiSgrPattern = RegExp(r'^\x1B\[[0-9;:]*m$');
+  static final _terminalControlPattern = RegExp(
+    r'\x1B\[[\x30-\x3F]*[\x20-\x2F]*[\x40-\x7E]|'
+    r'\x1B\][^\x07\x1B\r\n]*(?:\x07|\x1B\\)?|'
+    r'\x1B[\x20-\x2F]*[\x30-\x7E]|'
+    r'[\x00-\x08\x0B-\x1F\x7F-\x9F]',
+  );
+
+  // Bounded grace period for `extension.shutdown` RPCs so extensions can
+  // terminate child processes and tunnels before the isolate is killed
+  // without allowing a wedged extension to stall CLI exit.
+  static const _kShutdownTimeout = Duration(seconds: 2);
 
   Isolate? _isolate;
 
@@ -51,7 +72,11 @@ class ExtensionConnection {
   /// The resolved package or extension name of the connected extension.
   final String extensionName;
 
-  bool _isDisposed = false;
+  Future<void>? _disposeFuture;
+  bool _isolateExited = false;
+
+  /// Whether this connection has been disposed.
+  bool get isDisposed => _disposeFuture != null;
 
   /// Handles uncaught async errors from the extension isolate after handshake.
   ///
@@ -80,15 +105,24 @@ class ExtensionConnection {
   /// long-running `timeout: null` build requests) with a [StateError] and
   /// closing active notification streams instead of hanging indefinitely.
   void _handleIsolateExit() {
+    _isolateExited = true;
     _logger.printTrace('Extension isolate "$extensionName" exited unexpectedly.');
+    _receivePort.close();
     unawaited(dispose());
   }
 
   /// Returns a broadcast stream of JSON-RPC 2.0 notifications sent by the
   /// extension isolate for [method].
   Stream<Map<String, Object?>> onNotification(String method) {
-    if (_isDisposed) {
+    if (isDisposed) {
       throw StateError('ExtensionConnection has been disposed.');
+    }
+    if (method == ToolExtensionEntryPoint.logNotificationMethod) {
+      throw ArgumentError.value(
+        method,
+        'method',
+        'Notifications for "${ToolExtensionEntryPoint.logNotificationMethod}" are handled by ExtensionConnection and routed to the host Logger.',
+      );
     }
     final StreamController<Map<String, Object?>>
     controller = _notificationControllers.putIfAbsent(method, () {
@@ -117,7 +151,7 @@ class ExtensionConnection {
     Object? params,
     Duration? timeout = const Duration(seconds: 5),
   }) async {
-    if (_isDisposed) {
+    if (isDisposed) {
       throw StateError('ExtensionConnection has been disposed.');
     }
     _logger.printTrace('ExtensionConnection sending RPC request "$method"...');
@@ -126,19 +160,179 @@ class ExtensionConnection {
       final Object? result = await (timeout != null ? request.timeout(timeout) : request);
       _logger.printTrace('ExtensionConnection received response for RPC request "$method".');
       return result;
-    } catch (error) {
+    } on json_rpc.RpcException catch (error) {
+      if (error.code == ToolExtensionException.domainErrorCode) {
+        throw ToolExtensionException(error.message);
+      }
+      _logger.printTrace('ExtensionConnection RPC request "$method" failed with error: $error');
+      rethrow;
+    } on Object catch (error) {
       _logger.printTrace('ExtensionConnection RPC request "$method" failed with error: $error');
       rethrow;
     }
   }
 
-  /// Spawns an extension isolate from [entryPoint] and completes handshake.
+  /// Spawns an in-process extension isolate from [entryPoint] and completes the
+  /// capability handshake.
+  ///
+  /// Used by unit tests to exercise extension protocol behavior in-process
+  /// without compiling a `.dill` kernel file, and during transitional bootstrap
+  /// before dynamic project discovery is wired via [spawnUri].
+  ///
+  /// When [expectedConfig] is provided, validates that the runtime
+  /// [ToolExtensionCapabilities] reported by `extension.getCapabilities` match
+  /// the static declarations in `extension/flutter_tools/config.yaml`,
+  /// killing the extension isolate and throwing a [StateError] if they drift.
+  @visibleForTesting
   static Future<ExtensionConnection> spawn(
     ExtensionEntryPoint entryPoint, {
     required Logger logger,
+    ExtensionPackageConfig? expectedConfig,
+    String? extensionName,
+    Duration timeout = const Duration(seconds: 5),
+  }) {
+    logger.printTrace('ExtensionConnection spawning extension isolate...');
+    return _spawnAndHandshake(
+      expectedConfig: expectedConfig,
+      extensionName: extensionName ?? expectedConfig?.name,
+      isolateLauncher: (SendPort sendPort, SendPort onError, SendPort onExit) {
+        return Isolate.spawn(entryPoint, sendPort, onError: onError, onExit: onExit);
+      },
+      logger: logger,
+      timeout: timeout,
+    );
+  }
+
+  /// Spawns an extension isolate dynamically from [entrypointUri] (a compiled
+  /// `.dill` Kernel URI or `.dart` script URI) using [packageConfigUri] and
+  /// completes the capability handshake.
+  ///
+  /// When [expectedConfig] is provided, validates that the runtime
+  /// [ToolExtensionCapabilities] reported by `extension.getCapabilities` match
+  /// the static declarations in `extension/flutter_tools/config.yaml`,
+  /// killing the extension isolate and throwing a [StateError] if they drift.
+  static Future<ExtensionConnection> spawnUri(
+    Uri entrypointUri, {
+    required Logger logger,
+    required Uri packageConfigUri,
+    List<String> args = const <String>[],
+    ExtensionPackageConfig? expectedConfig,
+    String? extensionName,
+    Duration timeout = const Duration(seconds: 5),
+  }) {
+    logger.printTrace(
+      'ExtensionConnection spawning extension isolate from URI "$entrypointUri"...',
+    );
+    return _spawnAndHandshake(
+      expectedConfig: expectedConfig,
+      extensionName: extensionName ?? expectedConfig?.name,
+      isolateLauncher: (SendPort sendPort, SendPort onError, SendPort onExit) {
+        return Isolate.spawnUri(
+          entrypointUri,
+          args,
+          sendPort,
+          packageConfig: packageConfigUri,
+          onError: onError,
+          onExit: onExit,
+        );
+      },
+      logger: logger,
+      timeout: timeout,
+    );
+  }
+
+  static String _sanitizeLogMessage(String message, {required bool supportsColor}) {
+    var hasSgrSequence = false;
+    final String sanitized = message.replaceAllMapped(_terminalControlPattern, (Match match) {
+      final String sequence = match.group(0)!;
+      if (supportsColor && _ansiSgrPattern.hasMatch(sequence)) {
+        hasSgrSequence = true;
+        return sequence;
+      }
+      return '';
+    });
+    if (hasSgrSequence) {
+      return '$sanitized${AnsiTerminal.resetAll}';
+    }
+    return sanitized;
+  }
+
+  static void _handleLogNotification(
+    json_rpc.Parameters params, {
+    required String extensionName,
+    required Logger logger,
+  }) {
+    final Object? rawValue = params.value;
+    if (rawValue is! Map<String, Object?>) {
+      logger.printWarning(
+        'Extension "$extensionName" sent malformed "${ToolExtensionEntryPoint.logNotificationMethod}" notification: expected Map<String, Object?>.',
+      );
+      return;
+    }
+    final ExtensionLogMessage logMessage;
+    try {
+      logMessage = ExtensionLogMessage.fromJson(rawValue);
+    } on FormatException catch (error) {
+      logger.printWarning(
+        'Extension "$extensionName" sent malformed "${ToolExtensionEntryPoint.logNotificationMethod}" notification: $error',
+      );
+      return;
+    }
+    final String message = _sanitizeLogMessage(
+      logMessage.message,
+      supportsColor: logger.supportsColor,
+    );
+    final formatted = '[$extensionName] $message';
+    switch (logMessage.level) {
+      case .trace:
+        logger.printTrace(formatted);
+      case .info:
+        logger.printStatus(formatted);
+      case .warning:
+        logger.printWarning(formatted);
+      case .error:
+        logger.printError(formatted);
+    }
+  }
+
+  static void _validateCapabilitiesMatchConfig(
+    ToolExtensionCapabilities capabilities,
+    ExtensionPackageConfig expectedConfig, {
+    required String extensionName,
+  }) {
+    final Set<String> actualServices = capabilities.services.toSet();
+    if (actualServices.length != expectedConfig.services.length ||
+        !actualServices.containsAll(expectedConfig.services)) {
+      throw StateError(
+        'Extension "$extensionName" capabilities mismatch: '
+        'extension/flutter_tools/config.yaml declares services '
+        '${expectedConfig.services.toList()}, '
+        'but ToolExtensionEntryPoint.run registered ${capabilities.services}.',
+      );
+    }
+    if (expectedConfig.hostPlatforms.isNotEmpty) {
+      final Set<String> actualPlatforms = capabilities.supportedPlatforms;
+      if (actualPlatforms.length != expectedConfig.hostPlatforms.length ||
+          !actualPlatforms.containsAll(expectedConfig.hostPlatforms)) {
+        throw StateError(
+          'Extension "$extensionName" capabilities mismatch: '
+          'extension/flutter_tools/config.yaml declares host_platforms '
+          '${expectedConfig.hostPlatforms.toList()}, '
+          'but ToolExtensionEntryPoint.run registered supportedPlatforms '
+          '${actualPlatforms.toList()}.',
+        );
+      }
+    }
+  }
+
+  static Future<ExtensionConnection> _spawnAndHandshake({
+    required Future<Isolate> Function(SendPort sendPort, SendPort onError, SendPort onExit)
+    isolateLauncher,
+    required Logger logger,
+    ExtensionPackageConfig? expectedConfig,
+    String? extensionName,
     Duration timeout = const Duration(seconds: 5),
   }) async {
-    logger.printTrace('ExtensionConnection spawning extension isolate...');
     final receivePort = ReceivePort();
     final errorPort = ReceivePort();
     final exitPort = ReceivePort();
@@ -174,17 +368,35 @@ class ExtensionConnection {
     });
 
     Isolate? isolate;
+    List<json_rpc.Parameters>? pendingLogNotifications = <json_rpc.Parameters>[];
+    String currentExtensionName = extensionName ?? defaultExtensionName;
+
+    void flushPendingLogNotifications() {
+      final pending = pendingLogNotifications;
+      if (pending == null) {
+        return;
+      }
+      pendingLogNotifications = null;
+      for (final json_rpc.Parameters params in pending) {
+        _handleLogNotification(params, extensionName: currentExtensionName, logger: logger);
+      }
+    }
 
     try {
-      isolate = await Isolate.spawn(
-        entryPoint,
-        receivePort.sendPort,
-        onError: errorPort.sendPort,
-        onExit: exitPort.sendPort,
-      );
+      isolate = await isolateLauncher(receivePort.sendPort, errorPort.sendPort, exitPort.sendPort);
       logger.printTrace('ExtensionConnection isolate spawned; connecting IsolateChannel...');
       final channel = IsolateChannel<Object?>.connectReceive(receivePort);
       final peer = json_rpc.Peer.withoutJson(channel);
+
+      peer.registerMethod(ToolExtensionEntryPoint.logNotificationMethod, (
+        json_rpc.Parameters params,
+      ) {
+        if (pendingLogNotifications case final List<json_rpc.Parameters> pending) {
+          pending.add(params);
+          return;
+        }
+        _handleLogNotification(params, extensionName: currentExtensionName, logger: logger);
+      });
 
       unawaited(peer.listen());
 
@@ -203,17 +415,29 @@ class ExtensionConnection {
         'ExtensionConnection handshake complete. Capabilities: ${capabilities.services}',
       );
 
+      final String resolvedExtensionName =
+          extensionName ?? capabilities.extensionName ?? defaultExtensionName;
+      currentExtensionName = resolvedExtensionName;
+      flushPendingLogNotifications();
+      if (expectedConfig != null) {
+        _validateCapabilitiesMatchConfig(
+          capabilities,
+          expectedConfig,
+          extensionName: resolvedExtensionName,
+        );
+      }
       return connection = ExtensionConnection._(
         capabilities: capabilities,
-        extensionName: capabilities.extensionName ?? defaultExtensionName,
         errorPort: errorPort,
         exitPort: exitPort,
+        extensionName: resolvedExtensionName,
         isolate: isolate,
         logger: logger,
         peer: peer,
         receivePort: receivePort,
       );
     } on TimeoutException {
+      flushPendingLogNotifications();
       logger.printTrace('ExtensionConnection handshake timed out.');
       receivePort.close();
       errorPort.close();
@@ -221,6 +445,7 @@ class ExtensionConnection {
       isolate?.kill(priority: Isolate.immediate);
       throw TimeoutException('Handshake with tool extension isolate timed out.');
     } on Object catch (error) {
+      flushPendingLogNotifications();
       logger.printTrace('ExtensionConnection spawn failed with error: $error');
       receivePort.close();
       errorPort.close();
@@ -231,12 +456,19 @@ class ExtensionConnection {
   }
 
   /// Disposes the extension isolate connection.
-  Future<void> dispose() async {
-    if (_isDisposed) {
-      return;
-    }
-    _isDisposed = true;
+  Future<void> dispose() => _disposeFuture ??= _doDispose();
+
+  Future<void> _doDispose() async {
     _logger.printTrace('ExtensionConnection disposing isolate connection.');
+    if (!_isolateExited && !_peer.isClosed) {
+      try {
+        await _peer.sendRequest(ToolExtensionEntryPoint.shutdownMethod).timeout(_kShutdownTimeout);
+      } on Object catch (error) {
+        _logger.printTrace(
+          'Extension "$extensionName" shutdown RPC did not complete cleanly: $error',
+        );
+      }
+    }
     _errorPort.close();
     _exitPort.close();
     _receivePort.close();
@@ -282,9 +514,7 @@ class ExtensionDiscovery {
   /// Disposes all registered extension isolate connections.
   Future<void> dispose() async {
     _logger.printTrace('ExtensionDiscovery disposing all registered connections.');
-    for (final ExtensionConnection connection in _connections) {
-      await connection.dispose();
-    }
+    await Future.wait(_connections.map((ExtensionConnection c) => c.dispose()));
     _connections.clear();
   }
 }

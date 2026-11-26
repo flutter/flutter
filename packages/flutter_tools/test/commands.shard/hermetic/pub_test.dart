@@ -70,7 +70,7 @@ void main() {
     );
   }
 
-  testWithoutContext('pub shows help', () async {
+  test('pub shows help', () async {
     final toolContext = FakeToolContext(fs: fileSystem, logger: logger);
     final command = PackagesCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -88,7 +88,7 @@ void main() {
     );
   });
 
-  testWithoutContext(
+  test(
     'pub get usage values are resilient to missing package config files before running "pub get"',
     () async {
       fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
@@ -116,7 +116,7 @@ void main() {
     },
   );
 
-  testWithoutContext(
+  test(
     'pub get usage values are resilient to poorly formatted package config before "pub get"',
     () async {
       fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
@@ -147,7 +147,7 @@ void main() {
     },
   );
 
-  testWithoutContext('pub get on target directory', () async {
+  test('pub get on target directory', () async {
     fileSystem.currentDirectory.childDirectory('target').createSync();
     final Directory targetDirectory = fileSystem.currentDirectory.childDirectory('target');
     targetDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
@@ -173,7 +173,7 @@ void main() {
     });
   });
 
-  testWithoutContext("pub get doesn't treat unknown flag as directory", () async {
+  test("pub get doesn't treat unknown flag as directory", () async {
     fileSystem.currentDirectory.childDirectory('target').createSync();
     fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
     final PackagesGetCommand command = createPackagesGetCommand('get', '', PubContext.pubGet);
@@ -185,7 +185,7 @@ void main() {
     );
   });
 
-  testWithoutContext("pub get doesn't treat -v as directory", () async {
+  test("pub get doesn't treat -v as directory", () async {
     fileSystem.currentDirectory.childDirectory('target').createSync();
     fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
     final PackagesGetCommand command = createPackagesGetCommand('get', '', PubContext.pubGet);
@@ -199,7 +199,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/144898
   // Regression test for https://github.com/flutter/flutter/issues/160145
-  testWithoutContext("pub add doesn't treat dependency syntax as directory", () async {
+  test("pub add doesn't treat dependency syntax as directory", () async {
     fileSystem.currentDirectory.childDirectory('target').createSync();
     fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
     fileSystem.currentDirectory.childDirectory('example').createSync(recursive: true);
@@ -224,34 +224,31 @@ void main() {
     }
   });
 
-  testWithoutContext(
-    "pub get skips example directory if it doesn't contain a pubspec.yaml",
-    () async {
-      fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
-      fileSystem.currentDirectory.childDirectory('example').createSync(recursive: true);
-      fileSystem.currentDirectory.childDirectory('android').childFile('AndroidManifest.xml')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(minimalV2EmbeddingManifest);
+  test("pub get skips example directory if it doesn't contain a pubspec.yaml", () async {
+    fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
+    fileSystem.currentDirectory.childDirectory('example').createSync(recursive: true);
+    fileSystem.currentDirectory.childDirectory('android').childFile('AndroidManifest.xml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(minimalV2EmbeddingManifest);
 
-      final PackagesGetCommand command = createPackagesGetCommand('get', '', PubContext.pubGet);
-      final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+    final PackagesGetCommand command = createPackagesGetCommand('get', '', PubContext.pubGet);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
-      await commandRunner.run(<String>['get']);
+    await commandRunner.run(<String>['get']);
 
-      expect(
-        await command.unifiedAnalyticsUsageValues('pub'),
-        Event.commandUsageValues(
-          workflow: 'pub',
-          commandHasTerminal: false,
-          packagesNumberPlugins: 0,
-          packagesProjectModule: false,
-          packagesAndroidEmbeddingVersion: 'v2',
-        ),
-      );
-    },
-  );
+    expect(
+      await command.unifiedAnalyticsUsageValues('pub'),
+      Event.commandUsageValues(
+        workflow: 'pub',
+        commandHasTerminal: false,
+        packagesNumberPlugins: 0,
+        packagesProjectModule: false,
+        packagesAndroidEmbeddingVersion: 'v2',
+      ),
+    );
+  });
 
-  testWithoutContext('pub get throws error on missing directory', () async {
+  test('pub get throws error on missing directory', () async {
     final PackagesGetCommand command = createPackagesGetCommand('get', '', PubContext.pubGet);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
@@ -263,27 +260,24 @@ void main() {
     }
   });
 
-  testWithoutContext(
-    'packages forward command forwards command name and arguments to pub',
-    () async {
-      final toolContext = FakeToolContext(
-        fs: fileSystem,
-        logger: logger,
-        processManager: processManager,
-      );
-      fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
-      final command = PackagesCommand(
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        toolContext: toolContext,
-      );
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-      await runner.run(<String>['pub', 'outdated', '--json']);
-      expect(
-        processManager.lastCommand,
-        containsAllInOrder(<String>['pub', '--suppress-analytics', 'outdated', '--json']),
-      );
-    },
-  );
+  test('packages forward command forwards command name and arguments to pub', () async {
+    final toolContext = FakeToolContext(
+      fs: fileSystem,
+      logger: logger,
+      processManager: processManager,
+    );
+    fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
+    final command = PackagesCommand(
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      toolContext: toolContext,
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['pub', 'outdated', '--json']);
+    expect(
+      processManager.lastCommand,
+      containsAllInOrder(<String>['pub', '--suppress-analytics', 'outdated', '--json']),
+    );
+  });
 }
 
 class _PubTestProcessManager extends Fake implements ProcessManager {

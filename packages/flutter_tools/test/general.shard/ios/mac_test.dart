@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
@@ -20,6 +19,7 @@ import 'package:flutter_tools/src/ios/code_signing.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/ios/xcresult.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -28,10 +28,8 @@ import 'package:unified_analytics/unified_analytics.dart';
 import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
-import '../../src/throwing_pub.dart';
 
 void main() {
   late BufferLogger logger;
@@ -53,7 +51,7 @@ void main() {
     });
 
     group('startLogger', () {
-      testWithoutContext('starts idevicesyslog when USB connected', () async {
+      test('starts idevicesyslog when USB connected', () async {
         final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['HostArtifact.idevicesyslog', '-u', '1234'],
@@ -72,7 +70,7 @@ void main() {
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
 
-      testWithoutContext('starts idevicesyslog when wirelessly connected', () async {
+      test('starts idevicesyslog when wirelessly connected', () async {
         final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['HostArtifact.idevicesyslog', '-u', '1234', '--network'],
@@ -96,6 +94,7 @@ void main() {
   group('Diagnose Xcode build failure', () {
     late Map<String, String> buildSettings;
     late FakeAnalytics fakeAnalytics;
+    late ProcessUtils processUtils;
 
     setUp(() {
       buildSettings = <String, String>{'PRODUCT_BUNDLE_IDENTIFIER': 'test.app'};
@@ -105,9 +104,10 @@ void main() {
         fs: fs,
         fakeFlutterVersion: FakeFlutterVersion(),
       );
+      processUtils = ProcessUtils(processManager: FakeProcessManager.any(), logger: logger);
     });
 
-    testWithoutContext('Sends analytics when bitcode fails', () async {
+    test('Sends analytics when bitcode fails', () async {
       const buildCommands = <String>['xcrun', 'cc', 'blah'];
       final buildResult = XcodeBuildResult(
         success: false,
@@ -126,7 +126,9 @@ void main() {
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: FakeFlutterProject(fileSystem: fs),
+        xcode: null,
       );
       expect(
         fakeAnalytics.sentEvents,
@@ -141,7 +143,7 @@ void main() {
       );
     });
 
-    testWithoutContext('fallback to stdout: No provisioning profile shows message', () async {
+    test('fallback to stdout: No provisioning profile shows message', () async {
       final buildSettingsWithDevTeam = <String, String>{
         'PRODUCT_BUNDLE_IDENTIFIER': 'test.app',
         'DEVELOPMENT_TEAM': 'a team',
@@ -217,12 +219,14 @@ Error launching application on iPhone.''',
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: FakeFlutterProject(fileSystem: fs),
+        xcode: null,
       );
       expect(logger.errorText, contains(noProvisioningProfileInstruction));
     });
 
-    testWithoutContext('fallback to stdout: Ineligible destinations', () async {
+    test('fallback to stdout: Ineligible destinations', () async {
       final buildSettingsWithDevTeam = <String, String>{
         'PRODUCT_BUNDLE_IDENTIFIER': 'test.app',
         'DEVELOPMENT_TEAM': 'a team',
@@ -259,12 +263,14 @@ Error launching application on iPhone.''',
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: FakeFlutterProject(fileSystem: fs),
+        xcode: null,
       );
       expect(logger.errorText, contains(missingPlatformInstructions('iOS 17.0')));
     });
 
-    testWithoutContext('No development team shows message', () async {
+    test('No development team shows message', () async {
       final buildResult = XcodeBuildResult(
         success: false,
         stdout: '''
@@ -303,7 +309,9 @@ Could not build the precompiled application for the device.''',
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: FakeFlutterProject(fileSystem: fs),
+        xcode: null,
       );
       expect(
         logger.errorText,
@@ -313,12 +321,10 @@ Could not build the precompiled application for the device.''',
       );
     });
 
-    testWithoutContext(
-      'does not show no development team message when other Xcode issues detected',
-      () async {
-        final buildResult = XcodeBuildResult(
-          success: false,
-          stdout: '''
+    test('does not show no development team message when other Xcode issues detected', () async {
+      final buildResult = XcodeBuildResult(
+        success: false,
+        stdout: '''
 Running "flutter pub get" in flutter_gallery...  0.6s
 Launching lib/main.dart on x in release mode...
 Running pod install...                                1.2s
@@ -340,37 +346,38 @@ Xcode's output:
     [BCEROR]Signing for "Runner" requires a development team. Select a development team in the project editor.
 
 Could not build the precompiled application for the device.''',
-          xcodeBuildExecution: XcodeBuildExecution(
-            buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
-            appDirectory: '/blah/blah',
-            environmentType: EnvironmentType.physical,
-            buildSettings: buildSettings,
-          ),
-          xcResult: XCResult.test(
-            issues: <XCResultIssue>[
-              XCResultIssue.test(message: 'Target aot_assembly_release failed', subType: 'Error'),
-            ],
-          ),
-        );
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
+          appDirectory: '/blah/blah',
+          environmentType: EnvironmentType.physical,
+          buildSettings: buildSettings,
+        ),
+        xcResult: XCResult.test(
+          issues: <XCResultIssue>[
+            XCResultIssue.test(message: 'Target aot_assembly_release failed', subType: 'Error'),
+          ],
+        ),
+      );
 
-        final fs = MemoryFileSystem.test();
-        await diagnoseXcodeBuildFailure(
-          buildResult,
-          logger: logger,
-          analytics: fakeAnalytics,
-          fileSystem: fs,
-          platform: FlutterDarwinPlatform.ios,
-          project: FakeFlutterProject(fileSystem: fs),
-        );
-        expect(logger.errorText, contains('Error (Xcode): Target aot_assembly_release failed'));
-        expect(
-          logger.errorText,
-          isNot(contains('Building a deployable iOS app requires a selected Development Team')),
-        );
-      },
-    );
+      final fs = MemoryFileSystem.test();
+      await diagnoseXcodeBuildFailure(
+        buildResult,
+        logger: logger,
+        analytics: fakeAnalytics,
+        fileSystem: fs,
+        platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
+        project: FakeFlutterProject(fileSystem: fs),
+        xcode: null,
+      );
+      expect(logger.errorText, contains('Error (Xcode): Target aot_assembly_release failed'));
+      expect(
+        logger.errorText,
+        isNot(contains('Building a deployable iOS app requires a selected Development Team')),
+      );
+    });
 
-    testWithoutContext('parses redefinition of module error', () async {
+    test('parses redefinition of module error', () async {
       const buildCommands = <String>['xcrun', 'cc', 'blah'];
       final buildResult = XcodeBuildResult(
         success: false,
@@ -397,7 +404,9 @@ Could not build the precompiled application for the device.''',
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: project,
+        xcode: null,
       );
       expect(
         logger.errorText,
@@ -423,7 +432,7 @@ Could not build the precompiled application for the device.''',
       );
     });
 
-    testWithoutContext('parses duplicate symbols error with arch and number', () async {
+    test('parses duplicate symbols error with arch and number', () async {
       const buildCommands = <String>['xcrun', 'cc', 'blah'];
       final buildResult = XcodeBuildResult(
         success: false,
@@ -456,7 +465,9 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: project,
+        xcode: null,
       );
       expect(
         logger.errorText,
@@ -478,7 +489,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       );
     });
 
-    testWithoutContext('parses duplicate symbols error with number', () async {
+    test('parses duplicate symbols error with number', () async {
       const buildCommands = <String>['xcrun', 'cc', 'blah'];
       final buildResult = XcodeBuildResult(
         success: false,
@@ -508,7 +519,9 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: project,
+        xcode: null,
       );
       expect(
         logger.errorText,
@@ -530,7 +543,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       );
     });
 
-    testWithoutContext('parses duplicate symbols error without arch and number', () async {
+    test('parses duplicate symbols error without arch and number', () async {
       const buildCommands = <String>['xcrun', 'cc', 'blah'];
       final buildResult = XcodeBuildResult(
         success: false,
@@ -559,7 +572,9 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: project,
+        xcode: null,
       );
       expect(
         logger.errorText,
@@ -581,75 +596,66 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       );
     });
 
-    testUsingContext(
-      'parses missing module error',
-      () async {
-        const buildCommands = <String>['xcrun', 'cc', 'blah'];
-        final buildResult = XcodeBuildResult(
-          success: false,
-          stdout: '',
-          xcodeBuildExecution: XcodeBuildExecution(
-            buildCommands: buildCommands,
-            appDirectory: '/blah/blah',
-            environmentType: EnvironmentType.physical,
-            buildSettings: buildSettings,
-          ),
-          xcResult: XCResult.test(
-            issues: <XCResultIssue>[
-              XCResultIssue.test(message: "Module 'plugin_1_name' not found", subType: 'Error'),
-              XCResultIssue.test(message: "Module 'plugin_2_name' not found", subType: 'Error'),
-            ],
-          ),
-        );
-        final fs = MemoryFileSystem.test();
-        fs
-            .file('path/to/plugin_1_name/ios/plugin_1_name/Package.swift')
-            .createSync(recursive: true);
-        fs
-            .file('path/to/plugin_2_name/ios/plugin_2_name/Package.swift')
-            .createSync(recursive: true);
-        final project = FakeFlutterProject(
-          fileSystem: fs,
-          plugins: <Plugin>[
-            FakePlugin(
-              name: 'plugin_1_name',
-              platforms: <String, PluginPlatform>{
-                'ios': const IOSPlugin(name: 'plugin_1_name', classPrefix: ''),
-              },
-            ),
-            FakePlugin(
-              name: 'plugin_2_name',
-              platforms: <String, PluginPlatform>{
-                'ios': const IOSPlugin(name: 'plugin_1_name', classPrefix: ''),
-              },
-            ),
+    test('parses missing module error', () async {
+      const buildCommands = <String>['xcrun', 'cc', 'blah'];
+      final buildResult = XcodeBuildResult(
+        success: false,
+        stdout: '',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: buildCommands,
+          appDirectory: '/blah/blah',
+          environmentType: EnvironmentType.physical,
+          buildSettings: buildSettings,
+        ),
+        xcResult: XCResult.test(
+          issues: <XCResultIssue>[
+            XCResultIssue.test(message: "Module 'plugin_1_name' not found", subType: 'Error'),
+            XCResultIssue.test(message: "Module 'plugin_2_name' not found", subType: 'Error'),
           ],
-        );
-        project.ios.podfile.createSync(recursive: true);
-        project.manifest = FakeFlutterManifest();
-        await diagnoseXcodeBuildFailure(
-          buildResult,
-          logger: logger,
-          analytics: fakeAnalytics,
-          fileSystem: fs,
-          platform: FlutterDarwinPlatform.ios,
-          project: project,
-        );
-        expect(
-          logger.errorText,
-          contains(
-            'Your project uses CocoaPods as a dependency manager, but the following plugin(s) '
-            'only support Swift Package Manager: plugin_1_name, plugin_2_name.',
+        ),
+      );
+      final fs = MemoryFileSystem.test();
+      fs.file('path/to/plugin_1_name/ios/plugin_1_name/Package.swift').createSync(recursive: true);
+      fs.file('path/to/plugin_2_name/ios/plugin_2_name/Package.swift').createSync(recursive: true);
+      final project = FakeFlutterProject(
+        fileSystem: fs,
+        plugins: <Plugin>[
+          FakePlugin(
+            name: 'plugin_1_name',
+            platforms: <String, PluginPlatform>{
+              'ios': const IOSPlugin(name: 'plugin_1_name', classPrefix: ''),
+            },
           ),
-        );
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => FakeProcessManager.any(),
-        Pub: ThrowingPub.new,
-      },
-    );
+          FakePlugin(
+            name: 'plugin_2_name',
+            platforms: <String, PluginPlatform>{
+              'ios': const IOSPlugin(name: 'plugin_1_name', classPrefix: ''),
+            },
+          ),
+        ],
+      );
+      project.ios.podfile.createSync(recursive: true);
+      project.manifest = FakeFlutterManifest();
+      await diagnoseXcodeBuildFailure(
+        buildResult,
+        logger: logger,
+        analytics: fakeAnalytics,
+        fileSystem: fs,
+        platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
+        project: project,
+        xcode: null,
+      );
+      expect(
+        logger.errorText,
+        contains(
+          'Your project uses CocoaPods as a dependency manager, but the following plugin(s) '
+          'only support Swift Package Manager: plugin_1_name, plugin_2_name.',
+        ),
+      );
+    });
 
-    testWithoutContext('parses missing module map error', () async {
+    test('parses missing module map error', () async {
       const buildCommands = <String>['xcrun', 'cc', 'blah'];
       final buildResult = XcodeBuildResult(
         success: false,
@@ -678,7 +684,9 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: project,
+        xcode: null,
       );
       expect(
         logger.errorText,
@@ -689,7 +697,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       );
     });
 
-    testWithoutContext('parses file has been modified error', () async {
+    test('parses file has been modified error', () async {
       const buildCommands = <String>['xcrun', 'cc', 'blah'];
       final buildResult = XcodeBuildResult(
         success: false,
@@ -728,7 +736,9 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: project,
+        xcode: null,
       );
       expect(
         logger.errorText,
@@ -745,21 +755,19 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         processManager = FakeProcessManager.any();
       });
 
-      testUsingContext(
-        'on Xcode 26 if simulator is arm-only',
-        () async {
-          final fakeDevice = FakeDevice();
-          processManager = FakeProcessManager.list([
-            FakeCommand(
-              command: [
-                'xcrun',
-                'simctl',
-                'list',
-                'runtimes',
-                await fakeDevice.sdkNameAndVersion,
-                '--json',
-              ],
-              stdout: '''
+      test('on Xcode 26 if simulator is arm-only', () async {
+        final fakeDevice = FakeDevice();
+        processManager = FakeProcessManager.list([
+          FakeCommand(
+            command: [
+              'xcrun',
+              'simctl',
+              'list',
+              'runtimes',
+              await fakeDevice.sdkNameAndVersion,
+              '--json',
+            ],
+            stdout: '''
 {
   "runtimes" : [
     {
@@ -774,59 +782,59 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
     }
   ]
 }''',
-            ),
-          ]);
-          const buildCommands = <String>['xcrun', 'cc', 'blah'];
-          final buildResult = XcodeBuildResult(
-            success: false,
-            stdout: '',
-            xcodeBuildExecution: XcodeBuildExecution(
-              buildCommands: buildCommands,
-              appDirectory: '/blah/blah',
-              environmentType: EnvironmentType.simulator,
-              buildSettings: buildSettings,
-            ),
-            xcResult: XCResult.test(
-              issues: <XCResultIssue>[
-                XCResultIssue.test(
-                  message:
-                      'Unable to find a destination matching the provided destination specifier\n'
-                      'Available destinations for the "Runner" scheme:\n'
-                      '{ platform:macOS, arch:arm64, variant:Designed for [iPad,iPhone], id:00006022-000868640E90A01E, name:My Mac }\n'
-                      '{ platform:iOS, id:dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder, name:Any iOS Device }\n'
-                      '{ platform:iOS Simulator, id:dvtdevice-DVTiOSDeviceSimulatorPlaceholder-iphonesimulator:placeholder, name:Any iOS Simulator Device}\n'
-                      '{ platform:iOS Simulator, arch:x86_64, id:12345678-1234-1234-1234-123456789012, OS:18.2, name:Flutter-iPhone }',
-                  subType: 'Error',
-                ),
-              ],
-            ),
-          );
-          final fs = MemoryFileSystem.test();
-          final project = FakeFlutterProject(fileSystem: fs, usesSwiftPackageManager: true);
-          project.ios.podfile.createSync(recursive: true);
-          await diagnoseXcodeBuildFailure(
-            buildResult,
-            logger: logger,
-            analytics: fakeAnalytics,
-            fileSystem: fs,
-            platform: FlutterDarwinPlatform.ios,
-            project: project,
-            device: fakeDevice,
-          );
-          expect(
-            logger.errorText,
-            contains('The selected simulator is incompatible with the current build settings'),
-          );
-          expect(processManager.hasRemainingExpectations, isFalse);
-        },
-        overrides: <Type, Generator>{
-          XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(26, 0, 0)),
-          ProcessManager: () => processManager,
-        },
-      );
+          ),
+        ]);
+        const buildCommands = <String>['xcrun', 'cc', 'blah'];
+        final buildResult = XcodeBuildResult(
+          success: false,
+          stdout: '',
+          xcodeBuildExecution: XcodeBuildExecution(
+            buildCommands: buildCommands,
+            appDirectory: '/blah/blah',
+            environmentType: EnvironmentType.simulator,
+            buildSettings: buildSettings,
+          ),
+          xcResult: XCResult.test(
+            issues: <XCResultIssue>[
+              XCResultIssue.test(
+                message:
+                    'Unable to find a destination matching the provided destination specifier\n'
+                    'Available destinations for the "Runner" scheme:\n'
+                    '{ platform:macOS, arch:arm64, variant:Designed for [iPad,iPhone], id:00006022-000868640E90A01E, name:My Mac }\n'
+                    '{ platform:iOS, id:dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder, name:Any iOS Device }\n'
+                    '{ platform:iOS Simulator, id:dvtdevice-DVTiOSDeviceSimulatorPlaceholder-iphonesimulator:placeholder, name:Any iOS Simulator Device}\n'
+                    '{ platform:iOS Simulator, arch:x86_64, id:12345678-1234-1234-1234-123456789012, OS:18.2, name:Flutter-iPhone }',
+                subType: 'Error',
+              ),
+            ],
+          ),
+        );
+        final fs = MemoryFileSystem.test();
+        final project = FakeFlutterProject(fileSystem: fs, usesSwiftPackageManager: true);
+        project.ios.podfile.createSync(recursive: true);
+        await diagnoseXcodeBuildFailure(
+          buildResult,
+          logger: logger,
+          analytics: fakeAnalytics,
+          fileSystem: fs,
+          platform: FlutterDarwinPlatform.ios,
+          project: project,
+          device: fakeDevice,
+          processUtils: ProcessUtils(processManager: processManager, logger: logger),
+          xcode: Xcode.test(
+            toolContext: FakeToolContext(processManager: processManager),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(version: Version(26, 0, 0)),
+          ),
+        );
+        expect(
+          logger.errorText,
+          contains('The selected simulator is incompatible with the current build settings'),
+        );
+        expect(processManager.hasRemainingExpectations, isFalse);
+      });
     });
 
-    testWithoutContext('parses SwiftPM minimum platform version error from stdout for FlutterGeneratedPluginSwiftPackage target', () async {
+    test('parses SwiftPM minimum platform version error from stdout for FlutterGeneratedPluginSwiftPackage target', () async {
       const buildCommands = <String>['xcrun', 'cc', 'blah'];
       final buildResult = XcodeBuildResult(
         success: false,
@@ -861,7 +869,9 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: project,
+        xcode: null,
       );
 
       expect(
@@ -879,7 +889,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       );
     });
 
-    testWithoutContext('does not print app minimum platform guidance for non-FlutterGeneratedPluginSwiftPackage targets', () async {
+    test('does not print app minimum platform guidance for non-FlutterGeneratedPluginSwiftPackage targets', () async {
       const buildCommands = <String>['xcrun', 'cc', 'blah'];
       final buildResult = XcodeBuildResult(
         success: false,
@@ -911,7 +921,9 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: project,
+        xcode: null,
       );
 
       expect(
@@ -920,7 +932,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       );
     });
 
-    testWithoutContext('iOS deployment target too low shows message', () async {
+    test('iOS deployment target too low shows message', () async {
       final buildResult = XcodeBuildResult(
         success: false,
         stdout: '',
@@ -946,7 +958,9 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: FakeFlutterProject(fileSystem: fs),
+        xcode: null,
       );
       expect(
         logger.errorText,
@@ -954,7 +968,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       );
     });
 
-    testWithoutContext(
+    test(
       'iOS deployment target too low shows fallback message if version cannot be parsed',
       () async {
         final buildResult = XcodeBuildResult(
@@ -982,7 +996,9 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
           analytics: fakeAnalytics,
           fileSystem: fs,
           platform: FlutterDarwinPlatform.ios,
+          processUtils: processUtils,
           project: FakeFlutterProject(fileSystem: fs),
+          xcode: null,
         );
         expect(
           logger.errorText,
@@ -1009,7 +1025,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         '/* App.framework\n'
         'another line';
 
-    testWithoutContext('upgradePbxProjWithFlutterAssets', () async {
+    test('upgradePbxProjWithFlutterAssets', () async {
       final project = FakeIosProject(fileSystem: MemoryFileSystem.test());
       final File pbxprojFile = project.xcodeProjectInfoFile
         ..createSync(recursive: true)
@@ -1040,7 +1056,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       projectDirectory = fs.directory('flutter_project');
     });
 
-    testWithoutContext('removes xattr', () async {
+    test('removes xattr', () async {
       final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', projectDirectory.path],
@@ -1058,7 +1074,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('ignores errors', () async {
+    test('ignores errors', () async {
       final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', projectDirectory.path],
@@ -1080,7 +1096,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext(
+    test(
       'removeExtendedAttributesForProject removes attributes from expected files/directories',
       () async {
         final fs = MemoryFileSystem.test();
@@ -1164,10 +1180,12 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
 
         await removeExtendedAttributesForProject(
           xcodeProject: xcodeProject,
-          processUtils: ProcessUtils(processManager: processManager, logger: logger),
-          logger: logger,
-          fileSystem: fs,
-          config: config,
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fs,
+            logger: logger,
+            processUtils: ProcessUtils(processManager: processManager, logger: logger),
+          ),
           xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         );
 
@@ -1180,7 +1198,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
     const correctHeaderFingerprint =
         '{"files":{"/.tmp_rand0/Flutter.framework/Headers/FlutterPlugin.h":"d41d8cd98f00b204e9800998ecf8427e"}}';
 
-    testWithoutContext('returns true when headers change', () async {
+    test('returns true when headers change', () async {
       final fs = MemoryFileSystem.test();
       final logger = BufferLogger.test();
       final Directory mockFlutterFramework = fs.systemTempDirectory.childDirectory(
@@ -1208,7 +1226,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       expect(fingerprintFile.readAsStringSync(), correctHeaderFingerprint);
     });
 
-    testWithoutContext('returns true when fingerprint does not exist yet', () async {
+    test('returns true when fingerprint does not exist yet', () async {
       final fs = MemoryFileSystem.test();
       final logger = BufferLogger.test();
       final Directory mockFlutterFramework = fs.systemTempDirectory.childDirectory(
@@ -1235,7 +1253,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       expect(fingerprintFile.readAsStringSync(), correctHeaderFingerprint);
     });
 
-    testWithoutContext('returns false when fingerprint has not changed', () async {
+    test('returns false when fingerprint has not changed', () async {
       final fs = MemoryFileSystem.test();
       final logger = BufferLogger.test();
       final Directory mockFlutterFramework = fs.systemTempDirectory.childDirectory(
@@ -1333,6 +1351,9 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 }
 
 class FakeFlutterManifest extends Fake implements FlutterManifest {
+  @override
+  final Logger logger = BufferLogger.test();
+
   @override
   late final dependencies = <String>{};
 

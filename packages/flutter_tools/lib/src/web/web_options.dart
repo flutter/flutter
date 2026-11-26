@@ -6,7 +6,6 @@ import '../runner/options/common_options.dart';
 import '../runner/options/option_bundle.dart';
 import '../runner/options/option_descriptor.dart';
 import '../web_template.dart';
-import 'file_generators/flutter_service_worker_js.dart';
 import 'web_constants.dart';
 
 /// Typed option descriptors specific to Flutter Web compilation.
@@ -48,21 +47,20 @@ abstract final class WebOptions {
         'When this is set, it will replace all $kStaticAssetsUrlPlaceholder in web/index.html for the given value.',
   );
 
-  static const pwaStrategy = EnumOptionDescriptor<ServiceWorkerStrategy>(
-    name: 'pwa-strategy',
-    hide: true,
-    help:
-        'This option is deprecated and will be removed in a future Flutter release.\n'
-        'The caching strategy to be used by the PWA service worker.',
-    values: ServiceWorkerStrategy.values,
-  );
-
   static const webResourcesCdn = FlagOptionDescriptor(
     name: 'web-resources-cdn',
     defaultsTo: true,
     help:
         'Use WebAssembly, CanvasKit, and other web resources from a content delivery network (CDN).\n'
         'Set to "--no-web-resources-cdn" to embed all web resources locally in the built app.',
+  );
+
+  static const pwaStrategy = StringOptionDescriptor(
+    name: 'pwa-strategy',
+    help:
+        'Removed. Flutter no longer generates or registers an offline caching service worker by default. '
+        'Remove "--pwa-strategy" from your build command.',
+    hide: true,
   );
 
   static const optimizationLevel = StringOptionDescriptor(
@@ -91,9 +89,8 @@ abstract final class WebOptions {
         'server must still serve "index.html" and "flutter_bootstrap.js" '
         'with revalidation (for example, '
         '"Cache-Control: no-cache") for a new deploy to be picked up. '
-        'When "--no-web-resources-cdn" is used, locally bundled '
-        '"canvaskit/**" files are not content-hashed ("urlHashed: false" in '
-        '"precache_manifest.json") and must not be served with "immutable" '
+        'Files under "canvaskit/" are not content-hashed and must not be '
+        'served with "immutable" '
         'caching. Not supported with deferred imports. Custom "index.html" '
         'files that reference "main.dart.js" directly, and the deprecated '
         '"FlutterLoader.loadEntrypoint" JavaScript API, are incompatible '

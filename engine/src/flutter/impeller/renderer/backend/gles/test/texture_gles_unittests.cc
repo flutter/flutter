@@ -74,6 +74,45 @@ TEST_P(TextureGLESTest, CanSetSyncFence) {
   ASSERT_FALSE(sync_fence.has_value());
 }
 
+TEST_P(TextureGLESTest, SetAsFramebufferAttachmentWaitsForSyncFence) {
+  ContextGLES& context_gles = ContextGLES::Cast(*GetContext());
+  if (!context_gles.GetReactor()
+           ->GetProcTable()
+           .GetDescription()
+           ->GetGlVersion()
+           .IsAtLeast(Version{3, 0, 0})) {
+    GTEST_SKIP() << "GL Version too low to test sync fence.";
+  }
+
+  TextureDescriptor desc;
+  desc.storage_mode = StorageMode::kDevicePrivate;
+  desc.size = {100, 100};
+  desc.format = PixelFormat::kR8G8B8A8UNormInt;
+
+  auto texture = GetContext()->GetResourceAllocator()->CreateTexture(desc);
+  ASSERT_TRUE(!!texture);
+
+  EXPECT_TRUE(GetContext()->AddTrackingFence(texture));
+  EXPECT_TRUE(context_gles.GetReactor()->React());
+  ASSERT_TRUE(TextureGLES::Cast(*texture).GetSyncFence().has_value());
+
+  // Queue up an operation that attaches the texture to a framebuffer to verify
+  // that the sync fence is waited and removed.
+  EXPECT_TRUE(
+      context_gles.GetReactor()->AddOperation([&](const ReactorGLES& reactor) {
+        const auto& gl = reactor.GetProcTable();
+        GLuint fbo = GL_NONE;
+        gl.GenFramebuffers(1u, &fbo);
+        gl.BindFramebuffer(GL_FRAMEBUFFER, fbo);
+        EXPECT_TRUE(TextureGLES::Cast(*texture).SetAsFramebufferAttachment(
+            GL_FRAMEBUFFER, TextureGLES::AttachmentType::kColor0));
+        gl.BindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
+        gl.DeleteFramebuffers(1u, &fbo);
+      }));
+
+  EXPECT_FALSE(TextureGLES::Cast(*texture).GetSyncFence().has_value());
+}
+
 TEST_P(TextureGLESTest, TextureDtorDeletesFence) {
   ContextGLES& context_gles = ContextGLES::Cast(*GetContext());
   if (!context_gles.GetReactor()

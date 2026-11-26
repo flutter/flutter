@@ -36,7 +36,11 @@ class AnalyzeContinuously extends AnalyzeBase {
 
     if (isFlutterRepo) {
       final dependencies = PackageDependencyTracker();
-      dependencies.checkForConflictingDependencies(repoPackages, fileSystem: fileSystem);
+      dependencies.checkForConflictingDependencies(
+        repoPackages,
+        fileSystem: fileSystem,
+        flutterRoot: flutterRoot,
+      );
 
       directories = <String>[flutterRoot];
       analysisTarget = 'Flutter repository';
@@ -54,6 +58,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       toolContext: toolContext,
       protocolTrafficLog: protocolTrafficLog,
       usePlugins: usePlugins,
+      clientId: AnalysisServer.flutterAnalyzeClientId,
     );
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);

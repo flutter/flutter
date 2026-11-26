@@ -88,3 +88,12 @@ external void paragraphStyleSetRenderSoftHyphens(
   ParagraphStyleHandle handle,
   bool renderSoftHyphens,
 );
+
+@Native<Void Function(ParagraphStyleHandle, SkStringHandle)>(
+  symbol: 'paragraphStyle_setSoftHyphenString',
+  isLeaf: true,
+)
+external void paragraphStyleSetSoftHyphenString(
+  ParagraphStyleHandle handle,
+  SkStringHandle softHyphenString,
+);

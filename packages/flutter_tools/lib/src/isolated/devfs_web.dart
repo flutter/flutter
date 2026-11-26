@@ -29,8 +29,7 @@ import '../project.dart';
 import '../vmservice.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
-import '../web/compile.dart';
-import '../web/devfs_config.dart';
+import '../web/web_debug_config.dart';
 import '../web_template.dart';
 import 'web_asset_server.dart';
 
@@ -62,26 +61,18 @@ class WebDevFS implements DevFS {
   WebDevFS({
     required this.packagesFilePath,
     required this.urlTunneller,
-    required this.useSseForDebugProxy,
-    required this.useSseForDebugBackend,
-    required this.useSseForInjectedClient,
     required this.buildInfo,
     required this.enableDwds,
     required this.ddsConfig,
     required this.entrypoint,
     required this.expressionCompiler,
     required this.chromiumLauncher,
-    required this.nativeNullAssertions,
-    required this.webDevServerConfig,
-    required this.webRenderer,
-    required this.isWasm,
+    required this.webConfig,
     required this.useLocalCanvasKit,
     required this.rootDirectory,
-    this.useDwdsWebSocketConnection = false,
-    required this.webCrossOriginIsolation,
     required this._toolContext,
+    this.useDwdsWebSocketConnection = false,
     this.testMode = false,
-    this._webDefines = const <String, String>{},
   }) {
     final ToolContext(
       :Artifacts artifacts,
@@ -104,25 +95,17 @@ class WebDevFS implements DevFS {
   final Uri entrypoint;
   final String packagesFilePath;
   final UrlTunneller? urlTunneller;
-  final bool useSseForDebugProxy;
-  final bool useSseForDebugBackend;
-  final bool useSseForInjectedClient;
   final BuildInfo buildInfo;
   final bool enableDwds;
   final DartDevelopmentServiceConfiguration ddsConfig;
   final bool testMode;
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
-  final bool nativeNullAssertions;
   late final DevelopmentAssetTransformer _assetTransformer;
-  final WebRendererMode webRenderer;
-  final bool isWasm;
   final bool useLocalCanvasKit;
-  final WebDevServerConfig webDevServerConfig;
   final bool useDwdsWebSocketConnection;
-  final bool webCrossOriginIsolation;
+  final WebDebugConfig webConfig;
   final ToolContext _toolContext;
-  final Map<String, String> _webDefines;
 
   late WebAssetServer webAssetServer;
 
@@ -208,23 +191,16 @@ class WebDevFS implements DevFS {
     webAssetServer = await WebAssetServer.start(
       chromiumLauncher,
       urlTunneller,
-      useSseForDebugProxy,
-      useSseForDebugBackend,
-      useSseForInjectedClient,
       buildInfo,
       enableDwds,
       ddsConfig,
       entrypoint,
       expressionCompiler,
-      webRenderer: webRenderer,
-      isWasm: isWasm,
       useLocalCanvasKit: useLocalCanvasKit,
       testMode: testMode,
-      webDevServerConfig: webDevServerConfig,
+      webConfig: webConfig,
       useDwdsWebSocketConnection: useDwdsWebSocketConnection,
       toolContext: _toolContext,
-      crossOriginIsolation: webCrossOriginIsolation,
-      webDefines: _webDefines,
     );
     return baseUri;
   }
@@ -307,10 +283,9 @@ class WebDevFS implements DevFS {
       webAssetServer.writeBytes('stack_trace_mapper.js', stackTraceMapper.readAsBytesSync());
       webAssetServer.writeFile('manifest.json', '{"info":"manifest not generated in run mode."}');
       webAssetServer.writeFile(
-        'flutter_service_worker.js',
-        '// Service worker not loaded in run mode.',
+        'version.json',
+        FlutterProject.current(fs, logger: logger).getVersionInfo(),
       );
-      webAssetServer.writeFile('version.json', FlutterProject.current().getVersionInfo());
       webAssetServer.writeFile(
         'main.dart.js',
         generateDDCLibraryBundleBootstrapScript(
@@ -326,7 +301,7 @@ class WebDevFS implements DevFS {
         'main_module.bootstrap.js',
         generateDDCLibraryBundleMainModule(
           entrypoint: entrypoint,
-          nativeNullAssertions: nativeNullAssertions,
+          nativeNullAssertions: webConfig.nativeNullAssertions,
           onLoadEndBootstrap: onLoadEndBootstrap,
           isCi: platform.environment.containsKey(kLuciEnvName),
         ),

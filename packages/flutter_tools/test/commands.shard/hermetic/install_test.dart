@@ -31,127 +31,123 @@ void main() {
 
     late FileSystem fileSystem;
     late BufferLogger logger;
+    late FakeDeviceManager deviceManager;
     late FakeToolContext toolContext;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
       fileSystem.file('pubspec.yaml').createSync(recursive: true);
       logger = BufferLogger.test();
+      deviceManager = FakeDeviceManager();
       toolContext = FakeToolContext(fs: fileSystem, logger: logger);
     });
 
-    testUsingContext('returns 0 when Android is connected and ready for an install', () async {
+    TestFlutterCommandRunner createRunner(InstallCommand command) =>
+        TestFlutterCommandRunner(deviceManager: deviceManager, toolContext: toolContext)
+          ..addCommand(command);
+
+    test('returns 0 when Android is connected and ready for an install', () async {
       final command = InstallCommand(toolContext: toolContext, verboseHelp: false);
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final device = FakeAndroidDevice();
-      testDeviceManager.addAttachedDevice(device);
+      deviceManager.addAttachedDevice(device);
 
-      await createTestCommandRunner(command).run(<String>['install']);
+      await createRunner(command).run(<String>['install']);
       expect(logger.statusText, contains('Installing FakeAndroidApk to Android...'));
     });
 
-    testUsingContext('returns 1 when targeted device is not Android with --device-user', () async {
+    test('returns 1 when targeted device is not Android with --device-user', () async {
       final command = InstallCommand(toolContext: toolContext, verboseHelp: false);
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final device = FakeIOSDevice();
-      testDeviceManager.addAttachedDevice(device);
+      deviceManager.addAttachedDevice(device);
 
-      expect(
-        () async =>
-            createTestCommandRunner(command).run(<String>['install', '--device-user', '10']),
+      await expectLater(
+        () => createRunner(command).run(<String>['install', '--device-user', '10']),
         throwsToolExit(message: '--device-user is only supported for Android'),
       );
     });
 
-    testUsingContext('returns 0 when iOS is connected and ready for an install', () async {
+    test('returns 0 when iOS is connected and ready for an install', () async {
       final command = InstallCommand(toolContext: toolContext, verboseHelp: false);
       command.applicationPackages = FakeApplicationPackageFactory(FakeIOSApp());
 
       final device = FakeIOSDevice();
-      testDeviceManager.addAttachedDevice(device);
+      deviceManager.addAttachedDevice(device);
 
-      await createTestCommandRunner(command).run(<String>['install']);
+      await createRunner(command).run(<String>['install']);
       expect(logger.statusText, contains('Installing FakeIOSApp to iOS...'));
     });
 
-    testUsingContext('fails when prebuilt binary not found', () async {
+    test('fails when prebuilt binary not found', () async {
       final command = InstallCommand(toolContext: toolContext, verboseHelp: false);
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final device = FakeAndroidDevice();
-      testDeviceManager.addAttachedDevice(device);
+      deviceManager.addAttachedDevice(device);
 
-      expect(
-        () async =>
-            createTestCommandRunner(command)
-                .run(<String>['install', '--use-application-binary', 'bogus']),
+      await expectLater(
+        () => createRunner(command).run(<String>['install', '--use-application-binary', 'bogus']),
         throwsToolExit(message: 'Prebuilt binary bogus does not exist'),
       );
     });
 
-    testUsingContext('succeeds using prebuilt binary', () async {
+    test('succeeds using prebuilt binary', () async {
       final command = InstallCommand(toolContext: toolContext, verboseHelp: false);
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final device = FakeAndroidDevice();
-      testDeviceManager.addAttachedDevice(device);
+      deviceManager.addAttachedDevice(device);
       fileSystem.file('binary').createSync(recursive: true);
 
-      await createTestCommandRunner(command)
-          .run(<String>['install', '--use-application-binary', 'binary']);
+      await createRunner(command).run(<String>['install', '--use-application-binary', 'binary']);
       expect(logger.statusText, contains('Installing FakeAndroidApk to Android...'));
     });
 
-    testUsingContext('passes flavor to application package', () async {
+    test('passes flavor to application package', () async {
       const flavor = 'free';
       final command = InstallCommand(toolContext: toolContext, verboseHelp: false);
       final fakeAppFactory = FakeApplicationPackageFactory(FakeIOSApp());
       command.applicationPackages = fakeAppFactory;
 
       final device = FakeIOSDevice();
-      testDeviceManager.addAttachedDevice(device);
+      deviceManager.addAttachedDevice(device);
 
-      await createTestCommandRunner(command).run(<String>['install', '--flavor', flavor]);
+      await createRunner(command).run(<String>['install', '--flavor', flavor]);
       expect(fakeAppFactory.buildInfo, isNotNull);
       expect(fakeAppFactory.buildInfo!.flavor, flavor);
     });
 
-    testUsingContext(
-      'uninstalls app when --uninstall-only is provided and app is installed',
-      () async {
-        final command = InstallCommand(toolContext: toolContext, verboseHelp: false);
-        command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
+    test('uninstalls app when --uninstall-only is provided and app is installed', () async {
+      final command = InstallCommand(toolContext: toolContext, verboseHelp: false);
+      command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
-        final device = FakeAndroidDevice(appInstalled: true);
-        testDeviceManager.addAttachedDevice(device);
+      final device = FakeAndroidDevice(appInstalled: true);
+      deviceManager.addAttachedDevice(device);
 
-        await createTestCommandRunner(command).run(<String>['install', '--uninstall-only']);
-        expect(logger.statusText, contains('Uninstalling FakeAndroidApk from Android...'));
-        expect(device.uninstalled, isTrue);
-      },
-    );
+      await createRunner(command).run(<String>['install', '--uninstall-only']);
+      expect(logger.statusText, contains('Uninstalling FakeAndroidApk from Android...'));
+      expect(device.uninstalled, isTrue);
+    });
 
-    testUsingContext(
-      'skips uninstall when --uninstall-only is provided and app is not installed',
-      () async {
-        final command = InstallCommand(toolContext: toolContext, verboseHelp: false);
-        command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
+    test('skips uninstall when --uninstall-only is provided and app is not installed', () async {
+      final command = InstallCommand(toolContext: toolContext, verboseHelp: false);
+      command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
-        final device = FakeAndroidDevice();
-        testDeviceManager.addAttachedDevice(device);
+      final device = FakeAndroidDevice();
+      deviceManager.addAttachedDevice(device);
 
-        await createTestCommandRunner(command).run(<String>['install', '--uninstall-only']);
-        expect(
-          logger.statusText,
-          contains('FakeAndroidApk not found on Android, skipping uninstall'),
-        );
-        expect(device.uninstalled, isFalse);
-      },
-    );
+      await createRunner(command).run(<String>['install', '--uninstall-only']);
+      expect(
+        logger.statusText,
+        contains('FakeAndroidApk not found on Android, skipping uninstall'),
+      );
+      expect(device.uninstalled, isFalse);
+    });
 
-    testWithoutContext('installApp uninstalls old version if already installed', () async {
+    test('installApp uninstalls old version if already installed', () async {
       final testLogger = BufferLogger.test();
       final device = FakeAndroidDevice(appInstalled: true);
       final app = FakeAndroidApk();
@@ -162,7 +158,7 @@ void main() {
       expect(testLogger.statusText, contains('Uninstalling old version...'));
     });
 
-    testWithoutContext('installApp logs warning if uninstalling old version fails', () async {
+    test('installApp logs warning if uninstalling old version fails', () async {
       final testLogger = BufferLogger.test();
       final device = FakeAndroidDevice(appInstalled: true, uninstallSucceeds: false);
       final app = FakeAndroidApk();
@@ -172,7 +168,7 @@ void main() {
       expect(testLogger.warningText, contains('Warning: uninstalling old version failed'));
     });
 
-    testWithoutContext('installApp logs error when ProcessException is thrown', () async {
+    test('installApp logs error when ProcessException is thrown', () async {
       final testLogger = BufferLogger.test();
       final device = _ThrowingDevice();
       final app = FakeAndroidApk();

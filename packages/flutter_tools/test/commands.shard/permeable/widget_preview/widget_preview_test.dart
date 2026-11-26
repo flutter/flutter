@@ -8,6 +8,7 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -26,10 +27,10 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
@@ -242,10 +243,12 @@ void main() {
   late FakeMicrosoftEdgeDevice fakeMicrosoftEdgeDevice;
   late FakeCustomBrowserDevice fakeCustomBrowserDevice;
   late FakeWidgetPreviewScaffoldDtdServices fakeDtdServices;
+  late String flutterRoot;
 
   setUp(() async {
     Cache.disableLocking();
-    originalCwd = globals.fs.currentDirectory;
+    fs = LocalFileSystem.test(signals: Signals.test());
+    originalCwd = fs.currentDirectory;
     await ensureFlutterToolsSnapshot();
     loggingProcessManager = LoggingProcessManager();
     shutdownHooks = ShutdownHooks();
@@ -256,7 +259,7 @@ void main() {
       stdio: mockStdio,
       verbose: false,
     );
-    fs = LocalFileSystem.test(signals: Signals.test());
+    flutterRoot = fs.path.absolute('..', '..');
     botDetector = const FakeBotDetector(false);
     tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
     platform = FakePlatform.fromPlatform(const LocalPlatform());
@@ -276,49 +279,77 @@ void main() {
       fs: MemoryFileSystem.test(),
       fakeFlutterVersion: FakeFlutterVersion(),
     );
-
-    // Most, but not all, tests will run some variant of "pub get" after creation,
-    // which in turn will check for the presence of the Flutter SDK root. Without
-    // this field set consistently, the order of the tests becomes important *or*
-    // you need to remember to set it everywhere.
-    Cache.flutterRoot = fs.path.absolute('..', '..');
   });
 
   tearDown(() async {
     await shutdownHooks.runShutdownHooks(logger);
     tryToDelete(tempDir);
+    fs.currentDirectory = originalCwd;
     await fs.dispose();
-    globals.fs.currentDirectory = originalCwd;
   });
 
+  FakeToolContext createToolContext() => FakeToolContext(
+    artifacts: Artifacts.test(),
+    botDetector: botDetector,
+    cache: Cache.test(
+      flutterRoot: flutterRoot,
+      rootOverride: fs.directory(flutterRoot),
+      fileSystem: fs,
+      processManager: loggingProcessManager,
+      platform: platform,
+    ),
+    fs: fs,
+    logger: logger,
+    os: OperatingSystemUtils(
+      fileSystem: fs,
+      processManager: loggingProcessManager,
+      logger: logger,
+      platform: platform,
+    ),
+    platform: platform,
+    processManager: loggingProcessManager,
+    projectFactory: FlutterProjectFactory(logger: logger, fileSystem: fs, config: FakeConfig()),
+    shutdownHooks: shutdownHooks,
+    stdio: mockStdio,
+    terminal: FakeTerminal(),
+  );
+
+  Pub createPub() => Pub.test(
+    flutterRoot: flutterRoot,
+    fileSystem: fs,
+    logger: logger,
+    processManager: loggingProcessManager,
+    botDetector: botDetector,
+    platform: platform,
+    stdio: mockStdio,
+  );
+
   Future<Directory> createRootProject() async {
-    return fs.directory(await createProject(tempDir, arguments: <String>['--pub']));
+    return fs.directory(
+      await createProject(tempDir, arguments: <String>['--pub'], toolContext: createToolContext()),
+    );
   }
 
   WidgetPreviewCommand createWidgetPreviewCommand({
+    required Pub pub,
+    required FakeToolContext toolContext,
+    DeviceManager? deviceManager,
     Future<AnalysisServer> Function()? analysisServerFactoryOverride,
     ResidentRunnerFactory? residentRunnerFactoryOverride,
   }) {
     return WidgetPreviewCommand(
+      assetBundleFactory: AssetBundleFactory.defaultInstance(
+        fileSystem: fs,
+        flutterRoot: flutterRoot,
+        logger: logger,
+        platform: platform,
+      ),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       buildTargets: const BuildTargetsImpl(),
-      toolContext: FakeToolContext(
-        artifacts: Artifacts.test(),
-        cache: Cache.test(processManager: loggingProcessManager, platform: platform),
-        fs: fs,
-        logger: logger,
-        os: OperatingSystemUtils(
-          fileSystem: fs,
-          processManager: loggingProcessManager,
-          logger: logger,
-          platform: platform,
-        ),
-        platform: platform,
-        processManager: loggingProcessManager,
-        projectFactory: FlutterProjectFactory(logger: logger, fileSystem: fs),
-        shutdownHooks: shutdownHooks,
-        terminal: FakeTerminal(),
-      ),
+      deviceManager: deviceManager ?? fakeDeviceManager,
+      pub: pub,
+      templatePathProvider: TemplatePathProvider(flutterRoot: flutterRoot),
+      toolContext: toolContext,
       dtdServicesOverride: fakeDtdServices,
       analysisServerFactoryOverride:
           analysisServerFactoryOverride ?? () async => FakeAnalysisServer(),
@@ -328,11 +359,25 @@ void main() {
 
   Future<void> runWidgetPreviewCommand(
     List<String> arguments, {
+    FeatureFlags? featureFlags,
     Future<AnalysisServer> Function()? analysisServerFactoryOverride,
     ResidentRunnerFactory? residentRunnerFactoryOverride,
   }) async {
-    final CommandRunner<void> runner = createTestCommandRunner(
+    final FakeToolContext toolContext = createToolContext();
+    final Pub pub = createPub();
+    final runner = TestFlutterCommandRunner(
+      analytics: fakeAnalytics,
+      deviceManager: fakeDeviceManager,
+      featureFlags: featureFlags ?? TestFeatureFlags(isWebEnabled: true),
+      pub: pub,
+      templatePathProvider: TemplatePathProvider(flutterRoot: flutterRoot),
+      toolContext: toolContext,
+    );
+    runner.addCommand(
       createWidgetPreviewCommand(
+        deviceManager: runner.deviceManager,
+        pub: pub,
+        toolContext: toolContext,
         analysisServerFactoryOverride: analysisServerFactoryOverride,
         residentRunnerFactoryOverride: residentRunnerFactoryOverride,
       ),
@@ -363,23 +408,29 @@ void main() {
   Future<void> startWidgetPreview({
     required Directory? rootProject,
     List<String>? arguments,
+    FeatureFlags? featureFlags,
     bool legacyDetection = false,
     Future<AnalysisServer> Function()? analysisServerFactoryOverride,
   }) async {
     // This might get changed during the test, so keep track of the original directory.
     final Directory current = fs.currentDirectory;
-    await runWidgetPreviewCommand(<String>[
-      'start',
-      if (legacyDetection) '--legacy-preview-detection',
-      ...?arguments,
-      '--no-launch-previewer',
-      '--verbose',
-      ?rootProject?.path,
-    ], analysisServerFactoryOverride: analysisServerFactoryOverride);
+    await runWidgetPreviewCommand(
+      <String>[
+        'start',
+        if (legacyDetection) '--legacy-preview-detection',
+        ...?arguments,
+        '--no-launch-previewer',
+        '--verbose',
+        ?rootProject?.path,
+      ],
+      featureFlags: featureFlags,
+      analysisServerFactoryOverride: analysisServerFactoryOverride,
+    );
     final Directory projectDir = rootProject ?? current;
     final FlutterProject project = FlutterProjectFactory(
       logger: logger,
       fileSystem: fs,
+      config: FakeConfig(),
     ).fromDirectory(projectDir);
     final Directory scaffoldDir = (project.workspaceRoot ?? project).widgetPreviewScaffold;
     await analyzeProject(scaffoldDir.path);
@@ -407,39 +458,22 @@ void main() {
 
   group('flutter widget-preview', () {
     group('start exits if', () {
-      testUsingContext(
-        'DTD fails to retrieve widget previews',
-        () async {
-          final Directory rootProject = await createRootProject();
-          fakeDtdServices.shouldThrow = true;
-          try {
-            await startWidgetPreview(rootProject: rootProject);
-            fail('Successfully executed despite DTD failure.');
-          } on ToolExit catch (e) {
-            expect(
-              e.message,
-              contains('Failed to retrieve widget previews from the Dart Tooling Daemon (DTD)'),
-            );
-          }
-          expectNoPreviewLaunchTimingEvents();
-        },
-        overrides: <Type, Generator>{
-          Analytics: () => fakeAnalytics,
-          DeviceManager: () => fakeDeviceManager,
-          FileSystem: () => fs,
-          ProcessManager: () => loggingProcessManager,
-          Pub: () => Pub.test(
-            fileSystem: fs,
-            logger: logger,
-            processManager: loggingProcessManager,
-            botDetector: botDetector,
-            platform: platform,
-            stdio: mockStdio,
-          ),
-        },
-      );
+      test('DTD fails to retrieve widget previews', () async {
+        final Directory rootProject = await createRootProject();
+        fakeDtdServices.shouldThrow = true;
+        try {
+          await startWidgetPreview(rootProject: rootProject);
+          fail('Successfully executed despite DTD failure.');
+        } on ToolExit catch (e) {
+          expect(
+            e.message,
+            contains('Failed to retrieve widget previews from the Dart Tooling Daemon (DTD)'),
+          );
+        }
+        expectNoPreviewLaunchTimingEvents();
+      });
 
-      testUsingContext('given an invalid directory', () async {
+      test('given an invalid directory', () async {
         try {
           await runWidgetPreviewCommand(<String>['start', 'foo']);
           fail('Successfully executed with multiple project paths');
@@ -449,7 +483,7 @@ void main() {
         expectNoPreviewLaunchTimingEvents();
       });
 
-      testUsingContext('more than one project directory is provided', () async {
+      test('more than one project directory is provided', () async {
         try {
           await runWidgetPreviewCommand(<String>['start', tempDir.path, tempDir.path]);
           fail('Successfully executed with multiple project paths');
@@ -459,7 +493,7 @@ void main() {
         expectNoPreviewLaunchTimingEvents();
       });
 
-      testUsingContext('run outside of a Flutter project directory', () async {
+      test('run outside of a Flutter project directory', () async {
         try {
           await startWidgetPreview(rootProject: tempDir);
           fail('Successfully executed outside of a Flutter project directory');
@@ -469,44 +503,28 @@ void main() {
         expectNoPreviewLaunchTimingEvents();
       });
 
-      testUsingContext(
-        'Flutter Web is disabled',
-        () async {
-          try {
-            await startWidgetPreview(rootProject: await createRootProject());
-            fail('Successfully executed with Flutter Web disabled.');
-          } on ToolExit catch (e) {
-            expect(
-              e.message,
-              'Error: Widget Previews requires Flutter Web to be enabled. Please run '
-              "'flutter config --enable-web' to enable Flutter Web and try again.",
-            );
-          }
-          expectNoPreviewLaunchTimingEvents();
-        },
-        overrides: {
-          FeatureFlags: () => TestFeatureFlags(
-            // ignore: avoid_redundant_argument_values, readability
-            isWebEnabled: false,
-          ),
-          Pub: () => Pub.test(
-            fileSystem: fs,
-            logger: logger,
-            processManager: loggingProcessManager,
-            botDetector: botDetector,
-            platform: platform,
-            stdio: mockStdio,
-          ),
-        },
-      );
+      test('Flutter Web is disabled', () async {
+        try {
+          await startWidgetPreview(
+            rootProject: await createRootProject(),
+            featureFlags: TestFeatureFlags(),
+          );
+          fail('Successfully executed with Flutter Web disabled.');
+        } on ToolExit catch (e) {
+          expect(
+            e.message,
+            'Error: Widget Previews requires Flutter Web to be enabled. Please run '
+            "'flutter config --enable-web' to enable Flutter Web and try again.",
+          );
+        }
+        expectNoPreviewLaunchTimingEvents();
+      });
     });
 
     group('workspaces', () {
-      testUsingContext(
-        'starts from workspace root when run from member package',
-        () async {
-          final File workspacePubspec = tempDir.childFile('pubspec.yaml');
-          workspacePubspec.writeAsStringSync('''
+      test('starts from workspace root when run from member package', () async {
+        final File workspacePubspec = tempDir.childFile('pubspec.yaml');
+        workspacePubspec.writeAsStringSync('''
 name: my_workspace
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -514,98 +532,49 @@ workspace:
   - my_app
 ''');
 
-          final String memberProjectPath = await createProject(
-            tempDir,
-            name: 'my_app',
-            arguments: <String>['--pub'],
-          );
-          final Directory memberProjectDir = fs.directory(memberProjectPath);
+        final String memberProjectPath = await createProject(
+          tempDir,
+          name: 'my_app',
+          arguments: <String>['--pub'],
+          toolContext: createToolContext(),
+        );
+        final Directory memberProjectDir = fs.directory(memberProjectPath);
 
-          final File memberPubspec = memberProjectDir.childFile('pubspec.yaml');
-          final String memberPubspecContent = memberPubspec.readAsStringSync();
-          memberPubspec.writeAsStringSync('''
+        final File memberPubspec = memberProjectDir.childFile('pubspec.yaml');
+        final String memberPubspecContent = memberPubspec.readAsStringSync();
+        memberPubspec.writeAsStringSync('''
 $memberPubspecContent
 resolution: workspace
 ''');
 
-          fs.currentDirectory = memberProjectDir;
+        fs.currentDirectory = memberProjectDir;
 
-          await startWidgetPreview(rootProject: null);
-          final Directory workspaceScaffoldDir = tempDir.childDirectory('.widget_preview');
-          final Directory memberScaffoldDir = memberProjectDir.childDirectory('.widget_preview');
+        await startWidgetPreview(rootProject: null);
+        final Directory workspaceScaffoldDir = tempDir.childDirectory('.widget_preview');
+        final Directory memberScaffoldDir = memberProjectDir.childDirectory('.widget_preview');
 
-          expect(workspaceScaffoldDir, exists);
-          expect(memberScaffoldDir, isNot(exists));
+        expect(workspaceScaffoldDir, exists);
+        expect(memberScaffoldDir, isNot(exists));
 
-          await cleanWidgetPreview(rootProject: tempDir);
-        },
-        overrides: <Type, Generator>{
-          Analytics: () => fakeAnalytics,
-          DeviceManager: () => fakeDeviceManager,
-          FileSystem: () => fs,
-          ProcessManager: () => loggingProcessManager,
-          FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-          Pub: () => Pub.test(
-            fileSystem: fs,
-            logger: logger,
-            processManager: loggingProcessManager,
-            botDetector: botDetector,
-            platform: platform,
-            stdio: mockStdio,
-          ),
-        },
-      );
+        await cleanWidgetPreview(rootProject: tempDir);
+      });
     });
 
-    testUsingContext(
-      'start succeeds when no .dart_tool/ directory exists',
-      () async {
-        // Regression test for https://github.com/flutter/flutter/issues/178052
-        final Directory rootProject = await createRootProject();
-        rootProject.childDirectory('.dart_tool').deleteSync(recursive: true);
-        await startWidgetPreview(rootProject: rootProject);
-        expectSinglePreviewLaunchTimingEvent();
-      },
-      overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
-        DeviceManager: () => fakeDeviceManager,
-        FileSystem: () => fs,
-        ProcessManager: () => loggingProcessManager,
-        Pub: () => Pub.test(
-          fileSystem: fs,
-          logger: logger,
-          processManager: loggingProcessManager,
-          botDetector: botDetector,
-          platform: platform,
-          stdio: mockStdio,
-        ),
-      },
-    );
+    test('start succeeds when no .dart_tool/ directory exists', () async {
+      // Regression test for https://github.com/flutter/flutter/issues/178052
+      final Directory rootProject = await createRootProject();
+      rootProject.childDirectory('.dart_tool').deleteSync(recursive: true);
+      await startWidgetPreview(rootProject: rootProject);
+      expectSinglePreviewLaunchTimingEvent();
+    });
 
-    testUsingContext(
-      'start creates .widget_preview',
-      () async {
-        final Directory rootProject = await createRootProject();
-        await startWidgetPreview(rootProject: rootProject);
-        expectSinglePreviewLaunchTimingEvent();
-      },
-      overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
-        DeviceManager: () => fakeDeviceManager,
-        FileSystem: () => fs,
-        ProcessManager: () => loggingProcessManager,
-        Pub: () => Pub.test(
-          fileSystem: fs,
-          logger: logger,
-          processManager: loggingProcessManager,
-          botDetector: botDetector,
-          platform: platform,
-          stdio: mockStdio,
-        ),
-      },
-    );
+    test('start creates .widget_preview', () async {
+      final Directory rootProject = await createRootProject();
+      await startWidgetPreview(rootProject: rootProject);
+      expectSinglePreviewLaunchTimingEvent();
+    });
 
-    testUsingContext(
+    test(
       'start copies host web directory to scaffold if it exists and removes stale files',
       () async {
         final Directory rootProject = await createRootProject();
@@ -642,75 +611,27 @@ resolution: workspace
         );
         expectNPreviewLaunchTimingEvents(2);
       },
-      overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
-        DeviceManager: () => fakeDeviceManager,
-        FileSystem: () => fs,
-        ProcessManager: () => loggingProcessManager,
-        Pub: () => Pub.test(
-          fileSystem: fs,
-          logger: logger,
-          processManager: loggingProcessManager,
-          botDetector: botDetector,
-          platform: platform,
-          stdio: mockStdio,
-        ),
-      },
     );
 
-    testUsingContext(
-      'start waits for analysis to complete',
-      () async {
-        final Directory rootProject = await createRootProject();
-        final fakeAnalysisServer = FakeAnalysisServer();
+    test('start waits for analysis to complete', () async {
+      final Directory rootProject = await createRootProject();
+      final fakeAnalysisServer = FakeAnalysisServer();
 
-        await startWidgetPreview(
-          rootProject: rootProject,
-          analysisServerFactoryOverride: () async => fakeAnalysisServer,
-        );
+      await startWidgetPreview(
+        rootProject: rootProject,
+        analysisServerFactoryOverride: () async => fakeAnalysisServer,
+      );
 
-        expect(fakeAnalysisServer.waitForAnalysisCalled, isTrue);
-      },
-      overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
-        DeviceManager: () => fakeDeviceManager,
-        FileSystem: () => fs,
-        ProcessManager: () => loggingProcessManager,
-        Pub: () => Pub.test(
-          fileSystem: fs,
-          logger: logger,
-          processManager: loggingProcessManager,
-          botDetector: botDetector,
-          platform: platform,
-          stdio: mockStdio,
-        ),
-      },
-    );
+      expect(fakeAnalysisServer.waitForAnalysisCalled, isTrue);
+    });
 
-    testUsingContext(
-      'start creates .widget_preview in the CWD',
-      () async {
-        final Directory rootProject = await createRootProject();
-        // Try to execute using the CWD.
-        fs.currentDirectory = rootProject;
-        await startWidgetPreview(rootProject: null);
-        expectSinglePreviewLaunchTimingEvent();
-      },
-      overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
-        DeviceManager: () => fakeDeviceManager,
-        FileSystem: () => fs,
-        ProcessManager: () => loggingProcessManager,
-        Pub: () => Pub.test(
-          fileSystem: fs,
-          logger: logger,
-          processManager: loggingProcessManager,
-          botDetector: botDetector,
-          platform: platform,
-          stdio: mockStdio,
-        ),
-      },
-    );
+    test('start creates .widget_preview in the CWD', () async {
+      final Directory rootProject = await createRootProject();
+      // Try to execute using the CWD.
+      fs.currentDirectory = rootProject;
+      await startWidgetPreview(rootProject: null);
+      expectSinglePreviewLaunchTimingEvent();
+    });
 
     const samplePreviewFile = '''
 import 'package:flutter/widget_previews.dart';
@@ -741,7 +662,7 @@ List<_i1.WidgetPreview> previews() => [
 ''';
 
     group('LSP-based preview detection', () {
-      testUsingContext(
+      test(
         'start finds existing previews and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
         () async {
           final Directory rootProject = await createRootProject();
@@ -783,21 +704,9 @@ List<_i1.WidgetPreview> previews() => [
           expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
           expectSinglePreviewLaunchTimingEvent();
         },
-        overrides: <Type, Generator>{
-          Analytics: () => fakeAnalytics,
-          DeviceManager: () => fakeDeviceManager,
-          Pub: () => Pub.test(
-            fileSystem: fs,
-            logger: logger,
-            processManager: loggingProcessManager,
-            botDetector: botDetector,
-            platform: platform,
-            stdio: mockStdio,
-          ),
-        },
       );
 
-      testUsingContext(
+      test(
         'start finds existing previews in the CWD and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
         () async {
           final Directory rootProject = await createRootProject();
@@ -841,23 +750,9 @@ List<_i1.WidgetPreview> previews() => [
           expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
           expectSinglePreviewLaunchTimingEvent();
         },
-        overrides: <Type, Generator>{
-          Analytics: () => fakeAnalytics,
-          DeviceManager: () => fakeDeviceManager,
-          FileSystem: () => fs,
-          ProcessManager: () => loggingProcessManager,
-          Pub: () => Pub.test(
-            fileSystem: fs,
-            logger: logger,
-            processManager: loggingProcessManager,
-            botDetector: botDetector,
-            platform: platform,
-            stdio: mockStdio,
-          ),
-        },
       );
 
-      testUsingContext(
+      test(
         'start finds existing previews in the provided directory and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
         () async {
           final Directory rootProject = await createRootProject();
@@ -893,23 +788,11 @@ List<_i1.WidgetPreview> previews() => [
           await startWidgetPreview(rootProject: rootProject);
           expectSinglePreviewLaunchTimingEvent();
         },
-        overrides: <Type, Generator>{
-          Analytics: () => fakeAnalytics,
-          DeviceManager: () => fakeDeviceManager,
-          Pub: () => Pub.test(
-            fileSystem: fs,
-            logger: logger,
-            processManager: loggingProcessManager,
-            botDetector: botDetector,
-            platform: platform,
-            stdio: mockStdio,
-          ),
-        },
       );
     });
 
     group('Legacy preview detection', () {
-      testUsingContext(
+      test(
         'start finds existing previews and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
         () async {
           final Directory rootProject = await createRootProject();
@@ -927,21 +810,9 @@ List<_i1.WidgetPreview> previews() => [
           expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
           expectSinglePreviewLaunchTimingEvent();
         },
-        overrides: <Type, Generator>{
-          Analytics: () => fakeAnalytics,
-          DeviceManager: () => fakeDeviceManager,
-          Pub: () => Pub.test(
-            fileSystem: fs,
-            logger: logger,
-            processManager: loggingProcessManager,
-            botDetector: botDetector,
-            platform: platform,
-            stdio: mockStdio,
-          ),
-        },
       );
 
-      testUsingContext(
+      test(
         'start finds existing previews in the CWD and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
         () async {
           final Directory rootProject = await createRootProject();
@@ -961,23 +832,9 @@ List<_i1.WidgetPreview> previews() => [
           expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
           expectSinglePreviewLaunchTimingEvent();
         },
-        overrides: <Type, Generator>{
-          Analytics: () => fakeAnalytics,
-          DeviceManager: () => fakeDeviceManager,
-          FileSystem: () => fs,
-          ProcessManager: () => loggingProcessManager,
-          Pub: () => Pub.test(
-            fileSystem: fs,
-            logger: logger,
-            processManager: loggingProcessManager,
-            botDetector: botDetector,
-            platform: platform,
-            stdio: mockStdio,
-          ),
-        },
       );
 
-      testUsingContext(
+      test(
         'start finds existing previews in the provided directory and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
         () async {
           final Directory rootProject = await createRootProject();
@@ -995,283 +852,193 @@ List<_i1.WidgetPreview> previews() => [
           expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
           expectSinglePreviewLaunchTimingEvent();
         },
-        overrides: <Type, Generator>{
-          Analytics: () => fakeAnalytics,
-          DeviceManager: () => fakeDeviceManager,
-          Pub: () => Pub.test(
-            fileSystem: fs,
-            logger: logger,
-            processManager: loggingProcessManager,
-            botDetector: botDetector,
-            platform: platform,
-            stdio: mockStdio,
-          ),
-        },
       );
     });
 
-    testUsingContext(
-      'invokes pub in online and offline modes',
-      () async {
-        // Run pub online first in order to populate the pub cache.
-        final Directory rootProject = await createRootProject();
-        loggingProcessManager.clear();
+    test('invokes pub in online and offline modes', () async {
+      // Run pub online first in order to populate the pub cache.
+      final Directory rootProject = await createRootProject();
+      loggingProcessManager.clear();
 
-        final dartCommand = RegExp(r'dart-sdk[\\/]bin[\\/]dart');
+      final dartCommand = RegExp(r'dart-sdk[\\/]bin[\\/]dart');
 
-        await startWidgetPreview(rootProject: rootProject);
-        expect(
-          loggingProcessManager.commands,
-          contains(
-            predicate(
-              (List<String> c) =>
-                  dartCommand.hasMatch(c[0]) && c[1].contains('pub') && !c.contains('--offline'),
-            ),
+      await startWidgetPreview(rootProject: rootProject);
+      expect(
+        loggingProcessManager.commands,
+        contains(
+          predicate(
+            (List<String> c) =>
+                dartCommand.hasMatch(c[0]) && c[1].contains('pub') && !c.contains('--offline'),
+          ),
+        ),
+      );
+
+      await cleanWidgetPreview(rootProject: rootProject);
+
+      // Run pub offline.
+      loggingProcessManager.clear();
+      await startWidgetPreview(rootProject: rootProject, arguments: <String>['--pub', '--offline']);
+
+      expect(
+        loggingProcessManager.commands,
+        contains(
+          predicate(
+            (List<String> c) =>
+                dartCommand.hasMatch(c[0]) && c[1].contains('pub') && c.contains('--offline'),
+          ),
+        ),
+      );
+    });
+
+    test('start exits if no web target is available.', () async {
+      // Regression test for https://github.com/flutter/flutter/issues/173960.
+      fakeDeviceManager.attachedDevices.clear();
+      final Directory rootProject = await createRootProject();
+      await expectToolExitLater(
+        startWidgetPreview(rootProject: rootProject),
+        contains(WidgetPreviewStartCommand.kBrowserNotFoundErrorMessage),
+      );
+    });
+
+    test('always starts with Chrome when available.', () async {
+      fakeDeviceManager
+        ..attachedDevices.clear()
+        ..addAttachedDevice(fakeMicrosoftEdgeDevice)
+        // Register the Chrome device second to ensure we're not just grabbing the first device.
+        ..addAttachedDevice(fakeGoogleChromeDevice);
+      final Directory rootProject = await createRootProject();
+      await startWidgetPreview(rootProject: rootProject);
+      expectDeviceSelected(fakeGoogleChromeDevice);
+    });
+
+    test('starts with Edge if Chrome is not available.', () async {
+      fakeDeviceManager
+        ..attachedDevices.clear()
+        ..addAttachedDevice(fakeMicrosoftEdgeDevice);
+      final Directory rootProject = await createRootProject();
+      await startWidgetPreview(rootProject: rootProject);
+      expectDeviceSelected(fakeMicrosoftEdgeDevice);
+    });
+
+    test('serializes, coalesces, and gates reloads across previewer lifecycle', () async {
+      final Directory rootProject = await createRootProject();
+      final fakeResidentRunner = FakeResidentRunner(waitForAppToFinishCompleter: Completer<int>());
+
+      final FakeToolContext toolContext = createToolContext();
+      final Pub pub = createPub();
+      final CommandRunner<void> runner = createTestCommandRunner(
+        createWidgetPreviewCommand(
+          pub: pub,
+          toolContext: toolContext,
+          residentRunnerFactoryOverride:
+              (
+                FlutterDevice device, {
+                required DebuggingOptions debuggingOptions,
+                required FlutterProject flutterProject,
+                required String projectRootPath,
+                required String target,
+              }) {
+                device.devFS = FakeDevFS();
+                return fakeResidentRunner;
+              },
+        ),
+        fakeAnalytics,
+        toolContext,
+        TestFeatureFlags(isWebEnabled: true),
+        pub,
+      );
+
+      final startCommand =
+          runner.commands['widget-preview']!.subcommands['start']! as WidgetPreviewStartCommand;
+
+      void triggerChange() {
+        startCommand.onChangeDetected(
+          FlutterWidgetPreviews(
+            namespaces: const <String, String>{},
+            previews: const <FlutterWidgetPreviewDetails>[],
+            scriptUris: <Uri>[Uri.file(fs.path.join(rootProject.path, 'lib', 'main.dart'))],
           ),
         );
+      }
 
-        await cleanWidgetPreview(rootProject: rootProject);
+      final Future<void> runFuture = runner.run(<String>[
+        'widget-preview',
+        'start',
+        rootProject.path,
+      ]);
 
-        // Run pub offline.
-        loggingProcessManager.clear();
-        await startWidgetPreview(
-          rootProject: rootProject,
-          arguments: <String>['--pub', '--offline'],
-        );
+      while (fakeResidentRunner.appStartedCompleter == null) {
+        await pumpEventQueue();
+      }
+      await fakeResidentRunner.appStartedCompleter!.future;
 
-        expect(
-          loggingProcessManager.commands,
-          contains(
-            predicate(
-              (List<String> c) =>
-                  dartCommand.hasMatch(c[0]) && c[1].contains('pub') && c.contains('--offline'),
-            ),
-          ),
-        );
-      },
-      overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
-        DeviceManager: () => fakeDeviceManager,
-        ProcessManager: () => loggingProcessManager,
-        Pub: () => Pub.test(
-          fileSystem: fs,
-          logger: logger,
-          processManager: loggingProcessManager,
-          botDetector: botDetector,
-          platform: platform,
-          stdio: mockStdio,
+      // 1. Trigger a change while the previewer is still waiting for the debug
+      // connection. Reload must be gated until the connection is established.
+      triggerChange();
+      await pumpEventQueue();
+      expect(fakeResidentRunner.restartCount, 0);
+
+      fakeResidentRunner.connectionInfoCompleter!.complete(
+        DebugConnectionInfo(
+          wsUri: Uri.parse('ws://127.0.0.1:1234/ws'),
+          devToolsUri: Uri.parse('http://127.0.0.1:1234/devtools'),
         ),
-      },
-    );
+      );
+      await pumpEventQueue();
+      expect(fakeResidentRunner.restartCount, 1);
 
-    testUsingContext(
-      'start exits if no web target is available.',
-      () async {
-        // Regression test for https://github.com/flutter/flutter/issues/173960.
-        final Directory rootProject = await createRootProject();
-        await expectToolExitLater(
-          startWidgetPreview(rootProject: rootProject),
-          contains(WidgetPreviewStartCommand.kBrowserNotFoundErrorMessage),
-        );
-      },
-      overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
-        DeviceManager: () => fakeDeviceManager..attachedDevices.clear(),
-        FileSystem: () => fs,
-        ProcessManager: () => loggingProcessManager,
-        Pub: () => Pub.test(
-          fileSystem: fs,
-          logger: logger,
-          processManager: loggingProcessManager,
-          botDetector: botDetector,
-          platform: platform,
-          stdio: mockStdio,
-        ),
-      },
-    );
+      // 2. Coalesce multiple rapid file changes while a reload is in flight.
+      final inFlightRestartCompleter = Completer<OperationResult>();
+      fakeResidentRunner.currentRestartCompleter = inFlightRestartCompleter;
 
-    testUsingContext(
-      'always starts with Chrome when available.',
-      () async {
-        final Directory rootProject = await createRootProject();
-        await startWidgetPreview(rootProject: rootProject);
-        expectDeviceSelected(fakeGoogleChromeDevice);
-      },
-      overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
-        DeviceManager: () => fakeDeviceManager
-          ..attachedDevices.clear()
-          ..addAttachedDevice(fakeMicrosoftEdgeDevice)
-          // Register the Chrome device second to ensure we're not just grabbing the first device.
-          ..addAttachedDevice(fakeGoogleChromeDevice),
-        FileSystem: () => fs,
-        ProcessManager: () => loggingProcessManager,
-        Pub: () => Pub.test(
-          fileSystem: fs,
-          logger: logger,
-          processManager: loggingProcessManager,
-          botDetector: botDetector,
-          platform: platform,
-          stdio: mockStdio,
-        ),
-      },
-    );
+      triggerChange();
+      await pumpEventQueue();
+      expect(fakeResidentRunner.restartCount, 2);
+      expect(fakeResidentRunner.concurrentRestarts, 1);
 
-    testUsingContext(
-      'starts with Edge if Chrome is not available.',
-      () async {
-        final Directory rootProject = await createRootProject();
-        await startWidgetPreview(rootProject: rootProject);
-        expectDeviceSelected(fakeMicrosoftEdgeDevice);
-      },
-      overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
-        DeviceManager: () => fakeDeviceManager
-          ..attachedDevices.clear()
-          ..addAttachedDevice(fakeMicrosoftEdgeDevice),
-        FileSystem: () => fs,
-        ProcessManager: () => loggingProcessManager,
-        Pub: () => Pub.test(
-          fileSystem: fs,
-          logger: logger,
-          processManager: loggingProcessManager,
-          botDetector: botDetector,
-          platform: platform,
-          stdio: mockStdio,
-        ),
-      },
-    );
-
-    testUsingContext(
-      'serializes, coalesces, and gates reloads across previewer lifecycle',
-      () async {
-        final Directory rootProject = await createRootProject();
-        final fakeResidentRunner = FakeResidentRunner(
-          waitForAppToFinishCompleter: Completer<int>(),
-        );
-
-        final CommandRunner<void> runner = createTestCommandRunner(
-          createWidgetPreviewCommand(
-            residentRunnerFactoryOverride:
-                (
-                  FlutterDevice device, {
-                  required DebuggingOptions debuggingOptions,
-                  required FlutterProject flutterProject,
-                  required String projectRootPath,
-                  required String target,
-                }) {
-                  device.devFS = FakeDevFS();
-                  return fakeResidentRunner;
-                },
-          ),
-        );
-
-        final startCommand =
-            runner.commands['widget-preview']!.subcommands['start']! as WidgetPreviewStartCommand;
-
-        void triggerChange() {
-          startCommand.onChangeDetected(
-            FlutterWidgetPreviews(
-              namespaces: const <String, String>{},
-              previews: const <FlutterWidgetPreviewDetails>[],
-              scriptUris: <Uri>[Uri.file(fs.path.join(rootProject.path, 'lib', 'main.dart'))],
-            ),
-          );
-        }
-
-        final Future<void> runFuture = runner.run(<String>[
-          'widget-preview',
-          'start',
-          rootProject.path,
-        ]);
-
-        while (fakeResidentRunner.appStartedCompleter == null) {
-          await pumpEventQueue();
-        }
-        await fakeResidentRunner.appStartedCompleter!.future;
-
-        // 1. Trigger a change while the previewer is still waiting for the debug
-        // connection. Reload must be gated until the connection is established.
+      for (var i = 0; i < 3; i++) {
         triggerChange();
-        await pumpEventQueue();
-        expect(fakeResidentRunner.restartCount, 0);
+      }
+      await pumpEventQueue();
+      expect(fakeResidentRunner.maxConcurrentRestarts, 1);
+      expect(fakeResidentRunner.restartCount, 2);
 
-        fakeResidentRunner.connectionInfoCompleter!.complete(
-          DebugConnectionInfo(
-            wsUri: Uri.parse('ws://127.0.0.1:1234/ws'),
-            devToolsUri: Uri.parse('http://127.0.0.1:1234/devtools'),
-          ),
-        );
-        await pumpEventQueue();
-        expect(fakeResidentRunner.restartCount, 1);
+      fakeResidentRunner.currentRestartCompleter = null;
+      inFlightRestartCompleter.complete(OperationResult.ok);
+      await pumpEventQueue();
 
-        // 2. Coalesce multiple rapid file changes while a reload is in flight.
-        final inFlightRestartCompleter = Completer<OperationResult>();
-        fakeResidentRunner.currentRestartCompleter = inFlightRestartCompleter;
+      expect(fakeResidentRunner.restartCount, 3);
+      expect(fakeResidentRunner.maxConcurrentRestarts, 1);
+      expect(fakeResidentRunner.fullRestartRequests, <bool>[false, false, false]);
 
-        triggerChange();
-        await pumpEventQueue();
-        expect(fakeResidentRunner.restartCount, 2);
-        expect(fakeResidentRunner.concurrentRestarts, 1);
+      // 3. Upgrade a queued hot reload to a hot restart without downgrading on
+      // a subsequent hot reload.
+      final secondInFlightCompleter = Completer<OperationResult>();
+      fakeResidentRunner.currentRestartCompleter = secondInFlightCompleter;
 
-        for (var i = 0; i < 3; i++) {
-          triggerChange();
-        }
-        await pumpEventQueue();
-        expect(fakeResidentRunner.maxConcurrentRestarts, 1);
-        expect(fakeResidentRunner.restartCount, 2);
+      triggerChange();
+      await pumpEventQueue();
+      expect(fakeResidentRunner.restartCount, 4);
 
-        fakeResidentRunner.currentRestartCompleter = null;
-        inFlightRestartCompleter.complete(OperationResult.ok);
-        await pumpEventQueue();
+      triggerChange();
+      startCommand.onHotRestartRequest();
+      triggerChange();
 
-        expect(fakeResidentRunner.restartCount, 3);
-        expect(fakeResidentRunner.maxConcurrentRestarts, 1);
-        expect(fakeResidentRunner.fullRestartRequests, <bool>[false, false, false]);
+      fakeResidentRunner.currentRestartCompleter = null;
+      secondInFlightCompleter.complete(OperationResult.ok);
+      await pumpEventQueue();
 
-        // 3. Upgrade a queued hot reload to a hot restart without downgrading on
-        // a subsequent hot reload.
-        final secondInFlightCompleter = Completer<OperationResult>();
-        fakeResidentRunner.currentRestartCompleter = secondInFlightCompleter;
+      expect(fakeResidentRunner.restartCount, 5);
+      expect(fakeResidentRunner.maxConcurrentRestarts, 1);
+      expect(fakeResidentRunner.fullRestartRequests, <bool>[false, false, false, false, true]);
 
-        triggerChange();
-        await pumpEventQueue();
-        expect(fakeResidentRunner.restartCount, 4);
+      // 4. Ignore reload requests after the previewer has finished.
+      fakeResidentRunner.waitForAppToFinishCompleter!.complete(0);
+      await runFuture;
 
-        triggerChange();
-        startCommand.onHotRestartRequest();
-        triggerChange();
-
-        fakeResidentRunner.currentRestartCompleter = null;
-        secondInFlightCompleter.complete(OperationResult.ok);
-        await pumpEventQueue();
-
-        expect(fakeResidentRunner.restartCount, 5);
-        expect(fakeResidentRunner.maxConcurrentRestarts, 1);
-        expect(fakeResidentRunner.fullRestartRequests, <bool>[false, false, false, false, true]);
-
-        // 4. Ignore reload requests after the previewer has finished.
-        fakeResidentRunner.waitForAppToFinishCompleter!.complete(0);
-        await runFuture;
-
-        triggerChange();
-        await pumpEventQueue();
-        expect(fakeResidentRunner.restartCount, 5);
-      },
-      overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
-        DeviceManager: () => fakeDeviceManager,
-        FileSystem: () => fs,
-        ProcessManager: () => loggingProcessManager,
-        Pub: () => Pub.test(
-          fileSystem: fs,
-          logger: logger,
-          processManager: loggingProcessManager,
-          botDetector: botDetector,
-          platform: platform,
-          stdio: mockStdio,
-        ),
-      },
-    );
+      triggerChange();
+      await pumpEventQueue();
+      expect(fakeResidentRunner.restartCount, 5);
+    });
   });
 }

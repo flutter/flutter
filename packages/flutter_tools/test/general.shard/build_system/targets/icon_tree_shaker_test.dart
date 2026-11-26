@@ -87,13 +87,14 @@ void main() {
       fileSystem.directory('/icon_test')..createSync(recursive: true),
       defines: defines,
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
     );
   }
 
-  testWithoutContext('Prints error in debug mode environment', () async {
+  test('Prints error in debug mode environment', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'debug',
@@ -119,7 +120,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('Does not get enabled without font manifest', () async {
+  test('Does not get enabled without font manifest', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -139,7 +140,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('Gets enabled', () async {
+  test('Gets enabled', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -159,7 +160,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('No recorded uses file throws exception', () async {
+  test('No recorded uses file throws exception', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -185,7 +186,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('Can subset a font', () async {
+  test('Can subset a font', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -235,7 +236,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Does not subset a non-supported font', () async {
+  test('Does not subset a non-supported font', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -267,7 +268,7 @@ void main() {
     expect(subsetted, false);
   });
 
-  testWithoutContext('Does not subset an invalid ttf font', () async {
+  test('Does not subset an invalid ttf font', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -302,7 +303,7 @@ void main() {
     TargetPlatform.android_arm,
     TargetPlatform.web_javascript,
   ]) {
-    testWithoutContext('Non-constant instances $platform', () async {
+    test('Non-constant instances $platform', () async {
       final Environment environment = createEnvironment(<String, String>{
         kIconTreeShakerFlag: 'true',
         kBuildMode: 'release',
@@ -337,7 +338,7 @@ void main() {
     });
   }
 
-  testWithoutContext('Does not add 0x32 for non-web builds', () async {
+  test('Does not add 0x32 for non-web builds', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -376,7 +377,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('Ensures 0x32 is included for web builds', () async {
+  test('Ensures 0x32 is included for web builds', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -415,7 +416,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('Non-zero font-subset exit code', () async {
+  test('Non-zero font-subset exit code', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -448,7 +449,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('font-subset throws on write to sdtin', () async {
+  test('font-subset throws on write to sdtin', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -480,7 +481,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('Invalid font manifest', () async {
+  test('Invalid font manifest', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -512,7 +513,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('Allow system font fallback when fontFamily is null', () async {
+  test('Allow system font fallback when fontFamily is null', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -559,51 +560,48 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext(
-    'Allow system font fallback when fontFamily is null and manifest is empty',
-    () async {
-      final Environment environment = createEnvironment(<String, String>{
-        kIconTreeShakerFlag: 'true',
-        kBuildMode: 'release',
-      });
-      final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
+  test('Allow system font fallback when fontFamily is null and manifest is empty', () async {
+    final Environment environment = createEnvironment(<String, String>{
+      kIconTreeShakerFlag: 'true',
+      kBuildMode: 'release',
+    });
+    final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
 
-      // Nothing in font manifest
-      fontManifestContent = DevFSStringContent(emptyFontManifestJson);
+    // Nothing in font manifest
+    fontManifestContent = DevFSStringContent(emptyFontManifestJson);
 
-      final iconTreeShaker = IconTreeShaker(
-        environment,
-        fontManifestContent,
-        logger: logger,
-        processManager: processManager,
-        fileSystem: fileSystem,
-        artifacts: artifacts,
-        targetPlatform: TargetPlatform.android,
-      );
+    final iconTreeShaker = IconTreeShaker(
+      environment,
+      fontManifestContent,
+      logger: logger,
+      processManager: processManager,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
+    );
 
-      writeRecordedUsesFile(appDill.path, content: emptyRecordedUsesResult);
-      // Does not throw
-      await iconTreeShaker.subsetFont(
-        input: fileSystem.file(inputPath),
-        outputPath: outputPath,
-        relativePath: relativePath,
-      );
+    writeRecordedUsesFile(appDill.path, content: emptyRecordedUsesResult);
+    // Does not throw
+    await iconTreeShaker.subsetFont(
+      input: fileSystem.file(inputPath),
+      outputPath: outputPath,
+      relativePath: relativePath,
+    );
 
-      expect(
-        logger.traceText,
-        contains(
-          'Expected to find fontFamily for constant IconData with codepoint: '
-          '59470, but found fontFamily: null. This usually means '
-          'you are relying on the system font. Alternatively, font families in '
-          'an IconData class can be provided in the assets section of your '
-          'pubspec.yaml, or you are missing "uses-material-design: true".\n',
-        ),
-      );
-      expect(processManager, hasNoRemainingExpectations);
-    },
-  );
+    expect(
+      logger.traceText,
+      contains(
+        'Expected to find fontFamily for constant IconData with codepoint: '
+        '59470, but found fontFamily: null. This usually means '
+        'you are relying on the system font. Alternatively, font families in '
+        'an IconData class can be provided in the assets section of your '
+        'pubspec.yaml, or you are missing "uses-material-design: true".\n',
+      ),
+    );
+    expect(processManager, hasNoRemainingExpectations);
+  });
 
-  testWithoutContext('Invalid recorded uses JSON', () async {
+  test('Invalid recorded uses JSON', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -635,82 +633,75 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext(
-    'Can subset a font using InstanceCreationReference with constant arguments',
-    () async {
-      final Environment environment = createEnvironment(<String, String>{
-        kIconTreeShakerFlag: 'true',
-        kBuildMode: 'release',
-      });
-      final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
+  test('Can subset a font using InstanceCreationReference with constant arguments', () async {
+    final Environment environment = createEnvironment(<String, String>{
+      kIconTreeShakerFlag: 'true',
+      kBuildMode: 'release',
+    });
+    final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
 
-      final iconTreeShaker = IconTreeShaker(
-        environment,
-        fontManifestContent,
-        logger: logger,
-        processManager: processManager,
-        fileSystem: fileSystem,
-        artifacts: artifacts,
-        targetPlatform: TargetPlatform.android,
-      );
+    final iconTreeShaker = IconTreeShaker(
+      environment,
+      fontManifestContent,
+      logger: logger,
+      processManager: processManager,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
+    );
 
-      writeRecordedUsesFile(appDill.path, content: validRecordedUsesCreationResult);
+    writeRecordedUsesFile(appDill.path, content: validRecordedUsesCreationResult);
 
-      final stdinSink = CompleterIOSink();
-      resetFontSubsetInvocation(stdinSink: stdinSink);
+    final stdinSink = CompleterIOSink();
+    resetFontSubsetInvocation(stdinSink: stdinSink);
 
-      final File inputFont = fileSystem.file(inputPath)
-        ..writeAsBytesSync(List<int>.filled(2500, 0));
-      fileSystem.file(outputPath)
-        ..createSync(recursive: true)
-        ..writeAsBytesSync(List<int>.filled(1200, 0));
+    final File inputFont = fileSystem.file(inputPath)..writeAsBytesSync(List<int>.filled(2500, 0));
+    fileSystem.file(outputPath)
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(List<int>.filled(1200, 0));
 
-      final bool subsetted = await iconTreeShaker.subsetFont(
-        input: inputFont,
+    final bool subsetted = await iconTreeShaker.subsetFont(
+      input: inputFont,
+      outputPath: outputPath,
+      relativePath: relativePath,
+    );
+
+    expect(subsetted, true);
+    expect(stdinSink.getAndClear(), '59470\n');
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
+  test('InstanceCreationReference with non-constant arguments fails icon tree shaking', () async {
+    final Environment environment = createEnvironment(<String, String>{
+      kIconTreeShakerFlag: 'true',
+      kBuildMode: 'release',
+    });
+    final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
+
+    final iconTreeShaker = IconTreeShaker(
+      environment,
+      fontManifestContent,
+      logger: logger,
+      processManager: processManager,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
+    );
+
+    writeRecordedUsesFile(appDill.path, content: recordedUsesNonConstantCreationResult);
+
+    await expectLater(
+      () async => iconTreeShaker.subsetFont(
+        input: fileSystem.file(inputPath),
         outputPath: outputPath,
         relativePath: relativePath,
-      );
+      ),
+      throwsToolExit(),
+    );
+    expect(processManager, hasNoRemainingExpectations);
+  });
 
-      expect(subsetted, true);
-      expect(stdinSink.getAndClear(), '59470\n');
-      expect(processManager, hasNoRemainingExpectations);
-    },
-  );
-
-  testWithoutContext(
-    'InstanceCreationReference with non-constant arguments fails icon tree shaking',
-    () async {
-      final Environment environment = createEnvironment(<String, String>{
-        kIconTreeShakerFlag: 'true',
-        kBuildMode: 'release',
-      });
-      final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
-
-      final iconTreeShaker = IconTreeShaker(
-        environment,
-        fontManifestContent,
-        logger: logger,
-        processManager: processManager,
-        fileSystem: fileSystem,
-        artifacts: artifacts,
-        targetPlatform: TargetPlatform.android,
-      );
-
-      writeRecordedUsesFile(appDill.path, content: recordedUsesNonConstantCreationResult);
-
-      await expectLater(
-        () async => iconTreeShaker.subsetFont(
-          input: fileSystem.file(inputPath),
-          outputPath: outputPath,
-          relativePath: relativePath,
-        ),
-        throwsToolExit(),
-      );
-      expect(processManager, hasNoRemainingExpectations);
-    },
-  );
-
-  testWithoutContext('ConstructorTearoffReference fails icon tree shaking', () async {
+  test('ConstructorTearoffReference fails icon tree shaking', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -740,7 +731,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('Combines recorded uses from both js and wasm files', () async {
+  test('Combines recorded uses from both js and wasm files', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -792,8 +783,8 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext(
-    'Non-constant instance of non-Flutter IconData does not fail icon tree shaking',
+  test(
+    'recordedUsesFileNames restricts candidate files and ignores stale recorded_uses_wasm.json',
     () async {
       final Environment environment = createEnvironment(<String, String>{
         kIconTreeShakerFlag: 'true',
@@ -808,50 +799,20 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: artifacts,
-        targetPlatform: TargetPlatform.android,
+        targetPlatform: TargetPlatform.web_javascript,
+        recordedUsesFileNames: const <String>['recorded_uses_js.json'],
       );
 
-      const customLibrary = Library('package:my_package/custom_icon_data.dart');
-      const customIconDataClass = Class('IconData', customLibrary);
-      const customOtherClass = Class('MyIconData', customLibrary);
-
-      final String mixedRecordings = json.encode(
-        Recordings(
-          calls: <DefinitionWithStaticCalls, List<CallReference>>{},
-          instances: <DefinitionWithInstances, List<InstanceReference>>{
-            iconDataClass: <InstanceReference>[
-              const InstanceConstantReference(
-                instanceConstant: InstanceConstant(
-                  definition: iconDataClass,
-                  fields: <String, Constant>{
-                    'codePoint': IntConstant(59470),
-                    'fontFamily': StringConstant('MaterialIcons'),
-                  },
-                ),
-                loadingUnit: rootLoadingUnit,
-              ),
-            ],
-            customIconDataClass: <InstanceReference>[
-              const InstanceCreationReference(
-                definition: customIconDataClass,
-                loadingUnit: rootLoadingUnit,
-                positionalArguments: <MaybeConstant>[NonConstant()],
-                namedArguments: <String, MaybeConstant>{},
-              ),
-            ],
-            customOtherClass: <InstanceReference>[
-              const InstanceCreationReference(
-                definition: customOtherClass,
-                loadingUnit: rootLoadingUnit,
-                positionalArguments: <MaybeConstant>[NonConstant()],
-                namedArguments: <String, MaybeConstant>{},
-              ),
-            ],
-          },
-        ).toJson(),
+      writeRecordedUsesFile(
+        appDill.path,
+        content: validRecordedUsesResult,
+        fileName: 'recorded_uses_js.json',
       );
-
-      writeRecordedUsesFile(appDill.path, content: mixedRecordings);
+      writeRecordedUsesFile(
+        appDill.path,
+        content: validRecordedUsesSecondResult,
+        fileName: 'recorded_uses_wasm.json',
+      );
 
       final stdinSink = CompleterIOSink();
       resetFontSubsetInvocation(stdinSink: stdinSink);
@@ -862,19 +823,102 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsBytesSync(List<int>.filled(1200, 0));
 
-      final bool subsetted = await iconTreeShaker.subsetFont(
-        input: inputFont,
-        outputPath: outputPath,
-        relativePath: relativePath,
+      expect(
+        await iconTreeShaker.subsetFont(
+          input: inputFont,
+          outputPath: outputPath,
+          relativePath: relativePath,
+        ),
+        true,
       );
 
-      expect(subsetted, true);
-      expect(stdinSink.getAndClear(), '59470\n');
+      final String stdin = stdinSink.getAndClear();
+      expect(stdin, contains('59470'));
+      expect(stdin, isNot(contains('59471')));
+      expect(stdin, contains('optional:32'));
       expect(processManager, hasNoRemainingExpectations);
     },
   );
 
-  testWithoutContext('Skips empty recorded uses files', () async {
+  test('Non-constant instance of non-Flutter IconData does not fail icon tree shaking', () async {
+    final Environment environment = createEnvironment(<String, String>{
+      kIconTreeShakerFlag: 'true',
+      kBuildMode: 'release',
+    });
+    final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
+
+    final iconTreeShaker = IconTreeShaker(
+      environment,
+      fontManifestContent,
+      logger: logger,
+      processManager: processManager,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
+    );
+
+    const customLibrary = Library('package:my_package/custom_icon_data.dart');
+    const customIconDataClass = Class('IconData', customLibrary);
+    const customOtherClass = Class('MyIconData', customLibrary);
+
+    final String mixedRecordings = json.encode(
+      Recordings(
+        calls: <DefinitionWithStaticCalls, List<CallReference>>{},
+        instances: <DefinitionWithInstances, List<InstanceReference>>{
+          iconDataClass: <InstanceReference>[
+            const InstanceConstantReference(
+              instanceConstant: InstanceConstant(
+                definition: iconDataClass,
+                fields: <String, Constant>{
+                  'codePoint': IntConstant(59470),
+                  'fontFamily': StringConstant('MaterialIcons'),
+                },
+              ),
+              loadingUnit: rootLoadingUnit,
+            ),
+          ],
+          customIconDataClass: <InstanceReference>[
+            const InstanceCreationReference(
+              definition: customIconDataClass,
+              loadingUnit: rootLoadingUnit,
+              positionalArguments: <MaybeConstant>[NonConstant()],
+              namedArguments: <String, MaybeConstant>{},
+            ),
+          ],
+          customOtherClass: <InstanceReference>[
+            const InstanceCreationReference(
+              definition: customOtherClass,
+              loadingUnit: rootLoadingUnit,
+              positionalArguments: <MaybeConstant>[NonConstant()],
+              namedArguments: <String, MaybeConstant>{},
+            ),
+          ],
+        },
+      ).toJson(),
+    );
+
+    writeRecordedUsesFile(appDill.path, content: mixedRecordings);
+
+    final stdinSink = CompleterIOSink();
+    resetFontSubsetInvocation(stdinSink: stdinSink);
+
+    final File inputFont = fileSystem.file(inputPath)..writeAsBytesSync(List<int>.filled(2500, 0));
+    fileSystem.file(outputPath)
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(List<int>.filled(1200, 0));
+
+    final bool subsetted = await iconTreeShaker.subsetFont(
+      input: inputFont,
+      outputPath: outputPath,
+      relativePath: relativePath,
+    );
+
+    expect(subsetted, true);
+    expect(stdinSink.getAndClear(), '59470\n');
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
+  test('Skips empty recorded uses files', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -920,7 +964,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('Subsets unused CupertinoIcons font to fallback code point', () async {
+  test('Subsets unused CupertinoIcons font to fallback code point', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -978,7 +1022,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('Does not subset unused non-icon font', () async {
+  test('Does not subset unused non-icon font', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',

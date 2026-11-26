@@ -538,6 +538,15 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
   scrollView.contentSize = CGSizeMake(kScrollViewContentSize, kScrollViewContentSize);
   // This is an arbitrary offset that is not CGPointZero.
   scrollView.contentOffset = CGPointMake(kScrollViewContentSize, kScrollViewContentSize);
+  // This scroll-to-top helper UIScrollView has a non-zero contentOffset and draws nothing itself.
+  // On iOS 26+, UIScrollView automatically applies a scroll edge effect (blur/tint) when its
+  // contentOffset is non-zero, which would otherwise render over the Flutter canvas.
+  if (@available(iOS 26.0, *)) {
+    scrollView.topEdgeEffect.hidden = YES;
+    scrollView.bottomEdgeEffect.hidden = YES;
+    scrollView.leftEdgeEffect.hidden = YES;
+    scrollView.rightEdgeEffect.hidden = YES;
+  }
 
   [self.view addSubview:scrollView];
   self.scrollView = scrollView;
@@ -1344,6 +1353,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [self checkAndUpdateAutoResizeConstraints];
   [self setViewportMetricsPaddings];
   [self updateViewportMetricsIfNeeded];
+  [self updateEngineDisplays];
 
   // There is no guarantee that UIKit will layout subviews when the application/scene is in the
   // foreground. Creating the surface when backgrounded will cause app termination, so in that
@@ -1353,6 +1363,19 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   if (firstViewBoundsUpdate && self.stateIsForeground) {
     [self createSurfaceIfReady];
   }
+}
+
+// Asks the engine to send updated display information to the framework, e.g. when the view is first
+// placed in a window, or is resized because it moved between the inner and outer displays of a
+// device with multiple built-in displays. If the view moves between displays without changing size
+// (e.g. a fixed-size view in an add-to-app host), it may not be laid out again, so
+// `-[FlutterPluginSceneLifeCycleDelegate windowScene:didUpdateEffectiveGeometry:]` also updates the
+// displays. The engine skips the update if the display information has not changed.
+- (void)updateEngineDisplays {
+  if (self.engine.viewController != self) {
+    return;
+  }
+  [self.engine updateDisplays];
 }
 
 - (BOOL)isAutoResizable {

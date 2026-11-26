@@ -9,8 +9,8 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/cocoapod_utils.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -18,15 +18,15 @@ import 'package:test/fake.dart';
 import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/package_config.dart';
-import '../../src/throwing_pub.dart';
 
 void main() {
   group('processPodsIfNeeded', () {
     late MemoryFileSystem fs;
     late FakeCocoaPods cocoaPods;
     late BufferLogger logger;
+    late FakeToolContext toolContext;
 
     // Adds basic properties to the flutterProject and its subprojects.
     void setUpProject(
@@ -84,55 +84,46 @@ void main() {
       fs = MemoryFileSystem.test();
       cocoaPods = FakeCocoaPods();
       logger = BufferLogger.test();
+      toolContext = FakeToolContext(fs: fs, logger: logger);
     });
 
     group('for iOS', () {
       group('using CocoaPods only', () {
-        testUsingContext(
-          'processes when there are plugins',
-          () async {
-            final flutterProject = FakeFlutterProject();
-            setUpProject(flutterProject, fs, pluginNames: <String>['plugin_one', 'plugin_two']);
+        test('processes when there are plugins', () async {
+          final flutterProject = FakeFlutterProject();
+          setUpProject(flutterProject, fs, pluginNames: <String>['plugin_one', 'plugin_two']);
 
-            await processPodsIfNeeded(
-              flutterProject.ios,
-              fs.currentDirectory.childDirectory('build').path,
-              BuildMode.debug,
-            );
-            expect(cocoaPods.processedPods, isTrue);
-          },
-          overrides: <Type, Generator>{
-            FileSystem: () => fs,
-            ProcessManager: FakeProcessManager.empty,
-            Pub: ThrowingPub.new,
-            CocoaPods: () => cocoaPods,
-          },
-        );
+          await processPodsIfNeeded(
+            flutterProject.ios,
+            fs.currentDirectory.childDirectory('build').path,
+            BuildMode.debug,
+            cocoaPods: cocoaPods,
+            featureFlags: TestFeatureFlags(),
+            templateRenderer: const MustacheTemplateRenderer(),
+            toolContext: toolContext,
+          );
+          expect(cocoaPods.processedPods, isTrue);
+        });
 
-        testUsingContext(
-          'processes when no plugins but the project is a module and podfile exists',
-          () async {
-            final flutterProject = FakeFlutterProject();
-            setUpProject(flutterProject, fs);
-            flutterProject.isModule = true;
-            flutterProject.ios.podfile.createSync(recursive: true);
+        test('processes when no plugins but the project is a module and podfile exists', () async {
+          final flutterProject = FakeFlutterProject();
+          setUpProject(flutterProject, fs);
+          flutterProject.isModule = true;
+          flutterProject.ios.podfile.createSync(recursive: true);
 
-            await processPodsIfNeeded(
-              flutterProject.ios,
-              fs.currentDirectory.childDirectory('build').path,
-              BuildMode.debug,
-            );
-            expect(cocoaPods.processedPods, isTrue);
-          },
-          overrides: <Type, Generator>{
-            FileSystem: () => fs,
-            ProcessManager: FakeProcessManager.empty,
-            Pub: ThrowingPub.new,
-            CocoaPods: () => cocoaPods,
-          },
-        );
+          await processPodsIfNeeded(
+            flutterProject.ios,
+            fs.currentDirectory.childDirectory('build').path,
+            BuildMode.debug,
+            cocoaPods: cocoaPods,
+            featureFlags: TestFeatureFlags(),
+            templateRenderer: const MustacheTemplateRenderer(),
+            toolContext: toolContext,
+          );
+          expect(cocoaPods.processedPods, isTrue);
+        });
 
-        testUsingContext(
+        test(
           "skips when no plugins and the project is a module but podfile doesn't exist",
           () async {
             final flutterProject = FakeFlutterProject();
@@ -143,199 +134,162 @@ void main() {
               flutterProject.ios,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              cocoaPods: cocoaPods,
+              featureFlags: TestFeatureFlags(),
+              templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isFalse);
           },
-          overrides: <Type, Generator>{
-            FileSystem: () => fs,
-            ProcessManager: FakeProcessManager.empty,
-            Pub: ThrowingPub.new,
-            CocoaPods: () => cocoaPods,
-          },
         );
 
-        testUsingContext(
-          'skips when no plugins and project is not a module',
-          () async {
-            final flutterProject = FakeFlutterProject();
-            setUpProject(flutterProject, fs);
+        test('skips when no plugins and project is not a module', () async {
+          final flutterProject = FakeFlutterProject();
+          setUpProject(flutterProject, fs);
 
-            await processPodsIfNeeded(
-              flutterProject.ios,
-              fs.currentDirectory.childDirectory('build').path,
-              BuildMode.debug,
-            );
-            expect(cocoaPods.processedPods, isFalse);
-          },
-          overrides: <Type, Generator>{
-            FileSystem: () => fs,
-            ProcessManager: FakeProcessManager.empty,
-            Pub: ThrowingPub.new,
-            CocoaPods: () => cocoaPods,
-          },
-        );
+          await processPodsIfNeeded(
+            flutterProject.ios,
+            fs.currentDirectory.childDirectory('build').path,
+            BuildMode.debug,
+            cocoaPods: cocoaPods,
+            featureFlags: TestFeatureFlags(),
+            templateRenderer: const MustacheTemplateRenderer(),
+            toolContext: toolContext,
+          );
+          expect(cocoaPods.processedPods, isFalse);
+        });
       });
 
       group('using Swift Package Manager', () {
-        testUsingContext(
-          'processes if podfile exists',
-          () async {
-            final flutterProject = FakeFlutterProject();
-            setUpProject(flutterProject, fs, pluginNames: <String>['plugin_one', 'plugin_two']);
-            flutterProject.ios.usesSwiftPackageManager = true;
-            flutterProject.ios.podfile.createSync(recursive: true);
+        test('processes if podfile exists', () async {
+          final flutterProject = FakeFlutterProject();
+          setUpProject(flutterProject, fs, pluginNames: <String>['plugin_one', 'plugin_two']);
+          flutterProject.ios.usesSwiftPackageManager = true;
+          flutterProject.ios.podfile.createSync(recursive: true);
 
-            await processPodsIfNeeded(
-              flutterProject.ios,
-              fs.currentDirectory.childDirectory('build').path,
-              BuildMode.debug,
-            );
-            expect(cocoaPods.processedPods, isTrue);
-          },
-          overrides: <Type, Generator>{
-            FileSystem: () => fs,
-            ProcessManager: FakeProcessManager.empty,
-            Pub: ThrowingPub.new,
-            CocoaPods: () => cocoaPods,
-          },
-        );
+          await processPodsIfNeeded(
+            flutterProject.ios,
+            fs.currentDirectory.childDirectory('build').path,
+            BuildMode.debug,
+            cocoaPods: cocoaPods,
+            featureFlags: TestFeatureFlags(),
+            templateRenderer: const MustacheTemplateRenderer(),
+            toolContext: toolContext,
+          );
+          expect(cocoaPods.processedPods, isTrue);
+        });
 
-        testUsingContext(
-          'skip if podfile does not exists',
-          () async {
-            final flutterProject = FakeFlutterProject();
-            setUpProject(flutterProject, fs, pluginNames: <String>['plugin_one', 'plugin_two']);
-            flutterProject.ios.usesSwiftPackageManager = true;
+        test('skip if podfile does not exists', () async {
+          final flutterProject = FakeFlutterProject();
+          setUpProject(flutterProject, fs, pluginNames: <String>['plugin_one', 'plugin_two']);
+          flutterProject.ios.usesSwiftPackageManager = true;
 
-            await processPodsIfNeeded(
-              flutterProject.ios,
-              fs.currentDirectory.childDirectory('build').path,
-              BuildMode.debug,
-            );
-            expect(cocoaPods.processedPods, isFalse);
-          },
-          overrides: <Type, Generator>{
-            FileSystem: () => fs,
-            ProcessManager: FakeProcessManager.empty,
-            CocoaPods: () => cocoaPods,
-          },
-        );
+          await processPodsIfNeeded(
+            flutterProject.ios,
+            fs.currentDirectory.childDirectory('build').path,
+            BuildMode.debug,
+            cocoaPods: cocoaPods,
+            featureFlags: TestFeatureFlags(),
+            templateRenderer: const MustacheTemplateRenderer(),
+            toolContext: toolContext,
+          );
+          expect(cocoaPods.processedPods, isFalse);
+        });
 
-        testUsingContext(
-          'process if podfile does not exists but forceCocoaPodsOnly is true',
-          () async {
-            final flutterProject = FakeFlutterProject();
-            setUpProject(flutterProject, fs, pluginNames: <String>['plugin_one', 'plugin_two']);
-            flutterProject.ios.usesSwiftPackageManager = true;
-            final File generatedManifestFile = flutterProject.ios.flutterPluginSwiftPackageManifest;
-            generatedManifestFile.createSync(recursive: true);
+        test('process if podfile does not exists but forceCocoaPodsOnly is true', () async {
+          final flutterProject = FakeFlutterProject();
+          setUpProject(flutterProject, fs, pluginNames: <String>['plugin_one', 'plugin_two']);
+          flutterProject.ios.usesSwiftPackageManager = true;
+          final File generatedManifestFile = flutterProject.ios.flutterPluginSwiftPackageManifest;
+          generatedManifestFile.createSync(recursive: true);
 
-            await processPodsIfNeeded(
-              flutterProject.ios,
-              fs.currentDirectory.childDirectory('build').path,
-              BuildMode.debug,
-              forceCocoaPodsOnly: true,
-            );
-            expect(cocoaPods.processedPods, isTrue);
-            expect(cocoaPods.podfileSetup, isTrue);
-            expect(
-              logger.warningText,
-              'Swift Package Manager does not yet support this command. '
-              'CocoaPods will be used instead.\n',
-            );
-            expect(generatedManifestFile, exists);
-            const emptyDependencies = 'dependencies: [\n        \n    ],\n';
-            expect(generatedManifestFile.readAsStringSync(), contains(emptyDependencies));
-          },
-          overrides: <Type, Generator>{
-            FileSystem: () => fs,
-            ProcessManager: FakeProcessManager.empty,
-            Pub: ThrowingPub.new,
-            CocoaPods: () => cocoaPods,
-            Logger: () => logger,
-          },
-        );
+          await processPodsIfNeeded(
+            flutterProject.ios,
+            fs.currentDirectory.childDirectory('build').path,
+            BuildMode.debug,
+            cocoaPods: cocoaPods,
+            featureFlags: TestFeatureFlags(),
+            templateRenderer: const MustacheTemplateRenderer(),
+            toolContext: toolContext,
+            forceCocoaPodsOnly: true,
+          );
+          expect(cocoaPods.processedPods, isTrue);
+          expect(cocoaPods.podfileSetup, isTrue);
+          expect(
+            logger.warningText,
+            'Swift Package Manager does not yet support this command. '
+            'CocoaPods will be used instead.\n',
+          );
+          expect(generatedManifestFile, exists);
+          const emptyDependencies = 'dependencies: [\n        \n    ],\n';
+          expect(generatedManifestFile.readAsStringSync(), contains(emptyDependencies));
+        });
 
-        testUsingContext(
-          'sets swift_package_manager_enabled when forceSwiftPM is true',
-          () async {
-            final flutterProject = FakeFlutterProject();
-            setUpProject(flutterProject, fs, pluginNames: <String>['plugin_one', 'plugin_two']);
+        test('sets swift_package_manager_enabled when forceSwiftPM is true', () async {
+          final flutterProject = FakeFlutterProject();
+          setUpProject(flutterProject, fs, pluginNames: <String>['plugin_one', 'plugin_two']);
 
-            await processPodsIfNeeded(
-              flutterProject.ios,
-              fs.currentDirectory.childDirectory('build').path,
-              BuildMode.debug,
-              forceSwiftPM: true,
-            );
+          await processPodsIfNeeded(
+            flutterProject.ios,
+            fs.currentDirectory.childDirectory('build').path,
+            BuildMode.debug,
+            cocoaPods: cocoaPods,
+            featureFlags: TestFeatureFlags(),
+            templateRenderer: const MustacheTemplateRenderer(),
+            toolContext: toolContext,
+            forceSwiftPM: true,
+          );
 
-            expect(flutterProject.flutterPluginsDependenciesFile, exists);
-            final String pluginsString = flutterProject.flutterPluginsDependenciesFile
-                .readAsStringSync();
-            final jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
+          expect(flutterProject.flutterPluginsDependenciesFile, exists);
+          final String pluginsString = flutterProject.flutterPluginsDependenciesFile
+              .readAsStringSync();
+          final jsonContent = json.decode(pluginsString) as Map<String, Object?>;
 
-            expect(jsonContent['swift_package_manager_enabled'], <String, dynamic>{
-              'ios': true,
-              'macos': true,
-            });
-          },
-          overrides: <Type, Generator>{
-            FileSystem: () => fs,
-            ProcessManager: FakeProcessManager.empty,
-            Pub: ThrowingPub.new,
-            CocoaPods: () => cocoaPods,
-          },
-        );
+          expect(jsonContent['swift_package_manager_enabled'], <String, Object?>{
+            'ios': true,
+            'macos': true,
+          });
+        });
       });
     });
 
     group('for macOS', () {
       group('using CocoaPods only', () {
-        testUsingContext(
-          'processes when there are plugins',
-          () async {
-            final flutterProject = FakeFlutterProject();
-            setUpProject(flutterProject, fs, pluginNames: <String>['plugin_one', 'plugin_two']);
+        test('processes when there are plugins', () async {
+          final flutterProject = FakeFlutterProject();
+          setUpProject(flutterProject, fs, pluginNames: <String>['plugin_one', 'plugin_two']);
 
-            await processPodsIfNeeded(
-              flutterProject.macos,
-              fs.currentDirectory.childDirectory('build').path,
-              BuildMode.debug,
-            );
-            expect(cocoaPods.processedPods, isTrue);
-          },
-          overrides: <Type, Generator>{
-            FileSystem: () => fs,
-            ProcessManager: FakeProcessManager.empty,
-            Pub: ThrowingPub.new,
-            CocoaPods: () => cocoaPods,
-          },
-        );
+          await processPodsIfNeeded(
+            flutterProject.macos,
+            fs.currentDirectory.childDirectory('build').path,
+            BuildMode.debug,
+            cocoaPods: cocoaPods,
+            featureFlags: TestFeatureFlags(),
+            templateRenderer: const MustacheTemplateRenderer(),
+            toolContext: toolContext,
+          );
+          expect(cocoaPods.processedPods, isTrue);
+        });
 
-        testUsingContext(
-          'processes when no plugins but the project is a module and podfile exists',
-          () async {
-            final flutterProject = FakeFlutterProject();
-            setUpProject(flutterProject, fs);
-            flutterProject.isModule = true;
-            flutterProject.macos.podfile.createSync(recursive: true);
+        test('processes when no plugins but the project is a module and podfile exists', () async {
+          final flutterProject = FakeFlutterProject();
+          setUpProject(flutterProject, fs);
+          flutterProject.isModule = true;
+          flutterProject.macos.podfile.createSync(recursive: true);
 
-            await processPodsIfNeeded(
-              flutterProject.macos,
-              fs.currentDirectory.childDirectory('build').path,
-              BuildMode.debug,
-            );
-            expect(cocoaPods.processedPods, isTrue);
-          },
-          overrides: <Type, Generator>{
-            FileSystem: () => fs,
-            ProcessManager: FakeProcessManager.empty,
-            Pub: ThrowingPub.new,
-            CocoaPods: () => cocoaPods,
-          },
-        );
+          await processPodsIfNeeded(
+            flutterProject.macos,
+            fs.currentDirectory.childDirectory('build').path,
+            BuildMode.debug,
+            cocoaPods: cocoaPods,
+            featureFlags: TestFeatureFlags(),
+            templateRenderer: const MustacheTemplateRenderer(),
+            toolContext: toolContext,
+          );
+          expect(cocoaPods.processedPods, isTrue);
+        });
 
-        testUsingContext(
+        test(
           "skips when no plugins and the project is a module but podfile doesn't exist",
           () async {
             final flutterProject = FakeFlutterProject();
@@ -346,126 +300,105 @@ void main() {
               flutterProject.macos,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              cocoaPods: cocoaPods,
+              featureFlags: TestFeatureFlags(),
+              templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isFalse);
           },
-          overrides: <Type, Generator>{
-            FileSystem: () => fs,
-            ProcessManager: FakeProcessManager.empty,
-            Pub: ThrowingPub.new,
-            CocoaPods: () => cocoaPods,
-          },
         );
 
-        testUsingContext(
-          'skips when no plugins and project is not a module',
-          () async {
-            final flutterProject = FakeFlutterProject();
-            setUpProject(flutterProject, fs);
+        test('skips when no plugins and project is not a module', () async {
+          final flutterProject = FakeFlutterProject();
+          setUpProject(flutterProject, fs);
 
-            await processPodsIfNeeded(
-              flutterProject.macos,
-              fs.currentDirectory.childDirectory('build').path,
-              BuildMode.debug,
-            );
-            expect(cocoaPods.processedPods, isFalse);
-          },
-          overrides: <Type, Generator>{
-            FileSystem: () => fs,
-            ProcessManager: FakeProcessManager.empty,
-            Pub: ThrowingPub.new,
-            CocoaPods: () => cocoaPods,
-          },
-        );
+          await processPodsIfNeeded(
+            flutterProject.macos,
+            fs.currentDirectory.childDirectory('build').path,
+            BuildMode.debug,
+            cocoaPods: cocoaPods,
+            featureFlags: TestFeatureFlags(),
+            templateRenderer: const MustacheTemplateRenderer(),
+            toolContext: toolContext,
+          );
+          expect(cocoaPods.processedPods, isFalse);
+        });
       });
 
       group('using Swift Package Manager', () {
-        testUsingContext(
-          'processes if podfile exists',
-          () async {
-            final flutterProject = FakeFlutterProject();
-            setUpProject(flutterProject, fs, pluginNames: <String>['plugin_one', 'plugin_two']);
-            flutterProject.macos.usesSwiftPackageManager = true;
-            flutterProject.macos.podfile.createSync(recursive: true);
+        test('processes if podfile exists', () async {
+          final flutterProject = FakeFlutterProject();
+          setUpProject(flutterProject, fs, pluginNames: <String>['plugin_one', 'plugin_two']);
+          flutterProject.macos.usesSwiftPackageManager = true;
+          flutterProject.macos.podfile.createSync(recursive: true);
 
-            await processPodsIfNeeded(
-              flutterProject.macos,
-              fs.currentDirectory.childDirectory('build').path,
-              BuildMode.debug,
-            );
-            expect(cocoaPods.processedPods, isTrue);
-          },
-          overrides: <Type, Generator>{
-            FileSystem: () => fs,
-            ProcessManager: FakeProcessManager.empty,
-            Pub: ThrowingPub.new,
-            CocoaPods: () => cocoaPods,
-          },
-        );
+          await processPodsIfNeeded(
+            flutterProject.macos,
+            fs.currentDirectory.childDirectory('build').path,
+            BuildMode.debug,
+            cocoaPods: cocoaPods,
+            featureFlags: TestFeatureFlags(),
+            templateRenderer: const MustacheTemplateRenderer(),
+            toolContext: toolContext,
+          );
+          expect(cocoaPods.processedPods, isTrue);
+        });
 
-        testUsingContext(
-          'skip if podfile does not exists',
-          () async {
-            final flutterProject = FakeFlutterProject();
-            setUpProject(flutterProject, fs, pluginNames: <String>['plugin_one', 'plugin_two']);
-            flutterProject.macos.usesSwiftPackageManager = true;
+        test('skip if podfile does not exists', () async {
+          final flutterProject = FakeFlutterProject();
+          setUpProject(flutterProject, fs, pluginNames: <String>['plugin_one', 'plugin_two']);
+          flutterProject.macos.usesSwiftPackageManager = true;
 
-            await processPodsIfNeeded(
-              flutterProject.macos,
-              fs.currentDirectory.childDirectory('build').path,
-              BuildMode.debug,
-            );
-            expect(cocoaPods.processedPods, isFalse);
-          },
-          overrides: <Type, Generator>{
-            FileSystem: () => fs,
-            ProcessManager: FakeProcessManager.empty,
-            CocoaPods: () => cocoaPods,
-          },
-        );
+          await processPodsIfNeeded(
+            flutterProject.macos,
+            fs.currentDirectory.childDirectory('build').path,
+            BuildMode.debug,
+            cocoaPods: cocoaPods,
+            featureFlags: TestFeatureFlags(),
+            templateRenderer: const MustacheTemplateRenderer(),
+            toolContext: toolContext,
+          );
+          expect(cocoaPods.processedPods, isFalse);
+        });
 
-        testUsingContext(
-          'process if podfile does not exists but forceCocoaPodsOnly is true',
-          () async {
-            final flutterProject = FakeFlutterProject();
-            setUpProject(flutterProject, fs, pluginNames: <String>['plugin_one', 'plugin_two']);
-            flutterProject.macos.usesSwiftPackageManager = true;
-            final File generatedManifestFile =
-                flutterProject.macos.flutterPluginSwiftPackageManifest;
-            generatedManifestFile.createSync(recursive: true);
+        test('process if podfile does not exists but forceCocoaPodsOnly is true', () async {
+          final flutterProject = FakeFlutterProject();
+          setUpProject(flutterProject, fs, pluginNames: <String>['plugin_one', 'plugin_two']);
+          flutterProject.macos.usesSwiftPackageManager = true;
+          final File generatedManifestFile = flutterProject.macos.flutterPluginSwiftPackageManifest;
+          generatedManifestFile.createSync(recursive: true);
 
-            await processPodsIfNeeded(
-              flutterProject.macos,
-              fs.currentDirectory.childDirectory('build').path,
-              BuildMode.debug,
-              forceCocoaPodsOnly: true,
-            );
-            expect(cocoaPods.processedPods, isTrue);
-            expect(cocoaPods.podfileSetup, isTrue);
-            expect(
-              logger.warningText,
-              'Swift Package Manager does not yet support this command. '
-              'CocoaPods will be used instead.\n',
-            );
+          await processPodsIfNeeded(
+            flutterProject.macos,
+            fs.currentDirectory.childDirectory('build').path,
+            BuildMode.debug,
+            cocoaPods: cocoaPods,
+            featureFlags: TestFeatureFlags(),
+            templateRenderer: const MustacheTemplateRenderer(),
+            toolContext: toolContext,
+            forceCocoaPodsOnly: true,
+          );
+          expect(cocoaPods.processedPods, isTrue);
+          expect(cocoaPods.podfileSetup, isTrue);
+          expect(
+            logger.warningText,
+            'Swift Package Manager does not yet support this command. '
+            'CocoaPods will be used instead.\n',
+          );
 
-            expect(generatedManifestFile, exists);
-            const emptyDependencies = 'dependencies: [\n        \n    ],\n';
-            expect(generatedManifestFile.readAsStringSync(), contains(emptyDependencies));
-          },
-          overrides: <Type, Generator>{
-            FileSystem: () => fs,
-            ProcessManager: FakeProcessManager.empty,
-            Pub: ThrowingPub.new,
-            CocoaPods: () => cocoaPods,
-            Logger: () => logger,
-          },
-        );
+          expect(generatedManifestFile, exists);
+          const emptyDependencies = 'dependencies: [\n        \n    ],\n';
+          expect(generatedManifestFile.readAsStringSync(), contains(emptyDependencies));
+        });
       });
     });
   });
 }
 
 class FakeFlutterManifest extends Fake implements FlutterManifest {
+  @override
+  Logger get logger => BufferLogger.test();
   @override
   late Set<String> dependencies = <String>{};
   @override

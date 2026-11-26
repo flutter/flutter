@@ -115,6 +115,53 @@ Future<void> testMain() async {
     expect(paragraph.height, lessThan(2 * fontSize));
   });
 
+  test('StrutStyle inherits leadingDistribution from ParagraphStyle.textHeightBehavior', () {
+    LineMetrics layoutWithStrut({
+      TextHeightBehavior? textHeightBehavior,
+      TextLeadingDistribution? strutLeadingDistribution,
+    }) {
+      final builder = ParagraphBuilder(
+        ParagraphStyle(
+          fontSize: 10,
+          fontFamily: 'FlutterTest',
+          textHeightBehavior: textHeightBehavior,
+          strutStyle: StrutStyle(
+            fontFamily: 'FlutterTest',
+            fontSize: 10,
+            height: 3,
+            forceStrutHeight: true,
+            leadingDistribution: strutLeadingDistribution,
+          ),
+        ),
+      );
+      builder.addText('A');
+      final Paragraph paragraph = builder.build()..layout(const ParagraphConstraints(width: 1000));
+      final LineMetrics metrics = paragraph.computeLineMetrics().single;
+      paragraph.dispose();
+      return metrics;
+    }
+
+    final LineMetrics proportional = layoutWithStrut();
+    final LineMetrics inheritedEven = layoutWithStrut(
+      textHeightBehavior: const TextHeightBehavior(
+        leadingDistribution: TextLeadingDistribution.even,
+      ),
+    );
+    final LineMetrics explicitEven = layoutWithStrut(
+      strutLeadingDistribution: TextLeadingDistribution.even,
+    );
+    final LineMetrics overriddenProportional = layoutWithStrut(
+      textHeightBehavior: const TextHeightBehavior(
+        leadingDistribution: TextLeadingDistribution.even,
+      ),
+      strutLeadingDistribution: TextLeadingDistribution.proportional,
+    );
+
+    expect(inheritedEven.baseline, explicitEven.baseline);
+    expect(inheritedEven.baseline, isNot(proportional.baseline));
+    expect(overriddenProportional.baseline, proportional.baseline);
+  });
+
   test('tracks placeholderCount and placeholderScales', () {
     final builder = ParagraphBuilder(ParagraphStyle());
     expect(builder.placeholderCount, 0);
@@ -175,6 +222,23 @@ Future<void> testMain() async {
       final Paragraph manual = layoutParagraph(Hyphens.manual, breakingWidth());
 
       expect(unspecified.longestLine, manual.longestLine);
+    });
+  });
+
+  group('hyphenCharacter', () {
+    double longestLine(String? hyphenCharacter) {
+      final builder = ParagraphBuilder(
+        ParagraphStyle(fontSize: 10, fontFamily: 'FlutterTest', hyphenCharacter: hyphenCharacter),
+      );
+      // Breaks at the soft hyphen into 'abcd' and 'efg'.
+      builder.addText('abcd\u00ADefg');
+      return (builder.build()..layout(const ParagraphConstraints(width: 65))).longestLine;
+    }
+
+    test('is drawn at a soft hyphen line break', () {
+      expect(longestLine(null), 50);
+      expect(longestLine('--'), 60);
+      expect(longestLine(''), 40);
     });
   });
 }

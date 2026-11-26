@@ -7,11 +7,9 @@ import 'dart:math';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/web/compiler_config.dart';
 import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -20,7 +18,6 @@ import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
-import '../../../src/testbed.dart';
 
 final Map<String, String> _fakePackageVersions = {
   'foo': '4.3.23',
@@ -32,14 +29,11 @@ final Map<String, String> _fakePackageVersions = {
 };
 
 void main() {
-  late TestBed testbed;
   late MemoryFileSystem fs;
   late Environment environment;
   late FakeProcessManager processManager;
   late FakeAnalytics fakeAnalytics;
   late List<String> commandArgs;
-
-  final Platform linux = FakePlatform(environment: <String, String>{});
 
   Dart2WasmTarget createTarget({bool omitDeprecatedJsInteropFindings = false}) => Dart2WasmTarget(
     WasmCompilerConfig(
@@ -51,165 +45,152 @@ void main() {
   )..dryRunRandom = Random(0);
 
   setUp(() {
-    testbed = TestBed(
-      setup: () {
-        fs = MemoryFileSystem.test();
-        fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('''
+    fs = MemoryFileSystem.test();
+    fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('''
 name: my_app
 ''');
 
-        writePackageConfigFiles(
-          directory: fs.currentDirectory,
-          packages: _fakePackageVersions.map(
-            (k, v) => MapEntry(k, 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/$k-$v'),
-          ),
-          mainLibName: 'my_app',
-        );
-        fs.currentDirectory.childDirectory('bar').createSync();
-        processManager = FakeProcessManager.empty();
-        fs.file('bin/cache/flutter_web_sdk/flutter_js/flutter.js').createSync(recursive: true);
-
-        environment = Environment.test(
-          fs.currentDirectory,
-          projectDir: fs.currentDirectory.childDirectory('foo'),
-          outputDir: fs.currentDirectory.childDirectory('bar'),
-          defines: <String, String>{
-            kTargetFile: fs.path.join('foo', 'lib', 'main.dart'),
-            kBuildMode: BuildMode.debug.cliName,
-          },
-          artifacts: Artifacts.test(),
-          processManager: processManager,
-          logger: globals.logger,
-          fileSystem: fs,
-        );
-        environment.buildDir.createSync(recursive: true);
-
-        fakeAnalytics = getInitializedFakeAnalyticsInstance(
-          fs: fs,
-          fakeFlutterVersion: FakeFlutterVersion(),
-        );
-        commandArgs = [
-          'Artifact.engineDartBinary.TargetPlatform.web_javascript',
-          'compile',
-          'wasm',
-          '--packages=/.dart_tool/package_config.json',
-          '--extra-compiler-option=--platform=HostArtifact.webPlatformKernelFolder/dart2wasm_platform.dill',
-          '-Ddart.vm.profile=false',
-          '-Ddart.vm.product=false',
-          '--extra-compiler-option=--import-shared-memory',
-          '--extra-compiler-option=--shared-memory-max-pages=32768',
-          '-DFLUTTER_WEB_USE_SKIA=false',
-          '-DFLUTTER_WEB_USE_SKWASM=true',
-          '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-          '--extra-compiler-option=--depfile=${environment.buildDir.childFile('dart2wasm.d').path}',
-          '--recorded-uses=${environment.buildDir.childFile('recorded_uses_wasm.json').path}',
-          '-O0',
-          '--no-strip-wasm',
-          '--no-minify',
-          '--extra-compiler-option=--enable-asserts',
-          '--extra-compiler-option=--dry-run',
-          '-o',
-          environment.buildDir.childFile('main.dart.wasm').absolute.path,
-          environment.buildDir.childFile('main.dart').absolute.path,
-        ];
-      },
-      overrides: <Type, Generator>{Platform: () => linux},
+    writePackageConfigFiles(
+      directory: fs.currentDirectory,
+      packages: _fakePackageVersions.map(
+        (k, v) => MapEntry(k, 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/$k-$v'),
+      ),
+      mainLibName: 'my_app',
     );
+    fs.currentDirectory.childDirectory('bar').createSync();
+    processManager = FakeProcessManager.empty();
+    fs.file('bin/cache/flutter_web_sdk/flutter_js/flutter.js').createSync(recursive: true);
+
+    environment = Environment.test(
+      fs.currentDirectory,
+      projectDir: fs.currentDirectory.childDirectory('foo'),
+      outputDir: fs.currentDirectory.childDirectory('bar'),
+      defines: <String, String>{
+        kTargetFile: fs.path.join('foo', 'lib', 'main.dart'),
+        kBuildMode: BuildMode.debug.cliName,
+      },
+      artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(isRecordUseEnabled: true),
+      processManager: processManager,
+      logger: BufferLogger.test(),
+      fileSystem: fs,
+    );
+    environment.buildDir.createSync(recursive: true);
+
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fs,
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
+    commandArgs = [
+      'Artifact.engineDartBinary.TargetPlatform.web_javascript',
+      'compile',
+      'wasm',
+      '--packages=/.dart_tool/package_config.json',
+      '--extra-compiler-option=--platform=HostArtifact.webPlatformKernelFolder/dart2wasm_platform.dill',
+      '-Ddart.vm.profile=false',
+      '-Ddart.vm.product=false',
+      '--extra-compiler-option=--import-shared-memory',
+      '--extra-compiler-option=--shared-memory-max-pages=32768',
+      '-DFLUTTER_WEB_USE_SKIA=false',
+      '-DFLUTTER_WEB_USE_SKWASM=true',
+      '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+      '--extra-compiler-option=--depfile=${environment.buildDir.childFile('dart2wasm.d').path}',
+      '--recorded-uses=${environment.buildDir.childFile('recorded_uses_wasm.json').path}',
+      '-O0',
+      '--no-strip-wasm',
+      '--no-minify',
+      '--extra-compiler-option=--enable-asserts',
+      '--extra-compiler-option=--dry-run',
+      '-o',
+      environment.buildDir.childFile('main.dart.wasm').absolute.path,
+      environment.buildDir.childFile('main.dart').absolute.path,
+    ];
+  });
+
+  test('wasm dry run success', () async {
+    processManager.addCommand(FakeCommand(command: commandArgs));
+    final Dart2WasmTarget target = createTarget();
+    await target.build(environment);
+
+    expect(fakeAnalytics.sentEvents, hasLength(1));
+
+    final Event event = fakeAnalytics.sentEvents[0];
+    expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
+    expect(event.eventData, hasLength(2));
+    expect(event.eventData['result'], 'success');
+    expect(event.eventData['exitCode'], 0);
+  });
+
+  test('wasm dry run crash', () async {
+    processManager.addCommand(
+      FakeCommand(
+        command: commandArgs,
+        exitCode: 100,
+        stdout: '''
+Found incompatibilities with WebAssembly.
+
+package:foo/some/path.dart 6:1 - dart:html unsupported (0)
+''',
+      ),
+    );
+    final Dart2WasmTarget target = createTarget();
+    await target.build(environment);
+
+    expect(fakeAnalytics.sentEvents, hasLength(1));
+
+    final Event event = fakeAnalytics.sentEvents[0];
+    expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
+    expect(event.eventData, hasLength(2));
+    expect(event.eventData['result'], 'crash');
+    expect(event.eventData['exitCode'], 100);
+  });
+
+  test('wasm dry run failure', () async {
+    processManager.addCommand(
+      FakeCommand(
+        command: commandArgs,
+        exitCode: 254,
+        stdout: '''
+Found incompatibilities with WebAssembly.
+
+package:foo/some/path.dart 6:1 - dart:html unsupported (0)
+''',
+        stderr: 'Failure reason',
+      ),
+    );
+    final Dart2WasmTarget target = createTarget();
+    await target.build(environment);
+
+    final logger = environment.logger as BufferLogger;
+    expect(
+      logger.statusText,
+      contains('Note: WebAssembly compilation failed due to legacy web imports.'),
+    );
+    expect(
+      logger.statusText,
+      contains(
+        'dart:html, dart:js, and legacy JS interop libraries are deprecated and planned for removal',
+      ),
+    );
+    expect(
+      logger.statusText,
+      contains(
+        'from the Dart SDK in a future release. Migrate your project to package:web and dart:js_interop.',
+      ),
+    );
+
+    expect(fakeAnalytics.sentEvents, hasLength(1));
+
+    final Event event = fakeAnalytics.sentEvents[0];
+    expect(event.eventName, DashEvent.flutterWasmDryRunPackage);
+    expect(event.eventData, hasLength(2));
+    expect(event.eventData['result'], 'failure');
+    expect(event.eventData['exitCode'], 254);
   });
 
   test(
-    'wasm dry run success',
-    () => testbed.run(() async {
-      processManager.addCommand(FakeCommand(command: commandArgs));
-      final Dart2WasmTarget target = createTarget();
-      await target.build(environment);
-
-      expect(fakeAnalytics.sentEvents, hasLength(1));
-
-      final Event event = fakeAnalytics.sentEvents[0];
-      expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
-      expect(event.eventData, hasLength(2));
-      expect(event.eventData['result'], 'success');
-      expect(event.eventData['exitCode'], 0);
-    }),
-  );
-
-  test(
-    'wasm dry run crash',
-    () => testbed.run(() async {
-      processManager.addCommand(
-        FakeCommand(
-          command: commandArgs,
-          exitCode: 100,
-          stdout: '''
-Found incompatibilities with WebAssembly.
-
-package:foo/some/path.dart 6:1 - dart:html unsupported (0)
-''',
-        ),
-      );
-      final Dart2WasmTarget target = createTarget();
-      await target.build(environment);
-
-      expect(fakeAnalytics.sentEvents, hasLength(1));
-
-      final Event event = fakeAnalytics.sentEvents[0];
-      expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
-      expect(event.eventData, hasLength(2));
-      expect(event.eventData['result'], 'crash');
-      expect(event.eventData['exitCode'], 100);
-    }),
-  );
-
-  test(
-    'wasm dry run failure',
-    () => testbed.run(() async {
-      processManager.addCommand(
-        FakeCommand(
-          command: commandArgs,
-          exitCode: 254,
-          stdout: '''
-Found incompatibilities with WebAssembly.
-
-package:foo/some/path.dart 6:1 - dart:html unsupported (0)
-''',
-          stderr: 'Failure reason',
-        ),
-      );
-      final Dart2WasmTarget target = createTarget();
-      await target.build(environment);
-
-      final logger = environment.logger as BufferLogger;
-      expect(
-        logger.statusText,
-        contains('Note: WebAssembly compilation failed due to legacy web imports.'),
-      );
-      expect(
-        logger.statusText,
-        contains(
-          'dart:html, dart:js, and legacy JS interop libraries are deprecated and planned for removal',
-        ),
-      );
-      expect(
-        logger.statusText,
-        contains(
-          'from the Dart SDK in a future release. Migrate your project to package:web and dart:js_interop.',
-        ),
-      );
-
-      expect(fakeAnalytics.sentEvents, hasLength(1));
-
-      final Event event = fakeAnalytics.sentEvents[0];
-      expect(event.eventName, DashEvent.flutterWasmDryRunPackage);
-      expect(event.eventData, hasLength(2));
-      expect(event.eventData['result'], 'failure');
-      expect(event.eventData['exitCode'], 254);
-    }),
-  );
-
-  test(
     'dry run prints JS interop migration footer on dart:svg and dart:js_util unsupported findings',
-    () => testbed.run(() async {
+    () async {
       processManager.addCommand(
         FakeCommand(
           command: commandArgs,
@@ -242,43 +223,38 @@ package:bar/some/path.dart 12:4 - dart:js_util unsupported (6)
           'from the Dart SDK in a future release. Migrate your project to package:web and dart:js_interop.',
         ),
       );
-    }),
+    },
   );
 
-  test(
-    'dry run does not print JS interop migration footer on non-web unsupported libraries like dart:ffi or incidental filenames',
-    () => testbed.run(() async {
-      processManager.addCommand(
-        FakeCommand(
-          command: commandArgs,
-          exitCode: 254,
-          stdout: '''
+  test('dry run does not print JS interop migration footer on non-web unsupported libraries like dart:ffi or incidental filenames', () async {
+    processManager.addCommand(
+      FakeCommand(
+        command: commandArgs,
+        exitCode: 254,
+        stdout: '''
 Found incompatibilities with WebAssembly.
 
 package:fizz/some/path.dart 80:2 - dart:ffi unsupported (3)
 package:foo/some/my_dart_html_wrapper.dart 103:20 - dart:io unsupported (4)
 ''',
-        ),
-      );
-      final Dart2WasmTarget target = createTarget();
-      await target.build(environment);
+      ),
+    );
+    final Dart2WasmTarget target = createTarget();
+    await target.build(environment);
 
-      final logger = environment.logger as BufferLogger;
-      expect(
-        logger.statusText,
-        isNot(contains('Note: WebAssembly compilation failed due to legacy web imports.')),
-      );
-    }),
-  );
+    final logger = environment.logger as BufferLogger;
+    expect(
+      logger.statusText,
+      isNot(contains('Note: WebAssembly compilation failed due to legacy web imports.')),
+    );
+  });
 
-  test(
-    'dry run findings public packages',
-    () => testbed.run(() async {
-      processManager.addCommand(
-        FakeCommand(
-          command: commandArgs,
-          exitCode: 254,
-          stdout: '''
+  test('dry run findings public packages', () async {
+    processManager.addCommand(
+      FakeCommand(
+        command: commandArgs,
+        exitCode: 254,
+        stdout: '''
 Found incompatibilities with WebAssembly.
 
 package:foo/some/path.dart 6:1 - dart:html unsupported (0)
@@ -290,79 +266,73 @@ package:baz/some/path.dart 16:6 - dart:js unsupported (1)
 package:fizz/some/path.dart 80:2 - dart:ffi unsupported (3)
 package:foo/some(5)/path.dart 103:20 - dart:io unsupported (4)
 ''',
-        ),
-      );
-      final Dart2WasmTarget target = createTarget();
-      await target.build(environment);
+      ),
+    );
+    final Dart2WasmTarget target = createTarget();
+    await target.build(environment);
 
-      expect(fakeAnalytics.sentEvents, hasLength(1));
+    expect(fakeAnalytics.sentEvents, hasLength(1));
 
-      final Event event = fakeAnalytics.sentEvents[0];
-      expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
-      expect(event.eventData, hasLength(7));
-      expect(event.eventData['result'], 'findings');
-      expect(event.eventData['exitCode'], 254);
-      expect(
-        event.eventData['E0'],
-        'foo:${_fakePackageVersions['foo']},baz:${_fakePackageVersions['baz']}',
-      );
-      expect(
-        event.eventData['E1'],
-        'bar:${_fakePackageVersions['bar']},baz:${_fakePackageVersions['baz']}',
-      );
-      expect(event.eventData['E2'], 'bar:${_fakePackageVersions['bar']}');
-      expect(event.eventData['E3'], 'fizz:${_fakePackageVersions['fizz']}');
-      expect(event.eventData['E4'], 'foo:${_fakePackageVersions['foo']}');
-    }),
-  );
+    final Event event = fakeAnalytics.sentEvents[0];
+    expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
+    expect(event.eventData, hasLength(7));
+    expect(event.eventData['result'], 'findings');
+    expect(event.eventData['exitCode'], 254);
+    expect(
+      event.eventData['E0'],
+      'foo:${_fakePackageVersions['foo']},baz:${_fakePackageVersions['baz']}',
+    );
+    expect(
+      event.eventData['E1'],
+      'bar:${_fakePackageVersions['bar']},baz:${_fakePackageVersions['baz']}',
+    );
+    expect(event.eventData['E2'], 'bar:${_fakePackageVersions['bar']}');
+    expect(event.eventData['E3'], 'fizz:${_fakePackageVersions['fizz']}');
+    expect(event.eventData['E4'], 'foo:${_fakePackageVersions['foo']}');
+  });
 
-  test(
-    'dry run findings public packages with private package',
-    () => testbed.run(() async {
-      writePackageConfigFiles(
-        directory: fs.currentDirectory,
-        packages: _fakePackageVersions.map(
-          (k, v) => MapEntry(k, 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/$k-$v'),
-        )..addAll({'priv': 'file:///path/to/local/pkg/private_package'}),
-        mainLibName: 'my_app',
-      );
+  test('dry run findings public packages with private package', () async {
+    writePackageConfigFiles(
+      directory: fs.currentDirectory,
+      packages: _fakePackageVersions.map(
+        (k, v) => MapEntry(k, 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/$k-$v'),
+      )..addAll({'priv': 'file:///path/to/local/pkg/private_package'}),
+      mainLibName: 'my_app',
+    );
 
-      processManager.addCommand(
-        FakeCommand(
-          command: commandArgs,
-          exitCode: 254,
-          stdout: '''
+    processManager.addCommand(
+      FakeCommand(
+        command: commandArgs,
+        exitCode: 254,
+        stdout: '''
 Found incompatibilities with WebAssembly.
 
 package:foo/some/path.dart 6:1 - dart:html unsupported (0)
 package:priv/some/path.dart 943:10 - dart:js unsupported (1)
 package:priv/some/path.dart 195:54 - dart:html unsupported (0)
 ''',
-        ),
-      );
-      final Dart2WasmTarget target = createTarget();
-      await target.build(environment);
+      ),
+    );
+    final Dart2WasmTarget target = createTarget();
+    await target.build(environment);
 
-      expect(fakeAnalytics.sentEvents, hasLength(1));
+    expect(fakeAnalytics.sentEvents, hasLength(1));
 
-      final Event event = fakeAnalytics.sentEvents[0];
-      expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
-      expect(event.eventData, hasLength(4));
-      expect(event.eventData['result'], 'findings');
-      expect(event.eventData['exitCode'], 254);
-      expect(event.eventData['E0'], '-p,foo:${_fakePackageVersions['foo']}');
-      expect(event.eventData['E1'], '-p');
-    }),
-  );
+    final Event event = fakeAnalytics.sentEvents[0];
+    expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
+    expect(event.eventData, hasLength(4));
+    expect(event.eventData['result'], 'findings');
+    expect(event.eventData['exitCode'], 254);
+    expect(event.eventData['E0'], '-p,foo:${_fakePackageVersions['foo']}');
+    expect(event.eventData['E1'], '-p');
+  });
 
-  test(
-    'dry run findings public packages with host app',
-    () => testbed.run(() async {
-      processManager.addCommand(
-        FakeCommand(
-          command: commandArgs,
-          exitCode: 254,
-          stdout: '''
+  test('dry run findings public packages with host app', () async {
+    processManager.addCommand(
+      FakeCommand(
+        command: commandArgs,
+        exitCode: 254,
+        stdout: '''
 Found incompatibilities with WebAssembly.
 
 package:foo/some/path.dart 6:1 - dart:html unsupported (0)
@@ -370,40 +340,37 @@ file:///some/local/path.dart 943:10 - dart:js unsupported (1)
 file:///some/local/path.dart 195:54 - dart:html unsupported (0)
 package:priv/some/local/path.dart 243:12 - package:js unsupported (2)
 ''',
-        ),
-      );
-      final Dart2WasmTarget target = createTarget();
-      await target.build(environment);
+      ),
+    );
+    final Dart2WasmTarget target = createTarget();
+    await target.build(environment);
 
-      expect(fakeAnalytics.sentEvents, hasLength(1));
+    expect(fakeAnalytics.sentEvents, hasLength(1));
 
-      final Event event = fakeAnalytics.sentEvents[0];
-      expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
-      expect(event.eventData, hasLength(5));
-      expect(event.eventData['result'], 'findings');
-      expect(event.eventData['exitCode'], 254);
-      expect(event.eventData['E0'], '-h,foo:${_fakePackageVersions['foo']}');
-      expect(event.eventData['E1'], '-h');
-      expect(event.eventData['E2'], '-h');
-    }),
-  );
+    final Event event = fakeAnalytics.sentEvents[0];
+    expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
+    expect(event.eventData, hasLength(5));
+    expect(event.eventData['result'], 'findings');
+    expect(event.eventData['exitCode'], 254);
+    expect(event.eventData['E0'], '-h,foo:${_fakePackageVersions['foo']}');
+    expect(event.eventData['E1'], '-h');
+    expect(event.eventData['E2'], '-h');
+  });
 
-  test(
-    'dry run findings public packages with host app and private packages',
-    () => testbed.run(() async {
-      writePackageConfigFiles(
-        directory: fs.currentDirectory,
-        packages: _fakePackageVersions.map(
-          (k, v) => MapEntry(k, 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/$k-$v'),
-        )..addAll({'priv': 'file:///path/to/local/pkg/private_package'}),
-        mainLibName: 'my_app',
-      );
+  test('dry run findings public packages with host app and private packages', () async {
+    writePackageConfigFiles(
+      directory: fs.currentDirectory,
+      packages: _fakePackageVersions.map(
+        (k, v) => MapEntry(k, 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/$k-$v'),
+      )..addAll({'priv': 'file:///path/to/local/pkg/private_package'}),
+      mainLibName: 'my_app',
+    );
 
-      processManager.addCommand(
-        FakeCommand(
-          command: commandArgs,
-          exitCode: 254,
-          stdout: '''
+    processManager.addCommand(
+      FakeCommand(
+        command: commandArgs,
+        exitCode: 254,
+        stdout: '''
 Found incompatibilities with WebAssembly.
 
 package:foo/some/path.dart 6:1 - dart:html unsupported (0)
@@ -412,192 +379,176 @@ file:///some/local/path.dart 943:10 - dart:js unsupported (1)
 file:///some/local/path.dart 195:54 - dart:html unsupported (0)
 package:priv/some/path.dart 193:32 - package:js unsupported (2)
 ''',
-        ),
-      );
-      final Dart2WasmTarget target = createTarget();
-      await target.build(environment);
+      ),
+    );
+    final Dart2WasmTarget target = createTarget();
+    await target.build(environment);
 
-      expect(fakeAnalytics.sentEvents, hasLength(1));
+    expect(fakeAnalytics.sentEvents, hasLength(1));
 
-      final Event event = fakeAnalytics.sentEvents[0];
-      expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
-      expect(event.eventData, hasLength(5));
-      expect(event.eventData['result'], 'findings');
-      expect(event.eventData['exitCode'], 254);
-      expect(event.eventData['E0'], '-hp,foo:${_fakePackageVersions['foo']}');
-      expect(event.eventData['E1'], '-h');
-      expect(event.eventData['E2'], '-p');
-    }),
-  );
+    final Event event = fakeAnalytics.sentEvents[0];
+    expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
+    expect(event.eventData, hasLength(5));
+    expect(event.eventData['result'], 'findings');
+    expect(event.eventData['exitCode'], 254);
+    expect(event.eventData['E0'], '-hp,foo:${_fakePackageVersions['foo']}');
+    expect(event.eventData['E1'], '-h');
+    expect(event.eventData['E2'], '-p');
+  });
 
-  test(
-    'dry run findings deduplicate entries',
-    () => testbed.run(() async {
-      processManager.addCommand(
-        FakeCommand(
-          command: commandArgs,
-          exitCode: 254,
-          stdout: '''
+  test('dry run findings deduplicate entries', () async {
+    processManager.addCommand(
+      FakeCommand(
+        command: commandArgs,
+        exitCode: 254,
+        stdout: '''
 Found incompatibilities with WebAssembly.
 
 package:foo/some/path.dart 6:1 - dart:html unsupported (0)
 package:foo/other/path.dart 18:1 - dart:html unsupported (0)
 ''',
-        ),
-      );
-      final Dart2WasmTarget target = createTarget();
-      await target.build(environment);
+      ),
+    );
+    final Dart2WasmTarget target = createTarget();
+    await target.build(environment);
 
-      expect(fakeAnalytics.sentEvents, hasLength(1));
+    expect(fakeAnalytics.sentEvents, hasLength(1));
 
-      final Event event = fakeAnalytics.sentEvents[0];
-      expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
-      expect(event.eventData, hasLength(3));
-      expect(event.eventData['result'], 'findings');
-      expect(event.eventData['exitCode'], 254);
-      expect(event.eventData['E0'], 'foo:${_fakePackageVersions['foo']}');
-    }),
-  );
+    final Event event = fakeAnalytics.sentEvents[0];
+    expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
+    expect(event.eventData, hasLength(3));
+    expect(event.eventData['result'], 'findings');
+    expect(event.eventData['exitCode'], 254);
+    expect(event.eventData['E0'], 'foo:${_fakePackageVersions['foo']}');
+  });
 
-  test(
-    'wasm dry run package config load failure',
-    () => testbed.run(() async {
-      processManager.addCommand(
-        FakeCommand(
-          command: commandArgs,
-          exitCode: 254,
-          stdout: '''
+  test('wasm dry run package config load failure', () async {
+    processManager.addCommand(
+      FakeCommand(
+        command: commandArgs,
+        exitCode: 254,
+        stdout: '''
 Found incompatibilities with WebAssembly.
 
 package:foo/some/path.dart 6:1 - dart:html unsupported (0)
 package:bar/some/path.dart 8:10 - package:js unsupported (2)
 ''',
-        ),
-      );
+      ),
+    );
 
-      fs.currentDirectory
-          .childDirectory('.dart_tool')
-          .childFile('package_config.json')
-          .writeAsStringSync('Invalid file');
+    fs.currentDirectory
+        .childDirectory('.dart_tool')
+        .childFile('package_config.json')
+        .writeAsStringSync('Invalid file');
 
-      final Dart2WasmTarget target = createTarget();
-      await target.build(environment);
+    final Dart2WasmTarget target = createTarget();
+    await target.build(environment);
 
-      expect(fakeAnalytics.sentEvents, hasLength(1));
+    expect(fakeAnalytics.sentEvents, hasLength(1));
 
-      final Event event = fakeAnalytics.sentEvents[0];
-      expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
-      expect(event.eventData, hasLength(4));
-      expect(event.eventData['result'], 'findings');
-      expect(event.eventData['exitCode'], 254);
-      expect(event.eventData['error'], 'packageConfigNotLoaded');
-      expect(event.eventData['findings'], '0,2');
-    }),
-  );
+    final Event event = fakeAnalytics.sentEvents[0];
+    expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
+    expect(event.eventData, hasLength(4));
+    expect(event.eventData['result'], 'findings');
+    expect(event.eventData['exitCode'], 254);
+    expect(event.eventData['error'], 'packageConfigNotLoaded');
+    expect(event.eventData['findings'], '0,2');
+  });
 
-  test(
-    'wasm dry run package config load failure',
-    () => testbed.run(() async {
-      processManager.addCommand(
-        FakeCommand(
-          command: commandArgs,
-          exitCode: 254,
-          stdout: '''
+  test('wasm dry run package config load failure', () async {
+    processManager.addCommand(
+      FakeCommand(
+        command: commandArgs,
+        exitCode: 254,
+        stdout: '''
 Found incompatibilities with WebAssembly.
 
 package:foo/some/path.dart 6:1 - dart:html unsupported (0)
 package:bar/some/path.dart 8:10 - package:js unsupported (2)
 ''',
-        ),
-      );
+      ),
+    );
 
-      fs.currentDirectory
-          .childDirectory('.dart_tool')
-          .childFile('package_config.json')
-          .writeAsStringSync('Invalid file');
+    fs.currentDirectory
+        .childDirectory('.dart_tool')
+        .childFile('package_config.json')
+        .writeAsStringSync('Invalid file');
 
-      final Dart2WasmTarget target = createTarget();
-      await target.build(environment);
+    final Dart2WasmTarget target = createTarget();
+    await target.build(environment);
 
-      expect(fakeAnalytics.sentEvents, hasLength(1));
+    expect(fakeAnalytics.sentEvents, hasLength(1));
 
-      final Event event = fakeAnalytics.sentEvents[0];
-      expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
-      expect(event.eventData, hasLength(4));
-      expect(event.eventData['result'], 'findings');
-      expect(event.eventData['exitCode'], 254);
-      expect(event.eventData['error'], 'packageConfigNotLoaded');
-      expect(event.eventData['findings'], '0,2');
-    }),
-  );
+    final Event event = fakeAnalytics.sentEvents[0];
+    expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
+    expect(event.eventData, hasLength(4));
+    expect(event.eventData['result'], 'findings');
+    expect(event.eventData['exitCode'], 254);
+    expect(event.eventData['error'], 'packageConfigNotLoaded');
+    expect(event.eventData['findings'], '0,2');
+  });
 
-  test(
-    'wasm dry run findings include up to 100 characters',
-    () => testbed.run(() async {
-      processManager.addCommand(
-        FakeCommand(
-          command: commandArgs,
-          exitCode: 254,
-          stdout: '''
+  test('wasm dry run findings include up to 100 characters', () async {
+    processManager.addCommand(
+      FakeCommand(
+        command: commandArgs,
+        exitCode: 254,
+        stdout: '''
 Found incompatibilities with WebAssembly.
 
 package:foo/some/path.dart 6:1 - dart:html unsupported (0)
 package:lesslong/some/path.dart 9:20 - dart:html unsupported (0)
 ''',
-        ),
-      );
+      ),
+    );
 
-      final Dart2WasmTarget target = createTarget();
-      await target.build(environment);
+    final Dart2WasmTarget target = createTarget();
+    await target.build(environment);
 
-      expect(fakeAnalytics.sentEvents, hasLength(1));
+    expect(fakeAnalytics.sentEvents, hasLength(1));
 
-      final Event event = fakeAnalytics.sentEvents[0];
-      expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
-      expect(event.eventData, hasLength(3));
-      expect(event.eventData['result'], 'findings');
-      expect(event.eventData['exitCode'], 254);
-      expect(event.eventData['E0'], hasLength(100));
-      expect(
-        event.eventData['E0'],
-        'foo:${_fakePackageVersions['foo']},lesslong:${_fakePackageVersions['lesslong']}',
-      );
-    }),
-  );
+    final Event event = fakeAnalytics.sentEvents[0];
+    expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
+    expect(event.eventData, hasLength(3));
+    expect(event.eventData['result'], 'findings');
+    expect(event.eventData['exitCode'], 254);
+    expect(event.eventData['E0'], hasLength(100));
+    expect(
+      event.eventData['E0'],
+      'foo:${_fakePackageVersions['foo']},lesslong:${_fakePackageVersions['lesslong']}',
+    );
+  });
 
-  test(
-    'wasm dry run findings truncate longer than 100 characters',
-    () => testbed.run(() async {
-      processManager.addCommand(
-        FakeCommand(
-          command: commandArgs,
-          exitCode: 254,
-          stdout: '''
+  test('wasm dry run findings truncate longer than 100 characters', () async {
+    processManager.addCommand(
+      FakeCommand(
+        command: commandArgs,
+        exitCode: 254,
+        stdout: '''
 Found incompatibilities with WebAssembly.
 
 package:foo/some/path.dart 6:1 - dart:html unsupported (0)
 package:morelong/some/path.dart 9:20 - dart:html unsupported (0)
 ''',
-        ),
-      );
+      ),
+    );
 
-      final Dart2WasmTarget target = createTarget();
-      await target.build(environment);
+    final Dart2WasmTarget target = createTarget();
+    await target.build(environment);
 
-      expect(fakeAnalytics.sentEvents, hasLength(1));
+    expect(fakeAnalytics.sentEvents, hasLength(1));
 
-      final Event event = fakeAnalytics.sentEvents[0];
-      expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
-      expect(event.eventData, hasLength(3));
-      expect(event.eventData['result'], 'findings');
-      expect(event.eventData['exitCode'], 254);
-      expect(event.eventData['E0'], hasLength(10));
-      expect(event.eventData['E0'], 'foo:${_fakePackageVersions['foo']}');
-    }),
-  );
+    final Event event = fakeAnalytics.sentEvents[0];
+    expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
+    expect(event.eventData, hasLength(3));
+    expect(event.eventData['result'], 'findings');
+    expect(event.eventData['exitCode'], 254);
+    expect(event.eventData['E0'], hasLength(10));
+    expect(event.eventData['E0'], 'foo:${_fakePackageVersions['foo']}');
+  });
   test(
     'wasm dry run extracts correct package version when ancestor directory contains numbers',
-    () => testbed.run(() async {
+    () async {
       writePackageConfigFiles(
         directory: fs.currentDirectory,
         packages: {'foo': 'file:///opt/flutter/3.22.0/.pub-cache/hosted/pub.dev/foo-1.0.0'},
@@ -626,84 +577,78 @@ package:foo/some/path.dart 6:1 - dart:html unsupported (0)
       expect(event.eventData['result'], 'findings');
       expect(event.eventData['exitCode'], 254);
       expect(event.eventData['E0'], 'foo:1.0.0');
-    }),
+    },
   );
 
-  test(
-    'wasm dry run extracts package version from custom pub mirrors',
-    () => testbed.run(() async {
-      writePackageConfigFiles(
-        directory: fs.currentDirectory,
-        packages: {
-          'foo': 'file:///opt/flutter/3.22.0/.pub-cache/hosted/pub.flutter-io.cn/foo-1.0.0/',
-        },
-        mainLibName: 'my_app',
-      );
+  test('wasm dry run extracts package version from custom pub mirrors', () async {
+    writePackageConfigFiles(
+      directory: fs.currentDirectory,
+      packages: {
+        'foo': 'file:///opt/flutter/3.22.0/.pub-cache/hosted/pub.flutter-io.cn/foo-1.0.0/',
+      },
+      mainLibName: 'my_app',
+    );
 
-      processManager.addCommand(
-        FakeCommand(
-          command: commandArgs,
-          exitCode: 254,
-          stdout: '''
+    processManager.addCommand(
+      FakeCommand(
+        command: commandArgs,
+        exitCode: 254,
+        stdout: '''
 Found incompatibilities with WebAssembly.
 
 package:foo/some/path.dart 6:1 - dart:html unsupported (0)
 ''',
-        ),
-      );
-      final Dart2WasmTarget target = createTarget();
-      await target.build(environment);
+      ),
+    );
+    final Dart2WasmTarget target = createTarget();
+    await target.build(environment);
 
-      expect(fakeAnalytics.sentEvents, hasLength(1));
+    expect(fakeAnalytics.sentEvents, hasLength(1));
 
-      final Event event = fakeAnalytics.sentEvents[0];
-      expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
-      expect(event.eventData, hasLength(3));
-      expect(event.eventData['result'], 'findings');
-      expect(event.eventData['exitCode'], 254);
-      expect(event.eventData['E0'], 'foo:1.0.0');
-    }),
-  );
+    final Event event = fakeAnalytics.sentEvents[0];
+    expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
+    expect(event.eventData, hasLength(3));
+    expect(event.eventData['result'], 'findings');
+    expect(event.eventData['exitCode'], 254);
+    expect(event.eventData['E0'], 'foo:1.0.0');
+  });
 
-  test(
-    'wasm dry run extracts package versions across multiple distinct hosted domains',
-    () => testbed.run(() async {
-      writePackageConfigFiles(
-        directory: fs.currentDirectory,
-        packages: {
-          'foo': 'file:///pubcache/.pub-cache/hosted/pub.dev/foo-1.0.0',
-          'bar': 'file:///pubcache/.pub-cache/hosted/pub.flutter-io.cn/bar-2.0.0',
-          'baz': 'file:///pubcache/.pub-cache/hosted/custom.repo.org%47/baz-3.0.0/',
-        },
-        mainLibName: 'my_app',
-      );
+  test('wasm dry run extracts package versions across multiple distinct hosted domains', () async {
+    writePackageConfigFiles(
+      directory: fs.currentDirectory,
+      packages: {
+        'foo': 'file:///pubcache/.pub-cache/hosted/pub.dev/foo-1.0.0',
+        'bar': 'file:///pubcache/.pub-cache/hosted/pub.flutter-io.cn/bar-2.0.0',
+        'baz': 'file:///pubcache/.pub-cache/hosted/custom.repo.org%47/baz-3.0.0/',
+      },
+      mainLibName: 'my_app',
+    );
 
-      processManager.addCommand(
-        FakeCommand(
-          command: commandArgs,
-          exitCode: 254,
-          stdout: '''
+    processManager.addCommand(
+      FakeCommand(
+        command: commandArgs,
+        exitCode: 254,
+        stdout: '''
 Found incompatibilities with WebAssembly.
 
 package:foo/some/path.dart 6:1 - dart:html unsupported (0)
 package:bar/some/path.dart 8:1 - dart:html unsupported (0)
 package:baz/some/path.dart 10:1 - dart:html unsupported (0)
 ''',
-        ),
-      );
-      final Dart2WasmTarget target = createTarget();
-      await target.build(environment);
+      ),
+    );
+    final Dart2WasmTarget target = createTarget();
+    await target.build(environment);
 
-      expect(fakeAnalytics.sentEvents, hasLength(1));
+    expect(fakeAnalytics.sentEvents, hasLength(1));
 
-      final Event event = fakeAnalytics.sentEvents[0];
-      expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
-      expect(event.eventData, hasLength(3));
-      expect(event.eventData['result'], 'findings');
-      expect(event.eventData['exitCode'], 254);
-      expect(event.eventData['E0'], 'baz:3.0.0,bar:2.0.0,foo:1.0.0');
-    }),
-  );
+    final Event event = fakeAnalytics.sentEvents[0];
+    expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
+    expect(event.eventData, hasLength(3));
+    expect(event.eventData['result'], 'findings');
+    expect(event.eventData['exitCode'], 254);
+    expect(event.eventData['E0'], 'baz:3.0.0,bar:2.0.0,foo:1.0.0');
+  });
 
   group('omitDeprecatedJsInteropFindings', () {
     const deprecatedJsInteropFindings = '''
@@ -724,92 +669,77 @@ package:foo/some/path.dart 8:1 - dart:js_util unsupported (15)
       processManager.addCommand(FakeCommand(command: commandArgs, exitCode: 254, stdout: stdout));
     }
 
-    test(
-      'shows deprecated JS interop findings by default',
-      () => testbed.run(() async {
-        addDryRunCommand(deprecatedJsInteropFindings);
+    test('shows deprecated JS interop findings by default', () async {
+      addDryRunCommand(deprecatedJsInteropFindings);
 
-        await createTarget().build(environment);
+      await createTarget().build(environment);
 
-        final logger = environment.logger as BufferLogger;
-        expect(logger.warningText, contains('Wasm dry run findings:'));
-        expect(logger.warningText, contains('dart:html unsupported (0)'));
-        expect(logger.warningText, contains(legacyWebDeprecationWarning));
-        expect(
-          logger.statusText,
-          contains('Note: WebAssembly compilation failed due to legacy web imports.'),
-        );
-      }),
-    );
+      final logger = environment.logger as BufferLogger;
+      expect(logger.warningText, contains('Wasm dry run findings:'));
+      expect(logger.warningText, contains('dart:html unsupported (0)'));
+      expect(logger.warningText, contains(legacyWebDeprecationWarning));
+      expect(
+        logger.statusText,
+        contains('Note: WebAssembly compilation failed due to legacy web imports.'),
+      );
+    });
 
-    test(
-      'logs nothing when only deprecated JS interop findings remain',
-      () => testbed.run(() async {
-        addDryRunCommand(deprecatedJsInteropFindings);
+    test('logs nothing when only deprecated JS interop findings remain', () async {
+      addDryRunCommand(deprecatedJsInteropFindings);
 
-        await createTarget(omitDeprecatedJsInteropFindings: true).build(environment);
+      await createTarget(omitDeprecatedJsInteropFindings: true).build(environment);
 
-        final logger = environment.logger as BufferLogger;
-        expect(logger.warningText, isEmpty);
-        expect(logger.statusText, isEmpty);
-      }),
-    );
+      final logger = environment.logger as BufferLogger;
+      expect(logger.warningText, isEmpty);
+      expect(logger.statusText, isEmpty);
+    });
 
-    test(
-      'logs only the remaining findings',
-      () => testbed.run(() async {
-        addDryRunCommand('$deprecatedJsInteropFindings$otherFinding\n');
+    test('logs only the remaining findings', () async {
+      addDryRunCommand('$deprecatedJsInteropFindings$otherFinding\n');
 
-        await createTarget(omitDeprecatedJsInteropFindings: true).build(environment);
+      await createTarget(omitDeprecatedJsInteropFindings: true).build(environment);
 
-        final logger = environment.logger as BufferLogger;
-        expect(logger.warningText, contains('Wasm dry run findings:'));
-        expect(logger.warningText, contains('Found incompatibilities with WebAssembly.'));
-        expect(logger.warningText, contains(otherFinding));
-        expect(logger.warningText, isNot(contains('unsupported')));
-        // None of the remaining findings are deprecated JS interop imports.
-        expect(logger.warningText, isNot(contains(legacyWebDeprecationWarning)));
-        expect(logger.warningText, contains('Use --no-wasm-dry-run to disable these warnings.'));
-        expect(
-          logger.statusText,
-          isNot(contains('Note: WebAssembly compilation failed due to legacy web imports.')),
-        );
-      }),
-    );
+      final logger = environment.logger as BufferLogger;
+      expect(logger.warningText, contains('Wasm dry run findings:'));
+      expect(logger.warningText, contains('Found incompatibilities with WebAssembly.'));
+      expect(logger.warningText, contains(otherFinding));
+      expect(logger.warningText, isNot(contains('unsupported')));
+      // None of the remaining findings are deprecated JS interop imports.
+      expect(logger.warningText, isNot(contains(legacyWebDeprecationWarning)));
+      expect(logger.warningText, contains('Use --no-wasm-dry-run to disable these warnings.'));
+      expect(
+        logger.statusText,
+        isNot(contains('Note: WebAssembly compilation failed due to legacy web imports.')),
+      );
+    });
 
-    test(
-      'does not mention the deprecation without deprecated JS interop findings',
-      () => testbed.run(() async {
-        addDryRunCommand('Found incompatibilities with WebAssembly.\n\n$otherFinding\n');
+    test('does not mention the deprecation without deprecated JS interop findings', () async {
+      addDryRunCommand('Found incompatibilities with WebAssembly.\n\n$otherFinding\n');
 
-        await createTarget().build(environment);
+      await createTarget().build(environment);
 
-        final logger = environment.logger as BufferLogger;
-        expect(logger.warningText, contains(otherFinding));
-        expect(
-          logger.warningText,
-          contains('Consider addressing these issues to enable wasm builds.'),
-        );
-        expect(logger.warningText, isNot(contains(legacyWebDeprecationWarning)));
-      }),
-    );
+      final logger = environment.logger as BufferLogger;
+      expect(logger.warningText, contains(otherFinding));
+      expect(
+        logger.warningText,
+        contains('Consider addressing these issues to enable wasm builds.'),
+      );
+      expect(logger.warningText, isNot(contains(legacyWebDeprecationWarning)));
+    });
 
-    test(
-      'still reports omitted findings to analytics',
-      () => testbed.run(() async {
-        addDryRunCommand(deprecatedJsInteropFindings);
+    test('still reports omitted findings to analytics', () async {
+      addDryRunCommand(deprecatedJsInteropFindings);
 
-        await createTarget(omitDeprecatedJsInteropFindings: true).build(environment);
+      await createTarget(omitDeprecatedJsInteropFindings: true).build(environment);
 
-        expect(fakeAnalytics.sentEvents, hasLength(1));
-        final Event event = fakeAnalytics.sentEvents.single;
-        expect(event.eventName, DashEvent.flutterWasmDryRunPackage);
-        expect(event.eventData['result'], 'findings');
-        expect(event.eventData['E0'], 'foo:${_fakePackageVersions['foo']}');
-        expect(event.eventData['E1'], 'bar:${_fakePackageVersions['bar']}');
-        expect(event.eventData['E14'], 'baz:${_fakePackageVersions['baz']}');
-        expect(event.eventData['E15'], 'foo:${_fakePackageVersions['foo']}');
-      }),
-    );
+      expect(fakeAnalytics.sentEvents, hasLength(1));
+      final Event event = fakeAnalytics.sentEvents.single;
+      expect(event.eventName, DashEvent.flutterWasmDryRunPackage);
+      expect(event.eventData['result'], 'findings');
+      expect(event.eventData['E0'], 'foo:${_fakePackageVersions['foo']}');
+      expect(event.eventData['E1'], 'bar:${_fakePackageVersions['bar']}');
+      expect(event.eventData['E14'], 'baz:${_fakePackageVersions['baz']}');
+      expect(event.eventData['E15'], 'foo:${_fakePackageVersions['foo']}');
+    });
   });
 }

@@ -110,10 +110,19 @@ class CommandPoolRecyclerVK final
     : public std::enable_shared_from_this<CommandPoolRecyclerVK> {
  public:
   /// A unique command pool and zero or more recycled command buffers.
+  ///
+  /// The buffers were allocated from the pool and have to be freed first.
+  /// Destruction does that (members are destroyed in reverse order), but move
+  /// assignment does not, so instances must not be move-assigned over each
+  /// other, as vector::erase would.
   struct RecycledData {
     vk::UniqueCommandPool pool;
     std::vector<vk::UniqueCommandBuffer> buffers;
   };
+
+  /// The most command pools kept for reuse. Without a limit, the pools of a
+  /// burst of work would stay cached for the lifetime of the context.
+  static constexpr size_t kMaxRecycledPools = 8u;
 
   /// @brief      Clean up resources held by all per-thread command pools
   ///             associated with the context.
@@ -130,6 +139,9 @@ class CommandPoolRecyclerVK final
   std::shared_ptr<CommandPoolVK> Get();
 
   /// @brief      Returns a command pool to be reset on a background thread.
+  ///
+  ///             If |kMaxRecycledPools| pools are already cached, the pool and
+  ///             its buffers are destroyed instead.
   ///
   /// @param[in]  pool The pool to recycle.
   /// @param[in]  should_trim whether to trim command pool memory before

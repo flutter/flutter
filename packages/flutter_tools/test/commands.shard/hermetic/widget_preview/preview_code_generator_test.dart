@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -24,7 +23,6 @@ import 'package:process/process.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
 import '../../../src/fakes.dart';
 import 'utils/preview_detector_test_utils.dart';
 
@@ -248,7 +246,7 @@ void main() {
     var fs = LocalFileSystem.test(signals: Signals.test());
 
     setUp(() async {
-      Cache.flutterRoot = getFlutterRoot();
+      final String flutterRoot = getFlutterRoot();
       // Note: we don't use a MemoryFileSystem since we don't have a way to
       // provide it to package:analyzer APIs without writing a significant amount
       // of wrapper logic.
@@ -268,9 +266,7 @@ void main() {
         ..childFile('lib/src/transitive_error.dart').writeAsStringSync(kTransitiveErrorLibrary)
         ..childFile('lib/src/custom_previews.dart').writeAsStringSync(kCustomPreviews);
       project = FlutterProject.fromDirectoryTest(projectDir);
-      final String? sdkPath = Cache.flutterRoot != null
-          ? fs.path.join(Cache.flutterRoot!, 'bin', 'cache', 'dart-sdk')
-          : null;
+      final String sdkPath = fs.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk');
       final Artifacts artifacts = FakeArtifacts(sdkPath: sdkPath);
       previewDetector = PreviewDetector(
         artifacts: artifacts,
@@ -297,6 +293,7 @@ void main() {
       );
       final pub = Pub.test(
         fileSystem: fs,
+        flutterRoot: flutterRoot,
         logger: logger,
         processManager: const LocalProcessManager(),
         platform: const LocalPlatform(),
@@ -313,21 +310,19 @@ void main() {
       await fs.dispose();
     });
 
-    testUsingContext(
-      'correctly generates ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
-      () async {
-        // Check that the generated preview file doesn't exist yet.
-        final File generatedPreviewFile = project.widgetPreviewScaffold.childFile(
-          PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
-        );
-        expect(generatedPreviewFile, isNot(exists));
-        generatedPreviewFile.createSync(recursive: true);
-        final PreviewDependencyGraph details = await previewDetector.initialize();
+    test('correctly generates ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}', () async {
+      // Check that the generated preview file doesn't exist yet.
+      final File generatedPreviewFile = project.widgetPreviewScaffold.childFile(
+        PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
+      );
+      expect(generatedPreviewFile, isNot(exists));
+      generatedPreviewFile.createSync(recursive: true);
+      final PreviewDependencyGraph details = await previewDetector.initialize();
 
-        // Populate the generated preview file.
-        codeGenerator.populatePreviewsInGeneratedPreviewScaffold(details);
+      // Populate the generated preview file.
+      codeGenerator.populatePreviewsInGeneratedPreviewScaffold(details);
 
-        const expectedGeneratedPreviewFileContents = '''
+      const expectedGeneratedPreviewFileContents = '''
 // ignore_for_file: implementation_imports
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 
@@ -438,20 +433,20 @@ List<_i1.WidgetPreview> previews() => [
   ),
 ];
 ''';
-        expect(
-          generatedPreviewFile.readAsStringSync().stripScriptUris,
-          expectedGeneratedPreviewFileContents,
-        );
+      expect(
+        generatedPreviewFile.readAsStringSync().stripScriptUris,
+        expectedGeneratedPreviewFileContents,
+      );
 
-        // Regenerate the generated file with no previews.
-        codeGenerator.populatePreviewsInGeneratedPreviewScaffold(
-          const <PreviewPath, LibraryPreviewNode>{},
-        );
+      // Regenerate the generated file with no previews.
+      codeGenerator.populatePreviewsInGeneratedPreviewScaffold(
+        const <PreviewPath, LibraryPreviewNode>{},
+      );
 
-        // The generated file should only contain:
-        // - An import of the widget preview library
-        // - A top-level function 'List<WidgetPreviewGroup> previews()' that returns an empty list.
-        const emptyGeneratedPreviewFileContents = '''
+      // The generated file should only contain:
+      // - An import of the widget preview library
+      // - A top-level function 'List<WidgetPreviewGroup> previews()' that returns an empty list.
+      const emptyGeneratedPreviewFileContents = '''
 // ignore_for_file: implementation_imports
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 
@@ -459,11 +454,10 @@ import 'widget_preview.dart' as _i1;
 
 List<_i1.WidgetPreview> previews() => [];
 ''';
-        expect(generatedPreviewFile.readAsStringSync(), emptyGeneratedPreviewFileContents);
-      },
-    );
+      expect(generatedPreviewFile.readAsStringSync(), emptyGeneratedPreviewFileContents);
+    });
 
-    testUsingContext('ignores previews with null packageName for LSP updates', () async {
+    test('ignores previews with null packageName for LSP updates', () async {
       await previewDetector.initialize();
       final File generatedPreviewFile = project.widgetPreviewScaffold.childFile(
         PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
@@ -536,7 +530,7 @@ List<_i1.WidgetPreview> previews() => [
       expect(generatedPreviewFile.readAsStringSync(), expectedGeneratedPreviewFileContents);
     });
 
-    testUsingContext(
+    test(
       'correctly generates ${PreviewCodeGenerator.getGeneratedDtdConnectionInfoFilePath(fs)}',
       () async {
         await previewDetector.initialize();

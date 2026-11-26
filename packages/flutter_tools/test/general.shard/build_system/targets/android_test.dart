@@ -12,10 +12,11 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/android.dart';
+import 'package:test/fake.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
+import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 
 void main() {
@@ -31,17 +32,18 @@ void main() {
     artifacts = Artifacts.test();
   });
 
-  testWithoutContext('Android AOT targets has analyticsName', () {
+  test('Android AOT targets has analyticsName', () {
     expect(androidArmProfile.analyticsName, 'android_aot');
   });
 
-  testUsingContext('debug bundle contains expected resources', () async {
+  test('debug bundle contains expected resources', () async {
     final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
       defines: <String, String>{kBuildMode: 'debug'},
       processManager: processManager,
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       fileSystem: fileSystem,
       logger: logger,
     );
@@ -79,13 +81,14 @@ void main() {
     );
   });
 
-  testUsingContext('debug bundle contains expected resources with bundle SkSL', () async {
+  test('debug bundle contains expected resources with bundle SkSL', () async {
     final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
       defines: <String, String>{kBuildMode: 'debug'},
       processManager: processManager,
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       fileSystem: fileSystem,
       logger: logger,
       engineVersion: '2',
@@ -118,12 +121,13 @@ void main() {
     );
   });
 
-  testWithoutContext('profile bundle contains expected resources', () async {
+  test('profile bundle contains expected resources', () async {
     final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
       defines: <String, String>{kBuildMode: 'profile'},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
@@ -138,12 +142,13 @@ void main() {
     expect(fileSystem.file(fileSystem.path.join('out', 'app.so')).existsSync(), true);
   });
 
-  testWithoutContext('release bundle contains expected resources', () async {
+  test('release bundle contains expected resources', () async {
     final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
       defines: <String, String>{kBuildMode: 'release'},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
@@ -158,13 +163,14 @@ void main() {
     expect(fileSystem.file(fileSystem.path.join('out', 'app.so')).existsSync(), true);
   });
 
-  testWithoutContext('AndroidAot can build provided target platform', () async {
+  test('AndroidAot can build provided target platform', () async {
     processManager = FakeProcessManager.empty();
     final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
       defines: <String, String>{kBuildMode: 'release'},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
@@ -194,13 +200,72 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('AndroidAot provide code size information.', () async {
+  test('AndroidAot throws ToolExit on Linux arm64 hosts when gen_snapshot is missing', () async {
+    processManager = FakeProcessManager.empty();
+    final environment = Environment.test(
+      fileSystem.currentDirectory,
+      outputDir: fileSystem.directory('out')..createSync(),
+      defines: <String, String>{kBuildMode: 'release'},
+      artifacts: _LinuxArm64GenSnapshotArtifacts(artifacts),
+      featureFlags: TestFeatureFlags(),
+      processManager: processManager,
+      fileSystem: fileSystem,
+      logger: logger,
+    );
+    environment.buildDir.createSync(recursive: true);
+    environment.buildDir.childFile('app.dill').createSync();
+    environment.buildDir.childFile('native_assets.json').createSync();
+    const androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+
+    await expectLater(
+      androidAot.build(environment),
+      throwsToolExit(message: 'not supported on Linux arm64 hosts'),
+    );
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
+  test('AndroidAot runs gen_snapshot on Linux arm64 hosts when it is present', () async {
+    processManager = FakeProcessManager.empty();
+    final environment = Environment.test(
+      fileSystem.currentDirectory,
+      outputDir: fileSystem.directory('out')..createSync(),
+      defines: <String, String>{kBuildMode: 'release'},
+      artifacts: _LinuxArm64GenSnapshotArtifacts(artifacts),
+      featureFlags: TestFeatureFlags(),
+      processManager: processManager,
+      fileSystem: fileSystem,
+      logger: logger,
+    );
+    fileSystem.file(_LinuxArm64GenSnapshotArtifacts.genSnapshotPath).createSync(recursive: true);
+    processManager.addCommand(
+      FakeCommand(
+        command: <String>[
+          _LinuxArm64GenSnapshotArtifacts.genSnapshotPath,
+          '--deterministic',
+          '--snapshot_kind=app-aot-elf',
+          '--elf=${environment.buildDir.childDirectory('arm64-v8a').childFile('app.so').path}',
+          environment.buildDir.childFile('app.dill').path,
+        ],
+      ),
+    );
+    environment.buildDir.createSync(recursive: true);
+    environment.buildDir.childFile('app.dill').createSync();
+    environment.buildDir.childFile('native_assets.json').createSync();
+    const androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+
+    await androidAot.build(environment);
+
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
+  test('AndroidAot provide code size information.', () async {
     processManager = FakeProcessManager.empty();
     final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
       defines: <String, String>{kBuildMode: 'release', kCodeSizeDirectory: 'code_size_1'},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
@@ -232,7 +297,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('kExtraGenSnapshotOptions passes values to gen_snapshot', () async {
+  test('kExtraGenSnapshotOptions passes values to gen_snapshot', () async {
     processManager = FakeProcessManager.empty();
     final environment = Environment.test(
       fileSystem.currentDirectory,
@@ -244,6 +309,7 @@ void main() {
       },
       processManager: processManager,
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       fileSystem: fileSystem,
       logger: logger,
     );
@@ -272,56 +338,55 @@ void main() {
     await const AndroidAot(TargetPlatform.android_arm64, BuildMode.release).build(environment);
   });
 
-  testUsingContext(
-    '--strip in kExtraGenSnapshotOptions provides --strip gen_snapshot flag',
-    () async {
-      processManager = FakeProcessManager.empty();
-      final environment = Environment.test(
-        fileSystem.currentDirectory,
-        outputDir: fileSystem.directory('out')..createSync(),
-        defines: <String, String>{
-          kBuildMode: 'release',
-          kExtraGenSnapshotOptions: 'foo,--strip,bar',
-          kTargetPlatform: 'android-arm',
-        },
-        processManager: processManager,
-        artifacts: artifacts,
-        fileSystem: fileSystem,
-        logger: logger,
-      );
-      processManager.addCommand(
-        FakeCommand(
-          command: <String>[
-            artifacts.getArtifactPath(
-              Artifact.genSnapshot,
-              platform: TargetPlatform.android_arm64,
-              mode: BuildMode.release,
-            ),
-            '--deterministic',
-            'foo',
-            '--strip',
-            'bar',
-            '--snapshot_kind=app-aot-elf',
-            '--elf=${environment.buildDir.childDirectory('arm64-v8a').childFile('app.so').path}',
-            environment.buildDir.childFile('app.dill').path,
-          ],
-        ),
-      );
-      environment.buildDir.createSync(recursive: true);
-      environment.buildDir.childFile('app.dill').createSync();
-      environment.buildDir.childFile('native_assets.json').createSync();
+  test('--strip in kExtraGenSnapshotOptions provides --strip gen_snapshot flag', () async {
+    processManager = FakeProcessManager.empty();
+    final environment = Environment.test(
+      fileSystem.currentDirectory,
+      outputDir: fileSystem.directory('out')..createSync(),
+      defines: <String, String>{
+        kBuildMode: 'release',
+        kExtraGenSnapshotOptions: 'foo,--strip,bar',
+        kTargetPlatform: 'android-arm',
+      },
+      processManager: processManager,
+      artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
+      fileSystem: fileSystem,
+      logger: logger,
+    );
+    processManager.addCommand(
+      FakeCommand(
+        command: <String>[
+          artifacts.getArtifactPath(
+            Artifact.genSnapshot,
+            platform: TargetPlatform.android_arm64,
+            mode: BuildMode.release,
+          ),
+          '--deterministic',
+          'foo',
+          '--strip',
+          'bar',
+          '--snapshot_kind=app-aot-elf',
+          '--elf=${environment.buildDir.childDirectory('arm64-v8a').childFile('app.so').path}',
+          environment.buildDir.childFile('app.dill').path,
+        ],
+      ),
+    );
+    environment.buildDir.createSync(recursive: true);
+    environment.buildDir.childFile('app.dill').createSync();
+    environment.buildDir.childFile('native_assets.json').createSync();
 
-      await const AndroidAot(TargetPlatform.android_arm64, BuildMode.release).build(environment);
-    },
-  );
+    await const AndroidAot(TargetPlatform.android_arm64, BuildMode.release).build(environment);
+  });
 
-  testWithoutContext('android aot bundle copies so from abi directory', () async {
+  test('android aot bundle copies so from abi directory', () async {
     final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
       defines: <String, String>{kBuildMode: 'release'},
       processManager: processManager,
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       fileSystem: fileSystem,
       logger: logger,
     );
@@ -349,6 +414,7 @@ void main() {
       defines: <String, String>{kBuildMode: 'release'},
       processManager: processManager,
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       fileSystem: fileSystem,
       logger: logger,
     );
@@ -446,6 +512,7 @@ void main() {
       defines: <String, String>{kBuildMode: 'release'},
       processManager: processManager,
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       fileSystem: fileSystem,
       logger: logger,
     );
@@ -520,84 +587,105 @@ void main() {
     expect(depfile.outputs[2].path, '/out/abi1/app.so-4.part.so');
   });
 
-  testUsingContext(
-    'DebugAndroidApplication with impeller and shader compilation',
-    () async {
-      // Create impellerc to work around fallback detection logic.
+  test('DebugAndroidApplication with impeller and shader compilation', () async {
+    // Create impellerc to work around fallback detection logic.
+    fileSystem.file(artifacts.getHostArtifact(HostArtifact.impellerc)).createSync(recursive: true);
+
+    final environment = Environment.test(
+      fileSystem.currentDirectory,
+      outputDir: fileSystem.directory('out')..createSync(),
+      defines: <String, String>{kBuildMode: 'debug'},
+      processManager: processManager,
+      artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
+      fileSystem: fileSystem,
+      logger: logger,
+    );
+    environment.buildDir.createSync(recursive: true);
+
+    // create pre-requisites.
+    environment.buildDir.childFile('app.dill').writeAsStringSync('abcd');
+    environment.buildDir.childFile('native_assets.json').createSync();
+    fileSystem
+        .file(artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug))
+        .createSync(recursive: true);
+    fileSystem
+        .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
+        .createSync(recursive: true);
+    fileSystem
+        .file('pubspec.yaml')
+        .writeAsStringSync('name: hello\nflutter:\n  shaders:\n    - shader.glsl');
+    writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'hello');
+    fileSystem.file('shader.glsl').writeAsStringSync('test');
+
+    processManager.addCommands(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'HostArtifact.impellerc',
+          '--sksl',
+          '--runtime-stage-gles',
+          '--runtime-stage-gles3',
+          '--runtime-stage-vulkan',
+          '--iplr',
+          '--sl=out/flutter_assets/shader.glsl',
+          '--spirv=out/flutter_assets/shader.glsl.spirv',
+          '--input=/shader.glsl',
+          '--input-type=frag',
+          '--include=/',
+          '--include=/./shader_lib',
+        ],
+      ),
+    ]);
+
+    await const DebugAndroidApplication().build(environment);
+    expect(processManager, hasNoRemainingExpectations);
+
+    expect(
       fileSystem
-          .file(artifacts.getHostArtifact(HostArtifact.impellerc))
-          .createSync(recursive: true);
-
-      final environment = Environment.test(
-        fileSystem.currentDirectory,
-        outputDir: fileSystem.directory('out')..createSync(),
-        defines: <String, String>{kBuildMode: 'debug'},
-        processManager: processManager,
-        artifacts: artifacts,
-        fileSystem: fileSystem,
-        logger: logger,
-      );
-      environment.buildDir.createSync(recursive: true);
-
-      // create pre-requisites.
-      environment.buildDir.childFile('app.dill').writeAsStringSync('abcd');
-      environment.buildDir.childFile('native_assets.json').createSync();
+          .file(fileSystem.path.join('out', 'flutter_assets', 'isolate_snapshot_data'))
+          .existsSync(),
+      true,
+    );
+    expect(
       fileSystem
-          .file(artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug))
-          .createSync(recursive: true);
+          .file(fileSystem.path.join('out', 'flutter_assets', 'vm_snapshot_data'))
+          .existsSync(),
+      true,
+    );
+    expect(
       fileSystem
-          .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
-          .createSync(recursive: true);
-      fileSystem
-          .file('pubspec.yaml')
-          .writeAsStringSync('name: hello\nflutter:\n  shaders:\n    - shader.glsl');
-      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'hello');
-      fileSystem.file('shader.glsl').writeAsStringSync('test');
+          .file(fileSystem.path.join('out', 'flutter_assets', 'kernel_blob.bin'))
+          .existsSync(),
+      true,
+    );
+  });
+}
 
-      processManager.addCommands(<FakeCommand>[
-        const FakeCommand(
-          command: <String>[
-            'HostArtifact.impellerc',
-            '--sksl',
-            '--runtime-stage-gles',
-            '--runtime-stage-gles3',
-            '--runtime-stage-vulkan',
-            '--iplr',
-            '--sl=out/flutter_assets/shader.glsl',
-            '--spirv=out/flutter_assets/shader.glsl.spirv',
-            '--input=/shader.glsl',
-            '--input-type=frag',
-            '--include=/',
-            '--include=/./shader_lib',
-          ],
-        ),
-      ]);
+/// Places the Android gen_snapshot in a `linux-arm64` host directory, as the
+/// cached artifacts do on Linux arm64 hosts.
+class _LinuxArm64GenSnapshotArtifacts extends Fake implements Artifacts {
+  _LinuxArm64GenSnapshotArtifacts(this._delegate);
 
-      await const DebugAndroidApplication().build(environment);
-      expect(processManager, hasNoRemainingExpectations);
+  static const genSnapshotPath =
+      '/cache/artifacts/engine/android-arm64-release/linux-arm64/gen_snapshot';
 
-      expect(
-        fileSystem
-            .file(fileSystem.path.join('out', 'flutter_assets', 'isolate_snapshot_data'))
-            .existsSync(),
-        true,
-      );
-      expect(
-        fileSystem
-            .file(fileSystem.path.join('out', 'flutter_assets', 'vm_snapshot_data'))
-            .existsSync(),
-        true,
-      );
-      expect(
-        fileSystem
-            .file(fileSystem.path.join('out', 'flutter_assets', 'kernel_blob.bin'))
-            .existsSync(),
-        true,
-      );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+  final Artifacts _delegate;
+
+  @override
+  String getArtifactPath(
+    Artifact artifact, {
+    TargetPlatform? platform,
+    BuildMode? mode,
+    EnvironmentType? environmentType,
+  }) {
+    if (artifact == Artifact.genSnapshot) {
+      return genSnapshotPath;
+    }
+    return _delegate.getArtifactPath(
+      artifact,
+      platform: platform,
+      mode: mode,
+      environmentType: environmentType,
+    );
+  }
 }

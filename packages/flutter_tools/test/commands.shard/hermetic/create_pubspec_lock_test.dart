@@ -5,18 +5,20 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 
 import '../../src/common.dart';
 
 void main() {
   late FileSystem fileSystem;
+  const flutterRoot = '/flutter';
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    Cache.flutterRoot = '/flutter';
   });
+
+  List<String> getDependencies(Directory projectDir) =>
+      gatherSdkPackageDependencies(projectDir, flutterRoot: flutterRoot);
 
   // Writes a minimal SDK package pubspec with a single hosted dependency.
   void writeSdkPackagePubspec(String path, String name) {
@@ -31,7 +33,7 @@ void main() {
     return projectDir;
   }
 
-  testWithoutContext('resolves SDK packages vendored under bin/cache/pkg', () {
+  test('resolves SDK packages vendored under bin/cache/pkg', () {
     // `flutter` lives under packages/, while `flutter_gpu` is vendored into
     // bin/cache/pkg. Both must be resolved without throwing.
     writeSdkPackagePubspec('/flutter/packages/flutter/pubspec.yaml', 'flutter');
@@ -46,11 +48,11 @@ void main() {
       '    sdk: flutter\n',
     );
 
-    expect(() => gatherSdkPackageDependencies(projectDir), returnsNormally);
-    expect(gatherSdkPackageDependencies(projectDir), contains('vector_math'));
+    expect(() => getDependencies(projectDir), returnsNormally);
+    expect(getDependencies(projectDir), contains('vector_math'));
   });
 
-  testWithoutContext('skips an SDK package whose pubspec cannot be found', () {
+  test('skips an SDK package whose pubspec cannot be found', () {
     writeSdkPackagePubspec('/flutter/packages/flutter/pubspec.yaml', 'flutter');
 
     final Directory projectDir = writeProject(
@@ -62,11 +64,11 @@ void main() {
       '    sdk: flutter\n',
     );
 
-    expect(() => gatherSdkPackageDependencies(projectDir), returnsNormally);
-    expect(gatherSdkPackageDependencies(projectDir), contains('vector_math'));
+    expect(() => getDependencies(projectDir), returnsNormally);
+    expect(getDependencies(projectDir), contains('vector_math'));
   });
 
-  testWithoutContext('skips an SDK package whose directory exists but has no pubspec', () {
+  test('skips an SDK package whose directory exists but has no pubspec', () {
     writeSdkPackagePubspec('/flutter/packages/flutter/pubspec.yaml', 'flutter');
     // The package directory exists, but does not contain a pubspec.yaml.
     fileSystem.directory('/flutter/bin/cache/pkg/empty_pkg').createSync(recursive: true);
@@ -80,23 +82,23 @@ void main() {
       '    sdk: flutter\n',
     );
 
-    expect(() => gatherSdkPackageDependencies(projectDir), returnsNormally);
-    expect(gatherSdkPackageDependencies(projectDir), contains('vector_math'));
+    expect(() => getDependencies(projectDir), returnsNormally);
+    expect(getDependencies(projectDir), contains('vector_math'));
   });
 
-  testWithoutContext('throws ToolExit if project pubspec.yaml is empty', () {
+  test('throws ToolExit if project pubspec.yaml is empty', () {
     final Directory projectDir = writeProject('');
-    expect(() => gatherSdkPackageDependencies(projectDir), throwsA(isA<ToolExit>()));
+    expect(() => getDependencies(projectDir), throwsA(isA<ToolExit>()));
   });
 
-  testWithoutContext('does not throw if project pubspec.yaml has no dependencies', () {
+  test('does not throw if project pubspec.yaml has no dependencies', () {
     final Directory projectDir = writeProject('name: my_app\n');
-    expect(() => gatherSdkPackageDependencies(projectDir), returnsNormally);
-    expect(gatherSdkPackageDependencies(projectDir), isEmpty);
+    expect(() => getDependencies(projectDir), returnsNormally);
+    expect(getDependencies(projectDir), isEmpty);
   });
 
-  testWithoutContext('throws ToolExit if project pubspec.yaml is malformed', () {
+  test('throws ToolExit if project pubspec.yaml is malformed', () {
     final Directory projectDir = writeProject('malformed: yaml: check');
-    expect(() => gatherSdkPackageDependencies(projectDir), throwsA(isA<ToolExit>()));
+    expect(() => getDependencies(projectDir), throwsA(isA<ToolExit>()));
   });
 }

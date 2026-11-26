@@ -4,7 +4,6 @@
 
 import 'dart:ffi' show Abi;
 
-import 'package:archive/archive.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -19,6 +18,7 @@ import '../../src/fake_process_manager.dart';
 const kExecutable = 'foo';
 const kPath1 = '/bar/bin/$kExecutable';
 const kPath2 = '/another/bin/$kExecutable';
+const kWindowsTarPath = r'C:\Windows\System32\tar.exe';
 
 const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
 
@@ -38,9 +38,9 @@ void main() {
     fakeProcessManager = FakeProcessManager.empty();
   });
 
-  OperatingSystemUtils createOSUtils(Platform platform, {Abi? currentAbi}) {
+  OperatingSystemUtils createOSUtils(Platform platform, {Abi? currentAbi, FileSystem? fileSystem}) {
     return OperatingSystemUtils(
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem ?? MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: platform,
       processManager: fakeProcessManager,
@@ -49,7 +49,7 @@ void main() {
   }
 
   group('which on POSIX', () {
-    testWithoutContext('returns null when executable does not exist', () async {
+    test('returns null when executable does not exist', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(command: <String>['which', kExecutable], exitCode: 1),
       );
@@ -57,7 +57,7 @@ void main() {
       expect(utils.which(kExecutable), isNull);
     });
 
-    testWithoutContext('returns exactly one result', () async {
+    test('returns exactly one result', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(command: <String>['which', 'foo'], stdout: kPath1),
       );
@@ -65,7 +65,7 @@ void main() {
       expect(utils.which(kExecutable)!.path, kPath1);
     });
 
-    testWithoutContext('returns all results for whichAll', () async {
+    test('returns all results for whichAll', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['which', '-a', kExecutable],
@@ -81,7 +81,7 @@ void main() {
   });
 
   group('which on Windows', () {
-    testWithoutContext('throws tool exit if where.exe cannot be run', () async {
+    test('throws tool exit if where.exe cannot be run', () async {
       fakeProcessManager.excludedExecutables.add('where');
 
       final utils = OperatingSystemUtils(
@@ -94,7 +94,7 @@ void main() {
       expect(() => utils.which(kExecutable), throwsToolExit());
     });
 
-    testWithoutContext('returns null when executable does not exist', () async {
+    test('returns null when executable does not exist', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(command: <String>['where', kExecutable], exitCode: 1),
       );
@@ -103,7 +103,7 @@ void main() {
       expect(utils.which(kExecutable), isNull);
     });
 
-    testWithoutContext('returns exactly one result', () async {
+    test('returns exactly one result', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(command: <String>['where', 'foo'], stdout: '$kPath1\n$kPath2'),
       );
@@ -111,7 +111,7 @@ void main() {
       expect(utils.which(kExecutable)!.path, kPath1);
     });
 
-    testWithoutContext('returns all results for whichAll', () async {
+    test('returns all results for whichAll', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(command: <String>['where', kExecutable], stdout: '$kPath1\n$kPath2'),
       );
@@ -124,7 +124,7 @@ void main() {
   });
 
   group('host platform', () {
-    testWithoutContext('Windows x64', () async {
+    test('Windows x64', () async {
       final OperatingSystemUtils utils = createOSUtils(
         FakePlatform(operatingSystem: 'windows'),
         currentAbi: Abi.windowsX64,
@@ -132,7 +132,7 @@ void main() {
       expect(utils.hostPlatform, HostPlatform.windows_x64);
     });
 
-    testWithoutContext('Windows ARM64', () async {
+    test('Windows ARM64', () async {
       final OperatingSystemUtils utils = createOSUtils(
         FakePlatform(operatingSystem: 'windows'),
         currentAbi: Abi.windowsArm64,
@@ -140,17 +140,17 @@ void main() {
       expect(utils.hostPlatform, HostPlatform.windows_arm64);
     });
 
-    testWithoutContext('Linux x64', () async {
+    test('Linux x64', () async {
       final OperatingSystemUtils utils = createOSUtils(FakePlatform(), currentAbi: Abi.linuxX64);
       expect(utils.hostPlatform, HostPlatform.linux_x64);
     });
 
-    testWithoutContext('Linux ARM64', () async {
+    test('Linux ARM64', () async {
       final OperatingSystemUtils utils = createOSUtils(FakePlatform(), currentAbi: Abi.linuxArm64);
       expect(utils.hostPlatform, HostPlatform.linux_arm64);
     });
 
-    testWithoutContext('Linux RISCV64', () async {
+    test('Linux RISCV64', () async {
       final OperatingSystemUtils utils = createOSUtils(
         FakePlatform(),
         currentAbi: Abi.linuxRiscv64,
@@ -158,7 +158,7 @@ void main() {
       expect(utils.hostPlatform, HostPlatform.linux_riscv64);
     });
 
-    testWithoutContext('macOS x64', () async {
+    test('macOS x64', () async {
       fakeProcessManager.addCommands(<FakeCommand>[kWhichSysctlCommand, kx64CheckCommand]);
       final OperatingSystemUtils utils = createOSUtils(
         FakePlatform(operatingSystem: 'macos'),
@@ -167,7 +167,7 @@ void main() {
       expect(utils.hostPlatform, HostPlatform.darwin_x64);
     });
 
-    testWithoutContext('macOS ARM64', () async {
+    test('macOS ARM64', () async {
       fakeProcessManager.addCommands(<FakeCommand>[kWhichSysctlCommand, kARMCheckCommand]);
       final OperatingSystemUtils utils = createOSUtils(
         FakePlatform(operatingSystem: 'macos'),
@@ -176,7 +176,7 @@ void main() {
       expect(utils.hostPlatform, HostPlatform.darwin_arm64);
     });
 
-    testWithoutContext('macOS ARM64 with FLUTTER_HOST_ARCH=x64 override', () async {
+    test('macOS ARM64 with FLUTTER_HOST_ARCH=x64 override', () async {
       final OperatingSystemUtils utils = createOSUtils(
         FakePlatform(
           operatingSystem: 'macos',
@@ -187,7 +187,7 @@ void main() {
       expect(utils.hostPlatform, HostPlatform.darwin_x64);
     });
 
-    testWithoutContext('macOS x64 with FLUTTER_HOST_ARCH=arm64 override', () async {
+    test('macOS x64 with FLUTTER_HOST_ARCH=arm64 override', () async {
       final OperatingSystemUtils utils = createOSUtils(
         FakePlatform(
           operatingSystem: 'macos',
@@ -198,7 +198,7 @@ void main() {
       expect(utils.hostPlatform, HostPlatform.darwin_arm64);
     });
 
-    testWithoutContext('Linux x64 with FLUTTER_HOST_ARCH=arm64 override', () async {
+    test('Linux x64 with FLUTTER_HOST_ARCH=arm64 override', () async {
       final OperatingSystemUtils utils = createOSUtils(
         FakePlatform(environment: <String, String>{'FLUTTER_HOST_ARCH': 'arm64'}),
         currentAbi: Abi.linuxX64,
@@ -206,7 +206,7 @@ void main() {
       expect(utils.hostPlatform, HostPlatform.linux_arm64);
     });
 
-    testWithoutContext('FLUTTER_HOST_ARCH override is case-insensitive', () async {
+    test('FLUTTER_HOST_ARCH override is case-insensitive', () async {
       final OperatingSystemUtils utils = createOSUtils(
         FakePlatform(environment: <String, String>{'FLUTTER_HOST_ARCH': 'ARM64'}),
         currentAbi: Abi.linuxX64,
@@ -214,7 +214,7 @@ void main() {
       expect(utils.hostPlatform, HostPlatform.linux_arm64);
     });
 
-    testWithoutContext('unrecognized FLUTTER_HOST_ARCH override is ignored', () async {
+    test('unrecognized FLUTTER_HOST_ARCH override is ignored', () async {
       final OperatingSystemUtils utils = createOSUtils(
         FakePlatform(environment: <String, String>{'FLUTTER_HOST_ARCH': 'sparc'}),
         currentAbi: Abi.linuxX64,
@@ -222,7 +222,7 @@ void main() {
       expect(utils.hostPlatform, HostPlatform.linux_x64);
     });
 
-    testWithoutContext('hostPlatformOverride property takes precedence', () async {
+    test('hostPlatformOverride property takes precedence', () async {
       final OperatingSystemUtils utils = createOSUtils(
         FakePlatform(operatingSystem: 'macos'),
         currentAbi: Abi.macosArm64,
@@ -231,12 +231,12 @@ void main() {
       expect(utils.hostPlatform, HostPlatform.darwin_x64);
     });
 
-    testWithoutContext('unsupported throws', () async {
+    test('unsupported throws', () async {
       final OperatingSystemUtils utils = createOSUtils(FakePlatform(), currentAbi: Abi.androidArm);
       expect(() => utils.hostPlatform, throwsUnsupportedError);
     });
 
-    testWithoutContext('macOS ARM name', () async {
+    test('macOS ARM name', () async {
       fakeProcessManager.addCommands(<FakeCommand>[
         const FakeCommand(command: <String>['sw_vers', '-productName'], stdout: 'product'),
         const FakeCommand(command: <String>['sw_vers', '-productVersion'], stdout: 'version'),
@@ -253,7 +253,7 @@ void main() {
       expect(utils.name, 'product version build darwin-arm64');
     });
 
-    testWithoutContext('macOS ARM on Rosetta name', () async {
+    test('macOS ARM on Rosetta name', () async {
       fakeProcessManager.addCommands(<FakeCommand>[
         const FakeCommand(command: <String>['sw_vers', '-productName'], stdout: 'product'),
         const FakeCommand(command: <String>['sw_vers', '-productVersion'], stdout: 'version'),
@@ -273,7 +273,7 @@ void main() {
       expect(utils.name, 'product version build darwin-arm64 (Rosetta)');
     });
 
-    testWithoutContext('macOS x86 name', () async {
+    test('macOS x86 name', () async {
       fakeProcessManager.addCommands(<FakeCommand>[
         const FakeCommand(command: <String>['sw_vers', '-productName'], stdout: 'product'),
         const FakeCommand(command: <String>['sw_vers', '-productVersion'], stdout: 'version'),
@@ -290,7 +290,7 @@ void main() {
       expect(utils.name, 'product version build darwin-x64');
     });
 
-    testWithoutContext('Windows name', () async {
+    test('Windows name', () async {
       fakeProcessManager.addCommands(<FakeCommand>[
         const FakeCommand(command: <String>['ver'], stdout: 'version'),
       ]);
@@ -299,7 +299,7 @@ void main() {
       expect(utils.name, 'version');
     });
 
-    testWithoutContext('Linux name', () async {
+    test('Linux name', () async {
       const fakeOsRelease = '''
       NAME="Name"
       ID=id
@@ -328,10 +328,8 @@ void main() {
       expect(utils.name, 'Pretty Name 1.2.3-abcd');
     });
 
-    testWithoutContext(
-      'Linux name reads from "/usr/lib/os-release" if "/etc/os-release" is missing',
-      () async {
-        const fakeOsRelease = '''
+    test('Linux name reads from "/usr/lib/os-release" if "/etc/os-release" is missing', () async {
+      const fakeOsRelease = '''
       NAME="Name"
       ID=id
       ID_LIKE=id_like
@@ -344,25 +342,24 @@ void main() {
       BUG_REPORT_URL="https://bug.report.url/"
       LOGO=logo
       ''';
-        final FileSystem fileSystem = MemoryFileSystem.test();
-        fileSystem.directory('/usr/lib').createSync(recursive: true);
-        fileSystem.file('/usr/lib/os-release').writeAsStringSync(fakeOsRelease);
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      fileSystem.directory('/usr/lib').createSync(recursive: true);
+      fileSystem.file('/usr/lib/os-release').writeAsStringSync(fakeOsRelease);
 
-        expect(fileSystem.file('/etc/os-release').existsSync(), false);
+      expect(fileSystem.file('/etc/os-release').existsSync(), false);
 
-        final utils = OperatingSystemUtils(
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          platform: FakePlatform(
-            operatingSystemVersion: 'Linux 1.2.3-abcd #1 SMP PREEMPT Sat Jan 1 00:00:00 UTC 2000',
-          ),
-          processManager: fakeProcessManager,
-        );
-        expect(utils.name, 'Pretty Name 1.2.3-abcd');
-      },
-    );
+      final utils = OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(
+          operatingSystemVersion: 'Linux 1.2.3-abcd #1 SMP PREEMPT Sat Jan 1 00:00:00 UTC 2000',
+        ),
+        processManager: fakeProcessManager,
+      );
+      expect(utils.name, 'Pretty Name 1.2.3-abcd');
+    });
 
-    testWithoutContext('Linux name when reading "/etc/os-release" fails', () async {
+    test('Linux name when reading "/etc/os-release" fails', () async {
       final handler = FileExceptionHandler();
       final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
 
@@ -382,7 +379,7 @@ void main() {
       expect(utils.name, 'Linux 1.2.3-abcd');
     });
 
-    testWithoutContext('Linux name omits kernel release if undefined', () async {
+    test('Linux name omits kernel release if undefined', () async {
       const fakeOsRelease = '''
       NAME="Name"
       ID=id
@@ -409,77 +406,197 @@ void main() {
       expect(utils.name, 'Pretty Name');
     });
 
-    // See https://snyk.io/research/zip-slip-vulnerability for more context
-    testWithoutContext('Windows validates paths when unzipping', () {
-      // on POSIX systems we use the `unzip` binary, which will fail to extract
-      // files with paths outside the target directory
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
-      final fs = MemoryFileSystem.test();
-      final File fakeZipFile = fs.file('archive.zip');
-      final Directory targetDirectory = fs.directory('output')..createSync(recursive: true);
-      const content = 'hello, world!';
-      final archive = Archive()
-        ..addFile(
-          // This file would be extracted outside of the target extraction dir
-          ArchiveFile(r'..\..\..\Target File.txt', content.length, content.codeUnits),
-        );
-      final List<int> zipData = ZipEncoder().encode(archive)!;
-      fakeZipFile.writeAsBytesSync(zipData);
-      expect(
-        () => utils.unzip(fakeZipFile, targetDirectory),
-        throwsA(
-          isA<StateError>().having(
-            (StateError error) => error.message,
-            'correct error message',
-            contains('Tried to extract the file '),
-          ),
+    group('unzip on Windows', () {
+      const tarResolutionCases = <(String, Map<String, String>, String)>[
+        (
+          'resolves tar using SYSTEMROOT over WINDIR',
+          <String, String>{'SYSTEMROOT': r'D:\Windows', 'WINDIR': r'E:\WinNT'},
+          r'D:\Windows\System32\tar.exe',
         ),
-      );
-    });
-
-    // Regression test for https://github.com/flutter/flutter/issues/185794.
-    // A canonical archive entry that resolves to a sibling directory sharing
-    // a name prefix with the extraction root (e.g. `<target>-sibling/x.txt`)
-    // must NOT be accepted: the previous `startsWith` check on canonical
-    // paths returned true for sibling directories with a name that started
-    // with the target's name.
-    testWithoutContext(
-      'Windows rejects archive entries that escape into a sibling directory with a name prefix',
-      () {
-        final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
-        final fs = MemoryFileSystem.test();
-        final File fakeZipFile = fs.file('archive.zip');
-        // Extract into `<cwd>/cache/windows-x64`. A crafted archive entry of
-        // `../windows-x64-profile/poc_marker.txt` resolves to
-        // `<cwd>/cache/windows-x64-profile/poc_marker.txt`, a sibling of the
-        // target whose canonical path shares the `windows-x64` prefix.
-        final Directory targetDirectory = fs.directory('cache/windows-x64')
-          ..createSync(recursive: true);
-        const content = 'malicious';
-        final archive = Archive()
-          ..addFile(
-            ArchiveFile('../windows-x64-profile/poc_marker.txt', content.length, content.codeUnits),
+        (
+          'resolves tar using WINDIR fallback when SYSTEMROOT is unset',
+          <String, String>{'WINDIR': r'E:\WinNT'},
+          r'E:\WinNT\System32\tar.exe',
+        ),
+        (
+          r'resolves tar using default C:\Windows fallback when SYSTEMROOT and WINDIR are unset',
+          <String, String>{},
+          kWindowsTarPath,
+        ),
+      ];
+      for (final (String description, Map<String, String> environment, String expectedTarPath)
+          in tarResolutionCases) {
+        test(description, () {
+          final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+          final Directory targetDirectory = fileSystem.directory('output')
+            ..createSync(recursive: true);
+          final File fakeZipFile = fileSystem.file('archive.zip')..createSync();
+          fakeProcessManager.addCommand(
+            FakeCommand(
+              command: <String>[
+                expectedTarPath,
+                '-xf',
+                fakeZipFile.path,
+                '-C',
+                targetDirectory.path,
+              ],
+            ),
           );
-        final List<int> zipData = ZipEncoder().encode(archive)!;
-        fakeZipFile.writeAsBytesSync(zipData);
+
+          final OperatingSystemUtils utils = createOSUtils(
+            FakePlatform(operatingSystem: 'windows', environment: environment),
+            fileSystem: fileSystem,
+          );
+          utils.unzip(fakeZipFile, targetDirectory);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        });
+      }
+
+      test('creates target directory if it does not exist', () {
+        final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+        final Directory targetDirectory = fileSystem.directory('nonexistent_output');
+        expect(targetDirectory.existsSync(), isFalse);
+        final File fakeZipFile = fileSystem.file('archive.zip')..createSync();
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[kWindowsTarPath, '-xf', fakeZipFile.path, '-C', targetDirectory.path],
+          ),
+        );
+
+        final OperatingSystemUtils utils = createOSUtils(
+          FakePlatform(operatingSystem: 'windows'),
+          fileSystem: fileSystem,
+        );
+        utils.unzip(fakeZipFile, targetDirectory);
+        expect(targetDirectory.existsSync(), isTrue);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      test('throws ToolExit when tar is not available', () {
+        final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+        final Directory targetDirectory = fileSystem.directory('output');
+        final File fakeZipFile = fileSystem.file('archive.zip')..createSync();
+        fakeProcessManager.excludedExecutables.add(kWindowsTarPath);
+
+        final OperatingSystemUtils utils = createOSUtils(
+          FakePlatform(operatingSystem: 'windows'),
+          fileSystem: fileSystem,
+        );
         expect(
           () => utils.unzip(fakeZipFile, targetDirectory),
-          throwsA(
-            isA<StateError>().having(
-              (StateError error) => error.message,
-              'correct error message',
-              contains('Tried to extract the file '),
-            ),
+          throwsToolExit(
+            message: 'Unable to find "$kWindowsTarPath". Unable to extract ${fakeZipFile.path}.',
           ),
         );
-        // The sibling file must not have been written.
-        expect(fs.file('cache/windows-x64-profile/poc_marker.txt').existsSync(), isFalse);
-      },
-    );
+        expect(targetDirectory.existsSync(), isFalse);
+      });
+
+      test('never passes -P or --absolute-paths to tar', () {
+        final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+        final Directory targetDirectory = fileSystem.directory('output')
+          ..createSync(recursive: true);
+        final File fakeZipFile = fileSystem.file('archive.zip')..createSync();
+        // Passing -P or --absolute-paths disables bsdtar's '..' and leading-slash
+        // rejection (zip-slip protection, see https://github.com/flutter/flutter/issues/185794).
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[kWindowsTarPath, '-xf', fakeZipFile.path, '-C', targetDirectory.path],
+          ),
+        );
+
+        final OperatingSystemUtils utils = createOSUtils(
+          FakePlatform(operatingSystem: 'windows'),
+          fileSystem: fileSystem,
+        );
+        utils.unzip(fakeZipFile, targetDirectory);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+    });
+
+    group('unpack on Windows', () {
+      test('unpacks with tar when tar is available', () {
+        final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+        final Directory targetDirectory = fileSystem.directory('output')
+          ..createSync(recursive: true);
+        final File fakeTarFile = fileSystem.file('archive.tar.gz')..createSync();
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[kWindowsTarPath, '-xf', fakeTarFile.path, '-C', targetDirectory.path],
+          ),
+        );
+
+        final OperatingSystemUtils utils = createOSUtils(
+          FakePlatform(operatingSystem: 'windows'),
+          fileSystem: fileSystem,
+        );
+        utils.unpack(fakeTarFile, targetDirectory);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      test('creates target directory if it does not exist', () {
+        final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+        final Directory targetDirectory = fileSystem.directory('nonexistent_output');
+        expect(targetDirectory.existsSync(), isFalse);
+        final File fakeTarFile = fileSystem.file('archive.tar.gz')..createSync();
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[kWindowsTarPath, '-xf', fakeTarFile.path, '-C', targetDirectory.path],
+          ),
+        );
+
+        final OperatingSystemUtils utils = createOSUtils(
+          FakePlatform(operatingSystem: 'windows'),
+          fileSystem: fileSystem,
+        );
+        utils.unpack(fakeTarFile, targetDirectory);
+        expect(targetDirectory.existsSync(), isTrue);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      test('throws ToolExit when tar is not available', () {
+        final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+        final Directory targetDirectory = fileSystem.directory('output');
+        final File fakeTarFile = fileSystem.file('archive.tar.gz')..createSync();
+        fakeProcessManager.excludedExecutables.add(kWindowsTarPath);
+
+        final OperatingSystemUtils utils = createOSUtils(
+          FakePlatform(operatingSystem: 'windows'),
+          fileSystem: fileSystem,
+        );
+        expect(
+          () => utils.unpack(fakeTarFile, targetDirectory),
+          throwsToolExit(
+            message: 'Unable to find "$kWindowsTarPath". Unable to extract ${fakeTarFile.path}.',
+          ),
+        );
+        expect(targetDirectory.existsSync(), isFalse);
+      });
+
+      test('never passes -P or --absolute-paths to tar', () {
+        final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+        final Directory targetDirectory = fileSystem.directory('output')
+          ..createSync(recursive: true);
+        final File fakeTarFile = fileSystem.file('archive.tar.gz')..createSync();
+        // Passing -P or --absolute-paths disables bsdtar's '..' and leading-slash
+        // rejection (zip-slip protection, see https://github.com/flutter/flutter/issues/185794).
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[kWindowsTarPath, '-xf', fakeTarFile.path, '-C', targetDirectory.path],
+          ),
+        );
+
+        final OperatingSystemUtils utils = createOSUtils(
+          FakePlatform(operatingSystem: 'windows'),
+          fileSystem: fileSystem,
+        );
+        utils.unpack(fakeTarFile, targetDirectory);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+    });
   });
 
   group('HostPlatform.fromOsAndArch', () {
-    testWithoutContext('maps supported OS and architecture combinations', () {
+    test('maps supported OS and architecture combinations', () {
       expect(HostPlatform.fromOsAndArch('macos', 'x64'), HostPlatform.darwin_x64);
       expect(HostPlatform.fromOsAndArch('macos', 'arm64'), HostPlatform.darwin_arm64);
       expect(HostPlatform.fromOsAndArch('linux', 'x64'), HostPlatform.linux_x64);
@@ -489,18 +606,18 @@ void main() {
       expect(HostPlatform.fromOsAndArch('windows', 'arm64'), HostPlatform.windows_arm64);
     });
 
-    testWithoutContext('matches the architecture case-insensitively', () {
+    test('matches the architecture case-insensitively', () {
       expect(HostPlatform.fromOsAndArch('macos', 'ARM64'), HostPlatform.darwin_arm64);
     });
 
-    testWithoutContext('returns null for unsupported combinations', () {
+    test('returns null for unsupported combinations', () {
       expect(HostPlatform.fromOsAndArch('macos', 'riscv64'), isNull);
       expect(HostPlatform.fromOsAndArch('fuchsia', 'x64'), isNull);
       expect(HostPlatform.fromOsAndArch('linux', 'sparc'), isNull);
     });
   });
 
-  testWithoutContext('If unzip fails, include stderr in exception text', () {
+  test('If unzip fails, include stderr in exception text', () {
     const exceptionMessage = 'Something really bad happened.';
     final handler = FileExceptionHandler();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
@@ -528,7 +645,7 @@ void main() {
   });
 
   group('unzip on macOS', () {
-    testWithoutContext('falls back to unzip when rsync cannot run', () {
+    test('falls back to unzip when rsync cannot run', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
       fakeProcessManager.excludedExecutables.add('rsync');
 
@@ -550,7 +667,7 @@ void main() {
       expect(logger.traceText, contains('Unable to find rsync'));
     });
 
-    testWithoutContext('unzip and rsyncs', () {
+    test('unzip and rsyncs', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
 
       final macOSUtils = OperatingSystemUtils(
@@ -602,7 +719,7 @@ void main() {
   });
 
   group('display an install message when unzip cannot be run', () {
-    testWithoutContext('Linux', () {
+    test('Linux', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
       fakeProcessManager.excludedExecutables.add('unzip');
 
@@ -623,7 +740,7 @@ void main() {
       );
     });
 
-    testWithoutContext('macOS', () {
+    test('macOS', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
       fakeProcessManager.excludedExecutables.add('unzip');
 
@@ -644,7 +761,7 @@ void main() {
       );
     });
 
-    testWithoutContext('unknown OS', () {
+    test('unknown OS', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
       fakeProcessManager.excludedExecutables.add('unzip');
 
@@ -666,7 +783,7 @@ void main() {
     });
   });
 
-  testWithoutContext('directory size', () {
+  test('directory size', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final osUtils = OperatingSystemUtils(
       fileSystem: fileSystem,
@@ -686,7 +803,7 @@ void main() {
     expect(osUtils.getDirectorySize(directory), equals(10 + 20 + 15));
   });
 
-  testWithoutContext('stream compression level', () {
+  test('stream compression level', () {
     expect(OperatingSystemUtils.gzipLevel1.level, equals(1));
   });
 }

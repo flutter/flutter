@@ -30,7 +30,7 @@ class PluginPlatformConfig {
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
 class FlutterManifest {
-  FlutterManifest._({required this._logger});
+  FlutterManifest._({required this.logger});
 
   /// Returns an empty manifest.
   factory FlutterManifest.empty({required Logger logger}) = FlutterManifest._;
@@ -83,7 +83,7 @@ class FlutterManifest {
     List<DeferredComponent>? deferredComponents,
     bool removeDependencies = false,
   }) {
-    final copy = FlutterManifest._(logger: _logger);
+    final copy = FlutterManifest._(logger: logger);
     copy._descriptor = <String, Object?>{..._descriptor};
     if (removeDependencies) {
       // Remove the non-Flutter SDK dependencies if they're going to be added back later.
@@ -126,10 +126,8 @@ class FlutterManifest {
     return copy;
   }
 
-  final Logger _logger;
-
   /// The logger associated with this manifest.
-  Logger get logger => _logger;
+  final Logger logger;
 
   /// A map representation of the entire `pubspec.yaml` file.
   var _descriptor = <String, Object?>{};
@@ -147,14 +145,23 @@ class FlutterManifest {
 
   /// Contains the name of the dependencies.
   /// These are the keys specified in the `dependency` map.
-  Set<String> get dependencies {
-    final dependencies = _descriptor['dependencies'] as YamlMap?;
-    return dependencies != null ? <String>{...dependencies.keys.cast<String>()} : <String>{};
-  }
+  Set<String> get dependencies => switch (_descriptor['dependencies']) {
+    final YamlMap map => map.keys.whereType<String>().toSet(),
+    _ => <String>{},
+  };
+
+  /// Contains the names of the development dependencies.
+  /// These are the keys specified in the `dev_dependencies` map.
+  Set<String> get devDependencies => switch (_descriptor['dev_dependencies']) {
+    final YamlMap map => map.keys.whereType<String>().toSet(),
+    _ => <String>{},
+  };
 
   /// List of all the entries in the workspace field of the `pubspec.yaml` file.
-  List<String> get workspace =>
-      (_descriptor['workspace'] as YamlList?)?.cast<String>() ?? <String>[];
+  List<String> get workspace => switch (_descriptor['workspace']) {
+    final YamlList list => list.whereType<String>().toList(),
+    _ => <String>[],
+  };
 
   // Flag to avoid printing multiple invalid version messages.
   var _hasShowInvalidVersionMsg = false;
@@ -181,7 +188,7 @@ class FlutterManifest {
       version = Version.parse(verStr);
     } on Exception {
       if (!_hasShowInvalidVersionMsg) {
-        _logger.printStatus(_invalidVersionSettingHintMessage(verStr), emphasis: true);
+        logger.printStatus(_invalidVersionSettingHintMessage(verStr), emphasis: true);
         _hasShowInvalidVersionMsg = true;
       }
     }
@@ -302,7 +309,7 @@ class FlutterManifest {
     }
     for (final Object? component in deferredComponents) {
       if (component is! YamlMap) {
-        _logger.printError('Expected deferred component manifest to be a map.');
+        logger.printError('Expected deferred component manifest to be a map.');
         continue;
       }
       components.add(
@@ -403,11 +410,11 @@ class FlutterManifest {
       final fontFiles = fontFamily['fonts'] as YamlList?;
       final familyName = fontFamily['family'] as String?;
       if (familyName == null) {
-        _logger.printWarning('Warning: Missing family name for font.', emphasis: true);
+        logger.printWarning('Warning: Missing family name for font.', emphasis: true);
         continue;
       }
       if (fontFiles == null) {
-        _logger.printWarning('Warning: No fonts specified for font $familyName', emphasis: true);
+        logger.printWarning('Warning: No fonts specified for font $familyName', emphasis: true);
         continue;
       }
 
@@ -415,7 +422,7 @@ class FlutterManifest {
       for (final Map<Object?, Object?> fontFile in fontFiles.cast<Map<Object?, Object?>>()) {
         final asset = fontFile['asset'] as String?;
         if (asset == null) {
-          _logger.printWarning('Warning: Missing asset in fonts for $familyName', emphasis: true);
+          logger.printWarning('Warning: Missing asset in fonts for $familyName', emphasis: true);
           continue;
         }
 

@@ -12,7 +12,7 @@ import '../src/fake_devices.dart';
 
 void main() {
   group('LogScanningVMServiceDiscoveryForAttach', () {
-    testWithoutContext('can discover the port', () async {
+    test('can discover the port', () async {
       final logReader = FakeDeviceLogReader();
       final discovery = LogScanningVMServiceDiscoveryForAttach(
         Future<FakeDeviceLogReader>.value(logReader),
@@ -25,7 +25,7 @@ void main() {
       expect(await discovery.uris.first, Uri.parse('http://127.0.0.1:9999'));
     });
 
-    testWithoutContext('ignores the port that does not match devicePort', () async {
+    test('ignores the port that does not match devicePort', () async {
       final logReader = FakeDeviceLogReader();
       final discovery = LogScanningVMServiceDiscoveryForAttach(
         Future<FakeDeviceLogReader>.value(logReader),
@@ -40,7 +40,7 @@ void main() {
       expect(await discovery.uris.first, Uri.parse('http://127.0.0.1:9998'));
     });
 
-    testWithoutContext('forwards the port if given a port forwarder', () async {
+    test('forwards the port if given a port forwarder', () async {
       final logReader = FakeDeviceLogReader();
       final portForwarder = FakePortForwarder(9900);
       final discovery = LogScanningVMServiceDiscoveryForAttach(
@@ -57,7 +57,7 @@ void main() {
       expect(portForwarder.forwardHostPort, null);
     });
 
-    testWithoutContext('uses the host port if given', () async {
+    test('uses the host port if given', () async {
       final logReader = FakeDeviceLogReader();
       final portForwarder = FakePortForwarder(9900);
       final discovery = LogScanningVMServiceDiscoveryForAttach(
@@ -94,7 +94,7 @@ void main() {
       ]);
     });
 
-    testWithoutContext('uris returns from both delegates', () async {
+    test('uris returns from both delegates', () async {
       uris1.add(Uri.parse('http://127.0.0.1:1'));
       uris1.add(Uri.parse('http://127.0.0.2:2'));
       uris2.add(Uri.parse('http://127.0.0.3:3'));

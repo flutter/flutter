@@ -63,6 +63,7 @@ dart_library("expect") {
     "async_helper.dart",
     "config.dart",
     "expect.dart",
+    "float_bits.dart",
     "legacy/async_minitest.dart",
     "legacy/minitest.dart",
     "minitest.dart",

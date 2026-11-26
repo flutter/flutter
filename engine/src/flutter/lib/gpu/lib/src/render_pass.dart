@@ -371,7 +371,8 @@ void _validateAttachmentSubresource(
 /// A pass records until [end] is called, or until its command buffer creates
 /// the next pass, records a copy, or is submitted. After that, every method
 /// except [end] throws a [StateError] naming what ended the pass.
-base class RenderPass extends NativeFieldWrapperClass1 {
+base class RenderPass extends NativeFieldWrapperClass1
+    implements _CommandBufferPass {
   /// The maximum number of vertex buffer slots that can be bound to a single
   /// draw. Matches `flutter::gpu::RenderPass::kMaxVertexBufferSlots` on the
   /// native side, which in turn matches `impeller::kMaxVertexBuffers`; keep
@@ -454,6 +455,11 @@ base class RenderPass extends NativeFieldWrapperClass1 {
       throw Exception(error);
     }
     _commandBuffer._openPass = this;
+  }
+
+  @override
+  void _markEnded(String endedBy) {
+    _endedBy = endedBy;
   }
 
   /// Ends this pass. Nothing more can be recorded into it.
@@ -757,6 +763,11 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   /// instance receives the same vertex buffer data. This is valid, but every
   /// instance will produce the same geometry unless the shader varies its output
   /// another way.
+  ///
+  /// Throws when the draw cannot be recorded. Whether the backend can build
+  /// the pipeline for the current state is only known once the pass is
+  /// encoded, so a draw whose pipeline fails to build is dropped and logged
+  /// then, and later draws with that state throw here.
   void draw(int vertexCount, {int instanceCount = 1}) {
     _checkNotEnded();
     RangeError.checkNotNegative(vertexCount, 'vertexCount');
@@ -788,6 +799,8 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   /// instance receives the same vertex and index buffer data. This is valid, but
   /// every instance will produce the same geometry unless the shader varies its
   /// output another way.
+  ///
+  /// Failures are reported as for [draw].
   void drawIndexed(int indexCount, {int instanceCount = 1}) {
     _checkNotEnded();
     RangeError.checkNotNegative(indexCount, 'indexCount');
