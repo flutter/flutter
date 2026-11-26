@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -21,7 +20,6 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
@@ -87,13 +85,6 @@ void main() {
     late FakeProcessManager fakeProcessManager;
     late TestBuildSystem buildSystem;
 
-    final startOverrides = <Type, Generator>{
-      Platform: () => FakePlatform(),
-      FileSystem: () => fileSystem,
-      ProcessManager: () => fakeProcessManager,
-      Artifacts: () => Artifacts.test(),
-    };
-
     setUp(() {
       buildSystem = TestBuildSystem.all(BuildResult(success: true));
       fakeProcessManager = FakeProcessManager.empty();
@@ -155,7 +146,7 @@ void main() {
       expect(jitReleaseResult.started, isFalse);
     });
 
-    testUsingContext('performs a build and starts in debug mode', () async {
+    test('performs a build and starts in debug mode', () async {
       final app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
       final Uri vmServiceUri = Uri.parse('http://127.0.0.1:6666/');
       final completer = Completer<void>();
@@ -195,47 +186,43 @@ Hello!
       expect(result.vmServiceUri, vmServiceUri);
       expect(logLines.last, 'Hello!');
       expect(fakeProcessManager, hasNoRemainingExpectations);
-    }, overrides: startOverrides);
+    });
 
-    testUsingContext(
-      'performs a build and starts in debug mode with track-widget-creation',
-      () async {
-        final app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
-        final Uri vmServiceUri = Uri.parse('http://127.0.0.1:6666/');
-        final completer = Completer<void>();
-        fakeProcessManager.addCommand(
-          FakeCommand(
-            command: const <String>[
-              'Artifact.flutterTester',
-              '--run-forever',
-              '--non-interactive',
-              '--enable-dart-profiling',
-              '--packages=.dart_tool/package_config.json',
-              '--flutter-assets-dir=/.tmp_rand0/flutter_tester.rand0',
-              '/.tmp_rand0/flutter_tester.rand0/flutter-tester-app.dill.track.dill',
-            ],
-            completer: completer,
-            stdout:
-                '''
+    test('performs a build and starts in debug mode with track-widget-creation', () async {
+      final app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
+      final Uri vmServiceUri = Uri.parse('http://127.0.0.1:6666/');
+      final completer = Completer<void>();
+      fakeProcessManager.addCommand(
+        FakeCommand(
+          command: const <String>[
+            'Artifact.flutterTester',
+            '--run-forever',
+            '--non-interactive',
+            '--enable-dart-profiling',
+            '--packages=.dart_tool/package_config.json',
+            '--flutter-assets-dir=/.tmp_rand0/flutter_tester.rand0',
+            '/.tmp_rand0/flutter_tester.rand0/flutter-tester-app.dill.track.dill',
+          ],
+          completer: completer,
+          stdout:
+              '''
 The Dart VM service is listening on $vmServiceUri
 Hello!
 ''',
-          ),
-        );
+        ),
+      );
 
-        final LaunchResult result = await device.startApp(
-          app,
-          mainPath: mainPath,
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        );
+      final LaunchResult result = await device.startApp(
+        app,
+        mainPath: mainPath,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      );
 
-        expect(result.started, isTrue);
-        expect(result.vmServiceUri, vmServiceUri);
-        expect(logLines.last, 'Hello!');
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      },
-      overrides: startOverrides,
-    );
+      expect(result.started, isTrue);
+      expect(result.vmServiceUri, vmServiceUri);
+      expect(logLines.last, 'Hello!');
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
   });
 }
 

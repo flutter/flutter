@@ -25,7 +25,10 @@ class AnalysisServer {
     required this.suppressAnalytics,
     required this._toolContext,
     this._protocolTrafficLog,
-    this.usePlugins = true,
+    this.usePlugins,
+    this.trustPlugins = false,
+    this.alwaysTrustPlugins = false,
+    this.neverTrustPlugins = false,
     this.withFineDependencies = true,
     this.clientId,
   });
@@ -38,7 +41,15 @@ class AnalysisServer {
   /// The client ID passed to the analysis server with `--client-id`, which it
   /// reports in analytics (for example, `flutter-analyze`).
   final String? clientId;
-  final bool usePlugins;
+
+  /// Whether to enable analyzer plugins (`--plugins` or `--no-plugins`).
+  ///
+  /// When `null`, neither flag is passed and the analysis server applies its
+  /// plugin trust gate.
+  final bool? usePlugins;
+  final bool trustPlugins;
+  final bool alwaysTrustPlugins;
+  final bool neverTrustPlugins;
   final String sdkPath;
   final List<String> directories;
   final ToolContext _toolContext;
@@ -83,7 +94,10 @@ class AnalysisServer {
       '--disable-server-feature-search',
       if (clientId != null) '--client-id=$clientId',
       if (!withFineDependencies) '--no-with-fine-dependencies',
-      if (!usePlugins) '--no-plugins',
+      if (usePlugins == true) '--plugins' else if (usePlugins == false) '--no-plugins',
+      if (trustPlugins) '--trust-plugins',
+      if (alwaysTrustPlugins) '--always-trust-plugins',
+      if (neverTrustPlugins) '--never-trust-plugins',
       if (suppressAnalytics) '--suppress-analytics',
       if (_protocolTrafficLog != null) '--protocol-traffic-log=$_protocolTrafficLog',
     ];

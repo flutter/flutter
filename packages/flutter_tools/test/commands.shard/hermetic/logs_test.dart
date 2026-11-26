@@ -13,9 +13,9 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/logs.dart';
-import 'package:flutter_tools/src/device.dart';
 import 'package:test/fake.dart';
 
+import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/fakes.dart';
@@ -41,62 +41,39 @@ void main() {
       Cache.enableLocking();
     });
 
-    testUsingContext('fail with a bad device id', () async {
+    TestFlutterCommandRunner createRunner(LogsCommand command) =>
+        TestFlutterCommandRunner(deviceManager: deviceManager, toolContext: toolContext)
+          ..addCommand(command);
+
+    test('fail with a bad device id', () async {
       final command = LogsCommand(
         toolContext: toolContext,
         sigterm: FakeProcessSignal(),
         sigint: FakeProcessSignal(),
       );
       await expectLater(
-        () => createTestCommandRunner(command).run(<String>['-d', 'abc123', 'logs']),
+        () => createRunner(command).run(<String>['-d', 'abc123', 'logs']),
         throwsA(
           isA<ToolExit>().having((ToolExit error) => error.exitCode, 'exitCode', anyOf(isNull, 1)),
         ),
       );
-    }, overrides: <Type, Generator>{DeviceManager: () => deviceManager, Platform: () => platform});
+    });
 
-    testUsingContext('does not try to complete exitCompleter multiple times', () async {
+    test('does not try to complete exitCompleter multiple times', () async {
       final fakeDevice = FakeDevice('phone', deviceId);
       deviceManager.attachedDevices.add(fakeDevice);
       final termSignal = FakeProcessSignal();
       final intSignal = FakeProcessSignal();
       final command = LogsCommand(toolContext: toolContext, sigterm: termSignal, sigint: intSignal);
-      final Future<void> commandFuture = createTestCommandRunner(command)
+      final Future<void> commandFuture = createRunner(command)
           .run(<String>['-d', deviceId, 'logs']);
       intSignal.send(1);
       termSignal.send(1);
       await pumpEventQueue(times: 5);
       await commandFuture;
-    }, overrides: <Type, Generator>{DeviceManager: () => deviceManager, Platform: () => platform});
+    });
 
-    testUsingContext(
-      'logs command parses --no-adb-log-filtering and disables filtering on device',
-      () async {
-        final fakeDevice = FakeAndroidDevice('phone', deviceId);
-        deviceManager.attachedDevices.add(fakeDevice);
-
-        expect(fakeDevice.lastPassedAdbLogFiltering, isNull);
-
-        final termSignal = FakeProcessSignal();
-        final intSignal = FakeProcessSignal();
-        final command = LogsCommand(
-          toolContext: toolContext,
-          sigterm: termSignal,
-          sigint: intSignal,
-        );
-
-        final Future<void> commandFuture = createTestCommandRunner(command)
-            .run(<String>['-d', deviceId, 'logs', '--no-adb-log-filtering']);
-
-        intSignal.send(1);
-        await commandFuture;
-
-        expect(fakeDevice.lastPassedAdbLogFiltering, isFalse);
-      },
-      overrides: <Type, Generator>{Platform: () => platform, DeviceManager: () => deviceManager},
-    );
-
-    testUsingContext('logs command defaults to filtering enabled on device', () async {
+    test('logs command parses --no-adb-log-filtering and disables filtering on device', () async {
       final fakeDevice = FakeAndroidDevice('phone', deviceId);
       deviceManager.attachedDevices.add(fakeDevice);
 
@@ -106,38 +83,57 @@ void main() {
       final intSignal = FakeProcessSignal();
       final command = LogsCommand(toolContext: toolContext, sigterm: termSignal, sigint: intSignal);
 
-      final Future<void> commandFuture = createTestCommandRunner(command)
+      final Future<void> commandFuture = createRunner(command)
+          .run(<String>['-d', deviceId, 'logs', '--no-adb-log-filtering']);
+
+      intSignal.send(1);
+      await commandFuture;
+
+      expect(fakeDevice.lastPassedAdbLogFiltering, isFalse);
+    });
+
+    test('logs command defaults to filtering enabled on device', () async {
+      final fakeDevice = FakeAndroidDevice('phone', deviceId);
+      deviceManager.attachedDevices.add(fakeDevice);
+
+      expect(fakeDevice.lastPassedAdbLogFiltering, isNull);
+
+      final termSignal = FakeProcessSignal();
+      final intSignal = FakeProcessSignal();
+      final command = LogsCommand(toolContext: toolContext, sigterm: termSignal, sigint: intSignal);
+
+      final Future<void> commandFuture = createRunner(command)
           .run(<String>['-d', deviceId, 'logs']);
 
       intSignal.send(1);
       await commandFuture;
 
       expect(fakeDevice.lastPassedAdbLogFiltering, isTrue);
-    }, overrides: <Type, Generator>{Platform: () => platform, DeviceManager: () => deviceManager});
+    });
 
-    testUsingContext('clears logs when --clear flag is specified', () async {
+    test('clears logs when --clear flag is specified', () async {
       final fakeDevice = _LoggingFakeDevice('phone', deviceId);
       deviceManager.attachedDevices.add(fakeDevice);
       final termSignal = FakeProcessSignal();
       final intSignal = FakeProcessSignal();
       final command = LogsCommand(toolContext: toolContext, sigterm: termSignal, sigint: intSignal);
-      final Future<void> commandFuture = createTestCommandRunner(command)
+      final Future<void> commandFuture = createRunner(command)
           .run(<String>['-d', deviceId, 'logs', '--clear']);
       termSignal.send(1);
       await pumpEventQueue(times: 5);
       await commandFuture;
 
       expect(fakeDevice.clearLogsCalled, isTrue);
-    }, overrides: <Type, Generator>{DeviceManager: () => deviceManager, Platform: () => platform});
+    });
 
-    testUsingContext('streams log lines to logger', () async {
+    test('streams log lines to logger', () async {
       final logReader = FakeDeviceLogReader();
       final fakeDevice = _LoggingFakeDevice('phone', deviceId, deviceLogReader: logReader);
       deviceManager.attachedDevices.add(fakeDevice);
       final termSignal = FakeProcessSignal();
       final intSignal = FakeProcessSignal();
       final command = LogsCommand(toolContext: toolContext, sigterm: termSignal, sigint: intSignal);
-      final Future<void> commandFuture = createTestCommandRunner(command)
+      final Future<void> commandFuture = createRunner(command)
           .run(<String>['-d', deviceId, 'logs']);
       await pumpEventQueue(times: 5);
 
@@ -149,9 +145,9 @@ void main() {
       intSignal.send(1);
       await pumpEventQueue(times: 5);
       await commandFuture;
-    }, overrides: <Type, Generator>{DeviceManager: () => deviceManager, Platform: () => platform});
+    });
 
-    testUsingContext('handles applicationPackageFactory when passed', () async {
+    test('handles applicationPackageFactory when passed', () async {
       final logReader = FakeDeviceLogReader();
       final fakeDevice = _LoggingFakeDevice('phone', deviceId, deviceLogReader: logReader);
       deviceManager.attachedDevices.add(fakeDevice);
@@ -164,7 +160,7 @@ void main() {
         sigterm: termSignal,
         sigint: intSignal,
       );
-      final Future<void> commandFuture = createTestCommandRunner(command)
+      final Future<void> commandFuture = createRunner(command)
           .run(<String>['-d', deviceId, 'logs']);
       await pumpEventQueue(times: 5);
 
@@ -173,9 +169,9 @@ void main() {
       intSignal.send(1);
       await pumpEventQueue(times: 5);
       await commandFuture;
-    }, overrides: <Type, Generator>{DeviceManager: () => deviceManager, Platform: () => platform});
+    });
 
-    testUsingContext('throws ToolExit on log reader error', () async {
+    test('throws ToolExit on log reader error', () async {
       final logReader = _ErrorDeviceLogReader();
       final fakeDevice = _LoggingFakeDevice('phone', deviceId, deviceLogReader: logReader);
       deviceManager.attachedDevices.add(fakeDevice);
@@ -183,7 +179,7 @@ void main() {
       final intSignal = FakeProcessSignal();
       final command = LogsCommand(toolContext: toolContext, sigterm: termSignal, sigint: intSignal);
       await expectLater(
-        () => createTestCommandRunner(command).run(<String>['-d', deviceId, 'logs']),
+        () => createRunner(command).run(<String>['-d', deviceId, 'logs']),
         throwsA(
           isA<ToolExit>().having(
             (ToolExit error) => error.message,
@@ -192,7 +188,7 @@ void main() {
           ),
         ),
       );
-    }, overrides: <Type, Generator>{DeviceManager: () => deviceManager, Platform: () => platform});
+    });
   });
 }
 

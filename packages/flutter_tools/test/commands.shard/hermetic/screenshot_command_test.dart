@@ -20,7 +20,6 @@ import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -82,7 +81,7 @@ void main() {
       );
     });
 
-    testUsingContext('device screenshots require device', () async {
+    test('device screenshots require device', () async {
       final toolContext = FakeToolContext(fs: MemoryFileSystem.test());
       await expectLater(
         () =>
@@ -187,7 +186,7 @@ void main() {
       toolContext = FakeToolContext(fs: MemoryFileSystem.test(), logger: logger);
     });
 
-    testUsingContext('should not throw for a single device', () async {
+    test('should not throw for a single device', () async {
       final command = ScreenshotCommand(toolContext: toolContext);
 
       final deviceUnsupportedForProject = _ScreenshotDevice(
@@ -198,10 +197,14 @@ void main() {
 
       testDeviceManager.devices = <Device>[deviceUnsupportedForProject];
 
-      await createTestCommandRunner(command).run(<String>['screenshot']);
-    }, overrides: <Type, Generator>{DeviceManager: () => testDeviceManager});
+      final runner = TestFlutterCommandRunner(
+        deviceManager: testDeviceManager,
+        toolContext: toolContext,
+      )..addCommand(command);
+      await runner.run(<String>['screenshot']);
+    });
 
-    testUsingContext('should tool exit for multiple devices', () async {
+    test('should tool exit for multiple devices', () async {
       final command = ScreenshotCommand(toolContext: toolContext);
 
       final devicesUnsupportedForProject = <_ScreenshotDevice>[
@@ -211,8 +214,12 @@ void main() {
 
       testDeviceManager.devices = devicesUnsupportedForProject;
 
+      final runner = TestFlutterCommandRunner(
+        deviceManager: testDeviceManager,
+        toolContext: toolContext,
+      )..addCommand(command);
       await expectLater(
-        () => createTestCommandRunner(command).run(<String>['screenshot']),
+        () => runner.run(<String>['screenshot']),
         throwsToolExit(message: 'Must have a connected device for screenshot type device'),
       );
 
@@ -225,7 +232,7 @@ Device 1 (mobile) • 123 • android • 1.2.3
 Device 2 (mobile) • 456 • android • 1.2.3
 '''),
       );
-    }, overrides: <Type, Generator>{DeviceManager: () => testDeviceManager});
+    });
   });
 
   group('Skia screenshot execution', () {
