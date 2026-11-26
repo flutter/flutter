@@ -17,7 +17,7 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
 void main() {
-  testWithoutContext('stopApp times out and does not hang forever', () {
+  test('stopApp times out and does not hang forever', () {
     fakeAsync((FakeAsync async) {
       final completer = Completer<void>();
       final processManager = FakeProcessManager.list(<FakeCommand>[
@@ -56,7 +56,7 @@ void main() {
     });
   });
 
-  testWithoutContext('uninstallApp times out and does not hang forever', () {
+  test('uninstallApp times out and does not hang forever', () {
     fakeAsync((FakeAsync async) {
       final completer = Completer<void>();
       final processManager = FakeProcessManager.list(<FakeCommand>[

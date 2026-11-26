@@ -53,8 +53,12 @@ class CanvasKitRenderer extends Renderer {
 
   @override
   void debugResetRasterizer() {
+    // Release the WebGL contexts held by the previous rasterizer.
+    _pictureToImageSurface.dispose();
+    rasterizer.dispose();
     rasterizer = _createRasterizer();
     _pictureToImageSurface = rasterizer.createPictureToImageSurface() as CkSurface;
+    debugClear();
   }
 
   @override
@@ -255,9 +259,9 @@ class CanvasKitRenderer extends Renderer {
   /// - **Hardware-Accelerated WebGL Path (`!isSoftware`):** To avoid blocking the main
   ///    thread and prevent massive GPU memory spikes, we use "lazy" texture uploads:
   ///    - **ImageBitmap Source:** We call `MakeLazyImageFromImageBitmap`. The second argument
-  ///      (`true`) transfers ownership of the bitmap to CanvasKit, allowing CanvasKit to
-  ///      automatically close and release the browser-allocated bitmap once it has been
-  ///      successfully uploaded to a GPU texture.
+  ///      (`true`) indicates that the bitmap pixels use premultiplied alpha. CanvasKit retains
+  ///      the bitmap for lazy GPU texture generation across WebGL contexts; closing the bitmap
+  ///      is managed by [EngineImage] and [PictureImageTracker] once all references are released.
   ///    - **Other Texture Sources:** We call `MakeLazyImageFromTextureSourceWithInfo` to register
   ///      the texture source (e.g. canvas or video frame) with WebGL.
   ///    In both cases, the actual upload of the texture to the GPU is deferred until the

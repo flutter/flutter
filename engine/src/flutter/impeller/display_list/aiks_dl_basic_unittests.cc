@@ -849,6 +849,34 @@ TEST_P(AiksTest, StrokedCirclesRenderCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+// Circles much larger than the window. The shape-local coordinates near the
+// visible edges are in the thousands, which the UberSDF shader must handle
+// without losing precision (e.g. on GPUs that run mediump at fp16).
+TEST_P(AiksTest, LargeCirclesRenderCorrectly) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  DlPaint paint;
+  paint.setColor(DlColor::kWhite());
+  builder.DrawPaint(paint);
+
+  // A filled circle whose edge crosses the left half of the window.
+  paint.setColor(DlColor::kBlue());
+  builder.DrawCircle(DlPoint(-600, 400), 1000, paint);
+
+  // A thin stroked circle whose edge crosses the bottom right of the window.
+  paint.setColor(DlColor::kRed());
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(4);
+  builder.DrawCircle(DlPoint(1600, 1300), 1100, paint);
+
+  // A wide stroked circle centered off the top of the window.
+  paint.setColor(DlColor::kGreen());
+  paint.setStrokeWidth(150);
+  builder.DrawCircle(DlPoint(700, -1500), 1700, paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 namespace {
 DlPath ManuallyConstructCirclePath(Scalar radius) {
   DlPathBuilder path_builder;

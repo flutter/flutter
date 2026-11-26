@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/windows/egl/manager.h"
 
+#include <d3d10.h>
+
 #include <string_view>
 #include <vector>
 
@@ -88,6 +90,8 @@ Manager::Manager(GpuPreference gpu_preference,
   if (!InitializeContexts()) {
     return;
   }
+
+  EnableMultithreadProtection();
 
   is_valid_ = true;
 }
@@ -352,6 +356,44 @@ bool Manager::InitializeDevice() {
 
   resolved_device_ = reinterpret_cast<ID3D11Device*>(angle_device);
   return true;
+}
+
+void Manager::EnableMultithreadProtection() {
+  // The render context (raster thread) and the resource context (IO thread)
+  // share ANGLE's single D3D11 device, so both threads' work ends up on the
+  // device's immediate context, which is not thread safe.
+  //
+  // ANGLE is built with angle_force_context_check_every_call, which makes GL
+  // calls take ANGLE's global mutex. However, EGL calls like eglSwapBuffers and
+  // eglMakeCurrent now only take a per-display mutex, so they no longer
+  // exclude GL calls on other threads. For example, the raster thread's
+  // present can run at the same time as the IO thread's texture upload, which
+  // corrupts the driver's state and crashes.
+  //
+  // Turn on Direct3D's own locking so that each call on the immediate context
+  // is atomic. This prevents the driver crash, but it does not serialize
+  // ANGLE's own state that is shared between contexts.
+  //
+  // TODO(mattkae): Remove this once ANGLE's EGL calls exclude GL calls again.
+  // See: https://github.com/flutter/flutter/issues/196618
+  Microsoft::WRL::ComPtr<ID3D11Device> device;
+  if (!GetDevice(&device) || !device) {
+    FML_LOG(WARNING) << "Unable to get ANGLE's D3D11 device to enable "
+                        "multithread protection.";
+    return;
+  }
+
+  Microsoft::WRL::ComPtr<ID3D11DeviceContext> device_context;
+  device->GetImmediateContext(&device_context);
+
+  Microsoft::WRL::ComPtr<ID3D10Multithread> multithread;
+  if (!device_context || FAILED(device_context.As(&multithread))) {
+    FML_LOG(WARNING) << "ANGLE's D3D11 device does not support multithread "
+                        "protection.";
+    return;
+  }
+
+  multithread->SetMultithreadProtected(TRUE);
 }
 
 void Manager::CleanUp() {

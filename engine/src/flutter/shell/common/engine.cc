@@ -152,6 +152,11 @@ void Engine::SetupDefaultFontManager() {
   font_collection_->SetupDefaultFontManager(settings_.font_initialization_data);
 }
 
+void Engine::DeferDefaultFontManager() {
+  TRACE_EVENT0("flutter", "Engine::DeferDefaultFontManager");
+  font_collection_->DeferDefaultFontManager(settings_.font_initialization_data);
+}
+
 std::shared_ptr<AssetManager> Engine::GetAssetManager() {
   return asset_manager_;
 }
@@ -229,11 +234,12 @@ Engine::RunStatus Engine::Run(RunConfiguration configuration) {
   }
 
   // If the embedding prefetched the default font manager, then set up the
-  // font manager later in the engine launch process.  This makes it less
-  // likely that the setup will need to wait for the prefetch to complete.
+  // font manager later in the engine launch process and defer resolving it
+  // until first font usage. This avoids blocking the UI thread if the
+  // background prefetch is still in flight.
   auto root_isolate_create_callback = [&]() {
     if (settings_.prefetched_default_font_manager) {
-      SetupDefaultFontManager();
+      DeferDefaultFontManager();
     }
   };
 

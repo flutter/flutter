@@ -10,7 +10,11 @@
 #if FML_OS_WIN
 #define FLUTTER_GPU_EXPORT __declspec(dllexport)
 #else  // FML_OS_WIN
-#define FLUTTER_GPU_EXPORT __attribute__((visibility("default")))
+// `used` prevents LTO from internalizing or dead-stripping these symbols. They
+// are only referenced at runtime via dlsym (Dart FFI process lookup), and
+// ld64.lld does not honor -exported_symbols_list when deciding what LTO may
+// strip from an executable.
+#define FLUTTER_GPU_EXPORT __attribute__((visibility("default"), used))
 #endif  // FML_OS_WIN
 
 #endif  // FLUTTER_LIB_GPU_EXPORT_H_

@@ -24,6 +24,7 @@ import '../experimental/extension_build_manager.dart';
 import '../features.dart';
 import '../macos/xcode.dart';
 import '../runner/flutter_command.dart';
+import '../template.dart';
 import '../windows/visual_studio.dart';
 import 'build_aar.dart';
 import 'build_apk.dart';
@@ -45,6 +46,7 @@ class BuildCommand extends FlutterCommand {
     required AppleContext appleContext,
     required BuildSystem buildSystem,
     required FeatureFlags featureFlags,
+    required TemplatePathProvider templatePathProvider,
     required TemplateRenderer templateRenderer,
     required ToolContext toolContext,
     AndroidBuilder? androidBuilder,
@@ -58,7 +60,7 @@ class BuildCommand extends FlutterCommand {
       appleContext: appleContext,
       toolContext: toolContext,
     );
-    final AndroidBuilder effectiveAndroidBuilder =
+    final AndroidBuilder resolvedAndroidBuilder =
         androidBuilder ??
         AndroidGradleBuilder.fromContexts(
           analytics: analytics,
@@ -67,7 +69,7 @@ class BuildCommand extends FlutterCommand {
         );
     _addSubcommand(
       BuildAarCommand(
-        androidBuilder: effectiveAndroidBuilder,
+        androidBuilder: resolvedAndroidBuilder,
         androidContext: androidContext,
         buildSystem: buildSystem,
         toolContext: toolContext,
@@ -76,7 +78,7 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildApkCommand(
-        androidBuilder: effectiveAndroidBuilder,
+        androidBuilder: resolvedAndroidBuilder,
         androidContext: androidContext,
         buildSystem: buildSystem,
         toolContext: toolContext,
@@ -85,9 +87,10 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildAppBundleCommand(
-        androidBuilder: effectiveAndroidBuilder,
+        androidBuilder: resolvedAndroidBuilder,
         androidContext: androidContext,
         buildSystem: buildSystem,
+        templatePathProvider: templatePathProvider,
         templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
@@ -129,6 +132,7 @@ class BuildCommand extends FlutterCommand {
         cocoaPods: appleContext.cocoaPods,
         codesign: codesign,
         featureFlags: featureFlags,
+        templatePathProvider: templatePathProvider,
         templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,

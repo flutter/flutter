@@ -8,15 +8,22 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/package_config.dart';
 
 void main() {
   late FileSystem testFileSystem;
+
+  AssetBundle createBundle() => AssetBundleFactory.defaultInstance(
+    fileSystem: testFileSystem,
+    flutterRoot: getFlutterRoot(),
+    logger: BufferLogger.test(),
+    platform: FakePlatform(),
+  ).createBundle();
 
   String fixPath(String path) {
     // The in-memory file system is strict about slashes on Windows being the
@@ -62,7 +69,7 @@ $fontsSection
     List<String> packages,
     String expectedAssetManifest,
   ) async {
-    final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+    final AssetBundle bundle = createBundle();
     await bundle.build(
       packageConfigPath: '.dart_tool/package_config.json',
       targetPlatform: TargetPlatform.tester,
@@ -103,254 +110,205 @@ $fontsSection
       );
     });
 
-    testUsingContext(
-      'App includes neither font manifest nor fonts when no defines fonts',
-      () async {
-        final deps = <String, String>{'test_package': 'p/p/'};
-        writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFiles(
-          directory: testFileSystem.currentDirectory,
-          packages: deps,
-          mainLibName: 'test',
-        );
-        writePubspecFile('p/p/pubspec.yaml', 'test_package');
+    test('App includes neither font manifest nor fonts when no defines fonts', () async {
+      final deps = <String, String>{'test_package': 'p/p/'};
+      writePubspecFile('pubspec.yaml', 'test');
+      writePackageConfigFiles(
+        directory: testFileSystem.currentDirectory,
+        packages: deps,
+        mainLibName: 'test',
+      );
+      writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-        await bundle.build(
-          packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
-        );
-        expect(
-          bundle.entries.keys,
-          unorderedEquals(<String>['AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z']),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      final AssetBundle bundle = createBundle();
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        targetPlatform: TargetPlatform.tester,
+      );
+      expect(
+        bundle.entries.keys,
+        unorderedEquals(<String>['AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z']),
+      );
+    });
 
-    testUsingContext(
-      'App font uses font file from package',
-      () async {
-        const fontsSection = '''
+    test('App font uses font file from package', () async {
+      const fontsSection = '''
        - family: foo
          fonts:
            - asset: packages/test_package/bar
 ''';
-        writePubspecFile('pubspec.yaml', 'my_app', fontsSection: fontsSection);
+      writePubspecFile('pubspec.yaml', 'my_app', fontsSection: fontsSection);
 
-        writePackageConfigFiles(
-          directory: testFileSystem.currentDirectory,
+      writePackageConfigFiles(
+        directory: testFileSystem.currentDirectory,
 
-          packages: <String, String>{'test_package': 'p/p/'},
-          mainLibName: 'my_app',
-        );
-        writePubspecFile('p/p/pubspec.yaml', 'test_package');
+        packages: <String, String>{'test_package': 'p/p/'},
+        mainLibName: 'my_app',
+      );
+      writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
-        const font = 'bar';
-        writeFontAsset('p/p/lib/', font);
+      const font = 'bar';
+      writeFontAsset('p/p/lib/', font);
 
-        const expectedFontManifest =
-            '[{"fonts":[{"asset":"packages/test_package/bar"}],"family":"foo"}]';
-        await buildAndVerifyFonts(
-          <String>[],
-          <String>[font],
-          <String>['test_package'],
-          expectedFontManifest,
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      const expectedFontManifest =
+          '[{"fonts":[{"asset":"packages/test_package/bar"}],"family":"foo"}]';
+      await buildAndVerifyFonts(
+        <String>[],
+        <String>[font],
+        <String>['test_package'],
+        expectedFontManifest,
+      );
+    });
 
-    testUsingContext(
-      'App font uses local font file and package font file',
-      () async {
-        const fontsSection = '''
+    test('App font uses local font file and package font file', () async {
+      const fontsSection = '''
        - family: foo
          fonts:
            - asset: packages/test_package/bar
            - asset: a/bar
 ''';
-        writePubspecFile('pubspec.yaml', 'my_app', fontsSection: fontsSection);
-        writePackageConfigFiles(
-          directory: testFileSystem.currentDirectory,
+      writePubspecFile('pubspec.yaml', 'my_app', fontsSection: fontsSection);
+      writePackageConfigFiles(
+        directory: testFileSystem.currentDirectory,
 
-          packages: <String, String>{'test_package': 'p/p/'},
-          mainLibName: 'my_app',
-        );
-        writePubspecFile('p/p/pubspec.yaml', 'test_package');
+        packages: <String, String>{'test_package': 'p/p/'},
+        mainLibName: 'my_app',
+      );
+      writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
-        const packageFont = 'bar';
-        writeFontAsset('p/p/lib/', packageFont);
-        const localFont = 'a/bar';
-        writeFontAsset('', localFont);
+      const packageFont = 'bar';
+      writeFontAsset('p/p/lib/', packageFont);
+      const localFont = 'a/bar';
+      writeFontAsset('', localFont);
 
-        const expectedFontManifest =
-            '[{"fonts":[{"asset":"packages/test_package/bar"},{"asset":"a/bar"}],'
-            '"family":"foo"}]';
-        await buildAndVerifyFonts(<String>[localFont], <String>[packageFont], <String>[
-          'test_package',
-        ], expectedFontManifest);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      const expectedFontManifest =
+          '[{"fonts":[{"asset":"packages/test_package/bar"},{"asset":"a/bar"}],'
+          '"family":"foo"}]';
+      await buildAndVerifyFonts(<String>[localFont], <String>[packageFont], <String>[
+        'test_package',
+      ], expectedFontManifest);
+    });
 
-    testUsingContext(
-      'App uses package font with own font file',
-      () async {
-        final deps = <String, String>{'test_package': 'p/p/'};
-        writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFiles(
-          directory: testFileSystem.currentDirectory,
+    test('App uses package font with own font file', () async {
+      final deps = <String, String>{'test_package': 'p/p/'};
+      writePubspecFile('pubspec.yaml', 'test');
+      writePackageConfigFiles(
+        directory: testFileSystem.currentDirectory,
 
-          packages: deps,
-          mainLibName: 'test',
-        );
-        const fontsSection = '''
+        packages: deps,
+        mainLibName: 'test',
+      );
+      const fontsSection = '''
        - family: foo
          fonts:
            - asset: a/bar
 ''';
-        writePubspecFile('p/p/pubspec.yaml', 'test_package', fontsSection: fontsSection);
+      writePubspecFile('p/p/pubspec.yaml', 'test_package', fontsSection: fontsSection);
 
-        const font = 'a/bar';
-        writeFontAsset('p/p/', font);
+      const font = 'a/bar';
+      writeFontAsset('p/p/', font);
 
-        const expectedFontManifest =
-            '[{"family":"packages/test_package/foo",'
-            '"fonts":[{"asset":"packages/test_package/a/bar"}]}]';
-        await buildAndVerifyFonts(
-          <String>[],
-          <String>[font],
-          <String>['test_package'],
-          expectedFontManifest,
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      const expectedFontManifest =
+          '[{"family":"packages/test_package/foo",'
+          '"fonts":[{"asset":"packages/test_package/a/bar"}]}]';
+      await buildAndVerifyFonts(
+        <String>[],
+        <String>[font],
+        <String>['test_package'],
+        expectedFontManifest,
+      );
+    });
 
-    testUsingContext(
-      'App uses package font with font file from another package',
-      () async {
-        final deps = <String, String>{'test_package': 'p/p/', 'test_package2': 'p2/p/'};
-        writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFiles(
-          directory: testFileSystem.currentDirectory,
+    test('App uses package font with font file from another package', () async {
+      final deps = <String, String>{'test_package': 'p/p/', 'test_package2': 'p2/p/'};
+      writePubspecFile('pubspec.yaml', 'test');
+      writePackageConfigFiles(
+        directory: testFileSystem.currentDirectory,
 
-          packages: deps,
-          mainLibName: 'test',
-        );
-        const fontsSection = '''
+        packages: deps,
+        mainLibName: 'test',
+      );
+      const fontsSection = '''
        - family: foo
          fonts:
            - asset: packages/test_package2/bar
 ''';
-        writePubspecFile('p/p/pubspec.yaml', 'test_package', fontsSection: fontsSection);
-        writePubspecFile('p2/p/pubspec.yaml', 'test_package2');
+      writePubspecFile('p/p/pubspec.yaml', 'test_package', fontsSection: fontsSection);
+      writePubspecFile('p2/p/pubspec.yaml', 'test_package2');
 
-        const font = 'bar';
-        writeFontAsset('p2/p/lib/', font);
+      const font = 'bar';
+      writeFontAsset('p2/p/lib/', font);
 
-        const expectedFontManifest =
-            '[{"family":"packages/test_package/foo",'
-            '"fonts":[{"asset":"packages/test_package2/bar"}]}]';
-        await buildAndVerifyFonts(
-          <String>[],
-          <String>[font],
-          <String>['test_package2'],
-          expectedFontManifest,
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      const expectedFontManifest =
+          '[{"family":"packages/test_package/foo",'
+          '"fonts":[{"asset":"packages/test_package2/bar"}]}]';
+      await buildAndVerifyFonts(
+        <String>[],
+        <String>[font],
+        <String>['test_package2'],
+        expectedFontManifest,
+      );
+    });
 
-    testUsingContext(
-      'App uses package font with properties and own font file',
-      () async {
-        final deps = <String, String>{'test_package': 'p/p/'};
-        writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFiles(
-          directory: testFileSystem.currentDirectory,
+    test('App uses package font with properties and own font file', () async {
+      final deps = <String, String>{'test_package': 'p/p/'};
+      writePubspecFile('pubspec.yaml', 'test');
+      writePackageConfigFiles(
+        directory: testFileSystem.currentDirectory,
 
-          packages: deps,
-          mainLibName: 'test',
-        );
+        packages: deps,
+        mainLibName: 'test',
+      );
 
-        const pubspec = '''
+      const pubspec = '''
        - family: foo
          fonts:
            - style: italic
              weight: 400
              asset: a/bar
 ''';
-        writePubspecFile('p/p/pubspec.yaml', 'test_package', fontsSection: pubspec);
-        const font = 'a/bar';
-        writeFontAsset('p/p/', font);
+      writePubspecFile('p/p/pubspec.yaml', 'test_package', fontsSection: pubspec);
+      const font = 'a/bar';
+      writeFontAsset('p/p/', font);
 
-        const expectedFontManifest =
-            '[{"family":"packages/test_package/foo",'
-            '"fonts":[{"weight":400,"style":"italic","asset":"packages/test_package/a/bar"}]}]';
-        await buildAndVerifyFonts(
-          <String>[],
-          <String>[font],
-          <String>['test_package'],
-          expectedFontManifest,
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      const expectedFontManifest =
+          '[{"family":"packages/test_package/foo",'
+          '"fonts":[{"weight":400,"style":"italic","asset":"packages/test_package/a/bar"}]}]';
+      await buildAndVerifyFonts(
+        <String>[],
+        <String>[font],
+        <String>['test_package'],
+        expectedFontManifest,
+      );
+    });
 
-    testUsingContext(
-      'App uses local font and package font with own font file.',
-      () async {
-        final deps = <String, String>{'test_package': 'p/p/'};
-        const fontsSection = '''
+    test('App uses local font and package font with own font file.', () async {
+      final deps = <String, String>{'test_package': 'p/p/'};
+      const fontsSection = '''
        - family: foo
          fonts:
            - asset: a/bar
 ''';
-        writePubspecFile('pubspec.yaml', 'test', fontsSection: fontsSection);
-        writePackageConfigFiles(
-          directory: testFileSystem.currentDirectory,
-          packages: deps,
-          mainLibName: 'test',
-        );
+      writePubspecFile('pubspec.yaml', 'test', fontsSection: fontsSection);
+      writePackageConfigFiles(
+        directory: testFileSystem.currentDirectory,
+        packages: deps,
+        mainLibName: 'test',
+      );
 
-        writePubspecFile('p/p/pubspec.yaml', 'test_package', fontsSection: fontsSection);
+      writePubspecFile('p/p/pubspec.yaml', 'test_package', fontsSection: fontsSection);
 
-        const font = 'a/bar';
-        writeFontAsset('', font);
-        writeFontAsset('p/p/', font);
+      const font = 'a/bar';
+      writeFontAsset('', font);
+      writeFontAsset('p/p/', font);
 
-        const expectedFontManifest =
-            '[{"fonts":[{"asset":"a/bar"}],"family":"foo"},'
-            '{"family":"packages/test_package/foo",'
-            '"fonts":[{"asset":"packages/test_package/a/bar"}]}]';
-        await buildAndVerifyFonts(<String>[font], <String>[font], <String>[
-          'test_package',
-        ], expectedFontManifest);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      const expectedFontManifest =
+          '[{"fonts":[{"asset":"a/bar"}],"family":"foo"},'
+          '{"family":"packages/test_package/foo",'
+          '"fonts":[{"asset":"packages/test_package/a/bar"}]}]';
+      await buildAndVerifyFonts(<String>[font], <String>[font], <String>[
+        'test_package',
+      ], expectedFontManifest);
+    });
   });
 }

@@ -22,6 +22,7 @@ import '../context/android_context.dart';
 import '../context/tool_context.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
+import '../template.dart';
 import 'build.dart';
 
 class BuildAppBundleCommand extends BuildSubCommand {
@@ -29,6 +30,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
     required this._androidBuilder,
     required this._androidContext,
     required this._buildSystem,
+    required this._templatePathProvider,
     required this._templateRenderer,
     required super.toolContext,
     super.verboseHelp = false,
@@ -72,6 +74,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
   final AndroidBuilder _androidBuilder;
   final AndroidContext _androidContext;
   final BuildSystem _buildSystem;
+  final TemplatePathProvider _templatePathProvider;
   final TemplateRenderer _templateRenderer;
 
   /// The [AndroidBuilder] used to build the app bundle.
@@ -165,8 +168,9 @@ class BuildAppBundleCommand extends BuildSubCommand {
         !getValue(CommonOptions.debugMode)) {
       final validator = DeferredComponentsPrebuildValidator(
         project.directory,
-        toolContext: toolContext,
+        templatePathProvider: _templatePathProvider,
         templateRenderer: _templateRenderer,
+        toolContext: toolContext,
         title: 'Deferred components prebuild validation',
         outputDir: project.buildDirectory.childDirectory(
           DeferredComponentsValidator.kDeferredComponentsTempDirectory,

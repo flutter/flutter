@@ -538,6 +538,15 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
   scrollView.contentSize = CGSizeMake(kScrollViewContentSize, kScrollViewContentSize);
   // This is an arbitrary offset that is not CGPointZero.
   scrollView.contentOffset = CGPointMake(kScrollViewContentSize, kScrollViewContentSize);
+  // This scroll-to-top helper UIScrollView has a non-zero contentOffset and draws nothing itself.
+  // On iOS 26+, UIScrollView automatically applies a scroll edge effect (blur/tint) when its
+  // contentOffset is non-zero, which would otherwise render over the Flutter canvas.
+  if (@available(iOS 26.0, *)) {
+    scrollView.topEdgeEffect.hidden = YES;
+    scrollView.bottomEdgeEffect.hidden = YES;
+    scrollView.leftEdgeEffect.hidden = YES;
+    scrollView.rightEdgeEffect.hidden = YES;
+  }
 
   [self.view addSubview:scrollView];
   self.scrollView = scrollView;

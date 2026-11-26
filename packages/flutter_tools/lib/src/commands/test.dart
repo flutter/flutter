@@ -13,6 +13,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/template.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle_builder.dart';
 import '../context/tool_context.dart';
@@ -29,6 +30,7 @@ import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
 import '../web/compile.dart';
 import '../web/web_constants.dart';
+import '../web/web_debug_config.dart';
 import '../web/web_options.dart';
 
 /// The name of the directory where Integration Tests are placed.
@@ -68,8 +70,10 @@ const _kIntegrationTestDirectory = 'integration_test';
 /// - https://flutter.dev/to/integration-testing
 class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   TestCommand({
+    required this._assetBundleFactory,
     required this._templateRenderer,
     required super.toolContext,
+    super.applicationPackages,
     this.nativeAssetsBuilder,
     FlutterTestRunner? testRunner,
     this.testWrapper = const TestWrapper(),
@@ -380,6 +384,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   /// The interface for starting and configuring the tester.
   final TestWrapper testWrapper;
 
+  final AssetBundleFactory _assetBundleFactory;
   final TemplateRenderer _templateRenderer;
   final FlutterTestRunner? _customTestRunner;
 
@@ -388,6 +393,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       _customTestRunner ??
       FlutterTestRunner(
         analytics: analytics,
+        applicationPackageFactory: applicationPackages,
         templateRenderer: _templateRenderer,
         toolContext: toolContext,
       );
@@ -553,11 +559,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       enableImpeller: ImpellerStatus.fromBool(getValue(DebuggingOptionDescriptors.enableImpeller)),
       enableFlutterGpu: getValue(DebuggingOptionDescriptors.enableFlutterGpu) ?? false,
       debugLogsDirectoryPath: debugLogsDirectoryPath,
-      webConfig: WebDebugConfig(
-        renderer: webRenderer,
-        crossOriginIsolation: getValue(WebOptions.crossOriginIsolation),
-        useWasm: useWasm,
-      ),
+      platformOptions: <PlatformDebuggingOptions>[
+        WebDebugConfig(
+          renderer: webRenderer,
+          crossOriginIsolation: getValue(WebOptions.crossOriginIsolation),
+          useWasm: useWasm,
+        ),
+      ],
       printDtd: getValue(CommonOptions.printDtd),
       enableHcpp: explicitEnableHcpp,
       uninstallApp: getValue(_uninstall),
@@ -568,7 +576,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
             nativeAssetsManifest: null,
             flutterHookResult: null,
           ) // Don't build for host when running integration tests.
-        : (await nativeAssetsBuilder?.buildWithHookResult(buildInfo, toolContext: toolContext) ??
+        : (await nativeAssetsBuilder?.buildWithHookResult(
+                buildInfo,
+                featureFlags: runner!.featureFlags,
+                toolContext: toolContext,
+              ) ??
               (nativeAssetsManifest: null, flutterHookResult: null));
     String? testAssetPath;
     if (buildTestAssets) {
@@ -833,7 +845,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     FlutterHookResult? flutterHookResult,
   }) async {
     final ToolContext(:Config config, :FileSystem fs) = toolContext;
-    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
+    final AssetBundle assetBundle = _assetBundleFactory.createBundle();
     final int build = await assetBundle.build(
       flutterHookResult: flutterHookResult,
       packageConfigPath: packageConfigPath,
@@ -844,7 +856,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }
-    if (_needsRebuild(assetBundle.entries, flavor, flutterHookResult)) {
+    if (await _needsRebuild(assetBundle.entries, flavor, flutterHookResult)) {
       await writeBundle(
         fs.directory(fs.path.join(getBuildDirectory(config, fs), 'unit_test_assets')),
         assetBundle.entries,
@@ -868,15 +880,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
   }
 
-  bool _needsRebuild(
+  Future<bool> _needsRebuild(
     Map<String, AssetBundleEntry> entries,
     String? flavor,
     FlutterHookResult? flutterHookResult,
-  ) {
-    // TODO(andrewkolos): This logic might fail in the future if we change the
-    //  schema of the contents of the asset manifest file and the user does not
-    //  perform a `flutter clean` after upgrading.
-    //  See https://github.com/flutter/flutter/issues/128563.
+  ) async {
     final ToolContext(:Config config, :FileSystem fs) = toolContext;
     final String unitTestAssetsDir = fs.path.join(
       getBuildDirectory(config, fs),
@@ -892,13 +900,24 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       return true;
     }
 
-    for (final MapEntry<String, AssetBundleEntry> entry in entries.entries) {
-      final DevFSContent content = entry.value.content;
+    for (final MapEntry(key: String assetPath, value: AssetBundleEntry assetEntry)
+        in entries.entries) {
+      final File file = fs.file(fs.path.join(unitTestAssetsDir, assetPath));
+      if (!file.existsSync()) {
+        return true;
+      }
+      final DevFSContent content = assetEntry.content;
       if (content is DevFSFileContent) {
-        if (!fs.file(fs.path.join(unitTestAssetsDir, entry.key)).existsSync()) {
+        if (content.isModifiedAfter(lastModified)) {
           return true;
         }
-        if (content.isModifiedAfter(lastModified)) {
+      } else {
+        final List<int> entryBytes = await assetEntry.contentsAsBytes();
+        if (entryBytes.length != await file.length()) {
+          return true;
+        }
+        final List<int> fileBytes = await file.readAsBytes();
+        if (!listEquals(entryBytes, fileBytes)) {
           return true;
         }
       }

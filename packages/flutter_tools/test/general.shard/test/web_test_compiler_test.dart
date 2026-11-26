@@ -16,7 +16,7 @@ import 'package:flutter_tools/src/web/compile.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 void main() {
@@ -29,7 +29,7 @@ void main() {
     );
   });
 
-  testUsingContext('web test compiler issues valid compile command', () async {
+  test('web test compiler issues valid compile command', () async {
     final logger = BufferLogger.test();
     final fileSystem = MemoryFileSystem.test();
     fileSystem.file('project/test/fake_test.dart').createSync(recursive: true);
@@ -121,11 +121,11 @@ void main() {
 
     expect(processManager.hasRemainingExpectations, isFalse);
     expect(fakeAnalytics.sentEvents, isEmpty);
-  }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
+  });
 
   for (final deprecatedJsInterop in <bool>[true, false]) {
     for (final succeeds in <bool>[true, false]) {
-      testUsingContext('web test compiler emits flutterBuildInfo analytics when '
+      test('web test compiler emits flutterBuildInfo analytics when '
           'deprecatedJsInterop: $deprecatedJsInterop (succeeds: $succeeds)', () async {
         final logger = BufferLogger.test();
         final fileSystem = MemoryFileSystem.test();
@@ -233,11 +233,11 @@ void main() {
             error: succeeds ? null : 'ddc-compile-failure',
           ),
         ]);
-      }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
+      });
     }
   }
 
-  testUsingContext('web test compiler issues valid compile command (wasm)', () async {
+  test('web test compiler issues valid compile command (wasm)', () async {
     final logger = BufferLogger.test();
     final fileSystem = MemoryFileSystem.test();
     fileSystem.file('project/test/fake_test.dart').createSync(recursive: true);

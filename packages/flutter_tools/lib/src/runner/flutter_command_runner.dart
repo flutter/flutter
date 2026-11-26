@@ -9,6 +9,7 @@ import 'package:file/file.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../android/gradle_utils.dart';
+import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/bot_detector.dart';
 import '../base/common.dart';
@@ -28,6 +29,7 @@ import '../cache.dart';
 import '../context/android_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
+import '../dart/pub.dart';
 import '../device.dart';
 import '../doctor.dart';
 import '../experimental/extension_manager.dart';
@@ -35,6 +37,7 @@ import '../features.dart';
 import '../ios/plist_parser.dart';
 import '../macos/cocoapods.dart';
 import '../resident_runner.dart';
+import '../template.dart';
 import '../tester/flutter_tester.dart';
 import '../version.dart';
 import '../web/web_device.dart';
@@ -73,12 +76,16 @@ class FlutterCommandRunner extends CommandRunner<void> {
   FlutterCommandRunner({
     required this.analytics,
     required this._androidContext,
+    required this.applicationPackageFactory,
     required this.cocoaPods,
     required this.deviceManager,
+    required this.devtoolsLauncher,
     required this.doctor,
     required this._extensionManager,
     required this.featureFlags,
     required this.plistParser,
+    required this.pub,
+    required this.templatePathProvider,
     required this.templateRenderer,
     required this.toolContext,
     this._verboseHelp = false,
@@ -348,11 +355,17 @@ class FlutterCommandRunner extends CommandRunner<void> {
   /// The [Analytics] instance.
   final Analytics analytics;
 
+  /// The [ApplicationPackageFactory] instance.
+  final ApplicationPackageFactory applicationPackageFactory;
+
   /// The [CocoaPods] instance.
   final CocoaPods cocoaPods;
 
   /// The [DeviceManager] instance.
   final DeviceManager deviceManager;
+
+  /// The [DevtoolsLauncher] instance.
+  final DevtoolsLauncher devtoolsLauncher;
 
   /// The [Doctor] instance.
   final Doctor doctor;
@@ -362,6 +375,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   /// The [PlistParser] instance.
   final PlistParser plistParser;
+
+  /// The [Pub] instance.
+  final Pub pub;
+
+  /// The [TemplatePathProvider] instance.
+  final TemplatePathProvider templatePathProvider;
 
   /// The [TemplateRenderer] instance.
   final TemplateRenderer templateRenderer;
@@ -553,6 +572,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
       :LocalEngineLocator localEngineLocator,
       :Logger logger,
       :OperatingSystemUtils os,
+      :OutputPreferences outputPreferences,
       :Platform platform,
       :Stdio stdio,
       :SystemClock systemClock,
@@ -596,9 +616,15 @@ class FlutterCommandRunner extends CommandRunner<void> {
     final bool useWrapping = topLevelResults.wasParsed(FlutterGlobalOptions.kWrapFlag)
         ? topLevelResults[FlutterGlobalOptions.kWrapFlag] as bool
         : stdio.terminalColumns != null && topLevelResults[FlutterGlobalOptions.kWrapFlag] as bool;
+    final showColor = topLevelResults[FlutterGlobalOptions.kColorFlag] as bool?;
+    outputPreferences.configure(
+      showColor: showColor,
+      wrapColumn: wrapColumn,
+      wrapText: useWrapping,
+    );
     contextOverrides[OutputPreferences] = OutputPreferences(
       wrapText: useWrapping,
-      showColor: topLevelResults[FlutterGlobalOptions.kColorFlag] as bool?,
+      showColor: showColor,
       wrapColumn: wrapColumn,
     );
 
@@ -702,7 +728,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         final bool shouldPrintDtdUri =
             topLevelResults[FlutterGlobalOptions.kPrintDtd] as bool? ?? false;
         if (shouldPrintDtdUri) {
-          DevtoolsLauncher.instance?.printDtdUri = shouldPrintDtdUri;
+          devtoolsLauncher.printDtdUri = shouldPrintDtdUri;
         }
 
         await super.runCommand(topLevelResults);

@@ -84,6 +84,7 @@ class BuildWindowsCommand extends BuildSubCommand {
       buildInfo,
       targetPlatform,
       analytics: analytics,
+      featureFlags: _featureFlags,
       target: targetFile,
       toolContext: toolContext,
       visualStudioOverride: _visualStudio,

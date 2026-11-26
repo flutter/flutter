@@ -7,6 +7,7 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterShell.h"
 
+#include "flutter/common/task_runners.h"
 #include "flutter/shell/common/thread_host.h"
 
 @interface FlutterShell ()
@@ -16,6 +17,9 @@
 // Spawned engines return the same ThreadHost as the engine they were spawned
 // from. null before creation and after destroyThreadHost.
 @property(nonatomic, readonly, nullable) const flutter::ThreadHost* threadHost;
+
+/// Creates the platform and raster task runner wrappers from `taskRunners`.
+- (void)adoptTaskRunners:(const flutter::TaskRunners&)taskRunners;
 
 @end
 

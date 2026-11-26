@@ -157,12 +157,10 @@ template("msvc_toolchain") {
     }
 
     tool("asm") {
-      is_msvc_assembler = true
       if (toolchain_args.current_cpu == "x64") {
         ml = "ml64.exe"
         x64 = "-D_ML64_X64"
       } else if (toolchain_args.current_cpu == "arm64") {
-        is_msvc_assembler = false
         prefix = rebase_path("$clang_base_path/bin", root_build_dir)
         ml = "${compiler_prefix}${prefix}/clang-cl.exe --target=arm64-windows"
         x64 = ""
@@ -170,12 +168,7 @@ template("msvc_toolchain") {
         ml = "ml.exe"
         x64 = ""
       }
-      command = "\"$python_path\" $tool_wrapper_path asm-wrapper $env $ml $x64 {{defines}} {{include_dirs}} {{asmflags}} "
-      if (is_msvc_assembler) {
-        command += "-c -o{{output}} {{source}}"
-      } else {
-        command += "/c /Fo{{output}} {{source}}"
-      }
+      command = "\"$python_path\" $tool_wrapper_path asm-wrapper $env $ml $x64 {{defines}} {{include_dirs}} {{asmflags}} /c /Fo{{output}} {{source}}"
       outputs = [
         "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.obj",
       ]

@@ -5,6 +5,8 @@
 #ifndef FLUTTER_IMPELLER_GEOMETRY_CONSTANTS_H_
 #define FLUTTER_IMPELLER_GEOMETRY_CONSTANTS_H_
 
+#include <cstddef>
+
 namespace impeller {
 
 // e
@@ -55,6 +57,14 @@ constexpr float kPhi = 1.61803398874989484820f;
 
 // 0.001
 constexpr float kEhCloseEnough = 1e-3f;
+
+// The number of line segments per quarter turn beyond which subdividing a
+// curve further cannot make it more accurate in float32: past this, the
+// chord error R(1 - cos(pi/4N)) of an arc of radius R is smaller than
+// float32 rounding error (R * 2^-24). N = (pi/4) / acos(1 - 2^-24) ~= 2274.76.
+//
+// Tessellators use this to bound the work done for extremely large geometry.
+constexpr size_t kMaxSegmentsPerQuarterTurn = 2275;
 
 }  // namespace impeller
 
