@@ -51,8 +51,8 @@ const kKnownHardware = <String, HardwareType>{
   'samsungexynos7570': HardwareType.physical,
 };
 
-/// Timeout for `adb shell getprop`.
-const _kGetpropTimeout = Duration(seconds: 30);
+/// How long `adb shell getprop` may run before a slow warning is shown.
+const _kGetpropSlowWarningDuration = Duration(seconds: 30);
 
 /// A physical Android device or emulator.
 ///
@@ -106,35 +106,30 @@ class AndroidDevice extends Device {
     final List<String> propCommand = adbCommandForDevice(<String>['shell', 'getprop']);
     _logger.printTrace(propCommand.join(' '));
 
+    final Status status = _logger.startSpinner(
+      timeout: _kGetpropSlowWarningDuration,
+      slowWarningCallback: () =>
+          'Retrieving device properties for $name is taking longer than expected. '
+          'Ensure the device is responsive.',
+    );
     try {
-      final Process process = await _processManager.start(propCommand);
-      final List<Object> result;
-      try {
-        // Decode as latin1; getprop output is not guaranteed to be valid UTF-8.
-        result = await Future.wait<Object>(<Future<Object>>[
-          process.exitCode,
-          latin1.decodeStream(process.stdout),
-          latin1.decodeStream(process.stderr),
-        ]).timeout(_kGetpropTimeout);
-      } on TimeoutException {
-        // Kill adb so it does not leak.
-        process.kill();
-        _logger.printError(
-          'Timed out retrieving device properties for $name; the device may be unresponsive.',
-        );
-        return properties;
-      }
-      final exitCode = result[0] as int;
-      final stdout = result[1] as String;
-      final stderr = result[2] as String;
-      if (exitCode == 0 || _allowHeapCorruptionOnWindows(exitCode, _platform)) {
-        properties = parseAdbDeviceProperties(stdout);
+      // We pass an encoding of latin1 so that we don't try and interpret the
+      // `adb shell getprop` result as UTF8.
+      final ProcessResult result = await _processManager.run(
+        propCommand,
+        stdoutEncoding: latin1,
+        stderrEncoding: latin1,
+      );
+      if (result.exitCode == 0 || _allowHeapCorruptionOnWindows(result.exitCode, _platform)) {
+        properties = parseAdbDeviceProperties(result.stdout as String);
       } else {
-        _logger.printError('Error $exitCode retrieving device properties for $name:');
-        _logger.printError(stderr);
+        _logger.printError('Error ${result.exitCode} retrieving device properties for $name:');
+        _logger.printError(result.stderr as String);
       }
     } on ProcessException catch (error) {
       _logger.printError('Error retrieving device properties for $name: $error');
+    } finally {
+      status.stop();
     }
     return properties;
   }();

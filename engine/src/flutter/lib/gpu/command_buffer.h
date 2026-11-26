@@ -11,54 +11,43 @@
 #include "flutter/lib/gpu/context.h"
 #include "flutter/lib/gpu/device_buffer.h"
 #include "flutter/lib/gpu/export.h"
+#include "flutter/lib/gpu/recording.h"
 #include "flutter/lib/gpu/texture.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
-#include "impeller/renderer/blit_pass.h"
 #include "impeller/renderer/command_buffer.h"
-#include "impeller/renderer/compute_pass.h"
 #include "impeller/renderer/context.h"
-#include "impeller/renderer/render_pass.h"
-#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace flutter {
 namespace gpu {
 
+class CommandBufferEncoder;
+class ReplayQueue;
+
+/// Records passes on the calling thread, and hands each one to the replay
+/// queue when it ends, so that encoding overlaps recording the next pass.
 class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
   DEFINE_WRAPPERTYPEINFO();
   FML_FRIEND_MAKE_REF_COUNTED(CommandBuffer);
 
  public:
-  CommandBuffer(std::shared_ptr<impeller::Context> context,
-                std::shared_ptr<impeller::CommandBuffer> command_buffer);
+  /// Encodes on [replay_queue], or on the calling thread when it is null.
+  explicit CommandBuffer(std::shared_ptr<impeller::Context> context,
+                         std::shared_ptr<ReplayQueue> replay_queue = nullptr);
 
-  std::shared_ptr<impeller::CommandBuffer> GetCommandBuffer();
+  /// Ends the open pass, then opens a pass of [kind] for [owner]. Returns the
+  /// recording, or null if this command buffer was already submitted.
+  PassRecording* BeginPass(PassRecording::Kind kind, const void* owner);
 
-  /// Ends the open pass, then creates a render pass for [render_target] and
-  /// makes it the open pass. Returns null if either step fails.
-  ///
-  /// The open pass is ended before the new backend pass is created, because
-  /// the Metal and Vulkan render pass constructors begin encoding, and Metal
-  /// allows one active encoder per command buffer.
-  std::shared_ptr<impeller::RenderPass> CreateRenderPass(
-      const impeller::RenderTarget& render_target);
+  /// Ends the open pass if [owner] began it. Does nothing if it was already
+  /// ended by a later command.
+  void EndPass(const void* owner);
 
-  /// Ends [render_pass] if it is the open pass. Does nothing if it was
-  /// already ended by a later command.
-  bool EndRenderPass(const impeller::RenderPass* render_pass);
-
-  /// Ends the open pass, then creates a compute pass and makes it the open
-  /// pass. Returns null if either step fails.
-  ///
-  /// The open pass is ended first for the same reason as in
-  /// `CreateRenderPass`: the Metal compute pass constructor begins encoding.
-  std::shared_ptr<impeller::ComputePass> CreateComputePass();
-
-  /// Ends [compute_pass] if it is the open pass. Does nothing if it was
-  /// already ended by a later command. Returns an error if the pass fails to
-  /// encode. [compute_pass] must not be null.
-  absl::Status EndComputePass(const impeller::ComputePass* compute_pass);
+  /// The recording [owner] began, or null if it has ended.
+  PassRecording* GetOpenPass(const void* owner) const {
+    return owner == open_pass_owner_ ? open_pass_.get() : nullptr;
+  }
 
   const std::shared_ptr<impeller::Context>& GetContext() const;
 
@@ -83,6 +72,8 @@ class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
                             impeller::IRect source_region,
                             impeller::IPoint destination_origin);
 
+  /// Submits the recorded passes. On the replay queue this returns before they
+  /// are encoded, and failures are reported to the completion callbacks.
   bool Submit();
   bool Submit(
       const impeller::CommandBuffer::CompletionCallback& completion_callback);
@@ -90,32 +81,17 @@ class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
   ~CommandBuffer() override;
 
  private:
+  void EndOpenPass();
+
+  /// The recording for copies, which share a pass while they are consecutive.
+  PassRecording* OpenBlitPass();
+
   std::shared_ptr<impeller::Context> context_;
-  std::shared_ptr<impeller::CommandBuffer> command_buffer_;
+  std::shared_ptr<ReplayQueue> replay_queue_;
+  std::shared_ptr<CommandBufferEncoder> encoder_;
 
-  struct Encodable {
-    std::shared_ptr<impeller::RenderPass> render_pass;
-    std::shared_ptr<impeller::BlitPass> blit_pass;
-    std::shared_ptr<impeller::ComputePass> compute_pass;
-
-    bool EncodeCommands() const;
-  };
-
-  /// Ends the pass that is recording, if any. On Metal and Vulkan the pass is
-  /// encoded now, which ends its backend encoder. On OpenGL ES every pass is
-  /// encoded in creation order at submit, on the raster thread. (OpenGL ES
-  /// never records compute passes, since Flutter GPU does not support compute
-  /// there.)
-  bool EndOpenPass();
-
-  std::shared_ptr<impeller::BlitPass> GetOrCreateBlitPass();
-
-  // Every pass in creation order, which is also execution order. Only the
-  // last one can be open.
-  std::vector<Encodable> encodables_;
-  bool has_open_pass_ = false;
-  // Set when a pass fails to encode as it ends, so that Submit fails.
-  bool encoding_failed_ = false;
+  PassRecording::Ptr open_pass_;
+  const void* open_pass_owner_ = nullptr;
   std::vector<impeller::CommandBuffer::CompletionCallback>
       completion_callbacks_;
   bool submitted_ = false;

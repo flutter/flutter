@@ -38,6 +38,7 @@ import '../web/devfs_proxy.dart';
 import '../web/memory_fs.dart';
 import '../web/module_metadata.dart';
 import '../web/web_constants.dart';
+import '../web/web_debug_config.dart';
 import '../web_template.dart';
 import 'proxy_middleware.dart';
 import 'release_asset_server.dart';
@@ -190,7 +191,7 @@ class WebAssetServer implements AssetReader {
   Uri get baseUri => _baseUri;
   late Uri _baseUri;
 
-  /// Start the web asset server with configuration provided by [webDevServerConfig].
+  /// Start the web asset server with configuration provided by [webConfig].
   ///
   /// If [testMode] is true, do not actually initialize dwds or the shelf static
   /// server.
@@ -200,24 +201,17 @@ class WebAssetServer implements AssetReader {
   static Future<WebAssetServer> start(
     ChromiumLauncher? chromiumLauncher,
     UrlTunneller? urlTunneller,
-    bool useSseForDebugProxy,
-    bool useSseForDebugBackend,
-    bool useSseForInjectedClient,
     BuildInfo buildInfo,
     bool enableDwds,
     DartDevelopmentServiceConfiguration ddsConfig,
     Uri entrypoint,
     ExpressionCompiler? expressionCompiler, {
-    required bool crossOriginIsolation,
-    required WebDevServerConfig webDevServerConfig,
-    required WebRendererMode webRenderer,
-    required bool isWasm,
     required bool useLocalCanvasKit,
     required ToolContext toolContext,
+    required WebDebugConfig webConfig,
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
     bool useDwdsWebSocketConnection = false,
-    Map<String, String> webDefines = const <String, String>{},
   }) async {
     final ToolContext(
       :Cache cache,
@@ -226,6 +220,8 @@ class WebAssetServer implements AssetReader {
       :Logger logger,
       :Platform platform,
     ) = toolContext;
+    final WebDevServerConfig webDevServerConfig =
+        webConfig.devServerConfig ?? const WebDevServerConfig();
     final String hostname = webDevServerConfig.host;
     final int port = webDevServerConfig.port;
     final HttpsConfig? httpsConfig = webDevServerConfig.https;
@@ -263,7 +259,7 @@ class WebAssetServer implements AssetReader {
     // Allow rendering in a iframe.
     httpServer!.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
 
-    if (crossOriginIsolation) {
+    if (webConfig.crossOriginIsolation) {
       for (final MapEntry<String, String> header in kCrossOriginIsolationHeaders.entries) {
         httpServer.defaultResponseHeaders.add(header.key, header.value);
       }
@@ -282,11 +278,11 @@ class WebAssetServer implements AssetReader {
       address,
       modules,
       digests,
-      webRenderer: webRenderer,
+      webRenderer: webConfig.renderer,
       useLocalCanvasKit: useLocalCanvasKit,
       toolContext: toolContext,
       baseHref: webDevServerConfig.baseHref,
-      webDefines: webDefines,
+      webDefines: webConfig.webDefines,
     );
     if (webDevServerConfig.baseHref case final String baseHref?) {
       server.basePath = stripLeadingSlash(baseHref.substring(0, baseHref.length - 1));
@@ -313,7 +309,7 @@ class WebAssetServer implements AssetReader {
     }
 
     // In release builds (or wasm builds) deploy a simpler proxy server.
-    if (buildInfo.mode != BuildMode.debug || isWasm) {
+    if (buildInfo.mode != BuildMode.debug || webConfig.useWasm) {
       final releaseAssetServer = ReleaseAssetServer(
         entrypoint,
         fileSystem: fs,
@@ -321,7 +317,7 @@ class WebAssetServer implements AssetReader {
         flutterRoot: cache.flutterRoot,
         webBuildDirectory: getWebBuildDirectory(config: config, fileSystem: fs),
         basePath: server.basePath,
-        needsCoopCoep: crossOriginIsolation,
+        needsCoopCoep: webConfig.crossOriginIsolation,
       );
       final shelf.Handler releaseHandler = const shelf.Pipeline()
           .addMiddleware(waitMiddleware)
@@ -372,9 +368,9 @@ class WebAssetServer implements AssetReader {
         debugSettings: DebugSettings(
           enableDebugExtension: true,
           urlEncoder: urlTunneller,
-          useSseForDebugProxy: useSseForDebugProxy,
-          useSseForDebugBackend: useSseForDebugBackend,
-          useSseForInjectedClient: useSseForInjectedClient,
+          useSseForDebugProxy: webConfig.useSseForDebugProxy,
+          useSseForDebugBackend: webConfig.useSseForDebugBackend,
+          useSseForInjectedClient: webConfig.useSseForInjectedClient,
           expressionCompiler: expressionCompiler,
           ddsConfiguration: ddsConfig,
         ),

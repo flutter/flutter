@@ -29,7 +29,7 @@ import 'test_utils.dart' show fileSystem;
 import 'transition_test_utils.dart';
 
 void main() {
-  testWithoutContext(
+  test(
     'flutter run writes and clears pidfile appropriately',
     () async {
       final String tempDirectory = fileSystem.systemTempDirectory
@@ -73,7 +73,7 @@ void main() {
     skip: Platform.isWindows,
   );
 
-  testWithoutContext('flutter run handle SIGUSR1/2 run', () async {
+  test('flutter run handle SIGUSR1/2 run', () async {
     final String tempDirectory = fileSystem.systemTempDirectory
         .createTempSync('flutter_overall_experience_test.')
         .resolveSymbolicLinksSync();
@@ -169,7 +169,7 @@ void main() {
     }
   }, skip: Platform.isWindows); // [intended] Windows doesn't support sending signals.
 
-  testWithoutContext('flutter run can hot reload and hot restart, handle "p" key', () async {
+  test('flutter run can hot reload and hot restart, handle "p" key', () async {
     final String tempDirectory = fileSystem.systemTempDirectory
         .createTempSync('flutter_overall_experience_test.')
         .resolveSymbolicLinksSync();
@@ -275,7 +275,7 @@ void main() {
     }
   });
 
-  testWithoutContext('flutter error messages include a DevTools link', () async {
+  test('flutter error messages include a DevTools link', () async {
     final String testDirectory = fileSystem.path.join(
       flutterRoot,
       'dev',
@@ -379,7 +379,7 @@ void main() {
     }
   });
 
-  testWithoutContext('flutter run help output', () async {
+  test('flutter run help output', () async {
     // This test enables all logging so that it checks the exact text of starting up an application.
     // The idea is to verify that we're not outputting spurious messages.
     // WHEN EDITING THIS TEST PLEASE CAREFULLY CONSIDER WHETHER THE NEW OUTPUT IS AN IMPROVEMENT.

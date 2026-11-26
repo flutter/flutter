@@ -55,6 +55,19 @@ void RenderTargetCache::Clear() {
   render_target_data_.clear();
 }
 
+void RenderTargetCache::RemoveFromCache(
+    const std::shared_ptr<Texture>& texture) {
+  // Non-MSAA targets have no resolve texture, so a null texture would match
+  // all of them.
+  if (!texture) {
+    return;
+  }
+  std::erase_if(render_target_data_, [&texture](const RenderTargetData& td) {
+    ColorAttachment color0 = td.render_target.GetColorAttachment(0);
+    return color0.texture == texture || color0.resolve_texture == texture;
+  });
+}
+
 RenderTarget RenderTargetCache::CreateOffscreen(
     const Context& context,
     ISize size,

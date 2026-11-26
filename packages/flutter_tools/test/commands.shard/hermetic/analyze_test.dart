@@ -24,7 +24,7 @@ const _kFlutterRoot = '/data/flutter';
 const SIGABRT = -6;
 
 void main() {
-  testWithoutContext('analyze generate correct errors message', () async {
+  test('analyze generate correct errors message', () async {
     expect(
       AnalyzeBase.generateErrorsMessage(issueCount: 0, seconds: '0.1'),
       'No issues found! (ran in 0.1s)',
@@ -76,7 +76,7 @@ void main() {
       }
     });
 
-    testWithoutContext('SIGABRT throws Exception', () async {
+    test('SIGABRT throws Exception', () async {
       const stderr = 'Something bad happened!';
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
@@ -88,6 +88,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
             '--no-with-fine-dependencies',
             '--suppress-analytics',
           ],
@@ -107,7 +108,7 @@ void main() {
       );
     });
 
-    testWithoutContext('Analysis server premature exit with 255 throws ToolExit', () async {
+    test('Analysis server premature exit with 255 throws ToolExit', () async {
       const stderr = 'Fatal error in analyzer';
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
@@ -118,6 +119,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
             '--no-with-fine-dependencies',
             '--suppress-analytics',
           ],
@@ -139,7 +141,7 @@ void main() {
       );
     });
 
-    testWithoutContext('--flutter-repo analyzes everything in the flutterRoot', () async {
+    test('--flutter-repo analyzes everything in the flutterRoot', () async {
       final process = MockLspServerProcess();
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
@@ -151,6 +153,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
             '--no-with-fine-dependencies',
             '--suppress-analytics',
           ],
@@ -172,7 +175,7 @@ void main() {
       );
     });
 
-    testWithoutContext('only the latest diagnostics published for a file are reported', () async {
+    test('only the latest diagnostics published for a file are reported', () async {
       final process = MockLspServerProcess();
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
@@ -183,6 +186,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
             '--no-with-fine-dependencies',
             '--suppress-analytics',
           ],
@@ -205,7 +209,7 @@ void main() {
       );
     });
 
-    testWithoutContext('--no-plugins passes --no-plugins to language-server', () async {
+    test('--no-plugins passes --no-plugins to language-server', () async {
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -215,6 +219,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
             '--no-with-fine-dependencies',
             '--no-plugins',
             '--suppress-analytics',
@@ -226,7 +231,7 @@ void main() {
       await expectLater(runner.run(<String>['analyze', '--no-plugins']), throwsA(isA<ToolExit>()));
     });
 
-    testWithoutContext('--benchmark passes --no-plugins to language-server by default', () async {
+    test('--benchmark passes --no-plugins to language-server by default', () async {
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -236,6 +241,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
             '--no-with-fine-dependencies',
             '--no-plugins',
             '--suppress-analytics',
@@ -247,7 +253,7 @@ void main() {
       await expectLater(runner.run(<String>['analyze', '--benchmark']), throwsA(isA<ToolExit>()));
     });
 
-    testWithoutContext('--benchmark with --plugins enables plugins', () async {
+    test('--benchmark with --plugins enables plugins', () async {
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -257,6 +263,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
             '--no-with-fine-dependencies',
             '--suppress-analytics',
           ],
@@ -271,7 +278,7 @@ void main() {
     });
   });
 
-  testWithoutContext('analyze inRepo', () {
+  test('analyze inRepo', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.directory(_kFlutterRoot).createSync(recursive: true);
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(

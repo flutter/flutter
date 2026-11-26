@@ -104,8 +104,6 @@ TEST(ImageDecoderNoGLTest, ImpellerUploadTracksSchedulingReceipt) {
   std::shared_ptr<impeller::CommandBufferSchedulingReceipt> receipt =
       std::make_shared<impeller::CommandBufferSchedulingReceiptState>();
 
-  EXPECT_CALL(*context, GetBackendType)
-      .WillOnce(Return(impeller::Context::BackendType::kMetal));
   EXPECT_CALL(*context, GetResourceAllocator).WillOnce(Return(allocator));
   EXPECT_CALL(*context, CreateCommandBuffer).WillOnce(Return(command_buffer));
   EXPECT_CALL(*context, GetCommandQueue).WillOnce(Return(command_queue));
@@ -521,6 +519,82 @@ TEST(ImageDecoderNoGLTest,
   ExpectDecodedFormat(
       SkColorSpace::MakeRGB(SkNamedTransferFn::kPQ, SkNamedGamut::kRec2020),
       /*supports_wide_gamut=*/false, impeller::PixelFormat::kR8G8B8A8UNormInt);
+#endif  // IMPELLER_SUPPORTS_RENDERING
+}
+
+TEST(ImageDecoderNoGLTest,
+     ImpellerGpuResizeOnlyGeneratesMipmapsForResizedTexture) {
+#if !IMPELLER_SUPPORTS_RENDERING
+  GTEST_SKIP() << "Test only supported with Impeller rendering.";
+#else
+  using ::impeller::testing::MockBlitPass;
+  using ::impeller::testing::MockCommandBuffer;
+  using ::impeller::testing::MockCommandQueue;
+  using ::impeller::testing::MockImpellerContext;
+  using ::testing::_;
+  using ::testing::Return;
+
+  auto context = std::make_shared<MockImpellerContext>();
+  auto allocator = std::make_shared<impeller::TestImpellerAllocator>();
+  auto command_buffer = std::make_shared<MockCommandBuffer>(context);
+  auto blit_pass = std::make_shared<MockBlitPass>();
+  auto command_queue = std::make_shared<MockCommandQueue>();
+
+  EXPECT_CALL(*context, GetBackendType)
+      .WillRepeatedly(Return(impeller::Context::BackendType::kVulkan));
+  EXPECT_CALL(*context, GetResourceAllocator).WillRepeatedly(Return(allocator));
+  EXPECT_CALL(*context, CreateCommandBuffer).WillOnce(Return(command_buffer));
+  EXPECT_CALL(*context, GetCommandQueue).WillOnce(Return(command_queue));
+  EXPECT_CALL(*command_buffer, SetLabel(_));
+  EXPECT_CALL(*command_buffer, OnCreateBlitPass).WillOnce(Return(blit_pass));
+  EXPECT_CALL(*command_buffer, OnWaitUntilCompleted);
+  EXPECT_CALL(*blit_pass, IsValid).WillOnce(Return(true));
+  EXPECT_CALL(*blit_pass, OnSetLabel(_)).Times(2);
+  EXPECT_CALL(*blit_pass, OnCopyBufferToTextureCommand(_, _, _, _, _, _, _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*blit_pass, ResizeTexture(_, _)).WillOnce(Return(true));
+  // Only the resized texture gets mipmaps.
+  EXPECT_CALL(*blit_pass, OnGenerateMipmapCommand(_, _)).WillOnce(Return(true));
+  EXPECT_CALL(*blit_pass, EncodeCommands).WillOnce(Return(true));
+  EXPECT_CALL(*command_queue, SubmitWithReceipt(_, _))
+      .WillOnce([](const std::shared_ptr<impeller::CommandBuffer>&,
+                   const impeller::CommandQueue::CompletionCallback&) {
+        return impeller::CommandQueue::SubmitResult{
+            .status = absl::OkStatus(),
+        };
+      });
+
+  impeller::DeviceBufferDescriptor buffer_descriptor;
+  buffer_descriptor.size = 256u * 256u * 4u;
+  auto buffer =
+      std::make_shared<impeller::TestImpellerDeviceBuffer>(buffer_descriptor);
+  auto gpu_disabled_switch = std::make_shared<fml::SyncSwitch>(false);
+  sk_sp<DlImage> image;
+  std::string decode_error;
+
+  ImageDecoderImpeller::UploadTextureToPrivate(
+      [&](const sk_sp<DlImage>& result, const std::string& error) {
+        image = result;
+        decode_error = error;
+      },
+      context, buffer,
+      {.size = impeller::ISize(256, 256),
+       .format = impeller::PixelFormat::kR8G8B8A8UNormInt},
+      SkImageInfo::Make(30, 30, kRGBA_8888_SkColorType, kPremul_SkAlphaType),
+      gpu_disabled_switch);
+
+  EXPECT_NE(image, nullptr);
+  EXPECT_TRUE(decode_error.empty());
+  // The full size texture is only read by the resize blit, so it has no
+  // mipmaps.
+  ASSERT_EQ(allocator->created_textures().size(), 2u);
+  EXPECT_EQ(allocator->created_textures().front()->GetSize(),
+            impeller::ISize(256, 256));
+  EXPECT_EQ(
+      allocator->created_textures().front()->GetTextureDescriptor().mip_count,
+      1u);
+  EXPECT_EQ(allocator->last_created_texture()->GetTextureDescriptor().mip_count,
+            impeller::ISize(30, 30).MipCount());
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 

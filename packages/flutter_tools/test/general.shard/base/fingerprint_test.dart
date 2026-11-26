@@ -20,7 +20,7 @@ void main() {
       fileSystem = MemoryFileSystem.test();
     });
 
-    testWithoutContext('creates fingerprint with specified properties and files', () {
+    test('creates fingerprint with specified properties and files', () {
       fileSystem.file('a.dart').createSync();
 
       final fingerprinter = Fingerprinter(
@@ -33,7 +33,7 @@ void main() {
       expect(fingerprint, Fingerprint.fromBuildInputs(const <String>['a.dart'], fileSystem));
     });
 
-    testWithoutContext('creates fingerprint with file checksums', () {
+    test('creates fingerprint with file checksums', () {
       fileSystem.file('a.dart').createSync();
 
       final fingerprinter = Fingerprinter(
@@ -46,7 +46,7 @@ void main() {
       expect(fingerprint, Fingerprint.fromBuildInputs(const <String>['a.dart'], fileSystem));
     });
 
-    testWithoutContext('fingerprint does not match if not present', () {
+    test('fingerprint does not match if not present', () {
       fileSystem.file('a.dart').createSync();
       fileSystem.file('b.dart').createSync();
 
@@ -59,7 +59,7 @@ void main() {
       expect(fingerprinter.doesFingerprintMatch(), isFalse);
     });
 
-    testWithoutContext('fingerprint does match if identical', () {
+    test('fingerprint does match if identical', () {
       fileSystem.file('a.dart').createSync();
       fileSystem.file('b.dart').createSync();
 
@@ -75,7 +75,7 @@ void main() {
       expect(fileSystem.file(fingerprintPath), exists);
     });
 
-    testWithoutContext('fails to write fingerprint if inputs are missing', () {
+    test('fails to write fingerprint if inputs are missing', () {
       const fingerprintPath = 'path/to/out.fingerprint';
       final fingerprinter = Fingerprinter(
         fingerprintPath: fingerprintPath,
@@ -95,7 +95,7 @@ void main() {
           fileSystem = MemoryFileSystem.test();
         });
 
-        testWithoutContext('throws if any input file does not exist', () {
+        test('throws if any input file does not exist', () {
           fileSystem.file('a.dart').createSync();
           expect(
             () => Fingerprint.fromBuildInputs(const <String>['a.dart', 'b.dart'], fileSystem),
@@ -103,7 +103,7 @@ void main() {
           );
         });
 
-        testWithoutContext('populates checksums for valid files', () {
+        test('populates checksums for valid files', () {
           fileSystem.file('a.dart').writeAsStringSync('This is a');
           fileSystem.file('b.dart').writeAsStringSync('This is b');
           final fingerprint = Fingerprint.fromBuildInputs(const <String>[
@@ -122,11 +122,11 @@ void main() {
       });
 
       group('fromJson', () {
-        testWithoutContext('throws if JSON is invalid', () {
+        test('throws if JSON is invalid', () {
           expect(() => Fingerprint.fromJson('<xml></xml>'), throwsA(anything));
         });
 
-        testWithoutContext('creates fingerprint from valid JSON', () {
+        test('creates fingerprint from valid JSON', () {
           final String jsonString = json.encode(<String, dynamic>{
             'files': <String, dynamic>{
               'a.dart': '8a21a15fad560b799f6731d436c1b698',
@@ -143,7 +143,7 @@ void main() {
           expect(files['a.dart'], '8a21a15fad560b799f6731d436c1b698');
           expect(files['b.dart'], '6f144e08b58cd0925328610fad7ac07c');
         });
-        testWithoutContext('treats missing properties and files entries as if empty', () {
+        test('treats missing properties and files entries as if empty', () {
           final String jsonString = json.encode(<String, dynamic>{});
           expect(
             Fingerprint.fromJson(jsonString),
@@ -153,7 +153,7 @@ void main() {
       });
 
       group('operator ==', () {
-        testWithoutContext('reports not equal if file checksums do not match', () {
+        test('reports not equal if file checksums do not match', () {
           final a = <String, dynamic>{
             'files': <String, dynamic>{
               'a.dart': '8a21a15fad560b799f6731d436c1b698',
@@ -171,7 +171,7 @@ void main() {
           );
         });
 
-        testWithoutContext('reports not equal if file paths do not match', () {
+        test('reports not equal if file paths do not match', () {
           final a = <String, dynamic>{
             'files': <String, dynamic>{
               'a.dart': '8a21a15fad560b799f6731d436c1b698',
@@ -189,7 +189,7 @@ void main() {
           );
         });
 
-        testWithoutContext('reports equal if properties and file checksums match', () {
+        test('reports equal if properties and file checksums match', () {
           final a = <String, dynamic>{
             'files': <String, dynamic>{
               'a.dart': '8a21a15fad560b799f6731d436c1b698',
@@ -203,7 +203,7 @@ void main() {
         });
       });
       group('hashCode', () {
-        testWithoutContext('is consistent with equals, even if map entries are reordered', () {
+        test('is consistent with equals, even if map entries are reordered', () {
           final a = Fingerprint.fromJson('{"properties":{"a":"A","b":"B"},"files":{}}');
           final b = Fingerprint.fromJson('{"properties":{"b":"B","a":"A"},"files":{}}');
           expect(a, b);

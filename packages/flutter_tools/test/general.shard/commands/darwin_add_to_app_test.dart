@@ -17,7 +17,7 @@ import '../../src/fakes.dart';
 
 void main() {
   group('DarwinAddToAppCodesigning', () {
-    testWithoutContext('getCodesignIdentity returns null if codesign is disabled', () async {
+    test('getCodesignIdentity returns null if codesign is disabled', () async {
       final logger = BufferLogger.test();
       final addtoAppCodesigning = DarwinAddToAppCodesigning(
         logger: logger,
@@ -34,35 +34,32 @@ void main() {
       expect(logger.statusText, contains('Skipping code-signing...'));
     });
 
-    testWithoutContext(
-      'getCodesignIdentity warns if codesign is disabled and identity has changed',
-      () async {
-        final logger = BufferLogger.test();
-        final addtoAppCodesigning = DarwinAddToAppCodesigning(
-          logger: logger,
-          xcodeCodeSigningSettings: FakeXcodeCodeSigningSettings(),
-        );
-        final fs = MemoryFileSystem.test();
-        final File identityFile = fs.file('.codesign_identity');
-        identityFile.writeAsStringSync('old identity');
-        final String? codesignIdentity = await addtoAppCodesigning.getCodesignIdentity(
-          buildInfo: BuildInfo.debug,
-          xcodeProject: FakeXcodeBasedProject(),
-          codesignIdentityOption: null,
-          identityFile: identityFile,
-          codesignEnabled: false,
-        );
-        expect(codesignIdentity, null);
-        expect(logger.statusText, contains('Skipping code-signing...'));
-        expect(logger.warningText, '''
+    test('getCodesignIdentity warns if codesign is disabled and identity has changed', () async {
+      final logger = BufferLogger.test();
+      final addtoAppCodesigning = DarwinAddToAppCodesigning(
+        logger: logger,
+        xcodeCodeSigningSettings: FakeXcodeCodeSigningSettings(),
+      );
+      final fs = MemoryFileSystem.test();
+      final File identityFile = fs.file('.codesign_identity');
+      identityFile.writeAsStringSync('old identity');
+      final String? codesignIdentity = await addtoAppCodesigning.getCodesignIdentity(
+        buildInfo: BuildInfo.debug,
+        xcodeProject: FakeXcodeBasedProject(),
+        codesignIdentityOption: null,
+        identityFile: identityFile,
+        codesignEnabled: false,
+      );
+      expect(codesignIdentity, null);
+      expect(logger.statusText, contains('Skipping code-signing...'));
+      expect(logger.warningText, '''
    └── Identity has changed since last run. Previous identity: old identity
        If this triggers a notice in Xcode, select "Accept Change" to accept the new identity.
 ''');
-        expect(identityFile.readAsStringSync(), '');
-      },
-    );
+      expect(identityFile.readAsStringSync(), '');
+    });
 
-    testWithoutContext('getCodesignIdentity uses codesignIdentityOption if provided', () async {
+    test('getCodesignIdentity uses codesignIdentityOption if provided', () async {
       final logger = BufferLogger.test();
       final addtoAppCodesigning = DarwinAddToAppCodesigning(
         logger: logger,
@@ -87,7 +84,7 @@ void main() {
       expect(identityFile.readAsStringSync(), 'new identity');
     });
 
-    testWithoutContext(
+    test(
       'getCodesignIdentity has different warning when codesign cache file does not exist',
       () async {
         final logger = BufferLogger.test();
@@ -114,7 +111,7 @@ void main() {
       },
     );
 
-    testWithoutContext('getCodesignIdentity throws if tools are not available', () async {
+    test('getCodesignIdentity throws if tools are not available', () async {
       final Logger logger = BufferLogger.test();
       final addtoAppCodesigning = DarwinAddToAppCodesigning(
         logger: logger,
@@ -132,7 +129,7 @@ void main() {
       );
     });
 
-    testWithoutContext('getCodesignIdentity throws if no valid identities are found', () async {
+    test('getCodesignIdentity throws if no valid identities are found', () async {
       final Logger logger = BufferLogger.test();
       final addtoAppCodesigning = DarwinAddToAppCodesigning(
         logger: logger,
@@ -171,33 +168,30 @@ For more information, please visit:
       );
     });
 
-    testWithoutContext(
-      'getCodesignIdentity throws if no valid matching identities are found',
-      () async {
-        final Logger logger = BufferLogger.test();
-        const commonName = 'Apple Development: EXAMPLE.IO LLC (A1BC2DF345)';
-        final addtoAppCodesigning = DarwinAddToAppCodesigning(
-          logger: logger,
-          xcodeCodeSigningSettings: FakeXcodeCodeSigningSettings(identities: <String>[commonName]),
-        );
-        await expectLater(
-          addtoAppCodesigning.getCodesignIdentity(
-            buildInfo: BuildInfo.debug,
-            xcodeProject: FakeXcodeBasedProject(),
-            codesignIdentityOption: null,
-            identityFile: MemoryFileSystem.test().file('.codesign_identity'),
-            codesignEnabled: true,
-          ),
-          throwsToolExit(
-            message:
-                'No valid code-signing identity found. Please specify which identity to use with '
-                '--codesign-identity or use --no-codesign',
-          ),
-        );
-      },
-    );
+    test('getCodesignIdentity throws if no valid matching identities are found', () async {
+      final Logger logger = BufferLogger.test();
+      const commonName = 'Apple Development: EXAMPLE.IO LLC (A1BC2DF345)';
+      final addtoAppCodesigning = DarwinAddToAppCodesigning(
+        logger: logger,
+        xcodeCodeSigningSettings: FakeXcodeCodeSigningSettings(identities: <String>[commonName]),
+      );
+      await expectLater(
+        addtoAppCodesigning.getCodesignIdentity(
+          buildInfo: BuildInfo.debug,
+          xcodeProject: FakeXcodeBasedProject(),
+          codesignIdentityOption: null,
+          identityFile: MemoryFileSystem.test().file('.codesign_identity'),
+          codesignEnabled: true,
+        ),
+        throwsToolExit(
+          message:
+              'No valid code-signing identity found. Please specify which identity to use with '
+              '--codesign-identity or use --no-codesign',
+        ),
+      );
+    });
 
-    testWithoutContext(
+    test(
       'getCodesignIdentity from project uses provisioning profile for manual codesigning',
       () async {
         final fs = MemoryFileSystem.test();
@@ -244,74 +238,68 @@ For more information, please visit:
       },
     );
 
-    testWithoutContext(
-      'getCodesignIdentity from project uses team for automatic codesigning',
-      () async {
-        const userId = 'ABC1DEF23G';
-        const entityName = 'User Name';
-        const organizationalUnitId = 'A1BC2DF345';
-        const commonName = 'Apple Development: $entityName ($userId)';
-        final fs = MemoryFileSystem.test();
-        final File identityFile = fs.file('.codesign_identity');
-        final Logger logger = BufferLogger.test();
-        final addtoAppCodesigning = DarwinAddToAppCodesigning(
-          logger: logger,
-          xcodeCodeSigningSettings: FakeXcodeCodeSigningSettings(
-            identities: <String>[commonName],
-            identityToTeam: {commonName: organizationalUnitId},
-          ),
-        );
-        final String? codesignIdentity = await addtoAppCodesigning.getCodesignIdentity(
+    test('getCodesignIdentity from project uses team for automatic codesigning', () async {
+      const userId = 'ABC1DEF23G';
+      const entityName = 'User Name';
+      const organizationalUnitId = 'A1BC2DF345';
+      const commonName = 'Apple Development: $entityName ($userId)';
+      final fs = MemoryFileSystem.test();
+      final File identityFile = fs.file('.codesign_identity');
+      final Logger logger = BufferLogger.test();
+      final addtoAppCodesigning = DarwinAddToAppCodesigning(
+        logger: logger,
+        xcodeCodeSigningSettings: FakeXcodeCodeSigningSettings(
+          identities: <String>[commonName],
+          identityToTeam: {commonName: organizationalUnitId},
+        ),
+      );
+      final String? codesignIdentity = await addtoAppCodesigning.getCodesignIdentity(
+        buildInfo: BuildInfo.debug,
+        xcodeProject: FakeXcodeBasedProject(
+          buildSettings: <String, String>{'DEVELOPMENT_TEAM': organizationalUnitId},
+        ),
+        codesignIdentityOption: null,
+        identityFile: identityFile,
+        codesignEnabled: true,
+      );
+      expect(codesignIdentity, commonName);
+      expect(identityFile.readAsStringSync(), commonName);
+    });
+
+    test('getCodesignIdentity from project throws if multiple identities are found', () async {
+      const organizationalUnit = 'A1BC2DF345';
+      const commonName1 = 'Apple Development: User Name 1 (UserID1)';
+      const commonName2 = 'Apple Development: User Name 2 (UserID2)';
+      final Logger logger = BufferLogger.test();
+      final addtoAppCodesigning = DarwinAddToAppCodesigning(
+        logger: logger,
+        xcodeCodeSigningSettings: FakeXcodeCodeSigningSettings(
+          identities: <String>[commonName1, commonName2],
+          identityToTeam: {commonName1: organizationalUnit, commonName2: organizationalUnit},
+        ),
+      );
+      await expectLater(
+        addtoAppCodesigning.getCodesignIdentity(
           buildInfo: BuildInfo.debug,
           xcodeProject: FakeXcodeBasedProject(
-            buildSettings: <String, String>{'DEVELOPMENT_TEAM': organizationalUnitId},
+            buildSettings: <String, String>{'DEVELOPMENT_TEAM': organizationalUnit},
           ),
           codesignIdentityOption: null,
-          identityFile: identityFile,
+          identityFile: MemoryFileSystem.test().file('.codesign_identity'),
           codesignEnabled: true,
-        );
-        expect(codesignIdentity, commonName);
-        expect(identityFile.readAsStringSync(), commonName);
-      },
-    );
-
-    testWithoutContext(
-      'getCodesignIdentity from project throws if multiple identities are found',
-      () async {
-        const organizationalUnit = 'A1BC2DF345';
-        const commonName1 = 'Apple Development: User Name 1 (UserID1)';
-        const commonName2 = 'Apple Development: User Name 2 (UserID2)';
-        final Logger logger = BufferLogger.test();
-        final addtoAppCodesigning = DarwinAddToAppCodesigning(
-          logger: logger,
-          xcodeCodeSigningSettings: FakeXcodeCodeSigningSettings(
-            identities: <String>[commonName1, commonName2],
-            identityToTeam: {commonName1: organizationalUnit, commonName2: organizationalUnit},
-          ),
-        );
-        await expectLater(
-          addtoAppCodesigning.getCodesignIdentity(
-            buildInfo: BuildInfo.debug,
-            xcodeProject: FakeXcodeBasedProject(
-              buildSettings: <String, String>{'DEVELOPMENT_TEAM': organizationalUnit},
-            ),
-            codesignIdentityOption: null,
-            identityFile: MemoryFileSystem.test().file('.codesign_identity'),
-            codesignEnabled: true,
-          ),
-          throwsToolExit(
-            message:
-                '''
+        ),
+        throwsToolExit(
+          message:
+              '''
 Multiple identities found for development team $organizationalUnit. Please specify which identity to use with --codesign-identity.
 Available identities:
   $commonName1
   $commonName2''',
-          ),
-        );
-      },
-    );
+        ),
+      );
+    });
 
-    testWithoutContext('getCodesignIdentity from config uses provisioning profile', () async {
+    test('getCodesignIdentity from config uses provisioning profile', () async {
       final fs = MemoryFileSystem.test();
       const provisioningProfileName = 'iOS Team Provisioning Profile: *';
       const teamId = 'A1BC2DF345';
@@ -345,7 +333,7 @@ Available identities:
       expect(identityFile.readAsStringSync(), commonName);
     });
 
-    testWithoutContext('getCodesignIdentity from config throws if multiple identities', () async {
+    test('getCodesignIdentity from config throws if multiple identities', () async {
       final fs = MemoryFileSystem.test();
       const provisioningProfileName = 'iOS Team Provisioning Profile: *';
       const teamId = 'A1BC2DF345';
@@ -389,7 +377,7 @@ Available identities:
       );
     });
 
-    testWithoutContext('getCodesignIdentity from config uses identity', () async {
+    test('getCodesignIdentity from config uses identity', () async {
       const userId = 'A1BC2DF345';
       const entityName = 'EXAMPLE.IO LLC';
       const commonName = 'Apple Development: $entityName ($userId)';
@@ -414,7 +402,7 @@ Available identities:
       expect(identityFile.readAsStringSync(), commonName);
     });
 
-    testWithoutContext('codesign for release mode', () async {
+    test('codesign for release mode', () async {
       final fs = MemoryFileSystem.test();
       final fakeProcessManager = FakeProcessManager.list([
         const FakeCommand(
@@ -436,7 +424,7 @@ Available identities:
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('codesign uses timestamp=none for non-release mode', () async {
+    test('codesign uses timestamp=none for non-release mode', () async {
       final fs = MemoryFileSystem.test();
       final fakeProcessManager = FakeProcessManager.list([
         const FakeCommand(
@@ -459,7 +447,7 @@ Available identities:
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('codesignFlutterXCFramework codesigns if not already codesigned', () async {
+    test('codesignFlutterXCFramework codesigns if not already codesigned', () async {
       final fs = MemoryFileSystem.test();
       final Directory flutterXCFramework = fs.directory('Flutter.xcframework');
       final fakeProcessManager = FakeProcessManager.list([
@@ -487,7 +475,7 @@ Available identities:
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('codesignFlutterXCFramework skips when already codesigned', () async {
+    test('codesignFlutterXCFramework skips when already codesigned', () async {
       final fs = MemoryFileSystem.test();
       final Directory flutterXCFramework = fs.directory('Flutter.xcframework');
       final fakeProcessManager = FakeProcessManager.list([
@@ -502,7 +490,7 @@ Available identities:
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('fromContexts constructor initializes dependencies', () {
+    test('fromContexts constructor initializes dependencies', () {
       final appleContext = FakeAppleContext(plistParser: FakePlistParser());
       final toolContext = FakeToolContext(logger: BufferLogger.test());
 

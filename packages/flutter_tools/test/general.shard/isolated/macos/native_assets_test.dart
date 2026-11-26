@@ -24,7 +24,6 @@ import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:hooks/hooks.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 import '../fake_native_assets_build_runner.dart';
@@ -81,7 +80,7 @@ void main() {
       signPathBuz = '/build/native_assets/macos/buz.framework';
     }
     for (final buildMode in <BuildMode>[BuildMode.debug, if (!flutterTester) BuildMode.release]) {
-      testUsingContext('build with assets $buildMode$testName', () async {
+      test('build with assets $buildMode$testName', () async {
         if (const LocalPlatform().isWindows) {
           return; // Backslashes in commands, but we will never run these commands on Windows.
         }
@@ -320,20 +319,30 @@ void main() {
         ];
         final buildRunner = FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
-          onBuild: (BuildInput input) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
-            codeAssets: buildMode == BuildMode.debug
-                ? codeAssets(input.config.code.targetOS, input.config.code)
-                : <CodeAsset>[],
-          ),
-          onLink: (LinkInput input) => buildMode == BuildMode.debug
-              ? null
-              : FakeFlutterNativeAssetsBuilderResult.fromAssets(
-                  codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
-                ),
+          onBuild: (BuildInput input) {
+            expect(
+              input.config.code.macOS.deploymentVersion,
+              flutterTester ? AppleVersion(13) : AppleVersion(14, minor: 4, patch: 1),
+            );
+            return FakeFlutterNativeAssetsBuilderResult.fromAssets(
+              codeAssets: buildMode == BuildMode.debug
+                  ? codeAssets(input.config.code.targetOS, input.config.code)
+                  : <CodeAsset>[],
+            );
+          },
+          onLink: (LinkInput input) {
+            expect(input.config.code.macOS.deploymentVersion, AppleVersion(14, minor: 4, patch: 1));
+            return buildMode == BuildMode.debug
+                ? null
+                : FakeFlutterNativeAssetsBuilderResult.fromAssets(
+                    codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
+                  );
+          },
         );
         final environmentDefines = <String, String>{
           kBuildMode: buildMode.cliName,
           kDarwinArchs: 'arm64 x86_64',
+          if (!flutterTester) kMacOSDeploymentTarget: '14.4.1',
         };
         final TargetPlatform targetPlatform = flutterTester
             ? TargetPlatform.tester
@@ -356,9 +365,7 @@ void main() {
           recordedUsesFile: null,
         );
         final Uri nativeAssetsFileUri = flutterTester
-            ? projectUri.resolve(
-                'build/native_assets/macos/${InstallCodeAssets.nativeAssetsFilename}',
-              )
+            ? projectUri.resolve('build/native_assets/flutter_test_native_assets.json')
             : nonFlutterTesterAssetUri;
 
         await installCodeAssets(
@@ -458,7 +465,7 @@ void main() {
       architecture: Architecture.arm64,
     );
 
-    testWithoutContext(
+    test(
       'flutter tester keeps the install name of a dylib without header room for its path',
       () async {
         if (const LocalPlatform().isWindows) {
@@ -572,7 +579,7 @@ void main() {
       },
     );
 
-    testWithoutContext('flutter tester does not keep the install name through a symlink', () async {
+    test('flutter tester does not keep the install name through a symlink', () async {
       if (const LocalPlatform().isWindows) {
         return; // Backslashes in commands, but we will never run these commands on Windows.
       }
@@ -623,7 +630,7 @@ void main() {
       expect(logger.warningText, isEmpty);
     });
 
-    testWithoutContext('app builds still fail when the install name does not fit', () async {
+    test('app builds still fail when the install name does not fit', () async {
       if (const LocalPlatform().isWindows) {
         return; // Backslashes in commands, but we will never run these commands on Windows.
       }
@@ -674,7 +681,7 @@ void main() {
   // This logic is mocked in the other tests to avoid having test order
   // randomization causing issues with what processes are invoked.
   // Exercise the parsing of the process output in this separate test.
-  testWithoutContext('NativeAssetsBuildRunnerImpl.cCompilerConfig normal installation', () async {
+  test('NativeAssetsBuildRunnerImpl.cCompilerConfig normal installation', () async {
     if (!const LocalPlatform().isMacOS) {
       return;
     }
@@ -716,7 +723,7 @@ void main() {
     );
   });
 
-  testWithoutContext('NativeAssetsBuildRunnerImpl.cCompilerConfig Nix installation', () async {
+  test('NativeAssetsBuildRunnerImpl.cCompilerConfig Nix installation', () async {
     if (!const LocalPlatform().isMacOS) {
       return;
     }
@@ -740,7 +747,7 @@ void main() {
     expect(result.linker, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/ld'));
   });
 
-  testWithoutContext('missing xcode when required', () async {
+  test('missing xcode when required', () async {
     if (!const LocalPlatform().isMacOS) {
       return;
     }
@@ -762,7 +769,7 @@ void main() {
     );
   });
 
-  testWithoutContext('missing xcode when not required', () async {
+  test('missing xcode when not required', () async {
     if (!const LocalPlatform().isMacOS) {
       return;
     }

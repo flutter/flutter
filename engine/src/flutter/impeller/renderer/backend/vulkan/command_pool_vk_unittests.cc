@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/testing/testing.h"  // IWYU pragma: keep.
+#include "fml/synchronization/count_down_latch.h"
 #include "fml/synchronization/waitable_event.h"
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/device_holder_vk.h"
@@ -216,6 +217,58 @@ TEST(CommandPoolRecyclerVKTest, ExtraCommandBufferAllocationsTriggerTrim) {
   EXPECT_EQ(std::count(called->begin(), called->end(),
                        "vkResetCommandPoolReleaseResources"),
             1u);
+
+  context->Shutdown();
+}
+
+TEST(CommandPoolRecyclerVKTest, DroppedPoolsFreeBuffersBeforeTheirPool) {
+  auto const context = MockVulkanContextBuilder().Build();
+
+  // Reclaim more pools than the recycler keeps, each with one recycled command
+  // buffer. Pools are per thread, so every pool is created on its own thread.
+  // The latch keeps all of them alive until each thread has created its own;
+  // otherwise a thread could reuse a pool that another one already returned.
+  constexpr size_t kDroppedPools = 2u;
+  constexpr size_t kPoolCount =
+      CommandPoolRecyclerVK::kMaxRecycledPools + kDroppedPools;
+  fml::CountDownLatch all_created(kPoolCount);
+  fml::ManualResetWaitableEvent dispose;
+  std::vector<std::thread> threads;
+  threads.reserve(kPoolCount);
+  for (size_t i = 0u; i < kPoolCount; i++) {
+    threads.emplace_back([&]() {
+      auto const recycler = context->GetCommandPoolRecycler();
+      auto pool = recycler->Get();
+      pool->CollectCommandBuffer(pool->CreateCommandBuffer());
+      all_created.CountDown();
+      dispose.Wait();
+      pool.reset();
+      recycler->Dispose();
+    });
+  }
+  all_created.Wait();
+  dispose.Signal();
+  for (auto& thread : threads) {
+    thread.join();
+  }
+
+  // Only the pools reclaimed past the cap are destroyed before shutdown. Each
+  // of them has to free its buffer before the pool is destroyed, so at every
+  // point in the recorded calls there must be at least as many
+  // vkFreeCommandBuffers calls as vkDestroyCommandPool calls.
+  auto const called = ReclaimAndGetMockVulkanFunctions(context);
+  size_t frees = 0u;
+  size_t destroys = 0u;
+  for (const auto& function : *called) {
+    if (function == "vkFreeCommandBuffers") {
+      frees++;
+    } else if (function == "vkDestroyCommandPool") {
+      destroys++;
+    }
+    EXPECT_GE(frees, destroys);
+  }
+  EXPECT_EQ(destroys, kDroppedPools);
+  EXPECT_EQ(frees, kDroppedPools);
 
   context->Shutdown();
 }

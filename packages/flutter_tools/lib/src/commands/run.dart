@@ -22,6 +22,7 @@ import '../base/time.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
+import '../compile.dart' show ResidentCompilerFactory;
 import '../context/android_context.dart';
 import '../context/apple_context.dart';
 import '../context/tool_context.dart';
@@ -37,6 +38,7 @@ import '../runner/flutter_command.dart';
 import '../tracing.dart';
 import '../web/compile.dart';
 import '../web/devfs_config.dart';
+import '../web/web_debug_config.dart';
 import '../web/web_options.dart';
 import '../web/web_runner.dart';
 import 'daemon.dart';
@@ -194,16 +196,19 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
           ? getValue(WebOptions.webLaunchUrl)
           : null,
       crossOriginIsolation: webCrossOriginIsolation,
+      nativeNullAssertions:
+          !buildInfo.mode.isRelease && getValue(CommonOptions.nativeNullAssertions),
       renderer: webRenderer,
       useWasm: useWasm,
       devServerConfig: webDevServerConfig,
+      webDefines: extractWebDefines(),
     );
 
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
         dartEntrypointArgs: getValue(DebuggingOptionDescriptors.dartEntrypointArgs),
-        webConfig: webConfig,
+        platformOptions: <PlatformDebuggingOptions>[webConfig],
         enableImpeller: enableImpeller,
         enableFlutterGpu: enableFlutterGpu,
         enableVulkanValidation: enableVulkanValidation,
@@ -253,9 +258,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         ddsPort: ddsPort,
         devToolsServerAddress: devToolsServerAddress,
         verboseSystemLogs: getValue(DebuggingOptionDescriptors.verboseSystemLogs),
-        webConfig: webConfig,
+        platformOptions: <PlatformDebuggingOptions>[webConfig],
         vmserviceOutFile: getValue(DebuggingOptionDescriptors.vmserviceOutFile),
-        nativeNullAssertions: getValue(CommonOptions.nativeNullAssertions),
         enableImpeller: enableImpeller,
         enableFlutterGpu: enableFlutterGpu,
         enableVulkanValidation: enableVulkanValidation,
@@ -593,6 +597,10 @@ class RunCommand extends RunCommandBase {
   bool get stayResident => getValue(_resident);
   bool get awaitFirstFrameWhenTracing => getValue(_awaitFirstFrameWhenTracing);
 
+  /// Factory used to construct the resident compiler for each target device.
+  @protected
+  ResidentCompilerFactory get residentCompilerFactory => const ResidentCompilerFactory();
+
   @override
   Future<void> validateCommand() async {
     if (runningWithPrebuiltApplication) {
@@ -713,7 +721,6 @@ class RunCommand extends RunCommandBase {
         featureFlags: _featureFlags,
         flutterHookRunner: _flutterHookRunner,
         toolContext: toolContext,
-        webDefines: extractWebDefines(),
       );
     }
     return ColdRunner(
@@ -793,7 +800,6 @@ class RunCommand extends RunCommandBase {
           route,
           debuggingOptions,
           hotMode,
-          webDefines: extractWebDefines(),
           applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
           trackWidgetCreation: trackWidgetCreation,
           projectRootPath: getValue(DebuggingOptionDescriptors.projectRoot),
@@ -840,6 +846,7 @@ class RunCommand extends RunCommandBase {
         await FlutterDevice.create(
           device,
           buildInfo: buildInfo,
+          residentCompilerFactory: residentCompilerFactory,
           target: targetFile,
           toolContext: toolContext,
           userIdentifier: userIdentifier,

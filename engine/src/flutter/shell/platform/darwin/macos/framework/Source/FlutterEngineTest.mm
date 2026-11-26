@@ -849,6 +849,40 @@ TEST_F(FlutterEngineTest, MessengerCleanupConnectionWorks) {
 
   [engine.binaryMessenger sendOnChannel:@"test/send_message" message:channel_data];
   EXPECT_EQ(record, 21);
+
+  // Cleaning up an unregistration must not remove a subsequently registered handler.
+  FlutterBinaryMessengerConnection removedConnection =
+      [engine.binaryMessenger setMessageHandlerOnChannel:channel binaryMessageHandler:nil];
+  [channel2 setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
+    record += 100;
+  }];
+  [engine.binaryMessenger cleanUpConnection:removedConnection];
+
+  [engine.binaryMessenger sendOnChannel:@"test/send_message" message:channel_data];
+  EXPECT_EQ(record, 121);
+}
+
+TEST_F(FlutterEngineTest, NilMessageHandlerUnregistersChannel) {
+  FlutterEngine* engine = GetFlutterEngine();
+  [engine.binaryMessenger setMessageHandlerOnChannel:@"foo"
+                                binaryMessageHandler:^(NSData* message, FlutterBinaryReply reply) {
+                                  ADD_FAILURE()
+                                      << "An unregistered handler must not receive messages";
+                                  reply(nil);
+                                }];
+  [engine.binaryMessenger setMessageHandlerOnChannel:@"foo" binaryMessageHandler:nil];
+
+  bool didReply = false;
+  AddFfiNativeCallback("NotifyPlatformMessageResponse",
+                       CREATE_FFI_LAMBDA([&](Dart_Handle response) {
+                         EXPECT_TRUE(Dart_IsNull(response));
+                         didReply = true;
+                       }));
+
+  ASSERT_TRUE([engine runWithEntrypoint:@"sendFooMessageAndNotifyResponse"]);
+  while (!didReply) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, YES);
+  }
 }
 
 TEST_F(FlutterEngineTest, HasStringsWhenPasteboardEmpty) {

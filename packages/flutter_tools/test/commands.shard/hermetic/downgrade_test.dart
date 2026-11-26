@@ -40,7 +40,7 @@ void main() {
     bufferLogger = BufferLogger.test(terminal: terminal);
   });
 
-  testWithoutContext('Downgrade exits on unknown channel', () async {
+  test('Downgrade exits on unknown channel', () async {
     final fakeFlutterVersion = FakeFlutterVersion(branch: 'WestSideStory'); // an unknown branch
     fileSystem.currentDirectory
         .childFile('.flutter_tool_state')
@@ -71,7 +71,7 @@ void main() {
     <String>['3.19.0', 'extra'],
     <String>['more', 'additional', 'arguments'],
   ]) {
-    testWithoutContext(
+    test(
       'Downgrade exits on unexpected positional arguments: ${positionalArguments.join(' ')}',
       () async {
         final fakeFlutterVersion = FakeFlutterVersion();
@@ -101,7 +101,7 @@ void main() {
     );
   }
 
-  testWithoutContext('Downgrade exits on no recorded version', () async {
+  test('Downgrade exits on no recorded version', () async {
     final fakeFlutterVersion = FakeFlutterVersion(branch: 'beta');
     fileSystem.currentDirectory
         .childFile('.flutter_tool_state')
@@ -139,7 +139,7 @@ Channel "master" was previously on: v1.2.3.''',
     );
   });
 
-  testWithoutContext('Downgrade exits on unknown recorded version', () async {
+  test('Downgrade exits on unknown recorded version', () async {
     final fakeFlutterVersion = FakeFlutterVersion();
     fileSystem.currentDirectory
         .childFile('.flutter_tool_state')
@@ -168,7 +168,7 @@ Channel "master" was previously on: v1.2.3.''',
     );
   });
 
-  testWithoutContext('Downgrade prompts for user input when terminal is attached - y', () async {
+  test('Downgrade prompts for user input when terminal is attached - y', () async {
     processManager.addCommands(const [
       FakeCommand(command: ['git', 'describe', '--tags', 'g6b00b5e88']),
       FakeCommand(command: ['git', 'reset', '--hard', 'g6b00b5e88']),
@@ -201,7 +201,7 @@ Channel "master" was previously on: v1.2.3.''',
     expect(bufferLogger.statusText, contains('Success'));
   });
 
-  testWithoutContext('Downgrade prompts for user input when terminal is attached - n', () async {
+  test('Downgrade prompts for user input when terminal is attached - n', () async {
     processManager.addCommands(const [
       FakeCommand(command: ['git', 'describe', '--tags', 'g6b00b5e88']),
       FakeCommand(command: ['git', 'reset', '--hard', 'g6b00b5e88']),
@@ -234,7 +234,7 @@ Channel "master" was previously on: v1.2.3.''',
     expect(bufferLogger.statusText, isNot(contains('Success')));
   });
 
-  testWithoutContext('Downgrade does not prompt when there is no terminal', () async {
+  test('Downgrade does not prompt when there is no terminal', () async {
     processManager.addCommands(const [
       FakeCommand(command: ['git', 'describe', '--tags', 'g6b00b5e88']),
       FakeCommand(command: ['git', 'reset', '--hard', 'g6b00b5e88']),
@@ -265,7 +265,7 @@ Channel "master" was previously on: v1.2.3.''',
     expect(bufferLogger.statusText, contains('Success'));
   });
 
-  testWithoutContext('Downgrade performs correct git commands', () async {
+  test('Downgrade performs correct git commands', () async {
     final fakeFlutterVersion = FakeFlutterVersion();
     stdio.hasTerminal = false;
     fileSystem.currentDirectory
