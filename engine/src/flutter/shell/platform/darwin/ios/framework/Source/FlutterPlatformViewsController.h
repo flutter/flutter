@@ -25,6 +25,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class FlutterPlatformViewFrame;
 @class FlutterPlatformViewLayer;
 @class FlutterTouchInterceptingView;
 @class FlutterClippingMaskViewPool;
@@ -67,22 +68,18 @@ NS_ASSUME_NONNULL_BEGIN
 /// the next frame.
 - (void)reset;
 
-/// @brief Encode rendering for the Flutter overlay views and queue up perform platform view
-/// mutations.
+/// @brief Sets the intrinsic content size of the Flutter view to `frameSize`.
 ///
-/// `compositionOrder` is the IDs of the platform views in the frame, in composition order.
-/// `compositionParams` and `slices` are keyed by view ID.
+/// Must run on the platform thread.
+- (void)performResize:(CGSize)frameSize;
+
+/// @brief Update the buffers and mutate the platform views in CATransaction on the platform thread.
 ///
-/// Called from the raster thread.
-- (void)submitFrame:(std::unique_ptr<flutter::SurfaceFrame>)frame
-       withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext
-            frameSize:(flutter::DlISize)frameSize
-     devicePixelRatio:(CGFloat)devicePixelRatio
-     compositionOrder:(const std::vector<int64_t>&)compositionOrder
-    compositionParams:
-        (const std::unordered_map<int64_t, flutter::EmbeddedViewParams>&)compositionParams
-               slices:(std::unordered_map<int64_t, std::unique_ptr<flutter::EmbedderViewSlice>>&)
-                          slices;
+/// This method composites only the platform views whose layers in `frame` differ from the layers
+/// they were last composited with.
+///
+/// Must run on the platform thread.
+- (void)presentFrame:(FlutterPlatformViewFrame*)frame;
 
 /// @brief Handler for platform view message channels.
 - (void)onMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
