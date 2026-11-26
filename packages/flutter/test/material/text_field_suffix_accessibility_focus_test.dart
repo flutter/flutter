@@ -9,16 +9,16 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // Verbatim Field widget from issue #197193 (with optional focusNode for testing).
-class Field extends StatefulWidget {
-  const Field({super.key, this.focusNode});
+class _Field extends StatefulWidget {
+  const _Field({this.focusNode});
 
   final FocusNode? focusNode;
 
   @override
-  State<Field> createState() => _FieldState();
+  State<_Field> createState() => _FieldState();
 }
 
-class _FieldState extends State<Field> {
+class _FieldState extends State<_Field> {
   final TextEditingController controller = TextEditingController();
 
   @override
@@ -96,7 +96,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Center(
-              child: SizedBox(width: 400.0, child: Field(focusNode: focus)),
+              child: SizedBox(width: 400.0, child: _Field(focusNode: focus)),
             ),
           ),
         ),
@@ -125,15 +125,14 @@ void main() {
 
       // Outer node must no longer carry didLoseAccessibilityFocus once EditableText
       // splits into its own semantics node.
-      if (activeId != initialId) {
-        final SemanticsNode? oldNode = _findSemanticsNodeById(root, initialId);
-        expect(
-          oldNode?.getSemanticsData().hasAction(SemanticsAction.didLoseAccessibilityFocus),
-          isFalse,
-        );
-        semanticsOwner.performAction(initialId, SemanticsAction.didLoseAccessibilityFocus);
-        await tester.pump();
-      }
+      expect(activeId, isNot(initialId));
+      final SemanticsNode? oldNode = _findSemanticsNodeById(root, initialId);
+      expect(
+        oldNode?.getSemanticsData().hasAction(SemanticsAction.didLoseAccessibilityFocus),
+        isFalse,
+      );
+      semanticsOwner.performAction(initialId, SemanticsAction.didLoseAccessibilityFocus);
+      await tester.pump();
 
       // Field must retain focus so subsequent characters can be typed.
       expect(focus.hasFocus, isTrue);
