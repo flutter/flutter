@@ -1,22 +1,24 @@
 # Experimental Impeller Vulkan on GTK4
 
-Set `FLUTTER_LINUX_RENDERER=vulkan` when launching a GTK4 app with a local engine
-built with Vulkan support. OpenGL remains the default. Vulkan requires a loader,
-a Vulkan 1.1 device with a queue supporting graphics and compute, and the
+GTK4 defaults to automatic selection. Vulkan requires a loader, a Vulkan 1.1
+device with a queue supporting graphics and compute, and the
 surface/Wayland-surface and swapchain extensions currently required by Impeller.
 The GTK presentation renderer is independent: `GSK_RENDERER=vulkan` alone does
 not select Impeller Vulkan.
 
-Set `FLUTTER_LINUX_RENDERER=auto` to try hardware Vulkan on Wayland during engine
-construction. GTK must support DMA-BUF textures and accept a sample buffer
-exported by the selected Vulkan device. If this check fails, DMA-BUF is disabled,
-or Impeller is explicitly disabled, the engine selects OpenGL before creating
-the view compositor and logs the reason. The sample checks a small export and
-GDK texture construction. Actual frames still depend on their dimensions,
-available buffers and compositor support. Later embedder startup and plugin
-import errors remain visible on the selected backend.
+The default and explicit `FLUTTER_LINUX_RENDERER=auto` try hardware Vulkan on
+Wayland during engine construction. GTK must accept a DMA-BUF sample exported
+by the selected device, and the engine must have a usable GL context for
+plugin textures. If the checks fail, DMA-BUF is disabled, or Impeller is
+explicitly disabled, the engine selects OpenGL before creating the view and
+logs the reason. An explicit OpenGL subsurface request also selects OpenGL
+when the renderer is unset. Actual frames depend on their size, available
+buffers and compositor support. Later embedder startup and plugin import
+errors remain visible on the selected backend.
 
-An explicit Vulkan request enables Impeller. `--enable-impeller=false` is an
+Set `FLUTTER_LINUX_RENDERER=opengl` to require OpenGL or
+`FLUTTER_LINUX_RENDERER=vulkan` to require Vulkan. A Vulkan request enables
+Impeller. `--enable-impeller=false` is an
 error, and loader/device failures fail startup rather than silently running GLES.
 Flutter GPU additionally requires `--enable-flutter-gpu`, supplied by the Dart
 project or engine switches. This is not a new framework context override.

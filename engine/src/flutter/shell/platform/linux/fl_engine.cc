@@ -918,6 +918,14 @@ static FlEngine* fl_engine_new_full(FlDartProject* project,
 
   self->project = FL_DART_PROJECT(g_object_ref(project));
   const gchar* renderer = g_getenv("FLUTTER_LINUX_RENDERER");
+#if FLUTTER_LINUX_GTK4
+  // An explicit subsurface request still selects the OpenGL-only path when
+  // the app leaves the renderer unset.
+  if (renderer == nullptr &&
+      g_strcmp0(g_getenv("FLUTTER_GTK4_ENABLE_SUBSURFACE"), "1") != 0) {
+    renderer = "auto";
+  }
+#endif
   if (g_strcmp0(renderer, "software") == 0) {
     self->renderer_type = kSoftware;
     g_warning(

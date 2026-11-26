@@ -5,7 +5,8 @@ Investigated at `655f44114e4` with Flutter GPU compute PR
 
 GTK4 now has an experimental opt-in Impeller Vulkan backend selected with
 `FLUTTER_LINUX_RENDERER=vulkan`. Enable Flutter GPU as well to use compute.
-The default remains OpenGL ES; `GSK_RENDERER=vulkan` alone changes GTK
+GTK4 automatically selects Vulkan when the startup checks pass.
+`GSK_RENDERER=vulkan` alone changes GTK
 presentation and does not enable compute. The Vulkan path can present via DMA-BUF with a readback fallback. Functional
 compute and native presentation support do not by themselves prove better
 rendering performance. See [Vulkan setup and tests](VULKAN.md).

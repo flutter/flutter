@@ -79,7 +79,7 @@ with tempfile.TemporaryDirectory(prefix='gtk4-fractional-') as temp:
     else:
       raise RuntimeError('sway timeout')
     env.pop('FLUTTER_TEST_WAYLAND_SCALE', None)
-    env.pop('FLUTTER_LINUX_RENDERER', None)
+    env['FLUTTER_LINUX_RENDERER'] = 'opengl'
     captures = d / 'captures'
     captures.mkdir()
     env['GRADIENT_PROBE_OUTPUT'] = str(captures)

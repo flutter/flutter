@@ -318,9 +318,11 @@ TEST_F(FlEngineTest, AutoSkipsVulkanInOpenGLBuild) {
 TEST_F(FlEngineTest, AutoUsesOpenGLWhenDmabufIsDisabled) {
   g_autofree gchar* renderer = g_strdup(g_getenv("FLUTTER_LINUX_RENDERER"));
   g_autofree gchar* dmabuf = g_strdup(g_getenv("FLUTTER_GTK4_ENABLE_DMABUF"));
-  g_setenv("FLUTTER_LINUX_RENDERER", "auto", TRUE);
   g_setenv("FLUTTER_GTK4_ENABLE_DMABUF", "0", TRUE);
-  g_autoptr(FlEngine) selected = fl_engine_new(project);
+  g_unsetenv("FLUTTER_LINUX_RENDERER");
+  g_autoptr(FlEngine) default_engine = fl_engine_new(project);
+  g_setenv("FLUTTER_LINUX_RENDERER", "auto", TRUE);
+  g_autoptr(FlEngine) auto_engine = fl_engine_new(project);
   if (renderer != nullptr) {
     g_setenv("FLUTTER_LINUX_RENDERER", renderer, TRUE);
   } else {
@@ -331,8 +333,10 @@ TEST_F(FlEngineTest, AutoUsesOpenGLWhenDmabufIsDisabled) {
   } else {
     g_unsetenv("FLUTTER_GTK4_ENABLE_DMABUF");
   }
-  EXPECT_EQ(fl_engine_get_renderer_type(selected), kOpenGL);
-  EXPECT_EQ(fl_engine_get_vulkan_manager(selected), nullptr);
+  EXPECT_EQ(fl_engine_get_renderer_type(default_engine), kOpenGL);
+  EXPECT_EQ(fl_engine_get_vulkan_manager(default_engine), nullptr);
+  EXPECT_EQ(fl_engine_get_renderer_type(auto_engine), kOpenGL);
+  EXPECT_EQ(fl_engine_get_vulkan_manager(auto_engine), nullptr);
 }
 
 TEST_F(FlEngineTest, SelectVulkanWithoutInitializingDriver) {

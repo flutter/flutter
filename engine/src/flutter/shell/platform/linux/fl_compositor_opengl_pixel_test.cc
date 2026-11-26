@@ -21,6 +21,9 @@ static void test_subsurface_resize() {
       g_strcmp0(g_getenv("FLUTTER_GTK4_ENABLE_SUBSURFACE"), "1") == 0;
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlView) view = FL_VIEW(g_object_ref_sink(fl_view_new(project)));
+  if (requested && g_getenv("FLUTTER_LINUX_RENDERER") == nullptr) {
+    g_assert_cmpint(fl_engine_get_renderer_type(view->engine), ==, kOpenGL);
+  }
   // Realize just the toplevel so the view has a Wayland parent without
   // starting the engine or receiving an initial allocation.
   g_autoptr(GtkWindow) window = GTK_WINDOW(g_object_ref_sink(gtk_window_new()));
@@ -385,6 +388,18 @@ static void test_external_egl_texture_readback() {
   fl_opengl_manager_clear_current(gl);
 }
 
+static void test_default_renderer_vulkan() {
+  if (g_strcmp0(g_getenv("FLUTTER_TEST_VULKAN_GTK_IMPORT"), "1") != 0) {
+    g_test_skip("Requires a hardware Vulkan device and Wayland DMA-BUF import");
+    return;
+  }
+  g_assert_null(g_getenv("FLUTTER_LINUX_RENDERER"));
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  g_assert_cmpint(fl_engine_get_renderer_type(engine), ==, kVulkan);
+  g_assert_nonnull(fl_engine_get_vulkan_manager(engine));
+}
+
 int main(int argc, char** argv) {
   g_test_init(&argc, &argv, nullptr);
   gtk_init();
@@ -394,5 +409,7 @@ int main(int argc, char** argv) {
   g_test_add_func("/gtk4/vulkan/gl-texture-readback", test_gl_texture_readback);
   g_test_add_func("/gtk4/gl/external-egl-texture-readback",
                   test_external_egl_texture_readback);
+  g_test_add_func("/gtk4/vulkan/default-renderer",
+                  test_default_renderer_vulkan);
   return g_test_run();
 }

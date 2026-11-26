@@ -3,7 +3,7 @@
 ## Scope
 
 This document describes how the Linux embedder presents Flutter output through
-GTK3 and GTK4, including the opt-in GTK4 Impeller Vulkan backend. It deliberately distinguishes CPU-copy avoidance,
+GTK3 and GTK4, including GTK4 Impeller Vulkan. It distinguishes CPU-copy avoidance,
 GPU-copy avoidance, and synchronization: describing every accelerated path as
 "direct" hides important performance and correctness tradeoffs.
 
@@ -43,7 +43,7 @@ for ownership, recovery behavior, benchmark requirements, and limitations.
 | Path | GTK | Pixel transfer | Synchronization | Notes |
 | --- | --- | --- | --- | --- |
 | Memory texture/readback | GTK4 | `glReadPixels`, RGBA-to-BGRA swizzle, `GdkMemoryTexture` | Readback synchronizes | Most compatible GTK4 fallback; highest CPU cost. |
-| Impeller Vulkan | GTK4 | Vulkan backing stores presented via DMA-BUF or host readback | Queue barriers and completion fences | Enables Flutter GPU compute; experimental and opt-in. |
+| Impeller Vulkan | GTK4 | Vulkan backing stores presented via DMA-BUF or host readback | Queue barriers and completion fences | Enables Flutter GPU compute and selected automatically when the startup checks pass. |
 | Shared GL texture | GTK4 | EGLImage import into a sibling framebuffer, then `GdkGLTexture` | EGL fence; GPU wait when GDK has a compatible EGL context | CPU-copy-free and usually no GPU pixel copy. Falls back to a client wait for GLX/non-EGL consumers, or `glFinish()` when fences are unavailable. |
 | Exported DMA-BUF texture | GTK4 | Render framebuffer is GPU-blitted to an EGLImage-backed export snapshot; GDK imports its DMA-BUF | Native fence handoff, with completion fallback | CPU-copy-free and cross-renderer-oriented. Current implementation is **not** strict zero-copy because of the snapshot blit. |
 | GTK graphics offload | GTK4, 4.14+ runtime | Optional `GtkGraphicsOffload` wrapper around the texture widget; suitable DMA-BUFs can be handed to the Wayland compositor | Existing texture ownership and synchronization | GTK decides acceptance per scene and uses ordinary composition when unavailable. Independent of Flutter's subsurface renderer and of compositor direct scanout. |
@@ -159,24 +159,30 @@ GTK4 renderers make the distinction more important:
 * `GSK_RENDERER=cairo`: useful as a diagnostic software baseline, not an
   accelerated presentation target.
 
-On GTK 4.16 or newer, the generated GTK4 runner prefers GL composition for
-Flutter's default OpenGL texture path in a Wayland session. The runner applies
-this preference before GTK startup. An explicit `GSK_RENDERER` takes precedence.
-Selecting Flutter Vulkan, software rendering, DMA-BUF export, or graphics
-offload leaves the GTK renderer choice to the application and GTK. Existing
-runners can use `GSK_RENDERER=gl` at launch to try the same configuration.
+On GTK 4.16 or newer, the generated GTK4 runners prefer GL composition in a
+Wayland session for Flutter's `auto` and `opengl` policies. This keeps the
+shared texture path efficient when `auto` selects OpenGL. When `auto` selects
+Vulkan, GTK can still consume its DMA-BUF. An explicit `GSK_RENDERER` takes
+precedence. Explicitly selecting Flutter Vulkan, software rendering, DMA-BUF
+export, or graphics offload leaves the GTK renderer choice to the application
+and GTK. Existing runners can set `GSK_RENDERER=gl` at launch to try the same
+configuration.
 
 Available renderer names depend on the installed GTK version. `GSK_RENDERER`
 selects GTK's renderer, not Flutter's rendering backend.
 
-GTK4 uses OpenGL by default. Set `FLUTTER_LINUX_RENDERER` to select a startup policy.
+GTK4 defaults to automatic renderer selection. GTK3 defaults to OpenGL.
+Set `FLUTTER_LINUX_RENDERER` to select a startup policy.
 
 | Value | Behavior |
 |---|---|
 | `opengl` | Use OpenGL. |
-| `auto` | Try hardware Vulkan on Wayland before creating the view compositor. Require a working DMA-BUF sample import and a usable plugin GL context. Select OpenGL if either check fails or Impeller is explicitly disabled. |
+| Unset or `auto` | Try hardware Vulkan on Wayland before creating the view compositor. Require a working DMA-BUF sample import and a usable plugin GL context. Select OpenGL if either check fails or Impeller is explicitly disabled. |
 | `vulkan` | Require Impeller Vulkan. An explicit Impeller disable or Vulkan initialization failure stops startup. |
 | `software` | Use software rendering. |
+
+An explicit request for the OpenGL-only Wayland subsurface selects OpenGL
+when `FLUTTER_LINUX_RENDERER` is unset.
 
 Vulkan requires a Vulkan-enabled engine and a Vulkan 1.1 device with a queue
 supporting graphics and compute. Applications using Flutter GPU compute must
@@ -222,7 +228,7 @@ checks.
 
 ## Plugin texture migration
 
-Test native plugins on GTK4 with OpenGL before opting into Vulkan. Exercise
+Test native plugins on GTK4 with OpenGL and with the default renderer. Exercise
 playback, resize, teardown, and any other path that creates, replaces, or
 releases a texture.
 
