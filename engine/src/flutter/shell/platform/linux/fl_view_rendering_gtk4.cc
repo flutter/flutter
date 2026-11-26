@@ -1,0 +1,354 @@
+// Copyright 2026 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "flutter/shell/platform/linux/fl_view_private.h"
+
+#include <gdk/wayland/gdkwayland.h>
+#include <cmath>
+
+#include "flutter/common/constants.h"
+#include "flutter/fml/trace_event.h"
+#include "flutter/shell/platform/linux/fl_compositor_opengl.h"
+#include "flutter/shell/platform/linux/fl_compositor_software.h"
+#include "flutter/shell/platform/linux/fl_compositor_vulkan.h"
+#include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_gtk.h"
+#include "flutter/shell/platform/linux/fl_render_texture_gtk4.h"
+#include "flutter/shell/platform/linux/fl_subsurface.h"
+#include "flutter/shell/platform/linux/fl_wayland_display.h"
+
+static void parent_after_paint_cb(GdkFrameClock* clock, FlSubsurface* child) {
+  g_signal_handlers_disconnect_by_func(
+      clock, reinterpret_cast<gpointer>(parent_after_paint_cb), child);
+  fl_subsurface_set_desync(child);
+}
+
+static void synchronize_parent_update(FlView* view, FlSubsurface* child) {
+  GdkFrameClock* clock = gtk_widget_get_frame_clock(view->render_area);
+  if (clock == nullptr) {
+    fl_subsurface_set_desync(child);
+    return;
+  }
+  fl_subsurface_set_sync(child);
+  g_signal_handlers_disconnect_by_func(
+      clock, reinterpret_cast<gpointer>(parent_after_paint_cb), child);
+  g_signal_connect_object(clock, "after-paint",
+                          G_CALLBACK(parent_after_paint_cb), child,
+                          G_CONNECT_AFTER);
+  gtk_widget_queue_draw(view->render_area);
+}
+
+static void setup_subsurface(FlView* view) {
+  if (view->engine == nullptr ||
+      fl_engine_get_renderer_type(view->engine) != kOpenGL ||
+      view->view_id != flutter::kFlutterImplicitViewId) {
+    return;
+  }
+
+  GtkWidget* toplevel = fl_view_gtk4_get_toplevel_window(view);
+  if (toplevel == nullptr || !GTK_IS_NATIVE(toplevel)) {
+    return;
+  }
+  GdkSurface* surface = gtk_native_get_surface(GTK_NATIVE(toplevel));
+  if (!GDK_IS_WAYLAND_SURFACE(surface)) {
+    return;
+  }
+
+  const double surface_scale = fl_gtk_widget_get_scale(view->render_area);
+  // wl_surface buffer scale is integral. Use GTK's texture presentation for
+  // fractional surfaces until this optional path supports wp_viewporter.
+  if (surface_scale != floor(surface_scale)) {
+    return;
+  }
+
+  const int width = gtk_widget_get_width(view->render_area);
+  const int height = gtk_widget_get_height(view->render_area);
+  if (width <= 0 || height <= 0) {
+    return;
+  }
+
+  FlWaylandDisplay* display =
+      fl_wayland_display_get_for_display(gtk_widget_get_display(toplevel));
+  if (display == nullptr) {
+    return;
+  }
+  g_autoptr(FlSubsurface) subsurface = fl_wayland_display_create_subsurface(
+      display, gdk_wayland_surface_get_wl_surface(surface));
+  if (subsurface == nullptr) {
+    return;
+  }
+
+  const int scale =
+      static_cast<int>(MAX(fl_gtk_widget_get_scale(view->render_area), 1.0));
+  g_autoptr(FlSubsurfaceEGL) subsurface_egl =
+      fl_subsurface_egl_new(fl_engine_get_opengl_manager(view->engine),
+                            subsurface, width, height, scale);
+  if (!fl_subsurface_egl_is_ready(subsurface_egl)) {
+    return;
+  }
+
+  graphene_point_t point = GRAPHENE_POINT_INIT(0.0f, 0.0f);
+  graphene_point_t translated_point;
+  if (gtk_widget_compute_point(view->render_area, toplevel, &point,
+                               &translated_point)) {
+    fl_subsurface_set_position(subsurface, static_cast<int>(translated_point.x),
+                               static_cast<int>(translated_point.y));
+  }
+
+  synchronize_parent_update(view, subsurface);
+  g_set_object(&view->subsurface, subsurface);
+  view->subsurface_width = width;
+  view->subsurface_height = height;
+  view->subsurface_scale = scale;
+  g_mutex_lock(&view->subsurface_mutex);
+  g_set_object(&view->subsurface_egl, subsurface_egl);
+  g_mutex_unlock(&view->subsurface_mutex);
+}
+
+void fl_view_gtk4_clear_subsurface(FlView* view) {
+  g_clear_object(&view->subsurface);
+  g_mutex_lock(&view->subsurface_mutex);
+  g_clear_object(&view->subsurface_egl);
+  g_mutex_unlock(&view->subsurface_mutex);
+}
+
+void fl_view_gtk4_resize_subsurface(FlView* view, int width, int height) {
+  if (!view->subsurface_requested) {
+    return;
+  }
+  if (view->subsurface != nullptr &&
+      fl_gtk_widget_get_scale(view->render_area) != view->subsurface_scale) {
+    fl_view_gtk4_clear_subsurface(view);
+  }
+  if (view->subsurface != nullptr) {
+    // GTK can allocate the widget again with identical dimensions. Cycling
+    // synchronization in that case can discard presentation feedback for a
+    // buffer that the child already committed.
+    if (width == view->subsurface_width && height == view->subsurface_height) {
+      return;
+    }
+    view->subsurface_width = width;
+    view->subsurface_height = height;
+    // Present resizes the EGL window on the raster thread. Hold the child
+    // commit until GTK has painted the corresponding parent geometry.
+    synchronize_parent_update(view, view->subsurface);
+  } else if (width > 0 && height > 0) {
+    setup_subsurface(view);
+  }
+}
+
+static void setup_opengl(FlView* self) {
+  g_autoptr(GError) error = nullptr;
+
+  FlGdkSurface* surface =
+      fl_gtk_widget_get_surface(GTK_WIDGET(self->render_area));
+  if (surface == nullptr) {
+    return;
+  }
+  self->render_context = gdk_surface_create_gl_context(surface, &error);
+  if (self->render_context == nullptr) {
+    g_warning("Failed to create OpenGL context: %s", error->message);
+    return;
+  }
+
+  if (!gdk_gl_context_realize(self->render_context, &error)) {
+    g_warning("Failed to realize OpenGL context: %s", error->message);
+    return;
+  }
+
+  // If using Wayland, then EGL is in use and we can access the frame
+  // from the Flutter context using EGLImage. If not (i.e. X11 using GLX)
+  // then we have to copy the texture via the CPU.
+  gboolean shareable =
+      GDK_IS_WAYLAND_DISPLAY(fl_gtk_surface_get_display(surface));
+  self->compositor = FL_COMPOSITOR(fl_compositor_opengl_new(
+      fl_engine_get_task_runner(self->engine),
+      fl_engine_get_opengl_manager(self->engine), shareable));
+}
+
+static void setup_software(FlView* self) {
+  self->compositor = FL_COMPOSITOR(
+      fl_compositor_software_new(fl_engine_get_task_runner(self->engine)));
+}
+
+void fl_view_gtk4_setup_rendering(FlView* self) {
+  switch (fl_engine_get_renderer_type(self->engine)) {
+    case kOpenGL:
+      setup_opengl(self);
+      break;
+    case kVulkan:
+      self->compositor = FL_COMPOSITOR(
+          fl_compositor_vulkan_new(fl_engine_get_task_runner(self->engine)));
+      break;
+    case kSoftware:
+      setup_software(self);
+      break;
+    default:
+      break;
+  }
+
+  if (self->subsurface_requested) {
+    setup_subsurface(self);
+  }
+}
+
+// Hold the selected destination across composition and submission. The GTK
+// thread can replace its own reference during a scale change.
+static FlSubsurfaceEGL* ref_subsurface(FlView* self) {
+  g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&self->subsurface_mutex);
+  return self->subsurface_egl != nullptr
+             ? FL_SUBSURFACE_EGL(g_object_ref(self->subsurface_egl))
+             : nullptr;
+}
+
+static gboolean retry_native_texture_cb(gpointer user_data);
+
+void fl_view_gtk4_cancel_native_texture_retry(FlView* self) {
+  if (self->native_texture_retry_source_id != 0) {
+    g_source_remove(self->native_texture_retry_source_id);
+    self->native_texture_retry_source_id = 0;
+  }
+}
+
+static void schedule_native_texture_retry(FlView* self) {
+  if (self->native_texture_retry_source_id == 0) {
+    self->native_texture_retry_source_id =
+        g_timeout_add_full(G_PRIORITY_DEFAULT, 16, retry_native_texture_cb,
+                           g_object_ref(self), g_object_unref);
+  }
+}
+
+// Imports the composited frame into the context used by the GTK widget.
+static void publish_gtk_texture(FlView* self, size_t width, size_t height) {
+  g_autoptr(GdkTexture) texture = nullptr;
+  FlGdkSurface* surface =
+      fl_gtk_widget_get_surface(GTK_WIDGET(self->render_area));
+  if (surface != nullptr) {
+    GdkGLContext* old_gl_context = gdk_gl_context_get_current();
+    if (self->render_context != nullptr) {
+      gdk_gl_context_make_current(self->render_context);
+    }
+
+    texture = fl_compositor_acquire_texture(
+        self->compositor, surface, self->render_context, width, height,
+        !self->sized_to_content || !self->native_texture_ready);
+
+    if (gdk_gl_context_get_current() != old_gl_context) {
+      gdk_gl_context_clear_current();
+    }
+
+    if (texture != nullptr && FL_IS_RENDER_TEXTURE_GTK4(self->render_area)) {
+      fl_render_texture_gtk4_set_flip_y(
+          FL_RENDER_TEXTURE_GTK4(self->render_area),
+          self->render_context != nullptr);
+      fl_render_texture_gtk4_set_texture(
+          FL_RENDER_TEXTURE_GTK4(self->render_area), texture);
+      self->native_texture_ready = TRUE;
+      fl_view_notify_first_frame(self);
+      fl_view_gtk4_cancel_native_texture_retry(self);
+    } else if (!self->native_texture_ready) {
+      schedule_native_texture_retry(self);
+    }
+  }
+}
+
+// Redraw the view from the GTK thread.
+static gboolean redraw_cb(gpointer user_data) {
+  TRACE_EVENT0("flutter", "GTK4UpdateTexture");
+  g_autoptr(FlView) self = FL_VIEW(user_data);
+
+  if (!self->sized_to_content) {
+    fl_view_notify_first_frame(self);
+  }
+
+  // If Flutter is controlling the window size, then resize the view if
+  // necessary.
+  const double scale_factor =
+      fl_gtk_widget_get_scale(GTK_WIDGET(self->render_area));
+  const size_t width = fl_gtk_size_to_pixels(
+      gtk_widget_get_width(self->render_area), scale_factor);
+  const size_t height = fl_gtk_size_to_pixels(
+      gtk_widget_get_height(self->render_area), scale_factor);
+  size_t frame_width, frame_height;
+  fl_compositor_get_frame_size(self->compositor, &frame_width, &frame_height);
+  const gint logical_frame_width =
+      MAX(static_cast<gint>(ceil(frame_width / scale_factor)), 1);
+  const gint logical_frame_height =
+      MAX(static_cast<gint>(ceil(frame_height / scale_factor)), 1);
+  gboolean frame_size_matches = width == frame_width && height == frame_height;
+  if (self->sized_to_content && !frame_size_matches) {
+    gtk_widget_set_size_request(GTK_WIDGET(self->render_area),
+                                logical_frame_width, logical_frame_height);
+    schedule_native_texture_retry(self);
+    // A popover is its own native surface. Resizing its content must not
+    // resize the parent window returned by gtk_widget_get_root().
+    GtkNative* native = gtk_widget_get_native(GTK_WIDGET(self->render_area));
+    if (GTK_IS_WINDOW(native)) {
+      gtk_window_set_default_size(GTK_WINDOW(native), logical_frame_width,
+                                  logical_frame_height);
+    }
+    return G_SOURCE_REMOVE;
+  }
+
+  if (!self->sized_to_content && !frame_size_matches && width > 1 &&
+      height > 1) {
+    fl_view_update_geometry(self);
+    return G_SOURCE_REMOVE;
+  }
+
+  if (width == 0 || height == 0) {
+    schedule_native_texture_retry(self);
+    return G_SOURCE_REMOVE;
+  }
+
+  if (self->subsurface_requested) {
+    g_mutex_lock(&self->subsurface_mutex);
+    const gboolean subsurface_enabled = self->subsurface_egl != nullptr;
+    g_mutex_unlock(&self->subsurface_mutex);
+    if (subsurface_enabled) {
+      return G_SOURCE_REMOVE;
+    }
+  }
+
+  publish_gtk_texture(self, width, height);
+
+  return G_SOURCE_REMOVE;
+}
+
+static gboolean retry_native_texture_cb(gpointer user_data) {
+  FlView* self = FL_VIEW(user_data);
+  self->native_texture_retry_source_id = 0;
+  redraw_cb(g_object_ref(self));
+  return G_SOURCE_REMOVE;
+}
+
+void fl_view_gtk4_present_layers(FlView* self,
+                                 const FlutterLayer** layers,
+                                 size_t layers_count) {
+  if (self->cancellable == nullptr ||
+      g_cancellable_is_cancelled(self->cancellable)) {
+    return;
+  }
+  // The engine can present its first frame before the GTK widget is realized.
+  // The compositor is created during realization, so request a replacement
+  // after realization rather than dropping the only frame for a new view.
+  if (self->compositor == nullptr) {
+    self->needs_frame_after_realize = TRUE;
+    return;
+  }
+
+  g_autoptr(FlSubsurfaceEGL) subsurface =
+      self->subsurface_requested ? ref_subsurface(self) : nullptr;
+  if (subsurface != nullptr) {
+    fl_compositor_opengl_present_to_subsurface(
+        FL_COMPOSITOR_OPENGL(self->compositor), subsurface, layers,
+        layers_count);
+  } else {
+    fl_compositor_present_layers(self->compositor, layers, layers_count);
+  }
+
+  // The GTK thread handles geometry and first-frame notification for both
+  // destinations. Only the GTK texture path imports a texture during redraw.
+  g_idle_add(redraw_cb, g_object_ref(self));
+}

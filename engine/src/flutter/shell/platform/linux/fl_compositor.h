@@ -1,0 +1,122 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef FLUTTER_SHELL_PLATFORM_LINUX_FL_COMPOSITOR_H_
+#define FLUTTER_SHELL_PLATFORM_LINUX_FL_COMPOSITOR_H_
+
+#include <cairo.h>
+#include <gdk/gdk.h>
+
+#include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/linux/fl_gtk.h"
+
+G_BEGIN_DECLS
+
+// Maximum time to wait for a frame to be ready before giving up and rendering.
+constexpr gint64 kCompositorRenderTimeoutMicroseconds = 100000;  // 100ms
+
+G_DECLARE_DERIVABLE_TYPE(FlCompositor, fl_compositor, FL, COMPOSITOR, GObject)
+
+struct _FlCompositorClass {
+  GObjectClass parent_class;
+
+  gboolean (*present_layers)(FlCompositor* compositor,
+                             const FlutterLayer** layers,
+                             size_t layers_count);
+
+  void (*get_frame_size)(FlCompositor* compositor,
+                         size_t* width,
+                         size_t* height);
+
+  gboolean (*render)(FlCompositor* compositor,
+                     cairo_t* cr,
+                     FlGdkSurface* surface,
+                     gboolean wait_for_frame);
+
+#if FLUTTER_LINUX_GTK4
+  GdkTexture* (*acquire_texture)(FlCompositor* compositor,
+                                 FlGdkSurface* surface,
+                                 GdkGLContext* context,
+                                 size_t width,
+                                 size_t height,
+                                 gboolean wait_for_frame);
+#endif
+};
+
+/**
+ * FlCompositor:
+ *
+ * #FlCompositor is an abstract class that implements Flutter compositing.
+ */
+
+/**
+ * fl_compositor_present_layers:
+ * @compositor: an #FlCompositor.
+ * @layers: layers to be composited.
+ * @layers_count: number of layers.
+ *
+ * Composite layers. Called from the Flutter rendering thread.
+ *
+ * Returns %TRUE if successful.
+ */
+gboolean fl_compositor_present_layers(FlCompositor* compositor,
+                                      const FlutterLayer** layers,
+                                      size_t layers_count);
+
+/**
+ * fl_compositor_get_frame_size:
+ * @compositor: an #FlCompositor.
+ * @width: location to write frame width in pixels.
+ * @height: location to write frame height in pixels.
+ *
+ * Get the size of the layer ready for rendering.
+ */
+void fl_compositor_get_frame_size(FlCompositor* compositor,
+                                  size_t* width,
+                                  size_t* height);
+
+/**
+ * fl_compositor_render:
+ * @compositor: an #FlCompositor.
+ * @cr: a Cairo rendering context.
+ * @window: window being rendered into.
+ * @wait_for_frame: if the available frame is not the size of the window block
+ * until a new frame is received.
+ *
+ * Renders the current frame. Called from the GTK thread.
+ *
+ * Returns %TRUE if successful.
+ */
+gboolean fl_compositor_render(FlCompositor* compositor,
+                              cairo_t* cr,
+                              FlGdkSurface* surface,
+                              gboolean wait_for_frame);
+
+#if FLUTTER_LINUX_GTK4
+/**
+ * fl_compositor_acquire_texture:
+ * @compositor: an #FlCompositor.
+ * @surface: surface being rendered into.
+ * @context: (nullable): GTK render context owning the resulting texture.
+ * @width: expected frame width in physical pixels.
+ * @height: expected frame height in physical pixels.
+ * @wait_for_frame: if the available frame is not the size of the window block
+ * until a new frame is received.
+ *
+ * Acquires the current frame as a GTK texture for native GTK4 presentation.
+ * Called from the GTK thread.
+ *
+ * Returns: (transfer full): a #GdkTexture or %NULL if unavailable.
+ */
+GdkTexture* fl_compositor_acquire_texture(FlCompositor* compositor,
+                                          FlGdkSurface* surface,
+                                          GdkGLContext* context,
+                                          size_t width,
+                                          size_t height,
+                                          gboolean wait_for_frame);
+#endif
+
+G_END_DECLS
+
+#endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_COMPOSITOR_H_

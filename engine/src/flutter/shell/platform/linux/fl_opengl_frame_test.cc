@@ -17,7 +17,7 @@ class FlOpenGLFrameTest : public flutter::testing::LinuxTest {
  protected:
   void SetUp() override {
     opengl_manager = fl_opengl_manager_new();
-    compositor = fl_compositor_opengl_new(opengl_manager);
+    compositor = fl_compositor_opengl_new(opengl_manager, FALSE);
   }
 
   ~FlOpenGLFrameTest() override {
@@ -57,7 +57,7 @@ TEST_F(FlOpenGLFrameTest, CompositeRGBA) {
                         .size = {width, height}};
   const FlutterLayer* layers[1] = {&layer};
 
-  EXPECT_CALL(epoxy, glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
+  EXPECT_CALL(epoxy, glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0,
                                   GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
 
   fl_opengl_frame_composite(frame, compositor, layers, 1);
@@ -87,7 +87,7 @@ TEST_F(FlOpenGLFrameTest, CompositeBGRA) {
                         .size = {width, height}};
   const FlutterLayer* layers[1] = {&layer};
 
-  EXPECT_CALL(epoxy, glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height,
+  EXPECT_CALL(epoxy, glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA8_EXT, width, height,
                                   0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, nullptr));
 
   fl_opengl_frame_composite(frame, compositor, layers, 1);

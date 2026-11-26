@@ -2897,28 +2897,39 @@ void main() {
     );
   });
 
-  test('plugin includes native Linux unit tests', () async {
-    final CreateCommand command = createCreateCommand(
-      featureFlags: TestFeatureFlags(isLinuxEnabled: true),
-    );
-    final CommandRunner<void> runner = _createCommandRunner(command);
+  for (final gtkVariant in <String>['gtk3', 'gtk4']) {
+    test('plugin includes native Linux unit tests and Pigeon bindings for $gtkVariant', () async {
+      final CreateCommand command = createCreateCommand(
+        featureFlags: TestFeatureFlags(isLinuxEnabled: true),
+      );
+      final CommandRunner<void> runner = _createCommandRunner(command);
 
-    await runner.run(<String>[
-      'create',
-      '--no-pub',
-      '--template=plugin',
-      '--platforms=linux',
-      projectDir.path,
-    ]);
+      await runner.run(<String>[
+        'create',
+        '--no-pub',
+        '--template=plugin',
+        '--platforms=linux',
+        '--linux-gtk=$gtkVariant',
+        projectDir.path,
+      ]);
 
-    expect(
-      projectDir
-          .childDirectory('linux')
-          .childDirectory('test')
-          .childFile('flutter_project_plugin_test.cc'),
-      exists,
-    );
-  });
+      expect(
+        projectDir
+            .childDirectory('linux')
+            .childDirectory('test')
+            .childFile('flutter_project_plugin_test.cc'),
+        exists,
+      );
+      final Directory linux = projectDir.childDirectory('linux');
+      expect(linux.childFile('messages.g.cc'), exists);
+      expect(linux.childFile('messages.g.h'), exists);
+      expect(linux.childFile('CMakeLists.txt').readAsStringSync(), contains('"messages.g.cc"'));
+      expect(
+        linux.childFile('flutter_project_plugin.cc').readAsStringSync(),
+        contains('_api_set_method_handlers('),
+      );
+    });
+  }
 
   test('create a module with --platforms throws error.', () async {
     final CreateCommand command = createCreateCommand();

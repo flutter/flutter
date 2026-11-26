@@ -8,6 +8,10 @@
 #include <epoxy/gl.h>
 #include <glib-object.h>
 
+#if FLUTTER_LINUX_GTK4
+#include "flutter/shell/platform/linux/fl_egl_image.h"
+#endif
+
 G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE(FlFramebuffer, fl_framebuffer, FL, FRAMEBUFFER, GObject)
@@ -35,6 +39,12 @@ FlFramebuffer* fl_framebuffer_new(GLint format,
                                   size_t width,
                                   size_t height,
                                   gboolean depth_stencil);
+
+#if FLUTTER_LINUX_GTK4
+FlFramebuffer* fl_framebuffer_new_shareable(GLint format,
+                                            size_t width,
+                                            size_t height);
+#endif
 
 /**
  * fl_framebuffer_new_multisample:
@@ -65,6 +75,33 @@ FlFramebuffer* fl_framebuffer_new_multisample(GLint format,
                                               size_t height,
                                               gboolean use_msaa);
 
+#if FLUTTER_LINUX_GTK4
+/**
+ * fl_framebuffer_get_shareable:
+ * @framebuffer: an #FlFramebuffer.
+ *
+ * Checks if this framebuffer can be shared between contexts (using
+ * fl_framebuffer_create_sibling_texture).
+ *
+ * Returns: %TRUE if this framebuffer can be shared.
+ */
+gboolean fl_framebuffer_get_shareable(FlFramebuffer* framebuffer);
+
+/**
+ * fl_framebuffer_get_egl_image:
+ * @framebuffer: an #FlFramebuffer.
+ *
+ * Gets the EGL image backing a shareable framebuffer.
+ *
+ * Returns: (transfer none) (nullable): the backing EGL image.
+ */
+FlEGLImage* fl_framebuffer_get_egl_image(FlFramebuffer* framebuffer);
+
+// Import the framebuffer's EGL image as a texture in the current context.
+// The caller must delete the texture in that context after use.
+GLuint fl_framebuffer_create_sibling_texture(FlFramebuffer* framebuffer);
+
+#endif  // FLUTTER_LINUX_GTK4
 /**
  * fl_framebuffer_get_id:
  * @framebuffer: an #FlFramebuffer.

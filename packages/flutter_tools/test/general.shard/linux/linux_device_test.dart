@@ -235,6 +235,7 @@ void main() {
             'Ninja',
             '-DCMAKE_BUILD_TYPE=Debug',
             '-DFLUTTER_TARGET_PLATFORM=linux-x64',
+            '-DLINUX_GTK_VARIANT=gtk3',
             '/linux',
           ],
           workingDirectory: '/build/linux/x64/debug',
@@ -287,11 +288,11 @@ FlutterProject setUpFlutterProject(Directory directory) {
 
 class FakeLinuxApp extends Fake implements LinuxApp {
   @override
-  String executable(BuildMode buildMode, [String? flavor]) => switch (buildMode) {
+  String executable(BuildInfo buildInfo) => switch (buildInfo.mode) {
     BuildMode.debug => 'debug/executable',
     BuildMode.profile => 'profile/executable',
     BuildMode.release => 'release/executable',
-    _ => throw StateError('Invalid mode: $buildMode'),
+    _ => throw StateError('Invalid mode: ${buildInfo.mode}'),
   };
 }
 

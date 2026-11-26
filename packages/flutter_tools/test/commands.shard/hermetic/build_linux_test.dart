@@ -78,8 +78,10 @@ void main() {
   FakeCommand cmakeCommand(
     String buildMode, {
     String target = 'x64',
+    String linuxGtkVersion = 'gtk3',
     void Function(List<String> command)? onRun,
   }) {
+    final buildDirectory = linuxGtkVersion == 'gtk4' ? 'linux-gtk4' : 'linux';
     return FakeCommand(
       command: <String>[
         'cmake',
@@ -87,9 +89,10 @@ void main() {
         'Ninja',
         '-DCMAKE_BUILD_TYPE=${sentenceCase(buildMode)}',
         '-DFLUTTER_TARGET_PLATFORM=linux-$target',
+        '-DLINUX_GTK_VARIANT=$linuxGtkVersion',
         '/linux',
       ],
-      workingDirectory: '/build/linux/$target/$buildMode',
+      workingDirectory: '/build/$buildDirectory/$target/$buildMode',
       onRun: onRun,
     );
   }
@@ -99,11 +102,13 @@ void main() {
     String buildMode, {
     Map<String, String>? environment,
     String target = 'x64',
+    String? linuxGtkVersion,
     void Function(List<String> command)? onRun,
     String stdout = '',
   }) {
+    final buildDirectory = linuxGtkVersion == 'gtk4' ? 'linux-gtk4' : 'linux';
     return FakeCommand(
-      command: <String>['ninja', '-C', '/build/linux/$target/$buildMode', 'install'],
+      command: <String>['ninja', '-C', '/build/$buildDirectory/$target/$buildMode', 'install'],
       environment: environment,
       onRun: onRun,
       stdout: stdout,
@@ -232,6 +237,20 @@ void main() {
     expect(logger.statusText, contains('✓ Built build/linux/x64/release/bundle'));
   });
 
+  test('Linux GTK4 build uses an isolated output directory', () async {
+    final BuildCommand command = createBuildCommand();
+    setUpMockProjectFilesForBuild();
+    processManager.addCommands(<FakeCommand>[
+      cmakeCommand('debug', linuxGtkVersion: 'gtk4'),
+      ninjaCommand('debug', linuxGtkVersion: 'gtk4'),
+    ]);
+
+    await createTestCommandRunner(command)
+        .run(const <String>['build', 'linux', '--debug', '--linux-gtk=gtk4', '--no-pub']);
+
+    expect(logger.statusText, contains('Built build/linux-gtk4/x64/debug/bundle'));
+  });
+
   test('Linux build invokes CMake and ninja, and writes temporary files', () async {
     final BuildCommand command = createBuildCommand();
     processManager.addCommands(<FakeCommand>[cmakeCommand('release'), ninjaCommand('release')]);
@@ -344,7 +363,7 @@ void main() {
     // (Dart error, compile error, link error), edited down for compactness.
     const stdout = r'''
 ninja: Entering directory `/build/linux/x64/release'
-[1/6] Generating /foo/linux/flutter/ephemeral/libflutter_linux_gtk.so, /foo/linux/flutter/ephemeral/flutter_linux/flutter_linux.h, _phony
+[1/7] Generating /foo/linux/flutter/ephemeral/libflutter_linux_gtk.so, /foo/linux/flutter/ephemeral/libflutter_linux_gtk4.so, /foo/linux/flutter/ephemeral/flutter_linux/flutter_linux.h, _phony
 lib/main.dart:4:3: Error: Method not found: 'foo'.
 [2/6] Building CXX object CMakeFiles/foo.dir/main.cc.o
 /foo/linux/main.cc:6:2: error: expected ';' after class
@@ -529,6 +548,7 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         '  "DART_DEFINES=${encodeDartDefinesMap(<String, String>{
           'foo.bar': '2', //
           'fizz.far': '3',
+          'FLUTTER_LINUX_GTK': 'gtk3',
           'FLUTTER_VERSION': '0.0.0',
           'FLUTTER_CHANNEL': 'master',
           'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
@@ -544,6 +564,7 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         '  "TREE_SHAKE_ICONS=true"',
         '  "FLUTTER_ROOT=$_kTestFlutterRoot"',
         '  "PROJECT_DIR=${fileSystem.currentDirectory.path}"',
+        '  "FLUTTER_LINUX_GTK=gtk3"',
         '  "FLUTTER_TARGET=lib/other.dart"',
       ]),
     );

@@ -35,6 +35,24 @@ static MockGtk* mock = nullptr;
 MockGtk::MockGtk() {
   thread = g_thread_self();
   mock = this;
+  ON_CALL(*this, gdk_monitor_get_scale_factor(::testing::_))
+      .WillByDefault(::testing::Return(1));
+  ON_CALL(*this, gdk_monitor_get_geometry(::testing::_, ::testing::_))
+      .WillByDefault([](GdkMonitor*, GdkRectangle* geometry) {
+        *geometry = {0, 0, 1920, 1080};
+      });
+  ON_CALL(*this, gdk_event_get_axis(::testing::_, ::testing::_, ::testing::_))
+      .WillByDefault(
+          [](const GdkEvent* event, GdkAxisUse axis, gdouble* value) {
+            auto original = reinterpret_cast<decltype(&::gdk_event_get_axis)>(
+                dlsym(RTLD_NEXT, "gdk_event_get_axis"));
+            return original(event, axis, value);
+          });
+  ON_CALL(*this, gdk_window_get_display(::testing::_))
+      .WillByDefault([](GdkWindow*) {
+        return GDK_DISPLAY(
+            g_object_new(gdk_wayland_display_get_type(), nullptr));
+      });
   ON_CALL(*this, gdk_window_get_width(::testing::_))
       .WillByDefault(::testing::Return(100));
   ON_CALL(*this, gdk_window_get_height(::testing::_))
@@ -65,6 +83,17 @@ GdkKeymap* gdk_keymap_get_for_display(GdkDisplay* display) {
 guint gdk_keymap_lookup_key(GdkKeymap* keymap, const GdkKeymapKey* key) {
   check_thread();
   return mock->gdk_keymap_lookup_key(keymap, key);
+}
+
+gboolean gdk_event_get_axis(const GdkEvent* event,
+                            GdkAxisUse axis_use,
+                            gdouble* value) {
+  if (mock != nullptr && mock->thread == g_thread_self()) {
+    return mock->gdk_event_get_axis(event, axis_use, value);
+  }
+  auto original = reinterpret_cast<decltype(&::gdk_event_get_axis)>(
+      dlsym(RTLD_NEXT, "gdk_event_get_axis"));
+  return original(event, axis_use, value);
 }
 
 GdkDisplay* gdk_display_get_default() {
@@ -104,6 +133,9 @@ GdkWindowState gdk_window_get_state(GdkWindow* window) {
 
 GdkDisplay* gdk_window_get_display(GdkWindow* window) {
   check_thread();
+  if (mock != nullptr) {
+    return mock->gdk_window_get_display(window);
+  }
   return GDK_DISPLAY(g_object_new(gdk_wayland_display_get_type(), nullptr));
 }
 
@@ -120,11 +152,19 @@ GdkMonitor* gdk_display_get_monitor(GdkDisplay* display, int n) {
 GdkMonitor* gdk_display_get_monitor_at_window(GdkDisplay* display,
                                               GdkWindow* window) {
   check_thread();
+  if (mock != nullptr) {
+    return mock->gdk_display_get_monitor_at_window(display, window);
+  }
   return nullptr;
 }
 
 void gdk_monitor_get_geometry(GdkMonitor* monitor, GdkRectangle* geometry) {
   check_thread();
+  if (mock != nullptr) {
+    mock->gdk_monitor_get_geometry(monitor, geometry);
+  } else {
+    *geometry = {0, 0, 1920, 1080};
+  }
 }
 
 int gdk_monitor_get_refresh_rate(GdkMonitor* monitor) {
@@ -134,7 +174,7 @@ int gdk_monitor_get_refresh_rate(GdkMonitor* monitor) {
 
 int gdk_monitor_get_scale_factor(GdkMonitor* monitor) {
   check_thread();
-  return 1;
+  return mock != nullptr ? mock->gdk_monitor_get_scale_factor(monitor) : 1;
 }
 
 GdkCursor* gdk_cursor_new_from_name(GdkDisplay* display, const gchar* name) {

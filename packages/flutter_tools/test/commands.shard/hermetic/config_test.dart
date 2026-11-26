@@ -179,6 +179,16 @@ void main() {
       expect(fakeAnalytics.sentEvents, isEmpty);
     });
 
+    test('Can set linux-gtk-default', () async {
+      final ConfigCommand configCommand = createConfigCommand();
+      final CommandRunner<void> commandRunner = createRunner(configCommand);
+
+      await commandRunner.run(<String>['config', '--linux-gtk-default=gtk4']);
+
+      expect(defaultConfig.getValue('linux-gtk-default'), 'gtk4');
+      expect(fakeAnalytics.sentEvents, isEmpty);
+    });
+
     test('throws error on absolute path to build-dir', () async {
       final ConfigCommand configCommand = createConfigCommand();
       final CommandRunner<void> commandRunner = createRunner(configCommand);

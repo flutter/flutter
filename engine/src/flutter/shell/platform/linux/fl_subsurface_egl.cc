@@ -154,6 +154,8 @@ static void setup(FlSubsurfaceEGL* self,
 
   eglMakeCurrent(egl_display, self->egl_surface, self->egl_surface,
                  self->egl_context);
+  // The engine already paces frame production. Let the raster thread submit
+  // the child buffer without also waiting on EGL's swap interval.
   eglSwapInterval(egl_display, 0);
 
   // Determine whether this context can use glBlitFramebuffer to copy the engine
@@ -231,6 +233,12 @@ FlSubsurfaceEGL* fl_subsurface_egl_new(FlOpenGLManager* opengl_manager,
   setup(self, width, height, scale);
 
   return self;
+}
+
+gboolean fl_subsurface_egl_is_ready(FlSubsurfaceEGL* self) {
+  g_return_val_if_fail(FL_IS_SUBSURFACE_EGL(self), FALSE);
+  return self->egl_context != EGL_NO_CONTEXT &&
+         self->egl_surface != EGL_NO_SURFACE;
 }
 
 void fl_subsurface_egl_resize(FlSubsurfaceEGL* self,

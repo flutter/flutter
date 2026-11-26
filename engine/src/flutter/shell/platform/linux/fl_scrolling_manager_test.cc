@@ -42,17 +42,19 @@ TEST_F(FlScrollingManagerTest, DiscreteDirectional) {
   event->y = 8.0;
   event->device = mouse;
   event->direction = GDK_SCROLL_UP;
-  fl_scrolling_manager_handle_scroll_event(manager, event, 1.0);
+  fl_scrolling_manager_handle_scroll_event(manager, event, 12.0, 16.0, TRUE,
+                                           0.0, -1.0, 1.0);
   EXPECT_EQ(pointer_events.size(), 1u);
-  EXPECT_EQ(pointer_events[0].x, 4.0);
-  EXPECT_EQ(pointer_events[0].y, 8.0);
+  EXPECT_EQ(pointer_events[0].x, 12.0);
+  EXPECT_EQ(pointer_events[0].y, 16.0);
   EXPECT_EQ(pointer_events[0].device_kind, kFlutterPointerDeviceKindMouse);
   EXPECT_EQ(pointer_events[0].timestamp,
             1000lu);  // Milliseconds -> Microseconds
   EXPECT_EQ(pointer_events[0].scroll_delta_x, 0);
   EXPECT_EQ(pointer_events[0].scroll_delta_y, 53 * -1.0);
   event->direction = GDK_SCROLL_DOWN;
-  fl_scrolling_manager_handle_scroll_event(manager, event, 1.0);
+  fl_scrolling_manager_handle_scroll_event(manager, event, event->x, event->y,
+                                           TRUE, 0.0, 1.0, 1.0);
   EXPECT_EQ(pointer_events.size(), 2u);
   EXPECT_EQ(pointer_events[1].x, 4.0);
   EXPECT_EQ(pointer_events[1].y, 8.0);
@@ -62,7 +64,8 @@ TEST_F(FlScrollingManagerTest, DiscreteDirectional) {
   EXPECT_EQ(pointer_events[1].scroll_delta_x, 0);
   EXPECT_EQ(pointer_events[1].scroll_delta_y, 53 * 1.0);
   event->direction = GDK_SCROLL_LEFT;
-  fl_scrolling_manager_handle_scroll_event(manager, event, 1.0);
+  fl_scrolling_manager_handle_scroll_event(manager, event, event->x, event->y,
+                                           TRUE, -1.0, 0.0, 1.0);
   EXPECT_EQ(pointer_events.size(), 3u);
   EXPECT_EQ(pointer_events[2].x, 4.0);
   EXPECT_EQ(pointer_events[2].y, 8.0);
@@ -72,7 +75,8 @@ TEST_F(FlScrollingManagerTest, DiscreteDirectional) {
   EXPECT_EQ(pointer_events[2].scroll_delta_x, 53 * -1.0);
   EXPECT_EQ(pointer_events[2].scroll_delta_y, 0);
   event->direction = GDK_SCROLL_RIGHT;
-  fl_scrolling_manager_handle_scroll_event(manager, event, 1.0);
+  fl_scrolling_manager_handle_scroll_event(manager, event, event->x, event->y,
+                                           TRUE, 1.0, 0.0, 1.0);
   EXPECT_EQ(pointer_events.size(), 4u);
   EXPECT_EQ(pointer_events[3].x, 4.0);
   EXPECT_EQ(pointer_events[3].y, 8.0);
@@ -112,7 +116,9 @@ TEST_F(FlScrollingManagerTest, DiscreteScrolling) {
   event->delta_y = 2.0;
   event->device = mouse;
   event->direction = GDK_SCROLL_SMOOTH;
-  fl_scrolling_manager_handle_scroll_event(manager, event, 1.0);
+  fl_scrolling_manager_handle_scroll_event(manager, event, event->x, event->y,
+                                           TRUE, event->delta_x, event->delta_y,
+                                           1.0);
   EXPECT_EQ(pointer_events.size(), 1u);
   EXPECT_EQ(pointer_events[0].x, 4.0);
   EXPECT_EQ(pointer_events[0].y, 8.0);
@@ -121,6 +127,40 @@ TEST_F(FlScrollingManagerTest, DiscreteScrolling) {
             1000lu);  // Milliseconds -> Microseconds
   EXPECT_EQ(pointer_events[0].scroll_delta_x, 53 * 1.0);
   EXPECT_EQ(pointer_events[0].scroll_delta_y, 53 * 2.0);
+}
+
+TEST_F(FlScrollingManagerTest, ScrollWithoutEventPositionUsesLastPosition) {
+  StartEngine();
+
+  std::vector<FlutterPointerEvent> pointer_events;
+  fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
+      SendPointerEvent,
+      ([&pointer_events](auto engine, const FlutterPointerEvent* events,
+                         size_t events_count) {
+        for (size_t i = 0; i < events_count; i++) {
+          pointer_events.push_back(events[i]);
+        }
+        return kSuccess;
+      }));
+
+  g_autoptr(FlScrollingManager) manager = fl_scrolling_manager_new(engine, 0);
+  fl_scrolling_manager_set_last_mouse_position(manager, 24.0, 32.0);
+
+  GdkDevice* mouse =
+      GDK_DEVICE(g_object_new(gdk_wayland_device_get_type(), "input-source",
+                              GDK_SOURCE_MOUSE, nullptr));
+  GdkEventScroll* event =
+      reinterpret_cast<GdkEventScroll*>(gdk_event_new(GDK_SCROLL));
+  event->time = 1;
+  event->device = mouse;
+
+  fl_scrolling_manager_handle_scroll_event(manager, event, 0.0, 0.0, FALSE, 0.0,
+                                           -1.0, 1.0);
+
+  ASSERT_EQ(pointer_events.size(), 1u);
+  EXPECT_EQ(pointer_events[0].x, 24.0);
+  EXPECT_EQ(pointer_events[0].y, 32.0);
+  EXPECT_EQ(pointer_events[0].scroll_delta_y, -53.0);
 }
 
 TEST_F(FlScrollingManagerTest, Panning) {
@@ -152,7 +192,9 @@ TEST_F(FlScrollingManagerTest, Panning) {
   event->delta_y = 2.0;
   event->device = touchpad;
   event->direction = GDK_SCROLL_SMOOTH;
-  fl_scrolling_manager_handle_scroll_event(manager, event, 1.0);
+  fl_scrolling_manager_handle_scroll_event(manager, event, event->x, event->y,
+                                           TRUE, event->delta_x, event->delta_y,
+                                           1.0);
   EXPECT_EQ(pointer_events.size(), 2u);
   EXPECT_EQ(pointer_events[0].x, 4.0);
   EXPECT_EQ(pointer_events[0].y, 8.0);
@@ -168,7 +210,9 @@ TEST_F(FlScrollingManagerTest, Panning) {
   EXPECT_EQ(pointer_events[1].pan_y, 53 * -2.0);
   EXPECT_EQ(pointer_events[1].scale, 1.0);
   EXPECT_EQ(pointer_events[1].rotation, 0.0);
-  fl_scrolling_manager_handle_scroll_event(manager, event, 1.0);
+  fl_scrolling_manager_handle_scroll_event(manager, event, event->x, event->y,
+                                           TRUE, event->delta_x, event->delta_y,
+                                           1.0);
   EXPECT_EQ(pointer_events.size(), 3u);
   EXPECT_EQ(pointer_events[2].x, 4.0);
   EXPECT_EQ(pointer_events[2].y, 8.0);
@@ -180,7 +224,9 @@ TEST_F(FlScrollingManagerTest, Panning) {
   EXPECT_EQ(pointer_events[2].scale, 1.0);
   EXPECT_EQ(pointer_events[2].rotation, 0.0);
   event->is_stop = true;
-  fl_scrolling_manager_handle_scroll_event(manager, event, 1.0);
+  fl_scrolling_manager_handle_scroll_event(manager, event, event->x, event->y,
+                                           TRUE, event->delta_x, event->delta_y,
+                                           1.0);
   EXPECT_EQ(pointer_events.size(), 4u);
   EXPECT_EQ(pointer_events[3].x, 4.0);
   EXPECT_EQ(pointer_events[3].y, 8.0);

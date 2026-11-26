@@ -106,9 +106,11 @@ void fl_key_channel_responder_handle_event(FlKeyChannelResponder* self,
   // as being "pressed" whenever the lock is on, which breaks a lot of
   // interactions (for example, if shift-lock is on, tab traversal is broken).
 
-  // Remove lock states from state mask.
+  // The legacy Flutter key channel uses GTK3's Mod2 bit for Num Lock,
+  // including when the event comes from GTK4.
+  constexpr guint kNumLockModifier = 1u << 4;
   guint state =
-      fl_key_event_get_state(event) & ~(GDK_LOCK_MASK | GDK_MOD2_MASK);
+      fl_key_event_get_state(event) & ~(GDK_LOCK_MASK | kNumLockModifier);
 
   static bool shift_lock_pressed = FALSE;
   static bool caps_lock_pressed = FALSE;
@@ -128,7 +130,7 @@ void fl_key_channel_responder_handle_event(FlKeyChannelResponder* self,
   // Add back in the state matching the actual pressed state of the lock keys,
   // not the lock states.
   state |= (shift_lock_pressed || caps_lock_pressed) ? GDK_LOCK_MASK : 0x0;
-  state |= num_lock_pressed ? GDK_MOD2_MASK : 0x0;
+  state |= num_lock_pressed ? kNumLockModifier : 0x0;
 
   fl_key_event_channel_send(
       self->channel, type, scan_code, fl_key_event_get_keyval(event), state,

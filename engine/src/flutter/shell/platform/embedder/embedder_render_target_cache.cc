@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/embedder/embedder_render_target_cache.h"
 
+#include "flutter/fml/trace_event.h"
+
 namespace flutter {
 
 EmbedderRenderTargetCache::EmbedderRenderTargetCache() = default;
@@ -14,6 +16,9 @@ std::unique_ptr<EmbedderRenderTarget>
 EmbedderRenderTargetCache::GetRenderTarget(
     const EmbedderExternalView::RenderTargetDescriptor& descriptor) {
   auto compatible_target = cached_render_targets_.find(descriptor);
+  TRACE_EVENT_INSTANT1(
+      "flutter", "EmbedderRenderTargetCacheLookup", "hit",
+      compatible_target != cached_render_targets_.end() ? "true" : "false");
   if (compatible_target == cached_render_targets_.end()) {
     return nullptr;
   }

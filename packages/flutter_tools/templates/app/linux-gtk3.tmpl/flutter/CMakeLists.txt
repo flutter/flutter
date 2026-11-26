@@ -61,6 +61,7 @@ add_library(flutter INTERFACE)
 target_include_directories(flutter INTERFACE
   "${EPHEMERAL_DIR}"
 )
+target_compile_definitions(flutter INTERFACE FLUTTER_LINUX_GTK3)
 target_link_libraries(flutter INTERFACE "${FLUTTER_LIBRARY}")
 target_link_libraries(flutter INTERFACE
   PkgConfig::GTK

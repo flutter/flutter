@@ -16,6 +16,8 @@ SwapchainTransientsVK::SwapchainTransientsVK(std::weak_ptr<Context> context,
 SwapchainTransientsVK::~SwapchainTransientsVK() = default;
 
 const std::shared_ptr<Texture>& SwapchainTransientsVK::GetMSAATexture() {
+  TRACE_EVENT1("impeller", "SwapchainTransientsVK::GetMSAATexture", "cache_hit",
+               cached_msaa_texture_ ? "true" : "false");
   if (cached_msaa_texture_) {
     return cached_msaa_texture_;
   }
@@ -25,6 +27,8 @@ const std::shared_ptr<Texture>& SwapchainTransientsVK::GetMSAATexture() {
 
 const std::shared_ptr<Texture>&
 SwapchainTransientsVK::GetDepthStencilTexture() {
+  TRACE_EVENT1("impeller", "SwapchainTransientsVK::GetDepthStencilTexture",
+               "cache_hit", cached_depth_stencil_ ? "true" : "false");
   if (cached_depth_stencil_) {
     return cached_depth_stencil_;
   }
@@ -53,6 +57,8 @@ std::shared_ptr<Texture> SwapchainTransientsVK::CreateMSAATexture() const {
   if (!texture) {
     return nullptr;
   }
+  TRACE_EVENT_INSTANT1("impeller", "VulkanTransientAttachmentAllocated", "kind",
+                       "msaa");
   texture->SetLabel("SwapchainMSAA");
   return texture;
 }
@@ -83,6 +89,8 @@ std::shared_ptr<Texture> SwapchainTransientsVK::CreateDepthStencilTexture()
   if (!texture) {
     return nullptr;
   }
+  TRACE_EVENT_INSTANT1("impeller", "VulkanTransientAttachmentAllocated", "kind",
+                       "depth_stencil");
   texture->SetLabel("SwapchainDepthStencil");
   return texture;
 }
