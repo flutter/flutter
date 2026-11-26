@@ -1816,36 +1816,3 @@ class TestSelectionRegistrar extends SelectionRegistrar {
     expect(selectables.remove(selectable), isTrue);
   }
 }
-
-// test('ellipsis applies when parent height is reached before maxLines', () {
-//   const double lineHeight = 10.0;
-//   final paragraph = RenderParagraph(
-//     const TextSpan(
-//       text: 'Line 1\nLine 2\nLine 3\nLine 4\nLine 5',
-//       style: TextStyle(fontSize: lineHeight),
-//     ),
-//     textDirection: TextDirection.ltr,
-//     overflow: TextOverflow.ellipsis,
-//     maxLines: 10,
-//   );
-
-//   // Parent height fits 2.5 lines, so 2 lines fit and ellipsis is applied.
-//   layout(paragraph, constraints: const BoxConstraints(maxWidth: 200.0, maxHeight: 25.0));
-//   expect(paragraph.maxLines, 10);
-//   expect(paragraph.didExceedMaxLines, isTrue);
-//   expect(paragraph.textSize.height, equals(2 * lineHeight));
-
-//   // When maxLines is smaller than what fits in parent height, maxLines wins.
-//   paragraph.maxLines = 1;
-//   layout(paragraph, constraints: const BoxConstraints(maxWidth: 200.0, maxHeight: 50.0));
-//   expect(paragraph.maxLines, 1);
-//   expect(paragraph.didExceedMaxLines, isTrue);
-//   expect(paragraph.textSize.height, equals(lineHeight));
-
-//   // When maxLines is null and parent height is constrained, ellipsis still applies.
-//   paragraph.maxLines = null;
-//   layout(paragraph, constraints: const BoxConstraints(maxWidth: 200.0, maxHeight: 25.0));
-//   expect(paragraph.maxLines, isNull);
-//   expect(paragraph.didExceedMaxLines, isTrue);
-//   expect(paragraph.textSize.height, equals(2 * lineHeight));
-// });
