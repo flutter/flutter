@@ -16,6 +16,7 @@ struct _FlCompositorVulkan {
   FlTaskRunner* task_runner;
   GMutex frame_mutex;
   GBytes* pixels;
+  const gchar* pixel_reason;  // Static string describing the published frame.
   GdkMemoryFormat pixel_format;
   FlVulkanComposition* composition;
   std::shared_ptr<flutter::FlVulkanSnapshot>* snapshot;
@@ -64,6 +65,7 @@ static gboolean present_layers(FlCompositor* compositor,
     g_clear_object(&self->texture);
     if (self->width > 0 && self->height > 0) {
       const size_t length = self->width * self->height * 4;
+      self->pixel_reason = "empty-frame";
       self->pixels = g_bytes_new_take(g_malloc0(length), length);
     }
     fl_task_runner_stop_wait(self->task_runner);
@@ -88,6 +90,7 @@ static gboolean present_layers(FlCompositor* compositor,
                                                   width, height)) {
     frame = layers[0]->backing_store;
   }
+  const gchar* pixel_reason = "export-disabled";
   if (try_export && frame) {
     g_autoptr(GError) error = nullptr;
     auto snapshot = fl_vulkan_backing_store_snapshot(frame, &error);
@@ -103,8 +106,10 @@ static gboolean present_layers(FlCompositor* compositor,
     }
     // Retained GTK textures can temporarily occupy every pool slot. Fall back
     // for this frame and retry export next frame rather than disabling it.
-    if (!snapshot &&
-        !g_error_matches(error, G_IO_ERROR, G_IO_ERROR_WOULD_BLOCK)) {
+    if (g_error_matches(error, G_IO_ERROR, G_IO_ERROR_WOULD_BLOCK)) {
+      pixel_reason = "snapshot-pool-busy";
+    } else {
+      pixel_reason = "export-failed";
       g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&self->frame_mutex);
       self->dmabuf_disabled = TRUE;
       flutter_linux_gtk4_dbg(
@@ -124,6 +129,7 @@ static gboolean present_layers(FlCompositor* compositor,
     self->snapshot->reset();
     g_clear_object(&self->texture);
     g_clear_pointer(&self->pixels, g_bytes_unref);
+    self->pixel_reason = pixel_reason;
     self->pixels = rgba;
     self->pixel_format = GDK_MEMORY_R8G8B8A8_PREMULTIPLIED;
     self->width = width;
@@ -189,6 +195,7 @@ static gboolean present_layers(FlCompositor* compositor,
     g_clear_pointer(&self->pixels, g_bytes_unref);
     self->snapshot->reset();
     g_clear_object(&self->texture);
+    self->pixel_reason = "cpu-composition";
     self->pixels = g_bytes_ref(pixels);
     self->pixel_format = GDK_MEMORY_DEFAULT;
     self->width = width;
@@ -257,9 +264,8 @@ static GdkTexture* acquire_texture(FlCompositor* compositor,
         gdk_memory_texture_new(self->width, self->height, self->pixel_format,
                                self->pixels, self->width * 4);
     if (self->last_path != 2) {
-      flutter_linux_gtk4_dbg(
-          "vulkan-presentation",
-          "path=readback reason=composition-or-export-disabled");
+      flutter_linux_gtk4_dbg("vulkan-presentation", "path=readback reason=%s",
+                             self->pixel_reason);
       self->last_path = 2;
     }
   }

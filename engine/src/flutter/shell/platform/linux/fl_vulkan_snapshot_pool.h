@@ -61,7 +61,7 @@ class FlVulkanSnapshotPool
   };
   static std::shared_ptr<FlVulkanSnapshotPool> Create(
       const FlVulkanDeviceContext& context,
-      size_t capacity = 3);
+      size_t capacity = 4);
   std::shared_ptr<FlVulkanSnapshotBuffer> Copy(VkImage source,
                                                uint32_t width,
                                                uint32_t height,

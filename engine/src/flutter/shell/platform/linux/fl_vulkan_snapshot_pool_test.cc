@@ -232,7 +232,7 @@ class FlVulkanSnapshotPoolTest : public ::testing::Test {
         VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
     context.get_proc = Driver::GetProc;
     context.submit = Driver::QueueSubmit;
-    pool = FlVulkanSnapshotPool::Create(context, 2);
+    pool = FlVulkanSnapshotPool::Create(context);
   }
   std::shared_ptr<FlVulkanSnapshot> Copy(uint32_t width = 17,
                                          uint32_t height = 13,
@@ -264,6 +264,10 @@ TEST_F(FlVulkanSnapshotPoolTest, ReusesAllocationCommandsAndFenceAfterWarmup) {
 TEST_F(FlVulkanSnapshotPoolTest, RetainedFramesExhaustPoolThenRecover) {
   auto first = Copy();
   auto second = Copy();
+  auto third = Copy();
+  auto fourth = Copy();
+  ASSERT_NE(third, nullptr);
+  ASSERT_NE(fourth, nullptr);
   ASSERT_NE(first, nullptr);
   ASSERT_NE(second, nullptr);
   const int first_fd = first->descriptor().planes[0].fd;
@@ -271,7 +275,7 @@ TEST_F(FlVulkanSnapshotPoolTest, RetainedFramesExhaustPoolThenRecover) {
   g_autoptr(GError) error = nullptr;
   EXPECT_EQ(Copy(17, 13, &error), nullptr);
   EXPECT_TRUE(g_error_matches(error, G_IO_ERROR, G_IO_ERROR_WOULD_BLOCK));
-  EXPECT_EQ(driver->buffers, 2u);
+  EXPECT_EQ(driver->buffers, 4u);
   std::thread release([frame = std::move(first)]() mutable { frame.reset(); });
   release.join();
   EXPECT_EQ(driver->destroyed_buffers, 0u);
@@ -307,16 +311,13 @@ TEST_F(FlVulkanSnapshotPoolTest, ResizeRetiresIdleSizesButPreservesHeldFrames) {
 TEST_F(FlVulkanSnapshotPoolTest, DoesNotReuseBufferWithUnreadyImplicitFences) {
   // A non-writable FD stands in for a DMA-BUF whose readers have not finished.
   driver->export_read_only_fd = true;
-  {
-    ASSERT_NE(Copy(), nullptr);
-  }
-  {
+  for (size_t i = 0; i < 4; i++) {
     ASSERT_NE(Copy(), nullptr);
   }
   g_autoptr(GError) error = nullptr;
   EXPECT_EQ(Copy(17, 13, &error), nullptr);
   EXPECT_TRUE(g_error_matches(error, G_IO_ERROR, G_IO_ERROR_WOULD_BLOCK));
-  EXPECT_EQ(driver->buffers, 2u);
+  EXPECT_EQ(driver->buffers, 4u);
   EXPECT_EQ(pool->stats().reuses, 0u);
 }
 
