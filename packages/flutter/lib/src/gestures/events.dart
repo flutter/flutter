@@ -888,10 +888,21 @@ mixin _CopyPointerAddedEvent on PointerEvent {
   }
 }
 
-/// The device has started tracking the pointer.
+/// An event that corresponds to a pointer entering the input system.
 ///
-/// For example, the pointer might be hovering above the device, having not yet
-/// made contact with the surface of the device.
+/// Pointer added events are dispatched when a pointer becomes available for
+/// interaction with the input system, such as when a mouse or stylus enters
+/// the detection range of a device.
+///
+/// See also:
+///
+///  * [PointerEvent], the base class for pointer events.
+///  * [PointerHoverEvent], which is dispatched when a pointer moves without
+///    making contact with the input surface.
+///  * [PointerDownEvent], which is dispatched when a pointer makes contact
+///    with the input surface.
+///  * [PointerRemovedEvent], which is dispatched when a pointer is no longer
+///    available for interaction with the input system.
 class PointerAddedEvent extends PointerEvent with _PointerEventDescription, _CopyPointerAddedEvent {
   /// Creates a pointer added event.
   const PointerAddedEvent({
@@ -981,10 +992,20 @@ mixin _CopyPointerRemovedEvent on PointerEvent {
   }
 }
 
-/// The device is no longer tracking the pointer.
+/// An event that corresponds to a pointer no longer being tracked by the
+/// input system.
 ///
-/// For example, the pointer might have drifted out of the device's hover
-/// detection range or might have been disconnected from the system entirely.
+/// Pointer removed events are dispatched when a pointer is no longer available
+/// for interaction, such as when a stylus moves out of the device's hover
+/// detection range or a pointing device is disconnected from the system.
+///
+/// See also:
+///
+///  * [PointerEvent], the base class for pointer events.
+///  * [PointerAddedEvent], which is dispatched when a pointer becomes
+///    available for interaction with the input system.
+///  * [PointerUpEvent], which is dispatched when a pointer is no longer in
+///    contact with the input surface.
 class PointerRemovedEvent extends PointerEvent
     with _PointerEventDescription, _CopyPointerRemovedEvent {
   /// Creates a pointer removed event.
@@ -1082,8 +1103,12 @@ mixin _CopyPointerHoverEvent on PointerEvent {
   }
 }
 
-/// The pointer has moved with respect to the device while the pointer is not
-/// in contact with the device.
+/// An event that corresponds to a pointer moving without being in contact with
+/// the input surface.
+///
+/// Pointer hover events are dispatched when a pointer moves while remaining
+/// outside the input surface, such as when a mouse moves without any buttons
+/// pressed or a stylus moves within the device's hover detection range.
 ///
 /// See also:
 ///
@@ -1091,7 +1116,7 @@ mixin _CopyPointerHoverEvent on PointerEvent {
 ///    object.
 ///  * [PointerExitEvent], which reports when the pointer has left an object.
 ///  * [PointerMoveEvent], which reports movement while the pointer is in
-///    contact with the device.
+///    contact with the input surface.
 ///  * [Listener.onPointerHover], which allows callers to be notified of these
 ///    events in a widget tree.
 class PointerHoverEvent extends PointerEvent with _PointerEventDescription, _CopyPointerHoverEvent {
@@ -1198,16 +1223,21 @@ mixin _CopyPointerEnterEvent on PointerEvent {
   }
 }
 
-/// The pointer has moved with respect to the device while the pointer is or is
-/// not in contact with the device, and it has entered a target object.
+/// An event that corresponds to a pointer entering a target object.
+///
+/// Pointer enter events are dispatched when a pointer moves into the bounds of
+/// an object, regardless of whether the pointer is in contact with the input
+/// surface. For example, this can happen when a mouse cursor moves over a
+/// widget or a stylus enters an object's bounds while within the device's
+/// hover detection range.
 ///
 /// See also:
 ///
-///  * [PointerHoverEvent], which reports when the pointer has moved while
-///    within an object.
+///  * [PointerHoverEvent], which reports when the pointer moves while within
+///    an object.
 ///  * [PointerExitEvent], which reports when the pointer has left an object.
 ///  * [PointerMoveEvent], which reports movement while the pointer is in
-///    contact with the device.
+///    contact with the input surface.
 ///  * [MouseRegion.onEnter], which allows callers to be notified of these
 ///    events in a widget tree.
 class PointerEnterEvent extends PointerEvent with _PointerEventDescription, _CopyPointerEnterEvent {
@@ -1344,16 +1374,22 @@ mixin _CopyPointerExitEvent on PointerEvent {
   }
 }
 
-/// The pointer has moved with respect to the device while the pointer is or is
-/// not in contact with the device, and exited a target object.
+/// An event that corresponds to a pointer leaving a target object.
+///
+/// Pointer exit events are dispatched when a pointer moves out of the bounds
+/// of an object, regardless of whether the pointer is in contact with the
+/// input surface. For example, this can happen when a mouse cursor moves
+/// outside a widget or a stylus leaves an object's bounds while within the
+/// device's hover detection range.
 ///
 /// See also:
 ///
-///  * [PointerHoverEvent], which reports when the pointer has moved while
-///    within an object.
-///  * [PointerEnterEvent], which reports when the pointer has entered an object.
+///  * [PointerHoverEvent], which reports when the pointer moves while within
+///    an object.
+///  * [PointerEnterEvent], which reports when the pointer has entered an
+///    object.
 ///  * [PointerMoveEvent], which reports movement while the pointer is in
-///    contact with the device.
+///    contact with the input surface.
 ///  * [MouseRegion.onExit], which allows callers to be notified of these
 ///    events in a widget tree.
 class PointerExitEvent extends PointerEvent with _PointerEventDescription, _CopyPointerExitEvent {
@@ -1489,12 +1525,23 @@ mixin _CopyPointerDownEvent on PointerEvent {
   }
 }
 
-/// The pointer has made contact with the device.
+/// An event that corresponds to a pointer making contact with a surface.
+///
+/// Pointer down events are dispatched when a pointer first makes contact with
+/// the screen or another input surface, such as when a finger touches a
+/// touchscreen or a mouse button is pressed.
 ///
 /// See also:
 ///
 ///  * [Listener.onPointerDown], which allows callers to be notified of these
 ///    events in a widget tree.
+///  * [PointerEvent], the base class for pointer events.
+///  * [PointerMoveEvent], which is dispatched when a pointer moves while in
+///    contact with the input surface.
+///  * [PointerUpEvent], which is dispatched when a pointer is no longer in
+///    contact with the input surface.
+///  * [PointerCancelEvent], which is dispatched when a pointer interaction is
+///    interrupted.
 class PointerDownEvent extends PointerEvent with _PointerEventDescription, _CopyPointerDownEvent {
   /// Creates a pointer down event.
   const PointerDownEvent({
@@ -1599,13 +1646,21 @@ mixin _CopyPointerMoveEvent on PointerEvent {
   }
 }
 
-/// The pointer has moved with respect to the device while the pointer is in
-/// contact with the device.
+/// An event that corresponds to a pointer moving while in contact with the
+/// input surface.
+///
+/// Pointer move events are dispatched when a pointer changes position while
+/// remaining in contact with the input surface, such as when a finger moves
+/// across a touchscreen or a mouse moves while a button is pressed.
 ///
 /// See also:
 ///
 ///  * [PointerHoverEvent], which reports movement while the pointer is not in
-///    contact with the device.
+///    contact with the input surface.
+///  * [PointerDownEvent], which reports when a pointer makes contact with the
+///    input surface.
+///  * [PointerUpEvent], which reports when a pointer is no longer in contact
+///    with the input surface.
 ///  * [Listener.onPointerMove], which allows callers to be notified of these
 ///    events in a widget tree.
 class PointerMoveEvent extends PointerEvent with _PointerEventDescription, _CopyPointerMoveEvent {
@@ -1716,12 +1771,23 @@ mixin _CopyPointerUpEvent on PointerEvent {
   }
 }
 
-/// The pointer has stopped making contact with the device.
+/// An event that corresponds to a pointer existing contact with a surface.
+///
+/// Pointer up events are dispatched when a pointer first exits contact with
+/// the screen or another input surface, such as when a finger is removed from
+/// touchscreen or a mouse button is released.
 ///
 /// See also:
 ///
 ///  * [Listener.onPointerUp], which allows callers to be notified of these
 ///    events in a widget tree.
+///  * [PointerEvent], the base class for pointer events.
+///  * [PointerMoveEvent], which is dispatched when a pointer moves while in
+///    contact with the input surface.
+///  * [PointerUpEvent], which is dispatched when a pointer is no longer in
+///    contact with the input surface.
+///  * [PointerCancelEvent], which is dispatched when a pointer interaction is
+///    interrupted.
 class PointerUpEvent extends PointerEvent with _PointerEventDescription, _CopyPointerUpEvent {
   /// Creates a pointer up event.
   const PointerUpEvent({
@@ -2170,12 +2236,20 @@ mixin _CopyPointerPanZoomStartEvent on PointerEvent {
   }
 }
 
-/// A pan/zoom has begun on this pointer.
+/// An event that corresponds to the beginning of a pan/zoom interaction.
+///
+/// Pointer pan/zoom start events are dispatched when a pointer device begins
+/// a pan/zoom interaction, such as when a trackpad gesture starts scrolling or
+/// zooming.
 ///
 /// See also:
 ///
-///  * [Listener.onPointerPanZoomStart], which allows callers to be notified of these
-///    events in a widget tree.
+///  * [PointerPanZoomUpdateEvent], which reports changes during a pan/zoom
+///    interaction.
+///  * [PointerPanZoomEndEvent], which reports when a pan/zoom interaction has
+///    ended.
+///  * [Listener.onPointerPanZoomStart], which allows callers to be notified
+///    of these events in a widget tree.
 class PointerPanZoomStartEvent extends PointerEvent
     with _PointerEventDescription, _CopyPointerPanZoomStartEvent {
   /// Creates a pointer pan/zoom start event.
@@ -2282,12 +2356,21 @@ mixin _CopyPointerPanZoomUpdateEvent on PointerEvent {
   }
 }
 
-/// The active pan/zoom on this pointer has updated.
+/// An event that corresponds to an update during an active pan/zoom
+/// interaction.
+///
+/// Pointer pan/zoom update events are dispatched when the pan or zoom
+/// associated with a pointer changes, such as when a trackpad gesture moves
+/// or changes its zoom level.
 ///
 /// See also:
 ///
-///  * [Listener.onPointerPanZoomUpdate], which allows callers to be notified of these
-///    events in a widget tree.
+///  * [PointerPanZoomStartEvent], which reports when a pan/zoom interaction
+///    begins.
+///  * [PointerPanZoomEndEvent], which reports when a pan/zoom interaction
+///    ends.
+///  * [Listener.onPointerPanZoomUpdate], which allows callers to be notified
+///    of these events in a widget tree.
 class PointerPanZoomUpdateEvent extends PointerEvent
     with _PointerEventDescription, _CopyPointerPanZoomUpdateEvent {
   /// Creates a pointer pan/zoom update event.
@@ -2406,12 +2489,20 @@ mixin _CopyPointerPanZoomEndEvent on PointerEvent {
   }
 }
 
-/// The pan/zoom on this pointer has ended.
+/// An event that corresponds to the end of a pan/zoom interaction.
+///
+/// Pointer pan/zoom end events are dispatched when an active pan/zoom
+/// interaction associated with a pointer has ended, such as when a trackpad
+/// gesture used for scrolling or zooming is completed.
 ///
 /// See also:
 ///
-///  * [Listener.onPointerPanZoomEnd], which allows callers to be notified of these
-///    events in a widget tree.
+///  * [PointerPanZoomStartEvent], which reports when a pan/zoom interaction
+///    begins.
+///  * [PointerPanZoomUpdateEvent], which reports changes during an active
+///    pan/zoom interaction.
+///  * [Listener.onPointerPanZoomEnd], which allows callers to be notified
+///    of these events in a widget tree.
 class PointerPanZoomEndEvent extends PointerEvent
     with _PointerEventDescription, _CopyPointerPanZoomEndEvent {
   /// Creates a pointer pan/zoom end event.
@@ -2504,12 +2595,20 @@ mixin _CopyPointerCancelEvent on PointerEvent {
   }
 }
 
-/// The input from the pointer is no longer directed towards this receiver.
+/// An event that corresponds to a pointer interaction being cancelled.
+///
+/// Pointer cancel events are dispatched when the input system determines that
+/// a pointer interaction should no longer continue, such as when the system
+/// interrupts the interaction or redirects pointer input elsewhere.
 ///
 /// See also:
 ///
-///  * [Listener.onPointerCancel], which allows callers to be notified of these
-///    events in a widget tree.
+///  * [PointerDownEvent], which reports when a pointer makes contact with the
+///    input surface.
+///  * [PointerUpEvent], which reports when a pointer is no longer in contact
+///    with the input surface.
+///  * [Listener.onPointerCancel], which allows callers to be notified of
+///    these events in a widget tree.
 class PointerCancelEvent extends PointerEvent
     with _PointerEventDescription, _CopyPointerCancelEvent {
   /// Creates a pointer cancel event.
