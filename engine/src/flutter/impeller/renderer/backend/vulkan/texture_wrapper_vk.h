@@ -5,13 +5,14 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_TEXTURE_WRAPPER_VK_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_TEXTURE_WRAPPER_VK_H_
 
+#include <functional>
 #include <memory>
 
 #include "impeller/core/texture.h"
 #include "impeller/core/texture_descriptor.h"
+#include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_source_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
-#include "impeller/renderer/context.h"
 
 namespace impeller {
 
@@ -24,11 +25,16 @@ namespace impeller {
 ///
 ///             Returns nullptr if the view could not be created.
 ///
+///             If `cleanup` is provided it is invoked exactly once: when the
+///             returned source is destroyed (after its framebuffer and image
+///             view are released), or before returning if this fails.
+///
 /// @see        `WrapTextureMTL`, the Metal equivalent.
 std::shared_ptr<TextureSourceVK> WrapTextureSourceVK(
-    const std::shared_ptr<Context>& context,
+    const ContextVK& context,
     const TextureDescriptor& desc,
-    vk::Image image);
+    vk::Image image,
+    std::function<void()> cleanup = nullptr);
 
 }  // namespace impeller
 

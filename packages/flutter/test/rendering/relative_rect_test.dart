@@ -75,4 +75,12 @@ void main() {
     const RelativeRect rect = RelativeRect.fill;
     expect(identical(RelativeRect.lerp(rect, rect, 0.5), rect), true);
   });
+  test('RelativeRect.lerp with null a', () {
+    const rect = RelativeRect.fromLTRB(10.0, 20.0, 30.0, 40.0);
+    expect(RelativeRect.lerp(null, rect, 0.25), const RelativeRect.fromLTRB(2.5, 5.0, 7.5, 10.0));
+  });
+  test('RelativeRect.lerp with null b', () {
+    const rect = RelativeRect.fromLTRB(10.0, 20.0, 30.0, 40.0);
+    expect(RelativeRect.lerp(rect, null, 0.25), const RelativeRect.fromLTRB(7.5, 15.0, 22.5, 30.0));
+  });
 }

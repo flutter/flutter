@@ -23,6 +23,7 @@ import '../desktop_device.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
+import '../features.dart' show FeatureFlags;
 import '../native_assets.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
@@ -51,12 +52,14 @@ class FlutterTesterDevice extends Device {
     required this._analytics,
     required this._buildSystem,
     required this._buildTargets,
+    required this._featureFlags,
     required ToolContext super.toolContext,
   }) : super(logger: toolContext.logger, platformType: null, category: null, ephemeral: false);
 
   final Analytics _analytics;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
+  final FeatureFlags _featureFlags;
 
   Process? _process;
   final DevicePortForwarder _portForwarder = const NoOpDevicePortForwarder();
@@ -148,6 +151,7 @@ class FlutterTesterDevice extends Device {
       analytics: _analytics,
       buildSystem: _buildSystem,
       buildTargets: _buildTargets,
+      featureFlags: _featureFlags,
       toolContext: toolContext,
     ).build(
       project: project,
@@ -242,12 +246,14 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
     required Analytics analytics,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
+    required FeatureFlags featureFlags,
     required ToolContext super.toolContext,
   }) : _testerDevice = FlutterTesterDevice(
          kTesterDeviceId,
          analytics: analytics,
          buildSystem: buildSystem,
          buildTargets: buildTargets,
+         featureFlags: featureFlags,
          toolContext: toolContext,
        ),
        super('Flutter tester');

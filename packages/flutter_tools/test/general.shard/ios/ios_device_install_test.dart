@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
+import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -40,7 +41,7 @@ void main() {
     iosDeployPath = artifacts.getHostArtifact(HostArtifact.iosDeploy).path;
   });
 
-  testWithoutContext('IOSDevice.installApp calls ios-deploy correctly with USB', () async {
+  test('IOSDevice.installApp calls ios-deploy correctly with USB', () async {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       uncompressedBundle: fileSystem.currentDirectory,
@@ -64,7 +65,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('IOSDevice.installApp calls ios-deploy correctly with network', () async {
+  test('IOSDevice.installApp calls ios-deploy correctly with network', () async {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       uncompressedBundle: fileSystem.currentDirectory,
@@ -88,7 +89,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('IOSDevice.installApp uses devicectl for CoreDevices', () async {
+  test('IOSDevice.installApp uses devicectl for CoreDevices', () async {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       uncompressedBundle: fileSystem.currentDirectory,
@@ -110,7 +111,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('IOSDevice.uninstallApp calls ios-deploy correctly', () async {
+  test('IOSDevice.uninstallApp calls ios-deploy correctly', () async {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       uncompressedBundle: bundleDirectory,
@@ -129,7 +130,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('IOSDevice.uninstallApp uses devicectl for CoreDevices', () async {
+  test('IOSDevice.uninstallApp uses devicectl for CoreDevices', () async {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       uncompressedBundle: fileSystem.currentDirectory,
@@ -152,7 +153,7 @@ void main() {
   });
 
   group('isAppInstalled', () {
-    testWithoutContext('catches ProcessException from ios-deploy', () async {
+    test('catches ProcessException from ios-deploy', () async {
       final IOSApp iosApp = PrebuiltIOSApp(
         projectBundleId: 'app',
         uncompressedBundle: bundleDirectory,
@@ -181,7 +182,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('returns true when app is installed', () async {
+    test('returns true when app is installed', () async {
       final IOSApp iosApp = PrebuiltIOSApp(
         projectBundleId: 'app',
         uncompressedBundle: bundleDirectory,
@@ -209,7 +210,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('returns false when app is not installed', () async {
+    test('returns false when app is not installed', () async {
       final IOSApp iosApp = PrebuiltIOSApp(
         projectBundleId: 'app',
         uncompressedBundle: bundleDirectory,
@@ -244,7 +245,7 @@ void main() {
       expect(logger.traceText, contains('${iosApp.id} not installed on ${device.id}'));
     });
 
-    testWithoutContext('returns false on command timeout or other error', () async {
+    test('returns false on command timeout or other error', () async {
       final IOSApp iosApp = PrebuiltIOSApp(
         projectBundleId: 'app',
         uncompressedBundle: bundleDirectory,
@@ -282,7 +283,7 @@ void main() {
       expect(logger.traceText, contains(stderr));
     });
 
-    testWithoutContext('uses devicectl for CoreDevices', () async {
+    test('uses devicectl for CoreDevices', () async {
       final IOSApp iosApp = PrebuiltIOSApp(
         projectBundleId: 'app',
         uncompressedBundle: fileSystem.currentDirectory,
@@ -305,7 +306,7 @@ void main() {
     });
   });
 
-  testWithoutContext('IOSDevice.installApp catches ProcessException from ios-deploy', () async {
+  test('IOSDevice.installApp catches ProcessException from ios-deploy', () async {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       uncompressedBundle: fileSystem.currentDirectory,
@@ -324,7 +325,7 @@ void main() {
     expect(wasAppInstalled, false);
   });
 
-  testWithoutContext('IOSDevice.uninstallApp catches ProcessException from ios-deploy', () async {
+  test('IOSDevice.uninstallApp catches ProcessException from ios-deploy', () async {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       uncompressedBundle: bundleDirectory,
@@ -372,6 +373,7 @@ IOSDevice setUpIOSDevice({
   return IOSDevice(
     '1234',
     name: 'iPhone 1',
+    featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
     toolContext: toolContext,
     xcode: FakeXcode(),
     sdkVersion: '13.3',
@@ -396,6 +398,11 @@ IOSDevice setUpIOSDevice({
     isPaired: true,
     devModeEnabled: true,
     isCoreDevice: isCoreDevice,
+    mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+      analytics: const NoOpAnalytics(),
+      logger: logger,
+      platform: platform,
+    ),
     templateRenderer: FakeTemplateRenderer(),
   );
 }

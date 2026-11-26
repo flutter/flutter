@@ -40,6 +40,7 @@ Future<void> buildWindows(
   BuildInfo buildInfo,
   TargetPlatform targetPlatform, {
   required Analytics analytics,
+  required FeatureFlags featureFlags,
   required ToolContext toolContext,
   String? target,
   VisualStudio? visualStudioOverride,

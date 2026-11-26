@@ -117,7 +117,7 @@ class FakeVersionExtractor extends Fake implements WindowsVersionExtractor {
 }
 
 void main() {
-  testWithoutContext('Successfully running windows version check on windows 10', () async {
+  test('Successfully running windows version check on windows 10', () async {
     final windowsVersionValidator = WindowsVersionValidator(
       operatingSystemUtils: FakeValidOperatingSystemUtils(),
       processLister: ofdNotRunning(),
@@ -138,7 +138,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Successfully running windows version check on windows 10 for BR', () async {
+  test('Successfully running windows version check on windows 10 for BR', () async {
     final windowsVersionValidator = WindowsVersionValidator(
       operatingSystemUtils: FakeValidOperatingSystemUtils(
         'Microsoft Windows [versão 10.0.22621.1105]',
@@ -161,7 +161,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Identifying a windows version before 10', () async {
+  test('Identifying a windows version before 10', () async {
     final windowsVersionValidator = WindowsVersionValidator(
       operatingSystemUtils: FakeValidOperatingSystemUtils(
         'Microsoft Windows [Version 8.0.22621.1105]',
@@ -179,7 +179,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Unit testing on a regex pattern validator', () async {
+  test('Unit testing on a regex pattern validator', () async {
     const testStr = r'''
 OS Version:                10.0.19044 N/A Build 19044
 OSz Version:                10.0.19044 N/A Build 19044
@@ -197,7 +197,7 @@ OS 版本:          10.0.22621 暂缺 Build 22621
     expect(matches.length, 5, reason: 'There should be only 5 matches for the pattern provided');
   });
 
-  testWithoutContext('Successfully checks for Topaz OFD when it is running', () async {
+  test('Successfully checks for Topaz OFD when it is running', () async {
     final validator = WindowsVersionValidator(
       operatingSystemUtils: FakeValidOperatingSystemUtils(),
       processLister: ofdRunning(),
@@ -226,7 +226,7 @@ OS 版本:          10.0.22621 暂缺 Build 22621
     );
   });
 
-  testWithoutContext('Reports missing powershell', () async {
+  test('Reports missing powershell', () async {
     final validator = WindowsVersionValidator(
       operatingSystemUtils: FakeValidOperatingSystemUtils(),
       processLister: powershellUnavailable(),
@@ -255,7 +255,7 @@ OS 版本:          10.0.22621 暂缺 Build 22621
     );
   });
 
-  testWithoutContext('Reports failure of Get-Process', () async {
+  test('Reports failure of Get-Process', () async {
     final validator = WindowsVersionValidator(
       operatingSystemUtils: FakeValidOperatingSystemUtils(),
       processLister: failure(),
@@ -284,7 +284,7 @@ OS 版本:          10.0.22621 暂缺 Build 22621
     );
   });
 
-  testWithoutContext('getProcessesWithPath successfully runs with powershell', () async {
+  test('getProcessesWithPath successfully runs with powershell', () async {
     final processLister = ProcessLister(
       FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
@@ -302,66 +302,58 @@ OS 版本:          10.0.22621 暂缺 Build 22621
     }
   });
 
-  testWithoutContext(
-    'getProcessesWithPath falls back to pwsh when powershell is not on the path',
-    () async {
-      final processLister = ProcessLister(
-        FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>[ProcessLister.pwsh, '-command', 'Get-Process | Format-List Path'],
-            stdout: ProcessLister.pwsh,
-          ),
-        ])..excludedExecutables.add(ProcessLister.powershell),
-      );
-
-      try {
-        final ProcessResult result = await processLister.getProcessesWithPath();
-        expect(result.stdout, ProcessLister.pwsh);
-      } catch (e) {
-        fail('Unexpected exception: $e');
-      }
-    },
-  );
-
-  testWithoutContext(
-    'getProcessesWithPath throws if both powershell and pwsh are not on PATH',
-    () async {
-      final processLister = ProcessLister(
-        FakeProcessManager.empty()
-          ..excludedExecutables.addAll(<String>[ProcessLister.powershell, ProcessLister.pwsh]),
-      );
-
-      try {
-        final ProcessResult result = await processLister.getProcessesWithPath();
-        fail('Should have thrown, but successfully ran ${result.stdout}');
-      } on StateError {
-        // Expected
-      } catch (e) {
-        fail('Unexpected exception: $e');
-      }
-    },
-  );
-
-  testWithoutContext(
-    'Parses Caption, OSArchitecture, releaseId, and CurrentVersion from the OS',
-    () async {
-      final processManager = FakeProcessManager.list(<FakeCommand>[
+  test('getProcessesWithPath falls back to pwsh when powershell is not on the path', () async {
+    final processLister = ProcessLister(
+      FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
-          command: <Pattern>['wmic', 'os', 'get', 'Caption,OSArchitecture'],
-          stdout: '''
+          command: <String>[ProcessLister.pwsh, '-command', 'Get-Process | Format-List Path'],
+          stdout: ProcessLister.pwsh,
+        ),
+      ])..excludedExecutables.add(ProcessLister.powershell),
+    );
+
+    try {
+      final ProcessResult result = await processLister.getProcessesWithPath();
+      expect(result.stdout, ProcessLister.pwsh);
+    } catch (e) {
+      fail('Unexpected exception: $e');
+    }
+  });
+
+  test('getProcessesWithPath throws if both powershell and pwsh are not on PATH', () async {
+    final processLister = ProcessLister(
+      FakeProcessManager.empty()
+        ..excludedExecutables.addAll(<String>[ProcessLister.powershell, ProcessLister.pwsh]),
+    );
+
+    try {
+      final ProcessResult result = await processLister.getProcessesWithPath();
+      fail('Should have thrown, but successfully ran ${result.stdout}');
+    } on StateError {
+      // Expected
+    } catch (e) {
+      fail('Unexpected exception: $e');
+    }
+  });
+
+  test('Parses Caption, OSArchitecture, releaseId, and CurrentVersion from the OS', () async {
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <Pattern>['wmic', 'os', 'get', 'Caption,OSArchitecture'],
+        stdout: '''
 Caption                          OSArchitecture
 Microsoft Windows 10 Enterprise  64-bit
 ''',
-        ),
-        const FakeCommand(
-          command: <Pattern>[
-            'reg',
-            'query',
-            r'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion',
-            '/t',
-            'REG_SZ',
-          ],
-          stdout: r'''
+      ),
+      const FakeCommand(
+        command: <Pattern>[
+          'reg',
+          'query',
+          r'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion',
+          '/t',
+          'REG_SZ',
+        ],
+        stdout: r'''
 HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion
     SystemRoot    REG_SZ    C:\Windows
     BuildBranch    REG_SZ    vb_release
@@ -389,23 +381,22 @@ HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion
 End of search: 22 match(es) found.
 
 ''',
-        ),
-      ]);
-      final validator = WindowsVersionValidator(
-        operatingSystemUtils: FakeValidOperatingSystemUtils(),
-        processLister: ofdNotRunning(),
-        versionExtractor: WindowsVersionExtractor(
-          processManager: processManager,
-          logger: BufferLogger.test(),
-        ),
-      );
-      final ValidationResult result = await validator.validate();
-      expect(result.type, ValidationType.success);
-      expect(result.statusInfo, '10 Enterprise 64-bit, 22H2, 2009');
-    },
-  );
+      ),
+    ]);
+    final validator = WindowsVersionValidator(
+      operatingSystemUtils: FakeValidOperatingSystemUtils(),
+      processLister: ofdNotRunning(),
+      versionExtractor: WindowsVersionExtractor(
+        processManager: processManager,
+        logger: BufferLogger.test(),
+      ),
+    );
+    final ValidationResult result = await validator.validate();
+    expect(result.type, ValidationType.success);
+    expect(result.statusInfo, '10 Enterprise 64-bit, 22H2, 2009');
+  });
 
-  testWithoutContext('Differentiates Windows 11 from 10 when wmic call fails', () async {
+  test('Differentiates Windows 11 from 10 when wmic call fails', () async {
     const windows10RegQueryOutput = r'''
 HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion
     SystemRoot    REG_SZ    C:\WINDOWS
@@ -464,7 +455,7 @@ End of search: 21 match(es) found.
     expect(result.statusInfo, 'Windows 11 or higher, 23H2, 2009');
   });
 
-  testWithoutContext('Handles reg call failing', () async {
+  test('Handles reg call failing', () async {
     const wmicCommand = <String>['wmic', 'os', 'get', 'Caption,OSArchitecture'];
     const regCommand = <String>[
       'reg',

@@ -36,7 +36,7 @@ void main() {
       responseData = utf8.encode(responseString);
     });
 
-    testWithoutContext('fetchUrl() gets the data', () async {
+    test('fetchUrl() gets the data', () async {
       final Net net = createNet(
         FakeHttpClient.list(<FakeRequest>[
           FakeRequest(
@@ -50,7 +50,7 @@ void main() {
       expect(data, equals(responseData));
     });
 
-    testWithoutContext('fetchUrl(destFile) writes the data to a file', () async {
+    test('fetchUrl(destFile) writes the data to a file', () async {
       final Net net = createNet(
         FakeHttpClient.list(<FakeRequest>[
           FakeRequest(
@@ -70,7 +70,7 @@ void main() {
     });
   });
 
-  testWithoutContext('retry from 500', () async {
+  test('retry from 500', () async {
     final Net net = createNet(
       FakeHttpClient.list(<FakeRequest>[
         FakeRequest(
@@ -108,7 +108,7 @@ void main() {
     expect(testLogger.errorText, isEmpty);
   });
 
-  testWithoutContext('retry from network error', () async {
+  test('retry from network error', () async {
     final Uri invalid = Uri.parse('http://example.invalid/');
     final Net net = createNet(
       FakeHttpClient.list(<FakeRequest>[
@@ -135,7 +135,7 @@ void main() {
     expect(testLogger.errorText, isEmpty);
   });
 
-  testWithoutContext('retry from SocketException', () async {
+  test('retry from SocketException', () async {
     final Uri invalid = Uri.parse('http://example.invalid/');
     final Net net = createNet(
       FakeHttpClient.list(<FakeRequest>[
@@ -172,7 +172,7 @@ void main() {
     expect(testLogger.traceText, contains('Download error: SocketException'));
   });
 
-  testWithoutContext('no retry from HandshakeException', () async {
+  test('no retry from HandshakeException', () async {
     final Uri invalid = Uri.parse('http://example.invalid/');
     final Net net = createNet(
       FakeHttpClient.list(<FakeRequest>[
@@ -202,7 +202,7 @@ void main() {
     expect(testLogger.traceText, contains('HandshakeException'));
   });
 
-  testWithoutContext('check for bad override on ArgumentError', () async {
+  test('check for bad override on ArgumentError', () async {
     final Uri invalid = Uri.parse('example.invalid/');
     final net = Net(
       httpClientFactory: () {
@@ -236,7 +236,7 @@ void main() {
     expect(error, contains('FLUTTER_STORAGE_BASE_URL'));
   });
 
-  testWithoutContext('retry from HttpException', () async {
+  test('retry from HttpException', () async {
     final Uri invalid = Uri.parse('http://example.invalid/');
     final Net net = createNet(
       FakeHttpClient.list(<FakeRequest>[
@@ -273,7 +273,7 @@ void main() {
     expect(testLogger.traceText, contains('Download error: HttpException'));
   });
 
-  testWithoutContext('retry from HttpException when request throws', () async {
+  test('retry from HttpException when request throws', () async {
     final Uri invalid = Uri.parse('http://example.invalid/');
     final Net net = createNet(
       FakeHttpClient.list(<FakeRequest>[
@@ -310,7 +310,7 @@ void main() {
     expect(testLogger.traceText, contains('Download error: HttpException'));
   });
 
-  testWithoutContext('max attempts', () async {
+  test('max attempts', () async {
     final Uri invalid = Uri.parse('http://example.invalid/');
     final Net net = createNet(
       FakeHttpClient.list(<FakeRequest>[
@@ -355,7 +355,7 @@ void main() {
     expect(actualResult, isNull);
   });
 
-  testWithoutContext('remote file non-existent', () async {
+  test('remote file non-existent', () async {
     final Uri invalid = Uri.parse('http://example.invalid/');
     final Net net = createNet(
       FakeHttpClient.list(<FakeRequest>[
@@ -370,7 +370,7 @@ void main() {
     expect(result, false);
   });
 
-  testWithoutContext('remote file server error', () async {
+  test('remote file server error', () async {
     final Uri valid = Uri.parse('http://example.valid/');
     final Net net = createNet(
       FakeHttpClient.list(<FakeRequest>[
@@ -385,7 +385,7 @@ void main() {
     expect(result, false);
   });
 
-  testWithoutContext('remote file exists', () async {
+  test('remote file exists', () async {
     final Uri valid = Uri.parse('http://example.valid/');
     final Net net = createNet(
       FakeHttpClient.list(<FakeRequest>[FakeRequest(valid, method: HttpMethod.head)]),

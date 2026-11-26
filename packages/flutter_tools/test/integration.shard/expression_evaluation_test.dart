@@ -40,49 +40,43 @@ void batch1() {
     );
   }
 
-  testWithoutContext('can evaluate trivial expressions in top level function', () async {
+  test('can evaluate trivial expressions in top level function', () async {
     await flutter.run(withDebugger: true);
     await breakInTopLevelFunction(flutter);
     await evaluateTrivialExpressions(flutter);
   });
 
-  testWithoutContext('can evaluate trivial expressions in build method', () async {
+  test('can evaluate trivial expressions in build method', () async {
     await flutter.run(withDebugger: true);
     await breakInBuildMethod(flutter);
     await evaluateTrivialExpressions(flutter);
   });
 
-  testWithoutContext('can evaluate complex expressions in top level function', () async {
+  test('can evaluate complex expressions in top level function', () async {
     await flutter.run(withDebugger: true);
     await breakInTopLevelFunction(flutter);
     await evaluateComplexExpressions(flutter);
   });
 
-  testWithoutContext('can evaluate complex expressions in build method', () async {
+  test('can evaluate complex expressions in build method', () async {
     await flutter.run(withDebugger: true);
     await breakInBuildMethod(flutter);
     await evaluateComplexExpressions(flutter);
   });
 
-  testWithoutContext(
-    'can evaluate expressions returning complex objects in top level function',
-    () async {
-      await flutter.run(withDebugger: true);
-      await breakInTopLevelFunction(flutter);
-      await evaluateComplexReturningExpressions(flutter);
-    },
-  );
+  test('can evaluate expressions returning complex objects in top level function', () async {
+    await flutter.run(withDebugger: true);
+    await breakInTopLevelFunction(flutter);
+    await evaluateComplexReturningExpressions(flutter);
+  });
 
-  testWithoutContext(
-    'can evaluate expressions returning complex objects in build method',
-    () async {
-      await flutter.run(withDebugger: true);
-      await breakInBuildMethod(flutter);
-      await evaluateComplexReturningExpressions(flutter);
-    },
-  );
+  test('can evaluate expressions returning complex objects in build method', () async {
+    await flutter.run(withDebugger: true);
+    await breakInBuildMethod(flutter);
+    await evaluateComplexReturningExpressions(flutter);
+  });
 
-  testWithoutContext(
+  test(
     'evaluating invalid expressions throws an exception with compilation error details',
     () async {
       await flutter.run(withDebugger: true);
@@ -108,7 +102,7 @@ void batch2() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('can evaluate trivial expressions in a test', () async {
+  test('can evaluate trivial expressions in a test', () async {
     await flutter.test(
       withDebugger: true,
       beforeStart: () => flutter.addBreakpoint(project.breakpointUri, project.breakpointLine),
@@ -122,7 +116,7 @@ void batch2() {
     expect(fileSystem.file(dillFilename).existsSync(), isFalse);
   });
 
-  testWithoutContext('can evaluate complex expressions in a test', () async {
+  test('can evaluate complex expressions in a test', () async {
     await flutter.test(
       withDebugger: true,
       beforeStart: () => flutter.addBreakpoint(project.breakpointUri, project.breakpointLine),
@@ -131,7 +125,7 @@ void batch2() {
     await evaluateComplexExpressions(flutter);
   });
 
-  testWithoutContext('can evaluate expressions returning complex objects in a test', () async {
+  test('can evaluate expressions returning complex objects in a test', () async {
     await flutter.test(
       withDebugger: true,
       beforeStart: () => flutter.addBreakpoint(project.breakpointUri, project.breakpointLine),
@@ -140,7 +134,7 @@ void batch2() {
     await evaluateComplexReturningExpressions(flutter);
   });
 
-  testWithoutContext(
+  test(
     'evaluating invalid expressions throws an exception with compilation error details',
     () async {
       await flutter.test(
@@ -169,7 +163,7 @@ void batch3() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('can evaluate expressions in a test', () async {
+  test('can evaluate expressions in a test', () async {
     await flutter.test(
       deviceId: 'flutter-tester',
       testFile: project.testFilePath,
@@ -185,7 +179,7 @@ void batch3() {
     expect(fileSystem.file(dillFilename).existsSync(), isFalse);
   });
 
-  testWithoutContext(
+  test(
     'evaluating invalid expressions throws an exception with compilation error details',
     () async {
       await flutter.test(

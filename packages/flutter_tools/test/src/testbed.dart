@@ -21,7 +21,6 @@ import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
-import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_cache.dart';
@@ -35,6 +34,7 @@ import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import 'context.dart';
+import 'context_runner.dart';
 import 'fake_http_client.dart';
 import 'fakes.dart';
 import 'throwing_pub.dart';
@@ -50,7 +50,7 @@ FlutterProjectFactory _contextProjectFactory() =>
     context.get<FlutterProjectFactory>() ??
     FlutterProjectFactory(
       config: context.get<Config>()!,
-      featureFlagsBuilder: () => featureFlags,
+      featureFlagsBuilder: () => context.get<FeatureFlags>()!,
       fileSystem: _contextFileSystem(),
       logger: context.get<Logger>()!,
       plistParser:
@@ -91,10 +91,12 @@ final _testbedDefaults = <Type, Generator>{
   Cache: () => FlutterCache(
     flutterRoot: '',
     fileSystem: _contextFileSystem(),
+    isLocalEngineBuilder: () => context.get<Artifacts>()?.localEngineInfo != null,
     logger: context.get<Logger>()!,
     platform: _contextPlatform(),
     osUtils: context.get<OperatingSystemUtils>()!,
     projectFactory: _contextProjectFactory(),
+    pub: () => const ThrowingPub(),
   ),
   Config: () => Config.test(
     name: Config.kFlutterSettings,

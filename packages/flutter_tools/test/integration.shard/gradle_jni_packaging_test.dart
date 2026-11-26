@@ -28,7 +28,7 @@ void main() {
   // Tests the behavior of abiFilters during the build process.
   // Without abiFilters set, third-party x86 libraries would be packaged into the resulting APK/bundle.
   // This would force Google Play to add x86 ABI to the list of supported ABIs, leading to crashes on x86 devices.
-  testWithoutContext('3rd-party x86 library is not packaged (default settings)', () async {
+  test('3rd-party x86 library is not packaged (default settings)', () async {
     final Directory projectDir = createProjectWithThirdpartyLib(tempDir);
     processManager.runSync(<String>[flutterBin, 'build', 'apk'], workingDirectory: projectDir.path);
 
@@ -51,89 +51,79 @@ void main() {
     expect(_checkLibIsInApk(projectDir, 'lib/x86/libflutter.so'), false);
   });
 
-  testWithoutContext(
-    'abiFilters provided by the user in buildTypes can override Flutter defaults',
-    () async {
-      final Directory projectDir = createProjectWithThirdpartyLib(tempDir);
-      final String buildGradleContents = projectDir
-          .childFile('android/app/build.gradle.kts')
-          .readAsStringSync();
+  test('abiFilters provided by the user in buildTypes can override Flutter defaults', () async {
+    final Directory projectDir = createProjectWithThirdpartyLib(tempDir);
+    final String buildGradleContents = projectDir
+        .childFile('android/app/build.gradle.kts')
+        .readAsStringSync();
 
-      // Modify the project's build.gradle.kts file to include abiFilters for a single ABI only.
-      final String updatedBuildGradleContents = buildGradleContents.replaceFirstMapped(
-        RegExp(r'(buildTypes\s*\{\s*release\s*\{)([^}]*)\}', dotAll: true),
-        (Match match) {
-          final String before = match.group(1)!;
-          final String body = match.group(2)!;
-          const ndkBlock = '''
+    // Modify the project's build.gradle.kts file to include abiFilters for a single ABI only.
+    final String updatedBuildGradleContents = buildGradleContents.replaceFirstMapped(
+      RegExp(r'(buildTypes\s*\{\s*release\s*\{)([^}]*)\}', dotAll: true),
+      (Match match) {
+        final String before = match.group(1)!;
+        final String body = match.group(2)!;
+        const ndkBlock = '''
                 ndk {
                     abiFilters.clear()
                     abiFilters.addAll(listOf("arm64-v8a"))
                 }
     ''';
-          return '$before$body$ndkBlock        }';
-        },
-      );
-      projectDir
-          .childFile('android/app/build.gradle.kts')
-          .writeAsStringSync(updatedBuildGradleContents);
+        return '$before$body$ndkBlock        }';
+      },
+    );
+    projectDir
+        .childFile('android/app/build.gradle.kts')
+        .writeAsStringSync(updatedBuildGradleContents);
 
-      processManager.runSync(<String>[
-        flutterBin,
-        'build',
-        'apk',
-        '-P',
-        'disable-abi-filtering=true',
-      ], workingDirectory: projectDir.path);
+    processManager.runSync(<String>[
+      flutterBin,
+      'build',
+      'apk',
+      '-P',
+      'disable-abi-filtering=true',
+    ], workingDirectory: projectDir.path);
 
-      expect(_checkLibIsInApk(projectDir, 'lib/arm64-v8a/libflutter.so'), true);
-      expect(_checkLibIsInApk(projectDir, 'lib/x86_64/libflutter.so'), false);
-      expect(_checkLibIsInApk(projectDir, 'lib/armeabi-v7a/libflutter.so'), false);
-      expect(_checkLibIsInApk(projectDir, 'lib/x86/libflutter.so'), false);
-    },
-  );
+    expect(_checkLibIsInApk(projectDir, 'lib/arm64-v8a/libflutter.so'), true);
+    expect(_checkLibIsInApk(projectDir, 'lib/x86_64/libflutter.so'), false);
+    expect(_checkLibIsInApk(projectDir, 'lib/armeabi-v7a/libflutter.so'), false);
+    expect(_checkLibIsInApk(projectDir, 'lib/x86/libflutter.so'), false);
+  });
 
-  testWithoutContext(
-    'abiFilters provided by the user in defaultConfig take precedence over flutter',
-    () async {
-      final Directory projectDir = createProjectWithThirdpartyLib(tempDir);
-      final String buildGradleContents = projectDir
-          .childFile('android/app/build.gradle.kts')
-          .readAsStringSync();
+  test('abiFilters provided by the user in defaultConfig take precedence over flutter', () async {
+    final Directory projectDir = createProjectWithThirdpartyLib(tempDir);
+    final String buildGradleContents = projectDir
+        .childFile('android/app/build.gradle.kts')
+        .readAsStringSync();
 
-      // Modify the project's build.gradle.kts file to include abiFilters for a single ABI only.
-      final String updatedBuildGradleContents = buildGradleContents.replaceFirstMapped(
-        RegExp(r'(defaultConfig\s*\{)([^}]*)\}', dotAll: true),
-        (Match match) {
-          final String before = match.group(1)!;
-          final String body = match.group(2)!;
-          const ndkBlock = '''
+    // Modify the project's build.gradle.kts file to include abiFilters for a single ABI only.
+    final String updatedBuildGradleContents = buildGradleContents.replaceFirstMapped(
+      RegExp(r'(defaultConfig\s*\{)([^}]*)\}', dotAll: true),
+      (Match match) {
+        final String before = match.group(1)!;
+        final String body = match.group(2)!;
+        const ndkBlock = '''
                 ndk {
                     abiFilters.clear()
                     abiFilters.addAll(listOf("arm64-v8a"))
                 }
     ''';
-          return '$before$body$ndkBlock        }';
-        },
-      );
-      projectDir
-          .childFile('android/app/build.gradle.kts')
-          .writeAsStringSync(updatedBuildGradleContents);
+        return '$before$body$ndkBlock        }';
+      },
+    );
+    projectDir
+        .childFile('android/app/build.gradle.kts')
+        .writeAsStringSync(updatedBuildGradleContents);
 
-      processManager.runSync(<String>[
-        flutterBin,
-        'build',
-        'apk',
-      ], workingDirectory: projectDir.path);
+    processManager.runSync(<String>[flutterBin, 'build', 'apk'], workingDirectory: projectDir.path);
 
-      expect(_checkLibIsInApk(projectDir, 'lib/arm64-v8a/libflutter.so'), true);
-      expect(_checkLibIsInApk(projectDir, 'lib/x86_64/libflutter.so'), false);
-      expect(_checkLibIsInApk(projectDir, 'lib/armeabi-v7a/libflutter.so'), false);
-      expect(_checkLibIsInApk(projectDir, 'lib/x86/libflutter.so'), false);
-    },
-  );
+    expect(_checkLibIsInApk(projectDir, 'lib/arm64-v8a/libflutter.so'), true);
+    expect(_checkLibIsInApk(projectDir, 'lib/x86_64/libflutter.so'), false);
+    expect(_checkLibIsInApk(projectDir, 'lib/armeabi-v7a/libflutter.so'), false);
+    expect(_checkLibIsInApk(projectDir, 'lib/x86/libflutter.so'), false);
+  });
 
-  testWithoutContext(
+  test(
     'abiFilters in product flavors provided by the user take precedence over the default',
     () async {
       final Directory projectDir = createProjectWithThirdpartyLib(tempDir);
@@ -195,28 +185,25 @@ void main() {
     },
   );
 
-  testWithoutContext(
-    'Argument force-version-code-ignoring-abi ignores split ABI for version code',
-    () async {
-      final Directory projectDir = createProjectWithThirdpartyLib(tempDir);
+  test('Argument force-version-code-ignoring-abi ignores split ABI for version code', () async {
+    final Directory projectDir = createProjectWithThirdpartyLib(tempDir);
 
-      processManager.runSync(<String>[
-        flutterBin,
-        'build',
-        'apk',
-        '--release',
-        '--split-per-abi',
-        '--target-platform',
-        'android-arm64',
-        '--build-number',
-        '2',
-        '-P',
-        'force-version-code-ignoring-abi=true',
-      ], workingDirectory: projectDir.path);
+    processManager.runSync(<String>[
+      flutterBin,
+      'build',
+      'apk',
+      '--release',
+      '--split-per-abi',
+      '--target-platform',
+      'android-arm64',
+      '--build-number',
+      '2',
+      '-P',
+      'force-version-code-ignoring-abi=true',
+    ], workingDirectory: projectDir.path);
 
-      expect(_apkHasVersionCode(projectDir, 2, abi: 'arm64-v8a'), true);
-    },
-  );
+    expect(_apkHasVersionCode(projectDir, 2, abi: 'arm64-v8a'), true);
+  });
 }
 
 Directory createProjectWithThirdpartyLib(Directory workingDir) {

@@ -4,6 +4,7 @@
 
 import 'package:process/process.dart';
 
+import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -13,6 +14,7 @@ import '../base/process.dart';
 import '../base/user_messages.dart';
 import '../device.dart';
 import 'adb.dart';
+import 'android_builder.dart';
 import 'android_device.dart';
 import 'android_sdk.dart';
 import 'android_workflow.dart';
@@ -27,13 +29,15 @@ import 'android_workflow.dart';
 class AndroidDevices extends PollingDeviceDiscovery {
   AndroidDevices({
     required this._androidWorkflow,
-    required ProcessManager processManager,
-    required Logger logger,
     required this._fileSystem,
+    required Logger logger,
     required this._platform,
+    required ProcessManager processManager,
     required this._userMessages,
+    this._androidBuilder,
     AndroidSdk? androidSdk,
     AndroidSdk? Function()? androidSdkBuilder,
+    this._applicationPackageFactory,
   }) : assert(
          androidSdk == null || androidSdkBuilder == null,
          'Cannot provide both androidSdk and androidSdkBuilder to AndroidDevices.',
@@ -44,7 +48,9 @@ class AndroidDevices extends PollingDeviceDiscovery {
        _logger = logger,
        super('Android devices');
 
+  final AndroidBuilder? _androidBuilder;
   final AndroidWorkflow _androidWorkflow;
+  final ApplicationPackageFactory? _applicationPackageFactory;
   final ProcessUtils _processUtils;
   final AndroidSdk? Function() _androidSdkBuilder;
   late final AndroidSdk? _androidSdk = _androidSdkBuilder();
@@ -201,14 +207,16 @@ class AndroidDevices extends PollingDeviceDiscovery {
             devices?.add(
               AndroidDevice(
                 deviceID,
-                productID: info['product'],
-                modelID: info['model'] ?? deviceID,
-                deviceCodeName: info['device'],
+                androidBuilder: _androidBuilder,
                 androidSdk: _androidSdk!,
+                applicationPackageFactory: _applicationPackageFactory,
+                deviceCodeName: info['device'],
                 fileSystem: _fileSystem,
                 logger: _logger,
+                modelID: info['model'] ?? deviceID,
                 platform: _platform,
                 processManager: _processManager,
+                productID: info['product'],
               ),
             );
         }

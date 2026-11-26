@@ -31,7 +31,7 @@ void main() {
       mockProject = FakeWindowsProject(flutterWindowFile);
     });
 
-    testWithoutContext('skipped if Flutter window file is missing', () async {
+    test('skipped if Flutter window file is missing', () async {
       final migration = ShowWindowMigration(mockProject, testLogger);
       await migration.migrate();
 
@@ -47,7 +47,7 @@ void main() {
       expect(testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('skipped if nothing to migrate', () async {
+    test('skipped if nothing to migrate', () async {
       const flutterWindowContents = 'Nothing to migrate';
 
       flutterWindowFile.writeAsStringSync(flutterWindowContents);
@@ -62,7 +62,7 @@ void main() {
       expect(testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('skipped if already migrated', () async {
+    test('skipped if already migrated', () async {
       const flutterWindowContents =
           '  flutter_controller_->engine()->SetNextFrameCallback([&]() {\n'
           '    this->Show();\n'
@@ -87,7 +87,7 @@ void main() {
       expect(testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('skipped if already migrated (CRLF)', () async {
+    test('skipped if already migrated (CRLF)', () async {
       const flutterWindowContents =
           '  flutter_controller_->engine()->SetNextFrameCallback([&]() {\r\n'
           '    this->Show();\r\n'
@@ -112,7 +112,7 @@ void main() {
       expect(testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('migrates project to ensure window is shown', () async {
+    test('migrates project to ensure window is shown', () async {
       flutterWindowFile.writeAsStringSync(
         '  flutter_controller_->engine()->SetNextFrameCallback([&]() {\n'
         '    this->Show();\n'
@@ -146,7 +146,7 @@ void main() {
       );
     });
 
-    testWithoutContext('migrates project to ensure window is shown (CRLF)', () async {
+    test('migrates project to ensure window is shown (CRLF)', () async {
       flutterWindowFile.writeAsStringSync(
         '  flutter_controller_->engine()->SetNextFrameCallback([&]() {\r\n'
         '    this->Show();\r\n'
