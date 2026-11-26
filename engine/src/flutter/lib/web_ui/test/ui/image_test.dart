@@ -351,6 +351,19 @@ Future<void> testMain() async {
 
         frameInfo.image.dispose();
         expect(activeSource.debugIsClosed, isTrue);
+
+        // Collecting a codec after getNextFrame() + frame disposal must also
+        // release the cached backend image and ImageSource cleanly.
+        final ImageSource gcAfterFrameSource = ImageBitmapImageSource(
+          await createImageBitmap(createBlankDomImageData(4, 4)),
+        );
+        final ui.Codec gcAfterFrameCodec = EngineCodec.staticImage(gcAfterFrameSource);
+        final ui.FrameInfo gcFrame = await gcAfterFrameCodec.getNextFrame();
+        gcFrame.image.dispose();
+        expect(gcAfterFrameSource.debugIsClosed, isFalse);
+
+        mockFinalizer.trigger(gcAfterFrameCodec);
+        expect(gcAfterFrameSource.debugIsClosed, isTrue);
       },
     );
 
@@ -378,7 +391,90 @@ Future<void> testMain() async {
     });
   });
 
+  test(
+    'EngineCodec.staticImage supports repeated getNextFrame after disposing first frame',
+    () async {
+      final DomImageBitmap bitmap = await createImageBitmap(_createSolidGreenImageData(4, 4));
+      final ImageSource source = ImageBitmapImageSource(bitmap);
+      final ui.Codec codec = EngineCodec.staticImage(source);
+
+      final ui.FrameInfo frame1 = await codec.getNextFrame();
+      frame1.image.dispose();
+      expect(source.debugIsClosed, isFalse);
+
+      // Flush single-threaded Skwasm's queued disposeAssociatedObject microtask.
+      await Future<void>.delayed(Duration.zero);
+
+      final ui.FrameInfo frame2 = await codec.getNextFrame();
+      final recorder = ui.PictureRecorder();
+      ui.Canvas(recorder).drawImage(frame2.image, ui.Offset.zero, ui.Paint());
+      final ui.Picture picture = recorder.endRecording();
+      final ui.Image rendered = await picture.toImage(4, 4);
+      final ByteData? pixels = await rendered.toByteData();
+      rendered.dispose();
+      picture.dispose();
+
+      expect(pixels, isNotNull);
+      expect(
+        <int>[pixels!.getUint8(0), pixels.getUint8(1), pixels.getUint8(2), pixels.getUint8(3)],
+        <int>[0, 255, 0, 255],
+      );
+
+      codec.dispose();
+      expect(source.debugIsClosed, isFalse);
+      frame2.image.dispose();
+      expect(source.debugIsClosed, isTrue);
+    },
+  );
+
+  test(
+    'EngineCodec.staticImage balances onCreate and onDispose in either disposal order',
+    () async {
+      for (final disposeCodecFirst in <bool>[true, false]) {
+        final activeImages = <ui.Image>{};
+        addTearDown(() {
+          ui.Image.onCreate = null;
+          ui.Image.onDispose = null;
+        });
+        ui.Image.onCreate = activeImages.add;
+        ui.Image.onDispose = activeImages.remove;
+
+        final ImageSource source = ImageBitmapImageSource(
+          await createImageBitmap(createBlankDomImageData(4, 4)),
+        );
+        final ui.Codec codec = EngineCodec.staticImage(source);
+        final ui.FrameInfo frameInfo = await codec.getNextFrame();
+        expect(activeImages, hasLength(1));
+
+        if (disposeCodecFirst) {
+          codec.dispose();
+          expect(activeImages, hasLength(1));
+          frameInfo.image.dispose();
+        } else {
+          frameInfo.image.dispose();
+          expect(activeImages, hasLength(1));
+          codec.dispose();
+        }
+        expect(activeImages, isEmpty);
+        expect(source.debugIsClosed, isTrue);
+      }
+    },
+  );
+
   group('Real GC finalization', () {
+    test(
+      'undisposed EngineCodec.staticImage releases ImageSource on GC after getNextFrame',
+      () async {
+        final DomImageBitmap bitmap = await createImageBitmap(createBlankDomImageData(4, 4));
+        final ImageSource source = await _decodeStaticCodecAndDrop(bitmap);
+        expect(source.debugIsClosed, isFalse);
+
+        await _forceMajorGc();
+        expect(source.debugIsClosed, isTrue);
+      },
+      skip: _jsGc == null,
+    );
+
     test('undisposed Picture releases ImageSource via DomFinalizationRegistry on GC', () async {
       final DomImageBitmap bitmap = await createImageBitmap(createBlankDomImageData(4, 4));
       final ImageSource source = _recordAndDropPictureWithBitmap(bitmap);
@@ -474,6 +570,16 @@ Float64List _identityMatrix() => Float64List(16)
   ..[5] = 1
   ..[10] = 1
   ..[15] = 1;
+
+@pragma('dart2js:noInline')
+@pragma('wasm:never-inline')
+Future<ImageSource> _decodeStaticCodecAndDrop(DomImageBitmap bitmap) async {
+  final ImageSource source = ImageBitmapImageSource(bitmap);
+  final ui.Codec codec = EngineCodec.staticImage(source);
+  final ui.FrameInfo frame = await codec.getNextFrame();
+  frame.image.dispose();
+  return source;
+}
 
 @pragma('dart2js:noInline')
 @pragma('wasm:never-inline')
