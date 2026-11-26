@@ -228,15 +228,11 @@ class UnpackMacOSVmService extends UnpackDarwin {
       targetPlatform: .darwin,
     );
 
-    final File frameworkBinary = environment.fileSystem.file(
-      environment.fileSystem.path.join(
-        environment.outputDir.path,
-        _kVmServiceFrameworkName,
-        'Versions',
-        'A',
-        _kVmServiceExecutableName,
-      ),
-    );
+    final File frameworkBinary = environment.outputDir
+        .childDirectory(_kVmServiceFrameworkName)
+        .childDirectory('Versions')
+        .childDirectory('A')
+        .childFile(_kVmServiceExecutableName);
     if (!frameworkBinary.existsSync()) {
       throw Exception('Binary ${frameworkBinary.path} does not exist, cannot thin');
     }
