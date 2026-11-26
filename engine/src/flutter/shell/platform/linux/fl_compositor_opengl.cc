@@ -278,7 +278,95 @@ static void paint_readback_framebuffer(FlCompositorOpenGL* self,
   glBindTexture(GL_TEXTURE_2D, saved_texture_binding);
 }
 
-// Both destinations use the same layer composition and GL state restoration.
+static void blit_backing_store(const FlutterLayer* layer, GLint height) {
+  auto* framebuffer =
+      FL_FRAMEBUFFER(layer->backing_store->open_gl.framebuffer.user_data);
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, fl_framebuffer_get_id(framebuffer));
+  blit_layer(layer, height);
+}
+
+static void draw_layers_with_shader(FlCompositorOpenGL* self,
+                                    const FlutterLayer** layers,
+                                    size_t layers_count,
+                                    size_t width,
+                                    size_t height) {
+  GLint saved_vao_binding;
+  glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &saved_vao_binding);
+  GLint saved_array_buffer_binding;
+  glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &saved_array_buffer_binding);
+  GLint saved_current_program;
+  glGetIntegerv(GL_CURRENT_PROGRAM, &saved_current_program);
+  GLboolean saved_blend = glIsEnabled(GL_BLEND);
+  GLint saved_src_rgb;
+  glGetIntegerv(GL_BLEND_SRC_RGB, &saved_src_rgb);
+  GLint saved_src_alpha;
+  glGetIntegerv(GL_BLEND_SRC_ALPHA, &saved_src_alpha);
+  GLint saved_dst_rgb;
+  glGetIntegerv(GL_BLEND_DST_RGB, &saved_dst_rgb);
+  GLint saved_dst_alpha;
+  glGetIntegerv(GL_BLEND_DST_ALPHA, &saved_dst_alpha);
+
+  // FIXME(robert-ancell): The vertex array is the same for all views, but
+  // cannot be shared in OpenGL. Find a way to not generate this every time.
+  GLuint vao;
+  glGenVertexArrays(1, &vao);
+  glBindVertexArray(vao);
+  glBindBuffer(GL_ARRAY_BUFFER, self->vertex_buffer);
+  GLint position_location = glGetAttribLocation(self->program, "position");
+  glEnableVertexAttribArray(position_location);
+  glVertexAttribPointer(position_location, 2, GL_FLOAT, GL_FALSE,
+                        sizeof(GLfloat) * 4, 0);
+  GLint texcoord_location = glGetAttribLocation(self->program, "in_texcoord");
+  glEnableVertexAttribArray(texcoord_location);
+  glVertexAttribPointer(texcoord_location, 2, GL_FLOAT, GL_FALSE,
+                        sizeof(GLfloat) * 4,
+                        reinterpret_cast<void*>(sizeof(GLfloat) * 2));
+
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  glUseProgram(self->program);
+
+  gboolean first_layer = TRUE;
+  for (size_t i = 0; i < layers_count; ++i) {
+    const FlutterLayer* layer = layers[i];
+    switch (layer->type) {
+      case kFlutterLayerContentTypeBackingStore: {
+        // The first layer can use a fast framebuffer blit when available;
+        // otherwise composite it with the shader like subsequent layers.
+        if (first_layer && self->can_blit) {
+          blit_backing_store(layer, height);
+          first_layer = FALSE;
+        } else {
+          auto* framebuffer = FL_FRAMEBUFFER(
+              layer->backing_store->open_gl.framebuffer.user_data);
+          composite_layer(self, framebuffer, layer->offset.x, layer->offset.y,
+                          width, height);
+        }
+      } break;
+      case kFlutterLayerContentTypePlatformView: {
+        // TODO(robert-ancell) Not implemented -
+        // https://github.com/flutter/flutter/issues/41724
+      } break;
+    }
+  }
+  glDeleteVertexArrays(1, &vao);
+
+  if (saved_blend) {
+    glEnable(GL_BLEND);
+  } else {
+    glDisable(GL_BLEND);
+  }
+  glBindVertexArray(saved_vao_binding);
+  glBindBuffer(GL_ARRAY_BUFFER, saved_array_buffer_binding);
+  glUseProgram(saved_current_program);
+  glBlendFuncSeparate(saved_src_rgb, saved_dst_rgb, saved_src_alpha,
+                      saved_dst_alpha);
+}
+
+// Compose into the retained framebuffer while holding frame_mutex. The
+// destination-specific callback runs before a GTK reader can acquire the frame
+// and while the producer context is still current.
 template <typename FinishFrame>
 static gboolean composite_frame(FlCompositorOpenGL* self,
                                 const FlutterLayer** layers,
@@ -302,30 +390,16 @@ static gboolean composite_frame(FlCompositorOpenGL* self,
   // been altered.
   GLint saved_texture_binding;
   glGetIntegerv(GL_TEXTURE_BINDING_2D, &saved_texture_binding);
-  GLint saved_vao_binding;
-  glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &saved_vao_binding);
-  GLint saved_array_buffer_binding;
-  glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &saved_array_buffer_binding);
   GLint saved_draw_framebuffer_binding;
   glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &saved_draw_framebuffer_binding);
   GLint saved_read_framebuffer_binding;
   glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &saved_read_framebuffer_binding);
-  GLint saved_current_program;
-  glGetIntegerv(GL_CURRENT_PROGRAM, &saved_current_program);
   GLboolean saved_scissor_test = glIsEnabled(GL_SCISSOR_TEST);
-  GLboolean saved_blend = glIsEnabled(GL_BLEND);
-  GLint saved_src_rgb;
-  glGetIntegerv(GL_BLEND_SRC_RGB, &saved_src_rgb);
-  GLint saved_src_alpha;
-  glGetIntegerv(GL_BLEND_SRC_ALPHA, &saved_src_alpha);
-  GLint saved_dst_rgb;
-  glGetIntegerv(GL_BLEND_DST_RGB, &saved_dst_rgb);
-  GLint saved_dst_alpha;
-  glGetIntegerv(GL_BLEND_DST_ALPHA, &saved_dst_alpha);
-
   // Update framebuffer to write into.
   size_t width = layers[0]->size.width;
   size_t height = layers[0]->size.height;
+  // GTK can keep sampling a published EGL image after the next frame starts.
+  // Give the producer fresh storage in that case, even at the same size.
   if (self->framebuffer == nullptr ||
 #if FLUTTER_LINUX_GTK4
       self->framebuffer_published ||
@@ -358,27 +432,6 @@ static gboolean composite_frame(FlCompositorOpenGL* self,
 
   self->had_first_frame = true;
 
-  // FIXME(robert-ancell): The vertex array is the same for all views, but
-  // cannot be shared in OpenGL. Find a way to not generate this every time.
-  GLuint vao;
-  glGenVertexArrays(1, &vao);
-  glBindVertexArray(vao);
-  glBindBuffer(GL_ARRAY_BUFFER, self->vertex_buffer);
-  GLint position_location = glGetAttribLocation(self->program, "position");
-  glEnableVertexAttribArray(position_location);
-  glVertexAttribPointer(position_location, 2, GL_FLOAT, GL_FALSE,
-                        sizeof(GLfloat) * 4, 0);
-  GLint texcoord_location = glGetAttribLocation(self->program, "in_texcoord");
-  glEnableVertexAttribArray(texcoord_location);
-  glVertexAttribPointer(texcoord_location, 2, GL_FLOAT, GL_FALSE,
-                        sizeof(GLfloat) * 4,
-                        reinterpret_cast<void*>(sizeof(GLfloat) * 2));
-
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  glUseProgram(self->program);
-
   // Disable the scissor test as it can affect blit operations.
   // Prevents regressions like: https://github.com/flutter/flutter/issues/140828
   // See OpenGL specification version 4.6, section 18.3.1.
@@ -395,42 +448,18 @@ static gboolean composite_frame(FlCompositorOpenGL* self,
     glClearColor(clear_color[0], clear_color[1], clear_color[2],
                  clear_color[3]);
   }
-  gboolean first_layer = TRUE;
-  for (size_t i = 0; i < layers_count; ++i) {
-    const FlutterLayer* layer = layers[i];
-    switch (layer->type) {
-      case kFlutterLayerContentTypeBackingStore: {
-        const FlutterBackingStore* backing_store = layer->backing_store;
-        FlFramebuffer* framebuffer =
-            FL_FRAMEBUFFER(backing_store->open_gl.framebuffer.user_data);
-        glBindFramebuffer(GL_READ_FRAMEBUFFER,
-                          fl_framebuffer_get_id(framebuffer));
-        // The first layer can use a fast framebuffer blit when available;
-        // otherwise composite it with the shader like subsequent layers.
-        if (first_layer && self->can_blit) {
-          blit_layer(layer, height);
-          first_layer = FALSE;
-        } else {
-          composite_layer(self, framebuffer, layer->offset.x, layer->offset.y,
-                          width, height);
-        }
-      } break;
-      case kFlutterLayerContentTypePlatformView: {
-        // TODO(robert-ancell) Not implemented -
-        // https://github.com/flutter/flutter/issues/41724
-      } break;
-    }
+  // Driver support is cached at construction. One backing store can be copied
+  // as-is, so there is no need to bind a shader, allocate a vertex array, or
+  // change blend state. The scissor and framebuffer rules above still apply.
+  if (self->can_blit && layers_count == 1 &&
+      layers[0]->type == kFlutterLayerContentTypeBackingStore) {
+    blit_backing_store(layers[0], height);
+  } else {
+    draw_layers_with_shader(self, layers, layers_count, width, height);
   }
   glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
   finish_frame(general_format, width, height);
 
-  glDeleteVertexArrays(1, &vao);
-
-  if (saved_blend) {
-    glEnable(GL_BLEND);
-  } else {
-    glDisable(GL_BLEND);
-  }
   if (saved_scissor_test) {
     glEnable(GL_SCISSOR_TEST);
   } else {
@@ -438,12 +467,7 @@ static gboolean composite_frame(FlCompositorOpenGL* self,
   }
 
   glBindTexture(GL_TEXTURE_2D, saved_texture_binding);
-  glBindVertexArray(saved_vao_binding);
-  glBindBuffer(GL_ARRAY_BUFFER, saved_array_buffer_binding);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, saved_draw_framebuffer_binding);
-  glUseProgram(saved_current_program);
-  glBlendFuncSeparate(saved_src_rgb, saved_dst_rgb, saved_src_alpha,
-                      saved_dst_alpha);
 
   if (!self->shareable) {
     glBindFramebuffer(GL_READ_FRAMEBUFFER,

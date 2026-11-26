@@ -93,7 +93,7 @@ static void test_offset_layer() {
   FlutterLayer layer = {.type = kFlutterLayerContentTypeBackingStore,
                         .backing_store = &store,
                         .size = {width, height}};
-  const FlutterLayer* layers[] = {&layer};
+  const FlutterLayer* layers[] = {&layer, &layer};
   // Seed the retained target so a missing clear produces a visible pixel.
   g_assert_true(
       fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers, 1));
@@ -102,19 +102,30 @@ static void test_offset_layer() {
   glScissor(0, height - 1, 1, 1);
   glClearColor(1, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT);
+  glViewport(0, 0, width, height);
   layer.offset = {2, 1};
-  g_assert_true(
-      fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers, 1));
-  for (int y = 0; y < height; ++y) {
-    for (int x = 0; x < width; ++x) {
-      const uint8_t* pixel =
-          compositor->pixels + 4 * ((height - 1 - y) * width + x);
-      bool covered = x >= 2 && y >= 1;
-      bool red = x == 2 && y == 1;
-      g_assert_cmpuint(pixel[0], ==, red ? 255 : 0);
-      g_assert_cmpuint(pixel[1], ==, covered && !red ? 255 : 0);
-      g_assert_cmpuint(pixel[2], ==, 0);
-      g_assert_cmpuint(pixel[3], ==, covered ? 255 : 0);
+  // A second opaque layer of the same size covers the same pixels through
+  // the shader path. Both paths should preserve scissor and framebuffer state.
+  for (size_t layers_count : {1u, 2u}) {
+    g_assert_true(fl_compositor_present_layers(FL_COMPOSITOR(compositor),
+                                               layers, layers_count));
+    g_assert_true(glIsEnabled(GL_SCISSOR_TEST));
+    GLint framebuffer = 0;
+    glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &framebuffer);
+    g_assert_cmpuint(framebuffer, ==, fl_framebuffer_get_id(source));
+    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &framebuffer);
+    g_assert_cmpuint(framebuffer, ==, fl_framebuffer_get_id(source));
+    for (int y = 0; y < height; ++y) {
+      for (int x = 0; x < width; ++x) {
+        const uint8_t* pixel =
+            compositor->pixels + 4 * ((height - 1 - y) * width + x);
+        bool covered = x >= 2 && y >= 1;
+        bool red = x == 2 && y == 1;
+        g_assert_cmpuint(pixel[0], ==, red ? 255 : 0);
+        g_assert_cmpuint(pixel[1], ==, covered && !red ? 255 : 0);
+        g_assert_cmpuint(pixel[2], ==, 0);
+        g_assert_cmpuint(pixel[3], ==, covered ? 255 : 0);
+      }
     }
   }
 }
