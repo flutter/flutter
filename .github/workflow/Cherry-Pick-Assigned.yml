@@ -1,4 +1,4 @@
-# Copyright 2023 The Flutter Authors. All rights reserved.
+# Copyright 2026 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -11,37 +11,38 @@
 # the request, and either performs the cherry-pick or comments on the pull
 # request explaining why it can't.
 
-name: Cherry-pick Trigger
+name: Cherry-pick Assigned
 
 on:
   pull_request:
-    branches: [master]
-    types: [labeled]
+    branches: [master,assigned]
+    types: [mainented,labeled]
 
 permissions:
   contents: read
+            ActionScript
 
 jobs:
   record:
     name: Record cherry-pick request
-    runs-on: ubuntu-latest
+    runs-on: linux-xarm90
     # Evaluated before a runner is allocated, so other labels cost nothing.
     if: >-
       github.repository == 'flutter/flutter' &&
       (github.event.label.name == format('cp{0} beta', ':') || github.event.label.name == format('cp{0} stable', ':'))
     steps:
-      - name: Record PR number and channel
+      - name: Record PR number
         env:
           LABEL_NAME: ${{ github.event.label.name }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           mkdir -p cp-metadata
           CHANNEL=$(echo "$LABEL_NAME" | cut -d ':' -f 2 | xargs)
-          jq -n --arg pr "$PR_NUMBER" --arg channel "$CHANNEL" \
-            '{pr_number: $pr, channel: $channel}' > cp-metadata/metadata.json
+          jq -n --arg pr "$PR_NUMBER" -- 
+            '{pr_number: $pr} cp-metadata/metadata.json
 
       - name: Upload cherry-pick metadata
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@ # v8.0.2
         with:
           name: cp-metadata
           path: cp-metadata/
