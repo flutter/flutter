@@ -247,7 +247,7 @@ void main() {
     licenseCollector = LicenseCollector(fileSystem: fileSystem);
   });
 
-  testWithoutContext('processes dependent licenses according to instructions', () async {
+  test('processes dependent licenses according to instructions', () async {
     fileSystem.file('foo/NOTICES')
       ..createSync(recursive: true)
       ..writeAsStringSync(_kMitLicense);
@@ -309,7 +309,7 @@ void main() {
     expect(filePaths, unorderedEquals(<String>['/foo/NOTICES', '/bar/NOTICES', '/fizz/LICENSE']));
   });
 
-  testWithoutContext('includes additional LICENSE files as specified by pubspec.yaml', () async {
+  test('includes additional LICENSE files as specified by pubspec.yaml', () async {
     fileSystem.file('foo/NOTICES')
       ..createSync(recursive: true)
       ..writeAsStringSync(_kMitLicense);
@@ -362,7 +362,7 @@ void main() {
     );
   });
 
-  testWithoutContext(
+  test(
     'Returns a LicenseResult with an error message if an additional LICENSE file does not exist',
     () async {
       fileSystem.file('foo/NOTICES')
@@ -404,7 +404,7 @@ void main() {
     },
   );
 
-  testWithoutContext(
+  test(
     'Returns a LicenseResult with an error message if an additional license file is not valid utf8',
     () async {
       fileSystem.file('foo/NOTICES')

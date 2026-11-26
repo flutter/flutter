@@ -34,7 +34,7 @@ void main() {
     tryToDelete(parentDirectory);
   });
 
-  testWithoutContext('Can upgrade and downgrade a Flutter checkout', () async {
+  test('Can upgrade and downgrade a Flutter checkout', () async {
     final Directory remoteDirectory = parentDirectory.childDirectory('remote')
       ..createSync(recursive: true);
     final Directory testDirectory = parentDirectory.childDirectory('flutter');
@@ -69,6 +69,10 @@ ${logger.errorText}''',
       checkExitCode(code);
     }
 
+    // Use a local git repository as the upstream remote instead of cloning
+    // https://github.com/flutter/flutter.git. Cloning the live repository over
+    // the network makes this test slow and flaky (for example, transient
+    // network failures or Windows path-length limits during checkout).
     printOnFailure('Step 0 - create a local upstream Flutter repository');
     for (final args in const <List<String>>[
       <String>['init'],

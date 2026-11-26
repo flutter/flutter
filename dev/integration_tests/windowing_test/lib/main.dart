@@ -214,6 +214,47 @@ void main() {
             return jsonEncode({'result': 'unsupported'});
           }
           return jsonEncode({'result': true});
+        } else if (jsonMap['type'] == 'popup_focus_loss') {
+          // Opens a popup, moves focus to another window and reports whether
+          // the popup was closed as a result. If `with_dialog` is set, the
+          // window given focus is a dialog opened from the popup.
+          final withDialog = jsonMap['with_dialog'] == true;
+          if (!controller.isActivated) {
+            await awaitNotification(controller.activate, () => controller.isActivated);
+          }
+          final popup = PopupWindowController(
+            parent: controller,
+            anchorRect: const Rect.fromLTWH(0, 0, 100, 100),
+            positioner: _kSecondaryPositioner,
+          );
+          final BaseWindowController otherWindow;
+          final VoidCallback activateOtherWindow;
+          if (withDialog) {
+            final dialog = DialogWindowController(size: const Size(200, 200), parent: popup);
+            otherWindow = dialog;
+            activateOtherWindow = dialog.activate;
+          } else {
+            final window = WindowController(size: const Size(200, 200), title: 'Other');
+            otherWindow = window;
+            activateOtherWindow = window.activate;
+          }
+          try {
+            // Let the new windows map before moving focus to one of them.
+            await Future<void>.delayed(const Duration(milliseconds: 500));
+            await awaitNotification(activateOtherWindow, () => !controller.isActivated);
+            // The popup is closed asynchronously after the focus change.
+            final stopwatch = Stopwatch()..start();
+            while (!popup.isDestroyed && stopwatch.elapsed < const Duration(seconds: 2)) {
+              await Future<void>.delayed(const Duration(milliseconds: 50));
+            }
+            return jsonEncode({'popupDestroyed': popup.isDestroyed});
+          } finally {
+            otherWindow.destroy();
+            if (!popup.isDestroyed) {
+              popup.destroy();
+            }
+            controller.activate();
+          }
         } else if (jsonMap['type'] == 'is_window_destroyed') {
           return jsonEncode({'isDestroyed': secondaryController?.isDestroyed});
         } else if (jsonMap['type'] == 'destroy_window') {

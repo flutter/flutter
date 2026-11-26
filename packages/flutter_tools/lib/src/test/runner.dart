@@ -22,6 +22,7 @@ import '../native_assets.dart';
 import '../project.dart';
 import '../web/chrome.dart';
 import '../web/memory_fs.dart';
+import '../web/web_debug_config.dart';
 import 'flutter_platform.dart' as loader;
 import 'flutter_web_platform.dart';
 import 'test_time_recorder.dart';

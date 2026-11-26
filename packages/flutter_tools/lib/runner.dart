@@ -117,7 +117,7 @@ Future<int> run(
     :DevtoolsLauncher devtoolsLauncher,
     :Doctor doctor,
     :EmulatorManager emulatorManager,
-    :ExtensionManager? extensionManager,
+    :ExtensionManager extensionManager,
     :FeatureFlags featureFlags,
     :FlutterHookRunner? flutterHookRunner,
     :MacOSWorkflow macOSWorkflow,
@@ -233,7 +233,7 @@ Future<int> run(
         deviceManager: deviceManager,
         devtoolsLauncher: devtoolsLauncher,
         doctor: doctor,
-        extensionManager: extensionManager!,
+        extensionManager: extensionManager,
         featureFlags: featureFlags,
         plistParser: appleContext.plistParser,
         pub: pub,
@@ -335,9 +335,9 @@ Future<int> run(
             // This catches all exceptions to send to crash logging, etc.
             // ignore: avoid_catches_without_on_clauses
           } catch (error, stackTrace) {
-            firstError = error;
-            firstStackTrace = stackTrace;
-            return handleError(error, stackTrace);
+            firstError ??= error;
+            firstStackTrace ??= stackTrace;
+            return handleError(firstError!, firstStackTrace);
           }
         },
         (Object error, StackTrace stackTrace) async {

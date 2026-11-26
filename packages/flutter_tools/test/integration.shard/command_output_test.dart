@@ -9,14 +9,13 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/features.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import 'test_utils.dart';
 
 // This test file does not use [getLocalEngineArguments] because it is testing
 // command output and not using cached artifacts.
 
 void main() {
-  testWithoutContext(
+  test(
     'All development tools and deprecated commands are hidden and help text is not verbose',
     () async {
       final ProcessResult result = await processManager.run(<String>[flutterBin, '-h', '-v']);
@@ -29,7 +28,7 @@ void main() {
     },
   );
 
-  testWithoutContext('Flutter help is shown with -? command line argument', () async {
+  test('Flutter help is shown with -? command line argument', () async {
     final ProcessResult result = await processManager.run(<String>[flutterBin, '-?']);
 
     // Development tools.
@@ -42,7 +41,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Flutter help is shown with /? command line argument', () async {
+  test('Flutter help is shown with /? command line argument', () async {
     final ProcessResult result = await processManager.run(<String>[flutterBin, '/?']);
 
     // Development tools.
@@ -55,7 +54,7 @@ void main() {
     );
   });
 
-  testWithoutContext('flutter doctor is not verbose', () async {
+  test('flutter doctor is not verbose', () async {
     final ProcessResult result = await processManager.run(<String>[flutterBin, 'doctor', '-v']);
 
     // Only printed by verbose tool.
@@ -63,7 +62,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/124793
-  testWithoutContext('flutter doctor is not verbose when preceded by a global flag', () async {
+  test('flutter doctor is not verbose when preceded by a global flag', () async {
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       '--no-version-check',
@@ -75,32 +74,29 @@ void main() {
     expect(result.stdout, isNot(contains('exiting with code 0')));
   });
 
-  testWithoutContext(
-    'flutter help -v shows hidden options when preceded by a global flag',
-    () async {
-      final ProcessResult result = await processManager.run(<String>[
-        flutterBin,
-        '--no-version-check',
-        'help',
-        '-v',
-      ]);
+  test('flutter help -v shows hidden options when preceded by a global flag', () async {
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      '--no-version-check',
+      'help',
+      '-v',
+    ]);
 
-      // Only shown in verbose help.
-      expect(result.stdout, contains('--local-engine'));
+    // Only shown in verbose help.
+    expect(result.stdout, contains('--local-engine'));
 
-      // Only printed by verbose tool.
-      expect(result.stdout, isNot(contains('exiting with code 0')));
-    },
-  );
+    // Only printed by verbose tool.
+    expect(result.stdout, isNot(contains('exiting with code 0')));
+  });
 
-  testWithoutContext('flutter doctor -vv super verbose', () async {
+  test('flutter doctor -vv super verbose', () async {
     final ProcessResult result = await processManager.run(<String>[flutterBin, 'doctor', '-vv']);
 
     // Check for message only printed in verbose mode.
     expect(result.stdout, contains('Shutdown hooks complete'));
   });
 
-  testUsingContext('flutter config --list contains all features', () async {
+  test('flutter config --list contains all features', () async {
     final ProcessResult result = await processManager.run(<String>[flutterBin, 'config', '--list']);
 
     // contains all of the experiments in features.dart
@@ -112,7 +108,7 @@ void main() {
     );
   });
 
-  testWithoutContext('flutter run --machine uses AppRunLogger', () async {
+  test('flutter run --machine uses AppRunLogger', () async {
     final Directory directory = createResolvedTempDirectorySync(
       'flutter_run_test.',
     ).createTempSync('_flutter_run_test.')..createSync(recursive: true);
@@ -134,7 +130,7 @@ void main() {
     }
   });
 
-  testWithoutContext('flutter attach --machine uses AppRunLogger', () async {
+  test('flutter attach --machine uses AppRunLogger', () async {
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'attach',
@@ -148,7 +144,7 @@ void main() {
     ); // Target file not found, but different paths on Windows and Linux/macOS.
   });
 
-  testWithoutContext('flutter --version --machine outputs JSON with flutterRoot', () async {
+  test('flutter --version --machine outputs JSON with flutterRoot', () async {
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       '--version',
@@ -166,7 +162,7 @@ void main() {
     expect(versionInfo, containsPair('flutterRoot', isNotNull));
   });
 
-  testWithoutContext('A tool exit is thrown for an invalid debug-url in flutter attach', () async {
+  test('A tool exit is thrown for an invalid debug-url in flutter attach', () async {
     // This test is almost exactly like the next one; update them together please.
     final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final ProcessResult result = await processManager.run(<String>[
@@ -187,7 +183,7 @@ void main() {
     );
   });
 
-  testWithoutContext('--debug-uri is an alias for --debug-url', () async {
+  test('--debug-uri is an alias for --debug-url', () async {
     // This text is exactly the same as the previous one but with a "l" turned to an "i".
     final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final ProcessResult result = await processManager.run(<String>[
@@ -209,7 +205,7 @@ void main() {
     );
   });
 
-  testWithoutContext('will load bootstrap script before starting', () async {
+  test('will load bootstrap script before starting', () async {
     final File bootstrap = fileSystem.file(
       fileSystem.path.join(
         getFlutterRoot(),
@@ -229,7 +225,7 @@ void main() {
     }
   });
 
-  testWithoutContext('flutter attach does not support --release', () async {
+  test('flutter attach does not support --release', () async {
     final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
@@ -242,7 +238,7 @@ void main() {
     expect(result.stderr, contains('Could not find an option named "--release"'));
   });
 
-  testWithoutContext('flutter can report crashes', () async {
+  test('flutter can report crashes', () async {
     final ProcessResult result = await processManager.run(
       <String>[flutterBin, 'update-packages', '--crash'],
       environment: <String, String>{'BOT': 'false'},
@@ -258,7 +254,7 @@ void main() {
     );
   });
 
-  testWithoutContext('flutter supports trailing args', () async {
+  test('flutter supports trailing args', () async {
     final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
@@ -273,7 +269,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/75876.
-  testWithoutContext('flutter create daemon produces output', () async {
+  test('flutter create daemon produces output', () async {
     final Directory directory = createResolvedTempDirectorySync('create_daemon_test.');
 
     try {

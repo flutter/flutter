@@ -6,11 +6,12 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
-import 'package:flutter_tools/src/context_runner.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -40,6 +41,7 @@ void main() {
     late UpgradeCommandRunner realCommandRunner;
     late FakeProcessManager processManager;
     late FakePlatform fakePlatform;
+    late BufferLogger logger;
     const gitTagVersion = GitTagVersion(
       x: 1,
       y: 2,
@@ -50,14 +52,40 @@ void main() {
       gitTag: '1.2.3+hotfix.5.pre.5',
     );
 
+    ToolContext createToolContext({
+      FlutterVersion? flutterVersion,
+      ProcessManager? processManagerOverride,
+      SystemClock? systemClock,
+    }) {
+      final ProcessManager resolvedProcessManager = processManagerOverride ?? processManager;
+      final String flutterRoot = getFlutterRoot();
+      return FakeToolContext(
+        cache: Cache.test(
+          flutterRoot: flutterRoot,
+          rootOverride: localFs.directory(flutterRoot),
+          fileSystem: localFs,
+          logger: logger,
+          platform: fakePlatform,
+          processManager: resolvedProcessManager,
+        ),
+        flutterVersion: flutterVersion,
+        fs: localFs,
+        logger: logger,
+        platform: fakePlatform,
+        processManager: resolvedProcessManager,
+        systemClock: systemClock ?? SystemClock.fixed(jan12026),
+      );
+    }
+
     setUp(() {
       fakePlatform = FakePlatform()
         ..environment = Map<String, String>.unmodifiable(<String, String>{
           'ENV1': 'irrelevant',
           'ENV2': 'irrelevant',
         });
+      logger = BufferLogger.test();
       processManager = FakeProcessManager.empty();
-      final toolContext = DelegatingToolContext(systemClock: SystemClock.fixed(jan12026));
+      final ToolContext toolContext = createToolContext();
       fakeCommandRunner = FakeUpgradeCommandRunner(
         featureFlags: TestFeatureFlags(),
         toolContext: toolContext,
@@ -69,7 +97,7 @@ void main() {
       fakeCommandRunner.willHaveUncommittedChanges = false;
     });
 
-    testUsingContext('throws on unknown tag, official branch,  noforce', () async {
+    test('throws on unknown tag, official branch,  noforce', () async {
       final flutterVersion = FakeFlutterVersion(branch: 'beta');
       const upstreamRevision = '';
       final latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
@@ -85,9 +113,9 @@ void main() {
       );
       expect(result, throwsToolExit());
       expect(processManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator>{Platform: () => fakePlatform});
+    });
 
-    testUsingContext('throws tool exit with uncommitted changes', () async {
+    test('throws tool exit with uncommitted changes', () async {
       final flutterVersion = FakeFlutterVersion(branch: 'beta');
       const upstreamRevision = '';
       final latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
@@ -104,99 +132,71 @@ void main() {
       );
       expect(result, throwsToolExit());
       expect(processManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator>{Platform: () => fakePlatform});
+    });
 
-    testUsingContext(
-      'hasUncommittedChanges ignores pubspec.lock on non-stable channel',
-      () async {
-        final flutterVersion = FakeFlutterVersion();
+    test('hasUncommittedChanges ignores pubspec.lock on non-stable channel', () async {
+      final flutterVersion = FakeFlutterVersion();
 
-        processManager.addCommand(
-          const FakeCommand(
-            command: <String>['git', 'status', '-s'],
-            stdout: ' M pubspec.lock\n M packages/flutter_tools/pubspec.lock',
-          ),
-        );
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>['git', 'status', '-s'],
+          stdout: ' M pubspec.lock\n M packages/flutter_tools/pubspec.lock',
+        ),
+      );
 
-        final bool result = await realCommandRunner.hasUncommittedChanges(flutterVersion);
-        expect(result, false);
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => processManager,
-        Platform: () => fakePlatform,
-      },
-    );
+      final bool result = await realCommandRunner.hasUncommittedChanges(flutterVersion);
+      expect(result, false);
+      expect(processManager, hasNoRemainingExpectations);
+    });
 
-    testUsingContext(
-      'hasUncommittedChanges does not ignore pubspec.lock on stable channel',
-      () async {
-        final flutterVersion = FakeFlutterVersion(branch: 'stable');
+    test('hasUncommittedChanges does not ignore pubspec.lock on stable channel', () async {
+      final flutterVersion = FakeFlutterVersion(branch: 'stable');
 
-        processManager.addCommand(
-          const FakeCommand(command: <String>['git', 'status', '-s'], stdout: ' M pubspec.lock'),
-        );
+      processManager.addCommand(
+        const FakeCommand(command: <String>['git', 'status', '-s'], stdout: ' M pubspec.lock'),
+      );
 
-        final bool result = await realCommandRunner.hasUncommittedChanges(flutterVersion);
-        expect(result, true);
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => processManager,
-        Platform: () => fakePlatform,
-      },
-    );
+      final bool result = await realCommandRunner.hasUncommittedChanges(flutterVersion);
+      expect(result, true);
+      expect(processManager, hasNoRemainingExpectations);
+    });
 
-    testUsingContext(
-      'hasUncommittedChanges detects other changes on non-stable channel',
-      () async {
-        final flutterVersion = FakeFlutterVersion();
+    test('hasUncommittedChanges detects other changes on non-stable channel', () async {
+      final flutterVersion = FakeFlutterVersion();
 
-        processManager.addCommand(
-          const FakeCommand(
-            command: <String>['git', 'status', '-s'],
-            stdout: ' M pubspec.lock\n M lib/src/commands/upgrade.dart',
-          ),
-        );
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>['git', 'status', '-s'],
+          stdout: ' M pubspec.lock\n M lib/src/commands/upgrade.dart',
+        ),
+      );
 
-        final bool result = await realCommandRunner.hasUncommittedChanges(flutterVersion);
-        expect(result, true);
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => processManager,
-        Platform: () => fakePlatform,
-      },
-    );
+      final bool result = await realCommandRunner.hasUncommittedChanges(flutterVersion);
+      expect(result, true);
+      expect(processManager, hasNoRemainingExpectations);
+    });
 
-    testUsingContext(
-      "Doesn't continue on known tag, beta branch, no force, already up-to-date",
-      () async {
-        const revision = 'abc123';
-        final latestVersion = FakeFlutterVersion(frameworkRevision: revision);
-        final flutterVersion = FakeFlutterVersion(branch: 'beta', frameworkRevision: revision);
-        fakeCommandRunner.alreadyUpToDate = true;
-        fakeCommandRunner.remoteVersion = latestVersion;
+    test("Doesn't continue on known tag, beta branch, no force, already up-to-date", () async {
+      const revision = 'abc123';
+      final latestVersion = FakeFlutterVersion(frameworkRevision: revision);
+      final flutterVersion = FakeFlutterVersion(branch: 'beta', frameworkRevision: revision);
+      fakeCommandRunner.alreadyUpToDate = true;
+      fakeCommandRunner.remoteVersion = latestVersion;
 
-        final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-          const UpgradePhase.firstHalf(),
-          force: false,
-          testFlow: false,
-          gitTagVersion: gitTagVersion,
-          flutterVersion: flutterVersion,
-          verifyOnly: false,
-        );
-        expect(await result, FlutterCommandResult.success());
-        expect(testLogger.statusText, contains('Flutter is already up to date'));
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => processManager,
-        Platform: () => fakePlatform,
-      },
-    );
+      final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+        const UpgradePhase.firstHalf(),
+        force: false,
+        testFlow: false,
+        gitTagVersion: gitTagVersion,
+        flutterVersion: flutterVersion,
+        verifyOnly: false,
+      );
+      expect(await result, FlutterCommandResult.success());
+      expect(logger.statusText, contains('Flutter is already up to date'));
+      expect(processManager, hasNoRemainingExpectations);
+    });
 
-    testUsingContext(
+    test(
       'starts the upgrade operation and passes now as --continue-started-at <iso-date>',
       () async {
         const revision = 'abc123';
@@ -220,7 +220,7 @@ void main() {
         final DateTime now = DateTime.now().subtract(const Duration(minutes: 25));
         fakeCommandRunner = FakeUpgradeCommandRunner(
           featureFlags: TestFeatureFlags(),
-          toolContext: DelegatingToolContext(systemClock: SystemClock.fixed(now)),
+          toolContext: createToolContext(systemClock: SystemClock.fixed(now)),
         )..remoteVersion = latestVersion;
 
         processManager.addCommands(<FakeCommand>[
@@ -245,147 +245,122 @@ void main() {
           verifyOnly: false,
         );
         expect(await result, FlutterCommandResult.success());
-        expect(testLogger.statusText, isNot(contains('Took ')));
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => processManager,
-        Platform: () => fakePlatform,
+        expect(logger.statusText, isNot(contains('Took ')));
       },
     );
 
-    testUsingContext(
-      'finishes the upgrade operation and prints minutes the operation took',
-      () async {
-        const revision = 'abc123';
-        const upstreamRevision = 'def456';
-        const version = '1.2.3';
-        const upstreamVersion = '4.5.6';
+    test('finishes the upgrade operation and prints minutes the operation took', () async {
+      const revision = 'abc123';
+      const upstreamRevision = 'def456';
+      const version = '1.2.3';
+      const upstreamVersion = '4.5.6';
 
-        final flutterVersion = FakeFlutterVersion(
-          branch: 'beta',
-          frameworkRevision: revision,
-          frameworkRevisionShort: revision,
-          frameworkVersion: version,
-        );
+      final flutterVersion = FakeFlutterVersion(
+        branch: 'beta',
+        frameworkRevision: revision,
+        frameworkRevisionShort: revision,
+        frameworkVersion: version,
+      );
 
-        final latestVersion = FakeFlutterVersion(
-          frameworkRevision: upstreamRevision,
-          frameworkRevisionShort: upstreamRevision,
-          frameworkVersion: upstreamVersion,
-        );
+      final latestVersion = FakeFlutterVersion(
+        frameworkRevision: upstreamRevision,
+        frameworkRevisionShort: upstreamRevision,
+        frameworkVersion: upstreamVersion,
+      );
 
-        final now = DateTime.now();
-        final DateTime before = now.subtract(const Duration(minutes: 25));
-        fakeCommandRunner = FakeUpgradeCommandRunner(
-          featureFlags: TestFeatureFlags(),
-          toolContext: DelegatingToolContext(systemClock: SystemClock.fixed(now)),
-        )..remoteVersion = latestVersion;
+      final now = DateTime.now();
+      final DateTime before = now.subtract(const Duration(minutes: 25));
+      fakeCommandRunner = FakeUpgradeCommandRunner(
+        featureFlags: TestFeatureFlags(),
+        toolContext: createToolContext(systemClock: SystemClock.fixed(now)),
+      )..remoteVersion = latestVersion;
 
-        processManager.addCommands(<FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              localFs.path.join('bin', 'flutter'),
-              '--no-color',
-              '--no-version-check',
-              'precache',
-            ],
-          ),
-        ]);
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            localFs.path.join('bin', 'flutter'),
+            '--no-color',
+            '--no-version-check',
+            'precache',
+          ],
+        ),
+      ]);
 
-        final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-          UpgradePhase.secondHalf(upgradeStartedAt: before),
-          force: false,
-          testFlow: false,
-          gitTagVersion: gitTagVersion,
-          flutterVersion: flutterVersion,
-          verifyOnly: false,
-        );
-        expect(await result, FlutterCommandResult.success());
-        expect(testLogger.statusText, contains('Took 25.0m'));
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => processManager,
-        Platform: () => fakePlatform,
-      },
-    );
+      final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+        UpgradePhase.secondHalf(upgradeStartedAt: before),
+        force: false,
+        testFlow: false,
+        gitTagVersion: gitTagVersion,
+        flutterVersion: flutterVersion,
+        verifyOnly: false,
+      );
+      expect(await result, FlutterCommandResult.success());
+      expect(logger.statusText, contains('Took 25.0m'));
+    });
 
-    testUsingContext(
-      'correctly provides upgrade version on verify only',
-      () async {
-        const revision = 'abc123';
-        const upstreamRevision = 'def456';
-        const version = '1.2.3';
-        const upstreamVersion = '4.5.6';
+    test('correctly provides upgrade version on verify only', () async {
+      const revision = 'abc123';
+      const upstreamRevision = 'def456';
+      const version = '1.2.3';
+      const upstreamVersion = '4.5.6';
 
-        final flutterVersion = FakeFlutterVersion(
-          branch: 'beta',
-          frameworkRevision: revision,
-          frameworkRevisionShort: revision,
-          frameworkVersion: version,
-        );
+      final flutterVersion = FakeFlutterVersion(
+        branch: 'beta',
+        frameworkRevision: revision,
+        frameworkRevisionShort: revision,
+        frameworkVersion: version,
+      );
 
-        final latestVersion = FakeFlutterVersion(
-          frameworkRevision: upstreamRevision,
-          frameworkRevisionShort: upstreamRevision,
-          frameworkVersion: upstreamVersion,
-        );
+      final latestVersion = FakeFlutterVersion(
+        frameworkRevision: upstreamRevision,
+        frameworkRevisionShort: upstreamRevision,
+        frameworkVersion: upstreamVersion,
+      );
 
-        fakeCommandRunner.alreadyUpToDate = false;
-        fakeCommandRunner.remoteVersion = latestVersion;
+      fakeCommandRunner.alreadyUpToDate = false;
+      fakeCommandRunner.remoteVersion = latestVersion;
 
-        final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-          const UpgradePhase.firstHalf(),
-          force: false,
-          testFlow: false,
-          gitTagVersion: gitTagVersion,
-          flutterVersion: flutterVersion,
-          verifyOnly: true,
-        );
-        expect(await result, FlutterCommandResult.success());
-        expect(testLogger.statusText, contains('A new version of Flutter is available'));
-        expect(testLogger.statusText, contains('The latest version: 4.5.6 (revision def456)'));
-        expect(testLogger.statusText, contains('Your current version: 1.2.3 (revision abc123)'));
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => processManager,
-        Platform: () => fakePlatform,
-      },
-    );
+      final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+        const UpgradePhase.firstHalf(),
+        force: false,
+        testFlow: false,
+        gitTagVersion: gitTagVersion,
+        flutterVersion: flutterVersion,
+        verifyOnly: true,
+      );
+      expect(await result, FlutterCommandResult.success());
+      expect(logger.statusText, contains('A new version of Flutter is available'));
+      expect(logger.statusText, contains('The latest version: 4.5.6 (revision def456)'));
+      expect(logger.statusText, contains('Your current version: 1.2.3 (revision abc123)'));
+      expect(processManager, hasNoRemainingExpectations);
+    });
 
-    testUsingContext(
-      'fetchLatestVersion returns version if git succeeds',
-      () async {
-        const revision = 'abc123';
-        const version = '1.2.3';
+    test('fetchLatestVersion returns version if git succeeds', () async {
+      const revision = 'abc123';
+      const version = '1.2.3';
 
-        processManager.addCommands(<FakeCommand>[
-          const FakeCommand(command: <String>['git', 'fetch', '--tags']),
-          const FakeCommand(
-            command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
-            stdout: revision,
-          ),
-          const FakeCommand(
-            command: <String>['git', 'tag', '--points-at', revision],
-            stdout: version,
-          ),
-        ]);
+      processManager.addCommands(<FakeCommand>[
+        const FakeCommand(command: <String>['git', 'fetch', '--tags']),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
+          stdout: revision,
+        ),
+        const FakeCommand(
+          command: <String>['git', 'tag', '--points-at', revision],
+          stdout: version,
+        ),
+      ]);
 
-        final FlutterVersion updateVersion = await realCommandRunner.fetchLatestVersion(
-          localVersion: FakeFlutterVersion(),
-        );
+      final FlutterVersion updateVersion = await realCommandRunner.fetchLatestVersion(
+        localVersion: FakeFlutterVersion(),
+      );
 
-        expect(updateVersion.frameworkVersion, version);
-        expect(updateVersion.frameworkRevision, revision);
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => processManager,
-        Platform: () => fakePlatform,
-      },
-    );
+      expect(updateVersion.frameworkVersion, version);
+      expect(updateVersion.frameworkRevision, revision);
+      expect(processManager, hasNoRemainingExpectations);
+    });
 
-    testUsingContext(
+    test(
       'fetchLatestVersion returns latest version if the upstream revision has multiple tags',
       () async {
         const latestVersion = '3.4.5';
@@ -412,289 +387,247 @@ void main() {
         expect(updateVersion.frameworkRevision, revision);
         expect(processManager, hasNoRemainingExpectations);
       },
-      overrides: <Type, Generator>{
-        ProcessManager: () => processManager,
-        Platform: () => fakePlatform,
-      },
     );
 
-    testUsingContext(
-      'fetchLatestVersion throws toolExit if HEAD is detached',
-      () async {
-        processManager.addCommands(const <FakeCommand>[
-          FakeCommand(command: <String>['git', 'fetch', '--tags']),
-          FakeCommand(
-            command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
-            exception: ProcessException('git', <String>[
-              'rev-parse',
-              '--verify',
-              '@{upstream}',
-            ], 'fatal: HEAD does not point to a branch'),
-          ),
-        ]);
+    test('fetchLatestVersion throws toolExit if HEAD is detached', () async {
+      processManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>['git', 'fetch', '--tags']),
+        FakeCommand(
+          command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
+          exception: ProcessException('git', <String>[
+            'rev-parse',
+            '--verify',
+            '@{upstream}',
+          ], 'fatal: HEAD does not point to a branch'),
+        ),
+      ]);
 
-        await expectLater(
-          () async => realCommandRunner.fetchLatestVersion(localVersion: FakeFlutterVersion()),
-          throwsToolExit(
-            message:
-                'Unable to upgrade Flutter: Your Flutter checkout '
-                'is currently not on a release branch.\n'
-                'Use "flutter channel" to switch to an official channel, and retry. '
-                'Alternatively, re-install Flutter by going to https://flutter.dev/setup.',
-          ),
-        );
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => processManager,
-        Platform: () => fakePlatform,
-      },
-    );
+      await expectLater(
+        () async => realCommandRunner.fetchLatestVersion(localVersion: FakeFlutterVersion()),
+        throwsToolExit(
+          message:
+              'Unable to upgrade Flutter: Your Flutter checkout '
+              'is currently not on a release branch.\n'
+              'Use "flutter channel" to switch to an official channel, and retry. '
+              'Alternatively, re-install Flutter by going to https://flutter.dev/setup.',
+        ),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
 
-    testUsingContext(
-      'fetchLatestVersion throws toolExit if no upstream configured',
-      () async {
-        processManager.addCommands(const <FakeCommand>[
-          FakeCommand(command: <String>['git', 'fetch', '--tags']),
-          FakeCommand(
-            command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
-            exception: ProcessException('git', <String>[
-              'rev-parse',
-              '--verify',
-              '@{upstream}',
-            ], 'fatal: no upstream configured for branch'),
-          ),
-        ]);
+    test('fetchLatestVersion throws toolExit if no upstream configured', () async {
+      processManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>['git', 'fetch', '--tags']),
+        FakeCommand(
+          command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
+          exception: ProcessException('git', <String>[
+            'rev-parse',
+            '--verify',
+            '@{upstream}',
+          ], 'fatal: no upstream configured for branch'),
+        ),
+      ]);
 
-        await expectLater(
-          () async => realCommandRunner.fetchLatestVersion(localVersion: FakeFlutterVersion()),
-          throwsToolExit(
-            message:
-                'Unable to upgrade Flutter: The current Flutter '
-                'branch/channel is not tracking any remote repository.\n'
-                'Re-install Flutter by going to https://flutter.dev/setup.',
-          ),
-        );
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => processManager,
-        Platform: () => fakePlatform,
-      },
-    );
+      await expectLater(
+        () async => realCommandRunner.fetchLatestVersion(localVersion: FakeFlutterVersion()),
+        throwsToolExit(
+          message:
+              'Unable to upgrade Flutter: The current Flutter '
+              'branch/channel is not tracking any remote repository.\n'
+              'Re-install Flutter by going to https://flutter.dev/setup.',
+        ),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
 
-    testUsingContext(
-      'git exception during attemptReset throwsToolExit',
-      () async {
-        const revision = 'abc123';
-        const errorMessage = 'fatal: Could not parse object ´$revision´';
-        processManager.addCommand(
-          const FakeCommand(
-            command: <String>['git', 'reset', '--hard', revision],
-            exception: ProcessException('git', <String>['reset', '--hard', revision], errorMessage),
-          ),
-        );
+    test('git exception during attemptReset throwsToolExit', () async {
+      const revision = 'abc123';
+      const errorMessage = 'fatal: Could not parse object ´$revision´';
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>['git', 'reset', '--hard', revision],
+          exception: ProcessException('git', <String>['reset', '--hard', revision], errorMessage),
+        ),
+      );
 
-        await expectLater(
-          () async => realCommandRunner.attemptReset(revision),
-          throwsToolExit(message: errorMessage),
-        );
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => processManager,
-        Platform: () => fakePlatform,
-      },
-    );
+      await expectLater(
+        () async => realCommandRunner.attemptReset(revision),
+        throwsToolExit(message: errorMessage),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
 
-    testUsingContext(
-      'flutterUpgradeContinue passes env variables to child process',
-      () async {
-        processManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              localFs.path.join(
-                realCommandRunner.workingDirectory ?? getFlutterRoot(),
-                'bin',
-                'flutter',
-              ),
-              'upgrade',
-              '--continue',
-              '--continue-started-at',
-              '2026-01-01T00:00:00.000Z',
-              '--no-version-check',
-            ],
-            environment: <String, String>{
-              'FLUTTER_ALREADY_LOCKED': 'true',
-              ...fakePlatform.environment,
-            },
-          ),
-        );
-        await realCommandRunner.flutterUpgradeContinue(startedAt: jan12026);
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => processManager,
-        Platform: () => fakePlatform,
-      },
-    );
-
-    testUsingContext(
-      'Show current version to the upgrade message.',
-      () async {
-        const revision = 'abc123';
-        const upstreamRevision = 'def456';
-        const version = '1.2.3';
-        const upstreamVersion = '4.5.6';
-
-        final flutterVersion = FakeFlutterVersion(
-          branch: 'beta',
-          frameworkRevision: revision,
-          frameworkVersion: version,
-        );
-        final latestVersion = FakeFlutterVersion(
-          frameworkRevision: upstreamRevision,
-          frameworkVersion: upstreamVersion,
-        );
-
-        fakeCommandRunner.alreadyUpToDate = false;
-        fakeCommandRunner.remoteVersion = latestVersion;
-        fakeCommandRunner.workingDirectory = 'workingDirectory/aaa/bbb';
-
-        final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-          const UpgradePhase.firstHalf(),
-          force: true,
-          testFlow: true,
-          gitTagVersion: gitTagVersion,
-          flutterVersion: flutterVersion,
-          verifyOnly: false,
-        );
-        expect(await result, FlutterCommandResult.success());
-        expect(
-          testLogger.statusText,
-          contains('Upgrading Flutter to 4.5.6 from 1.2.3 in workingDirectory/aaa/bbb...'),
-        );
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => processManager,
-        Platform: () => fakePlatform,
-      },
-    );
-
-    testUsingContext(
-      'Can upgrade to a newer version with the same framework Git revision',
-      () async {
-        const revision = 'abc123';
-        const version = '1.2.3';
-        const upstreamVersion = '4.5.6';
-
-        final flutterVersion = FakeFlutterVersion(
-          frameworkRevision: revision,
-          frameworkVersion: version,
-          gitTagVersion: GitTagVersion.parse(version),
-        );
-        final latestVersion = FakeFlutterVersion(
-          frameworkRevision: revision,
-          frameworkVersion: upstreamVersion,
-          gitTagVersion: GitTagVersion.parse(upstreamVersion),
-        );
-
-        fakeCommandRunner.alreadyUpToDate = false;
-        fakeCommandRunner.remoteVersion = latestVersion;
-        fakeCommandRunner.workingDirectory = 'workingDirectory/aaa/bbb';
-
-        final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-          const UpgradePhase.firstHalf(),
-          force: true,
-          testFlow: true,
-          gitTagVersion: gitTagVersion,
-          flutterVersion: flutterVersion,
-          verifyOnly: false,
-        );
-        expect(await result, FlutterCommandResult.success());
-        expect(
-          testLogger.statusText,
-          contains('Upgrading Flutter to 4.5.6 from 1.2.3 in workingDirectory/aaa/bbb...'),
-        );
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => processManager,
-        Platform: () => fakePlatform,
-      },
-    );
-
-    testUsingContext(
-      'always regenerates flutter.version.json',
-      () async {
-        const revision = 'abc123';
-        const version = '3.38.1';
-        const upstreamVersion = '3.38.2';
-        const engineRevision = 'zyxw';
-
-        final flutterVersion = FakeFlutterVersion(
-          frameworkRevision: revision,
-          frameworkVersion: version,
-          engineRevision: engineRevision,
-          gitTagVersion: GitTagVersion.parse(version),
-        );
-
-        final latestVersion = FakeFlutterVersion(
-          frameworkRevision: revision,
-          frameworkVersion: upstreamVersion,
-          engineRevision: engineRevision,
-          gitTagVersion: GitTagVersion.parse(upstreamVersion),
-        );
-
-        final CommandRunner<void> runner = createTestCommandRunner(
-          UpgradeCommand(
-            featureFlags: TestFeatureFlags(),
-            toolContext: const DelegatingToolContext(),
-            verboseHelp: false,
-            commandRunner: fakeCommandRunner,
-          ),
-        );
-
-        fakeCommandRunner.alreadyUpToDate = false;
-        fakeCommandRunner.remoteVersion = latestVersion;
-        fakeCommandRunner.workingDirectory = 'workingDirectory/aaa/bbb';
-
-        await runInContext(
-          () async {
-            await runner.run(<String>['upgrade', '--force']);
-            // Verify that flutter.version.json is deleted before running phase two of the
-            // upgrade command. This should cause the version file to be regenerated based on the
-            // current branch state.
-            expect(flutterVersion.didDeleteVersionFile, true);
+    test('flutterUpgradeContinue passes env variables to child process', () async {
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            localFs.path.join(
+              realCommandRunner.workingDirectory ?? getFlutterRoot(),
+              'bin',
+              'flutter',
+            ),
+            'upgrade',
+            '--continue',
+            '--continue-started-at',
+            '2026-01-01T00:00:00.000Z',
+            '--no-version-check',
+          ],
+          environment: <String, String>{
+            'FLUTTER_ALREADY_LOCKED': 'true',
+            ...fakePlatform.environment,
           },
-          overrides: <Type, Generator>{
-            FlutterVersion: () => flutterVersion,
-            ProcessManager: () => FakeProcessManager.any(),
-            Platform: () => fakePlatform,
-          },
-        );
+        ),
+      );
+      await realCommandRunner.flutterUpgradeContinue(startedAt: jan12026);
+      expect(processManager, hasNoRemainingExpectations);
+    });
 
-        await runInContext(
-          () async {
-            await runner.run(<String>['upgrade', '--continue']);
-            // Verify that ensureVersionFile() was invoked, which will create flutter.version.json
-            // if it doesn't exist.
-            expect(latestVersion.didEnsureVersionFile, true);
-            expect(latestVersion.didDeleteVersionFile, false);
-          },
-          overrides: <Type, Generator>{
-            FlutterVersion: () => latestVersion,
-            ProcessManager: () => FakeProcessManager.any(),
-            Platform: () => fakePlatform,
-          },
-        );
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () => fakePlatform,
-      },
-    );
+    test('Show current version to the upgrade message.', () async {
+      const revision = 'abc123';
+      const upstreamRevision = 'def456';
+      const version = '1.2.3';
+      const upstreamVersion = '4.5.6';
 
-    testUsingContext(
+      final flutterVersion = FakeFlutterVersion(
+        branch: 'beta',
+        frameworkRevision: revision,
+        frameworkVersion: version,
+      );
+      final latestVersion = FakeFlutterVersion(
+        frameworkRevision: upstreamRevision,
+        frameworkVersion: upstreamVersion,
+      );
+
+      fakeCommandRunner.alreadyUpToDate = false;
+      fakeCommandRunner.remoteVersion = latestVersion;
+      fakeCommandRunner.workingDirectory = 'workingDirectory/aaa/bbb';
+
+      final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+        const UpgradePhase.firstHalf(),
+        force: true,
+        testFlow: true,
+        gitTagVersion: gitTagVersion,
+        flutterVersion: flutterVersion,
+        verifyOnly: false,
+      );
+      expect(await result, FlutterCommandResult.success());
+      expect(
+        logger.statusText,
+        contains('Upgrading Flutter to 4.5.6 from 1.2.3 in workingDirectory/aaa/bbb...'),
+      );
+    });
+
+    test('Can upgrade to a newer version with the same framework Git revision', () async {
+      const revision = 'abc123';
+      const version = '1.2.3';
+      const upstreamVersion = '4.5.6';
+
+      final flutterVersion = FakeFlutterVersion(
+        frameworkRevision: revision,
+        frameworkVersion: version,
+        gitTagVersion: GitTagVersion.parse(version),
+      );
+      final latestVersion = FakeFlutterVersion(
+        frameworkRevision: revision,
+        frameworkVersion: upstreamVersion,
+        gitTagVersion: GitTagVersion.parse(upstreamVersion),
+      );
+
+      fakeCommandRunner.alreadyUpToDate = false;
+      fakeCommandRunner.remoteVersion = latestVersion;
+      fakeCommandRunner.workingDirectory = 'workingDirectory/aaa/bbb';
+
+      final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+        const UpgradePhase.firstHalf(),
+        force: true,
+        testFlow: true,
+        gitTagVersion: gitTagVersion,
+        flutterVersion: flutterVersion,
+        verifyOnly: false,
+      );
+      expect(await result, FlutterCommandResult.success());
+      expect(
+        logger.statusText,
+        contains('Upgrading Flutter to 4.5.6 from 1.2.3 in workingDirectory/aaa/bbb...'),
+      );
+    });
+
+    test('always regenerates flutter.version.json', () async {
+      const revision = 'abc123';
+      const version = '3.38.1';
+      const upstreamVersion = '3.38.2';
+      const engineRevision = 'zyxw';
+
+      final flutterVersion = FakeFlutterVersion(
+        frameworkRevision: revision,
+        frameworkVersion: version,
+        engineRevision: engineRevision,
+        gitTagVersion: GitTagVersion.parse(version),
+      );
+
+      final latestVersion = FakeFlutterVersion(
+        frameworkRevision: revision,
+        frameworkVersion: upstreamVersion,
+        engineRevision: engineRevision,
+        gitTagVersion: GitTagVersion.parse(upstreamVersion),
+      );
+
+      final ToolContext firstPhaseToolContext = createToolContext(
+        flutterVersion: flutterVersion,
+        processManagerOverride: FakeProcessManager.any(),
+      );
+      final firstPhaseCommandRunner =
+          FakeUpgradeCommandRunner(
+              featureFlags: TestFeatureFlags(),
+              toolContext: firstPhaseToolContext,
+            )
+            ..alreadyUpToDate = false
+            ..remoteVersion = latestVersion
+            ..workingDirectory = 'workingDirectory/aaa/bbb';
+
+      final CommandRunner<void> firstPhaseRunner = createTestCommandRunner(
+        UpgradeCommand(
+          featureFlags: TestFeatureFlags(),
+          toolContext: firstPhaseToolContext,
+          verboseHelp: false,
+          commandRunner: firstPhaseCommandRunner,
+        ),
+      );
+      await firstPhaseRunner.run(<String>['upgrade', '--force']);
+      // Verify that flutter.version.json is deleted before running phase two of the
+      // upgrade command. This should cause the version file to be regenerated based on the
+      // current branch state.
+      expect(flutterVersion.didDeleteVersionFile, true);
+
+      final ToolContext secondPhaseToolContext = createToolContext(
+        flutterVersion: latestVersion,
+        processManagerOverride: FakeProcessManager.any(),
+      );
+      final secondPhaseCommandRunner =
+          FakeUpgradeCommandRunner(
+              featureFlags: TestFeatureFlags(),
+              toolContext: secondPhaseToolContext,
+            )
+            ..alreadyUpToDate = false
+            ..remoteVersion = latestVersion
+            ..workingDirectory = 'workingDirectory/aaa/bbb';
+
+      final CommandRunner<void> secondPhaseRunner = createTestCommandRunner(
+        UpgradeCommand(
+          featureFlags: TestFeatureFlags(),
+          toolContext: secondPhaseToolContext,
+          verboseHelp: false,
+          commandRunner: secondPhaseCommandRunner,
+        ),
+      );
+      await secondPhaseRunner.run(<String>['upgrade', '--continue']);
+      // Verify that ensureVersionFile() was invoked, which will create flutter.version.json
+      // if it doesn't exist.
+      expect(latestVersion.didEnsureVersionFile, true);
+      expect(latestVersion.didDeleteVersionFile, false);
+    });
+
+    test(
       'Does not confuse an older release with the same revision as an available update',
       () async {
         const revision = 'abc123';
@@ -729,39 +662,28 @@ void main() {
           verifyOnly: false,
         );
         expect(await result, FlutterCommandResult.success());
-        expect(testLogger.statusText, contains('Flutter is already up to date on channel stable'));
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => processManager,
-        Platform: () => fakePlatform,
+        expect(logger.statusText, contains('Flutter is already up to date on channel stable'));
       },
     );
 
-    testUsingContext(
-      'precacheArtifacts passes env variables to child process',
-      () async {
-        processManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              localFs.path.join('bin', 'flutter'),
-              '--no-color',
-              '--no-version-check',
-              'precache',
-            ],
-            environment: <String, String>{
-              'FLUTTER_ALREADY_LOCKED': 'true',
-              ...fakePlatform.environment,
-            },
-          ),
-        );
-        await precacheArtifacts(toolContext: DelegatingToolContext(platform: fakePlatform));
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => processManager,
-        Platform: () => fakePlatform,
-      },
-    );
+    test('precacheArtifacts passes env variables to child process', () async {
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            localFs.path.join('bin', 'flutter'),
+            '--no-color',
+            '--no-version-check',
+            'precache',
+          ],
+          environment: <String, String>{
+            'FLUTTER_ALREADY_LOCKED': 'true',
+            ...fakePlatform.environment,
+          },
+        ),
+      );
+      await precacheArtifacts(toolContext: createToolContext());
+      expect(processManager, hasNoRemainingExpectations);
+    });
 
     group('runs upgrade', () {
       void addUpgradeCommand() {
@@ -779,78 +701,57 @@ void main() {
         );
       }
 
-      testUsingContext(
-        'does not throw on unknown tag, official branch, force',
-        () async {
-          addUpgradeCommand();
-          fakeCommandRunner.remoteVersion = FakeFlutterVersion(frameworkRevision: '1234');
-          final flutterVersion = FakeFlutterVersion(branch: 'beta');
+      test('does not throw on unknown tag, official branch, force', () async {
+        addUpgradeCommand();
+        fakeCommandRunner.remoteVersion = FakeFlutterVersion(frameworkRevision: '1234');
+        final flutterVersion = FakeFlutterVersion(branch: 'beta');
 
-          final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-            const UpgradePhase.firstHalf(),
-            force: true,
-            testFlow: false,
-            gitTagVersion: const GitTagVersion.unknown(),
-            flutterVersion: flutterVersion,
-            verifyOnly: false,
-          );
-          expect(await result, FlutterCommandResult.success());
-          expect(processManager, hasNoRemainingExpectations);
-        },
-        overrides: <Type, Generator>{
-          ProcessManager: () => processManager,
-          Platform: () => fakePlatform,
-        },
-      );
+        final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+          const UpgradePhase.firstHalf(),
+          force: true,
+          testFlow: false,
+          gitTagVersion: const GitTagVersion.unknown(),
+          flutterVersion: flutterVersion,
+          verifyOnly: false,
+        );
+        expect(await result, FlutterCommandResult.success());
+        expect(processManager, hasNoRemainingExpectations);
+      });
 
-      testUsingContext(
-        'does not throw tool exit with uncommitted changes and force',
-        () async {
-          addUpgradeCommand();
-          final flutterVersion = FakeFlutterVersion(branch: 'beta');
-          fakeCommandRunner.remoteVersion = FakeFlutterVersion(frameworkRevision: '1234');
-          fakeCommandRunner.willHaveUncommittedChanges = true;
+      test('does not throw tool exit with uncommitted changes and force', () async {
+        addUpgradeCommand();
+        final flutterVersion = FakeFlutterVersion(branch: 'beta');
+        fakeCommandRunner.remoteVersion = FakeFlutterVersion(frameworkRevision: '1234');
+        fakeCommandRunner.willHaveUncommittedChanges = true;
 
-          final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-            const UpgradePhase.firstHalf(),
-            force: true,
-            testFlow: false,
-            gitTagVersion: gitTagVersion,
-            flutterVersion: flutterVersion,
-            verifyOnly: false,
-          );
-          expect(await result, FlutterCommandResult.success());
-          expect(processManager, hasNoRemainingExpectations);
-        },
-        overrides: <Type, Generator>{
-          ProcessManager: () => processManager,
-          Platform: () => fakePlatform,
-        },
-      );
+        final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+          const UpgradePhase.firstHalf(),
+          force: true,
+          testFlow: false,
+          gitTagVersion: gitTagVersion,
+          flutterVersion: flutterVersion,
+          verifyOnly: false,
+        );
+        expect(await result, FlutterCommandResult.success());
+        expect(processManager, hasNoRemainingExpectations);
+      });
 
-      testUsingContext(
-        "Doesn't throw on known tag, beta branch, no force",
-        () async {
-          addUpgradeCommand();
-          final flutterVersion = FakeFlutterVersion(branch: 'beta');
-          fakeCommandRunner.remoteVersion = FakeFlutterVersion(frameworkRevision: '1234');
+      test("Doesn't throw on known tag, beta branch, no force", () async {
+        addUpgradeCommand();
+        final flutterVersion = FakeFlutterVersion(branch: 'beta');
+        fakeCommandRunner.remoteVersion = FakeFlutterVersion(frameworkRevision: '1234');
 
-          final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-            const UpgradePhase.firstHalf(),
-            force: true,
-            testFlow: false,
-            gitTagVersion: gitTagVersion,
-            flutterVersion: flutterVersion,
-            verifyOnly: false,
-          );
-          expect(await result, FlutterCommandResult.success());
-          expect(processManager, hasNoRemainingExpectations);
-        },
-        overrides: <Type, Generator>{
-          ProcessManager: () => processManager,
-          Platform: () => fakePlatform,
-        },
-      );
+        final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+          const UpgradePhase.firstHalf(),
+          force: true,
+          testFlow: false,
+          gitTagVersion: gitTagVersion,
+          flutterVersion: flutterVersion,
+          verifyOnly: false,
+        );
+        expect(await result, FlutterCommandResult.success());
+        expect(processManager, hasNoRemainingExpectations);
+      });
 
       group('full command', () {
         late FakeProcessManager fakeProcessManager;
@@ -875,46 +776,38 @@ void main() {
           tryToDelete(tempDir);
         });
 
-        testUsingContext(
-          'upgrade continue prints welcome message',
-          () async {
-            fakeProcessManager = FakeProcessManager.any();
-            final toolContext = FakeToolContext(
-              fs: fs,
-              persistentToolState: PersistentToolState.test(directory: tempDir, logger: testLogger),
-              processManager: fakeProcessManager,
-            );
-            final fakeRunner = FakeUpgradeCommandRunner(
-              featureFlags: TestFeatureFlags(),
-              toolContext: toolContext,
-            );
-            final upgradeCommand = UpgradeCommand(
-              featureFlags: TestFeatureFlags(),
-              toolContext: toolContext,
-              verboseHelp: false,
-              commandRunner: fakeRunner,
-            );
+        test('upgrade continue prints welcome message', () async {
+          fakeProcessManager = FakeProcessManager.any();
+          final toolContext = FakeToolContext(
+            flutterVersion: FakeFlutterVersion(),
+            fs: fs,
+            logger: logger,
+            persistentToolState: PersistentToolState.test(directory: tempDir, logger: logger),
+            processManager: fakeProcessManager,
+          );
+          final fakeRunner = FakeUpgradeCommandRunner(
+            featureFlags: TestFeatureFlags(),
+            toolContext: toolContext,
+          );
+          final upgradeCommand = UpgradeCommand(
+            featureFlags: TestFeatureFlags(),
+            toolContext: toolContext,
+            verboseHelp: false,
+            commandRunner: fakeRunner,
+          );
 
-            await createTestCommandRunner(upgradeCommand).run(<String>[
-              'upgrade',
-              '--continue',
-              '--continue-started-at',
-              DateTime.now().toIso8601String(),
-            ]);
+          await createTestCommandRunner(upgradeCommand).run(<String>[
+            'upgrade',
+            '--continue',
+            '--continue-started-at',
+            DateTime.now().toIso8601String(),
+          ]);
 
-            expect(
-              json.decode(flutterToolState.readAsStringSync()),
-              containsPair('redisplay-welcome-message', true),
-            );
-          },
-          overrides: <Type, Generator>{
-            FileSystem: () => fs,
-            FlutterVersion: () => FakeFlutterVersion(),
-            ProcessManager: () => fakeProcessManager,
-            PersistentToolState: () =>
-                PersistentToolState.test(directory: tempDir, logger: testLogger),
-          },
-        );
+          expect(
+            json.decode(flutterToolState.readAsStringSync()),
+            containsPair('redisplay-welcome-message', true),
+          );
+        });
       });
     });
   });

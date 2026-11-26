@@ -226,6 +226,39 @@ id CreateMockViewControllerOnScreen(CGSize screenNativeSize, CGFloat screenScale
   [textures unregisterTexture:textureId];
 }
 
+- (void)testSetMessageHandlerAfterDestroyContextIsIgnored {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:nil];
+  XCTAssertTrue([engine run]);
+  NSObject<FlutterBinaryMessenger>* messenger = engine.binaryMessenger;
+  [engine destroyContext];
+
+  // Message handlers queued before teardown can run after it and register channels, for example
+  // through -[FlutterEventChannel setStreamHandler:].
+  // Verify this doesn't throw and returns the error connection.
+  FlutterBinaryMessageHandler handler = ^(NSData* _Nullable message, FlutterBinaryReply reply) {
+  };
+  FlutterBinaryMessengerConnection connection = 0;
+  XCTAssertNoThrow(connection = [messenger setMessageHandlerOnChannel:@"foo"
+                                                 binaryMessageHandler:handler]);
+  XCTAssertEqual(connection, [FlutterConnectionCollection makeErrorConnectionWithErrorCode:-1L]);
+}
+
+- (void)testSendMessageAfterDestroyContextIsIgnored {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:nil];
+  XCTAssertTrue([engine run]);
+  NSObject<FlutterBinaryMessenger>* messenger = engine.binaryMessenger;
+  [engine destroyContext];
+
+  // Native event sinks can send messages after teardown.
+  // Verify this doesn't throw, with and without a reply.
+  NSData* message = [@"bar" dataUsingEncoding:NSUTF8StringEncoding];
+  XCTAssertNoThrow([messenger sendOnChannel:@"foo" message:message]);
+  XCTAssertNoThrow([messenger sendOnChannel:@"foo"
+                                    message:message
+                                binaryReply:^(NSData* _Nullable reply){
+                                }]);
+}
+
 - (void)testInfoPlist {
   // Check the embedded Flutter.framework Info.plist, not the linked dylib.
   NSURL* flutterFrameworkURL =

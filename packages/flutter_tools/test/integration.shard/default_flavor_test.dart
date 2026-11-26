@@ -27,7 +27,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('Reads "default-flavor" in "flutter test"', () async {
+  test('Reads "default-flavor" in "flutter test"', () async {
     await flutter.test();
 
     // Without an assertion, this test always passes.

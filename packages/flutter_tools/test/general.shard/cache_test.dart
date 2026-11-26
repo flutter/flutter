@@ -5,7 +5,6 @@
 import 'dart:ffi' show Abi;
 
 import 'package:collection/collection.dart' show IterableExtension;
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -19,7 +18,6 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_cache.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
@@ -65,20 +63,20 @@ void main() {
       Cache.enableLocking();
     });
 
-    testWithoutContext('should throw when locking is not acquired', () {
+    test('should throw when locking is not acquired', () {
       final cache = Cache.test(processManager: FakeProcessManager.any());
 
       expect(cache.checkLockAcquired, throwsStateError);
     });
 
-    testWithoutContext('should not throw when locking is disabled', () {
+    test('should not throw when locking is disabled', () {
       final cache = Cache.test(processManager: FakeProcessManager.any());
       Cache.disableLocking();
 
       expect(cache.checkLockAcquired, returnsNormally);
     });
 
-    testWithoutContext('should not throw when lock is acquired', () async {
+    test('should not throw when lock is acquired', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final cache = Cache.test(
         fileSystem: fileSystem,
@@ -93,7 +91,7 @@ void main() {
       expect(cache.releaseLock, returnsNormally);
     }, skip: true); // https://github.com/flutter/flutter/issues/87923
 
-    testWithoutContext('throws tool exit when lockfile open fails', () async {
+    test('throws tool exit when lockfile open fails', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
       fileSystem.file(fileSystem.path.join('bin', 'cache', 'lockfile')).createSync(recursive: true);
@@ -102,7 +100,7 @@ void main() {
       // TODO(zanderso): implement support for lock so this can be tested with the memory file system.
     }, skip: true); // https://github.com/flutter/flutter/issues/87923
 
-    testWithoutContext('should not throw when FLUTTER_ALREADY_LOCKED is set', () {
+    test('should not throw when FLUTTER_ALREADY_LOCKED is set', () {
       final cache = Cache.test(
         platform: FakePlatform(environment: <String, String>{'FLUTTER_ALREADY_LOCKED': 'true'}),
         processManager: FakeProcessManager.any(),
@@ -113,7 +111,7 @@ void main() {
   });
 
   group('Cache', () {
-    testWithoutContext('Continues on failed stamp file update', () async {
+    test('Continues on failed stamp file update', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final logger = BufferLogger.test();
       final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync(
@@ -136,7 +134,7 @@ void main() {
       expect(logger.warningText, contains('stamp write failed'));
     });
 
-    testWithoutContext('Continues on missing version file', () async {
+    test('Continues on missing version file', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final logger = BufferLogger.test();
       final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync(
@@ -157,7 +155,7 @@ void main() {
       expect(logger.warningText, contains('No known version for the artifact name "fake"'));
     });
 
-    testWithoutContext('MaterialFonts continues on missing version file', () async {
+    test('MaterialFonts continues on missing version file', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final logger = BufferLogger.test();
       final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync(
@@ -186,24 +184,21 @@ void main() {
       );
     });
 
-    testWithoutContext(
-      'Gradle wrapper should not be up to date, if some cached artifact is not available',
-      () {
-        final FileSystem fileSystem = MemoryFileSystem.test();
-        final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
-        final gradleWrapper = GradleWrapper(cache);
-        final Directory directory = cache.getCacheDir(
-          fileSystem.path.join('artifacts', 'gradle_wrapper'),
-        );
-        fileSystem
-            .file(fileSystem.path.join(directory.path, 'gradle', 'wrapper', 'gradle-wrapper.jar'))
-            .createSync(recursive: true);
+    test('Gradle wrapper should not be up to date, if some cached artifact is not available', () {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
+      final gradleWrapper = GradleWrapper(cache);
+      final Directory directory = cache.getCacheDir(
+        fileSystem.path.join('artifacts', 'gradle_wrapper'),
+      );
+      fileSystem
+          .file(fileSystem.path.join(directory.path, 'gradle', 'wrapper', 'gradle-wrapper.jar'))
+          .createSync(recursive: true);
 
-        expect(gradleWrapper.isUpToDateInner(fileSystem), false);
-      },
-    );
+      expect(gradleWrapper.isUpToDateInner(fileSystem), false);
+    });
 
-    testWithoutContext('Gradle wrapper will delete .properties/NOTICES if they exist', () async {
+    test('Gradle wrapper will delete .properties/NOTICES if they exist', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync(
         'flutter_cache_test_artifact.',
@@ -231,30 +226,25 @@ void main() {
       expect(noticeFile, isNot(exists));
     });
 
-    testWithoutContext(
-      'Gradle wrapper should be up to date, only if all cached artifact are available',
-      () {
-        final FileSystem fileSystem = MemoryFileSystem.test();
-        final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
-        final gradleWrapper = GradleWrapper(cache);
-        final Directory directory = cache.getCacheDir(
-          fileSystem.path.join('artifacts', 'gradle_wrapper'),
-        );
-        fileSystem
-            .file(fileSystem.path.join(directory.path, 'gradle', 'wrapper', 'gradle-wrapper.jar'))
-            .createSync(recursive: true);
-        fileSystem
-            .file(fileSystem.path.join(directory.path, 'gradlew'))
-            .createSync(recursive: true);
-        fileSystem
-            .file(fileSystem.path.join(directory.path, 'gradlew.bat'))
-            .createSync(recursive: true);
+    test('Gradle wrapper should be up to date, only if all cached artifact are available', () {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
+      final gradleWrapper = GradleWrapper(cache);
+      final Directory directory = cache.getCacheDir(
+        fileSystem.path.join('artifacts', 'gradle_wrapper'),
+      );
+      fileSystem
+          .file(fileSystem.path.join(directory.path, 'gradle', 'wrapper', 'gradle-wrapper.jar'))
+          .createSync(recursive: true);
+      fileSystem.file(fileSystem.path.join(directory.path, 'gradlew')).createSync(recursive: true);
+      fileSystem
+          .file(fileSystem.path.join(directory.path, 'gradlew.bat'))
+          .createSync(recursive: true);
 
-        expect(gradleWrapper.isUpToDateInner(fileSystem), true);
-      },
-    );
+      expect(gradleWrapper.isUpToDateInner(fileSystem), true);
+    });
 
-    testWithoutContext('should not be up to date, if some cached artifact is not', () async {
+    test('should not be up to date, if some cached artifact is not', () async {
       final CachedArtifact artifact1 = FakeSecondaryCachedArtifact()..upToDate = true;
       final CachedArtifact artifact2 = FakeSecondaryCachedArtifact()..upToDate = false;
       final FileSystem fileSystem = MemoryFileSystem.test();
@@ -268,7 +258,7 @@ void main() {
       expect(await cache.isUpToDate(), isFalse);
     });
 
-    testWithoutContext('should be up to date, if all cached artifacts are', () async {
+    test('should be up to date, if all cached artifacts are', () async {
       final artifact1 = FakeSecondaryCachedArtifact()..upToDate = true;
       final artifact2 = FakeSecondaryCachedArtifact()..upToDate = true;
       final FileSystem fileSystem = MemoryFileSystem.test();
@@ -281,7 +271,7 @@ void main() {
       expect(await cache.isUpToDate(), isTrue);
     });
 
-    testUsingContext('should update cached artifacts which are not up to date', () async {
+    test('should update cached artifacts which are not up to date', () async {
       final artifact1 = FakeSecondaryCachedArtifact()..upToDate = true;
       final artifact2 = FakeSecondaryCachedArtifact()..upToDate = false;
       final FileSystem fileSystem = MemoryFileSystem.test();
@@ -297,7 +287,7 @@ void main() {
       expect(artifact2.didUpdate, true);
     });
 
-    testWithoutContext('should skip EngineCachedArtifacts when local engine is provided', () async {
+    test('should skip EngineCachedArtifacts when local engine is provided', () async {
       final artifact1 = FakeSecondaryCachedArtifact()..upToDate = false;
       final fileSystem = MemoryFileSystem.test();
       final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
@@ -315,7 +305,7 @@ void main() {
       expect(artifact2.didUpdate, false);
     });
 
-    testWithoutContext('should skip engine_stamp artifact when local engine is provided', () async {
+    test('should skip engine_stamp artifact when local engine is provided', () async {
       final artifact1 = FakeSecondaryCachedArtifact()..upToDate = false;
       final fileSystem = MemoryFileSystem.test();
       final artifact2 = FakeEngineStampArtifact()..upToDate = false;
@@ -332,7 +322,7 @@ void main() {
       expect(artifact2.didUpdate, false);
     });
 
-    testWithoutContext(
+    test(
       "getter dyLdLibEntry concatenates the output of each artifact's dyLdLibEntry getter",
       () async {
         final artifact1 = FakeIosUsbArtifacts();
@@ -358,7 +348,7 @@ void main() {
       },
     );
 
-    testUsingContext('failed storage.googleapis.com download shows China warning', () async {
+    test('failed storage.googleapis.com download shows China warning', () async {
       final InternetAddress address = (await InternetAddress.lookup('storage.googleapis.com'))
           .first;
       final artifact1 = FakeSecondaryCachedArtifact()..upToDate = false;
@@ -382,7 +372,7 @@ void main() {
       expect(logger.errorText, contains('https://flutter.dev/to/china-setup'));
     });
 
-    testWithoutContext('Invalid URI for FLUTTER_STORAGE_BASE_URL throws ToolExit', () async {
+    test('Invalid URI for FLUTTER_STORAGE_BASE_URL throws ToolExit', () async {
       final cache = Cache.test(
         platform: FakePlatform(
           environment: <String, String>{'FLUTTER_STORAGE_BASE_URL': ' http://foo'},
@@ -393,7 +383,7 @@ void main() {
       expect(() => cache.storageBaseUrl, throwsToolExit());
     });
 
-    testWithoutContext('overridden storage base url prints warning', () async {
+    test('overridden storage base url prints warning', () async {
       final logger = BufferLogger.test();
       const baseUrl = 'https://storage.com';
       final cache = Cache.test(
@@ -407,7 +397,7 @@ void main() {
       expect(logger.statusText, isEmpty);
     });
 
-    testWithoutContext('a non-empty realm is included in the storage url', () async {
+    test('a non-empty realm is included in the storage url', () async {
       final fileSystem = MemoryFileSystem.test();
       final Directory cacheDir = fileSystem.currentDirectory
           .childDirectory('bin')
@@ -426,7 +416,7 @@ void main() {
     });
   });
 
-  testWithoutContext('flattenNameSubdirs', () {
+  test('flattenNameSubdirs', () {
     expect(
       flattenNameSubdirs(Uri.parse('http://flutter.dev/foo/bar'), MemoryFileSystem.test()),
       'flutter.dev/foo/bar',
@@ -441,7 +431,7 @@ void main() {
     );
   });
 
-  testWithoutContext('ArtifactSet.displayName defaults to name', () {
+  test('ArtifactSet.displayName defaults to name', () {
     final cache = Cache.test(processManager: FakeProcessManager.any());
     final artifact = FakeSimpleArtifact(cache);
 
@@ -449,20 +439,20 @@ void main() {
     expect(artifact.displayName, 'fake');
   });
 
-  testWithoutContext('ArtifactSet.downloadCount defaults to 0', () {
+  test('ArtifactSet.downloadCount defaults to 0', () {
     final artifact = _FakeArtifactSet();
 
     expect(artifact.downloadCount, 0);
   });
 
-  testWithoutContext('CachedArtifact.downloadCount defaults to 1', () {
+  test('CachedArtifact.downloadCount defaults to 1', () {
     final cache = Cache.test(processManager: FakeProcessManager.any());
     final artifact = FakeSimpleArtifact(cache);
 
     expect(artifact.downloadCount, 1);
   });
 
-  testUsingContext('Cache.updateAll calculates progress only for downloading artifacts', () async {
+  test('Cache.updateAll calculates progress only for downloading artifacts', () async {
     final fileSystem = MemoryFileSystem.test();
     final logger = BufferLogger.test();
     final artifactUpdater = _FakeProgressRecordingArtifactUpdater();
@@ -495,7 +485,7 @@ void main() {
     ]);
   });
 
-  testUsingContext('Cache.updateAll succeeds when all artifacts are non-downloading', () async {
+  test('Cache.updateAll succeeds when all artifacts are non-downloading', () async {
     final fileSystem = MemoryFileSystem.test();
     final artifactUpdater = _FakeProgressRecordingArtifactUpdater();
     final artifact1 = _FakeArtifactSet(name: 'non_downloading_1')..upToDate = false;
@@ -515,28 +505,25 @@ void main() {
     expect(artifactUpdater.progressContexts, isEmpty);
   });
 
-  testWithoutContext(
-    'EngineCachedArtifact.downloadCount returns sum of package and binary dirs',
-    () {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync(
-        'flutter_cache_test_artifact.',
-      );
-      final cache = FakeSecondaryCache()..artifactDirectory = artifactDir;
+  test('EngineCachedArtifact.downloadCount returns sum of package and binary dirs', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync(
+      'flutter_cache_test_artifact.',
+    );
+    final cache = FakeSecondaryCache()..artifactDirectory = artifactDir;
 
-      final artifact = FakeCachedArtifact(
-        cache: cache,
-        binaryDirs: <List<String>>[
-          <String>['dir1', 'url1'],
-          <String>['dir2', 'url2'],
-        ],
-        packageDirs: <String>['pkg1', 'pkg2', 'pkg3'],
-        requiredArtifacts: DevelopmentArtifact.universal,
-      );
+    final artifact = FakeCachedArtifact(
+      cache: cache,
+      binaryDirs: <List<String>>[
+        <String>['dir1', 'url1'],
+        <String>['dir2', 'url2'],
+      ],
+      packageDirs: <String>['pkg1', 'pkg2', 'pkg3'],
+      requiredArtifacts: DevelopmentArtifact.universal,
+    );
 
-      expect(artifact.downloadCount, 5);
-    },
-  );
+    expect(artifact.downloadCount, 5);
+  });
 
   group('ArtifactUpdater progress formatting', () {
     late FileSystem fileSystem;
@@ -557,13 +544,13 @@ void main() {
       );
     });
 
-    testWithoutContext('formats single download with artifact index', () {
+    test('formats single download with artifact index', () {
       artifactUpdater.setProgressContext(artifactIndex: 2, artifactTotal: 5, downloadTotal: 1);
 
       expect(artifactUpdater.formatProgressMessage('Test Artifact'), '[2/5] Test Artifact');
     });
 
-    testWithoutContext('formats multiple downloads with tree prefix', () {
+    test('formats multiple downloads with tree prefix', () {
       // First download gets ├─ prefix
       artifactUpdater.setProgressContext(artifactIndex: 1, artifactTotal: 3, downloadTotal: 4);
       expect(artifactUpdater.formatProgressMessage('first'), '  ├─ [1/4] first');
@@ -595,7 +582,7 @@ void main() {
       expect(artifactUpdater.formatProgressMessage('fourth'), '  └─ [4/4] fourth');
     });
 
-    testWithoutContext('resetProgressContext resets download index', () {
+    test('resetProgressContext resets download index', () {
       artifactUpdater.setProgressContext(artifactIndex: 2, artifactTotal: 5, downloadTotal: 1);
       expect(artifactUpdater.formatProgressMessage('first'), '[2/5] first');
 
@@ -608,7 +595,7 @@ void main() {
   });
 
   group('DownloadProgress', () {
-    testWithoutContext('fraction and percent with known total', () {
+    test('fraction and percent with known total', () {
       final progress = DownloadProgress()..totalBytes = 1000;
       progress.addBytesReceived(250);
 
@@ -616,7 +603,7 @@ void main() {
       expect(progress.percentReceived, 25);
     });
 
-    testWithoutContext('fraction and percent with unknown total', () {
+    test('fraction and percent with unknown total', () {
       final progress = DownloadProgress();
       progress.addBytesReceived(500);
 
@@ -625,7 +612,7 @@ void main() {
       expect(progress.hasKnownSize, false);
     });
 
-    testWithoutContext('fraction clamps to 1.0 when bytesReceived exceeds total', () {
+    test('fraction clamps to 1.0 when bytesReceived exceeds total', () {
       final progress = DownloadProgress()..totalBytes = 100;
       progress.addBytesReceived(150);
 
@@ -633,7 +620,7 @@ void main() {
       expect(progress.percentReceived, 100);
     });
 
-    testWithoutContext('speed calculation', () {
+    test('speed calculation', () {
       final progress = DownloadProgress();
       progress.addBytesReceived(5000000);
       const elapsed = Duration(seconds: 2);
@@ -641,14 +628,14 @@ void main() {
       expect(progress.speedBytesPerSecond(elapsed), 2500000.0);
     });
 
-    testWithoutContext('speed is zero when elapsed is zero', () {
+    test('speed is zero when elapsed is zero', () {
       final progress = DownloadProgress();
       progress.addBytesReceived(5000000);
 
       expect(progress.speedBytesPerSecond(Duration.zero), 0.0);
     });
 
-    testWithoutContext('timeRemaining with known total', () {
+    test('timeRemaining with known total', () {
       final progress = DownloadProgress()..totalBytes = 10000000;
       progress.addBytesReceived(5000000);
       const elapsed = Duration(seconds: 2);
@@ -659,21 +646,21 @@ void main() {
       expect(rem!.inSeconds, 2);
     });
 
-    testWithoutContext('timeRemaining is null with unknown total', () {
+    test('timeRemaining is null with unknown total', () {
       final progress = DownloadProgress();
       progress.addBytesReceived(5000000);
 
       expect(progress.timeRemaining(const Duration(seconds: 2)), isNull);
     });
 
-    testWithoutContext('timeRemaining is null when speed is zero', () {
+    test('timeRemaining is null when speed is zero', () {
       final progress = DownloadProgress()..totalBytes = 10000000;
       progress.addBytesReceived(5000000);
 
       expect(progress.timeRemaining(Duration.zero), isNull);
     });
 
-    testWithoutContext('renderProgressBar at 50%', () {
+    test('renderProgressBar at 50%', () {
       final progress = DownloadProgress()..totalBytes = 100;
       progress.addBytesReceived(50);
 
@@ -682,7 +669,7 @@ void main() {
       expect(bar, '${'█' * 10}${' ' * 10}');
     });
 
-    testWithoutContext('renderProgressBar uses sub-character partial block', () {
+    test('renderProgressBar uses sub-character partial block', () {
       // 46% of 20 cells: totalEighths = round(0.46 * 20 * 8) = 74
       // fullBlocks=9, remainder=2 → partial='▎', emptyBlocks=10
       final progress = DownloadProgress()..totalBytes = 100;
@@ -693,42 +680,42 @@ void main() {
       expect(bar, '${'█' * 9}▎${' ' * 10}');
     });
 
-    testWithoutContext('renderProgressBar returns empty with unknown total', () {
+    test('renderProgressBar returns empty with unknown total', () {
       final progress = DownloadProgress();
       progress.addBytesReceived(50);
 
       expect(progress.renderProgressBar(20), '');
     });
 
-    testWithoutContext('renderProgressBar returns empty with zero width', () {
+    test('renderProgressBar returns empty with zero width', () {
       final progress = DownloadProgress()..totalBytes = 100;
       progress.addBytesReceived(50);
 
       expect(progress.renderProgressBar(0), '');
     });
 
-    testWithoutContext('formatBytes with known total', () {
+    test('formatBytes with known total', () {
       final progress = DownloadProgress()..totalBytes = 10000000;
       progress.addBytesReceived(5000000);
 
       expect(progress.formatBytes(), matches(r'^\d+\.\d+MB/\d+\.\d+MB$'));
     });
 
-    testWithoutContext('formatBytes with unknown total', () {
+    test('formatBytes with unknown total', () {
       final progress = DownloadProgress();
       progress.addBytesReceived(5000000);
 
       expect(progress.formatBytes(), matches(r'^\d+\.\d+MB$'));
     });
 
-    testWithoutContext('formatSpeed', () {
+    test('formatSpeed', () {
       final progress = DownloadProgress();
       progress.addBytesReceived(2000000);
 
       expect(progress.formatSpeed(const Duration(seconds: 1)), matches(r'^\d+\.\d+MB/s$'));
     });
 
-    testWithoutContext('formatRemaining with known total and speed', () {
+    test('formatRemaining with known total and speed', () {
       final progress = DownloadProgress()..totalBytes = 10000000;
       progress.addBytesReceived(5000000);
 
@@ -737,14 +724,14 @@ void main() {
       expect(eta, contains('s'));
     });
 
-    testWithoutContext('formatRemaining is empty with unknown total', () {
+    test('formatRemaining is empty with unknown total', () {
       final progress = DownloadProgress();
       progress.addBytesReceived(5000000);
 
       expect(progress.formatRemaining(const Duration(seconds: 2)), '');
     });
 
-    testWithoutContext('formatProgressLine includes progress bar with known total', () {
+    test('formatProgressLine includes progress bar with known total', () {
       final progress = DownloadProgress()..totalBytes = 10000000;
       progress.addBytesReceived(5000000);
 
@@ -761,7 +748,7 @@ void main() {
       expect(line, contains('▕'));
     });
 
-    testWithoutContext('formatProgressLine has fixed bar width and right-aligns info', () {
+    test('formatProgressLine has fixed bar width and right-aligns info', () {
       final progress = DownloadProgress()..totalBytes = 10000000;
       progress.addBytesReceived(5000000);
 
@@ -777,7 +764,7 @@ void main() {
       expect(line, endsWith('ETA 2.0s'));
     });
 
-    testWithoutContext('formatProgressLine omits bar with unknown total', () {
+    test('formatProgressLine omits bar with unknown total', () {
       final progress = DownloadProgress();
       progress.addBytesReceived(5000000);
 
@@ -791,7 +778,7 @@ void main() {
       expect(line, contains('/s'));
     });
 
-    testWithoutContext('formatProgressLine omits bar when terminal too narrow', () {
+    test('formatProgressLine omits bar when terminal too narrow', () {
       final progress = DownloadProgress()..totalBytes = 10000000;
       progress.addBytesReceived(5000000);
 
@@ -804,7 +791,7 @@ void main() {
       expect(line, contains('50%'));
     });
 
-    testWithoutContext('formatProgressLine never exceeds terminalWidth', () {
+    test('formatProgressLine never exceeds terminalWidth', () {
       final progress = DownloadProgress()..totalBytes = 10000000;
       progress.addBytesReceived(5000000);
 
@@ -816,22 +803,19 @@ void main() {
       expect(line.length, lessThanOrEqualTo(30));
     });
 
-    testWithoutContext(
-      'formatProgressLine does not have trailing whitespace with unknown total',
-      () {
-        final progress = DownloadProgress();
-        progress.addBytesReceived(5000000);
+    test('formatProgressLine does not have trailing whitespace with unknown total', () {
+      final progress = DownloadProgress();
+      progress.addBytesReceived(5000000);
 
-        final String line = progress.formatProgressLine(
-          elapsed: const Duration(seconds: 2),
-          terminalWidth: 80,
-        );
+      final String line = progress.formatProgressLine(
+        elapsed: const Duration(seconds: 2),
+        terminalWidth: 80,
+      );
 
-        expect(line, isNot(endsWith(' ')));
-      },
-    );
+      expect(line, isNot(endsWith(' ')));
+    });
 
-    testWithoutContext('formatCompletionSummary', () {
+    test('formatCompletionSummary', () {
       final progress = DownloadProgress();
       progress.addBytesReceived(21100000);
 
@@ -855,54 +839,51 @@ void main() {
       logger = BufferLogger.test(terminal: Terminal.test(supportsColor: true));
     });
 
-    testWithoutContext(
-      'shows ANSI progress when stdio is provided and color is supported',
-      () async {
-        final body = List<int>.filled(1000, 0);
-        final updater = ArtifactUpdater(
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          logger: logger,
-          fileSystem: fileSystem,
-          tempStorage: tempStorage,
-          httpClient: FakeHttpClient.list(<FakeRequest>[
-            FakeRequest(
-              Uri.parse('https://storage.googleapis.com/test-artifact.zip'),
-              response: FakeResponse(body: body),
-            ),
-          ]),
-          platform: FakePlatform(),
-          allowedBaseUrls: <String>['https://storage.googleapis.com'],
-          stdio: stdio,
-        );
+    test('shows ANSI progress when stdio is provided and color is supported', () async {
+      final body = List<int>.filled(1000, 0);
+      final updater = ArtifactUpdater(
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        logger: logger,
+        fileSystem: fileSystem,
+        tempStorage: tempStorage,
+        httpClient: FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://storage.googleapis.com/test-artifact.zip'),
+            response: FakeResponse(body: body),
+          ),
+        ]),
+        platform: FakePlatform(),
+        allowedBaseUrls: <String>['https://storage.googleapis.com'],
+        stdio: stdio,
+      );
 
-        updater.setProgressContext(artifactIndex: 1, artifactTotal: 1, downloadTotal: 1);
+      updater.setProgressContext(artifactIndex: 1, artifactTotal: 1, downloadTotal: 1);
 
-        await updater.downloadZipArchive(
-          'Test Artifact',
-          Uri.parse('https://storage.googleapis.com/test-artifact.zip'),
-          fileSystem.directory('output')..createSync(),
-        );
+      await updater.downloadZipArchive(
+        'Test Artifact',
+        Uri.parse('https://storage.googleapis.com/test-artifact.zip'),
+        fileSystem.directory('output')..createSync(),
+      );
 
-        final String allOutput = stdio.writtenToStdout.join();
+      final String allOutput = stdio.writtenToStdout.join();
 
-        // Should have written the status message followed by newline
-        expect(allOutput, contains('[1/1] Test Artifact'));
+      // Should have written the status message followed by newline
+      expect(allOutput, contains('[1/1] Test Artifact'));
 
-        // Should contain completion summary with size and time
-        expect(allOutput, contains('MB in'));
-        expect(allOutput, contains('s)'));
+      // Should contain completion summary with size and time
+      expect(allOutput, contains('MB in'));
+      expect(allOutput, contains('s)'));
 
-        // Should contain ANSI clear codes for cleanup
-        expect(allOutput, contains('\x1B[K')); // clear to end of line
-        expect(allOutput, contains('\x1B[1A')); // cursor up
+      // Should contain ANSI clear codes for cleanup
+      expect(allOutput, contains('\x1B[K')); // clear to end of line
+      expect(allOutput, contains('\x1B[1A')); // cursor up
 
-        // Completion line should be right-aligned to terminal width (80).
-        final String completionLine = stdio.writtenToStdout.last.replaceAll('\n', '');
-        expect(completionLine.length, 80);
-      },
-    );
+      // Completion line should be right-aligned to terminal width (80).
+      final String completionLine = stdio.writtenToStdout.last.replaceAll('\n', '');
+      expect(completionLine.length, 80);
+    });
 
-    testWithoutContext('falls back to logger progress when stdio is not provided', () async {
+    test('falls back to logger progress when stdio is not provided', () async {
       final updater = ArtifactUpdater(
         operatingSystemUtils: FakeOperatingSystemUtils(),
         logger: logger,
@@ -930,7 +911,7 @@ void main() {
       expect(stdio.writtenToStdout, isEmpty);
     });
 
-    testWithoutContext('falls back to logger progress when color is not supported', () async {
+    test('falls back to logger progress when color is not supported', () async {
       final noColorLogger = BufferLogger.test();
 
       final updater = ArtifactUpdater(
@@ -962,45 +943,42 @@ void main() {
     });
   });
 
-  testWithoutContext(
-    'EngineCachedArtifact makes binary dirs readable and executable by all',
-    () async {
-      final operatingSystemUtils = FakeOperatingSystemUtils();
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync(
-        'flutter_cache_test_artifact.',
-      );
-      final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync(
-        'flutter_cache_test_download.',
-      );
-      final cache = FakeSecondaryCache()
-        ..artifactDirectory = artifactDir
-        ..downloadDir = downloadDir;
-      artifactDir.childDirectory('bin_dir').createSync();
-      artifactDir.childFile('unused_url_path').createSync();
+  test('EngineCachedArtifact makes binary dirs readable and executable by all', () async {
+    final operatingSystemUtils = FakeOperatingSystemUtils();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync(
+      'flutter_cache_test_artifact.',
+    );
+    final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync(
+      'flutter_cache_test_download.',
+    );
+    final cache = FakeSecondaryCache()
+      ..artifactDirectory = artifactDir
+      ..downloadDir = downloadDir;
+    artifactDir.childDirectory('bin_dir').createSync();
+    artifactDir.childFile('unused_url_path').createSync();
 
-      final artifact = FakeCachedArtifact(
-        cache: cache,
-        binaryDirs: <List<String>>[
-          <String>['bin_dir', 'unused_url_path'],
-        ],
-        requiredArtifacts: DevelopmentArtifact.universal,
-      );
-      await artifact.updateInner(FakeArtifactUpdater(), fileSystem, operatingSystemUtils);
-      final Directory dir = fileSystem.systemTempDirectory
-          .listSync(recursive: true)
-          .whereType<Directory>()
-          .singleWhereOrNull((Directory directory) => directory.basename == 'bin_dir')!;
+    final artifact = FakeCachedArtifact(
+      cache: cache,
+      binaryDirs: <List<String>>[
+        <String>['bin_dir', 'unused_url_path'],
+      ],
+      requiredArtifacts: DevelopmentArtifact.universal,
+    );
+    await artifact.updateInner(FakeArtifactUpdater(), fileSystem, operatingSystemUtils);
+    final Directory dir = fileSystem.systemTempDirectory
+        .listSync(recursive: true)
+        .whereType<Directory>()
+        .singleWhereOrNull((Directory directory) => directory.basename == 'bin_dir')!;
 
-      expect(dir, isNotNull);
-      expect(dir.path, artifactDir.childDirectory('bin_dir').path);
-      expect(operatingSystemUtils.chmods, <List<String>>[
-        <String>['/.tmp_rand0/flutter_cache_test_artifact.rand0/bin_dir', 'a+r,a+x'],
-      ]);
-    },
-  );
+    expect(dir, isNotNull);
+    expect(dir.path, artifactDir.childDirectory('bin_dir').path);
+    expect(operatingSystemUtils.chmods, <List<String>>[
+      <String>['/.tmp_rand0/flutter_cache_test_artifact.rand0/bin_dir', 'a+r,a+x'],
+    ]);
+  });
 
-  testWithoutContext('EngineCachedArtifact downloads package zip from expected URL', () async {
+  test('EngineCachedArtifact downloads package zip from expected URL', () async {
     final operatingSystemUtils = FakeOperatingSystemUtils();
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync(
@@ -1043,7 +1021,7 @@ void main() {
     expect(dir.childDirectory('package_dir').existsSync(), isTrue);
   });
 
-  testWithoutContext('Try to remove without a parent', () async {
+  test('Try to remove without a parent', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Directory parent = fileSystem.directory('dir');
     parent.createSync();
@@ -1067,29 +1045,26 @@ void main() {
     fakeArtifact.removeDownloadedFiles();
   });
 
-  testWithoutContext(
-    'IosUsbArtifacts verifies executables for libimobiledevice in isUpToDateInner',
-    () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
-      final iosUsbArtifacts = IosUsbArtifacts(
-        'libimobiledevice',
-        cache,
-        platform: FakePlatform(operatingSystem: 'macos'),
-      );
-      iosUsbArtifacts.location.createSync();
-      final File ideviceSyslogFile = iosUsbArtifacts.location.childFile('idevicesyslog')
-        ..createSync();
+  test('IosUsbArtifacts verifies executables for libimobiledevice in isUpToDateInner', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
+    final iosUsbArtifacts = IosUsbArtifacts(
+      'libimobiledevice',
+      cache,
+      platform: FakePlatform(operatingSystem: 'macos'),
+    );
+    iosUsbArtifacts.location.createSync();
+    final File ideviceSyslogFile = iosUsbArtifacts.location.childFile('idevicesyslog')
+      ..createSync();
 
-      expect(iosUsbArtifacts.isUpToDateInner(fileSystem), true);
+    expect(iosUsbArtifacts.isUpToDateInner(fileSystem), true);
 
-      ideviceSyslogFile.deleteSync();
+    ideviceSyslogFile.deleteSync();
 
-      expect(iosUsbArtifacts.isUpToDateInner(fileSystem), false);
-    },
-  );
+    expect(iosUsbArtifacts.isUpToDateInner(fileSystem), false);
+  });
 
-  testWithoutContext('IosUsbArtifacts verifies iproxy for libusbmuxd in isUpToDateInner', () async {
+  test('IosUsbArtifacts verifies iproxy for libusbmuxd in isUpToDateInner', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
     final iosUsbArtifacts = IosUsbArtifacts(
@@ -1107,23 +1082,20 @@ void main() {
     expect(iosUsbArtifacts.isUpToDateInner(fileSystem), false);
   });
 
-  testWithoutContext(
-    'IosUsbArtifacts does not verify executables for openssl in isUpToDateInner',
-    () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
-      final iosUsbArtifacts = IosUsbArtifacts(
-        'openssl',
-        cache,
-        platform: FakePlatform(operatingSystem: 'macos'),
-      );
-      iosUsbArtifacts.location.createSync();
+  test('IosUsbArtifacts does not verify executables for openssl in isUpToDateInner', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
+    final iosUsbArtifacts = IosUsbArtifacts(
+      'openssl',
+      cache,
+      platform: FakePlatform(operatingSystem: 'macos'),
+    );
+    iosUsbArtifacts.location.createSync();
 
-      expect(iosUsbArtifacts.isUpToDateInner(fileSystem), true);
-    },
-  );
+    expect(iosUsbArtifacts.isUpToDateInner(fileSystem), true);
+  });
 
-  testWithoutContext('IosUsbArtifacts uses unsigned when specified', () async {
+  test('IosUsbArtifacts uses unsigned when specified', () async {
     final cache = Cache.test(processManager: FakeProcessManager.any());
     cache.useUnsignedMacBinaries = true;
 
@@ -1135,7 +1107,7 @@ void main() {
     expect(iosUsbArtifacts.archiveUri.toString(), contains('/unsigned/'));
   });
 
-  testWithoutContext('IosUsbArtifacts does not use unsigned when not specified', () async {
+  test('IosUsbArtifacts does not use unsigned when not specified', () async {
     final cache = Cache.test(processManager: FakeProcessManager.any());
     final iosUsbArtifacts = IosUsbArtifacts(
       'name',
@@ -1146,7 +1118,7 @@ void main() {
     expect(iosUsbArtifacts.archiveUri.toString(), isNot(contains('/unsigned/')));
   });
 
-  testWithoutContext('FlutterRunnerDebugSymbols downloads Flutter runner debug symbols', () async {
+  test('FlutterRunnerDebugSymbols downloads Flutter runner debug symbols', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Cache cache = FakeSecondaryCache()
       ..artifactDirectory = fileSystem.currentDirectory
@@ -1171,14 +1143,14 @@ void main() {
     ]);
   });
 
-  testWithoutContext('FontSubset in universal artifacts', () {
+  test('FontSubset in universal artifacts', () {
     final cache = Cache.test(processManager: FakeProcessManager.any());
     final artifacts = FontSubsetArtifacts(cache, platform: FakePlatform());
 
     expect(artifacts.developmentArtifact, DevelopmentArtifact.universal);
   });
 
-  testWithoutContext('FontSubset artifacts on x64 linux', () {
+  test('FontSubset artifacts on x64 linux', () {
     fakeProcessManager.addCommand(unameCommandForX64);
 
     final Cache cache = createCache(FakePlatform(), currentAbi: Abi.linuxX64);
@@ -1190,7 +1162,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('FontSubset artifacts on arm64 linux', () {
+  test('FontSubset artifacts on arm64 linux', () {
     fakeProcessManager.addCommand(unameCommandForArm64);
 
     final Cache cache = createCache(FakePlatform(), currentAbi: Abi.linuxArm64);
@@ -1202,7 +1174,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('FontSubset artifacts on windows', () {
+  test('FontSubset artifacts on windows', () {
     final Cache cache = createCache(
       FakePlatform(operatingSystem: 'windows'),
       currentAbi: Abi.windowsX64,
@@ -1218,7 +1190,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('FontSubset artifacts on macos', () {
+  test('FontSubset artifacts on macos', () {
     fakeProcessManager.addCommands(<FakeCommand>[kWhichSysctlCommand, kx64CheckCommand]);
 
     final Cache cache = createCache(
@@ -1233,7 +1205,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('FontSubset artifacts on fuchsia', () {
+  test('FontSubset artifacts on fuchsia', () {
     fakeProcessManager.addCommand(unameCommandForX64);
 
     final Cache cache = createCache(FakePlatform(operatingSystem: 'fuchsia'));
@@ -1249,7 +1221,7 @@ void main() {
     );
   });
 
-  testWithoutContext('FontSubset artifacts for all platforms on x64 hosts', () {
+  test('FontSubset artifacts for all platforms on x64 hosts', () {
     fakeProcessManager.addCommand(unameCommandForX64);
 
     final Cache cache = createCache(
@@ -1269,7 +1241,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('FontSubset artifacts for all platforms on arm64 hosts', () {
+  test('FontSubset artifacts for all platforms on arm64 hosts', () {
     fakeProcessManager.addCommand(unameCommandForArm64);
 
     final Cache cache = createCache(
@@ -1289,7 +1261,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('macOS desktop artifacts include all gen_snapshot binaries', () {
+  test('macOS desktop artifacts include all gen_snapshot binaries', () {
     final cache = Cache.test(processManager: FakeProcessManager.any());
     final artifacts = MacOSEngineArtifacts(cache, platform: FakePlatform());
     cache.includeAllPlatforms = false;
@@ -1305,7 +1277,7 @@ void main() {
     );
   });
 
-  testWithoutContext('macOS desktop artifacts ignore filtering when requested', () {
+  test('macOS desktop artifacts ignore filtering when requested', () {
     final cache = Cache.test(processManager: FakeProcessManager.any());
     final artifacts = MacOSEngineArtifacts(cache, platform: FakePlatform());
     cache.includeAllPlatforms = false;
@@ -1314,7 +1286,7 @@ void main() {
     expect(artifacts.getBinaryDirs(), isNotEmpty);
   });
 
-  testWithoutContext('Windows desktop artifacts ignore filtering when requested', () {
+  test('Windows desktop artifacts ignore filtering when requested', () {
     final cache = Cache.test(processManager: FakeProcessManager.any());
     final artifacts = WindowsEngineArtifacts(cache, platform: FakePlatform());
     cache.includeAllPlatforms = false;
@@ -1323,7 +1295,7 @@ void main() {
     expect(artifacts.getBinaryDirs(), isNotEmpty);
   });
 
-  testWithoutContext('Windows desktop artifacts include profile and release artifacts', () {
+  test('Windows desktop artifacts include profile and release artifacts', () {
     final cache = Cache.test(processManager: FakeProcessManager.any());
     final artifacts = WindowsEngineArtifacts(
       cache,
@@ -1336,7 +1308,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Linux desktop artifacts ignore filtering when requested', () {
+  test('Linux desktop artifacts ignore filtering when requested', () {
     fakeProcessManager.addCommand(unameCommandForX64);
 
     final Cache cache = createCache(FakePlatform());
@@ -1347,7 +1319,7 @@ void main() {
     expect(artifacts.getBinaryDirs(), isNotEmpty);
   });
 
-  testWithoutContext('Linux desktop artifacts for x64 include profile and release artifacts', () {
+  test('Linux desktop artifacts for x64 include profile and release artifacts', () {
     fakeProcessManager.addCommand(unameCommandForX64);
 
     final Cache cache = createCache(FakePlatform(), currentAbi: Abi.linuxX64);
@@ -1360,7 +1332,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Linux desktop artifacts for arm64 include profile and release artifacts', () {
+  test('Linux desktop artifacts for arm64 include profile and release artifacts', () {
     fakeProcessManager.addCommand(unameCommandForArm64);
 
     final Cache cache = createCache(FakePlatform(), currentAbi: Abi.linuxArm64);
@@ -1373,7 +1345,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Cache can delete stampfiles of artifacts', () {
+  test('Cache can delete stampfiles of artifacts', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final artifactSet = FakeIosUsbArtifacts();
     final logger = BufferLogger.test();
@@ -1400,7 +1372,7 @@ void main() {
     expect(toolStampFile, isNot(exists));
   });
 
-  testWithoutContext('Cache does not attempt to delete already missing stamp files', () {
+  test('Cache does not attempt to delete already missing stamp files', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final artifactSet = FakeIosUsbArtifacts();
     final logger = BufferLogger.test();
@@ -1426,7 +1398,7 @@ void main() {
     expect(toolStampFile, isNot(exists));
   });
 
-  testWithoutContext('Cache catches file system exception from missing tool stamp file', () {
+  test('Cache catches file system exception from missing tool stamp file', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final artifactSet = FakeIosUsbArtifacts();
     final logger = BufferLogger.test();
@@ -1447,7 +1419,7 @@ void main() {
     expect(logger.warningText, contains('Failed to delete some stamp files'));
   });
 
-  testWithoutContext('FlutterWebSdk fetches web artifacts and deletes previous directory contents', () async {
+  test('FlutterWebSdk fetches web artifacts and deletes previous directory contents', () async {
     final fileSystem = MemoryFileSystem.test();
     final Directory internalDir = fileSystem.currentDirectory
         .childDirectory('bin')
@@ -1494,56 +1466,53 @@ void main() {
     expect(webCacheDirectory.childFile('bar'), isNot(exists));
   });
 
-  testWithoutContext(
-    'FlutterWebSdk CanvasKit URL can be overridden via FLUTTER_STORAGE_BASE_URL',
-    () async {
-      final fileSystem = MemoryFileSystem.test();
-      final Directory internalDir = fileSystem.currentDirectory
-          .childDirectory('bin')
-          .childDirectory('internal');
-      final File canvasKitVersionFile = internalDir.childFile('canvaskit.version');
-      canvasKitVersionFile.createSync(recursive: true);
-      canvasKitVersionFile.writeAsStringSync('abcdefg');
+  test('FlutterWebSdk CanvasKit URL can be overridden via FLUTTER_STORAGE_BASE_URL', () async {
+    final fileSystem = MemoryFileSystem.test();
+    final Directory internalDir = fileSystem.currentDirectory
+        .childDirectory('bin')
+        .childDirectory('internal');
+    final File canvasKitVersionFile = internalDir.childFile('canvaskit.version');
+    canvasKitVersionFile.createSync(recursive: true);
+    canvasKitVersionFile.writeAsStringSync('abcdefg');
 
-      final Directory cacheDir = fileSystem.currentDirectory
-          .childDirectory('bin')
-          .childDirectory('cache');
-      final File engineVersionFile = cacheDir.childFile('engine.stamp');
-      engineVersionFile.createSync(recursive: true);
-      engineVersionFile.writeAsStringSync('hijklmnop');
+    final Directory cacheDir = fileSystem.currentDirectory
+        .childDirectory('bin')
+        .childDirectory('cache');
+    final File engineVersionFile = cacheDir.childFile('engine.stamp');
+    engineVersionFile.createSync(recursive: true);
+    engineVersionFile.writeAsStringSync('hijklmnop');
 
-      final cache = Cache.test(
-        processManager: FakeProcessManager.any(),
-        fileSystem: fileSystem,
-        platform: FakePlatform(
-          environment: <String, String>{
-            'FLUTTER_STORAGE_BASE_URL': 'https://flutter.storage.com/override',
-          },
-        ),
-      );
-      final Directory webCacheDirectory = cache.getWebSdkDirectory();
-      final artifactUpdater = FakeArtifactUpdater();
-      final webSdk = FlutterWebSdk(cache);
+    final cache = Cache.test(
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      platform: FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_STORAGE_BASE_URL': 'https://flutter.storage.com/override',
+        },
+      ),
+    );
+    final Directory webCacheDirectory = cache.getWebSdkDirectory();
+    final artifactUpdater = FakeArtifactUpdater();
+    final webSdk = FlutterWebSdk(cache);
 
-      final downloads = <String>[];
-      final locations = <String>[];
-      artifactUpdater.onDownloadZipArchive = (String message, Uri uri, Directory location) {
-        downloads.add(uri.toString());
-        locations.add(location.path);
-        location.createSync(recursive: true);
-        location.childFile('foo').createSync();
-      };
-      webCacheDirectory.childFile('bar').createSync(recursive: true);
+    final downloads = <String>[];
+    final locations = <String>[];
+    artifactUpdater.onDownloadZipArchive = (String message, Uri uri, Directory location) {
+      downloads.add(uri.toString());
+      locations.add(location.path);
+      location.createSync(recursive: true);
+      location.childFile('foo').createSync();
+    };
+    webCacheDirectory.childFile('bar').createSync(recursive: true);
 
-      await webSdk.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
+    await webSdk.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
 
-      expect(downloads, <String>[
-        'https://flutter.storage.com/override/flutter_infra_release/flutter/hijklmnop/flutter-web-sdk.zip',
-      ]);
-    },
-  );
+    expect(downloads, <String>[
+      'https://flutter.storage.com/override/flutter_infra_release/flutter/hijklmnop/flutter-web-sdk.zip',
+    ]);
+  });
 
-  testWithoutContext('FlutterWebSdk uses tryToDelete to handle directory edge cases', () async {
+  test('FlutterWebSdk uses tryToDelete to handle directory edge cases', () async {
     final handler = FileExceptionHandler();
     final fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
     final cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
@@ -1577,7 +1546,7 @@ void main() {
     );
   });
 
-  testWithoutContext('FlutterEngineStamp fetches engine_stamp.json', () async {
+  test('FlutterEngineStamp fetches engine_stamp.json', () async {
     final fileSystem = MemoryFileSystem.test();
     final Directory cacheDir = fileSystem.currentDirectory
         .childDirectory('bin')
@@ -1611,33 +1580,30 @@ void main() {
     // file copy is done by the real uploader; not the fake.
   });
 
-  testWithoutContext(
-    'LegacyCanvasKitRemover removes old canvaskit artifacts if they exist',
-    () async {
-      final handler = FileExceptionHandler();
-      final fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
-      final cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
-      final File canvasKitWasm = fileSystem.file(
-        fileSystem.path.join(cache.getRoot().path, 'canvaskit', 'canvaskit.wasm'),
-      );
-      canvasKitWasm.createSync(recursive: true);
-      canvasKitWasm.writeAsStringSync('hello world');
+  test('LegacyCanvasKitRemover removes old canvaskit artifacts if they exist', () async {
+    final handler = FileExceptionHandler();
+    final fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
+    final cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
+    final File canvasKitWasm = fileSystem.file(
+      fileSystem.path.join(cache.getRoot().path, 'canvaskit', 'canvaskit.wasm'),
+    );
+    canvasKitWasm.createSync(recursive: true);
+    canvasKitWasm.writeAsStringSync('hello world');
 
-      final remover = LegacyCanvasKitRemover(cache);
-      expect(await remover.isUpToDate(fileSystem), false);
-      await remover.update(
-        FakeArtifactUpdater(),
-        BufferLogger.test(),
-        fileSystem,
-        FakeOperatingSystemUtils(),
-      );
-      expect(await remover.isUpToDate(fileSystem), true);
+    final remover = LegacyCanvasKitRemover(cache);
+    expect(await remover.isUpToDate(fileSystem), false);
+    await remover.update(
+      FakeArtifactUpdater(),
+      BufferLogger.test(),
+      fileSystem,
+      FakeOperatingSystemUtils(),
+    );
+    expect(await remover.isUpToDate(fileSystem), true);
 
-      expect(canvasKitWasm.existsSync(), isFalse);
-    },
-  );
+    expect(canvasKitWasm.existsSync(), isFalse);
+  });
 
-  testWithoutContext('Cache handles exception thrown if stamp file cannot be parsed', () {
+  test('Cache handles exception thrown if stamp file cannot be parsed', () {
     final exceptionHandler = FileExceptionHandler();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
     final Logger logger = BufferLogger.test();
@@ -1658,7 +1624,7 @@ void main() {
     expect(cache.getStampFor('foo'), null);
   });
 
-  testWithoutContext('Cache parses stamp file', () {
+  test('Cache parses stamp file', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Logger logger = BufferLogger.test();
     final cache = FakeCache(
@@ -1674,7 +1640,7 @@ void main() {
     expect(cache.getStampFor('foo'), 'ABC');
   });
 
-  testWithoutContext('PubDependencies needs to be updated if the package config'
+  test('PubDependencies needs to be updated if the package config'
       ' file or the source directories are missing', () async {
     final logger = BufferLogger.test();
     final fileSystem = MemoryFileSystem.test();
@@ -1715,7 +1681,7 @@ void main() {
     expect(await pubDependencies.isUpToDate(fileSystem), true);
   });
 
-  testWithoutContext('PubDependencies updates via pub get', () async {
+  test('PubDependencies updates via pub get', () async {
     final logger = BufferLogger.test();
     final fileSystem = MemoryFileSystem.test();
     final pub = FakePub();
@@ -1743,16 +1709,26 @@ void main() {
     );
   });
 
-  testUsingContext('Check current DevTools version', () async {
-    final String currentDevToolsVersion = globals.cache.devToolsVersion;
+  test('Check current DevTools version', () {
+    final fileSystem = LocalFileSystem.test(signals: FakeSignals());
+    addTearDown(fileSystem.dispose);
+    final cache = Cache.test(
+      rootOverride: fileSystem.directory(getFlutterRoot()),
+      processManager: FakeProcessManager.any(),
+    );
+    final String currentDevToolsVersion = cache.devToolsVersion;
     final devToolsVersionFormat = RegExp(r'\d+\.\d+\.\d+(?:-\S+)?');
     expect(devToolsVersionFormat.allMatches(currentDevToolsVersion).length, 1);
   });
 
   // Check that the build number matches the format documented here:
   // https://dart.dev/get-dart#release-channels
-  testUsingContext('Check current Dart SDK build number', () async {
-    final String currentDartSdkVersion = globals.cache.dartSdkBuild;
+  test('Check current Dart SDK build number', () {
+    final cache = Cache.test(
+      platform: const LocalPlatform(),
+      processManager: FakeProcessManager.any(),
+    );
+    final String currentDartSdkVersion = cache.dartSdkBuild;
     final dartSdkVersionFormat = RegExp(r'\d+\.\d+\.\d+(?:-\S+)?');
 
     expect(dartSdkVersionFormat.allMatches(currentDartSdkVersion).length, 1);
@@ -1773,7 +1749,7 @@ void main() {
       fakeAndroidSdk = FakeAndroidSdk();
     });
 
-    testWithoutContext('AndroidMavenArtifacts has a specified development artifact', () async {
+    test('AndroidMavenArtifacts has a specified development artifact', () async {
       final mavenArtifacts = AndroidMavenArtifacts(
         cache!,
         java: FakeJava(),
@@ -1786,7 +1762,7 @@ void main() {
       expect(mavenArtifacts.developmentArtifact, DevelopmentArtifact.androidMaven);
     });
 
-    testWithoutContext(
+    test(
       'AndroidMavenArtifacts can invoke Gradle resolve dependencies if Android SDK is present',
       () async {
         final processManager = FakeProcessManager.list(<FakeCommand>[
@@ -1831,7 +1807,7 @@ void main() {
       },
     );
 
-    testWithoutContext('AndroidMavenArtifacts is a no-op if the Android SDK is absent', () async {
+    test('AndroidMavenArtifacts is a no-op if the Android SDK is absent', () async {
       final mavenArtifacts = AndroidMavenArtifacts(
         cache!,
         java: FakeJava(),
@@ -1854,7 +1830,7 @@ void main() {
     });
   });
 
-  testWithoutContext('Cache.flutterRoot precedence prefers explicit flutterRoot, then rootOverride, then defaultFlutterRoot', () {
+  test('Cache.flutterRoot precedence prefers explicit flutterRoot, then rootOverride, then defaultFlutterRoot', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final logger = BufferLogger.test();
     final osUtils = FakeOperatingSystemUtils();
