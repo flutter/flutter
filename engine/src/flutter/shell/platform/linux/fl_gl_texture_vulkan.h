@@ -9,7 +9,7 @@
 #include "flutter/shell/platform/linux/fl_vulkan_manager.h"
 
 // Probe the raster context before the engine starts using it on another thread.
-const gchar* fl_gl_texture_check_vulkan_import(FlOpenGLManager* gl);
+const gchar* fl_gl_texture_check_context(FlOpenGLManager* gl);
 
 bool fl_gl_texture_populate_vulkan(FlTextureGL* texture,
                                    FlOpenGLManager* gl,

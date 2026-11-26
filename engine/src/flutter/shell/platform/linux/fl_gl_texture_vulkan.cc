@@ -9,7 +9,9 @@
 #include <algorithm>
 #include <vector>
 
+#include "flutter/shell/platform/linux/fl_gl_texture_readback.h"
 #include "flutter/shell/platform/linux/fl_linux_gtk4_debug.h"
+#include "flutter/shell/platform/linux/fl_pixel_buffer_texture_vulkan.h"
 
 namespace {
 constexpr VkFormat kFormat = VK_FORMAT_R8G8B8A8_UNORM;
@@ -238,75 +240,40 @@ bool WarnFrameFailure(FlTextureGL* texture, const char* reason) {
   }
   return false;
 }
-using Slots = std::vector<std::shared_ptr<Slot>>;
-}  // namespace
+struct TextureState {
+  EGLContext gl_context;
+  VkDevice vk_device;
+  std::vector<std::shared_ptr<Slot>> slots;
+  bool can_import_dmabuf;
+  uint32_t failed_width = 0;
+  uint32_t failed_height = 0;
+  gint64 retry_dmabuf_after = 0;
+  bool logged_readback = false;
+  FlGlTextureReadback readback;
+};
 
-const gchar* fl_gl_texture_check_vulkan_import(FlOpenGLManager* gl) {
-  EGLDisplay display = fl_opengl_manager_get_display(gl);
-  if (display == EGL_NO_DISPLAY ||
-      !epoxy_has_egl_extension(display, "EGL_EXT_image_dma_buf_import") ||
-      !epoxy_has_egl_extension(display,
-                               "EGL_EXT_image_dma_buf_import_modifiers"))
-    return "EGL DMA-BUF import with modifiers is unavailable";
-
-  EGLDisplay previous = eglGetCurrentDisplay();
-  EGLContext context = eglGetCurrentContext();
-  EGLSurface draw = eglGetCurrentSurface(EGL_DRAW);
-  EGLSurface read = eglGetCurrentSurface(EGL_READ);
-  if (fl_opengl_manager_get_context(gl) == EGL_NO_CONTEXT ||
-      !fl_opengl_manager_make_current(gl))
-    return "Cannot bind the plugin render context";
-
-  const gchar* reason = nullptr;
-  if (epoxy_gl_version() < 30)
-    reason = "GL 3.0 is required";
-  else if (!epoxy_has_gl_extension("GL_OES_EGL_image"))
-    reason = "GL_OES_EGL_image is unavailable";
-  if (!eglMakeCurrent(previous == EGL_NO_DISPLAY ? display : previous, draw,
-                      read, context))
-    return "Cannot restore the previous EGL context";
-  return reason;
+bool CanImportDmabuf(EGLDisplay display) {
+  return epoxy_gl_version() >= 30 &&
+         epoxy_has_gl_extension("GL_OES_EGL_image") &&
+         epoxy_has_egl_extension(display, "EGL_EXT_image_dma_buf_import") &&
+         epoxy_has_egl_extension(display,
+                                 "EGL_EXT_image_dma_buf_import_modifiers");
 }
 
-bool fl_gl_texture_populate_vulkan(FlTextureGL* texture,
-                                   FlOpenGLManager* gl,
-                                   FlVulkanManager* vk,
-                                   uint32_t width,
-                                   uint32_t height,
-                                   FlutterVulkanExternalTexture* output) {
-  if (!fl_vulkan_manager_supports_gl_images(vk) ||
-      !fl_opengl_manager_make_current(gl))
-    return WarnFrameFailure(texture, "bridge or render context unavailable");
-  struct Clear {
-    FlOpenGLManager* gl;
-    ~Clear() { fl_opengl_manager_clear_current(gl); }
-  } clear{gl};
-  auto display = eglGetCurrentDisplay();
-  FlutterOpenGLTexture source = {};
-  g_autoptr(GError) error = nullptr;
-  if (!fl_texture_gl_populate(texture, width, height, &source, &error) ||
-      source.target != GL_TEXTURE_2D || !source.name ||
-      source.width > UINT32_MAX || source.height > UINT32_MAX)
-    return false;
-  // One pool per registered plugin texture. An engine-managed release can
-  // drop its lease on any thread; only this raster callback mutates the pool.
-  static const GQuark key = g_quark_from_static_string("fl-gl-vulkan-slots");
-  auto* slots = static_cast<Slots*>(g_object_get_qdata(G_OBJECT(texture), key));
-  if (!slots) {
-    slots = new Slots;
-    g_object_set_qdata_full(G_OBJECT(texture), key, slots, [](void* data) {
-      delete static_cast<Slots*>(data);
-    });
-  }
-  auto ctx = fl_vulkan_manager_get_device_context(vk);
-  auto available =
-      std::find_if(slots->begin(), slots->end(),
-                   [](const auto& s) { return !s || s.use_count() == 1; });
-  if (available == slots->end()) {
-    if (slots->size() >= 3)
+bool CopyDmabuf(TextureState& state,
+                const flutter::FlVulkanDeviceContext& ctx,
+                EGLDisplay display,
+                const FlutterOpenGLTexture& source,
+                FlutterVulkanExternalTexture* output) {
+  auto& slots = state.slots;
+  auto available = std::find_if(slots.begin(), slots.end(), [](const auto& s) {
+    return !s || s.use_count() == 1;
+  });
+  if (available == slots.end()) {
+    if (slots.size() >= 3)
       return false;
-    slots->emplace_back();
-    available = std::prev(slots->end());
+    slots.emplace_back();
+    available = std::prev(slots.end());
   }
   auto& slot = *available;
   if (!slot || slot->width != source.width || slot->height != source.height ||
@@ -314,14 +281,26 @@ bool fl_gl_texture_populate_vulkan(FlTextureGL* texture,
     slot = std::make_shared<Slot>(ctx, display, source.width, source.height);
     if (!slot->Initialize()) {
       slot.reset();
-      return WarnFrameFailure(texture, "DMA-BUF slot initialization failed");
+      state.failed_width = source.width;
+      state.failed_height = source.height;
+      state.retry_dmabuf_after = g_get_monotonic_time() + G_USEC_PER_SEC;
+      flutter_linux_gtk4_dbg("vulkan-gl-texture",
+                             "fallback=DMA-BUF slot initialization failed");
+      return false;
     }
   }
   if (!slot->TransferOwnership(true) || !CopyGL(*slot, source.name) ||
       !slot->TransferOwnership(false)) {
     slot.reset();
-    return WarnFrameFailure(texture, "ownership transfer or GL blit failed");
+    state.failed_width = source.width;
+    state.failed_height = source.height;
+    state.retry_dmabuf_after = g_get_monotonic_time() + G_USEC_PER_SEC;
+    flutter_linux_gtk4_dbg(
+        "vulkan-gl-texture",
+        "fallback=DMA-BUF ownership transfer or blit failed");
+    return false;
   }
+  state.retry_dmabuf_after = 0;
   if (!slot->sampled) {
     flutter_linux_gtk4_dbg("vulkan-gl-texture", "path=dmabuf size=%zux%zu",
                            source.width, source.height);
@@ -335,5 +314,100 @@ bool fl_gl_texture_populate_vulkan(FlTextureGL* texture,
       [](void* data) { delete static_cast<std::shared_ptr<Slot>*>(data); },
       source.width,
       source.height};
+  return true;
+}
+
+}  // namespace
+
+const gchar* fl_gl_texture_check_context(FlOpenGLManager* gl) {
+  EGLDisplay previous = eglGetCurrentDisplay();
+  EGLContext context = eglGetCurrentContext();
+  EGLSurface draw = eglGetCurrentSurface(EGL_DRAW);
+  EGLSurface read = eglGetCurrentSurface(EGL_READ);
+  if (fl_opengl_manager_get_context(gl) == EGL_NO_CONTEXT ||
+      !fl_opengl_manager_make_current(gl))
+    return "Cannot bind the plugin render context";
+
+  const gchar* reason =
+      epoxy_gl_version() < 20 ? "GL 2.0 is required" : nullptr;
+  EGLDisplay display = fl_opengl_manager_get_display(gl);
+  if (!eglMakeCurrent(previous == EGL_NO_DISPLAY ? display : previous, draw,
+                      read, context))
+    return "Cannot restore the previous EGL context";
+  return reason;
+}
+
+bool fl_gl_texture_populate_vulkan(FlTextureGL* texture,
+                                   FlOpenGLManager* gl,
+                                   FlVulkanManager* vk,
+                                   uint32_t width,
+                                   uint32_t height,
+                                   FlutterVulkanExternalTexture* output) {
+  if (!fl_opengl_manager_make_current(gl))
+    return WarnFrameFailure(texture, "Cannot bind the plugin render context");
+  struct Clear {
+    FlOpenGLManager* gl;
+    ~Clear() { fl_opengl_manager_clear_current(gl); }
+  } clear{gl};
+  FlutterOpenGLTexture source = {};
+  g_autoptr(GError) error = nullptr;
+  if (!fl_texture_gl_populate(texture, width, height, &source, &error))
+    return false;
+  if (source.target != GL_TEXTURE_2D && source.target != GL_TEXTURE_RECTANGLE &&
+      source.target != GL_TEXTURE_EXTERNAL_OES)
+    return WarnFrameFailure(texture, "unsupported GL texture target");
+  auto ctx = fl_vulkan_manager_get_device_context(vk);
+  if (!source.name || !source.width || !source.height ||
+      source.width > ctx.max_image_dimension ||
+      source.height > ctx.max_image_dimension ||
+      source.width > G_MAXSIZE / 4 / source.height)
+    return WarnFrameFailure(texture, "invalid GL texture dimensions or name");
+
+  // The raster callback owns the pool. Other threads can release image leases.
+  static const GQuark key = g_quark_from_static_string("fl-gl-vulkan-texture");
+  EGLDisplay display = eglGetCurrentDisplay();
+  auto* state =
+      static_cast<TextureState*>(g_object_get_qdata(G_OBJECT(texture), key));
+  EGLContext gl_context = fl_opengl_manager_get_context(gl);
+  if (state == nullptr || state->gl_context != gl_context ||
+      state->vk_device != ctx.device) {
+    state = new TextureState{
+        gl_context,
+        ctx.device,
+        {},
+        fl_vulkan_manager_supports_gl_images(vk) && CanImportDmabuf(display)};
+    g_object_set_qdata_full(G_OBJECT(texture), key, state, [](void* data) {
+      delete static_cast<TextureState*>(data);
+    });
+  }
+  if (state->can_import_dmabuf && source.target == GL_TEXTURE_2D &&
+      (state->retry_dmabuf_after == 0 || source.width != state->failed_width ||
+       source.height != state->failed_height ||
+       g_get_monotonic_time() >= state->retry_dmabuf_after) &&
+      CopyDmabuf(*state, ctx, display, source, output)) {
+    return true;
+  }
+
+  if (!fl_vulkan_upload_rgba_texture(
+          ctx, source.width, source.height,
+          [&](void* pixels, size_t) {
+            return state->readback.Read(source, pixels);
+          },
+          output, &error)) {
+    return WarnFrameFailure(
+        texture,
+        error ? error->message : "GL readback or Vulkan upload failed");
+  }
+  if (!state->logged_readback) {
+    flutter_linux_gtk4_dbg("vulkan-gl-texture", "path=readback size=%zux%zu",
+                           source.width, source.height);
+    g_warning(
+        "GTK4 Vulkan is using CPU readback for OpenGL plugin texture %s. "
+        "See the plugin texture migration guide in "
+        "docs/platforms/desktop/"
+        "linux-gtk-rendering.md#plugin-texture-migration.",
+        G_OBJECT_TYPE_NAME(texture));
+    state->logged_readback = true;
+  }
   return true;
 }

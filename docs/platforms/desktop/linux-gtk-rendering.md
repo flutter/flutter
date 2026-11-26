@@ -10,9 +10,9 @@ GPU-copy avoidance, and synchronization: describing every accelerated path as
 The selected path depends on the GTK variant, display backend, GTK/GDK runtime
 capabilities, EGL driver extensions, and the selected renderer.
 
-This covers presentation of Flutter's composed frame, not video decoding or
-the plugin-to-Flutter external-texture boundary. Enabling DMA-BUF here does not
-make a media plugin export DMA-BUFs or select Flutter's Vulkan backend.
+This covers presentation of Flutter's composed frame. The
+[plugin texture migration guide](#plugin-texture-migration) covers the separate
+handoff from a plugin to Flutter.
 
 The [distribution compatibility matrix](linux-gtk4-distribution-compatibility.md)
 shows which GTK releases provide DMA-BUF, graphics offload, and newer frame
@@ -174,7 +174,7 @@ GTK4 uses OpenGL by default. Set `FLUTTER_LINUX_RENDERER` to select a startup po
 | Value | Behavior |
 |---|---|
 | `opengl` | Use OpenGL. |
-| `auto` | Try Vulkan before creating the view compositor. If Vulkan initialization fails or Impeller is explicitly disabled, select OpenGL and log the reason once per engine. |
+| `auto` | Try hardware Vulkan on Wayland before creating the view compositor. Require a working DMA-BUF sample import and a usable plugin GL context. Select OpenGL if either check fails or Impeller is explicitly disabled. |
 | `vulkan` | Require Impeller Vulkan. An explicit Impeller disable or Vulkan initialization failure stops startup. |
 | `software` | Use software rendering. |
 
@@ -207,12 +207,7 @@ This route makes one GPU copy and waits for completion. It avoids CPU pixel
 processing and GTK upload when import succeeds, but is not zero-copy rendering.
 The optional graphics-offload wrapper can consume the exported texture; actual
 compositor handoff must still be verified. It uses neither EGL export nor the
-Wayland EGL path above. Pixel-buffer plugins use a Vulkan upload and work with
-their existing RGBA callback. For GL-only plugins, Vulkan offers an opt-in
-texture bridge (`FLUTTER_GTK4_VULKAN_GL_TEXTURES=1`). It copies a readable
-`GL_TEXTURE_2D` into a shared DMA-BUF image for Vulkan to sample. Startup
-fallback applies during backend selection. A later plugin import failure leaves
-the engine on its selected backend.
+Wayland EGL path above.
 
 See [Vulkan architecture and validation](../../../engine/src/flutter/shell/platform/linux/testing/VULKAN.md)
 and the [compute investigation](../../../engine/src/flutter/shell/platform/linux/testing/COMPUTE.md).
@@ -224,6 +219,31 @@ more workloads and Wayland presentation feedback remain follow-up work.
 Renderer names alone do not guarantee a path. The runtime API, EGL extensions,
 format/modifier acceptance, and frame size must all pass the compositor's
 checks.
+
+## Plugin texture migration
+
+Test native plugins on GTK4 with OpenGL before opting into Vulkan. Exercise
+playback, resize, teardown, and any other path that creates, replaces, or
+releases a texture.
+
+- When a plugin already produces CPU RGBA8 pixels, use
+  [`FlPixelBufferTexture`](../../../engine/src/flutter/shell/platform/linux/public/flutter_linux/fl_pixel_buffer_texture.h).
+  Flutter uploads those pixels with the selected renderer.
+- When a plugin produces an OpenGL texture, return a valid texture and its
+  dimensions from the [`FlTextureGL`](../../../engine/src/flutter/shell/platform/linux/public/flutter_linux/fl_texture_gl.h)
+  callback. On Vulkan, the migration bridge tries a GPU copy through DMA-BUF
+  for framebuffer-readable 2D textures. It can read back supported GL textures
+  into a Vulkan staging buffer when sharing fails. That transfer is synchronous
+  and can affect frame pacing, especially at high resolutions.
+- If the engine warns about CPU readback and the plugin needs the GL path for
+  sustained playback, use `FLUTTER_LINUX_RENDERER=opengl` for that app. Opt
+  into Vulkan again after testing the plugin's accelerated path on the target
+  drivers.
+
+The bridge is a migration aid. It can be retired when affected plugins use
+renderer-independent textures or a supported native GPU handoff. The current
+Linux API supports CPU pixel buffers and OpenGL textures. A native plugin
+Vulkan or DMA-BUF texture API would require separate work.
 
 ## Debugging Matrix
 

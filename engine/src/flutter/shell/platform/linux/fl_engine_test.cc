@@ -291,23 +291,13 @@ TEST_F(FlEngineShutdownTest, WorkerAdmissionRacesShutdown) {
 }
 
 #if FLUTTER_LINUX_GTK4
-TEST_F(FlEngineTest, VulkanGlImportChecksCapabilities) {
+TEST_F(FlEngineTest, VulkanPluginTexturesRequireUsableGlContext) {
   FlOpenGLManager* manager = fl_engine_get_opengl_manager(engine);
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
-  ON_CALL(epoxy, epoxy_has_egl_extension(::testing::_, ::testing::_))
-      .WillByDefault(::testing::Return(false));
-  EXPECT_STREQ(fl_gl_texture_check_vulkan_import(manager),
-               "EGL DMA-BUF import with modifiers is unavailable");
-  ON_CALL(epoxy, epoxy_has_egl_extension(::testing::_, ::testing::_))
-      .WillByDefault(::testing::Return(true));
-  EXPECT_STREQ(fl_gl_texture_check_vulkan_import(manager),
-               "GL 3.0 is required");
-  ON_CALL(epoxy, epoxy_gl_version).WillByDefault(::testing::Return(30));
-  EXPECT_STREQ(fl_gl_texture_check_vulkan_import(manager),
-               "GL_OES_EGL_image is unavailable");
-  ON_CALL(epoxy, epoxy_has_gl_extension(::testing::StrEq("GL_OES_EGL_image")))
-      .WillByDefault(::testing::Return(true));
-  EXPECT_EQ(fl_gl_texture_check_vulkan_import(manager), nullptr);
+  ON_CALL(epoxy, epoxy_gl_version).WillByDefault(::testing::Return(10));
+  EXPECT_STREQ(fl_gl_texture_check_context(manager), "GL 2.0 is required");
+  ON_CALL(epoxy, epoxy_gl_version).WillByDefault(::testing::Return(20));
+  EXPECT_EQ(fl_gl_texture_check_context(manager), nullptr);
 }
 
 #ifndef SHELL_ENABLE_VULKAN

@@ -7,6 +7,8 @@
 #include <gdk/wayland/gdkwayland.h>
 
 #include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_gl_texture_readback.h"
+#include "flutter/shell/platform/linux/fl_gl_texture_vulkan.h"
 #include "flutter/shell/platform/linux/fl_gtk.h"
 #include "flutter/shell/platform/linux/fl_view_private.h"
 
@@ -225,11 +227,172 @@ static void test_retained_texture() {
   g_assert_true(fl_opengl_manager_make_current(manager));
 }
 
+constexpr uint8_t kTexturePixels[] = {255, 0,   0,   255, 0,   255, 0,   255,
+                                      0,   0,   255, 255, 255, 255, 255, 255,
+                                      0,   255, 255, 255, 255, 255, 0,   255};
+
+struct TestVulkanGlTexture {
+  FlTextureGL parent;
+  GLuint texture;
+  GLuint pack_buffer;
+  bool extended_pack;
+};
+struct TestVulkanGlTextureClass {
+  FlTextureGLClass parent;
+};
+G_DEFINE_TYPE(TestVulkanGlTexture,
+              test_vulkan_gl_texture,
+              fl_texture_gl_get_type())
+
+static void test_vulkan_gl_texture_class_init(TestVulkanGlTextureClass* klass) {
+  FL_TEXTURE_GL_CLASS(klass)->populate =
+      [](FlTextureGL* texture, uint32_t* target, uint32_t* name,
+         uint32_t* width, uint32_t* height, GError**) -> gboolean {
+    auto* self = reinterpret_cast<TestVulkanGlTexture*>(texture);
+    g_assert_cmpuint(*width, ==, 7u);
+    g_assert_cmpuint(*height, ==, 9u);
+    g_assert_true(eglGetCurrentContext() != EGL_NO_CONTEXT);
+    glGenTextures(1, &self->texture);
+    glBindTexture(GL_TEXTURE_2D, self->texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 3, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                 kTexturePixels);
+    glPixelStorei(GL_PACK_ALIGNMENT, 8);
+    self->extended_pack = epoxy_gl_version() >= 30;
+    if (self->extended_pack) {
+      glGenBuffers(1, &self->pack_buffer);
+      glBindBuffer(GL_PIXEL_PACK_BUFFER, self->pack_buffer);
+      glPixelStorei(GL_PACK_ROW_LENGTH, 32);
+      glPixelStorei(GL_PACK_SKIP_ROWS, 2);
+      glPixelStorei(GL_PACK_SKIP_PIXELS, 1);
+    }
+    *target = GL_TEXTURE_2D;
+    *name = self->texture;
+    *width = 3;
+    *height = 2;
+    return TRUE;
+  };
+}
+static void test_vulkan_gl_texture_init(TestVulkanGlTexture*) {}
+
+static void test_gl_texture_readback() {
+  if (g_strcmp0(g_getenv("FLUTTER_TEST_VULKAN"), "1") != 0) {
+    g_test_skip("Set FLUTTER_TEST_VULKAN=1 with a Vulkan ICD to run");
+    return;
+  }
+  // Keep Vulkan and EGL real while forcing the compatibility transfer path.
+  g_autofree gchar* previous =
+      g_strdup(g_getenv("FLUTTER_GTK4_VULKAN_GL_TEXTURES"));
+  g_setenv("FLUTTER_GTK4_VULKAN_GL_TEXTURES", "0", TRUE);
+  g_autoptr(FlVulkanManager) staging_manager = fl_vulkan_manager_new();
+  FlutterVulkanRendererConfig staging_config = {};
+  g_autoptr(GError) error = nullptr;
+  const bool initialized =
+      fl_vulkan_manager_initialize(staging_manager, &staging_config, &error);
+  if (previous != nullptr) {
+    g_setenv("FLUTTER_GTK4_VULKAN_GL_TEXTURES", previous, TRUE);
+  } else {
+    g_unsetenv("FLUTTER_GTK4_VULKAN_GL_TEXTURES");
+  }
+  g_assert_no_error(error);
+  g_assert_true(initialized);
+  g_assert_false(fl_vulkan_manager_supports_gl_images(staging_manager));
+
+  g_autoptr(FlOpenGLManager) gl = fl_opengl_manager_new();
+  g_assert_null(fl_gl_texture_check_context(gl));
+  g_autoptr(FlTextureGL) texture =
+      FL_TEXTURE_GL(g_object_new(test_vulkan_gl_texture_get_type(), nullptr));
+  auto* source = reinterpret_cast<TestVulkanGlTexture*>(texture);
+  FlutterVulkanExternalTexture external = {};
+  g_test_expect_message(
+      nullptr, G_LOG_LEVEL_WARNING,
+      "*CPU readback for OpenGL plugin texture TestVulkanGlTexture*"
+      "linux-gtk-rendering.md#plugin-texture-migration*");
+  g_assert_true(fl_gl_texture_populate_vulkan(texture, gl, staging_manager, 7,
+                                              9, &external));
+  g_test_assert_expected_messages();
+  g_assert_cmpuint(external.width, ==, 3u);
+  g_assert_cmpuint(external.height, ==, 2u);
+  g_assert_cmpuint(external.format, ==, VK_FORMAT_R8G8B8A8_UNORM);
+  g_assert_cmpuint(external.image, !=, 0u);
+  g_assert_nonnull(external.destruction_callback);
+  external.destruction_callback(external.user_data);
+  g_assert_true(fl_opengl_manager_make_current(gl));
+  GLint value = 0;
+  glGetIntegerv(GL_PACK_ALIGNMENT, &value);
+  g_assert_cmpint(value, ==, 8);
+  if (source->extended_pack) {
+    glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING, &value);
+    g_assert_cmpuint(value, ==, source->pack_buffer);
+    glGetIntegerv(GL_PACK_ROW_LENGTH, &value);
+    g_assert_cmpint(value, ==, 32);
+    glGetIntegerv(GL_PACK_SKIP_ROWS, &value);
+    g_assert_cmpint(value, ==, 2);
+    glGetIntegerv(GL_PACK_SKIP_PIXELS, &value);
+    g_assert_cmpint(value, ==, 1);
+    glDeleteBuffers(1, &source->pack_buffer);
+  }
+  glDeleteTextures(1, &source->texture);
+  fl_opengl_manager_clear_current(gl);
+}
+
+static void test_external_egl_texture_readback() {
+  g_autoptr(FlOpenGLManager) gl = fl_opengl_manager_new();
+  g_assert_true(fl_opengl_manager_make_current(gl));
+  const EGLDisplay display = eglGetCurrentDisplay();
+  const EGLContext context = eglGetCurrentContext();
+  if (!epoxy_has_egl_extension(display, "EGL_KHR_gl_texture_2D_image") ||
+      !epoxy_has_gl_extension("GL_OES_EGL_image_external")) {
+    fl_opengl_manager_clear_current(gl);
+    g_test_skip(
+        "Requires EGL image texture import and external texture support");
+    return;
+  }
+
+  GLuint names[2] = {};
+  glGenTextures(2, names);
+  glBindTexture(GL_TEXTURE_2D, names[0]);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 3, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+               kTexturePixels);
+  const EGLint attributes[] = {EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE};
+  EGLImageKHR image = eglCreateImageKHR(
+      display, context, EGL_GL_TEXTURE_2D_KHR,
+      reinterpret_cast<EGLClientBuffer>(static_cast<uintptr_t>(names[0])),
+      attributes);
+  g_assert_true(image != EGL_NO_IMAGE_KHR);
+  glBindTexture(GL_TEXTURE_EXTERNAL_OES, names[1]);
+  glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, image);
+  g_assert_cmpuint(glGetError(), ==, GL_NO_ERROR);
+
+  FlGlTextureReadback reader;
+  FlutterOpenGLTexture source = {};
+  source.target = GL_TEXTURE_EXTERNAL_OES;
+  source.name = names[1];
+  source.width = 3;
+  source.height = 2;
+  uint8_t pixels[sizeof(kTexturePixels)] = {};
+  // The first read creates the shared context and the second reuses it.
+  for (int read = 0; read < 2; ++read) {
+    g_assert_true(reader.Read(source, pixels));
+    g_assert_cmpmem(pixels, sizeof(pixels), kTexturePixels,
+                    sizeof(kTexturePixels));
+    g_assert_true(eglGetCurrentContext() == context);
+  }
+  glDeleteTextures(2, names);
+  eglDestroyImageKHR(display, image);
+  fl_opengl_manager_clear_current(gl);
+}
+
 int main(int argc, char** argv) {
   g_test_init(&argc, &argv, nullptr);
   gtk_init();
   g_test_add_func("/compositor/retained-texture", test_retained_texture);
   g_test_add_func("/compositor/offset-layer", test_offset_layer);
   g_test_add_func("/compositor/subsurface/resize", test_subsurface_resize);
+  g_test_add_func("/gtk4/vulkan/gl-texture-readback", test_gl_texture_readback);
+  g_test_add_func("/gtk4/gl/external-egl-texture-readback",
+                  test_external_egl_texture_readback);
   return g_test_run();
 }

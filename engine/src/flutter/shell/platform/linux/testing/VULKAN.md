@@ -91,16 +91,21 @@ eligible Wayland views request it by default. Set
 `FLUTTER_LINUX_GTK_DEBUG=1` reports `event=vulkan-presentation path=dmabuf` or
 `path=readback`. EGL export and direct Wayland EGL rendering are independent.
 
-Pixel-buffer plugin textures work with Vulkan. To test GL-only plugins, set
-`FLUTTER_GTK4_VULKAN_GL_TEXTURES=1` with `FLUTTER_LINUX_RENDERER=vulkan`.
-Registration requires Vulkan export support for linear RGBA8 images, EGL DMA-BUF
-import with modifiers, and a GL 3.0 or newer context with `GL_OES_EGL_image`.
-At frame time EGL must import the image and the plugin must supply a framebuffer-readable
-`GL_TEXTURE_2D`. The bridge blits it into a pooled DMA-BUF image, waits for GL
-completion, and transfers ownership back to Vulkan for sampling. This introduces
-a GPU copy and synchronization costs. A successfully copied image logs
-`event=vulkan-gl-texture path=dmabuf` when GTK debug logging is enabled.
-With the option disabled, Vulkan rejects GL-only textures at registration.
+Pixel-buffer plugin textures work with Vulkan. GL-only plugin textures use a
+migration bridge whenever Vulkan is selected and the GL context is usable.
+The GPU transfer requires Vulkan export support for linear RGBA8 images, EGL
+DMA-BUF import with modifiers, GL 3.0 with `GL_OES_EGL_image`, and a readable
+`GL_TEXTURE_2D`. It blits to a pooled DMA-BUF image, waits for GL completion,
+then transfers ownership back to Vulkan. Debug logs show
+`event=vulkan-gl-texture path=dmabuf`.
+
+When sharing fails, the bridge reads supported textures into the Vulkan staging
+buffer and uploads them. GL external EGL images are sampled into RGBA before
+readback. This fallback adds synchronization and host transfers. The warning
+points plugin developers to the
+[migration guide](../../../../../../../docs/platforms/desktop/linux-gtk-rendering.md#plugin-texture-migration).
+Set `FLUTTER_GTK4_VULKAN_GL_TEXTURES=0` to force the compatibility transfer
+while testing. It does not change the separate Flutter-to-GTK presentation path.
 
 A native Vulkan plugin API is not provided. Platform-view layers are rejected. Allocation pooling, modifier-aware
 image export, finer completion synchronization,

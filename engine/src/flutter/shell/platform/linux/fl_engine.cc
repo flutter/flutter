@@ -884,6 +884,7 @@ static gboolean initialize_vulkan_renderer(FlVulkanManager* manager,
 }
 
 static gboolean probe_vulkan_renderer(FlVulkanManager* manager,
+                                      FlOpenGLManager* opengl_manager,
                                       GError** error) {
 #ifdef SHELL_ENABLE_VULKAN
   GdkDisplay* display = gdk_display_get_default();
@@ -892,6 +893,12 @@ static gboolean probe_vulkan_renderer(FlVulkanManager* manager,
       !fl_gtk_runtime_supports_dmabuf_textures()) {
     g_set_error_literal(error, fl_engine_error_quark(), FL_ENGINE_ERROR_FAILED,
                         "Wayland DMA-BUF presentation unavailable");
+    return FALSE;
+  }
+  const gchar* context_error = fl_gl_texture_check_context(opengl_manager);
+  if (context_error != nullptr) {
+    g_set_error_literal(error, fl_engine_error_quark(), FL_ENGINE_ERROR_FAILED,
+                        context_error);
     return FALSE;
   }
   return fl_vulkan_manager_initialize_auto(manager, display, error);
@@ -931,9 +938,10 @@ static FlEngine* fl_engine_new_full(FlDartProject* project,
           "reason=Impeller explicitly disabled");
     } else {
       g_autoptr(FlVulkanManager) manager = fl_vulkan_manager_new();
-      if (probe_vulkan_renderer(manager, &error)) {
+      if (probe_vulkan_renderer(manager, self->opengl_manager, &error)) {
         self->vulkan_manager = FL_VULKAN_MANAGER(g_steal_pointer(&manager));
         self->renderer_type = kVulkan;
+        self->gl_texture_bridge_error = nullptr;
       } else {
         g_message(
             "Flutter renderer fallback: requested=auto attempted=vulkan "
@@ -1124,12 +1132,10 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
                                     error)) {
       return FALSE;
     }
-    const gchar* bridge_error =
-        fl_vulkan_manager_supports_gl_images(self->vulkan_manager)
-            ? fl_gl_texture_check_vulkan_import(self->opengl_manager)
-            : "Vulkan DMA-BUF export for GL textures is unavailable or "
-              "disabled";
-    g_atomic_pointer_set(&self->gl_texture_bridge_error, bridge_error);
+    if (fl_engine_get_gl_texture_bridge_error(self) != nullptr) {
+      g_atomic_pointer_set(&self->gl_texture_bridge_error,
+                           fl_gl_texture_check_context(self->opengl_manager));
+    }
     config.vulkan.external_texture_frame_callback =
         fl_engine_vulkan_external_texture_frame_callback;
 #endif

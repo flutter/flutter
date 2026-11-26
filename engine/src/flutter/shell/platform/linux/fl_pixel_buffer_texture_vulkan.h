@@ -4,6 +4,9 @@
 
 #ifndef FLUTTER_SHELL_PLATFORM_LINUX_FL_PIXEL_BUFFER_TEXTURE_VULKAN_H_
 #define FLUTTER_SHELL_PLATFORM_LINUX_FL_PIXEL_BUFFER_TEXTURE_VULKAN_H_
+
+#include <functional>
+
 #include "flutter/shell/platform/linux/fl_vulkan_manager.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_pixel_buffer_texture.h"
 
@@ -14,6 +17,16 @@ gboolean fl_pixel_buffer_texture_populate_vulkan(
     FlVulkanManager* manager,
     uint32_t width,
     uint32_t height,
+    FlutterVulkanExternalTexture* output,
+    GError** error);
+
+// Invoke write_pixels with the mapped Vulkan staging buffer and its byte
+// length. The callback writes tightly packed RGBA8 pixels before returning.
+gboolean fl_vulkan_upload_rgba_texture(
+    const flutter::FlVulkanDeviceContext& context,
+    uint32_t width,
+    uint32_t height,
+    const std::function<bool(void*, size_t)>& write_pixels,
     FlutterVulkanExternalTexture* output,
     GError** error);
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_PIXEL_BUFFER_TEXTURE_VULKAN_H_

@@ -54,10 +54,28 @@ gboolean fl_pixel_buffer_texture_populate_vulkan(
   auto* klass = FL_PIXEL_BUFFER_TEXTURE_GET_CLASS(texture);
   const uint8_t* pixels = nullptr;
   if (!klass->copy_pixels ||
-      !klass->copy_pixels(texture, &pixels, &width, &height, error))
+      !klass->copy_pixels(texture, &pixels, &width, &height, error) ||
+      pixels == nullptr)
     return FALSE;
+  return fl_vulkan_upload_rgba_texture(
+      context, width, height,
+      [pixels](void* mapped, size_t length) {
+        memcpy(mapped, pixels, length);
+        return true;
+      },
+      output, error);
+}
+
+gboolean fl_vulkan_upload_rgba_texture(
+    const flutter::FlVulkanDeviceContext& context,
+    uint32_t width,
+    uint32_t height,
+    const std::function<bool(void*, size_t)>& write_pixels,
+    FlutterVulkanExternalTexture* output,
+    GError** error) {
   // Reject dimensions before issuing any Vulkan allocation.
-  if (!pixels || !width || !height || width > context.max_image_dimension ||
+  if (!context.lifetime || !width || !height ||
+      width > context.max_image_dimension ||
       height > context.max_image_dimension ||
       uint64_t(width) * height > std::numeric_limits<size_t>::max() / 4)
     return FALSE;
@@ -117,8 +135,10 @@ gboolean fl_pixel_buffer_texture_populate_vulkan(
     if (!Check(CALL(MapMemory)(device, staging, 0, length, 0, &mapped),
                "vkMapMemory(staging)", error))
       return false;
-    memcpy(mapped, pixels, length);
+    const bool wrote_pixels = write_pixels(mapped, length);
     CALL(UnmapMemory)(device, staging);
+    if (!wrote_pixels)
+      return false;
     VkCommandPoolCreateInfo pool_info = {
         VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};
     pool_info.queueFamilyIndex = context.queue_family;

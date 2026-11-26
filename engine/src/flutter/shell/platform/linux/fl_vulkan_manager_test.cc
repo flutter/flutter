@@ -133,13 +133,6 @@ class FlVulkanIntegrationTest : public flutter::testing::LinuxTest {
   FlutterVulkanRendererConfig config = {};
 };
 
-TEST_F(FlVulkanIntegrationTest, GLImagesRequireOptIn) {
-  if (g_strcmp0(g_getenv("FLUTTER_GTK4_VULKAN_GL_TEXTURES"), "1") == 0) {
-    GTEST_SKIP() << "Run without the GL texture bridge opt-in";
-  }
-  EXPECT_FALSE(fl_vulkan_manager_supports_gl_images(manager));
-}
-
 TEST_F(FlVulkanIntegrationTest, ReadbackSurvivesResizeAndCollection) {
   for (auto width : {17u, 101u}) {
     auto store = Create(width, 13);

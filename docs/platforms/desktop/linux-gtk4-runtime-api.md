@@ -135,8 +135,9 @@ snapshot helper uses the existing GTK 4.14 DMA-BUF wrappers after negotiating
 Vulkan external-memory FD, DMA-BUF and foreign-queue support and exportable buffer
 properties. A failed import uses a baseline `GdkMemoryTexture` from the same
 immutable snapshot. Older GTK and unsupported devices retain readback rendering.
-No new optional GTK symbols are required. Pixel-buffer plugin uploads use Vulkan
-independently of the optional EGL texture bridge. A loader or device initialization
+No new optional GTK symbols are required. Pixel-buffer plugin uploads and the
+[GL texture migration bridge](linux-gtk-rendering.md#plugin-texture-migration)
+work independently of GTK's presentation APIs. A loader or device initialization
 failure stops an explicit Vulkan request. Automatic selection logs the error and
 uses OpenGL. See [Vulkan validation](../../../engine/src/flutter/shell/platform/linux/testing/VULKAN.md).
 

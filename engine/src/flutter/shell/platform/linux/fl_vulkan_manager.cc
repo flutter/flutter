@@ -328,7 +328,7 @@ bool initialize(State& state, bool require_hardware, GError** error) {
     }
   }
   if (can_export &&
-      g_strcmp0(g_getenv("FLUTTER_GTK4_VULKAN_GL_TEXTURES"), "1") == 0) {
+      g_strcmp0(g_getenv("FLUTTER_GTK4_VULKAN_GL_TEXTURES"), "0") != 0) {
     auto has_extension = [&](const char* name) {
       return std::any_of(available.begin(), available.end(),
                          [&](const auto& ext) {
