@@ -21,7 +21,7 @@ import '../../src/fakes.dart'
 import '../../src/test_build_system.dart';
 
 void main() {
-  testWithoutContext('binds on ipv4 normally', () async {
+  test('binds on ipv4 normally', () async {
     final socket = FakeServerSocket();
     final logger = BufferLogger.test();
 
@@ -59,7 +59,7 @@ void main() {
     expect(bindPorts, <int>[123]);
   });
 
-  testWithoutContext('binds on ipv6 if ipv4 failed normally', () async {
+  test('binds on ipv6 if ipv4 failed normally', () async {
     final socket = FakeServerSocket();
     final logger = BufferLogger.test();
 
@@ -100,7 +100,7 @@ void main() {
     expect(bindPorts, <int>[123, 123]);
   });
 
-  testWithoutContext('waits for server socket stream to close', () async {
+  test('waits for server socket stream to close', () async {
     final socket = FakeServerSocket(closeImmediately: false);
     final logger = BufferLogger.test();
 

@@ -43,7 +43,7 @@ void main() {
         );
       });
 
-      testWithoutContext('app font uses local font file', () async {
+      test('app font uses local font file', () async {
         final String manifestPath = fileSystem.path.join('main', 'pubspec.yaml');
         final assetBundle = ManifestAssetBundle(
           logger: logger,
@@ -116,7 +116,7 @@ dependencies:
         );
       });
 
-      testWithoutContext('does not pick up assets from dev-dependencies and workspace packages not in the transitive closure', () async {
+      test('does not pick up assets from dev-dependencies and workspace packages not in the transitive closure', () async {
         final String manifestPath = fileSystem.path.join('main', 'pubspec.yaml');
         final assetBundle = ManifestAssetBundle(
           logger: logger,
@@ -270,7 +270,7 @@ flutter:
         );
       });
 
-      testWithoutContext('handles empty pubspec with .dart_tool/package_config.json', () async {
+      test('handles empty pubspec with .dart_tool/package_config.json', () async {
         final String packageConfigPath = fileSystem.path.join(
           'fuchsia_test',
           'main',
@@ -301,7 +301,7 @@ flutter:
         expect(assetBundle.inputFiles.map((File f) => f.path), <String>[]);
       });
 
-      testWithoutContext('bundles material shaders on non-web platforms', () async {
+      test('bundles material shaders on non-web platforms', () async {
         final String inkSparklePath = fileSystem.path.join(
           flutterRoot,
           'packages',
@@ -345,7 +345,7 @@ flutter:
         expect(assetBundle.entries.keys, contains('shaders/stretch_effect.frag'));
       });
 
-      testWithoutContext('bundles material shaders on web platforms', () async {
+      test('bundles material shaders on web platforms', () async {
         final String inkSparklePath = fileSystem.path.join(
           flutterRoot,
           'packages',
@@ -389,7 +389,7 @@ flutter:
         expect(assetBundle.entries.keys, contains('shaders/stretch_effect.frag'));
       });
 
-      testWithoutContext('fails if shader is also in assets', () async {
+      test('fails if shader is also in assets', () async {
         writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_package');
         fileSystem.file('pubspec.yaml').writeAsStringSync(r'''
 name: my_package
@@ -419,7 +419,7 @@ flutter:
         );
       });
 
-      testWithoutContext('fails if shader is in asset directory', () async {
+      test('fails if shader is in asset directory', () async {
         writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_package');
         fileSystem.file('pubspec.yaml').writeAsStringSync(r'''
 name: my_package

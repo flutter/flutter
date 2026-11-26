@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/web/memory_fs.dart';
 import '../../src/common.dart';
 
 void main() {
-  testWithoutContext('correctly parses source, source map, metadata, manifest files', () {
+  test('correctly parses source, source map, metadata, manifest files', () {
     final fileSystem = MemoryFileSystem();
     final File source = fileSystem.file('source')..writeAsStringSync('main() {}');
     final File sourcemap = fileSystem.file('sourcemap')..writeAsStringSync('{}');
@@ -35,7 +35,7 @@ void main() {
     expect(webMemoryFS.mergedMetadata, '{}');
   });
 
-  testWithoutContext('skips modules whose manifest offsets are malformed', () {
+  test('skips modules whose manifest offsets are malformed', () {
     final fileSystem = MemoryFileSystem();
     final File source = fileSystem.file('source')..writeAsStringSync('main() {}');
     final File sourcemap = fileSystem.file('sourcemap')..writeAsStringSync('{}');

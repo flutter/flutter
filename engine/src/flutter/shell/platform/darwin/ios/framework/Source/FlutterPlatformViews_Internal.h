@@ -182,6 +182,17 @@
 @property(nonatomic, readonly) FlutterTouchInterceptingView* touchInterceptor;
 @property(nonatomic, readonly) UIView* rootView;
 
+/// The layer that this platform view was last composited with.
+///
+/// `FlutterPlatformViewsController` composites the platform view in `presentFrame:` only if its
+/// layer in the frame differs from this one.
+///
+/// This value is nil for a new platform view. The controller also sets it to nil in the following
+/// cases, so that the platform view is composited in the next frame that includes it:
+/// * when the platform view is removed from the Flutter view
+/// * when the Flutter view changes
+@property(nonatomic, strong) FlutterPlatformViewLayer* lastCompositedLayer;
+
 @end
 
 @interface UIView (FirstResponder)

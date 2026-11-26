@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:archive/archive.dart';
-
 import '../application_package.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../build_info.dart';
@@ -55,7 +54,7 @@ abstract class WindowsApp extends ApplicationPackage {
     final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_app.');
     try {
       os.unzip(fs.file(applicationBinary), tempDir);
-    } on ArchiveException {
+    } on ProcessException {
       logger.printError('Invalid prebuilt Windows app. Unable to extract from archive.');
       return null;
     }
