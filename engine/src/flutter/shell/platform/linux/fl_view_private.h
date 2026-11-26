@@ -65,6 +65,9 @@ struct _FlView {
   GMutex subsurface_mutex;
   FlSubsurfaceEGL* subsurface_egl;
   FlSubsurface* subsurface;  // GTK thread only.
+  // Last GTK allocation in logical pixels and its integral buffer scale.
+  int subsurface_width;
+  int subsurface_height;
   int subsurface_scale;
 #endif
   GCancellable* cancellable;

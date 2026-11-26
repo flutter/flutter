@@ -154,6 +154,8 @@ static void setup(FlSubsurfaceEGL* self,
 
   eglMakeCurrent(egl_display, self->egl_surface, self->egl_surface,
                  self->egl_context);
+  // The engine already paces frame production. Let the raster thread submit
+  // the child buffer without also waiting on EGL's swap interval.
   eglSwapInterval(egl_display, 0);
 
   // Determine whether this context can use glBlitFramebuffer to copy the engine

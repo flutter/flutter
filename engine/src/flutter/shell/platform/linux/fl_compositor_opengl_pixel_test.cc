@@ -30,12 +30,42 @@ static void test_subsurface_resize() {
     g_test_skip("Direct subsurface presentation requires integer scale");
     return;
   }
+  if (requested) {
+    // Realize the render widget to get a frame clock without starting Dart.
+    const guint realize = g_signal_lookup("realize", GTK_TYPE_WIDGET);
+    g_signal_handlers_block_matched(view->render_area, G_SIGNAL_MATCH_ID,
+                                    realize, 0, nullptr, nullptr, nullptr);
+    gtk_widget_realize(GTK_WIDGET(view));
+    g_signal_handlers_unblock_matched(view->render_area, G_SIGNAL_MATCH_ID,
+                                      realize, 0, nullptr, nullptr, nullptr);
+  }
   g_assert_cmpint(gtk_widget_get_width(view->render_area), ==, 0);
   fl_view_gtk4_resize_subsurface(view, 0, 0);
   g_assert_null(view->subsurface_egl);
   gtk_widget_allocate(view->render_area, 64, 48, -1, nullptr);
   fl_view_gtk4_resize_subsurface(view, 64, 48);
   g_assert_cmpint(view->subsurface_egl != nullptr, ==, requested);
+  if (requested) {
+    GdkFrameClock* clock = gtk_widget_get_frame_clock(view->render_area);
+    g_assert_nonnull(clock);
+    const guint after_paint =
+        g_signal_lookup("after-paint", GDK_TYPE_FRAME_CLOCK);
+    auto sync_handler = [&]() {
+      return g_signal_handler_find(clock,
+                                   static_cast<GSignalMatchType>(
+                                       G_SIGNAL_MATCH_ID | G_SIGNAL_MATCH_DATA),
+                                   after_paint, 0, nullptr, nullptr,
+                                   view->subsurface);
+    };
+    const gulong initial_handler = sync_handler();
+    g_assert_cmpuint(initial_handler, !=, 0);
+    fl_view_gtk4_resize_subsurface(view, 64, 48);
+    g_assert_cmpuint(sync_handler(), ==, initial_handler);
+    gtk_widget_allocate(view->render_area, 80, 60, -1, nullptr);
+    g_assert_cmpuint(sync_handler(), !=, 0);
+    g_assert_cmpuint(sync_handler(), !=, initial_handler);
+    gtk_widget_allocate(view->render_area, 64, 48, -1, nullptr);
+  }
   // Exercise the view's selection with a live destination, then again while
   // the requested surface is unavailable and after recreating it.
   FlOpenGLManager* manager = fl_engine_get_opengl_manager(view->engine);

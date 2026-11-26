@@ -98,9 +98,11 @@ static void setup_subsurface(FlView* view) {
 
   synchronize_parent_update(view, subsurface);
   g_set_object(&view->subsurface, subsurface);
+  view->subsurface_width = width;
+  view->subsurface_height = height;
+  view->subsurface_scale = scale;
   g_mutex_lock(&view->subsurface_mutex);
   g_set_object(&view->subsurface_egl, subsurface_egl);
-  view->subsurface_scale = scale;
   g_mutex_unlock(&view->subsurface_mutex);
 }
 
@@ -120,6 +122,14 @@ void fl_view_gtk4_resize_subsurface(FlView* view, int width, int height) {
     fl_view_gtk4_clear_subsurface(view);
   }
   if (view->subsurface != nullptr) {
+    // GTK can allocate the widget again with identical dimensions. Cycling
+    // synchronization in that case can discard presentation feedback for a
+    // buffer that the child already committed.
+    if (width == view->subsurface_width && height == view->subsurface_height) {
+      return;
+    }
+    view->subsurface_width = width;
+    view->subsurface_height = height;
     // Present resizes the EGL window on the raster thread. Hold the child
     // commit until GTK has painted the corresponding parent geometry.
     synchronize_parent_update(view, view->subsurface);
@@ -338,6 +348,7 @@ void fl_view_gtk4_present_layers(FlView* self,
     fl_compositor_present_layers(self->compositor, layers, layers_count);
   }
 
-  // Perform the redraw in the GTK thread.
+  // The GTK thread handles geometry and first-frame notification for both
+  // destinations. Only the GTK texture path imports a texture during redraw.
   g_idle_add(redraw_cb, g_object_ref(self));
 }
