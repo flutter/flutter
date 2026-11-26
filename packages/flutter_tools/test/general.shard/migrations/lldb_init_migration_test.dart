@@ -16,7 +16,7 @@ import '../../src/common.dart';
 
 void main() {
   group('LLDBInitMigration', () {
-    testWithoutContext('fails if Xcode project is not found', () async {
+    test('fails if Xcode project is not found', () async {
       final memoryFileSystem = MemoryFileSystem();
       final testLogger = BufferLogger.test();
 
@@ -45,7 +45,7 @@ void main() {
     });
 
     group('get scheme file', () {
-      testWithoutContext('fails if Xcode project info not found', () async {
+      test('fails if Xcode project info not found', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
         final project = FakeXcodeProject(
@@ -74,7 +74,7 @@ void main() {
         );
       });
 
-      testWithoutContext('fails if scheme not found', () async {
+      test('fails if scheme not found', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
         final project = FakeXcodeProject(
@@ -98,7 +98,7 @@ void main() {
         );
       });
 
-      testWithoutContext('fails if scheme file not found', () async {
+      test('fails if scheme file not found', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
         final project = FakeXcodeProject(
@@ -127,7 +127,7 @@ void main() {
       });
     });
 
-    testWithoutContext('does nothing if both Launch and Test are already migrated', () async {
+    test('does nothing if both Launch and Test are already migrated', () async {
       final memoryFileSystem = MemoryFileSystem();
       final testLogger = BufferLogger.test();
       final project = FakeXcodeProject(
@@ -154,7 +154,7 @@ void main() {
       expect(testLogger.errorText, isEmpty);
     });
 
-    testWithoutContext('prints error if only Launch action is migrated', () async {
+    test('prints error if only Launch action is migrated', () async {
       final memoryFileSystem = MemoryFileSystem();
       final testLogger = BufferLogger.test();
       final project = FakeXcodeProject(
@@ -188,7 +188,7 @@ void main() {
       );
     });
 
-    testWithoutContext('prints error if only Test action is migrated', () async {
+    test('prints error if only Test action is migrated', () async {
       final memoryFileSystem = MemoryFileSystem();
       final testLogger = BufferLogger.test();
       final project = FakeXcodeProject(
@@ -221,7 +221,7 @@ void main() {
       );
     });
 
-    testWithoutContext(
+    test(
       'print error if customLLDBInitFile already exists and does not contain flutter lldbinit',
       () async {
         final memoryFileSystem = MemoryFileSystem();
@@ -251,37 +251,34 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'skips if customLLDBInitFile already exists and contain flutter lldbinit',
-      () async {
-        final memoryFileSystem = MemoryFileSystem();
-        final testLogger = BufferLogger.test();
-        final project = FakeXcodeProject(
-          platform: SupportedPlatform.ios.name,
-          fileSystem: memoryFileSystem,
-          logger: testLogger,
-        );
-        _createProjectFiles(project);
-        memoryFileSystem.file('non_flutter/.lldbinit')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('command source /path/to/Flutter/ephemeral/flutter_lldbinit');
-        project.xcodeProjectSchemeFile().writeAsStringSync(
-          _validScheme(lldbInitFile: '\n      customLLDBInitFile = "non_flutter/.lldbinit"'),
-        );
+    test('skips if customLLDBInitFile already exists and contain flutter lldbinit', () async {
+      final memoryFileSystem = MemoryFileSystem();
+      final testLogger = BufferLogger.test();
+      final project = FakeXcodeProject(
+        platform: SupportedPlatform.ios.name,
+        fileSystem: memoryFileSystem,
+        logger: testLogger,
+      );
+      _createProjectFiles(project);
+      memoryFileSystem.file('non_flutter/.lldbinit')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('command source /path/to/Flutter/ephemeral/flutter_lldbinit');
+      project.xcodeProjectSchemeFile().writeAsStringSync(
+        _validScheme(lldbInitFile: '\n      customLLDBInitFile = "non_flutter/.lldbinit"'),
+      );
 
-        final migration = LLDBInitMigration(
-          project,
-          BuildInfo.debug,
-          testLogger,
-          environmentType: EnvironmentType.physical,
-          fileSystem: memoryFileSystem,
-        );
-        await migration.migrate();
-        expect(testLogger.errorText, isEmpty);
-      },
-    );
+      final migration = LLDBInitMigration(
+        project,
+        BuildInfo.debug,
+        testLogger,
+        environmentType: EnvironmentType.physical,
+        fileSystem: memoryFileSystem,
+      );
+      await migration.migrate();
+      expect(testLogger.errorText, isEmpty);
+    });
 
-    testWithoutContext('prints error if customLLDBInitFile already exists and not both Launch and Test contain flutter lldbinit', () async {
+    test('prints error if customLLDBInitFile already exists and not both Launch and Test contain flutter lldbinit', () async {
       final memoryFileSystem = MemoryFileSystem();
       final testLogger = BufferLogger.test();
       final project = FakeXcodeProject(
@@ -314,40 +311,37 @@ void main() {
       );
     });
 
-    testWithoutContext(
-      'parses customLLDBInitFile if already exists and replaces Xcode build settings',
-      () async {
-        final memoryFileSystem = MemoryFileSystem();
-        final testLogger = BufferLogger.test();
-        final project = FakeXcodeProject(
-          platform: SupportedPlatform.ios.name,
-          fileSystem: memoryFileSystem,
-          logger: testLogger,
-          buildSettings: <String, String>{'SRCROOT': 'src_root'},
-        );
-        _createProjectFiles(project);
-        memoryFileSystem.file('src_root/non_flutter/.lldbinit')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('command source /path/to/Flutter/ephemeral/flutter_lldbinit');
-        project.xcodeProjectSchemeFile().writeAsStringSync(
-          _validScheme(
-            lldbInitFile: '\n      customLLDBInitFile = "\$(SRCROOT)/non_flutter/.lldbinit"',
-          ),
-        );
+    test('parses customLLDBInitFile if already exists and replaces Xcode build settings', () async {
+      final memoryFileSystem = MemoryFileSystem();
+      final testLogger = BufferLogger.test();
+      final project = FakeXcodeProject(
+        platform: SupportedPlatform.ios.name,
+        fileSystem: memoryFileSystem,
+        logger: testLogger,
+        buildSettings: <String, String>{'SRCROOT': 'src_root'},
+      );
+      _createProjectFiles(project);
+      memoryFileSystem.file('src_root/non_flutter/.lldbinit')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('command source /path/to/Flutter/ephemeral/flutter_lldbinit');
+      project.xcodeProjectSchemeFile().writeAsStringSync(
+        _validScheme(
+          lldbInitFile: '\n      customLLDBInitFile = "\$(SRCROOT)/non_flutter/.lldbinit"',
+        ),
+      );
 
-        final migration = LLDBInitMigration(
-          project,
-          BuildInfo.debug,
-          testLogger,
-          environmentType: EnvironmentType.physical,
-          fileSystem: memoryFileSystem,
-        );
-        await migration.migrate();
-        expect(testLogger.errorText, isEmpty);
-      },
-    );
+      final migration = LLDBInitMigration(
+        project,
+        BuildInfo.debug,
+        testLogger,
+        environmentType: EnvironmentType.physical,
+        fileSystem: memoryFileSystem,
+      );
+      await migration.migrate();
+      expect(testLogger.errorText, isEmpty);
+    });
 
-    testWithoutContext('prints error if LaunchAction is missing', () async {
+    test('prints error if LaunchAction is missing', () async {
       final memoryFileSystem = MemoryFileSystem();
       final testLogger = BufferLogger.test();
       final project = FakeXcodeProject(
@@ -376,7 +370,7 @@ void main() {
       );
     });
 
-    testWithoutContext('prints error if TestAction is missing', () async {
+    test('prints error if TestAction is missing', () async {
       final memoryFileSystem = MemoryFileSystem();
       final testLogger = BufferLogger.test();
       final project = FakeXcodeProject(
@@ -405,7 +399,7 @@ void main() {
       );
     });
 
-    testWithoutContext('prints error if scheme file is invalid XML', () async {
+    test('prints error if scheme file is invalid XML', () async {
       final memoryFileSystem = MemoryFileSystem();
       final testLogger = BufferLogger.test();
       final project = FakeXcodeProject(
@@ -436,7 +430,7 @@ void main() {
       );
     });
 
-    testWithoutContext('succeeds', () async {
+    test('succeeds', () async {
       final memoryFileSystem = MemoryFileSystem();
       final testLogger = BufferLogger.test();
       final project = FakeXcodeProject(
@@ -465,7 +459,7 @@ void main() {
       );
     });
 
-    testWithoutContext('succeeds with no Runner.xcworkspace', () async {
+    test('succeeds with no Runner.xcworkspace', () async {
       final memoryFileSystem = MemoryFileSystem();
       final testLogger = BufferLogger.test();
       final project = FakeXcodeProject(

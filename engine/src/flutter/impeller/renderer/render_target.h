@@ -199,6 +199,12 @@ class RenderTargetAllocator {
   /// @brief Drop all cached render target textures immediately.
   virtual void Clear() {}
 
+  /// @brief Stop caching the render target whose color texture is `texture`.
+  ///
+  ///        Use this when `texture` must outlive the current frame. It is never
+  ///        handed out again for a new render target.
+  virtual void RemoveFromCache(const std::shared_ptr<Texture>& texture) {}
+
  private:
   std::shared_ptr<Allocator> allocator_;
 };

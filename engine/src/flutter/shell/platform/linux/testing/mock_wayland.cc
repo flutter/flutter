@@ -19,6 +19,7 @@ struct MockProxy {
   uint32_t version;
   void (**listener)(void);
   void* listener_data;
+  uint32_t id;
 };
 
 // The fake wl_egl_window; libwayland-egl is replaced in the same way as
@@ -48,9 +49,11 @@ MockWayland::~MockWayland() {
 
 static MockProxy* proxy_new(const struct wl_interface* interface,
                             uint32_t version) {
+  static uint32_t next_id = 1;
   MockProxy* proxy = new MockProxy();
   proxy->interface = interface;
   proxy->version = version;
+  proxy->id = next_id++;
   return proxy;
 }
 
@@ -190,6 +193,10 @@ int wl_proxy_add_listener(struct wl_proxy* proxy,
 
 uint32_t wl_proxy_get_version(struct wl_proxy* proxy) {
   return reinterpret_cast<MockProxy*>(proxy)->version;
+}
+
+uint32_t wl_proxy_get_id(struct wl_proxy* proxy) {
+  return reinterpret_cast<MockProxy*>(proxy)->id;
 }
 
 int wl_display_roundtrip(struct wl_display* display) {

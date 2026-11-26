@@ -25,7 +25,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('Hot restart kills background isolates', () async {
+  test('Hot restart kills background isolates', () async {
     final project = BackgroundProject();
     await project.setUpIn(tempDir);
     final flutter = FlutterRunTestDriver(tempDir);
@@ -59,7 +59,7 @@ void main() {
     await flutter.stop();
   });
 
-  testWithoutContext('Hot reload updates background isolates', () async {
+  test('Hot reload updates background isolates', () async {
     final project = RepeatingBackgroundProject();
     await project.setUpIn(tempDir);
     final flutter = FlutterRunTestDriver(tempDir);

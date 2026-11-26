@@ -6,6 +6,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include "flutter/impeller/geometry/path_source.h"
+#include "flutter/impeller/geometry/wangs_formula.h"
 #include "flutter/impeller/tessellator/path_tessellator.h"
 
 #include "flutter/display_list/geometry/dl_path.h"
@@ -578,6 +580,31 @@ TEST(PathTessellatorTest, LinearCubicToPointCount) {
   auto [points, contours] = PathTessellator::CountFillStorage(path, 2.0f);
   EXPECT_EQ(points, 3u);
   EXPECT_EQ(contours, 1u);
+}
+
+// An oval drawn in very large "world" coordinates (and positioned with a
+// transform) used to make the tessellator loop forever because the
+// subdivision count for each of its conics overflowed to infinity.
+TEST(PathTessellatorTest, HugeOvalTessellationIsBounded) {
+  EllipsePathSource oval(Rect::MakeLTRB(-1.37565448e+21f, -7.48722031e+20f,
+                                        6.62345453e+20f, 1.28927798e+21f));
+
+  // 4 conics, each clamped, plus the contour origin.
+  const size_t max_points =
+      4u * static_cast<size_t>(kMaxCurveSubdivisions) + 1u;
+
+  auto [points, contours] = PathTessellator::CountFillStorage(oval, 1.0f);
+  EXPECT_LE(points, max_points);
+  EXPECT_EQ(contours, 1u);
+
+  size_t written = 0u;
+  ::testing::NiceMock<MockPathVertexWriter> mock_writer;
+  ON_CALL(mock_writer, Write(::testing::_)).WillByDefault([&written](Point) {
+    written++;
+  });
+  PathTessellator::PathToFilledVertices(oval, mock_writer, 1.0f);
+  EXPECT_LE(written, max_points);
+  EXPECT_LE(written, points);
 }
 
 }  // namespace testing

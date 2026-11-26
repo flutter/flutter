@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/github_template.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fakes.dart';
 
 const _kPluginsFile = '''
@@ -51,7 +50,7 @@ void main() {
   });
 
   group('GitHub template creator', () {
-    testWithoutContext('similar issues URL', () {
+    test('similar issues URL', () {
       expect(
         GitHubTemplateCreator.toolCrashSimilarIssuesURL('this is a 100% error'),
         'https://github.com/flutter/flutter/issues?q=is%3Aissue+this+is+a+100%25+error',
@@ -59,7 +58,7 @@ void main() {
     });
 
     group('sanitized error message', () {
-      testWithoutContext('ProcessException', () {
+      test('ProcessException', () {
         expect(
           GitHubTemplateCreator.sanitizedCrashException(
             const ProcessException('cd', <String>['path/to/something']),
@@ -80,7 +79,7 @@ void main() {
         );
       });
 
-      testWithoutContext('FileSystemException', () {
+      test('FileSystemException', () {
         expect(
           GitHubTemplateCreator.sanitizedCrashException(
             const FileSystemException('delete failed', 'path/to/something'),
@@ -99,7 +98,7 @@ void main() {
         );
       });
 
-      testWithoutContext('SocketException', () {
+      test('SocketException', () {
         expect(
           GitHubTemplateCreator.sanitizedCrashException(
             SocketException(
@@ -113,7 +112,7 @@ void main() {
         );
       });
 
-      testWithoutContext('DevFSException', () {
+      test('DevFSException', () {
         final stackTrace = StackTrace.fromString('''
 #0      _File.open.<anonymous closure> (dart:io/file_impl.dart:366:9)
 #1      _rootRunUnary (dart:async/zone.dart:1141:38)''');
@@ -125,21 +124,21 @@ void main() {
         );
       });
 
-      testWithoutContext('ArgumentError', () {
+      test('ArgumentError', () {
         expect(
           GitHubTemplateCreator.sanitizedCrashException(ArgumentError('argument error message')),
           'ArgumentError: Invalid argument(s): argument error message',
         );
       });
 
-      testWithoutContext('Error', () {
+      test('Error', () {
         expect(
           GitHubTemplateCreator.sanitizedCrashException(FakeError()),
           'FakeError: (#0      _File.open.<anonymous closure> (dart:io/file_impl.dart:366:9))',
         );
       });
 
-      testWithoutContext('String', () {
+      test('String', () {
         expect(
           GitHubTemplateCreator.sanitizedCrashException(
             'May have non-tool-internal info, very long string, 0b8abb4724aa590dd0f429683339b' // ignore: missing_whitespace_between_adjacent_strings
@@ -160,7 +159,7 @@ void main() {
         );
       });
 
-      testWithoutContext('Exception', () {
+      test('Exception', () {
         expect(
           GitHubTemplateCreator.sanitizedCrashException(
             Exception('May have non-tool-internal info'),
@@ -169,7 +168,7 @@ void main() {
         );
       });
 
-      testWithoutContext('custom Exception', () {
+      test('custom Exception', () {
         expect(GitHubTemplateCreator.sanitizedCrashException(FakeException()), 'FakeException');
       });
     });
@@ -185,50 +184,41 @@ void main() {
         error = ArgumentError('argument error message');
       });
 
-      testUsingContext(
-        'shows GitHub issue URL',
-        () async {
-          final creator = GitHubTemplateCreator(
+      test('shows GitHub issue URL', () async {
+        final creator = GitHubTemplateCreator(
+          fileSystem: fs,
+          logger: logger,
+          flutterProjectFactory: FlutterProjectFactory(
             fileSystem: fs,
             logger: logger,
-            flutterProjectFactory: FlutterProjectFactory(
-              fileSystem: fs,
-              logger: logger,
-              config: FakeConfig(),
-            ),
-          );
-          expect(
-            await creator.toolCrashIssueTemplateGitHubURL(command, error, stackTrace, doctorText),
-            'https://github.com/flutter/flutter/issues/new?title=%5Btool_crash%5D+ArgumentError%3A+'
-            'Invalid+argument%28s%29%3A+argument+error+message&body=%23%23+Command%0A%60%60%60sh%0A'
-            'flutter+test%0A%60%60%60%0A%0A%23%23+Steps+to+Reproduce%0A1.+...%0A2.+...%0A3.+...%0'
-            'A%0A%23%23+Logs%0AArgumentError%3A+Invalid+argument%28s%29%3A+argument+error+message'
-            '%0A%60%60%60console%0Atrace%0A%60%60%60%0A%60%60%60console%0A+%5B%E2%9C%93%5D+Flutter+%28Channel+r'
-            'eport%0A%60%60%60%0A%0A%23%23+Flutter+Application+Metadata%0ANo+pubspec+in+working+d'
-            'irectory.%0A&labels=tool%2Csevere%3A+crash',
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => MemoryFileSystem.test(),
-          ProcessManager: () => FakeProcessManager.any(),
-        },
-      );
+            config: FakeConfig(),
+          ),
+        );
+        expect(
+          await creator.toolCrashIssueTemplateGitHubURL(command, error, stackTrace, doctorText),
+          'https://github.com/flutter/flutter/issues/new?title=%5Btool_crash%5D+ArgumentError%3A+'
+          'Invalid+argument%28s%29%3A+argument+error+message&body=%23%23+Command%0A%60%60%60sh%0A'
+          'flutter+test%0A%60%60%60%0A%0A%23%23+Steps+to+Reproduce%0A1.+...%0A2.+...%0A3.+...%0'
+          'A%0A%23%23+Logs%0AArgumentError%3A+Invalid+argument%28s%29%3A+argument+error+message'
+          '%0A%60%60%60console%0Atrace%0A%60%60%60%0A%60%60%60console%0A+%5B%E2%9C%93%5D+Flutter+%28Channel+r'
+          'eport%0A%60%60%60%0A%0A%23%23+Flutter+Application+Metadata%0ANo+pubspec+in+working+d'
+          'irectory.%0A&labels=tool%2Csevere%3A+crash',
+        );
+      });
 
-      testUsingContext(
-        'app metadata',
-        () async {
-          final creator = GitHubTemplateCreator(
+      test('app metadata', () async {
+        final creator = GitHubTemplateCreator(
+          fileSystem: fs,
+          logger: logger,
+          flutterProjectFactory: FlutterProjectFactory(
             fileSystem: fs,
             logger: logger,
-            flutterProjectFactory: FlutterProjectFactory(
-              fileSystem: fs,
-              logger: logger,
-              config: FakeConfig(),
-            ),
-          );
-          final Directory projectDirectory = fs.currentDirectory;
+            config: FakeConfig(),
+          ),
+        );
+        final Directory projectDirectory = fs.currentDirectory;
 
-          projectDirectory.childFile('pubspec.yaml').writeAsStringSync('''
+        projectDirectory.childFile('pubspec.yaml').writeAsStringSync('''
 name: failing_app
 version: 2.0.1+100
 flutter:
@@ -239,11 +229,11 @@ flutter:
     iosBundleIdentifier: com.example.failing.ios
 ''');
 
-          final File pluginsFile = projectDirectory.childFile('.flutter-plugins-dependencies');
-          pluginsFile.writeAsStringSync(_kPluginsFile);
+        final File pluginsFile = projectDirectory.childFile('.flutter-plugins-dependencies');
+        pluginsFile.writeAsStringSync(_kPluginsFile);
 
-          final File metadataFile = projectDirectory.childFile('.metadata');
-          metadataFile.writeAsStringSync('''
+        final File metadataFile = projectDirectory.childFile('.metadata');
+        metadataFile.writeAsStringSync('''
 version:
   revision: 0b8abb4724aa590dd0f429683339b1e045a1594d
   channel: stable
@@ -251,14 +241,14 @@ version:
 project_type: app
         ''');
 
-          final String actualURL = await creator.toolCrashIssueTemplateGitHubURL(
-            command,
-            error,
-            stackTrace,
-            doctorText,
-          );
-          final String? actualBody = Uri.parse(actualURL).queryParameters['body'];
-          const expectedBody = '''
+        final String actualURL = await creator.toolCrashIssueTemplateGitHubURL(
+          command,
+          error,
+          stackTrace,
+          doctorText,
+        );
+        final String? actualBody = Uri.parse(actualURL).queryParameters['body'];
+        const expectedBody = '''
 ## Command
 ```sh
 flutter test
@@ -295,13 +285,8 @@ device_info-0.4.1+4
 
 ''';
 
-          expect(actualBody, expectedBody);
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-        },
-      );
+        expect(actualBody, expectedBody);
+      });
     });
   });
 }

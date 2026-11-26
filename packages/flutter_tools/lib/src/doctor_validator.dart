@@ -11,8 +11,13 @@ import 'base/terminal.dart';
 
 class ValidatorTask {
   ValidatorTask(this.validator, this.result);
+
   final DoctorValidator validator;
   final Future<ValidationResult> result;
+
+  /// The time taken to execute [validator], populated by `Doctor.startValidatorTasks`
+  /// when validation completes without an unhandled error.
+  Duration? executionTime;
 }
 
 /// A series of tools and required install steps for a target platform (iOS or Android).
@@ -46,18 +51,24 @@ abstract class DoctorValidator {
   Duration get slowWarningDuration => _slowWarningDuration;
 
   /// Performs validation by invoking [validateImpl].
-  ///
-  /// Tracks time taken to execute the validation step.
-  Future<ValidationResult> validate() async {
-    final stopwatch = Stopwatch()..start();
-    final ValidationResult result = await validateImpl();
-    stopwatch.stop();
-    result.executionTime = stopwatch.elapsed;
-    return result;
-  }
+  Future<ValidationResult> validate() => validateImpl();
 
   /// Validation implementation.
   Future<ValidationResult> validateImpl();
+
+  /// Creates a [ValidationResult] representing an unhandled crash during
+  /// validation.
+  ValidationResult createCrashResult(Object error, [StackTrace? stackTrace]) {
+    return ValidationResult(ValidationType.crash, <ValidationMessage>[
+      const ValidationMessage.error(
+        'Due to an error, the doctor check did not complete. '
+        'If the error message below is not helpful, '
+        'please let us know about this issue at https://github.com/flutter/flutter/issues',
+      ),
+      ValidationMessage.error('$error'),
+      if (stackTrace != null) ValidationMessage('$stackTrace'),
+    ], statusInfo: 'the doctor check crashed');
+  }
 }
 
 /// A validator that runs other [DoctorValidator]s and combines their output
@@ -95,7 +106,7 @@ class GroupedValidator extends DoctorValidator {
       try {
         results.add(await subValidator.result);
       } on Exception catch (exception, stackTrace) {
-        results.add(ValidationResult.crash(exception, stackTrace));
+        results.add(subValidator.validator.createCrashResult(exception, stackTrace));
       }
     }
     _currentSlowWarning = 'Merging results...';

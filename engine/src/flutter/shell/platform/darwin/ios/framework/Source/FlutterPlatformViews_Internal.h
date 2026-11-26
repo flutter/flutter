@@ -31,7 +31,7 @@
 // is replaced with the alpha channel of the |FlutterClippingMaskView|.
 @interface FlutterClippingMaskView : UIView
 
-- (instancetype)initWithFrame:(CGRect)frame screenScale:(CGFloat)screenScale;
+- (instancetype)initWithFrame:(CGRect)frame devicePixelRatio:(CGFloat)devicePixelRatio;
 
 - (void)reset;
 
@@ -70,7 +70,11 @@
 - (instancetype)initWithCapacity:(NSInteger)capacity;
 
 // Reuse a maskView from the pool, or allocate a new one.
-- (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame;
+//
+// `devicePixelRatio` is the number of physical pixels per point that the mask view converts its
+// clips with.
+- (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame
+                                devicePixelRatio:(CGFloat)devicePixelRatio;
 
 // Insert the `maskView` into the pool.
 - (void)insertViewToPoolIfNeeded:(FlutterClippingMaskView*)maskView;
@@ -177,6 +181,17 @@
 @property(nonatomic, readonly) NSObject<FlutterPlatformView>* view;
 @property(nonatomic, readonly) FlutterTouchInterceptingView* touchInterceptor;
 @property(nonatomic, readonly) UIView* rootView;
+
+/// The layer that this platform view was last composited with.
+///
+/// `FlutterPlatformViewsController` composites the platform view in `presentFrame:` only if its
+/// layer in the frame differs from this one.
+///
+/// This value is nil for a new platform view. The controller also sets it to nil in the following
+/// cases, so that the platform view is composited in the next frame that includes it:
+/// * when the platform view is removed from the Flutter view
+/// * when the Flutter view changes
+@property(nonatomic, strong) FlutterPlatformViewLayer* lastCompositedLayer;
 
 @end
 

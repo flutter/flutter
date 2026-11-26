@@ -43,15 +43,15 @@ RegExp _builderName(String pattern) => RegExp('^(${_hostByPrefix.keys.join('|')}
 
 final List<ToolShard> _shards = <ToolShard>[
   (name: 'integration', builderName: _builderName(r'tool_integration_tests_\d+(_\d+)?')),
-  (name: 'commands', builderName: _builderName(r'tool_tests_commands(_\d+_\d+)?')),
-  (name: 'web', builderName: _builderName(r'web_tool_tests(_\d+_\d+)?')),
+  (name: 'commands', builderName: _builderName(r'tool_tests_commands(_\d+(_\d+)?)?')),
+  (name: 'web', builderName: _builderName(r'web_tool_tests(_\d+(_\d+)?)?')),
 ];
 
 final http.Client _client = http.Client();
 
 Future<void> main(List<String> arguments) async {
   final parser = ArgParser()
-    ..addOption('builds', defaultsTo: '3', help: 'Successful builds to sample per subshard.')
+    ..addOption('builds', defaultsTo: '10', help: 'Successful builds to sample per subshard.')
     ..addFlag('help', abbr: 'h', negatable: false);
   final ArgResults args = parser.parse(arguments);
   if (args.flag('help')) {

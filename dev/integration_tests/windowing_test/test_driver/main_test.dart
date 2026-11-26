@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
@@ -244,6 +245,36 @@ void main() {
     test('Popup window is not destroyed until closed', () async {
       await _expectIsDestroyedTransition(driver, 'popup');
     }, timeout: Timeout.none);
+
+    test(
+      'Popup window is closed when another window is focused',
+      () async {
+        final String response = await _requestDataWithRetry(
+          driver,
+          jsonEncode({'type': 'popup_focus_loss'}),
+          maxRetries: 1,
+        );
+        final data = jsonDecode(response) as Map<String, Object?>;
+        expect(data['popupDestroyed'], true);
+      },
+      timeout: Timeout.none,
+      skip: Platform.isLinux ? false : 'Popups are only closed on focus loss on Linux.',
+    );
+
+    test(
+      'Popup window is not closed when a dialog opened from it is focused',
+      () async {
+        final String response = await _requestDataWithRetry(
+          driver,
+          jsonEncode({'type': 'popup_focus_loss', 'with_dialog': true}),
+          maxRetries: 1,
+        );
+        final data = jsonDecode(response) as Map<String, Object?>;
+        expect(data['popupDestroyed'], false);
+      },
+      timeout: Timeout.none,
+      skip: Platform.isLinux ? false : 'Popups are only closed on focus loss on Linux.',
+    );
 
     test('Satellite window is not destroyed until closed', () async {
       await _expectIsDestroyedTransition(driver, 'satellite');

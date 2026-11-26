@@ -63,7 +63,7 @@ void main() {
     '--web-define=API_URL=${WebDefineProject.kApiUrl}',
   ];
 
-  testWithoutContext('flutter run (debug) substitutes --web-define in served index.html '
+  test('flutter run (debug) substitutes --web-define in served index.html '
       'and keeps it substituted across hot reload and hot restart', () async {
     final testRunner = WebServerDeviceTestRunner(flutter);
     try {
@@ -82,7 +82,7 @@ void main() {
     }
   });
 
-  testWithoutContext('flutter run --profile substitutes --web-define in served index.html '
+  test('flutter run --profile substitutes --web-define in served index.html '
       'and keeps it substituted across hot restart', () async {
     final testRunner = WebServerDeviceTestRunner(flutter);
     try {
@@ -99,7 +99,7 @@ void main() {
     }
   });
 
-  testWithoutContext('flutter run --release substitutes --web-define in served index.html '
+  test('flutter run --release substitutes --web-define in served index.html '
       'and keeps it substituted across hot restart', () async {
     final testRunner = WebServerDeviceTestRunner(flutter);
     try {

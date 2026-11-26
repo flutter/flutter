@@ -11,8 +11,8 @@ import com.android.build.api.dsl.ApplicationExtension
  *
  * Flutter computes per-ABI versionCodes from these instead of reading `VariantOutput.versionCode`,
  * which AGP rejects during configuration when `android.compatibility.enableLegacyApi=false`.
- * Create it with [from] in `finalizeDsl`. It does not see changes made by `finalizeDsl` callbacks
- * registered after Flutter's.
+ * Create it with [from] after AGP has run every `finalizeDsl` callback, for example in
+ * `onVariants`, so it includes versionCodes that those callbacks set.
  *
  * @property productFlavorVersionCodes keyed by flavor name, which is unique across dimensions.
  */

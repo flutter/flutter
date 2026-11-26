@@ -315,6 +315,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 @implementation SemanticsObject {
   fml::WeakPtr<flutter::AccessibilityBridgeIos> _weakBridge;
   NSMutableArray<SemanticsObject*>* _children;
+  NSMutableArray<SemanticsObject*>* _childrenInHitTestOrder;
   BOOL _inDealloc;
 }
 
@@ -340,7 +341,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
     _weakBridge = bridge;
     _uid = uid;
     _children = [[NSMutableArray alloc] init];
-    _childrenInHitTestOrder = [[NSArray alloc] init];
+    _childrenInHitTestOrder = [[NSMutableArray alloc] init];
   }
 
   return self;
@@ -385,8 +386,12 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   }
 }
 
+- (NSArray<SemanticsObject*>*)childrenInHitTestOrder {
+  return [_childrenInHitTestOrder copy];
+}
+
 - (void)setChildrenInHitTestOrder:(NSArray<SemanticsObject*>*)childrenInHitTestOrder {
-  _childrenInHitTestOrder = [childrenInHitTestOrder copy];
+  _childrenInHitTestOrder = [childrenInHitTestOrder mutableCopy];
 }
 
 - (BOOL)hasChildren {
@@ -453,6 +458,15 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   oldChild.parent = nil;
   child.parent = self;
   [_children replaceObjectAtIndex:index withObject:child];
+}
+
+- (void)replaceChildInHitTestOrder:(SemanticsObject*)oldChild withChild:(SemanticsObject*)child {
+  NSUInteger hitTestIndex = _childrenInHitTestOrder
+                                ? [_childrenInHitTestOrder indexOfObjectIdenticalTo:oldChild]
+                                : NSNotFound;
+  if (hitTestIndex != NSNotFound) {
+    [_childrenInHitTestOrder replaceObjectAtIndex:hitTestIndex withObject:child];
+  }
 }
 
 - (NSString*)routeName {
@@ -626,7 +640,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
     return nil;
   }
   // Search children in hit test order.
-  for (SemanticsObject* child in [self childrenInHitTestOrder]) {
+  for (SemanticsObject* child in _childrenInHitTestOrder) {
     id childSearchResult = [child search:point];
     if (childSearchResult != nil) {
       return childSearchResult;

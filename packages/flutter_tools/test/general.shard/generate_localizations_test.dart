@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/localizations/gen_l10n_types.dart';
 import 'package:flutter_tools/src/localizations/localizations_utils.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 
 const defaultTemplateArbFileName = 'app_en.arb';
@@ -147,7 +146,7 @@ void main() {
   });
 
   group('Setters', () {
-    testWithoutContext('setInputDirectory fails if the directory does not exist', () {
+    test('setInputDirectory fails if the directory does not exist', () {
       expect(
         () => LocalizationsGenerator.inputDirectoryFromPath(fs, 'lib', fs.directory('bogus')),
         throwsA(
@@ -160,7 +159,7 @@ void main() {
       );
     });
 
-    testWithoutContext('setting className fails if input string is empty', () {
+    test('setting className fails if input string is empty', () {
       _standardFlutterDirectoryL10nSetup(fs);
       expect(
         () => LocalizationsGenerator.classNameFromString(''),
@@ -174,7 +173,7 @@ void main() {
       );
     });
 
-    testWithoutContext('sets absolute path of the target Flutter project', () {
+    test('sets absolute path of the target Flutter project', () {
       // Set up project directory.
       final Directory l10nDirectory =
           fs.currentDirectory
@@ -220,7 +219,7 @@ void main() {
       );
     });
 
-    testWithoutContext('throws error when directory at absolute path does not exist', () {
+    test('throws error when directory at absolute path does not exist', () {
       // Set up project directory.
       final Directory l10nDirectory =
           fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
@@ -252,7 +251,7 @@ void main() {
       );
     });
 
-    testWithoutContext('throws error when arb file does not exist', () {
+    test('throws error when arb file does not exist', () {
       // Set up project directory.
       fs.currentDirectory.childDirectory('lib').childDirectory('l10n').createSync(recursive: true);
 
@@ -283,7 +282,7 @@ void main() {
         _standardFlutterDirectoryL10nSetup(fs);
       });
 
-      testWithoutContext('fails on string with spaces', () {
+      test('fails on string with spaces', () {
         expect(
           () => LocalizationsGenerator.classNameFromString('String with spaces'),
           throwsA(
@@ -296,7 +295,7 @@ void main() {
         );
       });
 
-      testWithoutContext('fails on non-alphanumeric symbols', () {
+      test('fails on non-alphanumeric symbols', () {
         expect(
           () => LocalizationsGenerator.classNameFromString('TestClass@123'),
           throwsA(
@@ -309,7 +308,7 @@ void main() {
         );
       });
 
-      testWithoutContext('fails on camel-case', () {
+      test('fails on camel-case', () {
         expect(
           () => LocalizationsGenerator.classNameFromString('camelCaseClassName'),
           throwsA(
@@ -322,7 +321,7 @@ void main() {
         );
       });
 
-      testWithoutContext('fails when starting with a number', () {
+      test('fails when starting with a number', () {
         expect(
           () => LocalizationsGenerator.classNameFromString('123ClassName'),
           throwsA(
@@ -337,7 +336,7 @@ void main() {
     });
   });
 
-  testWithoutContext('correctly adds a headerString when it is set', () {
+  test('correctly adds a headerString when it is set', () {
     final LocalizationsGenerator generator = setupLocalizations(<String, String>{
       'en': singleMessageArbFileString,
       'es': singleEsMessageArbFileString,
@@ -345,7 +344,7 @@ void main() {
     expect(generator.header, '/// Sample header');
   });
 
-  testWithoutContext('correctly adds a headerFile when it is set', () {
+  test('correctly adds a headerFile when it is set', () {
     final LocalizationsGenerator generator = setupLocalizations(
       <String, String>{'en': singleMessageArbFileString, 'es': singleEsMessageArbFileString},
       headerFile: 'header.txt',
@@ -356,7 +355,7 @@ void main() {
     expect(generator.header, '/// Sample header in a text file');
   });
 
-  testWithoutContext('sets templateArbFileName with more than one underscore correctly', () {
+  test('sets templateArbFileName with more than one underscore correctly', () {
     setupLocalizations(<String, String>{
       'en': singleMessageArbFileString,
       'es': singleEsMessageArbFileString,
@@ -367,7 +366,7 @@ void main() {
     expect(outputDirectory.childFile('output-localization-file_es.dart').existsSync(), isTrue);
   });
 
-  testWithoutContext('filenames with invalid locales should not be recognized', () {
+  test('filenames with invalid locales should not be recognized', () {
     expect(
       () {
         // This attempts to create 'app_localizations_en_CA_foo.arb'.
@@ -386,7 +385,7 @@ void main() {
     );
   });
 
-  testWithoutContext('correctly creates an untranslated messages file', () {
+  test('correctly creates an untranslated messages file', () {
     final String untranslatedMessagesFilePath = fs.path.join(
       'lib',
       'l10n',
@@ -409,7 +408,7 @@ void main() {
     expect(unimplementedOutputString, contains('subtitle'));
   });
 
-  testWithoutContext('does not include inherited keys in untranslated messages file', () {
+  test('does not include inherited keys in untranslated messages file', () {
     final String untranslatedMessagesFilePath = fs.path.join(
       'lib',
       'l10n',
@@ -433,7 +432,7 @@ void main() {
     expect(unimplementedOutputString, isNot(contains('subtitle')));
   });
 
-  testWithoutContext('correctly creates an untranslated messages file when project directory is '
+  test('correctly creates an untranslated messages file when project directory is '
       'not the current directory', () {
     // Regression test for https://github.com/flutter/flutter/issues/174205
     final String untranslatedMessagesFilePath = fs.path.join(
@@ -467,7 +466,7 @@ void main() {
     expect(generator.untranslatedMessagesFile, exists);
   });
 
-  testWithoutContext('untranslated messages suggestion is printed when translation is missing: '
+  test('untranslated messages suggestion is printed when translation is missing: '
       'command line message', () {
     setupLocalizations(<String, String>{
       'en': twoMessageArbFileString,
@@ -483,7 +482,7 @@ void main() {
     );
   });
 
-  testWithoutContext('untranslated messages suggestion is printed when translation is missing: '
+  test('untranslated messages suggestion is printed when translation is missing: '
       'l10n.yaml message', () {
     setupLocalizations(<String, String>{
       'en': twoMessageArbFileString,
@@ -496,7 +495,7 @@ void main() {
     expect(logger.statusText, contains('untranslated-messages-file: desiredFileName.txt'));
   });
 
-  testWithoutContext('unimplemented messages suggestion is not printed when all messages '
+  test('unimplemented messages suggestion is not printed when all messages '
       'are fully translated', () {
     setupLocalizations(<String, String>{
       'en': twoMessageArbFileString,
@@ -505,7 +504,7 @@ void main() {
     expect(logger.statusText, equals(''));
   });
 
-  testWithoutContext('untranslated messages file included in generated JSON list of outputs', () {
+  test('untranslated messages file included in generated JSON list of outputs', () {
     final String untranslatedMessagesFilePath = fs.path.join(
       'lib',
       'l10n',
@@ -526,89 +525,80 @@ void main() {
     expect(outputList, contains(contains('unimplemented_message_translations.json')));
   });
 
-  testWithoutContext(
-    'uses inputPathString as outputPathString when the outputPathString is null',
-    () {
-      _standardFlutterDirectoryL10nSetup(fs);
-      LocalizationsGenerator(
-          fileSystem: fs,
-          inputPathString: defaultL10nPath,
-          // outputPathString is intentionally not defined
-          templateArbFileName: defaultTemplateArbFileName,
-          outputFileString: defaultOutputFileString,
-          classNameString: defaultClassNameString,
-          logger: logger,
-          projectPathString: fs.currentDirectory.path,
-        )
-        ..loadResources()
-        ..writeOutputFiles();
+  test('uses inputPathString as outputPathString when the outputPathString is null', () {
+    _standardFlutterDirectoryL10nSetup(fs);
+    LocalizationsGenerator(
+        fileSystem: fs,
+        inputPathString: defaultL10nPath,
+        // outputPathString is intentionally not defined
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        logger: logger,
+        projectPathString: fs.currentDirectory.path,
+      )
+      ..loadResources()
+      ..writeOutputFiles();
 
-      final Directory outputDirectory = fs.directory(defaultL10nPath);
-      expect(outputDirectory.childFile('output-localization-file.dart').existsSync(), isTrue);
-      expect(outputDirectory.childFile('output-localization-file_en.dart').existsSync(), isTrue);
-      expect(outputDirectory.childFile('output-localization-file_es.dart').existsSync(), isTrue);
-    },
-  );
+    final Directory outputDirectory = fs.directory(defaultL10nPath);
+    expect(outputDirectory.childFile('output-localization-file.dart').existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file_en.dart').existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file_es.dart').existsSync(), isTrue);
+  });
 
-  testWithoutContext(
-    'correctly generates output files in non-default output directory if it already exists',
-    () {
-      final Directory l10nDirectory = fs.currentDirectory.childDirectory(defaultL10nPath)
-        ..createSync(recursive: true);
+  test('correctly generates output files in non-default output directory if it already exists', () {
+    final Directory l10nDirectory = fs.currentDirectory.childDirectory(defaultL10nPath)
+      ..createSync(recursive: true);
 
-      l10nDirectory
-          .childFile(defaultTemplateArbFileName)
-          .writeAsStringSync(singleMessageArbFileString);
-      l10nDirectory.childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString);
+    l10nDirectory
+        .childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(singleMessageArbFileString);
+    l10nDirectory.childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString);
 
-      LocalizationsGenerator(
-          fileSystem: fs,
-          inputPathString: defaultL10nPath,
-          outputPathString: fs.path.join('lib', 'l10n', 'output'),
-          templateArbFileName: defaultTemplateArbFileName,
-          outputFileString: defaultOutputFileString,
-          classNameString: defaultClassNameString,
-          logger: logger,
-          projectPathString: fs.currentDirectory.path,
-        )
-        ..loadResources()
-        ..writeOutputFiles();
+    LocalizationsGenerator(
+        fileSystem: fs,
+        inputPathString: defaultL10nPath,
+        outputPathString: fs.path.join('lib', 'l10n', 'output'),
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        logger: logger,
+        projectPathString: fs.currentDirectory.path,
+      )
+      ..loadResources()
+      ..writeOutputFiles();
 
-      final Directory outputDirectory = fs.directory(defaultL10nPath).childDirectory('output');
-      expect(outputDirectory.existsSync(), isTrue);
-      expect(outputDirectory.childFile('output-localization-file.dart').existsSync(), isTrue);
-      expect(outputDirectory.childFile('output-localization-file_en.dart').existsSync(), isTrue);
-      expect(outputDirectory.childFile('output-localization-file_es.dart').existsSync(), isTrue);
-    },
-  );
+    final Directory outputDirectory = fs.directory(defaultL10nPath).childDirectory('output');
+    expect(outputDirectory.existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file.dart').existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file_en.dart').existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file_es.dart').existsSync(), isTrue);
+  });
 
-  testWithoutContext(
-    'correctly creates output directory if it does not exist and writes files in it',
-    () {
-      _standardFlutterDirectoryL10nSetup(fs);
+  test('correctly creates output directory if it does not exist and writes files in it', () {
+    _standardFlutterDirectoryL10nSetup(fs);
 
-      LocalizationsGenerator(
-          fileSystem: fs,
-          inputPathString: defaultL10nPath,
-          outputPathString: fs.path.join('lib', 'l10n', 'output'),
-          templateArbFileName: defaultTemplateArbFileName,
-          outputFileString: defaultOutputFileString,
-          classNameString: defaultClassNameString,
-          logger: logger,
-          projectPathString: fs.currentDirectory.path,
-        )
-        ..loadResources()
-        ..writeOutputFiles();
+    LocalizationsGenerator(
+        fileSystem: fs,
+        inputPathString: defaultL10nPath,
+        outputPathString: fs.path.join('lib', 'l10n', 'output'),
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        logger: logger,
+        projectPathString: fs.currentDirectory.path,
+      )
+      ..loadResources()
+      ..writeOutputFiles();
 
-      final Directory outputDirectory = fs.directory(defaultL10nPath).childDirectory('output');
-      expect(outputDirectory.existsSync(), isTrue);
-      expect(outputDirectory.childFile('output-localization-file.dart').existsSync(), isTrue);
-      expect(outputDirectory.childFile('output-localization-file_en.dart').existsSync(), isTrue);
-      expect(outputDirectory.childFile('output-localization-file_es.dart').existsSync(), isTrue);
-    },
-  );
+    final Directory outputDirectory = fs.directory(defaultL10nPath).childDirectory('output');
+    expect(outputDirectory.existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file.dart').existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file_en.dart').existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file_es.dart').existsSync(), isTrue);
+  });
 
-  testWithoutContext('generates nullable localizations class getter via static `of` method '
+  test('generates nullable localizations class getter via static `of` method '
       'by default', () {
     final LocalizationsGenerator generator = setupLocalizations(<String, String>{
       'en': singleMessageArbFileString,
@@ -629,30 +619,27 @@ void main() {
     );
   });
 
-  testWithoutContext(
-    'can generate non-nullable localizations class getter via static `of` method ',
-    () {
-      final LocalizationsGenerator generator = setupLocalizations(<String, String>{
-        'en': singleMessageArbFileString,
-        'es': singleEsMessageArbFileString,
-      }, usesNullableGetter: false);
-      expect(generator.outputDirectory.existsSync(), isTrue);
-      expect(
-        generator.outputDirectory.childFile('output-localization-file.dart').existsSync(),
-        isTrue,
-      );
-      expect(
-        generator.outputDirectory.childFile('output-localization-file.dart').readAsStringSync(),
-        contains('static AppLocalizations of(BuildContext context)'),
-      );
-      expect(
-        generator.outputDirectory.childFile('output-localization-file.dart').readAsStringSync(),
-        contains('return Localizations.of<AppLocalizations>(context, AppLocalizations)!;'),
-      );
-    },
-  );
+  test('can generate non-nullable localizations class getter via static `of` method ', () {
+    final LocalizationsGenerator generator = setupLocalizations(<String, String>{
+      'en': singleMessageArbFileString,
+      'es': singleEsMessageArbFileString,
+    }, usesNullableGetter: false);
+    expect(generator.outputDirectory.existsSync(), isTrue);
+    expect(
+      generator.outputDirectory.childFile('output-localization-file.dart').existsSync(),
+      isTrue,
+    );
+    expect(
+      generator.outputDirectory.childFile('output-localization-file.dart').readAsStringSync(),
+      contains('static AppLocalizations of(BuildContext context)'),
+    );
+    expect(
+      generator.outputDirectory.childFile('output-localization-file.dart').readAsStringSync(),
+      contains('return Localizations.of<AppLocalizations>(context, AppLocalizations)!;'),
+    );
+  });
 
-  testWithoutContext('creates list of inputs and outputs when file path is specified', () {
+  test('creates list of inputs and outputs when file path is specified', () {
     setupLocalizations(<String, String>{
       'en': singleMessageArbFileString,
       'es': singleEsMessageArbFileString,
@@ -684,7 +671,7 @@ void main() {
     );
   });
 
-  testWithoutContext('generates normalized input & output file paths', () {
+  test('generates normalized input & output file paths', () {
     const Platform platform = LocalPlatform();
     final FileSystem fs = MemoryFileSystem.test(
       style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
@@ -707,7 +694,7 @@ void main() {
     expect(outputList, everyElement(isNot(contains(oppositeSeparator))));
   });
 
-  testWithoutContext('setting both a headerString and a headerFile should fail', () {
+  test('setting both a headerString and a headerFile should fail', () {
     expect(
       () {
         setupLocalizations(
@@ -731,7 +718,7 @@ void main() {
     );
   });
 
-  testWithoutContext('setting a headerFile that does not exist should fail', () {
+  test('setting a headerFile that does not exist should fail', () {
     expect(
       () {
         setupLocalizations(<String, String>{
@@ -750,7 +737,7 @@ void main() {
   });
 
   group('generateLocalizations', () {
-    testWithoutContext('works even if CWD does not have a pubspec.yaml', () async {
+    test('works even if CWD does not have a pubspec.yaml', () async {
       final Directory projectDir = fs.currentDirectory.childDirectory('project')
         ..createSync(recursive: true);
       final Directory l10nDirectory = projectDir.childDirectory('lib').childDirectory('l10n')
@@ -785,7 +772,7 @@ flutter:
       );
     });
 
-    testWithoutContext('other logs from flutter_tools does not affect gen-l10n', () async {
+    test('other logs from flutter_tools does not affect gen-l10n', () async {
       _standardFlutterDirectoryL10nSetup(fs);
 
       final Logger logger = BufferLogger.test();
@@ -807,7 +794,7 @@ flutter:
       );
     });
 
-    testWithoutContext('forwards arguments correctly', () async {
+    test('forwards arguments correctly', () async {
       _standardFlutterDirectoryL10nSetup(fs);
       final options = LocalizationOptions(
         header: 'HEADER',
@@ -868,7 +855,7 @@ class FooEn extends Foo {
 ''');
     });
 
-    testUsingContext('throws exception on missing flutter: generate: true flag', () async {
+    test('throws exception on missing flutter: generate: true flag', () async {
       _standardFlutterDirectoryL10nSetup(fs);
 
       // Missing flutter: generate: true should throw exception.
@@ -909,7 +896,7 @@ flutter:
       );
     });
 
-    testUsingContext('uses the same line terminator as pubspec.yaml', () async {
+    test('uses the same line terminator as pubspec.yaml', () async {
       _standardFlutterDirectoryL10nSetup(fs);
 
       fs.file('pubspec.yaml')
@@ -937,7 +924,7 @@ flutter:\r
       expect(content, contains('\r\n'));
     });
 
-    testWithoutContext('blank lines generated nicely', () async {
+    test('blank lines generated nicely', () async {
       _standardFlutterDirectoryL10nSetup(fs);
 
       // Test without headers.
@@ -1006,7 +993,7 @@ class AppLocalizationsEn extends AppLocalizations {
 ''');
     });
 
-    testWithoutContext('throws ToolExit when dart format fails', () async {
+    test('throws ToolExit when dart format fails', () async {
       _standardFlutterDirectoryL10nSetup(fs);
       final processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
@@ -1053,85 +1040,76 @@ Could not format because the source could not be parsed.''',
   });
 
   group('loadResources', () {
-    testWithoutContext(
-      'correctly initializes supportedLocales and supportedLanguageCodes properties',
-      () {
-        _standardFlutterDirectoryL10nSetup(fs);
+    test('correctly initializes supportedLocales and supportedLanguageCodes properties', () {
+      _standardFlutterDirectoryL10nSetup(fs);
 
-        final generator = LocalizationsGenerator(
-          fileSystem: fs,
-          inputPathString: defaultL10nPath,
-          outputPathString: defaultL10nPath,
-          templateArbFileName: defaultTemplateArbFileName,
-          outputFileString: defaultOutputFileString,
-          classNameString: defaultClassNameString,
-          logger: logger,
-          projectPathString: fs.currentDirectory.path,
-        )..loadResources();
+      final generator = LocalizationsGenerator(
+        fileSystem: fs,
+        inputPathString: defaultL10nPath,
+        outputPathString: defaultL10nPath,
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        logger: logger,
+        projectPathString: fs.currentDirectory.path,
+      )..loadResources();
 
-        expect(generator.supportedLocales.contains(LocaleInfo.fromString('en')), true);
-        expect(generator.supportedLocales.contains(LocaleInfo.fromString('es')), true);
-      },
-    );
+      expect(generator.supportedLocales.contains(LocaleInfo.fromString('en')), true);
+      expect(generator.supportedLocales.contains(LocaleInfo.fromString('es')), true);
+    });
 
-    testWithoutContext(
-      'correctly sorts supportedLocales and supportedLanguageCodes alphabetically',
-      () {
-        final Directory l10nDirectory =
-            fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-              ..createSync(recursive: true);
-        // Write files in non-alphabetical order so that read performs in that order
-        l10nDirectory.childFile('app_zh.arb').writeAsStringSync(singleZhMessageArbFileString);
-        l10nDirectory.childFile('app_es.arb').writeAsStringSync(singleEsMessageArbFileString);
-        l10nDirectory.childFile('app_en.arb').writeAsStringSync(singleMessageArbFileString);
+    test('correctly sorts supportedLocales and supportedLanguageCodes alphabetically', () {
+      final Directory l10nDirectory =
+          fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+            ..createSync(recursive: true);
+      // Write files in non-alphabetical order so that read performs in that order
+      l10nDirectory.childFile('app_zh.arb').writeAsStringSync(singleZhMessageArbFileString);
+      l10nDirectory.childFile('app_es.arb').writeAsStringSync(singleEsMessageArbFileString);
+      l10nDirectory.childFile('app_en.arb').writeAsStringSync(singleMessageArbFileString);
 
-        final generator = LocalizationsGenerator(
-          fileSystem: fs,
-          inputPathString: defaultL10nPath,
-          outputPathString: defaultL10nPath,
-          templateArbFileName: defaultTemplateArbFileName,
-          outputFileString: defaultOutputFileString,
-          classNameString: defaultClassNameString,
-          logger: logger,
-          projectPathString: fs.currentDirectory.path,
-        )..loadResources();
+      final generator = LocalizationsGenerator(
+        fileSystem: fs,
+        inputPathString: defaultL10nPath,
+        outputPathString: defaultL10nPath,
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        logger: logger,
+        projectPathString: fs.currentDirectory.path,
+      )..loadResources();
 
-        expect(generator.supportedLocales.first, LocaleInfo.fromString('en'));
-        expect(generator.supportedLocales.elementAt(1), LocaleInfo.fromString('es'));
-        expect(generator.supportedLocales.elementAt(2), LocaleInfo.fromString('zh'));
-      },
-    );
+      expect(generator.supportedLocales.first, LocaleInfo.fromString('en'));
+      expect(generator.supportedLocales.elementAt(1), LocaleInfo.fromString('es'));
+      expect(generator.supportedLocales.elementAt(2), LocaleInfo.fromString('zh'));
+    });
 
-    testWithoutContext(
-      'adds preferred locales to the top of supportedLocales and supportedLanguageCodes',
-      () {
-        final Directory l10nDirectory =
-            fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-              ..createSync(recursive: true);
-        l10nDirectory.childFile('app_en.arb').writeAsStringSync(singleMessageArbFileString);
-        l10nDirectory.childFile('app_es.arb').writeAsStringSync(singleEsMessageArbFileString);
-        l10nDirectory.childFile('app_zh.arb').writeAsStringSync(singleZhMessageArbFileString);
+    test('adds preferred locales to the top of supportedLocales and supportedLanguageCodes', () {
+      final Directory l10nDirectory =
+          fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+            ..createSync(recursive: true);
+      l10nDirectory.childFile('app_en.arb').writeAsStringSync(singleMessageArbFileString);
+      l10nDirectory.childFile('app_es.arb').writeAsStringSync(singleEsMessageArbFileString);
+      l10nDirectory.childFile('app_zh.arb').writeAsStringSync(singleZhMessageArbFileString);
 
-        const preferredSupportedLocale = <String>['zh', 'es'];
-        final generator = LocalizationsGenerator(
-          fileSystem: fs,
-          inputPathString: defaultL10nPath,
-          outputPathString: defaultL10nPath,
-          templateArbFileName: defaultTemplateArbFileName,
-          outputFileString: defaultOutputFileString,
-          classNameString: defaultClassNameString,
-          preferredSupportedLocales: preferredSupportedLocale,
-          logger: logger,
-          projectPathString: fs.currentDirectory.path,
-        )..loadResources();
+      const preferredSupportedLocale = <String>['zh', 'es'];
+      final generator = LocalizationsGenerator(
+        fileSystem: fs,
+        inputPathString: defaultL10nPath,
+        outputPathString: defaultL10nPath,
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        preferredSupportedLocales: preferredSupportedLocale,
+        logger: logger,
+        projectPathString: fs.currentDirectory.path,
+      )..loadResources();
 
-        expect(generator.supportedLocales.first, LocaleInfo.fromString('zh'));
-        expect(generator.supportedLocales.elementAt(1), LocaleInfo.fromString('es'));
-        expect(generator.supportedLocales.elementAt(2), LocaleInfo.fromString('en'));
-      },
-    );
+      expect(generator.supportedLocales.first, LocaleInfo.fromString('zh'));
+      expect(generator.supportedLocales.elementAt(1), LocaleInfo.fromString('es'));
+      expect(generator.supportedLocales.elementAt(2), LocaleInfo.fromString('en'));
+    });
 
-    testWithoutContext('throws an error attempting to add preferred locales when there is no corresponding arb file for that locale', () {
+    test('throws an error attempting to add preferred locales when there is no corresponding arb file for that locale', () {
       final Directory l10nDirectory =
           fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
             ..createSync(recursive: true);
@@ -1164,7 +1142,7 @@ Could not format because the source could not be parsed.''',
       );
     });
 
-    testWithoutContext('correctly sorts arbPathString alphabetically', () {
+    test('correctly sorts arbPathString alphabetically', () {
       final Directory l10nDirectory =
           fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
             ..createSync(recursive: true);
@@ -1189,7 +1167,7 @@ Could not format because the source could not be parsed.''',
       expect(generator.arbPathStrings.elementAt(2), fs.path.join('/', 'lib', 'l10n', 'app_zh.arb'));
     });
 
-    testWithoutContext('correctly parses @@locale property in arb file', () {
+    test('correctly parses @@locale property in arb file', () {
       const arbFileWithEnLocale = '''
 {
   "@@locale": "en",
@@ -1229,7 +1207,7 @@ Could not format because the source could not be parsed.''',
       expect(generator.supportedLocales.contains(LocaleInfo.fromString('zh')), true);
     });
 
-    testWithoutContext(
+    test(
       'correctly requires @@locale property in arb file to match the filename locale suffix',
       () {
         const arbFileWithEnLocale = '''
@@ -1280,7 +1258,7 @@ Could not format because the source could not be parsed.''',
       },
     );
 
-    testWithoutContext('handles pt_BR locale correctly', () {
+    test('handles pt_BR locale correctly', () {
       const ptArbFileString = '''
 {
   "@@locale": "pt",
@@ -1313,7 +1291,7 @@ Could not format because the source could not be parsed.''',
       expect(generator.supportedLocales.contains(LocaleInfo.fromString('pt_BR')), true);
     });
 
-    testWithoutContext("throws when arb file's locale could not be determined", () {
+    test("throws when arb file's locale could not be determined", () {
       fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
         ..createSync(recursive: true)
         ..childFile('app.arb').writeAsStringSync(singleMessageArbFileString);
@@ -1340,7 +1318,7 @@ Could not format because the source could not be parsed.''',
       );
     });
 
-    testWithoutContext('throws when an empty string is used as a key', () {
+    test('throws when an empty string is used as a key', () {
       const arbFileStringWithEmptyResourceId = '''
 {
   "market": "MARKET",
@@ -1375,7 +1353,7 @@ Could not format because the source could not be parsed.''',
       );
     });
 
-    testWithoutContext('throws when the same locale is detected more than once', () {
+    test('throws when the same locale is detected more than once', () {
       const secondMessageArbFileString = '''
 {
   "market": "MARKET",
@@ -1413,7 +1391,7 @@ Could not format because the source could not be parsed.''',
       );
     });
 
-    testWithoutContext('throws when the base locale does not exist', () {
+    test('throws when the base locale does not exist', () {
       final Directory l10nDirectory =
           fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
             ..createSync(recursive: true);
@@ -1442,7 +1420,7 @@ Could not format because the source could not be parsed.''',
       );
     });
 
-    testWithoutContext('AppResourceBundle throws if file contains non-string value', () {
+    test('AppResourceBundle throws if file contains non-string value', () {
       const inputPathString = 'lib/l10n';
       const templateArbFileName = 'app_en.arb';
       const outputFileString = 'app_localizations.dart';
@@ -1476,7 +1454,7 @@ Could not format because the source could not be parsed.''',
   });
 
   group('writeOutputFiles', () {
-    testWithoutContext('multiple messages with syntax error all log their errors', () {
+    test('multiple messages with syntax error all log their errors', () {
       try {
         setupLocalizations(<String, String>{
           'en': r'''
@@ -1500,7 +1478,7 @@ Could not format because the source could not be parsed.''',
       }
     });
 
-    testWithoutContext('no description generates generic comment', () {
+    test('no description generates generic comment', () {
       setupLocalizations(<String, String>{
         'en': r'''
 {
@@ -1510,7 +1488,7 @@ Could not format because the source could not be parsed.''',
       expect(getGeneratedFileContent(), contains('/// No description provided for @helloWorld.'));
     });
 
-    testWithoutContext('multiline descriptions are correctly formatted as comments', () {
+    test('multiline descriptions are correctly formatted as comments', () {
       setupLocalizations(<String, String>{
         'en': r'''
 {
@@ -1528,7 +1506,7 @@ Could not format because the source could not be parsed.''',
       );
     });
 
-    testWithoutContext('message without placeholders - should generate code comment with description and template message translation', () {
+    test('message without placeholders - should generate code comment with description and template message translation', () {
       setupLocalizations(<String, String>{
         'en': singleMessageArbFileString,
         'es': singleEsMessageArbFileString,
@@ -1543,7 +1521,7 @@ Could not format because the source could not be parsed.''',
       );
     });
 
-    testWithoutContext('template message translation handles newline characters', () {
+    test('template message translation handles newline characters', () {
       setupLocalizations(<String, String>{
         'en': r'''
 {
@@ -1564,7 +1542,7 @@ Could not format because the source could not be parsed.''',
       );
     });
 
-    testWithoutContext('message with placeholders - should generate code comment with description and template message translation', () {
+    test('message with placeholders - should generate code comment with description and template message translation', () {
       setupLocalizations(<String, String>{
         'en': r'''
 {
@@ -1594,7 +1572,7 @@ Could not format because the source could not be parsed.''',
       );
     });
 
-    testWithoutContext('should generate a file per language', () {
+    test('should generate a file per language', () {
       setupLocalizations(<String, String>{
         'en': singleMessageArbFileString,
         'en_CA': '''
@@ -1613,7 +1591,7 @@ Could not format because the source could not be parsed.''',
       expect(() => getGeneratedFileContent(locale: 'en_US'), throwsException);
     });
 
-    testWithoutContext('uses a script locale as the parent for a regional locale', () {
+    test('uses a script locale as the parent for a regional locale', () {
       final String untranslatedMessagesFilePath = fs.path.join(
         'lib',
         'l10n',
@@ -1643,7 +1621,7 @@ Could not format because the source could not be parsed.''',
       });
     });
 
-    testWithoutContext('selects parent locales for script and country combinations', () {
+    test('selects parent locales for script and country combinations', () {
       setupLocalizations(<String, String>{
         'en': singleMessageArbFileString,
         'sr': singleMessageArbFileString,
@@ -1660,29 +1638,26 @@ Could not format because the source could not be parsed.''',
       expect(content, contains('class AppLocalizationsSrCyrlRs extends AppLocalizationsSr'));
     });
 
-    testWithoutContext(
-      'language imports are sorted when preferredSupportedLocaleString is given',
-      () {
-        const preferredSupportedLocales = <String>['zh'];
-        setupLocalizations(<String, String>{
-          'en': singleMessageArbFileString,
-          'zh': singleZhMessageArbFileString,
-          'es': singleEsMessageArbFileString,
-        }, preferredSupportedLocales: preferredSupportedLocales);
-        final String content = getGeneratedFileContent();
-        expect(
-          content,
-          contains('''
+    test('language imports are sorted when preferredSupportedLocaleString is given', () {
+      const preferredSupportedLocales = <String>['zh'];
+      setupLocalizations(<String, String>{
+        'en': singleMessageArbFileString,
+        'zh': singleZhMessageArbFileString,
+        'es': singleEsMessageArbFileString,
+      }, preferredSupportedLocales: preferredSupportedLocales);
+      final String content = getGeneratedFileContent();
+      expect(
+        content,
+        contains('''
 import 'output-localization-file_en.dart';
 import 'output-localization-file_es.dart';
 import 'output-localization-file_zh.dart';
 '''),
-        );
-      },
-    );
+      );
+    });
 
     // Regression test for https://github.com/flutter/flutter/issues/88356
-    testWithoutContext('full output file suffix is retained', () {
+    test('full output file suffix is retained', () {
       setupLocalizations(<String, String>{
         'en': singleMessageArbFileString,
       }, outputFileString: 'output-localization-file.g.dart');
@@ -1707,7 +1682,7 @@ import 'output-localization-file.g.dart';
       );
     });
 
-    testWithoutContext('throws an exception when invalid output file name is passed in', () {
+    test('throws an exception when invalid output file name is passed in', () {
       expect(
         () {
           setupLocalizations(<String, String>{
@@ -1748,7 +1723,7 @@ import 'output-localization-file.g.dart';
       );
     });
 
-    testWithoutContext('imports are deferred and loaded when useDeferredImports are set', () {
+    test('imports are deferred and loaded when useDeferredImports are set', () {
       setupLocalizations(<String, String>{
         'en': singleMessageArbFileString,
       }, useDeferredLoading: true);
@@ -1763,21 +1738,18 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     });
 
     group('placeholder tests', () {
-      testWithoutContext(
-        'should automatically infer placeholders that are not explicitly defined',
-        () {
-          setupLocalizations(<String, String>{
-            'en': '''
+      test('should automatically infer placeholders that are not explicitly defined', () {
+        setupLocalizations(<String, String>{
+          'en': '''
 {
   "helloWorld": "Hello {name}"
 }''',
-          });
-          final String content = getGeneratedFileContent(locale: 'en');
-          expect(content, contains('String helloWorld(Object name) {'));
-        },
-      );
+        });
+        final String content = getGeneratedFileContent(locale: 'en');
+        expect(content, contains('String helloWorld(Object name) {'));
+      });
 
-      testWithoutContext('placeholder parameter list should be consistent between languages', () {
+      test('placeholder parameter list should be consistent between languages', () {
         setupLocalizations(<String, String>{
           'en': '''
 {
@@ -1798,11 +1770,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(getGeneratedFileContent(locale: 'es'), contains('String helloWorld(Object name) {'));
       });
 
-      testWithoutContext(
-        'braces are ignored as special characters if placeholder does not exist',
-        () {
-          setupLocalizations(<String, String>{
-            'en': '''
+      test('braces are ignored as special characters if placeholder does not exist', () {
+        setupLocalizations(<String, String>{
+          'en': '''
 {
   "helloWorld": "Hello {name}",
   "@@helloWorld": {
@@ -1811,11 +1781,10 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     }
   }
 }''',
-          }, relaxSyntax: true);
-          final String content = getGeneratedFileContent(locale: 'en');
-          expect(content, contains("String get helloWorld => 'Hello {name}'"));
-        },
-      );
+        }, relaxSyntax: true);
+        final String content = getGeneratedFileContent(locale: 'en');
+        expect(content, contains("String get helloWorld => 'Hello {name}'"));
+      });
 
       // Regression test for https://github.com/flutter/flutter/issues/163627
       //
@@ -1832,11 +1801,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       //
       // This test ensures that both template and locale can be equally partially defined
       // in the arb.
-      testWithoutContext(
-        'translation placeholder type definitions can be inferred for plurals',
-        () {
-          setupLocalizations(<String, String>{
-            'en': '''
+      test('translation placeholder type definitions can be inferred for plurals', () {
+        setupLocalizations(<String, String>{
+          'en': '''
 {
   "helloWorld": "{count, plural, one{Hello World!} other{Hello Worlds!}}",
   "@helloWorld": {
@@ -1846,7 +1813,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     }
   }
 }''',
-            'de': '''
+          'de': '''
 {
   "helloWorld": "{count, plural, one{Hallo Welt!} other{Hallo Welten!}}",
   "@helloWorld": {
@@ -1856,14 +1823,13 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     }
   }
 }''',
-          });
-          expect(getGeneratedFileContent(locale: 'en'), isA<String>());
-        },
-      );
+        });
+        expect(getGeneratedFileContent(locale: 'en'), isA<String>());
+      });
     });
 
     group('DateTime tests', () {
-      testWithoutContext('imports package:intl', () {
+      test('imports package:intl', () {
         setupLocalizations(<String, String>{
           'en': '''
 {
@@ -1883,7 +1849,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(getGeneratedFileContent(locale: 'en'), contains(intlImportDartCode));
       });
 
-      testWithoutContext('throws an exception when improperly formatted date is passed in', () {
+      test('throws an exception when improperly formatted date is passed in', () {
         expect(
           () {
             setupLocalizations(<String, String>{
@@ -1917,7 +1883,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         );
       });
 
-      testWithoutContext('use standard date format whenever possible', () {
+      test('use standard date format whenever possible', () {
         setupLocalizations(<String, String>{
           'en': '''
 {
@@ -1937,7 +1903,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(content, contains('DateFormat.yMd(localeName)'));
       });
 
-      testWithoutContext('handle arbitrary formatted date', () {
+      test('handle arbitrary formatted date', () {
         setupLocalizations(<String, String>{
           'en': '''
 {
@@ -1959,7 +1925,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(content, contains(r"DateFormat('asdf o\'clock', localeName)"));
       });
 
-      testWithoutContext('handle arbitrary formatted date with actual boolean', () {
+      test('handle arbitrary formatted date with actual boolean', () {
         setupLocalizations(<String, String>{
           'en': '''
 {
@@ -1981,7 +1947,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(content, contains(r"DateFormat('asdf o\'clock', localeName)"));
       });
 
-      testWithoutContext('handles adding two valid formats', () {
+      test('handles adding two valid formats', () {
         setupLocalizations(<String, String>{
           'en': '''
 {
@@ -2000,7 +1966,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(content, contains(r'DateFormat.yMd(localeName).add_jms()'));
       });
 
-      testWithoutContext('handles adding three valid formats', () {
+      test('handles adding three valid formats', () {
         setupLocalizations(<String, String>{
           'en': '''
 {
@@ -2019,7 +1985,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(content, contains(r'DateFormat.yMMMMEEEEd(localeName).add_QQQQ().add_Hm()'));
       });
 
-      testWithoutContext('throws an exception when adding invalid formats', () {
+      test('throws an exception when adding invalid formats', () {
         expect(
           () {
             setupLocalizations(<String, String>{
@@ -2053,7 +2019,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         );
       });
 
-      testWithoutContext('throws an exception when adding formats and trailing plus sign', () {
+      test('throws an exception when adding formats and trailing plus sign', () {
         expect(
           () {
             setupLocalizations(<String, String>{
@@ -2087,7 +2053,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         );
       });
 
-      testWithoutContext('throws an exception when no format attribute is passed in', () {
+      test('throws an exception when no format attribute is passed in', () {
         expect(
           () {
             setupLocalizations(<String, String>{
@@ -2119,7 +2085,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         );
       });
 
-      testWithoutContext('handle date with multiple locale', () {
+      test('handle date with multiple locale', () {
         setupLocalizations(<String, String>{
           'en': '''
 {
@@ -2165,11 +2131,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         );
       });
 
-      testWithoutContext(
-        'handle date with multiple locale when only template has placeholders',
-        () {
-          setupLocalizations(<String, String>{
-            'en': '''
+      test('handle date with multiple locale when only template has placeholders', () {
+        setupLocalizations(<String, String>{
+          'en': '''
 {
   "@@locale": "en",
   "springBegins": "Spring begins on {springStartDate}",
@@ -2183,33 +2147,26 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     }
   }
 }''',
-            'ja': '''
+          'ja': '''
 {
   "@@locale": "ja",
   "springBegins": "春が始まるのは{springStartDate}"
 }''',
-          });
+        });
 
-          expect(
-            getGeneratedFileContent(locale: 'en'),
-            contains('intl.DateFormat.MMMd(localeName)'),
-          );
-          expect(
-            getGeneratedFileContent(locale: 'ja'),
-            contains('intl.DateFormat.MMMd(localeName)'),
-          );
-          expect(
-            getGeneratedFileContent(locale: 'en'),
-            contains('String springBegins(DateTime springStartDate)'),
-          );
-          expect(
-            getGeneratedFileContent(locale: 'ja'),
-            contains('String springBegins(DateTime springStartDate)'),
-          );
-        },
-      );
+        expect(getGeneratedFileContent(locale: 'en'), contains('intl.DateFormat.MMMd(localeName)'));
+        expect(getGeneratedFileContent(locale: 'ja'), contains('intl.DateFormat.MMMd(localeName)'));
+        expect(
+          getGeneratedFileContent(locale: 'en'),
+          contains('String springBegins(DateTime springStartDate)'),
+        );
+        expect(
+          getGeneratedFileContent(locale: 'ja'),
+          contains('String springBegins(DateTime springStartDate)'),
+        );
+      });
 
-      testWithoutContext('handle date with multiple locale when there is unused placeholder', () {
+      test('handle date with multiple locale when there is unused placeholder', () {
         setupLocalizations(<String, String>{
           'en': '''
 {
@@ -2254,7 +2211,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(getGeneratedFileContent(locale: 'ja'), isNot(contains('notUsed')));
       });
 
-      testWithoutContext('handle date with multiple locale when placeholders are incompatible', () {
+      test('handle date with multiple locale when placeholders are incompatible', () {
         expect(
           () {
             setupLocalizations(<String, String>{
@@ -2303,7 +2260,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         );
       });
 
-      testWithoutContext(
+      test(
         'handle date with multiple locale when non-template placeholder does not specify type',
         () {
           expect(
@@ -2355,7 +2312,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         },
       );
 
-      testWithoutContext('handle ordinary formatted date and arbitrary formatted date', () {
+      test('handle ordinary formatted date and arbitrary formatted date', () {
         setupLocalizations(<String, String>{
           'en': '''
 {
@@ -2399,7 +2356,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         );
       });
 
-      testWithoutContext('handle arbitrary formatted date with multiple locale', () {
+      test('handle arbitrary formatted date with multiple locale', () {
         setupLocalizations(<String, String>{
           'en': '''
 {
@@ -2449,7 +2406,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     });
 
     group('NumberFormat tests', () {
-      testWithoutContext('imports package:intl', () {
+      test('imports package:intl', () {
         setupLocalizations(<String, String>{
           'en': '''
 {
@@ -2469,7 +2426,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(content, contains(intlImportDartCode));
       });
 
-      testWithoutContext('throws an exception when improperly formatted number is passed in', () {
+      test('throws an exception when improperly formatted number is passed in', () {
         expect(
           () {
             setupLocalizations(<String, String>{
@@ -2506,7 +2463,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     });
 
     group('plural messages', () {
-      testWithoutContext(
+      test(
         'intl package import should be omitted in subclass files when no plurals are included',
         () {
           setupLocalizations(<String, String>{
@@ -2517,7 +2474,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         },
       );
 
-      testWithoutContext('warnings are generated when plural parts are repeated', () {
+      test('warnings are generated when plural parts are repeated', () {
         setupLocalizations(<String, String>{
           'en': '''
 {
@@ -2537,7 +2494,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         );
       });
 
-      testWithoutContext('undefined plural cases throws syntax error', () {
+      test('undefined plural cases throws syntax error', () {
         try {
           setupLocalizations(<String, String>{
             'en': '''
@@ -2559,7 +2516,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         }
       });
 
-      testWithoutContext('explicit plural values are mapped to plural categories by default', () {
+      test('explicit plural values are mapped to plural categories by default', () {
         setupLocalizations(<String, String>{
           'en': '''
 {
@@ -2572,19 +2529,17 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(content, isNot(contains('count == ')));
       });
 
-      testWithoutContext(
-        'explicit plural values generate exact-match checks before intl.Intl.pluralLogic',
-        () {
-          setupLocalizations(<String, String>{
-            'en': '''
+      test('explicit plural values generate exact-match checks before intl.Intl.pluralLogic', () {
+        setupLocalizations(<String, String>{
+          'en': '''
 {
   "itemCount": "{count,plural, =0{none} =1{exactly one} one{{count} item} other{{count} items}}"
 }''',
-          }, useExplicitPluralValues: true);
-          expect(logger.hadWarningOutput, isFalse);
-          expect(
-            getGeneratedFileContent(locale: 'en'),
-            contains(r'''
+        }, useExplicitPluralValues: true);
+        expect(logger.hadWarningOutput, isFalse);
+        expect(
+          getGeneratedFileContent(locale: 'en'),
+          contains(r'''
     String _temp0 = count == 0
         ? 'none'
         : count == 1
@@ -2595,11 +2550,10 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       other: '$count items',
       one: '$count item',
     );'''),
-          );
-        },
-      );
+        );
+      });
 
-      testWithoutContext('explicit plural values are not passed as plural categories', () {
+      test('explicit plural values are not passed as plural categories', () {
         setupLocalizations(<String, String>{
           'en': '''
 {
@@ -2616,7 +2570,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(content, contains("other: 'many',"));
       });
 
-      testWithoutContext('explicit plural values without categories only emit other', () {
+      test('explicit plural values without categories only emit other', () {
         setupLocalizations(<String, String>{
           'en': '''
 {
@@ -2632,7 +2586,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         );
       });
 
-      testWithoutContext('plural messages without explicit values are unchanged by the option', () {
+      test('plural messages without explicit values are unchanged by the option', () {
         const arb = '''
 {
   "itemCount": "{count,plural, zero{none} one{one} other{many}}"
@@ -2643,27 +2597,24 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(getGeneratedFileContent(locale: 'en'), withoutOption);
       });
 
-      testWithoutContext(
-        'explicit plural values and plural categories coexist without warnings',
-        () {
-          setupLocalizations(<String, String>{
-            'en': '''
+      test('explicit plural values and plural categories coexist without warnings', () {
+        setupLocalizations(<String, String>{
+          'en': '''
 {
   "itemCount": "{count,plural, =0{none} zero{zero category} =1{exactly one} one{one category} =2{exactly two} two{two category} other{many}}"
 }''',
-          }, useExplicitPluralValues: true);
-          expect(logger.hadWarningOutput, isFalse);
-          final String content = getGeneratedFileContent(locale: 'en');
-          expect(content, contains("'none'"));
-          expect(content, contains("'exactly one'"));
-          expect(content, contains("'exactly two'"));
-          expect(content, contains("zero: 'zero category',"));
-          expect(content, contains("one: 'one category',"));
-          expect(content, contains("two: 'two category',"));
-        },
-      );
+        }, useExplicitPluralValues: true);
+        expect(logger.hadWarningOutput, isFalse);
+        final String content = getGeneratedFileContent(locale: 'en');
+        expect(content, contains("'none'"));
+        expect(content, contains("'exactly one'"));
+        expect(content, contains("'exactly two'"));
+        expect(content, contains("zero: 'zero category',"));
+        expect(content, contains("one: 'one category',"));
+        expect(content, contains("two: 'two category',"));
+      });
 
-      testWithoutContext('arbitrary explicit plural values are accepted when enabled', () {
+      test('arbitrary explicit plural values are accepted when enabled', () {
         setupLocalizations(<String, String>{
           'en': '''
 {
@@ -2676,7 +2627,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(content, contains("count == 7\n        ? 'seven'"));
       });
 
-      testWithoutContext('explicit plural values support placeholders and nested messages', () {
+      test('explicit plural values support placeholders and nested messages', () {
         setupLocalizations(<String, String>{
           'en': '''
 {
@@ -2688,25 +2639,22 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(content, contains(r"other: '$name has $count items',"));
       });
 
-      testWithoutContext(
-        'explicit plural values do not substitute template placeholders in messages',
-        () {
-          setupLocalizations(<String, String>{
-            'en': '''
+      test('explicit plural values do not substitute template placeholders in messages', () {
+        setupLocalizations(<String, String>{
+          'en': '''
 {
   "itemCount": "{count,plural, =1{Costs @(count)} =2{@(pluralLogicArgs)} other{@(explicitPluralCases)}}"
 }''',
-          }, useExplicitPluralValues: true);
-          final String content = getGeneratedFileContent(locale: 'en');
-          expect(content, contains("'Costs @(count)'"));
-          expect(content, contains("'@(pluralLogicArgs)'"));
-          expect(content, contains("other: '@(explicitPluralCases)',"));
-          expect(content, contains('count == 1'));
-          expect(content, contains('count == 2'));
-        },
-      );
+        }, useExplicitPluralValues: true);
+        final String content = getGeneratedFileContent(locale: 'en');
+        expect(content, contains("'Costs @(count)'"));
+        expect(content, contains("'@(pluralLogicArgs)'"));
+        expect(content, contains("other: '@(explicitPluralCases)',"));
+        expect(content, contains('count == 1'));
+        expect(content, contains('count == 2'));
+      });
 
-      testWithoutContext('explicit plural values too large for an integer throw when enabled', () {
+      test('explicit plural values too large for an integer throw when enabled', () {
         expect(
           () => setupLocalizations(<String, String>{
             'en': '''
@@ -2725,7 +2673,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(logger.errorText, contains('The plural case "=99999999999999999999" is too large'));
       });
 
-      testWithoutContext('repeated explicit plural values warn when enabled', () {
+      test('repeated explicit plural values warn when enabled', () {
         setupLocalizations(<String, String>{
           'en': '''
 {
@@ -2745,24 +2693,21 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(content, isNot(contains("'Hello'")));
       });
 
-      testWithoutContext(
-        'repeated explicit plural values do not warn when warnings are suppressed',
-        () {
-          setupLocalizations(
-            <String, String>{
-              'en': '''
+      test('repeated explicit plural values do not warn when warnings are suppressed', () {
+        setupLocalizations(
+          <String, String>{
+            'en': '''
 {
   "helloWorlds": "{count,plural, =1{Hello} =1{hello} other{hi}}"
 }''',
-            },
-            useExplicitPluralValues: true,
-            suppressWarnings: true,
-          );
-          expect(logger.hadWarningOutput, isFalse);
-        },
-      );
+          },
+          useExplicitPluralValues: true,
+          suppressWarnings: true,
+        );
+        expect(logger.hadWarningOutput, isFalse);
+      });
 
-      testWithoutContext('repeated plural categories warn when explicit values are enabled', () {
+      test('repeated plural categories warn when explicit values are enabled', () {
         setupLocalizations(<String, String>{
           'en': '''
 {
@@ -2779,26 +2724,20 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         );
       });
 
-      testWithoutContext(
-        'should automatically infer plural placeholders that are not explicitly defined',
-        () {
-          setupLocalizations(<String, String>{
-            'en': '''
+      test('should automatically infer plural placeholders that are not explicitly defined', () {
+        setupLocalizations(<String, String>{
+          'en': '''
 {
   "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
   "@helloWorlds": {
     "description": "Improperly formatted since it has no placeholder attribute."
   }
 }''',
-          });
-          expect(
-            getGeneratedFileContent(locale: 'en'),
-            contains('String helloWorlds(num count) {'),
-          );
-        },
-      );
+        });
+        expect(getGeneratedFileContent(locale: 'en'), contains('String helloWorlds(num count) {'));
+      });
 
-      testWithoutContext('should throw attempting to generate a plural message with incorrect format for placeholders', () {
+      test('should throw attempting to generate a plural message with incorrect format for placeholders', () {
         expect(
           () {
             setupLocalizations(<String, String>{
@@ -2827,26 +2766,23 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     });
 
     group('select messages', () {
-      testWithoutContext(
-        'should automatically infer select placeholders that are not explicitly defined',
-        () {
-          setupLocalizations(<String, String>{
-            'en': '''
+      test('should automatically infer select placeholders that are not explicitly defined', () {
+        setupLocalizations(<String, String>{
+          'en': '''
 {
   "genderSelect": "{gender, select, female {She} male {He} other {they} }",
   "@genderSelect": {
     "description": "Improperly formatted since it has no placeholder attribute."
   }
 }''',
-          });
-          expect(
-            getGeneratedFileContent(locale: 'en'),
-            contains('String genderSelect(String gender) {'),
-          );
-        },
-      );
+        });
+        expect(
+          getGeneratedFileContent(locale: 'en'),
+          contains('String genderSelect(String gender) {'),
+        );
+      });
 
-      testWithoutContext('should throw attempting to generate a select message with incorrect format for placeholders', () {
+      test('should throw attempting to generate a select message with incorrect format for placeholders', () {
         expect(
           () {
             setupLocalizations(<String, String>{
@@ -2873,12 +2809,10 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         );
       });
 
-      testWithoutContext(
-        'should throw attempting to generate a select message with an incorrect message',
-        () {
-          try {
-            setupLocalizations(<String, String>{
-              'en': '''
+      test('should throw attempting to generate a select message with an incorrect message', () {
+        try {
+          setupLocalizations(<String, String>{
+            'en': '''
 {
   "genderSelect": "{gender, select,}",
   "@genderSelect": {
@@ -2887,22 +2821,21 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     }
   }
 }''',
-            });
-          } on L10nException {
-            expect(
-              logger.errorText,
-              contains('''
+          });
+        } on L10nException {
+          expect(
+            logger.errorText,
+            contains('''
 [app_en.arb:genderSelect] ICU Syntax Error: Select expressions must have an "other" case.
     {gender, select,}
                     ^'''),
-            );
-          }
-        },
-      );
+          );
+        }
+      });
     });
 
     group('argument messages', () {
-      testWithoutContext('should generate proper calls to intl.DateFormat', () {
+      test('should generate proper calls to intl.DateFormat', () {
         setupLocalizations(<String, String>{
           'en': '''
 {
@@ -2915,7 +2848,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         );
       });
 
-      testWithoutContext('should generate proper calls to intl.DateFormat when using time', () {
+      test('should generate proper calls to intl.DateFormat when using time', () {
         setupLocalizations(<String, String>{
           'en': '''
 {
@@ -2928,11 +2861,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         );
       });
 
-      testWithoutContext(
-        'should not complain when placeholders are explicitly typed to DateTime',
-        () {
-          setupLocalizations(<String, String>{
-            'en': '''
+      test('should not complain when placeholders are explicitly typed to DateTime', () {
+        setupLocalizations(<String, String>{
+          'en': '''
 {
   "datetime": "{today, date, ::yMd}",
   "@datetime": {
@@ -2941,31 +2872,27 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     }
   }
 }''',
-          });
-          expect(
-            getGeneratedFileContent(locale: 'en'),
-            contains('String datetime(DateTime today) {'),
-          );
-        },
-      );
+        });
+        expect(
+          getGeneratedFileContent(locale: 'en'),
+          contains('String datetime(DateTime today) {'),
+        );
+      });
 
-      testWithoutContext(
-        'should automatically infer date time placeholders that are not explicitly defined',
-        () {
-          setupLocalizations(<String, String>{
-            'en': '''
+      test('should automatically infer date time placeholders that are not explicitly defined', () {
+        setupLocalizations(<String, String>{
+          'en': '''
 {
   "datetime": "{today, date, ::yMd}"
 }''',
-          });
-          expect(
-            getGeneratedFileContent(locale: 'en'),
-            contains('String datetime(DateTime today) {'),
-          );
-        },
-      );
+        });
+        expect(
+          getGeneratedFileContent(locale: 'en'),
+          contains('String datetime(DateTime today) {'),
+        );
+      });
 
-      testWithoutContext('should throw on invalid DateFormat', () {
+      test('should throw on invalid DateFormat', () {
         try {
           setupLocalizations(<String, String>{
             'en': '''
@@ -2992,7 +2919,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     // All error handling for messages should collect errors on a per-error
     // basis and log them out individually. Then, it will throw an L10nException.
     group('error handling tests', () {
-      testWithoutContext('syntax/code-gen errors properly logs errors per message', () {
+      test('syntax/code-gen errors properly logs errors per message', () {
         // TODO(thkim1011): Fix error handling so that long indents don't get truncated.
         // See https://github.com/flutter/flutter/issues/120490.
         try {
@@ -3025,7 +2952,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         }
       });
 
-      testWithoutContext('errors thrown in multiple languages are all shown', () {
+      test('errors thrown in multiple languages are all shown', () {
         try {
           setupLocalizations(<String, String>{
             'en': '{ "hello": "Hello { name" }',
@@ -3046,10 +2973,8 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       });
     });
 
-    testWithoutContext(
-      'intl package import should be kept in subclass files when plurals are included',
-      () {
-        const pluralMessageArb = '''
+    test('intl package import should be kept in subclass files when plurals are included', () {
+      const pluralMessageArb = '''
 {
   "helloWorlds": "{count,plural, =0{Hello} =1{Hello World} =2{Hello two worlds} few{Hello {count} worlds} many{Hello all {count} worlds} other{Hello other {count} worlds}}",
   "@helloWorlds": {
@@ -3060,21 +2985,18 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
   }
 }
 ''';
-        const pluralMessageEsArb = '''
+      const pluralMessageEsArb = '''
 {
   "helloWorlds": "{count,plural, =0{ES - Hello} =1{ES - Hello World} =2{ES - Hello two worlds} few{ES - Hello {count} worlds} many{ES - Hello all {count} worlds} other{ES - Hello other {count} worlds}}"
 }
 ''';
-        setupLocalizations(<String, String>{'en': pluralMessageArb, 'es': pluralMessageEsArb});
-        expect(getGeneratedFileContent(locale: 'en'), contains(intlImportDartCode));
-        expect(getGeneratedFileContent(locale: 'es'), contains(intlImportDartCode));
-      },
-    );
+      setupLocalizations(<String, String>{'en': pluralMessageArb, 'es': pluralMessageEsArb});
+      expect(getGeneratedFileContent(locale: 'en'), contains(intlImportDartCode));
+      expect(getGeneratedFileContent(locale: 'es'), contains(intlImportDartCode));
+    });
 
-    testWithoutContext(
-      'intl package import should be kept in subclass files when select is included',
-      () {
-        const selectMessageArb = '''
+    test('intl package import should be kept in subclass files when select is included', () {
+      const selectMessageArb = '''
 {
   "genderSelect": "{gender, select, female {She} male {He} other {they} }",
   "@genderSelect": {
@@ -3085,18 +3007,17 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
   }
 }
 ''';
-        const selectMessageEsArb = '''
+      const selectMessageEsArb = '''
 {
   "genderSelect": "{gender, select, female {ES - She} male {ES - He} other {ES - they} }"
 }
 ''';
-        setupLocalizations(<String, String>{'en': selectMessageArb, 'es': selectMessageEsArb});
-        expect(getGeneratedFileContent(locale: 'en'), contains(intlImportDartCode));
-        expect(getGeneratedFileContent(locale: 'es'), contains(intlImportDartCode));
-      },
-    );
+      setupLocalizations(<String, String>{'en': selectMessageArb, 'es': selectMessageEsArb});
+      expect(getGeneratedFileContent(locale: 'en'), contains(intlImportDartCode));
+      expect(getGeneratedFileContent(locale: 'es'), contains(intlImportDartCode));
+    });
 
-    testWithoutContext('check indentation on generated files', () {
+    test('check indentation on generated files', () {
       setupLocalizations(<String, String>{
         'en': singleMessageArbFileString,
         'es': singleEsMessageArbFileString,
@@ -3119,7 +3040,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       expect(localizationsFile.contains('  ];'), true);
     });
 
-    testWithoutContext(
+    test(
       'foundation package import should be omitted from file template when deferred loading = true',
       () {
         setupLocalizations(<String, String>{
@@ -3130,7 +3051,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       },
     );
 
-    testWithoutContext(
+    test(
       'foundation package import should be kept in file template when deferred loading = false',
       () {
         setupLocalizations(<String, String>{
@@ -3141,7 +3062,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       },
     );
 
-    testWithoutContext('check for string interpolation rules', () {
+    test('check for string interpolation rules', () {
       const enArbCheckList = '''
 {
   "one": "The number of {one} elapsed is: 44",
@@ -3256,7 +3177,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       expect(localizationsFile, contains(r'$nine'));
     });
 
-    testWithoutContext('check for string interpolation rules - plurals', () {
+    test('check for string interpolation rules - plurals', () {
       const enArbCheckList = '''
 {
   "first": "{count,plural, =0{test {count} test} =1{哈{count}哈} =2{m{count}m} few{_{count}_} many{{count} test} other{{count}m}}",
@@ -3309,7 +3230,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       expect(localizationsFile, contains(r'totalString'));
     });
 
-    testWithoutContext('should throw with descriptive error message when failing to parse the '
+    test('should throw with descriptive error message when failing to parse the '
         'arb file', () {
       const arbFileWithTrailingComma = '''
 {
@@ -3336,7 +3257,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       );
     });
 
-    testWithoutContext('should throw when resource is missing resource attribute (isResourceAttributeRequired = true)', () {
+    test('should throw when resource is missing resource attribute (isResourceAttributeRequired = true)', () {
       const arbFileWithMissingResourceAttribute = '''
 {
   "title": "Stocks"
@@ -3358,7 +3279,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     });
 
     group('checks for method/getter formatting', () {
-      testWithoutContext('cannot contain non-alphanumeric symbols', () {
+      test('cannot contain non-alphanumeric symbols', () {
         const nonAlphaNumericArbFile = '''
 {
   "title!!": "Stocks",
@@ -3378,7 +3299,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         );
       });
 
-      testWithoutContext('must start with lowercase character', () {
+      test('must start with lowercase character', () {
         const nonAlphaNumericArbFile = '''
 {
   "Title": "Stocks",
@@ -3398,7 +3319,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         );
       });
 
-      testWithoutContext('cannot start with a number', () {
+      test('cannot start with a number', () {
         const nonAlphaNumericArbFile = '''
 {
   "123title": "Stocks",
@@ -3418,7 +3339,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         );
       });
 
-      testWithoutContext('can start with and contain a dollar sign', () {
+      test('can start with and contain a dollar sign', () {
         const dollarArbFile = r'''
 {
   "$title$": "Stocks",
@@ -3430,7 +3351,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       });
     });
 
-    testWithoutContext('throws when the language code is not supported', () {
+    test('throws when the language code is not supported', () {
       const arbFileWithInvalidCode = '''
 {
   "@@locale": "invalid",
@@ -3467,7 +3388,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       );
     });
 
-    testWithoutContext('handle number with multiple locale', () {
+    test('handle number with multiple locale', () {
       setupLocalizations(<String, String>{
         'en': '''
 {
@@ -3510,11 +3431,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       expect(getGeneratedFileContent(locale: 'ja'), contains('decimalDigits: 3'));
     });
 
-    testWithoutContext(
-      'handle number with multiple locale specifying a format only in template',
-      () {
-        setupLocalizations(<String, String>{
-          'en': '''
+    test('handle number with multiple locale specifying a format only in template', () {
+      setupLocalizations(<String, String>{
+        'en': '''
 {
 "@@locale": "en",
 "money": "Sum {number}",
@@ -3530,7 +3449,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
   }
 }
 }''',
-          'ja': '''
+        'ja': '''
 {
 "@@locale": "ja",
 "money": "合計 {number}",
@@ -3542,26 +3461,23 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
   }
 }
 }''',
-        });
+      });
 
-        expect(getGeneratedFileContent(locale: 'en'), contains('String money(int number)'));
-        expect(getGeneratedFileContent(locale: 'ja'), contains('String money(int number)'));
-        expect(
-          getGeneratedFileContent(locale: 'en'),
-          contains('intl.NumberFormat.decimalPatternDigits('),
-        );
-        expect(getGeneratedFileContent(locale: 'en'), contains('decimalDigits: 3'));
-        expect(getGeneratedFileContent(locale: 'en'), contains(r"return 'Sum $numberString'"));
-        expect(getGeneratedFileContent(locale: 'ja'), isNot(contains('intl.NumberFormat')));
-        expect(getGeneratedFileContent(locale: 'ja'), contains(r"return '合計 $number'"));
-      },
-    );
+      expect(getGeneratedFileContent(locale: 'en'), contains('String money(int number)'));
+      expect(getGeneratedFileContent(locale: 'ja'), contains('String money(int number)'));
+      expect(
+        getGeneratedFileContent(locale: 'en'),
+        contains('intl.NumberFormat.decimalPatternDigits('),
+      );
+      expect(getGeneratedFileContent(locale: 'en'), contains('decimalDigits: 3'));
+      expect(getGeneratedFileContent(locale: 'en'), contains(r"return 'Sum $numberString'"));
+      expect(getGeneratedFileContent(locale: 'ja'), isNot(contains('intl.NumberFormat')));
+      expect(getGeneratedFileContent(locale: 'ja'), contains(r"return '合計 $number'"));
+    });
 
-    testWithoutContext(
-      'handle number with multiple locale specifying a format only in non-template',
-      () {
-        setupLocalizations(<String, String>{
-          'en': '''
+    test('handle number with multiple locale specifying a format only in non-template', () {
+      setupLocalizations(<String, String>{
+        'en': '''
 {
 "@@locale": "en",
 "money": "Sum {number}",
@@ -3573,7 +3489,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
   }
 }
 }''',
-          'ja': '''
+        'ja': '''
 {
 "@@locale": "ja",
 "money": "合計 {number}",
@@ -3589,23 +3505,22 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
   }
 }
 }''',
-        });
+      });
 
-        expect(getGeneratedFileContent(locale: 'en'), contains('String money(int number)'));
-        expect(getGeneratedFileContent(locale: 'ja'), contains('String money(int number)'));
-        expect(getGeneratedFileContent(locale: 'en'), isNot(contains('intl.NumberFormat')));
-        expect(getGeneratedFileContent(locale: 'en'), contains(r"return 'Sum $number'"));
-        expect(
-          getGeneratedFileContent(locale: 'ja'),
-          contains('intl.NumberFormat.decimalPatternDigits('),
-        );
-        expect(getGeneratedFileContent(locale: 'ja'), contains('decimalDigits: 3'));
-        expect(getGeneratedFileContent(locale: 'ja'), contains(r"return '合計 $numberString'"));
-      },
-    );
+      expect(getGeneratedFileContent(locale: 'en'), contains('String money(int number)'));
+      expect(getGeneratedFileContent(locale: 'ja'), contains('String money(int number)'));
+      expect(getGeneratedFileContent(locale: 'en'), isNot(contains('intl.NumberFormat')));
+      expect(getGeneratedFileContent(locale: 'en'), contains(r"return 'Sum $number'"));
+      expect(
+        getGeneratedFileContent(locale: 'ja'),
+        contains('intl.NumberFormat.decimalPatternDigits('),
+      );
+      expect(getGeneratedFileContent(locale: 'ja'), contains('decimalDigits: 3'));
+      expect(getGeneratedFileContent(locale: 'ja'), contains(r"return '合計 $numberString'"));
+    });
   });
 
-  testWithoutContext('can use type: int without specifying a format', () {
+  test('can use type: int without specifying a format', () {
     const arbFile = '''
 {
   "orderNumber": "This is order #{number}.",
@@ -3630,7 +3545,7 @@ String orderNumber(int number) {
     expect(getGeneratedFileContent(locale: 'en'), contains(intlImportDartCode));
   });
 
-  testWithoutContext('app localizations lookup is a public method', () {
+  test('app localizations lookup is a public method', () {
     setupLocalizations(<String, String>{'en': singleMessageArbFileString});
     expect(
       getGeneratedFileContent(),
@@ -3640,7 +3555,7 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
     );
   });
 
-  testWithoutContext('escaping with single quotes', () {
+  test('escaping with single quotes', () {
     const arbFile = '''
 {
   "singleQuote": "Flutter''s amazing!",
@@ -3652,7 +3567,7 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
     expect(getGeneratedFileContent(locale: 'en'), contains(r"Flutter\'s amazing"));
   });
 
-  testWithoutContext('suppress warnings flag actually suppresses warnings', () {
+  test('suppress warnings flag actually suppresses warnings', () {
     const pluralMessageWithOverriddenParts = '''
 {
   "helloWorlds": "{count,plural, =0{Hello}zero{hello} other{hi}}",
@@ -3669,7 +3584,7 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
     expect(logger.hadWarningOutput, isFalse);
   });
 
-  testWithoutContext('can use decimalPatternDigits with decimalDigits optional parameter', () {
+  test('can use decimalPatternDigits with decimalDigits optional parameter', () {
     const arbFile = '''
 {
   "treeHeight": "Tree height is {height}m.",
@@ -3705,7 +3620,7 @@ NumberFormat.decimalPatternDigits(
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/125461.
-  testWithoutContext('dollar signs are escaped properly when there is a select clause', () {
+  test('dollar signs are escaped properly when there is a select clause', () {
     const dollarSignWithSelect = r'''
 {
   "dollarSignWithSelect": "$nice_bug\nHello Bug! Manifestation #1 {selectPlaceholder, select, case{message} other{messageOther}}"
@@ -3717,7 +3632,7 @@ NumberFormat.decimalPatternDigits(
     );
   });
 
-  testWithoutContext('can generate method with named parameter', () {
+  test('can generate method with named parameter', () {
     const arbFile = '''
 {
   "helloName": "Hello {name}!",
@@ -3763,7 +3678,7 @@ String helloNameAndAge({required String name, required int age}) {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/165794.
-  testWithoutContext('handles missing placeholders gracefully', () async {
+  test('handles missing placeholders gracefully', () async {
     const en = r'''
     {
       "test": "No placeholder in here"
@@ -3791,7 +3706,7 @@ String helloNameAndAge({required String name, required int age}) {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/192130.
-  testWithoutContext('throws an exception when placeholder type is invalid', () {
+  test('throws an exception when placeholder type is invalid', () {
     const maliciousArb = r'''
 {
   "greeting": "Hello {user}",
@@ -3837,6 +3752,130 @@ String helloNameAndAge({required String name, required int age}) {
     );
   });
 
+  // Regression tests for https://github.com/flutter/flutter/issues/191072.
+  group('standalone UI packages', () {
+    test('defaults to flutter_localizations and GlobalMaterialLocalizations.delegates', () {
+      setupLocalizations(<String, String>{'en': singleMessageArbFileString});
+
+      final String localizationsFile = getGeneratedFileContent();
+      expect(
+        localizationsFile,
+        contains("import 'package:flutter_localizations/flutter_localizations.dart';"),
+      );
+      expect(
+        localizationsFile,
+        containsIgnoringWhitespace('''
+    delegate,
+    ...GlobalMaterialLocalizations.delegates,
+  ];
+'''),
+      );
+    });
+
+    test('uses package:material_ui/material_ui.dart when material_ui is in dependencies', () {
+      fs.file('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+name: test_app
+dependencies:
+  flutter:
+    sdk: flutter
+  material_ui: ^1.0.0
+flutter:
+  generate: true
+''');
+      setupLocalizations(<String, String>{'en': singleMessageArbFileString});
+
+      final String localizationsFile = getGeneratedFileContent();
+      expect(
+        localizationsFile,
+        contains("import 'package:material_ui/material_ui.dart' show GlobalMaterialLocalizations;"),
+      );
+      expect(
+        localizationsFile,
+        isNot(contains("import 'package:flutter_localizations/flutter_localizations.dart';")),
+      );
+      expect(
+        localizationsFile,
+        containsIgnoringWhitespace('''
+    delegate,
+    ...GlobalMaterialLocalizations.delegates,
+  ];
+'''),
+      );
+    });
+
+    test('uses package:cupertino_ui/cupertino_ui.dart and GlobalCupertinoLocalizations.delegates when only cupertino_ui is in dependencies', () {
+      fs.file('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+name: test_app
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_ui: ^1.0.0
+flutter:
+  generate: true
+''');
+      setupLocalizations(<String, String>{'en': singleMessageArbFileString});
+
+      final String localizationsFile = getGeneratedFileContent();
+      expect(
+        localizationsFile,
+        contains(
+          "import 'package:cupertino_ui/cupertino_ui.dart' show GlobalCupertinoLocalizations;",
+        ),
+      );
+      expect(
+        localizationsFile,
+        isNot(contains("import 'package:flutter_localizations/flutter_localizations.dart';")),
+      );
+      expect(
+        localizationsFile,
+        containsIgnoringWhitespace('''
+    delegate,
+    ...GlobalCupertinoLocalizations.delegates,
+  ];
+'''),
+      );
+    });
+
+    test('uses package:material_ui/material_ui.dart when both material_ui and cupertino_ui are in dependencies', () {
+      fs.file('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+name: test_app
+dependencies:
+  flutter:
+    sdk: flutter
+  material_ui: ^1.0.0
+  cupertino_ui: ^1.0.0
+flutter:
+  generate: true
+''');
+      setupLocalizations(<String, String>{'en': singleMessageArbFileString});
+
+      final String localizationsFile = getGeneratedFileContent();
+      expect(
+        localizationsFile,
+        contains("import 'package:material_ui/material_ui.dart' show GlobalMaterialLocalizations;"),
+      );
+      expect(localizationsFile, isNot(contains('package:cupertino_ui/cupertino_ui.dart')));
+      expect(
+        localizationsFile,
+        isNot(contains('package:flutter_localizations/flutter_localizations.dart')),
+      );
+      expect(
+        localizationsFile,
+        containsIgnoringWhitespace('''
+    delegate,
+    ...GlobalMaterialLocalizations.delegates,
+  ];
+'''),
+      );
+    });
+  });
+
   // Regression tests for https://github.com/flutter/flutter/issues/195904.
   group('invalid identifier validation', () {
     const cases = <({String description, String arb, String expectedMessage})>[
@@ -3879,7 +3918,7 @@ String helloNameAndAge({required String name, required int age}) {
     ];
 
     for (final (:String description, :String arb, :String expectedMessage) in cases) {
-      testWithoutContext('throws L10nException on $description', () {
+      test('throws L10nException on $description', () {
         expect(
           () => setupLocalizations(<String, String>{'en': arb}),
           throwsA(
@@ -3897,7 +3936,7 @@ String helloNameAndAge({required String name, required int age}) {
       });
     }
 
-    testWithoutContext('ignores unused invalid placeholder keys in non-template ARB metadata', () {
+    test('ignores unused invalid placeholder keys in non-template ARB metadata', () {
       setupLocalizations(<String, String>{
         'en': '{"greeting": "Hello {user}", "@greeting": {"placeholders": {"user": {"type": "String"}}}}',
         'es': '{"greeting": "Hola {user}", "@greeting": {"placeholders": {"user": {"type": "String"}, "1": {"type": "String"}}}}',

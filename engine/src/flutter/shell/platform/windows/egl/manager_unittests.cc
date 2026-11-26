@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/windows/egl/manager.h"
 
+#include <d3d10.h>
+
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -44,6 +46,25 @@ TEST(EGLManagerTest, FeatureLevel10CapLimitsToOpenGLES2) {
   ASSERT_NE(capped, nullptr);
   EXPECT_TRUE(CanCreateGLESContext(*capped, 2));
   EXPECT_FALSE(CanCreateGLESContext(*capped, 3));
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/196618
+TEST(EGLManagerTest, EnablesMultithreadProtection) {
+  auto manager = egl::Manager::Create(egl::GpuPreference::NoPreference,
+                                      /*allow_inverted_surface=*/false);
+  ASSERT_NE(manager, nullptr);
+
+  Microsoft::WRL::ComPtr<ID3D11Device> device;
+  ASSERT_TRUE(manager->GetDevice(&device));
+  ASSERT_NE(device, nullptr);
+
+  Microsoft::WRL::ComPtr<ID3D11DeviceContext> device_context;
+  device->GetImmediateContext(&device_context);
+  ASSERT_NE(device_context, nullptr);
+
+  Microsoft::WRL::ComPtr<ID3D10Multithread> multithread;
+  ASSERT_TRUE(SUCCEEDED(device_context.As(&multithread)));
+  EXPECT_TRUE(multithread->GetMultithreadProtected());
 }
 
 }  // namespace testing

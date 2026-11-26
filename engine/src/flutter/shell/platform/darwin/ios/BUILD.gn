@@ -119,6 +119,8 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterOverlayView.mm",
     "framework/Source/FlutterPlatformPlugin.h",
     "framework/Source/FlutterPlatformPlugin.mm",
+    "framework/Source/FlutterPlatformViewFrame.h",
+    "framework/Source/FlutterPlatformViewFrame.m",
     "framework/Source/FlutterPlatformViewLayer.h",
     "framework/Source/FlutterPlatformViewLayer.m",
     "framework/Source/FlutterPlatformViews.mm",
