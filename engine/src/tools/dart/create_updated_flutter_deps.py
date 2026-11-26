@@ -46,6 +46,14 @@ class VarImpl(object):
       return 'x64' # assume some default value
     raise Exception("Var is not defined: %s" % var_name)
 
+def GclientEval(node, scope):
+  if isinstance(node, str):
+    return node.format(**scope).replace('${platform}', '${{platform}}')
+  if isinstance(node, list):
+    return [GclientEval(item, scope) for item in node]
+  if isinstance(node, dict):
+    return {GclientEval(key, scope): GclientEval(value, scope) for key, value in node.items()}
+  return node
 
 def ParseDepsFile(deps_file):
   local_scope = {}
@@ -60,8 +68,9 @@ def ParseDepsFile(deps_file):
 
   # Eval the content.
   exec(deps_content, global_scope, local_scope)
+  local_scope['deps'] = GclientEval(local_scope['deps'], local_scope['vars'])
 
-  return (local_scope.get('vars', {}), local_scope.get('deps', {}))
+  return local_scope['vars'], local_scope['deps']
 
 def GitHashArg(value):
   """Validates that the string is a 40-character hex string."""
@@ -190,8 +199,13 @@ def ComputeDartDeps(flutter_vars, flutter_deps, dart_deps):
   # take updated version from Dart DEPS.
   for (dep_path, dep_source) in sorted(flutter_deps.items()):
     if dep_path.startswith(dart_sdk_root_dir):
-      # Dart dependencies are given relative to root directory called `sdk/`.
+      # Old: Dart dependencies are given relative to root directory called `sdk/`.
       dart_dep_path = f'sdk/{dep_path[len(dart_sdk_root_dir):]}'
+      if dart_dep_path in dart_deps:
+        # Still used, add it to the result.
+        new_dart_deps[dep_path] = PrettifySourcePathForDEPS(flutter_vars, dep_path, dart_deps[dart_dep_path])
+      # New: Dart dependencies are given relative to Dart repo.
+      dart_dep_path = f'{dep_path[len(dart_sdk_root_dir):]}'
       if dart_dep_path in dart_deps:
         # Still used, add it to the result.
         new_dart_deps[dep_path] = PrettifySourcePathForDEPS(flutter_vars, dep_path, dart_deps[dart_dep_path])

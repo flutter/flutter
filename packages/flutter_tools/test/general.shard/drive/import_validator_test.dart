@@ -34,7 +34,7 @@ void main() {
     );
   }
 
-  testWithoutContext('passes when there are no imports', () {
+  test('passes when there are no imports', () {
     final File file = fileSystem.file('$projectRoot/test_driver/my_test.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('''
@@ -44,7 +44,7 @@ void main() {}
     expect(errors, isEmpty);
   });
 
-  testWithoutContext('passes with allowed imports', () {
+  test('passes with allowed imports', () {
     final File file = fileSystem.file('$projectRoot/test_driver/my_test.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('''
@@ -56,7 +56,7 @@ void main() {}
     expect(errors, isEmpty);
   });
 
-  testWithoutContext('fails with direct forbidden import dart:ui', () {
+  test('fails with direct forbidden import dart:ui', () {
     final File file = fileSystem.file('$projectRoot/test_driver/my_test.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('''
@@ -68,7 +68,7 @@ void main() {}
     expect(errors.first, contains('Forbidden import/export "dart:ui"'));
   });
 
-  testWithoutContext('fails with direct forbidden import package:flutter/material.dart', () {
+  test('fails with direct forbidden import package:flutter/material.dart', () {
     final File file = fileSystem.file('$projectRoot/test_driver/my_test.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('''
@@ -80,25 +80,22 @@ void main() {}
     expect(errors.first, contains('Forbidden import/export "package:flutter/material.dart"'));
   });
 
-  testWithoutContext(
-    'fails with direct forbidden import package:flutter_test/flutter_test.dart',
-    () {
-      final File file = fileSystem.file('$projectRoot/test_driver/my_test.dart')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('''
+  test('fails with direct forbidden import package:flutter_test/flutter_test.dart', () {
+    final File file = fileSystem.file('$projectRoot/test_driver/my_test.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
 import 'package:flutter_test/flutter_test.dart';
 void main() {}
 ''');
-      final List<String> errors = createValidator().validate(file);
-      expect(errors, hasLength(1));
-      expect(
-        errors.first,
-        contains('Forbidden import/export "package:flutter_test/flutter_test.dart"'),
-      );
-    },
-  );
+    final List<String> errors = createValidator().validate(file);
+    expect(errors, hasLength(1));
+    expect(
+      errors.first,
+      contains('Forbidden import/export "package:flutter_test/flutter_test.dart"'),
+    );
+  });
 
-  testWithoutContext('passes with relative import to safe file', () {
+  test('passes with relative import to safe file', () {
     final File file = fileSystem.file('$projectRoot/test_driver/my_test.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('''
@@ -114,7 +111,7 @@ void help() {}
     expect(errors, isEmpty);
   });
 
-  testWithoutContext('fails with relative import to unsafe file', () {
+  test('fails with relative import to unsafe file', () {
     final File file = fileSystem.file('$projectRoot/test_driver/my_test.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('''
@@ -133,7 +130,7 @@ void help() {}
     expect(errors.first, contains('helper.dart'));
   });
 
-  testWithoutContext('passes with package import to safe file', () {
+  test('passes with package import to safe file', () {
     final File file = fileSystem.file('$projectRoot/test_driver/my_test.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('''
@@ -149,7 +146,7 @@ void help() {}
     expect(errors, isEmpty);
   });
 
-  testWithoutContext('fails with package import to unsafe file', () {
+  test('fails with package import to unsafe file', () {
     final File file = fileSystem.file('$projectRoot/test_driver/my_test.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('''
@@ -168,7 +165,7 @@ void help() {}
     expect(errors.first, contains('helper.dart'));
   });
 
-  testWithoutContext('handles circular imports without infinite loop', () {
+  test('handles circular imports without infinite loop', () {
     final File file1 = fileSystem.file('$projectRoot/test_driver/file1.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('''
@@ -185,7 +182,7 @@ void help() {}
     expect(errors, isEmpty);
   });
 
-  testWithoutContext('ignores imports outside project root', () {
+  test('ignores imports outside project root', () {
     final File file = fileSystem.file('$projectRoot/test_driver/my_test.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('''
