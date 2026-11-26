@@ -13,7 +13,6 @@ import 'package:uuid/uuid.dart';
 import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/config.dart';
-import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
@@ -554,9 +553,6 @@ class _RejectRequest extends _CompilationRequest {
   @override
   Future<CompilerOutput?> _run(DefaultResidentCompiler compiler) async => compiler._reject();
 }
-
-ResidentCompilerFactory get residentCompilerFactory =>
-    context.get<ResidentCompilerFactory>() ?? const ResidentCompilerFactory();
 
 /// A factory for generating [ResidentCompiler] instances.
 class ResidentCompilerFactory {

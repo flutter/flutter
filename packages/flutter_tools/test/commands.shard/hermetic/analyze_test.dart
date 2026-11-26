@@ -24,7 +24,7 @@ const _kFlutterRoot = '/data/flutter';
 const SIGABRT = -6;
 
 void main() {
-  testWithoutContext('analyze generate correct errors message', () async {
+  test('analyze generate correct errors message', () async {
     expect(
       AnalyzeBase.generateErrorsMessage(issueCount: 0, seconds: '0.1'),
       'No issues found! (ran in 0.1s)',
@@ -76,7 +76,7 @@ void main() {
       }
     });
 
-    testWithoutContext('SIGABRT throws Exception', () async {
+    test('SIGABRT throws Exception', () async {
       const stderr = 'Something bad happened!';
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
@@ -108,7 +108,7 @@ void main() {
       );
     });
 
-    testWithoutContext('Analysis server premature exit with 255 throws ToolExit', () async {
+    test('Analysis server premature exit with 255 throws ToolExit', () async {
       const stderr = 'Fatal error in analyzer';
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
@@ -141,7 +141,7 @@ void main() {
       );
     });
 
-    testWithoutContext('--flutter-repo analyzes everything in the flutterRoot', () async {
+    test('--flutter-repo analyzes everything in the flutterRoot', () async {
       final process = MockLspServerProcess();
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
@@ -175,7 +175,7 @@ void main() {
       );
     });
 
-    testWithoutContext('only the latest diagnostics published for a file are reported', () async {
+    test('only the latest diagnostics published for a file are reported', () async {
       final process = MockLspServerProcess();
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
@@ -209,7 +209,7 @@ void main() {
       );
     });
 
-    testWithoutContext('--no-plugins passes --no-plugins to language-server', () async {
+    test('--no-plugins passes --no-plugins to language-server', () async {
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -231,7 +231,7 @@ void main() {
       await expectLater(runner.run(<String>['analyze', '--no-plugins']), throwsA(isA<ToolExit>()));
     });
 
-    testWithoutContext('--benchmark passes --no-plugins to language-server by default', () async {
+    test('--benchmark passes --no-plugins to language-server by default', () async {
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -253,7 +253,7 @@ void main() {
       await expectLater(runner.run(<String>['analyze', '--benchmark']), throwsA(isA<ToolExit>()));
     });
 
-    testWithoutContext('--benchmark with --plugins enables plugins', () async {
+    test('--benchmark with --plugins enables plugins', () async {
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -321,11 +321,11 @@ void main() {
       expect(botProcessManager, hasNoRemainingExpectations);
     }
 
-    testWithoutContext('--plugins passes --plugins to language-server', () async {
+    test('--plugins passes --plugins to language-server', () async {
       await expectServerArgs(<String>['--plugins'], <String>['--plugins']);
     });
 
-    testWithoutContext('plugin trust flags pass expected flags to language-server', () async {
+    test('plugin trust flags pass expected flags to language-server', () async {
       await expectServerArgs(<String>['--trust-plugins'], <String>['--trust-plugins']);
       await expectServerArgs(
         <String>['--always-trust-plugins'],
@@ -334,7 +334,7 @@ void main() {
       await expectServerArgs(<String>['--never-trust-plugins'], <String>['--never-trust-plugins']);
     });
 
-    testWithoutContext('plugin trust flags are mutually exclusive', () async {
+    test('plugin trust flags are mutually exclusive', () async {
       for (final args in const <List<String>>[
         <String>['--trust-plugins', '--always-trust-plugins'],
         <String>['--trust-plugins', '--never-trust-plugins'],
@@ -353,7 +353,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('plugin trust flags are not negatable', () async {
+    test('plugin trust flags are not negatable', () async {
       for (final flag in const <String>[
         '--no-trust-plugins',
         '--no-always-trust-plugins',
@@ -363,7 +363,7 @@ void main() {
       }
     });
 
-    testWithoutContext('enables plugins by default when running on a bot', () async {
+    test('enables plugins by default when running on a bot', () async {
       await expectServerArgs(const <String>[], <String>['--plugins'], isRunningOnBot: true);
       await expectServerArgs(
         <String>['--no-plugins'],
@@ -393,7 +393,7 @@ void main() {
     });
   });
 
-  testWithoutContext('analyze inRepo', () {
+  test('analyze inRepo', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.directory(_kFlutterRoot).createSync(recursive: true);
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(

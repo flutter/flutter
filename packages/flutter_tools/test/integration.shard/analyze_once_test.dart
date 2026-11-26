@@ -108,21 +108,21 @@ void main() {
   });
 
   // Analyze in the current directory - no arguments
-  testWithoutContext('working directory', () async {
+  test('working directory', () async {
     await runCommand(
       arguments: <String>['analyze', '--no-pub'],
       statusTextContains: <String>['No issues found!'],
     );
   });
 
-  testWithoutContext('passing one file works', () async {
+  test('passing one file works', () async {
     await runCommand(
       arguments: <String>['analyze', '--no-pub', libMain.path],
       statusTextContains: <String>['No issues found!'],
     );
   });
 
-  testWithoutContext('passing more than one file with errors', () async {
+  test('passing more than one file with errors', () async {
     await runCommand(
       arguments: <String>['analyze', '--no-pub', libMain.path, errorFile.path],
       statusTextContains: <String>[
@@ -136,7 +136,7 @@ void main() {
     );
   });
 
-  testWithoutContext('passing more than one file success', () async {
+  test('passing more than one file success', () async {
     final File secondFile = fileSystem.file(fileSystem.path.join(projectPath, 'lib', 'second.dart'))
       ..createSync(recursive: true)
       ..writeAsStringSync('');
@@ -146,14 +146,14 @@ void main() {
     );
   });
 
-  testWithoutContext('mixing directory and files success', () async {
+  test('mixing directory and files success', () async {
     await runCommand(
       arguments: <String>['analyze', '--no-pub', libMain.path, projectPath],
       statusTextContains: <String>['No issues found!'],
     );
   });
 
-  testWithoutContext('file not found', () async {
+  test('file not found', () async {
     await runCommand(
       arguments: <String>['analyze', '--no-pub', 'not_found.abc'],
       exitMessageContains: "not_found.abc', however it does not exist on disk",
@@ -162,7 +162,7 @@ void main() {
   });
 
   // Analyze in the current directory - no arguments
-  testWithoutContext('working directory with errors', () async {
+  test('working directory with errors', () async {
     // Break the code to produce an error and a warning.
     // Also insert a statement that should not trigger a lint here
     // but will trigger a lint later on when an analysis_options.yaml is added.
@@ -184,7 +184,7 @@ void main() {
   });
 
   // Analyze in the current directory - no arguments
-  testWithoutContext('working directory with local options', () async {
+  test('working directory with local options', () async {
     // Insert an analysis_options.yaml file in the project
     // which will trigger a lint for broken code that was inserted earlier
     final File optionsFile = fileSystem.file(
@@ -217,7 +217,7 @@ void main() {
     );
   });
 
-  testWithoutContext('analyze once no duplicate issues', () async {
+  test('analyze once no duplicate issues', () async {
     final File foo = fileSystem.file(fileSystem.path.join(projectPath, 'foo.dart'));
     foo.writeAsStringSync('''
 import 'bar.dart';
@@ -242,7 +242,7 @@ void bar() {
     );
   });
 
-  testWithoutContext('analyze once returns no issues when source is error-free', () async {
+  test('analyze once returns no issues when source is error-free', () async {
     const contents = '''
 StringBuffer bar = StringBuffer('baz');
 ''';
@@ -254,7 +254,7 @@ StringBuffer bar = StringBuffer('baz');
     );
   });
 
-  testWithoutContext('analyze once returns no issues for todo comments', () async {
+  test('analyze once returns no issues for todo comments', () async {
     const contents = '''
 // TODO(foobar):
 StringBuffer bar = StringBuffer('baz');
@@ -267,123 +267,108 @@ StringBuffer bar = StringBuffer('baz');
     );
   });
 
-  testWithoutContext(
-    'analyze once with default options has info issue finally exit code 1.',
-    () async {
-      const infoSourceCode = '''
+  test('analyze once with default options has info issue finally exit code 1.', () async {
+    const infoSourceCode = '''
 void _analyze() {}
 ''';
 
-      fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(infoSourceCode);
-      await runCommand(
-        arguments: <String>['analyze', '--no-pub'],
-        statusTextContains: <String>['warning', 'unused_element'],
-        exitMessageContains: '1 issue found.',
-        exitCode: 1,
-      );
-    },
-  );
+    fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(infoSourceCode);
+    await runCommand(
+      arguments: <String>['analyze', '--no-pub'],
+      statusTextContains: <String>['warning', 'unused_element'],
+      exitMessageContains: '1 issue found.',
+      exitCode: 1,
+    );
+  });
 
-  testWithoutContext(
-    'analyze once with no-fatal-infos has info issue finally exit code 0.',
-    () async {
-      const infoSourceCode = '''
+  test('analyze once with no-fatal-infos has info issue finally exit code 0.', () async {
+    const infoSourceCode = '''
 void _analyze() {}
 ''';
 
-      final File optionsFile = fileSystem.file(
-        fileSystem.path.join(projectPath, 'analysis_options.yaml'),
-      );
-      optionsFile.writeAsStringSync('''
+    final File optionsFile = fileSystem.file(
+      fileSystem.path.join(projectPath, 'analysis_options.yaml'),
+    );
+    optionsFile.writeAsStringSync('''
 analyzer:
   errors:
     unused_element: info
   ''');
 
-      fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(infoSourceCode);
-      await runCommand(
-        arguments: <String>['analyze', '--no-pub', '--no-fatal-infos'],
-        statusTextContains: <String>['info', 'unused_element'],
-        exitMessageContains: '1 issue found.',
-      );
-    },
-  );
+    fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(infoSourceCode);
+    await runCommand(
+      arguments: <String>['analyze', '--no-pub', '--no-fatal-infos'],
+      statusTextContains: <String>['info', 'unused_element'],
+      exitMessageContains: '1 issue found.',
+    );
+  });
 
-  testWithoutContext(
-    'analyze once only fatal-warnings has info issue finally exit code 0.',
-    () async {
-      const infoSourceCode = '''
+  test('analyze once only fatal-warnings has info issue finally exit code 0.', () async {
+    const infoSourceCode = '''
 void _analyze() {}
 ''';
 
-      final File optionsFile = fileSystem.file(
-        fileSystem.path.join(projectPath, 'analysis_options.yaml'),
-      );
-      optionsFile.writeAsStringSync('''
+    final File optionsFile = fileSystem.file(
+      fileSystem.path.join(projectPath, 'analysis_options.yaml'),
+    );
+    optionsFile.writeAsStringSync('''
 analyzer:
   errors:
     unused_element: info
   ''');
 
-      fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(infoSourceCode);
-      await runCommand(
-        arguments: <String>['analyze', '--no-pub', '--fatal-warnings', '--no-fatal-infos'],
-        statusTextContains: <String>['info', 'unused_element'],
-        exitMessageContains: '1 issue found.',
-      );
-    },
-  );
+    fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(infoSourceCode);
+    await runCommand(
+      arguments: <String>['analyze', '--no-pub', '--fatal-warnings', '--no-fatal-infos'],
+      statusTextContains: <String>['info', 'unused_element'],
+      exitMessageContains: '1 issue found.',
+    );
+  });
 
-  testWithoutContext(
-    'analyze once only fatal-infos has warning issue finally exit code 0.',
-    () async {
-      const warningSourceCode = '''
+  test('analyze once only fatal-infos has warning issue finally exit code 0.', () async {
+    const warningSourceCode = '''
 void _analyze() {}
 ''';
 
-      final File optionsFile = fileSystem.file(
-        fileSystem.path.join(projectPath, 'analysis_options.yaml'),
-      );
-      optionsFile.writeAsStringSync('''
+    final File optionsFile = fileSystem.file(
+      fileSystem.path.join(projectPath, 'analysis_options.yaml'),
+    );
+    optionsFile.writeAsStringSync('''
 analyzer:
   errors:
     unused_element: warning
   ''');
 
-      fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(warningSourceCode);
-      await runCommand(
-        arguments: <String>['analyze', '--no-pub', '--fatal-infos', '--no-fatal-warnings'],
-        statusTextContains: <String>['warning', 'unused_element'],
-        exitMessageContains: '1 issue found.',
-      );
-    },
-  );
+    fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(warningSourceCode);
+    await runCommand(
+      arguments: <String>['analyze', '--no-pub', '--fatal-infos', '--no-fatal-warnings'],
+      statusTextContains: <String>['warning', 'unused_element'],
+      exitMessageContains: '1 issue found.',
+    );
+  });
 
-  testWithoutContext(
-    'analyze once only fatal-warnings has warning issue finally exit code 1.',
-    () async {
-      const warningSourceCode = '''
+  test('analyze once only fatal-warnings has warning issue finally exit code 1.', () async {
+    const warningSourceCode = '''
 void _analyze() {}
 ''';
 
-      final File optionsFile = fileSystem.file(
-        fileSystem.path.join(projectPath, 'analysis_options.yaml'),
-      );
-      optionsFile.writeAsStringSync('''
+    final File optionsFile = fileSystem.file(
+      fileSystem.path.join(projectPath, 'analysis_options.yaml'),
+    );
+    optionsFile.writeAsStringSync('''
 analyzer:
   errors:
     unused_element: warning
   ''');
 
-      fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(warningSourceCode);
-      await runCommand(
-        arguments: <String>['analyze', '--no-pub', '--no-fatal-infos', '--fatal-warnings'],
-        statusTextContains: <String>['warning', 'unused_element'],
-        exitMessageContains: '1 issue found.',
-        exitCode: 1,
-      );
-    },
-  );
+    fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(warningSourceCode);
+    await runCommand(
+      arguments: <String>['analyze', '--no-pub', '--no-fatal-infos', '--fatal-warnings'],
+      statusTextContains: <String>['warning', 'unused_element'],
+      exitMessageContains: '1 issue found.',
+      exitCode: 1,
+    );
+  });
 
   group('plugin trust', () {
     const untrustedWarning = 'because they are not trusted.';
@@ -412,7 +397,7 @@ plugins:
       };
     }
 
-    testWithoutContext('--plugins runs plugins once without persisting trust', () async {
+    test('--plugins runs plugins once without persisting trust', () async {
       final Map<String, String> env = setupPluginProject();
 
       await runCommand(
@@ -435,7 +420,7 @@ plugins:
       );
     });
 
-    testWithoutContext('--trust-plugins persists trust until plugin contents change', () async {
+    test('--trust-plugins persists trust until plugin contents change', () async {
       final Map<String, String> env = setupPluginProject();
 
       await runCommand(
@@ -464,7 +449,7 @@ plugins:
       );
     });
 
-    testWithoutContext(
+    test(
       '--always-trust-plugins and --never-trust-plugins persist across plugin changes',
       () async {
         final Map<String, String> env = setupPluginProject();
@@ -502,7 +487,7 @@ plugins:
       },
     );
 
-    testWithoutContext('mutually exclusive plugin trust flags exit with error', () async {
+    test('mutually exclusive plugin trust flags exit with error', () async {
       await runCommand(
         arguments: <String>['analyze', '--no-pub', '--trust-plugins', '--never-trust-plugins'],
         exitMessageContains:

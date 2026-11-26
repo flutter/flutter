@@ -29,7 +29,7 @@ const kCertificates = '''
 void main() {
   group('Auto signing', () {
     group('with getCodeSigningIdentityDevelopmentTeamBuildSetting', () {
-      testWithoutContext('No auto-sign if Xcode project settings are not available', () async {
+      test('No auto-sign if Xcode project settings are not available', () async {
         final Map<String, String>? signingConfigs =
             await getCodeSigningIdentityDevelopmentTeamBuildSetting(
               buildSettings: <String, String>{},
@@ -47,7 +47,7 @@ void main() {
         expect(signingConfigs, isNull);
       });
 
-      testWithoutContext('No discovery if development team specified in Xcode project', () async {
+      test('No discovery if development team specified in Xcode project', () async {
         final logger = BufferLogger.test();
         final Map<String, String>? signingConfigs =
             await getCodeSigningIdentityDevelopmentTeamBuildSetting(
@@ -74,7 +74,7 @@ void main() {
         expect(logger.traceText, isEmpty);
       });
 
-      testWithoutContext('No misleading log when CODE_SIGN_STYLE is Manual', () async {
+      test('No misleading log when CODE_SIGN_STYLE is Manual', () async {
         final logger = BufferLogger.test();
         final Map<String, String>? signingConfigs =
             await getCodeSigningIdentityDevelopmentTeamBuildSetting(
@@ -107,45 +107,11 @@ void main() {
         expect(logger.traceText, isEmpty);
       });
 
-      testWithoutContext(
-        'No discovery if provisioning profile specified in Xcode project',
-        () async {
-          final logger = BufferLogger.test();
-          final Map<String, String>? signingConfigs =
-              await getCodeSigningIdentityDevelopmentTeamBuildSetting(
-                buildSettings: <String, String>{'PROVISIONING_PROFILE': 'abc'},
-                plistParser: FakePlistParser(),
-                toolContext: FakeToolContext(
-                  config: Config.test(),
-                  fileSystemUtils: FakeFileSystemUtils(),
-                  fs: MemoryFileSystem.test(),
-                  logger: logger,
-                  platform: FakePlatform(operatingSystem: 'macos'),
-                  processManager: FakeProcessManager.empty(),
-                  terminal: FakeTerminal(),
-                ),
-              );
-          expect(signingConfigs, isNull);
-          expect(logger.errorText, isEmpty);
-          expect(logger.statusText, isEmpty);
-          expect(logger.traceText, isEmpty);
-        },
-      );
-
-      testWithoutContext(
-        'throws error with instructions when no valid code signing certificates',
-        () async {
-          final processManager = FakeProcessManager.list(<FakeCommand>[
-            const FakeCommand(command: <String>['which', 'security']),
-            const FakeCommand(command: <String>['which', 'openssl']),
-            const FakeCommand(
-              command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
-            ),
-          ]);
-          final logger = BufferLogger.test();
-          await expectLater(
-            () => getCodeSigningIdentityDevelopmentTeamBuildSetting(
-              buildSettings: <String, String>{},
+      test('No discovery if provisioning profile specified in Xcode project', () async {
+        final logger = BufferLogger.test();
+        final Map<String, String>? signingConfigs =
+            await getCodeSigningIdentityDevelopmentTeamBuildSetting(
+              buildSettings: <String, String>{'PROVISIONING_PROFILE': 'abc'},
               plistParser: FakePlistParser(),
               toolContext: FakeToolContext(
                 config: Config.test(),
@@ -153,18 +119,46 @@ void main() {
                 fs: MemoryFileSystem.test(),
                 logger: logger,
                 platform: FakePlatform(operatingSystem: 'macos'),
-                processManager: processManager,
+                processManager: FakeProcessManager.empty(),
                 terminal: FakeTerminal(),
               ),
+            );
+        expect(signingConfigs, isNull);
+        expect(logger.errorText, isEmpty);
+        expect(logger.statusText, isEmpty);
+        expect(logger.traceText, isEmpty);
+      });
+
+      test('throws error with instructions when no valid code signing certificates', () async {
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(command: <String>['which', 'security']),
+          const FakeCommand(command: <String>['which', 'openssl']),
+          const FakeCommand(
+            command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
+          ),
+        ]);
+        final logger = BufferLogger.test();
+        await expectLater(
+          () => getCodeSigningIdentityDevelopmentTeamBuildSetting(
+            buildSettings: <String, String>{},
+            plistParser: FakePlistParser(),
+            toolContext: FakeToolContext(
+              config: Config.test(),
+              fileSystemUtils: FakeFileSystemUtils(),
+              fs: MemoryFileSystem.test(),
+              logger: logger,
+              platform: FakePlatform(operatingSystem: 'macos'),
+              processManager: processManager,
+              terminal: FakeTerminal(),
             ),
-            throwsToolExit(
-              message:
-                  'No development certificates available to code sign app for device deployment',
-            ),
-          );
-          expect(
-            logger.errorText,
-            contains('''
+          ),
+          throwsToolExit(
+            message: 'No development certificates available to code sign app for device deployment',
+          ),
+        );
+        expect(
+          logger.errorText,
+          contains('''
 ════════════════════════════════════════════════════════════════════════════════
 No valid code signing certificates were found
 You can connect to your Apple Developer account by signing in with your Apple ID
@@ -190,11 +184,10 @@ For more information, please visit:
 
 Or run on an iOS simulator without code signing
 ════════════════════════════════════════════════════════════════════════════════'''),
-          );
-        },
-      );
+        );
+      });
 
-      testWithoutContext('No auto-sign if security or openssl not available', () async {
+      test('No auto-sign if security or openssl not available', () async {
         final processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(command: <String>['which', 'security'], exitCode: 1),
         ]);
@@ -220,7 +213,7 @@ Or run on an iOS simulator without code signing
         expect(logger.errorText, isEmpty);
       });
 
-      testWithoutContext('No valid code signing certificates on non-macOS platform', () async {
+      test('No valid code signing certificates on non-macOS platform', () async {
         final processManager = FakeProcessManager.empty();
         final logger = BufferLogger.test();
 
@@ -244,7 +237,7 @@ Or run on an iOS simulator without code signing
         expect(logger.traceText, contains('Unable to get code-sign settings on non-Mac platform'));
       });
 
-      testWithoutContext('uses saved provisioning profile', () async {
+      test('uses saved provisioning profile', () async {
         final testConfig = Config.test();
         final fileSystem = MemoryFileSystem.test();
         final logger = BufferLogger.test();
@@ -331,7 +324,7 @@ Or run on an iOS simulator without code signing
         });
       });
 
-      testWithoutContext('does not use saved provisioning profile if does not exist', () async {
+      test('does not use saved provisioning profile if does not exist', () async {
         final testConfig = Config.test();
         final fileSystem = MemoryFileSystem.test();
         final logger = BufferLogger.test();
@@ -368,252 +361,240 @@ Or run on an iOS simulator without code signing
         expect(signingConfigs, isNull);
       });
 
-      testWithoutContext(
-        'does not use saved provisioning profile if security fails to decode',
-        () async {
-          final testConfig = Config.test();
-          final fileSystem = MemoryFileSystem.test();
-          final logger = BufferLogger.test();
-          const profileFilePath =
-              '/path/to/profiles/1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision';
-          fileSystem.file(profileFilePath).createSync(recursive: true);
-          testConfig.setValue('ios-signing-profile', profileFilePath);
-          final File profilePlist = fileSystem.file(
-            '/.tmp_rand0/provisioning_profiles/decoded_profile_1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision.plist',
-          );
+      test('does not use saved provisioning profile if security fails to decode', () async {
+        final testConfig = Config.test();
+        final fileSystem = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        const profileFilePath =
+            '/path/to/profiles/1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision';
+        fileSystem.file(profileFilePath).createSync(recursive: true);
+        testConfig.setValue('ios-signing-profile', profileFilePath);
+        final File profilePlist = fileSystem.file(
+          '/.tmp_rand0/provisioning_profiles/decoded_profile_1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision.plist',
+        );
 
-          final processManager = FakeProcessManager.list(<FakeCommand>[
-            const FakeCommand(command: <String>['which', 'security']),
-            const FakeCommand(command: <String>['which', 'openssl']),
-            const FakeCommand(
-              command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
-              stdout: kCertificates,
-            ),
-            FakeCommand(
-              command: <String>[
-                'security',
-                'cms',
-                '-D',
-                '-i',
-                profileFilePath,
-                '-o',
-                profilePlist.path,
-              ],
-              exitCode: 1,
-            ),
-          ]);
-
-          final Map<String, String>? signingConfigs =
-              await getCodeSigningIdentityDevelopmentTeamBuildSetting(
-                buildSettings: <String, String>{},
-                plistParser: FakePlistParser(),
-                toolContext: FakeToolContext(
-                  config: testConfig,
-                  fileSystemUtils: FakeFileSystemUtils(),
-                  fs: fileSystem,
-                  logger: logger,
-                  platform: FakePlatform(operatingSystem: 'macos'),
-                  processManager: processManager,
-                  terminal: FakeTerminal(),
-                ),
-              );
-
-          expect(processManager, hasNoRemainingExpectations);
-          expect(logger.errorText, contains('Unexpected failure from security'));
-          expect(signingConfigs, isNull);
-        },
-      );
-
-      testWithoutContext(
-        'does not use saved provisioning profile if security fails to create plist',
-        () async {
-          final testConfig = Config.test();
-          final fileSystem = MemoryFileSystem.test();
-          final logger = BufferLogger.test();
-          const profileFilePath =
-              '/path/to/profiles/1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision';
-          fileSystem.file(profileFilePath).createSync(recursive: true);
-          testConfig.setValue('ios-signing-profile', profileFilePath);
-          final File profilePlist = fileSystem.file(
-            '/.tmp_rand0/provisioning_profiles/decoded_profile_1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision.plist',
-          );
-
-          final processManager = FakeProcessManager.list(<FakeCommand>[
-            const FakeCommand(command: <String>['which', 'security']),
-            const FakeCommand(command: <String>['which', 'openssl']),
-            const FakeCommand(
-              command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
-              stdout: kCertificates,
-            ),
-            FakeCommand(
-              command: <String>[
-                'security',
-                'cms',
-                '-D',
-                '-i',
-                profileFilePath,
-                '-o',
-                profilePlist.path,
-              ],
-            ),
-          ]);
-
-          final Map<String, String>? signingConfigs =
-              await getCodeSigningIdentityDevelopmentTeamBuildSetting(
-                buildSettings: <String, String>{},
-                plistParser: FakePlistParser(),
-                toolContext: FakeToolContext(
-                  config: testConfig,
-                  fileSystemUtils: FakeFileSystemUtils(),
-                  fs: fileSystem,
-                  logger: logger,
-                  platform: FakePlatform(operatingSystem: 'macos'),
-                  processManager: processManager,
-                  terminal: FakeTerminal(),
-                ),
-              );
-
-          expect(processManager, hasNoRemainingExpectations);
-          expect(logger.errorText, contains('Failed to decode'));
-          expect(signingConfigs, isNull);
-        },
-      );
-
-      testWithoutContext(
-        'does not use saved provisioning profile if fails to parse plist',
-        () async {
-          final testConfig = Config.test();
-          final fileSystem = MemoryFileSystem.test();
-          final logger = BufferLogger.test();
-          const profileFilePath =
-              '/path/to/profiles/1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision';
-          fileSystem.file(profileFilePath).createSync(recursive: true);
-          testConfig.setValue('ios-signing-profile', profileFilePath);
-          final File profilePlist = fileSystem.file(
-            '/.tmp_rand0/provisioning_profiles/decoded_profile_1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision.plist',
-          );
-
-          final processManager = FakeProcessManager.list(<FakeCommand>[
-            const FakeCommand(command: <String>['which', 'security']),
-            const FakeCommand(command: <String>['which', 'openssl']),
-            const FakeCommand(
-              command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
-              stdout: kCertificates,
-            ),
-            FakeCommand(
-              command: <String>[
-                'security',
-                'cms',
-                '-D',
-                '-i',
-                profileFilePath,
-                '-o',
-                profilePlist.path,
-              ],
-              onRun: (List<String> command) => profilePlist.createSync(recursive: true),
-            ),
-          ]);
-
-          final Map<String, String>? signingConfigs =
-              await getCodeSigningIdentityDevelopmentTeamBuildSetting(
-                buildSettings: <String, String>{},
-                plistParser: FakePlistParser(),
-                toolContext: FakeToolContext(
-                  config: testConfig,
-                  fileSystemUtils: FakeFileSystemUtils(),
-                  fs: fileSystem,
-                  logger: logger,
-                  platform: FakePlatform(operatingSystem: 'macos'),
-                  processManager: processManager,
-                  terminal: FakeTerminal(),
-                ),
-              );
-
-          expect(processManager, hasNoRemainingExpectations);
-          expect(logger.errorText, contains('Failed to parse provisioning profile'));
-          expect(signingConfigs, isNull);
-        },
-      );
-
-      testWithoutContext(
-        'does not uses saved provisioning profile if openssl fails to read cert',
-        () async {
-          final testConfig = Config.test();
-          final fileSystem = MemoryFileSystem.test();
-          final logger = BufferLogger.test();
-          const profileFilePath =
-              '/path/to/profiles/1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision';
-          fileSystem.file(profileFilePath).createSync(recursive: true);
-          testConfig.setValue('ios-signing-profile', profileFilePath);
-
-          final File profilePlist = fileSystem.file(
-            '/.tmp_rand0/provisioning_profiles/decoded_profile_1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision.plist',
-          );
-          final File cert = fileSystem.file(
-            '/.tmp_rand0/provisioning_profile_certificates/UUID1234_0.cer',
-          );
-
-          final plistParser = FakePlistParser(
-            parsedValues: <Map<String, Object>>[
-              <String, Object>{
-                'Name': 'Flutter Development',
-                'ExpirationDate': '2026-02-20T16:04:31Z',
-                'IsXcodeManaged': false,
-                'DeveloperCertificates': <List<int>>[
-                  <int>[0, 1, 2, 3],
-                ],
-                'TeamIdentifier': <String>['ABCDE1F2DH'],
-                'UUID': 'UUID1234',
-              },
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(command: <String>['which', 'security']),
+          const FakeCommand(command: <String>['which', 'openssl']),
+          const FakeCommand(
+            command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
+            stdout: kCertificates,
+          ),
+          FakeCommand(
+            command: <String>[
+              'security',
+              'cms',
+              '-D',
+              '-i',
+              profileFilePath,
+              '-o',
+              profilePlist.path,
             ],
-          );
-          final processManager = FakeProcessManager.list(<FakeCommand>[
-            const FakeCommand(command: <String>['which', 'security']),
-            const FakeCommand(command: <String>['which', 'openssl']),
-            const FakeCommand(
-              command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
-              stdout: kCertificates,
-            ),
-            FakeCommand(
-              command: <String>[
-                'security',
-                'cms',
-                '-D',
-                '-i',
-                profileFilePath,
-                '-o',
-                profilePlist.path,
+            exitCode: 1,
+          ),
+        ]);
+
+        final Map<String, String>? signingConfigs =
+            await getCodeSigningIdentityDevelopmentTeamBuildSetting(
+              buildSettings: <String, String>{},
+              plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: testConfig,
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: fileSystem,
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: processManager,
+                terminal: FakeTerminal(),
+              ),
+            );
+
+        expect(processManager, hasNoRemainingExpectations);
+        expect(logger.errorText, contains('Unexpected failure from security'));
+        expect(signingConfigs, isNull);
+      });
+
+      test('does not use saved provisioning profile if security fails to create plist', () async {
+        final testConfig = Config.test();
+        final fileSystem = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        const profileFilePath =
+            '/path/to/profiles/1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision';
+        fileSystem.file(profileFilePath).createSync(recursive: true);
+        testConfig.setValue('ios-signing-profile', profileFilePath);
+        final File profilePlist = fileSystem.file(
+          '/.tmp_rand0/provisioning_profiles/decoded_profile_1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision.plist',
+        );
+
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(command: <String>['which', 'security']),
+          const FakeCommand(command: <String>['which', 'openssl']),
+          const FakeCommand(
+            command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
+            stdout: kCertificates,
+          ),
+          FakeCommand(
+            command: <String>[
+              'security',
+              'cms',
+              '-D',
+              '-i',
+              profileFilePath,
+              '-o',
+              profilePlist.path,
+            ],
+          ),
+        ]);
+
+        final Map<String, String>? signingConfigs =
+            await getCodeSigningIdentityDevelopmentTeamBuildSetting(
+              buildSettings: <String, String>{},
+              plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: testConfig,
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: fileSystem,
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: processManager,
+                terminal: FakeTerminal(),
+              ),
+            );
+
+        expect(processManager, hasNoRemainingExpectations);
+        expect(logger.errorText, contains('Failed to decode'));
+        expect(signingConfigs, isNull);
+      });
+
+      test('does not use saved provisioning profile if fails to parse plist', () async {
+        final testConfig = Config.test();
+        final fileSystem = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        const profileFilePath =
+            '/path/to/profiles/1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision';
+        fileSystem.file(profileFilePath).createSync(recursive: true);
+        testConfig.setValue('ios-signing-profile', profileFilePath);
+        final File profilePlist = fileSystem.file(
+          '/.tmp_rand0/provisioning_profiles/decoded_profile_1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision.plist',
+        );
+
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(command: <String>['which', 'security']),
+          const FakeCommand(command: <String>['which', 'openssl']),
+          const FakeCommand(
+            command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
+            stdout: kCertificates,
+          ),
+          FakeCommand(
+            command: <String>[
+              'security',
+              'cms',
+              '-D',
+              '-i',
+              profileFilePath,
+              '-o',
+              profilePlist.path,
+            ],
+            onRun: (List<String> command) => profilePlist.createSync(recursive: true),
+          ),
+        ]);
+
+        final Map<String, String>? signingConfigs =
+            await getCodeSigningIdentityDevelopmentTeamBuildSetting(
+              buildSettings: <String, String>{},
+              plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: testConfig,
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: fileSystem,
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: processManager,
+                terminal: FakeTerminal(),
+              ),
+            );
+
+        expect(processManager, hasNoRemainingExpectations);
+        expect(logger.errorText, contains('Failed to parse provisioning profile'));
+        expect(signingConfigs, isNull);
+      });
+
+      test('does not uses saved provisioning profile if openssl fails to read cert', () async {
+        final testConfig = Config.test();
+        final fileSystem = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        const profileFilePath =
+            '/path/to/profiles/1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision';
+        fileSystem.file(profileFilePath).createSync(recursive: true);
+        testConfig.setValue('ios-signing-profile', profileFilePath);
+
+        final File profilePlist = fileSystem.file(
+          '/.tmp_rand0/provisioning_profiles/decoded_profile_1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision.plist',
+        );
+        final File cert = fileSystem.file(
+          '/.tmp_rand0/provisioning_profile_certificates/UUID1234_0.cer',
+        );
+
+        final plistParser = FakePlistParser(
+          parsedValues: <Map<String, Object>>[
+            <String, Object>{
+              'Name': 'Flutter Development',
+              'ExpirationDate': '2026-02-20T16:04:31Z',
+              'IsXcodeManaged': false,
+              'DeveloperCertificates': <List<int>>[
+                <int>[0, 1, 2, 3],
               ],
-              onRun: (List<String> command) => profilePlist.createSync(recursive: true),
-            ),
-            FakeCommand(
-              command: <String>['openssl', 'x509', '-subject', '-in', cert.path, '-inform', 'DER'],
-              exitCode: 1,
-            ),
-          ]);
+              'TeamIdentifier': <String>['ABCDE1F2DH'],
+              'UUID': 'UUID1234',
+            },
+          ],
+        );
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(command: <String>['which', 'security']),
+          const FakeCommand(command: <String>['which', 'openssl']),
+          const FakeCommand(
+            command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
+            stdout: kCertificates,
+          ),
+          FakeCommand(
+            command: <String>[
+              'security',
+              'cms',
+              '-D',
+              '-i',
+              profileFilePath,
+              '-o',
+              profilePlist.path,
+            ],
+            onRun: (List<String> command) => profilePlist.createSync(recursive: true),
+          ),
+          FakeCommand(
+            command: <String>['openssl', 'x509', '-subject', '-in', cert.path, '-inform', 'DER'],
+            exitCode: 1,
+          ),
+        ]);
 
-          final Map<String, String>? signingConfigs =
-              await getCodeSigningIdentityDevelopmentTeamBuildSetting(
-                buildSettings: <String, String>{},
-                plistParser: plistParser,
-                toolContext: FakeToolContext(
-                  config: testConfig,
-                  fileSystemUtils: FakeFileSystemUtils(),
-                  fs: fileSystem,
-                  logger: logger,
-                  platform: FakePlatform(operatingSystem: 'macos'),
-                  processManager: processManager,
-                  terminal: FakeTerminal(),
-                ),
-              );
+        final Map<String, String>? signingConfigs =
+            await getCodeSigningIdentityDevelopmentTeamBuildSetting(
+              buildSettings: <String, String>{},
+              plistParser: plistParser,
+              toolContext: FakeToolContext(
+                config: testConfig,
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: fileSystem,
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: processManager,
+                terminal: FakeTerminal(),
+              ),
+            );
 
-          expect(processManager, hasNoRemainingExpectations);
-          expect(logger.errorText, contains('Unexpected failure from openssl'));
-          expect(signingConfigs, isNull);
-        },
-      );
+        expect(processManager, hasNoRemainingExpectations);
+        expect(logger.errorText, contains('Unexpected failure from openssl'));
+        expect(signingConfigs, isNull);
+      });
 
-      testWithoutContext(
+      test(
         'does not uses saved provisioning profile if fails to parse common name from cert',
         () async {
           final testConfig = Config.test();
@@ -690,91 +671,88 @@ Or run on an iOS simulator without code signing
         },
       );
 
-      testWithoutContext(
-        'does not use saved provisioning profile if fails to find matching identity',
-        () async {
-          final testConfig = Config.test();
-          final fileSystem = MemoryFileSystem.test();
-          final logger = BufferLogger.test();
-          const profileFilePath =
-              '/path/to/profiles/1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision';
-          fileSystem.file(profileFilePath).createSync(recursive: true);
-          testConfig.setValue('ios-signing-profile', profileFilePath);
+      test('does not use saved provisioning profile if fails to find matching identity', () async {
+        final testConfig = Config.test();
+        final fileSystem = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        const profileFilePath =
+            '/path/to/profiles/1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision';
+        fileSystem.file(profileFilePath).createSync(recursive: true);
+        testConfig.setValue('ios-signing-profile', profileFilePath);
 
-          final File profilePlist = fileSystem.file(
-            '/.tmp_rand0/provisioning_profiles/decoded_profile_1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision.plist',
-          );
-          final File cert = fileSystem.file(
-            '/.tmp_rand0/provisioning_profile_certificates/UUID1234_0.cer',
-          );
+        final File profilePlist = fileSystem.file(
+          '/.tmp_rand0/provisioning_profiles/decoded_profile_1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision.plist',
+        );
+        final File cert = fileSystem.file(
+          '/.tmp_rand0/provisioning_profile_certificates/UUID1234_0.cer',
+        );
 
-          final plistParser = FakePlistParser(
-            parsedValues: <Map<String, Object>>[
-              <String, Object>{
-                'Name': 'Flutter Development',
-                'ExpirationDate': '2026-02-20T16:04:31Z',
-                'IsXcodeManaged': false,
-                'DeveloperCertificates': <List<int>>[
-                  <int>[0, 1, 2, 3],
-                ],
-                'TeamIdentifier': <String>['ABCDE1F2DH'],
-                'UUID': 'UUID1234',
-              },
-            ],
-          );
-          const certificates = '''
+        final plistParser = FakePlistParser(
+          parsedValues: <Map<String, Object>>[
+            <String, Object>{
+              'Name': 'Flutter Development',
+              'ExpirationDate': '2026-02-20T16:04:31Z',
+              'IsXcodeManaged': false,
+              'DeveloperCertificates': <List<int>>[
+                <int>[0, 1, 2, 3],
+              ],
+              'TeamIdentifier': <String>['ABCDE1F2DH'],
+              'UUID': 'UUID1234',
+            },
+          ],
+        );
+        const certificates = '''
 1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "Apple Development: Not a Match (12ABCD234E)"
     1 valid identities found''';
-          final processManager = FakeProcessManager.list(<FakeCommand>[
-            const FakeCommand(command: <String>['which', 'security']),
-            const FakeCommand(command: <String>['which', 'openssl']),
-            const FakeCommand(
-              command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
-              stdout: certificates,
-            ),
-            FakeCommand(
-              command: <String>[
-                'security',
-                'cms',
-                '-D',
-                '-i',
-                profileFilePath,
-                '-o',
-                profilePlist.path,
-              ],
-              onRun: (List<String> command) => profilePlist.createSync(recursive: true),
-            ),
-            FakeCommand(
-              command: <String>['openssl', 'x509', '-subject', '-in', cert.path, '-inform', 'DER'],
-              stdout: 'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
-            ),
-          ]);
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(command: <String>['which', 'security']),
+          const FakeCommand(command: <String>['which', 'openssl']),
+          const FakeCommand(
+            command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
+            stdout: certificates,
+          ),
+          FakeCommand(
+            command: <String>[
+              'security',
+              'cms',
+              '-D',
+              '-i',
+              profileFilePath,
+              '-o',
+              profilePlist.path,
+            ],
+            onRun: (List<String> command) => profilePlist.createSync(recursive: true),
+          ),
+          FakeCommand(
+            command: <String>['openssl', 'x509', '-subject', '-in', cert.path, '-inform', 'DER'],
+            stdout: 'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
+          ),
+        ]);
 
-          final Map<String, String>? signingConfigs =
-              await getCodeSigningIdentityDevelopmentTeamBuildSetting(
-                buildSettings: <String, String>{},
-                plistParser: plistParser,
-                toolContext: FakeToolContext(
-                  config: testConfig,
-                  fileSystemUtils: FakeFileSystemUtils(),
-                  fs: fileSystem,
-                  logger: logger,
-                  platform: FakePlatform(operatingSystem: 'macos'),
-                  processManager: processManager,
-                  terminal: FakeTerminal(),
-                ),
-              );
+        final Map<String, String>? signingConfigs =
+            await getCodeSigningIdentityDevelopmentTeamBuildSetting(
+              buildSettings: <String, String>{},
+              plistParser: plistParser,
+              toolContext: FakeToolContext(
+                config: testConfig,
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: fileSystem,
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: processManager,
+                terminal: FakeTerminal(),
+              ),
+            );
 
-          expect(processManager, hasNoRemainingExpectations);
-          expect(
-            logger.errorText,
-            contains('Unable to find a valid certificate matching the provisioning profile'),
-          );
-          expect(signingConfigs, isNull);
-        },
-      );
+        expect(processManager, hasNoRemainingExpectations);
+        expect(
+          logger.errorText,
+          contains('Unable to find a valid certificate matching the provisioning profile'),
+        );
+        expect(signingConfigs, isNull);
+      });
 
-      testWithoutContext(
+      test(
         'Test single identity and certificate organization development team build setting',
         () async {
           final completer = Completer<void>();
@@ -833,7 +811,7 @@ Or run on an iOS simulator without code signing
         },
       );
 
-      testWithoutContext(
+      test(
         'Test auto-select single identity and certificate organization development team',
         () async {
           final completer = Completer<void>();
@@ -888,60 +866,57 @@ Or run on an iOS simulator without code signing
         },
       );
 
-      testWithoutContext(
-        'Test single identity (Catalina format) and certificate organization works',
-        () async {
-          final completer = Completer<void>();
-          final controller = StreamController<List<int>>();
-          const certificates = '''
+      test('Test single identity (Catalina format) and certificate organization works', () async {
+        final completer = Completer<void>();
+        final controller = StreamController<List<int>>();
+        const certificates = '''
     1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "Apple Development: Profile 1 (1111AAAA11)"
         1 valid identities found''';
-          final processManager = FakeProcessManager.list(<FakeCommand>[
-            const FakeCommand(command: <String>['which', 'security']),
-            const FakeCommand(command: <String>['which', 'openssl']),
-            const FakeCommand(
-              command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
-              stdout: certificates,
-            ),
-            const FakeCommand(
-              command: <String>['security', 'find-certificate', '-c', '1111AAAA11', '-p'],
-              stdout: 'This is a fake certificate',
-            ),
-            FakeCommand(
-              command: const <String>['openssl', 'x509', '-subject'],
-              stdin: IOSink(controller.sink),
-              stdout: 'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
-              completer: completer,
-            ),
-          ]);
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(command: <String>['which', 'security']),
+          const FakeCommand(command: <String>['which', 'openssl']),
+          const FakeCommand(
+            command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
+            stdout: certificates,
+          ),
+          const FakeCommand(
+            command: <String>['security', 'find-certificate', '-c', '1111AAAA11', '-p'],
+            stdout: 'This is a fake certificate',
+          ),
+          FakeCommand(
+            command: const <String>['openssl', 'x509', '-subject'],
+            stdin: IOSink(controller.sink),
+            stdout: 'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
+            completer: completer,
+          ),
+        ]);
 
-          // Verify that certificate value is passed into openssl command.
-          String? stdin;
-          controller.stream.listen((List<int> chunk) {
-            stdin = utf8.decode(chunk);
-            completer.complete();
-          });
-          final logger = BufferLogger.test();
-          final String? developmentTeam = await getCodeSigningIdentityDevelopmentTeam(
-            processManager: processManager,
-            platform: FakePlatform(operatingSystem: 'macos'),
-            logger: logger,
-            config: Config.test(),
-            terminal: FakeTerminal(),
-            fileSystem: MemoryFileSystem.test(),
-            fileSystemUtils: FakeFileSystemUtils(),
-            plistParser: FakePlistParser(),
-          );
+        // Verify that certificate value is passed into openssl command.
+        String? stdin;
+        controller.stream.listen((List<int> chunk) {
+          stdin = utf8.decode(chunk);
+          completer.complete();
+        });
+        final logger = BufferLogger.test();
+        final String? developmentTeam = await getCodeSigningIdentityDevelopmentTeam(
+          processManager: processManager,
+          platform: FakePlatform(operatingSystem: 'macos'),
+          logger: logger,
+          config: Config.test(),
+          terminal: FakeTerminal(),
+          fileSystem: MemoryFileSystem.test(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          plistParser: FakePlistParser(),
+        );
 
-          expect(logger.statusText, contains('Apple Development: Profile 1 (1111AAAA11)'));
-          expect(logger.errorText, isEmpty);
-          expect(stdin, 'This is a fake certificate');
-          expect(developmentTeam, '3333CCCC33');
-          expect(processManager, hasNoRemainingExpectations);
-        },
-      );
+        expect(logger.statusText, contains('Apple Development: Profile 1 (1111AAAA11)'));
+        expect(logger.errorText, isEmpty);
+        expect(stdin, 'This is a fake certificate');
+        expect(developmentTeam, '3333CCCC33');
+        expect(processManager, hasNoRemainingExpectations);
+      });
 
-      testWithoutContext('Test multiple identity and certificate organization works', () async {
+      test('Test multiple identity and certificate organization works', () async {
         final completer = Completer<void>();
         final controller = StreamController<List<int>>();
         final processManager = FakeProcessManager.list(<FakeCommand>[
@@ -1029,7 +1004,7 @@ Or run on an iOS simulator without code signing
         expect(processManager, hasNoRemainingExpectations);
       });
 
-      testWithoutContext('Test auto-select from multiple identity in machine mode works', () async {
+      test('Test auto-select from multiple identity in machine mode works', () async {
         final completer = Completer<void>();
         final controller = StreamController<List<int>>();
         final processManager = FakeProcessManager.list(<FakeCommand>[
@@ -1085,7 +1060,7 @@ Or run on an iOS simulator without code signing
         expect(processManager, hasNoRemainingExpectations);
       });
 
-      testWithoutContext('Test saved certificate used', () async {
+      test('Test saved certificate used', () async {
         final testConfig = Config.test();
         final logger = BufferLogger.test();
         testConfig.setValue('ios-signing-cert', 'iPhone Developer: Profile 3 (3333CCCC33)');
@@ -1150,7 +1125,7 @@ Or run on an iOS simulator without code signing
         expect(processManager, hasNoRemainingExpectations);
       });
 
-      testWithoutContext('Test invalid saved certificate shows error and prompts again', () async {
+      test('Test invalid saved certificate shows error and prompts again', () async {
         final testConfig = Config.test();
         testConfig.setValue('ios-signing-cert', 'iPhone Developer: Invalid Profile');
         final completer = Completer<void>();
@@ -1241,7 +1216,7 @@ Or run on an iOS simulator without code signing
         expect(processManager, hasNoRemainingExpectations);
       });
 
-      testWithoutContext('find-identity failure', () async {
+      test('find-identity failure', () async {
         final processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(command: <String>['which', 'security']),
           const FakeCommand(command: <String>['which', 'openssl']),
@@ -1272,7 +1247,7 @@ Or run on an iOS simulator without code signing
         expect(processManager, hasNoRemainingExpectations);
       });
 
-      testWithoutContext('find-certificate failure', () async {
+      test('find-certificate failure', () async {
         final processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(command: <String>['which', 'security']),
           const FakeCommand(command: <String>['which', 'openssl']),
@@ -1331,7 +1306,7 @@ Or run on an iOS simulator without code signing
         expect(logger.errorText, contains('Unexpected error from security'));
       });
 
-      testWithoutContext('handles stdin pipe breaking on openssl process', () async {
+      test('handles stdin pipe breaking on openssl process', () async {
         final StreamSink<List<int>> stdinSink = ClosedStdinController();
 
         final completer = Completer<void>();
@@ -1388,7 +1363,7 @@ Or run on an iOS simulator without code signing
     });
 
     group('with getCodeSigningIdentityDevelopmentTeam', () {
-      testWithoutContext('does not error when no valid code signing certificates', () async {
+      test('does not error when no valid code signing certificates', () async {
         final processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(command: <String>['which', 'security']),
           const FakeCommand(command: <String>['which', 'openssl']),
@@ -1412,7 +1387,7 @@ Or run on an iOS simulator without code signing
         expect(processManager, hasNoRemainingExpectations);
       });
 
-      testWithoutContext('does not use saved provisioning profile', () async {
+      test('does not use saved provisioning profile', () async {
         final testConfig = Config.test();
         testConfig.setValue(
           'ios-signing-profile',
@@ -1443,7 +1418,7 @@ Or run on an iOS simulator without code signing
         expect(processManager, hasNoRemainingExpectations);
       });
 
-      testWithoutContext('Test saved certificate used', () async {
+      test('Test saved certificate used', () async {
         final testConfig = Config.test();
         final logger = BufferLogger.test();
         testConfig.setValue('ios-signing-cert', 'iPhone Developer: Profile 3 (3333CCCC33)');
@@ -1507,7 +1482,7 @@ Or run on an iOS simulator without code signing
   });
 
   group('Select signing', () {
-    testWithoutContext('cancels if terminal does not have stdin', () async {
+    test('cancels if terminal does not have stdin', () async {
       final logger = BufferLogger.test();
       final config = Config.test();
       final settings = XcodeCodeSigningSettings.test(
@@ -1526,7 +1501,7 @@ Or run on an iOS simulator without code signing
       expect(config.getValue('ios-signing-profile'), isNull);
     });
 
-    testWithoutContext('cancels if code-signing tools are not found', () async {
+    test('cancels if code-signing tools are not found', () async {
       final logger = BufferLogger.test();
       final config = Config.test();
       final settings = XcodeCodeSigningSettings.test(
@@ -1545,7 +1520,7 @@ Or run on an iOS simulator without code signing
       expect(config.getValue('ios-signing-profile'), isNull);
     });
 
-    testWithoutContext('cancels if signing cert already saved', () async {
+    test('cancels if signing cert already saved', () async {
       final logger = BufferLogger.test();
       final config = Config.test();
       config.setValue('ios-signing-cert', 'some value');
@@ -1570,7 +1545,7 @@ Or run on an iOS simulator without code signing
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('cancels if signing profile already saved', () async {
+    test('cancels if signing profile already saved', () async {
       final logger = BufferLogger.test();
       final config = Config.test();
       config.setValue('ios-signing-profile', 'some value');
@@ -1595,7 +1570,7 @@ Or run on an iOS simulator without code signing
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('cancels if quit while selecting code signing style', () async {
+    test('cancels if quit while selecting code signing style', () async {
       final logger = BufferLogger.test();
       final config = Config.test();
       final processManager = FakeProcessManager.list(<FakeCommand>[
@@ -1626,7 +1601,7 @@ Or run on an iOS simulator without code signing
     });
 
     group('with automatic code signing style', () {
-      testWithoutContext('cancels if no identities are found', () async {
+      test('cancels if no identities are found', () async {
         final logger = BufferLogger.test();
         final config = Config.test();
         final terminal = FakeTerminal();
@@ -1662,7 +1637,7 @@ Or run on an iOS simulator without code signing
         expect(processManager, hasNoRemainingExpectations);
       });
 
-      testWithoutContext('cancels if quit while selecting identity', () async {
+      test('cancels if quit while selecting identity', () async {
         final logger = BufferLogger.test();
         final config = Config.test();
         final terminal = FakeTerminal();
@@ -1729,7 +1704,7 @@ Or run on an iOS simulator without code signing
         expect(processManager, hasNoRemainingExpectations);
       });
 
-      testWithoutContext('saves to config after selection', () async {
+      test('saves to config after selection', () async {
         final logger = BufferLogger.test();
         final config = Config.test();
         final terminal = FakeTerminal();
@@ -1794,7 +1769,7 @@ Or run on an iOS simulator without code signing
         expect(processManager, hasNoRemainingExpectations);
       });
 
-      testWithoutContext('displays team name and team ID alongside each identity', () async {
+      test('displays team name and team ID alongside each identity', () async {
         final logger = BufferLogger.test();
         final config = Config.test();
         final terminal = FakeTerminal();
@@ -1871,7 +1846,7 @@ Or run on an iOS simulator without code signing
     });
 
     group('with manual code signing style', () {
-      testWithoutContext('cancels if no profiles are found', () async {
+      test('cancels if no profiles are found', () async {
         final logger = BufferLogger.test();
         final config = Config.test();
         final terminal = FakeTerminal();
@@ -1904,7 +1879,7 @@ Or run on an iOS simulator without code signing
         expect(processManager, hasNoRemainingExpectations);
       });
 
-      testWithoutContext('cancels if quit while selecting profile', () async {
+      test('cancels if quit while selecting profile', () async {
         final logger = BufferLogger.test();
         final config = Config.test();
         final fileSystem = MemoryFileSystem.test();
@@ -2010,119 +1985,113 @@ Or run on an iOS simulator without code signing
         expect(processManager, hasNoRemainingExpectations);
       });
 
-      testWithoutContext(
-        'cancels if "Other (not listed)" selected while selecting profile',
-        () async {
-          final logger = BufferLogger.test();
-          final config = Config.test();
-          final fileSystem = MemoryFileSystem.test();
-          final terminal = FakeTerminal();
-          terminal.setPrompt(<String>['1', '2', 'q'], '2');
-          unawaited(
-            terminal.promptCompleter.future.whenComplete(() {
-              terminal.setPrompt(<String>['1', '2', 'q'], '2');
-            }),
-          );
+      test('cancels if "Other (not listed)" selected while selecting profile', () async {
+        final logger = BufferLogger.test();
+        final config = Config.test();
+        final fileSystem = MemoryFileSystem.test();
+        final terminal = FakeTerminal();
+        terminal.setPrompt(<String>['1', '2', 'q'], '2');
+        unawaited(
+          terminal.promptCompleter.future.whenComplete(() {
+            terminal.setPrompt(<String>['1', '2', 'q'], '2');
+          }),
+        );
 
-          const homeDir = '/Users/username';
+        const homeDir = '/Users/username';
 
-          final Directory profileDirectory = fileSystem.directory(
-            fileSystem.path.join(
-              homeDir,
-              'Library',
-              'Developer',
-              'Xcode',
-              'UserData',
-              'Provisioning Profiles',
-            ),
-          );
-          final File validProfile = profileDirectory.childFile('profile1.mobileprovision')
-            ..createSync(recursive: true);
-          final File validProfilePlist = fileSystem.file(
-            '/.tmp_rand0/provisioning_profiles/decoded_profile_profile1.mobileprovision.plist',
-          );
-          final File validProfileCert = fileSystem.file(
-            '/.tmp_rand0/provisioning_profile_certificates/UUIDProfile1_0.cer',
-          );
+        final Directory profileDirectory = fileSystem.directory(
+          fileSystem.path.join(
+            homeDir,
+            'Library',
+            'Developer',
+            'Xcode',
+            'UserData',
+            'Provisioning Profiles',
+          ),
+        );
+        final File validProfile = profileDirectory.childFile('profile1.mobileprovision')
+          ..createSync(recursive: true);
+        final File validProfilePlist = fileSystem.file(
+          '/.tmp_rand0/provisioning_profiles/decoded_profile_profile1.mobileprovision.plist',
+        );
+        final File validProfileCert = fileSystem.file(
+          '/.tmp_rand0/provisioning_profile_certificates/UUIDProfile1_0.cer',
+        );
 
-          final plistParser = FakePlistParser(
-            parsedValues: <Map<String, Object>>[
-              <String, Object>{
-                'Name': 'Company Development',
-                'ExpirationDate': '2026-02-20T16:04:31Z',
-                'IsXcodeManaged': false,
-                'DeveloperCertificates': <List<int>>[
-                  <int>[0, 1, 2, 3],
-                ],
-                'TeamIdentifier': <String>['ABCDE1F2DH'],
-                'UUID': 'UUIDProfile1',
-              },
-            ],
-          );
-          const certificates = '''
+        final plistParser = FakePlistParser(
+          parsedValues: <Map<String, Object>>[
+            <String, Object>{
+              'Name': 'Company Development',
+              'ExpirationDate': '2026-02-20T16:04:31Z',
+              'IsXcodeManaged': false,
+              'DeveloperCertificates': <List<int>>[
+                <int>[0, 1, 2, 3],
+              ],
+              'TeamIdentifier': <String>['ABCDE1F2DH'],
+              'UUID': 'UUIDProfile1',
+            },
+          ],
+        );
+        const certificates = '''
 1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "Apple Development: Company Development (12ABCD234E)"
     1 valid identities found''';
 
-          final processManager = FakeProcessManager.list(<FakeCommand>[
-            const FakeCommand(command: <String>['which', 'security']),
-            const FakeCommand(command: <String>['which', 'openssl']),
-            const FakeCommand(
-              command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
-              stdout: certificates,
-            ),
-            FakeCommand(
-              command: <String>[
-                'security',
-                'cms',
-                '-D',
-                '-i',
-                validProfile.path,
-                '-o',
-                validProfilePlist.path,
-              ],
-              onRun: (List<String> command) => validProfilePlist.createSync(recursive: true),
-            ),
-            FakeCommand(
-              command: <String>[
-                'openssl',
-                'x509',
-                '-subject',
-                '-in',
-                validProfileCert.path,
-                '-inform',
-                'DER',
-              ],
-              stdout: 'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
-            ),
-          ]);
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(command: <String>['which', 'security']),
+          const FakeCommand(command: <String>['which', 'openssl']),
+          const FakeCommand(
+            command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
+            stdout: certificates,
+          ),
+          FakeCommand(
+            command: <String>[
+              'security',
+              'cms',
+              '-D',
+              '-i',
+              validProfile.path,
+              '-o',
+              validProfilePlist.path,
+            ],
+            onRun: (List<String> command) => validProfilePlist.createSync(recursive: true),
+          ),
+          FakeCommand(
+            command: <String>[
+              'openssl',
+              'x509',
+              '-subject',
+              '-in',
+              validProfileCert.path,
+              '-inform',
+              'DER',
+            ],
+            stdout: 'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
+          ),
+        ]);
 
-          final settings = XcodeCodeSigningSettings.test(
-            config: config,
-            logger: logger,
-            platform: FakePlatform(operatingSystem: 'macos'),
-            fileSystem: fileSystem,
-            fileSystemUtils: FakeFileSystemUtils(homeDirPath: homeDir),
-            processUtils: ProcessUtils(processManager: processManager, logger: logger),
-            terminal: terminal,
-            plistParser: plistParser,
-          );
-          await settings.selectSettings();
+        final settings = XcodeCodeSigningSettings.test(
+          config: config,
+          logger: logger,
+          platform: FakePlatform(operatingSystem: 'macos'),
+          fileSystem: fileSystem,
+          fileSystemUtils: FakeFileSystemUtils(homeDirPath: homeDir),
+          processUtils: ProcessUtils(processManager: processManager, logger: logger),
+          terminal: terminal,
+          plistParser: plistParser,
+        );
+        await settings.selectSettings();
 
-          expect(
-            logger.errorText,
-            contains('If you have already downloaded a provisioning profile'),
-          );
-          expect(
-            logger.warningText,
-            contains('Code-signing setup canceled. Your changes have not been saved.'),
-          );
-          expect(config.getValue('ios-signing-cert'), isNull);
-          expect(config.getValue('ios-signing-profile'), isNull);
-          expect(processManager, hasNoRemainingExpectations);
-        },
-      );
+        expect(logger.errorText, contains('If you have already downloaded a provisioning profile'));
+        expect(
+          logger.warningText,
+          contains('Code-signing setup canceled. Your changes have not been saved.'),
+        );
+        expect(config.getValue('ios-signing-cert'), isNull);
+        expect(config.getValue('ios-signing-profile'), isNull);
+        expect(processManager, hasNoRemainingExpectations);
+      });
 
-      testWithoutContext('saves to config after selecting', () async {
+      test('saves to config after selecting', () async {
         final logger = BufferLogger.test();
         final config = Config.test();
         final fileSystem = MemoryFileSystem.test();
@@ -2316,7 +2285,7 @@ Or run on an iOS simulator without code signing
     });
   });
 
-  testWithoutContext('getProvisioningProfileFromConfig', () async {
+  test('getProvisioningProfileFromConfig', () async {
     final logger = BufferLogger.test();
     final config = Config.test();
     final fileSystem = MemoryFileSystem.test();
@@ -2385,7 +2354,7 @@ Or run on an iOS simulator without code signing
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('getIdentityFromCertFromConfig', () async {
+  test('getIdentityFromCertFromConfig', () async {
     final logger = BufferLogger.test();
     final config = Config.test();
     final fileSystem = MemoryFileSystem.test();
@@ -2410,7 +2379,7 @@ Or run on an iOS simulator without code signing
     expect(logger.warningText, isEmpty);
   });
 
-  testWithoutContext('fromContexts constructor initializes dependencies', () {
+  test('fromContexts constructor initializes dependencies', () {
     final appleContext = FakeAppleContext(plistParser: FakePlistParser());
     final toolContext = FakeToolContext(
       config: Config.test(),

@@ -1141,6 +1141,9 @@ class FakeCache extends Fake implements Cache {
   Directory getRoot() => _fileSystem.directory('/bin/cache');
 
   @override
+  File getStampFileFor(String artifactName) => getRoot().childFile('$artifactName.stamp');
+
+  @override
   Directory getCacheDir(String name, {bool shouldCreate = true}) =>
       _fileSystem.directory('/bin/cache/$name');
 

@@ -22,7 +22,7 @@ final String dart = fileSystem.path.join(
 );
 
 void main() {
-  testWithoutContext('tool_backend.dart exits if PROJECT_DIR is not set', () async {
+  test('tool_backend.dart exits if PROJECT_DIR is not set', () async {
     final ProcessResult result = await processManager.run(<String>[
       dart,
       toolBackend,
@@ -39,7 +39,7 @@ void main() {
     );
   });
 
-  testWithoutContext('tool_backend.dart exits if FLUTTER_ROOT is not set', () async {
+  test('tool_backend.dart exits if FLUTTER_ROOT is not set', () async {
     // Removing parent environment means that batch script cannot be run.
     final String dart = fileSystem.path.join(
       getFlutterRoot(),
@@ -66,7 +66,7 @@ void main() {
     );
   });
 
-  testWithoutContext('tool_backend.dart exits if local engine does not match build mode', () async {
+  test('tool_backend.dart exits if local engine does not match build mode', () async {
     final ProcessResult result = await processManager.run(
       <String>[dart, toolBackend, 'linux-x64', 'debug'],
       environment: <String, String>{
@@ -84,26 +84,22 @@ void main() {
     );
   });
 
-  testWithoutContext(
-    'tool_backend.dart exits if local engine host does not match build mode',
-    () async {
-      final ProcessResult result = await processManager.run(
-        <String>[dart, toolBackend, 'linux-x64', 'debug'],
-        environment: <String, String>{
-          'PROJECT_DIR': examplePath,
-          'LOCAL_ENGINE': 'debug_foo_bar', // OK
-          'LOCAL_ENGINE_HOST': 'release_foo_bar', // Does not contain "debug",
-        },
-      );
+  test('tool_backend.dart exits if local engine host does not match build mode', () async {
+    final ProcessResult result = await processManager.run(
+      <String>[dart, toolBackend, 'linux-x64', 'debug'],
+      environment: <String, String>{
+        'PROJECT_DIR': examplePath,
+        'LOCAL_ENGINE': 'debug_foo_bar', // OK
+        'LOCAL_ENGINE_HOST': 'release_foo_bar', // Does not contain "debug",
+      },
+    );
 
-      expect(
-        result,
-        const ProcessResultMatcher(
-          exitCode: 1,
-          stderrPattern:
-              "ERROR: Requested build with Flutter local engine host at 'release_foo_bar'",
-        ),
-      );
-    },
-  );
+    expect(
+      result,
+      const ProcessResultMatcher(
+        exitCode: 1,
+        stderrPattern: "ERROR: Requested build with Flutter local engine host at 'release_foo_bar'",
+      ),
+    );
+  });
 }
