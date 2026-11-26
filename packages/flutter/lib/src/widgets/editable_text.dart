@@ -5108,21 +5108,57 @@ class EditableTextState extends State<EditableText>
       size: renderEditable.size,
     );
 
+    final Rect visibleRect = _visibleRectOfRenderEditable();
     final RenderComparison comparison = force
         ? RenderComparison.layout
         : _scribbleCacheKey?.compare(newCacheKey) ?? RenderComparison.layout;
-    if (comparison.index < RenderComparison.layout.index) {
+    if (comparison.index < RenderComparison.layout.index &&
+        _rectContains(_scribbleCoveredRect, visibleRect)) {
       return;
     }
     _scribbleCacheKey = newCacheKey;
 
+    // Only the visible part of the text can be written on, but computing the
+    // rects of a margin around it too means that scrolling an ancestor
+    // scrollable doesn't require recomputing them on every frame.
+    final Rect paintBounds = renderEditable.paintBounds;
+    final Rect coveredRect = visibleRect.isEmpty
+        ? Rect.zero
+        : Rect.fromLTRB(
+            visibleRect.left - visibleRect.width,
+            visibleRect.top - visibleRect.height,
+            visibleRect.right + visibleRect.width,
+            visibleRect.bottom + visibleRect.height,
+          ).intersect(paintBounds);
+    _scribbleCoveredRect = coveredRect;
+
     final rects = <SelectionRect>[];
-    var graphemeStart = 0;
+    if (coveredRect.isEmpty) {
+      _textInputConnection!.setSelectionRects(rects);
+      return;
+    }
+
     // Can't use _value.text here: the controller value could change between
     // frames.
     final String plainText = inlineSpan.toPlainText(includeSemanticsLabels: false);
-    final characterRange = CharacterRange(plainText);
+    // Start at the line before the first covered one rather than at offset 0,
+    // so that the cost depends on the covered area instead of on the length of
+    // the text. The line before is included because a character whose bottom
+    // edge touches the top of the covered area still counts as covered.
+    final TextSelection firstCoveredLine = renderEditable.getLineAtOffset(
+      renderEditable.getPositionForPoint(renderEditable.localToGlobal(coveredRect.topLeft)),
+    );
+    // getLineAtOffset returns an invalid (-1) range when the text is empty.
+    final int firstLineStart = firstCoveredLine.start <= 0
+        ? 0
+        : renderEditable
+              .getLineAtOffset(
+                TextPosition(offset: firstCoveredLine.start, affinity: TextAffinity.upstream),
+              )
+              .start;
+    final characterRange = CharacterRange.at(plainText, firstLineStart.clamp(0, plainText.length));
     while (characterRange.moveNext()) {
+      final int graphemeStart = characterRange.stringBeforeLength;
       final int graphemeEnd = graphemeStart + characterRange.current.length;
       final List<TextBox> boxes = renderEditable.getBoxesForSelection(
         TextSelection(baseOffset: graphemeStart, extentOffset: graphemeEnd),
@@ -5130,25 +5166,75 @@ class EditableTextState extends State<EditableText>
 
       final TextBox? box = boxes.isEmpty ? null : boxes.first;
       if (box != null) {
-        final Rect paintBounds = renderEditable.paintBounds;
         // Stop early when characters are already below the bottom edge of the
-        // RenderEditable, regardless of its clipBehavior.
-        if (paintBounds.bottom <= box.top) {
+        // covered area, regardless of the RenderEditable's clipBehavior.
+        if (coveredRect.bottom <= box.top) {
           break;
         }
-        // Include any TextBox which intersects with the RenderEditable.
-        if (paintBounds.left <= box.right &&
-            box.left <= paintBounds.right &&
-            paintBounds.top <= box.bottom) {
+        // Include any TextBox which intersects with the covered area.
+        if (coveredRect.left <= box.right &&
+            box.left <= coveredRect.right &&
+            coveredRect.top <= box.bottom) {
           // At least some part of the letter is visible within the text field.
           rects.add(
             SelectionRect(position: graphemeStart, bounds: box.toRect(), direction: box.direction),
           );
         }
       }
-      graphemeStart = graphemeEnd;
     }
     _textInputConnection!.setSelectionRects(rects);
+  }
+
+  // The area of the RenderEditable, in its local coordinates, that the last
+  // call to setSelectionRects covered.
+  Rect? _scribbleCoveredRect;
+
+  static bool _rectContains(Rect? outer, Rect inner) {
+    if (inner.isEmpty) {
+      return outer != null;
+    }
+    return outer != null &&
+        outer.left <= inner.left &&
+        outer.top <= inner.top &&
+        inner.right <= outer.right &&
+        inner.bottom <= outer.bottom;
+  }
+
+  // Returns the part of the RenderEditable that isn't clipped out by its
+  // ancestors (for example an enclosing scroll view) or by the bounds of the
+  // view, in the RenderEditable's local coordinates.
+  //
+  // Returns an empty rect if none of it is visible.
+  Rect _visibleRectOfRenderEditable() {
+    final path = <RenderObject>[renderEditable];
+    for (RenderObject? node = renderEditable.parent; node != null; node = node.parent) {
+      path.add(node);
+    }
+    // The clip in the coordinates of the root of the render tree.
+    Rect clip = path.last.paintBounds;
+    // Maps the coordinates of path[i] to the root's.
+    final transform = Matrix4.identity();
+    for (int i = path.length - 1; i > 0; i -= 1) {
+      final RenderObject parent = path[i];
+      final RenderObject child = path[i - 1];
+      final Rect? childClip = parent.describeApproximatePaintClip(child);
+      if (childClip != null) {
+        clip = clip.intersect(MatrixUtils.transformRect(transform, childClip));
+        if (clip.isEmpty) {
+          return Rect.zero;
+        }
+      }
+      parent.applyPaintTransform(child, transform);
+    }
+    final Matrix4? inverse = Matrix4.tryInvert(transform);
+    if (inverse == null) {
+      return Rect.zero;
+    }
+    final Rect visibleRect = MatrixUtils.transformRect(
+      inverse,
+      clip,
+    ).intersect(renderEditable.paintBounds);
+    return visibleRect.isEmpty ? Rect.zero : visibleRect;
   }
 
   // Sends the current composing rect to the embedder's text input plugin.
