@@ -12,60 +12,45 @@ void main() {
   final windows = FakePlatform(operatingSystem: 'windows');
   final notWindows = FakePlatform();
 
-  testWithoutContext(
-    'Windows workflow configuration when feature is enabled on Windows host machine',
-    () {
-      final windowsWorkflow = WindowsWorkflow(
-        platform: windows,
-        featureFlags: TestFeatureFlags(isWindowsEnabled: true),
-      );
+  test('Windows workflow configuration when feature is enabled on Windows host machine', () {
+    final windowsWorkflow = WindowsWorkflow(
+      platform: windows,
+      featureFlags: TestFeatureFlags(isWindowsEnabled: true),
+    );
 
-      expect(windowsWorkflow.appliesToHostPlatform, true);
-      expect(windowsWorkflow.canListDevices, true);
-      expect(windowsWorkflow.canLaunchDevices, true);
-      expect(windowsWorkflow.canListEmulators, false);
-    },
-  );
+    expect(windowsWorkflow.appliesToHostPlatform, true);
+    expect(windowsWorkflow.canListDevices, true);
+    expect(windowsWorkflow.canLaunchDevices, true);
+    expect(windowsWorkflow.canListEmulators, false);
+  });
 
-  testWithoutContext(
-    'Windows workflow configuration when feature is disabled on Windows host machine',
-    () {
-      final windowsWorkflow = WindowsWorkflow(platform: windows, featureFlags: TestFeatureFlags());
+  test('Windows workflow configuration when feature is disabled on Windows host machine', () {
+    final windowsWorkflow = WindowsWorkflow(platform: windows, featureFlags: TestFeatureFlags());
 
-      expect(windowsWorkflow.appliesToHostPlatform, false);
-      expect(windowsWorkflow.canListDevices, false);
-      expect(windowsWorkflow.canLaunchDevices, false);
-      expect(windowsWorkflow.canListEmulators, false);
-    },
-  );
+    expect(windowsWorkflow.appliesToHostPlatform, false);
+    expect(windowsWorkflow.canListDevices, false);
+    expect(windowsWorkflow.canLaunchDevices, false);
+    expect(windowsWorkflow.canListEmulators, false);
+  });
 
-  testWithoutContext(
-    'Windows workflow configuration when feature is enabled on non-Windows host machine',
-    () {
-      final windowsWorkflow = WindowsWorkflow(
-        platform: notWindows,
-        featureFlags: TestFeatureFlags(isWindowsEnabled: true),
-      );
+  test('Windows workflow configuration when feature is enabled on non-Windows host machine', () {
+    final windowsWorkflow = WindowsWorkflow(
+      platform: notWindows,
+      featureFlags: TestFeatureFlags(isWindowsEnabled: true),
+    );
 
-      expect(windowsWorkflow.appliesToHostPlatform, false);
-      expect(windowsWorkflow.canListDevices, false);
-      expect(windowsWorkflow.canLaunchDevices, false);
-      expect(windowsWorkflow.canListEmulators, false);
-    },
-  );
+    expect(windowsWorkflow.appliesToHostPlatform, false);
+    expect(windowsWorkflow.canListDevices, false);
+    expect(windowsWorkflow.canLaunchDevices, false);
+    expect(windowsWorkflow.canListEmulators, false);
+  });
 
-  testWithoutContext(
-    'Windows workflow configuration when feature is disabled on non-Windows host machine',
-    () {
-      final windowsWorkflow = WindowsWorkflow(
-        platform: notWindows,
-        featureFlags: TestFeatureFlags(),
-      );
+  test('Windows workflow configuration when feature is disabled on non-Windows host machine', () {
+    final windowsWorkflow = WindowsWorkflow(platform: notWindows, featureFlags: TestFeatureFlags());
 
-      expect(windowsWorkflow.appliesToHostPlatform, false);
-      expect(windowsWorkflow.canListDevices, false);
-      expect(windowsWorkflow.canLaunchDevices, false);
-      expect(windowsWorkflow.canListEmulators, false);
-    },
-  );
+    expect(windowsWorkflow.appliesToHostPlatform, false);
+    expect(windowsWorkflow.canListDevices, false);
+    expect(windowsWorkflow.canLaunchDevices, false);
+    expect(windowsWorkflow.canListEmulators, false);
+  });
 }

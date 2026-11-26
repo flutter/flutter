@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/build_system/targets/desktop.dart';
 import '../../../src/common.dart';
 
 void main() {
-  testWithoutContext('unpackDesktopArtifacts copies files/directories to target', () async {
+  test('unpackDesktopArtifacts copies files/directories to target', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.directory('inputs/foo').createSync(recursive: true);
     // Should be copied.
@@ -46,44 +46,38 @@ void main() {
     );
   });
 
-  testWithoutContext(
-    'unpackDesktopArtifacts throws when attempting to copy missing file',
-    () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
+  test('unpackDesktopArtifacts throws when attempting to copy missing file', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
 
-      expect(
-        () => unpackDesktopArtifacts(
-          fileSystem: fileSystem,
-          engineSourcePath: 'inputs',
-          outputDirectory: fileSystem.directory('outputs'),
-          artifacts: <String>['a.txt'],
-          clientSourcePaths: <String>['foo'],
-        ),
-        throwsException,
-      );
-    },
-  );
+    expect(
+      () => unpackDesktopArtifacts(
+        fileSystem: fileSystem,
+        engineSourcePath: 'inputs',
+        outputDirectory: fileSystem.directory('outputs'),
+        artifacts: <String>['a.txt'],
+        clientSourcePaths: <String>['foo'],
+      ),
+      throwsException,
+    );
+  });
 
-  testWithoutContext(
-    'unpackDesktopArtifacts throws when attempting to copy missing directory',
-    () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      fileSystem.file('inputs/a.txt').createSync(recursive: true);
+  test('unpackDesktopArtifacts throws when attempting to copy missing directory', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    fileSystem.file('inputs/a.txt').createSync(recursive: true);
 
-      expect(
-        () => unpackDesktopArtifacts(
-          fileSystem: fileSystem,
-          engineSourcePath: 'inputs',
-          outputDirectory: fileSystem.directory('outputs'),
-          artifacts: <String>['a.txt'],
-          clientSourcePaths: <String>['foo'],
-        ),
-        throwsException,
-      );
-    },
-  );
+    expect(
+      () => unpackDesktopArtifacts(
+        fileSystem: fileSystem,
+        engineSourcePath: 'inputs',
+        outputDirectory: fileSystem.directory('outputs'),
+        artifacts: <String>['a.txt'],
+        clientSourcePaths: <String>['foo'],
+      ),
+      throwsException,
+    );
+  });
 
-  testWithoutContext('unpackDesktopArtifacts does not require a client source path', () async {
+  test('unpackDesktopArtifacts does not require a client source path', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('inputs/a.txt').createSync(recursive: true);
 

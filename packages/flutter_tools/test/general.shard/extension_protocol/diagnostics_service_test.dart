@@ -199,7 +199,7 @@ void main() {
       },
     );
 
-    testWithoutContext('reports extension-attributed ValidationType.crash and traces failure when runDiagnostics RPC throws', () async {
+    test('reports extension-attributed ValidationType.crash and traces failure when runDiagnostics RPC throws', () async {
       void crashingEntryPoint(SendPort sendPort) {
         ToolExtensionEntryPoint.run(
           sendPort,
@@ -260,7 +260,7 @@ void main() {
       expect(logger.warningText, isEmpty);
     });
 
-    testWithoutContext('reports extension-attributed ValidationType.crash and traces failure when runDiagnostics returns malformed payload', () async {
+    test('reports extension-attributed ValidationType.crash and traces failure when runDiagnostics returns malformed payload', () async {
       void nonListPayloadEntryPoint(SendPort sendPort) {
         ToolExtensionEntryPoint.run(
           sendPort,
@@ -355,7 +355,7 @@ void main() {
       );
     });
 
-    testWithoutContext('DiagnosticsExtensionClient.runDiagnostics allows slow checks up to 60 seconds without timing out', () {
+    test('DiagnosticsExtensionClient.runDiagnostics allows slow checks up to 60 seconds without timing out', () {
       final logger = BufferLogger.test();
       bool? diagnoseSucceeded;
       FakeAsync().run<void>((FakeAsync time) {
@@ -397,7 +397,7 @@ void main() {
       );
     });
 
-    testWithoutContext('Doctor.diagnose uses ExtensionDoctorValidator.createCrashResult when extension validator throws directly', () async {
+    test('Doctor.diagnose uses ExtensionDoctorValidator.createCrashResult when extension validator throws directly', () async {
       final directLogger = BufferLogger.test();
       final directDoctor = _TestExtensionDoctor(
         logger: directLogger,
@@ -419,7 +419,7 @@ void main() {
       expect(directLogger.statusText, isNot(contains('flutter/flutter/issues')));
     });
 
-    testWithoutContext('DiagnosticsExtensionClient.runDiagnostics times out after 60 seconds with extension attribution', () async {
+    test('DiagnosticsExtensionClient.runDiagnostics times out after 60 seconds with extension attribution', () async {
       final clientLogger = BufferLogger.test();
       void hangingEntryPoint(SendPort sendPort) {
         ToolExtensionEntryPoint.run(
@@ -484,7 +484,7 @@ void main() {
       );
     });
 
-    testWithoutContext('Doctor.diagnose uses ExtensionDoctorValidator.createCrashResult when extension exceeds doctorDuration', () {
+    test('Doctor.diagnose uses ExtensionDoctorValidator.createCrashResult when extension exceeds doctorDuration', () {
       final timeoutLogger = BufferLogger.test();
       bool? diagnoseSucceeded;
       FakeAsync().run<void>((FakeAsync time) {

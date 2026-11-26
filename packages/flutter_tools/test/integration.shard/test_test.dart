@@ -50,7 +50,7 @@ void main() {
     );
   });
 
-  testWithoutContext('flutter test should not have extraneous error messages', () async {
+  test('flutter test should not have extraneous error messages', () async {
     return _testFile(
       'trivial_widget',
       automatedTestsDirectory,
@@ -59,7 +59,7 @@ void main() {
     );
   });
 
-  testWithoutContext('integration test should not have extraneous error messages', () async {
+  test('integration test should not have extraneous error messages', () async {
     return _testFile(
       'trivial_widget',
       automatedTestsDirectory,
@@ -69,7 +69,7 @@ void main() {
     );
   });
 
-  testWithoutContext('flutter test set the working directory correctly', () async {
+  test('flutter test set the working directory correctly', () async {
     return _testFile(
       'working_directory',
       automatedTestsDirectory,
@@ -78,14 +78,14 @@ void main() {
     );
   });
 
-  testWithoutContext(
+  test(
     'flutter test should report nice errors for exceptions thrown within testWidgets()',
     () async {
       return _testFile('exception_handling', automatedTestsDirectory, flutterTestDirectory);
     },
   );
 
-  testWithoutContext(
+  test(
     'integration test should report nice errors for exceptions thrown within testWidgets()',
     () async {
       return _testFile(
@@ -97,28 +97,25 @@ void main() {
     },
   );
 
-  testWithoutContext(
+  test(
     'flutter test should report a nice error when a guarded function was called without await',
     () async {
       return _testFile('test_async_utils_guarded', automatedTestsDirectory, flutterTestDirectory);
     },
   );
 
-  testWithoutContext(
+  test(
     'flutter test should report a nice error when an async function was called without await',
     () async {
       return _testFile('test_async_utils_unguarded', automatedTestsDirectory, flutterTestDirectory);
     },
   );
 
-  testWithoutContext(
-    'flutter test should report a nice error when a Ticker is left running',
-    () async {
-      return _testFile('ticker', automatedTestsDirectory, flutterTestDirectory);
-    },
-  );
+  test('flutter test should report a nice error when a Ticker is left running', () async {
+    return _testFile('ticker', automatedTestsDirectory, flutterTestDirectory);
+  });
 
-  testWithoutContext('flutter test should report a nice error when a pubspec.yaml is missing a flutter_test dependency', () async {
+  test('flutter test should report a nice error when a pubspec.yaml is missing a flutter_test dependency', () async {
     final String missingDependencyTests = fileSystem.path.join(
       '..',
       '..',
@@ -128,31 +125,25 @@ void main() {
     return _testFile('trivial', missingDependencyTests, missingDependencyTests);
   });
 
-  testWithoutContext(
-    'flutter test should report which user-created widget caused the error',
-    () async {
-      return _testFile(
-        'print_user_created_ancestor',
-        automatedTestsDirectory,
-        flutterTestDirectory,
-        extraArguments: const <String>['--track-widget-creation'],
-      );
-    },
-  );
+  test('flutter test should report which user-created widget caused the error', () async {
+    return _testFile(
+      'print_user_created_ancestor',
+      automatedTestsDirectory,
+      flutterTestDirectory,
+      extraArguments: const <String>['--track-widget-creation'],
+    );
+  });
 
-  testWithoutContext(
-    'flutter test should report which user-created widget caused the error - no flag',
-    () async {
-      return _testFile(
-        'print_user_created_ancestor_no_flag',
-        automatedTestsDirectory,
-        flutterTestDirectory,
-        extraArguments: const <String>['--no-track-widget-creation'],
-      );
-    },
-  );
+  test('flutter test should report which user-created widget caused the error - no flag', () async {
+    return _testFile(
+      'print_user_created_ancestor_no_flag',
+      automatedTestsDirectory,
+      flutterTestDirectory,
+      extraArguments: const <String>['--no-track-widget-creation'],
+    );
+  });
 
-  testWithoutContext(
+  test(
     'flutter test should report the correct user-created widget that caused the error',
     () async {
       return _testFile(
@@ -164,7 +155,7 @@ void main() {
     },
   );
 
-  testWithoutContext('flutter test should can load assets within its own package', () async {
+  test('flutter test should can load assets within its own package', () async {
     return _testFile(
       'package_assets',
       automatedTestsDirectory,
@@ -173,7 +164,7 @@ void main() {
     );
   });
 
-  testWithoutContext('flutter test should support dart defines', () async {
+  test('flutter test should support dart defines', () async {
     return _testFile(
       'dart_defines',
       automatedTestsDirectory,
@@ -183,7 +174,7 @@ void main() {
     );
   });
 
-  testWithoutContext('flutter test should run a test when its name matches a regexp', () async {
+  test('flutter test should run a test when its name matches a regexp', () async {
     final ProcessResult result = await _runFlutterTest(
       'filtering',
       automatedTestsDirectory,
@@ -193,7 +184,7 @@ void main() {
     expect(result, ProcessResultMatcher(stdoutPattern: RegExp(r'\+\d+: All tests passed!')));
   });
 
-  testWithoutContext('flutter test should run a test when its name contains a string', () async {
+  test('flutter test should run a test when its name contains a string', () async {
     final ProcessResult result = await _runFlutterTest(
       'filtering',
       automatedTestsDirectory,
@@ -203,7 +194,7 @@ void main() {
     expect(result, ProcessResultMatcher(stdoutPattern: RegExp(r'\+\d+: All tests passed!')));
   });
 
-  testWithoutContext('flutter test should run a test with a given tag', () async {
+  test('flutter test should run a test with a given tag', () async {
     final ProcessResult result = await _runFlutterTest(
       'filtering_tag',
       automatedTestsDirectory,
@@ -213,7 +204,7 @@ void main() {
     expect(result, ProcessResultMatcher(stdoutPattern: RegExp(r'\+\d+: All tests passed!')));
   });
 
-  testWithoutContext('flutter test should not run a test with excluded tag', () async {
+  test('flutter test should not run a test with excluded tag', () async {
     final ProcessResult result = await _runFlutterTest(
       'filtering_tag',
       automatedTestsDirectory,
@@ -223,7 +214,7 @@ void main() {
     expect(result, ProcessResultMatcher(stdoutPattern: RegExp(r'\+\d+: All tests passed!')));
   });
 
-  testWithoutContext('flutter test should run all tests when tags are unspecified', () async {
+  test('flutter test should run all tests when tags are unspecified', () async {
     final ProcessResult result = await _runFlutterTest(
       'filtering_tag',
       automatedTestsDirectory,
@@ -235,7 +226,7 @@ void main() {
     );
   });
 
-  testWithoutContext('flutter test should run a widgetTest with a given tag', () async {
+  test('flutter test should run a widgetTest with a given tag', () async {
     final ProcessResult result = await _runFlutterTest(
       'filtering_tag_widget',
       automatedTestsDirectory,
@@ -245,7 +236,7 @@ void main() {
     expect(result, ProcessResultMatcher(stdoutPattern: RegExp(r'\+\d+: All tests passed!')));
   });
 
-  testWithoutContext('flutter test should not run a widgetTest with excluded tag', () async {
+  test('flutter test should not run a widgetTest with excluded tag', () async {
     final ProcessResult result = await _runFlutterTest(
       'filtering_tag_widget',
       automatedTestsDirectory,
@@ -255,7 +246,7 @@ void main() {
     expect(result, ProcessResultMatcher(stdoutPattern: RegExp(r'\+\d+: All tests passed!')));
   });
 
-  testWithoutContext('flutter test should run all widgetTest when tags are unspecified', () async {
+  test('flutter test should run all widgetTest when tags are unspecified', () async {
     final ProcessResult result = await _runFlutterTest(
       'filtering_tag_widget',
       automatedTestsDirectory,
@@ -267,7 +258,7 @@ void main() {
     );
   });
 
-  testWithoutContext('flutter test supports the short preset option', () async {
+  test('flutter test supports the short preset option', () async {
     final ProcessResult result = await _runFlutterTest(
       'preset',
       automatedTestsDirectory,
@@ -277,7 +268,7 @@ void main() {
     expect(result, const ProcessResultMatcher());
   });
 
-  testWithoutContext('flutter test supports the long preset option', () async {
+  test('flutter test supports the long preset option', () async {
     final ProcessResult result = await _runFlutterTest(
       'preset',
       automatedTestsDirectory,
@@ -287,7 +278,7 @@ void main() {
     expect(result, const ProcessResultMatcher());
   });
 
-  testWithoutContext('flutter test reports an undefined preset', () async {
+  test('flutter test reports an undefined preset', () async {
     final ProcessResult result = await _runFlutterTest(
       'preset',
       automatedTestsDirectory,
@@ -300,7 +291,7 @@ void main() {
     );
   });
 
-  testWithoutContext('flutter test combines a preset with other test options', () async {
+  test('flutter test combines a preset with other test options', () async {
     final ProcessResult result = await _runFlutterTest(
       'preset',
       automatedTestsDirectory,
@@ -310,7 +301,7 @@ void main() {
     expect(result, const ProcessResultMatcher());
   });
 
-  testWithoutContext('flutter test should run a test with an exact name in URI format', () async {
+  test('flutter test should run a test with an exact name in URI format', () async {
     final ProcessResult result = await _runFlutterTest(
       'uri_format',
       automatedTestsDirectory,
@@ -320,7 +311,7 @@ void main() {
     expect(result, ProcessResultMatcher(stdoutPattern: RegExp(r'\+\d+: All tests passed!')));
   });
 
-  testWithoutContext('flutter test should run a test by line number in URI format', () async {
+  test('flutter test should run a test by line number in URI format', () async {
     final ProcessResult result = await _runFlutterTest(
       'uri_format',
       automatedTestsDirectory,
@@ -330,7 +321,7 @@ void main() {
     expect(result, ProcessResultMatcher(stdoutPattern: RegExp(r'\+\d+: All tests passed!')));
   });
 
-  testWithoutContext('flutter test should test runs to completion', () async {
+  test('flutter test should test runs to completion', () async {
     final ProcessResult result = await _runFlutterTest(
       'trivial',
       automatedTestsDirectory,
@@ -349,29 +340,26 @@ void main() {
     expect(result, const ProcessResultMatcher());
   });
 
-  testWithoutContext(
-    'flutter test should run all tests inside of a directory with no trailing slash',
-    () async {
-      final ProcessResult result = await _runFlutterTest(
-        null,
-        automatedTestsDirectory,
-        '$flutterTestDirectory/child_directory',
-        extraArguments: const <String>['--verbose'],
-      );
-      final String stdout = (result.stdout as String).replaceAll('\r', '\n');
-      expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed\!')));
-      expect(stdout, contains('test 0: Starting flutter_tester process with command'));
-      expect(stdout, contains('test 0: deleting temporary directory'));
-      expect(stdout, contains('test 0: finished'));
-      expect(stdout, contains('test package returned with exit code 0'));
-      if ((result.stderr as String).isNotEmpty) {
-        fail('unexpected error output from test:\n\n${result.stderr}\n-- end stderr --\n\n');
-      }
-      expect(result, const ProcessResultMatcher());
-    },
-  );
+  test('flutter test should run all tests inside of a directory with no trailing slash', () async {
+    final ProcessResult result = await _runFlutterTest(
+      null,
+      automatedTestsDirectory,
+      '$flutterTestDirectory/child_directory',
+      extraArguments: const <String>['--verbose'],
+    );
+    final String stdout = (result.stdout as String).replaceAll('\r', '\n');
+    expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed\!')));
+    expect(stdout, contains('test 0: Starting flutter_tester process with command'));
+    expect(stdout, contains('test 0: deleting temporary directory'));
+    expect(stdout, contains('test 0: finished'));
+    expect(stdout, contains('test package returned with exit code 0'));
+    if ((result.stderr as String).isNotEmpty) {
+      fail('unexpected error output from test:\n\n${result.stderr}\n-- end stderr --\n\n');
+    }
+    expect(result, const ProcessResultMatcher());
+  });
 
-  testWithoutContext('flutter gold skips tests where the expectations are missing', () async {
+  test('flutter gold skips tests where the expectations are missing', () async {
     return _testFile(
       'flutter_gold',
       automatedTestsDirectory,
@@ -380,7 +368,7 @@ void main() {
     );
   });
 
-  testWithoutContext('flutter test should serve DevTools', () async {
+  test('flutter test should serve DevTools', () async {
     Process? process;
     StreamSubscription<String>? sub;
     try {
