@@ -6,7 +6,28 @@
 
 #include "flutter/fml/task_source.h"
 
+#include <algorithm>
+#include <functional>
+#include <utility>
+
 namespace fml {
+
+namespace {
+
+void PushTask(std::vector<DelayedTask>& heap, DelayedTask task) {
+  heap.push_back(std::move(task));
+  std::push_heap(heap.begin(), heap.end(), std::greater<DelayedTask>{});
+}
+
+fml::closure PopHeapTask(std::vector<DelayedTask>& heap) {
+  FML_DCHECK(!heap.empty());
+  std::pop_heap(heap.begin(), heap.end(), std::greater<DelayedTask>{});
+  fml::closure task = heap.back().TakeTask();
+  heap.pop_back();
+  return task;
+}
+
+}  // namespace
 
 TaskSource::TaskSource(TaskQueueId task_queue_id)
     : task_queue_id_(task_queue_id) {}
@@ -16,36 +37,31 @@ TaskSource::~TaskSource() {
 }
 
 void TaskSource::ShutDown() {
-  primary_task_queue_ = {};
-  secondary_task_queue_ = {};
+  std::vector<DelayedTask>().swap(primary_task_queue_);
+  std::vector<DelayedTask>().swap(secondary_task_queue_);
 }
 
-void TaskSource::RegisterTask(const DelayedTask& task) {
+void TaskSource::RegisterTask(DelayedTask task) {
   switch (task.GetTaskSourceGrade()) {
     case TaskSourceGrade::kUserInteraction:
-      primary_task_queue_.push(task);
-      break;
     case TaskSourceGrade::kUnspecified:
-      primary_task_queue_.push(task);
+      PushTask(primary_task_queue_, std::move(task));
       break;
     case TaskSourceGrade::kDartEventLoop:
-      secondary_task_queue_.push(task);
+      PushTask(secondary_task_queue_, std::move(task));
       break;
   }
 }
 
-void TaskSource::PopTask(TaskSourceGrade grade) {
+fml::closure TaskSource::PopTask(TaskSourceGrade grade) {
   switch (grade) {
     case TaskSourceGrade::kUserInteraction:
-      primary_task_queue_.pop();
-      break;
     case TaskSourceGrade::kUnspecified:
-      primary_task_queue_.pop();
-      break;
+      return PopHeapTask(primary_task_queue_);
     case TaskSourceGrade::kDartEventLoop:
-      secondary_task_queue_.pop();
-      break;
+      return PopHeapTask(secondary_task_queue_);
   }
+  FML_UNREACHABLE();
 }
 
 size_t TaskSource::GetNumPendingTasks() const {
@@ -63,20 +79,20 @@ bool TaskSource::IsEmpty() const {
 TaskSource::TopTask TaskSource::Top() const {
   FML_CHECK(!IsEmpty());
   if (secondary_pause_requests_ > 0 || secondary_task_queue_.empty()) {
-    const auto& primary_top = primary_task_queue_.top();
+    const auto& primary_top = primary_task_queue_.front();
     return {
         .task_queue_id = task_queue_id_,
         .task = primary_top,
     };
   } else if (primary_task_queue_.empty()) {
-    const auto& secondary_top = secondary_task_queue_.top();
+    const auto& secondary_top = secondary_task_queue_.front();
     return {
         .task_queue_id = task_queue_id_,
         .task = secondary_top,
     };
   } else {
-    const auto& primary_top = primary_task_queue_.top();
-    const auto& secondary_top = secondary_task_queue_.top();
+    const auto& primary_top = primary_task_queue_.front();
+    const auto& secondary_top = secondary_task_queue_.front();
     if (primary_top > secondary_top) {
       return {
           .task_queue_id = task_queue_id_,
