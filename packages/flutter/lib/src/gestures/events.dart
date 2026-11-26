@@ -1784,8 +1784,6 @@ mixin _CopyPointerUpEvent on PointerEvent {
 ///  * [PointerEvent], the base class for pointer events.
 ///  * [PointerMoveEvent], which is dispatched when a pointer moves while in
 ///    contact with the input surface.
-///  * [PointerUpEvent], which is dispatched when a pointer is no longer in
-///    contact with the input surface.
 ///  * [PointerCancelEvent], which is dispatched when a pointer interaction is
 ///    interrupted.
 class PointerUpEvent extends PointerEvent with _PointerEventDescription, _CopyPointerUpEvent {
