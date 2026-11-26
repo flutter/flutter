@@ -9,7 +9,6 @@ import 'package:file/src/interface/file_system_entity.dart';
 import '../integration.shard/test_utils.dart';
 import '../src/android_common.dart';
 import '../src/common.dart';
-import '../src/context.dart';
 
 void main() {
   late Directory tempDir;
@@ -22,7 +21,7 @@ void main() {
     tryToDelete(tempDir as FileSystemEntity);
   });
 
-  testUsingContext('AGP version out of "warn" support band but in "error" band builds '
+  test('AGP version out of "warn" support band but in "error" band builds '
       'successfully and prints warning', () async {
     final versionTuple = VersionTuple(
       agpVersion: '9.1.1',
@@ -37,7 +36,7 @@ void main() {
     expect(result.stderr, contains('Please upgrade your Android Gradle Plugin version'));
   });
 
-  testUsingContext('Gradle version out of "warn" support band but in "error" band builds '
+  test('Gradle version out of "warn" support band but in "error" band builds '
       'successfully and prints warning', () async {
     // Create a new flutter project.
     final versionTuple = VersionTuple(
@@ -53,7 +52,7 @@ void main() {
     expect(result.stderr, contains('Please upgrade your Gradle version'));
   });
 
-  testUsingContext('Kotlin version out of "warn" support band but in "error" band builds '
+  test('Kotlin version out of "warn" support band but in "error" band builds '
       'successfully and prints warning', () async {
     final versionTuple = VersionTuple(
       agpVersion: '9.1.1',
@@ -69,7 +68,7 @@ void main() {
     expect(result.stderr, contains('Please upgrade your Kotlin version'));
   });
 
-  testUsingContext('No logs are printed when suppression flag is passed', () async {
+  test('No logs are printed when suppression flag is passed', () async {
     final versionTuple = VersionTuple(
       agpVersion: '9.1.1',
       gradleVersion: '9.3.1',

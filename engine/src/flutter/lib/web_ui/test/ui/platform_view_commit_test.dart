@@ -271,15 +271,18 @@ void testMain() {
           final Future<void> pending = draw(width: 40);
           final Future<void> queued = draw();
           await whilePaused(pending, () {
+            final RenderRequest next = rasterizer.queue.next!;
             rasterizer.dispose();
             renderer.dispose();
+            expect(rasterizer.queue.next, isNull);
+            expect(next.completer.isCompleted, isTrue);
             expect(surface.isDisposed, isFalse);
             expect(rasterizer.sceneElement.children, isEmpty);
           });
           await queued;
           expect(surface.isDisposed, isTrue);
           expect(rasterizer.displayFactory.debugSurfaceCount, 0);
-          expectTimings(2);
+          expectTimings(1);
         } finally {
           renderer.debugOverrideRasterizer(original);
         }

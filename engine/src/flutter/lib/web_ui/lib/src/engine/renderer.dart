@@ -97,7 +97,25 @@ abstract class Renderer {
       return;
     }
     final ViewRasterizer rasterizer = rasterizers.remove(viewId)!;
+    _disposeRasterizer(rasterizer);
+  }
+
+  void _disposeRasterizer(ViewRasterizer rasterizer) {
+    final RenderRequest? next = rasterizer.queue.next;
+    if (next != null) {
+      rasterizer.queue.next = null;
+      _unpinScene(next.scene);
+      next.completer.complete();
+    }
     rasterizer.dispose();
+  }
+
+  void _pinScene(ui.Scene scene) {
+    (scene as LayerScene).layerTree.rootLayer.pinForRender();
+  }
+
+  void _unpinScene(ui.Scene scene) {
+    (scene as LayerScene).layerTree.rootLayer.unpinForRender();
   }
 
   /// Creates a native paint for a single draw call from [paint].
@@ -378,10 +396,19 @@ abstract class Renderer {
     // [renderQueue.next]; recording build finish now ensures queue waiting time
     // is not mistakenly counted as build time.
     recorder?.recordBuildFinish();
+    // Pin the scene while it is queued or being rasterized.
+    // The framework typically calls scene.dispose() immediately after submitting
+    // to window.render(), so this protects child picture layers from being
+    // disposed prematurely before rasterization completes.
+    _pinScene(scene);
     if (renderQueue.current != null) {
       // If a scene is already queued up, drop it and queue this one up instead
       // so that the scene view always displays the most recently requested scene.
-      renderQueue.next?.completer.complete();
+      final RenderRequest? dropped = renderQueue.next;
+      if (dropped != null) {
+        _unpinScene(dropped.scene);
+        dropped.completer.complete();
+      }
       final completer = Completer<void>();
       renderQueue.next = (scene: scene, size: size, completer: completer, recorder: recorder);
       return completer.future;
@@ -400,6 +427,8 @@ abstract class Renderer {
       current.completer.complete();
     } catch (error, stackTrace) {
       current.completer.completeError(error, stackTrace);
+    } finally {
+      _unpinScene(current.scene);
     }
     renderQueue.current = renderQueue.next;
     renderQueue.next = null;
@@ -427,6 +456,7 @@ abstract class Renderer {
   void dispose() {
     _onViewCreatedListener.cancel();
     _onViewDisposedListener.cancel();
+    rasterizers.values.forEach(_disposeRasterizer);
     // The rasterizer also owns pictureToImageSurface, which Skwasm shares with
     // any frames that are still rasterizing.
     rasterizer.dispose();
@@ -437,9 +467,7 @@ abstract class Renderer {
   void debugClear() {
     _onViewCreatedListener.cancel();
     _onViewDisposedListener.cancel();
-    for (final ViewRasterizer rasterizer in rasterizers.values) {
-      rasterizer.dispose();
-    }
+    rasterizers.values.forEach(_disposeRasterizer);
     rasterizers.clear();
     _setUpViewListeners();
   }
