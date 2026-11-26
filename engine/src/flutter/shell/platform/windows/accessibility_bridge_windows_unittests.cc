@@ -262,6 +262,39 @@ TEST(AccessibilityBridgeWindows, GetParent) {
             node1_delegate->GetParent());
 }
 
+TEST(AccessibilityBridgeWindows, ChildLookupAfterSemanticsChildRemoval) {
+  auto engine = GetTestEngine();
+  FlutterWindowsViewSpy view{
+      engine.get(), std::make_unique<NiceMock<MockWindowBindingHandler>>()};
+  EngineModifier modifier{engine.get()};
+  modifier.SetImplicitView(&view);
+  view.OnUpdateSemanticsEnabled(true);
+
+  auto bridge = view.accessibility_bridge().lock();
+  PopulateAXTree(bridge);
+  auto root = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  ASSERT_NE(root, nullptr);
+  ASSERT_EQ(root->GetChildCount(), 2);
+  ASSERT_NE(root->ChildAtIndex(1), nullptr);
+
+  FlutterSemanticsFlags flags{};
+  FlutterSemanticsNode2 update{sizeof(FlutterSemanticsNode2), 0};
+  int32_t children[] = {1};
+  update.flags2 = &flags;
+  update.child_count = 1;
+  update.children_in_traversal_order = children;
+  update.children_in_hit_test_order = children;
+  bridge->AddFlutterSemanticsNodeUpdate(update);
+  bridge->CommitUpdates();
+
+  ASSERT_EQ(root->GetChildCount(), 1);
+  auto remaining = bridge->GetFlutterPlatformNodeDelegateFromID(1).lock();
+  ASSERT_NE(remaining, nullptr);
+  ASSERT_NE(remaining->GetNativeViewAccessible(), nullptr);
+  EXPECT_EQ(root->ChildAtIndex(0), remaining->GetNativeViewAccessible());
+  EXPECT_EQ(root->ChildAtIndex(1), nullptr);
+}
+
 TEST(AccessibilityBridgeWindows, GetParentOnRootRetunsNullptr) {
   auto engine = GetTestEngine();
   FlutterWindowsViewSpy view{
