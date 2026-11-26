@@ -197,7 +197,8 @@ static void swizzle_rgba_to_bgra(uint8_t* pixels, size_t width, size_t height) {
 // Returns the log for the given OpenGL shader. Must be freed by the caller.
 #if FLUTTER_LINUX_GTK4
 struct Gtk4NativeTextureData {
-  FlFramebuffer* framebuffer;
+  GLuint texture;
+  FlEGLImage* image;
   GdkGLContext* context;
 };
 
@@ -276,13 +277,14 @@ static void release_native_texture_data(gpointer user_data) {
   Gtk4NativeTextureData* data = static_cast<Gtk4NativeTextureData*>(user_data);
 
   // GDK may release the texture after snapshotting, when no GL context is
-  // current. The sibling framebuffer belongs to the GDK context used to import
+  // current. The sibling texture belongs to the GDK context used to import
   // the EGL image, so make that context current before deleting its GL objects.
   GdkGLContext* old_context = gdk_gl_context_get_current();
   if (old_context != data->context) {
     gdk_gl_context_make_current(data->context);
   }
-  g_clear_object(&data->framebuffer);
+  glDeleteTextures(1, &data->texture);
+  g_clear_object(&data->image);
   if (old_context != data->context) {
     gdk_gl_context_clear_current();
     if (old_context != nullptr) {
@@ -298,19 +300,20 @@ static GdkTexture* acquire_shareable_texture(FlFramebuffer* framebuffer,
   g_return_val_if_fail(framebuffer != nullptr, nullptr);
   g_return_val_if_fail(context != nullptr, nullptr);
 
-  g_autoptr(FlFramebuffer) sibling = fl_framebuffer_create_sibling(framebuffer);
-  if (sibling == nullptr) {
+  GLuint sibling = fl_framebuffer_create_sibling_texture(framebuffer);
+  if (sibling == 0) {
     return nullptr;
   }
 
   Gtk4NativeTextureData* data = g_new0(Gtk4NativeTextureData, 1);
-  data->framebuffer = FL_FRAMEBUFFER(g_object_ref(sibling));
+  data->texture = sibling;
+  data->image =
+      FL_EGL_IMAGE(g_object_ref(fl_framebuffer_get_egl_image(framebuffer)));
   data->context = GDK_GL_CONTEXT(g_object_ref(context));
 #if GTK_CHECK_VERSION(4, 12, 0)
   g_autoptr(GdkGLTextureBuilder) builder = gdk_gl_texture_builder_new();
   gdk_gl_texture_builder_set_context(builder, context);
-  gdk_gl_texture_builder_set_id(builder,
-                                fl_framebuffer_get_texture_id(sibling));
+  gdk_gl_texture_builder_set_id(builder, sibling);
   gdk_gl_texture_builder_set_width(
       builder, static_cast<int>(fl_framebuffer_get_width(framebuffer)));
   gdk_gl_texture_builder_set_height(
@@ -319,8 +322,7 @@ static GdkTexture* acquire_shareable_texture(FlFramebuffer* framebuffer,
       gdk_gl_texture_builder_build(builder, release_native_texture_data, data);
 #else
   GdkTexture* texture = gdk_gl_texture_new(
-      context, fl_framebuffer_get_texture_id(sibling),
-      static_cast<int>(fl_framebuffer_get_width(framebuffer)),
+      context, sibling, static_cast<int>(fl_framebuffer_get_width(framebuffer)),
       static_cast<int>(fl_framebuffer_get_height(framebuffer)),
       release_native_texture_data, data);
 #endif

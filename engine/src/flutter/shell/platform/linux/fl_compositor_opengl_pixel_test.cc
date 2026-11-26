@@ -87,9 +87,75 @@ static void test_offset_layer() {
   }
 }
 
+static void test_retained_texture() {
+  g_autoptr(FlOpenGLManager) manager = fl_opengl_manager_new();
+  g_assert_true(fl_opengl_manager_make_current(manager));
+  g_autoptr(FlTaskRunner) runner = fl_task_runner_new(nullptr);
+  g_autoptr(FlCompositorOpenGL) compositor =
+      fl_compositor_opengl_new(runner, manager, TRUE);
+  compositor->dmabuf_disabled = TRUE;
+  g_autoptr(FlFramebuffer) source = fl_framebuffer_new(GL_RGBA, 4, 4, FALSE);
+  FlutterBackingStore store = {
+      .type = kFlutterBackingStoreTypeOpenGL,
+      .open_gl = {.framebuffer = {.user_data = source}}};
+  FlutterLayer layer = {.type = kFlutterLayerContentTypeBackingStore,
+                        .backing_store = &store,
+                        .size = {4, 4}};
+  const FlutterLayer* layers[] = {&layer};
+  glBindFramebuffer(GL_FRAMEBUFFER, fl_framebuffer_get_id(source));
+  glClearColor(1, 0, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT);
+  g_assert_true(
+      fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers, 1));
+  if (!fl_framebuffer_get_shareable(compositor->framebuffer)) {
+    g_test_skip("Requires EGL image sharing");
+    return;
+  }
+  glBindFramebuffer(GL_FRAMEBUFFER,
+                    fl_framebuffer_get_id(compositor->framebuffer));
+  GLint attachment = -1;
+  glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                                        GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE,
+                                        &attachment);
+  g_assert_cmpint(attachment, ==, GL_NONE);
+  g_autoptr(GtkWindow) window = GTK_WINDOW(g_object_ref_sink(gtk_window_new()));
+  gtk_widget_realize(GTK_WIDGET(window));
+  GdkSurface* surface = gtk_native_get_surface(GTK_NATIVE(window));
+  g_autoptr(GError) error = nullptr;
+  g_autoptr(GdkGLContext) context =
+      gdk_surface_create_gl_context(surface, &error);
+  g_assert_no_error(error);
+  gdk_gl_context_make_current(context);
+  g_autoptr(GdkTexture) retained = fl_compositor_acquire_texture(
+      FL_COMPOSITOR(compositor), surface, context, 4, 4, FALSE);
+  g_assert_nonnull(retained);
+  g_assert_true(compositor->framebuffer_published);
+  gdk_gl_context_clear_current();
+  g_assert_true(fl_opengl_manager_make_current(manager));
+  glBindFramebuffer(GL_FRAMEBUFFER, fl_framebuffer_get_id(source));
+  glClearColor(0, 1, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT);
+  g_assert_true(
+      fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers, 1));
+  glBindFramebuffer(GL_FRAMEBUFFER,
+                    fl_framebuffer_get_id(compositor->framebuffer));
+  uint8_t pixel[4];
+  glReadPixels(0, 0, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
+  g_assert_cmpuint(pixel[1], ==, 255);
+  // gdk_texture_download returns native-endian premultiplied ARGB pixels.
+  uint32_t pixels[16];
+  gdk_texture_download(retained, reinterpret_cast<guchar*>(pixels),
+                       4 * sizeof(uint32_t));
+  g_assert_cmphex(pixels[0], ==, 0xffff0000);
+  g_clear_object(&retained);
+  gtk_window_destroy(window);
+  g_assert_true(fl_opengl_manager_make_current(manager));
+}
+
 int main(int argc, char** argv) {
   g_test_init(&argc, &argv, nullptr);
   gtk_init();
+  g_test_add_func("/compositor/retained-texture", test_retained_texture);
   g_test_add_func("/compositor/offset-layer", test_offset_layer);
   g_test_add_func("/compositor/subsurface/resize", test_subsurface_resize);
   return g_test_run();

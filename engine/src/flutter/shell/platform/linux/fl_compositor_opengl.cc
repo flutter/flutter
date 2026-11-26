@@ -247,9 +247,9 @@ static void paint_shareable_framebuffer(FlFramebuffer* framebuffer,
                                         gint scale_factor,
                                         size_t width,
                                         size_t height) {
-  g_autoptr(FlFramebuffer) sibling = fl_framebuffer_create_sibling(framebuffer);
-  draw_texture_to_cairo(cr, surface, fl_framebuffer_get_texture_id(sibling),
-                        scale_factor, width, height);
+  GLuint texture = fl_framebuffer_create_sibling_texture(framebuffer);
+  draw_texture_to_cairo(cr, surface, texture, scale_factor, width, height);
+  glDeleteTextures(1, &texture);
 }
 #endif
 

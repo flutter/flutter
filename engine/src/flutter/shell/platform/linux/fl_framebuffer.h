@@ -81,7 +81,7 @@ FlFramebuffer* fl_framebuffer_new_multisample(GLint format,
  * @framebuffer: an #FlFramebuffer.
  *
  * Checks if this framebuffer can be shared between contexts (using
- * fl_framebuffer_create_sibling).
+ * fl_framebuffer_create_sibling_texture).
  *
  * Returns: %TRUE if this framebuffer can be shared.
  */
@@ -97,17 +97,9 @@ gboolean fl_framebuffer_get_shareable(FlFramebuffer* framebuffer);
  */
 FlEGLImage* fl_framebuffer_get_egl_image(FlFramebuffer* framebuffer);
 
-/**
- * fl_framebuffer_create_sibling:
- * @framebuffer: an #FlFramebuffer.
- *
- * Creates a new framebuffer with the same backing texture as the original. This
- * uses EGLImage to share the texture and allows a framebuffer created in one
- * OpenGL context to be used in another.
- *
- * Returns: a new #FlFramebuffer.
- */
-FlFramebuffer* fl_framebuffer_create_sibling(FlFramebuffer* framebuffer);
+// Import the framebuffer's EGL image as a texture in the current context.
+// The caller must delete the texture in that context after use.
+GLuint fl_framebuffer_create_sibling_texture(FlFramebuffer* framebuffer);
 
 #endif  // FLUTTER_LINUX_GTK4
 /**

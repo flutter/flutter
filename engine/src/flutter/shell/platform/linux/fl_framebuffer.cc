@@ -163,7 +163,8 @@ FlFramebuffer* fl_framebuffer_new(GLint format,
 FlFramebuffer* fl_framebuffer_new_shareable(GLint format,
                                             size_t width,
                                             size_t height) {
-  return fl_framebuffer_new_internal(format, width, height, TRUE, TRUE);
+  // The compositor only blits or blends color into its exported target.
+  return fl_framebuffer_new_internal(format, width, height, TRUE, FALSE);
 }
 #endif
 
@@ -249,33 +250,15 @@ FlEGLImage* fl_framebuffer_get_egl_image(FlFramebuffer* self) {
   return self->image;
 }
 
-FlFramebuffer* fl_framebuffer_create_sibling(FlFramebuffer* self) {
-  g_return_val_if_fail(FL_IS_FRAMEBUFFER(self), nullptr);
-  g_return_val_if_fail(fl_framebuffer_get_shareable(self), nullptr);
+GLuint fl_framebuffer_create_sibling_texture(FlFramebuffer* self) {
+  g_return_val_if_fail(fl_framebuffer_get_shareable(self), 0);
 
-  FlFramebuffer* sibling =
-      FL_FRAMEBUFFER(g_object_new(fl_framebuffer_get_type(), nullptr));
-
-  sibling->width = self->width;
-  sibling->height = self->height;
-  sibling->image = FL_EGL_IMAGE(g_object_ref(self->image));
-
-  // Make texture from existing image.
-  glGenTextures(1, &sibling->texture_id);
-  glBindTexture(GL_TEXTURE_2D, sibling->texture_id);
+  GLuint texture = 0;
+  glGenTextures(1, &texture);
+  glBindTexture(GL_TEXTURE_2D, texture);
   glEGLImageTargetTexture2DOES(GL_TEXTURE_2D,
                                fl_egl_image_get_image(self->image));
-
-  // Make framebuffer that uses this texture.
-  glGenFramebuffers(1, &sibling->framebuffer_id);
-  GLint saved_framebuffer_binding;
-  glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &saved_framebuffer_binding);
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, sibling->framebuffer_id);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                         sibling->texture_id, 0);
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, saved_framebuffer_binding);
-
-  return sibling;
+  return texture;
 }
 
 #endif
