@@ -101,6 +101,13 @@ void MessageLoopFuchsia::Terminate() {
 }
 
 void MessageLoopFuchsia::WakeUp(fml::TimePoint time_point) {
+  if (time_point == fml::TimePoint::Max()) {
+    zx_status_t cancel_status = timer_.cancel();
+    FML_CHECK(cancel_status == ZX_OK)
+        << "MessageLoopFuchsia::WakeUp failed to cancel timer; status="
+        << zx_status_get_string(cancel_status);
+    return;
+  }
   constexpr zx::duration kZeroSlack(0);
   zx::time due_time(time_point.ToEpochDelta().ToNanoseconds());
 

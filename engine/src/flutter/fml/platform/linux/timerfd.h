@@ -43,7 +43,8 @@ int timerfd_settime(int ufc,
 
 namespace fml {
 
-/// Rearms the timer to expire at the given time point.
+/// Rearms the timer to expire at the given time point, or disarms it when
+/// given |TimePoint::Max()|.
 bool TimerRearm(int fd, fml::TimePoint time_point);
 
 /// Drains the timer FD and returns true if it has expired. This may be false in

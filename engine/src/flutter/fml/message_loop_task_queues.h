@@ -5,6 +5,7 @@
 #ifndef FLUTTER_FML_MESSAGE_LOOP_TASK_QUEUES_H_
 #define FLUTTER_FML_MESSAGE_LOOP_TASK_QUEUES_H_
 
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -156,7 +157,7 @@ class MessageLoopTaskQueues {
 
   size_t task_queue_id_counter_ = 0;
 
-  std::atomic_int order_;
+  uint64_t order_ = 0;
 
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(MessageLoopTaskQueues);
 };

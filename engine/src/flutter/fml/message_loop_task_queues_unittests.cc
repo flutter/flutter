@@ -7,14 +7,24 @@
 #include "flutter/fml/message_loop_task_queues.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <cstdlib>
+#include <limits>
 #include <thread>
 #include <utility>
 
+#include "flutter/fml/build_config.h"
+#include "flutter/fml/closure.h"
+#include "flutter/fml/delayed_task.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/time/chrono_timestamp_provider.h"
 #include "gtest/gtest.h"
+
+#if defined(FML_OS_LINUX)
+#include <unistd.h>
+#include "flutter/fml/platform/linux/timerfd.h"
+#endif  // FML_OS_LINUX
 
 namespace fml {
 namespace testing {
@@ -441,6 +451,86 @@ TEST(MessageLoopTaskQueue, RegisterTaskWakesUpOwnerQueue) {
   ASSERT_EQ(time1, wakes[1]);
   ASSERT_EQ(time1, wakes[2]);
 }
+
+TEST(MessageLoopTaskQueue, GetCurrentTaskSourceGradeOnFreshThread) {
+  TaskSourceGrade grade = TaskSourceGrade::kUserInteraction;
+  std::thread fresh_thread(
+      [&grade] { grade = MessageLoopTaskQueues::GetCurrentTaskSourceGrade(); });
+  fresh_thread.join();
+  EXPECT_EQ(grade, TaskSourceGrade::kUnspecified);
+}
+
+TEST(MessageLoopTaskQueue, GetNextTaskToRunSchedulesNextOrDisarmsWakeable) {
+  auto task_queue = fml::MessageLoopTaskQueues::GetInstance();
+  auto queue_id = task_queue->CreateTaskQueue();
+  fml::ScopedCleanupClosure dispose_queue(
+      [task_queue, queue_id] { task_queue->Dispose(queue_id); });
+
+  std::vector<fml::TimePoint> wakes;
+  auto wakeable = std::make_unique<TestWakeable>(
+      [&wakes](fml::TimePoint wake_time) { wakes.push_back(wake_time); });
+
+  const auto now = ChronoTicksSinceEpoch();
+  const auto future = now + fml::TimeDelta::FromSeconds(10);
+
+  task_queue->RegisterTask(
+      queue_id, []() {}, now, TaskSourceGrade::kUserInteraction);
+  task_queue->RegisterTask(queue_id, []() {}, future);
+  task_queue->SetWakeable(queue_id, wakeable.get());
+
+  // Popping the due task schedules the remaining future task.
+  fml::closure first = task_queue->GetNextTaskToRun(queue_id, now);
+  ASSERT_NE(first, nullptr);
+  EXPECT_EQ(MessageLoopTaskQueues::GetCurrentTaskSourceGrade(),
+            TaskSourceGrade::kUserInteraction);
+  ASSERT_EQ(wakes.size(), 1u);
+  EXPECT_EQ(wakes[0], future);
+
+  // Peeking before the future task is due schedules it without popping.
+  EXPECT_EQ(task_queue->GetNextTaskToRun(queue_id, now), nullptr);
+  ASSERT_EQ(wakes.size(), 2u);
+  EXPECT_EQ(wakes[1], future);
+
+  // Popping the final task updates TLS grade and disarms with TimePoint::Max().
+  fml::closure second = task_queue->GetNextTaskToRun(queue_id, future);
+  ASSERT_NE(second, nullptr);
+  EXPECT_EQ(MessageLoopTaskQueues::GetCurrentTaskSourceGrade(),
+            TaskSourceGrade::kUnspecified);
+  ASSERT_EQ(wakes.size(), 3u);
+  EXPECT_EQ(wakes[2], fml::TimePoint::Max());
+}
+
+TEST(MessageLoopTaskQueue, DelayedTaskOrderPreservesUint64Above32Bit) {
+  const auto target = ChronoTicksSinceEpoch();
+  const uint64_t high_32 =
+      static_cast<uint64_t>(std::numeric_limits<uint32_t>::max());
+  DelayedTask before_wrap(
+      high_32, []() {}, target, TaskSourceGrade::kUnspecified);
+  DelayedTask after_wrap(
+      high_32 + 1u, []() {}, target, TaskSourceGrade::kUnspecified);
+  EXPECT_TRUE(after_wrap > before_wrap);
+  EXPECT_FALSE(before_wrap > after_wrap);
+}
+
+#if defined(FML_OS_LINUX)
+TEST(MessageLoopTaskQueue, TimerRearmDisarmsOnTimePointMax) {
+  int fd = ::timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
+  ASSERT_GE(fd, 0);
+  fml::ScopedCleanupClosure close_fd([fd] { ::close(fd); });
+
+  const auto soon = fml::TimePoint::Now() + fml::TimeDelta::FromSeconds(60);
+  ASSERT_TRUE(fml::TimerRearm(fd, soon));
+  struct itimerspec armed = {};
+  ASSERT_EQ(::timerfd_gettime(fd, &armed), 0);
+  EXPECT_TRUE(armed.it_value.tv_sec > 0 || armed.it_value.tv_nsec > 0);
+
+  ASSERT_TRUE(fml::TimerRearm(fd, fml::TimePoint::Max()));
+  struct itimerspec disarmed = {};
+  ASSERT_EQ(::timerfd_gettime(fd, &disarmed), 0);
+  EXPECT_EQ(disarmed.it_value.tv_sec, 0);
+  EXPECT_EQ(disarmed.it_value.tv_nsec, 0);
+}
+#endif  // FML_OS_LINUX
 
 }  // namespace testing
 }  // namespace fml
