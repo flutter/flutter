@@ -249,6 +249,7 @@ List<FlutterCommand> generateCommands({
     CreateCommand(
       androidContext: toolDependencies.androidContext,
       appleContext: toolDependencies.appleContext,
+      extensionBuildManager: toolDependencies.extensionBuildManager,
       featureFlags: featureFlags,
       pub: toolDependencies.pub,
       templatePathProvider: toolDependencies.templatePathProvider,

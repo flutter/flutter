@@ -100,4 +100,8 @@ abstract final class BuiltInTargets {
 
   /// Copies the application's assets to `{BUILD_DIR}/flutter_assets`.
   static const String copyAssets = 'copy_assets';
+
+  /// Installs native code assets built by Dart build and link hooks and writes
+  /// `{BUILD_DIR}/native_assets.json`.
+  static const String installCodeAssets = 'install_code_assets';
 }

@@ -1385,7 +1385,9 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
       ExtensionBuildManager(
         extensionManager: extensionManager,
         featureFlags: featureFlags,
+        fileSystem: _fs,
         logger: _logger,
+        projectFactory: _projectFactory,
       );
 
   @override
@@ -1436,8 +1438,10 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
       _windowsWorkflow ?? WindowsWorkflow(featureFlags: featureFlags, platform: _platform);
 
   Cache get _cache => toolContext.cache;
+  FileSystem get _fs => toolContext.fs;
   Logger get _logger => toolContext.logger;
   Platform get _platform => toolContext.platform;
+  FlutterProjectFactory get _projectFactory => toolContext.projectFactory;
 }
 
 class FakeToolContext extends Fake implements ToolContext {

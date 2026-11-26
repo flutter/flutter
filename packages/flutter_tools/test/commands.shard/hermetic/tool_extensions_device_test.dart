@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart'
     show
@@ -227,6 +228,22 @@ void _fakeAppLaunchExtensionEntryPoint(SendPort sendPort) {
   );
 }
 
+ExtensionBuildManager _createTestBuildManager({
+  required ExtensionManager extensionManager,
+  required FeatureFlags featureFlags,
+  required Logger logger,
+  FileSystem? fileSystem,
+}) {
+  final FileSystem fs = fileSystem ?? MemoryFileSystem.test();
+  return ExtensionBuildManager(
+    extensionManager: extensionManager,
+    featureFlags: featureFlags,
+    fileSystem: fs,
+    logger: logger,
+    projectFactory: FlutterProjectFactory(config: FakeConfig(), fileSystem: fs, logger: logger),
+  );
+}
+
 void main() {
   setUpAll(() {
     Cache.disableLocking();
@@ -243,7 +260,7 @@ void main() {
         featureFlags: featureFlags,
       );
       final discovery = ExtensionDevices(
-        extensionBuildManager: ExtensionBuildManager(
+        extensionBuildManager: _createTestBuildManager(
           extensionManager: manager,
           featureFlags: featureFlags,
           logger: logger,
@@ -274,7 +291,7 @@ void main() {
           logger: logger,
           discoverers: <DeviceDiscovery>[
             ExtensionDevices(
-              extensionBuildManager: ExtensionBuildManager(
+              extensionBuildManager: _createTestBuildManager(
                 extensionManager: manager,
                 featureFlags: featureFlags,
                 logger: logger,
@@ -371,7 +388,7 @@ flutter:
         featureFlags: featureFlags,
       );
       final discovery = ExtensionDevices(
-        extensionBuildManager: ExtensionBuildManager(
+        extensionBuildManager: _createTestBuildManager(
           extensionManager: manager,
           featureFlags: featureFlags,
           logger: logger,
@@ -414,7 +431,7 @@ flutter:
           logger: logger,
           discoverers: <DeviceDiscovery>[
             ExtensionDevices(
-              extensionBuildManager: ExtensionBuildManager(
+              extensionBuildManager: _createTestBuildManager(
                 extensionManager: manager,
                 featureFlags: featureFlags,
                 logger: logger,
@@ -460,7 +477,7 @@ flutter:
           logger: extensionLogger,
           discoverers: <DeviceDiscovery>[
             ExtensionDevices(
-              extensionBuildManager: ExtensionBuildManager(
+              extensionBuildManager: _createTestBuildManager(
                 extensionManager: logsExtensionManager!,
                 featureFlags: featureFlags,
                 logger: extensionLogger,
@@ -520,9 +537,10 @@ flutter:
         addTearDown(manager.dispose);
 
         final discovery = ExtensionDevices(
-          extensionBuildManager: ExtensionBuildManager(
+          extensionBuildManager: _createTestBuildManager(
             extensionManager: manager,
             featureFlags: featureFlags,
+            fileSystem: fileSystem,
             logger: logger,
           ),
           extensionManager: manager,

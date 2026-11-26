@@ -22,6 +22,7 @@ import '../exceptions.dart';
 import '../tools/shader_compiler.dart';
 import 'assets.dart';
 import 'dart_plugin_registrant.dart';
+import 'extension.dart' show hasExtensionPlatformDefines;
 import 'icon_tree_shaker.dart';
 import 'localizations.dart';
 import 'native_assets.dart';
@@ -203,7 +204,22 @@ class KernelSnapshot extends Target {
     final String targetFileAbsolute = environment.fileSystem.file(targetFile).absolute.path;
     // everything besides 'false' is considered to be enabled.
     final trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
-    final targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
+    // Custom extension platforms are not part of the built-in TargetPlatform
+    // enum. Map recognized custom extension target platforms to
+    // TargetPlatform.unsupported and resolve Artifact.flutterPatchedSdkPath
+    // against the host engine (platform: null) without triggering built-in
+    // platform-specific side effects such as Xcode flavor parsing.
+    TargetPlatform targetPlatform;
+    var isExtensionTargetPlatform = false;
+    try {
+      targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
+    } on Exception {
+      if (!hasExtensionPlatformDefines(environment.defines)) {
+        rethrow;
+      }
+      isExtensionTargetPlatform = true;
+      targetPlatform = TargetPlatform.unsupported;
+    }
 
     // This configuration is all optional.
     final String? frontendServerStarterPath = environment.defines[kFrontendServerStarterPath];
@@ -253,18 +269,16 @@ class KernelSnapshot extends Target {
       case TargetPlatform.web_javascript:
         forceLinkPlatform = false;
       case TargetPlatform.unsupported:
-        TargetPlatform.throwUnsupportedTarget();
+        if (!isExtensionTargetPlatform) {
+          TargetPlatform.throwUnsupportedTarget();
+        }
+        forceLinkPlatform = true;
     }
 
     final String? targetOS = switch (targetPlatform.os) {
-      .fuchsia => 'fuchsia',
-      .android => 'android',
-      .macos => 'macos',
-      .ios => 'ios',
-      .linux => 'linux',
-      .windows => 'windows',
+      .fuchsia || .android || .macos || .ios || .linux || .windows => targetPlatform.os.name,
       .tester || .web => null,
-      .unsupported => TargetPlatform.throwUnsupportedTarget(),
+      .unsupported => isExtensionTargetPlatform ? null : TargetPlatform.throwUnsupportedTarget(),
     };
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
@@ -276,11 +290,17 @@ class KernelSnapshot extends Target {
 
     final List<String> dartDefines = decodeDartDefines(environment.defines, kDartDefines);
     await _addFlavorToDartDefines(dartDefines, environment, targetPlatform);
+    if (resolveCustomPluginPlatformKey(environment.defines) case final String customPlatformKey) {
+      dartDefines.removeWhere(
+        (String define) => define.startsWith('$kFlutterCustomPlatformDartDefine='),
+      );
+      dartDefines.add('$kFlutterCustomPlatformDartDefine=$customPlatformKey');
+    }
 
     final CompilerOutput? output = await compiler.compile(
       sdkRoot: environment.artifacts.getArtifactPath(
         Artifact.flutterPatchedSdkPath,
-        platform: targetPlatform,
+        platform: targetPlatform == TargetPlatform.unsupported ? null : targetPlatform,
         mode: buildMode,
       ),
       aot: buildMode.isPrecompiled,

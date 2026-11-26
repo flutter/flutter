@@ -81,27 +81,39 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
     required File? recordedUsesFile,
   }) async {
     LinkResult? result = linkResult;
-    for (final String package in packagesWithNativeAssetsResult) {
-      final input = LinkInputBuilder()
-        ..setupShared(
-          packageRoot: Uri.parse('$package/'),
-          packageName: package,
-          outputDirectoryShared: Uri.parse('build-out-dir-shared'),
-          outputFile: Uri.file('output.json'),
-        )
-        ..setupLink(
-          assets: buildResult.encodedAssets,
-          recordedUsesFile: recordedUsesFile?.uri,
-          assetsFromLinking: [],
-        );
-      for (final extension in extensions) {
-        extension.setupLinkInput(input);
+    if (packagesWithNativeAssetsResult.isEmpty) {
+      return result;
+    }
+    // LinkInput's constructor creates outputDirectory on dart:io; place it in
+    // systemTemp for FSGuardIOOverrides and delete it before returning.
+    final io.Directory tempDir = io.Directory.systemTemp.createTempSync(
+      'flutter_native_assets_test.',
+    );
+    try {
+      for (final String package in packagesWithNativeAssetsResult) {
+        final input = LinkInputBuilder()
+          ..setupShared(
+            packageRoot: tempDir.uri.resolve('$package/'),
+            packageName: package,
+            outputDirectoryShared: tempDir.uri.resolve('build-out-dir-shared/'),
+            outputFile: tempDir.uri.resolve('$package/output.json'),
+          )
+          ..setupLink(
+            assets: buildResult.encodedAssets,
+            recordedUsesFile: recordedUsesFile?.uri,
+            assetsFromLinking: [],
+          );
+        for (final extension in extensions) {
+          extension.setupLinkInput(input);
+        }
+        final buildConfig = LinkInput(input.json);
+        if (onLink != null) {
+          result = onLink!(buildConfig);
+        }
+        linkInvocations++;
       }
-      final buildConfig = LinkInput(input.json);
-      if (onLink != null) {
-        result = onLink!(buildConfig);
-      }
-      linkInvocations++;
+    } finally {
+      tempDir.deleteSync(recursive: true);
     }
     return result;
   }

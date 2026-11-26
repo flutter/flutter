@@ -21,6 +21,7 @@ class ExtensionBuildContext {
     required this.outputDir,
     required this.projectRoot,
     required this.resolvedArtifacts,
+    this.plugins = const <ExtensionPlugin>[],
   });
 
   /// The compilation mode for the build.
@@ -34,6 +35,9 @@ class ExtensionBuildContext {
 
   /// The absolute directory URI (ending with `/`) where final build outputs should be placed.
   final Uri outputDir;
+
+  /// Resolved platform plugins for this target when [BuildTarget.pluginPlatformKey] is set.
+  final List<ExtensionPlugin> plugins;
 
   /// The absolute directory URI (ending with `/`) to the root directory of the Flutter project being built.
   final Uri projectRoot;
@@ -55,6 +59,7 @@ class ExtensionAssembleContext extends ExtensionBuildContext {
     required super.outputDir,
     required super.projectRoot,
     required super.resolvedArtifacts,
+    super.plugins,
   });
 
   /// The absolute directory URI (ending with `/`) used for intermediate build
@@ -111,6 +116,17 @@ abstract base class BuildTarget {
 
   /// Host-side build tool or library artifacts required by this build target.
   Set<ExtensionHostArtifact> get hostArtifacts => const <ExtensionHostArtifact>{};
+
+  /// Optional platform key under `flutter.plugin.platforms.<key>` in `pubspec.yaml`
+  /// used to resolve plugins for this target (e.g. `'linux'`, `'custom_platform'`).
+  String? get pluginPlatformKey => null;
+
+  /// Resolves the cross-compilation configuration passed to Dart Build Hooks
+  /// (`package:code_assets`) for the current build [context], or returns
+  /// `null` if native asset hooks are not configured by this target.
+  Future<ExtensionNativeAssetsConfig?> resolveNativeAssetsConfig(
+    ExtensionBuildContext context,
+  ) async => null;
 
   /// Performs the actual compilation/build steps in the extension process/isolate.
   ///
@@ -198,6 +214,10 @@ abstract base class BuildService extends ToolExtensionService {
   /// RPC method identifier to query contributed `flutter assemble` targets.
   static const String getAssembleTargetsMethod = 'build.getAssembleTargets';
 
+  /// RPC method identifier to dynamically resolve native assets hook configuration
+  /// for a contributed `flutter build` target.
+  static const String resolveNativeAssetsConfigMethod = 'build.resolveNativeAssetsConfig';
+
   /// RPC method identifier to trigger a custom `flutter build` target.
   static const String buildMethod = 'build.build';
 
@@ -219,6 +239,9 @@ abstract base class BuildService extends ToolExtensionService {
   /// RPC parameter key for the output directory.
   static const String outputDirParam = 'outputDir';
 
+  /// RPC parameter key for the resolved platform plugins list.
+  static const String pluginsParam = 'plugins';
+
   /// RPC parameter key for the project root path.
   static const String projectRootParam = 'projectRoot';
 
@@ -230,6 +253,9 @@ abstract base class BuildService extends ToolExtensionService {
 
   static const String _getBuildTargetsRpcMethod = 'getBuildTargets';
   static const String _getAssembleTargetsRpcMethod = 'getAssembleTargets';
+  static const _getPluginPlatformDirectoriesRpcMethod = 'getPluginPlatformDirectories';
+  static const _injectPluginsRpcMethod = 'injectPlugins';
+  static const String _resolveNativeAssetsConfigRpcMethod = 'resolveNativeAssetsConfig';
   static const String _buildRpcMethod = 'build';
   static const String _assembleRpcMethod = 'assemble';
 
@@ -242,11 +268,25 @@ abstract base class BuildService extends ToolExtensionService {
   /// Returns the custom `flutter assemble` targets contributed by this extension.
   List<AssembleTarget> get assembleTargets => const <AssembleTarget>[];
 
+  /// Maps `flutter.plugin.platforms.<key>` identifiers to project-relative
+  /// runner directories (for example,
+  /// `const <String, String>{'custom_os': 'custom_os'}`) for pre-build native
+  /// plugin injection via [injectPlugins].
+  Map<String, String> get pluginPlatformDirectories => const <String, String>{};
+
+  /// Generates native plugin registrants, build-system inputs, or plugin
+  /// symlinks inside [ExtensionPluginInjectionContext.runnerDirectory] during
+  /// `flutter create`, `flutter pub get`, and pre-build tooling regeneration.
+  Future<void> injectPlugins(ExtensionPluginInjectionContext context) async {}
+
   @override
   Future<Map<String, ExtensionRpcHandler>> initialize() async {
     return <String, ExtensionRpcHandler>{
       _getBuildTargetsRpcMethod: _getBuildTargetsRpc,
       _getAssembleTargetsRpcMethod: _getAssembleTargetsRpc,
+      _getPluginPlatformDirectoriesRpcMethod: _getPluginPlatformDirectoriesRpc,
+      _injectPluginsRpcMethod: _injectPluginsRpc,
+      _resolveNativeAssetsConfigRpcMethod: _resolveNativeAssetsConfigRpc,
       _buildRpcMethod: _buildRpc,
       _assembleRpcMethod: _assembleRpc,
     };
@@ -254,6 +294,21 @@ abstract base class BuildService extends ToolExtensionService {
 
   @override
   Future<void> shutdown() async {}
+
+  Future<Map<String, String>> _getPluginPlatformDirectoriesRpc(Map<String, Object?> _) async {
+    return Map<String, String>.of(pluginPlatformDirectories);
+  }
+
+  Future<Object?> _injectPluginsRpc(Map<String, Object?> params) async {
+    final ExtensionPluginInjectionContext context;
+    try {
+      context = ExtensionPluginInjectionContext.fromJson(params);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
+    }
+    await injectPlugins(context);
+    return null;
+  }
 
   Future<List<Map<String, Object?>>> _getBuildTargetsRpc(Map<String, Object?> _) async {
     return buildTargets
@@ -264,6 +319,7 @@ abstract base class BuildService extends ToolExtensionService {
             hostArtifacts: target.hostArtifacts,
             name: target.name,
             outputDir: target.outputDir,
+            pluginPlatformKey: target.pluginPlatformKey,
             targetPlatform: target.targetPlatform,
           ).toMap(),
         )
@@ -305,6 +361,7 @@ abstract base class BuildService extends ToolExtensionService {
     final Uri outputDirUri;
     final Uri flutterRootUri;
     final Map<String, Object?> rawResolvedArtifacts;
+    final List<ExtensionPlugin> plugins;
     try {
       targetName = params.requiredField<String>(targetNameParam);
       projectRootUri = _requireAbsoluteDirectoryUri(params, projectRootParam);
@@ -313,6 +370,10 @@ abstract base class BuildService extends ToolExtensionService {
       outputDirUri = _requireAbsoluteDirectoryUri(params, outputDirParam);
       flutterRootUri = _requireAbsoluteDirectoryUri(params, flutterRootParam);
       rawResolvedArtifacts = params.requiredField<Map<String, Object?>>(resolvedArtifactsParam);
+      final List<Object?>? rawPlugins = params.nullableField<List<Object?>>(pluginsParam);
+      plugins = rawPlugins != null
+          ? ExtensionPlugin.listFromJson(rawPlugins)
+          : const <ExtensionPlugin>[];
     } on FormatException catch (e) {
       throw RpcException.invalidParams(e.message);
     }
@@ -338,6 +399,7 @@ abstract base class BuildService extends ToolExtensionService {
       flutterRoot: flutterRootUri,
       mainPath: mainPath,
       outputDir: outputDirUri,
+      plugins: plugins,
       projectRoot: projectRootUri,
       resolvedArtifacts: resolvedArtifacts,
     );
@@ -360,10 +422,23 @@ abstract base class BuildService extends ToolExtensionService {
       flutterRoot: buildContext.flutterRoot,
       mainPath: buildContext.mainPath,
       outputDir: buildContext.outputDir,
+      plugins: buildContext.plugins,
       projectRoot: buildContext.projectRoot,
       resolvedArtifacts: buildContext.resolvedArtifacts,
     );
     return (targetName, context);
+  }
+
+  Future<Map<String, Object?>?> _resolveNativeAssetsConfigRpc(Map<String, Object?> params) async {
+    final (String targetName, ExtensionBuildContext context) = _parseBuildRequest(params);
+    final BuildTarget? target = buildTargets
+        .where((BuildTarget t) => t.name == targetName)
+        .firstOrNull;
+    if (target == null) {
+      throw RpcException.invalidParams('Unknown build target: $targetName');
+    }
+    final ExtensionNativeAssetsConfig? config = await target.resolveNativeAssetsConfig(context);
+    return config?.toMap();
   }
 
   Future<Map<String, Object?>> _buildRpc(Map<String, Object?> params) async {
