@@ -1045,14 +1045,33 @@ class DefaultResidentCompiler implements ResidentCompiler {
     );
 
     if (nativeAssetsUri != null && nativeAssetsUri.isNotEmpty) {
-      _server?.stdin.writeln('native-assets $nativeAssetsUri');
-      _logger.printTrace('<- native-assets $nativeAssetsUri');
+      await _writelnToServerStdin('native-assets $nativeAssetsUri');
     }
 
-    _server?.stdin.writeln('compile $scriptUri');
-    _logger.printTrace('<- compile $scriptUri');
+    await _writelnToServerStdin('compile $scriptUri');
 
     return _stdoutHandler.compilerOutput?.future;
+  }
+
+  /// Writes [line] to the stdin of the frontend server process.
+  ///
+  /// If the frontend server exits right after starting, writing to its stdin
+  /// fails, for example with a "Broken pipe" [SocketException]. The listeners
+  /// on its stdout and exit code already report that failure, so the write
+  /// error is only logged.
+  Future<void> _writelnToServerStdin(String line) async {
+    final Process? server = _server;
+    if (server == null) {
+      return;
+    }
+    await ProcessUtils.writelnToStdinGuarded(
+      stdin: server.stdin,
+      line: line,
+      onError: (Object error, StackTrace stackTrace) {
+        _logger.printTrace('Failed to write to the frontend server: $error');
+      },
+    );
+    _logger.printTrace('<- $line');
   }
 
   @override

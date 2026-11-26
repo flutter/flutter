@@ -8,7 +8,9 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/async_guard.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -409,6 +411,61 @@ void main() {
       throwsToolExit(message: 'The Dart compiler exited unexpectedly.'),
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/197236.
+  test(
+    'incremental compile does not crash when writing to the stdin of an exited frontend server',
+    () async {
+      // Collect every uncaught error, not only the first one. The stdin sink
+      // is created in this zone so that its write errors are reported here.
+      final errors = <Object>[];
+      final compileDone = Completer<void>();
+      unawaited(
+        runZonedGuarded(() async {
+          fakeProcessManager.addCommand(
+            FakeCommand(
+              command: const <String>[
+                ...frontendServerCommand,
+                '--initialize-from-dill',
+                expectedCachePath,
+                '--verbosity=error',
+              ],
+              stdin: IOSink(_BrokenPipeStreamConsumer()),
+              exitCode: 1,
+            ),
+          );
+          await generator.recompile(
+            Uri.parse('/path/to/main.dart'),
+            null,
+            /* invalidatedFiles */
+            outputPath: '/build/',
+            packageConfig: PackageConfig.empty,
+            fs: MemoryFileSystem.test(),
+            projectRootPath: '',
+          );
+          compileDone.complete();
+        }, (Object error, StackTrace stackTrace) => errors.add(error)),
+      );
+      await compileDone.future;
+      await pumpEventQueue();
+
+      expect(errors, isNot(contains(isA<SocketException>())));
+      expect(
+        errors,
+        contains(
+          isA<ToolExit>().having(
+            (ToolExit e) => e.message,
+            'message',
+            'The Dart compiler exited unexpectedly.',
+          ),
+        ),
+      );
+      expect(
+        testLogger.traceText,
+        contains('Failed to write to the frontend server: SocketException'),
+      );
+    },
+  );
 
   test('incremental compile and recompile', () async {
     final completer = Completer<void>();
@@ -895,4 +952,17 @@ Future<void> _reject(
   final String commands = frontendServerStdIn.getAndClear();
   final re = RegExp(expected);
   expect(commands, matches(re));
+}
+
+/// A [StreamConsumer] that fails every write like a pipe whose reader has exited.
+class _BrokenPipeStreamConsumer implements StreamConsumer<List<int>> {
+  @override
+  Future<void> addStream(Stream<List<int>> stream) async {
+    await for (final _ in stream) {
+      throw const SocketException('Write failed', osError: OSError('Broken pipe', 32));
+    }
+  }
+
+  @override
+  Future<void> close() async {}
 }
