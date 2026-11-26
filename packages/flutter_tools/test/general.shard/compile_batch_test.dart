@@ -484,12 +484,9 @@ void main() {
     expect((await output)?.outputFilename, '');
   });
 
-  for (final (String styleName, FileSystemStyle style) in <(String, FileSystemStyle)>[
-    ('posix', FileSystemStyle.posix),
-    ('windows', FileSystemStyle.windows),
-  ]) {
+  for (final FileSystemStyle style in [FileSystemStyle.posix, FileSystemStyle.windows]) {
     test(
-      'KernelCompiler converts dart_plugin_registrant physical path to virtual URI ($styleName)',
+      'KernelCompiler converts dart_plugin_registrant physical path to virtual URI ($style.name)',
       () async {
         final logger = BufferLogger.test();
         final fileSystem = MemoryFileSystem.test(style: style);
