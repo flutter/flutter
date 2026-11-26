@@ -62,6 +62,7 @@ struct _FlEngine {
   FlOpenGLManager* opengl_manager;
 #if FLUTTER_LINUX_GTK4
   FlVulkanManager* vulkan_manager;
+  const gchar* gl_texture_bridge_error;
 #endif
 
   // Messenger used to send and receive platform messages.
@@ -847,6 +848,9 @@ static void fl_engine_init(FlEngine* self) {
         free(ref);
       });
 
+#if FLUTTER_LINUX_GTK4
+  self->gl_texture_bridge_error = "Vulkan renderer has not started";
+#endif
   self->texture_registrar = fl_texture_registrar_new(self);
 }
 
@@ -973,6 +977,11 @@ FlOpenGLManager* fl_engine_get_opengl_manager(FlEngine* self) {
 }
 
 #if FLUTTER_LINUX_GTK4
+const gchar* fl_engine_get_gl_texture_bridge_error(FlEngine* self) {
+  return static_cast<const gchar*>(
+      g_atomic_pointer_get(&self->gl_texture_bridge_error));
+}
+
 FlVulkanManager* fl_engine_get_vulkan_manager(FlEngine* self) {
   g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
   return self->vulkan_manager;
@@ -1094,6 +1103,12 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
                                     error)) {
       return FALSE;
     }
+    const gchar* bridge_error =
+        fl_vulkan_manager_supports_gl_images(self->vulkan_manager)
+            ? fl_gl_texture_check_vulkan_import(self->opengl_manager)
+            : "Vulkan DMA-BUF export for GL textures is unavailable or "
+              "disabled";
+    g_atomic_pointer_set(&self->gl_texture_bridge_error, bridge_error);
     config.vulkan.external_texture_frame_callback =
         fl_engine_vulkan_external_texture_frame_callback;
 #endif

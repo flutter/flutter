@@ -88,8 +88,9 @@ set `FLUTTER_GTK4_ENABLE_GRAPHICS_OFFLOAD=1` to request that separately.
 
 Pixel-buffer plugin textures work with Vulkan. To test GL-only plugins, set
 `FLUTTER_GTK4_VULKAN_GL_TEXTURES=1` with `FLUTTER_LINUX_RENDERER=vulkan`.
-Registration requires Vulkan export support for linear RGBA8 images. At frame
-time EGL must import the image and the plugin must supply a framebuffer-readable
+Registration requires Vulkan export support for linear RGBA8 images, EGL DMA-BUF
+import with modifiers, and a GL 3.0 or newer context with `GL_OES_EGL_image`.
+At frame time EGL must import the image and the plugin must supply a framebuffer-readable
 `GL_TEXTURE_2D`. The bridge blits it into a pooled DMA-BUF image, waits for GL
 completion, and transfers ownership back to Vulkan for sampling. This introduces
 a GPU copy and synchronization costs. A successfully copied image logs

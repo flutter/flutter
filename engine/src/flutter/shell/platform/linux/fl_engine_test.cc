@@ -15,6 +15,9 @@
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
+#if FLUTTER_LINUX_GTK4
+#include "flutter/shell/platform/linux/fl_gl_texture_vulkan.h"  // nogncheck
+#endif
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_string_codec.h"
@@ -288,6 +291,25 @@ TEST_F(FlEngineShutdownTest, WorkerAdmissionRacesShutdown) {
 }
 
 #if FLUTTER_LINUX_GTK4
+TEST_F(FlEngineTest, VulkanGlImportChecksCapabilities) {
+  FlOpenGLManager* manager = fl_engine_get_opengl_manager(engine);
+  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+  ON_CALL(epoxy, epoxy_has_egl_extension(::testing::_, ::testing::_))
+      .WillByDefault(::testing::Return(false));
+  EXPECT_STREQ(fl_gl_texture_check_vulkan_import(manager),
+               "EGL DMA-BUF import with modifiers is unavailable");
+  ON_CALL(epoxy, epoxy_has_egl_extension(::testing::_, ::testing::_))
+      .WillByDefault(::testing::Return(true));
+  EXPECT_STREQ(fl_gl_texture_check_vulkan_import(manager),
+               "GL 3.0 is required");
+  ON_CALL(epoxy, epoxy_gl_version).WillByDefault(::testing::Return(30));
+  EXPECT_STREQ(fl_gl_texture_check_vulkan_import(manager),
+               "GL_OES_EGL_image is unavailable");
+  ON_CALL(epoxy, epoxy_has_gl_extension(::testing::StrEq("GL_OES_EGL_image")))
+      .WillByDefault(::testing::Return(true));
+  EXPECT_EQ(fl_gl_texture_check_vulkan_import(manager), nullptr);
+}
+
 #ifndef SHELL_ENABLE_VULKAN
 TEST_F(FlEngineTest, AutoSkipsVulkanInOpenGLBuild) {
   g_autofree gchar* previous = g_strdup(g_getenv("FLUTTER_LINUX_RENDERER"));

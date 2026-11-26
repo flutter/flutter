@@ -228,8 +228,45 @@ bool CopyGL(const Slot& slot, GLuint source) {
   glDeleteTextures(1, &texture);
   return complete;
 }
+// A permanent driver failure can recur on every raster callback.
+bool WarnFrameFailure(FlTextureGL* texture, const char* reason) {
+  static const GQuark key =
+      g_quark_from_static_string("fl-gl-vulkan-frame-error");
+  if (!g_object_get_qdata(G_OBJECT(texture), key)) {
+    g_object_set_qdata(G_OBJECT(texture), key, GINT_TO_POINTER(1));
+    g_warning("Cannot deliver OpenGL plugin texture to Vulkan: %s", reason);
+  }
+  return false;
+}
 using Slots = std::vector<std::shared_ptr<Slot>>;
 }  // namespace
+
+const gchar* fl_gl_texture_check_vulkan_import(FlOpenGLManager* gl) {
+  EGLDisplay display = fl_opengl_manager_get_display(gl);
+  if (display == EGL_NO_DISPLAY ||
+      !epoxy_has_egl_extension(display, "EGL_EXT_image_dma_buf_import") ||
+      !epoxy_has_egl_extension(display,
+                               "EGL_EXT_image_dma_buf_import_modifiers"))
+    return "EGL DMA-BUF import with modifiers is unavailable";
+
+  EGLDisplay previous = eglGetCurrentDisplay();
+  EGLContext context = eglGetCurrentContext();
+  EGLSurface draw = eglGetCurrentSurface(EGL_DRAW);
+  EGLSurface read = eglGetCurrentSurface(EGL_READ);
+  if (fl_opengl_manager_get_context(gl) == EGL_NO_CONTEXT ||
+      !fl_opengl_manager_make_current(gl))
+    return "Cannot bind the plugin render context";
+
+  const gchar* reason = nullptr;
+  if (epoxy_gl_version() < 30)
+    reason = "GL 3.0 is required";
+  else if (!epoxy_has_gl_extension("GL_OES_EGL_image"))
+    reason = "GL_OES_EGL_image is unavailable";
+  if (!eglMakeCurrent(previous == EGL_NO_DISPLAY ? display : previous, draw,
+                      read, context))
+    return "Cannot restore the previous EGL context";
+  return reason;
+}
 
 bool fl_gl_texture_populate_vulkan(FlTextureGL* texture,
                                    FlOpenGLManager* gl,
@@ -239,16 +276,12 @@ bool fl_gl_texture_populate_vulkan(FlTextureGL* texture,
                                    FlutterVulkanExternalTexture* output) {
   if (!fl_vulkan_manager_supports_gl_images(vk) ||
       !fl_opengl_manager_make_current(gl))
-    return false;
+    return WarnFrameFailure(texture, "bridge or render context unavailable");
   struct Clear {
     FlOpenGLManager* gl;
     ~Clear() { fl_opengl_manager_clear_current(gl); }
   } clear{gl};
   auto display = eglGetCurrentDisplay();
-  if (!epoxy_has_egl_extension(display,
-                               "EGL_EXT_image_dma_buf_import_modifiers") ||
-      !epoxy_has_gl_extension("GL_OES_EGL_image") || epoxy_gl_version() < 30)
-    return false;
   FlutterOpenGLTexture source = {};
   g_autoptr(GError) error = nullptr;
   if (!fl_texture_gl_populate(texture, width, height, &source, &error) ||
@@ -281,13 +314,13 @@ bool fl_gl_texture_populate_vulkan(FlTextureGL* texture,
     slot = std::make_shared<Slot>(ctx, display, source.width, source.height);
     if (!slot->Initialize()) {
       slot.reset();
-      return false;
+      return WarnFrameFailure(texture, "DMA-BUF slot initialization failed");
     }
   }
   if (!slot->TransferOwnership(true) || !CopyGL(*slot, source.name) ||
       !slot->TransferOwnership(false)) {
     slot.reset();
-    return false;
+    return WarnFrameFailure(texture, "ownership transfer or GL blit failed");
   }
   if (!slot->sampled) {
     flutter_linux_gtk4_dbg("vulkan-gl-texture", "path=dmabuf size=%zux%zu",

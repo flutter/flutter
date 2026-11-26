@@ -91,6 +91,8 @@ FlutterRendererType fl_engine_get_renderer_type(FlEngine* engine);
 FlOpenGLManager* fl_engine_get_opengl_manager(FlEngine* engine);
 
 #if FLUTTER_LINUX_GTK4
+const gchar* fl_engine_get_gl_texture_bridge_error(FlEngine* engine);
+
 FlVulkanManager* fl_engine_get_vulkan_manager(FlEngine* engine);
 #endif
 
