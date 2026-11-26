@@ -129,7 +129,7 @@ environment:
       Cache.enableLocking();
     });
 
-    testWithoutContext('success, error and warning', () async {
+    test('success, error and warning', () async {
       final loggerTest = BufferLogger.test();
       final command = AnalyzeCommand(
         allProjectValidators: <ProjectValidator>[
@@ -164,7 +164,7 @@ environment:
       expect(loggerTest.statusText, contains(expected));
     });
 
-    testWithoutContext('crash', () async {
+    test('crash', () async {
       final loggerTest = BufferLogger.test();
       final command = AnalyzeCommand(
         allProjectValidators: <ProjectValidator>[ProjectValidatorCrash()],
@@ -186,7 +186,7 @@ environment:
       expect(loggerTest.statusText, contains(expected));
     });
 
-    testWithoutContext('--watch and --suggestions not compatible together', () async {
+    test('--watch and --suggestions not compatible together', () async {
       final loggerTest = BufferLogger.test();
       final command = AnalyzeCommand(
         allProjectValidators: <ProjectValidator>[],

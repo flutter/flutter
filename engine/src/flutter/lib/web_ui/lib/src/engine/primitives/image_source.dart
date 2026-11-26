@@ -397,10 +397,15 @@ class PictureImageTracker {
     }
   }
 
-  /// Extracts and records the underlying [ImageSource] from a [ui.Image], if present.
+  /// Extracts and records any underlying [ImageSource]s retained by [image].
   void recordImage(ui.Image image) {
-    if (image case EngineImage(:final imageSource?)) {
-      recordSource(imageSource);
+    if (image case EngineImage(:final imageSource, :final imageTracker)) {
+      if (imageSource != null) {
+        recordSource(imageSource);
+      }
+      if (imageTracker != null) {
+        recordFrom(imageTracker);
+      }
     }
   }
 

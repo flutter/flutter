@@ -14,7 +14,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/preview_manifest.dart';
 
 import '../../../../src/common.dart';
-import '../../../../src/context.dart';
+import '../../../../src/fake_process_manager.dart';
 import '../utils/preview_project.dart';
 
 void main() {
@@ -45,7 +45,7 @@ void main() {
       );
     });
 
-    testUsingContext('generates a valid manifest', () async {
+    test('generates a valid manifest', () async {
       previewManifest.generate();
       final manifest = json.decode(
         rootProject.widgetPreviewScaffold
@@ -58,7 +58,7 @@ void main() {
       expect(manifest.containsKey(PreviewManifest.kSdkVersion), true);
     });
 
-    testUsingContext('identifies widget preview scaffold project needs to be generated', () {
+    test('identifies widget preview scaffold project needs to be generated', () {
       // The widget preview scaffold directory doesn't exist, so we should know that we need to
       // generate the project.
       expect(previewManifest.shouldGenerateProject(), true);
@@ -88,7 +88,7 @@ void main() {
       expect((modified.logger as BufferLogger).statusText, contains(sdkMismatchMessage));
     });
 
-    testUsingContext('identifies root project pubspec has changed', () {
+    test('identifies root project pubspec has changed', () {
       // The widget preview scaffold directory doesn't exist, so we should know that we need to
       // generate the project.
       expect(previewManifest.shouldGenerateProject(), true);
@@ -147,7 +147,7 @@ void main() {
       );
     }
 
-    testWithoutContext('can handle workspace entries that do not exist', () async {
+    test('can handle workspace entries that do not exist', () async {
       await workspace.createWorkspaceProject(name: 'foo');
       await workspace.createWorkspaceProject(name: 'bar');
 
@@ -169,7 +169,7 @@ void main() {
       expect(manifest.pubspecHashes.keys, workspace.workspacePubspecPaths);
     });
 
-    testWithoutContext(
+    test(
       'can handle the addition of new workspace projects before the workspace pubspec is updated',
       () async {
         await workspace.createWorkspaceProject(name: 'foo');
@@ -194,7 +194,7 @@ void main() {
       },
     );
 
-    testWithoutContext('can handle the removal of workspace projects', () async {
+    test('can handle the removal of workspace projects', () async {
       await workspace.createWorkspaceProject(name: 'foo');
       final WidgetPreviewProject bar = await workspace.createWorkspaceProject(name: 'bar');
       final String barPubspecPath = bar.pubspecAbsolutePath;

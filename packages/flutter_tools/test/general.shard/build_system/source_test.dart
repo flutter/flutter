@@ -71,12 +71,12 @@ void main() {
     environment.buildDir.createSync(recursive: true);
   });
 
-  testWithoutContext('configures implicit vs explicit correctly', () {
+  test('configures implicit vs explicit correctly', () {
     expect(const Source.pattern('{PROJECT_DIR}/foo').implicit, false);
     expect(const Source.pattern('{PROJECT_DIR}/*foo').implicit, true);
   });
 
-  testWithoutContext('can substitute {PROJECT_DIR}/foo', () {
+  test('can substitute {PROJECT_DIR}/foo', () {
     fileSystem.file('foo').createSync();
     const fooSource = Source.pattern('{PROJECT_DIR}/foo');
     fooSource.accept(visitor);
@@ -84,7 +84,7 @@ void main() {
     expect(visitor.sources.single.path, fileSystem.path.absolute('foo'));
   });
 
-  testWithoutContext('can substitute {OUTPUT_DIR}/foo', () {
+  test('can substitute {OUTPUT_DIR}/foo', () {
     fileSystem.file('foo').createSync();
     const fooSource = Source.pattern('{OUTPUT_DIR}/foo');
     fooSource.accept(visitor);
@@ -95,7 +95,7 @@ void main() {
     );
   });
 
-  testWithoutContext('can substitute {BUILD_DIR}/bar', () {
+  test('can substitute {BUILD_DIR}/bar', () {
     final String path = fileSystem.path.join(environment.buildDir.path, 'bar');
     fileSystem.file(path).createSync();
     const barSource = Source.pattern('{BUILD_DIR}/bar');
@@ -104,7 +104,7 @@ void main() {
     expect(visitor.sources.single.path, fileSystem.path.absolute(path));
   });
 
-  testWithoutContext('can substitute {FLUTTER_ROOT}/foo', () {
+  test('can substitute {FLUTTER_ROOT}/foo', () {
     final String path = fileSystem.path.join(environment.flutterRootDir.path, 'foo');
     fileSystem.file(path).createSync();
     const barSource = Source.pattern('{FLUTTER_ROOT}/foo');
@@ -113,7 +113,7 @@ void main() {
     expect(visitor.sources.single.path, fileSystem.path.absolute(path));
   });
 
-  testWithoutContext('can substitute Artifact', () {
+  test('can substitute Artifact', () {
     final String path = fileSystem.path.join(
       cache.getArtifactDirectory('engine').path,
       'windows-x64',
@@ -129,7 +129,7 @@ void main() {
     expect(visitor.sources.single.resolveSymbolicLinksSync(), fileSystem.path.absolute(path));
   });
 
-  testWithoutContext('can substitute {PROJECT_DIR}/*.fizz', () {
+  test('can substitute {PROJECT_DIR}/*.fizz', () {
     const fizzSource = Source.pattern('{PROJECT_DIR}/*.fizz');
     fizzSource.accept(visitor);
 
@@ -143,7 +143,7 @@ void main() {
     expect(visitor.sources.single.path, fileSystem.path.absolute('foo.fizz'));
   });
 
-  testWithoutContext('can substitute {PROJECT_DIR}/fizz.*', () {
+  test('can substitute {PROJECT_DIR}/fizz.*', () {
     const fizzSource = Source.pattern('{PROJECT_DIR}/fizz.*');
     fizzSource.accept(visitor);
 
@@ -157,7 +157,7 @@ void main() {
     expect(visitor.sources.single.path, fileSystem.path.absolute('fizz.foo'));
   });
 
-  testWithoutContext('can substitute {PROJECT_DIR}/a*bc', () {
+  test('can substitute {PROJECT_DIR}/a*bc', () {
     const fizzSource = Source.pattern('{PROJECT_DIR}/bc*bc');
     fizzSource.accept(visitor);
 
@@ -171,7 +171,7 @@ void main() {
     expect(visitor.sources.single.path, fileSystem.path.absolute('bcbc'));
   });
 
-  testWithoutContext('crashes on bad substitute of two **', () {
+  test('crashes on bad substitute of two **', () {
     const fizzSource = Source.pattern('{PROJECT_DIR}/*.*bar');
 
     fileSystem.file('abcd.bar').createSync();
@@ -179,13 +179,13 @@ void main() {
     expect(() => fizzSource.accept(visitor), throwsA(isA<InvalidPatternException>()));
   });
 
-  testWithoutContext("can't substitute foo", () {
+  test("can't substitute foo", () {
     const invalidBase = Source.pattern('foo');
 
     expect(() => invalidBase.accept(visitor), throwsA(isA<InvalidPatternException>()));
   });
 
-  testWithoutContext('can substitute optional files', () {
+  test('can substitute optional files', () {
     const missingSource = Source.pattern('{PROJECT_DIR}/foo', optional: true);
 
     expect(fileSystem.file('foo').existsSync(), false);
@@ -193,14 +193,14 @@ void main() {
     expect(visitor.sources, isEmpty);
   });
 
-  testWithoutContext('can resolve a missing depfile', () {
+  test('can resolve a missing depfile', () {
     visitor.visitDepfile('foo.d');
 
     expect(visitor.sources, isEmpty);
     expect(visitor.containsNewDepfile, true);
   });
 
-  testWithoutContext('can resolve a populated depfile', () {
+  test('can resolve a populated depfile', () {
     environment.buildDir.childFile('foo.d').writeAsStringSync('a.dart : c.dart');
 
     visitor.visitDepfile('foo.d');
@@ -214,7 +214,7 @@ void main() {
     expect(outputVisitor.containsNewDepfile, false);
   });
 
-  testWithoutContext('does not crash on completely invalid depfile', () {
+  test('does not crash on completely invalid depfile', () {
     environment.buildDir.childFile('foo.d').writeAsStringSync('hello, world');
 
     visitor.visitDepfile('foo.d');
@@ -222,7 +222,7 @@ void main() {
     expect(visitor.containsNewDepfile, false);
   });
 
-  testWithoutContext('can parse depfile with windows paths', () {
+  test('can parse depfile with windows paths', () {
     final windowsFileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     final windowsEnvironment = Environment.test(
       windowsFileSystem.currentDirectory,
@@ -243,7 +243,7 @@ void main() {
     expect(windowsVisitor.containsNewDepfile, false);
   });
 
-  testWithoutContext('can parse depfile with spaces in paths', () {
+  test('can parse depfile with spaces in paths', () {
     environment.buildDir.childFile('foo.d').writeAsStringSync(r'a.dart: foo\ bar.txt');
 
     visitor.visitDepfile('foo.d');
@@ -251,32 +251,29 @@ void main() {
     expect(visitor.containsNewDepfile, false);
   });
 
-  testWithoutContext(
-    'Non-local engine builds use the engine.stamp file as an Artifact dependency',
-    () {
-      final artifacts = Artifacts.test();
-      final versionedEnvironment = Environment.test(
-        fileSystem.currentDirectory,
-        artifacts: artifacts,
-        featureFlags: TestFeatureFlags(),
-        processManager: FakeProcessManager.any(),
-        fileSystem: fileSystem,
-        logger: environment.logger,
-        engineVersion: 'abcdefghijklmon', // Use a versioned engine.
-      );
-      visitor = SourceVisitor(versionedEnvironment);
+  test('Non-local engine builds use the engine.stamp file as an Artifact dependency', () {
+    final artifacts = Artifacts.test();
+    final versionedEnvironment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: environment.logger,
+      engineVersion: 'abcdefghijklmon', // Use a versioned engine.
+    );
+    visitor = SourceVisitor(versionedEnvironment);
 
-      const fizzSource = Source.artifact(
-        Artifact.windowsDesktopPath,
-        platform: TargetPlatform.windows_x64,
-      );
-      fizzSource.accept(visitor);
+    const fizzSource = Source.artifact(
+      Artifact.windowsDesktopPath,
+      platform: TargetPlatform.windows_x64,
+    );
+    fizzSource.accept(visitor);
 
-      expect(visitor.sources.single.path, contains('engine.stamp'));
-    },
-  );
+    expect(visitor.sources.single.path, contains('engine.stamp'));
+  });
 
-  testWithoutContext('can substitute project file', () {
+  test('can substitute project file', () {
     final String path = fileSystem.file('.flutter-plugins-dependencies').absolute.path;
     fileSystem.file(path).createSync(recursive: true);
     final pluginsSource = Source.fromProject(
@@ -288,7 +285,7 @@ void main() {
     expect(visitor.sources.single, exists);
   });
 
-  testWithoutContext('can substitute nonexistent project file', () {
+  test('can substitute nonexistent project file', () {
     final String path = fileSystem.file('.flutter-plugins-dependencies').absolute.path;
     final pluginsSource = Source.fromProject(
       (FlutterProject project) => project.flutterPluginsDependenciesFile,
@@ -299,7 +296,7 @@ void main() {
     expect(visitor.sources.single, isNot(exists));
   });
 
-  testWithoutContext('can substitute optional project file', () {
+  test('can substitute optional project file', () {
     final String path = fileSystem.file('.flutter-plugins-dependencies').absolute.path;
     fileSystem.file(path).createSync(recursive: true);
     final pluginsSource = Source.fromProject(
@@ -312,7 +309,7 @@ void main() {
     expect(visitor.sources.single, exists);
   });
 
-  testWithoutContext('skips nonexistent optional project file', () {
+  test('skips nonexistent optional project file', () {
     final pluginsSource = Source.fromProject(
       (FlutterProject project) => project.flutterPluginsDependenciesFile,
       optional: true,

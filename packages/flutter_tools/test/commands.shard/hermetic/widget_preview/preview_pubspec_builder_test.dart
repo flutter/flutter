@@ -16,7 +16,7 @@ import 'package:flutter_tools/src/widget_preview/preview_pubspec_builder.dart';
 import 'package:test_api/fake.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
 import '../../../src/package_config.dart';
 import '../../../src/throwing_pub.dart';
 import 'utils/preview_project.dart';
@@ -53,32 +53,25 @@ void main() {
       );
     });
 
-    testUsingContext(
-      'can create a pubspec.yaml for the preview scaffold including root project deferred components',
-      () {
-        final FlutterManifest root = rootProject.manifest;
-        final FlutterManifest updated = pubspecBuilder.buildPubspec(
-          rootProject: rootProject,
-          widgetPreviewManifest: rootProject.widgetPreviewScaffoldProject.manifest,
-        );
+    test('can create a pubspec.yaml for the preview scaffold including root project deferred components', () {
+      final FlutterManifest root = rootProject.manifest;
+      final FlutterManifest updated = pubspecBuilder.buildPubspec(
+        rootProject: rootProject,
+        widgetPreviewManifest: rootProject.widgetPreviewScaffoldProject.manifest,
+      );
 
-        expect(updated.deferredComponents?.length, root.deferredComponents?.length);
-        if (root.deferredComponents != null) {
-          for (var i = 0; i < root.deferredComponents!.length; ++i) {
-            expect(
-              updated.deferredComponents![i].toString(),
-              pubspecBuilder.transformDeferredComponent(root.deferredComponents![i]).toString(),
-            );
-          }
+      expect(updated.deferredComponents?.length, root.deferredComponents?.length);
+      if (root.deferredComponents != null) {
+        for (var i = 0; i < root.deferredComponents!.length; ++i) {
+          expect(
+            updated.deferredComponents![i].toString(),
+            pubspecBuilder.transformDeferredComponent(root.deferredComponents![i]).toString(),
+          );
         }
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      }
+    });
 
-    testWithoutContext('populatePreviewPubspec regenerates workspace root scaffold pubspec and updates manifest hash on member pubspec change', () async {
+    test('populatePreviewPubspec regenerates workspace root scaffold pubspec and updates manifest hash on member pubspec change', () async {
       const fakeSdkVersion = '2.1.0-dev.8.0.flutter-4312ae32';
       final Directory workspaceDir = fileSystem.directory('/workspace')..createSync();
       final workspace = WidgetPreviewWorkspace(workspaceRoot: workspaceDir);

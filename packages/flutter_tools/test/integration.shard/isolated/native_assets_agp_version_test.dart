@@ -33,7 +33,7 @@ void main() {
 
   for (final String agpVersion in agpVersions) {
     for (final String buildMode in buildModes) {
-      testWithoutContext(
+      test(
         'flutter build apk with native assets with build mode $buildMode and multiple flavors on AGP $agpVersion',
         () async {
           await inTempDir((Directory tempDirectory) async {

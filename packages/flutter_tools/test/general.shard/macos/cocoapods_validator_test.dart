@@ -12,7 +12,7 @@ import '../../src/common.dart';
 
 void main() {
   group('CocoaPods validation', () {
-    testWithoutContext('Emits installed status when CocoaPods is installed', () async {
+    test('Emits installed status when CocoaPods is installed', () async {
       final workflow = CocoaPodsValidator(
         FakeCocoaPods(CocoaPodsStatus.recommended, '1000.0.0'),
         UserMessages(),
@@ -25,7 +25,7 @@ void main() {
       expect(message.message, contains('CocoaPods version 1000.0.0'));
     });
 
-    testWithoutContext('Emits partial status when CocoaPods is not installed', () async {
+    test('Emits partial status when CocoaPods is not installed', () async {
       final workflow = CocoaPodsValidator(
         FakeCocoaPods(CocoaPodsStatus.notInstalled),
         UserMessages(),
@@ -39,24 +39,21 @@ void main() {
       expect(message.message, contains('getting-started.html#installation'));
     });
 
-    testWithoutContext(
-      'Emits partial status when CocoaPods is installed with unknown version',
-      () async {
-        final workflow = CocoaPodsValidator(
-          FakeCocoaPods(CocoaPodsStatus.unknownVersion),
-          UserMessages(),
-        );
-        final ValidationResult result = await workflow.validate();
-        expect(result.type, ValidationType.partial);
-        expect(result.messages.length, 1);
-        final ValidationMessage message = result.messages.first;
-        expect(message.type, ValidationMessageType.hint);
-        expect(message.message, contains('Unknown CocoaPods version installed'));
-        expect(message.message, contains('getting-started.html#updating-cocoapods'));
-      },
-    );
+    test('Emits partial status when CocoaPods is installed with unknown version', () async {
+      final workflow = CocoaPodsValidator(
+        FakeCocoaPods(CocoaPodsStatus.unknownVersion),
+        UserMessages(),
+      );
+      final ValidationResult result = await workflow.validate();
+      expect(result.type, ValidationType.partial);
+      expect(result.messages.length, 1);
+      final ValidationMessage message = result.messages.first;
+      expect(message.type, ValidationMessageType.hint);
+      expect(message.message, contains('Unknown CocoaPods version installed'));
+      expect(message.message, contains('getting-started.html#updating-cocoapods'));
+    });
 
-    testWithoutContext('Emits partial status when CocoaPods version is too low', () async {
+    test('Emits partial status when CocoaPods version is too low', () async {
       const currentVersion = '1.4.0';
       final CocoaPods fakeCocoaPods = FakeCocoaPods(
         CocoaPodsStatus.belowRecommendedVersion,

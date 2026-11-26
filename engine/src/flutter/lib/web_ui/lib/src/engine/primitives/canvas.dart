@@ -355,16 +355,19 @@ class EngineCanvas implements LayerCanvas {
 
   /// Draws a text [paragraph] at [offset].
   ///
-  /// Note: When [paragraph] is an [EngineParagraph], its layout and shaders are
-  /// encapsulated natively by the backend paragraph. When [paragraph] is a
-  /// [WebParagraph], painting is dispatched back to this canvas where paints
-  /// with image shaders are automatically tracked.
+  /// Retains any [ImageSource]s referenced by `foreground` or `background`
+  /// paints in [paragraph]. When [paragraph] is a [WebParagraph], painting is
+  /// dispatched back to this canvas where paints with image shaders are
+  /// tracked directly.
   @override
   void drawParagraph(ui.Paragraph paragraph, ui.Offset offset) {
     assert(!paragraph.debugDisposed);
     assert(offsetIsValid(offset));
     if (paragraph is EngineParagraph) {
       _backend.drawParagraph(paragraph.backendParagraph, offset);
+      if (paragraph.imageTracker case final PictureImageTracker tracker) {
+        _tracker?.recordFrom(tracker);
+      }
     } else if (paragraph is WebParagraph) {
       paragraph.paint(this, offset);
     } else {

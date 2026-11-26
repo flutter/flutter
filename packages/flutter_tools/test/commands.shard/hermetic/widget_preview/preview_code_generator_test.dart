@@ -32,7 +32,7 @@ void main() {
       );
     });
 
-    testWithoutContext(
+    test(
       'correctly generates ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)} for LSP updates',
       () async {
         final File generatedPreviewFile = project.widgetPreviewScaffold.childFile(
@@ -183,7 +183,7 @@ List<_i1.WidgetPreview> previews() => [];
       },
     );
 
-    testWithoutContext('ignores previews with null packageName for LSP updates', () async {
+    test('ignores previews with null packageName for LSP updates', () async {
       final File generatedPreviewFile = project.widgetPreviewScaffold.childFile(
         PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
       );
@@ -255,7 +255,7 @@ List<_i1.WidgetPreview> previews() => [
       expect(generatedPreviewFile.readAsStringSync(), expectedGeneratedPreviewFileContents);
     });
 
-    testWithoutContext(
+    test(
       'correctly generates ${PreviewCodeGenerator.getGeneratedDtdConnectionInfoFilePath(fs)}',
       () async {
         final File generatedDtdConnectionInfoFile = project.widgetPreviewScaffold.childFile(

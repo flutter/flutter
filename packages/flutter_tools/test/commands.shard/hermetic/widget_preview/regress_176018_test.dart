@@ -41,7 +41,7 @@ void main() {
       root.deleteSync(recursive: true);
     });
 
-    testWithoutContext('creates dependency_overrides for previewed project dependencies', () async {
+    test('creates dependency_overrides for previewed project dependencies', () async {
       const kPackageProjectName = 'abcd';
       const kExampleProjectName = 'example';
       final workspace = WidgetPreviewWorkspace(workspaceRoot: root);

@@ -120,7 +120,7 @@ void main() {
       await detector.mutex.runGuarded(() async {});
     }
 
-    testWithoutContext('reports preview reload timing when files are modified', () async {
+    test('reports preview reload timing when files are modified', () async {
       expectNPreviewReloadTimingEvents(0);
       expect(detectedChanges, isEmpty);
       expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
@@ -138,21 +138,18 @@ void main() {
       expect(fakeAnalysisServer.waitForAnalysisCallCount, 2);
     });
 
-    testWithoutContext(
-      'does not report preview reload timing when pubspec.yaml is modified',
-      () async {
-        expectNPreviewReloadTimingEvents(0);
-        expect(detectedPubspecChanges, isEmpty);
+    test('does not report preview reload timing when pubspec.yaml is modified', () async {
+      expectNPreviewReloadTimingEvents(0);
+      expect(detectedPubspecChanges, isEmpty);
 
-        await emitEvent(WatchEvent(ChangeType.MODIFY, _kPubspecPath));
+      await emitEvent(WatchEvent(ChangeType.MODIFY, _kPubspecPath));
 
-        expect(detectedPubspecChanges, <String>[_kPubspecPath]);
-        expectNPreviewReloadTimingEvents(0);
-        expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
-      },
-    );
+      expect(detectedPubspecChanges, <String>[_kPubspecPath]);
+      expectNPreviewReloadTimingEvents(0);
+      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+    });
 
-    testWithoutContext('notifies onNonDartFileChangeDetected and does not report preview reload timing when non-Dart file is modified', () async {
+    test('notifies onNonDartFileChangeDetected and does not report preview reload timing when non-Dart file is modified', () async {
       expectNPreviewReloadTimingEvents(0);
       expect(detectedChanges, isEmpty);
       expect(detectedPubspecChanges, isEmpty);
@@ -167,7 +164,7 @@ void main() {
       expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
     });
 
-    testWithoutContext('does not report preview reload timing for ignored directories', () async {
+    test('does not report preview reload timing for ignored directories', () async {
       expectNPreviewReloadTimingEvents(0);
 
       await emitEvent(WatchEvent(ChangeType.MODIFY, _kIgnoredDartToolPath));
@@ -179,26 +176,23 @@ void main() {
       expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
     });
 
-    testWithoutContext(
-      'resets reload timing stopwatch on DTD exception and does not report timing',
-      () async {
-        fakeDtd.shouldThrow = true;
-        expectNPreviewReloadTimingEvents(0);
+    test('resets reload timing stopwatch on DTD exception and does not report timing', () async {
+      fakeDtd.shouldThrow = true;
+      expectNPreviewReloadTimingEvents(0);
 
-        await emitEvent(WatchEvent(ChangeType.MODIFY, _kDartFilePath));
+      await emitEvent(WatchEvent(ChangeType.MODIFY, _kDartFilePath));
 
-        expect(detectedChanges, isEmpty);
-        expectNPreviewReloadTimingEvents(0);
+      expect(detectedChanges, isEmpty);
+      expectNPreviewReloadTimingEvents(0);
 
-        fakeDtd.shouldThrow = false;
-        await emitEvent(WatchEvent(ChangeType.MODIFY, _kDartFilePath));
+      fakeDtd.shouldThrow = false;
+      await emitEvent(WatchEvent(ChangeType.MODIFY, _kDartFilePath));
 
-        expect(detectedChanges, hasLength(1));
-        expectNPreviewReloadTimingEvents(1);
-      },
-    );
+      expect(detectedChanges, hasLength(1));
+      expectNPreviewReloadTimingEvents(1);
+    });
 
-    testWithoutContext(
+    test(
       'resets reload timing stopwatch on analysis server exception and does not report timing',
       () async {
         fakeAnalysisServer.shouldThrow = true;
@@ -217,7 +211,7 @@ void main() {
       },
     );
 
-    testWithoutContext('does not launch analysis server and waits for analysis over DTD when connected to an existing DTD instance', () async {
+    test('does not launch analysis server and waits for analysis over DTD when connected to an existing DTD instance', () async {
       await detector.dispose();
 
       fakeDtd = FakeWidgetPreviewDtdServices()..dtdUri = Uri.parse('ws://127.0.0.1:12345');
@@ -238,7 +232,7 @@ void main() {
       expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
     });
 
-    testWithoutContext(
+    test(
       'handles Windows directory watcher unexpected close error and rethrows other watcher errors',
       () async {
         // Regression test for https://github.com/flutter/flutter/issues/173895.
@@ -309,7 +303,7 @@ void main() {
       },
     );
 
-    testWithoutContext(
+    test(
       'ignores events in .widget_preview, ephemeralDirectories, and symlinked ephemeralDirectories',
       () async {
         // Regression test for https://github.com/flutter/flutter/issues/178317 and
@@ -357,38 +351,35 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'resolves relative and symlinked project.directory to canonical path',
-      () async {
-        await detector.dispose();
+    test('resolves relative and symlinked project.directory to canonical path', () async {
+      await detector.dispose();
 
-        final Directory realProjectDir = fs.directory('/canonical/my_app')
-          ..createSync(recursive: true);
-        final Directory workspaceDir = fs.directory('/workspace')..createSync();
-        fs.link('/workspace/linked_app').createSync(realProjectDir.path);
-        fs.currentDirectory = workspaceDir;
+      final Directory realProjectDir = fs.directory('/canonical/my_app')
+        ..createSync(recursive: true);
+      final Directory workspaceDir = fs.directory('/workspace')..createSync();
+      fs.link('/workspace/linked_app').createSync(realProjectDir.path);
+      fs.currentDirectory = workspaceDir;
 
-        String? watchedPath;
-        final symlinkWatcher = FakeWatcher();
-        addTearDown(symlinkWatcher.close);
-        detector = createDetector(
-          dtdOverride: FakeWidgetPreviewDtdServices(),
-          projectOverride: FakeFlutterProject(fs.directory('linked_app')),
-          watcherBuilderOverride: (String path) {
-            watchedPath = path;
-            return symlinkWatcher;
-          },
-        );
-        await detector.initialize();
+      String? watchedPath;
+      final symlinkWatcher = FakeWatcher();
+      addTearDown(symlinkWatcher.close);
+      detector = createDetector(
+        dtdOverride: FakeWidgetPreviewDtdServices(),
+        projectOverride: FakeFlutterProject(fs.directory('linked_app')),
+        watcherBuilderOverride: (String path) {
+          watchedPath = path;
+          return symlinkWatcher;
+        },
+      );
+      await detector.initialize();
 
-        expect(detector.projectRoot.path, realProjectDir.path);
-        expect(watchedPath, realProjectDir.path);
-      },
-    );
+      expect(detector.projectRoot.path, realProjectDir.path);
+      expect(watchedPath, realProjectDir.path);
+    });
   });
 
   group('$WidgetPreviewSubCommandBase.getRootProject', () {
-    testWithoutContext(
+    test(
       'resolves relative CLI paths and symlinked workspace roots to canonical directories',
       () async {
         final fs = MemoryFileSystem.test();
