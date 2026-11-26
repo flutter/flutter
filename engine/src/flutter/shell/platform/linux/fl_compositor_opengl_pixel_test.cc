@@ -73,6 +73,14 @@ static void test_subsurface_resize() {
   }
   // Exercise the view's selection with a live destination, then again while
   // the requested surface is unavailable and after recreating it.
+  // The view's normal rendering setup was bypassed to keep Dart stopped.
+  g_autoptr(GError) error = nullptr;
+  view->render_context = gdk_surface_create_gl_context(
+      gtk_native_get_surface(GTK_NATIVE(window)), &error);
+  g_assert_no_error(error);
+  g_assert_nonnull(view->render_context);
+  g_assert_true(gdk_gl_context_realize(view->render_context, &error));
+  g_assert_no_error(error);
   FlOpenGLManager* manager = fl_engine_get_opengl_manager(view->engine);
   g_assert_true(fl_opengl_manager_make_current(manager));
   auto* compositor = fl_compositor_opengl_new(
