@@ -558,6 +558,8 @@ static void setup_engine(FlView* self) {
       FL_SOCKET_ACCESSIBLE(gtk_widget_get_accessible(GTK_WIDGET(self))),
       ATK_PLUG(self->view_accessible));
 #else
+  fl_view_gtk4_setup(self);
+  fl_view_gtk4_update_accessible_tree(self);
   self->accessibility_backend =
       fl_view_gtk4_accessibility_new(self, self->view_id);
 #endif
@@ -625,8 +627,6 @@ static void fl_view_init(FlView* self) {
   fl_view_gtk4_update_accessible_name(self);
   gtk_widget_set_hexpand(GTK_WIDGET(self->render_area), TRUE);
   gtk_widget_set_vexpand(GTK_WIDGET(self->render_area), TRUE);
-  fl_view_gtk4_setup(self);
-  fl_view_gtk4_update_accessible_tree(self);
   gtk_widget_set_visible(GTK_WIDGET(self->render_area), TRUE);
   g_signal_connect_swapped(self->render_area, "realize", G_CALLBACK(realize_cb),
                            self);

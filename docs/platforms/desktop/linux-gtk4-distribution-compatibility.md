@@ -61,8 +61,9 @@ Text and tree access still depend on Flutter semantics and a working accessibili
 bus. API availability does not establish correct Orca behavior for every widget.
 
 DMA-BUF eligibility still requires supported formats/modifiers, renderer/driver
-interop, and a working display backend. Graphics offload is opt-in with
-`FLUTTER_GTK4_ENABLE_GRAPHICS_OFFLOAD=1`; GTK decides acceptance per scene. A
+interop, and a working display backend. GTK4 Vulkan views on Wayland request offload by default
+when runtime DMA-BUF support is available and enabled. GTK decides acceptance
+per scene. A
 wrapper or newer GTK version does not prove offload, direct scanout, or a speedup.
 Vulkan rendering and Flutter GPU compute are separate engine/driver capabilities;
 they are not unlocked merely by crossing a GTK version threshold.

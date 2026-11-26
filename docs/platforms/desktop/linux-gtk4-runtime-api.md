@@ -115,8 +115,8 @@ validation, and remaining behavior gaps.
 DMA-BUF API availability is only one prerequisite: display formats, EGL support,
 synchronization, and buffer ownership are checked by the rendering code.
 
-Graphics offload is separately requested with
-`FLUTTER_GTK4_ENABLE_GRAPHICS_OFFLOAD=1`. The table resolves its type getter
+GTK4 Vulkan views on Wayland request graphics offload by default when runtime
+DMA-BUF support is available and enabled. The table resolves the type getter
 after checking GTK 4.14, and `fl_graphics_offload_gtk4` constructs the wrapper
 through `g_object_new`, without requiring newer GTK declarations. This lookup
 is retained in both compatibility and direct-call builds: enabling offload
@@ -125,8 +125,8 @@ an import and includes the offload tests in its runtime filter.
 
 API presence permits construction; it does not establish that GTK accepted a
 frame for offload. GTK retains its ordinary-composition fallback. The request
-also enables DMA-BUF export unless explicitly overridden, but DMA-BUF import
-keeps its own capability checks. See [rendering paths](linux-gtk-rendering.md#gtk-graphics-offload).
+also enables OpenGL DMA-BUF export when explicitly requested with the flag.
+DMA-BUF import keeps its own capability checks. See [rendering paths](linux-gtk-rendering.md#gtk-graphics-offload).
 
 Explicit and automatic Vulkan selection use the same runtime loader. `fl_vulkan_manager` loads `libvulkan.so.1` on demand
 and resolves Vulkan entry points through the loader, keeping Vulkan out of the

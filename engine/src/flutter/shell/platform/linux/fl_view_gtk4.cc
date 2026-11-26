@@ -4,9 +4,12 @@
 
 #include "flutter/shell/platform/linux/fl_view_private.h"
 
+#include <gdk/wayland/gdkwayland.h>
+
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_graphics_offload_gtk4.h"
 #include "flutter/shell/platform/linux/fl_gtk.h"
+#include "flutter/shell/platform/linux/fl_gtk4_runtime_api.h"
 #include "flutter/shell/platform/linux/fl_key_event.h"
 #include "flutter/shell/platform/linux/fl_keyboard_manager.h"
 #include "flutter/shell/platform/linux/fl_pointer_manager.h"
@@ -316,8 +319,14 @@ static void key_released_cb(GtkEventControllerKey* controller,
 }
 
 void fl_view_gtk4_setup(FlView* view) {
+  const gboolean enable_offload_by_default =
+      fl_engine_get_renderer_type(view->engine) == kVulkan &&
+      GDK_IS_WAYLAND_DISPLAY(gtk_widget_get_display(GTK_WIDGET(view))) &&
+      fl_gtk_runtime_supports_dmabuf_textures() &&
+      g_strcmp0(g_getenv("FLUTTER_GTK4_ENABLE_DMABUF"), "0") != 0;
   gtk_box_append(GTK_BOX(view),
-                 fl_graphics_offload_gtk4_wrap(GTK_WIDGET(view->render_area)));
+                 fl_graphics_offload_gtk4_wrap(view->render_area, nullptr,
+                                               enable_offload_by_default));
 
   GtkEventController* legacy = gtk_event_controller_legacy_new();
   g_signal_connect_swapped(legacy, "event",

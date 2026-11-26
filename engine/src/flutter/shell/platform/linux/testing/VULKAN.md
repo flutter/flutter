@@ -82,7 +82,8 @@ The successful route avoids CPU pixel copies and GTK texture upload, but still
 performs one GPU image-to-buffer copy and a completion wait. It is not direct
 rendering into scanout memory, nor a zero-copy or performance claim. Graphics
 offload can consume the DMA-BUF texture when GTK and the compositor accept it;
-set `FLUTTER_GTK4_ENABLE_GRAPHICS_OFFLOAD=1` to request that separately.
+eligible Wayland views request it by default. Set
+`FLUTTER_GTK4_ENABLE_GRAPHICS_OFFLOAD=0` to compare ordinary GTK composition.
 `FLUTTER_LINUX_GTK_DEBUG=1` reports `event=vulkan-presentation path=dmabuf` or
 `path=readback`. EGL export and direct Wayland EGL rendering are independent.
 

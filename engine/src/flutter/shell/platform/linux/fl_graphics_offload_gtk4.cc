@@ -12,11 +12,15 @@ gboolean fl_graphics_offload_gtk4_is_requested() {
 }
 
 GtkWidget* fl_graphics_offload_gtk4_wrap(GtkWidget* child,
-                                         const FlGtkRuntimeApi* api) {
+                                         const FlGtkRuntimeApi* api,
+                                         gboolean enable_by_default) {
   g_return_val_if_fail(GTK_IS_WIDGET(child), nullptr);
   g_return_val_if_fail(gtk_widget_get_parent(child) == nullptr, nullptr);
 
-  if (!fl_graphics_offload_gtk4_is_requested()) {
+  const gchar* setting = g_getenv("FLUTTER_GTK4_ENABLE_GRAPHICS_OFFLOAD");
+  const gboolean enabled =
+      setting == nullptr ? enable_by_default : g_strcmp0(setting, "1") == 0;
+  if (!enabled) {
     return child;
   }
   if (api == nullptr) {

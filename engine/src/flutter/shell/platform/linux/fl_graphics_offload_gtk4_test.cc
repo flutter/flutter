@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <gdk/wayland/gdkwayland.h>
+
 #include "gtest/gtest.h"
 
 #include "flutter/shell/platform/linux/fl_graphics_offload_gtk4.h"
@@ -41,13 +43,13 @@ TEST_F(FlGraphicsOffloadGtk4Test, DisabledLeavesOriginalHierarchy) {
   EXPECT_EQ(gtk_widget_get_parent(child), nullptr);
 }
 
-TEST_F(FlGraphicsOffloadGtk4Test, RequiresExplicitOptIn) {
+TEST_F(FlGraphicsOffloadGtk4Test, ExplicitDisableOverridesAutomaticOffload) {
   g_autoptr(GtkWidget) child =
       GTK_WIDGET(g_object_ref_sink(fl_render_texture_gtk4_new()));
   for (const gchar* value : {"0", "false", "true", ""}) {
     g_setenv("FLUTTER_GTK4_ENABLE_GRAPHICS_OFFLOAD", value, TRUE);
     EXPECT_FALSE(fl_graphics_offload_gtk4_is_requested());
-    EXPECT_EQ(fl_graphics_offload_gtk4_wrap(child), child);
+    EXPECT_EQ(fl_graphics_offload_gtk4_wrap(child, nullptr, TRUE), child);
   }
 }
 
@@ -72,13 +74,12 @@ TEST_F(FlGraphicsOffloadGtk4Test, WrapperPreservesSizingAndChildLifetime) {
       api->gtk_graphics_offload_get_type == nullptr) {
     GTEST_SKIP() << "Graphics offload is unavailable on this GTK runtime";
   }
-  g_setenv("FLUTTER_GTK4_ENABLE_GRAPHICS_OFFLOAD", "1", TRUE);
   GtkWidget* child = fl_render_texture_gtk4_new();
   gtk_widget_set_size_request(child, 200, 100);
   GtkWidget* weak_child = child;
   g_object_add_weak_pointer(G_OBJECT(child),
                             reinterpret_cast<gpointer*>(&weak_child));
-  GtkWidget* wrapper = fl_graphics_offload_gtk4_wrap(child);
+  GtkWidget* wrapper = fl_graphics_offload_gtk4_wrap(child, api, TRUE);
   g_object_ref_sink(wrapper);
   EXPECT_NE(wrapper, child);
   EXPECT_EQ(gtk_widget_get_parent(child), wrapper);
@@ -97,6 +98,31 @@ TEST_F(FlGraphicsOffloadGtk4Test, WrapperPreservesSizingAndChildLifetime) {
   }
   g_object_unref(wrapper);
   EXPECT_EQ(weak_child, nullptr);
+}
+
+TEST_F(FlGraphicsOffloadGtk4Test, VulkanViewRequestsOffloadOnWayland) {
+  const FlGtkRuntimeApi* api = fl_gtk_runtime_api_get();
+  if (!fl_gtk_runtime_supports_dmabuf_textures() ||
+      api->gtk_graphics_offload_get_type == nullptr ||
+      g_strcmp0(g_getenv("FLUTTER_GTK4_ENABLE_DMABUF"), "0") == 0) {
+    GTEST_SKIP() << "Requires enabled DMA-BUF and graphics offload APIs";
+  }
+  g_autofree gchar* renderer = g_strdup(g_getenv("FLUTTER_LINUX_RENDERER"));
+  g_setenv("FLUTTER_LINUX_RENDERER", "vulkan", TRUE);
+  g_autoptr(FlView) view = fl_view_new(project);
+  if (renderer == nullptr) {
+    g_unsetenv("FLUTTER_LINUX_RENDERER");
+  } else {
+    g_setenv("FLUTTER_LINUX_RENDERER", renderer, TRUE);
+  }
+  g_object_ref_sink(view);
+
+  GtkWidget* parent = gtk_widget_get_parent(view->render_area);
+  if (GDK_IS_WAYLAND_DISPLAY(gtk_widget_get_display(GTK_WIDGET(view)))) {
+    EXPECT_EQ(G_OBJECT_TYPE(parent), api->gtk_graphics_offload_get_type());
+  } else {
+    EXPECT_EQ(parent, GTK_WIDGET(view));
+  }
 }
 
 TEST_F(FlGraphicsOffloadGtk4Test, ViewRetainsRenderWidgetInsideWrapper) {

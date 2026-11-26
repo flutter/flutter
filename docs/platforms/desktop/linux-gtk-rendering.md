@@ -82,10 +82,12 @@ secondary views. Leave this unset when comparing GTK texture routes.
 
 ## GTK Graphics Offload
 
-Set `FLUTTER_GTK4_ENABLE_GRAPHICS_OFFLOAD=1` to place the texture widget inside
-`GtkGraphicsOffload`. This also requests DMA-BUF export unless
-`FLUTTER_GTK4_ENABLE_DMABUF` is explicitly set; `=0` preserves texture fallback
-for diagnostic comparisons. With the flag unset, the hierarchy is unchanged.
+GTK4 Vulkan views on Wayland request `GtkGraphicsOffload` by default when the
+runtime supports DMA-BUF textures and DMA-BUF is enabled. Set
+`FLUTTER_GTK4_ENABLE_GRAPHICS_OFFLOAD=0` to compare ordinary GTK composition.
+Set it to `1` to explicitly request the wrapper, including for OpenGL.
+An explicit request also enables OpenGL DMA-BUF export unless
+`FLUTTER_GTK4_ENABLE_DMABUF` is set.
 
 The wrapper is discovered through the runtime API table, requiring GTK 4.14+
 and `gtk_graphics_offload_get_type`. Older runtimes or a missing symbol retain

@@ -1,9 +1,12 @@
 # GTK4 graphics offload
 
-Graphics offload is an experimental, opt-in presentation hint:
+Graphics offload is requested by default for GTK4 Vulkan views on Wayland when
+the runtime supports DMA-BUF textures and DMA-BUF is enabled. Use the flag to
+compare GTK composition with offload requested or disabled.
 
 ```sh
 FLUTTER_GTK4_ENABLE_GRAPHICS_OFFLOAD=1 ./your_flutter_app
+FLUTTER_GTK4_ENABLE_GRAPHICS_OFFLOAD=0 ./your_flutter_app
 ```
 
 `fl_graphics_offload_gtk4` owns the request policy and presentation wrapper.
@@ -18,7 +21,7 @@ scene can be offloaded and renders normally when it cannot. Clipping, overlays,
 texture formats, transforms, alpha and compositor support can affect acceptance.
 The implementation preserves transparency; it does not force an opaque backing.
 
-Requesting offload also requests the existing DMA-BUF export path, unless
+Explicitly enabling offload also requests OpenGL DMA-BUF export, unless
 `FLUTTER_GTK4_ENABLE_DMABUF` is explicitly set. Set it to `0` to exercise texture
 fallback. Export failures retain the existing GL texture/readback fallbacks.
 Use the texture presentation path when testing this feature; the independent
@@ -32,7 +35,7 @@ rendering or a measured performance improvement.
 ## Validation
 
 Build `flutter_linux_gtk4` and `flutter_linux_gtk4_unittests`. The
-`FlGraphicsOffloadGtk4Test` suite covers explicit opt-in, old runtimes/missing
+`FlGraphicsOffloadGtk4Test` suite covers automatic and explicit requests, opt-out, old runtimes/missing
 symbols, hierarchy, sizing, child lifetime and accessibility role. Run the full
 suite with the flag enabled to exercise existing accessibility/input tests
 through the wrapper. The artificial surface lifecycle test preserves the whole
