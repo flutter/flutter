@@ -22,6 +22,7 @@ import '../base/time.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
+import '../compile.dart' show ResidentCompilerFactory;
 import '../context/android_context.dart';
 import '../context/apple_context.dart';
 import '../context/tool_context.dart';
@@ -596,6 +597,10 @@ class RunCommand extends RunCommandBase {
   bool get stayResident => getValue(_resident);
   bool get awaitFirstFrameWhenTracing => getValue(_awaitFirstFrameWhenTracing);
 
+  /// Factory used to construct the resident compiler for each target device.
+  @protected
+  ResidentCompilerFactory get residentCompilerFactory => const ResidentCompilerFactory();
+
   @override
   Future<void> validateCommand() async {
     if (runningWithPrebuiltApplication) {
@@ -841,6 +846,7 @@ class RunCommand extends RunCommandBase {
         await FlutterDevice.create(
           device,
           buildInfo: buildInfo,
+          residentCompilerFactory: residentCompilerFactory,
           target: targetFile,
           toolContext: toolContext,
           userIdentifier: userIdentifier,
