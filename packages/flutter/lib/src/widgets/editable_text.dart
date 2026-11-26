@@ -5185,8 +5185,8 @@ class EditableTextState extends State<EditableText>
     _textInputConnection!.setSelectionRects(rects);
   }
 
-  // The area of the RenderEditable, in its local coordinates, that the last
-  // call to setSelectionRects covered.
+  /// The area of the [RenderEditable], in its local coordinates, that the last
+  /// call to [TextInputConnection.setSelectionRects] covered.
   Rect? _scribbleCoveredRect;
 
   static bool _rectContains(Rect? outer, Rect inner) {
@@ -5200,11 +5200,11 @@ class EditableTextState extends State<EditableText>
         inner.bottom <= outer.bottom;
   }
 
-  // Returns the part of the RenderEditable that isn't clipped out by its
-  // ancestors (for example an enclosing scroll view) or by the bounds of the
-  // view, in the RenderEditable's local coordinates.
-  //
-  // Returns an empty rect if none of it is visible.
+  /// Returns the part of the [RenderEditable] that isn't clipped out by its
+  /// ancestors (for example an enclosing scroll view) or by the bounds of the
+  /// view, in the [RenderEditable]'s local coordinates.
+  ///
+  /// Returns an empty rect if none of it is visible.
   Rect _visibleRectOfRenderEditable() {
     final path = <RenderObject>[renderEditable];
     for (RenderObject? node = renderEditable.parent; node != null; node = node.parent) {
