@@ -1760,6 +1760,14 @@ class _TextFieldState extends State<TextField>
       ),
     );
 
+    if (handleDidGainAccessibilityFocus != null || handleDidLoseAccessibilityFocus != null) {
+      child = Semantics(
+        onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
+        onDidLoseAccessibilityFocus: handleDidLoseAccessibilityFocus,
+        child: child,
+      );
+    }
+
     if (widget.decoration != null) {
       child = AnimatedBuilder(
         animation: Listenable.merge(<Listenable>[focusNode, controller]),
@@ -1817,8 +1825,6 @@ class _TextFieldState extends State<TextField>
                         }
                         _requestKeyboard();
                       },
-                onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
-                onDidLoseAccessibilityFocus: handleDidLoseAccessibilityFocus,
                 onFocus: _isEnabled
                     ? () {
                         assert(
