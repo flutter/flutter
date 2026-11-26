@@ -28,6 +28,7 @@ void main() {
       cache = Cache(
         rootOverride: cacheRoot,
         fileSystem: fileSystem,
+        isLocalEngineBuilder: () => false,
         platform: platform,
         logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
@@ -41,7 +42,7 @@ void main() {
       );
     });
 
-    testWithoutContext('getArtifactPath', () {
+    test('getArtifactPath', () {
       final String xcframeworkPath = artifacts.getArtifactPath(
         Artifact.flutterXcframework,
         platform: TargetPlatform.ios,
@@ -163,79 +164,108 @@ void main() {
           'frontend_server_aot.dart.snapshot',
         ),
       );
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.vmserviceFramework,
+          platform: TargetPlatform.ios,
+          mode: BuildMode.profile,
+        ),
+        fileSystem.path.join(
+          'root',
+          'bin',
+          'cache',
+          'artifacts',
+          'engine',
+          'ios-profile',
+          'VMService.framework',
+        ),
+      );
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.vmserviceFramework,
+          platform: TargetPlatform.darwin,
+          mode: BuildMode.profile,
+        ),
+        fileSystem.path.join(
+          'root',
+          'bin',
+          'cache',
+          'artifacts',
+          'engine',
+          'darwin-x64-profile',
+          'VMService.framework',
+        ),
+      );
     });
 
-    testWithoutContext(
-      'getArtifactPath for FlutterMacOS.framework and FlutterMacOS.xcframework',
-      () {
-        final String xcframeworkPath = fileSystem.path.join(
-          'root',
-          'bin',
-          'cache',
-          'artifacts',
-          'engine',
-          'darwin-x64-release',
-          'FlutterMacOS.xcframework',
-        );
-        final String xcframeworkPathWithUnsetPlatform = fileSystem.path.join(
-          'root',
-          'bin',
-          'cache',
-          'artifacts',
-          'engine',
-          'linux-x64-release',
-          'FlutterMacOS.xcframework',
-        );
-        expect(
-          artifacts.getArtifactPath(
-            Artifact.flutterMacOSXcframework,
-            platform: TargetPlatform.darwin,
-            mode: BuildMode.release,
-          ),
-          xcframeworkPath,
-        );
-        expect(
-          artifacts.getArtifactPath(Artifact.flutterMacOSXcframework, mode: BuildMode.release),
-          xcframeworkPathWithUnsetPlatform,
-        );
-        expect(
-          () => artifacts.getArtifactPath(
-            Artifact.flutterMacOSFramework,
-            platform: TargetPlatform.darwin,
-            mode: BuildMode.release,
-          ),
-          throwsToolExit(message: 'No xcframework found at $xcframeworkPath.'),
-        );
-        expect(
-          () => artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: BuildMode.release),
-          throwsToolExit(message: 'No xcframework found at $xcframeworkPathWithUnsetPlatform.'),
-        );
-        fileSystem.directory(xcframeworkPath).createSync(recursive: true);
-        expect(
-          () => artifacts.getArtifactPath(
-            Artifact.flutterMacOSFramework,
-            platform: TargetPlatform.darwin,
-            mode: BuildMode.release,
-          ),
-          throwsToolExit(message: 'No macOS frameworks found in $xcframeworkPath'),
-        );
-        fileSystem
-            .directory(xcframeworkPath)
-            .childDirectory('macos-arm64_x86_64')
-            .childDirectory('FlutterMacOS.framework')
-            .createSync(recursive: true);
-        expect(
-          artifacts.getArtifactPath(
-            Artifact.flutterMacOSFramework,
-            platform: TargetPlatform.darwin,
-            mode: BuildMode.release,
-          ),
-          fileSystem.path.join(xcframeworkPath, 'macos-arm64_x86_64', 'FlutterMacOS.framework'),
-        );
-      },
-    );
+    test('getArtifactPath for FlutterMacOS.framework and FlutterMacOS.xcframework', () {
+      final String xcframeworkPath = fileSystem.path.join(
+        'root',
+        'bin',
+        'cache',
+        'artifacts',
+        'engine',
+        'darwin-x64-release',
+        'FlutterMacOS.xcframework',
+      );
+      final String xcframeworkPathWithUnsetPlatform = fileSystem.path.join(
+        'root',
+        'bin',
+        'cache',
+        'artifacts',
+        'engine',
+        'linux-x64-release',
+        'FlutterMacOS.xcframework',
+      );
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.flutterMacOSXcframework,
+          platform: TargetPlatform.darwin,
+          mode: BuildMode.release,
+        ),
+        xcframeworkPath,
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterMacOSXcframework, mode: BuildMode.release),
+        xcframeworkPathWithUnsetPlatform,
+      );
+      expect(
+        () => artifacts.getArtifactPath(
+          Artifact.flutterMacOSFramework,
+          platform: TargetPlatform.darwin,
+          mode: BuildMode.release,
+        ),
+        throwsToolExit(message: 'No xcframework found at $xcframeworkPath.'),
+      );
+      expect(
+        () => artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: BuildMode.release),
+        throwsToolExit(message: 'No xcframework found at $xcframeworkPathWithUnsetPlatform.'),
+      );
+      fileSystem.directory(xcframeworkPath).createSync(recursive: true);
+      expect(
+        () => artifacts.getArtifactPath(
+          Artifact.flutterMacOSFramework,
+          platform: TargetPlatform.darwin,
+          mode: BuildMode.release,
+        ),
+        throwsToolExit(message: 'No macOS frameworks found in $xcframeworkPath'),
+      );
+      fileSystem
+          .directory(xcframeworkPath)
+          .childDirectory('macos-arm64_x86_64')
+          .childDirectory('FlutterMacOS.framework')
+          .createSync(recursive: true);
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.flutterMacOSFramework,
+          platform: TargetPlatform.darwin,
+          mode: BuildMode.release,
+        ),
+        fileSystem.path.join(xcframeworkPath, 'macos-arm64_x86_64', 'FlutterMacOS.framework'),
+      );
+    });
 
-    testWithoutContext('Precompiled web DDC stable SDK artifact paths are correct', () {
+    test('Precompiled web DDC stable SDK artifact paths are correct', () {
       expect(
         artifacts.getHostArtifact(HostArtifact.webPrecompiledDDCStableSdk).path,
         'root/bin/cache/flutter_web_sdk/kernel/ddc/stable/dart_sdk.js',
@@ -246,7 +276,7 @@ void main() {
       );
     });
 
-    testWithoutContext('Precompiled web DDC canary SDK artifact paths are correct', () {
+    test('Precompiled web DDC canary SDK artifact paths are correct', () {
       expect(
         artifacts.getHostArtifact(HostArtifact.webPrecompiledDDCCanarySdk).path,
         'root/bin/cache/flutter_web_sdk/kernel/ddc/canary/dart_sdk.js',
@@ -257,25 +287,22 @@ void main() {
       );
     });
 
-    testWithoutContext('getEngineType', () {
+    test('getEngineType', () {
       expect(artifacts.getEngineType(TargetPlatform.android_arm, BuildMode.debug), 'android-arm');
       expect(artifacts.getEngineType(TargetPlatform.ios, BuildMode.release), 'ios-release');
       expect(artifacts.getEngineType(TargetPlatform.darwin), 'darwin-x64');
     });
 
-    testWithoutContext(
-      'CachedLocalWebSdkArtifacts wrapping a versioned engine sets usesLocalArtifacts',
-      () {
-        final webArtifacts = CachedLocalWebSdkArtifacts(
-          parent: artifacts,
-          webSdkPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'wasm_release'),
-          fileSystem: fileSystem,
-          platform: platform,
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-        );
-        expect(webArtifacts.usesLocalArtifacts, true);
-      },
-    );
+    test('CachedLocalWebSdkArtifacts wrapping a versioned engine sets usesLocalArtifacts', () {
+      final webArtifacts = CachedLocalWebSdkArtifacts(
+        parent: artifacts,
+        webSdkPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'wasm_release'),
+        fileSystem: fileSystem,
+        platform: platform,
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+      );
+      expect(webArtifacts.usesLocalArtifacts, true);
+    });
   });
 
   group('LocalEngineArtifacts', () {
@@ -292,6 +319,7 @@ void main() {
       cache = Cache(
         rootOverride: cacheRoot,
         fileSystem: fileSystem,
+        isLocalEngineBuilder: () => false,
         platform: platform,
         logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
@@ -321,84 +349,79 @@ void main() {
       );
     });
 
-    testWithoutContext(
-      'getArtifactPath for FlutterMacOS.framework and FlutterMacOS.xcframework',
-      () {
-        final String xcframeworkPath = fileSystem.path.join(
-          '/out',
-          'android_debug_unopt',
-          'FlutterMacOS.xcframework',
-        );
-        expect(
-          artifacts.getArtifactPath(
-            Artifact.flutterMacOSXcframework,
-            platform: TargetPlatform.darwin,
-            mode: BuildMode.release,
-          ),
-          xcframeworkPath,
-        );
-        expect(
-          artifacts.getArtifactPath(Artifact.flutterMacOSXcframework, mode: BuildMode.release),
-          xcframeworkPath,
-        );
-        expect(
-          () => artifacts.getArtifactPath(
-            Artifact.flutterMacOSFramework,
-            platform: TargetPlatform.darwin,
-            mode: BuildMode.release,
-          ),
-          throwsToolExit(
-            message: 'No xcframework found at /out/android_debug_unopt/FlutterMacOS.xcframework',
-          ),
-        );
-        expect(
-          () => artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: BuildMode.release),
-          throwsToolExit(
-            message: 'No xcframework found at /out/android_debug_unopt/FlutterMacOS.xcframework',
-          ),
-        );
-        fileSystem.directory(xcframeworkPath).createSync(recursive: true);
-        expect(
-          () => artifacts.getArtifactPath(
-            Artifact.flutterMacOSFramework,
-            platform: TargetPlatform.darwin,
-            mode: BuildMode.release,
-          ),
-          throwsToolExit(
-            message:
-                'No macOS frameworks found in /out/android_debug_unopt/FlutterMacOS.xcframework',
-          ),
-        );
-        expect(
-          () => artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: BuildMode.release),
-          throwsToolExit(
-            message:
-                'No macOS frameworks found in /out/android_debug_unopt/FlutterMacOS.xcframework',
-          ),
-        );
+    test('getArtifactPath for FlutterMacOS.framework and FlutterMacOS.xcframework', () {
+      final String xcframeworkPath = fileSystem.path.join(
+        '/out',
+        'android_debug_unopt',
+        'FlutterMacOS.xcframework',
+      );
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.flutterMacOSXcframework,
+          platform: TargetPlatform.darwin,
+          mode: BuildMode.release,
+        ),
+        xcframeworkPath,
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterMacOSXcframework, mode: BuildMode.release),
+        xcframeworkPath,
+      );
+      expect(
+        () => artifacts.getArtifactPath(
+          Artifact.flutterMacOSFramework,
+          platform: TargetPlatform.darwin,
+          mode: BuildMode.release,
+        ),
+        throwsToolExit(
+          message: 'No xcframework found at /out/android_debug_unopt/FlutterMacOS.xcframework',
+        ),
+      );
+      expect(
+        () => artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: BuildMode.release),
+        throwsToolExit(
+          message: 'No xcframework found at /out/android_debug_unopt/FlutterMacOS.xcframework',
+        ),
+      );
+      fileSystem.directory(xcframeworkPath).createSync(recursive: true);
+      expect(
+        () => artifacts.getArtifactPath(
+          Artifact.flutterMacOSFramework,
+          platform: TargetPlatform.darwin,
+          mode: BuildMode.release,
+        ),
+        throwsToolExit(
+          message: 'No macOS frameworks found in /out/android_debug_unopt/FlutterMacOS.xcframework',
+        ),
+      );
+      expect(
+        () => artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: BuildMode.release),
+        throwsToolExit(
+          message: 'No macOS frameworks found in /out/android_debug_unopt/FlutterMacOS.xcframework',
+        ),
+      );
 
-        fileSystem
-            .directory(xcframeworkPath)
-            .childDirectory('macos-arm64_x86_64')
-            .childDirectory('FlutterMacOS.framework')
-            .createSync(recursive: true);
+      fileSystem
+          .directory(xcframeworkPath)
+          .childDirectory('macos-arm64_x86_64')
+          .childDirectory('FlutterMacOS.framework')
+          .createSync(recursive: true);
 
-        expect(
-          artifacts.getArtifactPath(
-            Artifact.flutterMacOSFramework,
-            platform: TargetPlatform.darwin,
-            mode: BuildMode.release,
-          ),
-          fileSystem.path.join(xcframeworkPath, 'macos-arm64_x86_64', 'FlutterMacOS.framework'),
-        );
-        expect(
-          artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: BuildMode.release),
-          fileSystem.path.join(xcframeworkPath, 'macos-arm64_x86_64', 'FlutterMacOS.framework'),
-        );
-      },
-    );
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.flutterMacOSFramework,
+          platform: TargetPlatform.darwin,
+          mode: BuildMode.release,
+        ),
+        fileSystem.path.join(xcframeworkPath, 'macos-arm64_x86_64', 'FlutterMacOS.framework'),
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: BuildMode.release),
+        fileSystem.path.join(xcframeworkPath, 'macos-arm64_x86_64', 'FlutterMacOS.framework'),
+      );
+    });
 
-    testWithoutContext('getArtifactPath', () {
+    test('getArtifactPath', () {
       final String xcframeworkPath = artifacts.getArtifactPath(
         Artifact.flutterXcframework,
         platform: TargetPlatform.ios,
@@ -516,9 +539,25 @@ void main() {
         artifacts.getArtifactPath(Artifact.genSnapshot),
         fileSystem.path.join('/out', 'android_debug_unopt', 'universal', 'gen_snapshot'),
       );
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.vmserviceFramework,
+          platform: TargetPlatform.ios,
+          mode: BuildMode.profile,
+        ),
+        fileSystem.path.join('/out', 'android_debug_unopt', 'VMService.framework'),
+      );
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.vmserviceFramework,
+          platform: TargetPlatform.darwin,
+          mode: BuildMode.profile,
+        ),
+        fileSystem.path.join('/out', 'android_debug_unopt', 'VMService.framework'),
+      );
     });
 
-    testWithoutContext(
+    test(
       'falls back to bundled impeller artifacts if the files do not exist in the local engine',
       () {
         expect(
@@ -548,7 +587,7 @@ void main() {
       },
     );
 
-    testWithoutContext('uses prebuilt dart sdk for web platform', () {
+    test('uses prebuilt dart sdk for web platform', () {
       final webArtifacts = CachedLocalWebSdkArtifacts(
         parent: CachedArtifacts(
           fileSystem: fileSystem,
@@ -641,7 +680,7 @@ void main() {
       );
     });
 
-    testWithoutContext('uses local dart sdk for web platform wrapping a local engine', () {
+    test('uses local dart sdk for web platform wrapping a local engine', () {
       final failureMessage =
           'Unable to find a built dart sdk at:'
           ' "${fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk')}"'
@@ -672,7 +711,7 @@ void main() {
       );
     });
 
-    testWithoutContext('getEngineType', () {
+    test('getEngineType', () {
       expect(
         artifacts.getEngineType(TargetPlatform.android_arm, BuildMode.debug),
         'android_debug_unopt',
@@ -681,7 +720,7 @@ void main() {
       expect(artifacts.getEngineType(TargetPlatform.darwin), 'android_debug_unopt');
     });
 
-    testWithoutContext('Looks up dart.exe on windows platforms', () async {
+    test('Looks up dart.exe on windows platforms', () async {
       artifacts = CachedLocalWebSdkArtifacts(
         parent: CachedLocalEngineArtifacts(
           fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
@@ -717,7 +756,7 @@ void main() {
       );
     });
 
-    testWithoutContext('Looks up dart on linux platforms', () async {
+    test('Looks up dart on linux platforms', () async {
       fileSystem
           .directory('/out')
           .childDirectory('host_debug_unopt')
@@ -731,7 +770,7 @@ void main() {
       );
     });
 
-    testWithoutContext('Finds dart-sdk in windows prebuilts for web platform', () async {
+    test('Finds dart-sdk in windows prebuilts for web platform', () async {
       artifacts = CachedLocalWebSdkArtifacts(
         parent: CachedLocalEngineArtifacts(
           fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
@@ -771,7 +810,7 @@ void main() {
       );
     });
 
-    testWithoutContext('Finds dart-sdk in macos prebuilts for web platform', () async {
+    test('Finds dart-sdk in macos prebuilts for web platform', () async {
       artifacts = CachedLocalWebSdkArtifacts(
         parent: CachedLocalEngineArtifacts(
           fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
@@ -820,7 +859,7 @@ void main() {
       fileSystem = MemoryFileSystem.test();
     });
 
-    testWithoutContext('determines the target device name from the path', () {
+    test('determines the target device name from the path', () {
       localEngineInfo = LocalEngineInfo(
         targetOutPath: fileSystem.path.join(
           fileSystem.currentDirectory.path,
@@ -838,28 +877,25 @@ void main() {
       expect(localEngineInfo.localTargetName, 'android_debug_unopt');
     });
 
-    testWithoutContext(
-      'determines the target device name from the path when using a custom engine path',
-      () {
-        localEngineInfo = LocalEngineInfo(
-          targetOutPath: fileSystem.path.join(
-            fileSystem.currentDirectory.path,
-            'out',
-            'android_debug_unopt',
-          ),
-          hostOutPath: fileSystem.path.join(
-            fileSystem.currentDirectory.path,
-            'out',
-            'host_debug_unopt',
-          ),
-          fileSystem: fileSystem,
-        );
+    test('determines the target device name from the path when using a custom engine path', () {
+      localEngineInfo = LocalEngineInfo(
+        targetOutPath: fileSystem.path.join(
+          fileSystem.currentDirectory.path,
+          'out',
+          'android_debug_unopt',
+        ),
+        hostOutPath: fileSystem.path.join(
+          fileSystem.currentDirectory.path,
+          'out',
+          'host_debug_unopt',
+        ),
+        fileSystem: fileSystem,
+      );
 
-        expect(localEngineInfo.localHostName, 'host_debug_unopt');
-      },
-    );
+      expect(localEngineInfo.localHostName, 'host_debug_unopt');
+    });
 
-    testWithoutContext('determines engine names using the file system path style', () {
+    test('determines engine names using the file system path style', () {
       final windowsFileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
       final localArtifacts = Artifacts.testLocalEngine(
         localEngine: windowsFileSystem.path.join(
@@ -879,7 +915,7 @@ void main() {
       expect(localArtifacts.localEngineInfo?.localHostName, 'host_debug_unopt');
     });
 
-    testWithoutContext('Artifacts.getLocalEngine constructs local engine artifacts', () {
+    test('Artifacts.getLocalEngine constructs local engine artifacts', () {
       final String targetEngine = fileSystem.path.join(
         fileSystem.currentDirectory.path,
         'out',
@@ -924,7 +960,7 @@ void main() {
       );
     });
 
-    testWithoutContext('builds against the artifacts it was given', () {
+    test('builds against the artifacts it was given', () {
       final artifacts = DeferredArtifacts(cached);
 
       expect(artifacts.usesLocalArtifacts, isFalse);
@@ -934,7 +970,7 @@ void main() {
       );
     });
 
-    testWithoutContext('builds against the artifacts it is resolved to', () {
+    test('builds against the artifacts it is resolved to', () {
       final artifacts = DeferredArtifacts(cached);
 
       artifacts.resolve(localEngine);
@@ -947,7 +983,7 @@ void main() {
       );
     });
 
-    testWithoutContext('cannot be resolved twice', () {
+    test('cannot be resolved twice', () {
       final artifacts = DeferredArtifacts(cached);
 
       artifacts.resolve(localEngine);

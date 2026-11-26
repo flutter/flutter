@@ -33,7 +33,7 @@ void main() {
   });
 
   group('launch', () {
-    testWithoutContext('can run and terminate a Flutter app in debug mode', () async {
+    test('can run and terminate a Flutter app in debug mode', () async {
       final project = BasicProject();
       await project.setUpIn(tempDir);
 
@@ -61,7 +61,7 @@ void main() {
       ], allowExtras: true);
     });
 
-    testWithoutContext('logs stdout to client when sendLogsToClient=true', () async {
+    test('logs stdout to client when sendLogsToClient=true', () async {
       final project = BasicProject();
       await project.setUpIn(tempDir);
 
@@ -98,7 +98,7 @@ void main() {
       );
     });
 
-    testWithoutContext('logs stderr to client when sendLogsToClient=true', () async {
+    test('logs stderr to client when sendLogsToClient=true', () async {
       final project = BasicProject();
       await project.setUpIn(tempDir);
 
@@ -131,7 +131,7 @@ void main() {
       );
     });
 
-    testWithoutContext('can run and terminate a Flutter app in noDebug mode', () async {
+    test('can run and terminate a Flutter app in noDebug mode', () async {
       final project = BasicProject();
       await project.setUpIn(tempDir);
 
@@ -168,7 +168,7 @@ void main() {
       }
     });
 
-    testWithoutContext('outputs useful message on invalid DAP protocol messages', () async {
+    test('outputs useful message on invalid DAP protocol messages', () async {
       final server = dap.server as OutOfProcessDapTestServer;
       final project = CompileErrorProject();
       await project.setUpIn(tempDir);
@@ -189,7 +189,7 @@ void main() {
       // not possible when running the DAP Server in-process.
     }, skip: useInProcessDap); // [intended] See above.
 
-    testWithoutContext('correctly outputs launch errors and terminates', () async {
+    test('correctly outputs launch errors and terminates', () async {
       final project = CompileErrorProject();
       await project.setUpIn(tempDir);
 
@@ -239,7 +239,7 @@ void main() {
         return output;
       }
 
-      testWithoutContext('correctly outputs exceptions in debug mode', () async {
+      test('correctly outputs exceptions in debug mode', () async {
         final project = BasicProjectThatThrows();
         final String output = await getExceptionOutput(project, noDebug: false, ansiColors: false);
 
@@ -255,7 +255,7 @@ The relevant error-causing widget was:
         );
       });
 
-      testWithoutContext(
+      test(
         'correctly outputs colored exceptions when supported',
         () async {
           final project = BasicProjectThatThrows();
@@ -289,7 +289,7 @@ When the exception was thrown, this was the stack:
         skip: true, // DAP URI parsing bug, https://github.com/dart-lang/sdk/issues/60797
       );
 
-      testWithoutContext('correctly outputs exceptions in noDebug mode', () async {
+      test('correctly outputs exceptions in noDebug mode', () async {
         final project = BasicProjectThatThrows();
         final String output = await getExceptionOutput(project, noDebug: true, ansiColors: false);
 
@@ -309,7 +309,7 @@ The relevant error-causing widget was:
       });
     });
 
-    testWithoutContext('can hot reload', () async {
+    test('can hot reload', () async {
       final project = BasicProject();
       await project.setUpIn(tempDir);
 
@@ -367,7 +367,7 @@ The relevant error-causing widget was:
     /// See:
     /// - https://github.com/Dart-Code/Dart-Code/issues/5554
     /// - https://github.com/flutter/flutter/issues/137184
-    testWithoutContext('can handle many hot reload requests concurrently', () async {
+    test('can handle many hot reload requests concurrently', () async {
       final project = BasicProject();
       await project.setUpIn(tempDir);
 
@@ -396,7 +396,7 @@ The relevant error-causing widget was:
       await dap.client.terminate();
     });
 
-    testWithoutContext('sends progress notifications during hot reload', () async {
+    test('sends progress notifications during hot reload', () async {
       final project = BasicProject();
       await project.setUpIn(tempDir);
 
@@ -438,7 +438,7 @@ The relevant error-causing widget was:
       expect(end.message, isNull);
     });
 
-    testWithoutContext('can hot restart', () async {
+    test('can hot restart', () async {
       final project = BasicProject();
       await project.setUpIn(tempDir);
 
@@ -474,7 +474,7 @@ The relevant error-causing widget was:
       await dap.client.terminate();
     });
 
-    testWithoutContext('sends progress notifications during hot restart', () async {
+    test('sends progress notifications during hot restart', () async {
       final project = BasicProject();
       await project.setUpIn(tempDir);
 
@@ -516,7 +516,7 @@ The relevant error-causing widget was:
       expect(end.message, isNull);
     });
 
-    testWithoutContext('can hot restart when exceptions occur on outgoing isolates', () async {
+    test('can hot restart when exceptions occur on outgoing isolates', () async {
       final project = BasicProjectThatThrows();
       await project.setUpIn(tempDir);
 
@@ -555,7 +555,7 @@ The relevant error-causing widget was:
       await dap.client.terminate();
     });
 
-    testWithoutContext('sends events for extension state updates', () async {
+    test('sends events for extension state updates', () async {
       final project = BasicProject();
       await project.setUpIn(tempDir);
       const debugPaintRpc = 'ext.flutter.debugPaint';
@@ -596,7 +596,7 @@ The relevant error-causing widget was:
       await dap.client.terminate();
     });
 
-    testWithoutContext('provides appStarted events to the client', () async {
+    test('provides appStarted events to the client', () async {
       final project = BasicProject();
       await project.setUpIn(tempDir);
 
@@ -618,7 +618,7 @@ The relevant error-causing widget was:
       expect(params['mode'], 'debug');
     });
 
-    testWithoutContext('provides appStarted events to the client', () async {
+    test('provides appStarted events to the client', () async {
       final project = BasicProject();
       await project.setUpIn(tempDir);
 
@@ -712,7 +712,7 @@ The relevant error-causing widget was:
       await testProcess.process.exitCode;
     });
 
-    testWithoutContext('can attach to an already-running Flutter app and reload', () async {
+    test('can attach to an already-running Flutter app and reload', () async {
       final Uri vmServiceUri = await testProcess.vmServiceUri;
 
       // Launch the app and wait for it to print "topLevelFunction".
@@ -746,37 +746,34 @@ The relevant error-causing widget was:
       await dap.client.terminate();
     });
 
-    testWithoutContext(
-      'can attach to an already-running Flutter app and hit breakpoints',
-      () async {
-        final Uri vmServiceUri = await testProcess.vmServiceUri;
+    test('can attach to an already-running Flutter app and hit breakpoints', () async {
+      final Uri vmServiceUri = await testProcess.vmServiceUri;
 
-        // Launch the app and wait for it to print "topLevelFunction".
-        await Future.wait(<Future<void>>[
-          dap.client.stdoutOutput.firstWhere(
-            (String output) => output.startsWith('topLevelFunction'),
+      // Launch the app and wait for it to print "topLevelFunction".
+      await Future.wait(<Future<void>>[
+        dap.client.stdoutOutput.firstWhere(
+          (String output) => output.startsWith('topLevelFunction'),
+        ),
+        dap.client.start(
+          launch: () => dap.client.attach(
+            cwd: project.dir.path,
+            toolArgs: <String>['-d', 'flutter-tester'],
+            vmServiceUri: vmServiceUri.toString(),
           ),
-          dap.client.start(
-            launch: () => dap.client.attach(
-              cwd: project.dir.path,
-              toolArgs: <String>['-d', 'flutter-tester'],
-              vmServiceUri: vmServiceUri.toString(),
-            ),
-          ),
-        ], eagerError: true);
+        ),
+      ], eagerError: true);
 
-        // Set a breakpoint and expect to hit it.
-        final Future<StoppedEventBody> stoppedFuture = dap.client.stoppedEvents.firstWhere(
-          (StoppedEventBody e) => e.reason == 'breakpoint',
-        );
-        await Future.wait(<Future<void>>[
-          stoppedFuture,
-          dap.client.setBreakpoint(breakpointFilePath, breakpointLine),
-        ], eagerError: true);
-      },
-    );
+      // Set a breakpoint and expect to hit it.
+      final Future<StoppedEventBody> stoppedFuture = dap.client.stoppedEvents.firstWhere(
+        (StoppedEventBody e) => e.reason == 'breakpoint',
+      );
+      await Future.wait(<Future<void>>[
+        stoppedFuture,
+        dap.client.setBreakpoint(breakpointFilePath, breakpointLine),
+      ], eagerError: true);
+    });
 
-    testWithoutContext('resumes and removes breakpoints on detach', () async {
+    test('resumes and removes breakpoints on detach', () async {
       final Uri vmServiceUri = await testProcess.vmServiceUri;
 
       // Launch the app and wait for it to print "topLevelFunction".

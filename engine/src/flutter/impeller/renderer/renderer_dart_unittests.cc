@@ -8,6 +8,7 @@
 
 #include "flutter/common/settings.h"
 #include "flutter/common/task_runners.h"
+#include "flutter/fml/message_loop.h"
 #include "flutter/lib/gpu/context.h"
 #include "flutter/lib/gpu/shader_library.h"
 #include "flutter/lib/gpu/texture.h"
@@ -54,6 +55,13 @@ static bool DrainMicrotasks() {
   return queue->GetLastError() == tonic::kNoError;
 }
 
+// Runs what Flutter GPU queued on the raster task runner, which in these tests
+// is this thread. Must be called outside of an isolate scope, since completion
+// callbacks enter the isolate.
+static void RunQueuedTasks() {
+  fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+}
+
 class RendererDartTest : public PlaygroundTest,
                          public flutter::testing::DartFixture {
  public:
@@ -86,6 +94,11 @@ class RendererDartTest : public PlaygroundTest,
     }
   }
 
+  ~RendererDartTest() override {
+    isolate_.reset();
+    RunQueuedTasks();
+  }
+
   flutter::testing::AutoIsolateShutdown* GetIsolate() {
     // Sneak the context into the Flutter GPU API.
     assert(GetContext() != nullptr);
@@ -111,6 +124,7 @@ class RendererDartTest : public PlaygroundTest,
           }
           return DrainMicrotasks();
         });
+    RunQueuedTasks();
     if (!success) {
       FML_LOG(ERROR) << "Failed to invoke dart test function:"
                      << dart_function_name;
@@ -129,14 +143,17 @@ class RendererDartTest : public PlaygroundTest,
   ///         Returns false if invoking the function failed or if any unhandled
   ///         exceptions were thrown.
   bool RunDartFunction(const char* dart_function_name) {
-    return GetIsolate()->RunInIsolateScope([&dart_function_name]() -> bool {
-      if (tonic::CheckAndHandleError(
-              ::Dart_Invoke(Dart_RootLibrary(),
-                            tonic::ToDart(dart_function_name), 0, nullptr))) {
-        return false;
-      }
-      return DrainMicrotasks();
-    });
+    bool success =
+        GetIsolate()->RunInIsolateScope([&dart_function_name]() -> bool {
+          if (tonic::CheckAndHandleError(::Dart_Invoke(
+                  Dart_RootLibrary(), tonic::ToDart(dart_function_name), 0,
+                  nullptr))) {
+            return false;
+          }
+          return DrainMicrotasks();
+        });
+    RunQueuedTasks();
+    return success;
   }
 
   /// @brief  Invokes a Dart function with the window's width and height as
@@ -145,8 +162,8 @@ class RendererDartTest : public PlaygroundTest,
   ///         Returns false if invoking the function failed or if any unhandled
   ///         exceptions were thrown.
   bool RunDartFunctionWithWindowSize(const char* dart_function_name) {
-    return GetIsolate()->RunInIsolateScope(
-        [this, &dart_function_name]() -> bool {
+    bool success =
+        GetIsolate()->RunInIsolateScope([this, &dart_function_name]() -> bool {
           Dart_Handle args[] = {tonic::ToDart(GetWindowSize().width),
                                 tonic::ToDart(GetWindowSize().height)};
           if (tonic::CheckAndHandleError(
@@ -156,6 +173,8 @@ class RendererDartTest : public PlaygroundTest,
           }
           return DrainMicrotasks();
         });
+    RunQueuedTasks();
+    return success;
   }
 
   /// @brief  Call a dart function that produces a texture and render the result

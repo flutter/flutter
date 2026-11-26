@@ -119,6 +119,8 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterOverlayView.mm",
     "framework/Source/FlutterPlatformPlugin.h",
     "framework/Source/FlutterPlatformPlugin.mm",
+    "framework/Source/FlutterPlatformViewFrame.h",
+    "framework/Source/FlutterPlatformViewFrame.m",
     "framework/Source/FlutterPlatformViewLayer.h",
     "framework/Source/FlutterPlatformViewLayer.m",
     "framework/Source/FlutterPlatformViews.mm",
@@ -526,6 +528,42 @@ shared_library("copy_and_verify_framework_module") {
   configs += [ "//build/config/ios:ios_application_extension" ]
 }
 
+if (flutter_runtime_mode == "profile") {
+  _vmservice_framework_dir = "$root_out_dir/VMService.framework"
+
+  copy("copy_vmservice_dylib") {
+    visibility = [ ":*" ]
+    sources = [ "$root_out_dir/libvmservice_snapshot.dylib" ]
+    outputs = [ "$_vmservice_framework_dir/VMService" ]
+    deps = [ "//flutter/shell/vmservice:vmservice_snapshot" ]
+  }
+
+  action("copy_vmservice_framework_info_plist") {
+    script = "//flutter/build/copy_info_plist.py"
+    visibility = [ ":*" ]
+    sources = [ "framework/VMServiceInfo.plist" ]
+    outputs = [ "$_vmservice_framework_dir/Info.plist" ]
+    args = [
+      "--source",
+      rebase_path(sources[0]),
+      "--destination",
+      rebase_path(outputs[0]),
+      "--minversion",
+      ios_deployment_target,
+      "--buildmode",
+      flutter_runtime_mode,
+    ]
+  }
+
+  group("vmservice_framework") {
+    visibility = [ ":*" ]
+    deps = [
+      ":copy_vmservice_dylib",
+      ":copy_vmservice_framework_info_plist",
+    ]
+  }
+}
+
 group("universal_flutter_framework") {
   visibility = [ ":*" ]
   deps = [
@@ -541,6 +579,14 @@ group("universal_flutter_framework") {
 
   if (is_asan) {
     deps += [ ":copy_asan_runtime_dylib" ]
+  }
+
+  # In debug mode, the VM service runs from Kernel (vmservice_snapshot.dill)
+  # packaged in the application bundle's flutter_assets/. Only profile mode
+  # requires the precompiled AOT dynamic library, which is packaged into
+  # VMService.framework.
+  if (flutter_runtime_mode == "profile") {
+    deps += [ ":vmservice_framework" ]
   }
 }
 

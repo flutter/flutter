@@ -97,6 +97,7 @@ class DowngradeCommand extends FlutterCommand {
         fs: fs,
         flutterRoot: workingDirectory,
         git: git,
+        isOmitLegacyVersionFileEnabled: () => runner!.featureFlags.isOmitLegacyVersionFileEnabled,
         logger: logger,
         platform: platform,
       );

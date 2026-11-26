@@ -1028,6 +1028,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       analytics: analytics,
       app: app,
       buildInfo: buildInfo,
+      featureFlags: runner!.featureFlags,
       plistParser: plistParser,
       templateRenderer: _templateRenderer,
       toolContext: toolContext,

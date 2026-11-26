@@ -11,7 +11,6 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../common/test_data.dart';
 import 'common.dart';
 
 void main() {
@@ -39,8 +38,7 @@ void testMain() {
     );
 
     // Instantiate the first CanvasKit-backed image using the shared imageSource.
-    final SkImage skImage1 =
-        ((await createImageFromBytes(k4x4PngImage)).backendImage as CkImageDelegate).skImage;
+    final SkImage skImage1 = _createTestSkImage();
     final image1 = EngineImage(
       CkImageDelegate(skImage1),
       skImage1.width().toInt(),
@@ -49,8 +47,7 @@ void testMain() {
     );
 
     // Instantiate a second separate CanvasKit image sharing the same imageSource.
-    final SkImage skImage2 =
-        ((await createImageFromBytes(k4x4PngImage)).backendImage as CkImageDelegate).skImage;
+    final SkImage skImage2 = _createTestSkImage();
     final image2 = EngineImage(
       CkImageDelegate(skImage2),
       skImage2.width().toInt(),
@@ -280,13 +277,67 @@ void testMain() {
       CkPictureRecorder.finalizer = originalFinalizer;
     }
   });
+
+  test('CkImageDelegate.dispose is idempotent', () {
+    final SkImage skImage = _createTestSkImage();
+    final delegate = CkImageDelegate(skImage);
+    delegate.dispose();
+    expect(skImage.isDeleted(), isTrue);
+    delegate.dispose();
+  });
+
+  test(
+    'Undisposed EngineImage and CkPicture release ImageSource and delete SkPicture when collected',
+    () async {
+      final Finalizer originalFinalizer = UniqueRef.finalizer;
+      final mockFinalizer = _MockFinalizer();
+      UniqueRef.finalizer = mockFinalizer;
+      try {
+        final image = await _createBitmapTestImage() as EngineImage;
+        final ImageSource source = image.imageSource!;
+
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder);
+        canvas.drawImage(image, ui.Offset.zero, ui.Paint());
+        final picture = recorder.endRecording() as CkPicture;
+        final skPicture = picture.skiaObject as SkDeletable;
+
+        // Simulate GC collection of the undisposed EngineImage while CkPicture is alive.
+        mockFinalizer.trigger(image.box);
+        expect(source.debugIsClosed, isFalse);
+        expect(skPicture.isDeleted(), isFalse);
+
+        // Simulate GC collection of the undisposed CkPicture's CountedRef.
+        expect(mockFinalizer.registeredPairs, hasLength(1));
+        mockFinalizer.trigger(mockFinalizer.registeredPairs.single.target);
+        expect(skPicture.isDeleted(), isTrue);
+        expect(source.debugIsClosed, isTrue);
+      } finally {
+        UniqueRef.finalizer = originalFinalizer;
+      }
+    },
+  );
+}
+
+SkImage _createTestSkImage() {
+  return canvasKit.MakeImage(
+    SkImageInfo(
+      alphaType: canvasKit.AlphaType.Premul,
+      colorType: canvasKit.ColorType.RGBA_8888,
+      colorSpace: SkColorSpaceSRGB,
+      width: 4,
+      height: 4,
+    ),
+    Uint8List(4 * 4 * 4),
+    4 * 4,
+  )!;
 }
 
 /// Creates a synthetic [EngineImage] backed by a genuine [SkImage] and an
 /// [ImageBitmapImageSource].
 ///
 /// In browser tests, creating an actual WebGL texture from a DOM ImageBitmap
-/// requires an asynchronous GPU upload pipeline. Pairing a valid 4x4 PNG
+/// requires an asynchronous GPU upload pipeline. Pairing a valid 4x4
 /// SkImage delegate with an [ImageBitmapImageSource] allows testing the
 /// reference-counting and disposal lifecycle of DOM image sources during canvas
 /// draw calls without relying on asynchronous WebGL texture creation.
@@ -294,8 +345,7 @@ Future<ui.Image> _createBitmapTestImage() async {
   final ImageSource imageSource = ImageBitmapImageSource(
     await createImageBitmap(createBlankDomImageData(4, 4)),
   );
-  final SkImage skImage =
-      ((await createImageFromBytes(k4x4PngImage)).backendImage as CkImageDelegate).skImage;
+  final SkImage skImage = _createTestSkImage();
   return EngineImage(
     CkImageDelegate(skImage),
     skImage.width().toInt(),
@@ -307,14 +357,13 @@ Future<ui.Image> _createBitmapTestImage() async {
 /// Creates a synthetic [EngineImage] backed by a genuine [SkImage] and an
 /// [ImageElementImageSource].
 ///
-/// Similar to [_createBitmapTestImage], this pairs a valid 4x4 PNG SkImage
+/// Similar to [_createBitmapTestImage], this pairs a valid 4x4 SkImage
 /// with an HTML <img> element source to test the DOM `src = ''` disposal lifecycle.
 Future<ui.Image> _createElementTestImage() async {
   final DomHTMLImageElement imageElement = createDomHTMLImageElement();
   imageElement.src = 'sample_image1.png';
   final ImageSource imageSource = ImageElementImageSource(imageElement);
-  final SkImage skImage =
-      ((await createImageFromBytes(k4x4PngImage)).backendImage as CkImageDelegate).skImage;
+  final SkImage skImage = _createTestSkImage();
   return EngineImage(
     CkImageDelegate(skImage),
     skImage.width().toInt(),
@@ -333,16 +382,18 @@ class _MockFinalizer implements Finalizer {
 
   @override
   void detach(Object detach) {
-    registeredPairs.removeWhere((pair) => pair.detach == detach);
+    registeredPairs.removeWhere((pair) => identical(pair.detach, detach));
   }
 
   void trigger(Object target) {
     final List<_MockPair> pairs = registeredPairs
-        .where((_MockPair pair) => pair.target == target)
+        .where((_MockPair pair) => identical(pair.target, target))
         .toList();
     for (final pair in pairs) {
       if (pair.value is PictureImageTracker) {
         (pair.value as PictureImageTracker).releaseAll();
+      } else if (pair.value is UniqueRef<dynamic>) {
+        (pair.value as UniqueRef<dynamic>).collect();
       }
     }
   }

@@ -329,7 +329,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           ? logger
           : NotifyingLogger(verbose: logger.isVerbose, parent: logger),
       logToStdout: true,
-      featureFlags: featureFlags,
+      featureFlags: this.runner!.featureFlags,
     );
 
     final ResidentRunner runner = await _discoverVmServiceAndCreateResidentRunner(device: device);
@@ -359,6 +359,10 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     await app.runner.waitForAppToFinish();
   }
 
+  /// Factory used to construct the [ResidentCompiler] for the attached device.
+  @protected
+  ResidentCompilerFactory get residentCompilerFactory => const ResidentCompilerFactory();
+
   Future<ResidentRunner> _discoverVmServiceAndCreateResidentRunner({required Device device}) async {
     final Future<Uri> vmServiceUri = _discoverVmService(device: device);
     vmServiceUri.ignore();
@@ -369,6 +373,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       device,
       toolContext: toolContext,
       buildInfo: buildInfo,
+      residentCompilerFactory: residentCompilerFactory,
       target: targetFile,
       targetModelOverride: TargetModel(getValue(DebuggingOptionDescriptors.fuchsiaTargetModel)),
       userIdentifier: userIdentifier,
@@ -404,6 +409,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             buildSystem: _buildSystem,
             buildTargets: _buildTargets,
             dartBuilder: _flutterHookRunner,
+            featureFlags: runner!.featureFlags,
             toolContext: toolContext,
             xcode: _xcode,
           )
@@ -417,6 +423,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             assetBundleFactory: _assetBundleFactory,
             buildSystem: _buildSystem,
             buildTargets: _buildTargets,
+            featureFlags: runner!.featureFlags,
             toolContext: toolContext,
             xcode: _xcode,
           );
@@ -502,6 +509,7 @@ class HotRunnerFactory {
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
     required DebuggingOptions debuggingOptions,
+    required FeatureFlags featureFlags,
     required String target,
     required ToolContext toolContext,
     required Xcode? xcode,
@@ -521,6 +529,7 @@ class HotRunnerFactory {
     buildSystem: buildSystem,
     buildTargets: buildTargets,
     debuggingOptions: debuggingOptions,
+    featureFlags: featureFlags,
     target: target,
     toolContext: toolContext,
     xcode: xcode,

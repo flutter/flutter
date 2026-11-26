@@ -367,7 +367,7 @@ void main() {
       stderr: stderr,
     );
 
-    testWithoutContext('sets the install name and changes the dependencies', () async {
+    test('sets the install name and changes the dependencies', () async {
       processManager.addCommand(setId());
 
       expect(
@@ -382,29 +382,26 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext(
-      'keeps the install name when the new one does not fit, if asked to',
-      () async {
-        processManager.addCommands(<FakeCommand>[
-          setId(exitCode: 1, stderr: doesNotFit),
-          changeOnlyDependencies(),
-        ]);
+    test('keeps the install name when the new one does not fit, if asked to', () async {
+      processManager.addCommands(<FakeCommand>[
+        setId(exitCode: 1, stderr: doesNotFit),
+        changeOnlyDependencies(),
+      ]);
 
-        expect(
-          await setInstallNamesDylib(
-            dylibFile,
-            newInstallName,
-            oldToNewInstallNames,
-            processUtils: processUtils,
-            keepInstallNameIfItDoesNotFit: true,
-          ),
-          isFalse,
-        );
-        expect(processManager, hasNoRemainingExpectations);
-      },
-    );
+      expect(
+        await setInstallNamesDylib(
+          dylibFile,
+          newInstallName,
+          oldToNewInstallNames,
+          processUtils: processUtils,
+          keepInstallNameIfItDoesNotFit: true,
+        ),
+        isFalse,
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
 
-    testWithoutContext('fails when the new install name does not fit, by default', () async {
+    test('fails when the new install name does not fit, by default', () async {
       processManager.addCommand(setId(exitCode: 1, stderr: doesNotFit));
 
       await expectLater(
@@ -421,7 +418,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext(
+    test(
       'fails on any other install_name_tool error, even if asked to keep the install name',
       () async {
         processManager.addCommand(
@@ -444,7 +441,7 @@ void main() {
       },
     );
 
-    testWithoutContext('fails when the dependencies cannot be changed either', () async {
+    test('fails when the dependencies cannot be changed either', () async {
       final String doesNotFitEither = doesNotFit.replaceFirst('arm64', 'x86_64');
       processManager.addCommands(<FakeCommand>[
         setId(exitCode: 1, stderr: doesNotFit),

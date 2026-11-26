@@ -76,9 +76,10 @@ void main() {
       xcodeDebug = FakeXcodeDebug();
     });
 
-    testWithoutContext('successfully instantiates on Mac OS', () async {
+    test('successfully instantiates on Mac OS', () async {
       final device = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         iosDeploy: iosDeploy,
@@ -110,9 +111,10 @@ void main() {
     });
 
     group('shouldAttachLLDBDebugger', () {
-      testWithoutContext('returns expected values for different BuildInfo and options', () {
+      test('returns expected values for different BuildInfo and options', () {
         final device = IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           iosDeploy: iosDeploy,
@@ -165,9 +167,10 @@ void main() {
       });
     });
 
-    testWithoutContext('32-bit devices are unsupported', () async {
+    test('32-bit devices are unsupported', () async {
       final device = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
@@ -197,10 +200,11 @@ void main() {
       expect(await device.isSupported(), isFalse);
     });
 
-    testWithoutContext('parses major version', () {
+    test('parses major version', () {
       expect(
         IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
@@ -233,6 +237,7 @@ void main() {
       expect(
         IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
@@ -265,6 +270,7 @@ void main() {
       expect(
         IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
@@ -297,6 +303,7 @@ void main() {
       expect(
         IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
@@ -329,6 +336,7 @@ void main() {
       expect(
         IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
@@ -360,9 +368,10 @@ void main() {
       );
     });
 
-    testWithoutContext('parses sdk version', () {
+    test('parses sdk version', () {
       Version? sdkVersion = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
@@ -397,6 +406,7 @@ void main() {
 
       sdkVersion = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
@@ -431,6 +441,7 @@ void main() {
 
       sdkVersion = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
@@ -465,6 +476,7 @@ void main() {
 
       sdkVersion = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
@@ -499,6 +511,7 @@ void main() {
 
       sdkVersion = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
@@ -529,6 +542,7 @@ void main() {
 
       sdkVersion = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
@@ -559,9 +573,10 @@ void main() {
       expect(sdkVersion, isNull);
     });
 
-    testWithoutContext('has build number in sdkNameAndVersion', () async {
+    test('has build number in sdkNameAndVersion', () async {
       final device = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
@@ -593,9 +608,10 @@ void main() {
       expect(await device.sdkNameAndVersion, 'iOS 13.3 17C54');
     });
 
-    testWithoutContext('Supports debug, profile, and release modes', () {
+    test('Supports debug, profile, and release modes', () {
       final device = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
@@ -631,42 +647,40 @@ void main() {
     });
 
     for (final platform in unsupportedPlatforms) {
-      testWithoutContext(
-        'throws UnsupportedError exception if instantiated on ${platform.operatingSystem}',
-        () {
-          expect(() {
-            IOSDevice(
-              'device-123',
-              iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-              toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: platform),
-              analytics: FakeAnalytics(),
-              cocoaPods: FakeCocoaPods(),
-              plistParser: FakePlistParser(),
-              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-              iosDeploy: iosDeploy,
-              iMobileDevice: iMobileDevice,
-              coreDeviceControl: coreDeviceControl,
-              coreDeviceLauncher: coreDeviceLauncher,
-              xcodeDebug: xcodeDebug,
-              name: 'iPhone 1',
-              sdkVersion: '13.3',
-              cpuArch: .arm64,
-              connectionInterface: DeviceConnectionInterface.attached,
-              isConnected: true,
-              isPaired: true,
-              devModeEnabled: true,
-              isCoreDevice: false,
-              mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
-                analytics: const NoOpAnalytics(),
-                logger: logger,
-                platform: macPlatform,
-              ),
-              templateRenderer: FakeTemplateRenderer(),
-              xcode: FakeXcode(),
-            );
-          }, throwsAssertionError);
-        },
-      );
+      test('throws UnsupportedError exception if instantiated on ${platform.operatingSystem}', () {
+        expect(() {
+          IOSDevice(
+            'device-123',
+            featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+            iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+            toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: platform),
+            analytics: FakeAnalytics(),
+            cocoaPods: FakeCocoaPods(),
+            plistParser: FakePlistParser(),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+            iosDeploy: iosDeploy,
+            iMobileDevice: iMobileDevice,
+            coreDeviceControl: coreDeviceControl,
+            coreDeviceLauncher: coreDeviceLauncher,
+            xcodeDebug: xcodeDebug,
+            name: 'iPhone 1',
+            sdkVersion: '13.3',
+            cpuArch: .arm64,
+            connectionInterface: DeviceConnectionInterface.attached,
+            isConnected: true,
+            isPaired: true,
+            devModeEnabled: true,
+            isCoreDevice: false,
+            mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+              analytics: const NoOpAnalytics(),
+              logger: logger,
+              platform: macPlatform,
+            ),
+            templateRenderer: FakeTemplateRenderer(),
+            xcode: FakeXcode(),
+          );
+        }, throwsAssertionError);
+      });
     }
 
     group('.dispose()', () {
@@ -735,9 +749,10 @@ void main() {
         );
       });
 
-      testWithoutContext('kills all log readers & port forwarders', () async {
+      test('kills all log readers & port forwarders', () async {
         device = IOSDevice(
           '123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
@@ -790,9 +805,10 @@ void main() {
         outputFile = fileSystem.file('screenshot.png');
       });
 
-      testWithoutContext('supportsScreenshot is false on CoreDevice with Xcode < 27', () async {
+      test('supportsScreenshot is false on CoreDevice with Xcode < 27', () async {
         device = IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           iosDeploy: iosDeploy,
@@ -824,12 +840,13 @@ void main() {
         expect(device.supportsScreenshot, isFalse);
       });
 
-      testWithoutContext(
+      test(
         'supportsScreenshot is true on CoreDevice with Xcode 27+ and devicectl installed',
         () async {
           final fakeXcode = FakeXcode(currentVersion: Version(27, 0, 0));
           device = IOSDevice(
             'device-123',
+            featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
             iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
             toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
             iosDeploy: iosDeploy,
@@ -866,9 +883,10 @@ void main() {
         },
       );
 
-      testWithoutContext('takeScreenshot uses devicectl on CoreDevice with Xcode 27+', () async {
+      test('takeScreenshot uses devicectl on CoreDevice with Xcode 27+', () async {
         device = IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           iosDeploy: iosDeploy,
@@ -904,9 +922,10 @@ void main() {
         expect(() => device.takeScreenshot(outputFile), throwsToolExit());
       });
 
-      testWithoutContext('takeScreenshot throws a ToolExit with actionable message when CoreDevice is locked/unreachable', () async {
+      test('takeScreenshot throws a ToolExit with actionable message when CoreDevice is locked/unreachable', () async {
         device = IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           iosDeploy: iosDeploy,
@@ -946,9 +965,10 @@ void main() {
         );
       });
 
-      testWithoutContext('takeScreenshot throws ToolExit on CoreDevice with Xcode < 27', () async {
+      test('takeScreenshot throws ToolExit on CoreDevice with Xcode < 27', () async {
         device = IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           iosDeploy: iosDeploy,
@@ -1032,6 +1052,7 @@ void main() {
         name: 'Paired iPhone',
         sdkVersion: '13.3',
         cpuArch: .arm64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         iosDeploy: iosDeploy,
         analytics: FakeAnalytics(),
@@ -1067,6 +1088,7 @@ void main() {
         name: 'iPad Pro',
         sdkVersion: '13.3',
         cpuArch: .arm64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         iosDeploy: iosDeploy,
         analytics: FakeAnalytics(),
@@ -1098,7 +1120,7 @@ void main() {
       );
     });
 
-    testWithoutContext('start polling without Xcode', () async {
+    test('start polling without Xcode', () async {
       final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
@@ -1111,7 +1133,7 @@ void main() {
       expect(xcdevice.getAvailableIOSDevicesCount, 0);
     });
 
-    testWithoutContext('start polling', () async {
+    test('start polling', () async {
       final iosDevices = TestIOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
@@ -1212,7 +1234,7 @@ void main() {
       expect(xcdevice.deviceEventController.hasListener, isFalse);
     });
 
-    testWithoutContext('polling can be restarted if stream is closed', () async {
+    test('polling can be restarted if stream is closed', () async {
       final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
@@ -1248,7 +1270,7 @@ void main() {
       expect(rescheduledStream.hasListener, isFalse);
     });
 
-    testWithoutContext('dispose cancels polling subscription', () async {
+    test('dispose cancels polling subscription', () async {
       final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
@@ -1268,7 +1290,7 @@ void main() {
 
     final unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
     for (final unsupportedPlatform in unsupportedPlatforms) {
-      testWithoutContext(
+      test(
         'pollingGetDevices throws Unsupported Operation exception on ${unsupportedPlatform.operatingSystem}',
         () async {
           final iosDevices = IOSDevices(
@@ -1285,7 +1307,7 @@ void main() {
       );
     }
 
-    testWithoutContext('pollingGetDevices returns attached devices', () async {
+    test('pollingGetDevices returns attached devices', () async {
       final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
@@ -1303,7 +1325,7 @@ void main() {
       expect(xcdevice.getAvailableIOSDevicesForWirelessDiscoveryCount, 0);
     });
 
-    testWithoutContext('pollingGetDevices returns wireless devices', () async {
+    test('pollingGetDevices returns wireless devices', () async {
       final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
@@ -1335,7 +1357,7 @@ void main() {
 
     final unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
     for (final unsupportedPlatform in unsupportedPlatforms) {
-      testWithoutContext(
+      test(
         'throws returns platform diagnostic exception on ${unsupportedPlatform.operatingSystem}',
         () async {
           final iosDevices = IOSDevices(
@@ -1353,7 +1375,7 @@ void main() {
       );
     }
 
-    testWithoutContext('returns diagnostics', () async {
+    test('returns diagnostics', () async {
       final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
@@ -1413,6 +1435,7 @@ void main() {
         name: 'iPad',
         sdkVersion: '13.3',
         cpuArch: .arm64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         iosDeploy: iosDeploy,
         analytics: FakeAnalytics(),
@@ -1444,7 +1467,7 @@ void main() {
       );
     });
 
-    testWithoutContext('wait for device to connect via wifi', () async {
+    test('wait for device to connect via wifi', () async {
       final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
@@ -1465,7 +1488,7 @@ void main() {
       expect(device?.connectionInterface, DeviceConnectionInterface.wireless);
     });
 
-    testWithoutContext('wait for device to connect via usb', () async {
+    test('wait for device to connect via usb', () async {
       final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
@@ -1486,7 +1509,7 @@ void main() {
       expect(device?.connectionInterface, DeviceConnectionInterface.attached);
     });
 
-    testWithoutContext('wait for device returns null', () async {
+    test('wait for device returns null', () async {
       final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,

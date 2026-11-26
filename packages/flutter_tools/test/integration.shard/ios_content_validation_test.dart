@@ -75,7 +75,7 @@ void main() {
         tryToDelete(tempDir);
       });
 
-      for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
+      for (final buildMode in <BuildMode>[.debug, .profile, .release]) {
         group('build in ${buildMode.cliName} mode', () {
           late Directory outputPath;
           late Directory outputApp;
@@ -84,6 +84,8 @@ void main() {
           late File outputFlutterFrameworkBinary;
           late Directory outputAppFramework;
           late File outputAppFrameworkBinary;
+          late Directory outputVmServiceFramework;
+          late File outputVmServiceFrameworkBinary;
           late File outputRunnerBinary;
           late File outputRunnerBinaryDebugDylib;
           late File outputPluginFrameworkBinary;
@@ -118,6 +120,9 @@ void main() {
             outputAppFramework = frameworkDirectory.childDirectory('App.framework');
             outputAppFrameworkBinary = outputAppFramework.childFile('App');
 
+            outputVmServiceFramework = frameworkDirectory.childDirectory('VMService.framework');
+            outputVmServiceFrameworkBinary = outputVmServiceFramework.childFile('VMService');
+
             outputRunnerBinary = outputApp.childFile('Runner');
             outputRunnerBinaryDebugDylib = outputApp.childFile('Runner.debug.dylib');
 
@@ -142,7 +147,7 @@ void main() {
             );
           });
 
-          testWithoutContext('flutter build ios builds a valid app', () {
+          test('flutter build ios builds a valid app', () {
             printOnFailure('Output of flutter build ios:');
             printOnFailure(buildResult.stdout.toString());
             printOnFailure(buildResult.stderr.toString());
@@ -170,6 +175,21 @@ void main() {
             expect(outputAppFrameworkBinary, exists);
             expect(outputAppFramework.childFile('Info.plist'), exists);
 
+            if (buildMode == .profile) {
+              expect(outputVmServiceFrameworkBinary, exists);
+              expect(outputVmServiceFramework.childFile('Info.plist'), exists);
+              final ProcessResult vmServiceArchs = processManager.runSync(<String>[
+                'file',
+                outputVmServiceFrameworkBinary.path,
+              ]);
+              expect(
+                vmServiceArchs.stdout,
+                contains('Mach-O 64-bit dynamically linked shared library arm64'),
+              );
+            } else {
+              expect(outputVmServiceFramework, isNot(exists));
+            }
+
             expect(buildAppFrameworkDsymBinary.existsSync(), buildMode != BuildMode.debug);
 
             final File vmSnapshot = fileSystem.file(
@@ -179,7 +199,7 @@ void main() {
             expect(vmSnapshot.existsSync(), buildMode == BuildMode.debug);
           });
 
-          testWithoutContext('App.framework Info.plist contains correct MinimumOSVersion', () {
+          test('App.framework Info.plist contains correct MinimumOSVersion', () {
             final File templateInfoPlist = fileSystem.file(
               fileSystem.path.join(projectRoot, 'ios', 'Flutter', 'AppFrameworkInfo.plist'),
             );
@@ -202,7 +222,7 @@ void main() {
             );
           });
 
-          testWithoutContext('Info.plist dart VM Service Bonjour service', () {
+          test('Info.plist dart VM Service Bonjour service', () {
             final String infoPlistPath = fileSystem.path.join(outputApp.path, 'Info.plist');
             final ProcessResult bonjourServices = processManager.runSync(<String>[
               'plutil',
@@ -216,7 +236,7 @@ void main() {
             final bool bonjourServicesFound = (bonjourServices.stdout as String).contains(
               '_dartVmService._tcp',
             );
-            expect(bonjourServicesFound, buildMode == BuildMode.debug);
+            expect(bonjourServicesFound, buildMode != .release);
 
             final ProcessResult localNetworkUsage = processManager.runSync(<String>[
               'plutil',
@@ -228,10 +248,10 @@ void main() {
               infoPlistPath,
             ]);
             final localNetworkUsageFound = localNetworkUsage.exitCode == 0;
-            expect(localNetworkUsageFound, buildMode == BuildMode.debug);
+            expect(localNetworkUsageFound, buildMode != .release);
           });
 
-          testWithoutContext('check symbols', () {
+          test('check symbols', () {
             final List<String> symbols = AppleTestUtils.getExportedSymbols(
               outputAppFrameworkBinary.path,
             );
@@ -242,7 +262,7 @@ void main() {
             }
           });
 
-          testWithoutContext('check symbols in dSYM', () {
+          test('check symbols in dSYM', () {
             if (buildMode == BuildMode.debug) {
               // dSYM is not created for a debug build.
               expect(buildAppFrameworkDsymBinary.existsSync(), isFalse);
@@ -257,7 +277,7 @@ void main() {
             }
           });
 
-          testWithoutContext(
+          test(
             'xcode_backend embed_and_thin',
             () {
               outputFlutterFramework.deleteSync(recursive: true);
@@ -309,7 +329,7 @@ void main() {
             skip: !platform.isMacOS || buildMode != BuildMode.release,
           );
 
-          testWithoutContext('validate obfuscation', () {
+          test('validate obfuscation', () {
             // HelloPlugin class is present in project.
             final ProcessResult grepResult = processManager.runSync(<String>[
               'grep',
@@ -341,7 +361,7 @@ void main() {
 
       for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.profile, BuildMode.release]) {
         for (final arch in <String>['ios-arm64', 'ios-arm64_x86_64-simulator']) {
-          testWithoutContext('verify ${buildMode.cliName} $arch Flutter.framework Info.plist', () {
+          test('verify ${buildMode.cliName} $arch Flutter.framework Info.plist', () {
             final String artifactDir;
             switch (buildMode) {
               case BuildMode.debug:
@@ -395,7 +415,7 @@ void main() {
         }
       }
 
-      testWithoutContext('builds all plugin architectures for simulator', () {
+      test('builds all plugin architectures for simulator', () {
         final ProcessResult buildSimulator = processManager.runSync(<String>[
           flutterBin,
           ...getLocalEngineArguments(),
@@ -453,7 +473,7 @@ void main() {
         }
       });
 
-      testWithoutContext('build for simulator with all available architectures', () {
+      test('build for simulator with all available architectures', () {
         final ProcessResult buildSimulator = processManager.runSync(
           <String>[
             flutterBin,
@@ -491,7 +511,7 @@ void main() {
         expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library arm64'));
       });
 
-      testWithoutContext('archive', () {
+      test('archive', () {
         final File appIconFile = fileSystem.file(
           fileSystem.path.join(
             projectRoot,

@@ -36,6 +36,7 @@ import '../project.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
+import '../web/web_debug_config.dart';
 import '../web/web_device.dart';
 import '../widget_preview/analytics.dart';
 import '../widget_preview/dependency_graph.dart';
@@ -62,6 +63,7 @@ class WidgetPreviewCommand extends FlutterCommand {
     required AssetBundleFactory assetBundleFactory,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
+    required DeviceManager deviceManager,
     required Pub pub,
     required TemplatePathProvider templatePathProvider,
     required super.toolContext,
@@ -77,6 +79,7 @@ class WidgetPreviewCommand extends FlutterCommand {
         assetBundleFactory: assetBundleFactory,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        deviceManager: deviceManager,
         pub: pub,
         templatePathProvider: templatePathProvider,
         toolContext: toolContext,
@@ -159,6 +162,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     required this._assetBundleFactory,
     required this._buildSystem,
     required this._buildTargets,
+    required this._deviceManager,
     required this._pub,
     required this.templatePathProvider,
     required super.toolContext,
@@ -254,6 +258,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   final AssetBundleFactory _assetBundleFactory;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
+  final DeviceManager _deviceManager;
   final FlutterHookRunner? _flutterHookRunner;
   final Pub _pub;
 
@@ -599,6 +604,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       // triggered while the preview scaffold is launching and establishing its
       // debug connection are gated until the previewer is ready.
       await _reloadMutex.runGuarded(() async {
+        final FeatureFlags featureFlags = runner!.featureFlags;
         // In the rare case that Flutter Web is disabled, the device manager will not return any web
         // devices which will cause us to crash.
         if (!featureFlags.isWebEnabled) {
@@ -613,7 +619,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           try {
             // The web-server device is hidden by default, make it visible before trying to look it up.
             WebServerDevice.showWebServerDevice = true;
-            devices = await deviceManager!.getDevicesById(WebServerDevice.kWebServerDeviceId);
+            devices = await _deviceManager.getDevicesById(WebServerDevice.kWebServerDeviceId);
           } finally {
             // Reset the flag to false to avoid affecting other commands.
             WebServerDevice.showWebServerDevice = false;
@@ -623,7 +629,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         } else {
           // Since the only target supported by the widget preview scaffold is the web
           // device, only a single web device should be returned.
-          final List<Device> devices = await deviceManager!.getDevices(
+          final List<Device> devices = await _deviceManager.getDevices(
             filter: DeviceDiscoveryFilter(
               supportFilter:
                   DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProject(
@@ -668,10 +674,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             useLocalCanvasKit: true,
             includeUnsupportedPlatformLibraryStubs: true,
           ),
-          webConfig: WebDebugConfig(
-            enableExpressionEvaluation: true,
-            runHeadless: boolArg(kHeadless),
-          ),
+          platformOptions: <PlatformDebuggingOptions>[
+            WebDebugConfig(enableExpressionEvaluation: true, runHeadless: boolArg(kHeadless)),
+          ],
           devToolsServerAddress: devToolsServerAddress,
         );
         final String target = widgetPreviewScaffoldProject.directory
@@ -704,6 +709,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
                   buildSystem: _buildSystem,
                   buildTargets: _buildTargets,
                   dartBuilder: _flutterHookRunner,
+                  featureFlags: featureFlags,
                   toolContext: toolContext,
                   target: target,
                   debuggingOptions: debuggingOptions,

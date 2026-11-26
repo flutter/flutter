@@ -25,7 +25,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('Can collect coverage in machine mode', () async {
+  test('Can collect coverage in machine mode', () async {
     final project = TestProject();
     await project.setUpIn(tempDir);
     final flutter = FlutterTestTestDriver(tempDir);

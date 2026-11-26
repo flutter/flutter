@@ -431,6 +431,7 @@ class CustomDevice extends Device {
     required this._analytics,
     required this._buildSystem,
     required this._buildTargets,
+    required this._featureFlags,
     required ToolContext super.toolContext,
   }) : _globalLogReader = CustomDeviceLogReader(_config.label),
        super(
@@ -445,6 +446,7 @@ class CustomDevice extends Device {
   final Analytics _analytics;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
+  final FeatureFlags _featureFlags;
   final _sessions = <ApplicationPackage, CustomDeviceAppSession>{};
   final CustomDeviceLogReader _globalLogReader;
   Process? _globalLogReaderProcess;
@@ -754,6 +756,7 @@ class CustomDevice extends Device {
         analytics: _analytics,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
+        featureFlags: _featureFlags,
         toolContext: toolContext,
       );
 
@@ -838,13 +841,15 @@ class CustomDevices extends PollingDeviceDiscovery {
     required this._buildSystem,
     required this._buildTargets,
     required ToolContext super.toolContext,
-  }) : _customDeviceWorkflow = CustomDeviceWorkflow(featureFlags: featureFlags),
+  }) : _featureFlags = featureFlags,
+       _customDeviceWorkflow = CustomDeviceWorkflow(featureFlags: featureFlags),
        super('custom devices');
 
   final CustomDeviceWorkflow _customDeviceWorkflow;
   final Analytics _analytics;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
+  final FeatureFlags _featureFlags;
 
   @override
   bool get supportsPlatform => true;
@@ -862,6 +867,7 @@ class CustomDevices extends PollingDeviceDiscovery {
             analytics: _analytics,
             buildSystem: _buildSystem,
             buildTargets: _buildTargets,
+            featureFlags: _featureFlags,
             toolContext: toolContext,
           ),
         )

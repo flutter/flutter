@@ -29,6 +29,7 @@ import '../dart/language_version.dart';
 import '../dart/package_map.dart';
 import '../devfs.dart';
 import '../device.dart';
+import '../features.dart' show FeatureFlags;
 import '../flutter_plugins.dart';
 import '../hook_runner.dart' show FlutterHookRunner;
 import '../project.dart';
@@ -39,6 +40,7 @@ import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/devfs_config.dart';
 import '../web/file_generators/main_dart.dart' as main_dart;
+import '../web/web_debug_config.dart';
 import '../web/web_device.dart';
 import '../web/web_runner.dart';
 import 'devfs_web.dart';
@@ -56,6 +58,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
     required DebuggingOptions debuggingOptions,
+    required FeatureFlags featureFlags,
     required FlutterProject flutterProject,
     required bool stayResident,
     required ToolContext toolContext,
@@ -64,7 +67,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     Map<String, Object?> platformArgs = const <String, Object?>{},
     String? target,
     UrlTunneller? urlTunneller,
-    Map<String, String> webDefines = const <String, String>{},
   }) {
     return ResidentWebRunner(
       device,
@@ -75,6 +77,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       buildTargets: buildTargets,
       dartBuilder: flutterHookRunner,
       debuggingOptions: debuggingOptions,
+      featureFlags: featureFlags,
       flutterProject: flutterProject,
       machine: machine,
       platformArgs: platformArgs,
@@ -82,7 +85,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       target: target,
       toolContext: toolContext,
       urlTunneller: urlTunneller,
-      webDefines: webDefines,
     );
   }
 }
@@ -103,6 +105,7 @@ class ResidentWebRunner extends ResidentRunner {
     required super.buildSystem,
     required super.buildTargets,
     required super.debuggingOptions,
+    required super.featureFlags,
     required this.flutterProject,
     required super.toolContext,
     super.dartBuilder,
@@ -112,7 +115,6 @@ class ResidentWebRunner extends ResidentRunner {
     super.stayResident = true,
     String? target,
     this._urlTunneller,
-    this._webDefines = const <String, String>{},
   }) : super(
          <FlutterDevice>[device],
          target: target ?? toolContext.fs.path.join('lib', 'main.dart'),
@@ -120,7 +122,6 @@ class ResidentWebRunner extends ResidentRunner {
        );
 
   final UrlTunneller? _urlTunneller;
-  final Map<String, String> _webDefines;
   final Map<String, Object?> platformArgs;
 
   FlutterDevice? get flutterDevice => flutterDevices.first;
@@ -262,32 +263,19 @@ class ResidentWebRunner extends ResidentRunner {
 
     try {
       return await asyncGuard(() async {
-        final WebDebugConfig(
-          :WebDevServerConfig? devServerConfig,
-          :bool enableExpressionEvaluation,
-          :bool useSseForDebugProxy,
-          :bool useSseForDebugBackend,
-          :bool useSseForInjectedClient,
-          :WebRendererMode renderer,
-          :bool useWasm,
-          :bool crossOriginIsolation,
-        ) = debuggingOptions.webConfig;
-
-        final WebDevServerConfig serverConfig = devServerConfig ?? const WebDevServerConfig();
+        final WebDebugConfig webConfig = debuggingOptions.webConfig;
+        final WebDevServerConfig serverConfig =
+            webConfig.devServerConfig ?? const WebDevServerConfig();
         validatePort(serverConfig.port);
-        final ExpressionCompiler? expressionCompiler = enableExpressionEvaluation
+        final ExpressionCompiler? expressionCompiler = webConfig.enableExpressionEvaluation
             ? WebExpressionCompiler(flutterDevice!.generator!, fileSystem: fileSystem)
             : null;
 
         flutterDevice!.developmentShaderCompiler.configureCompiler(TargetPlatform.web_javascript);
 
         flutterDevice!.devFS = WebDevFS(
-          webDevServerConfig: serverConfig,
           packagesFilePath: packagesFilePath,
           urlTunneller: _urlTunneller,
-          useSseForDebugProxy: useSseForDebugProxy,
-          useSseForDebugBackend: useSseForDebugBackend,
-          useSseForInjectedClient: useSseForInjectedClient,
           buildInfo: debuggingOptions.buildInfo,
           enableDwds: supportsServiceProtocol,
           ddsConfig: DartDevelopmentServiceConfiguration(
@@ -299,21 +287,17 @@ class ResidentWebRunner extends ResidentRunner {
           entrypoint: fileSystem.file(target).uri,
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
-          nativeNullAssertions: debuggingOptions.nativeNullAssertions,
-          webRenderer: renderer,
-          isWasm: useWasm,
           useLocalCanvasKit: debuggingOptions.buildInfo.useLocalCanvasKit,
           rootDirectory: fileSystem.directory(projectRootPath),
           useDwdsWebSocketConnection: useDwdsWebSocketConnection,
-          webCrossOriginIsolation: crossOriginIsolation,
           toolContext: toolContext,
-          webDefines: _webDefines,
+          webConfig: webConfig,
         );
         Uri url = await flutterDevice!.devFS!.create();
         if (serverConfig.https?.certKeyPath != null && serverConfig.https?.certPath != null) {
           url = url.replace(scheme: 'https');
         }
-        if (debuggingOptions.buildInfo.isDebug && !useWasm) {
+        if (debuggingOptions.buildInfo.isDebug && !webConfig.useWasm) {
           await runSourceGenerators();
           final UpdateFSReport report = await _updateDevFS(fullRestart: true, resetCompiler: true);
           sendDdcCompileAnalytics(
@@ -334,6 +318,7 @@ class ResidentWebRunner extends ResidentRunner {
             analytics: analytics,
             buildSystem: buildSystem,
             buildTargets: buildTargets,
+            featureFlags: featureFlags,
             toolContext: toolContext,
           );
           await webBuilder.buildWeb(
@@ -341,7 +326,7 @@ class ResidentWebRunner extends ResidentRunner {
             target,
             debuggingOptions.buildInfo,
             compilerConfigs: <WebCompilerConfig>[_compilerConfig],
-            webDefines: _webDefines,
+            webDefines: webConfig.webDefines,
           );
         }
         final webDevFS = flutterDevice!.devFS! as WebDevFS;
@@ -417,7 +402,7 @@ class ResidentWebRunner extends ResidentRunner {
       return WasmCompilerConfig(renderer: debuggingOptions.webConfig.renderer);
     }
     return JsCompilerConfig.run(
-      nativeNullAssertions: debuggingOptions.nativeNullAssertions,
+      nativeNullAssertions: debuggingOptions.webConfig.nativeNullAssertions,
       renderer: debuggingOptions.webConfig.renderer,
       deprecatedJsInterop: debuggingOptions.buildInfo.deprecatedJsInterop,
     );
@@ -493,6 +478,7 @@ class ResidentWebRunner extends ResidentRunner {
             analytics: analytics,
             buildSystem: buildSystem,
             buildTargets: buildTargets,
+            featureFlags: featureFlags,
             toolContext: toolContext,
           );
           await webBuilder.buildWeb(
@@ -500,7 +486,7 @@ class ResidentWebRunner extends ResidentRunner {
             target,
             debuggingOptions.buildInfo,
             compilerConfigs: <WebCompilerConfig>[_compilerConfig],
-            webDefines: _webDefines,
+            webDefines: debuggingOptions.webConfig.webDefines,
           );
         } on ToolExit {
           return OperationResult(1, 'Failed to recompile application.');

@@ -6,6 +6,7 @@
 
 #include <sstream>
 
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/native_library.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/trace_event.h"
@@ -75,7 +76,25 @@ static std::shared_ptr<const fml::Mapping> SearchMapping(
 
   // Look in application specified native library if specified.
   for (const std::string& path : native_library_paths) {
+    if (path.empty()) {
+      continue;
+    }
     auto native_library = fml::NativeLibrary::Create(path.c_str());
+    if (!native_library) {
+      auto directory = fml::paths::GetExecutableDirectoryPath();
+      if (directory.first) {
+        std::string path_relative_to_executable =
+            fml::paths::JoinPaths({directory.second, path});
+        native_library =
+            fml::NativeLibrary::Create(path_relative_to_executable.c_str());
+        if (!native_library) {
+          std::string path_relative_to_parent =
+              fml::paths::JoinPaths({directory.second, "..", path});
+          native_library =
+              fml::NativeLibrary::Create(path_relative_to_parent.c_str());
+        }
+      }
+    }
     auto symbol_mapping = std::make_unique<const fml::SymbolMapping>(
         native_library, native_library_symbol_name);
     if (symbol_mapping->GetMapping() != nullptr) {
@@ -216,16 +235,30 @@ fml::RefPtr<DartSnapshot> DartSnapshot::VMServiceIsolateSnapshotFromSettings(
     const Settings& settings) {
 #if DART_SNAPSHOT_STATIC_LINK
   return nullptr;
-#else   // DART_SNAPSHOT_STATIC_LINK
-  if (settings.vmservice_snapshot_library_path.empty()) {
+#else  // DART_SNAPSHOT_STATIC_LINK
+  if (!Dart_IsPrecompiledRuntime()) {
     return nullptr;
   }
 
-  std::shared_ptr<const fml::Mapping> snapshot_data =
-      SearchMapping(nullptr, "", settings.vmservice_snapshot_library_path,
-                    DartSnapshot::kIsolateDataSymbol, false);
+  std::vector<std::string> library_paths =
+      settings.vmservice_snapshot_library_path;
+  if (library_paths.empty()) {
+#if FML_OS_IOS || FML_OS_MACOSX
+    library_paths = {"Frameworks/VMService.framework/VMService",
+                     "libvmservice_snapshot.dylib"};
+#elif FML_OS_WIN
+    library_paths = {"libvmservice_snapshot.dll",
+                     "data\\libvmservice_snapshot.dll"};
+#else
+    library_paths = {"libvmservice_snapshot.so",
+                     "lib/libvmservice_snapshot.so"};
+#endif
+  }
+
+  std::shared_ptr<const fml::Mapping> snapshot_data = SearchMapping(
+      nullptr, "", library_paths, DartSnapshot::kIsolateDataSymbol, false);
   std::shared_ptr<const fml::Mapping> snapshot_instructions =
-      SearchMapping(nullptr, "", settings.vmservice_snapshot_library_path,
+      SearchMapping(nullptr, "", library_paths,
                     DartSnapshot::kIsolateInstructionsSymbol, true);
   return IsolateSnapshotFromMappings(snapshot_data, snapshot_instructions);
 #endif  // DART_SNAPSHOT_STATIC_LINK

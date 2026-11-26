@@ -6,7 +6,6 @@ import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_
 import 'package:process/process.dart';
 
 import 'runner.dart' as runner;
-import 'src/base/context.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -60,7 +59,6 @@ import 'src/isolated/mustache_template.dart';
 import 'src/isolated/native_assets/test/native_assets.dart';
 import 'src/isolated/resident_web_runner.dart';
 import 'src/native_assets.dart';
-import 'src/pre_run_validator.dart';
 import 'src/project_validator.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
@@ -125,17 +123,33 @@ Future<void> main(List<String> args) async {
         widgetPreviews: widgetPreviews,
       );
 
+  final ToolDependencies toolDependencies = await ToolDependencies.bootstrap(
+    buildTargets: const BuildTargetsImpl(),
+    enablePreRunValidator: true,
+    extensionEntryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+    flutterHookRunner: FlutterHookRunnerNative(),
+    logger: logger,
+    nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
+    outputPreferences: outputPreferences,
+    platform: platform,
+    shutdownHooks: shutdownHooks,
+    stdio: stdio,
+    templateRenderer: const MustacheTemplateRenderer(),
+    terminal: terminal,
+    // The web runner is not supported in google3 because it depends on dwds.
+    webRunnerFactory: DwdsWebRunnerFactory(),
+  );
+
   await runner.run(
     args,
     (ToolDependencies toolDependencies) {
       final ToolDependencies(
-        :ExtensionManager? extensionManager,
+        :ExtensionManager extensionManager,
         :FeatureFlags featureFlags,
         toolContext: ToolContext(:Cache cache, :FileSystem fs, :Logger logger),
       ) = toolDependencies;
-      final ExtensionManager manager = extensionManager!;
       final templateManager = ExtensionTemplateManager(
-        extensionManager: manager,
+        extensionManager: extensionManager,
         featureFlags: featureFlags,
         fileSystem: fs,
         flutterRoot: cache.flutterRoot,
@@ -148,24 +162,10 @@ Future<void> main(List<String> args) async {
         extensionTemplateManager: templateManager,
       );
     },
-    buildTargets: const BuildTargetsImpl(),
-    extensionEntryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
-    flutterHookRunner: FlutterHookRunnerNative(),
     muteCommandLogging: muteCommandLogging,
-    nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
-    overrides: <Type, Generator>{
-      AnsiTerminal: () => terminal,
-      Logger: () => logger,
-      OutputPreferences: () => outputPreferences,
-      Stdio: () => stdio,
-    },
-    preRunValidatorBuilder: PreRunValidator.new,
-    shutdownHooks: shutdownHooks,
-    templateRenderer: const MustacheTemplateRenderer(),
+    toolDependencies: toolDependencies,
     verbose: verbose,
     verboseHelp: verboseHelp,
-    // The web runner is not supported in google3 because it depends on dwds.
-    webRunnerFactory: DwdsWebRunnerFactory(),
   );
 }
 
@@ -191,7 +191,7 @@ List<FlutterCommand> generateCommands({
           logger: logger,
           processManager: processManager,
         ),
-        VariableDumpMachineProjectValidator(toolContext: toolContext),
+        VariableDumpMachineProjectValidator(featureFlags: featureFlags, toolContext: toolContext),
       ],
       androidBuilder: toolDependencies.androidBuilder,
       suppressAnalytics: !toolDependencies.analytics.okToSend,
@@ -249,6 +249,7 @@ List<FlutterCommand> generateCommands({
     CreateCommand(
       androidContext: toolDependencies.androidContext,
       appleContext: toolDependencies.appleContext,
+      featureFlags: featureFlags,
       pub: toolDependencies.pub,
       templatePathProvider: toolDependencies.templatePathProvider,
       templateRenderer: const MustacheTemplateRenderer(),
@@ -279,6 +280,7 @@ List<FlutterCommand> generateCommands({
       verboseHelp: verboseHelp,
     ),
     DoctorCommand(
+      androidContext: toolDependencies.androidContext,
       doctor: toolDependencies.doctor,
       extensionManager: toolDependencies.extensionManager,
       toolContext: toolContext,
@@ -357,13 +359,14 @@ List<FlutterCommand> generateCommands({
       assetBundleFactory: toolDependencies.assetBundleFactory,
       buildSystem: toolDependencies.buildSystem,
       buildTargets: toolDependencies.buildTargets,
+      deviceManager: toolDependencies.deviceManager,
       flutterHookRunner: toolDependencies.flutterHookRunner,
       pub: toolDependencies.pub,
       templatePathProvider: toolDependencies.templatePathProvider,
       toolContext: toolContext,
       verboseHelp: verboseHelp,
     ),
-    UpgradeCommand(toolContext: toolContext, verboseHelp: verboseHelp),
+    UpgradeCommand(featureFlags: featureFlags, toolContext: toolContext, verboseHelp: verboseHelp),
     SymbolizeCommand(toolContext: toolContext),
     // Development-only commands. These are always hidden,
     IdeConfigCommand(toolContext: toolContext),

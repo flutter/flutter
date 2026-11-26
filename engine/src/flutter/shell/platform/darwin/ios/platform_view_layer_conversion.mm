@@ -4,8 +4,14 @@
 
 #import "flutter/shell/platform/darwin/ios/platform_view_layer_conversion.h"
 
+#import <CoreGraphics/CoreGraphics.h>
+#import <QuartzCore/QuartzCore.h>
+
 #include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
+#include "flutter/display_list/geometry/dl_geometry_types.h"
+#include "flutter/display_list/geometry/dl_path.h"
 #include "flutter/display_list/utils/dl_matrix_clip_tracker.h"
+#include "flutter/fml/platform/darwin/cf_utils.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 
 FLUTTER_ASSERT_ARC
@@ -34,6 +40,44 @@ class CGPathReceiver final : public DlPathReceiver {
  private:
   fml::CFRef<CGMutablePathRef> path_ref_ = fml::CFRef<CGMutablePathRef>(CGPathCreateMutable());
 };
+
+CATransform3D GetCATransform3DFromDlMatrix(const DlMatrix& matrix) {
+  CATransform3D transform = CATransform3DIdentity;
+  transform.m11 = matrix.m[0];
+  transform.m12 = matrix.m[1];
+  transform.m13 = matrix.m[2];
+  transform.m14 = matrix.m[3];
+
+  transform.m21 = matrix.m[4];
+  transform.m22 = matrix.m[5];
+  transform.m23 = matrix.m[6];
+  transform.m24 = matrix.m[7];
+
+  transform.m31 = matrix.m[8];
+  transform.m32 = matrix.m[9];
+  transform.m33 = matrix.m[10];
+  transform.m34 = matrix.m[11];
+
+  transform.m41 = matrix.m[12];
+  transform.m42 = matrix.m[13];
+  transform.m43 = matrix.m[14];
+  transform.m44 = matrix.m[15];
+  return transform;
+}
+
+CGRect GetCGRectFromDlRect(const DlRect& rect) {
+  return CGRectMake(rect.GetX(), rect.GetY(), rect.GetWidth(), rect.GetHeight());
+}
+
+fml::CFRef<CGPathRef> GetCGPathFromDlPath(const DlPath& path) {
+  CGPathReceiver receiver;
+
+  // TODO(flar): https://github.com/flutter/flutter/issues/164826
+  // CGPaths do not have an inherit fill type, we would need to remember
+  // the fill type and employ it when we use the path.
+  path.Dispatch(receiver);
+  return receiver.TakePath();
+}
 
 FlutterPlatformViewCornerRadii GetCornerRadiiFromDlRoundingRadii(const DlRoundingRadii& radii) {
   return {
@@ -155,44 +199,6 @@ NSArray<FlutterPlatformViewMutator*>* GetMutatorsFromMutatorsStack(
 }
 
 }  // namespace
-
-CATransform3D GetCATransform3DFromDlMatrix(const DlMatrix& matrix) {
-  CATransform3D transform = CATransform3DIdentity;
-  transform.m11 = matrix.m[0];
-  transform.m12 = matrix.m[1];
-  transform.m13 = matrix.m[2];
-  transform.m14 = matrix.m[3];
-
-  transform.m21 = matrix.m[4];
-  transform.m22 = matrix.m[5];
-  transform.m23 = matrix.m[6];
-  transform.m24 = matrix.m[7];
-
-  transform.m31 = matrix.m[8];
-  transform.m32 = matrix.m[9];
-  transform.m33 = matrix.m[10];
-  transform.m34 = matrix.m[11];
-
-  transform.m41 = matrix.m[12];
-  transform.m42 = matrix.m[13];
-  transform.m43 = matrix.m[14];
-  transform.m44 = matrix.m[15];
-  return transform;
-}
-
-CGRect GetCGRectFromDlRect(const DlRect& rect) {
-  return CGRectMake(rect.GetX(), rect.GetY(), rect.GetWidth(), rect.GetHeight());
-}
-
-fml::CFRef<CGPathRef> GetCGPathFromDlPath(const DlPath& path) {
-  CGPathReceiver receiver;
-
-  // TODO(flar): https://github.com/flutter/flutter/issues/164826
-  // CGPaths do not have an inherit fill type, we would need to remember
-  // the fill type and employ it when we use the path.
-  path.Dispatch(receiver);
-  return receiver.TakePath();
-}
 
 FlutterPlatformViewLayer* GetPlatformViewLayerFromEmbeddedViewParams(
     int64_t view_id,

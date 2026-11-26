@@ -11,6 +11,7 @@ import '../font_fallback_service.dart';
 import '../native_memory.dart';
 import '../renderer.dart';
 import '../util.dart';
+import 'image_source.dart';
 
 const String _kWeightAxisTag = 'wght';
 const List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
@@ -607,16 +608,44 @@ class EngineTextStyle implements ui.TextStyle {
 }
 
 class EngineParagraph implements ui.Paragraph {
-  EngineParagraph(BackendParagraph backendParagraph) {
+  EngineParagraph(BackendParagraph backendParagraph, {this.imageTracker}) {
     _ref = UniqueRef<BackendParagraph>(
       this,
       backendParagraph,
       'Paragraph',
-      onDispose: (BackendParagraph p) => p.dispose(),
+      onDispose: _createDisposer(imageTracker),
     );
   }
 
+  static void _disposeBackendParagraph(BackendParagraph paragraph) {
+    paragraph.dispose();
+  }
+
+  /// Builds the [UniqueRef] disposal callback without capturing `this`, so
+  /// `DomFinalizationRegistry`'s strongly held [UniqueRef] does not retain
+  /// [EngineParagraph] and prevent garbage collection.
+  static void Function(BackendParagraph) _createDisposer(PictureImageTracker? tracker) {
+    if (tracker == null) {
+      return _disposeBackendParagraph;
+    }
+    return _createTrackedDisposer(tracker);
+  }
+
+  static void Function(BackendParagraph) _createTrackedDisposer(PictureImageTracker tracker) {
+    return (BackendParagraph paragraph) {
+      try {
+        paragraph.dispose();
+      } finally {
+        tracker.releaseAll();
+      }
+    };
+  }
+
   late final UniqueRef<BackendParagraph> _ref;
+
+  /// Retained [ImageSource]s from `foreground` or `background` paints pushed
+  /// onto the [EngineParagraphBuilder] that built this paragraph.
+  final PictureImageTracker? imageTracker;
 
   BackendParagraph get backendParagraph => _ref.nativeObject;
 
@@ -769,12 +798,22 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
       this,
       renderer.createParagraphBuilder(style),
       'ParagraphBuilder',
-      onDispose: (BackendParagraphBuilder builder) => builder.dispose(),
+      onDispose: _disposeBackendParagraphBuilder,
     );
     _styleStack.add(style.getTextStyle());
   }
 
+  static void _disposeBackendParagraphBuilder(BackendParagraphBuilder builder) {
+    builder.dispose();
+  }
+
+  @visibleForTesting
+  static NativeMemoryFinalizer finalizer = NativeMemoryFinalizer((Object tracker) {
+    (tracker as PictureImageTracker).releaseAll();
+  });
+
   late final UniqueRef<BackendParagraphBuilder> _ref;
+  PictureImageTracker? _tracker;
 
   BackendParagraphBuilder get _backendBuilder => _ref.nativeObject;
 
@@ -827,6 +866,15 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
     final EngineTextStyle mergedStyle = baseStyle.mergeWith(style);
     _styleStack.add(mergedStyle);
     _backendBuilder.pushStyle(mergedStyle);
+    if (style.foreground != null || style.background != null) {
+      final PictureImageTracker tracker = _tracker ??= PictureImageTracker();
+      final bool wasEmpty = tracker.isEmpty;
+      tracker.recordPaint(style.foreground);
+      tracker.recordPaint(style.background);
+      if (wasEmpty && !tracker.isEmpty) {
+        finalizer.attach(this, tracker, detach: this);
+      }
+    }
   }
 
   @override
@@ -845,9 +893,16 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
   @override
   EngineParagraph build() {
     final BackendParagraph backendParagraph = _backendBuilder.build();
+    final PictureImageTracker? tracker = _tracker;
+    PictureImageTracker? imageTracker;
+    if (tracker != null && !tracker.isEmpty) {
+      finalizer.detach(this);
+      imageTracker = tracker;
+    }
+    _tracker = null;
     // The backend builder is single-use; release it (and detach its
     // finalizer) as soon as the paragraph is built.
     _ref.dispose();
-    return EngineParagraph(backendParagraph);
+    return EngineParagraph(backendParagraph, imageTracker: imageTracker);
   }
 }
