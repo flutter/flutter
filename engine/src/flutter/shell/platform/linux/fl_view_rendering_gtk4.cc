@@ -18,6 +18,27 @@
 #include "flutter/shell/platform/linux/fl_subsurface.h"
 #include "flutter/shell/platform/linux/fl_wayland_display.h"
 
+static void parent_after_paint_cb(GdkFrameClock* clock, FlSubsurface* child) {
+  g_signal_handlers_disconnect_by_func(
+      clock, reinterpret_cast<gpointer>(parent_after_paint_cb), child);
+  fl_subsurface_set_desync(child);
+}
+
+static void synchronize_parent_update(FlView* view, FlSubsurface* child) {
+  GdkFrameClock* clock = gtk_widget_get_frame_clock(view->render_area);
+  if (clock == nullptr) {
+    fl_subsurface_set_desync(child);
+    return;
+  }
+  fl_subsurface_set_sync(child);
+  g_signal_handlers_disconnect_by_func(
+      clock, reinterpret_cast<gpointer>(parent_after_paint_cb), child);
+  g_signal_connect_object(clock, "after-paint",
+                          G_CALLBACK(parent_after_paint_cb), child,
+                          G_CONNECT_AFTER);
+  gtk_widget_queue_draw(view->render_area);
+}
+
 static void setup_subsurface(FlView* view) {
   if (view->engine == nullptr ||
       fl_engine_get_renderer_type(view->engine) != kOpenGL ||
@@ -75,6 +96,8 @@ static void setup_subsurface(FlView* view) {
                                static_cast<int>(translated_point.y));
   }
 
+  synchronize_parent_update(view, subsurface);
+  g_set_object(&view->subsurface, subsurface);
   g_mutex_lock(&view->subsurface_mutex);
   g_set_object(&view->subsurface_egl, subsurface_egl);
   view->subsurface_scale = scale;
@@ -82,6 +105,7 @@ static void setup_subsurface(FlView* view) {
 }
 
 void fl_view_gtk4_clear_subsurface(FlView* view) {
+  g_clear_object(&view->subsurface);
   g_mutex_lock(&view->subsurface_mutex);
   g_clear_object(&view->subsurface_egl);
   g_mutex_unlock(&view->subsurface_mutex);
@@ -91,22 +115,15 @@ void fl_view_gtk4_resize_subsurface(FlView* view, int width, int height) {
   if (!view->subsurface_requested) {
     return;
   }
-  g_mutex_lock(&view->subsurface_mutex);
-  const double surface_scale = fl_gtk_widget_get_scale(view->render_area);
-  if (view->subsurface_egl != nullptr &&
-      surface_scale != view->subsurface_scale) {
-    g_clear_object(&view->subsurface_egl);
+  if (view->subsurface != nullptr &&
+      fl_gtk_widget_get_scale(view->render_area) != view->subsurface_scale) {
+    fl_view_gtk4_clear_subsurface(view);
   }
-  const gboolean subsurface_enabled = view->subsurface_egl != nullptr;
-  if (subsurface_enabled) {
-    const int scale =
-        static_cast<int>(MAX(fl_gtk_widget_get_scale(view->render_area), 1.0));
-    fl_subsurface_egl_resize(view->subsurface_egl, width * scale,
-                             height * scale);
-  }
-  g_mutex_unlock(&view->subsurface_mutex);
-
-  if (!subsurface_enabled && width > 0 && height > 0) {
+  if (view->subsurface != nullptr) {
+    // Present resizes the EGL window on the raster thread. Hold the child
+    // commit until GTK has painted the corresponding parent geometry.
+    synchronize_parent_update(view, view->subsurface);
+  } else if (width > 0 && height > 0) {
     setup_subsurface(view);
   }
 }

@@ -64,6 +64,7 @@ struct _FlView {
   gboolean subsurface_requested;
   GMutex subsurface_mutex;
   FlSubsurfaceEGL* subsurface_egl;
+  FlSubsurface* subsurface;  // GTK thread only.
   int subsurface_scale;
 #endif
   GCancellable* cancellable;
