@@ -1044,6 +1044,17 @@ class DefaultResidentCompiler implements ResidentCompiler {
       }),
     );
 
+    // A write to the stdin of a frontend server that has already exited fails
+    // asynchronously, and the failure is only reported through `stdin.done`.
+    // It is logged rather than rethrown because the exit itself is reported
+    // by the `stdout` and `exitCode` handlers above.
+    // See https://github.com/flutter/flutter/issues/197236.
+    unawaited(
+      _server?.stdin.done.handleError((Object error, StackTrace stackTrace) {
+        _logger.printTrace('Failed to write to the stdin of the Dart compiler: $error');
+      }),
+    );
+
     if (nativeAssetsUri != null && nativeAssetsUri.isNotEmpty) {
       _server?.stdin.writeln('native-assets $nativeAssetsUri');
       _logger.printTrace('<- native-assets $nativeAssetsUri');

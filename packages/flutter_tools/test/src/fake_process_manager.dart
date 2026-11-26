@@ -209,7 +209,12 @@ class FakeProcess implements io.Process {
     } else {
       stdout = Stream<List<int>>.value(_stdout);
     }
-    this.exitCode.then((_) => this.stdin.close());
+    this.exitCode.then((_) {
+      // Closing a sink after one of its writes failed completes with the
+      // error of that write. The error is ignored here because the code under
+      // test already receives it through `stdin.done`.
+      this.stdin.close().ignore();
+    });
   }
 
   /// The process exit code.

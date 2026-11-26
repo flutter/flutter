@@ -9,6 +9,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -409,6 +410,63 @@ void main() {
       throwsToolExit(message: 'The Dart compiler exited unexpectedly.'),
     );
   });
+
+  test(
+    'incremental compile exits with a ToolExit when writing to the compiler stdin fails',
+    () async {
+      // Regression test for https://github.com/flutter/flutter/issues/197236.
+      final exitCompleter = Completer<void>();
+      final stdinConsumer = _BrokenPipeStreamConsumer();
+
+      final Future<CompilerOutput?> output = asyncGuard(() {
+        // The sink is created inside the guarded zone, like the stdin of a real
+        // process is, because future errors do not cross error zone boundaries.
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: const <String>[
+              ...frontendServerCommand,
+              '--initialize-from-dill',
+              expectedCachePath,
+              '--verbosity=error',
+            ],
+            stdin: IOSink(stdinConsumer),
+            // Keep stdout open until the process exits, so that the write to
+            // stdin fails before the exit is noticed.
+            stdout: 'Compiler terminated.',
+            outputFollowsExit: true,
+            exitCode: 1,
+            completer: exitCompleter,
+          ),
+        );
+        return generator.recompile(
+          Uri.parse('/path/to/main.dart'),
+          null,
+          /* invalidatedFiles */
+          outputPath: '/build/',
+          packageConfig: PackageConfig.empty,
+          fs: MemoryFileSystem(),
+          projectRootPath: '',
+        );
+      });
+      final Future<void> expectation = expectLater(
+        output,
+        throwsToolExit(message: 'The Dart compiler exited unexpectedly.'),
+      );
+
+      // Let the write to stdin fail, and the failure be reported, while the
+      // process is still running.
+      await stdinConsumer.writeFailed;
+      await pumpEventQueue();
+      exitCompleter.complete();
+
+      await expectation;
+      expect(
+        testLogger.traceText,
+        contains('Failed to write to the stdin of the Dart compiler: SocketException'),
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+  );
 
   test('incremental compile and recompile', () async {
     final completer = Completer<void>();
@@ -895,4 +953,25 @@ Future<void> _reject(
   final String commands = frontendServerStdIn.getAndClear();
   final re = RegExp(expected);
   expect(commands, matches(re));
+}
+
+/// A [StreamConsumer] whose first write fails with the [SocketException] that
+/// writing to the stdin of an exited process reports.
+///
+/// Wrap it in an [IOSink] and pass that as [FakeCommand.stdin].
+class _BrokenPipeStreamConsumer implements StreamConsumer<List<int>> {
+  final _writeFailed = Completer<void>();
+
+  /// Completes when the first write has been received, just before it fails.
+  Future<void> get writeFailed => _writeFailed.future;
+
+  @override
+  Future<void> addStream(Stream<List<int>> stream) async {
+    await stream.first;
+    _writeFailed.complete();
+    throw const SocketException('Write failed', osError: OSError('Broken pipe', 32));
+  }
+
+  @override
+  Future<void> close() async {}
 }
