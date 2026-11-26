@@ -19,7 +19,6 @@ import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
@@ -520,7 +519,7 @@ Warning: The --licenses option is no longer needed.
     expect(stdio.writtenToStderr, contains('sdkmanager crash'));
   });
 
-  testUsingContext('includes emulator version', () async {
+  test('includes emulator version', () async {
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = false
@@ -550,7 +549,7 @@ Warning: The --licenses option is no longer needed.
     expect(sdkMessage.message, 'Emulator version 35.2.10.0 (build_id 12414864) (CL:N/A)');
   });
 
-  testUsingContext('includes emulator version - no emulator path', () async {
+  test('includes emulator version - no emulator path', () async {
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = false
@@ -574,7 +573,7 @@ Warning: The --licenses option is no longer needed.
     expect(sdkMessage.message, 'Emulator version unknown');
   });
 
-  testUsingContext('detects license-only SDK installation with cmdline-tools', () async {
+  test('detects license-only SDK installation with cmdline-tools', () async {
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = false
@@ -602,7 +601,7 @@ Warning: The --licenses option is no longer needed.
     expect(licenseMessage.message, UserMessages().androidSdkLicenseOnly(kAndroidHome));
   });
 
-  testUsingContext('detects minimum required SDK and buildtools', () async {
+  test('detects minimum required SDK and buildtools', () async {
     final sdkVersion = FakeAndroidSdkVersion()
       ..sdkLevel = 28
       ..buildToolsVersion = Version(26, 0, 3);
@@ -659,7 +658,7 @@ Warning: The --licenses option is no longer needed.
     );
   });
 
-  testUsingContext('detects missing cmdline tools', () async {
+  test('detects missing cmdline tools', () async {
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = true
@@ -696,7 +695,7 @@ Warning: The --licenses option is no longer needed.
   });
 
   // Warning test not available when minimum and error are aligned.
-  testUsingContext('detects minimum required java version', () async {
+  test('detects minimum required java version', () async {
     // Test with older version of JDK
     final Platform platform = FakePlatform()
       ..environment = <String, String>{
@@ -802,7 +801,7 @@ Android sdkmanager tool was found, but failed to run
     expect(stdio.stderr.getAndClear(), contains('UnsupportedClassVersionError'));
   });
 
-  testUsingContext('Mentions that JDK is provided by latest Android Studio Installation', () async {
+  test('Mentions that JDK is provided by latest Android Studio Installation', () async {
     // Mock a pass through scenario to reach _checkJavaVersion()
     sdk
       ..licensesAvailable = true
@@ -840,48 +839,45 @@ Android sdkmanager tool was found, but failed to run
     );
   });
 
-  testUsingContext(
-    "Mentions that JDK is provided by user's JAVA_HOME environment variable",
-    () async {
-      // Mock a pass through scenario to reach _checkJavaVersion()
-      sdk
-        ..licensesAvailable = true
-        ..platformToolsAvailable = true
-        ..cmdlineToolsAvailable = true
-        ..directory = fileSystem.directory('/foo/bar')
-        ..sdkManagerPath = '/foo/bar/sdkmanager'
-        ..emulatorPath = 'path/to/emulator';
+  test("Mentions that JDK is provided by user's JAVA_HOME environment variable", () async {
+    // Mock a pass through scenario to reach _checkJavaVersion()
+    sdk
+      ..licensesAvailable = true
+      ..platformToolsAvailable = true
+      ..cmdlineToolsAvailable = true
+      ..directory = fileSystem.directory('/foo/bar')
+      ..sdkManagerPath = '/foo/bar/sdkmanager'
+      ..emulatorPath = 'path/to/emulator';
 
-      final ValidationResult validationResult = await AndroidValidator(
-        java: FakeJava(javaSource: JavaSource.javaHome),
-        androidSdk: sdk,
-        logger: logger,
-        platform: FakePlatform(),
-        userMessages: UserMessages(),
-        processManager: processManager,
-        osUtils: FakeOperatingSystemUtils(),
-      ).validate();
+    final ValidationResult validationResult = await AndroidValidator(
+      java: FakeJava(javaSource: JavaSource.javaHome),
+      androidSdk: sdk,
+      logger: logger,
+      platform: FakePlatform(),
+      userMessages: UserMessages(),
+      processManager: processManager,
+      osUtils: FakeOperatingSystemUtils(),
+    ).validate();
 
-      expect(
-        validationResult.messages.any(
-          (ValidationMessage message) => message.message.contains(
-            'This JDK is specified by the JAVA_HOME environment variable.',
-          ),
+    expect(
+      validationResult.messages.any(
+        (ValidationMessage message) => message.message.contains(
+          'This JDK is specified by the JAVA_HOME environment variable.',
         ),
-        true,
-      );
-      expect(
-        validationResult.messages.any(
-          (ValidationMessage message) => message.message.contains(
-            'To manually set the JDK path, use: `flutter config --jdk-dir="path/to/jdk"`',
-          ),
+      ),
+      true,
+    );
+    expect(
+      validationResult.messages.any(
+        (ValidationMessage message) => message.message.contains(
+          'To manually set the JDK path, use: `flutter config --jdk-dir="path/to/jdk"`',
         ),
-        true,
-      );
-    },
-  );
+      ),
+      true,
+    );
+  });
 
-  testUsingContext('Mentions that path to Java binary is obtained from PATH', () async {
+  test('Mentions that path to Java binary is obtained from PATH', () async {
     // Mock a pass through scenario to reach _checkJavaVersion()
     sdk
       ..licensesAvailable = true
@@ -918,7 +914,7 @@ Android sdkmanager tool was found, but failed to run
     );
   });
 
-  testUsingContext('Mentions that JDK is provided by Flutter config', () async {
+  test('Mentions that JDK is provided by Flutter config', () async {
     // Mock a pass through scenario to reach _checkJavaVersion()
     sdk
       ..licensesAvailable = true
@@ -955,7 +951,7 @@ Android sdkmanager tool was found, but failed to run
     );
   });
 
-  testUsingContext('AndroidValidator warns when multiple adb binaries are found', () async {
+  test('AndroidValidator warns when multiple adb binaries are found', () async {
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = true
@@ -994,7 +990,7 @@ Android sdkmanager tool was found, but failed to run
     );
   });
 
-  testUsingContext('AndroidValidator does not warn when only one adb binary is found', () async {
+  test('AndroidValidator does not warn when only one adb binary is found', () async {
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = true

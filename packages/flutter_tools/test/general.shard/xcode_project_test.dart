@@ -24,7 +24,6 @@ import 'package:flutter_tools/src/template.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
@@ -144,7 +143,7 @@ void main() {
         expect(await project.projectInfo(), isNull);
       });
 
-      testUsingContext('returns XcodeProjectInfo', () async {
+      test('returns XcodeProjectInfo', () async {
         final fs = MemoryFileSystem.test();
         final project = IosProject.fromFlutter(
           FakeFlutterProject(fileSystem: fs),
@@ -155,7 +154,7 @@ void main() {
       });
     });
 
-    testUsingContext('schemeForBuildInfo succeeds', () async {
+    test('schemeForBuildInfo succeeds', () async {
       final fs = MemoryFileSystem.test();
       final project = IosProject.fromFlutter(
         FakeFlutterProject(fileSystem: fs),
@@ -176,7 +175,7 @@ void main() {
       expect(await project.schemeForBuildInfo(buildInfo), isNull);
     });
 
-    testUsingContext('schemeForBuildInfo succeeds with flavor', () async {
+    test('schemeForBuildInfo succeeds with flavor', () async {
       final fs = MemoryFileSystem.test();
       final project = IosProject.fromFlutter(
         FakeFlutterProject(fileSystem: fs),
@@ -192,7 +191,7 @@ void main() {
       expect(await project.schemeForBuildInfo(buildInfo), 'my_flavor');
     });
 
-    testUsingContext('schemeForBuildInfo throws error if flavor is not found', () async {
+    test('schemeForBuildInfo throws error if flavor is not found', () async {
       final fs = MemoryFileSystem.test();
       final project = IosProject.fromFlutter(
         FakeFlutterProject(fileSystem: fs),
@@ -304,55 +303,49 @@ void main() {
         expect(await project.parseFlavorFromConfiguration(env), 'strawberry');
       });
 
-      testUsingContext(
-        'from CONFIGURATION when has flavor following a hyphen that matches a scheme',
-        () async {
-          final fs = MemoryFileSystem.test();
-          final project = IosProject.fromFlutter(
-            FakeFlutterProject(fileSystem: fs),
-            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
-              schemes: <String>['Runner', 'vanilla'],
-            ),
-          );
-          final env = Environment.test(
-            fs.currentDirectory,
-            fileSystem: fs,
-            logger: BufferLogger.test(),
-            artifacts: Artifacts.test(),
-            featureFlags: TestFeatureFlags(),
-            processManager: FakeProcessManager.any(),
-            defines: <String, String>{kFlavor: 'strawberry', kXcodeConfiguration: 'Debug-vanilla'},
-          );
-          project.xcodeProject.createSync(recursive: true);
-          expect(await project.parseFlavorFromConfiguration(env), 'vanilla');
-        },
-      );
+      test('from CONFIGURATION when has flavor following a hyphen that matches a scheme', () async {
+        final fs = MemoryFileSystem.test();
+        final project = IosProject.fromFlutter(
+          FakeFlutterProject(fileSystem: fs),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
+            schemes: <String>['Runner', 'vanilla'],
+          ),
+        );
+        final env = Environment.test(
+          fs.currentDirectory,
+          fileSystem: fs,
+          logger: BufferLogger.test(),
+          artifacts: Artifacts.test(),
+          featureFlags: TestFeatureFlags(),
+          processManager: FakeProcessManager.any(),
+          defines: <String, String>{kFlavor: 'strawberry', kXcodeConfiguration: 'Debug-vanilla'},
+        );
+        project.xcodeProject.createSync(recursive: true);
+        expect(await project.parseFlavorFromConfiguration(env), 'vanilla');
+      });
 
-      testUsingContext(
-        'from CONFIGURATION when has flavor following a space that matches a scheme',
-        () async {
-          final fs = MemoryFileSystem.test();
-          final project = IosProject.fromFlutter(
-            FakeFlutterProject(fileSystem: fs),
-            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
-              schemes: <String>['Runner', 'vanilla'],
-            ),
-          );
-          final env = Environment.test(
-            fs.currentDirectory,
-            fileSystem: fs,
-            logger: BufferLogger.test(),
-            artifacts: Artifacts.test(),
-            featureFlags: TestFeatureFlags(),
-            processManager: FakeProcessManager.any(),
-            defines: <String, String>{kFlavor: 'strawberry', kXcodeConfiguration: 'Debug vanilla'},
-          );
-          project.xcodeProject.createSync(recursive: true);
-          expect(await project.parseFlavorFromConfiguration(env), 'vanilla');
-        },
-      );
+      test('from CONFIGURATION when has flavor following a space that matches a scheme', () async {
+        final fs = MemoryFileSystem.test();
+        final project = IosProject.fromFlutter(
+          FakeFlutterProject(fileSystem: fs),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
+            schemes: <String>['Runner', 'vanilla'],
+          ),
+        );
+        final env = Environment.test(
+          fs.currentDirectory,
+          fileSystem: fs,
+          logger: BufferLogger.test(),
+          artifacts: Artifacts.test(),
+          featureFlags: TestFeatureFlags(),
+          processManager: FakeProcessManager.any(),
+          defines: <String, String>{kFlavor: 'strawberry', kXcodeConfiguration: 'Debug vanilla'},
+        );
+        project.xcodeProject.createSync(recursive: true);
+        expect(await project.parseFlavorFromConfiguration(env), 'vanilla');
+      });
 
-      testUsingContext('from FLAVOR when CONFIGURATION does not match a scheme', () async {
+      test('from FLAVOR when CONFIGURATION does not match a scheme', () async {
         final fs = MemoryFileSystem.test();
         final project = IosProject.fromFlutter(
           FakeFlutterProject(fileSystem: fs),
