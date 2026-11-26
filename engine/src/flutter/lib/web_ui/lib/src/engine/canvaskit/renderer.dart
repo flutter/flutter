@@ -27,9 +27,15 @@ class CanvasKitRenderer extends Renderer {
   /// Whether the renderer is using software rendering.
   bool get isSoftware => _pictureToImageSurface.isSoftware;
 
+  /// The CanvasKit font registry behind [fontCollection].
+  ///
+  /// Not used when `WebParagraph` is enabled, in which case [fontCollection]
+  /// is a [WebFontCollection] and text is laid out by the browser.
+  late final CkFontCollection ckFontCollection = CkFontCollection();
+
   late final FlutterFontCollection _fontCollection = isWebParagraphEnabled
       ? WebFontCollection()
-      : SkiaFontCollection();
+      : EngineFontCollection(ckFontCollection);
 
   @override
   FlutterFontCollection get fontCollection => _fontCollection;
@@ -47,8 +53,12 @@ class CanvasKitRenderer extends Renderer {
 
   @override
   void debugResetRasterizer() {
+    // Release the WebGL contexts held by the previous rasterizer.
+    _pictureToImageSurface.dispose();
+    rasterizer.dispose();
     rasterizer = _createRasterizer();
     _pictureToImageSurface = rasterizer.createPictureToImageSurface() as CkSurface;
+    debugClear();
   }
 
   @override
@@ -72,7 +82,8 @@ class CanvasKitRenderer extends Renderer {
   }
 
   @override
-  ui.Paint createPaint() => CkPaint();
+  BackendPaint createPaint(EnginePaint paint, {required ui.TileMode defaultBlurTileMode}) =>
+      CkPaint(paint, defaultBlurTileMode: defaultBlurTileMode);
 
   @override
   BackendVertices createVertices(
@@ -90,8 +101,10 @@ class CanvasKitRenderer extends Renderer {
   );
 
   @override
-  ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) =>
-      CkCanvas(recorder, cullRect);
+  ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) {
+    final ui.Rect rect = EngineCanvas.resolveCullRect(recorder, cullRect);
+    return (recorder as CkPictureRecorder).beginRecording(rect);
+  }
 
   @override
   BackendGradient createGradientLinear(
@@ -178,7 +191,11 @@ class CanvasKitRenderer extends Renderer {
     required double sigmaX,
     required double sigmaY,
     required ui.TileMode tileMode,
+    ui.Rect? bounds,
   }) {
+    // TODO(harryterkelsen): CanvasKit cannot express bounded blur; falls back
+    // to unbounded like native Skia.
+    // https://github.com/flutter/flutter/issues/175899
     return CkBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
   }
 
@@ -242,9 +259,9 @@ class CanvasKitRenderer extends Renderer {
   /// - **Hardware-Accelerated WebGL Path (`!isSoftware`):** To avoid blocking the main
   ///    thread and prevent massive GPU memory spikes, we use "lazy" texture uploads:
   ///    - **ImageBitmap Source:** We call `MakeLazyImageFromImageBitmap`. The second argument
-  ///      (`true`) transfers ownership of the bitmap to CanvasKit, allowing CanvasKit to
-  ///      automatically close and release the browser-allocated bitmap once it has been
-  ///      successfully uploaded to a GPU texture.
+  ///      (`true`) indicates that the bitmap pixels use premultiplied alpha. CanvasKit retains
+  ///      the bitmap for lazy GPU texture generation across WebGL contexts; closing the bitmap
+  ///      is managed by [EngineImage] and [PictureImageTracker] once all references are released.
   ///    - **Other Texture Sources:** We call `MakeLazyImageFromTextureSourceWithInfo` to register
   ///      the texture source (e.g. canvas or video frame) with WebGL.
   ///    In both cases, the actual upload of the texture to the GPU is deferred until the
@@ -335,7 +352,7 @@ class CanvasKitRenderer extends Renderer {
 
   @override
   BackendParagraphBuilder createParagraphBuilder(EngineParagraphStyle style) =>
-      CkParagraphBuilder(style);
+      CkParagraphBuilder(style, ckFontCollection);
 
   @override
   WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph) =>

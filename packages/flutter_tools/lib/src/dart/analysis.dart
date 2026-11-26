@@ -27,9 +27,17 @@ class AnalysisServer {
     this._protocolTrafficLog,
     this.usePlugins = true,
     this.withFineDependencies = true,
+    this.clientId,
   });
 
+  /// The [clientId] used by `flutter analyze`.
+  static const flutterAnalyzeClientId = 'flutter-analyze';
+
   final bool withFineDependencies;
+
+  /// The client ID passed to the analysis server with `--client-id`, which it
+  /// reports in analytics (for example, `flutter-analyze`).
+  final String? clientId;
   final bool usePlugins;
   final String sdkPath;
   final List<String> directories;
@@ -73,6 +81,7 @@ class AnalysisServer {
       sdkPath,
       '--disable-server-feature-completion',
       '--disable-server-feature-search',
+      if (clientId != null) '--client-id=$clientId',
       if (!withFineDependencies) '--no-with-fine-dependencies',
       if (!usePlugins) '--no-plugins',
       if (suppressAnalytics) '--suppress-analytics',

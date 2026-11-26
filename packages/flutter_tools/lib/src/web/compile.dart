@@ -19,8 +19,8 @@ import '../build_system/build_targets.dart';
 import '../cache.dart';
 import '../compile.dart' show kDdcCanaryFeatures;
 import '../context/tool_context.dart';
+import '../features.dart' show FeatureFlags;
 import '../flutter_plugins.dart';
-import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -47,12 +47,14 @@ class WebBuilder {
     required this._analytics,
     required this._buildSystem,
     required this._buildTargets,
+    required this._featureFlags,
     required this._toolContext,
   });
 
   final Analytics _analytics;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
+  final FeatureFlags _featureFlags;
   final ToolContext _toolContext;
 
   /// Builds the web application using the specified compiler configurations
@@ -76,6 +78,7 @@ class WebBuilder {
       :Logger logger,
       :Platform platform,
       :ProcessManager processManager,
+      :FlutterProjectFactory projectFactory,
       :Terminal terminal,
     ) = _toolContext;
     final bool hasWebPlugins = (await findPlugins(
@@ -131,6 +134,11 @@ class WebBuilder {
           processManager: processManager,
           platform: platform,
           analytics: _analytics,
+          androidSdkBuilder: null,
+          featureFlags: _featureFlags,
+          projectFactory: projectFactory,
+          visualStudio: null,
+          xcode: null,
           cacheDir: cache.getRoot(),
           engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
           flutterRootDir: fileSystem.directory(cache.flutterRoot),
@@ -330,12 +338,12 @@ void sendDdcCompileAnalytics({
   required bool? deprecatedJsInterop,
   required String command,
   required bool succeeded,
-  Analytics? analytics,
+  required Analytics analytics,
 }) {
   if (deprecatedJsInterop == null) {
     return;
   }
-  (analytics ?? globals.analytics).send(
+  analytics.send(
     Event.flutterBuildInfo(
       label: 'web-compile',
       buildType: 'web',

@@ -21,6 +21,7 @@ import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../features.dart';
 import '../ios/core_devices.dart';
 import '../ios/devices.dart';
 import '../ios/ios_deploy.dart';
@@ -29,6 +30,8 @@ import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
 import '../ios/xcode_debug.dart';
 import '../ios/xcodeproj.dart';
+import '../mdns_discovery.dart';
+import '../template.dart';
 import 'cocoapods.dart';
 import 'xcode.dart';
 
@@ -56,8 +59,11 @@ class XCDevice {
   XCDevice({
     required this._analytics,
     required this._cocoaPods,
+    required this._featureFlags,
     required IProxy iproxy,
+    required this._mdnsVmServiceDiscovery,
     required this._plistParser,
+    required TemplatePathProvider templatePathProvider,
     required this._templateRenderer,
     required this._toolContext,
     required this._xcode,
@@ -84,7 +90,13 @@ class XCDevice {
         coreDeviceControl ?? IOSCoreDeviceControl(toolContext: _toolContext, xcode: _xcode);
     _xcodeDebug =
         xcodeDebug ??
-        XcodeDebug(logger: logger, processManager: processManager, xcode: _xcode, fileSystem: fs);
+        XcodeDebug(
+          fileSystem: fs,
+          logger: logger,
+          processManager: processManager,
+          templatePathProvider: templatePathProvider,
+          xcode: _xcode,
+        );
     shutdownHooks.addShutdownHook(dispose);
 
     _setupDeviceIdentifierByEventStream();
@@ -111,9 +123,11 @@ class XCDevice {
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final IProxy _iProxy;
   late final IOSCoreDeviceControl _coreDeviceControl;
+  final MDnsVmServiceDiscovery _mdnsVmServiceDiscovery;
   late final XcodeDebug _xcodeDebug;
   final Analytics _analytics;
   final CocoaPods _cocoaPods;
+  final FeatureFlags _featureFlags;
   final PlistParser _plistParser;
   final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
@@ -641,6 +655,8 @@ class XCDevice {
           toolContext: _toolContext,
           analytics: _analytics,
           cocoaPods: _cocoaPods,
+          featureFlags: _featureFlags,
+          mdnsVmServiceDiscovery: _mdnsVmServiceDiscovery,
           plistParser: _plistParser,
           iosDeploy: _iosDeploy,
           iMobileDevice: _iMobileDevice,

@@ -167,8 +167,8 @@ public class PlatformPlugin {
       @Nullable PlatformPluginDelegate delegate) {
     this.activity = activity;
     this.platformChannel = platformChannel;
-    this.platformChannel.setPlatformMessageHandler(mPlatformMessageHandler);
     this.platformPluginDelegate = delegate;
+    this.platformChannel.setPlatformMessageHandler(mPlatformMessageHandler);
 
     mEnabledOverlays = DEFAULT_SYSTEM_UI;
   }

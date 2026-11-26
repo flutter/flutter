@@ -194,42 +194,39 @@ FakeCommand _missingBinaryException(String binary) {
 }
 
 void main() {
-  testWithoutContext(
-    'Full validation when everything is available at the necessary version',
-    () async {
-      final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-        _clangPresentCommand('4.0.1'),
-        _cmakePresentCommand('3.16.3'),
-        _ninjaPresentCommand('1.10.0'),
-        _pkgConfigPresentCommand('0.29'),
-        ..._gtkLibrariesPresentCommands(),
-        _eglinfoPresentCommand(),
-      ]);
-      final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
-        processManager: processManager,
-        userMessages: UserMessages(),
-      );
-      final ValidationResult result = await linuxDoctorValidator.validate();
+  test('Full validation when everything is available at the necessary version', () async {
+    final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      _clangPresentCommand('4.0.1'),
+      _cmakePresentCommand('3.16.3'),
+      _ninjaPresentCommand('1.10.0'),
+      _pkgConfigPresentCommand('0.29'),
+      ..._gtkLibrariesPresentCommands(),
+      _eglinfoPresentCommand(),
+    ]);
+    final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
+      processManager: processManager,
+      userMessages: UserMessages(),
+    );
+    final ValidationResult result = await linuxDoctorValidator.validate();
 
-      expect(result.type, ValidationType.success);
-      expect(result.messages, const <ValidationMessage>[
-        ValidationMessage('clang version 4.0.1-6+build1'),
-        ValidationMessage('cmake version 3.16.3'),
-        ValidationMessage('ninja version 1.10.0'),
-        ValidationMessage('pkg-config version 0.29'),
-        ValidationMessage('OpenGL core renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)'),
-        ValidationMessage('OpenGL core version: 4.6 (Core Profile) Mesa 24.2.8-1ubuntu1~24.10.1'),
-        ValidationMessage('OpenGL core shading language version: 4.60'),
-        ValidationMessage('OpenGL ES renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)'),
-        ValidationMessage('OpenGL ES version: OpenGL ES 3.2 Mesa 24.2.8-1ubuntu1~24.10.1'),
-        ValidationMessage('OpenGL ES shading language version: OpenGL ES GLSL ES 3.20'),
-        ValidationMessage('GL_EXT_framebuffer_blit: yes'),
-        ValidationMessage('GL_EXT_texture_format_BGRA8888: yes'),
-      ]);
-    },
-  );
+    expect(result.type, ValidationType.success);
+    expect(result.messages, const <ValidationMessage>[
+      ValidationMessage('clang version 4.0.1-6+build1'),
+      ValidationMessage('cmake version 3.16.3'),
+      ValidationMessage('ninja version 1.10.0'),
+      ValidationMessage('pkg-config version 0.29'),
+      ValidationMessage('OpenGL core renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)'),
+      ValidationMessage('OpenGL core version: 4.6 (Core Profile) Mesa 24.2.8-1ubuntu1~24.10.1'),
+      ValidationMessage('OpenGL core shading language version: 4.60'),
+      ValidationMessage('OpenGL ES renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)'),
+      ValidationMessage('OpenGL ES version: OpenGL ES 3.2 Mesa 24.2.8-1ubuntu1~24.10.1'),
+      ValidationMessage('OpenGL ES shading language version: OpenGL ES GLSL ES 3.20'),
+      ValidationMessage('GL_EXT_framebuffer_blit: yes'),
+      ValidationMessage('GL_EXT_texture_format_BGRA8888: yes'),
+    ]);
+  });
 
-  testWithoutContext('Partial validation when clang++ version is too old', () async {
+  test('Partial validation when clang++ version is too old', () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('2.0.1'),
       _cmakePresentCommand('3.16.3'),
@@ -262,7 +259,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Partial validation when CMake version is too old', () async {
+  test('Partial validation when CMake version is too old', () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.2.0'),
@@ -295,7 +292,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Partial validation when ninja version is too old', () async {
+  test('Partial validation when ninja version is too old', () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
@@ -328,7 +325,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Partial validation when pkg-config version is too old', () async {
+  test('Partial validation when pkg-config version is too old', () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
@@ -361,7 +358,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Missing validation when pkg-config is missing', () async {
+  test('Missing validation when pkg-config is missing', () async {
     final userMessages = UserMessages();
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
@@ -385,7 +382,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Missing validation when CMake is not available', () async {
+  test('Missing validation when CMake is not available', () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _missingBinaryCommand('cmake'),
@@ -420,7 +417,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Missing validation when CMake version is unparsable', () async {
+  test('Missing validation when CMake version is unparsable', () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('bogus'),
@@ -455,7 +452,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Missing validation when clang++ is not available', () async {
+  test('Missing validation when clang++ is not available', () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _missingBinaryException('clang++'),
       _cmakePresentCommand('3.16.3'),
@@ -490,7 +487,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Missing validation when clang++ version is unparsable', () async {
+  test('Missing validation when clang++ version is unparsable', () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('bogus'),
       _cmakePresentCommand('3.16.3'),
@@ -525,7 +522,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Missing validation when ninja is not available', () async {
+  test('Missing validation when ninja is not available', () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
@@ -560,7 +557,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Missing validation when ninja version is unparsable', () async {
+  test('Missing validation when ninja version is unparsable', () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
@@ -595,7 +592,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Missing validation when pkg-config is not available', () async {
+  test('Missing validation when pkg-config is not available', () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
@@ -620,7 +617,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Missing validation when pkg-config version is unparsable', () async {
+  test('Missing validation when pkg-config version is unparsable', () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
@@ -645,7 +642,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Missing validation when GTK libraries are not available', () async {
+  test('Missing validation when GTK libraries are not available', () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
@@ -681,7 +678,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Missing validation when multiple dependencies are not available', () async {
+  test('Missing validation when multiple dependencies are not available', () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _missingBinaryCommand('clang++'),
       _missingBinaryCommand('cmake'),
@@ -699,7 +696,7 @@ void main() {
     expect(result.type, ValidationType.missing);
   });
 
-  testWithoutContext('Warning when eglinfo not available', () async {
+  test('Warning when eglinfo not available', () async {
     final userMessages = UserMessages();
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
@@ -725,7 +722,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Wayland only platform', () async {
+  test('Wayland only platform', () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
@@ -759,7 +756,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('X11 only platform', () async {
+  test('X11 only platform', () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
@@ -793,7 +790,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('No OpenGL ES', () async {
+  test('No OpenGL ES', () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
@@ -822,7 +819,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('No OpenGL core', () async {
+  test('No OpenGL core', () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),

@@ -5,20 +5,21 @@
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
@@ -60,11 +61,28 @@ void main() {
       },
       inputs: <String, String>{},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
       engineVersion: '2',
       analytics: fakeAnalytics,
+      projectFactory: FlutterProjectFactory(
+        config: Config.test(directory: fileSystem.currentDirectory, logger: logger),
+        fileSystem: fileSystem,
+        logger: logger,
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
+          schemes: <String>['Runner', 'strawberry'],
+        ),
+      ),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(operatingSystem: 'macos'),
+          processManager: processManager,
+        ),
+      ),
     );
 
     binary = environment.outputDir
@@ -169,28 +187,21 @@ void main() {
     );
   });
 
-  testUsingContext(
-    'Copies files to correct cache directory',
-    () async {
-      binary.createSync(recursive: true);
-      processManager.addCommands(<FakeCommand>[
-        copyFrameworkCommand,
-        chmodDebugFrameworkCommand,
-        lipoInfoNonFatCommand,
-        lipoVerifyX86_64Command,
-      ]);
+  test('Copies files to correct cache directory', () async {
+    binary.createSync(recursive: true);
+    processManager.addCommands(<FakeCommand>[
+      copyFrameworkCommand,
+      chmodDebugFrameworkCommand,
+      lipoInfoNonFatCommand,
+      lipoVerifyX86_64Command,
+    ]);
 
-      await const DebugUnpackMacOS().build(environment);
+    await const DebugUnpackMacOS().build(environment);
 
-      expect(processManager, hasNoRemainingExpectations);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    expect(processManager, hasNoRemainingExpectations);
+  });
 
-  testUsingContext(
+  test(
     'deletes entitlements.txt, without_entitlements.txt, unsigned_binaries.txt files after copying',
     () async {
       binary.createSync(recursive: true);
@@ -238,66 +249,48 @@ void main() {
 
       expect(processManager, hasNoRemainingExpectations);
     },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
   );
 
-  testUsingContext(
-    'thinning fails when framework missing',
-    () async {
-      processManager.addCommand(copyFrameworkCommand);
-      processManager.addCommand(chmodDebugFrameworkCommand);
-      await expectLater(
-        const DebugUnpackMacOS().build(environment),
-        throwsA(
-          isException.having(
-            (Exception exception) => exception.toString(),
-            'description',
-            contains('FlutterMacOS.framework/Versions/A/FlutterMacOS does not exist, cannot thin'),
+  test('thinning fails when framework missing', () async {
+    processManager.addCommand(copyFrameworkCommand);
+    processManager.addCommand(chmodDebugFrameworkCommand);
+    await expectLater(
+      const DebugUnpackMacOS().build(environment),
+      throwsA(
+        isException.having(
+          (Exception exception) => exception.toString(),
+          'description',
+          contains('FlutterMacOS.framework/Versions/A/FlutterMacOS does not exist, cannot thin'),
+        ),
+      ),
+    );
+  });
+
+  test('lipo fails when arch missing from framework', () async {
+    environment.defines[kDarwinArchs] = 'arm64 x86_64';
+    binary.createSync(recursive: true);
+    processManager.addCommands(<FakeCommand>[
+      copyFrameworkCommand,
+      chmodDebugFrameworkCommand,
+      lipoInfoFatCommand,
+      FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'arm64'], exitCode: 1),
+    ]);
+
+    await expectLater(
+      const DebugUnpackMacOS().build(environment),
+      throwsA(
+        isException.having(
+          (Exception exception) => exception.toString(),
+          'description',
+          contains(
+            'does not contain architecture "arm64" (expected "arm64 x86_64").\n\nlipo -info:\nArchitectures in the fat file:',
           ),
         ),
-      );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+      ),
+    );
+  });
 
-  testUsingContext(
-    'lipo fails when arch missing from framework',
-    () async {
-      environment.defines[kDarwinArchs] = 'arm64 x86_64';
-      binary.createSync(recursive: true);
-      processManager.addCommands(<FakeCommand>[
-        copyFrameworkCommand,
-        chmodDebugFrameworkCommand,
-        lipoInfoFatCommand,
-        FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'arm64'], exitCode: 1),
-      ]);
-
-      await expectLater(
-        const DebugUnpackMacOS().build(environment),
-        throwsA(
-          isException.having(
-            (Exception exception) => exception.toString(),
-            'description',
-            contains(
-              'does not contain architecture "arm64" (expected "arm64 x86_64").\n\nlipo -info:\nArchitectures in the fat file:',
-            ),
-          ),
-        ),
-      );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
-
-  testUsingContext('skips thins framework', () async {
+  test('skips thins framework', () async {
     binary.createSync(recursive: true);
     processManager.addCommands(<FakeCommand>[
       copyFrameworkCommand,
@@ -314,7 +307,7 @@ void main() {
     );
   });
 
-  testUsingContext('thins fat framework', () async {
+  test('thins fat framework', () async {
     binary.createSync(recursive: true);
     processManager.addCommands(<FakeCommand>[
       copyFrameworkCommand,
@@ -329,216 +322,173 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext(
-    'Copies files to correct cache directory when no dSYM available in xcframework',
-    () async {
-      binary.createSync(recursive: true);
-      processManager.addCommands(<FakeCommand>[
-        releaseCopyFrameworkCommand,
-        chmodReleaseFrameworkCommand,
-        lipoInfoNonFatCommand,
-        lipoVerifyX86_64Command,
-      ]);
+  test('Copies files to correct cache directory when no dSYM available in xcframework', () async {
+    binary.createSync(recursive: true);
+    processManager.addCommands(<FakeCommand>[
+      releaseCopyFrameworkCommand,
+      chmodReleaseFrameworkCommand,
+      lipoInfoNonFatCommand,
+      lipoVerifyX86_64Command,
+    ]);
 
-      await const ReleaseUnpackMacOS().build(environment..defines[kBuildMode] = 'release');
+    await const ReleaseUnpackMacOS().build(environment..defines[kBuildMode] = 'release');
 
-      expect(processManager, hasNoRemainingExpectations);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    expect(processManager, hasNoRemainingExpectations);
+  });
 
-  testUsingContext(
-    'Copies files to correct cache directory when dSYM available in xcframework',
-    () async {
-      binary.createSync(recursive: true);
-      frameworkDsym.createSync(recursive: true);
-      processManager.addCommands(<FakeCommand>[
-        releaseCopyFrameworkCommand,
-        chmodReleaseFrameworkCommand,
-        lipoInfoNonFatCommand,
-        lipoVerifyX86_64Command,
-        copyFrameworkDsymCommand,
-      ]);
+  test('Copies files to correct cache directory when dSYM available in xcframework', () async {
+    binary.createSync(recursive: true);
+    frameworkDsym.createSync(recursive: true);
+    processManager.addCommands(<FakeCommand>[
+      releaseCopyFrameworkCommand,
+      chmodReleaseFrameworkCommand,
+      lipoInfoNonFatCommand,
+      lipoVerifyX86_64Command,
+      copyFrameworkDsymCommand,
+    ]);
 
-      await const ReleaseUnpackMacOS().build(environment..defines[kBuildMode] = 'release');
+    await const ReleaseUnpackMacOS().build(environment..defines[kBuildMode] = 'release');
 
-      expect(processManager, hasNoRemainingExpectations);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    expect(processManager, hasNoRemainingExpectations);
+  });
 
-  testUsingContext(
-    'Fails if framework dSYM found within framework but copy fails',
-    () async {
-      binary.createSync(recursive: true);
-      frameworkDsym.createSync(recursive: true);
-      final failedCopyFrameworkDsymCommand = FakeCommand(
-        command: <String>[
-          'rsync',
-          '-av',
-          '--delete',
-          '--filter',
-          '- .DS_Store/',
-          '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-          'Artifact.flutterMacOSFrameworkDsym.TargetPlatform.darwin.release',
-          environment.outputDir.path,
-        ],
-        exitCode: 1,
-      );
-      processManager.addCommands(<FakeCommand>[
-        releaseCopyFrameworkCommand,
-        chmodReleaseFrameworkCommand,
-        lipoInfoFatCommand,
-        lipoVerifyX86_64Command,
-        lipoExtractX86_64Command,
-        failedCopyFrameworkDsymCommand,
-      ]);
+  test('Fails if framework dSYM found within framework but copy fails', () async {
+    binary.createSync(recursive: true);
+    frameworkDsym.createSync(recursive: true);
+    final failedCopyFrameworkDsymCommand = FakeCommand(
+      command: <String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+        'Artifact.flutterMacOSFrameworkDsym.TargetPlatform.darwin.release',
+        environment.outputDir.path,
+      ],
+      exitCode: 1,
+    );
+    processManager.addCommands(<FakeCommand>[
+      releaseCopyFrameworkCommand,
+      chmodReleaseFrameworkCommand,
+      lipoInfoFatCommand,
+      lipoVerifyX86_64Command,
+      lipoExtractX86_64Command,
+      failedCopyFrameworkDsymCommand,
+    ]);
 
-      await expectLater(
-        const ReleaseUnpackMacOS().build(environment..defines[kBuildMode] = 'release'),
-        throwsA(
-          isException.having(
-            (Exception exception) => exception.toString(),
-            'description',
-            contains('Failed to copy framework dSYM'),
-          ),
+    await expectLater(
+      const ReleaseUnpackMacOS().build(environment..defines[kBuildMode] = 'release'),
+      throwsA(
+        isException.having(
+          (Exception exception) => exception.toString(),
+          'description',
+          contains('Failed to copy framework dSYM'),
         ),
-      );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+      ),
+    );
+  });
 
-  testUsingContext(
-    'debug macOS application fails if App.framework missing',
-    () async {
+  test('debug macOS application fails if App.framework missing', () async {
+    fileSystem
+        .directory(artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: BuildMode.debug))
+        .createSync();
+    final String inputKernel = fileSystem.path.join(environment.buildDir.path, 'app.dill');
+    fileSystem.file(inputKernel)
+      ..createSync(recursive: true)
+      ..writeAsStringSync('testing');
+
+    expect(() async => const DebugMacOSBundleFlutterAssets().build(environment), throwsException);
+  });
+
+  test('debug macOS application creates correctly structured framework', () async {
+    fileSystem
+        .directory(artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: BuildMode.debug))
+        .createSync();
+    fileSystem
+        .file(
+          artifacts.getArtifactPath(
+            Artifact.vmSnapshotData,
+            platform: TargetPlatform.darwin,
+            mode: BuildMode.debug,
+          ),
+        )
+        .createSync(recursive: true);
+    fileSystem
+        .file(
+          artifacts.getArtifactPath(
+            Artifact.isolateSnapshotData,
+            platform: TargetPlatform.darwin,
+            mode: BuildMode.debug,
+          ),
+        )
+        .createSync(recursive: true);
+    fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
+
+    final inputKernel = '${environment.buildDir.path}/app.dill';
+    fileSystem.file(inputKernel)
+      ..createSync(recursive: true)
+      ..writeAsStringSync('testing');
+    environment.buildDir.childFile('native_assets.json').createSync();
+
+    await const DebugMacOSBundleFlutterAssets().build(environment);
+
+    expect(
       fileSystem
-          .directory(
-            artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: BuildMode.debug),
-          )
-          .createSync();
-      final String inputKernel = fileSystem.path.join(environment.buildDir.path, 'app.dill');
-      fileSystem.file(inputKernel)
-        ..createSync(recursive: true)
-        ..writeAsStringSync('testing');
+          .file('App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin')
+          .readAsStringSync(),
+      'testing',
+    );
+    expect(
+      fileSystem.file('App.framework/Versions/A/Resources/Info.plist').readAsStringSync(),
+      contains('io.flutter.flutter.app'),
+    );
+    expect(
+      fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/vm_snapshot_data'),
+      exists,
+    );
+    expect(
+      fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
+      exists,
+    );
+  });
 
-      expect(() async => const DebugMacOSBundleFlutterAssets().build(environment), throwsException);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+  test('debug macOS application copies correct assets with flavor', () async {
+    fileSystem
+        .directory(artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: BuildMode.debug))
+        .createSync();
+    fileSystem
+        .file(
+          artifacts.getArtifactPath(
+            Artifact.vmSnapshotData,
+            platform: TargetPlatform.darwin,
+            mode: BuildMode.debug,
+          ),
+        )
+        .createSync(recursive: true);
+    fileSystem
+        .file(
+          artifacts.getArtifactPath(
+            Artifact.isolateSnapshotData,
+            platform: TargetPlatform.darwin,
+            mode: BuildMode.debug,
+          ),
+        )
+        .createSync(recursive: true);
+    fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
 
-  testUsingContext(
-    'debug macOS application creates correctly structured framework',
-    () async {
-      fileSystem
-          .directory(
-            artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: BuildMode.debug),
-          )
-          .createSync();
-      fileSystem
-          .file(
-            artifacts.getArtifactPath(
-              Artifact.vmSnapshotData,
-              platform: TargetPlatform.darwin,
-              mode: BuildMode.debug,
-            ),
-          )
-          .createSync(recursive: true);
-      fileSystem
-          .file(
-            artifacts.getArtifactPath(
-              Artifact.isolateSnapshotData,
-              platform: TargetPlatform.darwin,
-              mode: BuildMode.debug,
-            ),
-          )
-          .createSync(recursive: true);
-      fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
+    final inputKernel = '${environment.buildDir.path}/app.dill';
+    fileSystem.file(inputKernel)
+      ..createSync(recursive: true)
+      ..writeAsStringSync('testing');
+    environment.buildDir.childFile('native_assets.json').createSync();
 
-      final inputKernel = '${environment.buildDir.path}/app.dill';
-      fileSystem.file(inputKernel)
-        ..createSync(recursive: true)
-        ..writeAsStringSync('testing');
-      environment.buildDir.childFile('native_assets.json').createSync();
+    environment.defines[kXcodeConfiguration] = 'Debug-strawberry';
+    fileSystem.directory('/macos/Runner.xcodeproj').createSync(recursive: true);
 
-      await const DebugMacOSBundleFlutterAssets().build(environment);
-
-      expect(
-        fileSystem
-            .file('App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin')
-            .readAsStringSync(),
-        'testing',
-      );
-      expect(
-        fileSystem.file('App.framework/Versions/A/Resources/Info.plist').readAsStringSync(),
-        contains('io.flutter.flutter.app'),
-      );
-      expect(
-        fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/vm_snapshot_data'),
-        exists,
-      );
-      expect(
-        fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
-        exists,
-      );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
-
-  testUsingContext(
-    'debug macOS application copies correct assets with flavor',
-    () async {
-      fileSystem
-          .directory(
-            artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: BuildMode.debug),
-          )
-          .createSync();
-      fileSystem
-          .file(
-            artifacts.getArtifactPath(
-              Artifact.vmSnapshotData,
-              platform: TargetPlatform.darwin,
-              mode: BuildMode.debug,
-            ),
-          )
-          .createSync(recursive: true);
-      fileSystem
-          .file(
-            artifacts.getArtifactPath(
-              Artifact.isolateSnapshotData,
-              platform: TargetPlatform.darwin,
-              mode: BuildMode.debug,
-            ),
-          )
-          .createSync(recursive: true);
-      fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
-
-      final inputKernel = '${environment.buildDir.path}/app.dill';
-      fileSystem.file(inputKernel)
-        ..createSync(recursive: true)
-        ..writeAsStringSync('testing');
-      environment.buildDir.childFile('native_assets.json').createSync();
-
-      environment.defines[kXcodeConfiguration] = 'Debug-strawberry';
-      fileSystem.directory('/macos/Runner.xcodeproj').createSync(recursive: true);
-
-      fileSystem.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync('''
+    fileSystem.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync('''
   name: example
   flutter:
     assets:
@@ -551,393 +501,324 @@ void main() {
           - strawberry
   ''');
 
-      fileSystem.file('assets/common/image.png').createSync(recursive: true);
-      fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
-      fileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
-      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
+    fileSystem.file('assets/common/image.png').createSync(recursive: true);
+    fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
+    fileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
+    writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
-      await const DebugMacOSBundleFlutterAssets().build(environment);
-      final Directory frameworkDirectory = environment.outputDir.childDirectory(
-        '/App.framework/Versions/A/Resources/',
-      );
-      expect(
-        fileSystem.file('${frameworkDirectory.path}/flutter_assets/assets/common/image.png'),
-        exists,
-      );
-      expect(
-        fileSystem.file('${frameworkDirectory.path}/flutter_assets/assets/vanilla/ice-cream.png'),
-        isNot(exists),
-      );
-      expect(
-        fileSystem.file(
-          '${frameworkDirectory.path}/flutter_assets/assets/strawberry/ice-cream.png',
-        ),
-        exists,
-      );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry']),
-    },
-  );
+    await const DebugMacOSBundleFlutterAssets().build(environment);
+    final Directory frameworkDirectory = environment.outputDir.childDirectory(
+      '/App.framework/Versions/A/Resources/',
+    );
+    expect(
+      fileSystem.file('${frameworkDirectory.path}/flutter_assets/assets/common/image.png'),
+      exists,
+    );
+    expect(
+      fileSystem.file('${frameworkDirectory.path}/flutter_assets/assets/vanilla/ice-cream.png'),
+      isNot(exists),
+    );
+    expect(
+      fileSystem.file('${frameworkDirectory.path}/flutter_assets/assets/strawberry/ice-cream.png'),
+      exists,
+    );
+  });
 
-  testUsingContext(
-    'release/profile macOS application has no blob or precompiled runtime',
-    () async {
-      fileSystem
-          .file('bin/cache/artifacts/engine/darwin-x64/vm_isolate_snapshot.bin')
-          .createSync(recursive: true);
-      fileSystem
-          .file('bin/cache/artifacts/engine/darwin-x64/isolate_snapshot.bin')
-          .createSync(recursive: true);
-      fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
-      fileSystem.file('${environment.buildDir.path}/native_assets.json').createSync();
+  test('release/profile macOS application has no blob or precompiled runtime', () async {
+    fileSystem
+        .file('bin/cache/artifacts/engine/darwin-x64/vm_isolate_snapshot.bin')
+        .createSync(recursive: true);
+    fileSystem
+        .file('bin/cache/artifacts/engine/darwin-x64/isolate_snapshot.bin')
+        .createSync(recursive: true);
+    fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
+    fileSystem.file('${environment.buildDir.path}/native_assets.json').createSync();
 
-      await const ProfileMacOSBundleFlutterAssets().build(
-        environment..defines[kBuildMode] = 'profile',
-      );
+    await const ProfileMacOSBundleFlutterAssets().build(
+      environment..defines[kBuildMode] = 'profile',
+    );
 
-      expect(
-        fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin'),
-        isNot(exists),
-      );
-      expect(
-        fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/vm_snapshot_data'),
-        isNot(exists),
-      );
-      expect(
-        fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
-        isNot(exists),
-      );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    expect(
+      fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin'),
+      isNot(exists),
+    );
+    expect(
+      fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/vm_snapshot_data'),
+      isNot(exists),
+    );
+    expect(
+      fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
+      isNot(exists),
+    );
+  });
 
-  testUsingContext(
-    'release macOS application creates App.framework.dSYM',
-    () async {
-      fileSystem
-          .file('bin/cache/artifacts/engine/darwin-x64/vm_isolate_snapshot.bin')
-          .createSync(recursive: true);
-      fileSystem
-          .file('bin/cache/artifacts/engine/darwin-x64/isolate_snapshot.bin')
-          .createSync(recursive: true);
-      fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
-      fileSystem
-          .file('${environment.buildDir.path}/App.framework.dSYM/Contents/Resources/DWARF/App')
-          .createSync(recursive: true);
-      fileSystem.file('${environment.buildDir.path}/native_assets.json').createSync();
+  test('release macOS application creates App.framework.dSYM', () async {
+    fileSystem
+        .file('bin/cache/artifacts/engine/darwin-x64/vm_isolate_snapshot.bin')
+        .createSync(recursive: true);
+    fileSystem
+        .file('bin/cache/artifacts/engine/darwin-x64/isolate_snapshot.bin')
+        .createSync(recursive: true);
+    fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
+    fileSystem
+        .file('${environment.buildDir.path}/App.framework.dSYM/Contents/Resources/DWARF/App')
+        .createSync(recursive: true);
+    fileSystem.file('${environment.buildDir.path}/native_assets.json').createSync();
 
-      await const ReleaseMacOSBundleFlutterAssets().build(
-        environment..defines[kBuildMode] = 'release',
-      );
+    await const ReleaseMacOSBundleFlutterAssets().build(
+      environment..defines[kBuildMode] = 'release',
+    );
 
-      expect(fileSystem.file('App.framework.dSYM/Contents/Resources/DWARF/App'), exists);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    expect(fileSystem.file('App.framework.dSYM/Contents/Resources/DWARF/App'), exists);
+  });
 
-  testUsingContext(
-    'release/profile macOS application updates when App.framework updates',
-    () async {
-      fileSystem
-          .file('bin/cache/artifacts/engine/darwin-x64/vm_isolate_snapshot.bin')
-          .createSync(recursive: true);
-      fileSystem
-          .file('bin/cache/artifacts/engine/darwin-x64/isolate_snapshot.bin')
-          .createSync(recursive: true);
-      final File inputFramework =
-          fileSystem.file(fileSystem.path.join(environment.buildDir.path, 'App.framework', 'App'))
-            ..createSync(recursive: true)
-            ..writeAsStringSync('ABC');
-      fileSystem.file(environment.buildDir.childFile('native_assets.json')).createSync();
+  test('release/profile macOS application updates when App.framework updates', () async {
+    fileSystem
+        .file('bin/cache/artifacts/engine/darwin-x64/vm_isolate_snapshot.bin')
+        .createSync(recursive: true);
+    fileSystem
+        .file('bin/cache/artifacts/engine/darwin-x64/isolate_snapshot.bin')
+        .createSync(recursive: true);
+    final File inputFramework =
+        fileSystem.file(fileSystem.path.join(environment.buildDir.path, 'App.framework', 'App'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('ABC');
+    fileSystem.file(environment.buildDir.childFile('native_assets.json')).createSync();
 
-      await const ProfileMacOSBundleFlutterAssets().build(
-        environment..defines[kBuildMode] = 'profile',
-      );
-      final File outputFramework = fileSystem.file(
-        fileSystem.path.join(environment.outputDir.path, 'App.framework', 'App'),
-      );
+    await const ProfileMacOSBundleFlutterAssets().build(
+      environment..defines[kBuildMode] = 'profile',
+    );
+    final File outputFramework = fileSystem.file(
+      fileSystem.path.join(environment.outputDir.path, 'App.framework', 'App'),
+    );
 
-      expect(outputFramework.readAsStringSync(), 'ABC');
+    expect(outputFramework.readAsStringSync(), 'ABC');
 
-      inputFramework.writeAsStringSync('DEF');
-      await const ProfileMacOSBundleFlutterAssets().build(
-        environment..defines[kBuildMode] = 'profile',
-      );
+    inputFramework.writeAsStringSync('DEF');
+    await const ProfileMacOSBundleFlutterAssets().build(
+      environment..defines[kBuildMode] = 'profile',
+    );
 
-      expect(outputFramework.readAsStringSync(), 'DEF');
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    expect(outputFramework.readAsStringSync(), 'DEF');
+  });
 
-  testUsingContext(
-    'ReleaseMacOSBundleFlutterAssets sends archive success event',
-    () async {
-      environment.defines[kBuildMode] = 'release';
-      environment.defines[kXcodeAction] = 'install';
+  test('ReleaseMacOSBundleFlutterAssets sends archive success event', () async {
+    environment.defines[kBuildMode] = 'release';
+    environment.defines[kXcodeAction] = 'install';
 
-      fileSystem
-          .file('bin/cache/artifacts/engine/darwin-x64/vm_isolate_snapshot.bin')
-          .createSync(recursive: true);
-      fileSystem
-          .file('bin/cache/artifacts/engine/darwin-x64/isolate_snapshot.bin')
-          .createSync(recursive: true);
-      fileSystem
-          .file(fileSystem.path.join(environment.buildDir.path, 'App.framework', 'App'))
-          .createSync(recursive: true);
-      fileSystem.file(environment.buildDir.childFile('native_assets.json')).createSync();
+    fileSystem
+        .file('bin/cache/artifacts/engine/darwin-x64/vm_isolate_snapshot.bin')
+        .createSync(recursive: true);
+    fileSystem
+        .file('bin/cache/artifacts/engine/darwin-x64/isolate_snapshot.bin')
+        .createSync(recursive: true);
+    fileSystem
+        .file(fileSystem.path.join(environment.buildDir.path, 'App.framework', 'App'))
+        .createSync(recursive: true);
+    fileSystem.file(environment.buildDir.childFile('native_assets.json')).createSync();
 
-      await const ReleaseMacOSBundleFlutterAssets().build(environment);
-      expect(
-        fakeAnalytics.sentEvents,
-        contains(
-          Event.appleUsageEvent(
-            workflow: 'assemble',
-            parameter: 'macos-archive',
-            result: 'success',
-          ),
-        ),
-      );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    await const ReleaseMacOSBundleFlutterAssets().build(environment);
+    expect(
+      fakeAnalytics.sentEvents,
+      contains(
+        Event.appleUsageEvent(workflow: 'assemble', parameter: 'macos-archive', result: 'success'),
+      ),
+    );
+  });
 
-  testUsingContext(
-    'ReleaseMacOSBundleFlutterAssets sends archive fail event',
-    () async {
-      environment.defines[kBuildMode] = 'release';
-      environment.defines[kXcodeAction] = 'install';
+  test('ReleaseMacOSBundleFlutterAssets sends archive fail event', () async {
+    environment.defines[kBuildMode] = 'release';
+    environment.defines[kXcodeAction] = 'install';
 
-      // Throws because the project files are not set up.
-      await expectLater(
-        () => const ReleaseMacOSBundleFlutterAssets().build(environment),
-        throwsA(const TypeMatcher<FileSystemException>()),
-      );
-      expect(
-        fakeAnalytics.sentEvents,
-        contains(
-          Event.appleUsageEvent(workflow: 'assemble', parameter: 'macos-archive', result: 'fail'),
-        ),
-      );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    // Throws because the project files are not set up.
+    await expectLater(
+      () => const ReleaseMacOSBundleFlutterAssets().build(environment),
+      throwsA(const TypeMatcher<FileSystemException>()),
+    );
+    expect(
+      fakeAnalytics.sentEvents,
+      contains(
+        Event.appleUsageEvent(workflow: 'assemble', parameter: 'macos-archive', result: 'fail'),
+      ),
+    );
+  });
 
-  testUsingContext(
-    'DebugMacOSFramework creates expected binary with arm64 only arch',
-    () async {
-      environment.defines[kDarwinArchs] = 'arm64';
-      processManager.addCommand(
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'clang',
-            '-x',
-            'c',
-            environment.buildDir.childFile('debug_app.cc').path,
-            '-arch',
-            'arm64',
-            '-dynamiclib',
-            '-Xlinker',
-            '-rpath',
-            '-Xlinker',
-            '@executable_path/Frameworks',
-            '-Xlinker',
-            '-rpath',
-            '-Xlinker',
-            '@loader_path/Frameworks',
-            '-fapplication-extension',
-            '-install_name',
-            '@rpath/App.framework/App',
-            '-o',
-            environment.buildDir.childDirectory('App.framework').childFile('App').path,
-          ],
-        ),
-      );
+  test('DebugMacOSFramework creates expected binary with arm64 only arch', () async {
+    environment.defines[kDarwinArchs] = 'arm64';
+    processManager.addCommand(
+      FakeCommand(
+        command: <String>[
+          'xcrun',
+          'clang',
+          '-x',
+          'c',
+          environment.buildDir.childFile('debug_app.cc').path,
+          '-arch',
+          'arm64',
+          '-dynamiclib',
+          '-Xlinker',
+          '-rpath',
+          '-Xlinker',
+          '@executable_path/Frameworks',
+          '-Xlinker',
+          '-rpath',
+          '-Xlinker',
+          '@loader_path/Frameworks',
+          '-fapplication-extension',
+          '-install_name',
+          '@rpath/App.framework/App',
+          '-o',
+          environment.buildDir.childDirectory('App.framework').childFile('App').path,
+        ],
+      ),
+    );
 
-      await const DebugMacOSFramework().build(environment);
-      expect(processManager, hasNoRemainingExpectations);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    await const DebugMacOSFramework().build(environment);
+    expect(processManager, hasNoRemainingExpectations);
+  });
 
-  testUsingContext(
-    'DebugMacOSFramework creates universal binary',
-    () async {
-      environment.defines[kDarwinArchs] = 'arm64 x86_64';
-      processManager.addCommand(
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'clang',
-            '-x',
-            'c',
-            environment.buildDir.childFile('debug_app.cc').path,
-            '-arch',
-            'arm64',
-            '-arch',
-            'x86_64',
-            '-dynamiclib',
-            '-Xlinker',
-            '-rpath',
-            '-Xlinker',
-            '@executable_path/Frameworks',
-            '-Xlinker',
-            '-rpath',
-            '-Xlinker',
-            '@loader_path/Frameworks',
-            '-fapplication-extension',
-            '-install_name',
-            '@rpath/App.framework/App',
-            '-o',
-            environment.buildDir.childDirectory('App.framework').childFile('App').path,
-          ],
-        ),
-      );
+  test('DebugMacOSFramework creates universal binary', () async {
+    environment.defines[kDarwinArchs] = 'arm64 x86_64';
+    processManager.addCommand(
+      FakeCommand(
+        command: <String>[
+          'xcrun',
+          'clang',
+          '-x',
+          'c',
+          environment.buildDir.childFile('debug_app.cc').path,
+          '-arch',
+          'arm64',
+          '-arch',
+          'x86_64',
+          '-dynamiclib',
+          '-Xlinker',
+          '-rpath',
+          '-Xlinker',
+          '@executable_path/Frameworks',
+          '-Xlinker',
+          '-rpath',
+          '-Xlinker',
+          '@loader_path/Frameworks',
+          '-fapplication-extension',
+          '-install_name',
+          '@rpath/App.framework/App',
+          '-o',
+          environment.buildDir.childDirectory('App.framework').childFile('App').path,
+        ],
+      ),
+    );
 
-      await const DebugMacOSFramework().build(environment);
-      expect(processManager, hasNoRemainingExpectations);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    await const DebugMacOSFramework().build(environment);
+    expect(processManager, hasNoRemainingExpectations);
+  });
 
-  testUsingContext(
-    'CompileMacOSFramework creates universal binary',
-    () async {
-      environment.defines[kDarwinArchs] = 'arm64 x86_64';
-      environment.defines[kBuildMode] = 'release';
+  test('CompileMacOSFramework creates universal binary', () async {
+    environment.defines[kDarwinArchs] = 'arm64 x86_64';
+    environment.defines[kBuildMode] = 'release';
 
-      // Input dSYMs need to exist for `lipo` to combine them
-      environment.buildDir
-          .childFile('arm64/App.framework.dSYM/Contents/Resources/DWARF/App')
-          .createSync(recursive: true);
-      environment.buildDir
-          .childFile('x86_64/App.framework.dSYM/Contents/Resources/DWARF/App')
-          .createSync(recursive: true);
+    // Input dSYMs need to exist for `lipo` to combine them
+    environment.buildDir
+        .childFile('arm64/App.framework.dSYM/Contents/Resources/DWARF/App')
+        .createSync(recursive: true);
+    environment.buildDir
+        .childFile('x86_64/App.framework.dSYM/Contents/Resources/DWARF/App')
+        .createSync(recursive: true);
 
-      processManager.addCommands(<FakeCommand>[
-        FakeCommand(
-          command: <String>[
-            'Artifact.genSnapshotArm64.TargetPlatform.darwin.release',
-            '--deterministic',
-            '--snapshot_kind=app-aot-macho-dylib',
-            '--macho=${environment.buildDir.childFile('arm64/App.framework/App').path}',
-            '--macho-object=${environment.buildDir.childFile('arm64/app.o').path}',
-            '--macho-min-os-version=12.0',
-            '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
-            '--macho-install-name=@rpath/App.framework/App',
-            environment.buildDir.childFile('app.dill').path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'Artifact.genSnapshotX64.TargetPlatform.darwin.release',
-            '--deterministic',
-            '--snapshot_kind=app-aot-macho-dylib',
-            '--macho=${environment.buildDir.childFile('x86_64/App.framework/App').path}',
-            '--macho-object=${environment.buildDir.childFile('x86_64/app.o').path}',
-            '--macho-min-os-version=12.0',
-            '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
-            '--macho-install-name=@rpath/App.framework/App',
-            environment.buildDir.childFile('app.dill').path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'dsymutil',
-            '-o',
-            environment.buildDir.childFile('arm64/App.framework.dSYM').path,
-            environment.buildDir.childFile('arm64/App.framework/App').path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'dsymutil',
-            '-o',
-            environment.buildDir.childFile('x86_64/App.framework.dSYM').path,
-            environment.buildDir.childFile('x86_64/App.framework/App').path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'strip',
-            '-x',
-            environment.buildDir.childFile('arm64/App.framework/App').path,
-            '-o',
-            environment.buildDir.childFile('arm64/App.framework/App').path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'strip',
-            '-x',
-            environment.buildDir.childFile('x86_64/App.framework/App').path,
-            '-o',
-            environment.buildDir.childFile('x86_64/App.framework/App').path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'lipo',
-            environment.buildDir.childFile('arm64/App.framework/App').path,
-            environment.buildDir.childFile('x86_64/App.framework/App').path,
-            '-create',
-            '-output',
-            environment.buildDir.childFile('App.framework/App').path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'lipo',
-            environment.buildDir
-                .childFile('arm64/App.framework.dSYM/Contents/Resources/DWARF/App')
-                .path,
-            environment.buildDir
-                .childFile('x86_64/App.framework.dSYM/Contents/Resources/DWARF/App')
-                .path,
-            '-create',
-            '-output',
-            environment.buildDir.childFile('App.framework.dSYM/Contents/Resources/DWARF/App').path,
-          ],
-        ),
-      ]);
+    processManager.addCommands(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          'Artifact.genSnapshotArm64.TargetPlatform.darwin.release',
+          '--deterministic',
+          '--snapshot_kind=app-aot-macho-dylib',
+          '--macho=${environment.buildDir.childFile('arm64/App.framework/App').path}',
+          '--macho-object=${environment.buildDir.childFile('arm64/app.o').path}',
+          '--macho-min-os-version=12.0',
+          '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
+          '--macho-install-name=@rpath/App.framework/App',
+          environment.buildDir.childFile('app.dill').path,
+        ],
+      ),
+      FakeCommand(
+        command: <String>[
+          'Artifact.genSnapshotX64.TargetPlatform.darwin.release',
+          '--deterministic',
+          '--snapshot_kind=app-aot-macho-dylib',
+          '--macho=${environment.buildDir.childFile('x86_64/App.framework/App').path}',
+          '--macho-object=${environment.buildDir.childFile('x86_64/app.o').path}',
+          '--macho-min-os-version=12.0',
+          '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
+          '--macho-install-name=@rpath/App.framework/App',
+          environment.buildDir.childFile('app.dill').path,
+        ],
+      ),
+      FakeCommand(
+        command: <String>[
+          'xcrun',
+          'dsymutil',
+          '-o',
+          environment.buildDir.childFile('arm64/App.framework.dSYM').path,
+          environment.buildDir.childFile('arm64/App.framework/App').path,
+        ],
+      ),
+      FakeCommand(
+        command: <String>[
+          'xcrun',
+          'dsymutil',
+          '-o',
+          environment.buildDir.childFile('x86_64/App.framework.dSYM').path,
+          environment.buildDir.childFile('x86_64/App.framework/App').path,
+        ],
+      ),
+      FakeCommand(
+        command: <String>[
+          'xcrun',
+          'strip',
+          '-x',
+          environment.buildDir.childFile('arm64/App.framework/App').path,
+          '-o',
+          environment.buildDir.childFile('arm64/App.framework/App').path,
+        ],
+      ),
+      FakeCommand(
+        command: <String>[
+          'xcrun',
+          'strip',
+          '-x',
+          environment.buildDir.childFile('x86_64/App.framework/App').path,
+          '-o',
+          environment.buildDir.childFile('x86_64/App.framework/App').path,
+        ],
+      ),
+      FakeCommand(
+        command: <String>[
+          'lipo',
+          environment.buildDir.childFile('arm64/App.framework/App').path,
+          environment.buildDir.childFile('x86_64/App.framework/App').path,
+          '-create',
+          '-output',
+          environment.buildDir.childFile('App.framework/App').path,
+        ],
+      ),
+      FakeCommand(
+        command: <String>[
+          'lipo',
+          environment.buildDir
+              .childFile('arm64/App.framework.dSYM/Contents/Resources/DWARF/App')
+              .path,
+          environment.buildDir
+              .childFile('x86_64/App.framework.dSYM/Contents/Resources/DWARF/App')
+              .path,
+          '-create',
+          '-output',
+          environment.buildDir.childFile('App.framework.dSYM/Contents/Resources/DWARF/App').path,
+        ],
+      ),
+    ]);
 
-      await const CompileMacOSFramework().build(environment);
-      expect(processManager, hasNoRemainingExpectations);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    await const CompileMacOSFramework().build(environment);
+    expect(processManager, hasNoRemainingExpectations);
+  });
 
   group('FlutterMacOS output', () {
     late MemoryFileSystem testFileSystem;
@@ -950,17 +831,10 @@ void main() {
           .directory('macos/Flutter/ephemeral/Packages/.packages/FlutterFramework')
           .createSync(recursive: true);
     });
-    testUsingContext(
-      'included when not using SwiftPM',
-      () async {
-        const Target target = ReleaseUnpackMacOS();
-        expect(target.outputs.contains(kFlutterMacOSFrameworkBinarySource), isTrue);
-      },
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(),
-        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
-      },
-    );
+    test('included when not using SwiftPM', () async {
+      const Target target = ReleaseUnpackMacOS();
+      expect(target.outputs.contains(kFlutterMacOSFrameworkBinarySource), isTrue);
+    });
   });
 }
 

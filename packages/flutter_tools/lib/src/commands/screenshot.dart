@@ -62,9 +62,6 @@ class ScreenshotCommand extends FlutterCommand {
   FileSystem get fs => toolContext.fs;
 
   @override
-  ToolContext get toolContext => super.toolContext!;
-
-  @override
   String get name => 'screenshot';
 
   @override
@@ -167,7 +164,12 @@ class ScreenshotCommand extends FlutterCommand {
       flutterVersion: flutterVersion,
       logger: logger,
     );
-    final vm_service.Response? skp = await vmService.screenshotSkp();
+    final vm_service.Response? skp;
+    try {
+      skp = await vmService.screenshotSkp();
+    } on vm_service.RPCError catch (error) {
+      throwToolExit('The Skia picture request failed: ${error.message}');
+    }
     if (skp == null) {
       logger.printError(
         'The Skia picture request failed, probably because the device was '

@@ -215,175 +215,172 @@ void main() {
     expect(intentFilterCheck['hasBrowsableCategory'], hasBrowsableCategory);
   }
 
-  testWithoutContext(
-    'gradle task outputs<mode>AppLinkSettings works when a project has app links',
-    () async {
-      // Create a new flutter project.
-      ProcessResult result = await processManager.run(<String>[
-        flutterBin,
-        'create',
-        tempDir.path,
-        '--project-name=testapp',
-      ], workingDirectory: tempDir.path);
-      printOnFailure('Created testapp in $tempDir');
-      expect(result, const ProcessResultMatcher());
-      // Adds intent filters for app links
-      final String androidManifestPath = fileSystem.path.join(
-        tempDir.path,
-        'android',
-        'app',
-        'src',
-        'main',
-        'AndroidManifest.xml',
-      );
-      final androidManifestFile = io.File(androidManifestPath);
-      final androidManifest = XmlDocument.parse(androidManifestFile.readAsStringSync());
-      final XmlElement activity = androidManifest.findAllElements('activity').first;
-      activity.children.add(deeplinkFlagMetaData);
-      activity.children.add(pureHttpIntentFilter);
-      activity.children.add(nonHttpIntentFilter);
-      activity.children.add(hybridIntentFilter);
-      activity.children.add(nonAutoVerifyIntentFilter);
-      activity.children.add(nonActionIntentFilter);
-      activity.children.add(nonDefaultCategoryIntentFilter);
-      activity.children.add(nonBrowsableCategoryIntentFilter);
-      activity.children.add(nonSchemeCategoryIntentFilter);
-      activity.children.add(nonHostCategoryIntentFilter);
-      androidManifestFile.writeAsStringSync(androidManifest.toString(), flush: true);
+  test('gradle task outputs<mode>AppLinkSettings works when a project has app links', () async {
+    // Create a new flutter project.
+    ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      'create',
+      tempDir.path,
+      '--project-name=testapp',
+    ], workingDirectory: tempDir.path);
+    printOnFailure('Created testapp in $tempDir');
+    expect(result, const ProcessResultMatcher());
+    // Adds intent filters for app links
+    final String androidManifestPath = fileSystem.path.join(
+      tempDir.path,
+      'android',
+      'app',
+      'src',
+      'main',
+      'AndroidManifest.xml',
+    );
+    final androidManifestFile = io.File(androidManifestPath);
+    final androidManifest = XmlDocument.parse(androidManifestFile.readAsStringSync());
+    final XmlElement activity = androidManifest.findAllElements('activity').first;
+    activity.children.add(deeplinkFlagMetaData);
+    activity.children.add(pureHttpIntentFilter);
+    activity.children.add(nonHttpIntentFilter);
+    activity.children.add(hybridIntentFilter);
+    activity.children.add(nonAutoVerifyIntentFilter);
+    activity.children.add(nonActionIntentFilter);
+    activity.children.add(nonDefaultCategoryIntentFilter);
+    activity.children.add(nonBrowsableCategoryIntentFilter);
+    activity.children.add(nonSchemeCategoryIntentFilter);
+    activity.children.add(nonHostCategoryIntentFilter);
+    androidManifestFile.writeAsStringSync(androidManifest.toString(), flush: true);
 
-      // Ensure that gradle files exists from templates.
-      result = await processManager.run(<String>[
-        flutterBin,
-        'build',
-        'apk',
-        '--config-only',
-      ], workingDirectory: tempDir.path);
-      expect(result, const ProcessResultMatcher());
+    // Ensure that gradle files exists from templates.
+    result = await processManager.run(<String>[
+      flutterBin,
+      'build',
+      'apk',
+      '--config-only',
+    ], workingDirectory: tempDir.path);
+    expect(result, const ProcessResultMatcher());
 
-      final Directory androidApp = tempDir.childDirectory('android');
-      final io.File fileDump = tempDir
-          .childDirectory('build')
-          .childDirectory('app')
-          .childFile('app-link-settings-debug.json');
-      result = await processManager.run(<String>[
-        '.${platform.pathSeparator}${getGradlewFileName(platform)}',
-        ...getLocalEngineArguments(),
-        '-q', // quiet output.
-        '-PoutputPath=${fileDump.path}',
-        'outputDebugAppLinkSettings',
-      ], workingDirectory: androidApp.path);
+    final Directory androidApp = tempDir.childDirectory('android');
+    final io.File fileDump = tempDir
+        .childDirectory('build')
+        .childDirectory('app')
+        .childFile('app-link-settings-debug.json');
+    result = await processManager.run(<String>[
+      '.${platform.pathSeparator}${getGradlewFileName(platform)}',
+      ...getLocalEngineArguments(),
+      '-q', // quiet output.
+      '-PoutputPath=${fileDump.path}',
+      'outputDebugAppLinkSettings',
+    ], workingDirectory: androidApp.path);
 
-      expect(result, const ProcessResultMatcher());
-      expect(fileDump.existsSync(), true);
-      final json = jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
-      expect(json['applicationId'], 'com.example.testapp');
-      expect(json['deeplinkingFlagEnabled'], true);
-      final deeplinks = json['deeplinks']! as List<dynamic>;
-      expect(deeplinks.length, 10);
-      testDeeplink(
-        deeplinks[0],
-        'http',
-        'pure-http.com',
-        '.*',
-        hasAutoVerify: true,
-        hasActionView: true,
-        hasDefaultCategory: true,
-        hasBrowsableCategory: true,
-      );
-      testDeeplink(
-        deeplinks[1],
-        'custom',
-        'custom.com',
-        '.*',
-        hasAutoVerify: true,
-        hasActionView: true,
-        hasDefaultCategory: true,
-        hasBrowsableCategory: true,
-      );
-      testDeeplink(
-        deeplinks[2],
-        'custom',
-        'hybrid.com',
-        '.*',
-        hasAutoVerify: true,
-        hasActionView: true,
-        hasDefaultCategory: true,
-        hasBrowsableCategory: true,
-      );
-      testDeeplink(
-        deeplinks[3],
-        'http',
-        'hybrid.com',
-        '.*',
-        hasAutoVerify: true,
-        hasActionView: true,
-        hasDefaultCategory: true,
-        hasBrowsableCategory: true,
-      );
-      testDeeplink(
-        deeplinks[4],
-        'http',
-        'non-auto-verify.com',
-        '.*',
-        hasAutoVerify: false,
-        hasActionView: true,
-        hasDefaultCategory: true,
-        hasBrowsableCategory: true,
-      );
-      testDeeplink(
-        deeplinks[5],
-        'http',
-        'non-action.com',
-        '.*',
-        hasAutoVerify: true,
-        hasActionView: false,
-        hasDefaultCategory: true,
-        hasBrowsableCategory: true,
-      );
-      testDeeplink(
-        deeplinks[6],
-        'http',
-        'non-default-category.com',
-        '.*',
-        hasAutoVerify: true,
-        hasActionView: true,
-        hasDefaultCategory: false,
-        hasBrowsableCategory: true,
-      );
-      testDeeplink(
-        deeplinks[7],
-        'http',
-        'non-browsable-category.com',
-        '.*',
-        hasAutoVerify: true,
-        hasActionView: true,
-        hasDefaultCategory: true,
-        hasBrowsableCategory: false,
-      );
-      testDeeplink(
-        deeplinks[8],
-        null,
-        'non-browsable-category.com',
-        '.*',
-        hasAutoVerify: true,
-        hasActionView: true,
-        hasDefaultCategory: true,
-        hasBrowsableCategory: true,
-      );
-      testDeeplink(
-        deeplinks[9],
-        'http',
-        null,
-        '/path1',
-        hasAutoVerify: true,
-        hasActionView: true,
-        hasDefaultCategory: true,
-        hasBrowsableCategory: true,
-      );
-    },
-  );
+    expect(result, const ProcessResultMatcher());
+    expect(fileDump.existsSync(), true);
+    final json = jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
+    expect(json['applicationId'], 'com.example.testapp');
+    expect(json['deeplinkingFlagEnabled'], true);
+    final deeplinks = json['deeplinks']! as List<dynamic>;
+    expect(deeplinks.length, 10);
+    testDeeplink(
+      deeplinks[0],
+      'http',
+      'pure-http.com',
+      '.*',
+      hasAutoVerify: true,
+      hasActionView: true,
+      hasDefaultCategory: true,
+      hasBrowsableCategory: true,
+    );
+    testDeeplink(
+      deeplinks[1],
+      'custom',
+      'custom.com',
+      '.*',
+      hasAutoVerify: true,
+      hasActionView: true,
+      hasDefaultCategory: true,
+      hasBrowsableCategory: true,
+    );
+    testDeeplink(
+      deeplinks[2],
+      'custom',
+      'hybrid.com',
+      '.*',
+      hasAutoVerify: true,
+      hasActionView: true,
+      hasDefaultCategory: true,
+      hasBrowsableCategory: true,
+    );
+    testDeeplink(
+      deeplinks[3],
+      'http',
+      'hybrid.com',
+      '.*',
+      hasAutoVerify: true,
+      hasActionView: true,
+      hasDefaultCategory: true,
+      hasBrowsableCategory: true,
+    );
+    testDeeplink(
+      deeplinks[4],
+      'http',
+      'non-auto-verify.com',
+      '.*',
+      hasAutoVerify: false,
+      hasActionView: true,
+      hasDefaultCategory: true,
+      hasBrowsableCategory: true,
+    );
+    testDeeplink(
+      deeplinks[5],
+      'http',
+      'non-action.com',
+      '.*',
+      hasAutoVerify: true,
+      hasActionView: false,
+      hasDefaultCategory: true,
+      hasBrowsableCategory: true,
+    );
+    testDeeplink(
+      deeplinks[6],
+      'http',
+      'non-default-category.com',
+      '.*',
+      hasAutoVerify: true,
+      hasActionView: true,
+      hasDefaultCategory: false,
+      hasBrowsableCategory: true,
+    );
+    testDeeplink(
+      deeplinks[7],
+      'http',
+      'non-browsable-category.com',
+      '.*',
+      hasAutoVerify: true,
+      hasActionView: true,
+      hasDefaultCategory: true,
+      hasBrowsableCategory: false,
+    );
+    testDeeplink(
+      deeplinks[8],
+      null,
+      'non-browsable-category.com',
+      '.*',
+      hasAutoVerify: true,
+      hasActionView: true,
+      hasDefaultCategory: true,
+      hasBrowsableCategory: true,
+    );
+    testDeeplink(
+      deeplinks[9],
+      'http',
+      null,
+      '/path1',
+      hasAutoVerify: true,
+      hasActionView: true,
+      hasDefaultCategory: true,
+      hasBrowsableCategory: true,
+    );
+  });
 
-  testWithoutContext('gradle task outputs<mode>AppLinkSettings works when a project does not have app link and the flutter_deeplinking_enabled flag', () async {
+  test('gradle task outputs<mode>AppLinkSettings works when a project does not have app link and the flutter_deeplinking_enabled flag', () async {
     // Create a new flutter project.
     ProcessResult result = await processManager.run(<String>[
       flutterBin,
@@ -424,62 +421,59 @@ void main() {
     expect(deeplinks.length, 0);
   });
 
-  testWithoutContext(
-    'gradle task outputs<mode>AppLinkSettings uses resolved application ID',
-    () async {
-      ProcessResult result = await processManager.run(<String>[
-        flutterBin,
-        'create',
-        tempDir.path,
-        '--project-name=testapp',
-      ], workingDirectory: tempDir.path);
-      expect(result, const ProcessResultMatcher());
+  test('gradle task outputs<mode>AppLinkSettings uses resolved application ID', () async {
+    ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      'create',
+      tempDir.path,
+      '--project-name=testapp',
+    ], workingDirectory: tempDir.path);
+    expect(result, const ProcessResultMatcher());
 
-      final File buildGradle = tempDir
-          .childDirectory('android')
-          .childDirectory('app')
-          .childFile('build.gradle.kts');
-      buildGradle.writeAsStringSync(
-        buildGradle.readAsStringSync().replaceFirst(
-          'applicationId = "com.example.testapp"',
-          'applicationId = System.getenv("TEST_APPLICATION_ID") ?: "com.example.testapp"',
-        ),
-      );
+    final File buildGradle = tempDir
+        .childDirectory('android')
+        .childDirectory('app')
+        .childFile('build.gradle.kts');
+    buildGradle.writeAsStringSync(
+      buildGradle.readAsStringSync().replaceFirst(
+        'applicationId = "com.example.testapp"',
+        'applicationId = System.getenv("TEST_APPLICATION_ID") ?: "com.example.testapp"',
+      ),
+    );
 
-      // Ensure that gradle files exists from templates.
-      result = await processManager.run(<String>[
-        flutterBin,
-        'build',
-        'apk',
-        '--config-only',
-      ], workingDirectory: tempDir.path);
-      expect(result, const ProcessResultMatcher());
+    // Ensure that gradle files exists from templates.
+    result = await processManager.run(<String>[
+      flutterBin,
+      'build',
+      'apk',
+      '--config-only',
+    ], workingDirectory: tempDir.path);
+    expect(result, const ProcessResultMatcher());
 
-      final Directory androidApp = tempDir.childDirectory('android');
-      final io.File fileDump = tempDir
-          .childDirectory('build')
-          .childDirectory('app')
-          .childFile('app-link-settings-release.json');
-      result = await processManager.run(
-        <String>[
-          '.${platform.pathSeparator}${getGradlewFileName(platform)}',
-          ...getLocalEngineArguments(),
-          '-q', // quiet output.
-          '-PoutputPath=${fileDump.path}',
-          'outputReleaseAppLinkSettings',
-        ],
-        workingDirectory: androidApp.path,
-        environment: <String, String>{'TEST_APPLICATION_ID': 'com.example.fromenv'},
-      );
+    final Directory androidApp = tempDir.childDirectory('android');
+    final io.File fileDump = tempDir
+        .childDirectory('build')
+        .childDirectory('app')
+        .childFile('app-link-settings-release.json');
+    result = await processManager.run(
+      <String>[
+        '.${platform.pathSeparator}${getGradlewFileName(platform)}',
+        ...getLocalEngineArguments(),
+        '-q', // quiet output.
+        '-PoutputPath=${fileDump.path}',
+        'outputReleaseAppLinkSettings',
+      ],
+      workingDirectory: androidApp.path,
+      environment: <String, String>{'TEST_APPLICATION_ID': 'com.example.fromenv'},
+    );
 
-      expect(result, const ProcessResultMatcher());
-      expect(fileDump.existsSync(), true);
-      final json = jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
-      expect(json['applicationId'], 'com.example.fromenv');
-    },
-  );
+    expect(result, const ProcessResultMatcher());
+    expect(fileDump.existsSync(), true);
+    final json = jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
+    expect(json['applicationId'], 'com.example.fromenv');
+  });
 
-  testWithoutContext('gradle task outputs<mode>AppLinkSettings is resolved FROM-CACHE after clean build if manifest does not change with build caching enabled', () async {
+  test('gradle task outputs<mode>AppLinkSettings is resolved FROM-CACHE after clean build if manifest does not change with build caching enabled', () async {
     // Create a new flutter project.
     ProcessResult result = await processManager.run(<String>[
       flutterBin,

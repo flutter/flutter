@@ -114,4 +114,28 @@ void main() {
     final ByteData? result = await binaryMessenger.send('', null);
     expect(result?.buffer.asUint8List(), Uint8List.fromList(<int>[2, 3, 4]));
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/190807.
+  testWidgets('endOfStream in a mock stream handler does not hang tear down', (
+    WidgetTester tester,
+  ) async {
+    const channel = EventChannel('test_default_binary_messenger_test');
+    addTearDown(
+      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockStreamHandler(
+        channel,
+        null,
+      ),
+    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockStreamHandler(
+      channel,
+      MockStreamHandler.inline(
+        onListen: (Object? arguments, MockStreamHandlerEventSink events) => events.endOfStream(),
+      ),
+    );
+    var done = false;
+    channel.receiveBroadcastStream().listen(null, onDone: () => done = true);
+    await tester.pump();
+    expect(done, isTrue);
+    // A short timeout makes a hang in tear down fail fast.
+  }, timeout: const Timeout(Duration(seconds: 5)));
 }

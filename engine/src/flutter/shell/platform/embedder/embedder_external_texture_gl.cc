@@ -158,6 +158,17 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
   impeller::TextureDescriptor desc;
   desc.size = impeller::ISize(texture->width, texture->height);
   desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+  switch (texture->target) {
+    case GL_TEXTURE_2D:
+      desc.type = impeller::TextureType::kTexture2D;
+      break;
+    case GL_TEXTURE_EXTERNAL_OES:
+      desc.type = impeller::TextureType::kTextureExternalOES;
+      break;
+    default:
+      FML_LOG(ERROR) << "Unsupported texture target " << texture->target;
+      return nullptr;
+  }
 
   impeller::ContextGLES& context =
       impeller::ContextGLES::Cast(*aiks_context->GetContext());

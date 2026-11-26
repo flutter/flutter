@@ -62,6 +62,7 @@
 #include "impeller/entity/texture_uv_fill.vert.h"
 #include "impeller/entity/tiled_texture_fill.frag.h"
 #include "impeller/entity/uber_sdf.frag.h"
+#include "impeller/entity/uber_sdf.vert.h"
 #include "impeller/entity/uber_sdf_ssbo.frag.h"
 #include "impeller/entity/vertices_uber_1.frag.h"
 #include "impeller/entity/vertices_uber_2.frag.h"
@@ -158,8 +159,8 @@ using TextureStrictSrcPipeline = RenderPipelineHandle<TextureFillVertexShader, T
 using TiledTexturePipeline = RenderPipelineHandle<TextureUvFillVertexShader, TiledTextureFillFragmentShader>;
 using VerticesUber1Shader = RenderPipelineHandle<PorterDuffBlendVertexShader, VerticesUber1FragmentShader>;
 using VerticesUber2Shader = RenderPipelineHandle<PorterDuffBlendVertexShader, VerticesUber2FragmentShader>;
-using UberSDFPipeline = RenderPipelineHandle<CircleVertexShader, UberSdfFragmentShader>;
-using UberSDFSSBOPipeline = RenderPipelineHandle<CircleVertexShader, UberSdfSsboFragmentShader>;
+using UberSDFPipeline = RenderPipelineHandle<UberSdfVertexShader, UberSdfFragmentShader>;
+using UberSDFSSBOPipeline = RenderPipelineHandle<UberSdfVertexShader, UberSdfSsboFragmentShader>;
 using ComplexRSEPipeline = RenderPipelineHandle<CircleVertexShader, ComplexRseFragmentShader>;
 using YUVToRGBFilterPipeline = RenderPipelineHandle<FilterPositionVertexShader, YuvToRgbFilterFragmentShader>;
 // clang-format on

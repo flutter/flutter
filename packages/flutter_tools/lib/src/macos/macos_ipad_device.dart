@@ -13,14 +13,17 @@ import '../desktop_device.dart';
 import '../device.dart';
 import '../device_vm_service_discovery_for_attach.dart';
 import '../ios/ios_workflow.dart';
+import '../mdns_discovery.dart';
 import '../project.dart';
 
 /// Represents an ARM macOS target that can run iPad apps.
 ///
 /// https://developer.apple.com/documentation/apple-silicon/running-your-ios-apps-on-macos
 class MacOSDesignedForIPadDevice extends DesktopDevice {
-  MacOSDesignedForIPadDevice({required super.toolContext})
+  MacOSDesignedForIPadDevice({required this._mdnsVmServiceDiscovery, required super.toolContext})
     : super('mac-designed-for-ipad', platformType: PlatformType.macos, ephemeral: false);
+
+  final MDnsVmServiceDiscovery _mdnsVmServiceDiscovery;
 
   @override
   String get name => 'Mac Designed for iPad';
@@ -58,6 +61,7 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   }) {
     final mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
       device: this,
+      mdnsVmServiceDiscovery: _mdnsVmServiceDiscovery,
       appId: appId,
       deviceVmservicePort: filterDevicePort,
       hostVmservicePort: expectedHostPort,
@@ -110,10 +114,14 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
 }
 
 class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
-  MacOSDesignedForIPadDevices({required this._iosWorkflow, required ToolContext super.toolContext})
-    : super('Mac designed for iPad devices');
+  MacOSDesignedForIPadDevices({
+    required this._iosWorkflow,
+    required this._mdnsVmServiceDiscovery,
+    required ToolContext super.toolContext,
+  }) : super('Mac designed for iPad devices');
 
   final IOSWorkflow _iosWorkflow;
+  final MDnsVmServiceDiscovery _mdnsVmServiceDiscovery;
 
   @override
   bool get supportsPlatform => toolContext.platform.isMacOS;
@@ -137,7 +145,12 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
     if (!canListAnything) {
       return const <Device>[];
     }
-    return <Device>[MacOSDesignedForIPadDevice(toolContext: toolContext)];
+    return <Device>[
+      MacOSDesignedForIPadDevice(
+        mdnsVmServiceDiscovery: _mdnsVmServiceDiscovery,
+        toolContext: toolContext,
+      ),
+    ];
   }
 
   @override

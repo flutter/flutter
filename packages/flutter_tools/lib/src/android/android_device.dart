@@ -60,15 +60,17 @@ const kKnownHardware = <String, HardwareType>{
 class AndroidDevice extends Device {
   AndroidDevice(
     super.id, {
-    this.productID,
-    required this.modelID,
-    this.deviceCodeName,
-    required super.logger,
-    required ProcessManager processManager,
-    required this._platform,
     required this._androidSdk,
     required this._fileSystem,
+    required super.logger,
+    required this.modelID,
+    required this._platform,
+    required ProcessManager processManager,
+    this._androidBuilder,
     this._androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
+    this._applicationPackageFactory,
+    this.deviceCodeName,
+    this.productID,
   }) : _logger = logger,
        _processManager = processManager,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
@@ -80,7 +82,9 @@ class AndroidDevice extends Device {
   final Platform _platform;
   final FileSystem _fileSystem;
   final ProcessUtils _processUtils;
+  final AndroidBuilder? _androidBuilder;
   final AndroidConsoleSocketFactory _androidConsoleSocketFactory;
+  final ApplicationPackageFactory? _applicationPackageFactory;
 
   final String? productID;
   final String modelID;
@@ -190,10 +194,10 @@ class AndroidDevice extends Device {
   @override
   late final Future<TargetPlatform> targetPlatform = () async {
     return switch (await cpuArch) {
-      CpuArch.arm64 => TargetPlatform.android_arm64,
-      CpuArch.armv7 => TargetPlatform.android_arm,
-      CpuArch.x64 => TargetPlatform.android_x64,
-      CpuArch.x86 || CpuArch.riscv64 || CpuArch.unknown => TargetPlatform.unsupported,
+      .arm64 => TargetPlatform.android_arm64,
+      .armv7 => TargetPlatform.android_arm,
+      .x64 => TargetPlatform.android_x64,
+      _ => TargetPlatform.unsupported,
     };
   }();
 
@@ -532,21 +536,19 @@ class AndroidDevice extends Device {
     var builtPackage = package;
     final CpuArch cpuArch = await this.cpuArch;
     switch (cpuArch) {
-      case CpuArch.armv7:
-      case CpuArch.arm64:
-      case CpuArch.x64:
+      case .armv7:
+      case .arm64:
+      case .x64:
         break;
-      case CpuArch.x86:
-      case CpuArch.riscv64:
-      case CpuArch.unknown:
-        _logger.printError('Android platforms are only supported.');
+      default:
+        _logger.printError('Unsupported Android CPU architecture: $cpuArch');
         return LaunchResult.failed();
     }
 
     if (!prebuiltApplication ||
         _androidSdk.licensesAvailable && _androidSdk.latestVersion == null) {
       _logger.printTrace('Building APK');
-      final FlutterProject project = FlutterProject.current();
+      final FlutterProject project = FlutterProject.current(_fileSystem, logger: _logger);
 
       final releaseManifestEngineShellArgs = <String>[
         if (debuggingOptions.buildInfo.mode == BuildMode.release) ...<String>[
@@ -557,7 +559,7 @@ class AndroidDevice extends Device {
         ],
       ];
 
-      await androidBuilder!.buildApk(
+      await _androidBuilder!.buildApk(
         project: project,
         target: mainPath ?? 'lib/main.dart',
         androidBuildInfo: AndroidBuildInfo(
@@ -570,7 +572,7 @@ class AndroidDevice extends Device {
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      builtPackage = await ApplicationPackageFactory.instance!.getPackageForPlatform(
+      builtPackage = await _applicationPackageFactory!.getPackageForPlatform(
         devicePlatform,
         buildInfo: debuggingOptions.buildInfo,
       ) as AndroidApk?;
@@ -826,8 +828,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<void> dispose() async {
-    _logReader?._stop();
-    _pastLogReader?._stop();
+    await Future.wait(<Future<void>>[?_logReader?.dispose(), ?_pastLogReader?.dispose()]);
   }
 }
 
@@ -1205,14 +1206,15 @@ class AdbLogReader extends DeviceLogReader {
     }
   }
 
-  void _stop() {
-    _linesController.close();
+  Future<void> _stop() async {
+    final Future<void> closed = _linesController.close();
     _adbProcess.kill();
+    await closed;
   }
 
   @override
-  void dispose() {
-    _stop();
+  Future<void> dispose() async {
+    await _stop();
   }
 }
 

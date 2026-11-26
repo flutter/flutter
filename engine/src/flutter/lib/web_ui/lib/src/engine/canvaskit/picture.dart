@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 
 import '../layer/layer_painting.dart';
+import '../primitives/canvas.dart';
 import '../primitives/image.dart';
 import '../primitives/image_source.dart';
 import '../util.dart';
@@ -24,11 +25,7 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
       skPicture,
       this,
       'Picture',
-      onDispose: imageTracker == null
-          ? null
-          : (SkPicture _) {
-              imageTracker!.releaseAll();
-            },
+      onDispose: _createDisposer(imageTracker),
     );
     _initStackTrace();
   }
@@ -39,9 +36,22 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
     _initStackTrace();
   }
 
+  /// Builds the [CkCountedRef] disposal callback without capturing `this`, so
+  /// `DomFinalizationRegistry`'s strongly held `UniqueRef` does not retain
+  /// [_ref] and prevent garbage collection.
+  static void Function(SkPicture)? _createDisposer(PictureImageTracker? tracker) {
+    if (tracker == null) {
+      return null;
+    }
+    return (SkPicture _) {
+      tracker.releaseAll();
+    };
+  }
+
   final bool _isClone;
 
   /// Retained image sources for images recorded onto this picture.
+  @override
   final PictureImageTracker? imageTracker;
 
   late final CkCountedRef<CkPicture, SkPicture> _ref;
@@ -135,9 +145,9 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
     surface.setSize(BitmapSize(width, height));
     final SkSurface skiaSurface = surface.skSurface!;
 
-    final ckCanvas = CkCanvas.fromSkCanvas(skiaSurface.getCanvas());
-    ckCanvas.clear(const ui.Color(0x00000000));
-    ckCanvas.drawPicture(this);
+    final canvas = EngineCanvas(CkCanvas(skiaSurface.getCanvas()));
+    canvas.clear(const ui.Color(0x00000000));
+    canvas.drawPicture(this);
     final SkImage skImage = skiaSurface.makeImageSnapshot();
 
     // TODO(hterkelsen): This is a hack to get the pixels from the SkImage.

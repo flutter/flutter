@@ -6,7 +6,6 @@ import 'dart:async';
 
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../context/tool_context.dart';
 import '../debug_adapters/server.dart';
 import '../runner/flutter_command.dart';
 
@@ -35,9 +34,6 @@ class DebugAdapterCommand extends FlutterCommand {
           ' and emit custom events for test progress/results.',
     );
   }
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'debug-adapter';

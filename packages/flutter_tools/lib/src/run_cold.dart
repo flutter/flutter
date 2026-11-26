@@ -17,9 +17,12 @@ class ColdRunner extends ResidentRunner {
   ColdRunner(
     super.flutterDevices, {
     required super.analytics,
+    required super.applicationPackageFactory,
+    required super.assetBundleFactory,
     required super.buildSystem,
     required super.buildTargets,
     required super.debuggingOptions,
+    required super.featureFlags,
     required super.target,
     required super.toolContext,
     required super.xcode,

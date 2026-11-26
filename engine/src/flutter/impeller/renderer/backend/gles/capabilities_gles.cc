@@ -221,6 +221,12 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
       (HasPrefix(desc->GetRenderer(), "Mali-G") ||
        HasPrefix(desc->GetRenderer(), "Immortalis-G")) &&
       MaliDriverNeedsTextureUploadRebind(desc->GetGlVersionString());
+  // Mesa's svga driver (VMware) keeps separate host surfaces for a buffer when
+  // it is used as both a uniform buffer and a vertex or index buffer, and
+  // updates to one surface are not copied to the other. This results in stale
+  // uniform data being used.
+  // https://github.com/flutter/flutter/issues/192915
+  needs_separate_uniform_buffers_ = HasPrefix(desc->GetRenderer(), "SVGA3D");
 
   // ETC2 and EAC are mandatory in OpenGL ES 3.0. BC and ASTC are gated behind
   // extensions and are not present on most mobile or desktop GLES. The whole BC
@@ -284,6 +290,10 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
 
 bool CapabilitiesGLES::NeedsTextureUploadRebind() const {
   return needs_texture_upload_rebind_;
+}
+
+bool CapabilitiesGLES::NeedsSeparateUniformBuffers() const {
+  return needs_separate_uniform_buffers_;
 }
 
 bool CapabilitiesGLES::IsES() const {

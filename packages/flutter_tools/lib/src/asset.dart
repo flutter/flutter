@@ -9,7 +9,6 @@ import 'package:package_config/package_config.dart';
 import 'package:standard_message_codec/standard_message_codec.dart';
 
 import 'base/common.dart';
-import 'base/context.dart';
 import 'base/deferred_component.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -129,9 +128,6 @@ const kMaterialFonts = <Map<String, Object>>[
 
 /// Injected factory class for spawning [AssetBundle] instances.
 abstract class AssetBundleFactory {
-  /// The singleton instance, pulled from the [AppContext].
-  static AssetBundleFactory get instance => context.get<AssetBundleFactory>()!;
-
   static AssetBundleFactory defaultInstance({
     required FileSystem fileSystem,
     required String flutterRoot,
@@ -326,7 +322,10 @@ class ManifestAssetBundle implements AssetBundle {
   }) async {
     if (flutterProject == null) {
       try {
-        flutterProject = FlutterProject.fromDirectory(_fileSystem.file(manifestPath).parent);
+        flutterProject = FlutterProject.fromDirectory(
+          _fileSystem.file(manifestPath).parent,
+          logger: _logger,
+        );
       } on Exception catch (e) {
         _logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
         _logger.printError('$e');

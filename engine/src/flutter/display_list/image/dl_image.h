@@ -140,6 +140,17 @@ class DlImage : public SkRefCnt {
   ///             image.
   virtual std::optional<std::string> get_error() const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Equality check for `DlImage` objects.
+  ///
+  ///             This is an identity comparison, not a comparison of pixels.
+  ///             Two images with identical contents may compare unequal.
+  ///
+  ///             - An image is always equal to itself.
+  ///             - Impeller images and Skia images owned by the raster context
+  ///               (i.e. DlDeferredImageGPUSkia) are only equal to themselves.
+  ///             - Skia images that are not owned by the raster context are
+  ///               equal if they wrap the same SkImage.
   bool Equals(const DlImage* other) const;
 
   bool Equals(const DlImage& other) const { return Equals(&other); }

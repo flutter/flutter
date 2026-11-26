@@ -1359,6 +1359,62 @@ void testMain() {
     ui_web.browser.debugOperatingSystemOverride = null;
   });
 
+  test('leaves Control+wheel to the browser outside of macOS', () {
+    final _ButtonedEventMixin context = _PointerEventContext();
+    final packets = <ui.PointerDataPacket>[];
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      packets.add(packet);
+    };
+
+    for (final os in <ui_web.OperatingSystem>[
+      ui_web.OperatingSystem.windows,
+      ui_web.OperatingSystem.linux,
+    ]) {
+      ui_web.browser.debugOperatingSystemOverride = os;
+      packets.clear();
+
+      // A trackpad pinch: the browser sets ctrlKey, but no key is pressed.
+      // The framework receives a scale and the browser must not zoom the page.
+      DomEvent event = context.wheel(
+        buttons: 0,
+        clientX: 10,
+        clientY: 10,
+        deltaX: 0,
+        deltaY: 100,
+        ctrlKey: true,
+      );
+      rootElement.dispatchEvent(event);
+      expect(packets, hasLength(1), reason: '$os');
+      expect(packets[0].data.last.signalKind, equals(ui.PointerSignalKind.scale));
+      expect(event.defaultPrevented, isTrue, reason: '$os');
+
+      // The zoom shortcut: the Control key is physically held down. The event
+      // is left entirely to the browser.
+      keyboardConverter.handleEvent(keyDownEvent('ControlLeft', 'Control', kCtrl));
+      event = context.wheel(
+        buttons: 0,
+        clientX: 10,
+        clientY: 10,
+        deltaX: 0,
+        deltaY: 100,
+        ctrlKey: true,
+      );
+      rootElement.dispatchEvent(event);
+      expect(packets, hasLength(1), reason: '$os');
+      expect(event.defaultPrevented, isFalse, reason: '$os');
+      keyboardConverter.handleEvent(keyUpEvent('ControlLeft', 'Control', kCtrl));
+
+      // Releasing the key brings back normal scrolling.
+      event = context.wheel(buttons: 0, clientX: 10, clientY: 10, deltaX: 0, deltaY: 100);
+      rootElement.dispatchEvent(event);
+      expect(packets, hasLength(2), reason: '$os');
+      expect(packets[1].data.last.signalKind, equals(ui.PointerSignalKind.scroll));
+      expect(event.defaultPrevented, isTrue, reason: '$os');
+    }
+
+    ui_web.browser.debugOperatingSystemOverride = null;
+  });
+
   test('does reverse flip of scroll axis when "shift" key is pressed (macOS)', () {
     final _ButtonedEventMixin context = _PointerEventContext();
     final packets = <ui.PointerDataPacket>[];
@@ -3433,6 +3489,13 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     return Future.delayed(Duration.zero);
   }
 
+  // Mouse clicks are forwarded to the framework as pointer events rather than
+  // as `SemanticsAction.tap`, so tests that exercise the semantics action use
+  // touch, like an assistive technology would.
+  DomEvent touchDown() =>
+      context.multiTouchDown(const <_TouchDetails>[_TouchDetails(pointer: 1)])[0];
+  DomEvent touchUp() => context.multiTouchUp(const <_TouchDetails>[_TouchDetails(pointer: 1)])[0];
+
   void testWithSemantics(
     String description,
     Future<void> Function() body, {
@@ -3546,7 +3609,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     testElement.setAttribute('flt-tappable', '');
     view.dom.semanticsHost.appendChild(testElement);
 
-    testElement.dispatchEvent(context.primaryDown());
+    testElement.dispatchEvent(touchDown());
     // ClickDebouncer does not start debouncing right away.
     expect(PointerBinding.clickDebouncer.isDebouncing, isTrue);
     expect(PointerBinding.clickDebouncer.debugState, isNotNull);
@@ -3576,13 +3639,13 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     view.dom.semanticsHost.appendChild(testElement);
 
     // A `pointerdown` kicks off the debouncing process.
-    testElement.dispatchEvent(context.primaryDown());
+    testElement.dispatchEvent(touchDown());
     expect(PointerBinding.clickDebouncer.isDebouncing, isTrue);
     expect(PointerBinding.clickDebouncer.debugState, isNotNull);
     expect(PointerBinding.clickDebouncer.debugState!.queue, hasLength(1));
 
     // A `pointerup` in the same event loop should not throw.
-    expect(() => testElement.dispatchEvent(context.primaryUp()), returnsNormally);
+    expect(() => testElement.dispatchEvent(touchUp()), returnsNormally);
     expect(PointerBinding.clickDebouncer.isDebouncing, isTrue);
     expect(PointerBinding.clickDebouncer.debugState, isNotNull);
     expect(PointerBinding.clickDebouncer.debugState!.queue, hasLength(2));
@@ -3721,7 +3784,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     final DomElement testElement = createDomElement('flt-semantics');
     testElement.setAttribute('flt-tappable', '');
     view.dom.semanticsHost.appendChild(testElement);
-    testElement.dispatchEvent(context.primaryDown());
+    testElement.dispatchEvent(touchDown());
     expect(PointerBinding.clickDebouncer.isDebouncing, true);
 
     await nextEventLoop();
@@ -3731,6 +3794,69 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     });
 
     PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
+    expect(pointerPackets, isEmpty);
+    expect(semanticsActions, <CapturedSemanticsEvent>[(type: ui.SemanticsAction.tap, nodeId: 42)]);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/188859
+  //
+  // A `SemanticsAction.tap` carries no position and no device kind, so the
+  // framework has to synthesize the tap at the center of the semantics node.
+  // Mouse clicks come with pointer events that describe the interaction
+  // precisely, so those are flushed to the framework instead.
+  testWithSemantics('Flushes pointer events instead of tap action for mouse clicks', () async {
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
+
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    view.dom.semanticsHost.appendChild(testElement);
+    testElement.dispatchEvent(context.primaryDown());
+    expect(PointerBinding.clickDebouncer.isDebouncing, true);
+
+    await nextEventLoop();
+    testElement.dispatchEvent(context.primaryUp());
+    expect(
+      reason: 'Events are withheld from the framework while debouncing',
+      pointerPackets,
+      isEmpty,
+    );
+
+    final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
+      'clientX': testElement.getBoundingClientRect().x,
+      'clientY': testElement.getBoundingClientRect().y,
+    });
+    PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
+
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
+    expect(pointerPackets, <ui.PointerChange>[
+      ui.PointerChange.add,
+      ui.PointerChange.down,
+      ui.PointerChange.up,
+    ]);
+    expect(semanticsActions, isEmpty);
+  });
+
+  // Chrome turns screen reader activation into mouse pointer events and a click
+  // at the center of the element, all dispatched in a single task. Those must
+  // keep producing `SemanticsAction.tap`, otherwise nodes that only handle the
+  // semantics action, such as `Semantics(onTap: ...)`, stop responding.
+  testWithSemantics('Forwards tap action for mouse clicks within a single task', () async {
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
+
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    view.dom.semanticsHost.appendChild(testElement);
+    testElement.dispatchEvent(context.primaryDown());
+    testElement.dispatchEvent(context.primaryUp());
+    expect(PointerBinding.clickDebouncer.isDebouncing, true);
+
+    final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
+      'clientX': testElement.getBoundingClientRect().x,
+      'clientY': testElement.getBoundingClientRect().y,
+    });
+    PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
+
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
     expect(pointerPackets, isEmpty);
     expect(semanticsActions, <CapturedSemanticsEvent>[(type: ui.SemanticsAction.tap, nodeId: 42)]);
   });

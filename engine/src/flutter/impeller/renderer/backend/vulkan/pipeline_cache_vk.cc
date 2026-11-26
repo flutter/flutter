@@ -115,6 +115,15 @@ void PipelineCacheVK::PersistCacheToDisk() {
   if (!is_valid_) {
     return;
   }
+  // Ensure the device is still alive and keep it alive for the duration of the
+  // persist, since the cache only holds a weak reference and may outlive the
+  // context. During normal ContextVK teardown, ContextVK declares its worker
+  // loop after its device holder, so worker threads are joined before
+  // ContextVK releases its reference to the device.
+  std::shared_ptr<DeviceHolderVK> strong_device = device_holder_.lock();
+  if (!strong_device) {
+    return;
+  }
   const auto& vk_caps = CapabilitiesVK::Cast(*caps_);
   PipelineCacheDataPersist(cache_directory_,                       //
                            vk_caps.GetPhysicalDeviceProperties(),  //

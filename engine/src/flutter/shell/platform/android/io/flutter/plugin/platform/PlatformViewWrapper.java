@@ -11,6 +11,8 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -48,6 +50,14 @@ public class PlatformViewWrapper extends FrameLayout {
   private final PlatformViewGestureTracker gestureTracker = new PlatformViewGestureTracker();
 
   private ViewTreeObserver.OnGlobalFocusChangeListener activeFocusListener;
+
+  private final Handler mainHandler = new Handler(Looper.getMainLooper());
+
+  // The render target surface and canvas of a frame that has been recorded in draw(), but not yet
+  // posted to the render target. See draw().
+  @Nullable private Surface pendingFrameSurface;
+  @Nullable private Canvas pendingFrameCanvas;
+  private final Runnable postPendingFrameRunnable = () -> postPendingFrame(true);
 
   public PlatformViewWrapper(@NonNull Context context) {
     super(context);
@@ -118,6 +128,8 @@ public class PlatformViewWrapper extends FrameLayout {
   }
 
   public void resizeRenderTarget(int width, int height) {
+    // Post any frame recorded at the old size before the render target switches surfaces.
+    postPendingFrame(true);
     if (renderTarget != null) {
       renderTarget.resize(width, height);
     }
@@ -137,8 +149,21 @@ public class PlatformViewWrapper extends FrameLayout {
     return 0;
   }
 
+  @Override
+  protected void onWindowVisibilityChanged(int visibility) {
+    super.onWindowVisibilityChanged(visibility);
+    if (visibility != View.VISIBLE) {
+      // Flush any pending frame so the render target surface does not remain locked while
+      // backgrounded.
+      postPendingFrame(true);
+    }
+  }
+
   /** Releases resources. */
   public void release() {
+    // Unlock any pending canvas without scheduling a redundant engine frame for a texture that is
+    // about to be released.
+    postPendingFrame(false);
     if (renderTarget != null) {
       renderTarget.release();
       renderTarget = null;
@@ -188,6 +213,10 @@ public class PlatformViewWrapper extends FrameLayout {
       return;
     }
 
+    // A frame recorded by a previous draw() in this same traversal must be posted before
+    // querying or locking the render target's surface again.
+    postPendingFrame(true);
+
     final Surface targetSurface = renderTarget.getSurface();
     if (!targetSurface.isValid()) {
       Log.e(TAG, "Platform view cannot be composed without a valid RenderTarget surface.");
@@ -208,8 +237,44 @@ public class PlatformViewWrapper extends FrameLayout {
       // Override the canvas that this subtree of views will use to draw.
       super.draw(targetCanvas);
     } finally {
+      // Don't post the frame to the render target synchronously here.
+      //
+      // draw() runs while the window's ThreadedRenderer records its display list, i.e. before the
+      // window syncs its own frame with the RenderThread in this same traversal. In observed
+      // traces (e.g. scrolling a WebView with a heavy draw functor), calling unlockCanvasAndPost()
+      // inline hands the render target's frame to the process-wide RenderThread ahead of the
+      // window's sync, stalling the UI thread (also Flutter's UI thread) on that RenderThread
+      // submission during traversal.
+      //
+      // Posting at the front of the main thread queue defers unlockCanvasAndPost() until
+      // immediately after the current traversal completes (after the window's frame sync),
+      // avoiding that inline UI-thread stall during traversal. Note that this orders submission
+      // after the current traversal rather than providing a hard guarantee that the resulting
+      // buffer reaches the same display presentation deadline.
+      pendingFrameSurface = targetSurface;
+      pendingFrameCanvas = targetCanvas;
+      mainHandler.postAtFrontOfQueue(postPendingFrameRunnable);
+    }
+  }
+
+  /** Posts the frame recorded by the last {@link #draw(Canvas)} call to the render target. */
+  private void postPendingFrame(boolean scheduleFrame) {
+    final Surface surface = pendingFrameSurface;
+    final Canvas canvas = pendingFrameCanvas;
+    if (surface == null || canvas == null) {
+      return;
+    }
+    pendingFrameSurface = null;
+    pendingFrameCanvas = null;
+    mainHandler.removeCallbacks(postPendingFrameRunnable);
+    try {
+      surface.unlockCanvasAndPost(canvas);
+    } catch (IllegalStateException | IllegalArgumentException e) {
+      Log.e(TAG, "Failed to post platform view frame to the render target: " + e);
+      return;
+    }
+    if (scheduleFrame && renderTarget != null) {
       renderTarget.scheduleFrame();
-      targetSurface.unlockCanvasAndPost(targetCanvas);
     }
   }
 

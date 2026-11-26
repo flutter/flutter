@@ -4,6 +4,7 @@
 
 import 'package:meta/meta.dart';
 
+import '../android/android_builder.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -23,6 +24,7 @@ class AnalyzeCommand extends FlutterCommand {
     required this._allProjectValidators,
     required this._suppressAnalytics,
     required super.toolContext,
+    this._androidBuilder,
     bool verboseHelp = false,
     this.workingDirectory,
   }) {
@@ -191,10 +193,8 @@ class AnalyzeCommand extends FlutterCommand {
   final Directory? workingDirectory;
 
   final List<ProjectValidator> _allProjectValidators;
+  final AndroidBuilder? _androidBuilder;
   final bool _suppressAnalytics;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get name => 'analyze';
@@ -272,6 +272,7 @@ class AnalyzeCommand extends FlutterCommand {
         directoryPath = items.first;
       }
       await AndroidAnalyze(
+        androidBuilder: _androidBuilder,
         fileSystem: fs,
         option: option,
         userPath: directoryPath,

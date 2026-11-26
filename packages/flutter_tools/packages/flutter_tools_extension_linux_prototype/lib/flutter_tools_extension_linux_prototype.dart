@@ -7,6 +7,7 @@ library flutter_tools_extension_linux_prototype;
 
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
+import 'src/artifact.dart';
 import 'src/build.dart';
 import 'src/clean.dart';
 import 'src/config.dart';
@@ -25,6 +26,7 @@ Future<void> linuxExtensionEntryPoint(Object? sendPort) {
       LinuxDeviceService(),
       LinuxBuildService(),
       LinuxCleanService(),
+      LinuxArtifactService(),
     ],
     extensionName: 'flutter_tools_extension_linux_prototype',
     supportedPlatforms: const <String>{'linux'},

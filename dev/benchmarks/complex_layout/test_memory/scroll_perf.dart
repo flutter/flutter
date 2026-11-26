@@ -24,8 +24,10 @@ Future<void> main() async {
   runApp(
     GestureDetector(
       onTap: () {
-        debugPrint('==== MEMORY BENCHMARK ==== TAPPED ====');
-        ready.complete();
+        if (!ready.isCompleted) {
+          debugPrint('==== MEMORY BENCHMARK ==== TAPPED ====');
+          ready.complete();
+        }
       },
       behavior: HitTestBehavior.opaque,
       child: const IgnorePointer(child: ComplexLayoutApp()),

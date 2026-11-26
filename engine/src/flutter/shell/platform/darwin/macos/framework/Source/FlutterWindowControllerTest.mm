@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
+#include <vector>
+
 #import "flutter/shell/platform/common/isolate_scope.h"
 #import "flutter/shell/platform/common/windowing.h"
 
@@ -776,31 +779,48 @@ TEST_F(FlutterWindowControllerSizeTest, SizedToContentNotResizable) {
   }
 
   auto controller = [engine viewControllerForIdentifier:viewId];
-  auto window = controller.view.window;
+  NSWindow* window = controller.view.window;
 
-  CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent();
+  // The fixture renders a 300x300 frame followed immediately by a 200x200 frame.
+  // Both frame commits can be processed within a single run loop turn, so
+  // polling window.frame may never observe the intermediate size. Record every
+  // content size the window is resized to instead.
+  // See https://github.com/flutter/flutter/issues/194780.
+  __block std::vector<NSSize> contentSizes;
+  id observer = [[NSNotificationCenter defaultCenter]
+      addObserverForName:NSWindowDidResizeNotification
+                  object:window
+                   queue:nil
+              usingBlock:^(NSNotification* note) {
+                NSWindow* resizedWindow = note.object;
+                contentSizes.push_back(
+                    [resizedWindow contentRectForFrameRect:resizedWindow.frame].size);
+              }];
+
   double pixelRatio = [window backingScaleFactor];
-  while (window.frame.size.width != 300 / pixelRatio &&
-         CFAbsoluteTimeGetCurrent() - startTime < kTestTimeout) {
-    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
-  }
-
-  NSRect contentRect = [window contentRectForFrameRect:window.frame];
-  EXPECT_EQ(contentRect.size.width, 300 / pixelRatio);
-  EXPECT_EQ(contentRect.size.height, 300 / pixelRatio);
-  EXPECT_TRUE((window.styleMask & NSWindowStyleMaskResizable) == 0);
+  NSSize firstSize = NSMakeSize(300 / pixelRatio, 300 / pixelRatio);
+  NSSize secondSize = NSMakeSize(200 / pixelRatio, 200 / pixelRatio);
 
   // Wait until the second frame is rendered, which should resize the window based
   // on new content.
-  startTime = CFAbsoluteTimeGetCurrent();
-  while (window.frame.size.width == 300 / pixelRatio &&
-         CFAbsoluteTimeGetCurrent() - startTime < kTestTimeout) {
-    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
-  }
+  RunLoopUntilPredicate(kTestTimeout, ^bool {
+    return !contentSizes.empty() && NSEqualSizes(contentSizes.back(), secondSize);
+  });
+  [[NSNotificationCenter defaultCenter] removeObserver:observer];
 
-  contentRect = [window contentRectForFrameRect:window.frame];
-  EXPECT_EQ(contentRect.size.width, 200 / pixelRatio);
-  EXPECT_EQ(contentRect.size.height, 200 / pixelRatio);
+  // The window must have been sized to the first frame before the second.
+  auto firstSizeIt = std::find_if(contentSizes.begin(), contentSizes.end(),
+                                  [&](NSSize size) { return NSEqualSizes(size, firstSize); });
+  std::string observedSizes;
+  for (NSSize size : contentSizes) {
+    observedSizes += NSStringFromSize(size).UTF8String;
+    observedSizes += " ";
+  }
+  EXPECT_NE(firstSizeIt, contentSizes.end())
+      << "Window was never sized to the first frame. Observed sizes: " << observedSizes;
+  ASSERT_FALSE(contentSizes.empty());
+  EXPECT_TRUE(NSEqualSizes(contentSizes.back(), secondSize));
+  EXPECT_TRUE((window.styleMask & NSWindowStyleMaskResizable) == 0);
 
   [engine.windowController closeAllWindows];
   [engine shutDownEngine];

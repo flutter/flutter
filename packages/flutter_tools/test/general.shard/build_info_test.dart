@@ -6,14 +6,12 @@ import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/config.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fakes.dart';
 import '../src/test_build_system.dart';
 
@@ -24,7 +22,7 @@ void main() {
   });
 
   group('Validate build number', () {
-    testWithoutContext('CFBundleVersion for iOS', () async {
+    test('CFBundleVersion for iOS', () async {
       String? buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, 'xyz', logger);
       expect(buildName, isNull);
       buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '0.0.1', logger);
@@ -35,7 +33,7 @@ void main() {
       expect(buildName, '123.456');
     });
 
-    testWithoutContext('versionCode for Android', () async {
+    test('versionCode for Android', () async {
       String? buildName = validatedBuildNumberForPlatform(
         TargetPlatform.android_arm,
         '123.abc+-',
@@ -48,7 +46,7 @@ void main() {
   });
 
   group('Validate build name', () {
-    testWithoutContext('CFBundleShortVersionString for iOS', () async {
+    test('CFBundleShortVersionString for iOS', () async {
       String? buildName = validatedBuildNameForPlatform(TargetPlatform.ios, 'xyz', logger);
       expect(buildName, isNull);
       buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '0.0.1', logger);
@@ -62,7 +60,7 @@ void main() {
       expect(buildName, '123.0.0');
     });
 
-    testWithoutContext('versionName for Android', () async {
+    test('versionName for Android', () async {
       String? buildName = validatedBuildNameForPlatform(
         TargetPlatform.android_arm,
         '123.abc+-',
@@ -73,7 +71,7 @@ void main() {
       expect(buildName, 'abc+-');
     });
 
-    testWithoutContext('build mode configuration is correct', () {
+    test('build mode configuration is correct', () {
       expect(BuildMode.debug.isRelease, false);
       expect(BuildMode.debug.isPrecompiled, false);
       expect(BuildMode.debug.isJit, true);
@@ -98,26 +96,50 @@ void main() {
     });
   });
 
-  testWithoutContext('getDartNameForDarwinArch returns name used in Dart SDK', () {
+  test('dartName returns name used in Dart SDK', () {
     expect(CpuArch.armv7.dartName, 'armv7');
     expect(CpuArch.arm64.dartName, 'arm64');
+    expect(CpuArch.x86.dartName, 'x86');
     expect(CpuArch.x64.dartName, 'x64');
+    expect(CpuArch.riscv64.dartName, 'riscv64');
+    expect(() => CpuArch.unknown.dartName, throwsUnsupportedError);
+    expect(() => CpuArch('ppc64le').dartName, throwsUnsupportedError);
   });
 
-  testWithoutContext('darwinArchName returns Apple names', () {
+  test('darwinArchName returns Apple names', () {
     expect(CpuArch.armv7.darwinArchName, 'armv7');
     expect(CpuArch.arm64.darwinArchName, 'arm64');
     expect(CpuArch.x64.darwinArchName, 'x86_64');
+    expect(() => CpuArch.riscv64.darwinArchName, throwsUnsupportedError);
   });
 
-  testWithoutContext('getNameForTargetPlatform on Darwin arches', () {
+  test('androidArchName and androidPlatformName return Android names', () {
+    expect(CpuArch.armv7.androidArchName, 'armeabi-v7a');
+    expect(CpuArch.arm64.androidArchName, 'arm64-v8a');
+    expect(CpuArch.x64.androidArchName, 'x86_64');
+    expect(() => CpuArch.riscv64.androidArchName, throwsUnsupportedError);
+
+    expect(CpuArch.armv7.androidPlatformName, 'android-arm');
+    expect(CpuArch.arm64.androidPlatformName, 'android-arm64');
+    expect(CpuArch.x64.androidPlatformName, 'android-x64');
+    expect(() => CpuArch.riscv64.androidPlatformName, throwsUnsupportedError);
+  });
+
+  test('HostPlatform.cpuArch maps standard and custom host platforms', () {
+    expect(HostPlatform.linux_x64.cpuArch, CpuArch.x64);
+    expect(HostPlatform.darwin_arm64.cpuArch, CpuArch.arm64);
+    expect(HostPlatform.linux_riscv64.cpuArch, CpuArch.riscv64);
+    expect(HostPlatform('freebsd', .x64).cpuArch, CpuArch.x64);
+  });
+
+  test('getNameForTargetPlatform on Darwin arches', () {
     expect(TargetPlatform.ios.getName(cpuArch: CpuArch.arm64), 'ios-arm64');
     expect(TargetPlatform.ios.getName(cpuArch: CpuArch.armv7), 'ios-armv7');
     expect(TargetPlatform.ios.getName(cpuArch: CpuArch.x64), 'ios-x86_64');
     expect(TargetPlatform.android.getName(), isNot(contains('ios')));
   });
 
-  testWithoutContext('TargetPlatform.os maps every platform to its operating system', () {
+  test('TargetPlatform.os maps every platform to its operating system', () {
     const expected = <TargetPlatform, TargetOperatingSystem>{
       .android: .android,
       .android_arm: .android,
@@ -144,93 +166,110 @@ void main() {
     }
   });
 
-  testUsingContext(
-    'defaultIOSArchsForEnvironment',
-    () {
-      expect(
-        defaultIOSArchsForEnvironment(
-          EnvironmentType.physical,
-          Artifacts.testLocalEngine(
-            localEngineHost: 'host_debug_unopt',
-            localEngine: 'ios_debug_unopt',
-          ),
-        ).single,
-        CpuArch.arm64,
-      );
+  test('TargetPlatform.cpuArch maps architecture-specific platforms and throws for others', () {
+    const expected = <TargetPlatform, CpuArch>{
+      .android_arm: .armv7,
+      .android_arm64: .arm64,
+      .android_x64: .x64,
+      .fuchsia_arm64: .arm64,
+      .fuchsia_x64: .x64,
+      .linux_arm64: .arm64,
+      .linux_riscv64: .riscv64,
+      .linux_x64: .x64,
+      .windows_arm64: .arm64,
+      .windows_x64: .x64,
+    };
+    const unsupported = <TargetPlatform>{
+      .android,
+      .darwin,
+      .ios,
+      .tester,
+      .web_javascript,
+      .unsupported,
+    };
+    // Every TargetPlatform value must be covered by this test.
+    expect(<TargetPlatform>{...expected.keys, ...unsupported}, containsAll(TargetPlatform.values));
+    for (final MapEntry(:TargetPlatform key, :CpuArch value) in expected.entries) {
+      expect(key.cpuArch, value, reason: '$key');
+    }
+    for (final platform in unsupported) {
+      expect(() => platform.cpuArch, throwsUnsupportedError, reason: '$platform');
+    }
+  });
 
-      expect(
-        defaultIOSArchsForEnvironment(
-          EnvironmentType.simulator,
-          Artifacts.testLocalEngine(
-            localEngineHost: 'host_debug_unopt',
-            localEngine: 'ios_debug_sim_unopt',
-          ),
-        ).single,
-        CpuArch.x64,
-      );
+  test('defaultIOSArchsForEnvironment', () {
+    expect(
+      defaultIOSArchsForEnvironment(
+        EnvironmentType.physical,
+        Artifacts.testLocalEngine(
+          localEngineHost: 'host_debug_unopt',
+          localEngine: 'ios_debug_unopt',
+        ),
+      ).single,
+      CpuArch.arm64,
+    );
 
-      expect(
-        defaultIOSArchsForEnvironment(
-          EnvironmentType.simulator,
-          Artifacts.testLocalEngine(
-            localEngineHost: 'host_debug_unopt',
-            localEngine: 'ios_debug_sim_unopt_arm64',
-          ),
-        ).single,
-        CpuArch.arm64,
-      );
+    expect(
+      defaultIOSArchsForEnvironment(
+        EnvironmentType.simulator,
+        Artifacts.testLocalEngine(
+          localEngineHost: 'host_debug_unopt',
+          localEngine: 'ios_debug_sim_unopt',
+        ),
+      ).single,
+      CpuArch.x64,
+    );
 
-      expect(
-        defaultIOSArchsForEnvironment(EnvironmentType.physical, Artifacts.test()).single,
-        CpuArch.arm64,
-      );
+    expect(
+      defaultIOSArchsForEnvironment(
+        EnvironmentType.simulator,
+        Artifacts.testLocalEngine(
+          localEngineHost: 'host_debug_unopt',
+          localEngine: 'ios_debug_sim_unopt_arm64',
+        ),
+      ).single,
+      CpuArch.arm64,
+    );
 
-      expect(defaultIOSArchsForEnvironment(EnvironmentType.simulator, Artifacts.test()), <CpuArch>[
-        CpuArch.x64,
-        CpuArch.arm64,
-      ]);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+    expect(
+      defaultIOSArchsForEnvironment(EnvironmentType.physical, Artifacts.test()).single,
+      CpuArch.arm64,
+    );
 
-  testUsingContext(
-    'defaultMacOSArchsForEnvironment',
-    () {
-      expect(
-        defaultMacOSArchsForEnvironment(
-          Artifacts.testLocalEngine(
-            localEngineHost: 'host_debug_unopt',
-            localEngine: 'host_debug_unopt',
-          ),
-        ).single,
-        CpuArch.x64,
-      );
+    expect(defaultIOSArchsForEnvironment(EnvironmentType.simulator, Artifacts.test()), <CpuArch>[
+      CpuArch.x64,
+      CpuArch.arm64,
+    ]);
+  });
 
-      expect(
-        defaultMacOSArchsForEnvironment(
-          Artifacts.testLocalEngine(
-            localEngineHost: 'host_debug_unopt',
-            localEngine: 'host_debug_unopt_arm64',
-          ),
-        ).single,
-        CpuArch.arm64,
-      );
+  test('defaultMacOSArchsForEnvironment', () {
+    expect(
+      defaultMacOSArchsForEnvironment(
+        Artifacts.testLocalEngine(
+          localEngineHost: 'host_debug_unopt',
+          localEngine: 'host_debug_unopt',
+        ),
+      ).single,
+      CpuArch.x64,
+    );
 
-      expect(defaultMacOSArchsForEnvironment(Artifacts.test()), <CpuArch>[
-        CpuArch.x64,
-        CpuArch.arm64,
-      ]);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+    expect(
+      defaultMacOSArchsForEnvironment(
+        Artifacts.testLocalEngine(
+          localEngineHost: 'host_debug_unopt',
+          localEngine: 'host_debug_unopt_arm64',
+        ),
+      ).single,
+      CpuArch.arm64,
+    );
 
-  testWithoutContext('getCpuArchForName on Darwin and Android arches', () {
+    expect(defaultMacOSArchsForEnvironment(Artifacts.test()), <CpuArch>[
+      CpuArch.x64,
+      CpuArch.arm64,
+    ]);
+  });
+
+  test('getCpuArchForName on Darwin and Android arches', () {
     expect(getCpuArchForName('armv7'), CpuArch.armv7);
     expect(getCpuArchForName('arm64'), CpuArch.arm64);
     expect(getCpuArchForName('arm64e'), CpuArch.arm64);
@@ -241,7 +280,7 @@ void main() {
     expect(() => getCpuArchForName('bogus'), throwsException);
   });
 
-  testWithoutContext('named BuildInfo has correct defaults', () {
+  test('named BuildInfo has correct defaults', () {
     expect(BuildInfo.debug.mode, BuildMode.debug);
     expect(BuildInfo.debug.trackWidgetCreation, true);
 
@@ -252,7 +291,7 @@ void main() {
     expect(BuildInfo.release.trackWidgetCreation, false);
   });
 
-  testWithoutContext('toBuildSystemEnvironment encoding of standard values', () {
+  test('toBuildSystemEnvironment encoding of standard values', () {
     const buildInfo = BuildInfo(
       BuildMode.debug,
       '',
@@ -290,7 +329,7 @@ void main() {
     });
   });
 
-  testWithoutContext('toEnvironmentConfig encoding of standard values', () {
+  test('toEnvironmentConfig encoding of standard values', () {
     const buildInfo = BuildInfo(
       BuildMode.debug,
       'strawberry',
@@ -323,7 +362,7 @@ void main() {
     });
   });
 
-  testWithoutContext('toEnvironmentConfig includes build name and build number', () {
+  test('toEnvironmentConfig includes build name and build number', () {
     const buildInfo = BuildInfo(
       BuildMode.release,
       null,
@@ -337,7 +376,7 @@ void main() {
     expect(buildInfo.toEnvironmentConfig()['BUILD_NUMBER'], '7');
   });
 
-  testWithoutContext('AndroidGradleConfig defaults and overrides', () {
+  test('AndroidGradleConfig defaults and overrides', () {
     const defaultConfig = AndroidGradleConfig();
     expect(defaultConfig.projectArgs, isEmpty);
     expect(defaultConfig.projectCacheDir, isNull);
@@ -376,7 +415,7 @@ void main() {
     expect(customBuildInfo.copyWith().androidGradleConfig, same(customConfig));
   });
 
-  testWithoutContext('AndroidBuildInfo.toGradleConfig encoding of standard values', () {
+  test('AndroidBuildInfo.toGradleConfig encoding of standard values', () {
     const buildInfo = BuildInfo(
       BuildMode.debug,
       '',
@@ -416,7 +455,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('AndroidBuildInfo.toGradleConfig encoding of enableHcpp', () {
+  test('AndroidBuildInfo.toGradleConfig encoding of enableHcpp', () {
     const buildInfo = BuildInfo(
       BuildMode.debug,
       '',
@@ -469,7 +508,7 @@ void main() {
     );
   });
 
-  testWithoutContext('encodeDartDefines encodes define values with base64 encoded components', () {
+  test('encodeDartDefines encodes define values with base64 encoded components', () {
     expect(encodeDartDefines(<String>['"hello"']), 'ImhlbGxvIg==');
     expect(
       encodeDartDefines(<String>['https://www.google.com']),
@@ -480,7 +519,7 @@ void main() {
     expect(encodeDartDefines(<String>['1232,456', '2']), 'MTIzMiw0NTY=,Mg==');
   });
 
-  testWithoutContext('decodeDartDefines decodes base64 encoded dart defines', () {
+  test('decodeDartDefines decodes base64 encoded dart defines', () {
     expect(
       decodeDartDefines(<String, String>{kDartDefines: 'ImhlbGxvIg=='}, kDartDefines),
       <String>['"hello"'],
@@ -505,7 +544,7 @@ void main() {
     );
   });
 
-  testWithoutContext('BuildMode names', () {
+  test('BuildMode names', () {
     for (final BuildMode buildMode in BuildMode.values) {
       switch (buildMode) {
         case BuildMode.debug:
@@ -532,7 +571,7 @@ void main() {
     }
   });
 
-  testWithoutContext('CpuArch', () {
+  test('CpuArch', () {
     expect(CpuArch.fromName('unknown'), CpuArch.unknown);
     expect(CpuArch.fromName('armv7'), CpuArch.armv7);
     expect(CpuArch.fromName('arm64'), CpuArch.arm64);
@@ -540,7 +579,8 @@ void main() {
     expect(CpuArch.fromName('x64'), CpuArch.x64);
     expect(CpuArch.fromName('x86_64'), CpuArch.x64);
     expect(CpuArch.fromName('riscv64'), CpuArch.riscv64);
-    expect(() => CpuArch.fromName('bogus'), throwsException);
+    expect(CpuArch.fromName('ppc64le'), CpuArch('ppc64le'));
+    expect(() => CpuArch.fromName('invalid-arch'), throwsFormatException);
 
     expect(CpuArch.unknown.name, 'unknown');
     expect(CpuArch.armv7.name, 'armv7');
@@ -551,7 +591,7 @@ void main() {
   });
 
   group('getCurrentHostPlatform', () {
-    testWithoutContext('returns darwin host platform on macOS', () {
+    test('returns darwin host platform on macOS', () {
       final platform = FakePlatform(operatingSystem: 'macos');
       expect(
         getCurrentHostPlatform(
@@ -569,7 +609,7 @@ void main() {
       );
     });
 
-    testWithoutContext('throws on unsupported Darwin host platform', () {
+    test('throws on unsupported Darwin host platform', () {
       expect(
         () => getCurrentHostPlatform(
           operatingSystemUtils: FakeOperatingSystemUtils(),
@@ -585,7 +625,7 @@ void main() {
       );
     });
 
-    testWithoutContext('returns host platform on Linux', () {
+    test('returns host platform on Linux', () {
       final platform = FakePlatform();
       expect(
         getCurrentHostPlatform(
@@ -603,7 +643,7 @@ void main() {
       );
     });
 
-    testWithoutContext('returns windows_x64 on Windows', () {
+    test('returns windows_x64 on Windows', () {
       expect(
         getCurrentHostPlatform(
           operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.windows_arm64),
@@ -615,27 +655,27 @@ void main() {
   });
 
   group('getBuildDirectory', () {
-    testWithoutContext('defaults to "build" when config does not specify build-dir', () {
+    test('defaults to "build" when config does not specify build-dir', () {
       final fileSystem = MemoryFileSystem.test();
       final config = Config.test();
       expect(getBuildDirectory(config, fileSystem), 'build');
     });
 
-    testWithoutContext('uses passed in config', () {
+    test('uses passed in config', () {
       final fileSystem = MemoryFileSystem.test();
       final config = Config.test();
       config.setValue('build-dir', 'custom_build_out');
       expect(getBuildDirectory(config, fileSystem), 'custom_build_out');
     });
 
-    testWithoutContext('throws exception when configured build-dir is absolute', () {
+    test('throws exception when configured build-dir is absolute', () {
       final fileSystem = MemoryFileSystem.test();
       final config = Config.test();
       config.setValue('build-dir', '/absolute/path/to/build');
       expect(() => getBuildDirectory(config, fileSystem), throwsException);
     });
 
-    testWithoutContext('platform build directory helpers respect configured build-dir', () {
+    test('platform build directory helpers respect configured build-dir', () {
       final fileSystem = MemoryFileSystem.test();
       final config = Config.test()..setValue('build-dir', 'custom_build_out');
       expect(getAndroidBuildDirectory(config: config, fileSystem: fileSystem), 'custom_build_out');
@@ -661,6 +701,13 @@ void main() {
       );
       expect(
         getLinuxBuildDirectory(
+          TargetPlatform.linux_riscv64,
+          toolContext: FakeToolContext(config: config, fs: fileSystem),
+        ),
+        fileSystem.path.join('custom_build_out', 'linux', 'riscv64'),
+      );
+      expect(
+        getLinuxBuildDirectory(
           null,
           toolContext: FakeToolContext(
             config: config,
@@ -680,20 +727,40 @@ void main() {
         ),
         fileSystem.path.join('custom_build_out', 'windows', 'x64', 'prod'),
       );
+      expect(
+        getWindowsBuildDirectory(
+          TargetPlatform.windows_arm64,
+          config: config,
+          fileSystem: fileSystem,
+        ),
+        fileSystem.path.join('custom_build_out', 'windows', 'arm64'),
+      );
+      expect(
+        () => getLinuxBuildDirectory(
+          TargetPlatform.darwin,
+          toolContext: FakeToolContext(config: config, fs: fileSystem),
+        ),
+        throwsUnsupportedError,
+      );
+      expect(
+        () =>
+            getWindowsBuildDirectory(TargetPlatform.darwin, config: config, fileSystem: fileSystem),
+        throwsUnsupportedError,
+      );
     });
   });
 
   group('deprecatedJsInterop', () {
-    testWithoutContext('passes no compiler flags when unset', () {
+    test('passes no compiler flags when unset', () {
       expect(deprecatedJsInteropCompilerFlags(null), isEmpty);
     });
 
-    testWithoutContext('passes the matching compiler flag when set', () {
+    test('passes the matching compiler flag when set', () {
       expect(deprecatedJsInteropCompilerFlags(true), <String>['--deprecated-js-interop']);
       expect(deprecatedJsInteropCompilerFlags(false), <String>['--no-deprecated-js-interop']);
     });
 
-    testWithoutContext('defaults to null and is preserved by copyWith', () {
+    test('defaults to null and is preserved by copyWith', () {
       expect(BuildInfo.debug.deprecatedJsInterop, isNull);
 
       const buildInfo = BuildInfo(

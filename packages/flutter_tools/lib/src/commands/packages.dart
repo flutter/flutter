@@ -25,6 +25,7 @@ import '../cache.dart';
 import '../context/tool_context.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
+import '../features.dart';
 import '../flutter_plugins.dart';
 import '../package_graph.dart';
 import '../plugins.dart';
@@ -157,14 +158,11 @@ class PackagesCommand extends FlutterCommand {
 }
 
 class PackagesTestCommand extends FlutterCommand {
-  PackagesTestCommand({required ToolContext super.toolContext}) {
+  PackagesTestCommand({required super.toolContext}) {
     requiresPubspecYaml();
   }
 
-  @override
-  ToolContext get toolContext => super.toolContext!;
-
-  late final Pub _pub = _createPub(toolContext);
+  late final Pub _pub = _createPub(runner!.featureFlags, toolContext);
 
   @override
   String get name => 'test';
@@ -195,7 +193,7 @@ class PackagesForwardCommand extends FlutterCommand {
   PackagesForwardCommand(
     this._commandName,
     this._description, {
-    required ToolContext super.toolContext,
+    required super.toolContext,
     bool requiresPubspec = false,
   }) {
     if (requiresPubspec) {
@@ -203,10 +201,7 @@ class PackagesForwardCommand extends FlutterCommand {
     }
   }
 
-  @override
-  ToolContext get toolContext => super.toolContext!;
-
-  late final Pub _pub = _createPub(toolContext);
+  late final Pub _pub = _createPub(runner!.featureFlags, toolContext);
 
   PubContext context = PubContext.pubForward;
 
@@ -244,15 +239,12 @@ class PackagesForwardCommand extends FlutterCommand {
 }
 
 class PackagesPassthroughCommand extends FlutterCommand {
-  PackagesPassthroughCommand({required ToolContext super.toolContext});
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
+  PackagesPassthroughCommand({required super.toolContext});
 
   @override
   ArgParser argParser = ArgParser.allowAnything();
 
-  late final Pub _pub = _createPub(toolContext);
+  late final Pub _pub = _createPub(runner!.featureFlags, toolContext);
 
   @override
   String get name => 'pub';
@@ -283,11 +275,8 @@ class PackagesGetCommand extends FlutterCommand {
     this._description,
     this._context, {
     required this._buildSystem,
-    required ToolContext super.toolContext,
+    required super.toolContext,
   });
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   final BuildSystem _buildSystem;
 
@@ -314,7 +303,7 @@ class PackagesGetCommand extends FlutterCommand {
     return '${runner!.executableName} pub $_commandName [<arguments...>]';
   }
 
-  late final Pub _pub = _createPub(toolContext);
+  late final Pub _pub = _createPub(runner!.featureFlags, toolContext);
 
   /// An [ArgParser] that accepts all options and flags that the
   ///
@@ -474,6 +463,11 @@ class PackagesGetCommand extends FlutterCommand {
             processManager: processManager,
             platform: platform,
             analytics: analytics,
+            androidSdkBuilder: null,
+            featureFlags: runner!.featureFlags,
+            projectFactory: projectFactory,
+            visualStudio: null,
+            xcode: null,
             projectDir: project.directory,
             packageConfigPath: packageConfigPath(),
             generateDartPluginRegistry: true,
@@ -607,6 +601,6 @@ class PackagesGetCommand extends FlutterCommand {
   }
 }
 
-Pub _createPub(ToolContext toolContext) {
-  return Pub(stdio: toolContext.stdio, toolContext: toolContext);
+Pub _createPub(FeatureFlags featureFlags, ToolContext toolContext) {
+  return Pub(featureFlags: featureFlags, toolContext: toolContext, stdio: toolContext.stdio);
 }

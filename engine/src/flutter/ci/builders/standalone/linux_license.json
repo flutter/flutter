@@ -12,7 +12,6 @@
         "--runtime-mode",
         "release",
         "--no-rbe",
-        "--no-goma",
         "--enable-minimal-linux"
     ],
     "ninja": {

@@ -47,11 +47,13 @@ class LayerScene implements ui.Scene {
 
 class LayerSceneBuilder implements ui.SceneBuilder {
   LayerSceneBuilder() : rootLayer = RootLayer() {
-    currentLayer = rootLayer;
+    _layerStack.add(rootLayer);
   }
 
   final RootLayer rootLayer;
-  late ContainerLayer currentLayer;
+  final List<ContainerLayer> _layerStack = <ContainerLayer>[];
+
+  ContainerLayer get currentLayer => _layerStack.last;
 
   @override
   void addPerformanceOverlay(int enabledOptions, ui.Rect bounds) {
@@ -117,11 +119,9 @@ class LayerSceneBuilder implements ui.SceneBuilder {
 
   @override
   void pop() {
-    if (currentLayer == rootLayer) {
-      // Don't pop the root layer. It must always be there.
-      return;
+    if (_layerStack.length > 1) {
+      _layerStack.removeLast();
     }
-    currentLayer = currentLayer.parent!;
   }
 
   @override
@@ -224,7 +224,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
 
   T pushLayer<T extends ContainerLayer>(T layer) {
     currentLayer.add(layer);
-    currentLayer = layer;
+    _layerStack.add(layer);
     return layer;
   }
 

@@ -910,7 +910,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     required this._appleContext,
     required this._buildSystem,
     required this._templateRenderer,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
   }) : super(logger: toolContext.logger) {
     registerOptionBundles(const <OptionBundle>[
@@ -938,10 +938,6 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   @visibleForTesting
   BuildSystem get buildSystem => _buildSystem;
 
-  @visibleForTesting
-  @override
-  ToolContext get toolContext => super.toolContext!;
-
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
     DevelopmentArtifact.iOS,
@@ -961,7 +957,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   late final Future<BuildInfo> cachedBuildInfo = getBuildInfo();
 
   late final Future<BuildableIOSApp> buildableIOSApp = () async {
-    final app = await applicationPackages?.getPackageForPlatform(
+    final app = await applicationPackages.getPackageForPlatform(
       TargetPlatform.ios,
       buildInfo: await cachedBuildInfo,
     ) as BuildableIOSApp?;
@@ -1032,6 +1028,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       analytics: analytics,
       app: app,
       buildInfo: buildInfo,
+      featureFlags: runner!.featureFlags,
       plistParser: plistParser,
       templateRenderer: _templateRenderer,
       toolContext: toolContext,

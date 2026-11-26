@@ -71,6 +71,16 @@ Future<void> testMain() async {
     );
   });
 
+  test('imageFilter returns the ColorFilter that was set', () {
+    // Not const, so the filter is a distinct instance from any other test's.
+    // ignore: prefer_const_constructors
+    final cf = ui.ColorFilter.mode(const ui.Color(0xFF00FF00), ui.BlendMode.srcIn);
+    final paint = ui.Paint()..imageFilter = cf;
+
+    expect(paint.imageFilter, same(cf));
+    expect(ui.Paint.from(paint).imageFilter, same(cf));
+  });
+
   test('.from copies every field', () {
     final paint = ui.Paint();
     paint.blendMode = ui.BlendMode.darken;

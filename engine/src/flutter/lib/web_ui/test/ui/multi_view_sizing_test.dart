@@ -72,8 +72,117 @@ void testMain() {
     }
 
     Future<void> render(EngineFlutterView view) {
-      return renderer.renderScene(_createMarkedScene(view.physicalSize), view);
+      return renderer.renderScene(
+        _createMarkedScene(view.physicalSize),
+        view,
+        size: view.physicalSize,
+      );
     }
+
+    test('FlutterView.render uses passed size when hostElement is narrower', () async {
+      // Simulate a host container constrained by CSS (e.g. a 360px flex column)
+      // while the framework renders larger scenes (680x260 and 960x260) via
+      // viewConstraints.
+      final EngineFlutterView mediumView = createView(360, 260);
+      final EngineFlutterView expandedView = createView(360, 260);
+
+      const mediumSize = ui.Size(680, 260);
+      const expandedSize = ui.Size(960, 260);
+
+      final EnginePlatformDispatcher dispatcher = EnginePlatformDispatcher.instance;
+      final ui.VoidCallback? previousOnDrawFrame = dispatcher.onDrawFrame;
+      addTearDown(() => dispatcher.onDrawFrame = previousOnDrawFrame);
+
+      dispatcher.onDrawFrame = () {
+        mediumView.render(_createMarkedScene(mediumSize), size: mediumSize);
+        expandedView.render(_createMarkedScene(expandedSize), size: expandedSize);
+      };
+      dispatcher.invokeOnDrawFrame();
+
+      await Future.wait(<Future<void>>[
+        ?renderer.rasterizers[mediumView.viewId]!.queue.current?.completer.future,
+        ?renderer.rasterizers[expandedView.viewId]!.queue.current?.completer.future,
+      ]);
+
+      // The host elements remain 360x260, so view.physicalSize remains 360x260,
+      // while the canvases and root elements match the rendered frame sizes.
+      expect(mediumView.physicalSize, const ui.Size(360, 260));
+      expect(expandedView.physicalSize, const ui.Size(360, 260));
+      expect(mediumView.dom.rootElement.style.width, '680px');
+      expect(expandedView.dom.rootElement.style.width, '960px');
+
+      _expectViewRendered(mediumView, 680, 260);
+      _expectViewRendered(expandedView, 960, 260);
+    });
+
+    test('FlutterView.render falls back to physicalSize when size is omitted', () async {
+      final EngineFlutterView view = createView(360, 260);
+
+      final EnginePlatformDispatcher dispatcher = EnginePlatformDispatcher.instance;
+      final ui.VoidCallback? previousOnDrawFrame = dispatcher.onDrawFrame;
+      addTearDown(() => dispatcher.onDrawFrame = previousOnDrawFrame);
+
+      dispatcher.onDrawFrame = () {
+        view.render(_createMarkedScene(const ui.Size(360, 260)));
+      };
+      dispatcher.invokeOnDrawFrame();
+
+      await renderer.rasterizers[view.viewId]!.queue.current?.completer.future;
+
+      _expectViewRendered(view, 360, 260);
+    });
+
+    test('FlutterView.render skips sub-pixel size that rounds to 0 without failing', () async {
+      final EngineFlutterView view = createView(360, 260);
+      final CkOffscreenSurface? ckSurface = switch (renderer.rasterizer) {
+        OffscreenCanvasRasterizer(offscreenSurface: final CkOffscreenSurface s) => s,
+        _ => null,
+      };
+      if (ckSurface != null) {
+        await ckSurface.initialized;
+      }
+      final bool? supportedWebGlBefore = ckSurface?.supportsWebGl;
+
+      const subPixelSize = ui.Size(360, 0.2);
+      const finalSize = ui.Size(360, 260);
+
+      final EnginePlatformDispatcher dispatcher = EnginePlatformDispatcher.instance;
+      final ui.VoidCallback? previousOnDrawFrame = dispatcher.onDrawFrame;
+      addTearDown(() => dispatcher.onDrawFrame = previousOnDrawFrame);
+
+      dispatcher.onDrawFrame = () {
+        view.render(_createMarkedScene(subPixelSize), size: subPixelSize);
+      };
+      dispatcher.invokeOnDrawFrame();
+      await renderer.rasterizers[view.viewId]!.queue.current?.completer.future;
+
+      dispatcher.onDrawFrame = () {
+        view.render(_createMarkedScene(finalSize), size: finalSize);
+      };
+      dispatcher.invokeOnDrawFrame();
+      await renderer.rasterizers[view.viewId]!.queue.current?.completer.future;
+
+      expect(ckSurface?.supportsWebGl, supportedWebGlBefore);
+      _expectViewRendered(view, 360, 260);
+    });
+
+    test('queued renderScene requests each use their own size', () async {
+      final EngineFlutterView view = createView(360, 260);
+
+      const firstSize = ui.Size(400, 200);
+      const droppedSize = ui.Size(500, 220);
+      const finalSize = ui.Size(680, 260);
+
+      // Enqueue three scenes in the same turn so the first runs, the second is
+      // replaced in `queue.next`, and the third renders at `finalSize`.
+      await Future.wait(<Future<void>>[
+        renderer.renderScene(_createMarkedScene(firstSize), view, size: firstSize),
+        renderer.renderScene(_createMarkedScene(droppedSize), view, size: droppedSize),
+        renderer.renderScene(_createMarkedScene(finalSize), view, size: finalSize),
+      ]);
+
+      _expectViewRendered(view, 680, 260);
+    });
 
     test('3 views of different sizes rendered in the same turn', () async {
       final EngineFlutterView view1 = createView(100, 100);
