@@ -1771,7 +1771,7 @@ mixin _CopyPointerUpEvent on PointerEvent {
   }
 }
 
-/// An event that corresponds to a pointer existing contact with a surface.
+/// An event that corresponds to a pointer exiting contact with a surface.
 ///
 /// Pointer up events are dispatched when a pointer first exits contact with
 /// the screen or another input surface, such as when a finger is removed from
