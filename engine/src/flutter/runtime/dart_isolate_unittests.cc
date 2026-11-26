@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <atomic>
+#include <memory>
 #include <mutex>
 #include <string>
 
@@ -409,24 +410,26 @@ TEST_F(DartIsolateTest, CanCreateServiceIsolate) {
 #endif
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   fml::AutoResetWaitableEvent service_isolate_latch;
-  fml::AutoResetWaitableEvent server_uri_latch;
-  std::atomic<bool> armed{false};
-  std::mutex server_uri_mutex;
-  std::string server_uri;
+  struct ServerUriState {
+    fml::AutoResetWaitableEvent latch;
+    std::atomic<bool> armed{false};
+    std::mutex mutex;
+    std::string uri;
+  };
+  auto state = std::make_shared<ServerUriState>();
   auto callback_handle = DartServiceIsolate::AddServerStatusCallback(
-      [&armed, &server_uri_latch, &server_uri_mutex,
-       &server_uri](const std::string& uri) {
-        if (!armed.load() || uri.empty()) {
+      [state](const std::string& uri) {
+        if (!state->armed.load() || uri.empty()) {
           return;
         }
-        std::scoped_lock lock(server_uri_mutex);
-        if (server_uri.empty()) {
-          server_uri = uri;
-          server_uri_latch.Signal();
+        std::scoped_lock lock(state->mutex);
+        if (state->uri.empty()) {
+          state->uri = uri;
+          state->latch.Signal();
         }
       });
   ASSERT_NE(callback_handle, 0);
-  armed.store(true);
+  state->armed.store(true);
   auto settings = CreateSettingsForFixture();
   settings.enable_vm_service = true;
   settings.vm_service_port = 0;
@@ -452,11 +455,11 @@ TEST_F(DartIsolateTest, CanCreateServiceIsolate) {
   ASSERT_TRUE(isolate);
   ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
   service_isolate_latch.Wait();
-  server_uri_latch.Wait();
+  state->latch.Wait();
   ASSERT_TRUE(DartServiceIsolate::RemoveServerStatusCallback(callback_handle));
   {
-    std::scoped_lock lock(server_uri_mutex);
-    ASSERT_EQ(server_uri.rfind("http://127.0.0.1:", 0), 0u);
+    std::scoped_lock lock(state->mutex);
+    ASSERT_EQ(state->uri.rfind("http://127.0.0.1:", 0), 0u);
   }
 }
 
