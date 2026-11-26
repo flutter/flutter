@@ -325,6 +325,26 @@ TEST_F(FlEngineTest, AutoSkipsVulkanInOpenGLBuild) {
 }
 #endif
 
+TEST_F(FlEngineTest, AutoUsesOpenGLWhenDmabufIsDisabled) {
+  g_autofree gchar* renderer = g_strdup(g_getenv("FLUTTER_LINUX_RENDERER"));
+  g_autofree gchar* dmabuf = g_strdup(g_getenv("FLUTTER_GTK4_ENABLE_DMABUF"));
+  g_setenv("FLUTTER_LINUX_RENDERER", "auto", TRUE);
+  g_setenv("FLUTTER_GTK4_ENABLE_DMABUF", "0", TRUE);
+  g_autoptr(FlEngine) selected = fl_engine_new(project);
+  if (renderer != nullptr) {
+    g_setenv("FLUTTER_LINUX_RENDERER", renderer, TRUE);
+  } else {
+    g_unsetenv("FLUTTER_LINUX_RENDERER");
+  }
+  if (dmabuf != nullptr) {
+    g_setenv("FLUTTER_GTK4_ENABLE_DMABUF", dmabuf, TRUE);
+  } else {
+    g_unsetenv("FLUTTER_GTK4_ENABLE_DMABUF");
+  }
+  EXPECT_EQ(fl_engine_get_renderer_type(selected), kOpenGL);
+  EXPECT_EQ(fl_engine_get_vulkan_manager(selected), nullptr);
+}
+
 TEST_F(FlEngineTest, SelectVulkanWithoutInitializingDriver) {
   g_autofree gchar* previous = g_strdup(g_getenv("FLUTTER_LINUX_RENDERER"));
   g_setenv("FLUTTER_LINUX_RENDERER", "vulkan", TRUE);

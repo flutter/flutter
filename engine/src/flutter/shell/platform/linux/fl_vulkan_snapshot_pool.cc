@@ -8,6 +8,7 @@
 #include <poll.h>
 #include <unistd.h>
 
+#include <cstring>
 #include <limits>
 
 #include "flutter/fml/trace_event.h"
@@ -29,10 +30,10 @@ FlVulkanSnapshotBuffer::FlVulkanSnapshotBuffer(
     const FlVulkanDeviceContext& context)
     : context(context) {}
 
-bool FlVulkanSnapshotBuffer::Initialize(uint32_t width,
-                                        uint32_t height,
-                                        GError** error) {
-  TRACE_EVENT0("flutter", "VulkanSnapshotAllocate");
+#define CALL(name) Proc<PFN_vk##name>("vk" #name)
+bool FlVulkanSnapshotBuffer::InitializeStorage(uint32_t width,
+                                               uint32_t height,
+                                               GError** error) {
   const uint64_t stride = (uint64_t(width) * 4 + 255) & ~uint64_t(255);
   if (!width || !height || width > context.max_image_dimension ||
       height > context.max_image_dimension || stride > UINT32_MAX ||
@@ -43,7 +44,6 @@ bool FlVulkanSnapshotBuffer::Initialize(uint32_t width,
   }
   const VkDeviceSize length = stride * height;
   auto device = context.device;
-#define CALL(name) Proc<PFN_vk##name>("vk" #name)
   VkExternalMemoryBufferCreateInfo external = {
       VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO};
   external.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_DMA_BUF_BIT_EXT;
@@ -104,6 +104,23 @@ bool FlVulkanSnapshotBuffer::Initialize(uint32_t width,
              error))
     return false;
 
+  descriptor = {width,
+                height,
+                kAbgr8888,
+                0,
+                TRUE,
+                1,
+                {{fd, static_cast<guint>(stride), 0}}};
+  return true;
+}
+
+bool FlVulkanSnapshotBuffer::Initialize(uint32_t width,
+                                        uint32_t height,
+                                        GError** error) {
+  TRACE_EVENT0("flutter", "VulkanSnapshotAllocate");
+  if (!InitializeStorage(width, height, error))
+    return false;
+  auto device = context.device;
   VkCommandPoolCreateInfo pool_info = {
       VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};
   pool_info.queueFamilyIndex = context.queue_family;
@@ -124,13 +141,6 @@ bool FlVulkanSnapshotBuffer::Initialize(uint32_t width,
   if (!Check(CALL(CreateFence)(device, &fence_info, nullptr, &fence),
              "vkCreateFence", error))
     return false;
-  descriptor = {width,
-                height,
-                kAbgr8888,
-                0,
-                TRUE,
-                1,
-                {{fd, static_cast<guint>(stride), 0}}};
   return true;
 }
 
@@ -243,6 +253,35 @@ FlVulkanSnapshotBuffer::~FlVulkanSnapshotBuffer() {
     CALL(FreeMemory)(device, memory, nullptr);
 }
 #undef CALL
+
+bool FlVulkanSnapshotPool::CanImportSample(const FlVulkanDeviceContext& context,
+                                           GdkDisplay* display,
+                                           GError** error) {
+  if (!fl_gtk_runtime_dmabuf_format_supported(display, kAbgr8888, 0)) {
+    g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                        "GTK does not accept linear ABGR8888 DMA-BUF textures");
+    return false;
+  }
+  FlVulkanSnapshotBuffer sample(context);
+  constexpr uint32_t kSize = 64;
+  if (!sample.InitializeStorage(kSize, kSize, error))
+    return false;
+  // No Vulkan queue uses this buffer. Initialize its coherent storage on
+  // the host so the import can be checked without submitting any GPU work.
+  void* mapped = nullptr;
+  size_t length = kSize * sample.descriptor.planes[0].stride;
+  if (!Check(sample.Proc<PFN_vkMapMemory>("vkMapMemory")(
+                 context.device, sample.memory, 0, length, 0, &mapped),
+             "vkMapMemory(DMA-BUF probe)", error))
+    return false;
+  std::memset(mapped, 0, length);
+  sample.Proc<PFN_vkUnmapMemory>("vkUnmapMemory")(context.device,
+                                                  sample.memory);
+  // The texture is released before the descriptor and its FD leave scope.
+  g_autoptr(GdkTexture) texture = fl_gtk_runtime_build_dmabuf_texture(
+      display, &sample.descriptor, nullptr, nullptr, error);
+  return texture != nullptr;
+}
 
 FlVulkanSnapshotPool::FlVulkanSnapshotPool(const FlVulkanDeviceContext& context,
                                            size_t capacity)

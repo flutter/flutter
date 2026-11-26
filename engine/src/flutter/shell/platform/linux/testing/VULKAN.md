@@ -7,10 +7,14 @@ surface/Wayland-surface and swapchain extensions currently required by Impeller.
 The GTK presentation renderer is independent: `GSK_RENDERER=vulkan` alone does
 not select Impeller Vulkan.
 
-Set `FLUTTER_LINUX_RENDERER=auto` to try Vulkan during engine construction.
-If device initialization fails or Impeller is explicitly disabled, the engine
-selects OpenGL before creating any view compositor and logs the reason once.
-Later embedder startup and plugin import errors remain visible on the selected backend.
+Set `FLUTTER_LINUX_RENDERER=auto` to try hardware Vulkan on Wayland during engine
+construction. GTK must support DMA-BUF textures and accept a sample buffer
+exported by the selected Vulkan device. If this check fails, DMA-BUF is disabled,
+or Impeller is explicitly disabled, the engine selects OpenGL before creating
+the view compositor and logs the reason. The sample checks a small export and
+GDK texture construction. Actual frames still depend on their dimensions,
+available buffers and compositor support. Later embedder startup and plugin
+import errors remain visible on the selected backend.
 
 An explicit Vulkan request enables Impeller. `--enable-impeller=false` is an
 error, and loader/device failures fail startup rather than silently running GLES.
@@ -41,7 +45,7 @@ project or engine switches. This is not a new framework context override.
   aligned, with DRM ABGR8888 describing RGBA bytes. The source image is restored
   to `GENERAL`. The buffer is released to `VK_QUEUE_FAMILY_FOREIGN_EXT`, and a
   fence completes before GTK can import it. No implicit producer fence is assumed.
-- `fl_vulkan_snapshot_pool` retains at most three export allocations per manager,
+- `fl_vulkan_snapshot_pool` retains up to four export allocations per manager,
   including their command pools, command buffers and fences. A slot is reusable
   only after every snapshot/GTK texture lease releases (the
   [GTK texture release contract](https://docs.gtk.org/gdk4/method.DmabufTextureBuilder.build.html))

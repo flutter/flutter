@@ -31,6 +31,7 @@ struct FlVulkanSnapshotBuffer {
     return reinterpret_cast<T>(context.get_proc(context.device, name));
   }
   bool Initialize(uint32_t width, uint32_t height, GError** error);
+  bool InitializeStorage(uint32_t width, uint32_t height, GError** error);
   bool Copy(VkImage source, GError** error);
   FlVulkanDeviceContext context;
   FlGtk4DmabufDescriptor descriptor = {};
@@ -62,6 +63,11 @@ class FlVulkanSnapshotPool
   static std::shared_ptr<FlVulkanSnapshotPool> Create(
       const FlVulkanDeviceContext& context,
       size_t capacity = 4);
+  // Checks that GDK can construct a texture from the same buffer format and
+  // allocation strategy used for real frames. Runs once on the GTK thread.
+  static bool CanImportSample(const FlVulkanDeviceContext& context,
+                              GdkDisplay* display,
+                              GError** error);
   std::shared_ptr<FlVulkanSnapshotBuffer> Copy(VkImage source,
                                                uint32_t width,
                                                uint32_t height,

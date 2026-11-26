@@ -138,6 +138,7 @@ struct State {
   std::vector<const char*> extensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
   bool supports_export = false;
   bool supports_gl_images = false;
+  bool cpu_device = false;
 #define DECLARE(name) PFN_vk##name name = nullptr;
   DEVICE_FUNCTIONS(DECLARE)
 #undef DECLARE
@@ -188,7 +189,7 @@ struct Frame {
   }
 };
 
-bool initialize(State& state, GError** error) {
+bool initialize(State& state, bool require_hardware, GError** error) {
   if (loader().instance_proc == nullptr || loader().device_proc == nullptr) {
     g_set_error_literal(error, error_quark(), 0, "Vulkan loader unavailable");
     return false;
@@ -233,7 +234,10 @@ bool initialize(State& state, GError** error) {
   for (auto physical : devices) {
     VkPhysicalDeviceProperties properties;
     GetPhysicalDeviceProperties(physical, &properties);
-    if (properties.apiVersion < VK_API_VERSION_1_1) {
+    const bool cpu_device =
+        properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU;
+    if (properties.apiVersion < VK_API_VERSION_1_1 ||
+        (require_hardware && cpu_device)) {
       continue;
     }
     uint32_t extension_count = 0;
@@ -269,13 +273,17 @@ bool initialize(State& state, GError** error) {
       if (score > best_score) {
         state.physical_device = physical;
         state.queue_family = i;
+        state.cpu_device = cpu_device;
         best_score = score;
       }
     }
   }
   if (state.physical_device == VK_NULL_HANDLE) {
-    g_set_error_literal(error, error_quark(), 0,
-                        "No Vulkan 1.1 graphics/compute device available");
+    g_set_error_literal(
+        error, error_quark(), 0,
+        require_hardware
+            ? "No hardware Vulkan 1.1 graphics/compute device available"
+            : "No Vulkan 1.1 graphics/compute device available");
     return false;
   }
   uint32_t extension_count = 0;
@@ -465,17 +473,30 @@ FlVulkanManager* fl_vulkan_manager_new() {
   return FL_VULKAN_MANAGER(g_object_new(fl_vulkan_manager_get_type(), nullptr));
 }
 
+static bool initialize_device(FlVulkanManager* self,
+                              bool require_hardware,
+                              GError** error) {
+  if (!*self->state) {
+    auto state = std::make_shared<State>();
+    if (!initialize(*state, require_hardware, error)) {
+      return false;
+    }
+    *self->state = std::move(state);
+  }
+  if (require_hardware && (*self->state)->cpu_device) {
+    g_set_error_literal(error, error_quark(), 0,
+                        "Vulkan device renders on the CPU");
+    return false;
+  }
+  return true;
+}
+
 gboolean fl_vulkan_manager_initialize(FlVulkanManager* self,
                                       FlutterVulkanRendererConfig* config,
                                       GError** error) {
   g_return_val_if_fail(FL_IS_VULKAN_MANAGER(self), FALSE);
-  if (!*self->state) {
-    auto state = std::make_shared<State>();
-    if (!initialize(*state, error)) {
-      return FALSE;
-    }
-    *self->state = std::move(state);
-  }
+  if (!initialize_device(self, false, error))
+    return FALSE;
   if (!*self->snapshots) {
     *self->snapshots = flutter::FlVulkanSnapshotPool::Create(
         fl_vulkan_manager_get_device_context(self));
@@ -508,6 +529,22 @@ gboolean fl_vulkan_manager_initialize(FlVulkanManager* self,
     return false;
   };
   return TRUE;
+}
+
+gboolean fl_vulkan_manager_initialize_auto(FlVulkanManager* self,
+                                           GdkDisplay* display,
+                                           GError** error) {
+  g_return_val_if_fail(FL_IS_VULKAN_MANAGER(self), FALSE);
+  g_return_val_if_fail(GDK_IS_DISPLAY(display), FALSE);
+  if (!initialize_device(self, true, error))
+    return FALSE;
+  if (!(*self->state)->supports_export) {
+    g_set_error_literal(error, error_quark(), 0,
+                        "Vulkan DMA-BUF export unavailable");
+    return FALSE;
+  }
+  return flutter::FlVulkanSnapshotPool::CanImportSample(
+      fl_vulkan_manager_get_device_context(self), display, error);
 }
 
 static std::unique_ptr<Frame> allocate_frame(

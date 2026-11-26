@@ -23,6 +23,11 @@ FlVulkanManager* fl_vulkan_manager_new();
 gboolean fl_vulkan_manager_initialize(FlVulkanManager* self,
                                       FlutterVulkanRendererConfig* config,
                                       GError** error);
+// Probes hardware Vulkan and a native GDK texture before choosing the renderer.
+// Runs on the GTK thread before any view depends on the chosen backend.
+gboolean fl_vulkan_manager_initialize_auto(FlVulkanManager* self,
+                                           GdkDisplay* display,
+                                           GError** error);
 gboolean fl_vulkan_manager_create_backing_store(
     FlVulkanManager* self,
     const FlutterBackingStoreConfig* config,

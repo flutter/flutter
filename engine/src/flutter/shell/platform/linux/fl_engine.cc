@@ -24,7 +24,10 @@
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
 #include "flutter/shell/platform/linux/fl_pixel_buffer_texture_private.h"
 #if FLUTTER_LINUX_GTK4
+#include <gdk/wayland/gdkwayland.h>
+
 #include "flutter/shell/platform/linux/fl_gl_texture_vulkan.h"  // nogncheck
+#include "flutter/shell/platform/linux/fl_gtk4_runtime_api.h"
 #include "flutter/shell/platform/linux/fl_pixel_buffer_texture_vulkan.h"  // nogncheck
 #endif
 #include "flutter/shell/platform/linux/fl_gtk_frame_pacer.h"
@@ -879,6 +882,25 @@ static gboolean initialize_vulkan_renderer(FlVulkanManager* manager,
   return FALSE;
 #endif
 }
+
+static gboolean probe_vulkan_renderer(FlVulkanManager* manager,
+                                      GError** error) {
+#ifdef SHELL_ENABLE_VULKAN
+  GdkDisplay* display = gdk_display_get_default();
+  if (!GDK_IS_WAYLAND_DISPLAY(display) ||
+      g_strcmp0(g_getenv("FLUTTER_GTK4_ENABLE_DMABUF"), "0") == 0 ||
+      !fl_gtk_runtime_supports_dmabuf_textures()) {
+    g_set_error_literal(error, fl_engine_error_quark(), FL_ENGINE_ERROR_FAILED,
+                        "Wayland DMA-BUF presentation unavailable");
+    return FALSE;
+  }
+  return fl_vulkan_manager_initialize_auto(manager, display, error);
+#else
+  g_set_error_literal(error, fl_engine_error_quark(), FL_ENGINE_ERROR_FAILED,
+                      "Embedder built without Vulkan rendering");
+  return FALSE;
+#endif
+}
 #endif
 
 static FlEngine* fl_engine_new_full(FlDartProject* project,
@@ -909,8 +931,7 @@ static FlEngine* fl_engine_new_full(FlDartProject* project,
           "reason=Impeller explicitly disabled");
     } else {
       g_autoptr(FlVulkanManager) manager = fl_vulkan_manager_new();
-      FlutterVulkanRendererConfig config = {};
-      if (initialize_vulkan_renderer(manager, &config, &error)) {
+      if (probe_vulkan_renderer(manager, &error)) {
         self->vulkan_manager = FL_VULKAN_MANAGER(g_steal_pointer(&manager));
         self->renderer_type = kVulkan;
       } else {
@@ -918,7 +939,7 @@ static FlEngine* fl_engine_new_full(FlDartProject* project,
             "Flutter renderer fallback: requested=auto attempted=vulkan "
             "selected=opengl "
             "reason=%s",
-            error->message);
+            error ? error->message : "GTK DMA-BUF texture probe failed");
       }
     }
   } else if (g_strcmp0(renderer, "vulkan") == 0) {
