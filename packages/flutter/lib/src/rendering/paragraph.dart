@@ -391,6 +391,8 @@ class RenderParagraph extends RenderBox
 
   final TextPainter _textPainter;
   int? _maxLines;
+  String? get _effectiveEllipsis =>
+      _overflow == TextOverflow.ellipsis && !(_maxLines == null && softWrap) ? _kEllipsis : null;
 
   // Currently, computing min/max intrinsic width/height will destroy state
   // inside the painter. Instead of calling _layout again to get back the correct
@@ -407,9 +409,7 @@ class RenderParagraph extends RenderBox
       ..textDirection = _textPainter.textDirection
       ..textScaler = _textPainter.textScaler
       ..maxLines = _maxLines
-      ..ellipsis = _overflow == TextOverflow.ellipsis && !(_maxLines == null && softWrap)
-          ? _kEllipsis
-          : null
+      ..ellipsis = _effectiveEllipsis
       ..locale = _textPainter.locale
       ..strutStyle = _textPainter.strutStyle
       ..textWidthBasis = _textPainter.textWidthBasis
@@ -918,6 +918,8 @@ class RenderParagraph extends RenderBox
     return softWrap || overflow == TextOverflow.ellipsis ? maxWidth : double.infinity;
   }
 
+  /// Lays out the [painter] with the given [constraints], and truncates the text
+  /// with an ellipsis if it overflows the bounded height.
   void _layoutTextPainter(TextPainter painter, BoxConstraints constraints) {
     final double maxWidth = _adjustMaxWidth(constraints.maxWidth);
     painter.layout(minWidth: constraints.minWidth, maxWidth: maxWidth);
@@ -926,14 +928,9 @@ class RenderParagraph extends RenderBox
         constraints.hasBoundedHeight &&
         painter.height > constraints.maxHeight) {
       final List<ui.LineMetrics> lines = painter.computeLineMetrics();
-      var fittingLines = 0;
-      for (final ui.LineMetrics line in lines) {
-        if (line.baseline + line.descent <= constraints.maxHeight) {
-          fittingLines++;
-        } else {
-          break;
-        }
-      }
+      final int fittingLines = lines
+          .takeWhile((ui.LineMetrics line) => line.baseline + line.descent <= constraints.maxHeight)
+          .length;
       final int effectiveMaxLines = math.max(1, fittingLines);
       if (effectiveMaxLines < lines.length) {
         painter
