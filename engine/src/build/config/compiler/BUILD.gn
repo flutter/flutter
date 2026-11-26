@@ -491,7 +491,12 @@ config("compiler") {
     configs = [ "//flutter/tools/fuchsia/gn-sdk/src/config:compiler" ]
   }
 
-  asmflags = cflags
+  # Assign compiler flags to asmflags for non-MASM assemblers. Windows x86/x64
+  # uses ml.exe/ml64.exe, which rejects C/C++ compiler flags such as /GS, /FS,
+  # /guard:cf, -m64, and -fcolor-diagnostics (warning A4018).
+  if (!is_win || current_cpu == "arm64") {
+    asmflags = cflags
+  }
 }
 
 # C++ modules (available and enabled by default in C++20 and above) are
