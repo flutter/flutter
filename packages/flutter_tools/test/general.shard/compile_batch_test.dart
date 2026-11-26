@@ -485,8 +485,10 @@ void main() {
   });
 
   for (final FileSystemStyle style in [FileSystemStyle.posix, FileSystemStyle.windows]) {
+    final styleName = style == FileSystemStyle.windows ? 'windows' : 'posix';
+
     test(
-      'KernelCompiler converts dart_plugin_registrant physical path to virtual URI ($style.name)',
+      'KernelCompiler converts dart_plugin_registrant physical path to virtual URI ($styleName)',
       () async {
         final logger = BufferLogger.test();
         final fileSystem = MemoryFileSystem.test(style: style);
