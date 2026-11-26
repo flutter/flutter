@@ -1531,6 +1531,41 @@ name: test
 
     expect(flutterManifest, isNotNull);
     expect(flutterManifest!.dependencies, isEmpty);
+    expect(flutterManifest.devDependencies, isEmpty);
+  });
+
+  test('FlutterManifest can parse devDependencies', () async {
+    const manifest = '''
+name: test
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  my_ext: ^1.0.0
+''';
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: BufferLogger.test(),
+    );
+
+    expect(flutterManifest, isNotNull);
+    expect(flutterManifest!.devDependencies, <String>{'flutter_test', 'my_ext'});
+  });
+
+  test('FlutterManifest falls back to empty sets for non-map dependencies', () async {
+    const manifest = '''
+name: test
+dependencies: invalid
+dev_dependencies:
+  - invalid
+''';
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: BufferLogger.test(),
+    );
+
+    expect(flutterManifest, isNotNull);
+    expect(flutterManifest!.dependencies, isEmpty);
+    expect(flutterManifest.devDependencies, isEmpty);
   });
 
   test(
@@ -1791,6 +1826,20 @@ workspace:
   test('FlutterManifest can parse empty workspace', () async {
     const manifest = '''
 name: test
+''';
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: BufferLogger.test(),
+    );
+
+    expect(flutterManifest, isNotNull);
+    expect(flutterManifest!.workspace, isEmpty);
+  });
+
+  test('FlutterManifest falls back to empty list for non-list workspace', () async {
+    const manifest = '''
+name: test
+workspace: invalid
 ''';
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,

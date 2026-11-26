@@ -1163,7 +1163,7 @@ void main() {
       fileSystem = MemoryFileSystem.test();
     });
 
-    testUsingContext('creates temporary xcode project', () async {
+    test('creates temporary xcode project', () async {
       final Xcode xcode = setupXcode(
         fakeProcessManager: fakeProcessManager,
         fileSystem: fileSystem,

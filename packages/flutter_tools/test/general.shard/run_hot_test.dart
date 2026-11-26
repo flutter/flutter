@@ -4,7 +4,6 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/asset.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -23,7 +22,6 @@ import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fakes.dart';
 import '../src/test_build_system.dart';
 import 'hot_shared.dart';
@@ -52,118 +50,97 @@ void main() {
       fileSystem = MemoryFileSystem.test();
     });
 
-    testUsingContext(
-      'kills the test device',
-      () async {
-        final runner = HotRunner(
-          <FlutterDevice>[flutterDevice],
-          applicationPackageFactory: FlutterApplicationPackageFactory(
-            androidSdkBuilder: () => null,
-            plistParserBuilder: FakePlistParser.new,
-            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
-            toolContext: FakeToolContext(fs: fileSystem),
-          ),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          assetBundleFactory: AssetBundleFactory.defaultInstance(
-            fileSystem: fileSystem,
-            flutterRoot: getFlutterRoot(),
-            logger: BufferLogger.test(),
-            platform: FakePlatform(),
-          ),
-          buildTargets: const BuildTargetsImpl(),
-          featureFlags: TestFeatureFlags(),
-          target: 'main.dart',
-          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+    test('kills the test device', () async {
+      final runner = HotRunner(
+        <FlutterDevice>[flutterDevice],
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           toolContext: FakeToolContext(fs: fileSystem),
-          xcode: null,
-          analytics: _FakeAnalytics(),
-        );
+        ),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: getFlutterRoot(),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
+        buildTargets: const BuildTargetsImpl(),
+        featureFlags: TestFeatureFlags(),
+        target: 'main.dart',
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        toolContext: FakeToolContext(fs: fileSystem),
+        xcode: null,
+        analytics: _FakeAnalytics(),
+      );
 
-        await runner.run();
-        await runner.cleanupAfterSignal();
-        expect(flutterDevice.wasExited, true);
-        expect((flutterDevice.device.dds as FakeDartDevelopmentService).wasShutdown, true);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: FakeProcessManager.empty,
-      },
-    );
+      await runner.run();
+      await runner.cleanupAfterSignal();
+      expect(flutterDevice.wasExited, true);
+      expect((flutterDevice.device.dds as FakeDartDevelopmentService).wasShutdown, true);
+    });
 
-    testUsingContext(
-      'kill with a detach keeps the test device running',
-      () async {
-        final runner = HotRunner(
-          <FlutterDevice>[flutterDevice],
-          applicationPackageFactory: FlutterApplicationPackageFactory(
-            androidSdkBuilder: () => null,
-            plistParserBuilder: FakePlistParser.new,
-            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
-            toolContext: FakeToolContext(fs: fileSystem),
-          ),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          assetBundleFactory: AssetBundleFactory.defaultInstance(
-            fileSystem: fileSystem,
-            flutterRoot: getFlutterRoot(),
-            logger: BufferLogger.test(),
-            platform: FakePlatform(),
-          ),
-          buildTargets: const BuildTargetsImpl(),
-          featureFlags: TestFeatureFlags(),
-          target: 'main.dart',
-          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+    test('kill with a detach keeps the test device running', () async {
+      final runner = HotRunner(
+        <FlutterDevice>[flutterDevice],
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           toolContext: FakeToolContext(fs: fileSystem),
-          xcode: null,
-          analytics: _FakeAnalytics(),
-        );
+        ),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: getFlutterRoot(),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
+        buildTargets: const BuildTargetsImpl(),
+        featureFlags: TestFeatureFlags(),
+        target: 'main.dart',
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        toolContext: FakeToolContext(fs: fileSystem),
+        xcode: null,
+        analytics: _FakeAnalytics(),
+      );
 
-        await runner.run();
-        await runner.detach();
-        await runner.cleanupAfterSignal();
-        expect(flutterDevice.wasExited, false);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: FakeProcessManager.empty,
-      },
-    );
+      await runner.run();
+      await runner.detach();
+      await runner.cleanupAfterSignal();
+      expect(flutterDevice.wasExited, false);
+    });
 
-    testUsingContext(
-      'kill on an attached device keeps the test device running',
-      () async {
-        final runner = HotRunner(
-          <FlutterDevice>[flutterDevice],
-          applicationPackageFactory: FlutterApplicationPackageFactory(
-            androidSdkBuilder: () => null,
-            plistParserBuilder: FakePlistParser.new,
-            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
-            toolContext: FakeToolContext(fs: fileSystem),
-          ),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          assetBundleFactory: AssetBundleFactory.defaultInstance(
-            fileSystem: fileSystem,
-            flutterRoot: getFlutterRoot(),
-            logger: BufferLogger.test(),
-            platform: FakePlatform(),
-          ),
-          buildTargets: const BuildTargetsImpl(),
-          featureFlags: TestFeatureFlags(),
-          target: 'main.dart',
-          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+    test('kill on an attached device keeps the test device running', () async {
+      final runner = HotRunner(
+        <FlutterDevice>[flutterDevice],
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           toolContext: FakeToolContext(fs: fileSystem),
-          xcode: null,
-          analytics: _FakeAnalytics(),
-        );
+        ),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: getFlutterRoot(),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
+        buildTargets: const BuildTargetsImpl(),
+        featureFlags: TestFeatureFlags(),
+        target: 'main.dart',
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        toolContext: FakeToolContext(fs: fileSystem),
+        xcode: null,
+        analytics: _FakeAnalytics(),
+      );
 
-        await runner.attach();
-        await runner.cleanupAfterSignal();
-        expect(flutterDevice.wasExited, false);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: FakeProcessManager.empty,
-      },
-    );
+      await runner.attach();
+      await runner.cleanupAfterSignal();
+      expect(flutterDevice.wasExited, false);
+    });
   });
 
   group('multiple target devices', () {
@@ -178,49 +155,42 @@ void main() {
       fileSystem = MemoryFileSystem.test();
     });
 
-    testUsingContext(
-      'regression test for https://github.com/flutter/flutter/issues/179857',
-      () async {
-        final runner = HotRunner(
-          flutterDevices,
-          applicationPackageFactory: FlutterApplicationPackageFactory(
-            androidSdkBuilder: () => null,
-            plistParserBuilder: FakePlistParser.new,
-            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
-            toolContext: FakeToolContext(fs: fileSystem),
-          ),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          assetBundleFactory: AssetBundleFactory.defaultInstance(
-            fileSystem: fileSystem,
-            flutterRoot: getFlutterRoot(),
-            logger: BufferLogger.test(),
-            platform: FakePlatform(),
-          ),
-          buildTargets: const BuildTargetsImpl(),
-          featureFlags: TestFeatureFlags(),
-          target: 'main.dart',
-          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+    test('regression test for https://github.com/flutter/flutter/issues/179857', () async {
+      final runner = HotRunner(
+        flutterDevices,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           toolContext: FakeToolContext(fs: fileSystem),
-          xcode: null,
-          analytics: _FakeAnalytics(),
-        );
+        ),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: getFlutterRoot(),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
+        buildTargets: const BuildTargetsImpl(),
+        featureFlags: TestFeatureFlags(),
+        target: 'main.dart',
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        toolContext: FakeToolContext(fs: fileSystem),
+        xcode: null,
+        analytics: _FakeAnalytics(),
+      );
 
-        await runner.run();
-        await runner.cleanupAfterSignal();
+      await runner.run();
+      await runner.cleanupAfterSignal();
 
-        // Providing multiple Flutter devices should result in the target platform being set to
-        // 'multiple', which we use to report analytics.
-        expect(runner.targetPlatformName, 'multiple');
-        for (final flutterDevice in flutterDevices) {
-          expect(flutterDevice.wasExited, true);
-          expect((flutterDevice.device.dds as FakeDartDevelopmentService).wasShutdown, true);
-        }
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: FakeProcessManager.empty,
-      },
-    );
+      // Providing multiple Flutter devices should result in the target platform being set to
+      // 'multiple', which we use to report analytics.
+      expect(runner.targetPlatformName, 'multiple');
+      for (final flutterDevice in flutterDevices) {
+        expect(flutterDevice.wasExited, true);
+        expect((flutterDevice.device.dds as FakeDartDevelopmentService).wasShutdown, true);
+      }
+    });
   });
 }
 
