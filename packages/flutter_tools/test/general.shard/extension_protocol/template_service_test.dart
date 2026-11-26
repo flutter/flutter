@@ -30,11 +30,13 @@ final class _DuplicateLinuxTemplateService extends TemplateService {
 }
 
 void _duplicateLinuxExtensionEntryPoint(SendPort sendPort) {
-  ToolExtensionEntryPoint.run(
-    sendPort,
-    <ToolExtensionService>[_DuplicateLinuxTemplateService()],
-    extensionName: 'duplicate_linux_extension',
-    supportedPlatforms: const <String>{'linux'},
+  unawaited(
+    ToolExtensionEntryPoint.run(
+      sendPort,
+      <ToolExtensionService>[_DuplicateLinuxTemplateService()],
+      extensionName: 'duplicate_linux_extension',
+      supportedPlatforms: const <String>{'linux'},
+    ),
   );
 }
 
@@ -48,6 +50,7 @@ final class _ConflictingPluginLinuxTemplateService extends TemplateService {
   @override
   Future<Map<String, Object?>> generatePlatformTemplateParameters({
     required String platform,
+    required ExtensionTemplateType templateType,
     required Map<String, Object?> toolParameters,
   }) async {
     return <String, Object?>{...toolParameters, 'fromConflictingPluginExtension': true};
@@ -55,11 +58,13 @@ final class _ConflictingPluginLinuxTemplateService extends TemplateService {
 }
 
 void _conflictingPluginLinuxExtensionEntryPoint(SendPort sendPort) {
-  ToolExtensionEntryPoint.run(
-    sendPort,
-    <ToolExtensionService>[_ConflictingPluginLinuxTemplateService()],
-    extensionName: 'conflicting_plugin_linux_extension',
-    supportedPlatforms: const <String>{'linux'},
+  unawaited(
+    ToolExtensionEntryPoint.run(
+      sendPort,
+      <ToolExtensionService>[_ConflictingPluginLinuxTemplateService()],
+      extensionName: 'conflicting_plugin_linux_extension',
+      supportedPlatforms: const <String>{'linux'},
+    ),
   );
 }
 
@@ -84,11 +89,13 @@ final class _BuiltInCollisionTemplateService extends TemplateService {
 }
 
 void _builtInCollisionEntryPoint(SendPort sendPort) {
-  ToolExtensionEntryPoint.run(
-    sendPort,
-    <ToolExtensionService>[_BuiltInCollisionTemplateService()],
-    extensionName: 'builtin_collision_ext',
-    supportedPlatforms: const <String>{'linux'},
+  unawaited(
+    ToolExtensionEntryPoint.run(
+      sendPort,
+      <ToolExtensionService>[_BuiltInCollisionTemplateService()],
+      extensionName: 'builtin_collision_ext',
+      supportedPlatforms: const <String>{'linux'},
+    ),
   );
 }
 
@@ -118,18 +125,25 @@ final class _MultiVariantTemplateService extends TemplateService {
   @override
   Future<Map<String, Object?>> generatePlatformTemplateParameters({
     required String platform,
+    required ExtensionTemplateType templateType,
     required Map<String, Object?> toolParameters,
   }) async {
-    return <String, Object?>{...toolParameters, 'combinedExtension': true};
+    return <String, Object?>{
+      ...toolParameters,
+      'combinedExtension': true,
+      'templateType': templateType.name,
+    };
   }
 }
 
 void _multiVariantExtensionEntryPoint(SendPort sendPort) {
-  ToolExtensionEntryPoint.run(
-    sendPort,
-    <ToolExtensionService>[_MultiVariantTemplateService()],
-    extensionName: 'multi_variant_ext',
-    supportedPlatforms: const <String>{'linux'},
+  unawaited(
+    ToolExtensionEntryPoint.run(
+      sendPort,
+      <ToolExtensionService>[_MultiVariantTemplateService()],
+      extensionName: 'multi_variant_ext',
+      supportedPlatforms: const <String>{'linux'},
+    ),
   );
 }
 
@@ -158,6 +172,7 @@ final class _FailingTemplateService extends TemplateService {
   @override
   Future<Map<String, Object?>> generatePlatformTemplateParameters({
     required String platform,
+    required ExtensionTemplateType templateType,
     required Map<String, Object?> toolParameters,
   }) async {
     if (platform == domainErrorPlatform) {
@@ -244,6 +259,7 @@ void main() {
         expect(
           await templateManager.generatePlatformTemplateParameters(
             platform: LinuxTemplateService.customLinuxPlatformName,
+            templateType: .app,
             toolParameters: defaultParams,
           ),
           equals(defaultParams),
@@ -307,6 +323,7 @@ void main() {
       };
       final Map<String, Object?> result = await templateManager.generatePlatformTemplateParameters(
         platform: LinuxTemplateService.customLinuxPlatformName,
+        templateType: .app,
         toolParameters: inputParams,
       );
 
@@ -316,7 +333,16 @@ void main() {
 
       expect(
         await templateManager.generatePlatformTemplateParameters(
+          platform: LinuxTemplateService.customLinuxPlatformName,
+          templateType: .plugin,
+          toolParameters: inputParams,
+        ),
+        equals(inputParams),
+      );
+      expect(
+        await templateManager.generatePlatformTemplateParameters(
           platform: 'unknown_platform',
+          templateType: .app,
           toolParameters: inputParams,
         ),
         equals(inputParams),
@@ -392,6 +418,7 @@ void main() {
 
       final Map<String, Object?> params = await templateManager.generatePlatformTemplateParameters(
         platform: LinuxTemplateService.customLinuxPlatformName,
+        templateType: .app,
         toolParameters: const <String, Object?>{'projectName': 'my_app'},
       );
       expect(params['customLinux'], isTrue);
@@ -433,9 +460,11 @@ void main() {
         final Map<String, Object?> params = await templateManager
             .generatePlatformTemplateParameters(
               platform: _MultiVariantTemplateService.platformName,
+              templateType: .plugin,
               toolParameters: const <String, Object?>{'projectName': 'my_plugin'},
             );
         expect(params['combinedExtension'], isTrue);
+        expect(params['templateType'], 'plugin');
       },
     );
 
@@ -476,6 +505,7 @@ void main() {
           TemplateService.generatePlatformTemplateParametersMethod,
           const <String, Object?>{
             TemplateService.platformParam: 123,
+            TemplateService.templateTypeParam: 'app',
             TemplateService.toolParametersParam: <String, Object?>{},
           },
         ),
@@ -483,6 +513,15 @@ void main() {
           TemplateService.generatePlatformTemplateParametersMethod,
           const <String, Object?>{
             TemplateService.platformParam: 'custom_linux',
+            TemplateService.templateTypeParam: 'unknown_type',
+            TemplateService.toolParametersParam: <String, Object?>{},
+          },
+        ),
+        (
+          TemplateService.generatePlatformTemplateParametersMethod,
+          const <String, Object?>{
+            TemplateService.platformParam: 'custom_linux',
+            TemplateService.templateTypeParam: 'app',
             TemplateService.toolParametersParam: 'invalid',
           },
         ),
@@ -537,7 +576,8 @@ void main() {
           'flutter_tools_extension_linux_prototype',
           'lib',
           'templates',
-          'custom-linux-app',
+          'app',
+          'custom_linux.tmpl',
         ),
       );
 
@@ -549,51 +589,51 @@ void main() {
       );
     });
 
-    test('surfaces resolvePlatformTemplate errors as ToolExit and falls back on unexpected parameter errors', () async {
-      final (_, ExtensionTemplateManager templateManager) = await createManagers(
-        entryPoints: <ExtensionEntryPoint>[_failingTemplateEntryPoint],
-      );
+    test(
+      'surfaces resolvePlatformTemplate and generatePlatformTemplateParameters errors as ToolExit',
+      () async {
+        final (_, ExtensionTemplateManager templateManager) = await createManagers(
+          entryPoints: <ExtensionEntryPoint>[_failingTemplateEntryPoint],
+        );
 
-      await expectLater(
-        templateManager.resolvePlatformTemplate(
-          platform: _FailingTemplateService.domainErrorPlatform,
-          templateType: .app,
-          toolParameters: const <String, Object?>{},
-        ),
-        throwsToolExit(message: 'Template resolution failed.'),
-      );
+        await expectLater(
+          templateManager.resolvePlatformTemplate(
+            platform: _FailingTemplateService.domainErrorPlatform,
+            templateType: .app,
+            toolParameters: const <String, Object?>{},
+          ),
+          throwsToolExit(message: 'Template resolution failed.'),
+        );
 
-      await expectLater(
-        templateManager.resolvePlatformTemplate(
-          platform: _FailingTemplateService.crashPlatform,
-          templateType: .app,
-          toolParameters: const <String, Object?>{},
-        ),
-        throwsToolExit(),
-      );
+        await expectLater(
+          templateManager.resolvePlatformTemplate(
+            platform: _FailingTemplateService.crashPlatform,
+            templateType: .app,
+            toolParameters: const <String, Object?>{},
+          ),
+          throwsToolExit(),
+        );
 
-      await expectLater(
-        templateManager.generatePlatformTemplateParameters(
-          platform: _FailingTemplateService.domainErrorPlatform,
-          toolParameters: const <String, Object?>{'projectName': 'my_app'},
-        ),
-        throwsToolExit(message: 'Template parameter generation failed.'),
-      );
+        await expectLater(
+          templateManager.generatePlatformTemplateParameters(
+            platform: _FailingTemplateService.domainErrorPlatform,
+            templateType: .app,
+            toolParameters: const <String, Object?>{'projectName': 'my_app'},
+          ),
+          throwsToolExit(message: 'Template parameter generation failed.'),
+        );
 
-      const inputParams = <String, Object?>{'projectName': 'my_app'};
-      expect(
-        await templateManager.generatePlatformTemplateParameters(
-          platform: _FailingTemplateService.crashPlatform,
-          toolParameters: inputParams,
-        ),
-        equals(inputParams),
-      );
-      expect(
-        logger.traceText,
-        contains(
-          'Failed to generate platform template parameters from extension "failing_template_ext"',
-        ),
-      );
-    });
+        await expectLater(
+          templateManager.generatePlatformTemplateParameters(
+            platform: _FailingTemplateService.crashPlatform,
+            templateType: .app,
+            toolParameters: const <String, Object?>{'projectName': 'my_app'},
+          ),
+          throwsToolExit(
+            message: 'Failed to generate platform template parameters from extension "failing_template_ext"',
+          ),
+        );
+      },
+    );
   });
 }

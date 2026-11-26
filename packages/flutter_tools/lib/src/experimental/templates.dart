@@ -232,19 +232,31 @@ base class ExtensionTemplateManager {
         'Unsupported template package: "$packageName".',
       ),
     };
-    return _fileSystem.directory(
+    final String resolvedPath = _fileSystem.path.normalize(
       _fileSystem.path.joinAll(<String>[packageLibPath, ...segments.skip(1)]),
     );
+    // Defense in depth; ExtensionPlatformTemplate already rejects traversal segments.
+    if (!_fileSystem.path.isWithin(packageLibPath, resolvedPath)) {
+      throw ArgumentError.value(
+        template.templateUri,
+        'template',
+        'Template URI escapes package lib directory: "${template.templateUri}".',
+      );
+    }
+    return _fileSystem.directory(resolvedPath);
   }
 
   /// Requests platform template parameter generation over extension protocol RPC.
   ///
-  /// Delegates parameter generation for [platform] to the active tool
-  /// extension that provides platform support for [platform], passing the
-  /// host's [toolParameters]. Falls back to returning [toolParameters] unchanged
-  /// if the extension fails, does not modify parameters, or is not available.
+  /// Delegates parameter generation for [platform] and [templateType] to the
+  /// active tool extension that provides platform support for [platform],
+  /// passing the host's [toolParameters]. Returns [toolParameters] unchanged if
+  /// tool extensions are disabled or no extension supports [platform] for
+  /// [templateType]. Throws a [ToolExit] if the extension fails or returns an
+  /// invalid response.
   Future<Map<String, Object?>> generatePlatformTemplateParameters({
     required String platform,
+    required ExtensionTemplateType templateType,
     required Map<String, Object?> toolParameters,
   }) async {
     if (!_featureFlags.isToolExtensionsEnabled) {
@@ -254,30 +266,35 @@ base class ExtensionTemplateManager {
     await (_loadFuture ??= _loadSupportedPlatforms());
 
     final ExtensionConnection? owner = _platformOwners[platform];
-    if (owner == null) {
+    if (owner == null || !cachedPlatforms(templateType).contains(platform)) {
       return toolParameters;
     }
 
+    final Object? result;
     try {
-      final Object? result = await owner.sendRequest(
+      result = await owner.sendRequest(
         TemplateService.generatePlatformTemplateParametersMethod,
         params: <String, Object?>{
           TemplateService.platformParam: platform,
+          TemplateService.templateTypeParam: templateType.name,
           TemplateService.toolParametersParam: toolParameters,
         },
       );
-      if (result is Map<String, Object?>) {
-        return result;
-      }
     } on ToolExtensionException catch (e) {
       throwToolExit(e.message);
     } on Object catch (e) {
-      _logger.printTrace(
+      throwToolExit(
         'Failed to generate platform template parameters from extension '
-        '"${owner.extensionName}": $e',
+        '"${owner.extensionName}" for platform "$platform": $e',
       );
     }
 
-    return toolParameters;
+    if (result is! Map<String, Object?>) {
+      throwToolExit(
+        'Invalid platform template parameters from extension "${owner.extensionName}" '
+        'for platform "$platform": expected Map<String, Object?>, got ${result.runtimeType}.',
+      );
+    }
+    return result;
   }
 }

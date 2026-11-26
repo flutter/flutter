@@ -154,25 +154,6 @@ class Template {
     }
   }
 
-  /// Creates a [Template] by resolving one or more source directories.
-  static Future<Template> fromDirectories(
-    List<Directory> templateSources, {
-    List<Directory> imageSourceDirectories = const <Directory>[],
-    required FileSystem fileSystem,
-    required Logger logger,
-    required TemplateRenderer templateRenderer,
-    Set<Uri>? templateManifest,
-  }) async {
-    return Template._(
-      templateSources,
-      imageSourceDirectories,
-      fileSystem: fileSystem,
-      logger: logger,
-      templateRenderer: templateRenderer,
-      templateManifest: templateManifest,
-    );
-  }
-
   static Future<Template> fromName(
     String name, {
     required FileSystem fileSystem,

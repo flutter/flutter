@@ -51,29 +51,38 @@ void main() {
       },
     );
 
-    test('generatePlatformTemplateParameters augments custom_linux parameters', () async {
+    test('generatePlatformTemplateParameters augments custom_linux app parameters', () async {
       final service = LinuxTemplateService();
       final inputParams = <String, Object?>{'projectName': 'my_app', 'org': 'com.example'};
 
       final Map<String, Object?> result = await service.generatePlatformTemplateParameters(
         platform: LinuxTemplateService.customLinuxPlatformName,
+        templateType: .app,
         toolParameters: inputParams,
       );
       expect(result, equals(<String, Object?>{...inputParams, 'customLinux': true}));
     });
 
-    test(
-      'generatePlatformTemplateParameters returns toolParameters unchanged for unknown platforms',
-      () async {
-        final service = LinuxTemplateService();
-        final inputParams = <String, Object?>{'projectName': 'my_app', 'org': 'com.example'};
+    test('generatePlatformTemplateParameters returns toolParameters unchanged for unsupported template types or unknown platforms', () async {
+      final service = LinuxTemplateService();
+      final inputParams = <String, Object?>{'projectName': 'my_app', 'org': 'com.example'};
 
-        final Map<String, Object?> result = await service.generatePlatformTemplateParameters(
-          platform: 'unknown_platform',
+      expect(
+        await service.generatePlatformTemplateParameters(
+          platform: LinuxTemplateService.customLinuxPlatformName,
+          templateType: .plugin,
           toolParameters: inputParams,
-        );
-        expect(result, equals(inputParams));
-      },
-    );
+        ),
+        equals(inputParams),
+      );
+      expect(
+        await service.generatePlatformTemplateParameters(
+          platform: 'unknown_platform',
+          templateType: .app,
+          toolParameters: inputParams,
+        ),
+        equals(inputParams),
+      );
+    });
   });
 }

@@ -14,7 +14,7 @@ final class LinuxTemplateService extends TemplateService {
 
   /// Package template URI for the custom Linux platform template files.
   static final Uri customLinuxTemplateUri = Uri.parse(
-    'package:flutter_tools_extension_linux_prototype/templates/custom-linux-app',
+    'package:flutter_tools_extension_linux_prototype/templates/app/custom_linux.tmpl',
   );
 
   @override
@@ -38,9 +38,10 @@ final class LinuxTemplateService extends TemplateService {
   @override
   Future<Map<String, Object?>> generatePlatformTemplateParameters({
     required String platform,
+    required ExtensionTemplateType templateType,
     required Map<String, Object?> toolParameters,
   }) async {
-    if (platform == customLinuxPlatformName) {
+    if (platform == customLinuxPlatformName && templateType == .app) {
       return <String, Object?>{...toolParameters, 'customLinux': true};
     }
     return toolParameters;

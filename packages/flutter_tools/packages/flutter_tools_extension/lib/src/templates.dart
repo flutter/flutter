@@ -76,7 +76,18 @@ abstract base class TemplateService extends ToolExtensionService {
   /// [generatePlatformTemplateParameters] and written to the same relative path
   /// inside the project without the `.tmpl` suffix. Files ending in
   /// `.copy.tmpl` are copied without Mustache rendering, with the `.copy.tmpl`
-  /// suffix stripped. Files without `.tmpl` in their path are ignored.
+  /// suffix stripped. Subdirectories ending in `.tmpl` under `templateUri` copy
+  /// their contents verbatim (with `.tmpl` stripped from the directory name),
+  /// while `.tmpl` files inside them are still rendered with Mustache; a
+  /// `.tmpl` suffix on the root `templateUri` directory itself has no effect.
+  /// Files ending in `.test.tmpl` are included only when
+  /// `--implementation-tests` is passed. Built-in `*.img.tmpl` image
+  /// placeholders and `<platform>-<language>.tmpl` language-variant directories
+  /// are not supported for extensions (avoid hyphenated `<a>-<b>.tmpl`
+  /// subdirectory names until language-variant filtering is disabled for
+  /// extensions); bundle binary assets directly and use
+  /// [resolvePlatformTemplate] for template variants instead. Files without
+  /// `.tmpl` in their relative path are ignored.
   ///
   /// Extensions with multiple template variants (such as language or app-type
   /// variants) can inspect [toolParameters] to select the appropriate template
@@ -105,13 +116,14 @@ abstract base class TemplateService extends ToolExtensionService {
   }) async => null;
 
   /// Generates custom template parameters when rendering Mustache templates
-  /// returned by [resolvePlatformTemplate] across all [ExtensionTemplateType]s
+  /// returned by [resolvePlatformTemplate] for [platform] and [templateType]
   /// (for example, via `flutter create --platforms=<platform>`).
   ///
   /// Defaults to returning [toolParameters] unchanged. Extensions can override
   /// this method to supply custom template variables to Mustache templates.
   Future<Map<String, Object?>> generatePlatformTemplateParameters({
     required String platform,
+    required ExtensionTemplateType templateType,
     required Map<String, Object?> toolParameters,
   }) async => toolParameters;
 
@@ -134,20 +146,32 @@ abstract base class TemplateService extends ToolExtensionService {
       type.name: supportedPlatforms(type).toList(),
   };
 
-  Future<Object?> _resolvePlatformTemplateRpc(Map<String, Object?> params) async {
-    final String platform;
-    final ExtensionTemplateType templateType;
-    final Map<String, Object?> toolParameters;
+  (String, ExtensionTemplateType, Map<String, Object?>) _parsePlatformTemplateRpcParams(
+    Map<String, Object?> params,
+  ) {
     try {
-      platform = params.requiredField<String>(platformParam);
+      final String platform = params.requiredField<String>(platformParam);
       final String rawType = params.requiredField<String>(templateTypeParam);
-      templateType =
+      final ExtensionTemplateType templateType =
           ExtensionTemplateType.tryFromName(rawType) ??
           (throw FormatException('Invalid "$templateTypeParam": "$rawType".'));
-      toolParameters = params.requiredField<Map<String, Object?>>(toolParametersParam);
+      final Map<String, Object?> toolParameters = params.requiredField<Map<String, Object?>>(
+        toolParametersParam,
+      );
+      return (platform, templateType, toolParameters);
     } on FormatException catch (e) {
       throw RpcException.invalidParams(e.message);
     }
+  }
+
+  Future<Object?> _resolvePlatformTemplateRpc(Map<String, Object?> params) async {
+    final (
+      String platform,
+      ExtensionTemplateType templateType,
+      Map<String, Object?> toolParameters,
+    ) = _parsePlatformTemplateRpcParams(
+      params,
+    );
     final ExtensionPlatformTemplate? resolved = await resolvePlatformTemplate(
       platform: platform,
       templateType: templateType,
@@ -157,14 +181,17 @@ abstract base class TemplateService extends ToolExtensionService {
   }
 
   Future<Object?> _generatePlatformTemplateParametersRpc(Map<String, Object?> params) async {
-    final String platform;
-    final Map<String, Object?> toolParameters;
-    try {
-      platform = params.requiredField<String>(platformParam);
-      toolParameters = params.requiredField<Map<String, Object?>>(toolParametersParam);
-    } on FormatException catch (e) {
-      throw RpcException.invalidParams(e.message);
-    }
-    return generatePlatformTemplateParameters(platform: platform, toolParameters: toolParameters);
+    final (
+      String platform,
+      ExtensionTemplateType templateType,
+      Map<String, Object?> toolParameters,
+    ) = _parsePlatformTemplateRpcParams(
+      params,
+    );
+    return generatePlatformTemplateParameters(
+      platform: platform,
+      templateType: templateType,
+      toolParameters: toolParameters,
+    );
   }
 }
