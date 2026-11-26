@@ -65,6 +65,7 @@ source_set("InternalFlutterSwift") {
   sources = [
     "framework/Source/AccessibilityFeatures.swift",
     "framework/Source/ConnectionCollection.swift",
+    "framework/Source/DisplayFeatures.swift",
     "framework/Source/DisplayLinkManager.swift",
     "framework/Source/KeyboardInsetManager.swift",
     "framework/Source/LaunchEngine.swift",
@@ -102,8 +103,6 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterDartProject_Internal.h",
     "framework/Source/FlutterDartVMServicePublisher.h",
     "framework/Source/FlutterDartVMServicePublisher.mm",
-    "framework/Source/FlutterDisplayFeatures.h",
-    "framework/Source/FlutterDisplayFeatures.mm",
     "framework/Source/FlutterEmbedderKeyResponder.h",
     "framework/Source/FlutterEmbedderKeyResponder.mm",
     "framework/Source/FlutterEngine+TaskRunners.h",
@@ -265,6 +264,7 @@ if (enable_ios_unittests) {
     sources = [
       "framework/Source/AccessibilityFeaturesTests.swift",
       "framework/Source/ConnectionCollectionTests.swift",
+      "framework/Source/DisplayFeaturesTests.swift",
       "framework/Source/DisplayLinkManagerTests.swift",
       "framework/Source/FakeUIPressProxy.swift",
       "framework/Source/LaunchEngineTests.swift",
@@ -307,7 +307,6 @@ if (enable_ios_unittests) {
       "framework/Source/FlutterAppDelegateTest.mm",
       "framework/Source/FlutterChannelKeyResponderTest.mm",
       "framework/Source/FlutterDartProjectTest.mm",
-      "framework/Source/FlutterDisplayFeaturesTest.mm",
       "framework/Source/FlutterEmbedderKeyResponderTest.mm",
       "framework/Source/FlutterEngineGroupTest.mm",
       "framework/Source/FlutterEnginePlatformViewTest.mm",

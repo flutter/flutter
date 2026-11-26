@@ -8,7 +8,6 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 
 #import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDisplayFeatures.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeySecondaryResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardManager.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
@@ -76,9 +75,9 @@ extern NSNotificationName const FlutterViewControllerShowHomeIndicator;
  * device pixel ratio. Sending is skipped when nothing changed.
  *
  * Exposed so the path from features to metrics can be tested without the hinge
- * hardware or the iOS 27.1 SDK.
+ * hardware.
  */
-- (void)applyDisplayFeatures:(const FlutterDisplayFeatureList&)features;
+- (void)applyDisplayFeatures:(FlutterDisplayFeatureList*)features;
 
 /**
  * Determines whether a UIScene notification should be handled by this view controller.

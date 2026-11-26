@@ -19,7 +19,6 @@
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterChannelKeyResponder.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDisplayFeatures.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEmbedderKeyResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+TaskRunners.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
@@ -822,14 +821,13 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 
   if (@available(iOS 27.1, *)) {
     // Reports the fold and camera regions of a foldable device (iPhone Duo) as
-    // display features. Returns nil when the engine was built against an SDK
-    // older than iOS 27.1, in which case nothing is reported.
+    // display features. On a device without a hinge nothing is ever reported.
     __weak FlutterViewController* weakSelf = self;
-    _displayFeaturesMonitor = [[FlutterDisplayFeaturesMonitor alloc]
-        initWithView:self.flutterView
-            onUpdate:^(const FlutterDisplayFeatureList& features) {
-              [weakSelf applyDisplayFeatures:features];
-            }];
+    _displayFeaturesMonitor =
+        [[FlutterDisplayFeaturesMonitor alloc] initWithView:self.flutterView
+                                                   onUpdate:^(FlutterDisplayFeatureList* features) {
+                                                     [weakSelf applyDisplayFeatures:features];
+                                                   }];
   }
 
   [super viewDidLoad];
@@ -1346,21 +1344,31 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
 #pragma mark - Handle view resizing
 
-- (void)applyDisplayFeatures:(const FlutterDisplayFeatureList&)features {
+- (void)applyDisplayFeatures:(FlutterDisplayFeatureList*)features {
   const double scale = _viewportMetrics.device_pixel_ratio;
   std::vector<double> bounds;
-  bounds.reserve(features.bounds.size());
-  for (double value : features.bounds) {
-    bounds.push_back(value * scale);
+  bounds.reserve(features.bounds.count);
+  for (NSNumber* value in features.bounds) {
+    bounds.push_back(value.doubleValue * scale);
+  }
+  std::vector<int> types;
+  types.reserve(features.types.count);
+  for (NSNumber* value in features.types) {
+    types.push_back(value.intValue);
+  }
+  std::vector<int> states;
+  states.reserve(features.states.count);
+  for (NSNumber* value in features.states) {
+    states.push_back(value.intValue);
   }
   if (bounds == _viewportMetrics.physical_display_features_bounds &&
-      features.types == _viewportMetrics.physical_display_features_type &&
-      features.states == _viewportMetrics.physical_display_features_state) {
+      types == _viewportMetrics.physical_display_features_type &&
+      states == _viewportMetrics.physical_display_features_state) {
     return;
   }
   _viewportMetrics.physical_display_features_bounds = std::move(bounds);
-  _viewportMetrics.physical_display_features_type = features.types;
-  _viewportMetrics.physical_display_features_state = features.states;
+  _viewportMetrics.physical_display_features_type = std::move(types);
+  _viewportMetrics.physical_display_features_state = std::move(states);
   [self updateViewportMetricsIfNeeded];
 }
 
