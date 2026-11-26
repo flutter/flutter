@@ -6,7 +6,7 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/base/exit.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -17,10 +17,9 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/template.dart';
 
 import '../../src/android_common.dart';
-
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_build_command.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -34,17 +33,18 @@ void main() {
     restoreExitFunction();
   });
 
-  testUsingContext('flutter build without arguments prints help and exits with code 1', () async {
+  test('flutter build without arguments prints help and exits with code 1', () async {
     int? exitCode;
     setExitFunctionForTests((int code) {
       exitCode = code;
     });
 
+    final logger = BufferLogger.test();
     final BuildCommand command = createFakeBuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: testLogger,
+      logger: logger,
       osUtils: FakeOperatingSystemUtils(),
       config: FakeConfig(),
       platform: FakePlatform(),
@@ -65,10 +65,10 @@ void main() {
     await commandRunner.run(<String>['build']);
 
     expect(exitCode, 1);
-    expect(testLogger.statusText, contains(command.description));
+    expect(logger.statusText, contains(command.description));
   });
 
-  testUsingContext('obfuscate requires split-debug-info', () {
+  test('obfuscate requires split-debug-info', () {
     final command = FakeBuildInfoCommand();
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
@@ -85,23 +85,25 @@ void main() {
   group('Fatal Logs', () {
     late FakeBuildCommand command;
     late MemoryFileSystem fs;
-    late ProcessManager processManager;
+    late BufferLogger logger;
+    late FakeProcessManager processManager;
 
     setUp(() {
       fs = MemoryFileSystem.test();
       fs.file('/package/pubspec.yaml').createSync(recursive: true);
       fs.currentDirectory = '/package';
       Cache.disableLocking();
+      logger = BufferLogger.test();
       processManager = FakeProcessManager.empty();
     });
 
-    testUsingContext("doesn't fail if --fatal-warnings specified and no warnings occur", () async {
+    test("doesn't fail if --fatal-warnings specified and no warnings occur", () async {
       command = FakeBuildCommand(
         androidContext: FakeAndroidContext(),
         appleContext: FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(fs: fs, logger: testLogger),
+        toolContext: FakeToolContext(fs: fs, logger: logger, processManager: processManager),
       );
       try {
         await createTestCommandRunner(command)
@@ -109,33 +111,33 @@ void main() {
       } on Exception {
         fail('Unexpected exception thrown');
       }
-    }, overrides: <Type, Generator>{FileSystem: () => fs, ProcessManager: () => processManager});
+    });
 
-    testUsingContext("doesn't fail if --fatal-warnings not specified", () async {
+    test("doesn't fail if --fatal-warnings not specified", () async {
       command = FakeBuildCommand(
         androidContext: FakeAndroidContext(),
         appleContext: FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(fs: fs, logger: testLogger),
+        toolContext: FakeToolContext(fs: fs, logger: logger, processManager: processManager),
       );
-      testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
+      logger.printWarning('Warning: Mild annoyance Will Robinson!');
       try {
         await createTestCommandRunner(command).run(<String>['build', 'test']);
       } on Exception {
         fail('Unexpected exception thrown');
       }
-    }, overrides: <Type, Generator>{FileSystem: () => fs, ProcessManager: () => processManager});
+    });
 
-    testUsingContext('fails if --fatal-warnings specified and warnings emitted', () async {
+    test('fails if --fatal-warnings specified and warnings emitted', () async {
       command = FakeBuildCommand(
         androidContext: FakeAndroidContext(),
         appleContext: FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(fs: fs, logger: testLogger),
+        toolContext: FakeToolContext(fs: fs, logger: logger, processManager: processManager),
       );
-      testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
+      logger.printWarning('Warning: Mild annoyance Will Robinson!');
       await expectLater(
         createTestCommandRunner(command)
             .run(<String>['build', 'test', '--${FlutterOptions.kFatalWarnings}']),
@@ -144,17 +146,17 @@ void main() {
               'Logger received warning output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.',
         ),
       );
-    }, overrides: <Type, Generator>{FileSystem: () => fs, ProcessManager: () => processManager});
+    });
 
-    testUsingContext('fails if --fatal-warnings specified and errors emitted', () async {
+    test('fails if --fatal-warnings specified and errors emitted', () async {
       command = FakeBuildCommand(
         androidContext: FakeAndroidContext(),
         appleContext: FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(fs: fs, logger: testLogger),
+        toolContext: FakeToolContext(fs: fs, logger: logger, processManager: processManager),
       );
-      testLogger.printError('Error: Danger Will Robinson!');
+      logger.printError('Error: Danger Will Robinson!');
       await expectLater(
         createTestCommandRunner(command)
             .run(<String>['build', 'test', '--${FlutterOptions.kFatalWarnings}']),
@@ -163,13 +165,13 @@ void main() {
               'Logger received error output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.',
         ),
       );
-    }, overrides: <Type, Generator>{FileSystem: () => fs, ProcessManager: () => processManager});
+    });
   });
 }
 
 class FakeBuildInfoCommand extends FlutterCommand {
   FakeBuildInfoCommand({ToolContext? toolContext})
-    : super(toolContext: toolContext ?? const DelegatingToolContext()) {
+    : super(toolContext: toolContext ?? FakeToolContext()) {
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       BuildInfoOptions.splitDebugInfo,
       BuildInfoOptions.obfuscate,

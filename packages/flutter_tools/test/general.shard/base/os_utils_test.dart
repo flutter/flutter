@@ -50,7 +50,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    testWithoutContext('makeExecutable', () async {
+    test('makeExecutable', () async {
       const Platform platform = LocalPlatform();
       final operatingSystemUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
@@ -70,7 +70,7 @@ void main() {
       }
     });
 
-    testWithoutContext('unzip extracts valid archive', () {
+    test('unzip extracts valid archive', () {
       const Platform platform = LocalPlatform();
       final File zipFile = tempDir.childFile('valid.zip');
       final List<int> content = utf8.encode('hello zip');
@@ -98,7 +98,7 @@ void main() {
       }
     });
 
-    testWithoutContext('unzip protects against zip-slip path traversal', () {
+    test('unzip protects against zip-slip path traversal', () {
       const Platform platform = LocalPlatform();
       final File zipFile = tempDir.childFile('zip_slip.zip')
         ..writeAsBytesSync(ZipEncoder().encode(_buildZipSlipArchive())!);
@@ -141,7 +141,7 @@ void main() {
       }
     });
 
-    testWithoutContext('unpack extracts valid archive', () {
+    test('unpack extracts valid archive', () {
       const Platform platform = LocalPlatform();
       final Directory targetDirectory = tempDir.childDirectory('target')..createSync();
       final File tarGzFile = tempDir.childFile('valid.tar.gz');
@@ -162,7 +162,7 @@ void main() {
       expect(extractedFile.readAsStringSync(), 'hello tar');
     });
 
-    testWithoutContext('unpack protects against zip-slip path traversal', () {
+    test('unpack protects against zip-slip path traversal', () {
       const Platform platform = LocalPlatform();
       final Directory cacheDir = tempDir.childDirectory('cache')..createSync(recursive: true);
       final Directory targetDirectory = cacheDir.childDirectory('target')

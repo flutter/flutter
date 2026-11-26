@@ -36,7 +36,7 @@ void main() {
   });
 
   group('gradleErrors', () {
-    testWithoutContext('list of errors', () {
+    test('list of errors', () {
       // If you added a new Gradle error, please update this test.
       expect(
         gradleErrors,
@@ -71,7 +71,7 @@ void main() {
   });
 
   group('network errors', () {
-    testWithoutContext('retries if gradle fails while downloading', () async {
+    test('retries if gradle fails while downloading', () async {
       const errorMessage = r'''
 Exception in thread "main" java.io.FileNotFoundException: https://downloads.gradle.org/distributions/gradle-4.1.1-all.zip
 at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1872)
@@ -104,7 +104,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       );
     });
 
-    testWithoutContext('retries if remote host terminated ssl handshake', () async {
+    test('retries if remote host terminated ssl handshake', () async {
       const errorMessage = r'''
 Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host terminated the handshake
 	at java.base/sun.security.ssl.SSLSocketImpl.handleEOF(SSLSocketImpl.java:1696)
@@ -152,7 +152,7 @@ Caused by: java.io.EOFException: SSL peer shut down incorrectly
       );
     });
 
-    testWithoutContext('retries if gradle fails downloading with proxy error', () async {
+    test('retries if gradle fails downloading with proxy error', () async {
       const errorMessage = r'''
 Exception in thread "main" java.io.IOException: Unable to tunnel through proxy. Proxy returns "HTTP/1.1 400 Bad Request"
 at sun.net.www.protocol.http.HttpURLConnection.doTunneling(HttpURLConnection.java:2124)
@@ -187,7 +187,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       );
     });
 
-    testWithoutContext('retries if gradle fails downloading with bad gateway error', () async {
+    test('retries if gradle fails downloading with bad gateway error', () async {
       const errorMessage = r'''
 Exception in thread "main" java.io.IOException: Server returned HTTP response code: 502 for URL: https://objects.githubusercontent.com/github-production-release-asset-2e65be/696192900/1e77bbfb-4cde-4376-92ea-fc4ff57b8362?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=FFFF%2F20231220%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231220T160553Z&X-Amz-Expires=300&X-Amz-Signature=ffff&X-Amz-SignedHeaders=host&actor_id=0&key_id=0&repo_id=696192900&response-content-disposition=attachment%3B%20filename%3Dgradle-8.2.1-all.zip&response-content-type=application%2Foctet-stream
 at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1997)
@@ -220,7 +220,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       );
     });
 
-    testWithoutContext('retries if gradle times out waiting for exclusive access to zip', () async {
+    test('retries if gradle times out waiting for exclusive access to zip', () async {
       const errorMessage = '''
 Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached waiting for exclusive access to file: /User/documents/gradle-5.6.2-all.zip
 	at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:61)
@@ -246,7 +246,7 @@ Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached
       );
     });
 
-    testWithoutContext('retries if remote host closes connection', () async {
+    test('retries if remote host closes connection', () async {
       const errorMessage = r'''
 Downloading https://services.gradle.org/distributions/gradle-5.6.2-all.zip
 Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host closed connection during handshake
@@ -288,7 +288,7 @@ Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host clos
       );
     });
 
-    testWithoutContext('retries if file opening fails', () async {
+    test('retries if file opening fails', () async {
       const errorMessage = r'''
 Downloading https://services.gradle.org/distributions/gradle-3.5.0-all.zip
 Exception in thread "main" java.io.FileNotFoundException: https://downloads.gradle-dn.com/distributions/gradle-3.5.0-all.zip
@@ -322,7 +322,7 @@ Exception in thread "main" java.io.FileNotFoundException: https://downloads.grad
       );
     });
 
-    testWithoutContext('retries if the connection is reset', () async {
+    test('retries if the connection is reset', () async {
       const errorMessage = r'''
 Downloading https://services.gradle.org/distributions/gradle-5.6.2-all.zip
 Exception in thread "main" java.net.SocketException: Connection reset
@@ -367,7 +367,7 @@ Exception in thread "main" java.net.SocketException: Connection reset
       );
     });
 
-    testWithoutContext('retries if Gradle could not get a resource', () async {
+    test('retries if Gradle could not get a resource', () async {
       const errorMessage = '''
 A problem occurred configuring root project 'android'.
 > Could not resolve all artifacts for configuration ':classpath'.
@@ -399,7 +399,7 @@ A problem occurred configuring root project 'android'.
       );
     });
 
-    testWithoutContext('retries if Gradle could not get a resource (non-Gateway)', () async {
+    test('retries if Gradle could not get a resource (non-Gateway)', () async {
       const errorMessage = '''
 * Error running Gradle:
 Exit code 1 from: /home/travis/build/flutter/flutter sdk/examples/flutter_gallery/android/gradlew app:properties:
@@ -435,7 +435,7 @@ A problem occurred configuring root project 'android'.
       );
     });
 
-    testWithoutContext('retries if connection times out', () async {
+    test('retries if connection times out', () async {
       const errorMessage = r'''
 Exception in thread "main" java.net.ConnectException: Connection timed out
 java.base/sun.nio.ch.Net.connect0(Native Method)
@@ -472,7 +472,7 @@ java.base/sun.nio.ch.Net.connect0(Native Method)
   });
 
   group('permission errors', () {
-    testWithoutContext('throws toolExit if gradle is missing execute permissions', () async {
+    test('throws toolExit if gradle is missing execute permissions', () async {
       const errorMessage = '''
 Permission denied
 Command: /home/android/gradlew assembleRelease
@@ -503,7 +503,7 @@ Command: /home/android/gradlew assembleRelease
       );
     });
 
-    testWithoutContext('pattern', () async {
+    test('pattern', () async {
       const errorMessage = '''
 Permission denied
 Command: /home/android/gradlew assembleRelease
@@ -511,7 +511,7 @@ Command: /home/android/gradlew assembleRelease
       expect(formatTestErrorMessage(errorMessage, permissionDeniedErrorHandler), isTrue);
     });
 
-    testWithoutContext('handler', () async {
+    test('handler', () async {
       expect(
         await permissionDeniedErrorHandler.handler(
           gradleUtils: FakeGradleUtils(),
@@ -539,7 +539,7 @@ Command: /home/android/gradlew assembleRelease
   });
 
   group('license not accepted', () {
-    testWithoutContext('pattern', () {
+    test('pattern', () {
       expect(
         licenseNotAcceptedHandler.test(
           'You have not accepted the license agreements of the following SDK components',
@@ -548,7 +548,7 @@ Command: /home/android/gradlew assembleRelease
       );
     });
 
-    testWithoutContext('handler', () async {
+    test('handler', () async {
       await licenseNotAcceptedHandler.handler(
         gradleUtils: FakeGradleUtils(),
         line: 'You have not accepted the license agreements of the following SDK components: [foo, bar]',
@@ -574,7 +574,7 @@ Command: /home/android/gradlew assembleRelease
   });
 
   group('flavor undefined', () {
-    testWithoutContext('pattern', () {
+    test('pattern', () {
       expect(
         flavorUndefinedHandler.test('Task assembleFooRelease not found in root project.'),
         isTrue,
@@ -590,7 +590,7 @@ Command: /home/android/gradlew assembleRelease
       );
     });
 
-    testWithoutContext('handler - with flavor', () async {
+    test('handler - with flavor', () async {
       processManager.addCommand(
         const FakeCommand(
           command: <String>['gradlew', 'app:tasks', '--all', '--console=auto'],
@@ -639,7 +639,7 @@ assembleFooTest
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('handler - without flavor', () async {
+    test('handler - without flavor', () async {
       processManager.addCommand(
         const FakeCommand(
           command: <String>['gradlew', 'app:tasks', '--all', '--console=auto'],
@@ -680,11 +680,11 @@ assembleProfile
     const stdoutLine =
         'uses-sdk:minSdkVersion 16 cannot be smaller than version 21 declared in library [:webview_flutter] /tmp/cirrus-ci-build/all_plugins/build/webview_flutter/intermediates/library_manifest/release/AndroidManifest.xml as the library might be using APIs not available in 21';
 
-    testWithoutContext('pattern', () {
+    test('pattern', () {
       expect(minSdkVersionHandler.test(stdoutLine), isTrue);
     });
 
-    testWithoutContext('suggestion', () async {
+    test('suggestion', () async {
       await minSdkVersionHandler.handler(
         gradleUtils: FakeGradleUtils(),
         line: stdoutLine,
@@ -718,14 +718,14 @@ assembleProfile
 
   // https://issuetracker.google.com/issues/141126614
   group('transform input issue', () {
-    testWithoutContext('pattern', () {
+    test('pattern', () {
       expect(
         transformInputIssueHandler.test('https://issuetracker.google.com/issues/158753935'),
         isTrue,
       );
     });
 
-    testWithoutContext('suggestion', () async {
+    test('suggestion', () async {
       await transformInputIssueHandler.handler(
         gradleUtils: FakeGradleUtils(),
         line: '',
@@ -753,12 +753,12 @@ assembleProfile
   });
 
   group('java heap space', () {
-    testWithoutContext('pattern', () {
+    test('pattern', () {
       expect(javaHeapSpaceHandler.test('> Java heap space'), isTrue);
       expect(javaHeapSpaceHandler.test('java.lang.OutOfMemoryError: Java heap space'), isTrue);
     });
 
-    testWithoutContext('suggestion', () async {
+    test('suggestion', () async {
       final GradleBuildStatus status = await javaHeapSpaceHandler.handler(
         gradleUtils: FakeGradleUtils(),
         line: '> Java heap space',
@@ -779,7 +779,7 @@ assembleProfile
   });
 
   group('Dependency mismatch', () {
-    testWithoutContext('pattern', () {
+    test('pattern', () {
       expect(
         lockFileDepMissingHandler.test(
           '''
@@ -793,7 +793,7 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
       );
     });
 
-    testWithoutContext('suggestion', () async {
+    test('suggestion', () async {
       await lockFileDepMissingHandler.handler(
         gradleUtils: FakeGradleUtils(),
         line: '',
@@ -821,7 +821,7 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
     });
   });
 
-  testWithoutContext('generates correct gradle command for Unix-like environment', () async {
+  test('generates correct gradle command for Unix-like environment', () async {
     await lockFileDepMissingHandler.handler(
       gradleUtils: FakeGradleUtils(),
       line: '',
@@ -849,7 +849,7 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
     );
   });
 
-  testWithoutContext('generates correct gradle command for windows environment', () async {
+  test('generates correct gradle command for windows environment', () async {
     await lockFileDepMissingHandler.handler(
       gradleUtils: FakeGradleUtils(),
       line: '',
@@ -877,7 +877,7 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
   });
 
   group('Incompatible Kotlin version', () {
-    testWithoutContext('pattern', () {
+    test('pattern', () {
       expect(
         incompatibleKotlinVersionHandler.test(
           'Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.5.1, expected version is 1.1.15.',
@@ -892,7 +892,7 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
       );
     });
 
-    testWithoutContext('suggestion', () async {
+    test('suggestion', () async {
       await incompatibleKotlinVersionHandler.handler(
         gradleUtils: FakeGradleUtils(),
         line: '',
@@ -928,11 +928,11 @@ A problem occurred evaluating project ':app'.
    > The current Gradle version 4.10.2 is not compatible with the Kotlin Gradle plugin. Please use Gradle 6.1.1 or newer, or the previous version of the Kotlin plugin.
 ''';
 
-    testWithoutContext('pattern', () {
+    test('pattern', () {
       expect(outdatedGradleHandler.test(errorMessage), isTrue);
     });
 
-    testWithoutContext('suggestion', () async {
+    test('suggestion', () async {
       await outdatedGradleHandler.handler(
         gradleUtils: FakeGradleUtils(),
         line: errorMessage,
@@ -980,11 +980,11 @@ Execution failed for task ':app:checkDebugAarMetadata'.
      AAR metadata file: ~/.gradle/caches/transforms-3/88f7e476ef68cecca729426edff955b5/transformed/jetified-window-1.0.0-beta04/META-INF/com/android/build/gradle/aar-metadata.properties.
 ''';
 
-    testWithoutContext('pattern', () {
+    test('pattern', () {
       expect(minCompileSdkVersionHandler.test(errorMessage), isTrue);
     });
 
-    testWithoutContext('suggestion', () async {
+    test('suggestion', () async {
       await minCompileSdkVersionHandler.handler(
         gradleUtils: FakeGradleUtils(),
         line: errorMessage,
@@ -1021,11 +1021,11 @@ An exception occurred applying plugin request [id: 'com.android.application']
        - changing `org.gradle.java.home` in `gradle.properties`.
 ''';
 
-    testWithoutContext('pattern', () {
+    test('pattern', () {
       expect(incompatibleJavaAndAgpVersionsHandler.test(errorMessage), isTrue);
     });
 
-    testWithoutContext('suggestion', () async {
+    test('suggestion', () async {
       await incompatibleJavaAndAgpVersionsHandler.handler(
         gradleUtils: FakeGradleUtils(),
         line: errorMessage,
@@ -1048,7 +1048,7 @@ An exception occurred applying plugin request [id: 'com.android.application']
   });
 
   group('SSLException', () {
-    testWithoutContext('pattern', () {
+    test('pattern', () {
       expect(
         sslExceptionHandler.test(r'''
 Exception in thread "main" javax.net.ssl.SSLException: Tag mismatch!
@@ -1095,7 +1095,7 @@ at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:108)'''),
       );
     });
 
-    testWithoutContext('suggestion', () async {
+    test('suggestion', () async {
       final GradleBuildStatus status = await sslExceptionHandler.handler(
         gradleUtils: FakeGradleUtils(),
         line: '',
@@ -1113,7 +1113,7 @@ at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:108)'''),
   });
 
   group('Zip exception', () {
-    testWithoutContext('pattern', () {
+    test('pattern', () {
       expect(
         zipExceptionHandler.test(r'''
 Exception in thread "main" java.util.zip.ZipException: error in opening zip file
@@ -1133,7 +1133,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''),
       );
     });
 
-    testWithoutContext('suggestion', () async {
+    test('suggestion', () async {
       fileSystem.file('foo/.gradle/fizz.zip').createSync(recursive: true);
 
       final GradleBuildStatus result = await zipExceptionHandler.handler(
@@ -1159,7 +1159,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''),
       expect(testLogger.statusText, '');
     });
 
-    testWithoutContext('suggestion if running as bot', () async {
+    test('suggestion if running as bot', () async {
       fileSystem.file('foo/.gradle/fizz.zip').createSync(recursive: true);
 
       final GradleBuildStatus result = await zipExceptionHandler.handler(
@@ -1186,7 +1186,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''),
       expect(testLogger.statusText, contains('Deleting foo/.gradle\n'));
     });
 
-    testWithoutContext('suggestion if stdin has terminal and user entered y', () async {
+    test('suggestion if stdin has terminal and user entered y', () async {
       fileSystem.file('foo/.gradle/fizz.zip').createSync(recursive: true);
       final promptLogger = BufferLogger.test(terminal: _TestPromptTerminal('y'));
 
@@ -1213,7 +1213,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''),
       expect(promptLogger.statusText, contains('Deleting foo/.gradle\n'));
     });
 
-    testWithoutContext('suggestion if stdin has terminal and user entered n', () async {
+    test('suggestion if stdin has terminal and user entered n', () async {
       fileSystem.file('foo/.gradle/fizz.zip').createSync(recursive: true);
       final promptLogger = BufferLogger.test(terminal: _TestPromptTerminal('n'));
 
@@ -1249,11 +1249,11 @@ Could not compile build file '…/example/android/build.gradle'.
   java.lang.IllegalArgumentException: Unsupported class file major version 61
 ''';
 
-    testWithoutContext('pattern', () {
+    test('pattern', () {
       expect(incompatibleJavaAndGradleVersionsHandler.test(errorMessage), isTrue);
     });
 
-    testWithoutContext('suggestion', () async {
+    test('suggestion', () async {
       await incompatibleJavaAndGradleVersionsHandler.handler(
         gradleUtils: FakeGradleUtils(),
         line: errorMessage,
@@ -1276,7 +1276,7 @@ Could not compile build file '…/example/android/build.gradle'.
     });
   });
 
-  testWithoutContext('couldNotOpenCacheDirectoryHandler', () async {
+  test('couldNotOpenCacheDirectoryHandler', () async {
     final GradleBuildStatus status = await couldNotOpenCacheDirectoryHandler.handler(
       gradleUtils: FakeGradleUtils(),
       line: '''
@@ -1298,7 +1298,7 @@ A problem occurred evaluating script.
     expect(status, GradleBuildStatus.retry);
   });
 
-  testWithoutContext('compileSdk 35 and AGP < 8.1', () async {
+  test('compileSdk 35 and AGP < 8.1', () async {
     const errorExample = r'''
 Execution failed for task ':app:bundleReleaseResources'.
 > A failure occurred while executing com.android.build.gradle.internal.res.Aapt2ProcessResourcesRunnable
@@ -1340,7 +1340,7 @@ Execution failed for task ':app:bundleReleaseResources'.
     );
   });
 
-  testWithoutContext('AGP 7.3.0 R8 bug', () async {
+  test('AGP 7.3.0 R8 bug', () async {
     const errorExample = r'''
 ERROR:/Users/mackall/.gradle/caches/transforms-3/bd2c84591857c6d4c308221ffece862e/transformed/jetified-media3-exoplayer-dash-1.4.0-runtime.jar: R8: com.android.tools.r8.internal.Y10: Unused argument with users in androidx
     ''';
@@ -1375,7 +1375,7 @@ ERROR:/Users/mackall/.gradle/caches/transforms-3/bd2c84591857c6d4c308221ffece862
     );
   });
 
-  testWithoutContext('Usage of removed v1 embedding references', () async {
+  test('Usage of removed v1 embedding references', () async {
     const errorExample = r'''
 /Users/jesswon/.pub-cache/hosted/pub.dev/video_player_android-2.5.0/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java:42: error: cannot find symbol
   private VideoPlayerPlugin(io.flutter.plugin.common.PluginRegistry.Registrar registrar) {
@@ -1412,7 +1412,7 @@ FAILURE: Build failed with an exception.
     expect(testLogger.statusText, contains('https://github.com/flutter/flutter/issues'));
   });
 
-  testWithoutContext('Java 21 and jlink bug', () async {
+  test('Java 21 and jlink bug', () async {
     const errorExample = r'''
 * What went wrong:
 Execution failed for task ':shared_preferences_android:compileReleaseJavaWithJavac'.
@@ -1444,7 +1444,7 @@ Execution failed for task ':shared_preferences_android:compileReleaseJavaWithJav
     expect(testLogger.statusText, contains('https://github.com/flutter/flutter/issues/156304'));
   });
 
-  testWithoutContext('Missing NDK source.properties file', () async {
+  test('Missing NDK source.properties file', () async {
     const unixErrorExample = r'''
 * What went wrong:
 A problem occurred configuring project ':app'.
@@ -1483,7 +1483,7 @@ A problem occurred configuring project ':app'.
     );
   });
 
-  testWithoutContext('Failure to apply kotlin-android plugin', () async {
+  test('Failure to apply kotlin-android plugin', () async {
     const applyingKotlinAndroidPluginErrorExample = r'''
 FAILURE: Build failed with an exception.
 
@@ -1535,11 +1535,11 @@ An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-p
    > java.lang.NullPointerException (no error message)
 ''';
 
-    testWithoutContext('matches the new AGP DSL failure', () {
+    test('matches the new AGP DSL failure', () {
       expect(formatTestErrorMessage(useNewAgpDslErrorExample, useNewAgpDslErrorHandler), isTrue);
     });
 
-    testWithoutContext('does not match unsupported dependency version errors', () {
+    test('does not match unsupported dependency version errors', () {
       const unsupportedAgpVersionErrorExample = r'''
 FAILURE: Build failed with an exception.
 
@@ -1558,7 +1558,7 @@ An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-p
       );
     });
 
-    testWithoutContext('does not match other errors thrown while applying the plugin', () {
+    test('does not match other errors thrown while applying the plugin', () {
       const minimumGradleVersionErrorExample = r'''
 FAILURE: Build failed with an exception.
 
@@ -1574,7 +1574,7 @@ An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-p
     });
   });
 
-  testWithoutContext('Failure to apply Flutter Gradle plugin with the new AGP DSL', () async {
+  test('Failure to apply Flutter Gradle plugin with the new AGP DSL', () async {
     const useNewAgpDslErrorHandlerExample = r'''
 FAILURE: Build failed with an exception.
 

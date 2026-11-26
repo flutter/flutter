@@ -572,6 +572,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
       :LocalEngineLocator localEngineLocator,
       :Logger logger,
       :OperatingSystemUtils os,
+      :OutputPreferences outputPreferences,
       :Platform platform,
       :Stdio stdio,
       :SystemClock systemClock,
@@ -615,9 +616,15 @@ class FlutterCommandRunner extends CommandRunner<void> {
     final bool useWrapping = topLevelResults.wasParsed(FlutterGlobalOptions.kWrapFlag)
         ? topLevelResults[FlutterGlobalOptions.kWrapFlag] as bool
         : stdio.terminalColumns != null && topLevelResults[FlutterGlobalOptions.kWrapFlag] as bool;
+    final showColor = topLevelResults[FlutterGlobalOptions.kColorFlag] as bool?;
+    outputPreferences.configure(
+      showColor: showColor,
+      wrapColumn: wrapColumn,
+      wrapText: useWrapping,
+    );
     contextOverrides[OutputPreferences] = OutputPreferences(
       wrapText: useWrapping,
-      showColor: topLevelResults[FlutterGlobalOptions.kColorFlag] as bool?,
+      showColor: showColor,
       wrapColumn: wrapColumn,
     );
 

@@ -26,7 +26,7 @@ import 'test_utils.dart';
 
 void main() {
   group('analyze --suggestions command integration', () {
-    testWithoutContext('General Info Project Validator', () async {
+    test('General Info Project Validator', () async {
       Cache.disableLocking();
       addTearDown(Cache.enableLocking);
       final loggerTest = BufferLogger.test();
@@ -120,7 +120,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    testWithoutContext('analyze --suggestions --machine produces expected values', () async {
+    test('analyze --suggestions --machine produces expected values', () async {
       final ProcessResult result = await processManager.run(<String>[
         'flutter',
         'analyze',

@@ -3916,8 +3916,16 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
                                                      }]
             result:result];
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @1,
+                                                       @"viewType" : @"MockFlutterPlatformView",
+                                                       @"gestureBlockingPolicy" : @"eager"
+                                                     }]
+            result:result];
 
-  // First frame, |embeddedViewCount| is not empty after preroll.
+  // First frame, which is prerolled but not submitted.
   embedder->PrepareFlutterView(flutter::DlISize(300, 300), [UIScreen mainScreen].scale);
   flutter::MutatorsStack stack;
   flutter::DlMatrix finalMatrix;
@@ -3925,17 +3933,18 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, flutter::DlSize(300, 300), stack);
   embedder->PrerollCompositeEmbeddedView(0, std::move(embeddedViewParams1));
 
-  XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 1UL);
-
-  // Second frame, |embeddedViewCount| should be empty at the start
+  // Second frame, with view 1.
+  // We submit this frame so we can check which views were presented.
+  // No earlier frame was submitted, so this frame is only presented if it has a platform view.
   embedder->PrepareFlutterView(flutter::DlISize(300, 300), [UIScreen mainScreen].scale);
-  XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 0UL);
-
   auto embeddedViewParams2 =
       std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, flutter::DlSize(300, 300), stack);
-  embedder->PrerollCompositeEmbeddedView(0, std::move(embeddedViewParams2));
+  embedder->PrerollCompositeEmbeddedView(1, std::move(embeddedViewParams2));
+  embedder->SubmitFlutterView(flutter::kFlutterImplicitViewId, nullptr, nullptr,
+                              CreateTestSurfaceFrame());
 
-  XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 1UL);
+  // Verify that view 0 from the first frame was not carried over.
+  XCTAssertEqualObjects(flutterPlatformViewsController.previousCompositionOrder, (@[ @1 ]));
 }
 
 - (void)
@@ -4454,8 +4463,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
         finalMatrix, flutter::DlSize(300, 300), stack);
     embedder->PrerollCompositeEmbeddedView(1, std::move(embeddedViewParams1));
 
-    XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 2UL);
-
     XCTestExpectation* expectation = [self expectationWithDescription:@"dispose call ended."];
     FlutterResult disposeResult = ^(id result) {
       [expectation fulfill];
@@ -4471,7 +4478,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
                                 std::move(mock_surface));
 
     // Disposing won't remove embedded views until the view is removed from the composition_order_
-    XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 2UL);
+    XCTAssertEqualObjects(flutterPlatformViewsController.previousCompositionOrder, (@[ @0, @1 ]));
     XCTAssertNotNil([flutterPlatformViewsController platformViewForId:0]);
     XCTAssertNotNil([flutterPlatformViewsController platformViewForId:1]);
   }
@@ -4490,8 +4497,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
     embedder->SubmitFlutterView(flutter::kFlutterImplicitViewId, nullptr, nullptr,
                                 std::move(mock_surface));
 
-    // Disposing won't remove embedded views until the view is removed from the composition_order_
-    XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 1UL);
+    // View 0 is no longer in the composition order, so it was disposed.
+    XCTAssertEqualObjects(flutterPlatformViewsController.previousCompositionOrder, (@[ @1 ]));
     XCTAssertNil([flutterPlatformViewsController platformViewForId:0]);
     XCTAssertNotNil([flutterPlatformViewsController platformViewForId:1]);
   }
@@ -4795,6 +4802,53 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   XCTAssertEqual([self alphaOfPoint:CGPointMake(85, 70) onView:flutterView], 0);
 }
 
+- (void)testSubmitFrameResizesInsteadOfPresentingWithoutPlatformViews {
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      CreateTestPlatformViewsController(self.name);
+  std::unique_ptr<flutter::ExternalViewEmbedder> embedder =
+      CreateTestExternalViewEmbedder(flutterPlatformViewsController);
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id value) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @0,
+                                                       @"viewType" : @"MockFlutterPlatformView",
+                                                       @"gestureBlockingPolicy" : @"eager"
+                                                     }]
+            result:result];
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
+  flutterPlatformViewsController.flutterView = flutterView;
+  id mockController = OCMPartialMock(flutterPlatformViewsController);
+
+  // A frame with a platform view is presented.
+  OCMExpect([mockController presentFrame:[OCMArg any]]).andForwardToRealObject();
+  [self submitFrameWithEmbedder:embedder.get() viewId:0 offset:10 backdropFilter:NO];
+  OCMVerifyAll(mockController);
+
+  // A frame without platform views is presented if the previous frame had platform views.
+  OCMExpect([mockController presentFrame:[OCMArg any]]).andForwardToRealObject();
+  embedder->PrepareFlutterView(flutter::DlISize(300, 300), [UIScreen mainScreen].scale);
+  embedder->SubmitFlutterView(flutter::kFlutterImplicitViewId, nullptr, nullptr,
+                              CreateTestSurfaceFrame());
+  OCMVerifyAll(mockController);
+
+  // A frame without platform views isn't presented if the previous frame had none.
+  // The Flutter view is resized to the frame size instead.
+  OCMReject([mockController presentFrame:[OCMArg any]]);
+  OCMExpect([mockController performResize:CGSizeMake(300, 300)]);
+  embedder->PrepareFlutterView(flutter::DlISize(300, 300), [UIScreen mainScreen].scale);
+  embedder->SubmitFlutterView(flutter::kFlutterImplicitViewId, nullptr, nullptr,
+                              CreateTestSurfaceFrame());
+  OCMVerifyAll(mockController);
+}
+
 - (void)testOnlyPlatformViewsAreRemovedWhenReset {
   FlutterPlatformViewsController* flutterPlatformViewsController =
       CreateTestPlatformViewsController(self.name);
@@ -4968,7 +5022,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   flutterPlatformViewsController.flutterView = flutterView;
 
   // Submit a frame with the view, so that the frame without it below is presented.
-  // `submitFrame:` doesn't present a frame without platform views if the previous frame had none.
+  // `IOSExternalViewEmbedder::SubmitFlutterView` doesn't present a frame without platform views if
+  // the previous frame had none.
   [self submitFrameWithEmbedder:embedder.get() viewId:0 offset:10 backdropFilter:NO];
 
   // Dispose the view, and reset while its disposal is still pending.
