@@ -17,6 +17,7 @@
 
 import 'package:test/test.dart';
 import 'package:web_locale_keymap/web_locale_keymap.dart';
+
 import 'testing.dart';
 
 void testWin(LocaleKeymap mapping) {

@@ -310,8 +310,8 @@ void main() {
     // This is the one weird case. If maxLines is null, we would expect to allow
     // infinite wrapping. However, if we did, we'd never know when to append an
     // ellipsis, so this really means "append ellipsis as soon as we exceed the
-    // width".
-    relayoutWith(softWrap: true, overflow: TextOverflow.ellipsis);
+    // width when softWrap is false".
+    relayoutWith(softWrap: false, overflow: TextOverflow.ellipsis);
     expect(paragraph.size.height, equals(2 * lineHeight));
 
     // Now with no soft wrapping.
@@ -349,10 +349,7 @@ void main() {
       ..maxLines = 1
       ..softWrap = true
       ..overflow = TextOverflow.ellipsis
-      ..layout(
-        BoxConstraints(maxWidth: 50.0, maxHeight: 10 * lineHeight),
-        parentUsesSize: true,
-      );
+      ..layout(BoxConstraints(maxWidth: 50.0, maxHeight: 10 * lineHeight), parentUsesSize: true);
     expect(paragraph.didExceedMaxLines, isTrue);
     expect(paragraph.size.height, equals(lineHeight));
     expect(paragraph.textSize.height, equals(lineHeight));
@@ -362,10 +359,7 @@ void main() {
       ..maxLines = 100
       ..softWrap = true
       ..overflow = TextOverflow.ellipsis
-      ..layout(
-        BoxConstraints(maxWidth: 50.0, maxHeight: 2.5 * lineHeight),
-        parentUsesSize: true,
-      );
+      ..layout(BoxConstraints(maxWidth: 50.0, maxHeight: 2.5 * lineHeight), parentUsesSize: true);
     expect(paragraph.didExceedMaxLines, isTrue);
     expect(paragraph.size.height, equals(2 * lineHeight));
     expect(paragraph.textSize.height, equals(2 * lineHeight));
@@ -526,7 +520,7 @@ void main() {
     test('limited by ellipsis', () {
       final RenderParagraph paragraph = createRenderParagraph(overflow: TextOverflow.ellipsis);
       layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
-      expect(paragraph.didExceedMaxLines, true);
+      expect(paragraph.didExceedMaxLines, false);
     });
   });
 
@@ -778,8 +772,11 @@ void main() {
     expect(boxes[8], const TextBox.fromLTRBD(14.0, 28.0, 28.0, 42.0, TextDirection.ltr));
   });
 
-  test('Does not include the semantics node of truncated rendering children', () {
-    // Regression test for https://github.com/flutter/flutter/issues/88180
+  // Helper function to assemble a RenderParagraph with a WidgetSpan child and return the semantics nodes for testing.
+  ({SemanticsNode result, SemanticsNode childNode}) assembleOverflowParagraphSemantics({
+    int? maxLines,
+    bool? softWrap,
+  }) {
     const double screenWidth = 100;
     const sentence = 'truncated';
     final renderBoxes = <RenderBox>[
@@ -790,6 +787,8 @@ void main() {
         text: 'a long line to be truncated.',
         children: <InlineSpan>[WidgetSpan(child: Text(sentence))],
       ),
+      softWrap: softWrap ?? true,
+      maxLines: maxLines,
       overflow: TextOverflow.ellipsis,
       children: renderBoxes,
       textDirection: TextDirection.ltr,
@@ -797,17 +796,37 @@ void main() {
     _applyParentData(renderBoxes, paragraph.text);
     layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
     final result = SemanticsNode();
-    final truncatedChild = SemanticsNode();
-    truncatedChild.tags = <SemanticsTag>{const PlaceholderSpanIndexSemanticsTag(0)};
-    paragraph.assembleSemanticsNode(result, SemanticsConfiguration(), <SemanticsNode>[
-      truncatedChild,
-    ]);
+    final childNode = SemanticsNode();
+    childNode.tags = <SemanticsTag>{const PlaceholderSpanIndexSemanticsTag(0)};
+    paragraph.assembleSemanticsNode(result, SemanticsConfiguration(), <SemanticsNode>[childNode]);
+    return (result: result, childNode: childNode);
+  }
+
+  test('Does not include the semantics node of truncated rendering children', () {
+    // Regression test for https://github.com/flutter/flutter/issues/88180
+    final (:SemanticsNode result, :SemanticsNode childNode) = assembleOverflowParagraphSemantics(
+      softWrap: false,
+    );
     // It should only contain the semantics node of the TextSpan.
     expect(result.childrenCount, 1);
     result.visitChildren((SemanticsNode node) {
-      expect(node != truncatedChild, isTrue);
+      expect(node != childNode, isTrue);
       return true;
     });
+  });
+
+  test('Includes the semantics node of wrapped rendering children when maxLines is null', () {
+    final (:SemanticsNode result, :SemanticsNode childNode) = assembleOverflowParagraphSemantics();
+    // Both the TextSpan semantics node and the wrapped WidgetSpan semantics node are included.
+    expect(result.childrenCount, 2);
+    var includesChildNode = false;
+    result.visitChildren((SemanticsNode node) {
+      if (node == childNode) {
+        includesChildNode = true;
+      }
+      return true;
+    });
+    expect(includesChildNode, isTrue);
   });
 
   test('Supports gesture recognizer semantics', () {
@@ -1707,7 +1726,6 @@ void main() {
       expect(() => paragraph.positionInlineChildren(boxes), returnsNormally);
     });
   });
-
 }
 
 class MockCanvas extends Fake implements Canvas {
@@ -1799,37 +1817,35 @@ class TestSelectionRegistrar extends SelectionRegistrar {
   }
 }
 
+// test('ellipsis applies when parent height is reached before maxLines', () {
+//   const double lineHeight = 10.0;
+//   final paragraph = RenderParagraph(
+//     const TextSpan(
+//       text: 'Line 1\nLine 2\nLine 3\nLine 4\nLine 5',
+//       style: TextStyle(fontSize: lineHeight),
+//     ),
+//     textDirection: TextDirection.ltr,
+//     overflow: TextOverflow.ellipsis,
+//     maxLines: 10,
+//   );
 
+//   // Parent height fits 2.5 lines, so 2 lines fit and ellipsis is applied.
+//   layout(paragraph, constraints: const BoxConstraints(maxWidth: 200.0, maxHeight: 25.0));
+//   expect(paragraph.maxLines, 10);
+//   expect(paragraph.didExceedMaxLines, isTrue);
+//   expect(paragraph.textSize.height, equals(2 * lineHeight));
 
-  // test('ellipsis applies when parent height is reached before maxLines', () {
-  //   const double lineHeight = 10.0;
-  //   final paragraph = RenderParagraph(
-  //     const TextSpan(
-  //       text: 'Line 1\nLine 2\nLine 3\nLine 4\nLine 5',
-  //       style: TextStyle(fontSize: lineHeight),
-  //     ),
-  //     textDirection: TextDirection.ltr,
-  //     overflow: TextOverflow.ellipsis,
-  //     maxLines: 10,
-  //   );
+//   // When maxLines is smaller than what fits in parent height, maxLines wins.
+//   paragraph.maxLines = 1;
+//   layout(paragraph, constraints: const BoxConstraints(maxWidth: 200.0, maxHeight: 50.0));
+//   expect(paragraph.maxLines, 1);
+//   expect(paragraph.didExceedMaxLines, isTrue);
+//   expect(paragraph.textSize.height, equals(lineHeight));
 
-  //   // Parent height fits 2.5 lines, so 2 lines fit and ellipsis is applied.
-  //   layout(paragraph, constraints: const BoxConstraints(maxWidth: 200.0, maxHeight: 25.0));
-  //   expect(paragraph.maxLines, 10);
-  //   expect(paragraph.didExceedMaxLines, isTrue);
-  //   expect(paragraph.textSize.height, equals(2 * lineHeight));
-
-  //   // When maxLines is smaller than what fits in parent height, maxLines wins.
-  //   paragraph.maxLines = 1;
-  //   layout(paragraph, constraints: const BoxConstraints(maxWidth: 200.0, maxHeight: 50.0));
-  //   expect(paragraph.maxLines, 1);
-  //   expect(paragraph.didExceedMaxLines, isTrue);
-  //   expect(paragraph.textSize.height, equals(lineHeight));
-
-  //   // When maxLines is null and parent height is constrained, ellipsis still applies.
-  //   paragraph.maxLines = null;
-  //   layout(paragraph, constraints: const BoxConstraints(maxWidth: 200.0, maxHeight: 25.0));
-  //   expect(paragraph.maxLines, isNull);
-  //   expect(paragraph.didExceedMaxLines, isTrue);
-  //   expect(paragraph.textSize.height, equals(2 * lineHeight));
-  // });
+//   // When maxLines is null and parent height is constrained, ellipsis still applies.
+//   paragraph.maxLines = null;
+//   layout(paragraph, constraints: const BoxConstraints(maxWidth: 200.0, maxHeight: 25.0));
+//   expect(paragraph.maxLines, isNull);
+//   expect(paragraph.didExceedMaxLines, isTrue);
+//   expect(paragraph.textSize.height, equals(2 * lineHeight));
+// });
