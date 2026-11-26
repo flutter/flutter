@@ -871,13 +871,13 @@ void main() {
   );
 
   group('semantic scroll actions do not overscroll at the boundaries', () {
-    // Bouncing ListView under a MediaQuery, tracking the extreme offsets seen.
+    // Bouncing ListView, tracking the extreme offsets seen.
     Future<(ScrollController, int Function(), List<double>)> pumpList(
       WidgetTester tester, {
       required SemanticsTester semantics,
-      required bool accessibleNavigation,
     }) async {
       final controller = ScrollController();
+      addTearDown(controller.dispose);
       final extremes = <double>[0.0, 0.0]; // [minObserved, maxObserved]
       controller.addListener(() {
         extremes[0] = controller.offset < extremes[0] ? controller.offset : extremes[0];
@@ -887,15 +887,12 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: MediaQueryData(accessibleNavigation: accessibleNavigation),
-            child: ListView(
-              controller: controller,
-              physics: const BouncingScrollPhysics(),
-              children: List<Widget>.generate(
-                80,
-                (int i) => SizedBox(height: 40.0, child: Text('$i')),
-              ),
+          child: ListView(
+            controller: controller,
+            physics: const BouncingScrollPhysics(),
+            children: List<Widget>.generate(
+              80,
+              (int i) => SizedBox(height: 40.0, child: Text('$i')),
             ),
           ),
         ),
@@ -921,7 +918,7 @@ void main() {
     ) async {
       final semantics = SemanticsTester(tester);
       final (ScrollController controller, int Function() scrollableId, List<double> extremes) =
-          await pumpList(tester, semantics: semantics, accessibleNavigation: true);
+          await pumpList(tester, semantics: semantics);
 
       final double maxExtent = controller.position.maxScrollExtent;
       // Less room left than one semantic scroll step (size * scrollFactor).
@@ -938,7 +935,6 @@ void main() {
       expect(extremes[1], lessThanOrEqualTo(maxExtent));
       expect(controller.offset, moreOrLessEquals(maxExtent));
 
-      controller.dispose();
       semantics.dispose();
     });
 
@@ -947,7 +943,7 @@ void main() {
     ) async {
       final semantics = SemanticsTester(tester);
       final (ScrollController controller, int Function() scrollableId, List<double> extremes) =
-          await pumpList(tester, semantics: semantics, accessibleNavigation: true);
+          await pumpList(tester, semantics: semantics);
 
       final double minExtent = controller.position.minScrollExtent;
       controller.jumpTo(minExtent + 10.0);
@@ -963,7 +959,6 @@ void main() {
       expect(extremes[0], greaterThanOrEqualTo(minExtent));
       expect(controller.offset, moreOrLessEquals(minExtent));
 
-      controller.dispose();
       semantics.dispose();
     });
 
@@ -972,7 +967,7 @@ void main() {
     ) async {
       final semantics = SemanticsTester(tester);
       final (ScrollController controller, int Function() scrollableId, List<double> extremes) =
-          await pumpList(tester, semantics: semantics, accessibleNavigation: true);
+          await pumpList(tester, semantics: semantics);
 
       final double maxExtent = controller.position.maxScrollExtent;
       controller.jumpTo(maxExtent / 2.0);
@@ -990,13 +985,13 @@ void main() {
       expect(extremes[1], lessThanOrEqualTo(maxExtent));
       expect(controller.offset, lessThanOrEqualTo(maxExtent));
 
-      controller.dispose();
       semantics.dispose();
     });
 
     testWidgets('does not make a NeverScrollable view scrollable', (WidgetTester tester) async {
       final semantics = SemanticsTester(tester);
       final controller = ScrollController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1022,7 +1017,6 @@ void main() {
         isEmpty,
       );
 
-      controller.dispose();
       semantics.dispose();
     });
 
@@ -1352,6 +1346,359 @@ void main() {
 
       await tester.pumpAndSettle();
       expect(controller.offset, 0.0);
+
+      semantics.dispose();
+    });
+
+    testWidgets('clamps both axes of a TwoDimensionalScrollable without diagonal dragging', (
+      WidgetTester tester,
+    ) async {
+      final semantics = SemanticsTester(tester);
+      final horizontalController = ScrollController(initialScrollOffset: 190.0);
+      final verticalController = ScrollController(initialScrollOffset: 390.0);
+      addTearDown(horizontalController.dispose);
+      addTearDown(verticalController.dispose);
+
+      // A 1000 by 1000 table in an 800 by 600 viewport.
+      final delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 4,
+        maxYIndex: 4,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          return const SizedBox.square(dimension: 200.0);
+        },
+      );
+      addTearDown(delegate.dispose);
+
+      var maxHorizontalObserved = 190.0;
+      horizontalController.addListener(() {
+        if (horizontalController.offset > maxHorizontalObserved) {
+          maxHorizontalObserved = horizontalController.offset;
+        }
+      });
+      var maxVerticalObserved = 390.0;
+      verticalController.addListener(() {
+        if (verticalController.offset > maxVerticalObserved) {
+          maxVerticalObserved = verticalController.offset;
+        }
+      });
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: SimpleBuilderTableView(
+            horizontalDetails: ScrollableDetails.horizontal(
+              controller: horizontalController,
+              physics: const BouncingScrollPhysics(),
+            ),
+            verticalDetails: ScrollableDetails.vertical(
+              controller: verticalController,
+              physics: const BouncingScrollPhysics(),
+            ),
+            delegate: delegate,
+          ),
+        ),
+      );
+      expect(horizontalController.position.maxScrollExtent, 200.0);
+      expect(verticalController.position.maxScrollExtent, 400.0);
+
+      // Each axis has its own scrollable, which exposes its own actions.
+      int idOfNodeWith(SemanticsAction action) {
+        final ids = <int>[];
+        bool visit(SemanticsNode node) {
+          if (node.getSemanticsData().hasAction(action)) {
+            ids.add(node.id);
+          }
+          node.visitChildren(visit);
+          return true;
+        }
+
+        visit(tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!);
+        return ids.single;
+      }
+
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        idOfNodeWith(SemanticsAction.scrollLeft),
+        SemanticsAction.scrollLeft,
+      );
+      await tester.pumpAndSettle();
+
+      expect(horizontalController.offset, 200.0);
+      expect(maxHorizontalObserved, 200.0);
+      expect(verticalController.offset, 390.0);
+
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        idOfNodeWith(SemanticsAction.scrollUp),
+        SemanticsAction.scrollUp,
+      );
+      await tester.pumpAndSettle();
+
+      expect(verticalController.offset, 400.0);
+      expect(maxVerticalObserved, 400.0);
+      expect(horizontalController.offset, 200.0);
+
+      semantics.dispose();
+    });
+
+    testWidgets('stays in range when the next layout shrinks the max extent', (
+      WidgetTester tester,
+    ) async {
+      final semantics = SemanticsTester(tester);
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+
+      var trailingHeight = 300.0;
+      late StateSetter updateState;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              updateState = setState;
+              return ListView(
+                controller: controller,
+                physics: const BouncingScrollPhysics(),
+                children: <Widget>[
+                  const SizedBox(height: 300.0, child: Text('A')),
+                  const SizedBox(height: 300.0, child: Text('B')),
+                  SizedBox(height: trailingHeight, child: const Text('C')),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+      expect(controller.position.maxScrollExtent, 300.0);
+
+      // The content shrinks in the same frame as the semantic scroll.
+      updateState(() {
+        trailingHeight = 150.0;
+      });
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        semantics
+            .nodesWith(
+              actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset],
+            )
+            .single
+            .id,
+        SemanticsAction.scrollUp,
+      );
+      expect(controller.offset, 300.0);
+      await tester.pump();
+
+      // Lands on the new max extent without bouncing back to it.
+      expect(controller.position.maxScrollExtent, 150.0);
+      expect(controller.offset, 150.0);
+
+      await tester.pumpAndSettle();
+      expect(controller.offset, 150.0);
+
+      semantics.dispose();
+    });
+
+    testWidgets('stays in range when the next layout grows the min extent', (
+      WidgetTester tester,
+    ) async {
+      final semantics = SemanticsTester(tester);
+      final controller = ScrollController(initialScrollOffset: 100.0);
+      addTearDown(controller.dispose);
+
+      const centerKey = ValueKey<String>('center');
+      var leadingHeight = 300.0;
+      late StateSetter updateState;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              updateState = setState;
+              return CustomScrollView(
+                controller: controller,
+                physics: const BouncingScrollPhysics(),
+                center: centerKey,
+                slivers: <Widget>[
+                  SliverToBoxAdapter(child: SizedBox(height: leadingHeight)),
+                  const SliverToBoxAdapter(key: centerKey, child: SizedBox(height: 1200.0)),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+      expect(controller.position.minScrollExtent, -300.0);
+
+      // The content before the center shrinks in the same frame as the
+      // semantic scroll.
+      updateState(() {
+        leadingHeight = 100.0;
+      });
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        semantics
+            .nodesWith(
+              actions: <SemanticsAction>[
+                SemanticsAction.scrollUp,
+                SemanticsAction.scrollDown,
+                SemanticsAction.scrollToOffset,
+              ],
+            )
+            .single
+            .id,
+        SemanticsAction.scrollDown,
+      );
+      expect(controller.offset, -300.0);
+      await tester.pump();
+
+      // Lands on the new min extent without bouncing back to it.
+      expect(controller.position.minScrollExtent, -100.0);
+      expect(controller.offset, -100.0);
+
+      await tester.pumpAndSettle();
+      expect(controller.offset, -100.0);
+
+      semantics.dispose();
+    });
+
+    testWidgets('stays in range when the layout corrects the offset after a semantic scroll', (
+      WidgetTester tester,
+    ) async {
+      final semantics = SemanticsTester(tester);
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+
+      var item0Height = 100.0;
+      var middleHeight = 300.0;
+      late StateSetter updateState;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              height: 350.0,
+              width: 400.0,
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  updateState = setState;
+                  return ListView.builder(
+                    controller: controller,
+                    cacheExtent: 0.0,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: 7,
+                    itemBuilder: (BuildContext context, int index) {
+                      final double height = switch (index) {
+                        0 => item0Height,
+                        1 => middleHeight,
+                        2 => 100.0,
+                        _ => 10.0,
+                      };
+                      return SizedBox(height: height, child: Text('Item $index'));
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Scrolls the first item out of the viewport, so it is garbage collected.
+      controller.jumpTo(120.0);
+      await tester.pump();
+
+      final int scrollableId = semantics
+          .nodesWith(
+            actions: <SemanticsAction>[
+              SemanticsAction.scrollUp,
+              SemanticsAction.scrollDown,
+              SemanticsAction.scrollToOffset,
+            ],
+          )
+          .single
+          .id;
+
+      // The first item grows while it is not laid out, so the sliver corrects
+      // the scroll offset once the semantic scroll brings it back. The content
+      // after it shrinks in the same frame.
+      updateState(() {
+        item0Height = 1100.0;
+        middleHeight = 50.0;
+      });
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        scrollableId,
+        SemanticsAction.scrollDown,
+      );
+      expect(controller.offset, 0.0);
+      await tester.pump();
+
+      expect(controller.position.maxScrollExtent, 940.0);
+      expect(controller.offset, 940.0);
+
+      await tester.pumpAndSettle();
+      expect(controller.offset, 940.0);
+
+      semantics.dispose();
+    });
+
+    testWidgets('does not clamp a pointer drag that follows a semantic scroll', (
+      WidgetTester tester,
+    ) async {
+      final semantics = SemanticsTester(tester);
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+
+      var trailingHeight = 300.0;
+      late StateSetter updateState;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              updateState = setState;
+              return ListView(
+                controller: controller,
+                physics: const BouncingScrollPhysics(),
+                children: <Widget>[
+                  const SizedBox(height: 300.0, child: Text('A')),
+                  const SizedBox(height: 300.0, child: Text('B')),
+                  SizedBox(height: trailingHeight, child: const Text('C')),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        semantics
+            .nodesWith(
+              actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset],
+            )
+            .single
+            .id,
+        SemanticsAction.scrollUp,
+      );
+      expect(controller.offset, 300.0);
+
+      // A pointer drag takes over before the next frame, and the content
+      // shrinks in that frame.
+      final TestGesture gesture = await tester.startGesture(const Offset(400.0, 300.0));
+      await gesture.moveBy(const Offset(0.0, 88.0));
+      final double draggedOffset = controller.offset;
+      expect(draggedOffset, greaterThan(150.0));
+      updateState(() {
+        trailingHeight = 150.0;
+      });
+      await tester.pump();
+
+      // The content stays under the pointer, past the new max extent.
+      expect(controller.position.maxScrollExtent, 150.0);
+      expect(controller.offset, moreOrLessEquals(draggedOffset));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(controller.offset, 150.0);
 
       semantics.dispose();
     });

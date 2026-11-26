@@ -2279,6 +2279,11 @@ class _TwoDimensionalScrollableSemanticsGestureDelegate
 
   @override
   void _performSemanticDrag(RenderSemanticsGestureHandler renderObject, DragUpdateDetails details) {
+    if (!state._gestureRecognizers.containsKey(PanGestureRecognizer)) {
+      // Without diagonal dragging, the drag only moves the vertical position.
+      super._performSemanticDrag(renderObject, details);
+      return;
+    }
     final ScrollPosition horizontalPosition = state.horizontalScrollable.position;
     horizontalPosition.semanticsScrollInProgress = true;
     try {

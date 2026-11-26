@@ -355,17 +355,17 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// to [maxScrollExtent], regardless of the [physics], and the discarded
   /// distance is reported by [didOverscrollBy]. If the next layout changes
   /// the scroll extents, [pixels] is also kept in the new range.
+  @internal
   bool get semanticsScrollInProgress => _semanticsScrollInProgress;
   bool _semanticsScrollInProgress = false;
+  @internal
   set semanticsScrollInProgress(bool value) {
     _semanticsScrollInProgress = value;
-    if (value) {
-      _semanticsScrollAwaitingLayout = true;
-    }
   }
 
-  // Whether a semantics scroll may have moved [pixels] since the last layout.
-  bool _semanticsScrollAwaitingLayout = false;
+  // Whether a semantics scroll left [pixels] in range and nothing else has
+  // moved it since, so the next layout keeps it in range.
+  bool _semanticsScrollEndedInRange = false;
 
   /// Update the scroll position ([pixels]) to a given pixel value.
   ///
@@ -417,6 +417,9 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       }
       _pixels = target;
       if (_pixels != oldPixels) {
+        if (semanticsScrollInProgress && haveDimensions) {
+          _semanticsScrollEndedInRange = !outOfRange;
+        }
         if (outOfRange) {
           context.setIgnorePointer(false);
         }
@@ -522,6 +525,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     assert(hasPixels);
     _impliedVelocity = value - pixels;
     _pixels = value;
+    _semanticsScrollEndedInRange = semanticsScrollInProgress && haveDimensions && !outOfRange;
     notifyListeners();
     SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
       _impliedVelocity = 0;
@@ -696,7 +700,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       applyNewDimensions();
       _pendingDimensions = false;
     }
-    _semanticsScrollAwaitingLayout = false;
+    _semanticsScrollEndedInRange = false;
     assert(
       !_didChangeViewportDimensionOrReceiveCorrection,
       'Use correctForNewDimensions() (and return true) to change the scroll offset during applyContentDimensions().',
@@ -737,9 +741,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       isScrolling: activity!.isScrolling,
       velocity: activity!.velocity,
     );
-    if (_semanticsScrollAwaitingLayout &&
-        pixels >= oldPosition.minScrollExtent &&
-        pixels <= oldPosition.maxScrollExtent) {
+    if (_semanticsScrollEndedInRange) {
       // A semantics scroll that ended in range stays in range, so that it
       // does not bounce back when the layout changes the scroll extents.
       newPixels = clampDouble(newPixels, newPosition.minScrollExtent, newPosition.maxScrollExtent);
@@ -1054,6 +1056,10 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   void beginActivity(ScrollActivity? newActivity) {
     if (newActivity == null) {
       return;
+    }
+    if (!semanticsScrollInProgress) {
+      // Something else, such as a pointer drag, has taken over.
+      _semanticsScrollEndedInRange = false;
     }
     bool wasScrolling, oldIgnorePointer;
     if (_activity != null) {
