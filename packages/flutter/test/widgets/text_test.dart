@@ -1953,11 +1953,9 @@ void main() {
     );
   });
 
-  testWidgets('Hard-break ellipsized Text in IntrinsicWidth and Row(mainAxisSize: min)', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Hard-break ellipsized Text in Row(mainAxisSize: min)', (WidgetTester tester) async {
     const style = TextStyle(fontSize: 10);
-    const intrinsicKey = Key('intrinsic');
+    const rowLeftKey = Key('row-left');
     const rowCenterKey = Key('row-center');
     const rowRightKey = Key('row-right');
     const rowRtlKey = Key('row-rtl');
@@ -1969,18 +1967,16 @@ void main() {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            IntrinsicWidth(
-              child: Text(
-                'AAA\nBBB',
-                key: intrinsicKey,
-                style: style,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
+                Text(
+                  'AAA\nBBB',
+                  key: rowLeftKey,
+                  style: style,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 Text(
                   'AAA\nBBB',
                   key: rowCenterKey,
@@ -2007,26 +2003,29 @@ void main() {
                 ),
               ],
             ),
-            IntrinsicWidth(
-              child: Text.rich(
-                TextSpan(
-                  style: style,
-                  children: <InlineSpan>[
-                    WidgetSpan(child: SizedBox(width: 20, height: 10)),
-                    TextSpan(text: 'A\nBBB'),
-                  ],
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text.rich(
+                  TextSpan(
+                    style: style,
+                    children: <InlineSpan>[
+                      WidgetSpan(child: SizedBox(width: 20, height: 10)),
+                      TextSpan(text: 'A\nBBB'),
+                    ],
+                  ),
+                  key: widgetSpanKey,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                key: widgetSpanKey,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+              ],
             ),
           ],
         ),
       ),
     );
 
-    expect(tester.getSize(find.byKey(intrinsicKey)).width, 40);
+    expect(tester.getSize(find.byKey(rowLeftKey)).width, 40);
     expect(tester.getSize(find.byKey(rowCenterKey)).width, 40);
     expect(tester.getSize(find.byKey(rowRightKey)).width, 40);
     expect(tester.getSize(find.byKey(rowRtlKey)).width, 40);

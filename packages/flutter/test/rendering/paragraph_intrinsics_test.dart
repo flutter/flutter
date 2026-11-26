@@ -95,39 +95,4 @@ void main() {
     paragraph.strutStyle = const StrutStyle(fontSize: 100, forceStrutHeight: true);
     expect(paragraph.getMaxIntrinsicHeight(double.infinity), 100);
   });
-
-  test('hard-break ellipsis affects maxIntrinsicWidth', () {
-    for (final TextWidthBasis basis in TextWidthBasis.values) {
-      final paragraph = RenderParagraph(
-        const TextSpan(style: TextStyle(fontSize: 10), text: 'AAA\nBBB'),
-        textDirection: TextDirection.ltr,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        textWidthBasis: basis,
-      );
-      expect(paragraph.getMaxIntrinsicWidth(double.infinity), 40, reason: '$basis');
-      paragraph.dispose();
-
-      // When a hidden line is already wider than visible line + ellipsis,
-      // maxIntrinsicWidth stays at the wider line.
-      final widerHidden = RenderParagraph(
-        const TextSpan(style: TextStyle(fontSize: 10), text: 'AAA\nBBBBBB'),
-        textDirection: TextDirection.ltr,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        textWidthBasis: basis,
-      );
-      expect(widerHidden.getMaxIntrinsicWidth(double.infinity), 60, reason: '$basis');
-      widerHidden.dispose();
-    }
-
-    // Default TextOverflow.clip (no ellipsis) does not widen maxIntrinsicWidth.
-    final clipped = RenderParagraph(
-      const TextSpan(style: TextStyle(fontSize: 10), text: 'AAA\nBBB'),
-      textDirection: TextDirection.ltr,
-      maxLines: 1,
-    );
-    expect(clipped.getMaxIntrinsicWidth(double.infinity), 30);
-    clipped.dispose();
-  });
 }
