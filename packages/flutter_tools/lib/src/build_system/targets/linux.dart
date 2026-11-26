@@ -76,10 +76,7 @@ class UnpackLinux extends Target {
       fileSystem: environment.fileSystem,
       engineSourcePath: engineSourcePath,
       outputDirectory: outputDirectory,
-      artifacts: <String>[
-        ..._kLinuxArtifacts,
-        if (buildMode == BuildMode.profile) 'libvmservice_snapshot.so',
-      ],
+      artifacts: _kLinuxArtifacts,
       clientSourcePaths: <String>[headersPath],
       icuDataPath: environment.artifacts.getArtifactPath(
         Artifact.icuData,
@@ -127,19 +124,11 @@ abstract class BundleLinuxAssets extends Target {
       outputDirectory.createSync();
     }
 
-    // Only copy the kernel blob and vmservice in debug mode.
+    // Only copy the kernel blob in debug mode.
     if (buildMode == BuildMode.debug) {
       environment.buildDir
           .childFile('app.dill')
           .copySync(outputDirectory.childFile('kernel_blob.bin').path);
-
-      final String vmserviceDill = environment.artifacts.getArtifactPath(
-        Artifact.vmserviceKernelDill,
-        mode: BuildMode.debug,
-      );
-      environment.fileSystem
-          .file(vmserviceDill)
-          .copySync(outputDirectory.childFile('vmservice_snapshot.dill').path);
     }
     final String versionInfo = getVersionInfo(
       environment.defines,
@@ -227,15 +216,11 @@ class DebugBundleLinuxAssets extends BundleLinuxAssets {
   String get name => 'debug_bundle_${targetPlatform.getName()}_assets';
 
   @override
-  List<Source> get inputs => <Source>[
-    const Source.pattern('{BUILD_DIR}/app.dill'),
-    const Source.artifact(Artifact.vmserviceKernelDill, mode: BuildMode.debug),
-  ];
+  List<Source> get inputs => <Source>[const Source.pattern('{BUILD_DIR}/app.dill')];
 
   @override
   List<Source> get outputs => <Source>[
     const Source.pattern('{OUTPUT_DIR}/flutter_assets/kernel_blob.bin'),
-    const Source.pattern('{OUTPUT_DIR}/flutter_assets/vmservice_snapshot.dill'),
   ];
 }
 
