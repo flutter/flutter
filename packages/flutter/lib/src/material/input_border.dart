@@ -6,7 +6,7 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui' show lerpDouble;
+import 'dart:ui' show ClipOp, lerpDouble;
 
 import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
@@ -713,35 +713,6 @@ class ShapedInputBorder extends InputBorder {
   @override
   bool get preferPaintInterior => shape.preferPaintInterior;
 
-  Path _gapBorderPath(Rect rect, double start, double extent, {TextDirection? textDirection}) {
-    // Create a continuous path for the border with a gap in the top edge.
-    final Path outerPath = shape.getOuterPath(rect, textDirection: textDirection);
-
-    // If there's no meaningful gap, return the full outline.
-    if (start <= 0 && extent <= 0) {
-      return outerPath;
-    }
-
-    // Create a rectangle that represents the gap area.
-    // The gap is on the top edge, so we create a rect that covers the gap region.
-    final gapLeft = start;
-    final double gapRight = start + extent;
-
-    // Create a path that excludes the gap area by combining with a difference operation.
-    // We'll subtract a small rectangle at the top where the gap should be.
-    final gapRect = Path()
-      ..addRect(
-        Rect.fromLTRB(
-          clampDouble(gapLeft, rect.left, rect.right),
-          rect.top - 1.0, // Extend slightly beyond to ensure clean cut.
-          clampDouble(gapRight, rect.left, rect.right),
-          rect.top + 1.0, // Small height to only affect top edge.
-        ),
-      );
-
-    return Path.combine(PathOperation.difference, outerPath, gapRect);
-  }
-
   /// Draw the custom shape around [rect].
   ///
   /// The [borderSide] defines the line's color and weight.
@@ -780,13 +751,21 @@ class ShapedInputBorder extends InputBorder {
         TextDirection.rtl => gapStart + gapPadding - extent,
         TextDirection.ltr => gapStart - gapPadding,
       };
-      final Path path = _gapBorderPath(
-        deflatedRect,
-        math.max(0.0, start),
-        extent,
-        textDirection: textDirection,
+      // Leave out the part of the top edge that is behind the label, then
+      // paint the shape without a gap. The clip is tall enough to cover the
+      // stroke for any BorderSide.strokeAlign.
+      canvas.save();
+      canvas.clipRect(
+        Rect.fromLTRB(
+          start,
+          rect.top - borderSide.width - 1.0,
+          start + extent,
+          rect.top + borderSide.width * 2.0 + 1.0,
+        ),
+        clipOp: ClipOp.difference,
       );
-      canvas.drawPath(path, paint);
+      this.paint(canvas, rect, textDirection: textDirection);
+      canvas.restore();
     }
   }
 
