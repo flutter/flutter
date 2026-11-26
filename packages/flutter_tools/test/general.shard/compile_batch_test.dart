@@ -484,7 +484,7 @@ void main() {
     expect((await output)?.outputFilename, '');
   });
 
-  for (final FileSystemStyle style in [FileSystemStyle.posix, FileSystemStyle.windows]) {
+  for (final style in [FileSystemStyle.posix, FileSystemStyle.windows]) {
     final styleName = style == FileSystemStyle.windows ? 'windows' : 'posix';
 
     test(
