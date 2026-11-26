@@ -27,7 +27,7 @@
 #include <gdk/wayland/gdkwayland.h>
 
 #include "flutter/shell/platform/linux/fl_gl_texture_vulkan.h"  // nogncheck
-#include "flutter/shell/platform/linux/fl_gtk4_runtime_api.h"
+#include "flutter/shell/platform/linux/fl_gtk4_runtime_api.h"   // nogncheck
 #include "flutter/shell/platform/linux/fl_pixel_buffer_texture_vulkan.h"  // nogncheck
 #endif
 #include "flutter/shell/platform/linux/fl_gtk_frame_pacer.h"
