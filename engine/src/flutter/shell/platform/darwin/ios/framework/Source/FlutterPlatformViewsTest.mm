@@ -4802,6 +4802,53 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   XCTAssertEqual([self alphaOfPoint:CGPointMake(85, 70) onView:flutterView], 0);
 }
 
+- (void)testSubmitFrameResizesInsteadOfPresentingWithoutPlatformViews {
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      CreateTestPlatformViewsController(self.name);
+  std::unique_ptr<flutter::ExternalViewEmbedder> embedder =
+      CreateTestExternalViewEmbedder(flutterPlatformViewsController);
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id value) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @0,
+                                                       @"viewType" : @"MockFlutterPlatformView",
+                                                       @"gestureBlockingPolicy" : @"eager"
+                                                     }]
+            result:result];
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
+  flutterPlatformViewsController.flutterView = flutterView;
+  id mockController = OCMPartialMock(flutterPlatformViewsController);
+
+  // A frame with a platform view is presented.
+  OCMExpect([mockController presentFrame:[OCMArg any]]).andForwardToRealObject();
+  [self submitFrameWithEmbedder:embedder.get() viewId:0 offset:10 backdropFilter:NO];
+  OCMVerifyAll(mockController);
+
+  // A frame without platform views is presented if the previous frame had platform views.
+  OCMExpect([mockController presentFrame:[OCMArg any]]).andForwardToRealObject();
+  embedder->PrepareFlutterView(flutter::DlISize(300, 300), [UIScreen mainScreen].scale);
+  embedder->SubmitFlutterView(flutter::kFlutterImplicitViewId, nullptr, nullptr,
+                              CreateTestSurfaceFrame());
+  OCMVerifyAll(mockController);
+
+  // A frame without platform views isn't presented if the previous frame had none.
+  // The Flutter view is resized to the frame size instead.
+  OCMReject([mockController presentFrame:[OCMArg any]]);
+  OCMExpect([mockController performResize:CGSizeMake(300, 300)]);
+  embedder->PrepareFlutterView(flutter::DlISize(300, 300), [UIScreen mainScreen].scale);
+  embedder->SubmitFlutterView(flutter::kFlutterImplicitViewId, nullptr, nullptr,
+                              CreateTestSurfaceFrame());
+  OCMVerifyAll(mockController);
+}
+
 - (void)testOnlyPlatformViewsAreRemovedWhenReset {
   FlutterPlatformViewsController* flutterPlatformViewsController =
       CreateTestPlatformViewsController(self.name);
@@ -4975,7 +5022,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   flutterPlatformViewsController.flutterView = flutterView;
 
   // Submit a frame with the view, so that the frame without it below is presented.
-  // `submitFrame:` doesn't present a frame without platform views if the previous frame had none.
+  // `IOSExternalViewEmbedder::SubmitFlutterView` doesn't present a frame without platform views if
+  // the previous frame had none.
   [self submitFrameWithEmbedder:embedder.get() viewId:0 offset:10 backdropFilter:NO];
 
   // Dispose the view, and reset while its disposal is still pending.

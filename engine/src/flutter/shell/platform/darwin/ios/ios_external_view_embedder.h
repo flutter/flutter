@@ -9,7 +9,10 @@
 #include <vector>
 
 #include "flutter/flow/embedded_views.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/overlay_layer_pool.h"
+#import "flutter/shell/platform/darwin/ios/ios_context.h"
 
 namespace flutter {
 
@@ -25,6 +28,27 @@ class IOSExternalViewEmbedder : public ExternalViewEmbedder {
  private:
   __weak FlutterPlatformViewsController* platform_views_controller_;
   std::shared_ptr<IOSContext> ios_context_;
+
+  // The platform task runner (where the overlay layers were created), or nil if
+  // none have been created. Required so the destructor can clean up the UIViews
+  // associated with the overlay layers on the platform thread.
+  FlutterFMLTaskRunner* platform_task_runner_;
+
+  // A pool of reusable view layers that are reused across frames.
+  //
+  // The layers must be created and destroyed on the platform thread.
+  // All other access is on the raster thread.
+  std::shared_ptr<OverlayLayerPool> layer_pool_;
+
+  // Whether the previous frame had any platform views in active composition
+  // order.
+  //
+  // This state is tracked in order to force the platform view rendering code
+  // path for the first frame after removing the last platform view, giving us
+  // a chance to remove the platform view from the UIView hierarchy.
+  //
+  // Only accessed from the raster thread.
+  bool had_platform_views_ = false;
 
 #pragma mark - Frame state
 
@@ -55,6 +79,24 @@ class IOSExternalViewEmbedder : public ExternalViewEmbedder {
   // Clears the composition order, composition parameters, slices, and visited
   // platform views.
   void ResetFrameState();
+
+  // Slices the frame at the platform views, renders the overlays, and posts a
+  // `FlutterPlatformViewFrame` to the controller's `presentFrame:`.
+  //
+  // The surface frames are encoded here and submitted by the controller's
+  // `presentFrame:`, in the same `CATransaction` as the platform view updates.
+  //
+  // Submits `background_frame` directly when:
+  // * There is no Flutter view.
+  // * Neither the previous frame nor this frame has any platform views.
+  void SubmitFrame(std::unique_ptr<SurfaceFrame> background_frame);
+
+  // Populate any missing overlay layers in `layer_pool_`.
+  //
+  // The layers are created on the platform thread, and this blocks until they
+  // have been created. Also sets `platform_task_runner_` to the task runner the
+  // layers are created on.
+  void CreateMissingOverlays(size_t required_overlay_layers);
 
 #pragma mark - ExternalViewEmbedder
 
