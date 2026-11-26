@@ -321,14 +321,14 @@ static void key_released_cb(GtkEventControllerKey* controller,
 
 void fl_view_gtk4_setup(FlView* view) {
   const auto renderer = fl_engine_get_renderer_type(view->engine);
+  const gboolean is_wayland =
+      GDK_IS_WAYLAND_DISPLAY(gtk_widget_get_display(GTK_WIDGET(view)));
   const gboolean can_offload =
-      GDK_IS_WAYLAND_DISPLAY(gtk_widget_get_display(GTK_WIDGET(view))) &&
-      fl_gtk_runtime_supports_dmabuf_textures() &&
+      is_wayland && fl_gtk_runtime_supports_dmabuf_textures() &&
       g_strcmp0(g_getenv("FLUTTER_GTK4_ENABLE_DMABUF"), "0") != 0;
   GtkWidget* presentation = fl_graphics_offload_gtk4_wrap(
       view->render_area, nullptr, can_offload && renderer == kVulkan);
-  if (presentation != view->render_area && can_offload && renderer == kOpenGL &&
-      !view->subsurface_requested) {
+  if (is_wayland && renderer == kOpenGL && !view->subsurface_requested) {
     fl_gtk_frame_pacer_enable_idle_start(GTK_WIDGET(view));
   }
   gtk_box_append(GTK_BOX(view), presentation);
