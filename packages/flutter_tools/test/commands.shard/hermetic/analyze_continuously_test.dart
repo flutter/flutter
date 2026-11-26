@@ -699,6 +699,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
             ...expectedFlags,
             '--suppress-analytics',
           ],

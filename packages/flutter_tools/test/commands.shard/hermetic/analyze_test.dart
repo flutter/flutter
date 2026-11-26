@@ -278,12 +278,12 @@ void main() {
       );
     });
 
-    Future<void> expectServerArgs(
-      List<String> analyzeArgs,
-      List<String> expectedServerFlags, {
+    Future<void> expectServerArgs({
+      required List<String> analyzeArgs,
+      required List<String> expectedServerFlags,
       bool isRunningOnBot = false,
     }) async {
-      final botProcessManager = FakeProcessManager.list(<FakeCommand>[
+      final localProcessManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>[
             'Artifact.engineDartSdkPath/bin/dart',
@@ -292,6 +292,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
             '--no-with-fine-dependencies',
             ...expectedServerFlags,
             '--suppress-analytics',
@@ -310,7 +311,7 @@ void main() {
           fs: fileSystem,
           logger: logger,
           platform: platform,
-          processManager: botProcessManager,
+          processManager: localProcessManager,
         ),
       );
       final CommandRunner<void> localRunner = createTestCommandRunner(localCommand);
@@ -318,20 +319,29 @@ void main() {
         localRunner.run(<String>['analyze', ...analyzeArgs]),
         throwsA(isA<ToolExit>()),
       );
-      expect(botProcessManager, hasNoRemainingExpectations);
+      expect(localProcessManager, hasNoRemainingExpectations);
     }
 
     test('--plugins passes --plugins to language-server', () async {
-      await expectServerArgs(<String>['--plugins'], <String>['--plugins']);
+      await expectServerArgs(
+        analyzeArgs: <String>['--plugins'],
+        expectedServerFlags: <String>['--plugins'],
+      );
     });
 
     test('plugin trust flags pass expected flags to language-server', () async {
-      await expectServerArgs(<String>['--trust-plugins'], <String>['--trust-plugins']);
       await expectServerArgs(
-        <String>['--always-trust-plugins'],
-        <String>['--always-trust-plugins'],
+        analyzeArgs: <String>['--trust-plugins'],
+        expectedServerFlags: <String>['--trust-plugins'],
       );
-      await expectServerArgs(<String>['--never-trust-plugins'], <String>['--never-trust-plugins']);
+      await expectServerArgs(
+        analyzeArgs: <String>['--always-trust-plugins'],
+        expectedServerFlags: <String>['--always-trust-plugins'],
+      );
+      await expectServerArgs(
+        analyzeArgs: <String>['--never-trust-plugins'],
+        expectedServerFlags: <String>['--never-trust-plugins'],
+      );
     });
 
     test('plugin trust flags are mutually exclusive', () async {
@@ -364,30 +374,34 @@ void main() {
     });
 
     test('enables plugins by default when running on a bot', () async {
-      await expectServerArgs(const <String>[], <String>['--plugins'], isRunningOnBot: true);
       await expectServerArgs(
-        <String>['--no-plugins'],
-        <String>['--no-plugins'],
+        analyzeArgs: const <String>[],
+        expectedServerFlags: <String>['--plugins'],
         isRunningOnBot: true,
       );
       await expectServerArgs(
-        <String>['--benchmark'],
-        <String>['--no-plugins'],
+        analyzeArgs: <String>['--no-plugins'],
+        expectedServerFlags: <String>['--no-plugins'],
         isRunningOnBot: true,
       );
       await expectServerArgs(
-        <String>['--never-trust-plugins'],
-        <String>['--never-trust-plugins'],
+        analyzeArgs: <String>['--benchmark'],
+        expectedServerFlags: <String>['--no-plugins'],
         isRunningOnBot: true,
       );
       await expectServerArgs(
-        <String>['--trust-plugins'],
-        <String>['--plugins', '--trust-plugins'],
+        analyzeArgs: <String>['--never-trust-plugins'],
+        expectedServerFlags: <String>['--never-trust-plugins'],
         isRunningOnBot: true,
       );
       await expectServerArgs(
-        <String>['--always-trust-plugins'],
-        <String>['--plugins', '--always-trust-plugins'],
+        analyzeArgs: <String>['--trust-plugins'],
+        expectedServerFlags: <String>['--plugins', '--trust-plugins'],
+        isRunningOnBot: true,
+      );
+      await expectServerArgs(
+        analyzeArgs: <String>['--always-trust-plugins'],
+        expectedServerFlags: <String>['--plugins', '--always-trust-plugins'],
         isRunningOnBot: true,
       );
     });

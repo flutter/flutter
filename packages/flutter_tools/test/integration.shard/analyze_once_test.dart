@@ -373,7 +373,7 @@ analyzer:
   group('plugin trust', () {
     const untrustedWarning = 'because they are not trusted.';
 
-    Map<String, String> setupPluginProject({String pluginBody = 'void pluginEntry() {}\n'}) {
+    Map<String, String> setupPluginProject() {
       final Directory pluginDir = tempDir.childDirectory('my_plugin')..createSync(recursive: true);
       pluginDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: my_plugin
@@ -382,7 +382,7 @@ environment:
 ''');
       pluginDir.childDirectory('lib')
         ..createSync(recursive: true)
-        ..childFile('main.dart').writeAsStringSync(pluginBody);
+        ..childFile('main.dart').writeAsStringSync('void pluginEntry() {}\n');
       fileSystem.file(fileSystem.path.join(projectPath, 'analysis_options.yaml')).writeAsStringSync(
         '''
 plugins:
@@ -393,6 +393,8 @@ plugins:
       final Directory stateDir = tempDir.childDirectory('analyzer_state')..createSync();
       return <String, String>{
         'ANALYZER_STATE_LOCATION_OVERRIDE': stateDir.path,
+        // Setting FLUTTER_HOST forces BotDetector.isRunningOnBot to false so
+        // these tests behave the same on CI and locally.
         'FLUTTER_HOST': 'test',
       };
     }
@@ -449,51 +451,53 @@ plugins:
       );
     });
 
-    test(
-      '--always-trust-plugins and --never-trust-plugins persist across plugin changes',
-      () async {
-        final Map<String, String> env = setupPluginProject();
+    test('--always-trust-plugins persists across plugin changes', () async {
+      final Map<String, String> env = setupPluginProject();
 
-        await runCommand(
-          arguments: <String>['analyze', '--no-pub', '--always-trust-plugins'],
-          statusTextContains: <String>['No issues found!'],
-          stderrNotContains: <String>[untrustedWarning],
-          environment: env,
-        );
-        tempDir
-            .childDirectory('my_plugin')
-            .childDirectory('lib')
-            .childFile('main.dart')
-            .writeAsStringSync('void pluginEntry() { int.parse("2"); }\n');
-        await runCommand(
-          arguments: <String>['analyze', '--no-pub'],
-          statusTextContains: <String>['No issues found!'],
-          stderrNotContains: <String>[untrustedWarning],
-          environment: env,
-        );
-
-        await runCommand(
-          arguments: <String>['analyze', '--no-pub', '--never-trust-plugins'],
-          statusTextContains: <String>['No issues found!'],
-          stderrNotContains: <String>[untrustedWarning],
-          environment: env,
-        );
-        await runCommand(
-          arguments: <String>['analyze', '--no-pub'],
-          statusTextContains: <String>['No issues found!'],
-          stderrNotContains: <String>[untrustedWarning],
-          environment: env,
-        );
-      },
-    );
-
-    test('mutually exclusive plugin trust flags exit with error', () async {
       await runCommand(
-        arguments: <String>['analyze', '--no-pub', '--trust-plugins', '--never-trust-plugins'],
-        exitMessageContains:
-            'Cannot specify more than one of "--trust-plugins", '
-            '"--always-trust-plugins", and "--never-trust-plugins".',
-        exitCode: 1,
+        arguments: <String>['analyze', '--no-pub', '--always-trust-plugins'],
+        statusTextContains: <String>['No issues found!'],
+        stderrNotContains: <String>[untrustedWarning],
+        environment: env,
+      );
+      tempDir
+          .childDirectory('my_plugin')
+          .childDirectory('lib')
+          .childFile('main.dart')
+          .writeAsStringSync('void pluginEntry() { int.parse("2"); }\n');
+      await runCommand(
+        arguments: <String>['analyze', '--no-pub'],
+        statusTextContains: <String>['No issues found!'],
+        stderrNotContains: <String>[untrustedWarning],
+        environment: env,
+      );
+    });
+
+    test('--never-trust-plugins persists across plugin changes', () async {
+      final Map<String, String> env = setupPluginProject();
+
+      await runCommand(
+        arguments: <String>['analyze', '--no-pub'],
+        statusTextContains: <String>['No issues found!'],
+        exitMessageContains: untrustedWarning,
+        environment: env,
+      );
+      await runCommand(
+        arguments: <String>['analyze', '--no-pub', '--never-trust-plugins'],
+        statusTextContains: <String>['No issues found!'],
+        stderrNotContains: <String>[untrustedWarning],
+        environment: env,
+      );
+      tempDir
+          .childDirectory('my_plugin')
+          .childDirectory('lib')
+          .childFile('main.dart')
+          .writeAsStringSync('void pluginEntry() { int.parse("3"); }\n');
+      await runCommand(
+        arguments: <String>['analyze', '--no-pub'],
+        statusTextContains: <String>['No issues found!'],
+        stderrNotContains: <String>[untrustedWarning],
+        environment: env,
       );
     });
   });

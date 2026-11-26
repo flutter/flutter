@@ -41,6 +41,11 @@ class AnalysisServer {
   /// The client ID passed to the analysis server with `--client-id`, which it
   /// reports in analytics (for example, `flutter-analyze`).
   final String? clientId;
+
+  /// Whether to enable analyzer plugins (`--plugins` or `--no-plugins`).
+  ///
+  /// When `null`, neither flag is passed and the analysis server applies its
+  /// plugin trust gate.
   final bool? usePlugins;
   final bool trustPlugins;
   final bool alwaysTrustPlugins;
