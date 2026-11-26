@@ -42,10 +42,15 @@ void main() {
       final List<Map<String, Object?>> settings =
           (jsonDecode(result.stdout as String) as List<Object?>).cast<Map<String, Object?>>();
       for (final target in <String>['Runner', 'RunnerTests']) {
-        final Map<String, Object?> entry = settings.firstWhere(
-          (Map<String, Object?> entry) => entry['target'] == target,
+        final Map<String, Object?>? entry = settings
+            .where((Map<String, Object?> entry) => entry['target'] == target)
+            .firstOrNull;
+        expect(
+          entry,
+          isNotNull,
+          reason: 'Xcode did not report build settings for $target ($configuration).',
         );
-        final buildSettings = entry['buildSettings']! as Map<String, Object?>;
+        final buildSettings = entry!['buildSettings']! as Map<String, Object?>;
         final List<String> flags =
             (buildSettings['SWIFT_ACTIVE_COMPILATION_CONDITIONS'] as String? ?? '').split(' ');
         expect(
