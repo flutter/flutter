@@ -1775,7 +1775,7 @@ mixin _CopyPointerUpEvent on PointerEvent {
 ///
 /// Pointer up events are dispatched when a pointer first exits contact with
 /// the screen or another input surface, such as when a finger is removed from
-/// touchscreen or a mouse button is released.
+/// a touchscreen or a mouse button is released.
 ///
 /// See also:
 ///
