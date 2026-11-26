@@ -53,6 +53,8 @@ class MockableJNIEnv : public JNIEnv {
     functions = &jni_;
     jni_.CallObjectMethod = WrapCallObjectMethod;
     jni_.CallObjectMethodV = WrapCallObjectMethodV;
+    jni_.CallStaticVoidMethod = WrapCallStaticVoidMethod;
+    jni_.CallStaticVoidMethodV = WrapCallStaticVoidMethodV;
     jni_.CallVoidMethod = WrapCallVoidMethod;
     jni_.CallVoidMethodV = WrapCallVoidMethodV;
     jni_.DeleteGlobalRef = WrapDeleteGlobalRef;
@@ -77,6 +79,7 @@ class MockableJNIEnv : public JNIEnv {
   }
 
   virtual jobject CallObjectMethodV(jobject, jmethodID, va_list) = 0;
+  virtual void CallStaticVoidMethodV(jclass, jmethodID, va_list) = 0;
   virtual void CallVoidMethodV(jobject, jmethodID, va_list) = 0;
   virtual void DeleteGlobalRef(jobject) = 0;
   virtual void DeleteLocalRef(jobject) = 0;
@@ -115,6 +118,22 @@ class MockableJNIEnv : public JNIEnv {
                                        va_list args) {
     return static_cast<MockableJNIEnv*>(env)->CallObjectMethodV(obj, methodID,
                                                                 args);
+  }
+  static void WrapCallStaticVoidMethod(JNIEnv* env,
+                                       jclass clazz,
+                                       jmethodID methodID,
+                                       ...) {
+    va_list args;
+    va_start(args, methodID);
+    WrapCallStaticVoidMethodV(env, clazz, methodID, args);
+    va_end(args);
+  }
+  static void WrapCallStaticVoidMethodV(JNIEnv* env,
+                                        jclass clazz,
+                                        jmethodID methodID,
+                                        va_list args) {
+    static_cast<MockableJNIEnv*>(env)->CallStaticVoidMethodV(clazz, methodID,
+                                                             args);
   }
   static void WrapCallVoidMethod(JNIEnv* env,
                                  jobject obj,
@@ -220,6 +239,10 @@ class MockJNIEnv : public MockableJNIEnv {
   MOCK_METHOD(jobject,
               CallObjectMethodV,
               (jobject, jmethodID, va_list),
+              (override));
+  MOCK_METHOD(void,
+              CallStaticVoidMethodV,
+              (jclass, jmethodID, va_list),
               (override));
   MOCK_METHOD(void, CallVoidMethodV, (jobject, jmethodID, va_list), (override));
   MOCK_METHOD(void, DeleteGlobalRef, (jobject), (override));
