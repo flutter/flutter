@@ -16,7 +16,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
 
   RenderSliverList createRenderObject() {
     _renderObject = RenderSliverList(childManager: this);
-    return RenderSliverList(childManager: this);
+    return _renderObject;
   }
 
   int? _currentlyUpdatingChildIndex;
