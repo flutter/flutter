@@ -7,8 +7,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-late GestureVelocityTrackerBuilder lastCreatedBuilder;
-
 class TestScrollBehavior extends ScrollBehavior {
   const TestScrollBehavior(this.flag);
 
@@ -24,10 +22,9 @@ class TestScrollBehavior extends ScrollBehavior {
 
   @override
   GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) {
-    lastCreatedBuilder = flag
+    return flag
         ? (PointerEvent ev) => VelocityTracker.withKind(ev.kind)
         : (PointerEvent ev) => IOSScrollViewFlingVelocityTracker(ev.kind);
-    return lastCreatedBuilder;
   }
 }
 
@@ -92,11 +89,13 @@ void main() {
     final GlobalKey key = GlobalKey(debugLabel: 'scrollable');
     TestScrollBehavior? behavior;
     late ScrollPositionWithSingleContext position;
+    late BuildContext scrollContext;
 
     final Widget scrollView = SingleChildScrollView(
       key: key,
       child: Builder(
         builder: (BuildContext context) {
+          scrollContext = context;
           behavior = ScrollConfiguration.of(context) as TestScrollBehavior;
           position = Scrollable.of(context).position as ScrollPositionWithSingleContext;
           return Container(height: 1000.0);
@@ -108,29 +107,30 @@ void main() {
       ScrollConfiguration(behavior: const TestScrollBehavior(true), child: scrollView),
     );
 
-    expect(behavior, isNotNull);
     expect(behavior!.flag, isTrue);
     expect(position.physics, isA<ClampingScrollPhysics>());
-    expect(lastCreatedBuilder(const PointerDownEvent()), isA<VelocityTracker>());
-    ScrollMetrics metrics = position.copyWith();
-    expect(metrics.extentAfter, equals(400.0));
-    expect(metrics.viewportDimension, equals(600.0));
+
+    GestureVelocityTrackerBuilder builder = behavior!.velocityTrackerBuilder(scrollContext);
+
+    expect(builder(const PointerDownEvent()), isA<VelocityTracker>());
 
     // Same Scrollable, different ScrollConfiguration
     await tester.pumpWidget(
       ScrollConfiguration(behavior: const TestScrollBehavior(false), child: scrollView),
     );
 
-    expect(behavior, isNotNull);
     expect(behavior!.flag, isFalse);
     expect(position.physics, isA<BouncingScrollPhysics>());
-    expect(lastCreatedBuilder(const PointerDownEvent()), isA<IOSScrollViewFlingVelocityTracker>());
-    // Regression test for https://github.com/flutter/flutter/issues/5856
-    metrics = position.copyWith();
+
+    builder = behavior!.velocityTrackerBuilder(scrollContext);
+
+    expect(builder(const PointerDownEvent()), isA<IOSScrollViewFlingVelocityTracker>());
+
+    // Regression test for https://github.com/flutter/flutter/issues/5856.
+    final ScrollMetrics metrics = position.copyWith();
     expect(metrics.extentAfter, equals(400.0));
     expect(metrics.viewportDimension, equals(600.0));
   });
-
   testWidgets('ScrollBehavior default android overscroll indicator', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(

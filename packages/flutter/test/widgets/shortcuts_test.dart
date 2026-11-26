@@ -883,7 +883,7 @@ void main() {
               TestIntent: TestAction(
                 onInvoke: (Intent intent) {
                   invoked = true;
-                  return invoked;
+                  return true;
                 },
               ),
             },
@@ -927,7 +927,7 @@ void main() {
                 TestIntent: TestAction(
                   onInvoke: (Intent intent) {
                     invoked = true;
-                    return invoked;
+                    return true;
                   },
                 ),
               },
@@ -999,7 +999,7 @@ void main() {
                 TestIntent: TestAction(
                   onInvoke: (Intent intent) {
                     invoked = true;
-                    return invoked;
+                    return true;
                   },
                 ),
               },
@@ -1037,7 +1037,7 @@ void main() {
                 TestIntent: TestAction(
                   onInvoke: (Intent intent) {
                     invoked = true;
-                    return invoked;
+                    return true;
                   },
                 ),
               },
@@ -1077,7 +1077,7 @@ void main() {
                   TestIntent: TestAction(
                     onInvoke: (Intent intent) {
                       invoked = true;
-                      return invoked;
+                      return true;
                     },
                   ),
                 },

@@ -2913,8 +2913,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
   static int _lastIdentifier = 0;
   static int _generateNewId() {
-    _lastIdentifier = (_lastIdentifier + 1) % _maxFrameworkAccessibilityIdentifier;
-    return _lastIdentifier;
+    return (_lastIdentifier + 1) % _maxFrameworkAccessibilityIdentifier;
   }
 
   /// Uniquely identifies this node in the list of sibling nodes.

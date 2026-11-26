@@ -345,8 +345,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
 
     // If we still didn't find any candidate, use the current node as a
     // fallback.
-    candidate ??= currentNode;
-    return candidate;
+    return candidate ?? currentNode;
   }
 
   /// Returns the first node in the given `direction` that should receive focus

@@ -12,8 +12,7 @@ class RenderTestBox extends RenderBox {
   int calls = 0;
   double value = 0.0;
   double next() {
-    value += 1.0;
-    return value;
+    return ++value;
   }
 
   @override

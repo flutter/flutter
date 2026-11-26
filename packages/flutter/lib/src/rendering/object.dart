@@ -4001,8 +4001,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     String header = describeIdentity(this);
     if (!kReleaseMode) {
       if (_debugDisposed) {
-        header += ' DISPOSED';
-        return header;
+        return '$header DISPOSED';
       }
 
       var count = 0;

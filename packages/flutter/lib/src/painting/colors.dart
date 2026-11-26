@@ -11,7 +11,9 @@ import 'dart:ui' show Color, lerpDouble;
 import 'package:flutter/foundation.dart';
 
 double _getHue(double red, double green, double blue, double max, double delta) {
-  late double hue;
+  late final double hue;
+  // You might assume that this can trigger `LateInitializationError` but it won't
+  // because max is going to be either blue or green or red
   if (max == 0.0) {
     hue = 0.0;
   } else if (max == red) {
@@ -23,8 +25,7 @@ double _getHue(double red, double green, double blue, double max, double delta) 
   }
 
   /// Set hue to 0.0 when red == green == blue.
-  hue = hue.isNaN ? 0.0 : hue;
-  return hue;
+  return hue.isNaN ? 0.0 : hue;
 }
 
 double _lerpHue(double a, double b, double t) {

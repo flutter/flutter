@@ -21,7 +21,7 @@ void main() {
         TestAction(
           onInvoke: (Intent intent) {
             invoked = true;
-            return invoked;
+            return true;
           },
         ),
         const TestIntent(),
@@ -62,7 +62,7 @@ void main() {
             TestIntent: TestAction(
               onInvoke: (Intent intent) {
                 invoked = true;
-                return invoked;
+                return true;
               },
             ),
           },
@@ -88,7 +88,7 @@ void main() {
             TestIntent: TestAction(
               onInvoke: (Intent intent) {
                 invoked = true;
-                return invoked;
+                return true;
               },
             ),
           },
@@ -112,7 +112,7 @@ void main() {
             TestIntent: TestAction(
               onInvoke: (Intent intent) {
                 invoked = true;
-                return invoked;
+                return true;
               },
             ),
           },
@@ -139,7 +139,7 @@ void main() {
             TestIntent: TestAction(
               onInvoke: (Intent intent) {
                 invoked = true;
-                return invoked;
+                return true;
               },
             ),
           },
@@ -165,7 +165,7 @@ void main() {
       final Action<Intent> testAction = TestAction(
         onInvoke: (Intent intent) {
           invoked = true;
-          return invoked;
+          return true;
         },
       );
 
@@ -191,7 +191,7 @@ void main() {
       final Action<Intent> testAction = TestAction(
         onInvoke: (Intent intent) {
           invoked = true;
-          return invoked;
+          return true;
         },
       );
 
@@ -225,7 +225,7 @@ void main() {
         final Action<Intent> testAction = TestAction(
           onInvoke: (Intent intent) {
             invoked = true;
-            return invoked;
+            return true;
           },
         );
 
@@ -270,11 +270,9 @@ void main() {
     testWidgets('Action can be found with find', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final ActionDispatcher testDispatcher = TestDispatcher1(postInvoke: collect);
-      var invoked = false;
       final testAction = TestAction(
         onInvoke: (Intent intent) {
-          invoked = true;
-          return invoked;
+          return true;
         },
       );
       await tester.pumpWidget(
@@ -325,7 +323,7 @@ void main() {
       final testAction = TestAction(
         onInvoke: (Intent intent) {
           invoked = true;
-          return invoked;
+          return true;
         },
       );
       await tester.pumpWidget(
@@ -385,7 +383,7 @@ void main() {
       final Action<Intent> testAction = TestAction(
         onInvoke: (Intent intent) {
           invoked = true;
-          return invoked;
+          return true;
         },
       );
       var hovering = false;
@@ -545,14 +543,14 @@ void main() {
       final enabledTestAction = TestAction(
         onInvoke: (Intent intent) {
           invoked = true;
-          return invoked;
+          return true;
         },
       );
       enabledTestAction.enabled = true;
       final disabledTestAction = TestAction(
         onInvoke: (Intent intent) {
           invoked = true;
-          return invoked;
+          return true;
         },
       );
       disabledTestAction.enabled = false;
@@ -584,23 +582,21 @@ void main() {
       final GlobalKey containerKey = GlobalKey();
       var invoked1 = false;
       var invoked2 = false;
-      var invoked3 = false;
       final action1 = TestAction(
         onInvoke: (Intent intent) {
           invoked1 = true;
-          return invoked1;
+          return true;
         },
       );
       final action2 = TestAction(
         onInvoke: (Intent intent) {
           invoked2 = true;
-          return invoked2;
+          return true;
         },
       );
       final action3 = TestAction(
         onInvoke: (Intent intent) {
-          invoked3 = true;
-          return invoked3;
+          return true;
         },
       );
       var enabled1 = true;
@@ -774,7 +770,7 @@ void main() {
       testAction = TestAction(
         onInvoke: (Intent intent) {
           invoked = true;
-          return invoked;
+          return true;
         },
       );
     });
