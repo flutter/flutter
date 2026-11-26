@@ -1749,10 +1749,10 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 /// dependent widgets from being notified of the update, but does not prevent
 /// them or other widgets in the subtree from rebuilding for other reasons.
 /// For example, widgets in the subtree may still rebuild when their parent
-/// rebuilds and provides new widget configurations. In this case, Flutter can
-/// skip rebuilding children whose widget instances have not changed, while
-/// widgets that depend on the inherited widget can still rebuild independently
-/// when notified of the update.
+/// rebuilds. However, if the parent rebuilds but the child widget instances
+/// have not changed (such as when using constant widgets), Flutter can skip
+/// rebuilding those children, while still allowing widgets that depend on the
+/// inherited widget to rebuild independently when [updateShouldNotify] returns true.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=Zbm3hjPjQMk}
 ///
