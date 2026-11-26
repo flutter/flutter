@@ -25,6 +25,10 @@ typedef void (*FlGtkFramePacerCallback)(intptr_t baton,
 // Create on the GTK platform thread. Scheduling uses the default main context.
 FlGtkFramePacer* fl_gtk_frame_pacer_new();
 
+// Marks a GTK-managed presentation widget on the GTK thread. Its first frame
+// after idle can start before GTK begins painting the updated texture.
+void fl_gtk_frame_pacer_enable_idle_start(GtkWidget* widget);
+
 // May be called from an engine worker. The callback runs on the GTK thread.
 // Retains widget (which may be null) until delivery, then observes it weakly.
 // Takes ownership of user_data through

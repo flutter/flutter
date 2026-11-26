@@ -15,6 +15,9 @@ struct _FlGtkFramePacer {
   // Registration may run on an engine worker; delivery and stop run on GTK.
   GMutex mutex;
   GQueue requests;
+  // GTK-thread state, including the extra idle tick after regular delivery.
+  guint active_ticks;
+  guint64 active_until_ns;
   gboolean stopped;
 };
 
@@ -106,6 +109,7 @@ static void remove_tick(VsyncRequest* request) {
 static void tick_destroy(gpointer data) {
   auto* request = static_cast<VsyncRequest*>(data);
   request->tick_callback_id = 0;
+  request->pacer->active_ticks--;
   complete_on_wall_time(request);
   request_unref(request);
 }
@@ -121,6 +125,8 @@ static gboolean frame_tick(GtkWidget*, GdkFrameClock* clock, gpointer data) {
     return G_SOURCE_REMOVE;
   }
   const FlVsyncTiming timing = fl_vsync_timing_for_clock(clock);
+  request->pacer->active_until_ns =
+      timing.frame_target_ns + timing.refresh_interval_us * 1000;
   TRACE_EVENT_INSTANT2(
       "flutter", "LinuxVsyncTick", "baton",
       std::to_string(request->baton).c_str(), "frame_counter",
@@ -169,11 +175,30 @@ static gboolean schedule(gpointer data) {
     request->dispatch_source_id = 0;
   }
   if (request->widget != nullptr && gtk_widget_get_mapped(request->widget)) {
+    GdkFrameClock* clock = gtk_widget_get_frame_clock(request->widget);
+    if (clock != nullptr && request->pacer->active_ticks == 0 &&
+        g_object_get_data(G_OBJECT(request->widget), "fl-pacer-idle-start")) {
+      const gint64 now = g_get_monotonic_time();
+      // A new request can arrive just after a retained tick has retired.
+      // Keep pacing through the following refresh opportunity as well.
+      if (static_cast<guint64>(now) * 1000 >= request->pacer->active_until_ns) {
+        gint64 interval = 0;
+        gint64 target = 0;
+        gdk_frame_clock_get_refresh_info(clock, now, &interval, &target);
+        const auto timing =
+            fl_vsync_timing_from_refresh_info(now, interval, target);
+        request->pacer->active_until_ns =
+            timing.frame_target_ns + timing.refresh_interval_us * 1000;
+        TRACE_EVENT_INSTANT0("flutter", "LinuxVsyncIdleStart");
+        complete(request, timing.frame_start_ns, timing.frame_target_ns);
+        return G_SOURCE_REMOVE;
+      }
+    }
+    request->pacer->active_ticks++;
     request->unmap_handler_id =
         g_signal_connect(request->widget, "unmap", G_CALLBACK(unmap), request);
     request->tick_callback_id = gtk_widget_add_tick_callback(
         request->widget, frame_tick, request_ref(request), tick_destroy);
-    GdkFrameClock* clock = gtk_widget_get_frame_clock(request->widget);
     const gint64 interval =
         clock ? fl_vsync_timing_for_clock(clock).refresh_interval_us : 16667;
     const guint timeout_ms =
@@ -208,6 +233,11 @@ static void fl_gtk_frame_pacer_init(FlGtkFramePacer* self) {
 FlGtkFramePacer* fl_gtk_frame_pacer_new() {
   return FL_GTK_FRAME_PACER(
       g_object_new(fl_gtk_frame_pacer_get_type(), nullptr));
+}
+
+void fl_gtk_frame_pacer_enable_idle_start(GtkWidget* widget) {
+  g_object_set_data(G_OBJECT(widget), "fl-pacer-idle-start",
+                    GINT_TO_POINTER(1));
 }
 
 void fl_gtk_frame_pacer_request(FlGtkFramePacer* self,

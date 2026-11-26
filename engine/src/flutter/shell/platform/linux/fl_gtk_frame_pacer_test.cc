@@ -150,6 +150,35 @@ TEST_F(FlGtkFramePacerTest, StopDrainsMappedRequestExactlyOnce) {
   EXPECT_EQ(TickHandler(), 0u);
 }
 
+TEST_F(FlGtkFramePacerTest, IdleStartReturnsToTicksForAnimation) {
+  fl_gtk_frame_pacer_enable_idle_start(widget);
+  Arm();
+  ASSERT_EQ(batons, std::vector<intptr_t>({1}));
+  EXPECT_EQ(TickHandler(), 0u);
+  Arm(2);
+  EXPECT_EQ(batons.size(), 1u);
+  Tick();
+  EXPECT_EQ(batons, std::vector<intptr_t>({1, 2}));
+  Arm(3);
+  Tick();
+  EXPECT_EQ(batons, std::vector<intptr_t>({1, 2, 3}));
+  Tick();
+  EXPECT_EQ(TickHandler(), 0u);
+  Arm(4);
+  EXPECT_EQ(batons.size(), 3u);
+  Tick();
+  EXPECT_EQ(batons, std::vector<intptr_t>({1, 2, 3, 4}));
+}
+
+TEST_F(FlGtkFramePacerTest, IdleDeliveryCanStopPacerReentrantly) {
+  fl_gtk_frame_pacer_enable_idle_start(widget);
+  stop_on_delivery = true;
+  Arm();
+  EXPECT_EQ(batons, std::vector<intptr_t>({1}));
+  EXPECT_EQ(releases, 1);
+  EXPECT_EQ(TickHandler(), 0u);
+}
+
 TEST_F(FlGtkFramePacerTest, StopDrainsFallbackTimer) {
   Arm(1, false);
   EXPECT_TRUE(batons.empty());
