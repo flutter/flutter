@@ -4,6 +4,10 @@
 
 #include "flutter/display_list/effects/dl_color_source.h"
 
+#include <algorithm>
+#include <cmath>
+#include <limits>
+
 #include "flutter/display_list/dl_sampling_options.h"
 #include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/effects/dl_runtime_effect.h"
@@ -36,6 +40,13 @@ size_t CalculateGradientSize(uint32_t stop_count) {
   return sizeof(GradientColorSource) +
          (stop_count * (sizeof(DlColor) + sizeof(float)));
 }
+
+template <typename ColorType>
+bool IsValidGradientColors(uint32_t stop_count, const ColorType* colors) {
+  // DlGradientColorSourceBase::stop_count() returns an int.
+  return colors != nullptr && stop_count > 0 &&
+         stop_count <= static_cast<uint32_t>(std::numeric_limits<int>::max());
+}
 }  // namespace
 
 std::shared_ptr<DlColorSource> DlColorSource::MakeLinear(
@@ -46,6 +57,9 @@ std::shared_ptr<DlColorSource> DlColorSource::MakeLinear(
     const float* stops,
     DlTileMode tile_mode,
     const DlMatrix* matrix) {
+  if (!IsValidGradientColors(stop_count, colors)) {
+    return nullptr;
+  }
   size_t needed =
       CalculateGradientSize<DlLinearGradientColorSource>(stop_count);
   void* storage = ::operator new(needed);
@@ -66,6 +80,9 @@ std::shared_ptr<DlColorSource> DlColorSource::MakeLinear(
     const float* stops,
     DlTileMode tile_mode,
     const DlMatrix* matrix) {
+  if (!IsValidGradientColors(stop_count, colors_argb)) {
+    return nullptr;
+  }
   size_t needed =
       CalculateGradientSize<DlLinearGradientColorSource>(stop_count);
   void* storage = ::operator new(needed);
@@ -86,6 +103,9 @@ std::shared_ptr<DlColorSource> DlColorSource::MakeRadial(
     const float* stops,
     DlTileMode tile_mode,
     const DlMatrix* matrix) {
+  if (!IsValidGradientColors(stop_count, colors)) {
+    return nullptr;
+  }
   size_t needed =
       CalculateGradientSize<DlRadialGradientColorSource>(stop_count);
   void* storage = ::operator new(needed);
@@ -105,6 +125,9 @@ std::shared_ptr<DlColorSource> DlColorSource::MakeRadial(
     const float* stops,
     DlTileMode tile_mode,
     const DlMatrix* matrix) {
+  if (!IsValidGradientColors(stop_count, colors_argb)) {
+    return nullptr;
+  }
   size_t needed =
       CalculateGradientSize<DlRadialGradientColorSource>(stop_count);
   void* storage = ::operator new(needed);
@@ -127,6 +150,9 @@ std::shared_ptr<DlColorSource> DlColorSource::MakeConical(
     const float* stops,
     DlTileMode tile_mode,
     const DlMatrix* matrix) {
+  if (!IsValidGradientColors(stop_count, colors)) {
+    return nullptr;
+  }
   size_t needed =
       CalculateGradientSize<DlConicalGradientColorSource>(stop_count);
   void* storage = ::operator new(needed);
@@ -149,6 +175,9 @@ std::shared_ptr<DlColorSource> DlColorSource::MakeConical(
     const float* stops,
     DlTileMode tile_mode,
     const DlMatrix* matrix) {
+  if (!IsValidGradientColors(stop_count, colors_argb)) {
+    return nullptr;
+  }
   size_t needed =
       CalculateGradientSize<DlConicalGradientColorSource>(stop_count);
 
@@ -171,6 +200,9 @@ std::shared_ptr<DlColorSource> DlColorSource::MakeSweep(
     const float* stops,
     DlTileMode tile_mode,
     const DlMatrix* matrix) {
+  if (!IsValidGradientColors(stop_count, colors)) {
+    return nullptr;
+  }
   size_t needed = CalculateGradientSize<DlSweepGradientColorSource>(stop_count);
   void* storage = ::operator new(needed);
 
@@ -191,6 +223,9 @@ std::shared_ptr<DlColorSource> DlColorSource::MakeSweep(
     const float* stops,
     DlTileMode tile_mode,
     const DlMatrix* matrix) {
+  if (!IsValidGradientColors(stop_count, colors_argb)) {
+    return nullptr;
+  }
   size_t needed = CalculateGradientSize<DlSweepGradientColorSource>(stop_count);
   void* storage = ::operator new(needed);
 
@@ -257,7 +292,14 @@ void do_store_color_stops(void* pod,
   }
   float* stop_storage = reinterpret_cast<float*>(color_storage);
   if (stop_data) {
-    memcpy(stop_storage, stop_data, stop_count * sizeof(*stop_data));
+    // Pin each stop to [previous stop, 1] as Skia does, treating NaN as the
+    // previous stop, so that every backend sees non-decreasing stops in [0, 1].
+    float previous = 0.0f;
+    for (uint32_t i = 0; i < stop_count; i++) {
+      float stop = std::isnan(stop_data[i]) ? previous : stop_data[i];
+      previous = std::clamp(stop, previous, 1.0f);
+      stop_storage[i] = previous;
+    }
   } else {
     float div = stop_count - 1;
     if (div <= 0) {

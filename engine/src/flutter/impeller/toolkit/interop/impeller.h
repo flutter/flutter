@@ -1476,13 +1476,13 @@ void ImpellerColorSourceRelease(
 ///
 /// @param[in]  start_point     The start point.
 /// @param[in]  end_point       The end point.
-/// @param[in]  stop_count      The stop count.
+/// @param[in]  stop_count      The stop count. Must be at least 1.
 /// @param[in]  colors          The colors.
 /// @param[in]  stops           The stops.
 /// @param[in]  tile_mode       The tile mode.
 /// @param[in]  transformation  The transformation.
 ///
-/// @return     The color source.
+/// @return     The color source, or NULL if `stop_count` is 0.
 ///
 IMPELLER_EXPORT IMPELLER_NODISCARD ImpellerColorSource IMPELLER_NULLABLE
 ImpellerColorSourceCreateLinearGradientNew(
@@ -1499,13 +1499,13 @@ ImpellerColorSourceCreateLinearGradientNew(
 ///
 /// @param[in]  center          The center.
 /// @param[in]  radius          The radius.
-/// @param[in]  stop_count      The stop count.
+/// @param[in]  stop_count      The stop count. Must be at least 1.
 /// @param[in]  colors          The colors.
 /// @param[in]  stops           The stops.
 /// @param[in]  tile_mode       The tile mode.
 /// @param[in]  transformation  The transformation.
 ///
-/// @return     The color source.
+/// @return     The color source, or NULL if `stop_count` is 0.
 ///
 IMPELLER_EXPORT IMPELLER_NODISCARD ImpellerColorSource IMPELLER_NULLABLE
 ImpellerColorSourceCreateRadialGradientNew(
@@ -1524,13 +1524,13 @@ ImpellerColorSourceCreateRadialGradientNew(
 /// @param[in]  start_radius    The start radius.
 /// @param[in]  end_center      The end center.
 /// @param[in]  end_radius      The end radius.
-/// @param[in]  stop_count      The stop count.
+/// @param[in]  stop_count      The stop count. Must be at least 1.
 /// @param[in]  colors          The colors.
 /// @param[in]  stops           The stops.
 /// @param[in]  tile_mode       The tile mode.
 /// @param[in]  transformation  The transformation.
 ///
-/// @return     The color source.
+/// @return     The color source, or NULL if `stop_count` is 0.
 ///
 IMPELLER_EXPORT IMPELLER_NODISCARD ImpellerColorSource IMPELLER_NULLABLE
 ImpellerColorSourceCreateConicalGradientNew(
@@ -1550,13 +1550,13 @@ ImpellerColorSourceCreateConicalGradientNew(
 /// @param[in]  center          The center.
 /// @param[in]  start           The start.
 /// @param[in]  end             The end.
-/// @param[in]  stop_count      The stop count.
+/// @param[in]  stop_count      The stop count. Must be at least 1.
 /// @param[in]  colors          The colors.
 /// @param[in]  stops           The stops.
 /// @param[in]  tile_mode       The tile mode.
 /// @param[in]  transformation  The transformation.
 ///
-/// @return     The color source.
+/// @return     The color source, or NULL if `stop_count` is 0.
 ///
 IMPELLER_EXPORT IMPELLER_NODISCARD ImpellerColorSource IMPELLER_NULLABLE
 ImpellerColorSourceCreateSweepGradientNew(

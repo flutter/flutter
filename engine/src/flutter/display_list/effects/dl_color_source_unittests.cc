@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <limits>
 #include <memory>
 #include <vector>
 
@@ -785,6 +786,57 @@ TEST(DisplayListColorSource, RuntimeEffect) {
   TestEquals(source3, source3);
   TestNotEquals(source1, source2, "RuntimeEffect differs");
   TestNotEquals(source2, source3, "RuntimeEffect differs");
+}
+
+TEST(DisplayListColorSource, GradientsWithoutStopsAreRejected) {
+  EXPECT_EQ(
+      DlColorSource::MakeLinear(kTestPoints1[0], kTestPoints1[1], 0,
+                                kTestColors, kTestStops, DlTileMode::kClamp),
+      nullptr);
+  EXPECT_EQ(DlColorSource::MakeRadial(kTestPoints1[0], 10.0, 0, kTestColors,
+                                      kTestStops, DlTileMode::kClamp),
+            nullptr);
+  EXPECT_EQ(DlColorSource::MakeConical(kTestPoints1[0], 10.0, kTestPoints1[1],
+                                       20.0, 0, kTestColors, kTestStops,
+                                       DlTileMode::kClamp),
+            nullptr);
+  EXPECT_EQ(
+      DlColorSource::MakeSweep(kTestPoints1[0], 10.0, 20.0, 0, kTestColors,
+                               kTestStops, DlTileMode::kClamp),
+      nullptr);
+}
+
+TEST(DisplayListColorSource, GradientsWithNullColorsAreRejected) {
+  EXPECT_EQ(DlColorSource::MakeLinear(kTestPoints1[0], kTestPoints1[1],
+                                      kTestStopCount,
+                                      static_cast<const DlColor*>(nullptr),
+                                      kTestStops, DlTileMode::kClamp),
+            nullptr);
+  EXPECT_EQ(DlColorSource::MakeLinear(kTestPoints1[0], kTestPoints1[1],
+                                      kTestStopCount,
+                                      static_cast<const DlScalar*>(nullptr),
+                                      kTestStops, DlTileMode::kClamp),
+            nullptr);
+}
+
+TEST(DisplayListColorSource, GradientStopsAreClampedAndNonDecreasing) {
+  constexpr float kInfinity = std::numeric_limits<float>::infinity();
+  constexpr float kNaN = std::numeric_limits<float>::quiet_NaN();
+  const DlColor colors[] = {DlColor::kRed(), DlColor::kGreen(),
+                            DlColor::kBlue(), DlColor::kRed(),
+                            DlColor::kGreen()};
+  const float stops[] = {-kInfinity, 0.5f, 0.25f, kNaN, kInfinity};
+  std::shared_ptr<DlColorSource> source = DlColorSource::MakeLinear(
+      kTestPoints1[0], kTestPoints1[1], 5, colors, stops, DlTileMode::kClamp);
+  ASSERT_NE(source, nullptr);
+  const DlLinearGradientColorSource* linear = source->asLinearGradient();
+  ASSERT_NE(linear, nullptr);
+
+  EXPECT_EQ(linear->stops()[0], 0.0f);
+  EXPECT_EQ(linear->stops()[1], 0.5f);
+  EXPECT_EQ(linear->stops()[2], 0.5f);
+  EXPECT_EQ(linear->stops()[3], 0.5f);
+  EXPECT_EQ(linear->stops()[4], 1.0f);
 }
 
 }  // namespace testing

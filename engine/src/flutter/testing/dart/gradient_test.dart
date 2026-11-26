@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:test/test.dart';
@@ -66,5 +67,29 @@ void main() {
       ),
       throwsA(isA<AssertionError>()),
     );
+  });
+
+  test('gradients with no colors draw with the paint color', () async {
+    final shaders = <Shader>[
+      Gradient.linear(Offset.zero, const Offset(10.0, 10.0), const <Color>[], const <double>[]),
+      Gradient.radial(Offset.zero, 10.0, const <Color>[], const <double>[]),
+      Gradient.sweep(Offset.zero, const <Color>[], const <double>[]),
+    ];
+    for (final Shader shader in shaders) {
+      final recorder = PictureRecorder();
+      final canvas = Canvas(recorder);
+      canvas.drawRect(
+        const Rect.fromLTWH(0.0, 0.0, 10.0, 10.0),
+        Paint()
+          ..color = const Color(0xFF00FF00)
+          ..shader = shader,
+      );
+      final Picture picture = recorder.endRecording();
+      final Image image = await picture.toImage(10, 10);
+      final ByteData? pixels = await image.toByteData();
+      expect(pixels!.getUint32(0), 0x00FF00FF);
+      image.dispose();
+      picture.dispose();
+    }
   });
 }

@@ -50,6 +50,10 @@ class DlColorSource : public DlAttribute<DlColorSource, DlColorSourceType> {
       DlImageSampling sampling = DlImageSampling::kLinear,
       const DlMatrix* matrix = nullptr);
 
+  // MakeLinear, MakeRadial, MakeConical and MakeSweep return nullptr if
+  // `stop_count` is 0 or the colors pointer is null. Stops passed in are
+  // stored clamped to [0, 1] and non-decreasing, with NaN treated as the
+  // previous stop. If `stops` is null, the stops are spaced evenly.
   static std::shared_ptr<DlColorSource> MakeLinear(
       const DlPoint start_point,
       const DlPoint end_point,

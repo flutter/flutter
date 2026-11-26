@@ -201,5 +201,62 @@ TEST(PaintTest, GradientConversionNonMonotonic) {
   ASSERT_TRUE(ScalarNearlyEqual(converted_stops[3], 1.0f));
 }
 
+TEST(PaintTest, GradientConversionNonMonotonicMissingFirstValue) {
+  std::vector<flutter::DlColor> colors = {flutter::DlColor::kBlue(),
+                                          flutter::DlColor::kGreen(),
+                                          flutter::DlColor::kRed()};
+  std::vector<float> stops = {0.8, 0.2, 0.1};
+  const auto gradient =
+      flutter::DlColorSource::MakeLinear(flutter::DlPoint(0, 0),       //
+                                         flutter::DlPoint(1.0, 1.0),   //
+                                         3,                            //
+                                         colors.data(),                //
+                                         stops.data(),                 //
+                                         flutter::DlTileMode::kClamp,  //
+                                         nullptr                       //
+      );
+
+  std::vector<Color> converted_colors;
+  std::vector<Scalar> converted_stops;
+  Paint::ConvertStops(gradient->asLinearGradient(), converted_colors,
+                      converted_stops);
+
+  // Every stop after the inserted 0.0 is clamped up to 0.8.
+  ASSERT_EQ(converted_stops.size(), 5u);
+  ASSERT_TRUE(ScalarNearlyEqual(converted_stops[0], 0.0f));
+  ASSERT_TRUE(ScalarNearlyEqual(converted_stops[1], 0.8f));
+  ASSERT_TRUE(ScalarNearlyEqual(converted_stops[2], 0.8f));
+  ASSERT_TRUE(ScalarNearlyEqual(converted_stops[3], 0.8f));
+  ASSERT_TRUE(ScalarNearlyEqual(converted_stops[4], 1.0f));
+}
+
+TEST(PaintTest, GradientConversionSingleStop) {
+  std::vector<flutter::DlColor> colors = {flutter::DlColor::kBlue()};
+  std::vector<float> stops = {0.5};
+  const auto gradient =
+      flutter::DlColorSource::MakeLinear(flutter::DlPoint(0, 0),       //
+                                         flutter::DlPoint(1.0, 1.0),   //
+                                         1,                            //
+                                         colors.data(),                //
+                                         stops.data(),                 //
+                                         flutter::DlTileMode::kClamp,  //
+                                         nullptr                       //
+      );
+
+  std::vector<Color> converted_colors;
+  std::vector<Scalar> converted_stops;
+  Paint::ConvertStops(gradient->asLinearGradient(), converted_colors,
+                      converted_stops);
+
+  ASSERT_EQ(converted_colors.size(), 3u);
+  ASSERT_EQ(converted_stops.size(), 3u);
+  for (const Color& color : converted_colors) {
+    ASSERT_TRUE(ScalarNearlyEqual(color.blue, 1.0f));
+  }
+  ASSERT_TRUE(ScalarNearlyEqual(converted_stops[0], 0.0f));
+  ASSERT_TRUE(ScalarNearlyEqual(converted_stops[1], 0.5f));
+  ASSERT_TRUE(ScalarNearlyEqual(converted_stops[2], 1.0f));
+}
+
 }  // namespace testing
 }  // namespace impeller

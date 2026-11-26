@@ -722,4 +722,28 @@ TEST_P(InteropPlaygroundTest, MappingsReleaseTheirDataOnDestruction) {
   ASSERT_TRUE(deleted);
 }
 
+TEST_P(InteropPlaygroundTest, GradientsWithoutStopsAreRejected) {
+  const ImpellerPoint start = {0, 0};
+  const ImpellerPoint end = {100, 100};
+  const ImpellerColor colors[] = {
+      {1.0, 0.0, 0.0, 1.0, kImpellerColorSpaceSRGB}};
+  const float stops[] = {0.0};
+
+  EXPECT_EQ(
+      ImpellerColorSourceCreateLinearGradientNew(
+          &start, &end, 0, colors, stops, kImpellerTileModeClamp, nullptr),
+      nullptr);
+  EXPECT_EQ(ImpellerColorSourceCreateRadialGradientNew(
+                &start, 50, 0, colors, stops, kImpellerTileModeClamp, nullptr),
+            nullptr);
+  EXPECT_EQ(ImpellerColorSourceCreateConicalGradientNew(
+                &start, 10, &end, 50, 0, colors, stops, kImpellerTileModeClamp,
+                nullptr),
+            nullptr);
+  EXPECT_EQ(
+      ImpellerColorSourceCreateSweepGradientNew(
+          &start, 0, 180, 0, colors, stops, kImpellerTileModeClamp, nullptr),
+      nullptr);
+}
+
 }  // namespace impeller::interop::testing
