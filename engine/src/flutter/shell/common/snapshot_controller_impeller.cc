@@ -23,7 +23,8 @@ std::shared_ptr<impeller::Texture> DoMakeRasterSnapshot(
     const sk_sp<DisplayList>& display_list,
     DlISize size,
     const std::shared_ptr<impeller::AiksContext>& context,
-    SnapshotPixelFormat pixel_format) {
+    SnapshotPixelFormat pixel_format,
+    bool reset_host_buffer = false) {
   TRACE_EVENT0("flutter", __FUNCTION__);
   if (!context) {
     return nullptr;
@@ -62,8 +63,7 @@ std::shared_ptr<impeller::Texture> DoMakeRasterSnapshot(
   }
 
   return impeller::DisplayListToTexture(
-      display_list, render_target_size, *context,
-      /*reset_host_buffer=*/false,
+      display_list, render_target_size, *context, reset_host_buffer,
       /*generate_mips=*/false, impeller_pixel_format);
 }
 
@@ -73,6 +73,7 @@ std::shared_ptr<impeller::Texture> DoMakeRasterSnapshot(
 struct SnapshotContext {
   // Destroyed in reverse order: the context result is released before the
   // offscreen surface it made current.
+  bool reset_host_buffer = false;
   std::unique_ptr<Surface> pbuffer_surface;
   std::unique_ptr<GLContextResult> context_result;
   std::shared_ptr<impeller::AiksContext> aiks_context;
@@ -115,6 +116,10 @@ SnapshotContext MakeSnapshotContextCurrent(
   // surface. Backends without a thread-local rendering context, such as
   // Vulkan, can construct the headless AiksContext directly.
   result.aiks_context = delegate.CreateHeadlessAiksContext();
+  result.reset_host_buffer =
+      result.aiks_context &&
+      result.aiks_context->GetContext()->GetBackendType() ==
+          impeller::Context::BackendType::kVulkan;
   return result;
 }
 
@@ -135,7 +140,8 @@ std::shared_ptr<impeller::Texture> DoMakeRasterSnapshot(
   if (!display_list) {
     return nullptr;
   }
-  return DoMakeRasterSnapshot(display_list, size, aiks_context, pixel_format);
+  return DoMakeRasterSnapshot(display_list, size, aiks_context, pixel_format,
+                              snapshot_context.reset_host_buffer);
 }
 
 std::shared_ptr<impeller::Texture> DoMakeRasterSnapshot(

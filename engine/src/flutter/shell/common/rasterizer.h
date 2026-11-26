@@ -744,14 +744,22 @@ class Rasterizer final : public SnapshotDelegate,
                         impeller::Context::BackendType::kOpenGLES) {
       return nullptr;
     }
-    // Vulkan retains submitted buffers until their fence signals.
-    const auto lifetime =
-        context->GetBackendType() == impeller::Context::BackendType::kVulkan
-            ? impeller::HostBuffer::Lifetime::kRetainInCommandBuffer
-            : impeller::HostBuffer::Lifetime::kWaitForIdle;
-    return std::make_shared<impeller::AiksContext>(
-        context, impeller::TypographerContextSkia::Make(), std::nullopt,
-        lifetime);
+    if (context->GetBackendType() != impeller::Context::BackendType::kVulkan) {
+      return std::make_shared<impeller::AiksContext>(
+          context, impeller::TypographerContextSkia::Make());
+    }
+    if (!context->IsValid()) {
+      return nullptr;
+    }
+    if (!headless_vulkan_context_) {
+      auto headless = std::make_shared<impeller::AiksContext>(
+          context, impeller::TypographerContextSkia::Make());
+      if (!headless->IsValid()) {
+        return nullptr;
+      }
+      headless_vulkan_context_ = std::move(headless);
+    }
+    return headless_vulkan_context_;
 #else
     return nullptr;
 #endif
@@ -822,6 +830,9 @@ class Rasterizer final : public SnapshotDelegate,
   Delegate& delegate_;
   [[maybe_unused]] MakeGpuImageBehavior gpu_image_behavior_;
   std::shared_ptr<impeller::ImpellerContextFuture> impeller_context_;
+#if IMPELLER_SUPPORTS_RENDERING
+  mutable std::shared_ptr<impeller::AiksContext> headless_vulkan_context_;
+#endif
   std::unique_ptr<Surface> surface_;
   std::unique_ptr<SnapshotSurfaceProducer> snapshot_surface_producer_;
   std::unique_ptr<flutter::CompositorContext> compositor_context_;

@@ -30,13 +30,10 @@ class AiksContext {
   ///                             errors.
   /// @param render_target_allocator Injects a render target allocator or
   ///                                allocates its own if none is supplied.
-  /// @param host_buffer_lifetime  Controls ownership of transient buffers.
   AiksContext(std::shared_ptr<Context> context,
               std::shared_ptr<TypographerContext> typographer_context,
               std::optional<std::shared_ptr<RenderTargetAllocator>>
-                  render_target_allocator = std::nullopt,
-              HostBuffer::Lifetime host_buffer_lifetime =
-                  HostBuffer::Lifetime::kWaitForIdle);
+                  render_target_allocator = std::nullopt);
 
   virtual ~AiksContext();
 

@@ -639,6 +639,7 @@ ContextVK::GetConcurrentWorkerTaskRunner() const {
 }
 
 void ContextVK::Shutdown() {
+  is_valid_ = false;
   // There are multiple objects, for example |CommandPoolVK|, that in their
   // destructors make a strong reference to |ContextVK|. Resetting these shared
   // pointers ensures that cleanup happens in a correct order.

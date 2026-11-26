@@ -442,13 +442,13 @@ bool RenderPassVK::SetVertexBuffer(BufferView vertex_buffers[],
   vk::Buffer buffers[kMaxVertexBuffers];
   vk::DeviceSize vertex_buffer_offsets[kMaxVertexBuffers];
   for (size_t i = 0; i < vertex_buffer_count; i++) {
-    const BufferView& view = vertex_buffers[i];
-    buffers[i] = DeviceBufferVK::Cast(*view.GetBuffer()).GetBuffer();
-    vertex_buffer_offsets[i] = view.GetRange().offset;
-    // Each command buffer retains its own reference when the array is reused.
-    const auto& device_buffer = view.GetSharedBuffer();
-    if (device_buffer && !command_buffer_->Track(device_buffer)) {
-      return false;
+    buffers[i] =
+        DeviceBufferVK::Cast(*vertex_buffers[i].GetBuffer()).GetBuffer();
+    vertex_buffer_offsets[i] = vertex_buffers[i].GetRange().offset;
+    std::shared_ptr<const DeviceBuffer> device_buffer =
+        vertex_buffers[i].TakeBuffer();
+    if (device_buffer) {
+      command_buffer_->Track(device_buffer);
     }
   }
 

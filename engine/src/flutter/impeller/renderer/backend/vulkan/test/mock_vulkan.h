@@ -69,6 +69,8 @@ class MockFence final {
 void SetMockVulkanQueueSubmitCallback(VkDevice device,
                                       std::function<void(MockFence*)> callback);
 
+void SetNextMockIdleCallback(VkDevice device, std::function<void()> callback);
+
 size_t GetMockVulkanFunctionCallCount(VkDevice device,
                                       const std::string& function);
 

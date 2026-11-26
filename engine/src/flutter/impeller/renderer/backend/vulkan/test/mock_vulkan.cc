@@ -181,7 +181,7 @@ class MockDevice final {
     std::function<void(MockFence*)> callback;
     {
       Lock lock(queue_submit_callback_mutex_);
-      callback = std::move(queue_submit_callback_);
+      callback = std::exchange(queue_submit_callback_, {});
     }
     if (callback) {
       callback(fence);
@@ -201,6 +201,8 @@ class MockDevice final {
   uint64_t NextMockTimestamp() {
     return next_mock_timestamp_.fetch_add(1000000u);
   }
+
+  std::function<void()> next_idle_callback;
 
   MockQueue& GetQueue() { return queue_; }
 
@@ -388,6 +390,8 @@ void vkGetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice,
       static_cast<VkSampleCountFlags>(VK_SAMPLE_COUNT_1_BIT |
                                       VK_SAMPLE_COUNT_4_BIT);
   pProperties->limits.maxImageDimension2D = 4096;
+  pProperties->limits.maxFramebufferWidth = 4096;
+  pProperties->limits.maxFramebufferHeight = 4096;
   pProperties->limits.timestampPeriod = 1;
   if (GetMockVulkanState().physical_device_properties_callback) {
     GetMockVulkanState().physical_device_properties_callback(physicalDevice,
@@ -761,6 +765,9 @@ VkResult vkCreateGraphicsPipelines(
 VkResult vkDeviceWaitIdle(VkDevice device) {
   MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkDeviceWaitIdle");
+  if (auto callback = std::exchange(mock_device->next_idle_callback, {})) {
+    callback();
+  }
   return VK_SUCCESS;
 }
 
@@ -1594,6 +1601,10 @@ std::shared_ptr<std::vector<std::string>> GetMockVulkanFunctions(
     VkDevice device) {
   MockDevice* mock_device = MockDevice::Unwrap(device);
   return mock_device->GetCalledFunctions();
+}
+
+void SetNextMockIdleCallback(VkDevice device, std::function<void()> callback) {
+  MockDevice::Unwrap(device)->next_idle_callback = std::move(callback);
 }
 
 void SetMockVulkanQueueSubmitCallback(

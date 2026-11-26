@@ -125,9 +125,7 @@ class ContentContext {
   explicit ContentContext(
       std::shared_ptr<Context> context,
       std::shared_ptr<TypographerContext> typographer_context,
-      std::shared_ptr<RenderTargetAllocator> render_target_allocator = nullptr,
-      HostBuffer::Lifetime host_buffer_lifetime =
-          HostBuffer::Lifetime::kWaitForIdle);
+      std::shared_ptr<RenderTargetAllocator> render_target_allocator = nullptr);
 
   ~ContentContext();
 

@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_CONTEXT_VK_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_CONTEXT_VK_H_
 
+#include <atomic>
 #include <memory>
 #include <optional>
 #include <string>
@@ -343,7 +344,7 @@ class ContextVK final : public Context,
 
   const uint64_t hash_;
 
-  bool is_valid_ = false;
+  std::atomic_bool is_valid_ = false;
 
   explicit ContextVK(const Flags& flags);
 
