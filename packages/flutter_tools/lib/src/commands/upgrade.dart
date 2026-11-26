@@ -480,7 +480,6 @@ class UpgradeCommandRunner {
       :FileSystem fs,
       :Logger logger,
       :FlutterProjectFactory projectFactory,
-      :Stdio stdio,
     ) = _toolContext;
     logger.printStatus('');
     logger.printStatus(flutterVersion.toString());

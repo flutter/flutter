@@ -26,7 +26,6 @@ import '../cache.dart';
 import '../context/tool_context.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
-import '../features.dart';
 import '../flutter_plugins.dart';
 import '../package_graph.dart';
 import '../plugins.dart';
