@@ -49,11 +49,16 @@ static FlView* get_view(FlPluginRegistrar* registrar) {
   return NULL;
 }
 
+static FlView* get_view_by_id(FlPluginRegistrar* registrar, int64_t view_id) {
+  return NULL;
+}
+
 static void fl_mock_plugin_registrar_iface_init(
     FlPluginRegistrarInterface* iface) {
   iface->get_messenger = get_messenger;
   iface->get_texture_registrar = get_texture_registrar;
   iface->get_view = get_view;
+  iface->get_view_by_id = get_view_by_id;
 }
 
 static void fl_mock_plugin_registrar_init(FlMockPluginRegistrar* self) {}

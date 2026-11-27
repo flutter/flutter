@@ -12,6 +12,7 @@
 #include <thread>
 #include <vector>
 
+#include "flutter/common/constants.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/platform/common/accessibility_bridge.h"
@@ -1469,6 +1470,81 @@ TEST_F(FlutterEngineTest, ReportsHourFormat) {
   [mockHourFormat stopMocking];
   [engineMock stopMocking];
   [channelMock stopMocking];
+}
+
+TEST_F(FlutterEngineTest, PluginRegistrarViewForIdentifierSingleView) {
+  NSString* fixtures = @(flutter::testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test"
+                                                      project:project
+                                       allowHeadlessExecution:YES];
+  id<FlutterPluginRegistrar> registrar = [engine registrarForPlugin:@"MyPlugin"];
+
+  // Headless engine has no views.
+  EXPECT_EQ([registrar viewForIdentifier:flutter::kFlutterImplicitViewId], nil);
+  EXPECT_EQ([registrar viewForIdentifier:123], nil);
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  EXPECT_EQ(viewController.viewIdentifier, flutter::kFlutterImplicitViewId);
+  NSView* view = [registrar viewForIdentifier:viewController.viewIdentifier];
+  EXPECT_NE(view, nil);
+  EXPECT_EQ(view, viewController.flutterView);
+  EXPECT_EQ([registrar viewForIdentifier:123], nil);
+
+  engine.viewController = nil;
+  EXPECT_EQ([registrar viewForIdentifier:flutter::kFlutterImplicitViewId], nil);
+
+  [engine shutDownEngine];
+}
+
+TEST_F(FlutterEngineTest, PluginRegistrarViewForIdentifierMultiView) {
+  NSString* fixtures = @(flutter::testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test"
+                                                      project:project
+                                       allowHeadlessExecution:YES];
+  [engine enableMultiView];
+  EXPECT_TRUE([engine runWithEntrypoint:@"main"]);
+  id<FlutterPluginRegistrar> registrar = [engine registrarForPlugin:@"MyPlugin"];
+
+  EXPECT_EQ([registrar viewForIdentifier:flutter::kFlutterImplicitViewId], nil);
+
+  @autoreleasepool {
+    FlutterViewController* viewController1 = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                   nibName:nil
+                                                                                    bundle:nil];
+    FlutterViewIdentifier viewId1 = viewController1.viewIdentifier;
+    FlutterViewIdentifier viewId2 = 0;
+
+    @autoreleasepool {
+      FlutterViewController* viewController2 = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                     nibName:nil
+                                                                                      bundle:nil];
+      viewId2 = viewController2.viewIdentifier;
+      EXPECT_NE(viewId1, viewId2);
+
+      NSView* view1 = [registrar viewForIdentifier:viewId1];
+      NSView* view2 = [registrar viewForIdentifier:viewId2];
+      EXPECT_NE(view1, nil);
+      EXPECT_NE(view2, nil);
+      EXPECT_NE(view1, view2);
+      EXPECT_EQ(view1, viewController1.flutterView);
+      EXPECT_EQ(view2, viewController2.flutterView);
+      EXPECT_EQ([registrar viewForIdentifier:999], nil);
+    }
+
+    // After viewController2 is deallocated, its view should no longer be found.
+    EXPECT_EQ([registrar viewForIdentifier:viewId2], nil);
+    EXPECT_EQ([registrar viewForIdentifier:viewId1], viewController1.flutterView);
+  }
+
+  [engine shutDownEngine];
 }
 
 }  // namespace flutter::testing

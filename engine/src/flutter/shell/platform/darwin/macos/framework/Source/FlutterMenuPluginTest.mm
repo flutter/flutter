@@ -67,6 +67,10 @@
 - (NSViewController*)viewController {
   return nil;
 }
+
+- (nullable NSView*)viewForIdentifier:(FlutterViewIdentifier)viewIdentifier {
+  return nil;
+}
 @end
 
 namespace flutter::testing {

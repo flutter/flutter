@@ -7,6 +7,10 @@
 
 #include <gmodule.h>
 
+#include "flutter/common/constants.h"
+#include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_renderable.h"
+
 G_DECLARE_FINAL_TYPE(FlPluginRegistrarImpl,
                      fl_plugin_registrar_impl,
                      FL,
@@ -15,6 +19,9 @@ G_DECLARE_FINAL_TYPE(FlPluginRegistrarImpl,
 
 struct _FlPluginRegistrarImpl {
   GObject parent_instance;
+
+  // Engine that plugin is registered with.
+  GWeakRef engine;
 
   // View that plugin is controlling.
   GWeakRef view;
@@ -44,6 +51,7 @@ static void fl_plugin_registrar_default_init(
 static void fl_plugin_registrar_impl_dispose(GObject* object) {
   FlPluginRegistrarImpl* self = FL_PLUGIN_REGISTRAR_IMPL(object);
 
+  g_weak_ref_clear(&self->engine);
   g_weak_ref_clear(&self->view);
   g_clear_object(&self->messenger);
   g_clear_object(&self->texture_registrar);
@@ -66,10 +74,27 @@ static FlTextureRegistrar* get_texture_registrar(FlPluginRegistrar* registrar) {
   return self->texture_registrar;
 }
 
+static FlView* get_view_by_id(FlPluginRegistrar* registrar, int64_t view_id) {
+  FlPluginRegistrarImpl* self = FL_PLUGIN_REGISTRAR_IMPL(registrar);
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
+  if (engine == nullptr) {
+    return nullptr;
+  }
+  g_autoptr(FlRenderable) renderable =
+      fl_engine_get_renderable(engine, view_id);
+  if (renderable == nullptr || !FL_IS_VIEW(renderable)) {
+    return nullptr;
+  }
+  return FL_VIEW(renderable);
+}
+
 static FlView* get_view(FlPluginRegistrar* registrar) {
   FlPluginRegistrarImpl* self = FL_PLUGIN_REGISTRAR_IMPL(registrar);
   g_autoptr(FlView) view = FL_VIEW(g_weak_ref_get(&self->view));
-  return view;
+  if (view != nullptr) {
+    return view;
+  }
+  return get_view_by_id(registrar, flutter::kFlutterImplicitViewId);
 }
 
 static void fl_plugin_registrar_impl_iface_init(
@@ -77,14 +102,17 @@ static void fl_plugin_registrar_impl_iface_init(
   iface->get_messenger = get_messenger;
   iface->get_texture_registrar = get_texture_registrar;
   iface->get_view = get_view;
+  iface->get_view_by_id = get_view_by_id;
 }
 
 static void fl_plugin_registrar_impl_init(FlPluginRegistrarImpl* self) {}
 
 FlPluginRegistrar* fl_plugin_registrar_new(
+    FlEngine* engine,
     FlView* view,
     FlBinaryMessenger* messenger,
     FlTextureRegistrar* texture_registrar) {
+  g_return_val_if_fail(engine == nullptr || FL_IS_ENGINE(engine), nullptr);
   g_return_val_if_fail(view == nullptr || FL_IS_VIEW(view), nullptr);
   g_return_val_if_fail(FL_IS_BINARY_MESSENGER(messenger), nullptr);
   g_return_val_if_fail(FL_IS_TEXTURE_REGISTRAR(texture_registrar), nullptr);
@@ -95,6 +123,7 @@ FlPluginRegistrar* fl_plugin_registrar_new(
   // Added to stop compiler complaining about an unused function.
   FL_IS_PLUGIN_REGISTRAR_IMPL(self);
 
+  g_weak_ref_init(&self->engine, engine);
   g_weak_ref_init(&self->view, view);
   self->messenger = FL_BINARY_MESSENGER(g_object_ref(messenger));
   self->texture_registrar =
@@ -121,4 +150,16 @@ G_MODULE_EXPORT FlView* fl_plugin_registrar_get_view(FlPluginRegistrar* self) {
   g_return_val_if_fail(FL_IS_PLUGIN_REGISTRAR(self), nullptr);
 
   return FL_PLUGIN_REGISTRAR_GET_IFACE(self)->get_view(self);
+}
+
+G_MODULE_EXPORT FlView* fl_plugin_registrar_get_view_by_id(
+    FlPluginRegistrar* self,
+    int64_t view_id) {
+  g_return_val_if_fail(FL_IS_PLUGIN_REGISTRAR(self), nullptr);
+
+  FlPluginRegistrarInterface* iface = FL_PLUGIN_REGISTRAR_GET_IFACE(self);
+  if (iface->get_view_by_id == nullptr) {
+    return nullptr;
+  }
+  return iface->get_view_by_id(self, view_id);
 }

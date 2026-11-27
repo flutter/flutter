@@ -14,6 +14,14 @@
 #import "FlutterPluginMacOS.h"
 #import "FlutterTexture.h"
 
+/**
+ * A unique identifier for a view within which Flutter content is hosted.
+ *
+ * Identifiers are guaranteed to be unique for views owned by a given engine but
+ * may collide for views owned by different engines.
+ */
+typedef int64_t FlutterViewIdentifier;
+
 // TODO(stuartmorgan): Merge this file and FlutterPluginMacOS.h with the iOS FlutterPlugin.h,
 // sharing all but the platform-specific methods.
 
@@ -49,12 +57,21 @@ FLUTTER_DARWIN_EXPORT
  * The view displaying Flutter content.
  *
  * This property is provided for backwards compatibility for apps
- * that assume a single view. This will eventually be replaced by
- * a multi-view API variant.
+ * that assume a single view. Prefer `viewForIdentifier:` instead.
  *
- * This method may return |nil|, for instance in a headless environment.
+ * This method may return |nil|, for instance in a headless environment or when
+ * there is no implicit view.
  */
 @property(nullable, readonly) NSView* view;
+
+/**
+ * Returns the view displaying Flutter content for the given view identifier,
+ * or |nil| if no such view exists.
+ *
+ * @param viewIdentifier The unique identifier for the view.
+ * @return The `NSView` for the given identifier, or |nil| if the view does not exist.
+ */
+- (nullable NSView*)viewForIdentifier:(FlutterViewIdentifier)viewIdentifier;
 
 /**
  * The `NSViewController` that hosts |view|.
