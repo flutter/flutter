@@ -326,6 +326,82 @@ void main() {
       expect(process4.wasKilled, isTrue);
     });
   });
+
+  group('BlinkTraceSummary', () {
+    var nextTs = 0;
+    setUp(() {
+      nextTs = 0;
+    });
+
+    List<Map<String, dynamic>> buildFrames(
+      int count, {
+      int? beginFrame,
+      required int updateLifecycle,
+      bool measured = true,
+    }) {
+      Map<String, dynamic> event(String name, String ph, [int? tdur]) => <String, dynamic>{
+        'args': <String, dynamic>{},
+        'cat': 'blink',
+        'name': name,
+        'ph': ph,
+        'pid': 1,
+        'tid': 1,
+        'ts': ++nextTs,
+        'tdur': ?tdur,
+      };
+      return <Map<String, dynamic>>[
+        for (var i = 0; i < count; i++) ...<Map<String, dynamic>>[
+          if (measured) event('measured_frame', 'b'),
+          if (beginFrame != null) event('WebFrameWidgetImpl::BeginMainFrame', 'X', beginFrame),
+          if (measured) event('measured_frame', 'e'),
+          event('WebFrameWidgetImpl::UpdateLifecycle', 'X', updateLifecycle),
+        ],
+      ];
+    }
+
+    test('averages all measured frames rather than only the last 10', () {
+      final BlinkTraceSummary summary = BlinkTraceSummary.fromJson(<Map<String, dynamic>>[
+        ...buildFrames(2, beginFrame: 50000, updateLifecycle: 10000, measured: false),
+        ...buildFrames(10, beginFrame: 1000, updateLifecycle: 200),
+        ...buildFrames(10, beginFrame: 3000, updateLifecycle: 600),
+      ])!;
+
+      expect(summary.averageBeginFrameTime, const Duration(microseconds: 2000));
+      expect(summary.averageUpdateLifecyclePhasesTime, const Duration(microseconds: 400));
+      expect(summary.averageTotalUIFrameTime, const Duration(microseconds: 2400));
+    });
+
+    test('accumulates large microsecond durations without 53-bit double rounding', () {
+      const int base = 1 << 52;
+      final BlinkTraceSummary summary = BlinkTraceSummary.fromJson(<Map<String, dynamic>>[
+        ...buildFrames(1, beginFrame: base + 2, updateLifecycle: 200),
+        ...buildFrames(1, beginFrame: base + 1, updateLifecycle: 200),
+      ])!;
+
+      expect(summary.averageBeginFrameTime, const Duration(microseconds: base + 1));
+    });
+
+    test('throws FormatException when measured frames lack beginFrame events', () {
+      final io.Directory tempDir = io.Directory.systemTemp.createTempSync(
+        'blink_trace_summary_test.',
+      );
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+      final String tracePath = tempDir.uri.resolve('chrome-trace.json').toFilePath();
+
+      void parseInvalidTrace() {
+        final Zone parentZone = Zone.current;
+        io.IOOverrides.runZoned(
+          () => BlinkTraceSummary.fromJson(buildFrames(3, updateLifecycle: 200)),
+          createFile: (String filePath) => parentZone.run(
+            () => io.File(filePath == './chrome-trace.json' ? tracePath : filePath),
+          ),
+        );
+      }
+
+      expect(parseInvalidTrace, throwsFormatException);
+      expect(() => Zone.root.run(parseInvalidTrace), throwsFormatException);
+    });
+  });
 }
 
 class FakeProcess implements io.Process {
