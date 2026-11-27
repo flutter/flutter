@@ -23,8 +23,68 @@
 
 class FlViewRendererSubsurfaceTest : public flutter::testing::LinuxTest {
  protected:
+  void TearDown() override {
+    if (parent_surface != nullptr) {
+      flutter::testing::fl_mock_wayland_free_surface(parent_surface);
+      parent_surface = nullptr;
+    }
+    LinuxTest::TearDown();
+  }
+
+  // Pretends widgets are on Wayland, using the mock Wayland display.
+  void UseWayland() {
+    GdkDisplay* display =
+        GDK_DISPLAY(g_object_new(gdk_wayland_display_get_type(), nullptr));
+    GdkWindow* window =
+        GDK_WINDOW(g_object_new(gdk_wayland_window_get_type(), nullptr));
+    parent_surface = flutter::testing::fl_mock_wayland_get_surface();
+    ON_CALL(gtk, gtk_widget_get_display(::testing::_))
+        .WillByDefault(::testing::Return(display));
+    ON_CALL(gtk, gdk_wayland_display_get_wl_display(display))
+        .WillByDefault(
+            ::testing::Return(flutter::testing::fl_mock_wayland_get_display()));
+    ON_CALL(gtk, gtk_widget_get_window(::testing::_))
+        .WillByDefault(::testing::Return(window));
+    ON_CALL(gtk, gdk_wayland_window_get_wl_surface(window))
+        .WillByDefault(::testing::Return(parent_surface));
+  }
+
+  // Creates a renderer inside a window that is shown, so it has a subsurface.
+  FlViewRendererSubsurface* CreateRenderer(gboolean sized_to_content,
+                                           size_t width,
+                                           size_t height,
+                                           GtkWidget** toplevel) {
+    FlViewRendererSubsurface* renderer =
+        fl_view_renderer_subsurface_new(engine, sized_to_content);
+    gtk_widget_set_size_request(GTK_WIDGET(renderer), width, height);
+    *toplevel = gtk_offscreen_window_new();
+    gtk_container_add(GTK_CONTAINER(*toplevel), GTK_WIDGET(renderer));
+    gtk_widget_show_all(*toplevel);
+    return renderer;
+  }
+
+  // Presents a frame of the given size, as the raster thread would.
+  void Present(FlViewRendererSubsurface* renderer,
+               size_t width,
+               size_t height) {
+    g_autoptr(FlFramebuffer) framebuffer =
+        fl_framebuffer_new(GL_RGB, width, height, FALSE);
+    FlutterBackingStore backing_store = {
+        .type = kFlutterBackingStoreTypeOpenGL,
+        .open_gl = {.framebuffer = {.user_data = framebuffer}}};
+    FlutterLayer layer = {
+        .type = kFlutterLayerContentTypeBackingStore,
+        .backing_store = &backing_store,
+        .offset = {0, 0},
+        .size = {static_cast<double>(width), static_cast<double>(height)}};
+    const FlutterLayer* layers[1] = {&layer};
+    fl_view_renderer_present_layers(FL_VIEW_RENDERER(renderer), layers, 1);
+  }
+
   // GTK queries the window state when widgets are realized.
   ::testing::NiceMock<flutter::testing::MockGtk> gtk;
+
+  struct wl_surface* parent_surface = nullptr;
 };
 
 TEST_F(FlViewRendererSubsurfaceTest, New) {
@@ -190,4 +250,31 @@ TEST_F(FlViewRendererSubsurfaceTest, ResizeWhilePresentIsBlocked) {
 
   fl_gtk_widget_destroy(toplevel);
   flutter::testing::fl_mock_wayland_free_surface(parent_surface);
+}
+
+// The raster thread holds a reference to the renderer while presenting, which
+// doesn't stop the GTK thread destroying the window it is in. Everything the
+// renderer uses to present has to survive that.
+TEST_F(FlViewRendererSubsurfaceTest, PresentAfterWindowDestroyed) {
+  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+  ::testing::NiceMock<flutter::testing::MockWayland> wayland;
+  UseWayland();
+
+  GtkWidget* toplevel;
+  FlViewRendererSubsurface* renderer =
+      CreateRenderer(FALSE, 100, 100, &toplevel);
+  Present(renderer, 100, 100);
+
+  g_object_ref(renderer);
+  fl_gtk_widget_destroy(toplevel);
+
+  // The frame is dropped, as there is nothing left to show it in.
+  EXPECT_CALL(epoxy, eglSwapBuffers).Times(0);
+  Present(renderer, 100, 100);
+
+  // Process the notifications of the presented frames.
+  while (g_main_context_iteration(nullptr, FALSE)) {
+  }
+
+  g_object_unref(renderer);
 }
