@@ -1739,8 +1739,20 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 /// To obtain the nearest instance of a particular type of inherited widget from
 /// a build context, use [BuildContext.dependOnInheritedWidgetOfExactType].
 ///
-/// Inherited widgets, when referenced in this way, will cause the consumer to
-/// rebuild when the inherited widget itself changes state.
+/// Widgets that depend on an inherited widget are notified when a new instance
+/// of that widget is provided by its parent and [updateShouldNotify] returns
+/// true. The dependent widgets are then scheduled to rebuild.
+///
+/// An inherited widget does not manage its own state. To propagate updated
+/// information, its parent must rebuild and provide a new instance of the
+/// inherited widget. Returning false from [updateShouldNotify] prevents
+/// dependent widgets from being notified of the update, but does not prevent
+/// them or other widgets in the subtree from rebuilding for other reasons.
+/// For example, widgets in the subtree may still rebuild when their parent
+/// rebuilds. However, if the parent rebuilds but the child widget instances
+/// have not changed (such as when using constant widgets), Flutter can skip
+/// rebuilding those children, while still allowing widgets that depend on the
+/// inherited widget to rebuild independently when [updateShouldNotify] returns true.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=Zbm3hjPjQMk}
 ///
