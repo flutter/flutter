@@ -42,6 +42,22 @@ void main() {
       );
     });
 
+    test('skyEnginePath lookups do not create bin/cache/pkg', () {
+      final Directory pkgDir = fileSystem.directory(
+        fileSystem.path.join('root', 'bin', 'cache', 'pkg'),
+      );
+
+      expect(
+        artifacts.getHostArtifact(HostArtifact.skyEnginePath).path,
+        fileSystem.path.join(pkgDir.path, 'sky_engine'),
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.skyEnginePath, platform: TargetPlatform.linux_x64),
+        fileSystem.path.join(pkgDir.path, 'sky_engine'),
+      );
+      expect(pkgDir.existsSync(), isFalse);
+    });
+
     test('getArtifactPath', () {
       final String xcframeworkPath = artifacts.getArtifactPath(
         Artifact.flutterXcframework,

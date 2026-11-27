@@ -987,7 +987,9 @@ abstract class CachedArtifact extends ArtifactSet {
     if (!location.existsSync()) {
       try {
         // Ensure bin/cache/artifacts exists with 755 permissions before creating location.
-        cache.getCacheDir('artifacts');
+        if (fileSystem.path.isWithin(cache.getCacheArtifacts().path, location.path)) {
+          cache.getCacheDir('artifacts');
+        }
         location.createSync(recursive: true);
       } on FileSystemException catch (err) {
         logger.printError(err.toString());
