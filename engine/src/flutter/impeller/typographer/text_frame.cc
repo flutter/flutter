@@ -111,6 +111,38 @@ SubpixelPosition TextFrame::ComputeSubpixelPosition(
   }
 }
 
+// Only translation along an axis that no run uses can be omitted from the
+// membership key. Integer translation on an active axis is kept exact because
+// changing it can affect the floating-point subpixel bucket at a boundary.
+Matrix TextFrame::GetGlyphCacheTransform(const Matrix& transform) const {
+  bool uses_x = false;
+  bool uses_y = false;
+  for (const auto& run : GetRuns()) {
+    switch (run.GetFont().GetAxisAlignment()) {
+      case AxisAlignment::kNone:
+        break;
+      case AxisAlignment::kX:
+        uses_x = true;
+        break;
+      case AxisAlignment::kY:
+        uses_y = true;
+        break;
+      case AxisAlignment::kAll:
+        uses_x = true;
+        uses_y = true;
+        break;
+    }
+  }
+  Matrix result = transform;
+  if (!uses_x) {
+    result.m[12] = 0;
+  }
+  if (!uses_y) {
+    result.m[13] = 0;
+  }
+  return result;
+}
+
 absl::StatusOr<flutter::DlPath> TextFrame::GetPath() const {
   if (path_creator_) {
     return path_creator_();

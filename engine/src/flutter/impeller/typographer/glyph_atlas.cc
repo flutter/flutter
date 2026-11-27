@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "impeller/typographer/font_glyph_pair.h"
+#include "impeller/typographer/text_frame.h"
 
 namespace impeller {
 
@@ -64,6 +65,7 @@ const std::shared_ptr<Texture>& GlyphAtlas::GetTexture() const {
 }
 
 void GlyphAtlas::SetTexture(std::shared_ptr<Texture> texture) {
+  cached_frames_.clear();
   texture_ = std::move(texture);
 }
 
@@ -72,7 +74,86 @@ size_t GlyphAtlas::GetAtlasGeneration() const {
 }
 
 void GlyphAtlas::SetAtlasGeneration(size_t generation) {
+  if (generation_ != generation) {
+    cached_frames_.clear();
+  }
   generation_ = generation;
+}
+
+bool GlyphAtlas::HasCachedFrame(const std::shared_ptr<TextFrame>& frame,
+                                const Matrix& transform,
+                                const GlyphProperties& properties) const {
+  return FindCachedFrame(frame, transform, properties) != nullptr;
+}
+
+const GlyphAtlas::CachedFrame* GlyphAtlas::FindCachedFrame(
+    const std::shared_ptr<TextFrame>& frame,
+    const Matrix& transform,
+    const GlyphProperties& properties) const {
+  auto found = cached_frames_.find(frame.get());
+  if (found == cached_frames_.end()) {
+    return nullptr;
+  }
+  const CachedFrame& cached = found->second;
+  // The map lookup matched the address. A live weak reference rules out
+  // a new TextFrame allocated at the same address as a destroyed one.
+  if (!cached.frame.expired() && cached.transform == transform &&
+      GlyphProperties::Equal{}(cached.properties, properties)) {
+    return &cached;
+  }
+  return nullptr;
+}
+
+void GlyphAtlas::AddCachedFrame(const std::shared_ptr<TextFrame>& frame,
+                                const Matrix& transform,
+                                const GlyphProperties& properties) {
+  constexpr size_t kMaxCachedFrames = 256;
+  if (cached_frames_.size() >= kMaxCachedFrames &&
+      !cached_frames_.contains(frame.get())) {
+    absl::erase_if(cached_frames_, [](const auto& entry) {
+      return entry.second.frame.expired();
+    });
+    if (cached_frames_.size() >= kMaxCachedFrames) {
+      cached_frames_.clear();
+    }
+  }
+  cached_frames_.insert_or_assign(frame.get(),
+                                  CachedFrame{frame, transform, properties});
+}
+
+const std::vector<PreparedGlyphQuad>* GlyphAtlas::FindPreparedGlyphs(
+    const std::shared_ptr<TextFrame>& frame,
+    const Matrix& frame_transform,
+    const Matrix& basis,
+    const GlyphProperties& properties) const {
+  const CachedFrame* entry = FindCachedFrame(
+      frame, frame->GetGlyphCacheTransform(frame_transform), properties);
+  if (entry && entry->prepared_basis == basis &&
+      !entry->prepared_glyphs.empty()) {
+    return &entry->prepared_glyphs;
+  }
+  return nullptr;
+}
+
+bool GlyphAtlas::CanPrepareGlyphs(const std::shared_ptr<TextFrame>& frame,
+                                  const Matrix& frame_transform,
+                                  const GlyphProperties& properties) const {
+  return HasCachedFrame(frame, frame->GetGlyphCacheTransform(frame_transform),
+                        properties);
+}
+
+void GlyphAtlas::StorePreparedGlyphs(const std::shared_ptr<TextFrame>& frame,
+                                     const Matrix& frame_transform,
+                                     const Matrix& basis,
+                                     const GlyphProperties& properties,
+                                     std::vector<PreparedGlyphQuad> glyphs) {
+  if (glyphs.empty() || glyphs.capacity() > kMaxPreparedGlyphsPerFrame ||
+      !CanPrepareGlyphs(frame, frame_transform, properties)) {
+    return;
+  }
+  CachedFrame& entry = cached_frames_.find(frame.get())->second;
+  entry.prepared_basis = basis;
+  entry.prepared_glyphs = std::move(glyphs);
 }
 
 void GlyphAtlas::AddTypefaceGlyphPositionAndBounds(const FontGlyphPair& pair,
@@ -80,8 +161,7 @@ void GlyphAtlas::AddTypefaceGlyphPositionAndBounds(const FontGlyphPair& pair,
                                                    Rect bounds) {
   FontAtlasMap::iterator it = font_atlas_map_.find(pair.scaled_font);
   FML_DCHECK(it != font_atlas_map_.end());
-  it->second.positions_[pair.glyph] =
-      FrameBounds{position, bounds, /*is_placeholder=*/false};
+  it->second.AppendGlyph(pair.glyph, FrameBounds{position, bounds, false});
 }
 
 std::optional<FrameBounds> GlyphAtlas::FindFontGlyphBounds(
@@ -95,8 +175,7 @@ std::optional<FrameBounds> GlyphAtlas::FindFontGlyphBounds(
 
 FontGlyphAtlas* GlyphAtlas::GetOrCreateFontGlyphAtlas(
     const ScaledFont& scaled_font) {
-  auto [iter, inserted] =
-      font_atlas_map_.try_emplace(scaled_font, FontGlyphAtlas());
+  auto [iter, inserted] = font_atlas_map_.try_emplace(scaled_font, this);
   return &iter->second;
 }
 
@@ -148,7 +227,17 @@ std::optional<FrameBounds> FontGlyphAtlas::FindGlyphBounds(
 
 void FontGlyphAtlas::AppendGlyph(const SubpixelGlyph& glyph,
                                  const FrameBounds& frame_bounds) {
-  positions_[glyph] = frame_bounds;
+  auto [it, inserted] = positions_.try_emplace(glyph, frame_bounds);
+  if (!inserted) {
+    const FrameBounds& old = it->second;
+    if (owner_ && !old.is_placeholder &&
+        (frame_bounds.is_placeholder ||
+         old.atlas_bounds != frame_bounds.atlas_bounds ||
+         old.glyph_bounds != frame_bounds.glyph_bounds)) {
+      owner_->cached_frames_.clear();
+    }
+    it->second = frame_bounds;
+  }
 }
 
 }  // namespace impeller

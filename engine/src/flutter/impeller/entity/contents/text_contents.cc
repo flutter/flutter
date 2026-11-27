@@ -116,6 +116,42 @@ Scalar AttractToOne(Scalar x) {
   return x;
 }
 
+constexpr std::array<Point, 4> kUnitPoints = {Point{0, 0}, Point{1, 0},
+                                              Point{0, 1}, Point{1, 1}};
+
+PreparedGlyphQuad PrepareGlyphQuad(const FrameBounds& bounds,
+                                   const Point& glyph_position,
+                                   const Point& subpixel_adjustment,
+                                   const Matrix& basis_transform,
+                                   const Matrix& unscaled_basis,
+                                   Point uv_origin,
+                                   Point uv_size) {
+  PreparedGlyphQuad quad;
+  quad.unrounded_origin = unscaled_basis * bounds.glyph_bounds.GetLeftTop() +
+                          (basis_transform * glyph_position);
+  quad.subpixel_adjustment = subpixel_adjustment;
+  for (size_t j = 0; j < kUnitPoints.size(); j++) {
+    const Point& point = kUnitPoints[j];
+    quad.offsets[j] = unscaled_basis * point * bounds.glyph_bounds.GetSize();
+    quad.uvs[j] = uv_origin + (uv_size * point);
+  }
+  return quad;
+}
+
+void WritePreparedGlyphQuad(VS::PerVertexData* output,
+                            const PreparedGlyphQuad& quad,
+                            Point screen_offset) {
+  // Reapply the current draw translation before snapping. Offsetting a
+  // previously snapped quad can select a different pixel during scrolling.
+  const Point origin =
+      (screen_offset + quad.unrounded_origin + quad.subpixel_adjustment)
+          .Floor();
+  for (size_t j = 0; j < kUnitPoints.size(); j++) {
+    output[j].position = (origin + quad.offsets[j]).Round();
+    output[j].uv = quad.uvs[j];
+  }
+}
+
 }  // namespace
 
 void TextContents::ComputeVertexData(VS::PerVertexData* vtx_contents,
@@ -132,9 +168,6 @@ void TextContents::ComputeVertexData(VS::PerVertexData* vtx_contents,
   // interpolated vertex information is also used in the fragment shader to
   // sample from the glyph atlas.
 
-  constexpr std::array<Point, 4> unit_points = {Point{0, 0}, Point{1, 0},
-                                                Point{0, 1}, Point{1, 1}};
-
   ISize atlas_size = atlas->GetTexture()->GetSize();
   bool is_translation_scale = entity_offset_transform.IsTranslationScaleOnly();
   Matrix basis_transform = entity_offset_transform.Basis();
@@ -144,6 +177,29 @@ void TextContents::ComputeVertexData(VS::PerVertexData* vtx_contents,
 
   const Matrix frame_transform =
       screen_transform * Matrix::MakeTranslation(position);
+  const Point screen_offset = entity_offset_transform * Point(0, 0);
+  size_t prepare_count = 0;
+  std::vector<PreparedGlyphQuad> prepared;
+  if (is_translation_scale) {
+    if (const auto* quads = atlas->FindPreparedGlyphs(
+            frame, frame_transform, basis_transform, glyph_properties)) {
+      for (const auto& quad : *quads) {
+        WritePreparedGlyphQuad(vtx_contents, quad, screen_offset);
+        vtx_contents += kUnitPoints.size();
+      }
+      return;
+    }
+    if (atlas->CanPrepareGlyphs(frame, frame_transform, glyph_properties)) {
+      for (const auto& run : frame->GetRuns()) {
+        prepare_count += run.GetGlyphCount();
+      }
+      if (prepare_count <= GlyphAtlas::kMaxPreparedGlyphsPerFrame) {
+        prepared.reserve(prepare_count);
+      } else {
+        prepare_count = 0;
+      }
+    }
+  }
   Rational rounded_scale =
       TextFrame::RoundScaledFontSize(frame_transform.GetMaxBasisLengthXY());
   Scalar inverted_rounded_scale = static_cast<Scalar>(rounded_scale.Invert());
@@ -155,9 +211,6 @@ void TextContents::ComputeVertexData(VS::PerVertexData* vtx_contents,
   // those to avoid inaccuracies.
   unscaled_basis.m[0] = AttractToOne(unscaled_basis.m[0]);
   unscaled_basis.m[5] = AttractToOne(unscaled_basis.m[5]);
-
-  // Compute the device origin of the entire frame.
-  Point screen_offset = (entity_offset_transform * Point(0, 0));
 
   for (const TextRun& run : frame->GetRuns()) {
     const Font& font = run.GetFont();
@@ -222,33 +275,32 @@ void TextContents::ComputeVertexData(VS::PerVertexData* vtx_contents,
       Point uv_size =
           SizeToPoint(frame_bounds.atlas_bounds.GetSize()) / atlas_size;
 
-      for (const Point& point : unit_points) {
-        Point position;
-        if (is_translation_scale) {
-          Point unrounded_glyph_position =
-              // This is for RTL text.
-              unscaled_basis * frame_bounds.glyph_bounds.GetLeftTop() +
-              (basis_transform * glyph_position.position);
-
-          Point screen_glyph_position =
-              (screen_offset + unrounded_glyph_position + subpixel_adjustment)
-                  .Floor();
-          position =
-              (screen_glyph_position +
-               (unscaled_basis * point * frame_bounds.glyph_bounds.GetSize()))
-                  .Round();
-        } else {
-          Rect scaled_bounds =
-              frame_bounds.glyph_bounds.Scale(inverted_rounded_scale);
-          position = entity_offset_transform *
-                     (glyph_position.position + scaled_bounds.GetLeftTop() +
-                      point * scaled_bounds.GetSize());
+      if (is_translation_scale) {
+        const auto quad = PrepareGlyphQuad(
+            frame_bounds, glyph_position.position, subpixel_adjustment,
+            basis_transform, unscaled_basis, uv_origin, uv_size);
+        WritePreparedGlyphQuad(vtx_contents + i, quad, screen_offset);
+        i += kUnitPoints.size();
+        if (prepare_count != 0) {
+          prepared.push_back(quad);
         }
-        vtx.uv = uv_origin + (uv_size * point);
-        vtx.position = position;
-        vtx_contents[i++] = vtx;
+      } else {
+        Rect scaled_bounds =
+            frame_bounds.glyph_bounds.Scale(inverted_rounded_scale);
+        for (const Point& point : kUnitPoints) {
+          vtx.position = entity_offset_transform *
+                         (glyph_position.position + scaled_bounds.GetLeftTop() +
+                          point * scaled_bounds.GetSize());
+          vtx.uv = uv_origin + (uv_size * point);
+          vtx_contents[i++] = vtx;
+        }
       }
     }
+  }
+  // Missing fonts or placeholder glyphs leave no reusable draw record.
+  if (prepare_count != 0 && prepared.size() == prepare_count) {
+    atlas->StorePreparedGlyphs(frame, frame_transform, basis_transform,
+                               glyph_properties, std::move(prepared));
   }
 }
 

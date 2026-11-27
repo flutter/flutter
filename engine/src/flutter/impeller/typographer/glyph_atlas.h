@@ -5,11 +5,14 @@
 #ifndef FLUTTER_IMPELLER_TYPOGRAPHER_GLYPH_ATLAS_H_
 #define FLUTTER_IMPELLER_TYPOGRAPHER_GLYPH_ATLAS_H_
 
+#include <array>
 #include <functional>
 #include <memory>
 #include <optional>
+#include <vector>
 
 #include "impeller/core/texture.h"
+#include "impeller/geometry/matrix.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/typographer/font_glyph_pair.h"
 #include "impeller/typographer/rectangle_packer.h"
@@ -18,6 +21,7 @@
 namespace impeller {
 
 class FontGlyphAtlas;
+class TextFrame;
 
 struct FrameBounds {
   /// The bounds of the glyph within the glyph atlas texture.
@@ -27,6 +31,13 @@ struct FrameBounds {
   /// Whether [atlas_bounds] are still a placeholder and have
   /// not yet been computed.
   bool is_placeholder = true;
+};
+
+struct PreparedGlyphQuad {
+  Point unrounded_origin;
+  Point subpixel_adjustment;
+  std::array<Point, 4> offsets;
+  std::array<Point, 4> uvs;
 };
 
 //------------------------------------------------------------------------------
@@ -170,6 +181,37 @@ class GlyphAtlas {
   /// @brief      Update the atlas generation.
   void SetAtlasGeneration(size_t value);
 
+  // A complete frame can skip all glyph membership lookups until this atlas
+  // is replaced. The frame is weakly held so this bounded cache does not
+  // extend display-list lifetimes.
+  bool HasCachedFrame(const std::shared_ptr<TextFrame>& frame,
+                      const Matrix& transform,
+                      const GlyphProperties& properties) const;
+
+  void AddCachedFrame(const std::shared_ptr<TextFrame>& frame,
+                      const Matrix& transform,
+                      const GlyphProperties& properties);
+
+  // With at most 256 cached frames this limits quad storage to 1.875 MiB
+  // per atlas. Larger draws use the regular vertex path.
+  static constexpr size_t kMaxPreparedGlyphsPerFrame = 96;
+
+  const std::vector<PreparedGlyphQuad>* FindPreparedGlyphs(
+      const std::shared_ptr<TextFrame>& frame,
+      const Matrix& frame_transform,
+      const Matrix& basis,
+      const GlyphProperties& properties) const;
+
+  bool CanPrepareGlyphs(const std::shared_ptr<TextFrame>& frame,
+                        const Matrix& frame_transform,
+                        const GlyphProperties& properties) const;
+
+  void StorePreparedGlyphs(const std::shared_ptr<TextFrame>& frame,
+                           const Matrix& frame_transform,
+                           const Matrix& basis,
+                           const GlyphProperties& properties,
+                           std::vector<PreparedGlyphQuad> glyphs);
+
  private:
   const Type type_;
   std::shared_ptr<Texture> texture_;
@@ -181,6 +223,20 @@ class GlyphAtlas {
                                            ScaledFont::Equal>;
 
   FontAtlasMap font_atlas_map_;
+
+  struct CachedFrame {
+    std::weak_ptr<TextFrame> frame;
+    Matrix transform;
+    GlyphProperties properties;
+    Matrix prepared_basis = {};
+    std::vector<PreparedGlyphQuad> prepared_glyphs = {};
+  };
+
+  absl::flat_hash_map<const TextFrame*, CachedFrame> cached_frames_;
+  const CachedFrame* FindCachedFrame(const std::shared_ptr<TextFrame>& frame,
+                                     const Matrix& transform,
+                                     const GlyphProperties& properties) const;
+  friend class FontGlyphAtlas;
 
   GlyphAtlas(const GlyphAtlas&) = delete;
 
@@ -243,7 +299,7 @@ class GlyphAtlasContext {
 ///
 class FontGlyphAtlas {
  public:
-  FontGlyphAtlas() = default;
+  explicit FontGlyphAtlas(GlyphAtlas* owner = nullptr) : owner_(owner) {}
   FontGlyphAtlas(FontGlyphAtlas&&) = default;
 
   //----------------------------------------------------------------------------
@@ -271,6 +327,7 @@ class FontGlyphAtlas {
                                            absl::Hash<SubpixelGlyph>,
                                            SubpixelGlyph::Equal>;
 
+  GlyphAtlas* owner_;
   PositionsMap positions_;
   FontGlyphAtlas(const FontGlyphAtlas&) = delete;
 };
