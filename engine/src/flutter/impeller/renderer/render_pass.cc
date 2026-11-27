@@ -76,7 +76,15 @@ bool RenderPass::AddCommand(Command&& command) {
 }
 
 bool RenderPass::EncodeCommands() const {
-  return OnEncodeCommands(*context_);
+  const bool encoded = OnEncodeCommands(*context_);
+  if (auto library = context_->GetPipelineLibrary()) {
+    pipeline_uses_.Flush(*library);
+  }
+  return encoded;
+}
+
+void RenderPass::CountPipelineUse(PipelineRef pipeline) {
+  pipeline_uses_.Count(pipeline);
 }
 
 const std::shared_ptr<const Context>& RenderPass::GetContext() const {
@@ -84,6 +92,7 @@ const std::shared_ptr<const Context>& RenderPass::GetContext() const {
 }
 
 void RenderPass::SetPipeline(PipelineRef pipeline) {
+  CountPipelineUse(pipeline);
   // On debug this makes a difference, but not on release builds.
   // NOLINTNEXTLINE(performance-move-const-arg)
   pending_.pipeline = std::move(pipeline);

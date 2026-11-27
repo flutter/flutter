@@ -2,10 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <memory>
+
+#include "impeller/renderer/pipeline_use_counter.h"
 #include "impeller/renderer/testing/mocks.h"
 
 namespace impeller {
 namespace testing {
+
+class TestPipeline : public Pipeline<PipelineDescriptor> {
+ public:
+  explicit TestPipeline(const PipelineDescriptor& desc)
+      : Pipeline(std::weak_ptr<PipelineLibrary>(), desc) {}
+
+  bool IsValid() const override { return true; }
+};
 
 TEST(MockPipelineLibrary, LogAndGetPipelineUsageSinglePipeline) {
   MockPipelineLibrary pipeline_library;
@@ -80,6 +91,41 @@ TEST(MockPipelineLibrary, LogPipelineCreationMarksPipelineEagerlyCreated) {
   EXPECT_FALSE(usage[lazy_desc].eagerly_created);
 #else
   EXPECT_TRUE(usage.empty());
+#endif
+}
+
+// A pass reports its uses once per distinct pipeline when flushed, with the
+// same totals as logging every use.
+TEST(MockPipelineLibrary, PipelineUseCounterReportsTotalsOnFlush) {
+  MockPipelineLibrary pipeline_library;
+
+  PipelineDescriptor desc_a;
+  desc_a.SetLabel("pipeline_a");
+  PipelineDescriptor desc_b;
+  desc_b.SetLabel("pipeline_b");
+  std::shared_ptr<Pipeline<PipelineDescriptor>> pipeline_a =
+      std::make_shared<TestPipeline>(desc_a);
+  std::shared_ptr<Pipeline<PipelineDescriptor>> pipeline_b =
+      std::make_shared<TestPipeline>(desc_b);
+
+  PipelineUseCounter counter;
+  counter.Count(PipelineRef(pipeline_a));
+  counter.Count(PipelineRef(pipeline_a));
+  counter.Count(PipelineRef(pipeline_b));
+  counter.Count(PipelineRef(pipeline_a));
+  EXPECT_TRUE(pipeline_library.GetPipelineUsage().empty());
+
+  counter.Flush(pipeline_library);
+  counter.Flush(pipeline_library);
+  auto usage = pipeline_library.GetPipelineUsage();
+
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
+    FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
+  EXPECT_EQ(usage[desc_a].count, 3);
+  EXPECT_EQ(usage[desc_b].count, 1);
+#else
+  EXPECT_EQ(usage[desc_a].count, 0);
+  EXPECT_EQ(usage[desc_b].count, 0);
 #endif
 }
 
