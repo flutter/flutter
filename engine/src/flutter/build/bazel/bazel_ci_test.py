@@ -15,6 +15,7 @@ import contextlib
 import io
 import json
 import os
+import re
 import stat
 import sys
 import tempfile
@@ -756,6 +757,34 @@ class RealTableTest(unittest.TestCase):
         self.assertIs(bazel_ci.rbe_flag(flags + ['--no-goma', '--no-rbe']), False, build['name'])
     self.assertGreater(remote, 10)
     self.assertGreater(local, 0)
+
+
+class RootBazelrcTest(unittest.TestCase):
+  """The checked-in root .bazelrc: the disk cache's directory holds nothing else."""
+
+  def test_the_repository_caches_are_outside_the_disk_cache(self):
+    # Bazel's disk cache collector takes every file under --disk_cache for
+    # an entry and deletes the oldest once the cache is over its size: a
+    # repository cache in there loses its downloads, the repo contents
+    # cache every file of its repositories (the Mac's T141, 11-25).
+    # build/bazel/ -> build/ -> flutter/ -> engine/src -> engine/ -> the checkout.
+    root = os.path.abspath(__file__)
+    for _ in range(6):
+      root = os.path.dirname(root)
+    bazelrc = os.path.join(root, '.bazelrc')
+    if not os.path.isfile(bazelrc):
+      self.skipTest('no root .bazelrc above the module')
+    caches = {}
+    with open(bazelrc, encoding='utf-8') as file:
+      for line in file:
+        match = re.match(
+            r'(?:build|common)\s+--(disk_cache|repository_cache|repo_contents_cache)=(\S+)', line
+        )
+        if match:
+          caches[match.group(1)] = match.group(2).rstrip('/') + '/'
+    self.assertEqual(sorted(caches), ['disk_cache', 'repo_contents_cache', 'repository_cache'])
+    for name in ('repository_cache', 'repo_contents_cache'):
+      self.assertFalse(caches[name].startswith(caches['disk_cache']), f'{name}: {caches[name]}')
 
 
 if __name__ == '__main__':

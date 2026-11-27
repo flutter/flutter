@@ -77,19 +77,29 @@ build --notrim_test_configuration
 # there long enough to collect it, so an engine build's disk cache on a bot
 # is in its task's directory and gone with it (bazel_ci.py's
 # bot_cache_options), and a test shard, which is one command, has none
-# (dev/bots/bazel.dart's bazelBotCacheOptions).
+# (dev/bots/bazel.dart's bazelBotCacheOptions). The directory is the
+# collector's alone: it takes every file under it for a cache entry (its
+# own gc/ and tmp/ aside) and, over the cap, deletes the oldest by date,
+# which the files of a fetched repository soon are, written once and not
+# touched again. The two caches below were inside it at first, and on a
+# machine whose cache had reached the cap an idle server emptied them
+# (the Mac's T141, 11-25): the downloads, and every file of a repository
+# Bazel had fetched, whose directories stayed, so that Bazel took the
+# repository for fetched and an analysis failed on a glob that matched
+# nothing.
 build --disk_cache=~/.cache/flutter_engine_bazel
 build --experimental_disk_cache_gc_max_size=20G
 
 # The repository cache -- the files repository rules download: Chrome for
 # Testing (@chrome), the browser's Debian sysroot (debian_runtime: 151
 # .debs from snapshot.debian.org), the Dart SDK of a checkout without one
-# -- beside the disk cache rather than under the output user root, so that
+# -- in the home directory rather than under the output user root, so that
 # on a bot, whose output root is the task's and gone with it, it lives in
 # the home directory that outlasts the task: a warm bot downloads nothing,
 # and a 503 from snapshot.debian.org (web_tool_tests at 505, 11-04) fails
-# no run that has the files.
-common --repository_cache=~/.cache/flutter_engine_bazel/repository_cache
+# no run that has the files. In a directory beside the disk cache's, not
+# in it (above).
+common --repository_cache=~/.cache/flutter_engine_bazel_repositories/repository_cache
 
 # The repo contents cache -- whole fetched repositories, kept once and
 # linked into every output base that asks for the same one: Bazel's own
@@ -99,12 +109,12 @@ common --repository_cache=~/.cache/flutter_engine_bazel/repository_cache
 # fetched). A second checkout, a new output base, the build after `bazel
 # clean --expunge` then fetch none of those again. This Bazel leaves the
 # cache off unless it is named. Beside the repository cache, outside every
-# output root; Bazel refuses one inside the checkout. Its idle server drops
-# what no output base has used for two weeks
-# (--repo_contents_cache_gc_max_age). A bot turns it off, for the disk
-# cache's reason (above): its repositories are laid in the task's output
-# base.
-common --repo_contents_cache=~/.cache/flutter_engine_bazel/repo_contents_cache
+# output root and outside the disk cache's directory (above); Bazel refuses
+# one inside the checkout. Its idle server drops what no output base has
+# used for two weeks (--repo_contents_cache_gc_max_age). A bot turns it
+# off, for the disk cache's reason (above): its repositories are laid in
+# the task's output base.
+common --repo_contents_cache=~/.cache/flutter_engine_bazel_repositories/repo_contents_cache
 
 # The checkout's revision in the build (common:stamp). Unstamped, the
 # default, a build depends on the files it reads and not on git's HEAD: the

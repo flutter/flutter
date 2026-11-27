@@ -138,10 +138,16 @@ reproducible, and every output base that needs a repository of the same
 definition gets a link to that one directory: a second checkout or
 worktree, a new output base, the build after `bazel clean --expunge` fetch
 nothing again. The root `.bazelrc` names the cache (`--repo_contents_cache`,
-beside the repository cache under `~/.cache/flutter_engine_bazel`; this
-Bazel leaves it off unless it is named, and `--repo_contents_cache=` on a
-command line turns it off for that command). Bazel's idle server drops an
-entry that no output base has used for two weeks. A `fetched_archive` is
+beside the repository cache under
+`~/.cache/flutter_engine_bazel_repositories`; this Bazel leaves it off
+unless it is named, and `--repo_contents_cache=` on a command line turns it
+off for that command). Neither cache may be inside the disk cache's
+directory, `~/.cache/flutter_engine_bazel`: the disk cache's collector
+deletes the oldest files it finds under that directory, whatever they are,
+and while the two were kept there it emptied them, a fetched repository
+down to its directories. Bazel's idle server drops an entry of the repo
+contents cache that no output base has used for two weeks. A
+`fetched_archive` is
 reproducible when the lock has its sha256, which it has for every package
 CIPD serves; a `fetched_tree` when it is a commit with nothing inside it
 but pinned commits and checked packages, whether or not it runs hooks: the

@@ -137,6 +137,7 @@ when it reports a GN construct it does not know.
 |---|---|
 | Build outputs | Bazel's output root, `~/.cache/bazel` by default; `engine/src/out/bazel-bin` and its siblings are links into it |
 | The disk cache of action results, shared by every checkout | `~/.cache/flutter_engine_bazel`, collected to 20 GB by an idle server |
+| What Bazel downloads, and the repositories it fetches (the repository cache, the repo contents cache) | `~/.cache/flutter_engine_bazel_repositories`: not in the disk cache's directory, whose collector deletes whatever it finds there |
 | Outputs and cache of `tools/gn --bazel` builds and of `dev/bots/test.dart` | `.bazel_ci/` in the checkout, ignored by git |
 
 ## How long it takes, and how much room
