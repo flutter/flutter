@@ -614,6 +614,49 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     await createTestCommandRunner(command).run(const <String>['windows', '--release', '--no-pub']);
   });
 
+  test('Windows build writes AOT format to generated config', () async {
+    final fakeVisualStudio = FakeVisualStudio();
+    setUpMockProjectFilesForBuild();
+
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeGenerationCommand(),
+      buildCommand('Release'),
+    ]);
+
+    final BuildWindowsCommand command = createCommand(visualStudio: fakeVisualStudio);
+    await createTestCommandRunner(command)
+        .run(const <String>['windows', '--no-pub', '--windows-aot-format=elf']);
+
+    final File cmakeConfig = fileSystem.currentDirectory
+        .childDirectory('windows')
+        .childDirectory('flutter')
+        .childDirectory('ephemeral')
+        .childFile('generated_config.cmake');
+
+    expect(cmakeConfig.readAsLinesSync(), contains('  "WINDOWS_AOT_FORMAT=elf"'));
+  });
+
+  test('Windows build omits AOT format from generated config by default', () async {
+    final fakeVisualStudio = FakeVisualStudio();
+    setUpMockProjectFilesForBuild();
+
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeGenerationCommand(),
+      buildCommand('Release'),
+    ]);
+
+    final BuildWindowsCommand command = createCommand(visualStudio: fakeVisualStudio);
+    await createTestCommandRunner(command).run(const <String>['windows', '--no-pub']);
+
+    final File cmakeConfig = fileSystem.currentDirectory
+        .childDirectory('windows')
+        .childDirectory('flutter')
+        .childDirectory('ephemeral')
+        .childFile('generated_config.cmake');
+
+    expect(cmakeConfig.readAsStringSync(), isNot(contains('WINDOWS_AOT_FORMAT')));
+  });
+
   test("Windows build uses pubspec's version", () async {
     final fakeVisualStudio = FakeVisualStudio();
     setUpMockProjectFilesForBuild();
