@@ -180,7 +180,14 @@ class AndroidView extends StatefulWidget {
 
   /// Passed as the args argument of [PlatformViewFactory#create](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#create-android.content.Context-int-java.lang.Object-)
   ///
-  /// This can be used by plugins to pass constructor parameters to the embedded Android view.
+  /// {@template flutter.widgets.platformView.creationParams}
+  /// This can be used by plugins to pass constructor parameters to the embedded native view.
+  ///
+  /// These parameters are used only when the native view is created. Changing
+  /// this value does not recreate or update the native view. To update an
+  /// existing native view, the plugin must communicate with it directly, for
+  /// example through a [MethodChannel] or Dart FFI.
+  /// {@endtemplate}
   final dynamic creationParams;
 
   /// The codec used to encode `creationParams` before sending it to the
@@ -236,7 +243,7 @@ abstract class _DarwinView extends StatefulWidget {
 
   /// Passed as the `arguments` argument of [-\[FlutterPlatformViewFactory createWithFrame:viewIdentifier:arguments:\]](/ios-embedder/protocol_flutter_platform_view_factory-p.html#a4e3c4390cd6ebd982390635e9bca4edc)
   ///
-  /// This can be used by plugins to pass constructor parameters to the embedded iOS view.
+  /// {@macro flutter.widgets.platformView.creationParams}
   final dynamic creationParams;
 
   /// The codec used to encode `creationParams` before sending it to the
