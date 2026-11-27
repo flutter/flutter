@@ -25,48 +25,32 @@ import '../../../src/fakes.dart';
 final class FakeExtensionManager extends Fake implements ExtensionManager {}
 
 final class FakeExtensionBuildManager extends ExtensionBuildManager {
-  FakeExtensionBuildManager({this.buildResult, this.onAssemble})
+  FakeExtensionBuildManager({this.assembleError, this.onAssemble})
     : super(
         extensionManager: FakeExtensionManager(),
         featureFlags: TestFeatureFlags(),
         logger: BufferLogger.test(),
       );
 
-  final ExtensionBuildResult? buildResult;
+  final ToolExtensionException? assembleError;
   final void Function(Uri buildDir)? onAssemble;
 
   int assembleCount = 0;
-  Uri? invokedBuildDir;
-  BuildMode? invokedBuildMode;
-  Uri? invokedFlutterRoot;
-  String? invokedMainPath;
-  Uri? invokedOutputDir;
-  Uri? invokedProjectRoot;
-  Map<String, String>? invokedResolvedArtifacts;
+  ExtensionAssembleContext? invokedContext;
   String? invokedTargetName;
 
   @override
-  Future<ExtensionBuildResult> assemble({
-    required Uri buildDir,
-    required BuildMode buildMode,
-    required Uri flutterRoot,
-    required String mainPath,
-    required Uri outputDir,
-    required Uri projectRoot,
-    required Map<String, String> resolvedArtifacts,
+  Future<void> assemble({
+    required ExtensionAssembleContext context,
     required String targetName,
   }) async {
     assembleCount += 1;
-    invokedBuildDir = buildDir;
-    invokedBuildMode = buildMode;
-    invokedFlutterRoot = flutterRoot;
-    invokedMainPath = mainPath;
-    invokedOutputDir = outputDir;
-    invokedProjectRoot = projectRoot;
-    invokedResolvedArtifacts = resolvedArtifacts;
+    invokedContext = context;
     invokedTargetName = targetName;
-    onAssemble?.call(buildDir);
-    return buildResult ?? const ExtensionBuildResult(success: true);
+    onAssemble?.call(context.buildDir);
+    if (assembleError case final ToolExtensionException error) {
+      throw error;
+    }
   }
 }
 
@@ -161,13 +145,16 @@ void main() {
     await target.build(environment);
 
     expect(buildManager.invokedTargetName, equals('custom-target'));
-    expect(buildManager.invokedProjectRoot, equals(environment.projectDir.uri));
-    expect(buildManager.invokedMainPath, equals('lib/main.dart'));
-    expect(buildManager.invokedBuildMode, equals(BuildMode.debug));
-    expect(buildManager.invokedOutputDir, equals(environment.outputDir.uri));
-    expect(buildManager.invokedBuildDir, equals(environment.buildDir.uri));
-    expect(buildManager.invokedFlutterRoot, equals(environment.flutterRootDir.uri));
-    expect(buildManager.invokedResolvedArtifacts, isEmpty);
+    expect(buildManager.invokedContext!.projectRoot, equals(environment.projectDir.uri));
+    expect(
+      buildManager.invokedContext!.mainPath,
+      equals(environment.projectDir.childFile(fileSystem.path.join('lib', 'main.dart')).path),
+    );
+    expect(buildManager.invokedContext!.buildMode, equals(BuildMode.debug));
+    expect(buildManager.invokedContext!.outputDir, equals(environment.outputDir.uri));
+    expect(buildManager.invokedContext!.buildDir, equals(environment.buildDir.uri));
+    expect(buildManager.invokedContext!.flutterRoot, equals(environment.flutterRootDir.uri));
+    expect(buildManager.invokedContext!.resolvedArtifacts, isEmpty);
   });
 
   test('ExtensionTarget resolves and passes artifacts', () async {
@@ -188,7 +175,7 @@ void main() {
     await target.build(environment);
 
     expect(
-      buildManager.invokedResolvedArtifacts,
+      buildManager.invokedContext!.resolvedArtifacts,
       equals(<String, String>{
         'icuData': 'Artifact.icuData.TargetPlatform.linux_x64.debug',
         'genSnapshot': 'Artifact.genSnapshot.TargetPlatform.linux_arm64.release',
@@ -213,7 +200,7 @@ void main() {
 
   test('ExtensionTarget throws ExtensionAssembleException if assemble fails', () async {
     final buildManager = FakeExtensionBuildManager(
-      buildResult: const ExtensionBuildResult(success: false, errorMessage: 'Build failed error'),
+      assembleError: const ToolExtensionException('Build failed error'),
     );
     final ExtensionTarget target = _createTarget(buildManager: buildManager);
 
@@ -236,30 +223,10 @@ void main() {
     );
 
     final ExtensionTarget emptyMessageTarget = _createTarget(
-      buildManager: FakeExtensionBuildManager(
-        buildResult: const ExtensionBuildResult(success: false, errorMessage: ''),
-      ),
+      buildManager: FakeExtensionBuildManager(assembleError: const ToolExtensionException('')),
     );
     await expectLater(
       () => emptyMessageTarget.build(environment),
-      throwsA(
-        isA<ExtensionAssembleException>()
-            .having((ExtensionAssembleException e) => e.target, 'target', 'custom-target')
-            .having(
-              (ExtensionAssembleException e) => e.toString(),
-              'toString',
-              equals('Extension assemble target "custom-target" failed.'),
-            ),
-      ),
-    );
-
-    final ExtensionTarget nullMessageTarget = _createTarget(
-      buildManager: FakeExtensionBuildManager(
-        buildResult: const ExtensionBuildResult(success: false),
-      ),
-    );
-    await expectLater(
-      () => nullMessageTarget.build(environment),
       throwsA(
         isA<ExtensionAssembleException>()
             .having((ExtensionAssembleException e) => e.target, 'target', 'custom-target')
@@ -372,7 +339,7 @@ void main() {
 
       expect(result.success, isTrue);
       expect(
-        buildManager.invokedResolvedArtifacts,
+        buildManager.invokedContext!.resolvedArtifacts,
         equals(<String, String>{'genSnapshot': expectedGenSnapshotPath}),
       );
       expect(result.inputFiles.map((File f) => f.path), contains(expectedGenSnapshotPath));
@@ -632,7 +599,7 @@ void main() {
 
     await matchingDuplicateArtifactTarget.build(environment);
     expect(
-      buildManager.invokedResolvedArtifacts,
+      buildManager.invokedContext!.resolvedArtifacts,
       equals(<String, String>{
         'genSnapshot': 'Artifact.genSnapshot.TargetPlatform.linux_x64.debug',
       }),
@@ -668,7 +635,7 @@ void main() {
     await customTargetPlatformTarget.build(environment);
 
     expect(
-      buildManager.invokedResolvedArtifacts,
+      buildManager.invokedContext!.resolvedArtifacts,
       equals(<String, String>{
         'icuData': 'Artifact.icuData.debug',
         'flutterPatchedSdkPath': 'Artifact.flutterPatchedSdkPath.debug',
@@ -754,7 +721,7 @@ void main() {
         description: 'Out-of-tree build target with target-independent artifacts',
         name: 'custom-target',
         outputDir: '{OUTPUT_DIR}/custom',
-        targetPlatform: 'custom-embedder-arm64',
+        targetPlatforms: const <String>{'custom-embedder-arm64'},
         artifacts: const <ExtensionArtifact>{
           BuiltInArtifacts.flutterPatchedSdkPath,
           BuiltInArtifacts.icuData,
@@ -777,7 +744,7 @@ void main() {
           description: 'Out-of-tree build target with genSnapshot',
           name: 'custom-target',
           outputDir: '{OUTPUT_DIR}/custom',
-          targetPlatform: 'custom-embedder-arm64',
+          targetPlatforms: const <String>{'custom-embedder-arm64'},
           artifacts: const <ExtensionArtifact>{BuiltInArtifacts.genSnapshot},
         ),
       ),
@@ -839,7 +806,7 @@ void main() {
             description: 'description',
             name: 'custom-target',
             outputDir: pattern,
-            targetPlatform: 'linux-x64',
+            targetPlatforms: const <String>{'linux-x64'},
           ),
         );
         expect(resolved.path, equals(expectedPath));
@@ -858,7 +825,7 @@ void main() {
           description: 'description',
           name: 'custom-target',
           outputDir: '{OUTPUT_DIR}/custom/{BUILD_MODE}',
-          targetPlatform: 'linux-x64',
+          targetPlatforms: const <String>{'linux-x64'},
         ),
       );
       expect(resolved.path, equals('/home/user/{client}/project/build/custom/profile'));
@@ -877,7 +844,7 @@ void main() {
             description: 'description',
             name: 'custom-target',
             outputDir: '{BUILD_DIR}/custom-out',
-            targetPlatform: 'linux-x64',
+            targetPlatforms: const <String>{'linux-x64'},
           ),
         ),
         throwsToolExit(
@@ -886,7 +853,7 @@ void main() {
       );
     });
 
-    test('resolves outputDir without {TARGET_PLATFORM} when targetPlatform is null and throws ToolExit if {TARGET_PLATFORM} is used', () {
+    test('resolves outputDir without {TARGET_PLATFORM} when targetPlatforms is empty and throws ToolExit if {TARGET_PLATFORM} is used', () {
       final Directory projectDir = fileSystem.directory('/project');
       final Directory buildOutputDir = projectDir.childDirectory('build');
       final Directory resolved = resolveExtensionOutputDir(
@@ -928,7 +895,7 @@ void main() {
       description: 'Contract check build target',
       name: 'contract-build-target',
       outputDir: '{OUTPUT_DIR}/contract-build',
-      targetPlatform: 'linux-x64',
+      targetPlatforms: const <String>{'linux-x64'},
       artifacts: const <ExtensionArtifact>{
         BuiltInArtifacts.flutterPatchedSdkPath,
         BuiltInArtifacts.genSnapshot,
@@ -984,5 +951,130 @@ void main() {
 
     expect(BuiltInTargets.copyAssets, equals(const CopyAssets().name));
     expect(BuiltInTargets.kernelSnapshot, equals(const KernelSnapshot().name));
+  });
+
+  test('ExtensionTarget extracts and forwards build context defines and filters built-in keys from extraDefines', () async {
+    final buildManager = FakeExtensionBuildManager();
+    final ExtensionTarget target = _createTarget(buildManager: buildManager);
+    final customEnvironment = Environment.test(
+      fileSystem.currentDirectory,
+      defines: <String, String>{
+        kBuildMode: BuildMode.release.cliName,
+        kTargetFile: 'lib/custom_main.dart',
+        kTargetPlatform: 'linux-arm64',
+        kFlavor: 'staging',
+        kBuildName: '2.0.0',
+        kBuildNumber: '99',
+        kDartDefines: encodeDartDefines(<String>['API_HOST=api.example.com', 'FLAG=1']),
+        kDartObfuscation: 'true',
+        kSplitDebugInfo: '/project/symbols',
+        kCodeSizeDirectory: '/project/code_size',
+        kExtraFrontEndOptions: '--fe-opt1,--fe-opt2',
+        kExtraGenSnapshotOptions: '--gs-opt1',
+        kTrackWidgetCreation: 'false',
+        kIconTreeShakerFlag: 'true',
+        kExtensionConfigDefines: encodeExtensionConfigDefines(const <String, Map<String, Object?>>{
+          'custom-target': <String, Object?>{'sdk-dir': '/opt/custom', 'enable-feature': true},
+        }),
+        'CustomUserDefine': 'user-val',
+      },
+      inputs: <String, String>{},
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
+      processManager: FakeProcessManager.any(),
+    );
+
+    await target.build(customEnvironment);
+
+    final ExtensionAssembleContext context = buildManager.invokedContext!;
+    expect(context.buildMode, BuildMode.release);
+    expect(context.mainPath, '/lib/custom_main.dart');
+    expect(context.targetPlatform, 'linux-arm64');
+    expect(context.flavor, 'staging');
+    expect(context.buildName, '2.0.0');
+    expect(context.buildNumber, '99');
+    expect(
+      context.dartDefines,
+      equals(const <String, String>{'API_HOST': 'api.example.com', 'FLAG': '1'}),
+    );
+    expect(context.dartObfuscation, isTrue);
+    expect(context.splitDebugInfo, Uri.parse('file:///project/symbols/'));
+    expect(context.codeSizeDirectory, Uri.parse('file:///project/code_size/'));
+    expect(context.extraFrontEndOptions, equals(const <String>['--fe-opt1', '--fe-opt2']));
+    expect(context.extraGenSnapshotOptions, equals(const <String>['--gs-opt1']));
+    expect(context.trackWidgetCreation, isFalse);
+    expect(context.treeShakeIcons, isTrue);
+    expect(
+      context.configuration,
+      equals(const <String, Object?>{'enable-feature': true, 'sdk-dir': '/opt/custom'}),
+    );
+    expect(context.extraDefines, equals(const <String, String>{'CustomUserDefine': 'user-val'}));
+
+    final Directory relativeProjectDir = fileSystem.directory('/workspace/app')
+      ..createSync(recursive: true);
+    final relativeEnvironment = Environment.test(
+      relativeProjectDir,
+      defines: <String, String>{
+        kBuildMode: BuildMode.release.cliName,
+        kSplitDebugInfo: 'rel_symbols',
+        kCodeSizeDirectory: 'rel_code_size',
+        kExtensionConfigDefines: encodeExtensionConfigDefines(const <String, Map<String, Object?>>{
+          'custom-target': <String, Object?>{'enable-target': false, 'target-key': 'target-val'},
+          'other-target': <String, Object?>{'other-key': 'other-val'},
+        }),
+      },
+      inputs: <String, String>{},
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
+      processManager: FakeProcessManager.any(),
+    );
+
+    await target.build(relativeEnvironment);
+
+    final ExtensionAssembleContext relativeContext = buildManager.invokedContext!;
+    expect(relativeContext.mainPath, '/workspace/app/lib/main.dart');
+    expect(relativeContext.splitDebugInfo, Uri.parse('file:///workspace/app/rel_symbols/'));
+    expect(relativeContext.codeSizeDirectory, Uri.parse('file:///workspace/app/rel_code_size/'));
+    expect(
+      relativeContext.configuration,
+      equals(const <String, Object?>{'enable-target': false, 'target-key': 'target-val'}),
+    );
+  });
+
+  test('resolveExtensionOutputDir and resolveExtensionBuildTargetArtifacts honor targetPlatform override', () {
+    final Directory projectDir = fileSystem.directory('/project');
+    final Directory buildOutputDir = projectDir.childDirectory('build');
+    final target = ExtensionBuildTarget(
+      description: 'Multi-arch target',
+      name: 'multi-arch',
+      outputDir: '{OUTPUT_DIR}/{TARGET_PLATFORM}/{BUILD_MODE}',
+      targetPlatforms: const <String>{'linux-x64', 'linux-arm64'},
+      artifacts: const <ExtensionArtifact>{BuiltInArtifacts.genSnapshot},
+    );
+
+    final Directory resolvedDir = resolveExtensionOutputDir(
+      buildMode: .release,
+      buildOutputDir: buildOutputDir,
+      fileSystem: fileSystem,
+      projectDir: projectDir,
+      target: target,
+      targetPlatform: 'linux-arm64',
+    );
+    expect(resolvedDir.path, equals('/project/build/linux-arm64/release'));
+
+    final Map<String, String> resolvedArtifacts = resolveExtensionBuildTargetArtifacts(
+      artifacts: artifacts,
+      buildMode: .release,
+      target: target,
+      targetPlatform: 'linux-arm64',
+    );
+    expect(
+      resolvedArtifacts[BuiltInArtifacts.genSnapshot.name],
+      equals('Artifact.genSnapshot.TargetPlatform.linux_arm64.release'),
+    );
   });
 }

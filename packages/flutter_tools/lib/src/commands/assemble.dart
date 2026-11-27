@@ -300,7 +300,7 @@ class AssembleCommand extends FlutterCommand {
   late final Environment _environment = _createEnvironment();
 
   /// The environmental configuration for a build invocation.
-  Environment _createEnvironment() {
+  Environment _createEnvironment({Map<String, String> extraDefines = const <String, String>{}}) {
     final ToolContext(
       :Artifacts artifacts,
       :Cache cache,
@@ -338,7 +338,7 @@ class AssembleCommand extends FlutterCommand {
       buildDir: project.directory.childDirectory('.dart_tool').childDirectory('flutter_build'),
       projectDir: project.directory,
       packageConfigPath: packageConfigPath(),
-      defines: _parseDefines([...getValue(_define), ...decodedDefines]),
+      defines: _parseDefines([...getValue(_define), ...decodedDefines], extraDefines: extraDefines),
       inputs: _parseDefines(getValue(_input)),
       cacheDir: cache.getRoot(),
       flutterRootDir: fs.directory(cache.flutterRoot),
@@ -358,7 +358,10 @@ class AssembleCommand extends FlutterCommand {
     );
   }
 
-  Map<String, String> _parseDefines(List<String> values) {
+  Map<String, String> _parseDefines(
+    List<String> values, {
+    Map<String, String> extraDefines = const <String, String>{},
+  }) {
     final results = <String, String>{};
     for (final chunk in values) {
       if (chunk.isEmpty) {
@@ -392,13 +395,56 @@ class AssembleCommand extends FlutterCommand {
     if (wasParsed(BuildInfoOptions.extraFrontEndOptions)) {
       results[kExtraFrontEndOptions] = getValue(BuildInfoOptions.extraFrontEndOptions).join(',');
     }
+    results.addAll(extraDefines);
     return results;
+  }
+
+  static void _collectExtensionTargets(
+    Target root,
+    Set<String> visited,
+    List<ExtensionTarget> out,
+  ) {
+    if (!visited.add(root.name)) {
+      return;
+    }
+    if (root is ExtensionTarget) {
+      out.add(root);
+    }
+    for (final Target dep in root.dependencies) {
+      _collectExtensionTargets(dep, visited, out);
+    }
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     final List<Target> targets = await createTargets();
+    final extensionDefines = <String, String>{};
+    if (_extensionBuildManager case final ExtensionBuildManager extensionBuildManager?) {
+      final visited = <String>{
+        for (final Target defaultTarget in _kDefaultTargets) defaultTarget.name,
+      };
+      final extensionTargets = <ExtensionTarget>[];
+      for (final target in targets) {
+        _collectExtensionTargets(target, visited, extensionTargets);
+      }
+      if (extensionTargets.isNotEmpty) {
+        final targetConfigs = <String, Map<String, Object?>>{};
+        for (final extTarget in extensionTargets) {
+          final Map<String, Object?> config = await extensionBuildManager
+              .getAssembleTargetConfiguration(extTarget.name);
+          if (config.isNotEmpty) {
+            targetConfigs[extTarget.name] = config;
+          }
+        }
+        if (targetConfigs.isNotEmpty) {
+          extensionDefines[kExtensionConfigDefines] = encodeExtensionConfigDefines(targetConfigs);
+        }
+      }
+    }
+    final Environment environment = extensionDefines.isEmpty
+        ? _environment
+        : _createEnvironment(extraDefines: extensionDefines);
     final nonDeferredTargets = <Target>[];
     final List<Target> deferredTargets = <AndroidAotDeferredComponentsBundle>[];
     for (final target in targets) {
@@ -420,7 +466,7 @@ class AssembleCommand extends FlutterCommand {
       );
     }
     if (project.manifest.deferredComponents != null &&
-        _environment.defines['validate-deferred-components'] == 'true' &&
+        environment.defines['validate-deferred-components'] == 'true' &&
         deferredTargets.isNotEmpty &&
         !isDebug()) {
       // Add deferred components validation target that require loading units.
@@ -436,7 +482,7 @@ class AssembleCommand extends FlutterCommand {
     }
     final BuildResult result = await _buildSystem.build(
       target!,
-      _environment,
+      environment,
       buildSystemConfig: BuildSystemConfig(
         resourcePoolSize: wasParsed(_resourcePoolSize)
             ? int.tryParse(getValue(_resourcePoolSize)!)
@@ -469,7 +515,7 @@ class AssembleCommand extends FlutterCommand {
     if (wasParsed(_depfile)) {
       final File depfileFile = fs.file(getValue(_depfile));
       final depfile = Depfile(result.inputFiles, result.outputFiles);
-      _environment.depFileService.writeToFile(depfile, depfileFile);
+      environment.depFileService.writeToFile(depfile, depfileFile);
     }
     return FlutterCommandResult.success();
   }

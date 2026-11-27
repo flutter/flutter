@@ -22,6 +22,18 @@ void main() {
     );
   }
 
+  group('ExtensionUriValidation', () {
+    test('isValidArtifactUri accepts non-root absolute file and directory URIs', () {
+      expect(Uri.parse('file:///path/to/app').isValidArtifactUri, isTrue);
+      expect(Uri.parse('file:///path/to/MyApp.app/').isValidArtifactUri, isTrue);
+      expect(Uri.parse('file:///').isValidArtifactUri, isFalse);
+      expect(Uri.parse('relative/path/app').isValidArtifactUri, isFalse);
+      expect(Uri.parse('https://example.com/app').isValidArtifactUri, isFalse);
+      expect(Uri.parse('file:///path/to/app?q=1').isValidArtifactUri, isFalse);
+      expect(Uri.parse('file:///path/to/app#frag').isValidArtifactUri, isFalse);
+    });
+  });
+
   group('ExtensionJsonParsing', () {
     group('requiredField', () {
       test('extracts present field with matching type', () {

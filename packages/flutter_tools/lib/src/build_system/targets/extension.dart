@@ -10,10 +10,91 @@ import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../build_info.dart';
+import '../../convert.dart';
 import '../../experimental/extension_build_manager.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
+
+/// The build define key used to hash an extension's owned `flutter config`
+/// values into [Environment.defines] so configuration changes invalidate
+/// cached `flutter assemble` outputs.
+const kExtensionConfigDefines = 'ExtensionConfigDefines';
+
+const _standardAssembleDefineKeys = <String>{
+  kBuildMode,
+  kBuildName,
+  kBuildNumber,
+  kCodeSizeDirectory,
+  kDartDefines,
+  kDartObfuscation,
+  kDeferredComponents,
+  kExtensionConfigDefines,
+  kExtraFrontEndOptions,
+  kExtraGenSnapshotOptions,
+  kFileSystemRoots,
+  kFileSystemScheme,
+  kFlavor,
+  kFrontendServerStarterPath,
+  kIconTreeShakerFlag,
+  kSplitDebugInfo,
+  kTargetFile,
+  kTargetPlatform,
+  kTrackWidgetCreation,
+  kUseLocalCanvasKitFlag,
+};
+
+/// Resolves an optional directory path (relative to [baseDir] or absolute)
+/// into a trailing-slash directory [Uri], returning `null` when [rawPath] is
+/// null or empty.
+Uri? resolveOptionalDirectoryUri(
+  String? rawPath, {
+  required Directory baseDir,
+  required FileSystem fileSystem,
+}) {
+  if (rawPath == null || rawPath.isEmpty) {
+    return null;
+  }
+  return (fileSystem.path.isRelative(rawPath)
+          ? baseDir.childDirectory(rawPath)
+          : fileSystem.directory(rawPath))
+      .uri;
+}
+
+/// Encodes per-target extension configurations deterministically (sorted by
+/// target name and configuration key) into a JSON string suitable for
+/// [Environment.defines].
+String encodeExtensionConfigDefines(Map<String, Map<String, Object?>> targetConfigurations) {
+  final List<String> sortedTargets = targetConfigurations.keys.toList()..sort();
+  final sorted = <String, Map<String, Object?>>{};
+  for (final targetName in sortedTargets) {
+    final Map<String, Object?> config = targetConfigurations[targetName]!;
+    final List<String> sortedKeys = config.keys.toList()..sort();
+    sorted[targetName] = <String, Object?>{for (final String key in sortedKeys) key: config[key]};
+  }
+  return json.encode(sorted);
+}
+
+/// Decodes [targetName]'s configuration map from a per-target
+/// [kExtensionConfigDefines] JSON string.
+Map<String, Object?>? decodeExtensionConfigDefines(String? encoded, {required String targetName}) {
+  if (encoded == null || encoded.isEmpty) {
+    return null;
+  }
+  try {
+    if (json.decode(encoded) case final Map<String, Object?> map) {
+      if (map[targetName] case final Map<String, Object?> targetMap) {
+        return <String, Object?>{
+          for (final MapEntry(:String key, :Object? value) in targetMap.entries)
+            if (value is bool || value is String) key: value,
+        };
+      }
+    }
+  } on FormatException {
+    // Ignore malformed JSON defines.
+  }
+  return null;
+}
 
 /// Resolves a build target dependency by its [dependency] name.
 typedef DependencyResolverCallback = Target Function(String dependency);
@@ -128,7 +209,13 @@ class ExtensionTarget extends Target {
       :Directory outputDir,
       :Directory projectDir,
     ) = environment;
-    final String mainPath = defines[kTargetFile] ?? fileSystem.path.join('lib', 'main.dart');
+    final String rawMainPath = defines[kTargetFile] ?? fileSystem.path.join('lib', 'main.dart');
+    final String mainPath =
+        (fileSystem.path.isRelative(rawMainPath)
+                ? projectDir.childFile(rawMainPath)
+                : fileSystem.file(rawMainPath))
+            .absolute
+            .path;
     final String? buildMode = defines[kBuildMode];
     if (buildMode == null) {
       throw MissingDefineException(kBuildMode, name);
@@ -141,6 +228,44 @@ class ExtensionTarget extends Target {
       target: assembleTarget,
     );
 
+    final String targetPlatform = defines[kTargetPlatform] ?? assembleTarget.targetPlatform;
+    final String? flavor = defines[kFlavor];
+    final String? buildName = defines[kBuildName];
+    final String? buildNumber = defines[kBuildNumber];
+    final Map<String, String> dartDefines = parseExtensionDartDefines(
+      decodeDartDefines(defines, kDartDefines),
+    );
+    final dartObfuscation = defines[kDartObfuscation] == 'true';
+    final Uri? splitDebugInfo = resolveOptionalDirectoryUri(
+      defines[kSplitDebugInfo],
+      baseDir: projectDir,
+      fileSystem: fileSystem,
+    );
+    final Uri? codeSizeDirectory = resolveOptionalDirectoryUri(
+      defines[kCodeSizeDirectory],
+      baseDir: projectDir,
+      fileSystem: fileSystem,
+    );
+    final List<String> extraFrontEndOptions = decodeCommaSeparated(defines, kExtraFrontEndOptions);
+    final List<String> extraGenSnapshotOptions = decodeCommaSeparated(
+      defines,
+      kExtraGenSnapshotOptions,
+    );
+    final trackWidgetCreation = defines[kTrackWidgetCreation] != null
+        ? defines[kTrackWidgetCreation] == 'true'
+        : mode == BuildMode.debug;
+    final bool treeShakeIcons = defines[kIconTreeShakerFlag] != null
+        ? defines[kIconTreeShakerFlag] == 'true'
+        : mode.isPrecompiled;
+    final Map<String, Object?>? configuration = decodeExtensionConfigDefines(
+      defines[kExtensionConfigDefines],
+      targetName: assembleTarget.name,
+    );
+    final extraDefines = <String, String>{
+      for (final MapEntry(:String key, :String value) in defines.entries)
+        if (!_standardAssembleDefineKeys.contains(key)) key: value,
+    };
+
     // Unlike built-in targets, extensions may not rewrite every declared
     // depfile on a rebuild. Delete stale ones so the existence check below
     // catches a missing depfile instead of reusing dependencies from a prior
@@ -149,19 +274,35 @@ class ExtensionTarget extends Target {
       ErrorHandlingFileSystem.deleteIfExists(buildDir.childFile(depfileName));
     }
 
-    final ExtensionBuildResult result = await _buildManager.assemble(
-      buildDir: buildDir.uri,
-      buildMode: mode,
-      flutterRoot: environment.flutterRootDir.uri,
-      mainPath: mainPath,
-      outputDir: outputDir.uri,
-      projectRoot: projectDir.uri,
-      resolvedArtifacts: resolvedArtifacts,
-      targetName: assembleTarget.name,
-    );
-
-    if (!result.success) {
-      throw ExtensionAssembleException(assembleTarget.name, errorMessage: result.errorMessage);
+    try {
+      await _buildManager.assemble(
+        context: ExtensionAssembleContext(
+          buildDir: buildDir.uri,
+          buildMode: mode,
+          buildName: buildName,
+          buildNumber: buildNumber,
+          codeSizeDirectory: codeSizeDirectory,
+          configuration: configuration ?? const <String, Object?>{},
+          dartDefines: dartDefines,
+          dartObfuscation: dartObfuscation,
+          extraDefines: extraDefines,
+          extraFrontEndOptions: extraFrontEndOptions,
+          extraGenSnapshotOptions: extraGenSnapshotOptions,
+          flavor: flavor,
+          flutterRoot: environment.flutterRootDir.uri,
+          mainPath: mainPath,
+          outputDir: outputDir.uri,
+          projectRoot: projectDir.uri,
+          resolvedArtifacts: resolvedArtifacts,
+          splitDebugInfo: splitDebugInfo,
+          targetPlatform: targetPlatform,
+          trackWidgetCreation: trackWidgetCreation,
+          treeShakeIcons: treeShakeIcons,
+        ),
+        targetName: assembleTarget.name,
+      );
+    } on ToolExtensionException catch (e) {
+      throw ExtensionAssembleException(assembleTarget.name, errorMessage: e.message);
     }
 
     for (final String depfileName in depfiles) {
@@ -212,14 +353,16 @@ const _supportedOutputDirPlaceholders = <String>{
 /// Relative paths are resolved relative to [projectDir].
 /// Throws a [ToolExit] if [ExtensionBuildTarget.outputDir] contains an
 /// unsupported `{...}` placeholder or uses `{TARGET_PLATFORM}` when
-/// [ExtensionBuildTarget.targetPlatform] is `null`.
+/// [ExtensionBuildTarget.targetPlatforms] is empty and [targetPlatform] is `null`.
 Directory resolveExtensionOutputDir({
   required BuildMode buildMode,
   required Directory buildOutputDir,
   required FileSystem fileSystem,
   required Directory projectDir,
   required ExtensionBuildTarget target,
+  String? targetPlatform,
 }) {
+  final String? resolvedTargetPlatform = targetPlatform ?? target.targetPlatforms.firstOrNull;
   for (final RegExpMatch match in _placeholderRegex.allMatches(target.outputDir)) {
     final String? placeholder = match[0];
     if (!_supportedOutputDirPlaceholders.contains(placeholder)) {
@@ -227,7 +370,7 @@ Directory resolveExtensionOutputDir({
         'Unsupported placeholder "$placeholder" in outputDir "${target.outputDir}" for build target "${target.name}".',
       );
     }
-    if (placeholder == BuiltInPlaceholders.targetPlatform && target.targetPlatform == null) {
+    if (placeholder == BuiltInPlaceholders.targetPlatform && resolvedTargetPlatform == null) {
       throwToolExit(
         'Placeholder "${BuiltInPlaceholders.targetPlatform}" in outputDir "${target.outputDir}" '
         'requires targetPlatform to be set on build target "${target.name}".',
@@ -238,8 +381,8 @@ Directory resolveExtensionOutputDir({
       .replaceAll(BuiltInPlaceholders.outputDir, buildOutputDir.path)
       .replaceAll(BuiltInPlaceholders.projectDir, projectDir.path)
       .replaceAll(BuiltInPlaceholders.buildMode, buildMode.cliName);
-  if (target.targetPlatform case final String targetPlatform) {
-    outputPath = outputPath.replaceAll(BuiltInPlaceholders.targetPlatform, targetPlatform);
+  if (resolvedTargetPlatform != null) {
+    outputPath = outputPath.replaceAll(BuiltInPlaceholders.targetPlatform, resolvedTargetPlatform);
   }
   if (fileSystem.path.isRelative(outputPath)) {
     outputPath = fileSystem.path.join(projectDir.path, outputPath);
@@ -265,14 +408,16 @@ Map<String, String> resolveExtensionBuildTargetArtifacts({
   required Artifacts artifacts,
   required BuildMode buildMode,
   required ExtensionBuildTarget target,
+  String? targetPlatform,
 }) {
-  final TargetPlatform? targetPlatform = _tryResolveTargetPlatform(target.targetPlatform);
+  final String? resolvedPlatformName = targetPlatform ?? target.targetPlatforms.firstOrNull;
+  final TargetPlatform? resolvedPlatform = _tryResolveTargetPlatform(resolvedPlatformName);
   final resolvedArtifacts = <String, String>{};
   for (final ExtensionArtifact artifact in target.artifacts) {
     final Artifact resolvedArtifact = _resolveArtifact(artifact);
-    if (targetPlatform == null && !_targetPlatformIndependentArtifacts.contains(artifact)) {
-      final reason = target.targetPlatform != null
-          ? 'targets out-of-tree platform "${target.targetPlatform}"'
+    if (resolvedPlatform == null && !_targetPlatformIndependentArtifacts.contains(artifact)) {
+      final reason = resolvedPlatformName != null
+          ? 'targets out-of-tree platform "$resolvedPlatformName"'
           : 'does not specify a targetPlatform';
       throwToolExit(
         'Artifact "${artifact.name}" requires a built-in target platform, '
@@ -281,7 +426,7 @@ Map<String, String> resolveExtensionBuildTargetArtifacts({
     }
     resolvedArtifacts[artifact.name] = artifacts.getArtifactPath(
       resolvedArtifact,
-      platform: targetPlatform,
+      platform: resolvedPlatform,
       mode: buildMode,
     );
   }

@@ -11,65 +11,17 @@ import 'package:meta/meta.dart';
 
 import 'protocol_base/service.dart';
 
-/// Context passed to an extension target's [BuildTarget.build] method.
-@immutable
-class ExtensionBuildContext {
-  const ExtensionBuildContext({
-    required this.buildMode,
-    required this.flutterRoot,
-    required this.mainPath,
-    required this.outputDir,
-    required this.projectRoot,
-    required this.resolvedArtifacts,
-  });
-
-  /// The compilation mode for the build.
-  final BuildMode buildMode;
-
-  /// The absolute directory URI (ending with `/`) to the Flutter SDK root directory.
-  final Uri flutterRoot;
-
-  /// The path to the main entrypoint file (typically `lib/main.dart`).
-  final String mainPath;
-
-  /// The absolute directory URI (ending with `/`) where final build outputs should be placed.
-  final Uri outputDir;
-
-  /// The absolute directory URI (ending with `/`) to the root directory of the Flutter project being built.
-  final Uri projectRoot;
-
-  /// A map of resolved engine artifact names to their absolute paths on the host.
-  ///
-  /// Keys correspond to [ExtensionArtifact.name] or [ExtensionHostArtifact.name] values.
-  final Map<String, String> resolvedArtifacts;
-}
-
-/// Context passed to an extension target's [AssembleTarget.build] method.
-@immutable
-class ExtensionAssembleContext extends ExtensionBuildContext {
-  const ExtensionAssembleContext({
-    required this.buildDir,
-    required super.buildMode,
-    required super.flutterRoot,
-    required super.mainPath,
-    required super.outputDir,
-    required super.projectRoot,
-    required super.resolvedArtifacts,
-  });
-
-  /// The absolute directory URI (ending with `/`) used for intermediate build
-  /// artifacts (matching [BuiltInPlaceholders.buildDir]).
-  final Uri buildDir;
-}
-
 /// Abstract target for a custom `flutter build <subcommand>` target.
 ///
 /// Extensions should extend this class to contribute top-level `flutter build`
 /// subcommands via [BuildService.buildTargets].
 @immutable
 abstract base class BuildTarget {
-  const BuildTarget({required this.description, required this.outputDir, this.targetPlatform})
-    : assert(targetPlatform == null || targetPlatform != '');
+  const BuildTarget({
+    required this.description,
+    required this.outputDir,
+    this.targetPlatforms = const <String>{},
+  });
 
   /// The user-readable name of the target (exposed as `flutter build <name>`).
   ///
@@ -79,21 +31,6 @@ abstract base class BuildTarget {
   /// Description of what this target builds.
   final String description;
 
-  /// The target platform identifier (e.g. `'linux-x64'`, `'custom-embedder-arm64'`),
-  /// or `null` if this target is platform-agnostic.
-  ///
-  /// This is an open [String] rather than an enum so that extensions for custom
-  /// embedders can declare platform identifiers that are not built into Flutter.
-  /// Used to substitute [BuiltInPlaceholders.targetPlatform] in [outputDir], and as the
-  /// default artifact platform when it matches a built-in Flutter target platform.
-  ///
-  /// When `null`, [outputDir] must not reference
-  /// [BuiltInPlaceholders.targetPlatform], and only target-platform-independent
-  /// engine artifacts ([BuiltInArtifacts.flutterPatchedSdkPath] and
-  /// [BuiltInArtifacts.icuData]) can be resolved in [artifacts].
-  // TODO(bkonyi): Replace with declared supported target platforms on BuildTarget and a selected target platform on ExtensionBuildContext, https://github.com/flutter/flutter/issues/194810.
-  final String? targetPlatform;
-
   /// The directory pattern used by `flutter build` to determine this target's
   /// output directory, for example
   /// `'${BuiltInPlaceholders.outputDir}/custom/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}'`.
@@ -102,21 +39,51 @@ abstract base class BuildTarget {
   /// output root from `flutter config --build-dir`, defaulting to
   /// `<project>/build`), [BuiltInPlaceholders.projectDir],
   /// [BuiltInPlaceholders.buildMode], and [BuiltInPlaceholders.targetPlatform]
-  /// (when [targetPlatform] is non-null).
+  /// (when [targetPlatforms] is non-empty).
   final String outputDir;
 
-  /// Engine artifacts required by this build target, resolved for [targetPlatform]
-  /// and the active [BuildMode].
+  /// Supported target platform identifiers for this build target, preserving
+  /// insertion order.
+  ///
+  /// * When empty (`const <String>{}`), no `--target-platform` CLI option is
+  ///   registered and [ExtensionBuildContext.targetPlatform] is `null`.
+  /// * When containing a single platform, `targetPlatforms.single` is passed
+  ///   automatically as [ExtensionBuildContext.targetPlatform] without adding a
+  ///   redundant `--target-platform` CLI option.
+  /// * When containing multiple platforms, `flutter build <name>` registers a
+  ///   `--target-platform` CLI option defaulting to `targetPlatforms.first`.
+  final Set<String> targetPlatforms;
+
+  /// Custom boolean CLI flags registered on `flutter build <name>` and
+  /// passed via [ExtensionBuildContext.buildFlags].
+  List<ExtensionFlag> get flags => const <ExtensionFlag>[];
+
+  /// Custom single-value CLI options registered on `flutter build <name>` and
+  /// passed via [ExtensionBuildContext.buildOptions].
+  List<ExtensionOption> get options => const <ExtensionOption>[];
+
+  /// Compilation modes supported by this target on `flutter build <name>`
+  /// (registering `--debug`, `--profile`, and `--release` flags accordingly).
+  Set<BuildMode> get supportedBuildModes => const <BuildMode>{.debug, .profile, .release};
+
+  /// Whether this target supports `--flavor` on `flutter build <name>` and
+  /// `flutter run` (passing the parsed value via
+  /// [ExtensionBuildContext.flavor]).
+  bool get supportsFlavors => false;
+
+  /// Whether this target supports `--analyze-size` and
+  /// `--code-size-directory` on `flutter build <name>`.
+  bool get supportsSizeAnalysis => false;
+
+  /// Engine artifacts required by this build target, resolved for the active
+  /// target platform and [BuildMode].
   Set<ExtensionArtifact> get artifacts => const <ExtensionArtifact>{};
 
   /// Host-side build tool or library artifacts required by this build target.
   Set<ExtensionHostArtifact> get hostArtifacts => const <ExtensionHostArtifact>{};
 
-  /// Performs the actual compilation/build steps in the extension process/isolate.
-  ///
-  /// Access resolved artifact paths from [ExtensionBuildContext.resolvedArtifacts] using
-  /// [ExtensionArtifact.name] or [ExtensionHostArtifact.name] as keys.
-  /// Returns an [ExtensionBuildResult] indicating whether the build succeeded.
+  /// Executes the build target, returning an [ExtensionBuildResult] on success
+  /// or throwing a [ToolExtensionException] on failure.
   Future<ExtensionBuildResult> build(ExtensionBuildContext context);
 }
 
@@ -176,12 +143,9 @@ abstract base class AssembleTarget {
   /// `ExtensionSource.pattern('${BuiltInPlaceholders.outputDir}/app.bundle')`).
   List<ExtensionSource> get outputs => const <ExtensionSource>[];
 
-  /// Performs the actual compilation/build steps in the extension process/isolate.
-  ///
-  /// Access resolved artifact paths from [ExtensionAssembleContext.resolvedArtifacts] using
-  /// [ExtensionArtifact.name] or [ExtensionHostArtifact.name] as keys.
-  /// Returns an [ExtensionBuildResult] indicating whether the build succeeded.
-  Future<ExtensionBuildResult> build(ExtensionAssembleContext context);
+  /// Executes the assemble step in the extension isolate, writing declared
+  /// [outputs] and [depfiles] or throwing a [ToolExtensionException] on failure.
+  Future<void> build(ExtensionAssembleContext context);
 }
 
 /// Extension service interface for custom builds.
@@ -203,27 +167,6 @@ abstract base class BuildService extends ToolExtensionService {
 
   /// RPC method identifier to trigger a custom `flutter assemble` target.
   static const String assembleMethod = 'build.assemble';
-
-  /// RPC parameter key for the intermediate build directory (used by [assembleMethod]).
-  static const String buildDirParam = 'buildDir';
-
-  /// RPC parameter key for the build mode.
-  static const String buildModeParam = 'buildMode';
-
-  /// RPC parameter key for the Flutter SDK root directory.
-  static const String flutterRootParam = 'flutterRoot';
-
-  /// RPC parameter key for the main entrypoint path.
-  static const String mainPathParam = 'mainPath';
-
-  /// RPC parameter key for the output directory.
-  static const String outputDirParam = 'outputDir';
-
-  /// RPC parameter key for the project root path.
-  static const String projectRootParam = 'projectRoot';
-
-  /// RPC parameter key for the map of resolved engine artifacts.
-  static const String resolvedArtifactsParam = 'resolvedArtifacts';
 
   /// RPC parameter key for the target name.
   static const String targetNameParam = 'targetName';
@@ -261,10 +204,15 @@ abstract base class BuildService extends ToolExtensionService {
           (BuildTarget target) => ExtensionBuildTarget(
             artifacts: target.artifacts,
             description: target.description,
+            flags: target.flags,
             hostArtifacts: target.hostArtifacts,
             name: target.name,
+            options: target.options,
             outputDir: target.outputDir,
-            targetPlatform: target.targetPlatform,
+            supportedBuildModes: target.supportedBuildModes,
+            supportsFlavors: target.supportsFlavors,
+            supportsSizeAnalysis: target.supportsSizeAnalysis,
+            targetPlatforms: target.targetPlatforms,
           ).toMap(),
         )
         .toList();
@@ -286,83 +234,31 @@ abstract base class BuildService extends ToolExtensionService {
         .toList();
   }
 
-  static Uri _requireAbsoluteDirectoryUri(Map<String, Object?> params, String key) {
-    final String raw = params.requiredField<String>(key);
-    final Uri? uri = Uri.tryParse(raw);
-    if (uri == null || !uri.hasAbsolutePath) {
-      throw RpcException.invalidParams('Missing or invalid "$key" parameter.');
-    }
-    return uri.path.endsWith('/') ? uri : uri.replace(path: '${uri.path}/');
-  }
-
   static (String targetName, ExtensionBuildContext context) _parseBuildRequest(
     Map<String, Object?> params,
   ) {
     final String targetName;
-    final Uri projectRootUri;
-    final String mainPath;
-    final String buildMode;
-    final Uri outputDirUri;
-    final Uri flutterRootUri;
-    final Map<String, Object?> rawResolvedArtifacts;
+    final ExtensionBuildContext context;
     try {
       targetName = params.requiredField<String>(targetNameParam);
-      projectRootUri = _requireAbsoluteDirectoryUri(params, projectRootParam);
-      mainPath = params.requiredField<String>(mainPathParam);
-      buildMode = params.requiredField<String>(buildModeParam);
-      outputDirUri = _requireAbsoluteDirectoryUri(params, outputDirParam);
-      flutterRootUri = _requireAbsoluteDirectoryUri(params, flutterRootParam);
-      rawResolvedArtifacts = params.requiredField<Map<String, Object?>>(resolvedArtifactsParam);
+      context = ExtensionBuildContext.fromJson(params);
     } on FormatException catch (e) {
       throw RpcException.invalidParams(e.message);
     }
-
-    final BuildMode mode;
-    try {
-      mode = BuildMode.fromCliName(buildMode);
-    } on ArgumentError {
-      throw RpcException.invalidParams('Missing or invalid "$buildModeParam" parameter.');
-    }
-
-    final resolvedArtifacts = <String, String>{};
-    try {
-      for (final String key in rawResolvedArtifacts.keys) {
-        resolvedArtifacts[key] = rawResolvedArtifacts.requiredField<String>(key);
-      }
-    } on FormatException catch (e) {
-      throw RpcException.invalidParams('Invalid "$resolvedArtifactsParam" parameter: ${e.message}');
-    }
-
-    final context = ExtensionBuildContext(
-      buildMode: mode,
-      flutterRoot: flutterRootUri,
-      mainPath: mainPath,
-      outputDir: outputDirUri,
-      projectRoot: projectRootUri,
-      resolvedArtifacts: resolvedArtifacts,
-    );
     return (targetName, context);
   }
 
   static (String targetName, ExtensionAssembleContext context) _parseAssembleRequest(
     Map<String, Object?> params,
   ) {
-    final (String targetName, ExtensionBuildContext buildContext) = _parseBuildRequest(params);
-    final Uri buildDirUri;
+    final String targetName;
+    final ExtensionAssembleContext context;
     try {
-      buildDirUri = _requireAbsoluteDirectoryUri(params, buildDirParam);
+      targetName = params.requiredField<String>(targetNameParam);
+      context = ExtensionAssembleContext.fromJson(params);
     } on FormatException catch (e) {
       throw RpcException.invalidParams(e.message);
     }
-    final context = ExtensionAssembleContext(
-      buildDir: buildDirUri,
-      buildMode: buildContext.buildMode,
-      flutterRoot: buildContext.flutterRoot,
-      mainPath: buildContext.mainPath,
-      outputDir: buildContext.outputDir,
-      projectRoot: buildContext.projectRoot,
-      resolvedArtifacts: buildContext.resolvedArtifacts,
-    );
     return (targetName, context);
   }
 
@@ -372,10 +268,7 @@ abstract base class BuildService extends ToolExtensionService {
         .where((BuildTarget t) => t.name == targetName)
         .firstOrNull;
     if (target == null) {
-      return ExtensionBuildResult(
-        success: false,
-        errorMessage: 'Unknown build target: $targetName',
-      ).toMap();
+      throw ToolExtensionException('Unknown build target: $targetName');
     }
     final ExtensionBuildResult result = await target.build(context);
     return result.toMap();
@@ -387,12 +280,9 @@ abstract base class BuildService extends ToolExtensionService {
         .where((AssembleTarget t) => t.name == targetName)
         .firstOrNull;
     if (target == null) {
-      return ExtensionBuildResult(
-        success: false,
-        errorMessage: 'Unknown assemble target: $targetName',
-      ).toMap();
+      throw ToolExtensionException('Unknown assemble target: $targetName');
     }
-    final ExtensionBuildResult result = await target.build(context);
-    return result.toMap();
+    await target.build(context);
+    return <String, Object?>{};
   }
 }

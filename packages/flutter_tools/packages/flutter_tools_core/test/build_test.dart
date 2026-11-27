@@ -142,26 +142,42 @@ void main() {
       final target = ExtensionBuildTarget(
         description: 'A custom Linux build target.',
         name: 'custom-linux-build',
-        targetPlatform: 'linux-x64',
+        targetPlatforms: const <String>{'linux-x64', 'linux-arm64'},
         artifacts: const <ExtensionArtifact>{
           BuiltInArtifacts.icuData,
           BuiltInArtifacts.genSnapshot,
         },
+        flags: const <ExtensionFlag>[ExtensionFlag(help: 'Sign package', name: 'sign')],
         hostArtifacts: const <ExtensionHostArtifact>{BuiltInHostArtifacts.impellerc},
+        options: const <ExtensionOption>[ExtensionOption(help: 'Output format', name: 'format')],
         outputDir: '{OUTPUT_DIR}/linux',
+        supportedBuildModes: const <BuildMode>{.debug, .release},
+        supportsFlavors: true,
+        supportsSizeAnalysis: true,
       );
 
       final Map<String, Object?> map = target.toMap();
       expect(map[ExtensionBuildTarget.nameKey], 'custom-linux-build');
-      expect(map[ExtensionBuildTarget.targetPlatformKey], 'linux-x64');
+      expect(
+        map[ExtensionBuildTarget.targetPlatformsKey],
+        equals(<String>['linux-x64', 'linux-arm64']),
+      );
       expect(map[ExtensionBuildTarget.descriptionKey], 'A custom Linux build target.');
       expect(map[ExtensionBuildTarget.artifactsKey], equals(<String>['icuData', 'genSnapshot']));
       expect(map[ExtensionBuildTarget.hostArtifactsKey], equals(<String>['impellerc']));
       expect(map[ExtensionBuildTarget.outputDirKey], '{OUTPUT_DIR}/linux');
+      expect(
+        map[ExtensionBuildTarget.supportedBuildModesKey],
+        equals(<String>['debug', 'release']),
+      );
+      expect(map[ExtensionBuildTarget.supportsFlavorsKey], isTrue);
+      expect(map[ExtensionBuildTarget.supportsSizeAnalysisKey], isTrue);
 
       final parsed = ExtensionBuildTarget.fromJson(map);
       expect(parsed, equals(target));
       expect(parsed.hashCode, equals(target.hashCode));
+      expect(parsed.flags, hasLength(1));
+      expect(parsed.options, hasLength(1));
       expect(parsed.toString(), contains('custom-linux-build'));
       expect(parsed.toString(), contains('outputDir: {OUTPUT_DIR}/linux'));
     });
@@ -171,40 +187,80 @@ void main() {
         'description': 'A custom Linux build target.',
         'name': 'custom-linux-build',
         'outputDir': '{OUTPUT_DIR}/linux',
-        'targetPlatform': 'linux-x64',
       });
       expect(parsed.name, 'custom-linux-build');
-      expect(parsed.targetPlatform, 'linux-x64');
+      expect(parsed.targetPlatforms, isEmpty);
       expect(parsed.description, 'A custom Linux build target.');
       expect(parsed.artifacts, isEmpty);
+      expect(parsed.flags, isEmpty);
+      expect(parsed.options, isEmpty);
       expect(parsed.hostArtifacts, isEmpty);
+      expect(parsed.supportedBuildModes, equals(const <BuildMode>{.debug, .profile, .release}));
+      expect(parsed.supportsFlavors, isFalse);
+      expect(parsed.supportsSizeAnalysis, isFalse);
       expect(parsed.outputDir, '{OUTPUT_DIR}/linux');
     });
 
-    test('supports platform-agnostic target with null targetPlatform', () {
+    test('supports platform-agnostic target with empty targetPlatforms', () {
       final target = ExtensionBuildTarget(
         description: 'A platform-agnostic build target.',
         name: 'custom-agnostic-build',
         outputDir: '{OUTPUT_DIR}/agnostic',
       );
-      expect(target.targetPlatform, isNull);
+      expect(target.targetPlatforms, isEmpty);
 
       final Map<String, Object?> map = target.toMap();
-      expect(map.containsKey(ExtensionBuildTarget.targetPlatformKey), isFalse);
+      expect(map.containsKey(ExtensionBuildTarget.targetPlatformsKey), isFalse);
 
       final parsed = ExtensionBuildTarget.fromJson(map);
       expect(parsed, equals(target));
-      expect(parsed.targetPlatform, isNull);
+      expect(parsed.targetPlatforms, isEmpty);
       expect(parsed.hashCode, equals(target.hashCode));
     });
 
-    test('fromJson throws FormatException when targetPlatform is empty string', () {
+    test('validates targetPlatforms and supportedBuildModes', () {
+      expect(
+        () => ExtensionBuildTarget(
+          description: 'Empty platform in targetPlatforms',
+          name: 'custom-empty-platform',
+          outputDir: '{OUTPUT_DIR}/invalid',
+          targetPlatforms: const <String>{'linux-x64', ''},
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionBuildTarget(
+          description: 'Empty supportedBuildModes',
+          name: 'custom-empty-modes',
+          outputDir: '{OUTPUT_DIR}/invalid',
+          supportedBuildModes: const <BuildMode>{},
+        ),
+        throwsA(isA<AssertionError>()),
+      );
       expect(
         () => ExtensionBuildTarget.fromJson(const <String, Object?>{
-          'description': 'A custom build target.',
-          'name': 'custom-build',
-          'outputDir': '{OUTPUT_DIR}/custom',
-          'targetPlatform': '',
+          'description': 'Invalid targetPlatforms',
+          'name': 'custom-invalid',
+          'outputDir': '{OUTPUT_DIR}/invalid',
+          'targetPlatforms': <Object?>['linux-x64', ''],
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
+          'description': 'Empty supportedBuildModes',
+          'name': 'custom-invalid',
+          'outputDir': '{OUTPUT_DIR}/invalid',
+          'supportedBuildModes': <Object?>[],
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
+          'description': 'Invalid supportedBuildModes element',
+          'name': 'custom-invalid',
+          'outputDir': '{OUTPUT_DIR}/invalid',
+          'supportedBuildModes': <Object?>['not-a-mode'],
         }),
         throwsFormatException,
       );
@@ -215,7 +271,6 @@ void main() {
         'description': 'A custom Linux build target.',
         'name': 'custom-linux-build',
         'outputDir': '{OUTPUT_DIR}/linux',
-        'targetPlatform': 'linux-x64',
       };
       expect(() => ExtensionBuildTarget.fromJson(const <String, Object?>{}), throwsFormatException);
       expect(
@@ -230,7 +285,7 @@ void main() {
       expect(
         () => ExtensionBuildTarget.fromJson(<String, Object?>{
           ...validRequired,
-          'targetPlatform': 123,
+          'targetPlatforms': 123,
         }),
         throwsFormatException,
       );
@@ -291,7 +346,7 @@ void main() {
       final validJson = <String, Object?>{
         'name': 'custom-linux-build',
         'outputDir': '{OUTPUT_DIR}/linux',
-        'targetPlatform': 'linux-x64',
+        'targetPlatforms': const <String>['linux-x64'],
         'description': 'A custom Linux build target.',
       };
 
@@ -301,7 +356,7 @@ void main() {
       expect(targets, hasLength(1));
       expect(targets.first.name, 'custom-linux-build');
       expect(targets.first.outputDir, '{OUTPUT_DIR}/linux');
-      expect(targets.first.targetPlatform, 'linux-x64');
+      expect(targets.first.targetPlatforms, equals(const <String>{'linux-x64'}));
       expect(targets.first.description, 'A custom Linux build target.');
 
       expect(ExtensionBuildTarget.listFromJson(null), isEmpty);
@@ -326,17 +381,12 @@ void main() {
           description: 'A test target',
           name: 'Invalid-Name',
           outputDir: '{OUTPUT_DIR}',
-          targetPlatform: 'linux-x64',
         ),
         throwsA(isA<AssertionError>()),
       );
       expect(
-        () => ExtensionBuildTarget(
-          description: 'A test target',
-          name: '',
-          outputDir: '{OUTPUT_DIR}',
-          targetPlatform: 'linux-x64',
-        ),
+        () =>
+            ExtensionBuildTarget(description: 'A test target', name: '', outputDir: '{OUTPUT_DIR}'),
         throwsA(isA<AssertionError>()),
       );
     });
@@ -345,7 +395,6 @@ void main() {
       final validJson = <String, Object?>{
         'name': 'custom-linux-build',
         'outputDir': '{OUTPUT_DIR}/linux',
-        'targetPlatform': 'linux-x64',
         'description': 'A custom Linux build target.',
       };
       expect(
@@ -364,7 +413,7 @@ void main() {
         description: 'Target 1',
         name: 'target-1',
         outputDir: '{OUTPUT_DIR}/target-1',
-        targetPlatform: 'linux-x64',
+        targetPlatforms: const <String>{'linux-x64'},
         artifacts: const <ExtensionArtifact>{
           BuiltInArtifacts.icuData,
           BuiltInArtifacts.genSnapshot,
@@ -374,7 +423,7 @@ void main() {
         description: 'Target 1',
         name: 'target-1',
         outputDir: '{OUTPUT_DIR}/target-1',
-        targetPlatform: 'linux-x64',
+        targetPlatforms: const <String>{'linux-x64'},
         artifacts: const <ExtensionArtifact>{
           BuiltInArtifacts.genSnapshot,
           BuiltInArtifacts.icuData,
@@ -384,7 +433,7 @@ void main() {
         description: 'Target 2',
         name: 'target-2',
         outputDir: '{OUTPUT_DIR}/target-2',
-        targetPlatform: 'linux-x64',
+        targetPlatforms: const <String>{'linux-x64'},
       );
 
       expect(target1, equals(target1Reordered));
@@ -611,83 +660,433 @@ void main() {
   });
 
   group('ExtensionBuildResult', () {
-    test('serializes and deserializes successful result without errorMessage', () {
+    test('serializes and deserializes with default and custom fields', () {
       final result = ExtensionBuildResult(
-        success: true,
+        aotSnapshotFileName: 'app.so',
+        bundleDirectoryUri: Uri.directory('/path/to/bundle'),
         executableUri: Uri.file('/path/to/bundle/app'),
       );
 
       final Map<String, Object?> map = result.toMap();
-      expect(map[ExtensionBuildResult.successKey], isTrue);
-      expect(map.containsKey(ExtensionBuildResult.errorMessageKey), isFalse);
+      expect(map[ExtensionBuildResult.aotSnapshotFileNameKey], 'app.so');
+      expect(map[ExtensionBuildResult.bundleDirectoryUriKey], 'file:///path/to/bundle/');
       expect(map[ExtensionBuildResult.executableUriKey], 'file:///path/to/bundle/app');
 
       final parsed = ExtensionBuildResult.fromJson(map);
       expect(parsed, equals(result));
       expect(parsed.hashCode, equals(result.hashCode));
-      expect(parsed.toString(), contains('success: true'));
+      expect(parsed.toString(), contains('app.so'));
       expect(parsed.toString(), contains('file:///path/to/bundle/app'));
+
+      const defaultResult = ExtensionBuildResult();
+      expect(defaultResult.aotSnapshotFileName, 'libapp.so');
+      expect(defaultResult.bundleDirectoryUri, isNull);
+      expect(defaultResult.executableUri, isNull);
+      expect(ExtensionBuildResult.fromJson(const <String, Object?>{}), equals(defaultResult));
+
+      // Bundle directory executable URIs (such as macOS/iOS .app bundles) are accepted by isValidArtifactUri.
+      final bundleExecutableResult = ExtensionBuildResult.fromJson(const <String, Object?>{
+        'executableUri': 'file:///path/to/MyApp.app/',
+      });
+      expect(bundleExecutableResult.executableUri, Uri.parse('file:///path/to/MyApp.app/'));
     });
 
-    test('serializes and deserializes failed result with errorMessage', () {
-      const result = ExtensionBuildResult(success: false, errorMessage: 'Compilation failed.');
-
-      final Map<String, Object?> map = result.toMap();
-      expect(map[ExtensionBuildResult.successKey], isFalse);
-      expect(map[ExtensionBuildResult.errorMessageKey], 'Compilation failed.');
-      expect(map.containsKey(ExtensionBuildResult.executableUriKey), isFalse);
-
-      final parsed = ExtensionBuildResult.fromJson(map);
-      expect(parsed, equals(result));
-      expect(parsed.hashCode, equals(result.hashCode));
-      expect(parsed.toString(), contains('Compilation failed.'));
-    });
-
-    test('fromJson validates executableUri is an absolute file URI', () {
+    test('fromJson validates executableUri, bundleDirectoryUri, and aotSnapshotFileName', () {
       expect(
         () => ExtensionBuildResult.fromJson(const <String, Object?>{
-          'success': true,
           'executableUri': 'relative/path/app',
         }),
-        throwsA(isA<FormatException>()),
+        throwsFormatException,
       );
       expect(
         () => ExtensionBuildResult.fromJson(const <String, Object?>{
-          'success': true,
           'executableUri': 'https://example.com/app',
         }),
-        throwsA(isA<FormatException>()),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildResult.fromJson(const <String, Object?>{'executableUri': 'file:///'}),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildResult.fromJson(const <String, Object?>{'executableUri': 123}),
+        throwsFormatException,
       );
       expect(
         () => ExtensionBuildResult.fromJson(const <String, Object?>{
-          'success': true,
-          'executableUri': 123,
+          'bundleDirectoryUri': 'file:///path/without/trailing/slash',
         }),
-        throwsA(isA<FormatException>()),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildResult.fromJson(const <String, Object?>{
+          'bundleDirectoryUri': 'relative/bundle/',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildResult.fromJson(const <String, Object?>{'aotSnapshotFileName': ''}),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildResult.fromJson(const <String, Object?>{
+          'aotSnapshotFileName': 'lib/libapp.so',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildResult.fromJson(const <String, Object?>{
+          'aotSnapshotFileName': r'lib\libapp.so',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildResult.fromJson(const <String, Object?>{'aotSnapshotFileName': 42}),
+        throwsFormatException,
       );
     });
 
     test('equality and hashCode distinguish different results', () {
-      const result1 = ExtensionBuildResult(success: true);
-      const result2 = ExtensionBuildResult(success: false, errorMessage: 'Failed');
+      const result1 = ExtensionBuildResult();
+      const result2 = ExtensionBuildResult(aotSnapshotFileName: 'custom.so');
 
       expect(result1, isNot(equals(result2)));
       expect(result1.hashCode, isNot(equals(result2.hashCode)));
     });
+  });
 
-    test('fromJson throws FormatException when fields have invalid types', () {
+  group('ExtensionFlag and ExtensionOption', () {
+    test('ExtensionFlag serializes, deserializes, and implements equality and hashCode', () {
+      const flag = ExtensionFlag(
+        help: 'Enable custom bundling.',
+        name: 'bundle-custom',
+        defaultsTo: true,
+        deprecated: 'Use --new-bundle instead.',
+        hide: true,
+        negatable: false,
+      );
+      final Map<String, Object?> map = flag.toMap();
+      expect(map[ExtensionFlag.nameKey], 'bundle-custom');
+      expect(map[ExtensionFlag.helpKey], 'Enable custom bundling.');
+      expect(map[ExtensionFlag.defaultsToKey], isTrue);
+      expect(map[ExtensionFlag.deprecatedKey], 'Use --new-bundle instead.');
+      expect(map[ExtensionFlag.hideKey], isTrue);
+      expect(map[ExtensionFlag.negatableKey], isFalse);
+
+      final parsed = ExtensionFlag.fromJson(map);
+      expect(parsed, equals(flag));
+      expect(parsed.hashCode, equals(flag.hashCode));
+      expect(parsed.toString(), contains('bundle-custom'));
+
+      const defaultFlag = ExtensionFlag(help: 'Default flag', name: 'default-flag');
+      expect(defaultFlag.defaultsTo, isFalse);
+      expect(defaultFlag.deprecated, isNull);
+      expect(defaultFlag.hide, isFalse);
+      expect(defaultFlag.negatable, isTrue);
+      expect(ExtensionFlag.fromJson(defaultFlag.toMap()), equals(defaultFlag));
+      expect(defaultFlag, isNot(equals(flag)));
+    });
+
+    test('ExtensionFlag.fromJson and listFromJson validate input', () {
       expect(
-        () => ExtensionBuildResult.fromJson(const <String, Object?>{
-          ExtensionBuildResult.successKey: 'yes',
+        () => ExtensionFlag.fromJson(const <String, Object?>{'name': '', 'help': 'h'}),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionFlag.fromJson(const <String, Object?>{
+          'name': 'flag',
+          'help': 'h',
+          'defaultsTo': 'yes',
         }),
         throwsFormatException,
       );
       expect(
-        () => ExtensionBuildResult.fromJson(const <String, Object?>{
-          ExtensionBuildResult.errorMessageKey: 404,
+        () =>
+            ExtensionFlag.fromJson(const <String, Object?>{'name': 'flag', 'help': 'h', 'hide': 1}),
+        throwsFormatException,
+      );
+      expect(ExtensionFlag.listFromJson(null), isEmpty);
+      expect(() => ExtensionFlag.listFromJson('invalid'), throwsFormatException);
+      expect(() => ExtensionFlag.listFromJson(<Object?>[123]), throwsFormatException);
+    });
+
+    test('ExtensionOption serializes, deserializes, and implements equality and hashCode', () {
+      const option = ExtensionOption(
+        help: 'Select compression format.',
+        name: 'compression',
+        allowed: <String>['gzip', 'xz'],
+        allowedHelp: <String, String>{'gzip': 'Fast compression', 'xz': 'High ratio'},
+        defaultsTo: 'gzip',
+        deprecated: 'Use --archive-format instead.',
+        hide: true,
+        valueHelp: 'format',
+      );
+      final Map<String, Object?> map = option.toMap();
+      expect(map[ExtensionOption.nameKey], 'compression');
+      expect(map[ExtensionOption.helpKey], 'Select compression format.');
+      expect(map[ExtensionOption.allowedKey], equals(const <String>['gzip', 'xz']));
+      expect(
+        map[ExtensionOption.allowedHelpKey],
+        equals(const <String, String>{'gzip': 'Fast compression', 'xz': 'High ratio'}),
+      );
+      expect(map[ExtensionOption.defaultsToKey], 'gzip');
+      expect(map[ExtensionOption.deprecatedKey], 'Use --archive-format instead.');
+      expect(map[ExtensionOption.hideKey], isTrue);
+      expect(map[ExtensionOption.mandatoryKey], isFalse);
+      expect(map[ExtensionOption.valueHelpKey], 'format');
+
+      final parsed = ExtensionOption.fromJson(map);
+      expect(parsed, equals(option));
+      expect(parsed.hashCode, equals(option.hashCode));
+      expect(parsed.toString(), contains('compression'));
+
+      const mandatoryOption = ExtensionOption(
+        help: 'Required profile.',
+        name: 'profile',
+        mandatory: true,
+      );
+      expect(ExtensionOption.fromJson(mandatoryOption.toMap()), equals(mandatoryOption));
+
+      const defaultOption = ExtensionOption(help: 'Default option', name: 'default-option');
+      expect(defaultOption.hide, isFalse);
+      expect(defaultOption.mandatory, isFalse);
+      expect(defaultOption.defaultsTo, isNull);
+      expect(defaultOption.deprecated, isNull);
+      expect(defaultOption.allowed, isNull);
+      expect(ExtensionOption.fromJson(defaultOption.toMap()), equals(defaultOption));
+      expect(defaultOption, isNot(equals(option)));
+    });
+
+    test('ExtensionOption.fromJson and listFromJson validate input', () {
+      expect(
+        () => ExtensionOption.fromJson(const <String, Object?>{'name': '', 'help': 'h'}),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionOption.fromJson(const <String, Object?>{
+          'name': 'opt',
+          'help': 'h',
+          'mandatory': 'yes',
         }),
         throwsFormatException,
       );
+      expect(
+        () => ExtensionOption.fromJson(const <String, Object?>{
+          'name': 'opt',
+          'help': 'h',
+          'mandatory': true,
+          'defaultsTo': 'val',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionOption.fromJson(const <String, Object?>{
+          'name': 'opt',
+          'help': 'h',
+          'allowed': <String>['a', 'b'],
+          'defaultsTo': 'c',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionOption.fromJson(const <String, Object?>{
+          'name': 'opt',
+          'help': 'h',
+          'allowedHelp': 'not-a-map',
+        }),
+        throwsFormatException,
+      );
+      expect(ExtensionOption.listFromJson(null), isEmpty);
+      expect(() => ExtensionOption.listFromJson('invalid'), throwsFormatException);
+      expect(() => ExtensionOption.listFromJson(<Object?>[123]), throwsFormatException);
+    });
+  });
+
+  group('ExtensionBuildContext and ExtensionAssembleContext', () {
+    test('ExtensionBuildContext serializes, deserializes, and checks equality', () {
+      final context = ExtensionBuildContext(
+        buildMode: .release,
+        flutterRoot: Uri.parse('file:///flutter/'),
+        mainPath: '/project/lib/main.dart',
+        outputDir: Uri.parse('file:///project/build/custom/'),
+        projectRoot: Uri.parse('file:///project/'),
+        resolvedArtifacts: const <String, String>{'icuData': '/flutter/icudtl.dat'},
+        trackWidgetCreation: false,
+        treeShakeIcons: true,
+        buildFlags: const <String, bool>{'sign': true},
+        buildName: '1.2.3',
+        buildNumber: '45',
+        buildOptions: const <String, String>{'format': 'ipk'},
+        codeSizeDirectory: Uri.parse('file:///project/build/code_size/'),
+        configuration: const <String, Object?>{'enable-custom': true, 'sdk-path': '/opt/sdk'},
+        dartDefines: const <String, String>{'API_URL': 'https://example.com'},
+        dartObfuscation: true,
+        extraFrontEndOptions: const <String>['--enable-experiment=test'],
+        extraGenSnapshotOptions: const <String>['--deterministic'],
+        flavor: 'prod',
+        splitDebugInfo: Uri.parse('file:///project/build/symbols/'),
+        targetDeviceId: 'device-123',
+        targetPlatform: 'linux-arm64',
+      );
+
+      final Map<String, Object?> map = context.toMap();
+      final parsed = ExtensionBuildContext.fromJson(map);
+      expect(parsed, equals(context));
+      expect(parsed.hashCode, equals(context.hashCode));
+      expect(parsed.toString(), contains('ExtensionBuildContext('));
+    });
+
+    test('ExtensionBuildContext.fromJson validates directory URIs, buildOptions, configuration, and required bools', () {
+      final validBaseMap = <String, Object?>{
+        'buildMode': 'debug',
+        'dartObfuscation': false,
+        'flutterRoot': 'file:///flutter/',
+        'mainPath': '/project/lib/main.dart',
+        'outputDir': 'file:///project/build/',
+        'projectRoot': 'file:///project/',
+        'resolvedArtifacts': const <String, Object?>{},
+        'trackWidgetCreation': true,
+        'treeShakeIcons': false,
+      };
+      expect(
+        () => ExtensionBuildContext.fromJson(<String, Object?>{
+          ...validBaseMap,
+          'codeSizeDirectory': 'http://example.com/size/',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildContext.fromJson(<String, Object?>{
+          ...validBaseMap,
+          'codeSizeDirectory': 'file:///project/size_no_slash',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildContext.fromJson(<String, Object?>{
+          ...validBaseMap,
+          'splitDebugInfo': 'file:///project/symbols_no_slash',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildContext.fromJson(<String, Object?>{
+          ...validBaseMap,
+          'splitDebugInfo': 'relative/symbols/',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildContext.fromJson(<String, Object?>{
+          ...validBaseMap,
+          'buildOptions': const <String, Object?>{'format': null},
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildContext.fromJson(<String, Object?>{
+          ...validBaseMap,
+          'configuration': const <String, Object?>{'unset': null},
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildContext.fromJson(<String, Object?>{
+          ...validBaseMap,
+          'configuration': const <String, Object?>{'count': 42},
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildContext.fromJson(<String, Object?>{
+          ...validBaseMap,
+          'trackWidgetCreation': null,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildContext.fromJson(<String, Object?>{
+          ...validBaseMap,
+          'treeShakeIcons': null,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildContext.fromJson(<String, Object?>{
+          ...validBaseMap,
+          'dartObfuscation': null,
+        }),
+        throwsFormatException,
+      );
+    });
+
+    test(
+      'ExtensionAssembleContext is standalone, serializes all 21 fields, and checks equality',
+      () {
+        final context = ExtensionAssembleContext(
+          buildDir: Uri.parse('file:///project/.dart_tool/flutter_build/1234/'),
+          buildMode: .debug,
+          flutterRoot: Uri.parse('file:///flutter/'),
+          mainPath: '/project/lib/main.dart',
+          outputDir: Uri.parse('file:///project/build/'),
+          projectRoot: Uri.parse('file:///project/'),
+          resolvedArtifacts: const <String, String>{'icuData': '/flutter/icudtl.dat'},
+          trackWidgetCreation: true,
+          treeShakeIcons: false,
+          buildName: '1.2.3',
+          buildNumber: '45',
+          codeSizeDirectory: Uri.parse('file:///project/build/code_size/'),
+          configuration: const <String, Object?>{'enable-custom': false, 'custom-opt': 'val'},
+          dartDefines: const <String, String>{'FOO': 'bar'},
+          dartObfuscation: true,
+          extraDefines: const <String, String>{'CustomDefine': '42'},
+          extraFrontEndOptions: const <String>['--enable-experiment=test'],
+          extraGenSnapshotOptions: const <String>['--deterministic'],
+          flavor: 'dev',
+          splitDebugInfo: Uri.parse('file:///project/build/symbols/'),
+          targetPlatform: 'linux-x64',
+        );
+
+        final Map<String, Object?> map = context.toMap();
+        expect(map.containsKey('buildFlags'), isFalse);
+        expect(map.containsKey('buildOptions'), isFalse);
+        expect(map.containsKey('targetDeviceId'), isFalse);
+
+        final parsed = ExtensionAssembleContext.fromJson(map);
+        expect(parsed, equals(context));
+        expect(parsed.hashCode, equals(context.hashCode));
+        expect(parsed.toString(), contains('ExtensionAssembleContext('));
+        expect(parsed.extraDefines, equals(const <String, String>{'CustomDefine': '42'}));
+      },
+    );
+
+    test('ExtensionAssembleContext.fromJson validates buildDir and extraDefines', () {
+      const validBaseMap = <String, Object?>{
+        'buildDir': 'file:///project/.dart_tool/flutter_build/1234/',
+        'buildMode': 'debug',
+        'dartObfuscation': false,
+        'flutterRoot': 'file:///flutter/',
+        'mainPath': '/project/lib/main.dart',
+        'outputDir': 'file:///project/build/',
+        'projectRoot': 'file:///project/',
+        'resolvedArtifacts': <String, Object?>{},
+        'trackWidgetCreation': true,
+        'treeShakeIcons': false,
+      };
+      final invalidOverrides = <Map<String, Object?>>[
+        const <String, Object?>{'buildDir': null},
+        const <String, Object?>{'buildDir': 'relative/build/'},
+        const <String, Object?>{
+          'extraDefines': <String, Object?>{'bad': 123},
+        },
+      ];
+      for (final override in invalidOverrides) {
+        expect(
+          () => ExtensionAssembleContext.fromJson(<String, Object?>{...validBaseMap, ...override}),
+          throwsFormatException,
+          reason: 'Expected FormatException for override: $override',
+        );
+      }
     });
   });
 }

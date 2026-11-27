@@ -130,28 +130,29 @@ final class _FakeExtensionBuildManager extends ExtensionBuildManager {
                description: 'Custom Linux Build',
                name: 'custom-linux-build',
                outputDir: '{OUTPUT_DIR}/linux',
-               targetPlatform: 'linux-x64',
+               targetPlatforms: const <String>{'linux-x64'},
              ),
            ];
 
   final List<ExtensionBuildTarget> _targets;
+  ExtensionBuildContext? lastBuildContext;
+  String? lastTargetName;
 
   @override
   Future<List<ExtensionBuildTarget>> getBuildTargets() async => _targets;
 
   @override
   Future<ExtensionBuildResult> build({
-    required BuildMode buildMode,
-    required Uri flutterRoot,
-    required String mainPath,
-    required Uri outputDir,
-    required Uri projectRoot,
-    required Map<String, String> resolvedArtifacts,
+    required ExtensionBuildContext context,
     required String targetName,
-  }) async => const ExtensionBuildResult(success: true);
+  }) async {
+    lastBuildContext = context;
+    lastTargetName = targetName;
+    return const ExtensionBuildResult();
+  }
 }
 
-ExtensionBuildManager _createBuildManager({
+_FakeExtensionBuildManager _createBuildManager({
   required Logger logger,
   ExtensionManager? extensionManager,
   List<ExtensionBuildTarget>? targets,
@@ -648,6 +649,46 @@ void main() {
         logger.errorText,
         contains('No tool extension provides build target "custom-linux-build" for Test Device.'),
       );
+    });
+
+    test('ExtensionBackedDevice.startApp forwards targetDeviceId and absolute mainPath', () async {
+      final eventPort = ReceivePort();
+      addTearDown(eventPort.close);
+      final SendPort eventSendPort = eventPort.sendPort;
+
+      void entryPoint(SendPort sendPort) {
+        unawaited(
+          ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+            _StreamingTestDeviceService(eventSendPort: eventSendPort),
+          ]),
+        );
+      }
+
+      final ExtensionConnection conn = await ExtensionConnection.spawn(entryPoint, logger: logger);
+      addTearDown(conn.dispose);
+
+      final fs = MemoryFileSystem.test();
+      fs.currentDirectory = fs.directory('/workspace/app')..createSync(recursive: true);
+      final _FakeExtensionBuildManager buildManager = _createBuildManager(logger: logger);
+      final device = ExtensionBackedDevice(
+        buildManager: buildManager,
+        connection: conn,
+        deviceService: ExtensionDeviceClient(conn, logger: logger),
+        fileSystem: fs,
+        logger: logger,
+        targetDevice: const TargetDevice(
+          buildTarget: 'custom-linux-build',
+          category: Category.desktop,
+          id: 'test_device_id',
+          name: 'Test Device',
+        ),
+      );
+      addTearDown(device.dispose);
+
+      await device.startApp(null, debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug));
+      expect(buildManager.lastTargetName, 'custom-linux-build');
+      expect(buildManager.lastBuildContext?.targetDeviceId, 'test_device_id');
+      expect(buildManager.lastBuildContext?.mainPath, '/workspace/app/lib/main.dart');
     });
 
     test('ExtensionDeviceClient.launchApp and stopApp log error and return false on ToolExtensionException', () async {

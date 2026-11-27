@@ -5,13 +5,32 @@
 import 'dart:async';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/json.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:meta/meta.dart';
 
+import '../base/config.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../features.dart';
+import 'config.dart';
 import 'extension_discovery.dart';
 import 'extension_manager.dart';
+
+/// Parses a list of `KEY=VALUE` [dartDefines] strings into a map, splitting
+/// on the first `=` character.
+Map<String, String> parseExtensionDartDefines(List<String> dartDefines) {
+  final result = <String, String>{};
+  for (final define in dartDefines) {
+    final int separatorIndex = define.indexOf('=');
+    if (separatorIndex == -1) {
+      result[define] = '';
+    } else {
+      result[define.substring(0, separatorIndex)] = define.substring(separatorIndex + 1);
+    }
+  }
+  return result;
+}
 
 /// Manages querying build and assemble targets and running custom builds from extension isolates.
 base class ExtensionBuildManager {
@@ -19,16 +38,21 @@ base class ExtensionBuildManager {
     required this._extensionManager,
     required this._featureFlags,
     required this._logger,
+    this._config,
+    this._platform,
   });
 
+  final Config? _config;
   final ExtensionManager _extensionManager;
   final FeatureFlags _featureFlags;
   final Logger _logger;
+  final Platform? _platform;
 
   List<ExtensionBuildTarget>? _cachedBuildTargets;
   List<ExtensionAssembleTarget>? _cachedAssembleTargets;
   final _buildTargetToConnection = <String, ExtensionConnection>{};
   final _assembleTargetToConnection = <String, ExtensionConnection>{};
+  final _connectionConfigSchema = <ExtensionConnection, (List<FeatureFlag>, List<ConfigOption>)>{};
 
   /// Retrieve the cached `flutter build` targets synchronously.
   List<ExtensionBuildTarget> get cachedTargets =>
@@ -158,79 +182,208 @@ base class ExtensionBuildManager {
     return targets;
   }
 
-  /// Triggers a custom `flutter build` target for the given [targetName] by routing to the active extension.
+  /// Returns the snapshot of extension-owned `flutter config` values for the
+  /// extension that owns assemble target [targetName].
+  Future<Map<String, Object?>> getAssembleTargetConfiguration(String targetName) async {
+    if (!_featureFlags.isToolExtensionsEnabled) {
+      return const <String, Object?>{};
+    }
+    try {
+      await _extensionManager.ensureInitialized();
+    } on Object catch (e) {
+      _logger.printTrace('Failed to initialize extension manager: $e');
+      return const <String, Object?>{};
+    }
+    if (_cachedAssembleTargets == null) {
+      await getAssembleTargets();
+    }
+    final ExtensionConnection? connection = _assembleTargetToConnection[targetName];
+    if (connection == null) {
+      return const <String, Object?>{};
+    }
+    return _resolveExtensionConfiguration(connection);
+  }
+
+  Future<Map<String, Object?>> _resolveExtensionConfiguration(
+    ExtensionConnection connection,
+  ) async {
+    if (!connection.capabilities.services.contains(ConfigurationExtension.serviceNamespace)) {
+      return const <String, Object?>{};
+    }
+    (List<FeatureFlag>, List<ConfigOption>)? schema = _connectionConfigSchema[connection];
+    if (schema == null) {
+      final client = ConfigurationExtensionClient(connection, logger: _logger);
+      final List<FeatureFlag> flags = await client.getFeatureFlags();
+      final List<ConfigOption> options = await client.getConfigurations();
+      schema = (flags, options);
+      _connectionConfigSchema[connection] = schema;
+    }
+    final (List<FeatureFlag> featureFlags, List<ConfigOption> configOptions) = schema;
+    Map<String, Object?>? extensionSettings;
+    if (_config?.getValue('extensions') case final Map<String, Object?> extensionsMap) {
+      if (extensionsMap[connection.extensionName] case final Map<String, Object?> extMap) {
+        extensionSettings = extMap;
+      }
+    }
+
+    Object? lookupPersistedSetting(String key) {
+      if (extensionSettings != null && extensionSettings.containsKey(key)) {
+        return extensionSettings[key];
+      }
+      return _config?.getValue(key);
+    }
+
+    final snapshot = <String, Object?>{};
+    for (final FeatureFlag(:String name, :String? environmentVariable, :bool enabledByDefault)
+        in featureFlags) {
+      if (name.isEmpty) {
+        continue;
+      }
+      bool? envOverride;
+      if (environmentVariable != null && environmentVariable.isNotEmpty) {
+        envOverride = _parseOptionalBool(_platform?.environment[environmentVariable]);
+      }
+      final bool resolved =
+          envOverride ?? _parseOptionalBool(lookupPersistedSetting(name)) ?? enabledByDefault;
+      snapshot[name] = resolved;
+    }
+    for (final ConfigOption(:String name, :String? value) in configOptions) {
+      if (name.isEmpty) {
+        continue;
+      }
+      final Object? rawValue = lookupPersistedSetting(name);
+      final String? resolved = rawValue is String ? rawValue : value;
+      if (resolved != null) {
+        snapshot[name] = resolved;
+      }
+    }
+    return snapshot;
+  }
+
+  static bool? _parseOptionalBool(Object? rawValue) => switch (rawValue) {
+    final bool b => b,
+    final String s when s.toLowerCase() == 'true' || s == '1' => true,
+    final String s when s.toLowerCase() == 'false' || s == '0' => false,
+    _ => null,
+  };
+
+  /// Triggers a custom `flutter build` target for [targetName] by routing to the
+  /// owning extension, throwing a [ToolExtensionException] if the build fails.
+  ///
+  /// The owning extension's live `flutter config` snapshot is resolved by this
+  /// manager and populated on the outgoing RPC payload.
   Future<ExtensionBuildResult> build({
-    required BuildMode buildMode,
-    required Uri flutterRoot,
-    required String mainPath,
-    required Uri outputDir,
-    required Uri projectRoot,
-    required Map<String, String> resolvedArtifacts,
+    required ExtensionBuildContext context,
     required String targetName,
-  }) {
-    return _executeBuildRpc(
-      buildMode: buildMode,
+  }) async {
+    final ExtensionConnection connection = await _resolveTargetConnection(
+      codeSizeDirectory: context.codeSizeDirectory,
       connectionMap: _buildTargetToConnection,
       ensureTargetsLoaded: () async {
         if (_cachedBuildTargets == null) {
           await getBuildTargets();
         }
       },
-      flutterRoot: flutterRoot,
-      mainPath: mainPath,
-      outputDir: outputDir,
-      projectRoot: projectRoot,
-      resolvedArtifacts: resolvedArtifacts,
+      flutterRoot: context.flutterRoot,
+      outputDir: context.outputDir,
+      projectRoot: context.projectRoot,
+      splitDebugInfo: context.splitDebugInfo,
+      targetKind: 'build',
+      targetName: targetName,
+    );
+    final Map<String, Object?> resolvedConfiguration = await _resolveExtensionConfiguration(
+      connection,
+    );
+    final String? resolvedTargetPlatform =
+        context.targetPlatform ??
+        _cachedBuildTargets
+            ?.where((ExtensionBuildTarget t) => t.name == targetName)
+            .firstOrNull
+            ?.targetPlatforms
+            .firstOrNull;
+    final Map<String, Object?> contextParams = context.toMap();
+    if (resolvedConfiguration.isNotEmpty) {
+      contextParams[ExtensionBuildContext.configurationKey] = resolvedConfiguration;
+    } else {
+      contextParams.remove(ExtensionBuildContext.configurationKey);
+    }
+    if (resolvedTargetPlatform != null) {
+      contextParams[ExtensionBuildContext.targetPlatformKey] = resolvedTargetPlatform;
+    }
+    final Object? result = await _sendTargetRpc(
+      connection: connection,
+      contextParams: contextParams,
       rpcMethod: BuildService.buildMethod,
       targetKind: 'build',
       targetName: targetName,
     );
+    if (result case final Map<String, Object?> resultMap) {
+      try {
+        return ExtensionBuildResult.fromJson(resultMap);
+      } on FormatException catch (e) {
+        throw ToolExtensionException(
+          'Invalid build result from extension "${connection.extensionName}": ${e.message}',
+        );
+      }
+    }
+    throw ToolExtensionException(
+      'Invalid build result from extension "${connection.extensionName}".',
+    );
   }
 
-  /// Triggers a custom `flutter assemble` target for the given [targetName] by routing to the active extension.
-  Future<ExtensionBuildResult> assemble({
-    required Uri buildDir,
-    required BuildMode buildMode,
-    required Uri flutterRoot,
-    required String mainPath,
-    required Uri outputDir,
-    required Uri projectRoot,
-    required Map<String, String> resolvedArtifacts,
+  /// Triggers a custom `flutter assemble` target for [targetName] by routing to
+  /// the owning extension, throwing a [ToolExtensionException] if the step fails.
+  Future<void> assemble({
+    required ExtensionAssembleContext context,
     required String targetName,
-  }) {
-    return _executeBuildRpc(
-      buildDir: buildDir,
-      buildMode: buildMode,
+  }) async {
+    if (!context.buildDir.hasAbsolutePath) {
+      throw ArgumentError.value(context.buildDir, 'buildDir', 'Must be an absolute path.');
+    }
+    final ExtensionConnection connection = await _resolveTargetConnection(
+      codeSizeDirectory: context.codeSizeDirectory,
       connectionMap: _assembleTargetToConnection,
       ensureTargetsLoaded: () async {
         if (_cachedAssembleTargets == null) {
           await getAssembleTargets();
         }
       },
-      flutterRoot: flutterRoot,
-      mainPath: mainPath,
-      outputDir: outputDir,
-      projectRoot: projectRoot,
-      resolvedArtifacts: resolvedArtifacts,
+      flutterRoot: context.flutterRoot,
+      outputDir: context.outputDir,
+      projectRoot: context.projectRoot,
+      splitDebugInfo: context.splitDebugInfo,
+      targetKind: 'assemble',
+      targetName: targetName,
+    );
+    final String? resolvedTargetPlatform =
+        context.targetPlatform ??
+        _cachedAssembleTargets
+            ?.where((ExtensionAssembleTarget t) => t.name == targetName)
+            .firstOrNull
+            ?.targetPlatform;
+    final Map<String, Object?> contextParams = context.toMap();
+    if (resolvedTargetPlatform != null) {
+      contextParams[ExtensionBuildContext.targetPlatformKey] = resolvedTargetPlatform;
+    }
+    await _sendTargetRpc(
+      connection: connection,
+      contextParams: contextParams,
       rpcMethod: BuildService.assembleMethod,
       targetKind: 'assemble',
       targetName: targetName,
     );
   }
 
-  Future<ExtensionBuildResult> _executeBuildRpc({
-    required BuildMode buildMode,
+  Future<ExtensionConnection> _resolveTargetConnection({
     required Map<String, ExtensionConnection> connectionMap,
     required Future<void> Function() ensureTargetsLoaded,
     required Uri flutterRoot,
-    required String mainPath,
     required Uri outputDir,
     required Uri projectRoot,
-    required Map<String, String> resolvedArtifacts,
-    required String rpcMethod,
     required String targetKind,
     required String targetName,
-    Uri? buildDir,
+    Uri? codeSizeDirectory,
+    Uri? splitDebugInfo,
   }) async {
     if (!projectRoot.hasAbsolutePath) {
       throw ArgumentError.value(projectRoot, 'projectRoot', 'Must be an absolute path.');
@@ -238,68 +391,63 @@ base class ExtensionBuildManager {
     if (!outputDir.hasAbsolutePath) {
       throw ArgumentError.value(outputDir, 'outputDir', 'Must be an absolute path.');
     }
-    if (buildDir != null && !buildDir.hasAbsolutePath) {
-      throw ArgumentError.value(buildDir, 'buildDir', 'Must be an absolute path.');
-    }
     if (!flutterRoot.hasAbsolutePath) {
       throw ArgumentError.value(flutterRoot, 'flutterRoot', 'Must be an absolute path.');
     }
-    if (!_featureFlags.isToolExtensionsEnabled) {
-      return const ExtensionBuildResult(
-        success: false,
-        errorMessage: 'Tool extensions are disabled.',
+    if (codeSizeDirectory != null && !codeSizeDirectory.isValidDirectoryUri) {
+      throw ArgumentError.value(
+        codeSizeDirectory,
+        'codeSizeDirectory',
+        'Must be an absolute file:// directory URI ending with "/".',
       );
+    }
+    if (splitDebugInfo != null && !splitDebugInfo.isValidDirectoryUri) {
+      throw ArgumentError.value(
+        splitDebugInfo,
+        'splitDebugInfo',
+        'Must be an absolute file:// directory URI ending with "/".',
+      );
+    }
+    if (!_featureFlags.isToolExtensionsEnabled) {
+      throw const ToolExtensionException('Tool extensions are disabled.');
     }
 
     try {
       await _extensionManager.ensureInitialized();
+    } on ToolExtensionException {
+      rethrow;
     } on Object catch (e) {
       _logger.printTrace('Failed to initialize extension manager: $e');
-      return ExtensionBuildResult(
-        success: false,
-        errorMessage: 'Failed to initialize extension manager: $e',
-      );
+      throw ToolExtensionException('Failed to initialize extension manager: $e');
     }
 
     await ensureTargetsLoaded();
 
     final ExtensionConnection? connection = connectionMap[targetName];
     if (connection == null) {
-      return ExtensionBuildResult(
-        success: false,
-        errorMessage: 'No extension found to handle $targetKind target $targetName.',
-      );
+      throw ToolExtensionException('No extension found to handle $targetKind target $targetName.');
     }
+    return connection;
+  }
 
+  Future<Object?> _sendTargetRpc({
+    required ExtensionConnection connection,
+    required Map<String, Object?> contextParams,
+    required String rpcMethod,
+    required String targetKind,
+    required String targetName,
+  }) async {
     try {
-      final Object? result = await connection.sendRequest(
+      return await connection.sendRequest(
         rpcMethod,
-        params: <String, Object?>{
-          BuildService.buildDirParam: ?buildDir?.toString(),
-          BuildService.buildModeParam: buildMode.cliName,
-          BuildService.flutterRootParam: flutterRoot.toString(),
-          BuildService.mainPathParam: mainPath,
-          BuildService.outputDirParam: outputDir.toString(),
-          BuildService.projectRootParam: projectRoot.toString(),
-          BuildService.resolvedArtifactsParam: resolvedArtifacts,
-          BuildService.targetNameParam: targetName,
-        },
-        // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
-        // https://github.com/flutter/flutter/issues/193955.
+        params: <String, Object?>{BuildService.targetNameParam: targetName, ...contextParams},
         timeout: null,
       );
-      if (result case final Map<String, Object?> resultMap) {
-        return ExtensionBuildResult.fromJson(resultMap);
-      }
-      return ExtensionBuildResult(
-        success: false,
-        errorMessage: 'Invalid $targetKind result from extension.',
-      );
-    } on ToolExtensionException catch (e) {
-      return ExtensionBuildResult(success: false, errorMessage: e.message);
+    } on ToolExtensionException {
+      rethrow;
     } on Object catch (e) {
       _logger.printTrace('Failed to run $targetKind from extension: $e');
-      return ExtensionBuildResult(success: false, errorMessage: e.toString());
+      throw ToolExtensionException(e.toString());
     }
   }
 }
