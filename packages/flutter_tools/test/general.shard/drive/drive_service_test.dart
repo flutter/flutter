@@ -5,8 +5,10 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
@@ -77,6 +79,50 @@ void main() {
         DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
       ),
       throwsToolExit(message: 'Application failed to start. Will not run test. Quitting.'),
+    );
+  });
+
+  test('Exits if application package is null for target platform', () async {
+    final DriverService driverService = setUpDriverService(
+      applicationPackageFactory: FakeApplicationPackageFactory(),
+    );
+    final Device device = FakeDevice(LaunchResult.succeeded());
+
+    await expectLater(
+      () => driverService.start(
+        BuildInfo.profile,
+        device,
+        DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
+      ),
+      throwsToolExit(
+        message:
+            'No application found for TargetPlatform.android_arm.\n'
+            'Is your project missing an android/AndroidManifest.xml?\n'
+            'Consider running "flutter create ." to create one.',
+      ),
+    );
+  });
+
+  test('Exits without missing project hint if prebuilt application package is null', () async {
+    final DriverService driverService = setUpDriverService(
+      applicationPackageFactory: FakeApplicationPackageFactory(),
+    );
+    final Device device = FakeDevice(LaunchResult.succeeded());
+
+    await expectLater(
+      () => driverService.start(
+        BuildInfo.profile,
+        device,
+        DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
+        applicationBinary: MemoryFileSystem.test().file('app.apk'),
+      ),
+      throwsA(
+        isA<ToolExit>().having(
+          (ToolExit error) => error.message,
+          'message',
+          'No application found for TargetPlatform.android_arm.',
+        ),
+      ),
     );
   });
 
@@ -479,14 +525,16 @@ void main() {
 }
 
 FlutterDriverService setUpDriverService({
+  ApplicationPackageFactory? applicationPackageFactory,
+  DevtoolsLauncher? devtoolsLauncher,
   Logger? logger,
   Platform? platform,
   ProcessManager? processManager,
   FlutterVmService? vmService,
-  DevtoolsLauncher? devtoolsLauncher,
 }) {
   return FlutterDriverService(
-    applicationPackageFactory: FakeApplicationPackageFactory(FakeApplicationPackage()),
+    applicationPackageFactory:
+        applicationPackageFactory ?? FakeApplicationPackageFactory(FakeApplicationPackage()),
     dartSdkPath: 'dart',
     devtoolsLauncher: devtoolsLauncher ?? FakeDevtoolsLauncher(),
     toolContext: FakeToolContext(
@@ -520,12 +568,12 @@ FlutterDriverService setUpDriverService({
 }
 
 class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
-  FakeApplicationPackageFactory(this.applicationPackage);
+  FakeApplicationPackageFactory([this.applicationPackage]);
 
-  ApplicationPackage applicationPackage;
+  ApplicationPackage? applicationPackage;
 
   @override
-  Future<ApplicationPackage> getPackageForPlatform(
+  Future<ApplicationPackage?> getPackageForPlatform(
     TargetPlatform platform, {
     BuildInfo? buildInfo,
     File? applicationBinary,

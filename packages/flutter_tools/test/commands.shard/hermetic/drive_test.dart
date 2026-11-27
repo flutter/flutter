@@ -38,6 +38,7 @@ import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+import '../../src/fake_devices.dart' as fake_devices;
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
@@ -61,12 +62,15 @@ void main() {
         signals: signalsOverride ?? signals,
       );
 
-  TestFlutterCommandRunner createCommandRunner(DriveCommand command, {Pub? pub}) =>
-      TestFlutterCommandRunner(
-        deviceManager: fakeDeviceManager,
-        pub: pub,
-        toolContext: command.toolContext,
-      )..addCommand(command);
+  TestFlutterCommandRunner createCommandRunner(
+    DriveCommand command, {
+    DeviceManager? deviceManager,
+    Pub? pub,
+  }) => TestFlutterCommandRunner(
+    deviceManager: deviceManager ?? fakeDeviceManager,
+    pub: pub,
+    toolContext: command.toolContext,
+  )..addCommand(command);
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -199,6 +203,7 @@ void main() {
       buildTargets: const BuildTargetsImpl(),
       devtoolsLauncher: FakeDevtoolsLauncher(),
       toolContext: createToolContext(),
+      applicationPackages: _FakeApplicationPackageFactory(),
     );
     fileSystem.file('lib/main.dart').createSync(recursive: true);
     fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
@@ -265,6 +270,7 @@ void main() {
       buildTargets: const BuildTargetsImpl(),
       devtoolsLauncher: FakeDevtoolsLauncher(),
       toolContext: createToolContext(),
+      applicationPackages: _FakeApplicationPackageFactory(),
     );
     fileSystem.file('lib/main.dart').createSync(recursive: true);
     fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
@@ -341,6 +347,7 @@ void main() {
       buildTargets: const BuildTargetsImpl(),
       devtoolsLauncher: FakeDevtoolsLauncher(),
       toolContext: createToolContext(),
+      applicationPackages: _FakeApplicationPackageFactory(),
     );
 
     fileSystem.file('lib/main.dart').createSync(recursive: true);
@@ -806,6 +813,64 @@ void main() {}
     );
   });
 
+  group('device filtering for project support', () {
+    late CapturingDriverService capturingDriverService;
+    late fake_devices.FakeDevice unsupportedDevice;
+    late TestFlutterCommandRunner runner;
+
+    setUp(() {
+      capturingDriverService = CapturingDriverService();
+      unsupportedDevice = fake_devices.FakeDevice(
+        'Unsupported Device',
+        'unsupported_device',
+        isSupportedForProject: false,
+      );
+      final deviceManager = _TestDeviceManager(logger: logger, fileSystem: fileSystem)
+        ..addDevice(unsupportedDevice);
+      final command = DriveCommand(
+        assetBundleFactory: _FakeAssetBundleFactory(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
+        toolContext: createToolContext(),
+        flutterDriverFactory: CapturingFlutterDriverFactory(capturingDriverService),
+      );
+      fileSystem.file('lib/main.dart').createSync(recursive: true);
+      fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+      runner = createCommandRunner(command, deviceManager: deviceManager);
+    });
+
+    test('ignores devices unsupported by the project when building from source', () async {
+      await expectLater(() => runner.run(<String>['drive', '--no-pub']), throwsToolExit());
+      expect(logger.statusText, contains('No supported devices connected.'));
+      expect(capturingDriverService.device, isNull);
+    });
+
+    test(
+      'includes devices unsupported by the project when using prebuilt application binary',
+      () async {
+        final File appBinary = fileSystem.file('app.apk')..createSync();
+
+        await runner.run(<String>['drive', '--no-pub', '--use-application-binary', appBinary.path]);
+
+        expect(capturingDriverService.device, unsupportedDevice);
+        expect(capturingDriverService.applicationBinary?.path, appBinary.path);
+      },
+    );
+
+    test('includes devices unsupported by the project when using --use-existing-app', () async {
+      await runner.run(<String>[
+        'drive',
+        '--no-pub',
+        '--use-existing-app',
+        'http://localhost:8181',
+      ]);
+
+      expect(capturingDriverService.device, unsupportedDevice);
+    });
+  });
+
   test('succeeds when --use-application-binary is provided with --release and engine config flags for iOS', () async {
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('lib/main.dart').createSync(recursive: true);
@@ -1077,6 +1142,8 @@ class FakeDriverService extends Fake implements DriverService {
 }
 
 class CapturingDriverService extends Fake implements DriverService {
+  Device? device;
+  File? applicationBinary;
   Map<String, Object>? platformArgs;
   Map<String, String>? webDefines;
   DriveTestSpecification? lastSpec;
@@ -1092,6 +1159,8 @@ class CapturingDriverService extends Fake implements DriverService {
     String? mainPath,
     Map<String, Object> platformArgs = const <String, Object>{},
   }) async {
+    this.device = device;
+    this.applicationBinary = applicationBinary;
     this.platformArgs = platformArgs;
     webDefines = debuggingOptions.webConfig.webDefines;
   }
@@ -1101,7 +1170,9 @@ class CapturingDriverService extends Fake implements DriverService {
     Uri vmServiceUri,
     Device device,
     DebuggingOptions debuggingOptions,
-  ) async {}
+  ) async {
+    this.device = device;
+  }
 
   @override
   Future<int> startTest(String testFile, DriveTestSpecification spec) async {
@@ -1215,6 +1286,28 @@ class FakeSignals extends Fake implements Signals {
   @override
   Future<bool> removeHandler(ProcessSignal signal, Object token) async => true;
 }
+
+class _TestDeviceManager extends DeviceManager {
+  _TestDeviceManager({required super.logger, required super.fileSystem});
+
+  final _discoverer = fake_devices.FakePollingDeviceDiscovery();
+
+  @override
+  late final deviceDiscoverers = <DeviceDiscovery>[_discoverer];
+
+  void addDevice(Device device) => _discoverer.addDevice(device);
+}
+
+class _FakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
+  @override
+  Future<ApplicationPackage?> getPackageForPlatform(
+    TargetPlatform platform, {
+    BuildInfo? buildInfo,
+    File? applicationBinary,
+  }) async => _FakeApplicationPackage();
+}
+
+class _FakeApplicationPackage extends Fake implements ApplicationPackage {}
 
 class FakeWindowsDevice extends Fake implements Device {
   @override

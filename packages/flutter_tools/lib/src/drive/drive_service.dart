@@ -25,6 +25,7 @@ import '../context/tool_context.dart';
 import '../device.dart';
 import '../features.dart' show FeatureFlags;
 import '../hook_runner.dart' show FlutterHookRunner;
+import '../project.dart';
 import '../resident_runner.dart';
 import '../version.dart';
 import '../vmservice.dart';
@@ -196,17 +197,30 @@ class FlutterDriverService extends DriverService {
     }
     _device = device;
     final TargetPlatform targetPlatform = await device.targetPlatform;
-    _applicationPackage = await _applicationPackageFactory.getPackageForPlatform(
+    final ApplicationPackage? package = await _applicationPackageFactory.getPackageForPlatform(
       targetPlatform,
       buildInfo: buildInfo,
       applicationBinary: applicationBinary,
     );
+    if (package == null) {
+      String? hint;
+      if (applicationBinary == null) {
+        final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
+        hint = await getMissingPackageHintForPlatform(
+          targetPlatform,
+          fileSystem: fs,
+          projectFactory: projectFactory,
+        );
+      }
+      throwToolExit(<String>['No application found for $targetPlatform.', ?hint].join('\n'));
+    }
+    _applicationPackage = package;
     var attempt = 0;
     LaunchResult? result;
     var prebuiltApplication = applicationBinary != null;
     while (attempt < _kLaunchAttempts) {
       result = await device.startApp(
-        _applicationPackage,
+        package,
         mainPath: mainPath,
         route: route,
         debuggingOptions: debuggingOptions,
