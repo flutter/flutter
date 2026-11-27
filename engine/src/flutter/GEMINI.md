@@ -29,6 +29,9 @@ https://github.com/flutter/flutter.
 
 ## Style
 
+- Follow the language-specific style guidelines in `./CONTRIBUTING.md#style`.
 - The Google C++ Style Guide is used for C++.
 - C++ docstrings are in the Doxygen format.
 - Prefer functions that are less than 30 lines long.
+- For iOS and macOS code, prefer Swift over Objective-C when feasible,
+  especially when adding self-contained features.

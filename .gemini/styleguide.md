@@ -53,8 +53,8 @@ flutter/flutter repository. It is based on the more comprehensive official
 - Shaders are formatted using `clang-format`.
 - Kotlin code is formatted using `ktformat`, linted with `ktlint`, and should follow the [Android Kotlin Style Guide](https://developer.android.com/kotlin/style-guide).
 - Java code is formatted using `google-java-format` and should follow the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html).
-- Objective-C is formatted using `clang-format`, linted with `clang-tidy`, and should follow the [Google Objective-C Style Guide](https://google.github.io/styleguide/objcguide.html).
-- Swift is formatted and linted using `swift-format` and should follow the [Google Swift Style Guide](https://google.github.io/swift).
+- Objective-C is formatted using `clang-format`, linted with `clang-tidy`, and should follow the [Google Objective-C Style Guide](https://google.github.io/styleguide/objcguide.html). We are migrating Objective-C code to Swift where possible; for new, self-contained iOS/macOS features, suggest considering Swift when feasible (avoid suggesting rewrites for localized edits to existing Objective-C/Objective-C++ code).
+- Swift should follow the [Google Swift Style Guide](https://google.github.io/swift) and can be formatted using `swift format`.
 - GN code is formatted using `gn format` and should follow the [GN Style Guide](https://gn.googlesource.com/gn/+/main/docs/style_guide.md).
 
 ## Documentation
@@ -85,6 +85,7 @@ When providing a summary, the review agent must adhere to the following principl
 For more detailed guidance, refer to the following documents:
 
 - [Style guide for the Flutter repository](https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md)
+- [Flutter engine style guide](https://github.com/flutter/flutter/blob/main/engine/src/flutter/CONTRIBUTING.md#style)
 - [Effective Dart: Style](https://dart.dev/effective-dart/style)
 - [Tree Hygiene](https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md)
 - [The Flutter contribution guide](https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md)

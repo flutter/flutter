@@ -156,7 +156,17 @@ Some cases where an explicit type should be considered:
 Follows the [Google Java Style Guide][java_style] and is automatically formatted
 with `google-java-format`.
 
+### Swift
+
+Follows the [Google Swift Style Guide][swift_style].
+Swift auto-formatting is still [a work in progress][swift_format_issue];
+consider manually formatting Swift source code using `swift format` in the meantime.
+
 ### Objective-C
+
+> [!NOTE]
+> We are migrating Objective-C code to [Swift](#swift) where possible. Consider
+> using Swift when feasible, especially when adding self-contained features.
 
 Follows the [Google Objective-C Style Guide][objc_style], including for
 Objective-C++ and is automatically formatted with `clang-format`.
@@ -188,6 +198,8 @@ Automatically formatted with `gn format`.
 [engine_dev_setup]: docs/contributing/Setting-up-the-Engine-development-environment.md
 [flutter_style]: https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md
 [objc_style]: https://google.github.io/styleguide/objcguide.html
+[swift_style]: https://google.github.io/swift
+[swift_format_issue]: https://github.com/flutter/flutter/issues/172799
 [java_style]: https://google.github.io/styleguide/javaguide.html
 [google_python_style]: https://google.github.io/styleguide/pyguide.html
 
