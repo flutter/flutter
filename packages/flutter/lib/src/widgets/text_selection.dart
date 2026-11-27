@@ -2503,7 +2503,7 @@ class TextSelectionGestureDetectorBuilder {
         _isShiftPressed && renderEditable.selection?.baseOffset != null;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        if (editableText.widget.stylusHandwritingEnabled) {
+        if (!kIsWeb && editableText.widget.stylusHandwritingEnabled) {
           final bool stylusEnabled = switch (kind) {
             PointerDeviceKind.stylus ||
             PointerDeviceKind.invertedStylus => editableText.widget.stylusHandwritingEnabled,
