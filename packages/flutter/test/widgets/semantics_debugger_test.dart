@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -486,15 +487,11 @@ void main() {
   }, variant: TargetPlatformVariant.all());
 
   testWidgets('SemanticsDebugger textfield', (WidgetTester tester) async {
-    final textField = UniqueKey();
     final debugger = UniqueKey();
 
     await tester.pumpWidget(
       TestWidgetsApp(
-        home: SemanticsDebugger(
-          key: debugger,
-          child: TestTextField(key: textField),
-        ),
+        home: SemanticsDebugger(key: debugger, child: const TestTextField()),
       ),
     );
 
@@ -502,12 +499,14 @@ void main() {
       debuggerKey: debugger,
       tester: tester,
     );
-    final RenderObject renderTextfield = tester.renderObject(find.byKey(textField));
-
     final message =
         // ignore: avoid_dynamic_calls
-        semanticsDebuggerPainter.getMessage(renderTextfield.debugSemantics) as String;
+        semanticsDebuggerPainter.getMessage(
+          find.semantics.byFlag(SemanticsFlag.isTextField).evaluate().single,
+        ) as String;
     expect(message, contains('textfield'));
+    // EditableText provides the tap action, so the text field is not reported as disabled.
+    expect(message, isNot(contains('disabled')));
   });
 
   testWidgets('SemanticsDebugger label style is used in the painter.', (WidgetTester tester) async {
