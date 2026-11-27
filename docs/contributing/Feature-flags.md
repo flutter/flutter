@@ -280,14 +280,11 @@ provide a different execution branch.
 
 ### Tool
 
-In the `flutter` tool, feature flags. flags can be accessed either by adding
-(and providing) an explicit `FeatureFlags` parameter (**recommended**):
+In the `flutter` tool, feature flags are accessed by adding and providing an
+explicit `FeatureFlags` parameter:
 
 ```dart
 class WebDevices extends PollingDeviceDiscovery {
-  // While it could be injected from the global scope (see below), this larger
-  // feature (and tests of it) are made more explicit by directly taking a
-  // reference to a `FeatureFlags` instance.
   WebDevices({required FeatureFlags featureFlags}) : _featureFlags = featureFlags;
 
   final FeatureFlags _featureFlags;
@@ -296,24 +293,6 @@ class WebDevices extends PollingDeviceDiscovery {
   Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
     if (!_featureFlags.isWebEnabled) {
       return <Device>[];
-    }
-    /* ... omitted for brevity ... */
-  }
-}
-```
-
-Or by injecting the currently set flags using the `globals` pattern:
-
-```dart
-// Relative path depends on location in the tool.
-import '../src/features.dart';
-
-class CreateCommand extends FlutterCommand with CreateBase {
-  Future<int> _generateMethodChannelPlugin() async {
-    /* ... omitted for brevity ... */
-    final List<String> templates = <String>['plugin', 'plugin_shared'];
-    if ((isIos || isMacos) && featureFlags.isSwiftPackageManagerEnabled) {
-      templates.add('plugin_swift_package_manager');
     }
     /* ... omitted for brevity ... */
   }
@@ -362,7 +341,7 @@ You may see legacy cases where the flag is enabled or disabled globally using
 
 #### Tool unit tests
 
-For unit tests where the code directly takes a `FeatureFlags` instance:
+For unit tests, pass `TestFeatureFlags`:
 
 ```dart
 final WindowsWorkflow windowsWorkflow = WindowsWorkflow(
@@ -370,17 +349,6 @@ final WindowsWorkflow windowsWorkflow = WindowsWorkflow(
   featureFlags: TestFeatureFlags(isWindowsEnabled: true),
 );
 /* ... omitted for brevity ... */
-```
-
-Or, for larger test suites, or code that uses the global `featureFlags` getter:
-
-```dart
-testUsingContext('prints unicorns when enabled', () async {
-  // You'd write a real test, this is just an example.
-  expect(featureFlags.isUnicornEmojisEnabled, true);
-}, overrides: <Type, Generator>{
-  FeatureFlags: () => TestFeatureFlags(isUnicornEmojisEnabled: true),
-});
 ```
 
 #### Framework unit tests
