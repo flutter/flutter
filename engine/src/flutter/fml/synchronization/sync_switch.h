@@ -7,6 +7,7 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <shared_mutex>
 #include <vector>
 
@@ -28,6 +29,11 @@ class SyncSwitch {
     /// `new_is_disabled` not guaranteed to be the value of the SyncSwitch
     /// during execution, it should be checked with calls to
     /// SyncSwitch::Execute.
+    ///
+    /// Implementations may call `SyncSwitch::Execute`, but must not call
+    /// `SetSwitch`, `AddObserver`, or `RemoveObserver` on the same switch
+    /// (including transitively by dropping the last reference to an observer
+    /// whose destructor calls `RemoveObserver`).
     virtual void OnSyncSwitchUpdate(bool new_is_disabled) = 0;
   };
 
@@ -51,7 +57,9 @@ class SyncSwitch {
   /// Diverge execution between true and false values of the SyncSwitch.
   ///
   /// This can be called on any thread.  Note that attempting to call
-  /// |SetSwitch| inside of the handlers will result in a self deadlock.
+  /// |SetSwitch|, |AddObserver|, or |RemoveObserver| inside of the handlers
+  /// (including transitively by destroying an observer) can result in a
+  /// deadlock.
   ///
   /// @param[in]  handlers  Called for the correct value of the |SyncSwitch|.
   void Execute(const Handlers& handlers) const;
@@ -66,11 +74,13 @@ class SyncSwitch {
   /// Threadsafe.
   void AddObserver(Observer* observer) const;
 
-  /// Threadsafe.
+  /// Threadsafe. Blocks until any in-flight |OnSyncSwitchUpdate| notifications
+  /// complete, so the observer may be safely destroyed once this returns.
   void RemoveObserver(Observer* observer) const;
 
  private:
   mutable std::shared_mutex mutex_;
+  mutable std::mutex observers_mutex_;
   mutable std::vector<Observer*> observers_;
   bool value_;
 

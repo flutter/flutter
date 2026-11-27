@@ -33,6 +33,7 @@ void SyncSwitch::Execute(const SyncSwitch::Handlers& handlers) const {
 }
 
 void SyncSwitch::SetSwitch(bool value) {
+  std::lock_guard observers_lock(observers_mutex_);
   {
     std::unique_lock lock(mutex_);
     value_ = value;
@@ -43,7 +44,7 @@ void SyncSwitch::SetSwitch(bool value) {
 }
 
 void SyncSwitch::AddObserver(Observer* observer) const {
-  std::unique_lock lock(mutex_);
+  std::lock_guard lock(observers_mutex_);
   if (std::find(observers_.begin(), observers_.end(), observer) ==
       observers_.end()) {
     observers_.push_back(observer);
@@ -51,7 +52,7 @@ void SyncSwitch::AddObserver(Observer* observer) const {
 }
 
 void SyncSwitch::RemoveObserver(Observer* observer) const {
-  std::unique_lock lock(mutex_);
+  std::lock_guard lock(observers_mutex_);
   observers_.erase(std::remove(observers_.begin(), observers_.end(), observer),
                    observers_.end());
 }
