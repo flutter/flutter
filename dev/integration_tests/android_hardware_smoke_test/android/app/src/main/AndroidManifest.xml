@@ -25,6 +25,15 @@ found in the LICENSE file. -->
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".EngineTeardownActivity"
+            android:process=":engine_teardown"
+            android:taskAffinity=""
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
         <meta-data android:name="io.flutter.embedding.android.EnableImpeller" android:value="true" />
         <meta-data android:name="io.flutter.embedding.android.ImpellerBackend" android:value="vulkan" />
         <meta-data android:name="io.flutter.embedding.android.EnableHcpp" android:value="true" />

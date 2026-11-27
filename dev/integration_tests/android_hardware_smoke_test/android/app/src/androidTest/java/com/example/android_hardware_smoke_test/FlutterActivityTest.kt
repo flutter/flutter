@@ -6,7 +6,14 @@
 
 package com.example.android_hardware_smoke_test
 
+import android.app.ActivityManager
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Bitmap
+import android.os.Build
+import android.os.Process
 import android.util.Base64
 import android.util.Log
 import androidx.lifecycle.Lifecycle
@@ -23,6 +30,9 @@ import java.io.ByteArrayOutputStream
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 
 private class BlankScreenshotException(
     message: String
@@ -39,6 +49,10 @@ class FlutterActivityTest {
         private const val SCREENSHOT_CAPTURE_DELAY_MS = 200L
         private const val DIAGNOSTIC_WARNING_DELAY_SEC = 5L
         private const val TEST_TIMEOUT_SEC = 60L
+        private const val TEARDOWN_CYCLES = 5
+        private const val TEARDOWN_RENDER_TIMEOUT_SEC = 30L
+        private const val TEARDOWN_DESTROY_TIMEOUT_SEC = 15L
+        private const val TEARDOWN_PROCESS_SUFFIX = ":engine_teardown"
 
         // Keep in sync with _firstFatalGraphicsLogcatError in run_android_hardware_smoke_tests.dart.
         private val FATAL_GRAPHICS_ERROR_PATTERNS =
@@ -440,5 +454,134 @@ class FlutterActivityTest {
     @Test
     fun platformViewHybridCompositionPlusPlusTest() {
         templateTest(Constants.PLATFORM_VIEW_HYBRID_COMPOSITION_PLUS_PLUS_TEST)
+    }
+
+    private class TeardownCycleFutures {
+        val rendered = CompletableFuture<String?>()
+        val destroying = CompletableFuture<Unit>()
+        val destroyed = CompletableFuture<Unit>()
+    }
+
+    private fun registerTeardownReceiver(
+        context: Context,
+        expectedCycle: AtomicInteger,
+        currentFutures: AtomicReference<TeardownCycleFutures?>
+    ): BroadcastReceiver {
+        val receiver =
+            object : BroadcastReceiver() {
+                override fun onReceive(receiverContext: Context, intent: Intent) {
+                    val cycle = intent.getIntExtra(EngineTeardownActivity.EXTRA_CYCLE, -1)
+                    if (cycle != expectedCycle.get()) {
+                        return
+                    }
+                    val futures = currentFutures.get() ?: return
+                    when (intent.action) {
+                        EngineTeardownActivity.ACTION_RENDERED ->
+                            futures.rendered.complete(intent.getStringExtra(EngineTeardownActivity.EXTRA_ERROR))
+                        EngineTeardownActivity.ACTION_DESTROYING -> futures.destroying.complete(Unit)
+                        EngineTeardownActivity.ACTION_DESTROYED -> futures.destroyed.complete(Unit)
+                    }
+                }
+            }
+        val filter =
+            IntentFilter().apply {
+                addAction(EngineTeardownActivity.ACTION_RENDERED)
+                addAction(EngineTeardownActivity.ACTION_DESTROYING)
+                addAction(EngineTeardownActivity.ACTION_DESTROYED)
+            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            @Suppress("UnspecifiedRegisterReceiverFlag")
+            context.registerReceiver(receiver, filter)
+        }
+        return receiver
+    }
+
+    private fun killTeardownProcess(context: Context) {
+        val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+        val targetProcess = "${context.packageName}$TEARDOWN_PROCESS_SUFFIX"
+        activityManager
+            ?.runningAppProcesses
+            ?.filter { it.processName == targetProcess }
+            ?.forEach { proc ->
+                Log.i(TAG, "Killing lingering $targetProcess process (pid=${proc.pid})")
+                Process.killProcess(proc.pid)
+            }
+    }
+
+    private fun runTeardownCycle(
+        context: Context,
+        cycle: Int,
+        cycles: Int,
+        futures: TeardownCycleFutures
+    ) {
+        Log.i(TAG, "engineTeardownTest cycle $cycle/$cycles: launching EngineTeardownActivity")
+        val launchIntent =
+            Intent(context, EngineTeardownActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                putExtra(EngineTeardownActivity.EXTRA_CYCLE, cycle)
+            }
+        context.startActivity(launchIntent)
+
+        val renderError =
+            try {
+                futures.rendered.get(TEARDOWN_RENDER_TIMEOUT_SEC, TimeUnit.SECONDS)
+            } catch (e: TimeoutException) {
+                throw AssertionError(
+                    "engineTeardownTest cycle $cycle/$cycles timed out after " +
+                        "${TEARDOWN_RENDER_TIMEOUT_SEC}s waiting for initial frame render.",
+                    e
+                )
+            }
+        if (renderError != null) {
+            throw AssertionError("engineTeardownTest cycle $cycle failed to render: $renderError")
+        }
+
+        try {
+            futures.destroying.get(TEARDOWN_DESTROY_TIMEOUT_SEC, TimeUnit.SECONDS)
+        } catch (e: TimeoutException) {
+            throw AssertionError(
+                "engineTeardownTest cycle $cycle/$cycles timed out after " +
+                    "${TEARDOWN_DESTROY_TIMEOUT_SEC}s waiting for EngineTeardownActivity.onDestroy() to begin.",
+                e
+            )
+        }
+
+        try {
+            futures.destroyed.get(TEARDOWN_DESTROY_TIMEOUT_SEC, TimeUnit.SECONDS)
+        } catch (e: TimeoutException) {
+            throw AssertionError(
+                "engineTeardownTest cycle $cycle/$cycles timed out after " +
+                    "${TEARDOWN_DESTROY_TIMEOUT_SEC}s waiting for FlutterEngine teardown (possible vkDestroyDevice hang).",
+                e
+            )
+        }
+    }
+
+    @Test
+    fun engineTeardownTest() {
+        val targetContext = InstrumentationRegistry.getInstrumentation().targetContext
+
+        // Close the rule-managed MainActivity so the isolated :engine_teardown
+        // activity owns the screen during the stress loop.
+        rule.scenario.close()
+
+        val expectedCycle = AtomicInteger(0)
+        val currentFutures = AtomicReference<TeardownCycleFutures?>(null)
+        val receiver = registerTeardownReceiver(targetContext, expectedCycle, currentFutures)
+
+        try {
+            for (cycle in 1..TEARDOWN_CYCLES) {
+                val futures = TeardownCycleFutures()
+                currentFutures.set(futures)
+                expectedCycle.set(cycle)
+                runTeardownCycle(targetContext, cycle, TEARDOWN_CYCLES, futures)
+            }
+        } finally {
+            currentFutures.set(null)
+            targetContext.unregisterReceiver(receiver)
+            killTeardownProcess(targetContext)
+        }
     }
 }

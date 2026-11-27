@@ -54,6 +54,7 @@ object Constants {
     const val IMAGE_TEST = "imageTest"
     const val ADVANCED_BLEND_TEST = "advancedBlendTest"
     const val BACKDROP_FILTER_BLUR_TEST = "backdropFilterBlurTest"
+    const val ENGINE_TEARDOWN_TEST = "engineTeardownTest"
 
     const val PLATFORM_VIEW_PREFIX = "platformView"
     const val PLATFORM_VIEW_TEXTURE_LAYER_TEST = "${PLATFORM_VIEW_PREFIX}TextureLayerTest"
