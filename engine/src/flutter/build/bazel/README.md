@@ -177,9 +177,6 @@ sandbox contribute.
   inside it reruns the whole wrapped build. (The GPU test backends -- ANGLE,
   SwiftShader, the Vulkan loader and the validation layer -- are built from
   their converted GN files on Linux and on a Mac.)
-- The wrapped Dart SDK build compiles the VM without LTO in every build.
-  GN compiles it with the engine's LTO: full in the Android AOT and iOS
-  device builds, thin in the Linux profile and release builds.
 - Of GN's sanitizer builds only ASan has a Bazel counterpart, and there is
   no coverage build.
 - No IDE project is generated; the compile database is written on request.

@@ -202,6 +202,28 @@ config_setting(
     ],
 )
 
+# The build's LTO, for the wrapped build's GN arguments: on under
+# //engine/src/flutter/build/bazel:lto in the opt mode alone -- tools/gn's
+# enable_lto, and the condition of the toolchains' `lto` feature -- and
+# full or thin by :thin_lto (use_thin_lto).
+config_setting(
+    name = "full_lto",
+    flag_values = {
+        "//engine/src/flutter/build/bazel:lto": "True",
+        "//engine/src/flutter/build/bazel:thin_lto": "False",
+    },
+    values = {"compilation_mode": "opt"},
+)
+
+config_setting(
+    name = "thin_lto",
+    flag_values = {
+        "//engine/src/flutter/build/bazel:lto": "True",
+        "//engine/src/flutter/build/bazel:thin_lto": "True",
+    },
+    values = {"compilation_mode": "opt"},
+)
+
 # The Apple platforms, for the facades' frameworks and libraries (Dart's
 # runtime/bin/BUILD.gn and runtime/vm/BUILD.gn list them under `is_mac ||
 # is_ios`).
@@ -296,13 +318,26 @@ _GN_ARGS = {
     "dart_lib_export_symbols": "false",
     "dart_sdk_verification_hash": '"%s"' % _SDK_HASH,
     "dart_version_git_info": "false",
-    # No LTO in any build. In a build without it (tools/gn --no-lto: the
-    # debug builders, et's local_engine.json) that is GN's build. In a build
-    # with it -- full in the Android AOT and iOS device builds, thin in the
-    # Linux profile and release builds -- GN compiles the VM with the
-    # engine's LTO, and here the VM's objects stay machine code, which the
-    # engine's LTO link takes as they are.
-    "enable_lto": "false",
+} | select({
+    # The build's LTO, as tools/gn writes it: enable_lto unless --no-lto and
+    # never in an unoptimized build, use_thin_lto beside it (--thin-lto).
+    # GN compiles the VM with the engine's LTO -- full in the Android AOT
+    # and iOS device builds, thin in the Linux profile and release builds --
+    # and so does the wrapped build: the archives hold bitcode there, which
+    # the engine's link optimizes together with the engine's own, and
+    # gen_snapshot and the other executables are GN's LTO links. Without
+    # it (the debug builders, a presubmit's --no-lto, et's
+    # local_engine.json) the objects are machine code.
+    ":full_lto": {
+        "enable_lto": "true",
+        "use_thin_lto": "false",
+    },
+    ":thin_lto": {
+        "enable_lto": "true",
+        "use_thin_lto": "true",
+    },
+    "//conditions:default": {"enable_lto": "false"},
+}) | {
     "host_cpu": '"%s"' % HOST_CPU,
     "host_os": '"%s"' % HOST_OS,
     "is_clang": "true",

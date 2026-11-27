@@ -20,7 +20,12 @@ archive whole (a `cc_import` with `alwayslink`): the archives hold the
 objects of GN source sets, every one of which GN links into the binary that
 depends on them, and the VM relies on it (a `DEFINE_FLAG` registers its flag
 from a static initializer, in files that in some modes hold nothing else);
-no object being in two archives, none is linked twice.
+no object being in two archives, none is linked twice. In a build with LTO
+(`toolchains.md`) the wrapped build has it too -- `enable_lto` and
+`use_thin_lto` follow the build's two settings, as `tools/gn` writes them
+-- so the archives hold LLVM bitcode there, from the same clang as the
+engine's objects and archived by its `llvm-ar`, and `gen_snapshot` and the
+wrapped build's other executables are GN's LTO links.
 
 The inputs are the trees GN reads, declared as filegroups: `build_tree` in
 the overlays (`@dart`, `@icu`, `@zlib`, `@boringssl`, libc++ and the sysroot)

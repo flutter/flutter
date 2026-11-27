@@ -57,8 +57,10 @@ is GN's `enable_lto`, `-flto` on the compiles and links of an optimized
 build, and `--//engine/src/flutter/build/bazel:thin_lto` is GN's
 `use_thin_lto`, `-flto=thin` in its place (`tools/gn --thin-lto`, the flag
 of the Linux profile and release builders; it does nothing without `lto`).
-The wrapped GN builds set `enable_lto = false` in every build, so in a
-build with LTO the Dart VM's objects are not part of it, where GN's are.
+The wrapped Dart build takes the same two settings as its GN arguments
+(`enable_lto`, `use_thin_lto`), so in a build with LTO the VM is part of
+it, as in GN's: its archives hold bitcode, which the engine's links
+optimize together with the engine's own code.
 There is no component build: `.bazelrc` sets `--force_pic` and
 `--dynamic_mode=off`, as GN links everything statically with `-fPIC`.
 
