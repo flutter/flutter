@@ -140,20 +140,14 @@ struct Paint {
       Entity::RenderingMode rendering_mode) const;
 
   /// @brief Convert display list colors + stops into impeller colors and
-  ///        stops, taking care to ensure that the stops monotonically
-  ///        increase from 0.0 to 1.0.
+  ///        stops that start at 0.0 and end at 1.0.
   ///
-  /// The general process is:
-  /// * Ensure that the first gradient stop value is 0.0. If not, insert a
-  ///   new stop with a value of 0.0 and use the first gradient color as this
-  ///   new stops color.
-  /// * Ensure the last gradient stop value is 1.0. If not, insert a new stop
-  ///   with a value of 1.0 and use the last gradient color as this stops color.
-  /// * Clamp all gradient values between the values of 0.0 and 1.0.
-  /// * For all stop values, ensure that the values are monotonically
-  ///   increasing by clamping each value to a minimum of the previous stop
-  ///   value and itself. For example, with stop values of 0.0, 0.5, 0.4, 1.0,
-  ///   we would clamp such that the values were 0.0, 0.5, 0.5, 1.0.
+  /// The gradient's stops must already be in [0.0, 1.0] and non-decreasing,
+  /// which the `DlColorSource` gradient factories guarantee.
+  /// * If the first stop is not 0.0, a stop with the first color is inserted
+  ///   at 0.0.
+  /// * If the last stop is not 1.0, a stop with the last color is inserted at
+  ///   1.0.
   static void ConvertStops(const flutter::DlGradientColorSourceBase* gradient,
                            std::vector<Color>& colors,
                            std::vector<float>& stops);

@@ -39,7 +39,7 @@ using DlPath = flutter::DlPath;
 void Paint::ConvertStops(const flutter::DlGradientColorSourceBase* gradient,
                          std::vector<Color>& colors,
                          std::vector<float>& stops) {
-  FML_DCHECK(gradient->stop_count() >= 2)
+  FML_DCHECK(gradient->stop_count() >= 1)
       << "stop_count:" << gradient->stop_count();
 
   auto* dl_colors = gradient->colors();
@@ -50,14 +50,11 @@ void Paint::ConvertStops(const flutter::DlGradientColorSourceBase* gradient,
   }
   for (auto i = 0; i < gradient->stop_count(); i++) {
     colors.emplace_back(skia_conversions::ToColor(dl_colors[i]));
-    stops.emplace_back(std::clamp(dl_stops[i], 0.0f, 1.0f));
+    stops.emplace_back(dl_stops[i]);
   }
   if (dl_stops[gradient->stop_count() - 1] != 1.0) {
     colors.emplace_back(colors.back());
     stops.emplace_back(1.0);
-  }
-  for (auto i = 1; i < gradient->stop_count(); i++) {
-    stops[i] = std::clamp(stops[i], stops[i - 1], stops[i]);
   }
 }
 
