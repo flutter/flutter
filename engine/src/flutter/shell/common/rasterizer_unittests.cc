@@ -515,6 +515,67 @@ TEST(RasterizerTest, HeadlessCacheReplaceWithOutstandingOwner) {
   CheckHeadlessReplacement(true);
 }
 
+TEST(RasterizerTest,
+     HeadlessSnapshotOwnsContextAcrossCacheEvictionBeforeSubmit) {
+  using namespace impeller::testing;
+  NiceMock<MockDelegate> delegate;
+  Settings settings;
+  settings.enable_impeller = true;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+  auto backend = CreateMockVulkanContextWithShaders();
+  ASSERT_TRUE(backend);
+  Rasterizer rasterizer(delegate);
+  InstallSnapshotBackend(rasterizer, backend);
+  auto& selection = static_cast<SnapshotController::Delegate&>(rasterizer);
+  std::weak_ptr<impeller::AiksContext> selected =
+      selection.CreateHeadlessAiksContext();
+  ASSERT_FALSE(selected.expired());
+
+  auto command = backend->CreateCommandBuffer();
+  ASSERT_TRUE(command);
+  impeller::TextureDescriptor desc;
+  desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+  desc.size = {1, 1};
+  auto target = backend->GetResourceAllocator()->CreateTexture(desc);
+  ASSERT_TRUE(target);
+  auto tracker = backend->GetSubmissionTracker();
+  bool submitted = false;
+  auto provider = [&](impeller::AiksContext* context) -> sk_sp<DisplayList> {
+    auto& arena = context->GetContentContext().GetTransientsDataBuffer();
+    auto source = arena.EmplaceUniform(1.f);
+    auto backing = arena.GetCurrentBufferForTest();
+    EXPECT_EQ(source.GetBuffer(), backing.lock().get());
+    auto pass = command->CreateBlitPass();
+    if (!pass || !pass->AddCopy(std::move(source), target) ||
+        !pass->EncodeCommands()) {
+      return nullptr;
+    }
+    pass.reset();
+    const auto last = tracker->LatestSubmission();
+
+    // Drop the cache's reference after recording, before the queue has a
+    // submission to track. The snapshot itself must still own its context.
+    rasterizer.SetImpellerContext(nullptr);
+    EXPECT_EQ(tracker->LatestSubmission(), last);
+    EXPECT_FALSE(selected.expired());
+    EXPECT_FALSE(backing.expired());
+    if (selected.expired() || backing.expired()) {
+      return nullptr;
+    }
+    submitted = backend->GetCommandQueue()->Submit({command}).ok();
+    EXPECT_GT(tracker->LatestSubmission(), last);
+    DisplayListBuilder builder;
+    builder.DrawRect(DlRect::MakeLTRB(1, 1, 6, 6), DlPaint());
+    return builder.Build();
+  };
+  auto& snapshots = static_cast<SnapshotDelegate&>(rasterizer);
+  EXPECT_TRUE(snapshots.MakeImpellerSnapshotSync(
+      provider, {8, 8}, SnapshotPixelFormat::kDontCare));
+  EXPECT_TRUE(submitted);
+  EXPECT_TRUE(selected.expired());
+  EXPECT_EQ(selection.CreateHeadlessAiksContext(), nullptr);
+}
+
 TEST(RasterizerTest, HeadlessCacheRejectsShutdownBackend) {
   using namespace impeller::testing;
   NiceMock<MockDelegate> delegate;
