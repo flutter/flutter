@@ -11,17 +11,17 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../features.dart';
+import '../template.dart' show kAllCreatePlatforms;
 import 'extension_discovery.dart';
 import 'extension_manager.dart';
 
-const Duration _kRpcTimeout = Duration(seconds: 5);
-
-/// Manages querying project templates from extension isolates.
+/// Manages querying platform templates from extension isolates.
 ///
-/// This manager interacts with active [ExtensionConnection]s to discover custom
-/// project templates, resolve their directories on the host, and generate
-/// template parameters over the extension protocol RPC.
-base class ExtensionTemplateManager extends TemplateService {
+/// Interacts with active [ExtensionConnection]s to discover custom platform
+/// identifiers, resolve [ExtensionPlatformTemplate] descriptors and local
+/// template directories on the host, and generate platform template parameters
+/// over the extension protocol RPC.
+base class ExtensionTemplateManager {
   /// Creates an [ExtensionTemplateManager].
   ExtensionTemplateManager({
     required this._extensionManager,
@@ -37,145 +37,264 @@ base class ExtensionTemplateManager extends TemplateService {
   final String _flutterRoot;
   final Logger _logger;
 
-  List<ProjectTemplate>? _cachedTemplates;
+  Map<ExtensionTemplateType, Set<String>>? _cachedPlatforms;
+  Future<void>? _loadFuture;
+  final _platformOwners = <String, ExtensionConnection>{};
 
-  /// Retrieve the cached templates synchronously.
-  ///
-  /// Returns the list of project templates cached from the last [getProjectTemplates] call.
-  List<ProjectTemplate> get cachedTemplates => _cachedTemplates ?? const <ProjectTemplate>[];
+  /// Cached custom platform identifiers for [templateType].
+  Set<String> cachedPlatforms(ExtensionTemplateType templateType) =>
+      _cachedPlatforms?[templateType] ?? const <String>{};
 
-  /// Retrieve templates by routing `template.getProjectTemplates` to active tool extensions.
+  /// Retrieves custom platform identifiers for [templateType] by routing
+  /// `template.getSupportedPlatforms` to active tool extensions.
   ///
-  /// Results are cached after the first successful call.
-  Future<List<ProjectTemplate>> getProjectTemplates() async {
+  /// Results are cached after the first call.
+  Future<Set<String>> getSupportedPlatforms(ExtensionTemplateType templateType) async {
     if (!_featureFlags.isToolExtensionsEnabled) {
-      return const <ProjectTemplate>[];
+      return const <String>{};
     }
-    if (_cachedTemplates != null) {
-      return _cachedTemplates!;
-    }
+    await (_loadFuture ??= _loadSupportedPlatforms());
+    return cachedPlatforms(templateType);
+  }
 
+  Future<void> _loadSupportedPlatforms() async {
     await _extensionManager.ensureInitialized();
 
-    final templates = <ProjectTemplate>[];
-    final List<ExtensionConnection> connections = _extensionManager.connections
-        .where(
-          (ExtensionConnection c) =>
-              c.capabilities.services.contains(TemplateService.serviceNamespace),
-        )
-        .toList();
+    final connections = <ExtensionConnection>[
+      for (final ExtensionConnection connection in _extensionManager.connections)
+        if (connection.capabilities.services.contains(TemplateService.serviceNamespace)) connection,
+    ];
 
-    final List<List<ExtensionProjectTemplate>> results = await Future.wait(
+    final platformsByType = <ExtensionTemplateType, Set<String>>{
+      for (final ExtensionTemplateType type in ExtensionTemplateType.values) type: <String>{},
+    };
+
+    final List<(ExtensionConnection, Object?)> results = await Future.wait(
       connections.map((ExtensionConnection connection) async {
         try {
-          final Object? rpcResult = await connection
-              .sendRequest(TemplateService.getProjectTemplatesMethod)
-              .timeout(_kRpcTimeout);
-          return ExtensionProjectTemplate.listFromJson(rpcResult);
+          return (
+            connection,
+            await connection.sendRequest(TemplateService.getSupportedPlatformsMethod),
+          );
         } on ToolExtensionException catch (e) {
           _logger.printWarning('Extension "${connection.extensionName}": ${e.message}');
-          return const <ExtensionProjectTemplate>[];
+          return (connection, null);
         } on Object catch (e) {
           _logger.printTrace(
-            'Failed to get results from extension for ${TemplateService.getProjectTemplatesMethod}: $e',
+            'Failed to get supported platforms from extension "${connection.extensionName}": $e',
           );
-          return const <ExtensionProjectTemplate>[];
+          return (connection, null);
         }
       }),
     );
 
-    results.forEach(templates.addAll);
+    for (final (connection, rpcResult) in results) {
+      _collectSupportedPlatforms(
+        connection: connection,
+        rpcResult: rpcResult,
+        platformsByType: platformsByType,
+      );
+    }
 
-    _cachedTemplates = templates;
-    return templates;
+    _cachedPlatforms = <ExtensionTemplateType, Set<String>>{
+      for (final MapEntry(:key, :value) in platformsByType.entries)
+        key: Set<String>.unmodifiable(value),
+    };
   }
 
-  /// Resolves a template package URI to a local directory.
-  ///
-  /// Currently only supports 'package:flutter_tools/' and
-  /// 'package:flutter_tools_extension_linux_prototype/' URIs, resolving them
-  /// relative to the Flutter SDK root.
-  Directory resolveTemplateDirectory(String templatePath) {
-    if (templatePath.startsWith('package:flutter_tools/')) {
-      final String relativePath = templatePath.substring('package:flutter_tools/'.length);
-      final String absolutePath = _fileSystem.path.join(
-        _flutterRoot,
-        'packages',
-        'flutter_tools',
-        'lib',
-        relativePath,
-      );
-      return _fileSystem.directory(absolutePath);
+  void _collectSupportedPlatforms({
+    required ExtensionConnection connection,
+    required Object? rpcResult,
+    required Map<ExtensionTemplateType, Set<String>> platformsByType,
+  }) {
+    if (rpcResult is! Map<String, Object?>) {
+      return;
     }
-    // TODO(bkonyi): Resolve package URIs generically using package config or discovered paths.
-    if (templatePath.startsWith('package:flutter_tools_extension_linux_prototype/')) {
-      final String relativePath = templatePath.substring(
-        'package:flutter_tools_extension_linux_prototype/'.length,
+    for (final ExtensionTemplateType type in ExtensionTemplateType.values) {
+      final Object? rawList = rpcResult[type.name];
+      if (rawList is! List<Object?>) {
+        continue;
+      }
+      final Set<String> targetSet = platformsByType[type]!;
+      for (final Object? entry in rawList) {
+        if (entry is! String || entry.isEmpty) {
+          continue;
+        }
+        if (kAllCreatePlatforms.contains(entry)) {
+          _logger.printWarning(
+            'Extension "${connection.extensionName}" attempted to register ${type.name} '
+            'platform template "$entry", which conflicts with a built-in Flutter platform. '
+            'Ignoring extension template mapping.',
+          );
+          continue;
+        }
+        final ExtensionConnection? existingOwner = _platformOwners[entry];
+        if (existingOwner != null && existingOwner != connection) {
+          if (targetSet.contains(entry)) {
+            _logger.printWarning(
+              'Duplicate ${type.name} platform template "$entry" provided by extension '
+              '"${connection.extensionName}" (already registered by extension '
+              '"${existingOwner.extensionName}"). Ignoring subsequent template mapping.',
+            );
+          } else {
+            _logger.printWarning(
+              'Conflicting ${type.name} platform template "$entry" provided by extension '
+              '"${connection.extensionName}" (platform already registered by extension '
+              '"${existingOwner.extensionName}"). Ignoring subsequent template mapping.',
+            );
+          }
+        } else {
+          targetSet.add(entry);
+          _platformOwners[entry] = connection;
+        }
+      }
+    }
+  }
+
+  /// Resolves the [ExtensionPlatformTemplate] descriptor for [platform] and
+  /// [templateType] over RPC.
+  Future<ExtensionPlatformTemplate?> resolvePlatformTemplate({
+    required String platform,
+    required ExtensionTemplateType templateType,
+    required Map<String, Object?> toolParameters,
+  }) async {
+    if (!_featureFlags.isToolExtensionsEnabled) {
+      return null;
+    }
+
+    await (_loadFuture ??= _loadSupportedPlatforms());
+
+    final ExtensionConnection? owner = _platformOwners[platform];
+    if (owner == null || !cachedPlatforms(templateType).contains(platform)) {
+      return null;
+    }
+
+    final Object? result;
+    try {
+      result = await owner.sendRequest(
+        TemplateService.resolvePlatformTemplateMethod,
+        params: <String, Object?>{
+          TemplateService.platformParam: platform,
+          TemplateService.templateTypeParam: templateType.name,
+          TemplateService.toolParametersParam: toolParameters,
+        },
       );
-      final String absolutePath = _fileSystem.path.join(
+    } on ToolExtensionException catch (e) {
+      throwToolExit(e.message);
+    } on Object catch (e) {
+      throwToolExit(
+        'Failed to resolve platform template from extension "${owner.extensionName}" '
+        'for platform "$platform": $e',
+      );
+    }
+
+    if (result == null) {
+      return null;
+    }
+    if (result is! Map<String, Object?>) {
+      throwToolExit(
+        'Invalid platform template descriptor from extension "${owner.extensionName}" '
+        'for platform "$platform": expected Map<String, Object?>?, got ${result.runtimeType}.',
+      );
+    }
+    try {
+      return ExtensionPlatformTemplate.fromJson(result);
+    } on FormatException catch (e) {
+      throwToolExit(
+        'Invalid platform template descriptor from extension "${owner.extensionName}" '
+        'for platform "$platform": ${e.message}',
+      );
+    }
+  }
+
+  /// Resolves a [template]'s `package:` URI to a local directory.
+  ///
+  /// Currently only supports `package:flutter_tools/` and
+  /// `package:flutter_tools_extension_linux_prototype/` URIs, resolving them
+  /// relative to the Flutter SDK root.
+  Directory resolveTemplateDirectory(ExtensionPlatformTemplate template) {
+    final List<String> segments = template.templateUri.pathSegments;
+    final String packageName = segments.first;
+    // TODO(bkonyi): Resolve package URIs generically using package config or discovered paths.
+    final String packageLibPath = switch (packageName) {
+      'flutter_tools' => _fileSystem.path.join(_flutterRoot, 'packages', 'flutter_tools', 'lib'),
+      'flutter_tools_extension_linux_prototype' => _fileSystem.path.join(
         _flutterRoot,
         'packages',
         'flutter_tools',
         'packages',
         'flutter_tools_extension_linux_prototype',
         'lib',
-        relativePath,
+      ),
+      _ => throw ArgumentError.value(
+        template.templateUri,
+        'template',
+        'Unsupported template package: "$packageName".',
+      ),
+    };
+    final String resolvedPath = _fileSystem.path.normalize(
+      _fileSystem.path.joinAll(<String>[packageLibPath, ...segments.skip(1)]),
+    );
+    // Defense in depth; ExtensionPlatformTemplate already rejects traversal segments.
+    if (!_fileSystem.path.isWithin(packageLibPath, resolvedPath)) {
+      throw ArgumentError.value(
+        template.templateUri,
+        'template',
+        'Template URI escapes package lib directory: "${template.templateUri}".',
       );
-      return _fileSystem.directory(absolutePath);
     }
-    throw ArgumentError('Unsupported template path format: $templatePath');
+    return _fileSystem.directory(resolvedPath);
   }
 
-  /// Request template parameter generation over extension protocol RPC.
+  /// Requests platform template parameter generation over extension protocol RPC.
   ///
-  /// Delegates the parameter generation for [templateName] to the active tool
-  /// extension, passing the host's [toolParameters]. Falls back to returning
-  /// [toolParameters] unchanged if the extension fails or is not available.
-  Future<Map<String, Object?>> generateTemplateParameters(
-    String templateName,
-    Map<String, Object?> toolParameters,
-  ) async {
+  /// Delegates parameter generation for [platform] and [templateType] to the
+  /// active tool extension that provides platform support for [platform],
+  /// passing the host's [toolParameters]. Returns [toolParameters] unchanged if
+  /// tool extensions are disabled or no extension supports [platform] for
+  /// [templateType]. Throws a [ToolExit] if the extension fails or returns an
+  /// invalid response.
+  Future<Map<String, Object?>> generatePlatformTemplateParameters({
+    required String platform,
+    required ExtensionTemplateType templateType,
+    required Map<String, Object?> toolParameters,
+  }) async {
     if (!_featureFlags.isToolExtensionsEnabled) {
       return toolParameters;
     }
 
-    final List<ExtensionConnection> connections = _extensionManager.connections
-        .where(
-          (ExtensionConnection c) =>
-              c.capabilities.services.contains(TemplateService.serviceNamespace),
-        )
-        .toList();
+    await (_loadFuture ??= _loadSupportedPlatforms());
 
-    for (final connection in connections) {
-      try {
-        final Object? result = await connection
-            .sendRequest(
-              TemplateService.generateTemplateParametersMethod,
-              params: <String, Object?>{
-                'templateName': templateName,
-                'toolParameters': toolParameters,
-              },
-            )
-            .timeout(_kRpcTimeout);
-        if (result is Map) {
-          return result.cast<String, Object?>();
-        }
-      } on ToolExtensionException catch (e) {
-        throwToolExit(e.message);
-      } on Object catch (e) {
-        _logger.printTrace('Failed to generate template parameters from extension: $e');
-      }
+    final ExtensionConnection? owner = _platformOwners[platform];
+    if (owner == null || !cachedPlatforms(templateType).contains(platform)) {
+      return toolParameters;
     }
 
-    return toolParameters;
+    final Object? result;
+    try {
+      result = await owner.sendRequest(
+        TemplateService.generatePlatformTemplateParametersMethod,
+        params: <String, Object?>{
+          TemplateService.platformParam: platform,
+          TemplateService.templateTypeParam: templateType.name,
+          TemplateService.toolParametersParam: toolParameters,
+        },
+      );
+    } on ToolExtensionException catch (e) {
+      throwToolExit(e.message);
+    } on Object catch (e) {
+      throwToolExit(
+        'Failed to generate platform template parameters from extension '
+        '"${owner.extensionName}" for platform "$platform": $e',
+      );
+    }
+
+    if (result is! Map<String, Object?>) {
+      throwToolExit(
+        'Invalid platform template parameters from extension "${owner.extensionName}" '
+        'for platform "$platform": expected Map<String, Object?>, got ${result.runtimeType}.',
+      );
+    }
+    return result;
   }
-
-  @override
-  Set<ProjectTemplate> get projectTemplates => cachedTemplates.toSet();
-
-  @override
-  Set<String> get appPlatformTemplates => const <String>{};
-
-  @override
-  Set<String> get pluginPlatformTemplates => const <String>{};
 }

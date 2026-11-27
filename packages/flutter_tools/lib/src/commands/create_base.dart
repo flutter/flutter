@@ -18,7 +18,6 @@ import '../base/utils.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
-import '../experimental/templates.dart';
 import '../flutter_project_metadata.dart';
 import '../isolated/mustache_template.dart';
 import '../project.dart';
@@ -27,18 +26,6 @@ import '../template.dart';
 import '../version.dart';
 
 const _kAvailablePlatforms = <String>['ios', 'android', 'windows', 'linux', 'macos', 'web'];
-
-/// A list of all possible create platforms, even those that may not be enabled
-/// with the current config.
-const kAllCreatePlatforms = <String>[
-  'ios',
-  'android',
-  'windows',
-  'linux',
-  'macos',
-  'web',
-  'darwin',
-];
 
 const _kDefaultPlatformArgumentHelp =
     '(required) The platforms supported by this project. '
@@ -168,17 +155,11 @@ mixin CreateBase on FlutterCommand {
   /// Throws assertion if [projectDir] does not exist or empty.
   /// Returns null if no project type can be determined.
   @protected
-  ParsedFlutterTemplateType? determineTemplateType({
-    required ExtensionTemplateManager? extensionTemplateManager,
-  }) {
+  ParsedFlutterTemplateType? determineTemplateType() {
     assert(projectDir.existsSync() && projectDir.listSync().isNotEmpty);
     final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     final File metadataFile = fs.file(fs.path.join(projectDir.absolute.path, '.metadata'));
-    final projectMetadata = FlutterProjectMetadata(
-      metadataFile,
-      logger,
-      extensionTemplateManager: extensionTemplateManager,
-    );
+    final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     final ParsedFlutterTemplateType? projectType = projectMetadata.projectType;
     if (projectType != null) {
       return projectType;
@@ -590,11 +571,7 @@ mixin CreateBase on FlutterCommand {
       var migrateConfig = MigrateConfig();
       if (metadataFile.existsSync()) {
         try {
-          migrateConfig = FlutterProjectMetadata(
-            metadataFile,
-            logger,
-            extensionTemplateManager: null,
-          ).migrateConfig;
+          migrateConfig = FlutterProjectMetadata(metadataFile, logger).migrateConfig;
         } on Exception catch (error) {
           logger.printTrace('Failed to parse existing .metadata file: $error');
         }
@@ -606,7 +583,6 @@ mixin CreateBase on FlutterCommand {
         versionChannel: flutterVersion.getBranchName(), // may contain PII
         projectType: projectType,
         migrateConfig: migrateConfig,
-        extensionTemplateManager: null,
         logger: logger,
       );
       metadata.populate(

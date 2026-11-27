@@ -7,51 +7,43 @@ import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
 /// The template service for the Linux extension prototype.
 ///
-/// This service registers custom project templates for Linux,
-/// specifically the [LinuxProjectTemplate].
+/// This service registers custom platform templates for Linux.
 final class LinuxTemplateService extends TemplateService {
-  @override
-  Set<String> get appPlatformTemplates => const <String>{};
+  /// The CLI identifier for the custom Linux platform template.
+  static const String customLinuxPlatformName = 'custom_linux';
+
+  /// Package template URI for the custom Linux platform template files.
+  static final Uri customLinuxTemplateUri = Uri.parse(
+    'package:flutter_tools_extension_linux_prototype/templates/app/custom_linux.tmpl',
+  );
 
   @override
-  Set<String> get pluginPlatformTemplates => const <String>{};
-
-  @override
-  Set<ProjectTemplate> get projectTemplates => <ProjectTemplate>{LinuxProjectTemplate()};
-}
-
-/// The custom project template representing the 'custom-linux-app'.
-///
-/// This template defines the source files and dependencies for creating
-/// a new custom Linux application project.
-final class LinuxProjectTemplate extends ProjectTemplate {
-  @override
-  String get name => 'custom-linux-app';
-
-  @override
-  bool get hidden => false;
-
-  @override
-  Set<String> get templateDependencies => const <String>{'app'};
-
-  @override
-  Set<String> get templateSources => const <String>{
-    'pubspec.yaml.tmpl',
-    'lib/main.dart.tmpl',
-    '.custom_device_extension_info.copy.tmpl',
+  Set<String> supportedPlatforms(ExtensionTemplateType templateType) => switch (templateType) {
+    .app => const <String>{customLinuxPlatformName},
+    _ => const <String>{},
   };
 
   @override
-  String get templatePath =>
-      'package:flutter_tools_extension_linux_prototype/templates/custom-linux-app';
+  Future<ExtensionPlatformTemplate?> resolvePlatformTemplate({
+    required String platform,
+    required ExtensionTemplateType templateType,
+    required Map<String, Object?> toolParameters,
+  }) async => switch ((platform, templateType)) {
+    (customLinuxPlatformName, .app) => ExtensionPlatformTemplate(
+      templateUri: customLinuxTemplateUri,
+    ),
+    _ => null,
+  };
 
-  /// Generates template parameters for the project creation.
-  ///
-  /// For this prototype, it simply returns the input [toolParameters] unchanged.
   @override
-  Future<Map<String, Object?>> generateTemplateParameters(
-    Map<String, Object?> toolParameters,
-  ) async {
+  Future<Map<String, Object?>> generatePlatformTemplateParameters({
+    required String platform,
+    required ExtensionTemplateType templateType,
+    required Map<String, Object?> toolParameters,
+  }) async {
+    if (platform == customLinuxPlatformName && templateType == .app) {
+      return <String, Object?>{...toolParameters, 'customLinux': true};
+    }
     return toolParameters;
   }
 }

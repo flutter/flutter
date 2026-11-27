@@ -23,11 +23,7 @@ void main() {
   });
 
   test('project metadata fields are empty when file does not exist', () {
-    final projectMetadata = FlutterProjectMetadata(
-      metadataFile,
-      logger,
-      extensionTemplateManager: null,
-    );
+    final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     expect(projectMetadata.projectType, isNull);
     expect(projectMetadata.versionChannel, isNull);
     expect(projectMetadata.versionRevision, isNull);
@@ -37,11 +33,7 @@ void main() {
 
   test('project metadata fields are empty when file is empty', () {
     metadataFile.createSync();
-    final projectMetadata = FlutterProjectMetadata(
-      metadataFile,
-      logger,
-      extensionTemplateManager: null,
-    );
+    final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     expect(projectMetadata.projectType, isNull);
     expect(projectMetadata.versionChannel, isNull);
     expect(projectMetadata.versionRevision, isNull);
@@ -51,11 +43,7 @@ void main() {
 
   test('project metadata fields are empty when file is not valid yaml', () {
     metadataFile.writeAsStringSync(' channel: @something');
-    final projectMetadata = FlutterProjectMetadata(
-      metadataFile,
-      logger,
-      extensionTemplateManager: null,
-    );
+    final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     expect(projectMetadata.projectType, isNull);
     expect(projectMetadata.versionChannel, isNull);
     expect(projectMetadata.versionRevision, isNull);
@@ -70,11 +58,7 @@ void main() {
 version:
 project_type: plugin
       ''');
-    final projectMetadata = FlutterProjectMetadata(
-      metadataFile,
-      logger,
-      extensionTemplateManager: null,
-    );
+    final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     expect(projectMetadata.projectType, FlutterTemplateType.plugin);
     expect(projectMetadata.versionChannel, isNull);
     expect(projectMetadata.versionRevision, isNull);
@@ -92,11 +76,7 @@ project_type: plugin
 version: STRING INSTEAD OF MAP
 project_type: plugin
       ''');
-    final projectMetadata = FlutterProjectMetadata(
-      metadataFile,
-      logger,
-      extensionTemplateManager: null,
-    );
+    final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     expect(projectMetadata.projectType, FlutterTemplateType.plugin);
     expect(projectMetadata.versionChannel, isNull);
     expect(projectMetadata.versionRevision, isNull);
@@ -116,11 +96,7 @@ version:
   channel: stable
 project_type: {}
       ''');
-    final projectMetadata = FlutterProjectMetadata(
-      metadataFile,
-      logger,
-      extensionTemplateManager: null,
-    );
+    final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     expect(projectMetadata.projectType, isNull);
     expect(projectMetadata.versionChannel, 'stable');
     expect(projectMetadata.versionRevision, 'b59b226a49391949247e3d6122e34bb001049ae4');
@@ -149,11 +125,7 @@ migration:
   unmanaged_files:
     - 'file1'
       ''');
-    final projectMetadata = FlutterProjectMetadata(
-      metadataFile,
-      logger,
-      extensionTemplateManager: null,
-    );
+    final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     expect(projectMetadata.projectType, isNull);
     expect(
       projectMetadata.migrateConfig.platformConfigs[SupportedPlatform.root]?.createRevision,
@@ -194,11 +166,7 @@ migration:
 
   unmanaged_files: {}
       ''');
-    final projectMetadata = FlutterProjectMetadata(
-      metadataFile,
-      logger,
-      extensionTemplateManager: null,
-    );
+    final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     expect(projectMetadata.projectType, FlutterTemplateType.app);
     expect(
       projectMetadata.migrateConfig.platformConfigs[SupportedPlatform.root]?.createRevision,
@@ -242,11 +210,7 @@ migration:
   unmanaged_files:
     - 'file1'
       ''');
-    final projectMetadata = FlutterProjectMetadata(
-      metadataFile,
-      logger,
-      extensionTemplateManager: null,
-    );
+    final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     expect(projectMetadata.projectType, FlutterTemplateType.app);
     expect(
       projectMetadata.migrateConfig.platformConfigs[SupportedPlatform.root]?.createRevision,
@@ -276,51 +240,35 @@ migration:
   test('enabledValues does not contain packageFfi if native-assets not enabled', () {
     final flags = TestFeatureFlags();
     expect(
-      ParsedFlutterTemplateType.enabledValues(flags, extensionTemplateManager: null),
+      ParsedFlutterTemplateType.enabledValues(flags),
       isNot(contains(FlutterTemplateType.packageFfi)),
     );
-    expect(
-      ParsedFlutterTemplateType.enabledValues(flags, extensionTemplateManager: null),
-      contains(FlutterTemplateType.plugin),
-    );
+    expect(ParsedFlutterTemplateType.enabledValues(flags), contains(FlutterTemplateType.plugin));
   });
 
   test('enabledValues contains packageFfi if natives-assets enabled', () {
     final flags = TestFeatureFlags(isNativeAssetsEnabled: true);
     expect(
-      ParsedFlutterTemplateType.enabledValues(flags, extensionTemplateManager: null),
+      ParsedFlutterTemplateType.enabledValues(flags),
       contains(FlutterTemplateType.packageFfi),
     );
-    expect(
-      ParsedFlutterTemplateType.enabledValues(flags, extensionTemplateManager: null),
-      contains(FlutterTemplateType.plugin),
-    );
+    expect(ParsedFlutterTemplateType.enabledValues(flags), contains(FlutterTemplateType.plugin));
   });
 
-  test(
-    'projectType is null for unknown or custom template when extensionTemplateManager is null',
-    () {
-      metadataFile
-        ..createSync()
-        ..writeAsStringSync('''
+  test('projectType is null for unknown template', () {
+    metadataFile
+      ..createSync()
+      ..writeAsStringSync('''
 version:
   revision: b59b226a49391949247e3d6122e34bb001049ae4
   channel: stable
 project_type: custom-linux-app
       ''');
-      final projectMetadata = FlutterProjectMetadata(
-        metadataFile,
-        logger,
-        extensionTemplateManager: null,
-      );
-      expect(projectMetadata.projectType, isNull);
-    },
-  );
+    final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
+    expect(projectMetadata.projectType, isNull);
+  });
 
   test('ParsedFlutterTemplateType.fromCliName returns null when not found', () {
-    expect(
-      ParsedFlutterTemplateType.fromCliName('custom-template', extensionTemplateManager: null),
-      isNull,
-    );
+    expect(ParsedFlutterTemplateType.fromCliName('custom-template'), isNull);
   });
 }
