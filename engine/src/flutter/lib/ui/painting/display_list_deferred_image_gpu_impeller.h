@@ -44,6 +44,9 @@ class DlDeferredImageGPUImpeller final : public impeller::DlImageImpeller {
   std::shared_ptr<impeller::Texture> GetImpellerTexture(
       impeller::ContentContext& renderer) const override;
 
+  // |DlImageImpeller|
+  std::shared_ptr<impeller::Texture> GetResolvedTexture() const override;
+
   // |DlImage|
   flutter::DlColorSpace GetColorSpace() const override;
 

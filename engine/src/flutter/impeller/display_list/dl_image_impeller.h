@@ -28,6 +28,14 @@ class DlImageImpeller : public flutter::DlImage {
   virtual std::shared_ptr<Texture> GetImpellerTexture(
       ContentContext& renderer) const = 0;
 
+  /// The texture backing this image if it already exists, without rendering
+  /// anything, so it can be called without a renderer and on any thread.
+  /// Null when the image has no texture yet or needs a renderer to produce
+  /// one.
+  virtual std::shared_ptr<Texture> GetResolvedTexture() const {
+    return nullptr;
+  }
+
   std::shared_ptr<Texture> GetCachedTexture(ContentContext& renderer) const;
 
   static sk_sp<DlImageImpeller> Make(
@@ -51,6 +59,9 @@ class DlImageImpellerTexture final : public DlImageImpeller {
   // |DlImageImpeller|
   std::shared_ptr<Texture> GetImpellerTexture(
       ContentContext& renderer) const override;
+
+  // |DlImageImpeller|
+  std::shared_ptr<Texture> GetResolvedTexture() const override;
 
   flutter::DlColorSpace GetColorSpace() const override;
   bool isOpaque() const override;

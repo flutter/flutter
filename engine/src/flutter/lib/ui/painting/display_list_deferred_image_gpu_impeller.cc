@@ -56,6 +56,14 @@ DlDeferredImageGPUImpeller::GetImpellerTexture(
   return wrapper_->texture();
 }
 
+std::shared_ptr<impeller::Texture>
+DlDeferredImageGPUImpeller::GetResolvedTexture() const {
+  if (!wrapper_) {
+    return nullptr;
+  }
+  return wrapper_->texture();
+}
+
 // |DlImage|
 flutter::DlColorSpace DlDeferredImageGPUImpeller::GetColorSpace() const {
   if (!wrapper_) {

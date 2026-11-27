@@ -370,5 +370,37 @@ TEST_F(FlutterGpuPassLifecycleTest, CopiesMustFitTheSourceBuffer) {
       *buffer, 128, 0, *texture_, impeller::IRect::MakeXYWH(0, 0, 1, 1), 0, 0));
 }
 
+// Backends report kError themselves for some failed submissions before
+// returning failure. The completion must still run only once, since the Dart
+// callback wrapper is consumed by its first run.
+TEST(FlutterGpuCommandBufferTest, RunsCompletionOnceWhenTheBackendAlsoReports) {
+  auto context = std::make_shared<MockImpellerContext>();
+  auto impeller_command_buffer = std::make_shared<MockCommandBuffer>(context);
+  auto command_queue = std::make_shared<MockCommandQueue>();
+  auto command_buffer = fml::MakeRefCounted<CommandBuffer>(context);
+
+  std::vector<impeller::CommandBuffer::Status> statuses;
+
+  EXPECT_CALL(*context, CreateCommandBuffer)
+      .WillOnce(Return(impeller_command_buffer));
+  EXPECT_CALL(*context, GetCommandQueue).WillOnce(Return(command_queue));
+  EXPECT_CALL(*command_queue, Submit(_, _))
+      .WillOnce(DoAll(
+          [](const std::vector<std::shared_ptr<impeller::CommandBuffer>>&
+                 buffers,
+             const impeller::CommandQueue::CompletionCallback& callback) {
+            callback(impeller::CommandBuffer::Status::kError);
+          },
+          Return(absl::Status(absl::StatusCode::kInternal,
+                              "Command queue submit failed."))));
+
+  EXPECT_FALSE(command_buffer->Submit(
+      [&statuses](impeller::CommandBuffer::Status status) {
+        statuses.push_back(status);
+      }));
+  ASSERT_EQ(statuses.size(), 1u);
+  EXPECT_EQ(statuses[0], impeller::CommandBuffer::Status::kError);
+}
+
 }  // namespace
 }  // namespace flutter::gpu

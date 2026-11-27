@@ -503,6 +503,7 @@ def run_cc_tests(
       make_test('fml_unittests'),
       make_test('geometry_unittests'),
       make_test('gpu_surface_unittests'),
+      make_test('gpu_unittests'),
       make_test('no_dart_plugin_registrant_unittests'),
       make_test('runtime_unittests'),
       make_test('testing_unittests'),
