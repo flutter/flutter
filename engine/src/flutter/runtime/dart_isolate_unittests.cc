@@ -2,11 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <atomic>
+#include <memory>
+#include <mutex>
+#include <string>
+
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/runtime/dart_isolate.h"
+#include "flutter/runtime/dart_service_isolate.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/runtime/isolate_configuration.h"
@@ -404,6 +410,26 @@ TEST_F(DartIsolateTest, CanCreateServiceIsolate) {
 #endif
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   fml::AutoResetWaitableEvent service_isolate_latch;
+  struct ServerUriState {
+    fml::AutoResetWaitableEvent latch;
+    std::atomic<bool> armed{false};
+    std::mutex mutex;
+    std::string uri;
+  };
+  auto state = std::make_shared<ServerUriState>();
+  auto callback_handle = DartServiceIsolate::AddServerStatusCallback(
+      [state](const std::string& uri) {
+        if (!state->armed.load() || uri.empty()) {
+          return;
+        }
+        std::scoped_lock lock(state->mutex);
+        if (state->uri.empty()) {
+          state->uri = uri;
+          state->latch.Signal();
+        }
+      });
+  ASSERT_NE(callback_handle, 0);
+  state->armed.store(true);
   auto settings = CreateSettingsForFixture();
   settings.enable_vm_service = true;
   settings.vm_service_port = 0;
@@ -429,6 +455,12 @@ TEST_F(DartIsolateTest, CanCreateServiceIsolate) {
   ASSERT_TRUE(isolate);
   ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
   service_isolate_latch.Wait();
+  state->latch.Wait();
+  ASSERT_TRUE(DartServiceIsolate::RemoveServerStatusCallback(callback_handle));
+  {
+    std::scoped_lock lock(state->mutex);
+    ASSERT_EQ(state->uri.rfind("http://127.0.0.1:", 0), 0u);
+  }
 }
 
 TEST_F(DartIsolateTest,

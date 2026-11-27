@@ -11,6 +11,7 @@
 #include <set>
 #include <string>
 
+#include "flutter/fml/macros.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 
 namespace flutter {
@@ -27,8 +28,9 @@ class DartServiceIsolate {
   using CallbackHandle = ptrdiff_t;
 
   //----------------------------------------------------------------------------
-  /// A callback made by the Dart VM when the VM Service is ready. The argument
-  /// indicates the VM Service URI.
+  /// A callback made by the Dart VM when the VM Service state changes. The
+  /// argument indicates the VM Service URI, or an empty string if the server
+  /// has shut down.
   ///
   using DartVMServiceServerStateCallback =
       std::function<void(const std::string& vm_service_uri)>;
@@ -96,12 +98,19 @@ class DartServiceIsolate {
   static bool RemoveServerStatusCallback(CallbackHandle handle);
 
  private:
+  // Dart_ServiceServerStateCallback invoked by the Dart VM when the VM service
+  // server state changes.
+  static void OnServerStateChanged(const char* server_uri);
+
   // Native entries.
   static void NotifyServerState(Dart_NativeArguments args);
   static void Shutdown(Dart_NativeArguments args);
 
   static std::mutex callbacks_mutex_;
   static std::set<std::unique_ptr<DartVMServiceServerStateCallback>> callbacks_;
+
+  FML_FRIEND_TEST(DartServiceIsolateTest,
+                  NotifiesCallbacksOnServerStateChanged);
 };
 
 }  // namespace flutter

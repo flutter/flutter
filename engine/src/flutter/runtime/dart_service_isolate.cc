@@ -6,12 +6,13 @@
 
 #include <algorithm>
 #include <cstring>
+#include <vector>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/posix_wrappers.h"
 #include "flutter/runtime/embedder_resources.h"
 #include "third_party/dart/runtime/include/dart_api.h"
-#include "third_party/tonic/converter/dart_converter.h"
+#include "third_party/dart/runtime/include/dart_tools_api.h"
 #include "third_party/tonic/dart_library_natives.h"
 #include "third_party/tonic/logging/dart_error.h"
 
@@ -54,16 +55,8 @@ std::mutex DartServiceIsolate::callbacks_mutex_;
 std::set<std::unique_ptr<DartServiceIsolate::DartVMServiceServerStateCallback>>
     DartServiceIsolate::callbacks_;
 
-void DartServiceIsolate::NotifyServerState(Dart_NativeArguments args) {
-  Dart_Handle exception = nullptr;
-  std::string uri =
-      tonic::DartConverter<std::string>::FromArguments(args, 0, exception);
-
-  if (exception) {
-    return;
-  }
-
-  g_vm_service_uri = uri;
+void DartServiceIsolate::OnServerStateChanged(const char* server_uri) {
+  std::string uri = server_uri != nullptr ? server_uri : "";
 
   // Collect callbacks to fire in a separate collection and invoke them outside
   // the lock.
@@ -71,7 +64,9 @@ void DartServiceIsolate::NotifyServerState(Dart_NativeArguments args) {
       callbacks_to_fire;
   {
     std::scoped_lock lock(callbacks_mutex_);
-    for (auto& callback : callbacks_) {
+    g_vm_service_uri = uri;
+    callbacks_to_fire.reserve(callbacks_.size());
+    for (const auto& callback : callbacks_) {
       callbacks_to_fire.push_back(*callback.get());
     }
   }
@@ -79,6 +74,13 @@ void DartServiceIsolate::NotifyServerState(Dart_NativeArguments args) {
   for (const auto& callback_to_fire : callbacks_to_fire) {
     callback_to_fire(uri);
   }
+}
+
+void DartServiceIsolate::NotifyServerState(Dart_NativeArguments args) {
+  // NO-OP: server state notifications are delivered via
+  // Dart_SetServiceServerStateCallback. Keep this native entry until the Dart
+  // SDK removes VMServiceIO_NotifyServerState
+  // (https://github.com/dart-lang/sdk/issues/64161).
 }
 
 DartServiceIsolate::CallbackHandle DartServiceIsolate::AddServerStatusCallback(
@@ -93,13 +95,15 @@ DartServiceIsolate::CallbackHandle DartServiceIsolate::AddServerStatusCallback(
 
   auto handle = reinterpret_cast<CallbackHandle>(callback_pointer.get());
 
+  std::string uri;
   {
     std::scoped_lock lock(callbacks_mutex_);
     callbacks_.insert(std::move(callback_pointer));
+    uri = g_vm_service_uri;
   }
 
-  if (!g_vm_service_uri.empty()) {
-    callback(g_vm_service_uri);
+  if (!uri.empty()) {
+    callback(uri);
   }
 
   return handle;
@@ -203,6 +207,10 @@ bool DartServiceIsolate::Startup(const std::string& server_ip,
       SHUTDOWN_ON_ERROR(result);
     }
   }
+
+  // Register before the service isolate runs main() (registering after
+  // Dart_Initialize would race with async service isolate startup).
+  Dart_SetServiceServerStateCallback(OnServerStateChanged);
 
   return true;
 }
