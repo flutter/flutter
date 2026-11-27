@@ -83,10 +83,7 @@ class UnpackWindows extends Target {
     );
     final Depfile depfile = unpackDesktopArtifacts(
       fileSystem: environment.fileSystem,
-      artifacts: <String>[
-        ..._kWindowsArtifacts,
-        if (buildMode == BuildMode.profile) 'libvmservice_snapshot.dll',
-      ],
+      artifacts: _kWindowsArtifacts,
       engineSourcePath: engineSourcePath,
       outputDirectory: outputDirectory,
       clientSourcePaths: <String>[clientSourcePath],
@@ -141,19 +138,11 @@ abstract class BundleWindowsAssets extends Target {
       outputDirectory.createSync();
     }
 
-    // Only copy the kernel blob and vmservice in debug mode.
+    // Only copy the kernel blob in debug mode.
     if (buildMode == BuildMode.debug) {
       environment.buildDir
           .childFile('app.dill')
           .copySync(outputDirectory.childFile('kernel_blob.bin').path);
-
-      final String vmserviceDill = environment.artifacts.getArtifactPath(
-        Artifact.vmserviceKernelDill,
-        mode: BuildMode.debug,
-      );
-      environment.fileSystem
-          .file(vmserviceDill)
-          .copySync(outputDirectory.childFile('vmservice_snapshot.dill').path);
     }
     final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
     final Depfile depfile = await copyAssets(
@@ -246,14 +235,10 @@ class DebugBundleWindowsAssets extends BundleWindowsAssets {
   String get name => 'debug_bundle_${targetPlatform.getName()}_assets';
 
   @override
-  List<Source> get inputs => <Source>[
-    const Source.pattern('{BUILD_DIR}/app.dill'),
-    const Source.artifact(Artifact.vmserviceKernelDill, mode: BuildMode.debug),
-  ];
+  List<Source> get inputs => <Source>[const Source.pattern('{BUILD_DIR}/app.dill')];
 
   @override
   List<Source> get outputs => <Source>[
     const Source.pattern('{OUTPUT_DIR}/flutter_assets/kernel_blob.bin'),
-    const Source.pattern('{OUTPUT_DIR}/flutter_assets/vmservice_snapshot.dill'),
   ];
 }
