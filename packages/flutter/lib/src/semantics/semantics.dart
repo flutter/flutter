@@ -3550,12 +3550,52 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// {@macro flutter.semantics.SemanticsProperties.traversalParentIdentifier}
   Object? get traversalParentIdentifier => _traversalParentIdentifier;
   Object? _traversalParentIdentifier;
+  Set<Object>? _additionalTraversalParentIdentifiers;
 
   /// {@macro flutter.semantics.SemanticsProperties.traversalChildIdentifier}
   Object? get traversalChildIdentifier => _traversalChildIdentifier;
   Object? _traversalChildIdentifier;
 
-  bool get _isTraversalParent => _traversalParentIdentifier != null;
+  bool get _isTraversalParent {
+    if (_traversalParentIdentifier != null) {
+      return true;
+    }
+    if (!mergeAllDescendantsIntoThisNode) {
+      return false;
+    }
+    var hasDescendantParent = false;
+    _visitDescendants((SemanticsNode child) {
+      if (child._traversalParentIdentifier != null) {
+        hasDescendantParent = true;
+        return false;
+      }
+      return true;
+    });
+    return hasDescendantParent;
+  }
+
+  Set<Object> get _effectiveTraversalParentIdentifiers {
+    final ids = <Object>{};
+    if (_traversalParentIdentifier case final Object id?) {
+      ids.add(id);
+    }
+    if (_additionalTraversalParentIdentifiers case final Set<Object> extra?) {
+      ids.addAll(extra);
+    }
+    if (mergeAllDescendantsIntoThisNode) {
+      _visitDescendants((SemanticsNode child) {
+        if (child._traversalParentIdentifier case final Object id?) {
+          ids.add(id);
+        }
+        if (child._additionalTraversalParentIdentifiers case final Set<Object> extra?) {
+          ids.addAll(extra);
+        }
+        return true;
+      });
+    }
+    return ids;
+  }
+
   bool get _isTraversalChild => _traversalChildIdentifier != null;
 
   /// A textual description of this node.
@@ -3882,6 +3922,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
     _identifier = config.identifier;
     _traversalParentIdentifier = config.traversalParentIdentifier;
+    _additionalTraversalParentIdentifiers = config._additionalTraversalParentIdentifiers == null
+        ? null
+        : Set<Object>.of(config._additionalTraversalParentIdentifiers!);
     _traversalChildIdentifier = config.traversalChildIdentifier;
     _attributedLabel = config.attributedLabel;
     _attributedValue = config.attributedValue;
@@ -4270,18 +4313,25 @@ class SemanticsNode with DiagnosticableTreeMixin {
     if (!hasChildren || mergeAllDescendantsIntoThisNode) {
       if (_isTraversalParent && !kIsWeb) {
         // If the current node is a traversal parent node but it has no
-        // children in hit-test order, it means childrenIntraversalOrder will
+        // children in hit-test order, it means childrenInTraversalOrder will
         // only contain its traversalChildren in _traversalChildNodes map.
-        if (owner != null && owner!._traversalChildNodes.containsKey(traversalParentIdentifier)) {
-          final Set<SemanticsNode> traversalChildren =
-              owner!._traversalChildNodes[traversalParentIdentifier]!;
-          var index = 0;
-          childrenInTraversalOrder = Int32List(traversalChildren.length);
-          for (final node in traversalChildren) {
-            if (node.attached) {
-              childrenInTraversalOrder[index] = node.id;
-              index += 1;
+        final traversalChildren = <SemanticsNode>[];
+        if (owner != null) {
+          for (final Object parentId in _effectiveTraversalParentIdentifiers) {
+            final Set<SemanticsNode>? nodes = owner!._traversalChildNodes[parentId];
+            if (nodes != null) {
+              for (final SemanticsNode node in nodes) {
+                if (node.attached) {
+                  traversalChildren.add(node);
+                }
+              }
             }
+          }
+        }
+        if (traversalChildren.isNotEmpty) {
+          childrenInTraversalOrder = Int32List(traversalChildren.length);
+          for (var i = 0; i < traversalChildren.length; i += 1) {
+            childrenInTraversalOrder[i] = traversalChildren[i].id;
           }
         } else {
           childrenInTraversalOrder = _kEmptyChildList;
@@ -4418,25 +4468,26 @@ class SemanticsNode with DiagnosticableTreeMixin {
     // need to be grafted. To fix the traversal order, get the according traversal
     // children from _traversalChildNodes and add them to the children list
     // of this current node.
-    if (_isTraversalParent) {
-      final Set<SemanticsNode>? traversalChildren =
-          owner?._traversalChildNodes[traversalParentIdentifier!];
-      if (traversalChildren != null) {
-        // When traversal children are grafted from other branches, make sure
-        // these children are not ancestors of the traversal parent. Otherwise,
-        // it will cause infinite loop.
-        var currentNode = this;
-        while (currentNode.parent != null) {
-          currentNode = currentNode.parent!;
-          if (traversalChildren.contains(currentNode)) {
-            throw FlutterError(
-              'The traversalParent $id cannot be the child of the traversalChild ${currentNode.id} in hit-test order',
-            );
+    if (_isTraversalParent && owner != null) {
+      for (final Object parentId in _effectiveTraversalParentIdentifiers) {
+        final Set<SemanticsNode>? traversalChildren = owner!._traversalChildNodes[parentId];
+        if (traversalChildren != null) {
+          // When traversal children are grafted from other branches, make sure
+          // these children are not ancestors of the traversal parent. Otherwise,
+          // it will cause infinite loop.
+          var currentNode = this;
+          while (currentNode.parent != null) {
+            currentNode = currentNode.parent!;
+            if (traversalChildren.contains(currentNode)) {
+              throw FlutterError(
+                'The traversalParent $id cannot be the child of the traversalChild ${currentNode.id} in hit-test order',
+              );
+            }
           }
-        }
-        for (final SemanticsNode node in traversalChildren) {
-          if (node.attached) {
-            updatedChildren.add(node);
+          for (final SemanticsNode node in traversalChildren) {
+            if (node.attached) {
+              updatedChildren.add(node);
+            }
           }
         }
       }
@@ -5190,19 +5241,14 @@ class SemanticsOwner extends ChangeNotifier {
           }
         }
 
-        // Track whether this node was already registered as the traversal
-        // parent for its current identifier before refreshing the map.
-        final bool hadSameTraversalParent =
-            node._isTraversalParent &&
-            _traversalParentNodes[node.traversalParentIdentifier!] == node;
-
-        // Clean up the dirty entry in owner._traversalParentNodes map because it
-        // will be updated later. If the node's traversalParentIdentifier changed,
-        // mark the hit-test parents of its former traversal children dirty so
-        // they can update childrenInHitTestOrder.
+        final Set<Object> effectiveParentIds = node.isMergedIntoParent
+            ? const <Object>{}
+            : node._effectiveTraversalParentIdentifiers;
+        final previousParentIds = <Object>{};
         _traversalParentNodes.removeWhere((Object key, SemanticsNode oldNode) {
           if (node == oldNode) {
-            if (!kIsWeb && key != node.traversalParentIdentifier) {
+            previousParentIds.add(key);
+            if (!kIsWeb && !effectiveParentIds.contains(key)) {
               if (_traversalChildNodes[key] case final Set<SemanticsNode> childNodes?) {
                 for (final childNode in childNodes) {
                   if (childNode.parent != null && !visitedNodes.contains(childNode.parent)) {
@@ -5220,20 +5266,23 @@ class SemanticsOwner extends ChangeNotifier {
           childSet.removeWhere((SemanticsNode oldNode) => node == oldNode);
         }
         _traversalChildNodes.removeWhere((Object key, Set<SemanticsNode> value) => value.isEmpty);
-        final bool isTraversalParent = node._isTraversalParent;
+        final bool isTraversalParent = effectiveParentIds.isNotEmpty;
         final bool isTraversalChild = node._isTraversalChild;
 
         // If the node is a traversal parent, then add it to the
         // _traversalParentNodes map for later grafting. Similarly, add the node
         // to the _traversalChildNodes map if it is a traversal child.
         if (isTraversalParent) {
-          assert(
-            !_traversalParentNodes.containsKey(node._traversalParentIdentifier) ||
-                _traversalParentNodes[node.traversalParentIdentifier!] == node,
-            'The traversalParentIdentifier must be unique. No two semantics nodes can share the same traversalParentIdentifier.',
-          );
-          _traversalParentNodes[node.traversalParentIdentifier!] = node;
-        } else if (isTraversalChild) {
+          for (final parentId in effectiveParentIds) {
+            assert(
+              !_traversalParentNodes.containsKey(parentId) ||
+                  _traversalParentNodes[parentId] == node,
+              'The traversalParentIdentifier must be unique. No two semantics nodes can share the same traversalParentIdentifier.',
+            );
+            _traversalParentNodes[parentId] = node;
+          }
+        }
+        if (isTraversalChild) {
           _traversalChildNodes
               .putIfAbsent(node.traversalChildIdentifier!, () => <SemanticsNode>{})
               .add(node);
@@ -5252,32 +5301,34 @@ class SemanticsOwner extends ChangeNotifier {
               parentNode._markDirty();
             }
           }
-          if (node._isTraversalParent) {
+          if (isTraversalParent) {
             // Mark attached traversal children dirty so they recompute their
-            // traversal transform. If this traversal parent was newly registered,
-            // also mark each traversal child's hit-test parent and unmerged
-            // descendants dirty so previously skipped nodes are included in the
-            // semantics update.
-            final Set<SemanticsNode>? childNodes =
-                _traversalChildNodes[node.traversalParentIdentifier];
-            if (childNodes != null) {
-              for (final SemanticsNode childNode in childNodes) {
-                if (!childNode.attached) {
-                  continue;
-                }
-                if (!visitedNodes.contains(childNode)) {
-                  childNode._markDirty();
-                }
-                if (!hadSameTraversalParent) {
-                  if (childNode.parent != null && !visitedNodes.contains(childNode.parent)) {
-                    childNode.parent!._markDirty();
+            // traversal transform. If a traversal parent identifier was newly
+            // registered, also mark each traversal child's hit-test parent and
+            // unmerged descendants dirty so previously skipped nodes are included
+            // in the semantics update.
+            for (final parentId in effectiveParentIds) {
+              final bool hadSameTraversalParent = previousParentIds.contains(parentId);
+              final Set<SemanticsNode>? childNodes = _traversalChildNodes[parentId];
+              if (childNodes != null) {
+                for (final SemanticsNode childNode in childNodes) {
+                  if (!childNode.attached) {
+                    continue;
                   }
-                  childNode._visitDescendants((SemanticsNode descendant) {
-                    if (!descendant.isMergedIntoParent && !visitedNodes.contains(descendant)) {
-                      descendant._markDirty();
+                  if (!visitedNodes.contains(childNode)) {
+                    childNode._markDirty();
+                  }
+                  if (!hadSameTraversalParent) {
+                    if (childNode.parent != null && !visitedNodes.contains(childNode.parent)) {
+                      childNode.parent!._markDirty();
                     }
-                    return true;
-                  });
+                    childNode._visitDescendants((SemanticsNode descendant) {
+                      if (!descendant.isMergedIntoParent && !visitedNodes.contains(descendant)) {
+                        descendant._markDirty();
+                      }
+                      return true;
+                    });
+                  }
                 }
               }
             }
@@ -5312,7 +5363,7 @@ class SemanticsOwner extends ChangeNotifier {
           // missing traversal parent, as they would be orphans in the update.
           node._dirty = false;
           if (node._isTraversalParent) {
-            _traversalParentNodes.remove(node.traversalParentIdentifier);
+            node._effectiveTraversalParentIdentifiers.forEach(_traversalParentNodes.remove);
           }
         } else {
           node._addToUpdate(builder, customSemanticsActionIds);
@@ -6213,6 +6264,7 @@ class SemanticsConfiguration {
   /// {@macro flutter.semantics.SemanticsProperties.traversalParentIdentifier}
   Object? get traversalParentIdentifier => _traversalParentIdentifier;
   Object? _traversalParentIdentifier;
+  Set<Object>? _additionalTraversalParentIdentifiers;
   set traversalParentIdentifier(Object? value) {
     if (value == traversalParentIdentifier) {
       return;
@@ -7091,7 +7143,16 @@ class SemanticsConfiguration {
     // A node cannot have both `_traversalChildIdentifier` and
     // `_traversalParentIdentifier` not null.
     if (_traversalChildIdentifier == null) {
-      _traversalParentIdentifier ??= child._traversalParentIdentifier;
+      if (child._traversalParentIdentifier case final Object id?) {
+        if (_traversalParentIdentifier == null) {
+          _traversalParentIdentifier = id;
+        } else if (_traversalParentIdentifier != id) {
+          (_additionalTraversalParentIdentifiers ??= <Object>{}).add(id);
+        }
+      }
+      if (child._additionalTraversalParentIdentifiers case final Set<Object> extra?) {
+        (_additionalTraversalParentIdentifiers ??= <Object>{}).addAll(extra);
+      }
     }
     _traversalChildIdentifier ??= child._traversalChildIdentifier;
 
@@ -7176,6 +7237,9 @@ class SemanticsConfiguration {
       .._sortKey = _sortKey
       .._identifier = _identifier
       .._traversalParentIdentifier = _traversalParentIdentifier
+      .._additionalTraversalParentIdentifiers = _additionalTraversalParentIdentifiers == null
+          ? null
+          : Set<Object>.of(_additionalTraversalParentIdentifiers!)
       .._traversalChildIdentifier = _traversalChildIdentifier
       .._attributedLabel = _attributedLabel
       .._attributedIncreasedValue = _attributedIncreasedValue
