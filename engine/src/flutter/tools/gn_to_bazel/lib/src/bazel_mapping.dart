@@ -1565,6 +1565,13 @@ final Map<String, String> conditionSettings = Map<String, String>.unmodifiable(<
   // extra_toolchain_args in //flutter/third_party/canvaskit/BUILD.gn):
   // build settings a variant's platform sets (build/bazel/web; research/12).
   for (final String argument in webVariantArguments) argument: '$_webSettings:${argument}_on',
+  // skia.gni's `skia_enable_fontmgr_custom_directory = skia_use_freetype &&
+  // !is_canvaskit`, which tools/gn passes as false for the web build and no
+  // wasm toolchain sets again: the group of the same package that holds
+  // where Skia has FreeType and the build is not the web's. Linux and
+  // Android; not a Mac or iOS, where skia_use_freetype's own setting is off
+  // whatever its flag says.
+  'skia_enable_fontmgr_custom_directory': '$_webSettings:skia_enable_fontmgr_custom_directory_on',
   // runtime_args.gni's dart_dynamic_modules (tools/gn
   // --gn-args=dart_dynamic_modules=true, the `_ddm` builders): the Dart
   // wrap's flag, which the archives' names also read.
@@ -1625,6 +1632,7 @@ final Map<String, String> negatedSettings = Map<String, String>.unmodifiable(<St
   'is_host_toolchain': '//engine/src/flutter/build/bazel:not_host_toolchain',
   'use_flutter_cxx': '//engine/src/flutter/build/bazel:not_flutter_cxx',
   for (final String argument in webVariantArguments) argument: '$_webSettings:${argument}_off',
+  'skia_enable_fontmgr_custom_directory': '$_webSettings:skia_enable_fontmgr_custom_directory_off',
   'enable_backtrace': '//engine/src/flutter/common:backtrace_disabled',
   // Not a Slimpeller build: Skia's Ganesh backend (skia_enable_ganesh), in
   // conjunctions with Skia's other arguments.
@@ -2022,6 +2030,9 @@ const Set<String> knownExternalVariables = <String>{
   // skia.gni's arguments the wasm toolchains set per variant: the web
   // build's settings (webVariantArguments, conditionSettings).
   ...webVariantArguments,
+  // ... and the one skia.gni derives from skia_use_freetype that is a
+  // setting too (conditionSettings).
+  'skia_enable_fontmgr_custom_directory',
   // $dart_src/runtime/runtime_args.gni (known through zip_bundle.gni): the
   // Dart wrap's flags (conditionSettings).
   'dart_dynamic_modules',
@@ -3329,7 +3340,6 @@ const Map<String, ({bool host, bool web, bool mac, bool ios})> perTargetOsArgume
       'skia_use_libwebp_encode': (host: true, web: false, mac: true, ios: true),
       'skia_use_no_webp_encode': (host: false, web: true, mac: false, ios: false),
       'skia_enable_skottie': (host: true, web: false, mac: true, ios: true),
-      'skia_enable_fontmgr_custom_directory': (host: true, web: false, mac: true, ios: true),
       // CanvasKit's WebGL binding (canvaskit.gni's default is off; tools/gn
       // turns it on for the web), read by the module's file alone.
       'skia_canvaskit_enable_webgl': (host: false, web: true, mac: false, ios: false),
@@ -3610,7 +3620,6 @@ Assumptions linuxHostAssumptions() {
     'skia_use_libwebp_encode': GnBoolValue(true),
     'skia_use_no_webp_encode': GnBoolValue(false),
     'skia_enable_skottie': GnBoolValue(true),
-    'skia_enable_fontmgr_custom_directory': GnBoolValue(true),
     'skia_canvaskit_enable_webgl': GnBoolValue(false),
     'skia_icu_bidi_third_party_dir': GnStringValue('//flutter/third_party/canvaskit/icu_bidi'),
   });

@@ -13,10 +13,13 @@
 # generated files carry select()s on them where GN reads the arguments. The
 # defaults are the host build's values (tools/gn's host block and skia.gni's
 # defaults on Linux), so that nothing changes for a build that names none of
-# the variants. The two arguments that are compiler flags in GN
+# the variants; where skia.gni's own default differs on another OS the
+# setting says so (_OFF_ON_APPLE below). The two arguments that are compiler
+# flags in GN
 # (wasm_use_workers, wasm_prioritize_size) are features of the emscripten
 # toolchain instead, and enable_lto its `lto` feature.
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
 
 package(default_visibility = ["//visibility:public"])
@@ -58,6 +61,24 @@ _SETTINGS = [
     for name, default in _SETTINGS
 ]
 
+# The arguments among them that skia.gni derives from the OS before any
+# toolchain speaks: `skia_use_freetype = is_android || is_linux ||
+# is_canvaskit`, and the two custom font managers that follow it
+# (`skia_enable_fontmgr_custom_embedded = skia_use_freetype`,
+# `skia_enable_fontmgr_custom_empty = skia_use_freetype && !is_canvaskit`).
+# On a Mac and on iOS Skia has CoreText and no FreeType, and GN's builds
+# there compile none of it. A flag cannot carry that: its default is the
+# Linux host's, which is Android's too, and a Mac's own tools are built for
+# a Mac under every target. So for these three, `_on` holds only off the
+# Apple platforms, and `_off` on them as well as where the flag is off.
+# (Windows, where skia.gni gives no FreeType either, and Fuchsia, whose
+# values //flutter/skia/BUILD.gn sets itself, have no Bazel platform yet.)
+_OFF_ON_APPLE = [
+    "skia_use_freetype",
+    "skia_enable_fontmgr_custom_embedded",
+    "skia_enable_fontmgr_custom_empty",
+]
+
 # `<name>_on` holds where the argument is true, `<name>_off` where it is
 # false (the converter's select() keys, and the members of the
 # config_setting_groups it builds for conjunctions and disjunctions).
@@ -67,6 +88,7 @@ _SETTINGS = [
         flag_values = {":" + name: "True"},
     )
     for name, _ in _SETTINGS
+    if name not in _OFF_ON_APPLE
 ]
 
 [
@@ -75,7 +97,69 @@ _SETTINGS = [
         flag_values = {":" + name: "False"},
     )
     for name, _ in _SETTINGS
+    if name not in _OFF_ON_APPLE
 ]
+
+[
+    config_setting(
+        name = name + "_flag_on",
+        flag_values = {":" + name: "True"},
+    )
+    for name in _OFF_ON_APPLE
+]
+
+[
+    config_setting(
+        name = name + "_flag_off",
+        flag_values = {":" + name: "False"},
+    )
+    for name in _OFF_ON_APPLE
+]
+
+[
+    selects.config_setting_group(
+        name = name + "_on",
+        match_all = [
+            ":" + name + "_flag_on",
+            "//engine/src/flutter/build/bazel:not_mac",
+            "//engine/src/flutter/build/bazel:not_ios",
+        ],
+    )
+    for name in _OFF_ON_APPLE
+]
+
+[
+    selects.config_setting_group(
+        name = name + "_off",
+        match_any = [
+            ":" + name + "_flag_off",
+            "@platforms//os:macos",
+            "@platforms//os:ios",
+        ],
+    )
+    for name in _OFF_ON_APPLE
+]
+
+# skia.gni's `skia_enable_fontmgr_custom_directory = skia_use_freetype &&
+# !is_canvaskit`, which tools/gn passes as false for the web build and no
+# wasm toolchain sets again, so it has no flag: it holds where Skia has
+# FreeType and the build is not the web's. Linux and Android, then; not a
+# Mac or iOS (above).
+selects.config_setting_group(
+    name = "skia_enable_fontmgr_custom_directory_on",
+    match_all = [
+        ":skia_use_freetype_on",
+        "//engine/src/flutter/build/bazel:not_wasm",
+    ],
+)
+
+selects.config_setting_group(
+    name = "skia_enable_fontmgr_custom_directory_off",
+    match_any = [
+        ":skia_use_freetype_off",
+        "@platforms//os:emscripten",
+    ],
+)
 
 # Which of the platforms a wasm module is built for. GN builds a wasm_lib in
 # the toolchain its dependent names on the dependency edge

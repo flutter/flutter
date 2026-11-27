@@ -1635,6 +1635,41 @@ selects.config_setting_group(
         );
         expect(output, isNot(contains('SK_GRAPHITE')));
       });
+
+      test("Skia's directory font manager follows Skia's FreeType, as a setting", () async {
+        // skia.gni: skia_enable_fontmgr_custom_directory = skia_use_freetype
+        // && !is_canvaskit, and skia_use_freetype = is_android || is_linux ||
+        // is_canvaskit; tools/gn passes it false for the web build. So it
+        // holds on Linux and on Android, not on the web, and not on a Mac or
+        // on iOS, where Skia has CoreText and no FreeType. No scope fixes it:
+        // it is the group of build/bazel/web that says exactly that, beside
+        // skia_use_freetype's own settings, which are off on the Apple
+        // platforms. Until 11-23 it was a formula over the OS that held on a
+        // Mac and on iOS too, and Bazel's builds there compiled the font
+        // manager that GN's leave out.
+        const name = 'skia_enable_fontmgr_custom_directory';
+        const web = '//engine/src/flutter/build/bazel/web';
+        expect(generationAssumptions()[name], isNull);
+        expect(linuxHostAssumptions()[name], isNull);
+        expect(perTargetOsArguments.containsKey(name), isFalse);
+        expect(knownExternalVariables, contains(name));
+        expect(conditionSettings[name], '$web:${name}_on');
+        expect(negatedSettings[name], '$web:${name}_off');
+
+        // Read in a disjunction, as Skia's fontmgr_custom reads it, it is
+        // one key beside the others.
+        final String output = await convert('''
+source_set("x") {
+  sources = [ "a.cc" ]
+  defines = []
+  if (skia_enable_fontmgr_custom_directory || skia_enable_fontmgr_custom_embedded) {
+    defines += [ "CUSTOM" ]
+  }
+}
+''', assumptions: generationAssumptions());
+        expect(output, contains('"$web:${name}_on": ['));
+        expect(output, contains('"$web:skia_enable_fontmgr_custom_embedded_on": ['));
+      });
     });
 
     group('imports, arguments and templates', () {
