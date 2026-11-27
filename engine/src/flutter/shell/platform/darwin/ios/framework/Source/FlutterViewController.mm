@@ -7,6 +7,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 
 #import <os/log.h>
+#include <cmath>
 #include <memory>
 
 #include "flutter/common/constants.h"
@@ -1455,10 +1456,17 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
             @"rendering failure. Please ensure your top-level Flutter widget has explicit "
             @"constraints (e.g., using SizedBox or Container)."];
   }
-  _viewportMetrics.physical_min_width_constraint = minWidth * _viewportMetrics.device_pixel_ratio;
-  _viewportMetrics.physical_max_width_constraint = maxWidth * _viewportMetrics.device_pixel_ratio;
-  _viewportMetrics.physical_min_height_constraint = minHeight * _viewportMetrics.device_pixel_ratio;
-  _viewportMetrics.physical_max_height_constraint = maxHeight * _viewportMetrics.device_pixel_ratio;
+  // Round to whole physical pixels to match setViewportMetricsSize. The layer tree size is an
+  // integer, so a fractional tight constraint can never be met and every frame is discarded.
+  // See: https://github.com/flutter/flutter/issues/195954
+  _viewportMetrics.physical_min_width_constraint =
+      std::round(minWidth * _viewportMetrics.device_pixel_ratio);
+  _viewportMetrics.physical_max_width_constraint =
+      std::round(maxWidth * _viewportMetrics.device_pixel_ratio);
+  _viewportMetrics.physical_min_height_constraint =
+      std::round(minHeight * _viewportMetrics.device_pixel_ratio);
+  _viewportMetrics.physical_max_height_constraint =
+      std::round(maxHeight * _viewportMetrics.device_pixel_ratio);
 }
 
 - (void)viewSafeAreaInsetsDidChange {
@@ -1475,8 +1483,11 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   }
 
   CGFloat scale = screen.scale;
-  _viewportMetrics.physical_width = self.view.bounds.size.width * scale;
-  _viewportMetrics.physical_height = self.view.bounds.size.height * scale;
+  // Round to whole physical pixels. The layer tree size is an integer, so a fractional size here
+  // would fail the size check in the shell and every frame would be discarded.
+  // See: https://github.com/flutter/flutter/issues/195954
+  _viewportMetrics.physical_width = std::round(self.view.bounds.size.width * scale);
+  _viewportMetrics.physical_height = std::round(self.view.bounds.size.height * scale);
   // TODO(louisehsu): update for https://github.com/flutter/flutter/issues/169147
   _viewportMetrics.physical_min_width_constraint = _viewportMetrics.physical_width;
   _viewportMetrics.physical_max_width_constraint = _viewportMetrics.physical_width;
