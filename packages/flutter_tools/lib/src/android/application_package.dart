@@ -268,7 +268,7 @@ abstract class _Entry {
 }
 
 class _Element extends _Entry {
-  _Element._(this.name, _Element? parent, int level) : super(parent, level);
+  _Element._(this.name, super.parent, super.level);
 
   factory _Element.fromLine(String line, _Element? parent) {
     //      E: application (line=29)
@@ -307,7 +307,7 @@ class _Element extends _Entry {
 }
 
 class _Attribute extends _Entry {
-  const _Attribute._(this.key, this.value, _Element? parent, int level) : super(parent, level);
+  const _Attribute._(this.key, this.value, super.parent, super.level);
 
   factory _Attribute.fromLine(String line, _Element parent) {
     //     A: android:label(0x01010001)="hello_world" (Raw: "hello_world")

@@ -222,19 +222,19 @@ class ApplicationSample extends CodeSample {
   ApplicationSample({
     List<SourceLine> input = const <SourceLine>[],
     required List<String> args,
-    required int index,
-    required SourceLine lineProto,
+    required super.index,
+    required super.lineProto,
   }) : assert(args.isNotEmpty),
-       super(args, input, index: index, lineProto: lineProto);
+       super(args, input);
 
   ApplicationSample.fromFile({
     List<SourceLine> input = const <SourceLine>[],
     required List<String> args,
     required File sourceFile,
-    required int index,
-    required SourceLine lineProto,
+    required super.index,
+    required super.lineProto,
   }) : assert(args.isNotEmpty),
-       super.fromFile(args, input, sourceFile, index: index, lineProto: lineProto);
+       super.fromFile(args, input, sourceFile);
 
   @override
   String get type => 'sample';

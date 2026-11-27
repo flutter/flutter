@@ -306,7 +306,7 @@ class ShapeDecoration extends Decoration {
 
 /// An object that paints a [ShapeDecoration] into a canvas.
 class _ShapeDecorationPainter extends BoxPainter {
-  _ShapeDecorationPainter(this._decoration, VoidCallback onChanged) : super(onChanged);
+  _ShapeDecorationPainter(this._decoration, VoidCallback super.onChanged);
 
   final ShapeDecoration _decoration;
 

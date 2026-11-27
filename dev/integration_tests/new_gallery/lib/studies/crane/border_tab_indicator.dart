@@ -18,13 +18,8 @@ class BorderTabIndicator extends Decoration {
 }
 
 class BorderPainter extends BoxPainter {
-  BorderPainter(
-    this.decoration,
-    this.indicatorHeight,
-    this.textScaleFactor,
-    VoidCallback? onChanged,
-  ) : assert(indicatorHeight >= 0),
-      super(onChanged);
+  BorderPainter(this.decoration, this.indicatorHeight, this.textScaleFactor, super.onChanged)
+    : assert(indicatorHeight >= 0);
 
   final BorderTabIndicator decoration;
   final double indicatorHeight;

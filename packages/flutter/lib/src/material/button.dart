@@ -461,7 +461,7 @@ class _InputPadding extends SingleChildRenderObjectWidget {
 }
 
 class _RenderInputPadding extends RenderShiftedBox {
-  _RenderInputPadding(this._minSize, [RenderBox? child]) : super(child);
+  _RenderInputPadding(this._minSize) : super(null);
 
   Size get minSize => _minSize;
   Size _minSize;

@@ -173,7 +173,7 @@ class ProxiedDevices extends PollingDeviceDiscovery {
 class ProxiedDevice extends Device {
   ProxiedDevice(
     this.connection,
-    String id, {
+    super.id, {
     this._deltaFileTransfer = true,
     this._enableDdsProxy = false,
     required super.category,
@@ -194,8 +194,7 @@ class ProxiedDevice extends Device {
     required this._supportsHardwareRendering,
     required super.logger,
     this._fileTransfer = const FileTransfer(),
-  }) : _logger = logger,
-       super(id);
+  }) : _logger = logger;
 
   /// [DaemonConnection] used to communicate with the daemon.
   final DaemonConnection connection;

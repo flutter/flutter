@@ -1081,9 +1081,8 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     this._isLastButton,
     this._direction,
     this._verticalDirection,
-    this._textDirection, [
-    RenderBox? child,
-  ]) : super(child);
+    this._textDirection,
+  ) : super(null);
 
   Axis get direction => _direction;
   Axis _direction;
@@ -1605,7 +1604,7 @@ class _InputPadding extends SingleChildRenderObjectWidget {
 }
 
 class _RenderInputPadding extends RenderShiftedBox {
-  _RenderInputPadding(this._minSize, this._direction, [RenderBox? child]) : super(child);
+  _RenderInputPadding(this._minSize, this._direction) : super(null);
 
   Size get minSize => _minSize;
   Size _minSize;
