@@ -24,12 +24,17 @@ G_DECLARE_FINAL_TYPE(FlFramebuffer, fl_framebuffer, FL, FRAMEBUFFER, GObject)
  * @format: format, e.g. GL_RGB, GL_BGR
  * @width: width of texture.
  * @height: height of texture.
+ * @depth_stencil: %TRUE to attach a depth/stencil buffer, which is required to
+ * render into this framebuffer.
  *
  * Creates a new frame buffer. Requires a valid OpenGL context to create.
  *
  * Returns: a new #FlFramebuffer.
  */
-FlFramebuffer* fl_framebuffer_new(GLint format, size_t width, size_t height);
+FlFramebuffer* fl_framebuffer_new(GLint format,
+                                  size_t width,
+                                  size_t height,
+                                  gboolean depth_stencil);
 
 /**
  * fl_framebuffer_new_multisample:

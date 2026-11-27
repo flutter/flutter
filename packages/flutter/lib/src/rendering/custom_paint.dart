@@ -150,7 +150,7 @@ abstract class CustomPainter extends Listenable {
   /// Creates a custom painter.
   ///
   /// The painter will repaint whenever `repaint` notifies its listeners.
-  const CustomPainter({Listenable? repaint}) : _repaint = repaint;
+  const CustomPainter({this._repaint});
 
   final Listenable? _repaint;
 
@@ -382,16 +382,13 @@ class CustomPainterSemantics {
 class RenderCustomPaint extends RenderProxyBox {
   /// Creates a render object that delegates its painting.
   RenderCustomPaint({
-    CustomPainter? painter,
-    CustomPainter? foregroundPainter,
-    Size preferredSize = Size.zero,
+    this._painter,
+    this._foregroundPainter,
+    this._preferredSize = Size.zero,
     this.isComplex = false,
     this.willChange = false,
     RenderBox? child,
-  }) : _painter = painter,
-       _foregroundPainter = foregroundPainter,
-       _preferredSize = preferredSize,
-       super(child);
+  }) : super(child);
 
   /// The background custom paint delegate.
   ///
@@ -699,14 +696,14 @@ class RenderCustomPaint extends RenderProxyBox {
     final List<CustomPainterSemantics> backgroundSemantics =
         _backgroundSemanticsBuilder?.call(size) ?? const <CustomPainterSemantics>[];
     _backgroundSemanticsNodes = _updateSemanticsChildren(
-      _backgroundSemanticsNodes,
+      _backgroundSemanticsNodes ?? const <SemanticsNode>[],
       backgroundSemantics,
     );
 
     final List<CustomPainterSemantics> foregroundSemantics =
         _foregroundSemanticsBuilder?.call(size) ?? const <CustomPainterSemantics>[];
     _foregroundSemanticsNodes = _updateSemanticsChildren(
-      _foregroundSemanticsNodes,
+      _foregroundSemanticsNodes ?? const <SemanticsNode>[],
       foregroundSemantics,
     );
 
@@ -752,16 +749,13 @@ class RenderCustomPaint extends RenderProxyBox {
   /// concept of a "forgotten" node in semantics, deactivated nodes, or global
   /// keys.
   static List<SemanticsNode> _updateSemanticsChildren(
-    List<SemanticsNode>? oldSemantics,
-    List<CustomPainterSemantics>? newChildSemantics,
+    List<SemanticsNode> oldSemantics,
+    List<CustomPainterSemantics> newChildSemantics,
   ) {
-    oldSemantics = oldSemantics ?? const <SemanticsNode>[];
-    newChildSemantics = newChildSemantics ?? const <CustomPainterSemantics>[];
-
     assert(() {
       final Map<Key, int> keys = HashMap<Key, int>();
       final information = <DiagnosticsNode>[];
-      for (var i = 0; i < newChildSemantics!.length; i += 1) {
+      for (var i = 0; i < newChildSemantics.length; i += 1) {
         final CustomPainterSemantics child = newChildSemantics[i];
         if (child.key != null) {
           if (keys.containsKey(child.key)) {

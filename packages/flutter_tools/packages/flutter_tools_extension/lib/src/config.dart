@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
+
 import 'protocol_base/service.dart';
 
 /// Extension service interface for retrieving and managing configuration flags and feature toggles.
-abstract class ConfigurationExtension extends ToolExtensionService {
+abstract base class ConfigurationExtension extends ToolExtensionService {
   /// Service namespace identifier for configuration services.
   static const String serviceNamespace = 'config';
 

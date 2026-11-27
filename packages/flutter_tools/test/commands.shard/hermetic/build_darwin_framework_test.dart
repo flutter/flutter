@@ -14,14 +14,15 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_ios_framework.dart';
 import 'package:flutter_tools/src/commands/build_macos_framework.dart';
 import 'package:flutter_tools/src/commands/darwin_add_to_app.dart';
+import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/xcode_project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
@@ -52,6 +53,36 @@ void main() {
   });
 
   group('build ios-framework', () {
+    test('prints migration warning', () async {
+      memoryFileSystem.currentDirectory
+          .childFile('pubspec.yaml')
+          .writeAsStringSync('name: project');
+      memoryFileSystem.currentDirectory
+          .childDirectory('lib')
+          .childFile('main.dart')
+          .createSync(recursive: true);
+      final logger = BufferLogger.test();
+      final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        fileSystem: memoryFileSystem,
+        logger: logger,
+        platform: fakePlatform,
+      );
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+
+      await expectLater(
+        () => runner.run(<String>['ios-framework', '--no-pub']),
+        throwsToolExit(message: 'Project does not support iOS'),
+      );
+      expect(
+        logger.warningText,
+        contains(
+          'The "flutter build ios-framework" command is deprecated and has been replaced by '
+          '"flutter build swift-package --platform ios".',
+        ),
+      );
+      expect(logger.warningText, contains('https://docs.flutter.dev/add-to-app/ios/project-setup'));
+    });
+
     group('podspec', () {
       const engineRevision = '0123456789abcdef';
       late Cache cache;
@@ -69,164 +100,134 @@ void main() {
           ..writeAsStringSync(engineRevision);
       });
 
-      testUsingContext(
-        'version unknown',
-        () async {
-          const frameworkVersion = '0.0.0-unknown';
-          final fakeFlutterVersion = FakeFlutterVersion(frameworkVersion: frameworkVersion);
+      test('version unknown', () async {
+        const frameworkVersion = '0.0.0-unknown';
+        final fakeFlutterVersion = FakeFlutterVersion(frameworkVersion: frameworkVersion);
 
-          final command = BuildIOSFrameworkCommand(
-            logger: BufferLogger.test(),
-            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-            platform: fakePlatform,
-            flutterVersion: fakeFlutterVersion,
-            cache: cache,
-            verboseHelp: false,
-            codesign: FakeDarwinAddToAppCodesigning(),
-          );
+        final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+          fileSystem: memoryFileSystem,
+          logger: BufferLogger.test(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          platform: fakePlatform,
+          flutterVersion: fakeFlutterVersion,
+          cache: cache,
+          codesign: FakeDarwinAddToAppCodesigning(),
+        );
 
-          expect(
-            () => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
-            throwsToolExit(
-              message:
-                  '--cocoapods is only supported on the beta or stable channel. Detected version is $frameworkVersion',
-            ),
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => memoryFileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
-        },
-      );
+        expect(
+          () => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
+          throwsToolExit(
+            message:
+                '--cocoapods is only supported on the beta or stable channel. Detected version is $frameworkVersion',
+          ),
+        );
+      });
 
-      testUsingContext(
-        'throws when not on a released version',
-        () async {
-          const frameworkVersion = 'v1.13.10+hotfix-pre.2';
-          const gitTagVersion = GitTagVersion(
+      test('throws when not on a released version', () async {
+        const frameworkVersion = 'v1.13.10+hotfix-pre.2';
+        const gitTagVersion = GitTagVersion(
+          x: 1,
+          y: 13,
+          z: 10,
+          hotfix: 13,
+          commits: 2,
+          hash: '',
+          gitTag: frameworkVersion,
+        );
+        final fakeFlutterVersion = FakeFlutterVersion(
+          gitTagVersion: gitTagVersion,
+          frameworkVersion: frameworkVersion,
+        );
+
+        final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+          fileSystem: memoryFileSystem,
+          logger: BufferLogger.test(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          platform: fakePlatform,
+          flutterVersion: fakeFlutterVersion,
+          cache: cache,
+          codesign: FakeDarwinAddToAppCodesigning(),
+        );
+
+        expect(
+          () => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
+          throwsToolExit(
+            message:
+                '--cocoapods is only supported on the beta or stable channel. Detected version is $frameworkVersion',
+          ),
+        );
+      });
+
+      test('throws when license not found', () async {
+        final fakeFlutterVersion = FakeFlutterVersion(
+          gitTagVersion: const GitTagVersion(
             x: 1,
             y: 13,
             z: 10,
             hotfix: 13,
-            commits: 2,
+            commits: 0,
             hash: '',
-            gitTag: frameworkVersion,
-          );
-          final fakeFlutterVersion = FakeFlutterVersion(
-            gitTagVersion: gitTagVersion,
-            frameworkVersion: frameworkVersion,
-          );
+            gitTag: '1.13.10+hotfix.14.0',
+          ),
+        );
 
-          final command = BuildIOSFrameworkCommand(
-            logger: BufferLogger.test(),
-            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-            platform: fakePlatform,
-            flutterVersion: fakeFlutterVersion,
-            cache: cache,
-            verboseHelp: false,
-            codesign: FakeDarwinAddToAppCodesigning(),
-          );
+        final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+          fileSystem: memoryFileSystem,
+          logger: BufferLogger.test(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          platform: fakePlatform,
+          flutterVersion: fakeFlutterVersion,
+          cache: cache,
+          codesign: FakeDarwinAddToAppCodesigning(),
+        );
 
-          expect(
-            () => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
-            throwsToolExit(
-              message:
-                  '--cocoapods is only supported on the beta or stable channel. Detected version is $frameworkVersion',
-            ),
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => memoryFileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
-        },
-      );
-
-      testUsingContext(
-        'throws when license not found',
-        () async {
-          final fakeFlutterVersion = FakeFlutterVersion(
-            gitTagVersion: const GitTagVersion(
-              x: 1,
-              y: 13,
-              z: 10,
-              hotfix: 13,
-              commits: 0,
-              hash: '',
-              gitTag: '1.13.10+hotfix.14.0',
-            ),
-          );
-
-          final command = BuildIOSFrameworkCommand(
-            logger: BufferLogger.test(),
-            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-            platform: fakePlatform,
-            flutterVersion: fakeFlutterVersion,
-            cache: cache,
-            verboseHelp: false,
-            codesign: FakeDarwinAddToAppCodesigning(),
-          );
-
-          expect(
-            () => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
-            throwsToolExit(message: 'Could not find license'),
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => memoryFileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
-        },
-      );
+        expect(
+          () => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
+          throwsToolExit(message: 'Could not find license'),
+        );
+      });
 
       group('is created', () {
         const frameworkVersion = 'v1.13.11+hotfix.14';
         const licenseText = 'This is the license!';
 
         setUp(() {
-          // cache.getLicenseFile() relies on the flutter root being set.
-          Cache.flutterRoot ??= getFlutterRoot();
           cache.getLicenseFile()
             ..createSync(recursive: true)
             ..writeAsStringSync(licenseText);
         });
 
         group('on master channel', () {
-          testUsingContext(
-            'created when forced',
-            () async {
-              const frameworkVersionWithCommits = '$frameworkVersion.pre.100';
-              const gitTagVersion = GitTagVersion(
-                x: 1,
-                y: 13,
-                z: 11,
-                hotfix: 13,
-                commits: 100,
-                hash: '',
-                gitTag: frameworkVersionWithCommits,
-              );
-              final fakeFlutterVersion = FakeFlutterVersion(
-                gitTagVersion: gitTagVersion,
-                frameworkVersion: frameworkVersionWithCommits,
-              );
+          test('created when forced', () async {
+            const frameworkVersionWithCommits = '$frameworkVersion.pre.100';
+            const gitTagVersion = GitTagVersion(
+              x: 1,
+              y: 13,
+              z: 11,
+              hotfix: 13,
+              commits: 100,
+              hash: '',
+              gitTag: frameworkVersionWithCommits,
+            );
+            final fakeFlutterVersion = FakeFlutterVersion(
+              gitTagVersion: gitTagVersion,
+              frameworkVersion: frameworkVersionWithCommits,
+            );
 
-              final command = BuildIOSFrameworkCommand(
-                logger: BufferLogger.test(),
-                buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-                platform: fakePlatform,
-                flutterVersion: fakeFlutterVersion,
-                cache: cache,
-                verboseHelp: false,
-                codesign: FakeDarwinAddToAppCodesigning(),
-              );
-              command.produceFlutterPodspec(BuildMode.debug, outputDirectory, force: true);
+            final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+              fileSystem: memoryFileSystem,
+              logger: BufferLogger.test(),
+              buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+              platform: fakePlatform,
+              flutterVersion: fakeFlutterVersion,
+              cache: cache,
+              codesign: FakeDarwinAddToAppCodesigning(),
+            );
+            command.produceFlutterPodspec(BuildMode.debug, outputDirectory, force: true);
 
-              final File expectedPodspec = outputDirectory.childFile('Flutter.podspec');
-              expect(expectedPodspec.existsSync(), isTrue);
-            },
-            overrides: <Type, Generator>{
-              FileSystem: () => memoryFileSystem,
-              ProcessManager: () => FakeProcessManager.any(),
-            },
-          );
+            final File expectedPodspec = outputDirectory.childFile('Flutter.podspec');
+            expect(expectedPodspec.existsSync(), isTrue);
+          });
         });
 
         group('not on master channel', () {
@@ -248,118 +249,90 @@ void main() {
             );
           });
 
-          testUsingContext(
-            'contains license and version',
-            () async {
-              final command = BuildIOSFrameworkCommand(
-                logger: BufferLogger.test(),
-                buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-                platform: fakePlatform,
-                flutterVersion: fakeFlutterVersion,
-                cache: cache,
-                verboseHelp: false,
-                codesign: FakeDarwinAddToAppCodesigning(),
-              );
-              command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
+          test('contains license and version', () async {
+            final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+              fileSystem: memoryFileSystem,
+              logger: BufferLogger.test(),
+              buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+              platform: fakePlatform,
+              flutterVersion: fakeFlutterVersion,
+              cache: cache,
+              codesign: FakeDarwinAddToAppCodesigning(),
+            );
+            command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
 
-              final File expectedPodspec = outputDirectory.childFile('Flutter.podspec');
-              final String podspecContents = expectedPodspec.readAsStringSync();
-              expect(podspecContents, contains("'1.13.1113'"));
-              expect(podspecContents, contains('# $frameworkVersion'));
-              expect(podspecContents, contains(licenseText));
-            },
-            overrides: <Type, Generator>{
-              FileSystem: () => memoryFileSystem,
-              ProcessManager: () => FakeProcessManager.any(),
-            },
-          );
+            final File expectedPodspec = outputDirectory.childFile('Flutter.podspec');
+            final String podspecContents = expectedPodspec.readAsStringSync();
+            expect(podspecContents, contains("'1.13.1113'"));
+            expect(podspecContents, contains('# $frameworkVersion'));
+            expect(podspecContents, contains(licenseText));
+          });
 
-          testUsingContext(
-            'debug URL',
-            () async {
-              final command = BuildIOSFrameworkCommand(
-                logger: BufferLogger.test(),
-                buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-                platform: fakePlatform,
-                flutterVersion: fakeFlutterVersion,
-                cache: cache,
-                verboseHelp: false,
-                codesign: FakeDarwinAddToAppCodesigning(),
-              );
-              command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
+          test('debug URL', () async {
+            final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+              fileSystem: memoryFileSystem,
+              logger: BufferLogger.test(),
+              buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+              platform: fakePlatform,
+              flutterVersion: fakeFlutterVersion,
+              cache: cache,
+              codesign: FakeDarwinAddToAppCodesigning(),
+            );
+            command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
 
-              final File expectedPodspec = outputDirectory.childFile('Flutter.podspec');
-              final String podspecContents = expectedPodspec.readAsStringSync();
-              expect(
-                podspecContents,
-                contains(
-                  "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/ios/artifacts.zip'",
-                ),
-              );
-            },
-            overrides: <Type, Generator>{
-              FileSystem: () => memoryFileSystem,
-              ProcessManager: () => FakeProcessManager.any(),
-            },
-          );
+            final File expectedPodspec = outputDirectory.childFile('Flutter.podspec');
+            final String podspecContents = expectedPodspec.readAsStringSync();
+            expect(
+              podspecContents,
+              contains(
+                "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/ios/artifacts.zip'",
+              ),
+            );
+          });
 
-          testUsingContext(
-            'profile URL',
-            () async {
-              final command = BuildIOSFrameworkCommand(
-                logger: BufferLogger.test(),
-                buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-                platform: fakePlatform,
-                flutterVersion: fakeFlutterVersion,
-                cache: cache,
-                verboseHelp: false,
-                codesign: FakeDarwinAddToAppCodesigning(),
-              );
-              command.produceFlutterPodspec(BuildMode.profile, outputDirectory);
+          test('profile URL', () async {
+            final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+              fileSystem: memoryFileSystem,
+              logger: BufferLogger.test(),
+              buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+              platform: fakePlatform,
+              flutterVersion: fakeFlutterVersion,
+              cache: cache,
+              codesign: FakeDarwinAddToAppCodesigning(),
+            );
+            command.produceFlutterPodspec(BuildMode.profile, outputDirectory);
 
-              final File expectedPodspec = outputDirectory.childFile('Flutter.podspec');
-              final String podspecContents = expectedPodspec.readAsStringSync();
-              expect(
-                podspecContents,
-                contains(
-                  "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/ios-profile/artifacts.zip'",
-                ),
-              );
-            },
-            overrides: <Type, Generator>{
-              FileSystem: () => memoryFileSystem,
-              ProcessManager: () => FakeProcessManager.any(),
-            },
-          );
+            final File expectedPodspec = outputDirectory.childFile('Flutter.podspec');
+            final String podspecContents = expectedPodspec.readAsStringSync();
+            expect(
+              podspecContents,
+              contains(
+                "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/ios-profile/artifacts.zip'",
+              ),
+            );
+          });
 
-          testUsingContext(
-            'release URL',
-            () async {
-              final command = BuildIOSFrameworkCommand(
-                logger: BufferLogger.test(),
-                buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-                platform: fakePlatform,
-                flutterVersion: fakeFlutterVersion,
-                cache: cache,
-                verboseHelp: false,
-                codesign: FakeDarwinAddToAppCodesigning(),
-              );
-              command.produceFlutterPodspec(BuildMode.release, outputDirectory);
+          test('release URL', () async {
+            final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+              fileSystem: memoryFileSystem,
+              logger: BufferLogger.test(),
+              buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+              platform: fakePlatform,
+              flutterVersion: fakeFlutterVersion,
+              cache: cache,
+              codesign: FakeDarwinAddToAppCodesigning(),
+            );
+            command.produceFlutterPodspec(BuildMode.release, outputDirectory);
 
-              final File expectedPodspec = outputDirectory.childFile('Flutter.podspec');
-              final String podspecContents = expectedPodspec.readAsStringSync();
-              expect(
-                podspecContents,
-                contains(
-                  "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/ios-release/artifacts.zip'",
-                ),
-              );
-            },
-            overrides: <Type, Generator>{
-              FileSystem: () => memoryFileSystem,
-              ProcessManager: () => FakeProcessManager.any(),
-            },
-          );
+            final File expectedPodspec = outputDirectory.childFile('Flutter.podspec');
+            final String podspecContents = expectedPodspec.readAsStringSync();
+            expect(
+              podspecContents,
+              contains(
+                "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/ios-release/artifacts.zip'",
+              ),
+            );
+          });
         });
       });
     });
@@ -390,179 +363,197 @@ void main() {
       );
     });
 
-    testUsingContext(
-      'throws if simulator contains extra assets',
-      () async {
-        final Directory projectDir = memoryFileSystem.directory('project')..createSync();
-        projectDir.childDirectory('ios').createSync();
-        projectDir.childDirectory('ios').childDirectory('Pods').createSync();
-        projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
-        projectDir.childDirectory('.dart_tool').childFile('package_config.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(
-            '{"configVersion": 2, "packages": [{"name": "project", "rootUri": "../", "packageUri": "lib/", "languageVersion": "3.0"}]}',
+    test('throws if simulator contains extra assets', () async {
+      final Directory projectDir = memoryFileSystem.directory('project')..createSync();
+      projectDir.childDirectory('ios').createSync();
+      projectDir.childDirectory('ios').childDirectory('Pods').createSync();
+      projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
+      projectDir.childDirectory('.dart_tool').childFile('package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(
+          '{"configVersion": 2, "packages": [{"name": "project", "rootUri": "../", "packageUri": "lib/", "languageVersion": "3.0"}]}',
+        );
+      projectDir
+          .childDirectory('.dart_tool')
+          .childFile('package_graph.json')
+          .writeAsStringSync(
+            '{"configVersion": 1, "packages": [{"name": "project", "rootUri": "..", "packageUri": "lib/", "dependencies": []}]}',
           );
-        projectDir
-            .childDirectory('.dart_tool')
-            .childFile('package_graph.json')
-            .writeAsStringSync(
-              '{"configVersion": 1, "packages": [{"name": "project", "rootUri": "..", "packageUri": "lib/", "dependencies": []}]}',
+      projectDir.childFile('pubspec.yaml').writeAsStringSync('name: project');
+      projectDir.childFile('.metadata').createSync();
+      memoryFileSystem.currentDirectory = projectDir;
+
+      final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        artifacts: Artifacts.test(fileSystem: memoryFileSystem),
+        fileSystem: memoryFileSystem,
+        logger: BufferLogger.test(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+          Target target,
+          Environment environment,
+        ) {
+          final Directory output = environment.outputDir;
+          output.childDirectory('App.framework').childFile('App').createSync(recursive: true);
+          final File manifest = output
+              .childDirectory('App.framework')
+              .childDirectory('flutter_assets')
+              .childFile('NativeAssetsManifest.json');
+          manifest.createSync(recursive: true);
+          if (output.path.contains('iphoneos')) {
+            manifest.writeAsStringSync('{"format-version": [1, 0, 0], "native-assets": {}}');
+          } else {
+            manifest.writeAsStringSync(
+              '{"format-version": [1, 0, 0], "native-assets": {"ios_x64": {"package:project/asset1": ["absolute", "Foo.framework/Foo"]}}}',
             );
-        projectDir.childFile('pubspec.yaml').writeAsStringSync('name: project');
-        projectDir.childFile('.metadata').createSync();
-        memoryFileSystem.currentDirectory = projectDir;
+          }
+        }),
+        platform: fakePlatform,
+        flutterVersion: fakeFlutterVersion,
+        cache: cache,
+        codesign: FakeDarwinAddToAppCodesigning(),
+      );
 
-        final command = BuildIOSFrameworkCommand(
-          logger: BufferLogger.test(),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
-            Target target,
-            Environment environment,
-          ) {
-            final Directory output = environment.outputDir;
-            output.childDirectory('App.framework').childFile('App').createSync(recursive: true);
-            final File manifest = output
-                .childDirectory('App.framework')
-                .childDirectory('flutter_assets')
-                .childFile('NativeAssetsManifest.json');
-            manifest.createSync(recursive: true);
-            if (output.path.contains('iphoneos')) {
-              manifest.writeAsStringSync('{"format-version": [1, 0, 0], "native-assets": {}}');
-            } else {
-              manifest.writeAsStringSync(
-                '{"format-version": [1, 0, 0], "native-assets": {"ios_x64": {"package:project/asset1": ["absolute", "Foo.framework/Foo"]}}}',
-              );
-            }
-          }),
-          platform: fakePlatform,
-          flutterVersion: fakeFlutterVersion,
-          cache: cache,
-          verboseHelp: false,
-          codesign: FakeDarwinAddToAppCodesigning(),
+      // Mock engine artifacts. _TestArtifacts uses a string like this for getArtifactPath.
+      memoryFileSystem
+          .directory('Artifact.flutterXcframework.TargetPlatform.ios.debug')
+          .createSync(recursive: true);
+
+      final Directory buildDir =
+          projectDir.childDirectory('.dart_tool').childDirectory('flutter_build')
+            ..createSync(recursive: true);
+      buildDir
+          .childFile('link_hooks_result.json')
+          .writeAsStringSync('{"codeAssets": [], "dataAssets": [], "dependencies": []}');
+
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await expectLater(
+        () => runner.run(<String>[
+          'ios-framework',
+          '--no-pub',
+          '--no-plugins',
+          '--no-profile',
+          '--no-release',
+        ]),
+        throwsToolExit(
+          message: 'The simulator build contains a code asset "package:project/asset1" that is not present in the physical device build.',
+        ),
+      );
+    });
+
+    test('throws if framework names are inconsistent', () async {
+      final Directory projectDir = memoryFileSystem.directory('project')..createSync();
+      projectDir.childDirectory('ios').createSync();
+      projectDir.childDirectory('ios').childDirectory('Pods').createSync();
+      projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
+      projectDir.childDirectory('.dart_tool').childFile('package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(
+          '{"configVersion": 2, "packages": [{"name": "project", "rootUri": "../", "packageUri": "lib/", "languageVersion": "3.0"}]}',
         );
-
-        // Mock engine artifacts. _TestArtifacts uses a string like this for getArtifactPath.
-        memoryFileSystem
-            .directory('Artifact.flutterXcframework.TargetPlatform.ios.debug')
-            .createSync(recursive: true);
-
-        final Directory buildDir =
-            projectDir.childDirectory('.dart_tool').childDirectory('flutter_build')
-              ..createSync(recursive: true);
-        buildDir
-            .childFile('link_hooks_result.json')
-            .writeAsStringSync('{"codeAssets": [], "dataAssets": [], "dependencies": []}');
-
-        final CommandRunner<void> runner = createTestCommandRunner(command);
-        await expectLater(
-          () => runner.run(<String>[
-            'ios-framework',
-            '--no-pub',
-            '--no-plugins',
-            '--no-profile',
-            '--no-release',
-          ]),
-          throwsToolExit(
-            message:
-                'The simulator build contains a code asset "package:project/asset1" that is not present in the physical device build.',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => memoryFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Artifacts: () => Artifacts.test(fileSystem: memoryFileSystem),
-      },
-    );
-
-    testUsingContext(
-      'throws if framework names are inconsistent',
-      () async {
-        final Directory projectDir = memoryFileSystem.directory('project')..createSync();
-        projectDir.childDirectory('ios').createSync();
-        projectDir.childDirectory('ios').childDirectory('Pods').createSync();
-        projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
-        projectDir.childDirectory('.dart_tool').childFile('package_config.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(
-            '{"configVersion": 2, "packages": [{"name": "project", "rootUri": "../", "packageUri": "lib/", "languageVersion": "3.0"}]}',
+      projectDir
+          .childDirectory('.dart_tool')
+          .childFile('package_graph.json')
+          .writeAsStringSync(
+            '{"configVersion": 1, "packages": [{"name": "project", "rootUri": "..", "packageUri": "lib/", "dependencies": []}]}',
           );
-        projectDir
-            .childDirectory('.dart_tool')
-            .childFile('package_graph.json')
-            .writeAsStringSync(
-              '{"configVersion": 1, "packages": [{"name": "project", "rootUri": "..", "packageUri": "lib/", "dependencies": []}]}',
+      projectDir.childFile('pubspec.yaml').writeAsStringSync('name: project');
+      projectDir.childFile('.metadata').createSync();
+      memoryFileSystem.currentDirectory = projectDir;
+
+      final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        artifacts: Artifacts.test(fileSystem: memoryFileSystem),
+        fileSystem: memoryFileSystem,
+        logger: BufferLogger.test(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+          Target target,
+          Environment environment,
+        ) {
+          final Directory output = environment.outputDir;
+          output.childDirectory('App.framework').childFile('App').createSync(recursive: true);
+          final File manifest = output
+              .childDirectory('App.framework')
+              .childDirectory('flutter_assets')
+              .childFile('NativeAssetsManifest.json');
+          manifest.createSync(recursive: true);
+          if (output.path.contains('iphoneos')) {
+            manifest.writeAsStringSync(
+              '{"format-version": [1, 0, 0], "native-assets": {"ios_arm64": {"package:project/asset1": ["absolute", "Foo.framework/Foo"]}}}',
             );
-        projectDir.childFile('pubspec.yaml').writeAsStringSync('name: project');
-        projectDir.childFile('.metadata').createSync();
-        memoryFileSystem.currentDirectory = projectDir;
+          } else {
+            manifest.writeAsStringSync(
+              '{"format-version": [1, 0, 0], "native-assets": {"ios_x64": {"package:project/asset1": ["absolute", "Bar.framework/Bar"]}}}',
+            );
+          }
+        }),
+        platform: fakePlatform,
+        flutterVersion: fakeFlutterVersion,
+        cache: cache,
+        codesign: FakeDarwinAddToAppCodesigning(),
+      );
 
-        final command = BuildIOSFrameworkCommand(
-          logger: BufferLogger.test(),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
-            Target target,
-            Environment environment,
-          ) {
-            final Directory output = environment.outputDir;
-            output.childDirectory('App.framework').childFile('App').createSync(recursive: true);
-            final File manifest = output
-                .childDirectory('App.framework')
-                .childDirectory('flutter_assets')
-                .childFile('NativeAssetsManifest.json');
-            manifest.createSync(recursive: true);
-            if (output.path.contains('iphoneos')) {
-              manifest.writeAsStringSync(
-                '{"format-version": [1, 0, 0], "native-assets": {"ios_arm64": {"package:project/asset1": ["absolute", "Foo.framework/Foo"]}}}',
-              );
-            } else {
-              manifest.writeAsStringSync(
-                '{"format-version": [1, 0, 0], "native-assets": {"ios_x64": {"package:project/asset1": ["absolute", "Bar.framework/Bar"]}}}',
-              );
-            }
-          }),
-          platform: fakePlatform,
-          flutterVersion: fakeFlutterVersion,
-          cache: cache,
-          verboseHelp: false,
-          codesign: FakeDarwinAddToAppCodesigning(),
-        );
+      // Mock engine artifacts
+      memoryFileSystem
+          .directory('Artifact.flutterXcframework.TargetPlatform.ios.debug')
+          .createSync(recursive: true);
 
-        // Mock engine artifacts
-        memoryFileSystem
-            .directory('Artifact.flutterXcframework.TargetPlatform.ios.debug')
-            .createSync(recursive: true);
+      final Directory buildDir =
+          projectDir.childDirectory('.dart_tool').childDirectory('flutter_build')
+            ..createSync(recursive: true);
+      buildDir
+          .childFile('link_hooks_result.json')
+          .writeAsStringSync('{"codeAssets": [], "dataAssets": [], "dependencies": []}');
 
-        final Directory buildDir =
-            projectDir.childDirectory('.dart_tool').childDirectory('flutter_build')
-              ..createSync(recursive: true);
-        buildDir
-            .childFile('link_hooks_result.json')
-            .writeAsStringSync('{"codeAssets": [], "dataAssets": [], "dependencies": []}');
-
-        final CommandRunner<void> runner = createTestCommandRunner(command);
-        await expectLater(
-          () => runner.run(<String>[
-            'ios-framework',
-            '--no-pub',
-            '--no-plugins',
-            '--no-profile',
-            '--no-release',
-          ]),
-          throwsToolExit(
-            message:
-                'Consistent code asset framework names are required for XCFramework creation.\n'
-                'The asset "package:project/asset1" has different framework paths across platforms:',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => memoryFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Artifacts: () => Artifacts.test(fileSystem: memoryFileSystem),
-      },
-    );
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await expectLater(
+        () => runner.run(<String>[
+          'ios-framework',
+          '--no-pub',
+          '--no-plugins',
+          '--no-profile',
+          '--no-release',
+        ]),
+        throwsToolExit(
+          message:
+              'Consistent code asset framework names are required for XCFramework creation.\n'
+              'The asset "package:project/asset1" has different framework paths across platforms:',
+        ),
+      );
+    });
   });
 
   group('build macos-framework', () {
+    test('prints migration warning', () async {
+      memoryFileSystem.currentDirectory
+          .childFile('pubspec.yaml')
+          .writeAsStringSync('name: project');
+      memoryFileSystem.currentDirectory
+          .childDirectory('lib')
+          .childFile('main.dart')
+          .createSync(recursive: true);
+      final logger = BufferLogger.test();
+      final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+        fileSystem: memoryFileSystem,
+        logger: logger,
+        platform: fakePlatform,
+      );
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+
+      await expectLater(
+        () => runner.run(<String>['macos-framework', '--no-pub']),
+        throwsToolExit(message: 'Project does not support macOS'),
+      );
+      expect(
+        logger.warningText,
+        contains(
+          'The "flutter build macos-framework" command is deprecated and has been replaced by '
+          '"flutter build swift-package --platform macos".',
+        ),
+      );
+      expect(
+        logger.warningText,
+        contains('https://docs.flutter.dev/add-to-app/macos/project-setup'),
+      );
+    });
+
     group('podspec', () {
       const engineRevision = '0123456789abcdef';
       late Cache cache;
@@ -580,163 +571,133 @@ void main() {
           ..writeAsStringSync(engineRevision);
       });
 
-      testUsingContext(
-        'version unknown',
-        () async {
-          const frameworkVersion = '0.0.0-unknown';
-          final fakeFlutterVersion = FakeFlutterVersion(frameworkVersion: frameworkVersion);
+      test('version unknown', () async {
+        const frameworkVersion = '0.0.0-unknown';
+        final fakeFlutterVersion = FakeFlutterVersion(frameworkVersion: frameworkVersion);
 
-          final command = BuildMacOSFrameworkCommand(
-            logger: BufferLogger.test(),
-            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-            platform: fakePlatform,
-            flutterVersion: fakeFlutterVersion,
-            cache: cache,
-            verboseHelp: false,
-            codesign: FakeDarwinAddToAppCodesigning(),
-          );
+        final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+          fileSystem: memoryFileSystem,
+          logger: BufferLogger.test(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          platform: fakePlatform,
+          flutterVersion: fakeFlutterVersion,
+          cache: cache,
+          codesign: FakeDarwinAddToAppCodesigning(),
+        );
 
-          expect(
-            () => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
-            throwsToolExit(
-              message:
-                  '--cocoapods is only supported on the beta or stable channel. Detected version is $frameworkVersion',
-            ),
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => memoryFileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
-        },
-      );
+        expect(
+          () => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
+          throwsToolExit(
+            message:
+                '--cocoapods is only supported on the beta or stable channel. Detected version is $frameworkVersion',
+          ),
+        );
+      });
 
-      testUsingContext(
-        'throws when not on a released version',
-        () async {
-          const frameworkVersion = 'v1.13.10+hotfix.14.pre.2';
-          const gitTagVersion = GitTagVersion(
+      test('throws when not on a released version', () async {
+        const frameworkVersion = 'v1.13.10+hotfix.14.pre.2';
+        const gitTagVersion = GitTagVersion(
+          x: 1,
+          y: 13,
+          z: 10,
+          hotfix: 13,
+          commits: 2,
+          hash: '',
+          gitTag: frameworkVersion,
+        );
+        final fakeFlutterVersion = FakeFlutterVersion(
+          gitTagVersion: gitTagVersion,
+          frameworkVersion: frameworkVersion,
+        );
+
+        final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+          fileSystem: memoryFileSystem,
+          logger: BufferLogger.test(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          platform: fakePlatform,
+          flutterVersion: fakeFlutterVersion,
+          cache: cache,
+          codesign: FakeDarwinAddToAppCodesigning(),
+        );
+
+        expect(
+          () => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
+          throwsToolExit(
+            message:
+                '--cocoapods is only supported on the beta or stable channel. Detected version is $frameworkVersion',
+          ),
+        );
+      });
+
+      test('throws when license not found', () async {
+        final fakeFlutterVersion = FakeFlutterVersion(
+          gitTagVersion: const GitTagVersion(
             x: 1,
             y: 13,
             z: 10,
             hotfix: 13,
-            commits: 2,
+            commits: 0,
             hash: '',
-            gitTag: frameworkVersion,
-          );
-          final fakeFlutterVersion = FakeFlutterVersion(
-            gitTagVersion: gitTagVersion,
-            frameworkVersion: frameworkVersion,
-          );
+            gitTag: '1.13.10+hotfix.14.pre.0',
+          ),
+        );
 
-          final command = BuildMacOSFrameworkCommand(
-            logger: BufferLogger.test(),
-            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-            platform: fakePlatform,
-            flutterVersion: fakeFlutterVersion,
-            cache: cache,
-            verboseHelp: false,
-            codesign: FakeDarwinAddToAppCodesigning(),
-          );
+        final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+          fileSystem: memoryFileSystem,
+          logger: BufferLogger.test(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          platform: fakePlatform,
+          flutterVersion: fakeFlutterVersion,
+          cache: cache,
+          codesign: FakeDarwinAddToAppCodesigning(),
+        );
 
-          expect(
-            () => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
-            throwsToolExit(
-              message:
-                  '--cocoapods is only supported on the beta or stable channel. Detected version is $frameworkVersion',
-            ),
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => memoryFileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
-        },
-      );
-
-      testUsingContext(
-        'throws when license not found',
-        () async {
-          final fakeFlutterVersion = FakeFlutterVersion(
-            gitTagVersion: const GitTagVersion(
-              x: 1,
-              y: 13,
-              z: 10,
-              hotfix: 13,
-              commits: 0,
-              hash: '',
-              gitTag: '1.13.10+hotfix.14.pre.0',
-            ),
-          );
-
-          final command = BuildMacOSFrameworkCommand(
-            logger: BufferLogger.test(),
-            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-            platform: fakePlatform,
-            flutterVersion: fakeFlutterVersion,
-            cache: cache,
-            verboseHelp: false,
-            codesign: FakeDarwinAddToAppCodesigning(),
-          );
-
-          expect(
-            () => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
-            throwsToolExit(message: 'Could not find license'),
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => memoryFileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
-        },
-      );
+        expect(
+          () => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
+          throwsToolExit(message: 'Could not find license'),
+        );
+      });
 
       group('is created', () {
         const frameworkVersion = 'v1.13.11+hotfix.13';
         const licenseText = 'This is the license!';
 
         setUp(() {
-          // cache.getLicenseFile() relies on the flutter root being set.
-          Cache.flutterRoot ??= getFlutterRoot();
           cache.getLicenseFile()
             ..createSync(recursive: true)
             ..writeAsStringSync(licenseText);
         });
 
         group('on master channel', () {
-          testUsingContext(
-            'created when forced',
-            () async {
-              const gitTagVersion = GitTagVersion(
-                x: 1,
-                y: 13,
-                z: 11,
-                hotfix: 13,
-                commits: 100,
-                hash: '',
-                gitTag: '$frameworkVersion.pre.100',
-              );
-              final fakeFlutterVersion = FakeFlutterVersion(
-                gitTagVersion: gitTagVersion,
-                frameworkVersion: frameworkVersion,
-              );
+          test('created when forced', () async {
+            const gitTagVersion = GitTagVersion(
+              x: 1,
+              y: 13,
+              z: 11,
+              hotfix: 13,
+              commits: 100,
+              hash: '',
+              gitTag: '$frameworkVersion.pre.100',
+            );
+            final fakeFlutterVersion = FakeFlutterVersion(
+              gitTagVersion: gitTagVersion,
+              frameworkVersion: frameworkVersion,
+            );
 
-              final command = BuildMacOSFrameworkCommand(
-                logger: BufferLogger.test(),
-                buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-                platform: fakePlatform,
-                flutterVersion: fakeFlutterVersion,
-                cache: cache,
-                verboseHelp: false,
-                codesign: FakeDarwinAddToAppCodesigning(),
-              );
-              command.produceFlutterPodspec(BuildMode.debug, outputDirectory, force: true);
+            final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+              fileSystem: memoryFileSystem,
+              logger: BufferLogger.test(),
+              buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+              platform: fakePlatform,
+              flutterVersion: fakeFlutterVersion,
+              cache: cache,
+              codesign: FakeDarwinAddToAppCodesigning(),
+            );
+            command.produceFlutterPodspec(BuildMode.debug, outputDirectory, force: true);
 
-              final File expectedPodspec = outputDirectory.childFile('FlutterMacOS.podspec');
-              expect(expectedPodspec.existsSync(), isTrue);
-            },
-            overrides: <Type, Generator>{
-              FileSystem: () => memoryFileSystem,
-              ProcessManager: () => FakeProcessManager.any(),
-            },
-          );
+            final File expectedPodspec = outputDirectory.childFile('FlutterMacOS.podspec');
+            expect(expectedPodspec.existsSync(), isTrue);
+          });
         });
 
         group('not on master channel', () {
@@ -757,118 +718,90 @@ void main() {
             );
           });
 
-          testUsingContext(
-            'contains license and version',
-            () async {
-              final command = BuildMacOSFrameworkCommand(
-                logger: BufferLogger.test(),
-                buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-                platform: fakePlatform,
-                flutterVersion: fakeFlutterVersion,
-                cache: cache,
-                verboseHelp: false,
-                codesign: FakeDarwinAddToAppCodesigning(),
-              );
-              command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
+          test('contains license and version', () async {
+            final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+              fileSystem: memoryFileSystem,
+              logger: BufferLogger.test(),
+              buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+              platform: fakePlatform,
+              flutterVersion: fakeFlutterVersion,
+              cache: cache,
+              codesign: FakeDarwinAddToAppCodesigning(),
+            );
+            command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
 
-              final File expectedPodspec = outputDirectory.childFile('FlutterMacOS.podspec');
-              final String podspecContents = expectedPodspec.readAsStringSync();
-              expect(podspecContents, contains("'1.13.1113'"));
-              expect(podspecContents, contains('# $frameworkVersion'));
-              expect(podspecContents, contains(licenseText));
-            },
-            overrides: <Type, Generator>{
-              FileSystem: () => memoryFileSystem,
-              ProcessManager: () => FakeProcessManager.any(),
-            },
-          );
+            final File expectedPodspec = outputDirectory.childFile('FlutterMacOS.podspec');
+            final String podspecContents = expectedPodspec.readAsStringSync();
+            expect(podspecContents, contains("'1.13.1113'"));
+            expect(podspecContents, contains('# $frameworkVersion'));
+            expect(podspecContents, contains(licenseText));
+          });
 
-          testUsingContext(
-            'debug URL',
-            () async {
-              final command = BuildMacOSFrameworkCommand(
-                logger: BufferLogger.test(),
-                buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-                platform: fakePlatform,
-                flutterVersion: fakeFlutterVersion,
-                cache: cache,
-                verboseHelp: false,
-                codesign: FakeDarwinAddToAppCodesigning(),
-              );
-              command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
+          test('debug URL', () async {
+            final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+              fileSystem: memoryFileSystem,
+              logger: BufferLogger.test(),
+              buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+              platform: fakePlatform,
+              flutterVersion: fakeFlutterVersion,
+              cache: cache,
+              codesign: FakeDarwinAddToAppCodesigning(),
+            );
+            command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
 
-              final File expectedPodspec = outputDirectory.childFile('FlutterMacOS.podspec');
-              final String podspecContents = expectedPodspec.readAsStringSync();
-              expect(
-                podspecContents,
-                contains(
-                  "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64/FlutterMacOS.framework.zip'",
-                ),
-              );
-            },
-            overrides: <Type, Generator>{
-              FileSystem: () => memoryFileSystem,
-              ProcessManager: () => FakeProcessManager.any(),
-            },
-          );
+            final File expectedPodspec = outputDirectory.childFile('FlutterMacOS.podspec');
+            final String podspecContents = expectedPodspec.readAsStringSync();
+            expect(
+              podspecContents,
+              contains(
+                "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64/FlutterMacOS.framework.zip'",
+              ),
+            );
+          });
 
-          testUsingContext(
-            'profile URL',
-            () async {
-              final command = BuildMacOSFrameworkCommand(
-                logger: BufferLogger.test(),
-                buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-                platform: fakePlatform,
-                flutterVersion: fakeFlutterVersion,
-                cache: cache,
-                verboseHelp: false,
-                codesign: FakeDarwinAddToAppCodesigning(),
-              );
-              command.produceFlutterPodspec(BuildMode.profile, outputDirectory);
+          test('profile URL', () async {
+            final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+              fileSystem: memoryFileSystem,
+              logger: BufferLogger.test(),
+              buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+              platform: fakePlatform,
+              flutterVersion: fakeFlutterVersion,
+              cache: cache,
+              codesign: FakeDarwinAddToAppCodesigning(),
+            );
+            command.produceFlutterPodspec(BuildMode.profile, outputDirectory);
 
-              final File expectedPodspec = outputDirectory.childFile('FlutterMacOS.podspec');
-              final String podspecContents = expectedPodspec.readAsStringSync();
-              expect(
-                podspecContents,
-                contains(
-                  "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64-profile/FlutterMacOS.framework.zip'",
-                ),
-              );
-            },
-            overrides: <Type, Generator>{
-              FileSystem: () => memoryFileSystem,
-              ProcessManager: () => FakeProcessManager.any(),
-            },
-          );
+            final File expectedPodspec = outputDirectory.childFile('FlutterMacOS.podspec');
+            final String podspecContents = expectedPodspec.readAsStringSync();
+            expect(
+              podspecContents,
+              contains(
+                "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64-profile/FlutterMacOS.framework.zip'",
+              ),
+            );
+          });
 
-          testUsingContext(
-            'release URL',
-            () async {
-              final command = BuildMacOSFrameworkCommand(
-                logger: BufferLogger.test(),
-                buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-                platform: fakePlatform,
-                flutterVersion: fakeFlutterVersion,
-                cache: cache,
-                verboseHelp: false,
-                codesign: FakeDarwinAddToAppCodesigning(),
-              );
-              command.produceFlutterPodspec(BuildMode.release, outputDirectory);
+          test('release URL', () async {
+            final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+              fileSystem: memoryFileSystem,
+              logger: BufferLogger.test(),
+              buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+              platform: fakePlatform,
+              flutterVersion: fakeFlutterVersion,
+              cache: cache,
+              codesign: FakeDarwinAddToAppCodesigning(),
+            );
+            command.produceFlutterPodspec(BuildMode.release, outputDirectory);
 
-              final File expectedPodspec = outputDirectory.childFile('FlutterMacOS.podspec');
-              final String podspecContents = expectedPodspec.readAsStringSync();
-              expect(
-                podspecContents,
-                contains(
-                  "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64-release/FlutterMacOS.framework.zip'",
-                ),
-              );
-            },
-            overrides: <Type, Generator>{
-              FileSystem: () => memoryFileSystem,
-              ProcessManager: () => FakeProcessManager.any(),
-            },
-          );
+            final File expectedPodspec = outputDirectory.childFile('FlutterMacOS.podspec');
+            final String podspecContents = expectedPodspec.readAsStringSync();
+            expect(
+              podspecContents,
+              contains(
+                "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64-release/FlutterMacOS.framework.zip'",
+              ),
+            );
+          });
         });
       });
     });
@@ -883,7 +816,7 @@ void main() {
       fakeProcessManager = FakeProcessManager.empty();
     });
 
-    testWithoutContext('created and codesigned', () async {
+    test('created and codesigned', () async {
       final Directory frameworkA = fileSystem.directory('FrameworkA.framework')..createSync();
       final Directory frameworkB = fileSystem.directory('FrameworkB.framework')..createSync();
       final Directory output = fileSystem.directory('output');
@@ -924,7 +857,7 @@ void main() {
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('created with symbols', () async {
+    test('created with symbols', () async {
       final Directory parentA = fileSystem.directory('FrameworkA')..createSync();
       final File dSYMA = parentA.childFile('FrameworkA.framework.dSYM')..createSync();
       final Directory frameworkA = parentA.childDirectory('FrameworkA.framework')..createSync();
@@ -974,7 +907,7 @@ void main() {
       fileSystem = MemoryFileSystem.test();
     });
 
-    testWithoutContext('finds frameworks in native_assets', () {
+    test('finds frameworks in native_assets', () {
       final Directory output = fileSystem.directory('output')..createSync();
       final Directory nativeAssets = output.childDirectory('native_assets')..createSync();
       nativeAssets.childDirectory('foo.framework').createSync();
@@ -986,13 +919,13 @@ void main() {
       expect(names, unorderedEquals(<String>['foo.framework', 'bar.framework']));
     });
 
-    testWithoutContext('returns empty if native_assets does not exist', () {
+    test('returns empty if native_assets does not exist', () {
       final Directory output = fileSystem.directory('output')..createSync();
       final Iterable<String> names = BuildFrameworkCommand.findCodeAssetFrameworkNames(output);
       expect(names, isEmpty);
     });
 
-    testWithoutContext('parseNativeAssetsManifest for iOS', () {
+    test('parseNativeAssetsManifest for iOS', () {
       final Directory output = fileSystem.directory('output')..createSync();
       final File manifest = output
           .childDirectory('App.framework')
@@ -1029,7 +962,7 @@ void main() {
       });
     });
 
-    testWithoutContext('parseNativeAssetsManifest for macOS', () {
+    test('parseNativeAssetsManifest for macOS', () {
       final Directory output = fileSystem.directory('output')..createSync();
       final File manifest = output
           .childDirectory('App.framework')
@@ -1074,7 +1007,7 @@ void main() {
       fakePlistParser = FakePlistParser();
     });
 
-    testWithoutContext('returns empty list when project file does not exist', () {
+    test('returns empty list when project file does not exist', () {
       final File projectFile = fileSystem.file('/nonexistent/project.pbxproj');
       fakePlistParser.setJsonContent(projectFile.path, null);
 
@@ -1087,7 +1020,7 @@ void main() {
       expect(result, isEmpty);
     });
 
-    testWithoutContext('returns empty list when no Frameworks group exists', () {
+    test('returns empty list when no Frameworks group exists', () {
       final File projectFile = fileSystem.file('/test/project.pbxproj')
         ..createSync(recursive: true);
       fakePlistParser.setJsonContent(projectFile.path, '''
@@ -1111,7 +1044,7 @@ void main() {
       expect(result, isEmpty);
     });
 
-    testWithoutContext('parses frameworks from Frameworks group', () {
+    test('parses frameworks from Frameworks group', () {
       final File projectFile = fileSystem.file('/test/project.pbxproj')
         ..createSync(recursive: true);
       fakePlistParser.setJsonContent(projectFile.path, '''
@@ -1143,7 +1076,7 @@ void main() {
       expect(result, containsAll(<String>['MySDK.xcframework', 'AnotherSDK.framework']));
     });
 
-    testWithoutContext('skips non-framework files in Frameworks group', () {
+    test('skips non-framework files in Frameworks group', () {
       final File projectFile = fileSystem.file('/test/project.pbxproj')
         ..createSync(recursive: true);
       fakePlistParser.setJsonContent(projectFile.path, '''
@@ -1179,7 +1112,7 @@ void main() {
       expect(result, <String>['MySDK.xcframework']);
     });
 
-    testWithoutContext('handles multiple Frameworks groups', () {
+    test('handles multiple Frameworks groups', () {
       final File projectFile = fileSystem.file('/test/project.pbxproj')
         ..createSync(recursive: true);
       fakePlistParser.setJsonContent(projectFile.path, '''
@@ -1216,7 +1149,7 @@ void main() {
       expect(result, containsAll(<String>['SDK1.xcframework', 'SDK2.xcframework']));
     });
 
-    testWithoutContext('handles invalid JSON gracefully', () {
+    test('handles invalid JSON gracefully', () {
       final File projectFile = fileSystem.file('/test/project.pbxproj')
         ..createSync(recursive: true);
       fakePlistParser.setJsonContent(projectFile.path, 'not valid json');
@@ -1253,42 +1186,33 @@ void main() {
       hostAppRoot = fileSystem.directory('/project/ios')..createSync(recursive: true);
     });
 
-    testUsingContext(
-      'does nothing when Pods.xcodeproj does not exist',
-      () async {
-        final command = BuildIOSFrameworkCommand(
-          logger: logger,
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          platform: fakePlatform,
-          flutterVersion: FakeFlutterVersion(),
-          cache: cache,
-          verboseHelp: false,
-          codesign: FakeDarwinAddToAppCodesigning(),
-        );
+    test('does nothing when Pods.xcodeproj does not exist', () async {
+      final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        fileSystem: fileSystem,
+        processManager: fakeProcessManager,
+        logger: logger,
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        platform: fakePlatform,
+        flutterVersion: FakeFlutterVersion(),
+        cache: cache,
+        codesign: FakeDarwinAddToAppCodesigning(),
+      );
 
-        await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
+      await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
 
-        // Should not create any frameworks in output
-        expect(modeDirectory.listSync(), isEmpty);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => fakeProcessManager,
-        Logger: () => logger,
-      },
-    );
+      // Should not create any frameworks in output
+      expect(modeDirectory.listSync(), isEmpty);
+    });
 
-    testUsingContext(
-      'does nothing when parseVendoredFrameworksFromPbxproj returns empty list',
-      () async {
-        // Create project.pbxproj but with no frameworks
-        final File projectFile =
-            hostAppRoot
-                .childDirectory('Pods')
-                .childDirectory('Pods.xcodeproj')
-                .childFile('project.pbxproj')
-              ..createSync(recursive: true);
-        fakePlistParser.setJsonContent(projectFile.path, '''
+    test('does nothing when parseVendoredFrameworksFromPbxproj returns empty list', () async {
+      // Create project.pbxproj but with no frameworks
+      final File projectFile =
+          hostAppRoot
+              .childDirectory('Pods')
+              .childDirectory('Pods.xcodeproj')
+              .childFile('project.pbxproj')
+            ..createSync(recursive: true);
+      fakePlistParser.setJsonContent(projectFile.path, '''
 {
   "objects": {
     "ABC123": {
@@ -1300,38 +1224,31 @@ void main() {
 }
 ''');
 
-        final command = BuildIOSFrameworkCommand(
-          logger: logger,
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          platform: fakePlatform,
-          flutterVersion: FakeFlutterVersion(),
-          cache: cache,
-          verboseHelp: false,
-          codesign: FakeDarwinAddToAppCodesigning(),
-        );
+      final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        fileSystem: fileSystem,
+        processManager: fakeProcessManager,
+        logger: logger,
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        platform: fakePlatform,
+        flutterVersion: FakeFlutterVersion(),
+        cache: cache,
+        codesign: FakeDarwinAddToAppCodesigning(),
+      );
 
-        await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
+      await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
 
-        // Should not create any frameworks in output
-        expect(modeDirectory.listSync(), isEmpty);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => fakeProcessManager,
-        Logger: () => logger,
-      },
-    );
+      // Should not create any frameworks in output
+      expect(modeDirectory.listSync(), isEmpty);
+    });
 
-    testUsingContext(
-      'skips Flutter.framework, Flutter.xcframework, App.framework, App.xcframework',
-      () async {
-        final File projectFile =
-            hostAppRoot
-                .childDirectory('Pods')
-                .childDirectory('Pods.xcodeproj')
-                .childFile('project.pbxproj')
-              ..createSync(recursive: true);
-        fakePlistParser.setJsonContent(projectFile.path, '''
+    test('skips Flutter.framework, Flutter.xcframework, App.framework, App.xcframework', () async {
+      final File projectFile =
+          hostAppRoot
+              .childDirectory('Pods')
+              .childDirectory('Pods.xcodeproj')
+              .childFile('project.pbxproj')
+            ..createSync(recursive: true);
+      fakePlistParser.setJsonContent(projectFile.path, '''
 {
   "objects": {
     "GROUP1": {
@@ -1359,61 +1276,54 @@ void main() {
 }
 ''');
 
-        // Create the framework directories in Pods (though they should be skipped)
-        final Directory podsDir = hostAppRoot.childDirectory('Pods');
-        podsDir
-            .childDirectory('some')
-            .childDirectory('path')
-            .childDirectory('Flutter.framework')
-            .createSync(recursive: true);
-        podsDir
-            .childDirectory('some')
-            .childDirectory('path')
-            .childDirectory('Flutter.xcframework')
-            .createSync(recursive: true);
-        podsDir
-            .childDirectory('some')
-            .childDirectory('path')
-            .childDirectory('App.framework')
-            .createSync(recursive: true);
-        podsDir
-            .childDirectory('some')
-            .childDirectory('path')
-            .childDirectory('App.xcframework')
-            .createSync(recursive: true);
+      // Create the framework directories in Pods (though they should be skipped)
+      final Directory podsDir = hostAppRoot.childDirectory('Pods');
+      podsDir
+          .childDirectory('some')
+          .childDirectory('path')
+          .childDirectory('Flutter.framework')
+          .createSync(recursive: true);
+      podsDir
+          .childDirectory('some')
+          .childDirectory('path')
+          .childDirectory('Flutter.xcframework')
+          .createSync(recursive: true);
+      podsDir
+          .childDirectory('some')
+          .childDirectory('path')
+          .childDirectory('App.framework')
+          .createSync(recursive: true);
+      podsDir
+          .childDirectory('some')
+          .childDirectory('path')
+          .childDirectory('App.xcframework')
+          .createSync(recursive: true);
 
-        final command = BuildIOSFrameworkCommand(
-          logger: logger,
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          platform: fakePlatform,
-          flutterVersion: FakeFlutterVersion(),
-          cache: cache,
-          verboseHelp: false,
-          codesign: FakeDarwinAddToAppCodesigning(),
-        );
+      final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        fileSystem: fileSystem,
+        processManager: fakeProcessManager,
+        logger: logger,
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        platform: fakePlatform,
+        flutterVersion: FakeFlutterVersion(),
+        cache: cache,
+        codesign: FakeDarwinAddToAppCodesigning(),
+      );
 
-        await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
+      await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
 
-        // Should not copy any of the Flutter/App frameworks
-        expect(modeDirectory.listSync(), isEmpty);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => fakeProcessManager,
-        Logger: () => logger,
-      },
-    );
+      // Should not copy any of the Flutter/App frameworks
+      expect(modeDirectory.listSync(), isEmpty);
+    });
 
-    testUsingContext(
-      'copies xcframework directly to output',
-      () async {
-        final File projectFile =
-            hostAppRoot
-                .childDirectory('Pods')
-                .childDirectory('Pods.xcodeproj')
-                .childFile('project.pbxproj')
-              ..createSync(recursive: true);
-        fakePlistParser.setJsonContent(projectFile.path, '''
+    test('copies xcframework directly to output', () async {
+      final File projectFile =
+          hostAppRoot
+              .childDirectory('Pods')
+              .childDirectory('Pods.xcodeproj')
+              .childFile('project.pbxproj')
+            ..createSync(recursive: true);
+      fakePlistParser.setJsonContent(projectFile.path, '''
 {
   "objects": {
     "GROUP1": {
@@ -1429,49 +1339,42 @@ void main() {
 }
 ''');
 
-        // Create the xcframework with some content
-        final Directory xcframework =
-            hostAppRoot.childDirectory('Pods').childDirectory('MySDK.xcframework')
-              ..createSync(recursive: true);
-        xcframework.childFile('Info.plist').writeAsStringSync('plist content');
-        xcframework.childDirectory('ios-arm64').createSync();
+      // Create the xcframework with some content
+      final Directory xcframework =
+          hostAppRoot.childDirectory('Pods').childDirectory('MySDK.xcframework')
+            ..createSync(recursive: true);
+      xcframework.childFile('Info.plist').writeAsStringSync('plist content');
+      xcframework.childDirectory('ios-arm64').createSync();
 
-        final command = BuildIOSFrameworkCommand(
-          logger: logger,
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          platform: fakePlatform,
-          flutterVersion: FakeFlutterVersion(),
-          cache: cache,
-          verboseHelp: false,
-          codesign: FakeDarwinAddToAppCodesigning(),
-        );
+      final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        fileSystem: fileSystem,
+        processManager: fakeProcessManager,
+        logger: logger,
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        platform: fakePlatform,
+        flutterVersion: FakeFlutterVersion(),
+        cache: cache,
+        codesign: FakeDarwinAddToAppCodesigning(),
+      );
 
-        await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
+      await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
 
-        // Should copy the xcframework
-        expect(modeDirectory.childDirectory('MySDK.xcframework').existsSync(), isTrue);
-        expect(
-          modeDirectory.childDirectory('MySDK.xcframework').childFile('Info.plist').existsSync(),
-          isTrue,
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => fakeProcessManager,
-        Logger: () => logger,
-      },
-    );
+      // Should copy the xcframework
+      expect(modeDirectory.childDirectory('MySDK.xcframework').existsSync(), isTrue);
+      expect(
+        modeDirectory.childDirectory('MySDK.xcframework').childFile('Info.plist').existsSync(),
+        isTrue,
+      );
+    });
 
-    testUsingContext(
-      'copies .framework directly to output',
-      () async {
-        final File projectFile =
-            hostAppRoot
-                .childDirectory('Pods')
-                .childDirectory('Pods.xcodeproj')
-                .childFile('project.pbxproj')
-              ..createSync(recursive: true);
-        fakePlistParser.setJsonContent(projectFile.path, '''
+    test('copies .framework directly to output', () async {
+      final File projectFile =
+          hostAppRoot
+              .childDirectory('Pods')
+              .childDirectory('Pods.xcodeproj')
+              .childFile('project.pbxproj')
+            ..createSync(recursive: true);
+      fakePlistParser.setJsonContent(projectFile.path, '''
 {
   "objects": {
     "GROUP1": {
@@ -1487,48 +1390,41 @@ void main() {
 }
 ''');
 
-        // Create the framework
-        final Directory framework =
-            hostAppRoot.childDirectory('Pods').childDirectory('MySDK.framework')
-              ..createSync(recursive: true);
-        framework.childFile('MySDK').writeAsStringSync('binary');
+      // Create the framework
+      final Directory framework =
+          hostAppRoot.childDirectory('Pods').childDirectory('MySDK.framework')
+            ..createSync(recursive: true);
+      framework.childFile('MySDK').writeAsStringSync('binary');
 
-        final command = BuildIOSFrameworkCommand(
-          logger: logger,
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          platform: fakePlatform,
-          flutterVersion: FakeFlutterVersion(),
-          cache: cache,
-          verboseHelp: false,
-          codesign: FakeDarwinAddToAppCodesigning(),
-        );
+      final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        fileSystem: fileSystem,
+        processManager: fakeProcessManager,
+        logger: logger,
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        platform: fakePlatform,
+        flutterVersion: FakeFlutterVersion(),
+        cache: cache,
+        codesign: FakeDarwinAddToAppCodesigning(),
+      );
 
-        await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
+      await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
 
-        // Should copy the framework directly (not create xcframework)
-        expect(modeDirectory.childDirectory('MySDK.framework').existsSync(), isTrue);
-        expect(
-          modeDirectory.childDirectory('MySDK.framework').childFile('MySDK').readAsStringSync(),
-          'binary',
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => fakeProcessManager,
-        Logger: () => logger,
-      },
-    );
+      // Should copy the framework directly (not create xcframework)
+      expect(modeDirectory.childDirectory('MySDK.framework').existsSync(), isTrue);
+      expect(
+        modeDirectory.childDirectory('MySDK.framework').childFile('MySDK').readAsStringSync(),
+        'binary',
+      );
+    });
 
-    testUsingContext(
-      'skips framework that does not exist on disk',
-      () async {
-        final File projectFile =
-            hostAppRoot
-                .childDirectory('Pods')
-                .childDirectory('Pods.xcodeproj')
-                .childFile('project.pbxproj')
-              ..createSync(recursive: true);
-        fakePlistParser.setJsonContent(projectFile.path, '''
+    test('skips framework that does not exist on disk', () async {
+      final File projectFile =
+          hostAppRoot
+              .childDirectory('Pods')
+              .childDirectory('Pods.xcodeproj')
+              .childFile('project.pbxproj')
+            ..createSync(recursive: true);
+      fakePlistParser.setJsonContent(projectFile.path, '''
 {
   "objects": {
     "GROUP1": {
@@ -1544,42 +1440,35 @@ void main() {
 }
 ''');
 
-        // Don't create the framework - it should be skipped
+      // Don't create the framework - it should be skipped
 
-        final command = BuildIOSFrameworkCommand(
-          logger: logger,
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          platform: fakePlatform,
-          flutterVersion: FakeFlutterVersion(),
-          cache: cache,
-          verboseHelp: false,
-          codesign: FakeDarwinAddToAppCodesigning(),
-        );
+      final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        fileSystem: fileSystem,
+        processManager: fakeProcessManager,
+        logger: logger,
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        platform: fakePlatform,
+        flutterVersion: FakeFlutterVersion(),
+        cache: cache,
+        codesign: FakeDarwinAddToAppCodesigning(),
+      );
 
-        await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
+      await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
 
-        // Should not create anything in output
-        expect(modeDirectory.listSync(), isEmpty);
-        // Should log trace message
-        expect(logger.traceText, contains('Vendored framework not found'));
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => fakeProcessManager,
-        Logger: () => logger,
-      },
-    );
+      // Should not create anything in output
+      expect(modeDirectory.listSync(), isEmpty);
+      // Should log trace message
+      expect(logger.traceText, contains('Vendored framework not found'));
+    });
 
-    testUsingContext(
-      'skips duplicate frameworks with same binary name',
-      () async {
-        final File projectFile =
-            hostAppRoot
-                .childDirectory('Pods')
-                .childDirectory('Pods.xcodeproj')
-                .childFile('project.pbxproj')
-              ..createSync(recursive: true);
-        fakePlistParser.setJsonContent(projectFile.path, '''
+    test('skips duplicate frameworks with same binary name', () async {
+      final File projectFile =
+          hostAppRoot
+              .childDirectory('Pods')
+              .childDirectory('Pods.xcodeproj')
+              .childFile('project.pbxproj')
+            ..createSync(recursive: true);
+      fakePlistParser.setJsonContent(projectFile.path, '''
 {
   "objects": {
     "GROUP1": {
@@ -1599,58 +1488,51 @@ void main() {
 }
 ''');
 
-        // Create both xcframeworks
-        final Directory podsDir = hostAppRoot.childDirectory('Pods');
-        final Directory xcframework1 =
-            podsDir.childDirectory('path1').childDirectory('MySDK.xcframework')
-              ..createSync(recursive: true);
-        xcframework1.childFile('Info.plist').writeAsStringSync('plist1');
+      // Create both xcframeworks
+      final Directory podsDir = hostAppRoot.childDirectory('Pods');
+      final Directory xcframework1 =
+          podsDir.childDirectory('path1').childDirectory('MySDK.xcframework')
+            ..createSync(recursive: true);
+      xcframework1.childFile('Info.plist').writeAsStringSync('plist1');
 
-        final Directory xcframework2 =
-            podsDir.childDirectory('path2').childDirectory('MySDK.xcframework')
-              ..createSync(recursive: true);
-        xcframework2.childFile('Info.plist').writeAsStringSync('plist2');
+      final Directory xcframework2 =
+          podsDir.childDirectory('path2').childDirectory('MySDK.xcframework')
+            ..createSync(recursive: true);
+      xcframework2.childFile('Info.plist').writeAsStringSync('plist2');
 
-        final command = BuildIOSFrameworkCommand(
-          logger: logger,
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          platform: fakePlatform,
-          flutterVersion: FakeFlutterVersion(),
-          cache: cache,
-          verboseHelp: false,
-          codesign: FakeDarwinAddToAppCodesigning(),
-        );
+      final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        fileSystem: fileSystem,
+        processManager: fakeProcessManager,
+        logger: logger,
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        platform: fakePlatform,
+        flutterVersion: FakeFlutterVersion(),
+        cache: cache,
+        codesign: FakeDarwinAddToAppCodesigning(),
+      );
 
-        await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
+      await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
 
-        // Should only copy once
-        expect(modeDirectory.childDirectory('MySDK.xcframework').existsSync(), isTrue);
-        // Content should be from first one
-        expect(
-          modeDirectory
-              .childDirectory('MySDK.xcframework')
-              .childFile('Info.plist')
-              .readAsStringSync(),
-          'plist1',
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => fakeProcessManager,
-        Logger: () => logger,
-      },
-    );
+      // Should only copy once
+      expect(modeDirectory.childDirectory('MySDK.xcframework').existsSync(), isTrue);
+      // Content should be from first one
+      expect(
+        modeDirectory
+            .childDirectory('MySDK.xcframework')
+            .childFile('Info.plist')
+            .readAsStringSync(),
+        'plist1',
+      );
+    });
 
-    testUsingContext(
-      'does not re-copy xcframework if already exists in output',
-      () async {
-        final File projectFile =
-            hostAppRoot
-                .childDirectory('Pods')
-                .childDirectory('Pods.xcodeproj')
-                .childFile('project.pbxproj')
-              ..createSync(recursive: true);
-        fakePlistParser.setJsonContent(projectFile.path, '''
+    test('does not re-copy xcframework if already exists in output', () async {
+      final File projectFile =
+          hostAppRoot
+              .childDirectory('Pods')
+              .childDirectory('Pods.xcodeproj')
+              .childFile('project.pbxproj')
+            ..createSync(recursive: true);
+      fakePlistParser.setJsonContent(projectFile.path, '''
 {
   "objects": {
     "GROUP1": {
@@ -1666,55 +1548,48 @@ void main() {
 }
 ''');
 
-        // Create the source xcframework
-        final Directory xcframework =
-            hostAppRoot.childDirectory('Pods').childDirectory('MySDK.xcframework')
-              ..createSync(recursive: true);
-        xcframework.childFile('Info.plist').writeAsStringSync('source plist');
+      // Create the source xcframework
+      final Directory xcframework =
+          hostAppRoot.childDirectory('Pods').childDirectory('MySDK.xcframework')
+            ..createSync(recursive: true);
+      xcframework.childFile('Info.plist').writeAsStringSync('source plist');
 
-        // Create existing xcframework in output with different content
-        final Directory existingXcframework = modeDirectory.childDirectory('MySDK.xcframework')
-          ..createSync(recursive: true);
-        existingXcframework.childFile('Info.plist').writeAsStringSync('existing plist');
+      // Create existing xcframework in output with different content
+      final Directory existingXcframework = modeDirectory.childDirectory('MySDK.xcframework')
+        ..createSync(recursive: true);
+      existingXcframework.childFile('Info.plist').writeAsStringSync('existing plist');
 
-        final command = BuildIOSFrameworkCommand(
-          logger: logger,
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          platform: fakePlatform,
-          flutterVersion: FakeFlutterVersion(),
-          cache: cache,
-          verboseHelp: false,
-          codesign: FakeDarwinAddToAppCodesigning(),
-        );
+      final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        fileSystem: fileSystem,
+        processManager: fakeProcessManager,
+        logger: logger,
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        platform: fakePlatform,
+        flutterVersion: FakeFlutterVersion(),
+        cache: cache,
+        codesign: FakeDarwinAddToAppCodesigning(),
+      );
 
-        await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
+      await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
 
-        // Should not overwrite existing
-        expect(
-          modeDirectory
-              .childDirectory('MySDK.xcframework')
-              .childFile('Info.plist')
-              .readAsStringSync(),
-          'existing plist',
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => fakeProcessManager,
-        Logger: () => logger,
-      },
-    );
+      // Should not overwrite existing
+      expect(
+        modeDirectory
+            .childDirectory('MySDK.xcframework')
+            .childFile('Info.plist')
+            .readAsStringSync(),
+        'existing plist',
+      );
+    });
 
-    testUsingContext(
-      'does not skip frameworks whose names contain Flutter or App as a substring',
-      () async {
-        final File projectFile =
-            hostAppRoot
-                .childDirectory('Pods')
-                .childDirectory('Pods.xcodeproj')
-                .childFile('project.pbxproj')
-              ..createSync(recursive: true);
-        fakePlistParser.setJsonContent(projectFile.path, '''
+    test('does not skip frameworks whose names contain Flutter or App as a substring', () async {
+      final File projectFile =
+          hostAppRoot
+              .childDirectory('Pods')
+              .childDirectory('Pods.xcodeproj')
+              .childFile('project.pbxproj')
+            ..createSync(recursive: true);
+      fakePlistParser.setJsonContent(projectFile.path, '''
 {
   "objects": {
     "GROUP1": {
@@ -1734,49 +1609,42 @@ void main() {
 }
 ''');
 
-        // Create the frameworks
-        final Directory podsDir = hostAppRoot.childDirectory('Pods');
-        final Directory fairFramework = podsDir.childDirectory('FairDynamicFlutter.framework')
-          ..createSync(recursive: true);
-        fairFramework.childFile('FairDynamicFlutter').writeAsStringSync('binary');
+      // Create the frameworks
+      final Directory podsDir = hostAppRoot.childDirectory('Pods');
+      final Directory fairFramework = podsDir.childDirectory('FairDynamicFlutter.framework')
+        ..createSync(recursive: true);
+      fairFramework.childFile('FairDynamicFlutter').writeAsStringSync('binary');
 
-        final Directory appAuthFramework = podsDir.childDirectory('AppAuth.xcframework')
-          ..createSync(recursive: true);
-        appAuthFramework.childFile('Info.plist').writeAsStringSync('plist');
+      final Directory appAuthFramework = podsDir.childDirectory('AppAuth.xcframework')
+        ..createSync(recursive: true);
+      appAuthFramework.childFile('Info.plist').writeAsStringSync('plist');
 
-        final command = BuildIOSFrameworkCommand(
-          logger: logger,
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          platform: fakePlatform,
-          flutterVersion: FakeFlutterVersion(),
-          cache: cache,
-          verboseHelp: false,
-          codesign: FakeDarwinAddToAppCodesigning(),
-        );
+      final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        fileSystem: fileSystem,
+        processManager: fakeProcessManager,
+        logger: logger,
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        platform: fakePlatform,
+        flutterVersion: FakeFlutterVersion(),
+        cache: cache,
+        codesign: FakeDarwinAddToAppCodesigning(),
+      );
 
-        await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
+      await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
 
-        // Both should be copied, not skipped
-        expect(modeDirectory.childDirectory('FairDynamicFlutter.framework').existsSync(), isTrue);
-        expect(modeDirectory.childDirectory('AppAuth.xcframework').existsSync(), isTrue);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => fakeProcessManager,
-        Logger: () => logger,
-      },
-    );
+      // Both should be copied, not skipped
+      expect(modeDirectory.childDirectory('FairDynamicFlutter.framework').existsSync(), isTrue);
+      expect(modeDirectory.childDirectory('AppAuth.xcframework').existsSync(), isTrue);
+    });
 
-    testUsingContext(
-      'resolves paths with ../../../ prefix from CocoaPods virtual groups',
-      () async {
-        final File projectFile =
-            hostAppRoot
-                .childDirectory('Pods')
-                .childDirectory('Pods.xcodeproj')
-                .childFile('project.pbxproj')
-              ..createSync(recursive: true);
-        fakePlistParser.setJsonContent(projectFile.path, '''
+    test('resolves paths with ../../../ prefix from CocoaPods virtual groups', () async {
+      final File projectFile =
+          hostAppRoot
+              .childDirectory('Pods')
+              .childDirectory('Pods.xcodeproj')
+              .childFile('project.pbxproj')
+            ..createSync(recursive: true);
+      fakePlistParser.setJsonContent(projectFile.path, '''
 {
   "objects": {
     "GROUP1": {
@@ -1792,54 +1660,47 @@ void main() {
 }
 ''');
 
-        // Create the framework at the resolved path (Pods/SomePlugin/Frameworks/MySDK.xcframework)
-        final Directory podsDir = hostAppRoot.childDirectory('Pods');
-        final Directory xcframework =
-            podsDir
-                .childDirectory('SomePlugin')
-                .childDirectory('Frameworks')
-                .childDirectory('MySDK.xcframework')
-              ..createSync(recursive: true);
-        xcframework.childFile('Info.plist').writeAsStringSync('resolved plist');
-
-        final command = BuildIOSFrameworkCommand(
-          logger: logger,
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          platform: fakePlatform,
-          flutterVersion: FakeFlutterVersion(),
-          cache: cache,
-          verboseHelp: false,
-          codesign: FakeDarwinAddToAppCodesigning(),
-        );
-
-        await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
-
-        expect(modeDirectory.childDirectory('MySDK.xcframework').existsSync(), isTrue);
-        expect(
-          modeDirectory
+      // Create the framework at the resolved path (Pods/SomePlugin/Frameworks/MySDK.xcframework)
+      final Directory podsDir = hostAppRoot.childDirectory('Pods');
+      final Directory xcframework =
+          podsDir
+              .childDirectory('SomePlugin')
+              .childDirectory('Frameworks')
               .childDirectory('MySDK.xcframework')
-              .childFile('Info.plist')
-              .readAsStringSync(),
-          'resolved plist',
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => fakeProcessManager,
-        Logger: () => logger,
-      },
-    );
+            ..createSync(recursive: true);
+      xcframework.childFile('Info.plist').writeAsStringSync('resolved plist');
 
-    testUsingContext(
-      'handles nested framework paths',
-      () async {
-        final File projectFile =
-            hostAppRoot
-                .childDirectory('Pods')
-                .childDirectory('Pods.xcodeproj')
-                .childFile('project.pbxproj')
-              ..createSync(recursive: true);
-        fakePlistParser.setJsonContent(projectFile.path, '''
+      final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        fileSystem: fileSystem,
+        processManager: fakeProcessManager,
+        logger: logger,
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        platform: fakePlatform,
+        flutterVersion: FakeFlutterVersion(),
+        cache: cache,
+        codesign: FakeDarwinAddToAppCodesigning(),
+      );
+
+      await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
+
+      expect(modeDirectory.childDirectory('MySDK.xcframework').existsSync(), isTrue);
+      expect(
+        modeDirectory
+            .childDirectory('MySDK.xcframework')
+            .childFile('Info.plist')
+            .readAsStringSync(),
+        'resolved plist',
+      );
+    });
+
+    test('handles nested framework paths', () async {
+      final File projectFile =
+          hostAppRoot
+              .childDirectory('Pods')
+              .childDirectory('Pods.xcodeproj')
+              .childFile('project.pbxproj')
+            ..createSync(recursive: true);
+      fakePlistParser.setJsonContent(projectFile.path, '''
 {
   "objects": {
     "GROUP1": {
@@ -1855,45 +1716,40 @@ void main() {
 }
 ''');
 
-        // Create the nested xcframework
-        final Directory podsDir = hostAppRoot.childDirectory('Pods');
-        final Directory xcframework =
-            podsDir
-                .childDirectory('SomePlugin')
-                .childDirectory('Frameworks')
-                .childDirectory('Vendored')
-                .childDirectory('MySDK.xcframework')
-              ..createSync(recursive: true);
-        xcframework.childFile('Info.plist').writeAsStringSync('nested plist');
-
-        final command = BuildIOSFrameworkCommand(
-          logger: logger,
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          platform: fakePlatform,
-          flutterVersion: FakeFlutterVersion(),
-          cache: cache,
-          verboseHelp: false,
-          codesign: FakeDarwinAddToAppCodesigning(),
-        );
-
-        await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
-
-        // Should copy the xcframework to output
-        expect(modeDirectory.childDirectory('MySDK.xcframework').existsSync(), isTrue);
-        expect(
-          modeDirectory
+      // Create the nested xcframework
+      final Directory podsDir = hostAppRoot.childDirectory('Pods');
+      final Directory xcframework =
+          podsDir
+              .childDirectory('SomePlugin')
+              .childDirectory('Frameworks')
+              .childDirectory('Vendored')
               .childDirectory('MySDK.xcframework')
-              .childFile('Info.plist')
-              .readAsStringSync(),
-          'nested plist',
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => fakeProcessManager,
-        Logger: () => logger,
-      },
-    );
+            ..createSync(recursive: true);
+      xcframework.childFile('Info.plist').writeAsStringSync('nested plist');
+
+      final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        fileSystem: fileSystem,
+        processManager: fakeProcessManager,
+        logger: logger,
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        platform: fakePlatform,
+        flutterVersion: FakeFlutterVersion(),
+        cache: cache,
+        codesign: FakeDarwinAddToAppCodesigning(),
+      );
+
+      await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
+
+      // Should copy the xcframework to output
+      expect(modeDirectory.childDirectory('MySDK.xcframework').existsSync(), isTrue);
+      expect(
+        modeDirectory
+            .childDirectory('MySDK.xcframework')
+            .childFile('Info.plist')
+            .readAsStringSync(),
+        'nested plist',
+      );
+    });
   });
 }
 
@@ -1929,4 +1785,102 @@ class FakeDarwinAddToAppCodesigning extends Fake implements DarwinAddToAppCodesi
   }) async {
     return null;
   }
+}
+
+BuildIOSFrameworkCommand createBuildIOSFrameworkCommand({
+  AppleContext? appleContext,
+  Artifacts? artifacts,
+  BuildSystem? buildSystem,
+  Cache? cache,
+  DarwinAddToAppCodesigning? codesign,
+  FileSystem? fileSystem,
+  FlutterVersion? flutterVersion,
+  Logger? logger,
+  Platform? platform,
+  ProcessManager? processManager,
+  bool verboseHelp = false,
+}) {
+  final Platform effectivePlatform =
+      platform ??
+      FakePlatform(
+        operatingSystem: 'macos',
+        environment: const <String, String>{
+          'FLUTTER_STORAGE_BASE_URL': 'https://fake.googleapis.com',
+        },
+      );
+  final FileSystem effectiveFileSystem = fileSystem ?? MemoryFileSystem.test();
+  final Logger effectiveLogger = logger ?? BufferLogger.test();
+  final ProcessManager effectiveProcessManager = processManager ?? FakeProcessManager.any();
+  final Cache effectiveCache =
+      cache ??
+      Cache.test(
+        processManager: effectiveProcessManager,
+        fileSystem: effectiveFileSystem,
+        platform: effectivePlatform,
+      );
+  return BuildIOSFrameworkCommand(
+    appleContext: appleContext ?? FakeAppleContext(),
+    buildSystem: buildSystem ?? TestBuildSystem.all(BuildResult(success: true)),
+    codesign: codesign ?? FakeDarwinAddToAppCodesigning(),
+    templateRenderer: const MustacheTemplateRenderer(),
+    toolContext: FakeToolContext(
+      artifacts: artifacts,
+      flutterVersion: flutterVersion,
+      cache: effectiveCache,
+      fs: effectiveFileSystem,
+      logger: effectiveLogger,
+      platform: effectivePlatform,
+      processManager: effectiveProcessManager,
+    ),
+    verboseHelp: verboseHelp,
+  );
+}
+
+BuildMacOSFrameworkCommand createBuildMacOSFrameworkCommand({
+  AppleContext? appleContext,
+  Artifacts? artifacts,
+  BuildSystem? buildSystem,
+  Cache? cache,
+  DarwinAddToAppCodesigning? codesign,
+  FileSystem? fileSystem,
+  FlutterVersion? flutterVersion,
+  Logger? logger,
+  Platform? platform,
+  ProcessManager? processManager,
+  bool verboseHelp = false,
+}) {
+  final Platform effectivePlatform =
+      platform ??
+      FakePlatform(
+        operatingSystem: 'macos',
+        environment: const <String, String>{
+          'FLUTTER_STORAGE_BASE_URL': 'https://fake.googleapis.com',
+        },
+      );
+  final FileSystem effectiveFileSystem = fileSystem ?? MemoryFileSystem.test();
+  final Logger effectiveLogger = logger ?? BufferLogger.test();
+  final ProcessManager effectiveProcessManager = processManager ?? FakeProcessManager.any();
+  final Cache effectiveCache =
+      cache ??
+      Cache.test(
+        processManager: effectiveProcessManager,
+        fileSystem: effectiveFileSystem,
+        platform: effectivePlatform,
+      );
+  return BuildMacOSFrameworkCommand(
+    appleContext: appleContext ?? FakeAppleContext(),
+    buildSystem: buildSystem ?? TestBuildSystem.all(BuildResult(success: true)),
+    codesign: codesign ?? FakeDarwinAddToAppCodesigning(),
+    templateRenderer: const MustacheTemplateRenderer(),
+    toolContext: FakeToolContext(
+      artifacts: artifacts,
+      flutterVersion: flutterVersion,
+      cache: effectiveCache,
+      fs: effectiveFileSystem,
+      logger: effectiveLogger,
+      platform: effectivePlatform,
+      processManager: effectiveProcessManager,
+    ),
+    verboseHelp: verboseHelp,
+  );
 }

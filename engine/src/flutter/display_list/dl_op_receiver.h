@@ -97,6 +97,10 @@ class DlOpReceiver {
   // attribute for the rest of the display list or until it is reset by
   // another method that changes the same attribute. The current set of
   // attributes is not affected by |save| and |restore|.
+  //
+  // The |DisplayListBuilder| only records an attribute when its value differs
+  // from |DlPaint::kDefault|, so a receiver must begin every DisplayList with
+  // its attribute state equal to |DlPaint::kDefault|.
   virtual void setAntiAlias(bool aa) = 0;
   virtual void setDrawStyle(DlDrawStyle style) = 0;
   virtual void setColor(DlColor color) = 0;

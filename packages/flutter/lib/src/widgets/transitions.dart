@@ -148,14 +148,13 @@ class _AnimatedState extends State<AnimatedWidget> {
 /// when the topmost route is popped off the stack.
 ///
 /// Typically used as the argument for [ModalRoute.delegatedTransition].
-typedef DelegatedTransitionBuilder =
-    Widget? Function(
-      BuildContext context,
-      Animation<double> animation,
-      Animation<double> secondaryAnimation,
-      bool allowSnapshotting,
-      Widget? child,
-    );
+typedef DelegatedTransitionBuilder = Widget? Function(
+  BuildContext context,
+  Animation<double> animation,
+  Animation<double> secondaryAnimation,
+  bool allowSnapshotting,
+  Widget? child,
+);
 
 /// Animates the position of a widget relative to its normal position.
 ///
@@ -757,7 +756,8 @@ class RelativeRectTween extends Tween<RelativeRect> {
 /// [Animation<RelativeRect>] to transition the child's position from a start
 /// position to an end position over the lifetime of the animation.
 ///
-/// Only works if it's the child of a [Stack].
+/// Only works inside a [Stack] or an [Overlay]; see [Positioned] for the
+/// exact restrictions.
 ///
 /// Here's an illustration of the [PositionedTransition] widget, with it's [rect]
 /// animated by a [CurvedAnimation] set to [Curves.elasticInOut]:
@@ -810,7 +810,8 @@ class PositionedTransition extends AnimatedWidget {
 /// based on the value of [rect] relative to a bounding box with the
 /// specified [size].
 ///
-/// Only works if it's the child of a [Stack].
+/// Only works inside a [Stack] or an [Overlay]; see [Positioned] for the
+/// exact restrictions.
 ///
 /// Here's an illustration of the [RelativePositionedTransition] widget, with it's [rect]
 /// animated by a [CurvedAnimation] set to [Curves.elasticInOut]:

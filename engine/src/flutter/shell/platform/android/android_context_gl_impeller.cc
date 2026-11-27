@@ -52,6 +52,7 @@ class AndroidContextGLImpeller::ReactorWorker final
 static std::shared_ptr<impeller::Context> CreateImpellerContext(
     const std::shared_ptr<impeller::ReactorGLES::Worker>& worker,
     bool enable_gpu_tracing,
+    const impeller::Flags& impeller_flags,
     std::shared_ptr<fml::BasicTaskRunner> io_task_runner) {
   auto proc_table = std::make_unique<impeller::ProcTableGLES>(
       impeller::egl::CreateProcAddressResolver());
@@ -84,12 +85,12 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
   };
 
   auto context = impeller::ContextGLES::Create(
-      impeller::Flags{}, std::move(proc_table),
+      impeller_flags, std::move(proc_table),
       is_gles3 ? gles3_shader_mappings : gles2_shader_mappings,
       enable_gpu_tracing, std::move(io_task_runner));
 #else
   auto context = impeller::ContextGLES::Create(
-      impeller::Flags{}, std::move(proc_table), gles2_shader_mappings,
+      impeller_flags, std::move(proc_table), gles2_shader_mappings,
       enable_gpu_tracing, std::move(io_task_runner));
 #endif  // !SLIMPELLER
 
@@ -102,13 +103,18 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
     FML_LOG(ERROR) << "Could not add reactor worker.";
     return nullptr;
   }
-  FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (OpenGLES).";
+  if (impeller_flags.use_sdfs) {
+    FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (OpenGLESSDF).";
+  } else {
+    FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (OpenGLES).";
+  }
   return context;
 }
 
 AndroidContextGLImpeller::AndroidContextGLImpeller(
     std::unique_ptr<impeller::egl::Display> display,
     bool enable_gpu_tracing,
+    const impeller::Flags& impeller_flags,
     std::shared_ptr<fml::BasicTaskRunner> io_task_runner)
     : AndroidContext(AndroidRenderingAPI::kImpellerOpenGLES),
       reactor_worker_(std::shared_ptr<ReactorWorker>(new ReactorWorker())),
@@ -178,7 +184,7 @@ AndroidContextGLImpeller::AndroidContextGLImpeller(
   }
 
   auto impeller_context = CreateImpellerContext(
-      reactor_worker_, enable_gpu_tracing, io_task_runner_);
+      reactor_worker_, enable_gpu_tracing, impeller_flags, io_task_runner_);
 
   if (!impeller_context) {
     FML_LOG(ERROR) << "Could not create Impeller context.";
@@ -191,8 +197,7 @@ AndroidContextGLImpeller::AndroidContextGLImpeller(
   }
   // Setup context listeners.
   impeller::egl::Context::LifecycleListener listener =
-      [worker =
-           reactor_worker_](impeller::egl ::Context::LifecycleEvent event) {
+      [worker = reactor_worker_](impeller::egl::Context::LifecycleEvent event) {
         switch (event) {
           case impeller::egl::Context::LifecycleEvent::kDidMakeCurrent:
             worker->SetReactionsAllowedOnCurrentThread(true);

@@ -306,9 +306,8 @@ class _ChecklistMenuDemoState extends State<_ChecklistMenuDemo> with Restoration
     }
 
     widget.showInSnackBar(
-      GalleryLocalizations.of(
-        context,
-      )!.demoMenuChecked(_checkedValues.checkedValuesToString(context)),
+      GalleryLocalizations.of(context)!
+          .demoMenuChecked(_checkedValues.checkedValuesToString(context)),
     );
   }
 

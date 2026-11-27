@@ -14,7 +14,7 @@ import 'test_utils.dart';
 void main() {
   const ProcessManager processManager = LocalProcessManager();
 
-  testWithoutContext(
+  test(
     'flutter tools correctly skip pub get when resolution is up-to-date in a workspace',
     () async {
       await inTempDir((Directory tempDir) async {

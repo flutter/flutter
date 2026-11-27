@@ -31,12 +31,16 @@ body:
         - animations
         - camera
         - cross_file
+        - cupertino_icons
+        - cupertino_ui
         - espresso
         - extension_google_sign_in_as_googleapis_auth
         - file_selector
+        - flutter_hook_config
         - flutter_lints
         - flutter_migrate
         - flutter_plugin_android_lifecycle
+        - flutter_shaders
         - flutter_svg
         - flutter_template_images
         - go_router
@@ -49,15 +53,17 @@ body:
         - image_picker
         - in_app_purchase
         - interactive_media_ads
+        - listen
         - local_auth
+        - material_ui
         - metrics_center
         - multicast_dns
+        - mustache_template
         - path_parsing
         - path_provider
         - pigeon
         - plugin_platform_interface
         - pointer_interceptor
-        - process
         - quick_actions
         - rfw
         - shared_preferences

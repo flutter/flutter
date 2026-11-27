@@ -1,0 +1,35 @@
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:{{projectName}}/{{projectName}}_pigeon.dart';
+import 'package:{{projectName}}/src/messages.g.dart';
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  test('getPlatformVersion', () async {
+    final api = Fake{{pluginClass}}Api(platformVersion: '42');
+    final plugin = Pigeon{{pluginDartClass}}(api: api);
+
+    expect(await plugin.getPlatformVersion(), '42');
+  });
+}
+
+/// Fake implementation of the Pigeon API that provides a pre-set response.
+class Fake{{pluginClass}}Api implements {{pluginClass}}Api {
+  Fake{{pluginClass}}Api({required this.platformVersion});
+
+  final String platformVersion;
+
+  @override
+  Future<String> getPlatformVersion() async {
+    return platformVersion;
+  }
+
+  @override
+  // ignore: non_constant_identifier_names
+  BinaryMessenger? get pigeonVar_binaryMessenger => null;
+
+  @override
+  // ignore: non_constant_identifier_names
+  String get pigeonVar_messageChannelSuffix => '';
+}

@@ -10,16 +10,16 @@
 #include "flutter/fml/endianness.h"
 #include "flutter/fml/logging.h"
 
-#define PNG_FIELD(T, name)                \
- private:                                 \
-  T name;                                 \
-                                          \
- public:                                  \
-  T get_##name() const {                  \
-    return fml::BigEndianToArch<T>(name); \
-  }                                       \
-  void set_##name(T n) {                  \
-    name = fml::BigEndianToArch<T>(n);    \
+#define PNG_FIELD(T, name)                   \
+ private:                                    \
+  T name##_;                                 \
+                                             \
+ public:                                     \
+  T get_##name() const {                     \
+    return fml::BigEndianToArch<T>(name##_); \
+  }                                          \
+  void set_##name(T n) {                     \
+    name##_ = fml::BigEndianToArch<T>(n);    \
   }
 
 namespace flutter {

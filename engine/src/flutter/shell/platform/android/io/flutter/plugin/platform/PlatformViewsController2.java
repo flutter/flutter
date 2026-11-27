@@ -11,8 +11,13 @@ import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.SparseArray;
 import android.view.AttachedSurfaceControl;
+import android.view.Choreographer;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
@@ -43,6 +48,7 @@ import io.flutter.embedding.engine.systemchannels.PlatformViewTouch;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel2;
 import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.view.AccessibilityBridge;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -75,8 +81,51 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   private final SparseArray<FlutterMutatorView> platformViewParent;
   private final MotionEventTracker motionEventTracker;
 
-  private final ArrayList<SurfaceControl.Transaction> pendingTransactions;
-  private final ArrayList<SurfaceControl.Transaction> activeTransactions;
+  // Guarded by transactionLock: the raster thread appends to pendingRasterTransactions during a
+  // frame and seals the frame's batch into pendingRasterFrames; the platform thread pops one
+  // batch per swapTransactions() call.
+  private final ArrayList<SurfaceControl.Transaction> pendingRasterTransactions;
+  private final ArrayDeque<ArrayList<SurfaceControl.Transaction>> pendingRasterFrames =
+      new ArrayDeque<>();
+  private final Object transactionLock = new Object();
+
+  // Platform-thread only: populated by swapTransactions(), drained by onEndFrame().
+  private final ArrayList<SurfaceControl.Transaction> activeRasterTransactions;
+
+  // Platform-thread only. Clips and overlay visibility share one transaction per frame.
+  private SurfaceControl.Transaction pendingPlatformTransaction;
+  private SurfaceControl.Transaction activePlatformTransaction;
+
+  private static final class QueuedFrame {
+    final ArrayList<Runnable> viewOps = new ArrayList<>();
+    @Nullable SurfaceControl.Transaction platformTransaction;
+    final ArrayList<SurfaceControl.Transaction> rasterTransactions = new ArrayList<>();
+  }
+
+  // Platform-thread only: defers a second frame that arrives before the current Choreographer
+  // traversal has drawn the already-staged frame, so at most one frame is consumed per VSync.
+  private final ArrayList<Runnable> pendingViewOps = new ArrayList<>();
+  @Nullable private QueuedFrame queuedFrame;
+  private boolean frameStagedForTraversal = false;
+  private boolean choreographerCallbackFired = false;
+  @Nullable private Handler mainHandler;
+  private final Runnable traversalCompleteRunnable =
+      () -> {
+        if (Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
+          onTraversalComplete();
+        }
+      };
+  private final Choreographer.FrameCallback traversalFrameCallback =
+      frameTimeNanos -> {
+        choreographerCallbackFired = true;
+        if (mainHandler == null) {
+          mainHandler = new Handler(Looper.getMainLooper());
+        }
+        Message msg = Message.obtain(mainHandler, traversalCompleteRunnable);
+        msg.setAsynchronous(true);
+        mainHandler.sendMessageAtFrontOfQueue(msg);
+      };
+
   private Surface overlayerSurface = null;
   private SurfaceControl overlaySurfaceControl = null;
 
@@ -86,8 +135,8 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     accessibilityEventsDelegate = new AccessibilityEventsDelegate();
     platformViews = new SparseArray<>();
     platformViewParent = new SparseArray<>();
-    pendingTransactions = new ArrayList<>();
-    activeTransactions = new ArrayList<>();
+    pendingRasterTransactions = new ArrayList<>();
+    activeRasterTransactions = new ArrayList<>();
     motionEventTracker = MotionEventTracker.getInstance();
   }
 
@@ -269,6 +318,10 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     destroyOverlaySurface();
     flutterView = null;
 
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
+      dropTransactions();
+    }
+
     // Notify that the platform view have been detached from FlutterView.
     for (int index = 0; index < platformViews.size(); index++) {
       final PlatformView view = platformViews.valueAt(index);
@@ -438,6 +491,11 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     channelHandler.dispose(viewId);
   }
 
+  @VisibleForTesting
+  FlutterMutatorView getPlatformViewParent(int viewId) {
+    return platformViewParent.get(viewId);
+  }
+
   /**
    * Initializes a platform view and adds it to the view hierarchy.
    *
@@ -511,6 +569,27 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
    */
   @RequiresApi(API_LEVELS.API_34)
   public void onDisplayPlatformView(
+      int viewId,
+      int x,
+      int y,
+      int width,
+      int height,
+      int viewWidth,
+      int viewHeight,
+      @NonNull FlutterMutatorsStack mutatorsStack) {
+    flushCompletedTraversalIfNeeded();
+    if (frameStagedForTraversal) {
+      pendingViewOps.add(
+          () ->
+              applyDisplayPlatformView(
+                  viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack));
+      return;
+    }
+    applyDisplayPlatformView(viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
+  }
+
+  @RequiresApi(API_LEVELS.API_34)
+  private void applyDisplayPlatformView(
       int viewId,
       int x,
       int y,
@@ -611,7 +690,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       return;
     }
     SurfaceControl.Transaction tx =
-        createTransaction().setAlpha(sc, opacity).setCrop(sc, screenRect);
+        platformTransaction().setAlpha(sc, opacity).setCrop(sc, screenRect);
   }
 
   @RequiresApi(API_LEVELS.API_34)
@@ -626,7 +705,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
         SurfaceControl surfaceControl = surfaceView.getSurfaceControl();
         if (surfaceControl != null && surfaceControl.isValid()) {
           SurfaceControl.Transaction tx =
-              createTransaction()
+              platformTransaction()
                   .setAlpha(surfaceControl, opacity)
                   .setCrop(surfaceControl, screenRect);
         } else {
@@ -658,6 +737,17 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   }
 
   public void hidePlatformView(int viewId) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
+      flushCompletedTraversalIfNeeded();
+    }
+    if (frameStagedForTraversal) {
+      pendingViewOps.add(() -> applyHidePlatformView(viewId));
+      return;
+    }
+    applyHidePlatformView(viewId);
+  }
+
+  private void applyHidePlatformView(int viewId) {
     if (!initializePlatformViewIfNeeded(viewId)) {
       return;
     }
@@ -666,54 +756,251 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     parentView.setVisibility(View.GONE);
   }
 
+  @UiThread
   @RequiresApi(API_LEVELS.API_34)
   public void onEndFrame() {
-    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-    for (int i = 0; i < activeTransactions.size(); i++) {
-      tx = tx.merge(activeTransactions.get(i));
+    flushCompletedTraversalIfNeeded();
+    if (frameStagedForTraversal) {
+      if (queuedFrame == null) {
+        queuedFrame = new QueuedFrame();
+      }
+      queuedFrame.viewOps.addAll(pendingViewOps);
+      pendingViewOps.clear();
+      if (activePlatformTransaction != null) {
+        if (queuedFrame.platformTransaction == null) {
+          queuedFrame.platformTransaction = activePlatformTransaction;
+        } else {
+          queuedFrame.platformTransaction =
+              queuedFrame.platformTransaction.merge(activePlatformTransaction);
+          activePlatformTransaction.close();
+        }
+        activePlatformTransaction = null;
+      }
+      queuedFrame.rasterTransactions.addAll(activeRasterTransactions);
+      activeRasterTransactions.clear();
+      return;
     }
-    activeTransactions.clear();
 
-    // This runs on the platform thread but is posted from the raster thread, so by the time it
-    // runs the FlutterView may have been detached from the controller, or detached from its
-    // window (in which case getRootSurfaceControl() returns null). Throwing here is fatal rather
-    // than merely wrong: the JNI caller, onEndFrame2(), turns a pending Java exception into an
-    // abort() via FML_CHECK(fml::jni::CheckException(env)).
+    commitActiveFrame();
+  }
+
+  @UiThread
+  @RequiresApi(API_LEVELS.API_34)
+  private void commitActiveFrame() {
+    final SurfaceControl.Transaction platformTx = activePlatformTransaction;
+    activePlatformTransaction = null;
+
+    // Use a fresh destination so cleanup cannot close a raster input still in native use.
+    // Bypass newTransaction(), which tests may override to return an existing input.
+    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+    if (platformTx != null) {
+      tx = tx.merge(platformTx);
+      platformTx.close();
+    }
+    for (SurfaceControl.Transaction rasterTx : activeRasterTransactions) {
+      tx = tx.merge(rasterTx);
+    }
+    activeRasterTransactions.clear();
+
+    // The view or its window may detach before this posted frame runs.
     final AttachedSurfaceControl rootSurfaceControl =
         flutterView == null ? null : flutterView.getRootSurfaceControl();
     if (rootSurfaceControl == null) {
+      // Release the unapplied transaction and its owned fence FDs.
       tx.close();
       return;
     }
 
     flutterView.invalidate();
     rootSurfaceControl.applyTransactionOnDraw(tx);
-  }
-
-  // NOT called from UI thread.
-  public synchronized void swapTransactions() {
-    activeTransactions.clear();
-    activeTransactions.addAll(pendingTransactions);
-    pendingTransactions.clear();
-  }
-
-  // NOT called from UI thread.
-  @RequiresApi(API_LEVELS.API_34)
-  public SurfaceControl.Transaction createTransaction() {
-    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-    pendingTransactions.add(tx);
-    return tx;
-  }
-
-  // NOT called from UI thread.
-  @RequiresApi(API_LEVELS.API_34)
-  public void applyTransactions() {
-    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-    for (int i = 0; i < pendingTransactions.size(); i++) {
-      tx = tx.merge(pendingTransactions.get(i));
+    // Defer the next frame until this Choreographer traversal finishes so its View mutations do
+    // not overwrite this frame's layout before draw. If the traversal skips drawing (e.g. a
+    // pre-draw listener cancels draw), the next commit merges into ViewRootImpl's still-pending
+    // transaction (falling back to mailbox replacement).
+    if (shouldDeferUntilNextTraversal()) {
+      frameStagedForTraversal = true;
+      choreographerCallbackFired = false;
+      Choreographer.getInstance().postFrameCallback(traversalFrameCallback);
     }
-    tx.apply();
-    pendingTransactions.clear();
+  }
+
+  @VisibleForTesting
+  boolean shouldDeferUntilNextTraversal() {
+    return flutterView != null && flutterView.isAttachedToWindow();
+  }
+
+  /**
+   * Flushes a completed Choreographer traversal if the native ALooper callback for the next frame
+   * runs inside {@code MessageQueue.nativePollOnce()} before the Java handler message posted by
+   * {@link #traversalFrameCallback} is dispatched.
+   */
+  @UiThread
+  @RequiresApi(API_LEVELS.API_34)
+  private void flushCompletedTraversalIfNeeded() {
+    if (frameStagedForTraversal && choreographerCallbackFired) {
+      onTraversalComplete();
+    }
+  }
+
+  @UiThread
+  @RequiresApi(API_LEVELS.API_34)
+  private void onTraversalComplete() {
+    frameStagedForTraversal = false;
+    choreographerCallbackFired = false;
+    if (mainHandler != null) {
+      mainHandler.removeCallbacks(traversalCompleteRunnable);
+    }
+    if (queuedFrame == null) {
+      return;
+    }
+    final QueuedFrame next = queuedFrame;
+    queuedFrame = null;
+
+    final SurfaceControl.Transaction savedPendingPlatformTx = pendingPlatformTransaction;
+    pendingPlatformTransaction = next.platformTransaction;
+
+    for (Runnable op : next.viewOps) {
+      op.run();
+    }
+
+    activePlatformTransaction = pendingPlatformTransaction;
+    pendingPlatformTransaction = savedPendingPlatformTx;
+    activeRasterTransactions.addAll(next.rasterTransactions);
+
+    commitActiveFrame();
+  }
+
+  @UiThread
+  @RequiresApi(API_LEVELS.API_34)
+  public void swapTransactions() {
+    flushCompletedTraversalIfNeeded();
+    // Do not close discarded raster inputs; native producers may still use them.
+    activeRasterTransactions.clear();
+    synchronized (transactionLock) {
+      final ArrayList<SurfaceControl.Transaction> frameTransactions =
+          pendingRasterFrames.pollFirst();
+      if (frameTransactions != null) {
+        activeRasterTransactions.addAll(frameTransactions);
+      }
+    }
+
+    if (activePlatformTransaction != null) {
+      // Discard a platform transaction whose onEndFrame() never ran.
+      activePlatformTransaction.close();
+    }
+    activePlatformTransaction = pendingPlatformTransaction;
+    pendingPlatformTransaction = null;
+  }
+
+  /**
+   * Discards the transaction state of the view that just detached.
+   *
+   * <p>Platform transactions are closed here: they only touch SurfaceControls that this detach
+   * invalidates, including the overlay that {@link #destroyOverlaySurface()} just released, and
+   * nothing outside the platform thread references them. Raster transactions are dropped without
+   * closing them, because their native producers may still be writing into them.
+   */
+  @UiThread
+  @RequiresApi(API_LEVELS.API_34)
+  private void dropTransactions() {
+    frameStagedForTraversal = false;
+    choreographerCallbackFired = false;
+    pendingViewOps.clear();
+    Choreographer.getInstance().removeFrameCallback(traversalFrameCallback);
+    if (mainHandler != null) {
+      mainHandler.removeCallbacks(traversalCompleteRunnable);
+    }
+    if (queuedFrame != null) {
+      if (queuedFrame.platformTransaction != null) {
+        queuedFrame.platformTransaction.close();
+      }
+      queuedFrame = null;
+    }
+    activeRasterTransactions.clear();
+    synchronized (transactionLock) {
+      // If platform tasks posted before detach run swapTransactions() after an immediate
+      // re-attach seals new frames, batches can shift by one until those stale tasks drain.
+      pendingRasterFrames.clear();
+      pendingRasterTransactions.clear();
+    }
+
+    if (activePlatformTransaction != null) {
+      activePlatformTransaction.close();
+      activePlatformTransaction = null;
+    }
+    if (pendingPlatformTransaction != null) {
+      pendingPlatformTransaction.close();
+      pendingPlatformTransaction = null;
+    }
+  }
+
+  @UiThread
+  @RequiresApi(API_LEVELS.API_34)
+  private SurfaceControl.Transaction platformTransaction() {
+    if (pendingPlatformTransaction == null) {
+      pendingPlatformTransaction = newTransaction();
+    }
+    return pendingPlatformTransaction;
+  }
+
+  /**
+   * Allocates a transaction for the raster thread without making it visible to the platform thread.
+   *
+   * <p>The native caller continues to write into the transaction after this returns (setting the
+   * buffer and the completion callback). Publishing it here would let {@link #swapTransactions()}
+   * and {@link #onEndFrame()} merge and close it while those writes are in flight. The caller must
+   * call {@link #publishTransaction} once it is done writing.
+   *
+   * <p>This is only called when HCPP is active, which is gated on API 34+ in the engine (both
+   * {@code kMinAPILevelHCPP} and the AHB swapchain's {@code CreateTransactionCB} require API 34+,
+   * where {@code ASurfaceTransaction_fromJava} was introduced).
+   */
+  // Called from the raster thread through FlutterJNI.
+  @RequiresApi(API_LEVELS.API_34)
+  public SurfaceControl.Transaction createUnpublishedTransaction() {
+    return newTransaction();
+  }
+
+  /**
+   * Publishes a transaction returned by {@link #createUnpublishedTransaction()} now that the caller
+   * has finished writing into it.
+   *
+   * <p>Like {@link #createUnpublishedTransaction()}, this is only reachable on API 34+ because HCPP
+   * and the native transaction callback are gated on API 34+.
+   */
+  // Called from the raster thread through FlutterJNI.
+  @RequiresApi(API_LEVELS.API_34)
+  public void publishTransaction(SurfaceControl.Transaction tx) {
+    if (tx == null) {
+      return;
+    }
+    synchronized (transactionLock) {
+      pendingRasterTransactions.add(tx);
+    }
+  }
+
+  /**
+   * Seals the transactions published through {@link #publishTransaction} during the current raster
+   * frame into a single batch for the next {@link #swapTransactions()} call.
+   *
+   * <p>The raster thread may begin or complete the next frame before the platform thread runs the
+   * task posted by {@code SubmitFlutterView}. Queuing one batch per raster frame keeps {@link
+   * #swapTransactions()} from draining transactions that belong to a later frame.
+   */
+  // Called from the raster thread through FlutterJNI.
+  @RequiresApi(API_LEVELS.API_34)
+  public void sealFrameTransactions() {
+    synchronized (transactionLock) {
+      pendingRasterFrames.addLast(new ArrayList<>(pendingRasterTransactions));
+      pendingRasterTransactions.clear();
+    }
+  }
+
+  /** Allocates a transaction so tests can spy on the instance retained by the controller. */
+  @VisibleForTesting
+  @RequiresApi(API_LEVELS.API_34)
+  SurfaceControl.Transaction newTransaction() {
+    return new SurfaceControl.Transaction();
   }
 
   @RequiresApi(API_LEVELS.API_34)
@@ -747,19 +1034,39 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
   @RequiresApi(API_LEVELS.API_34)
   public void showOverlaySurface() {
+    flushCompletedTraversalIfNeeded();
+    if (frameStagedForTraversal) {
+      pendingViewOps.add(this::applyShowOverlaySurface);
+      return;
+    }
+    applyShowOverlaySurface();
+  }
+
+  @RequiresApi(API_LEVELS.API_34)
+  private void applyShowOverlaySurface() {
     if (overlaySurfaceControl == null) {
       return;
     }
-    SurfaceControl.Transaction tx = createTransaction();
+    SurfaceControl.Transaction tx = platformTransaction();
     tx.setVisibility(overlaySurfaceControl, /*visible=*/ true);
   }
 
   @RequiresApi(API_LEVELS.API_34)
   public void hideOverlaySurface() {
+    flushCompletedTraversalIfNeeded();
+    if (frameStagedForTraversal) {
+      pendingViewOps.add(this::applyHideOverlaySurface);
+      return;
+    }
+    applyHideOverlaySurface();
+  }
+
+  @RequiresApi(API_LEVELS.API_34)
+  private void applyHideOverlaySurface() {
     if (overlaySurfaceControl == null) {
       return;
     }
-    SurfaceControl.Transaction tx = createTransaction();
+    SurfaceControl.Transaction tx = platformTransaction();
     tx.setVisibility(overlaySurfaceControl, /*visible=*/ false);
   }
 
@@ -866,6 +1173,19 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
             return;
           }
           embeddedView.clearFocus();
+        }
+
+        @Override
+        public void onRejectGesture(int viewId, long gestureId) {
+          final MotionEvent event =
+              motionEventTracker.peek(MotionEventTracker.MotionEventId.from(gestureId));
+          if (event == null) {
+            return;
+          }
+          final FlutterMutatorView parentView = platformViewParent.get(viewId);
+          if (parentView != null) {
+            parentView.onFlutterWonGesture(event.getDownTime());
+          }
         }
 
         @Override

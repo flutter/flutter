@@ -254,6 +254,14 @@ bool Main(const fml::CommandLine& command_line) {
     }
   }
 
+  std::set<std::string> emitted_warnings;
+  for (const auto& compiler : compilers) {
+    const std::string warnings = compiler->GetWarningMessages();
+    if (!warnings.empty() && emitted_warnings.insert(warnings).second) {
+      std::cerr << warnings;
+    }
+  }
+
   // --------------------------------------------------------------------------
   /// 1. Output the source file. When in IPLR/RuntimeStage mode, output the
   ///    serialized IPLR flatbuffer. Otherwise output the shader source in the

@@ -63,20 +63,48 @@ class WebServerDeviceTestRunner {
 
   /// Starts the 'chromedriver' process and returns the port number that it is
   /// listening on.
+  ///
+  /// `chromedriver --port=0` lets the OS pick a port for its first bind and
+  /// then binds the same port on the other loopback address (`[::1]` then
+  /// `127.0.0.1` on Linux and Windows; the reverse on macOS) without
+  /// checking that it is free there (see `RunServer` in Chromium's
+  /// `chrome/test/chromedriver/server/chromedriver_server.cc`). When another
+  /// process already holds that port, chromedriver prints
+  /// `IPv4 port not available. Exiting...` (or `IPv6 ...` on macOS) and exits.
+  /// Each new attempt gets a fresh OS-assigned port.
   Future<int> _startChromeDriverProcess() async {
-    final int chromeDriverPort = await findFreePort();
-    _chromeDriverProcess = await io.Process.start('chromedriver', <String>[
-      '--port=$chromeDriverPort',
-    ]);
+    // TODO(mdebbar): Remove the retry once https://issues.chromium.org/issues/582923020 is fixed.
+    const maxAttempts = 3;
+    for (var attempt = 1; ; attempt++) {
+      try {
+        return await _startChromeDriverProcessOnce();
+      } on _ChromeDriverPortInUseException {
+        await _chromeDriverProcess?.exitCode;
+        if (attempt >= maxAttempts) {
+          rethrow;
+        }
+        printOnFailure('chromedriver could not bind its port (attempt $attempt), retrying.');
+      }
+    }
+  }
+
+  Future<int> _startChromeDriverProcessOnce() async {
+    _chromeDriverProcess = await io.Process.start('chromedriver', <String>['--port=0']);
     final completer = Completer<int>();
+    final portPattern = RegExp(r'started successfully on port (\d+)');
+    var portInUse = false;
     _chromeDriverProcess!.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen(
           (String line) {
             printOnFailure('chromedriver stdout: $line');
-            if (!completer.isCompleted && line.contains('ChromeDriver was started successfully')) {
-              completer.complete(chromeDriverPort);
+            if (line.contains('port not available')) {
+              portInUse = true;
+            }
+            final Match? match = portPattern.firstMatch(line);
+            if (!completer.isCompleted && match != null) {
+              completer.complete(int.parse(match.group(1)!));
             }
           },
           onError: (dynamic error, StackTrace stack) {
@@ -91,7 +119,12 @@ class WebServerDeviceTestRunner {
             }
           },
           onDone: () {
-            if (!completer.isCompleted) {
+            if (completer.isCompleted) {
+              return;
+            }
+            if (portInUse) {
+              completer.completeError(const _ChromeDriverPortInUseException());
+            } else {
               completer.completeError(
                 'chromedriver stdout closed before finding the expected startup message.',
               );
@@ -115,6 +148,7 @@ class WebServerDeviceTestRunner {
       desired: getDesiredCapabilities(
         Browser.chrome,
         true, // headless
+        platform: const LocalPlatform(),
         chromeBinary: const LocalPlatform().environment[kChromeEnvironment],
       ),
     );
@@ -220,13 +254,10 @@ class WebServerDeviceTestRunner {
   }
 }
 
-/// Returns a port that is likely to be unused.
-///
-/// NOTE: Technically speaking another process could bind this port after this
-/// method returns.
-Future<int> findFreePort() async {
-  final io.ServerSocket socket = await io.ServerSocket.bind(io.InternetAddress.loopbackIPv4, 0);
-  final int port = socket.port;
-  await socket.close();
-  return port;
+/// Thrown when chromedriver exits because the port it picked is already in use.
+class _ChromeDriverPortInUseException implements Exception {
+  const _ChromeDriverPortInUseException();
+
+  @override
+  String toString() => 'chromedriver exited because its port was not available.';
 }

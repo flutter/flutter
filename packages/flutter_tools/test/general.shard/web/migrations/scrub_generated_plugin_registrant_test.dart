@@ -5,22 +5,20 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/commands/build.dart';
 
-import '../../../src/context.dart'; // legacy
+import '../../../src/common.dart';
 import '../../../src/fake_build_command.dart';
+import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 import '../../../src/test_build_system.dart';
 import '../../../src/test_flutter_command_runner.dart';
-import '../../../src/throwing_pub.dart'; // legacy
 
 void main() {
   setUpAll(() {
-    Cache.flutterRoot = '';
     Cache.disableLocking();
   });
 
@@ -49,46 +47,28 @@ void main() {
       registrant = fileSystem.file(fileSystem.path.join('lib', 'generated_plugin_registrant.dart'));
     });
 
-    testUsingContext(
-      'noop - nothing to do - build runs',
-      () async {
-        expect(gitignore.existsSync(), isFalse);
-        expect(registrant.existsSync(), isFalse);
+    BuildCommand createBuildCommand({Logger? loggerOverride}) {
+      return createFakeBuildCommand(
+        buildSystem: buildSystem,
+        featureFlags: TestFeatureFlags(isWebEnabled: true),
+        fileSystem: fileSystem,
+        logger: loggerOverride ?? logger,
+        processManager: processManager,
+      );
+    }
 
-        await createTestCommandRunner(
-          createFakeBuildCommand(
-            androidSdk: FakeAndroidSdk(),
-            buildSystem: buildSystem,
-            fileSystem: fileSystem,
-            logger: BufferLogger.test(),
-            osUtils: FakeOperatingSystemUtils(),
-            config: FakeConfig(),
-            platform: FakePlatform(),
-            fileSystemUtils: FakeFileSystemUtils(),
-            terminal: FakeTerminal(),
-            plistParser: FakePlistParser(),
-            processUtils: FakeProcessUtils(),
-            processManager: FakeProcessManager.any(),
-            templateRenderer: FakeTemplateRenderer(),
-            xcode: FakeXcode(),
-            artifacts: FakeArtifacts(),
-            cache: FakeCache(),
-            flutterVersion: FakeFlutterVersion(),
-          ),
-        ).run(<String>['build', 'web', '--no-pub']);
+    test('noop - nothing to do - build runs', () async {
+      expect(gitignore.existsSync(), isFalse);
+      expect(registrant.existsSync(), isFalse);
 
-        final Directory buildDir = fileSystem.directory(fileSystem.path.join('build', 'web'));
-        expect(buildDir.existsSync(), true);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-        BuildSystem: () => buildSystem,
-        Pub: ThrowingPub.new,
-      },
-    );
+      await createTestCommandRunner(createBuildCommand(loggerOverride: BufferLogger.test()))
+          .run(<String>['build', 'web', '--no-pub']);
 
-    testUsingContext(
+      final Directory buildDir = fileSystem.directory(fileSystem.path.join('build', 'web'));
+      expect(buildDir.existsSync(), true);
+    });
+
+    test(
       'noop - .gitignore does not reference generated_plugin_registrant.dart - untouched',
       () async {
         writeGitignore(fileSystem, mentionsPluginRegistrant: false);
@@ -96,164 +76,46 @@ void main() {
         final String contentsBeforeBuild = gitignore.readAsStringSync();
         expect(contentsBeforeBuild, isNot(contains('lib/generated_plugin_registrant.dart')));
 
-        await createTestCommandRunner(
-          createFakeBuildCommand(
-            androidSdk: FakeAndroidSdk(),
-            buildSystem: buildSystem,
-            fileSystem: fileSystem,
-            logger: logger,
-            osUtils: FakeOperatingSystemUtils(),
-            config: FakeConfig(),
-            platform: FakePlatform(),
-            fileSystemUtils: FakeFileSystemUtils(),
-            terminal: FakeTerminal(),
-            plistParser: FakePlistParser(),
-            processUtils: FakeProcessUtils(),
-            processManager: FakeProcessManager.any(),
-            templateRenderer: FakeTemplateRenderer(),
-            xcode: FakeXcode(),
-            artifacts: FakeArtifacts(),
-            cache: FakeCache(),
-            flutterVersion: FakeFlutterVersion(),
-          ),
-        ).run(<String>['build', 'web', '--no-pub']);
+        await createTestCommandRunner(createBuildCommand())
+            .run(<String>['build', 'web', '--no-pub']);
 
         expect(gitignore.readAsStringSync(), contentsBeforeBuild);
       },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-        BuildSystem: () => buildSystem,
-        Pub: ThrowingPub.new,
-      },
     );
 
-    testUsingContext(
-      '.gitignore references generated_plugin_registrant - cleans it up',
-      () async {
-        writeGitignore(fileSystem);
+    test('.gitignore references generated_plugin_registrant - cleans it up', () async {
+      writeGitignore(fileSystem);
 
-        expect(gitignore.existsSync(), isTrue);
-        expect(gitignore.readAsStringSync(), contains('lib/generated_plugin_registrant.dart'));
+      expect(gitignore.existsSync(), isTrue);
+      expect(gitignore.readAsStringSync(), contains('lib/generated_plugin_registrant.dart'));
 
-        await createTestCommandRunner(
-          createFakeBuildCommand(
-            androidSdk: FakeAndroidSdk(),
-            buildSystem: buildSystem,
-            fileSystem: fileSystem,
-            logger: logger,
-            osUtils: FakeOperatingSystemUtils(),
-            config: FakeConfig(),
-            platform: FakePlatform(),
-            fileSystemUtils: FakeFileSystemUtils(),
-            terminal: FakeTerminal(),
-            plistParser: FakePlistParser(),
-            processUtils: FakeProcessUtils(),
-            processManager: FakeProcessManager.any(),
-            templateRenderer: FakeTemplateRenderer(),
-            xcode: FakeXcode(),
-            artifacts: FakeArtifacts(),
-            cache: FakeCache(),
-            flutterVersion: FakeFlutterVersion(),
-          ),
-        ).run(<String>['build', 'web', '--no-pub']);
+      await createTestCommandRunner(createBuildCommand()).run(<String>['build', 'web', '--no-pub']);
 
-        expect(
-          gitignore.readAsStringSync(),
-          isNot(contains('lib/generated_plugin_registrant.dart')),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-        BuildSystem: () => buildSystem,
-        Pub: ThrowingPub.new,
-      },
-    );
+      expect(gitignore.readAsStringSync(), isNot(contains('lib/generated_plugin_registrant.dart')));
+    });
 
-    testUsingContext(
-      'generated_plugin_registrant.dart exists - gets deleted',
-      () async {
-        writeGeneratedPluginRegistrant(fileSystem);
+    test('generated_plugin_registrant.dart exists - gets deleted', () async {
+      writeGeneratedPluginRegistrant(fileSystem);
 
-        expect(registrant.existsSync(), isTrue);
+      expect(registrant.existsSync(), isTrue);
 
-        await createTestCommandRunner(
-          createFakeBuildCommand(
-            androidSdk: FakeAndroidSdk(),
-            buildSystem: buildSystem,
-            fileSystem: fileSystem,
-            logger: logger,
-            osUtils: FakeOperatingSystemUtils(),
-            config: FakeConfig(),
-            platform: FakePlatform(),
-            fileSystemUtils: FakeFileSystemUtils(),
-            terminal: FakeTerminal(),
-            plistParser: FakePlistParser(),
-            processUtils: FakeProcessUtils(),
-            processManager: FakeProcessManager.any(),
-            templateRenderer: FakeTemplateRenderer(),
-            xcode: FakeXcode(),
-            artifacts: FakeArtifacts(),
-            cache: FakeCache(),
-            flutterVersion: FakeFlutterVersion(),
-          ),
-        ).run(<String>['build', 'web', '--no-pub']);
+      await createTestCommandRunner(createBuildCommand()).run(<String>['build', 'web', '--no-pub']);
 
-        expect(registrant.existsSync(), isFalse);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-        BuildSystem: () => buildSystem,
-        Pub: ThrowingPub.new,
-      },
-    );
+      expect(registrant.existsSync(), isFalse);
+    });
 
-    testUsingContext(
-      'scrubs generated_plugin_registrant file and cleans .gitignore',
-      () async {
-        writeGitignore(fileSystem);
-        writeGeneratedPluginRegistrant(fileSystem);
+    test('scrubs generated_plugin_registrant file and cleans .gitignore', () async {
+      writeGitignore(fileSystem);
+      writeGeneratedPluginRegistrant(fileSystem);
 
-        expect(registrant.existsSync(), isTrue);
-        expect(gitignore.readAsStringSync(), contains('lib/generated_plugin_registrant.dart'));
+      expect(registrant.existsSync(), isTrue);
+      expect(gitignore.readAsStringSync(), contains('lib/generated_plugin_registrant.dart'));
 
-        await createTestCommandRunner(
-          createFakeBuildCommand(
-            androidSdk: FakeAndroidSdk(),
-            buildSystem: buildSystem,
-            fileSystem: fileSystem,
-            logger: logger,
-            osUtils: FakeOperatingSystemUtils(),
-            config: FakeConfig(),
-            platform: FakePlatform(),
-            fileSystemUtils: FakeFileSystemUtils(),
-            terminal: FakeTerminal(),
-            plistParser: FakePlistParser(),
-            processUtils: FakeProcessUtils(),
-            processManager: FakeProcessManager.any(),
-            templateRenderer: FakeTemplateRenderer(),
-            xcode: FakeXcode(),
-            artifacts: FakeArtifacts(),
-            cache: FakeCache(),
-            flutterVersion: FakeFlutterVersion(),
-          ),
-        ).run(<String>['build', 'web', '--no-pub']);
+      await createTestCommandRunner(createBuildCommand()).run(<String>['build', 'web', '--no-pub']);
 
-        expect(registrant.existsSync(), isFalse);
-        expect(
-          gitignore.readAsStringSync(),
-          isNot(contains('lib/generated_plugin_registrant.dart')),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-        BuildSystem: () => buildSystem,
-        Pub: ThrowingPub.new,
-      },
-    );
+      expect(registrant.existsSync(), isFalse);
+      expect(gitignore.readAsStringSync(), isNot(contains('lib/generated_plugin_registrant.dart')));
+    });
   });
 }
 

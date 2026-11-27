@@ -63,6 +63,11 @@ std::shared_ptr<const IdleWaiter> SurfaceContextVK::GetIdleWaiter() const {
   return parent_->GetIdleWaiter();
 }
 
+std::shared_ptr<const GpuSubmissionTracker>
+SurfaceContextVK::GetSubmissionTracker() const {
+  return parent_->GetSubmissionTracker();
+}
+
 void SurfaceContextVK::Shutdown() {
   parent_->Shutdown();
 }
@@ -73,10 +78,14 @@ bool SurfaceContextVK::SetWindowSurface(vk::UniqueSurfaceKHR surface,
 }
 
 void SurfaceContextVK::TeardownSwapchain() {
-  // When background the application, tear down the swapchain to release memory
-  // from the images. When returning to the foreground, SetWindowSurface will be
-  // called which will re-create the swapchain.
+  // When backgrounding the application, tear down the swapchain to release
+  // memory from the images and persist any newly compiled pipelines so short
+  // sessions still warm the on-disk cache. When returning to the foreground,
+  // SetWindowSurface will be called which will re-create the swapchain.
   swapchain_.reset();
+  if (auto pipeline_library = parent_->GetPipelineLibrary()) {
+    PipelineLibraryVK::Cast(*pipeline_library).PersistPipelineCacheToDisk();
+  }
 }
 
 bool SurfaceContextVK::SetSwapchain(std::shared_ptr<SwapchainVK> swapchain) {

@@ -4,6 +4,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import 'velocity_tracker_data.dart';
 
 bool _withinTolerance(double actual, double expected) {

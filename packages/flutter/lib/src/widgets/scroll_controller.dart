@@ -72,12 +72,12 @@ typedef ScrollControllerCallback = void Function(ScrollPosition position);
 class ScrollController extends ChangeNotifier {
   /// Creates a controller for a scrollable widget.
   ScrollController({
-    double initialScrollOffset = 0.0,
+    this._initialScrollOffset = 0.0,
     this.keepScrollOffset = true,
     this.debugLabel,
     this.onAttach,
     this.onDetach,
-  }) : _initialScrollOffset = initialScrollOffset {
+  }) {
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }

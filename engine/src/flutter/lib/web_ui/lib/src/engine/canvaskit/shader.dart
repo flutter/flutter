@@ -174,6 +174,7 @@ class CkImageShader extends BackendImageShader implements CkShader {
 
   bool _isDisposed = false;
 
+  @override
   bool get debugDisposed {
     bool? result;
     assert(() {

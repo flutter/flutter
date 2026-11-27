@@ -30,7 +30,6 @@ import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fake_http_client.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fake_vm_services.dart';
@@ -56,7 +55,7 @@ FakeVmServiceRequest failingDeleteDevFSRequest = FakeVmServiceRequest(
 );
 
 void main() {
-  testWithoutContext('DevFSByteContent', () {
+  test('DevFSByteContent', () {
     final content = DevFSByteContent(<int>[4, 5, 6]);
 
     expect(content.bytes, orderedEquals(<int>[4, 5, 6]));
@@ -67,7 +66,7 @@ void main() {
     expect(content.isModified, isFalse);
   });
 
-  testWithoutContext('DevFSStringContent', () {
+  test('DevFSStringContent', () {
     final content = DevFSStringContent('some string');
 
     expect(content.string, 'some string');
@@ -79,7 +78,7 @@ void main() {
     expect(content.isModified, isFalse);
   });
 
-  testWithoutContext('DevFSFileContent', () async {
+  test('DevFSFileContent', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File file = fileSystem.file('foo.txt');
     final content = DevFSFileContent(file);
@@ -113,26 +112,23 @@ void main() {
     expect(content.isModified, isFalse);
   });
 
-  testWithoutContext(
-    'DevFSFileContent.isModifiedAfter only depends on the file modification time',
-    () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final File file = fileSystem.file('foo.txt')..writeAsBytesSync(<int>[1, 2, 3], flush: true);
-      // A freshly constructed DevFSFileContent has no cached stat, as is the
-      // case for the entries of a newly built asset bundle. Such an entry must
-      // not be reported as modified when its file is older than the given time.
-      final content = DevFSFileContent(file);
+  test('DevFSFileContent.isModifiedAfter only depends on the file modification time', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File file = fileSystem.file('foo.txt')..writeAsBytesSync(<int>[1, 2, 3], flush: true);
+    // A freshly constructed DevFSFileContent has no cached stat, as is the
+    // case for the entries of a newly built asset bundle. Such an entry must
+    // not be reported as modified when its file is older than the given time.
+    final content = DevFSFileContent(file);
 
-      final DateTime modified = file.statSync().modified;
-      expect(content.isModifiedAfter(modified.add(const Duration(seconds: 5))), isFalse);
-      expect(content.isModifiedAfter(modified.subtract(const Duration(seconds: 5))), isTrue);
+    final DateTime modified = file.statSync().modified;
+    expect(content.isModifiedAfter(modified.add(const Duration(seconds: 5))), isFalse);
+    expect(content.isModifiedAfter(modified.subtract(const Duration(seconds: 5))), isTrue);
 
-      file.deleteSync();
-      expect(content.isModifiedAfter(modified.subtract(const Duration(seconds: 5))), isFalse);
-    },
-  );
+    file.deleteSync();
+    expect(content.isModifiedAfter(modified.subtract(const Duration(seconds: 5))), isFalse);
+  });
 
-  testWithoutContext('DevFSStringCompressingBytesContent', () {
+  test('DevFSStringCompressingBytesContent', () {
     final content = DevFSStringCompressingBytesContent('uncompressed string');
 
     expect(content.equals('uncompressed string'), isTrue);
@@ -144,33 +140,178 @@ void main() {
     expect(content.isModified, isFalse);
   });
 
-  testWithoutContext(
-    'DevFS create throws a DevFSException when vmservice disconnects unexpectedly',
+  test('DevFS create throws a DevFSException when vmservice disconnects unexpectedly', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final OperatingSystemUtils osUtils = FakeOperatingSystemUtils();
+    final fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[failingCreateDevFSRequest],
+      httpAddress: Uri.parse('http://localhost'),
+    );
+
+    final devFS = DevFS(
+      fakeVmServiceHost.vmService,
+      'test',
+      fileSystem.currentDirectory,
+      buildMode: BuildMode.debug,
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        fs: fileSystem,
+        logger: BufferLogger.test(),
+        os: osUtils,
+        processManager: FakeProcessManager.empty(),
+      ),
+      httpClient: FakeHttpClient.any(),
+    );
+    expect(() async => devFS.create(), throwsA(isA<DevFSException>()));
+  });
+
+  DevFS createTestDevFS(FakeVmServiceHost host) {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    return DevFS(
+      host.vmService,
+      'test',
+      fileSystem.currentDirectory,
+      buildMode: .debug,
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        fs: fileSystem,
+        logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
+        processManager: FakeProcessManager.empty(),
+      ),
+      httpClient: FakeHttpClient.any(),
+    );
+  }
+
+  test('DevFS create translates target VM filesystem RPCError into DevFSException', () async {
+    final fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        FakeVmServiceRequest(
+          method: '_createDevFS',
+          args: const <String, Object>{'fsName': 'test'},
+          error: FakeRPCError(
+            code: vm_service.RPCErrorKind.kInternalError.code,
+            data: const <String, Object?>{
+              'details':
+                  '_createDevFS: Unexpected exception:PathAccessException: '
+                  r"Creation of temporary directory failed, path = 'C:\Users\user\AppData\Local\Temp' "
+                  '(OS Error: Access is denied, errno = 5)\n'
+                  '#0      _checkForErrorResponse (dart:io/common.dart:58:9)\n'
+                  '#1      _Directory.createTemp.<anonymous closure> (dart:io/directory_impl.dart:163:7)',
+            },
+          ),
+        ),
+      ],
+      httpAddress: Uri.parse('http://localhost'),
+    );
+
+    await expectLater(
+      createTestDevFS(fakeVmServiceHost).create(),
+      throwsA(
+        isA<DevFSException>()
+            .having((DevFSException e) => e.message, 'message', 'Failed to create DevFS on device')
+            .having(
+              (DevFSException e) => e.error,
+              'error',
+              r"PathAccessException: Creation of temporary directory failed, path = 'C:\Users\user\AppData\Local\Temp' (OS Error: Access is denied, errno = 5)",
+            ),
+      ),
+    );
+    expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+  });
+
+  test(
+    'DevFS create translates target VM filesystem RPCError on retry after existing filesystem',
     () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final OperatingSystemUtils osUtils = FakeOperatingSystemUtils();
+      // 1001 is kFileSystemAlreadyExists in //dart/runtime/vm/json_stream.h.
+      const kFileSystemAlreadyExists = 1001;
       final fakeVmServiceHost = FakeVmServiceHost(
-        requests: <VmServiceExpectation>[failingCreateDevFSRequest],
+        requests: <VmServiceExpectation>[
+          const FakeVmServiceRequest(
+            method: '_createDevFS',
+            args: <String, Object>{'fsName': 'test'},
+            error: FakeRPCError(code: kFileSystemAlreadyExists),
+          ),
+          const FakeVmServiceRequest(
+            method: '_deleteDevFS',
+            args: <String, Object>{'fsName': 'test'},
+          ),
+          FakeVmServiceRequest(
+            method: '_createDevFS',
+            args: const <String, Object>{'fsName': 'test'},
+            error: FakeRPCError(
+              code: vm_service.RPCErrorKind.kInternalError.code,
+              data: const <String, Object?>{
+                'details':
+                    '_createDevFS: Unexpected exception: FileSystemException: '
+                    "Creation of temporary directory failed, path = '/tmp' "
+                    '(OS Error: No space left on device, errno = 28)\n'
+                    '#0      _checkForErrorResponse (dart:io/common.dart:58:9)',
+              },
+            ),
+          ),
+        ],
         httpAddress: Uri.parse('http://localhost'),
       );
 
-      final devFS = DevFS(
-        fakeVmServiceHost.vmService,
-        'test',
-        fileSystem.currentDirectory,
-        osUtils: osUtils,
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        httpClient: FakeHttpClient.any(),
-        processManager: FakeProcessManager.empty(),
-        artifacts: Artifacts.test(),
-        buildMode: BuildMode.debug,
+      await expectLater(
+        createTestDevFS(fakeVmServiceHost).create(),
+        throwsA(
+          isA<DevFSException>()
+              .having(
+                (DevFSException e) => e.message,
+                'message',
+                'Failed to create DevFS on device',
+              )
+              .having(
+                (DevFSException e) => e.error,
+                'error',
+                "FileSystemException: Creation of temporary directory failed, path = '/tmp' (OS Error: No space left on device, errno = 28)",
+              ),
+        ),
       );
-      expect(() async => devFS.create(), throwsA(isA<DevFSException>()));
+      expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
     },
   );
 
-  testWithoutContext('DevFS destroy is resilient to vmservice disconnection', () async {
+  test('DevFS create rethrows non-filesystem internal RPCError from target VM', () async {
+    final fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        FakeVmServiceRequest(
+          method: '_createDevFS',
+          args: const <String, Object>{'fsName': 'test'},
+          error: FakeRPCError(
+            code: vm_service.RPCErrorKind.kInternalError.code,
+            data: const <String, Object?>{
+              'details':
+                  '_createDevFS: Unexpected exception:Bad state: Unexpected VM state\n'
+                  '#0      DevFS._createDevFS (dart:_vmservice/devfs.dart:197:21)',
+            },
+          ),
+        ),
+      ],
+      httpAddress: Uri.parse('http://localhost'),
+    );
+
+    await expectLater(
+      createTestDevFS(fakeVmServiceHost).create(),
+      throwsA(isA<vm_service.RPCError>()),
+    );
+    expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+  });
+
+  test('DevFSException.toString omits null error and stackTrace', () {
+    expect(
+      DevFSException('Failed to create DevFS').toString(),
+      'DevFSException(Failed to create DevFS)',
+    );
+    expect(
+      DevFSException('Service disconnected', StateError('disconnected')).toString(),
+      'DevFSException(Service disconnected, Bad state: disconnected)',
+    );
+  });
+
+  test('DevFS destroy is resilient to vmservice disconnection', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final OperatingSystemUtils osUtils = FakeOperatingSystemUtils();
     final fakeVmServiceHost = FakeVmServiceHost(
@@ -182,20 +323,22 @@ void main() {
       fakeVmServiceHost.vmService,
       'test',
       fileSystem.currentDirectory,
-      osUtils: osUtils,
-      fileSystem: fileSystem,
-      logger: BufferLogger.test(),
-      httpClient: FakeHttpClient.any(),
-      processManager: FakeProcessManager.empty(),
-      artifacts: Artifacts.test(),
       buildMode: BuildMode.debug,
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        fs: fileSystem,
+        logger: BufferLogger.test(),
+        os: osUtils,
+        processManager: FakeProcessManager.empty(),
+      ),
+      httpClient: FakeHttpClient.any(),
     );
 
     expect(await devFS.create(), isNotNull);
     await devFS.destroy(); // Testing that this does not throw.
   });
 
-  testWithoutContext('DevFS retries uploads when connection reset by peer', () async {
+  test('DevFS retries uploads when connection reset by peer', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final osUtils = OperatingSystemUtils(
       fileSystem: fileSystem,
@@ -224,9 +367,14 @@ void main() {
       fakeVmServiceHost.vmService,
       'test',
       fileSystem.currentDirectory,
-      osUtils: osUtils,
-      fileSystem: fileSystem,
-      logger: BufferLogger.test(),
+      buildMode: BuildMode.debug,
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        fs: fileSystem,
+        logger: BufferLogger.test(),
+        os: osUtils,
+        processManager: FakeProcessManager.empty(),
+      ),
       httpClient: FakeHttpClient.list(<FakeRequest>[
         FakeRequest(
           Uri.parse('http://localhost'),
@@ -261,9 +409,6 @@ void main() {
         ),
       ]),
       uploadRetryThrottle: Duration.zero,
-      processManager: FakeProcessManager.empty(),
-      artifacts: Artifacts.test(),
-      buildMode: BuildMode.debug,
     );
     await devFS.create();
 
@@ -282,7 +427,7 @@ void main() {
     expect(report.success, isTrue);
   });
 
-  testWithoutContext('DevFS reports unsuccessful compile when errors are returned', () async {
+  test('DevFS reports unsuccessful compile when errors are returned', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[createDevFSRequest],
@@ -293,13 +438,15 @@ void main() {
       fakeVmServiceHost.vmService,
       'test',
       fileSystem.currentDirectory,
-      fileSystem: fileSystem,
-      logger: BufferLogger.test(),
-      osUtils: FakeOperatingSystemUtils(),
-      httpClient: FakeHttpClient.any(),
-      processManager: FakeProcessManager.empty(),
-      artifacts: Artifacts.test(),
       buildMode: BuildMode.debug,
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        fs: fileSystem,
+        logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
+        processManager: FakeProcessManager.empty(),
+      ),
+      httpClient: FakeHttpClient.any(),
     );
 
     await devFS.create();
@@ -325,54 +472,53 @@ void main() {
     expect(devFS.lastCompiled, previousCompile);
   });
 
-  testWithoutContext(
-    'DevFS correctly updates last compiled time when compilation does not fail',
-    () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final fakeVmServiceHost = FakeVmServiceHost(
-        requests: <VmServiceExpectation>[createDevFSRequest],
-        httpAddress: Uri.parse('http://localhost'),
-      );
+  test('DevFS correctly updates last compiled time when compilation does not fail', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[createDevFSRequest],
+      httpAddress: Uri.parse('http://localhost'),
+    );
 
-      final devFS = DevFS(
-        fakeVmServiceHost.vmService,
-        'test',
-        fileSystem.currentDirectory,
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        osUtils: FakeOperatingSystemUtils(),
-        httpClient: FakeHttpClient.any(),
-        processManager: FakeProcessManager.empty(),
+    final devFS = DevFS(
+      fakeVmServiceHost.vmService,
+      'test',
+      fileSystem.currentDirectory,
+      buildMode: BuildMode.debug,
+      toolContext: FakeToolContext(
         artifacts: Artifacts.test(),
-        buildMode: BuildMode.debug,
-      );
+        fs: fileSystem,
+        logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
+        processManager: FakeProcessManager.empty(),
+      ),
+      httpClient: FakeHttpClient.any(),
+    );
 
-      await devFS.create();
-      final DateTime? previousCompile = devFS.lastCompiled;
+    await devFS.create();
+    final DateTime? previousCompile = devFS.lastCompiled;
 
-      final residentCompiler = FakeResidentCompiler();
-      residentCompiler.onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
-        fileSystem.file('lib/foo.txt.dill').createSync(recursive: true);
-        return const CompilerOutput('lib/foo.txt.dill', 0, <Uri>[]);
-      };
+    final residentCompiler = FakeResidentCompiler();
+    residentCompiler.onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
+      fileSystem.file('lib/foo.txt.dill').createSync(recursive: true);
+      return const CompilerOutput('lib/foo.txt.dill', 0, <Uri>[]);
+    };
 
-      final UpdateFSReport report = await devFS.update(
-        mainUri: Uri.parse('lib/main.dart'),
-        generator: residentCompiler,
-        dillOutputPath: 'lib/foo.dill',
-        pathToReload: 'lib/foo.txt.dill',
-        trackWidgetCreation: false,
-        invalidatedFiles: <Uri>[],
-        packageConfig: PackageConfig.empty,
-        shaderCompiler: const FakeShaderCompiler(),
-      );
+    final UpdateFSReport report = await devFS.update(
+      mainUri: Uri.parse('lib/main.dart'),
+      generator: residentCompiler,
+      dillOutputPath: 'lib/foo.dill',
+      pathToReload: 'lib/foo.txt.dill',
+      trackWidgetCreation: false,
+      invalidatedFiles: <Uri>[],
+      packageConfig: PackageConfig.empty,
+      shaderCompiler: const FakeShaderCompiler(),
+    );
 
-      expect(report.success, true);
-      expect(devFS.lastCompiled, isNot(previousCompile));
-    },
-  );
+    expect(report.success, true);
+    expect(devFS.lastCompiled, isNot(previousCompile));
+  });
 
-  testWithoutContext('DevFS can reset compilation time', () async {
+  test('DevFS can reset compilation time', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[createDevFSRequest],
@@ -384,13 +530,15 @@ void main() {
       fakeVmServiceHost.vmService,
       'test',
       fileSystem.currentDirectory,
-      fileSystem: fileSystem,
-      logger: BufferLogger.test(),
-      osUtils: FakeOperatingSystemUtils(),
-      httpClient: HttpClient(),
-      processManager: FakeProcessManager.empty(),
-      artifacts: Artifacts.test(),
       buildMode: BuildMode.debug,
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        fs: fileSystem,
+        logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
+        processManager: FakeProcessManager.empty(),
+      ),
+      httpClient: HttpClient(),
     );
 
     await devFS.create();
@@ -425,7 +573,7 @@ void main() {
     expect(devFS.lastCompiled, previousCompile);
   });
 
-  testWithoutContext('DevFS uses provided DevFSWriter instead of default HTTP writer', () async {
+  test('DevFS uses provided DevFSWriter instead of default HTTP writer', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final writer = FakeDevFSWriter();
     final fakeVmServiceHost = FakeVmServiceHost(
@@ -436,13 +584,15 @@ void main() {
       fakeVmServiceHost.vmService,
       'test',
       fileSystem.currentDirectory,
-      fileSystem: fileSystem,
-      logger: BufferLogger.test(),
-      osUtils: FakeOperatingSystemUtils(),
-      httpClient: FakeHttpClient.any(),
-      processManager: FakeProcessManager.empty(),
-      artifacts: Artifacts.test(),
       buildMode: BuildMode.debug,
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        fs: fileSystem,
+        logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
+        processManager: FakeProcessManager.empty(),
+      ),
+      httpClient: FakeHttpClient.any(),
     );
 
     await devFS.create();
@@ -471,7 +621,7 @@ void main() {
     expect(writer.written, true);
   });
 
-  testWithoutContext('Local DevFSWriter can copy and write files', () async {
+  test('Local DevFSWriter can copy and write files', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File file = fileSystem.file('foo_bar')..writeAsStringSync('goodbye');
     final writer = LocalDevFSWriter(fileSystem: fileSystem);
@@ -487,7 +637,7 @@ void main() {
     expect(fileSystem.file('/foo/bar/devfs/goodbye').readAsStringSync(), 'goodbye');
   });
 
-  testWithoutContext('Local DevFSWriter turns FileSystemException into DevFSException', () async {
+  test('Local DevFSWriter turns FileSystemException into DevFSException', () async {
     final handler = FileExceptionHandler();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
     final writer = LocalDevFSWriter(fileSystem: fileSystem);
@@ -502,7 +652,7 @@ void main() {
     );
   });
 
-  testWithoutContext('DevFS correctly records the elapsed time', () async {
+  test('DevFS correctly records the elapsed time', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     // final FakeDevFSWriter writer = FakeDevFSWriter();
     final fakeVmServiceHost = FakeVmServiceHost(
@@ -514,9 +664,14 @@ void main() {
       fakeVmServiceHost.vmService,
       'test',
       fileSystem.currentDirectory,
-      fileSystem: fileSystem,
-      logger: BufferLogger.test(),
-      osUtils: FakeOperatingSystemUtils(),
+      buildMode: BuildMode.debug,
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        fs: fileSystem,
+        logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
+        processManager: FakeProcessManager.empty(),
+      ),
       httpClient: FakeHttpClient.any(),
       stopwatchFactory: FakeStopwatchFactory(
         stopwatches: <String, Stopwatch>{
@@ -524,9 +679,6 @@ void main() {
           'transfer': FakeStopwatch()..elapsed = const Duration(seconds: 5),
         },
       ),
-      processManager: FakeProcessManager.empty(),
-      artifacts: Artifacts.test(),
-      buildMode: BuildMode.debug,
     );
 
     await devFS.create();
@@ -553,7 +705,7 @@ void main() {
     expect(report.transferDuration, const Duration(seconds: 5));
   });
 
-  testUsingContext('DevFS actually starts compile before processing bundle', () async {
+  test('DevFS actually starts compile before processing bundle', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[createDevFSRequest],
@@ -566,13 +718,16 @@ void main() {
       fakeVmServiceHost.vmService,
       'test',
       fileSystem.currentDirectory,
-      fileSystem: fileSystem,
-      logger: logger,
-      osUtils: FakeOperatingSystemUtils(),
-      httpClient: FakeHttpClient.any(),
-      processManager: FakeProcessManager.empty(),
-      artifacts: Artifacts.test(),
       buildMode: BuildMode.debug,
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        config: Config.test(),
+        fs: fileSystem,
+        logger: logger,
+        os: FakeOperatingSystemUtils(),
+        processManager: FakeProcessManager.empty(),
+      ),
+      httpClient: FakeHttpClient.any(),
     );
 
     await devFS.create();
@@ -614,7 +769,7 @@ void main() {
       frontendServerStdErr(),
       frontendServerStdIn,
     );
-    final generatorStdoutHandler = StdoutHandler(logger: testLogger, fileSystem: fileSystem);
+    final generatorStdoutHandler = StdoutHandler(logger: logger, fileSystem: fileSystem);
 
     final residentCompiler = DefaultResidentCompiler(
       'sdkroot',
@@ -670,7 +825,7 @@ void main() {
   });
 
   group('Shader compilation', () {
-    testWithoutContext('DevFS recompiles shaders', () async {
+    test('DevFS recompiles shaders', () async {
       final fileSystem = MemoryFileSystem.test();
       final fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[createDevFSRequest],
@@ -681,14 +836,16 @@ void main() {
         fakeVmServiceHost.vmService,
         'test',
         fileSystem.currentDirectory,
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        httpClient: FakeHttpClient.any(),
-        config: Config.test(),
-        processManager: FakeProcessManager.empty(),
-        artifacts: Artifacts.test(),
         buildMode: BuildMode.debug,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          config: Config.test(),
+          fs: fileSystem,
+          logger: logger,
+          os: FakeOperatingSystemUtils(),
+          processManager: FakeProcessManager.empty(),
+        ),
+        httpClient: FakeHttpClient.any(),
       );
 
       await devFS.create();
@@ -729,7 +886,7 @@ void main() {
       expect(devFS.assetPathsToEvict, <String>{'not.frag'});
     });
 
-    testWithoutContext('DevFS tracks when FontManifest is updated', () async {
+    test('DevFS tracks when FontManifest is updated', () async {
       final fileSystem = MemoryFileSystem.test();
       final fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[createDevFSRequest],
@@ -740,14 +897,16 @@ void main() {
         fakeVmServiceHost.vmService,
         'test',
         fileSystem.currentDirectory,
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        httpClient: FakeHttpClient.any(),
-        config: Config.test(),
-        processManager: FakeProcessManager.empty(),
-        artifacts: Artifacts.test(),
         buildMode: BuildMode.debug,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          config: Config.test(),
+          fs: fileSystem,
+          logger: logger,
+          os: FakeOperatingSystemUtils(),
+          processManager: FakeProcessManager.empty(),
+        ),
+        httpClient: FakeHttpClient.any(),
       );
 
       await devFS.create();
@@ -788,7 +947,7 @@ void main() {
   });
 
   group('Asset transformation', () {
-    testWithoutContext('DevFS re-transforms assets with transformers during update', () async {
+    test('DevFS re-transforms assets with transformers during update', () async {
       final fileSystem = MemoryFileSystem.test();
       final artifacts = Artifacts.test();
       final devFSWriter = FakeDevFSWriter();
@@ -830,14 +989,16 @@ void main() {
         fakeVmServiceHost.vmService,
         'test',
         fileSystem.currentDirectory,
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        httpClient: FakeHttpClient.any(),
-        config: Config.test(),
-        processManager: processManager,
-        artifacts: artifacts,
         buildMode: BuildMode.debug,
+        toolContext: FakeToolContext(
+          artifacts: artifacts,
+          config: Config.test(),
+          fs: fileSystem,
+          logger: logger,
+          os: FakeOperatingSystemUtils(),
+          processManager: processManager,
+        ),
+        httpClient: FakeHttpClient.any(),
       );
 
       await devFS.create();
@@ -883,7 +1044,7 @@ void main() {
       );
     });
 
-    testWithoutContext('DevFS reports failure when asset transformation fails', () async {
+    test('DevFS reports failure when asset transformation fails', () async {
       final fileSystem = MemoryFileSystem.test();
       final artifacts = Artifacts.test();
       final devFSWriter = FakeDevFSWriter();
@@ -909,14 +1070,16 @@ void main() {
         fakeVmServiceHost.vmService,
         'test',
         fileSystem.currentDirectory,
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        httpClient: FakeHttpClient.any(),
-        config: Config.test(),
-        processManager: processManager,
-        artifacts: artifacts,
         buildMode: BuildMode.debug,
+        toolContext: FakeToolContext(
+          artifacts: artifacts,
+          config: Config.test(),
+          fs: fileSystem,
+          logger: logger,
+          os: FakeOperatingSystemUtils(),
+          processManager: processManager,
+        ),
+        httpClient: FakeHttpClient.any(),
       );
 
       await devFS.create();
@@ -975,120 +1138,114 @@ void main() {
       );
     });
 
-    testWithoutContext(
-      'DevFS.updateBundle ensures all side effects are completed before returning (regression test for race condition)',
-      () async {
-        final FileSystem fileSystem = MemoryFileSystem.test();
-        final dirtyEntries = <Uri, DevFSContent>{};
-        final assetBundle = FakeBundle();
-        assetBundle.entries['shader.frag'] = AssetBundleEntry(
-          DevFSStringContent('source'),
-          kind: AssetKind.shader,
-          transformers: const [],
-        );
+    test('DevFS.updateBundle ensures all side effects are completed before returning (regression test for race condition)', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final dirtyEntries = <Uri, DevFSContent>{};
+      final assetBundle = FakeBundle();
+      assetBundle.entries['shader.frag'] = AssetBundleEntry(
+        DevFSStringContent('source'),
+        kind: AssetKind.shader,
+        transformers: const [],
+      );
 
-        final shaderCompleter = Completer<DevFSContent>();
-        final shaderCompiler = DelayedFakeShaderCompiler(shaderCompleter.future);
+      final shaderCompleter = Completer<DevFSContent>();
+      final shaderCompiler = DelayedFakeShaderCompiler(shaderCompleter.future);
 
-        final assetTransformer = DevelopmentAssetTransformer(
+      final assetTransformer = DevelopmentAssetTransformer(
+        fileSystem: fileSystem,
+        transformer: AssetTransformer(
+          processManager: FakeProcessManager.any(),
           fileSystem: fileSystem,
-          transformer: AssetTransformer(
-            processManager: FakeProcessManager.any(),
-            fileSystem: fileSystem,
-            dartBinaryPath: 'dart',
-            buildMode: BuildMode.debug,
-          ),
-          logger: BufferLogger.test(),
-        );
+          dartBinaryPath: 'dart',
+          buildMode: BuildMode.debug,
+        ),
+        logger: BufferLogger.test(),
+      );
 
-        final Future<int> updateFuture = DevFS.updateBundle(
-          bundle: assetBundle,
-          dirtyEntries: dirtyEntries,
-          assetDirectory: 'assets',
-          assetTransformer: assetTransformer,
-          shaderCompiler: shaderCompiler,
+      final Future<int> updateFuture = DevFS.updateBundle(
+        bundle: assetBundle,
+        dirtyEntries: dirtyEntries,
+        assetDirectory: 'assets',
+        assetTransformer: assetTransformer,
+        shaderCompiler: shaderCompiler,
+        fileSystem: fileSystem,
+        rootDirectoryPath: '/',
+        assetPathsToEvict: <String>{},
+        shaderPathsToEvict: <String>{},
+        bundleFirstUpload: true,
+        syncAllAssetsOnFirstUpload: true,
+      );
+
+      // Complete the shader compilation.
+      shaderCompleter.complete(DevFSStringContent('compiled'));
+
+      // Wait for updateBundle to return.
+      await updateFuture;
+
+      // Verify side effects are visible immediately.
+      // In the broken code, this could fail if updateBundle returned before the .then callback finished.
+      expect(dirtyEntries, hasLength(1));
+      expect(await dirtyEntries.values.first.contentsAsBytes(), utf8.encode('compiled'));
+    });
+
+    test('DevFS.updateBundle initializes isModified state of assets during first upload when sync is skipped', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final dirtyEntries = <Uri, DevFSContent>{};
+      final assetBundle = FakeBundle();
+      final assetContent = DevFSByteContent(<int>[1, 2, 3, 4]);
+      assetBundle.entries['asset.txt'] = AssetBundleEntry(
+        assetContent,
+        kind: AssetKind.regular,
+        transformers: const [],
+      );
+
+      const shaderCompiler = FakeShaderCompiler();
+      final assetTransformer = DevelopmentAssetTransformer(
+        fileSystem: fileSystem,
+        transformer: AssetTransformer(
+          processManager: FakeProcessManager.any(),
           fileSystem: fileSystem,
-          rootDirectoryPath: '/',
-          assetPathsToEvict: <String>{},
-          shaderPathsToEvict: <String>{},
-          bundleFirstUpload: true,
-          syncAllAssetsOnFirstUpload: true,
-        );
+          dartBinaryPath: 'dart',
+          buildMode: BuildMode.debug,
+        ),
+        logger: BufferLogger.test(),
+      );
 
-        // Complete the shader compilation.
-        shaderCompleter.complete(DevFSStringContent('compiled'));
+      // Perform the first upload with sync skipped.
+      final int firstUploadSyncedBytes = await DevFS.updateBundle(
+        bundle: assetBundle,
+        dirtyEntries: dirtyEntries,
+        assetDirectory: 'assets',
+        assetTransformer: assetTransformer,
+        shaderCompiler: shaderCompiler,
+        fileSystem: fileSystem,
+        rootDirectoryPath: '/',
+        assetPathsToEvict: <String>{},
+        shaderPathsToEvict: <String>{},
+        bundleFirstUpload: true,
+      );
 
-        // Wait for updateBundle to return.
-        await updateFuture;
+      expect(firstUploadSyncedBytes, 0);
+      expect(dirtyEntries, isEmpty);
 
-        // Verify side effects are visible immediately.
-        // In the broken code, this could fail if updateBundle returned before the .then callback finished.
-        expect(dirtyEntries, hasLength(1));
-        expect(await dirtyEntries.values.first.contentsAsBytes(), utf8.encode('compiled'));
-      },
-    );
+      // Perform a subsequent hot restart update (where bundleFirstUpload is false).
+      // Since the asset has not been modified since the first upload, it should not be synced.
+      final int secondUploadSyncedBytes = await DevFS.updateBundle(
+        bundle: assetBundle,
+        dirtyEntries: dirtyEntries,
+        assetDirectory: 'assets',
+        assetTransformer: assetTransformer,
+        shaderCompiler: shaderCompiler,
+        fileSystem: fileSystem,
+        rootDirectoryPath: '/',
+        assetPathsToEvict: <String>{},
+        shaderPathsToEvict: <String>{},
+        bundleFirstUpload: false,
+      );
 
-    testWithoutContext(
-      'DevFS.updateBundle initializes isModified state of assets during first upload when sync is skipped',
-      () async {
-        final FileSystem fileSystem = MemoryFileSystem.test();
-        final dirtyEntries = <Uri, DevFSContent>{};
-        final assetBundle = FakeBundle();
-        final assetContent = DevFSByteContent(<int>[1, 2, 3, 4]);
-        assetBundle.entries['asset.txt'] = AssetBundleEntry(
-          assetContent,
-          kind: AssetKind.regular,
-          transformers: const [],
-        );
-
-        const shaderCompiler = FakeShaderCompiler();
-        final assetTransformer = DevelopmentAssetTransformer(
-          fileSystem: fileSystem,
-          transformer: AssetTransformer(
-            processManager: FakeProcessManager.any(),
-            fileSystem: fileSystem,
-            dartBinaryPath: 'dart',
-            buildMode: BuildMode.debug,
-          ),
-          logger: BufferLogger.test(),
-        );
-
-        // Perform the first upload with sync skipped.
-        final int firstUploadSyncedBytes = await DevFS.updateBundle(
-          bundle: assetBundle,
-          dirtyEntries: dirtyEntries,
-          assetDirectory: 'assets',
-          assetTransformer: assetTransformer,
-          shaderCompiler: shaderCompiler,
-          fileSystem: fileSystem,
-          rootDirectoryPath: '/',
-          assetPathsToEvict: <String>{},
-          shaderPathsToEvict: <String>{},
-          bundleFirstUpload: true,
-        );
-
-        expect(firstUploadSyncedBytes, 0);
-        expect(dirtyEntries, isEmpty);
-
-        // Perform a subsequent hot restart update (where bundleFirstUpload is false).
-        // Since the asset has not been modified since the first upload, it should not be synced.
-        final int secondUploadSyncedBytes = await DevFS.updateBundle(
-          bundle: assetBundle,
-          dirtyEntries: dirtyEntries,
-          assetDirectory: 'assets',
-          assetTransformer: assetTransformer,
-          shaderCompiler: shaderCompiler,
-          fileSystem: fileSystem,
-          rootDirectoryPath: '/',
-          assetPathsToEvict: <String>{},
-          shaderPathsToEvict: <String>{},
-          bundleFirstUpload: false,
-        );
-
-        expect(secondUploadSyncedBytes, 0);
-        expect(dirtyEntries, isEmpty);
-      },
-    );
+      expect(secondUploadSyncedBytes, 0);
+      expect(dirtyEntries, isEmpty);
+    });
   });
 }
 

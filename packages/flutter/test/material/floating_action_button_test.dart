@@ -14,6 +14,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
 
@@ -515,8 +516,7 @@ void main() {
             },
       ),
     );
-    await tester
-        .pump(); // this would fail if heroTag was the same on both FloatingActionButtons (see below).
+    await tester.pump(); // this would fail if heroTag was the same on both FloatingActionButtons (see below).
   });
 
   testWidgets('Floating Action Button heroTag - with duplicate', (WidgetTester tester) async {

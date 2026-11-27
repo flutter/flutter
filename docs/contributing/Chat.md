@@ -69,6 +69,6 @@ Discord has both actual threads (temporary new channels) and a threadingish feat
 You can [change your status](https://support.discord.com/hc/en-us/articles/360035407531-Custom-Status) (online, away, custom messages) by clicking on your avatar in Discord.
 
 
-# Design documents
+# Design documents (RFCs)
 
-This page used to discuss how to create design docs, but that content is now on its own page: [Design documents](Design-Documents.md).
+Flutter design documents are authored and reviewed as Requests for Comments (RFCs) in the [Flutter RFC repository](https://github.com/flutter/rfc). See [Design documents](Design-Documents.md) for details on the process and guidelines.

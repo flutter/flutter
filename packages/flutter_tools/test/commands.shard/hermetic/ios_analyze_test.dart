@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/commands/ios_analyze.dart';
@@ -21,7 +20,8 @@ import 'package:flutter_tools/src/project_validator.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -30,7 +30,6 @@ void main() {
     late FileSystem fileSystem;
     late Platform platform;
     late FakeProcessManager processManager;
-    late Terminal terminal;
     late AnalyzeCommand command;
     late CommandRunner<void> runner;
 
@@ -43,28 +42,21 @@ void main() {
       fileSystem = MemoryFileSystem.test();
       platform = FakePlatform();
       processManager = FakeProcessManager.empty();
-      terminal = Terminal.test();
       command = AnalyzeCommand(
-        artifacts: Artifacts.test(),
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-        terminal: terminal,
         allProjectValidators: <ProjectValidator>[],
         suppressAnalytics: true,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
       );
       runner = createTestCommandRunner(command);
-
-      // Setup repo roots
-      const homePath = '/home/user/flutter';
-      Cache.flutterRoot = homePath;
-      for (final dir in <String>['dev', 'examples', 'packages']) {
-        fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
-      }
     });
 
-    testWithoutContext('can output json file', () async {
+    test('can output json file', () async {
       final ios = FakeIosProject();
       final project = FakeFlutterProject(ios);
       const expectedConfig = 'someConfig';
@@ -83,7 +75,7 @@ void main() {
       expect(ios.outputTarget, expectedTarget);
     });
 
-    testWithoutContext('can list build options', () async {
+    test('can list build options', () async {
       final ios = FakeIosProject();
       final project = FakeFlutterProject(ios);
       const targets = <String>['target1', 'target2'];
@@ -99,7 +91,7 @@ void main() {
       expect(jsonOutput['configurations'], unorderedEquals(configs));
     });
 
-    testUsingContext('throws if provide multiple path', () async {
+    test('throws if provide multiple path', () async {
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('someTemp');
       final Directory anotherTempDir = fileSystem.systemTempDirectory.createTempSync('another');
       await expectLater(
@@ -120,7 +112,7 @@ void main() {
       );
     });
 
-    testUsingContext('throws if not enough parameters', () async {
+    test('throws if not enough parameters', () async {
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('someTemp');
       await expectLater(
         runner.run(<String>['analyze', '--ios', '--output-universal-link-settings', tempDir.path]),

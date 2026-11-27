@@ -7,7 +7,9 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 
 import '../layer/layer_painting.dart';
+import '../primitives/canvas.dart';
 import '../primitives/image.dart';
+import '../primitives/image_source.dart';
 import '../util.dart';
 import 'canvas.dart';
 import 'canvaskit_api.dart';
@@ -18,18 +20,39 @@ import 'surface.dart';
 
 /// Implements [ui.Picture] on top of [SkPicture].
 class CkPicture implements LayerPicture, StackTraceDebugger {
-  CkPicture(SkPicture skPicture) : _isClone = false {
-    _ref = CkCountedRef<CkPicture, SkPicture>(skPicture, this, 'Picture');
+  CkPicture(SkPicture skPicture, [this.imageTracker]) : _isClone = false {
+    _ref = CkCountedRef<CkPicture, SkPicture>(
+      skPicture,
+      this,
+      'Picture',
+      onDispose: _createDisposer(imageTracker),
+    );
     _initStackTrace();
   }
 
-  CkPicture._clone(CkCountedRef<CkPicture, SkPicture> ref) : _isClone = true {
+  CkPicture._clone(CkCountedRef<CkPicture, SkPicture> ref, this.imageTracker) : _isClone = true {
     _ref = ref;
     ref.ref(this);
     _initStackTrace();
   }
 
+  /// Builds the [CkCountedRef] disposal callback without capturing `this`, so
+  /// `DomFinalizationRegistry`'s strongly held `UniqueRef` does not retain
+  /// [_ref] and prevent garbage collection.
+  static void Function(SkPicture)? _createDisposer(PictureImageTracker? tracker) {
+    if (tracker == null) {
+      return null;
+    }
+    return (SkPicture _) {
+      tracker.releaseAll();
+    };
+  }
+
   final bool _isClone;
+
+  /// Retained image sources for images recorded onto this picture.
+  @override
+  final PictureImageTracker? imageTracker;
 
   late final CkCountedRef<CkPicture, SkPicture> _ref;
 
@@ -91,6 +114,9 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
   @override
   void dispose() {
     assert(debugCheckNotDisposed('Cannot dispose picture.'));
+    if (_isDisposed) {
+      return;
+    }
     assert(() {
       _debugDisposalStackTrace = StackTrace.current;
       return true;
@@ -119,9 +145,9 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
     surface.setSize(BitmapSize(width, height));
     final SkSurface skiaSurface = surface.skSurface!;
 
-    final ckCanvas = CkCanvas.fromSkCanvas(skiaSurface.getCanvas());
-    ckCanvas.clear(const ui.Color(0x00000000));
-    ckCanvas.drawPicture(this);
+    final canvas = EngineCanvas(CkCanvas(skiaSurface.getCanvas()));
+    canvas.clear(const ui.Color(0x00000000));
+    canvas.drawPicture(this);
     final SkImage skImage = skiaSurface.makeImageSnapshot();
 
     // TODO(hterkelsen): This is a hack to get the pixels from the SkImage.
@@ -152,7 +178,7 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
 
   @override
   LayerPicture clone() {
-    return CkPicture._clone(_ref);
+    return CkPicture._clone(_ref, imageTracker);
   }
 
   void _initStackTrace() {

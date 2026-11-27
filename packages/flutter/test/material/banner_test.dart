@@ -478,9 +478,7 @@ void main() {
     await tester.pump(); // begin animation
     expect(find.text('banner1'), findsOneWidget);
     expect(find.text('banner2'), findsNothing);
-    await tester.pump(
-      const Duration(milliseconds: 750),
-    ); // 3.75s // last frame of animation, material banner removed from build, new material banner put in its place
+    await tester.pump(const Duration(milliseconds: 750)); // 3.75s // last frame of animation, material banner removed from build, new material banner put in its place
     expect(find.text('banner1'), findsNothing);
     expect(find.text('banner2'), findsOneWidget);
     await tester.pump(); // begin animation
@@ -523,9 +521,8 @@ void main() {
                   GestureDetector(
                     key: snackBarTapTarget,
                     onTap: () {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(const SnackBar(content: Text(snackBarText)));
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(const SnackBar(content: Text(snackBarText)));
                     },
                     behavior: HitTestBehavior.opaque,
                     child: const SizedBox(height: 100.0, width: 100.0),

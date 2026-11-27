@@ -1,0 +1,14 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef FLUTTER_THIRD_PARTY_LIBCXX_CONFIG_FORMAT_
+#define FLUTTER_THIRD_PARTY_LIBCXX_CONFIG_FORMAT_
+
+#if !defined(_LIBCPP_BUILDING_LIBRARY)
+#error "<format> and std::format are banned in the Flutter Engine because they pull ~200 KiB of libc++ formatting and Ryu floating-point tables into libflutter.so. Use absl::StrCat or absl::StrFormat instead."
+#else
+#include_next <format>
+#endif
+
+#endif  // FLUTTER_THIRD_PARTY_LIBCXX_CONFIG_FORMAT_

@@ -1305,25 +1305,26 @@ void main() {
     ]);
   });
 
-  testWidgets('Can not attach a non-RenderObjectElement to the MultiChildRenderObjectElement - mount', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(Column(children: <Widget>[Container(), const _EmptyWidget()]));
+  testWidgets(
+    'Can not attach a non-RenderObjectElement to the MultiChildRenderObjectElement - mount',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(Column(children: <Widget>[Container(), const _EmptyWidget()]));
 
-    final dynamic exception = tester.takeException();
-    expect(exception, isFlutterError);
-    expect(
-      exception.toString(),
-      startsWith(
-        'The children of `MultiChildRenderObjectElement` must each has an associated render object.\n'
-        'This typically means that the `_EmptyWidget` or its children\n'
-        'are not a subtype of `RenderObjectWidget`.\n'
-        'The following element does not have an associated render object:\n'
-        '  _EmptyWidget\n'
-        'debugCreator: _EmptyWidget ← Column ← ', // Omitted end of debugCreator chain because it's irrelevant for test.
-      ),
-    );
-  });
+      final dynamic exception = tester.takeException();
+      expect(exception, isFlutterError);
+      expect(
+        exception.toString(),
+        startsWith(
+          'The children of `MultiChildRenderObjectElement` must each has an associated render object.\n'
+          'This typically means that the `_EmptyWidget` or its children\n'
+          'are not a subtype of `RenderObjectWidget`.\n'
+          'The following element does not have an associated render object:\n'
+          '  _EmptyWidget\n'
+          'debugCreator: _EmptyWidget ← Column ← ', // Omitted end of debugCreator chain because it's irrelevant for test.
+        ),
+      );
+    },
+  );
 
   testWidgets(
     'Can not attach a non-RenderObjectElement to the MultiChildRenderObjectElement - update',
@@ -1738,9 +1739,9 @@ void main() {
       ),
       isTrue,
     );
-    final dependenciesProperty =
-        builder.properties.firstWhere((DiagnosticsNode property) => property.name == 'dependencies')
-            as DiagnosticsProperty<Set<InheritedElement>>;
+    final dependenciesProperty = builder.properties.firstWhere(
+      (DiagnosticsNode property) => property.name == 'dependencies',
+    ) as DiagnosticsProperty<Set<InheritedElement>>;
     expect(dependenciesProperty, isNotNull);
 
     final Set<InheritedElement> dependencies = dependenciesProperty.value!;
@@ -2566,7 +2567,7 @@ class _TestLeaderLayerWidget extends SingleChildRenderObjectWidget {
 }
 
 class _RenderTestLeaderLayerWidget extends RenderProxyBox {
-  _RenderTestLeaderLayerWidget({LayerLink? link, RenderBox? child}) : _link = link, super(child);
+  _RenderTestLeaderLayerWidget({this._link, RenderBox? child}) : super(child);
 
   LayerLink? get link => _link;
   LayerLink? _link;

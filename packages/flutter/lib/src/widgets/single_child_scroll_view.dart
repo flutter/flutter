@@ -348,13 +348,11 @@ class _RenderSingleChildViewport extends RenderBox
     with RenderObjectWithChildMixin<RenderBox>
     implements RenderAbstractViewport {
   _RenderSingleChildViewport({
-    AxisDirection axisDirection = AxisDirection.down,
-    required ViewportOffset offset,
+    this._axisDirection = AxisDirection.down,
+    required this._offset,
     RenderBox? child,
-    required Clip clipBehavior,
-  }) : _axisDirection = axisDirection,
-       _offset = offset,
-       _clipBehavior = clipBehavior {
+    required this._clipBehavior,
+  }) {
     this.child = child;
   }
 

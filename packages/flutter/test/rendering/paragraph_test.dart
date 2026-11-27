@@ -348,8 +348,7 @@ void main() {
   test('maxLines', () {
     final paragraph = RenderParagraph(
       const TextSpan(
-        text:
-            "How do you write like you're running out of time? Write day and night like you're running out of time?",
+        text: "How do you write like you're running out of time? Write day and night like you're running out of time?",
         // 0123456789 0123456789 012 345 0123456 012345 01234 012345678 012345678 0123 012 345 0123456 012345 01234
         // 0          1          2       3       4      5     6         7         8    9       10      11     12
         style: TextStyle(fontSize: 10.0),
@@ -397,6 +396,26 @@ void main() {
 
     paragraph.paint(MockPaintingContext(), Offset.zero);
     expect(getRectForA(), const Rect.fromLTWH(90, 0, 10, 10));
+  });
+
+  test('RenderParagraph hyphens control test', () {
+    final paragraph = RenderParagraph(
+      const TextSpan(text: 'Hello'),
+      textDirection: TextDirection.ltr,
+    );
+    expect(paragraph.hyphens, Hyphens.manual);
+    layout(paragraph);
+    pumpFrame(phase: EnginePhase.paint);
+    expect(paragraph.debugNeedsLayout, isFalse);
+
+    // Setting the same value is a no-op.
+    paragraph.hyphens = Hyphens.manual;
+    expect(paragraph.debugNeedsLayout, isFalse);
+
+    // A new value triggers relayout.
+    paragraph.hyphens = Hyphens.hidden;
+    expect(paragraph.hyphens, Hyphens.hidden);
+    expect(paragraph.debugNeedsLayout, isTrue);
   });
 
   test('RenderParagraph devicePixelRatio control test', () {

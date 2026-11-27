@@ -11,6 +11,7 @@ import 'dart:ui' as ui show lerpDouble;
 import 'package:flutter/foundation.dart';
 
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
+
 import 'basic_types.dart';
 import 'borders.dart';
 import 'circle_border.dart';
@@ -193,8 +194,7 @@ class StarBorder extends OutlinedBorder {
     if (t < split) {
       return first(t * (1 / split));
     } else {
-      t = (1 / (1.0 - split)) * (t - split);
-      return second(t);
+      return second((1 / (1.0 - split)) * (t - split));
     }
   }
 

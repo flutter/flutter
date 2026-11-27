@@ -67,7 +67,7 @@ class RenderDiagonal extends RenderBox
     with
         SlottedContainerRenderObjectMixin<DiagonalSlot, RenderBox>,
         DebugOverflowIndicatorMixin {
-  RenderDiagonal({Color? backgroundColor}) : _backgroundColor = backgroundColor;
+  RenderDiagonal({this._backgroundColor});
 
   // Getters and setters to configure the [RenderObject] with the configuration
   // of the [Widget]. These mostly contain boilerplate code, but depending on

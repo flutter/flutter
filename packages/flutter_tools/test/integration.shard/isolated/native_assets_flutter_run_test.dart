@@ -14,7 +14,7 @@ library;
 import 'package:file/file.dart';
 
 import '../../src/common.dart';
-import '../test_utils.dart' show platform;
+import '../test_utils.dart' show getLocalEngineArguments, platform;
 import '../transition_test_utils.dart';
 import 'native_assets_test_utils.dart';
 
@@ -41,13 +41,15 @@ void main() {
         continue;
       }
       final hotReload = buildMode == 'debug' ? ' hot reload and hot restart' : '';
-      testWithoutContext('flutter run$hotReload with native assets $device $buildMode', () async {
+      test('flutter run$hotReload with native assets $device $buildMode', () async {
         await inTempDir((Directory tempDirectory) async {
           final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
           final Directory exampleDirectory = packageDirectory.childDirectory('example');
+          await addCodeAssetOpenHelper(packageName, packageDirectory);
+          await addCodeAssetCallToExampleApp(packageName, packageDirectory);
 
           final ProcessTestResult result = await runFlutter(
-            <String>['run', '-d$device', '--$buildMode'],
+            <String>[...getLocalEngineArguments(), 'run', '-d$device', '--$buildMode'],
             exampleDirectory.path,
             <Transition>[
               Multiple.contains(
@@ -133,7 +135,7 @@ void main() {
     // the file is replaced, which is what rebuilding does to a bundle a debug
     // instance is still running, and the next `@Native` binding to resolve then
     // maps a second copy of the asset with its own copy of the library's state.
-    testWithoutContext('code asset is not mapped twice when its file is replaced', () async {
+    test('code asset is not mapped twice when its file is replaced', () async {
       await inTempDir((Directory tempDirectory) async {
         final Directory packageDirectory = await createTestProject(
           packageName,

@@ -18,7 +18,7 @@
 # * Fixes in this file are from the Cupertino library. *
 version: 1
 transforms:
-  # TODO(Piinks): Link eventual deprecation PR, add testing support once available.
+  # Part of https://github.com/flutter/flutter/issues/172935
   - title: 'Migrate from flutter/cupertino.dart to cupertino_ui/cupertino_ui.dart.'
     date: 2026-07-08
     library: 'package:flutter/cupertino.dart'

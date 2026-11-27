@@ -9,6 +9,7 @@
 #include "flutter/shell/platform/embedder/tests/embedder_test_context.h"
 #include "flutter/testing/test_vulkan_context.h"
 #include "flutter/vulkan/vulkan_application.h"
+#include "gmock/gmock.h"
 #include "testing/test_vulkan_surface.h"
 
 namespace flutter {
@@ -23,6 +24,9 @@ class EmbedderTestContextVulkan : public EmbedderTestContext {
   // |EmbedderTestContext|
   EmbedderTestContextType GetContextType() const override;
 
+  /// Render with Impeller instead of Skia. Set before the engine is launched.
+  void SetEnableImpeller(bool enable) { enable_impeller_ = enable; }
+
   // |EmbedderTestContext|
   size_t GetSurfacePresentCount() const override;
 
@@ -32,6 +36,13 @@ class EmbedderTestContextVulkan : public EmbedderTestContext {
 
   void SetVulkanInstanceProcAddressCallback(
       FlutterVulkanInstanceProcAddressCallback callback);
+
+  ::testing::MockFunction<void()>& PresentCallbackMock() {
+    return present_callback_mock_;
+  }
+  fml::RefPtr<TestVulkanContext> vulkan_context() const {
+    return vulkan_context_;
+  }
 
   static void* InstanceProcAddr(void* user_data,
                                 FlutterVulkanInstanceHandle instance,
@@ -52,6 +63,8 @@ class EmbedderTestContextVulkan : public EmbedderTestContext {
 
   DlISize surface_size_;
   size_t present_count_ = 0;
+  ::testing::NiceMock<::testing::MockFunction<void()>> present_callback_mock_;
+  bool enable_impeller_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTestContextVulkan);
 };

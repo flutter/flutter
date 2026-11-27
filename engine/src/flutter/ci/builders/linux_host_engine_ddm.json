@@ -29,7 +29,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -40,7 +39,6 @@
                 "--prebuilt-dart-sdk",
                 "--no-lto",
                 "--rbe",
-                "--no-goma",
                 "--gn-args=dart_dynamic_modules=true"
             ],
             "name": "ci/host_debug_ddm",

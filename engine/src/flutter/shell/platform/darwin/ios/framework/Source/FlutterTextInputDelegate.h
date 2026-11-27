@@ -7,6 +7,8 @@
 
 #import <Foundation/Foundation.h>
 
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
+
 @class FlutterTextInputPlugin;
 @class FlutterTextInputView;
 
@@ -66,6 +68,9 @@ typedef NS_ENUM(NSInteger, FlutterFloatingCursorDragState) {
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
     didResignFirstResponderWithTextInputClient:(int)client;
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+    didRestoreFirstResponderWithTextInputClient:(int)client
+                                         result:(FlutterResult)callback;
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
     willDismissEditMenuWithTextInputClient:(int)client;
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
            shareSelectedText:(NSString*)selectedText;
@@ -73,6 +78,8 @@ typedef NS_ENUM(NSInteger, FlutterFloatingCursorDragState) {
     searchWebWithSelectedText:(NSString*)selectedText;
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
           lookUpSelectedText:(NSString*)selectedText;
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+       translateSelectedText:(NSString*)selectedText;
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
     performContextMenuCustomActionWithActionID:(NSString*)actionID
                                textInputClient:(int)client;

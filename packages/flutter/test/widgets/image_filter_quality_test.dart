@@ -7,10 +7,9 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -123,17 +122,8 @@ Future<void> testImageQuality(WidgetTester tester, ui.FilterQuality? quality) as
     0x60,
     0x82,
   ]);
-  final ui.Image image = (await tester.runAsync(() async {
-    final ui.Codec codec = await ui.instantiateImageCodec(test3x3Image);
-    addTearDown(codec.dispose);
-    return (await codec.getNextFrame()).image;
-  }))!;
-  addTearDown(image.dispose);
-  expect(image.width, 3);
-  expect(image.height, 3);
-  final streamCompleter = _TestImageStreamCompleter();
-  streamCompleter.setData(imageInfo: ImageInfo(image: image));
-  final imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+  final imageProvider = MemoryImage(test3x3Image);
+  await precacheTestImage(imageProvider);
 
   await tester.pumpWidget(
     quality == null
@@ -145,80 +135,6 @@ Future<void> testImageQuality(WidgetTester tester, ui.FilterQuality? quality) as
     find.byType(Image),
     matchesGoldenFile('image_quality_${quality ?? 'default'}.png'),
   );
-}
 
-class _TestImageStreamCompleter extends ImageStreamCompleter {
-  ImageInfo? _currentImage;
-  final Set<ImageStreamListener> listeners = <ImageStreamListener>{};
-
-  @override
-  void addListener(ImageStreamListener listener) {
-    listeners.add(listener);
-    if (_currentImage != null) {
-      listener.onImage(_currentImage!.clone(), true);
-    }
-  }
-
-  @override
-  void removeListener(ImageStreamListener listener) {
-    listeners.remove(listener);
-  }
-
-  void setData({ImageInfo? imageInfo, ImageChunkEvent? chunkEvent}) {
-    if (imageInfo != null) {
-      _currentImage?.dispose();
-      _currentImage = imageInfo;
-    }
-    final List<ImageStreamListener> localListeners = listeners.toList();
-    for (final listener in localListeners) {
-      if (imageInfo != null) {
-        listener.onImage(imageInfo.clone(), false);
-      }
-      if (chunkEvent != null && listener.onChunk != null) {
-        listener.onChunk!(chunkEvent);
-      }
-    }
-  }
-
-  void setError({required Object exception, StackTrace? stackTrace}) {
-    final List<ImageStreamListener> localListeners = listeners.toList();
-    for (final listener in localListeners) {
-      listener.onError?.call(exception, stackTrace);
-    }
-  }
-}
-
-class _TestImageProvider extends ImageProvider<Object> {
-  _TestImageProvider({ImageStreamCompleter? streamCompleter}) {
-    _streamCompleter = streamCompleter ?? OneFrameImageStreamCompleter(_completer.future);
-  }
-
-  final Completer<ImageInfo> _completer = Completer<ImageInfo>();
-  late ImageStreamCompleter _streamCompleter;
-
-  bool get loadCalled => _loadCallCount > 0;
-  int get loadCallCount => _loadCallCount;
-  int _loadCallCount = 0;
-
-  @override
-  Future<Object> obtainKey(ImageConfiguration configuration) {
-    return SynchronousFuture<_TestImageProvider>(this);
-  }
-
-  @override
-  ImageStreamCompleter loadImage(Object key, ImageDecoderCallback decode) {
-    _loadCallCount += 1;
-    return _streamCompleter;
-  }
-
-  void complete(ui.Image image) {
-    _completer.complete(ImageInfo(image: image));
-  }
-
-  void fail(Object exception, StackTrace? stackTrace) {
-    _completer.completeError(exception, stackTrace);
-  }
-
-  @override
-  String toString() => '${describeIdentity(this)}()';
+  imageCache.clear();
 }

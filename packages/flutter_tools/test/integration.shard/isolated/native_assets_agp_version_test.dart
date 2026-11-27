@@ -16,7 +16,7 @@ import '../transition_test_utils.dart';
 import 'native_assets_test_utils.dart';
 
 /// The AGP versions to run these tests against.
-final agpVersions = <String>['8.4.0'];
+final agpVersions = <String>['9.3.1'];
 
 /// The build modes to target for each flutter command that supports passing
 /// a build mode.
@@ -33,7 +33,7 @@ void main() {
 
   for (final String agpVersion in agpVersions) {
     for (final String buildMode in buildModes) {
-      testWithoutContext(
+      test(
         'flutter build apk with native assets with build mode $buildMode and multiple flavors on AGP $agpVersion',
         () async {
           await inTempDir((Directory tempDirectory) async {

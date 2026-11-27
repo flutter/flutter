@@ -63,7 +63,7 @@ Iterable<SourceElement> getElementsFromString(String content, File file) {
 
 /// Gets an iterable over the [SourceElement]s in the given `file`.
 ///
-/// Takes an optional [ResourceProvider] to allow reading from a memory
+/// Takes an optional [afs.ResourceProvider] to allow reading from a memory
 /// filesystem.
 Iterable<SourceElement> getFileElements(File file, {afs.ResourceProvider? resourceProvider}) {
   resourceProvider ??= afs.PhysicalResourceProvider.INSTANCE;

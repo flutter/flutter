@@ -14,8 +14,10 @@ final Logger _log = Logger('DartVm');
 
 /// Signature of an asynchronous function for establishing a [vms.VmService]
 /// connection to a [Uri].
-typedef RpcPeerConnectionFunction =
-    Future<vms.VmService> Function(Uri uri, {required Duration timeout});
+typedef RpcPeerConnectionFunction = Future<vms.VmService> Function(
+  Uri uri, {
+  required Duration timeout,
+});
 
 /// [DartVm] uses this function to connect to the Dart VM on Fuchsia.
 ///

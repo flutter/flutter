@@ -92,4 +92,13 @@ public final class MotionEventTracker {
     eventById.remove(eventId.id);
     return event;
   }
+
+  /**
+   * Returns the MotionEvent corresponding to the eventId without consuming it, or null if this
+   * event was popped or discarded.
+   */
+  @Nullable
+  public MotionEvent peek(@NonNull MotionEventId eventId) {
+    return eventById.get(eventId.id);
+  }
 }

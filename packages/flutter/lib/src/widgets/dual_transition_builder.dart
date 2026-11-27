@@ -18,8 +18,11 @@ import 'framework.dart';
 /// Passing a pre-built widget here and incorporating it into the returned
 /// widget tree avoids rebuilding it for every frame of the animation and
 /// can improve performance significantly in some cases.
-typedef AnimatedTransitionBuilder =
-    Widget Function(BuildContext context, Animation<double> animation, Widget? child);
+typedef AnimatedTransitionBuilder = Widget Function(
+  BuildContext context,
+  Animation<double> animation,
+  Widget? child,
+);
 
 /// A transition builder that animates its [child] based on the
 /// [AnimationStatus] of the provided [animation].

@@ -416,9 +416,8 @@ class _FakeHttpClientResponse extends Fake implements HttpClientResponse {
     void Function()? onDone,
     bool? cancelOnError,
   }) {
-    return Stream<List<int>>.fromIterable(
-      content,
-    ).listen(onData, onDone: onDone, onError: onError, cancelOnError: cancelOnError);
+    return Stream<List<int>>.fromIterable(content)
+        .listen(onData, onDone: onDone, onError: onError, cancelOnError: cancelOnError);
   }
 
   @override

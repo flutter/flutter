@@ -519,9 +519,8 @@ class _DemoSectionOptionsItem extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
           child: Text(
             title,
-            style: Theme.of(context).textTheme.bodyMedium!.apply(
-              color: isSelected ? colorScheme.primary : colorScheme.onSurface,
-            ),
+            style: Theme.of(context).textTheme.bodyMedium!
+                .apply(color: isSelected ? colorScheme.primary : colorScheme.onSurface),
           ),
         ),
       ),
@@ -657,9 +656,8 @@ class CodeDisplayPage extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            GalleryLocalizations.of(
-              context,
-            )!.demoCodeViewerFailedToCopyToClipboardMessage(exception),
+            GalleryLocalizations.of(context)!
+                .demoCodeViewerFailedToCopyToClipboardMessage(exception),
           ),
         ),
       );
@@ -681,15 +679,14 @@ class CodeDisplayPage extends StatelessWidget {
               ),
             ),
             onPressed: () async {
-              await Clipboard.setData(
-                ClipboardData(text: plainTextCode),
-              ).then(showSnackBarOnCopySuccess).catchError(showSnackBarOnCopyFailure);
+              await Clipboard.setData(ClipboardData(text: plainTextCode))
+                  .then(showSnackBarOnCopySuccess)
+                  .catchError(showSnackBarOnCopyFailure);
             },
             child: Text(
               GalleryLocalizations.of(context)!.demoCodeViewerCopyAll,
-              style: Theme.of(
-                context,
-              ).textTheme.labelLarge!.copyWith(color: Colors.white, fontWeight: FontWeight.w500),
+              style: Theme.of(context).textTheme.labelLarge!
+                  .copyWith(color: Colors.white, fontWeight: FontWeight.w500),
             ),
           ),
         ),

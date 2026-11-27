@@ -49,24 +49,26 @@ abstract final class MatrixUtils {
   static double? getAsScale(Matrix4 transform) {
     // Values are stored in column-major order
     // (but this symmetric matrix is unaffected).
-    if (transform.storage case [
-      final double diagonal1,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      final double diagonal2,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      1.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      1.0,
-    ] when diagonal1 == diagonal2) {
+    if (transform.storage
+        case [
+          final double diagonal1,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          final double diagonal2,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+        ]
+        when diagonal1 == diagonal2) {
       return diagonal1;
     }
     return null;
@@ -512,8 +514,7 @@ abstract final class MatrixUtils {
     if (isIdentity(transform)) {
       return rect;
     }
-    transform = Matrix4.copy(transform)..invert();
-    return transformRect(transform, rect);
+    return transformRect(Matrix4.copy(transform)..invert(), rect);
   }
 
   /// Create a transformation matrix which mimics the effects of tangentially

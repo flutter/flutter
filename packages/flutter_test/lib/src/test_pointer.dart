@@ -462,13 +462,12 @@ class TestGesture {
   /// None of the arguments may be null. The `dispatcher` and `hitTester`
   /// arguments are required.
   TestGesture({
-    required EventDispatcher dispatcher,
+    required this._dispatcher,
     int pointer = 1,
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int? device,
     int buttons = kPrimaryButton,
-  }) : _dispatcher = dispatcher,
-       _pointer = TestPointer(pointer, kind, device, buttons);
+  }) : _pointer = TestPointer(pointer, kind, device, buttons);
 
   /// Dispatch a pointer down event at the given `downLocation`, caching the
   /// hit test result.
@@ -512,19 +511,35 @@ class TestGesture {
   }
 
   /// In a test, send a pointer add event for this pointer.
-  Future<void> addPointer({Duration timeStamp = Duration.zero, Offset? location}) {
+  Future<void> addPointer({
+    Duration timeStamp = Duration.zero,
+    Offset? location,
+    FlutterView? view,
+  }) {
     return TestAsyncUtils.guard<void>(() {
       return _dispatcher(
-        _pointer.addPointer(timeStamp: timeStamp, location: location ?? _pointer.location),
+        _pointer.addPointer(
+          timeStamp: timeStamp,
+          location: location ?? _pointer.location,
+          view: view,
+        ),
       );
     });
   }
 
   /// In a test, send a pointer remove event for this pointer.
-  Future<void> removePointer({Duration timeStamp = Duration.zero, Offset? location}) {
+  Future<void> removePointer({
+    Duration timeStamp = Duration.zero,
+    Offset? location,
+    FlutterView? view,
+  }) {
     return TestAsyncUtils.guard<void>(() {
       return _dispatcher(
-        _pointer.removePointer(timeStamp: timeStamp, location: location ?? _pointer.location),
+        _pointer.removePointer(
+          timeStamp: timeStamp,
+          location: location ?? _pointer.location,
+          view: view,
+        ),
       );
     });
   }

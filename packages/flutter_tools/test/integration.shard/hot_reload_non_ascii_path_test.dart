@@ -30,7 +30,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    testWithoutContext('hot reload works', () async {
+    test('hot reload works', () async {
       await flutter.run();
       // Hot reload works without error.
       await flutter.hotReload();

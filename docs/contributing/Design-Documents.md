@@ -1,72 +1,86 @@
-If you want to write a design doc for people to review, we recommend using Google Docs.
-We have a template you can use, at [flutter.dev/go/template](https://flutter.dev/go/template). It describes the process for minting a `flutter.dev/go/foo` shortlink for your design doc.
-We recommend you use that template so that people can immediately recognize that this is a Flutter design document and that it is shared publicly.
+# Flutter RFCs & Design Documents
 
-After you have created your design doc, the next step is to create a tracking GitHub issue for it. File a new issue to track the design doc using [the design doc issue template](https://github.com/flutter/flutter/issues/new?template=07_design_doc.yml). Assign it to yourself. Add the label "design doc" to the issue.
+In the Flutter project, technical design documents are authored and reviewed as Requests for Comments (RFCs) in the [**`flutter/rfc`**](https://github.com/flutter/rfc) repository.
 
-Don't forget to configure your document's Sharing settings so that everyone has comment access. The idea of sharing the document in this way is not necessarily to proactively obtain feedback from the entire community; it is to make it _possible_ for people to share the document with anyone in the community, whether they work for your employer or not, and whether you have personally shared the document with them yet or not.
+RFCs provide a collaborative, transparent space to share ideas early, explore trade-offs, align with subsystem maintainers, and build architectural consensus before writing production code.
 
-The template discusses how to create a shortlink for your design doc (flutter.dev/go/...). When creating the shortlink, remember to test the URL you are publishing in an incognito window!
+---
 
-Googlers: Design docs must be created by non-corp accounts! See [Contributor Access](Contributor-access.md#fcontriborg-accounts) for details on getting `fcontrib.org` accounts if you don't want to use your personal GMail account.
+## When to Write an RFC (The Threshold)
 
-When you implement a design, document it in the source code in detail. The API documentation is the usual place where we document our designs. It's perfectly reasonable for API docs to be multiple pages long with subheadings (e.g. see the docs for [RenderBox](https://master-api.flutter.dev/flutter/rendering/RenderBox-class.html)!). Do not assume that anyone will ever read your design doc after the discussion has finished. Similarly, do not assume that anyone will look at closed GitHub issues or PR discussions.
+Not every contribution requires a formal RFC! The size and impact of your change guide the kind of documentation needed:
 
-See also:
+* **One-Pagers (Issue or PR description)**: Localized features, bug fixes, performance optimizations, or internal refactors within a single subsystem do not require an RFC. A clear description in a GitHub issue or pull request is often all you need.
+* **Two-Pagers (Issue or PR description)**: Features that consume existing APIs across subsystems without altering public API/ABI contracts generally do not need an RFC. You can coordinate informally with the affected subsystem leads directly in GitHub issues or pull requests.
+* **Full Design Docs / RFCs (Markdown in `flutter/rfc`)**: A formal RFC is required when proposing:
+  * **Cross-Subsystem Architectural Impact**: Changes that cross or alter boundaries between major subsystems (e.g., Framework+Engine, Engine+Embedders).
+  * **New Foundational Primitives**: New rendering backends, compilers, execution platforms, or embedder shells.
+  * **File Formats & Protocols**: Wire protocols, packaging schemes, or tooling interop protocols.
+  * **Breaking Changes & Deprecations**: Substantive alterations to public API/ABI contracts (see [Handling breaking changes](Tree-hygiene.md#handling-breaking-changes)).
+  * **Governance, Release, & Infrastructure Policies**: Changes to release cycles, contributor standards, or the RFC process itself.
+  * **Style Guide Changes**: Project-wide coding and formatting standards.
 
-1. [`design doc`][] GitHub issue label: list of all design documents.
-2. [Archive of design documents][] from before the [`design doc`][]
-   GitHub issue label was introduced.
+For complete threshold definitions and criteria, see [RFC 000.0002: When to Write an RFC](https://github.com/flutter/rfc/blob/main/rfc/000.0002-flutter-rfc-review-process.md#when-to-write-an-rfc-the-threshold).
+
+---
+
+## Seeking Approval on an RFC
+
+An RFC Pull Request is where you propose your design and seek formal approval for your idea, architecture, or breaking change:
+
+* **Approval happens on the RFC Pull Request**: Your pull request in `flutter/rfc` is the authoritative place where technical alignment, review feedback, and approvals are recorded. Gaining approval on the RFC gives you and the project confidence before investing time writing production code.
+* **Meetings are for feedback, not decisions**: Discussion venues (chat, design forums, etc) are consultative spaces meant to gather broad feedback, discuss difficult trade-offs, and surface architectural blindspots. Binding decisions and approvals are finalized asynchronously on the GitHub RFC pull request.
+* **Disentangling design from code review**: Agreeing on architecture and subsystem boundaries upfront frees subsequent code reviews in `flutter/flutter` and other repositories to focus strictly on implementation correctness, code quality, test coverage, and performance.
+
+---
+
+## How to Propose an RFC
+
+The full specifications for RFC categories, formatting, and review stages are maintained in the `flutter/rfc` repository. A typical proposal follows these steps:
+
+1. **Review Taxonomy & Guidelines**: Consult [RFC 000.0001](https://github.com/flutter/rfc/blob/main/rfc/000.0001-flutter-architecture-and-reference-taxonomy.md) to choose the primary 3-digit category for the subsystem being changed (e.g., `110` for Foundation, `130` for Widgets, `210` for Graphics) and follow the YAML frontmatter schema.
+2. **Open a Draft PR**: Submit your draft as `rfc/AAA.0000-title.md` against [`flutter/rfc`](https://github.com/flutter/rfc).
+3. **Open a Tracking Issue**: File a tracking issue in `flutter/flutter` using the [design doc issue template](https://github.com/flutter/flutter/issues/new?template=07_design_doc.yml) and apply the [`design doc`][] label so the community and triage bots can discover it.
+4. **Iterate with Reviewers**: A Subsystem Tech Lead (TL) serves as the Shepherd for your RFC to guide review momentum, tag relevant domain leads, and help answer questions.
+5. **Approval & Merging**: Once the necessary approvals are recorded on GitHub (and any optional Final Comment Period concludes), your RFC receives a permanent sequential number (`AAA.NNNN`) before it merges. Subsequent code implementation PRs link back to this merged RFC.
+
+For complete details on roles, shepherding, and review stages, see [RFC 000.0002](https://github.com/flutter/rfc/blob/main/rfc/000.0002-flutter-rfc-review-process.md).
+
+---
+
+## Documenting Implementation in Source Code
+
+When you implement an approved design, document it in detail directly in the codebase.
+
+The API documentation is where architecture permanently lives for developers and future maintainers. It is normal and expected for API docs to be comprehensive, complete with diagrams and subheadings (e.g., see the docs for [`RenderBox`](https://master-api.flutter.dev/flutter/rendering/RenderBox-class.html)).
+
+Do not assume someone will read your RFC after the discussion has concluded and the code has landed. Long after an RFC or PR is merged, the in-tree code comments and API docs remain the primary source of truth.
+
+---
+
+## Tips for Getting Helpful Feedback
+
+Writing a design document can feel daunting, especially if it is your first time. Here are practical tips to help you get constructive and supportive feedback:
+
+* **Start from first principles**: Clearly distinguish the problem you are solving from your proposed solution. Show example code, user scenarios, or error traces that illustrate the problem before diving into the solution.
+* **Keep it focused**: If a proposal touches multiple systems, break it into smaller components that can be evaluated independently before combining them into a larger design.
+* **Ask specific questions**: If there is a particular trade-off, API ergonomics choice, or edge case you are unsure about, call it out explicitly to invite targeted input.
+* **Use diagrams**: Diagrams clarify architecture quickly. Because RFCs are Markdown files, you can embed native **[Mermaid](https://mermaid.js.org/)** diagrams (` ```mermaid `) directly in your document, or include SVG/PNG images.
+* **Reach out**: Share your RFC tracking issue or PR on Discord (see [Chat](Chat.md)), in channels like `#hackers`, `#hackers-framework`, or `#hackers-engine`. Maintainers and community members are glad to help!
+
+---
+
+## Historical Design Documents & Google Docs
+
+Historically, Flutter design documents were authored in Google Docs using `flutter.dev/go/template`. While existing Google Docs remain valuable historical records:
+
+* **All new design proposals follow the [Flutter RFC process](https://github.com/flutter/rfc).** There are no one-off drafts in Google Docs.
+* Contributors use standard GitHub accounts—no special Google Workspace accounts or drive sharing permissions are required.
+
+### Archive Links
+
+1. [`design doc`][] GitHub issue label: list of all design documents and RFC tracking issues.
+2. [Archive of design documents][] from before the [`design doc`][] GitHub issue label was introduced.
 
 [`design doc`]: https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22design+doc%22
 [Archive of design documents]: https://github.com/flutter/flutter/issues/151486
-
-## Purpose of design docs
-
-The Flutter project uses design docs as a tool for guiding discussions.
-
-Decisions are made in PRs, not in design docs.
-
-Approvals are given in PRs, not in design docs.
-
-## Soliciting feedback
-
-If you wish to get feedback on your design doc, you have many options for doing so, depending on how much feedback you want:
-
-* If there is an issue already filed on the topic, definitely put a link to the design doc there. People who have found the issue and want to get updates on the topic will have subscribed to the issue, so this is the most effective way to communicate with them.
-
-* Post the link on Discord. You can post it to #hidden-chat to just get feedback from team members. You can post it to one or more of the #hackers-* channels if you want feedback from people who are interested in the general area. You can post it to the global #hackers channel if you want feedback from anyone interested in working on Flutter. If you really want feedback, you can post a request to #announcements and publish it to any server that is following ours.
-
-* If you want feedback from the broad community, tweet out the link and let other team members know so that we can retweet it. Similarly, you can post the request to one of the Flutter reddit channels, such as r/FlutterDev.
-
-* You can ask our developer relations (devrel) team to broadcast a request for comments. (Start by asking in #hackers-devrel; if nobody responds, ping Hixie on that channel.)
-
-* You can ask our user experience researcher (UXR) team to study the proposal and potentially test it with real users, or collect relevant data from the next quarterly survey. (Start by asking in #hackers-devexp; if nobody responds, ping Hixie on that channel.)
-
-* If you have commit access, you can ask to talk about the design doc at the next Dash Forum meeting (normally held on Tuesdays at 11am US west coast time). Ping Hixie on #hidden-chat to get on the schedule, or use the form to request to be added, the link for which is pinned in the #hidden-chat channel.
-
-### How to get good feedback
-
-Often, you will solicit feedback, and get none. There are many causes of this.
-
-Maybe your proposal is unclear, and so people don't really know what to suggest. People are often reluctant to provide broad criticisms. Consider if you can improve the clarity of your design doc. Do you have a clear problem statement separate from your solution? Do you show example code of the problem? Do you have screenshots or diagrams of the problem? For your solution, do you start from first principles and explain it? Often it's easy to forget that your readers don't have the same context you do, so without a gentle introduction they'll get lost very quickly. Do you have sample code of your proposed solution(s)? Do you need more diagrams or screenshots? Ask someone you trust if they think your document is sufficiently clear.
-
-Maybe your proposal is too big for anyone to get their head around. Can it be split into smaller components, so that each one can be understood separately, before bringing all the pieces together into your grand design? (You can do this all in the same doc.)
-
-Maybe people don't know what to provide feedback about. If you have an area you are particularly interested in getting feedback about, it can be very helpful to explicitly invite such feedback.
-
-Maybe you are asking the wrong people. Consider the suggestions in the earlier section, and reach out explicitly to people who are affected by your proposal. Consider escalating, asking more and more people until you get the volume of feedback you desire.
-
-Maybe everyone agrees. Consider leaving some intentionally sketchy details in your proposal to encourage people to engage! (This is a risky strategy, sometimes people end up _liking_ your "bad" ideas...)
-
-Maybe your proposal is too obvious or uninteresting. Sometimes, a change is so uncontroversial and simple that frankly it would be better just to write the PR and submit it.
-
-## Content in design docs
-
-### Screen captures
-
-The easiest way to capture videos for design docs is using macOS. Press Command+Shift+5 for a whole bunch of options.
-
-### Diagrams
-
-As we use Google Docs for the text portion of design docs, the easiest way to draw diagrams is using Google Diagrams. Select `Insert` > `Drawing` > `New` to create a new diagram.

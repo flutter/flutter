@@ -318,15 +318,18 @@ class TestTree extends Object with DiagnosticableTreeMixin {
   }
 }
 
-typedef NodeDelegator =
-    DiagnosticsSerializationDelegate Function(
-      DiagnosticsNode node,
-      TestDiagnosticsSerializationDelegate delegate,
-    );
-typedef NodeTruncator =
-    List<DiagnosticsNode> Function(List<DiagnosticsNode> nodes, DiagnosticsNode? owner);
-typedef NodeFilter =
-    List<DiagnosticsNode> Function(List<DiagnosticsNode> nodes, DiagnosticsNode owner);
+typedef NodeDelegator = DiagnosticsSerializationDelegate Function(
+  DiagnosticsNode node,
+  TestDiagnosticsSerializationDelegate delegate,
+);
+typedef NodeTruncator = List<DiagnosticsNode> Function(
+  List<DiagnosticsNode> nodes,
+  DiagnosticsNode? owner,
+);
+typedef NodeFilter = List<DiagnosticsNode> Function(
+  List<DiagnosticsNode> nodes,
+  DiagnosticsNode owner,
+);
 
 class TestDiagnosticsSerializationDelegate implements DiagnosticsSerializationDelegate {
   const TestDiagnosticsSerializationDelegate({

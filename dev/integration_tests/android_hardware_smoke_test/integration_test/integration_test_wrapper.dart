@@ -27,9 +27,8 @@ void main() {
 
       // Handle host-side graphics backend self-discovery query
       if (payload[keyCommand] == commandGetGoldenVariant) {
-        final String? variant = await const MethodChannel(
-          nativeSupportChannelName,
-        ).invokeMethod<String>(methodImpellerBackend);
+        final String? variant = await const MethodChannel(nativeSupportChannelName)
+            .invokeMethod<String>(methodImpellerBackend);
         return json.encode(<String, Object?>{keyGoldenVariant: variant});
       }
 
@@ -38,7 +37,7 @@ void main() {
       final completer = Completer<String>();
 
       // ignore: deprecated_member_use
-      ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         testChannelName,
         message,
         (ByteData? replyData) {

@@ -215,48 +215,59 @@ final class zircon_dart_handle_list_t extends ffi.Struct {
 
 final class _Dart_Handle extends ffi.Opaque {}
 
-typedef _c_zircon_dart_byte_array_create =
-    ffi.Pointer<zircon_dart_byte_array_t> Function(ffi.Uint32 size);
+typedef _c_zircon_dart_byte_array_create = ffi.Pointer<zircon_dart_byte_array_t> Function(
+  ffi.Uint32 size,
+);
 
-typedef _dart_zircon_dart_byte_array_create =
-    ffi.Pointer<zircon_dart_byte_array_t> Function(int size);
+typedef _dart_zircon_dart_byte_array_create = ffi.Pointer<zircon_dart_byte_array_t> Function(
+  int size,
+);
 
-typedef _c_zircon_dart_byte_array_set_value =
-    ffi.Void Function(ffi.Pointer<zircon_dart_byte_array_t> arr, ffi.Uint32 index, ffi.Uint8 value);
+typedef _c_zircon_dart_byte_array_set_value = ffi.Void Function(
+  ffi.Pointer<zircon_dart_byte_array_t> arr,
+  ffi.Uint32 index,
+  ffi.Uint8 value,
+);
 
-typedef _dart_zircon_dart_byte_array_set_value =
-    void Function(ffi.Pointer<zircon_dart_byte_array_t> arr, int index, int value);
+typedef _dart_zircon_dart_byte_array_set_value = void Function(
+  ffi.Pointer<zircon_dart_byte_array_t> arr,
+  int index,
+  int value,
+);
 
-typedef _c_zircon_dart_byte_array_free =
-    ffi.Void Function(ffi.Pointer<zircon_dart_byte_array_t> arr);
+typedef _c_zircon_dart_byte_array_free = ffi.Void Function(
+  ffi.Pointer<zircon_dart_byte_array_t> arr,
+);
 
-typedef _dart_zircon_dart_byte_array_free =
-    void Function(ffi.Pointer<zircon_dart_byte_array_t> arr);
+typedef _dart_zircon_dart_byte_array_free = void Function(
+  ffi.Pointer<zircon_dart_byte_array_t> arr,
+);
 
 typedef _c_zircon_dart_handle_list_create = ffi.Pointer<zircon_dart_handle_list_t> Function();
 
 typedef _dart_zircon_dart_handle_list_create = ffi.Pointer<zircon_dart_handle_list_t> Function();
 
-typedef _c_zircon_dart_handle_list_append =
-    ffi.Void Function(
-      ffi.Pointer<zircon_dart_handle_list_t> list,
-      ffi.Pointer<zircon_dart_handle_t> handle,
-    );
+typedef _c_zircon_dart_handle_list_append = ffi.Void Function(
+  ffi.Pointer<zircon_dart_handle_list_t> list,
+  ffi.Pointer<zircon_dart_handle_t> handle,
+);
 
-typedef _dart_zircon_dart_handle_list_append =
-    void Function(
-      ffi.Pointer<zircon_dart_handle_list_t> list,
-      ffi.Pointer<zircon_dart_handle_t> handle,
-    );
+typedef _dart_zircon_dart_handle_list_append = void Function(
+  ffi.Pointer<zircon_dart_handle_list_t> list,
+  ffi.Pointer<zircon_dart_handle_t> handle,
+);
 
-typedef _c_zircon_dart_handle_list_free =
-    ffi.Void Function(ffi.Pointer<zircon_dart_handle_list_t> list);
+typedef _c_zircon_dart_handle_list_free = ffi.Void Function(
+  ffi.Pointer<zircon_dart_handle_list_t> list,
+);
 
-typedef _dart_zircon_dart_handle_list_free =
-    void Function(ffi.Pointer<zircon_dart_handle_list_t> list);
+typedef _dart_zircon_dart_handle_list_free = void Function(
+  ffi.Pointer<zircon_dart_handle_list_t> list,
+);
 
-typedef _c_zircon_dart_handle_is_valid =
-    ffi.Int32 Function(ffi.Pointer<zircon_dart_handle_t> handle);
+typedef _c_zircon_dart_handle_is_valid = ffi.Int32 Function(
+  ffi.Pointer<zircon_dart_handle_t> handle,
+);
 
 typedef _dart_zircon_dart_handle_is_valid = int Function(ffi.Pointer<zircon_dart_handle_t> handle);
 
@@ -268,52 +279,58 @@ typedef _c_zircon_dart_handle_free = ffi.Void Function(ffi.Pointer<zircon_dart_h
 
 typedef _dart_zircon_dart_handle_free = void Function(ffi.Pointer<zircon_dart_handle_t> handle);
 
-typedef _c_zircon_dart_handle_pair_attach_finalizer =
-    ffi.Int32 Function(
-      ffi.Handle object,
-      ffi.Pointer<ffi.Void> pointer,
-      ffi.IntPtr external_allocation_size,
-    );
+typedef _c_zircon_dart_handle_pair_attach_finalizer = ffi.Int32 Function(
+  ffi.Handle object,
+  ffi.Pointer<ffi.Void> pointer,
+  ffi.IntPtr external_allocation_size,
+);
 
-typedef _dart_zircon_dart_handle_pair_attach_finalizer =
-    int Function(Object object, ffi.Pointer<ffi.Void> pointer, int external_allocation_size);
+typedef _dart_zircon_dart_handle_pair_attach_finalizer = int Function(
+  Object object,
+  ffi.Pointer<ffi.Void> pointer,
+  int external_allocation_size,
+);
 
-typedef _c_zircon_dart_handle_attach_finalizer =
-    ffi.Int32 Function(
-      ffi.Handle object,
-      ffi.Pointer<ffi.Void> pointer,
-      ffi.IntPtr external_allocation_size,
-    );
+typedef _c_zircon_dart_handle_attach_finalizer = ffi.Int32 Function(
+  ffi.Handle object,
+  ffi.Pointer<ffi.Void> pointer,
+  ffi.IntPtr external_allocation_size,
+);
 
-typedef _dart_zircon_dart_handle_attach_finalizer =
-    int Function(Object object, ffi.Pointer<ffi.Void> pointer, int external_allocation_size);
+typedef _dart_zircon_dart_handle_attach_finalizer = int Function(
+  Object object,
+  ffi.Pointer<ffi.Void> pointer,
+  int external_allocation_size,
+);
 
-typedef _c_zircon_dart_channel_create =
-    ffi.Pointer<zircon_dart_handle_pair_t> Function(ffi.Uint32 options);
+typedef _c_zircon_dart_channel_create = ffi.Pointer<zircon_dart_handle_pair_t> Function(
+  ffi.Uint32 options,
+);
 
-typedef _dart_zircon_dart_channel_create =
-    ffi.Pointer<zircon_dart_handle_pair_t> Function(int options);
+typedef _dart_zircon_dart_channel_create = ffi.Pointer<zircon_dart_handle_pair_t> Function(
+  int options,
+);
 
-typedef _c_zircon_dart_channel_write =
-    ffi.Int32 Function(
-      ffi.Pointer<zircon_dart_handle_t> handle,
-      ffi.Pointer<zircon_dart_byte_array_t> bytes,
-      ffi.Pointer<zircon_dart_handle_list_t> handles,
-    );
+typedef _c_zircon_dart_channel_write = ffi.Int32 Function(
+  ffi.Pointer<zircon_dart_handle_t> handle,
+  ffi.Pointer<zircon_dart_byte_array_t> bytes,
+  ffi.Pointer<zircon_dart_handle_list_t> handles,
+);
 
-typedef _dart_zircon_dart_channel_write =
-    int Function(
-      ffi.Pointer<zircon_dart_handle_t> handle,
-      ffi.Pointer<zircon_dart_byte_array_t> bytes,
-      ffi.Pointer<zircon_dart_handle_list_t> handles,
-    );
+typedef _dart_zircon_dart_channel_write = int Function(
+  ffi.Pointer<zircon_dart_handle_t> handle,
+  ffi.Pointer<zircon_dart_byte_array_t> bytes,
+  ffi.Pointer<zircon_dart_handle_list_t> handles,
+);
 
 typedef _c_zircon_dart_clock_get_monotonic = ffi.Uint64 Function();
 
 typedef _dart_zircon_dart_clock_get_monotonic = int Function();
 
-typedef _c_zircon_dart_dl_initialize =
-    ffi.Int32 Function(ffi.Pointer<ffi.Void> initialize_api_dl_data);
+typedef _c_zircon_dart_dl_initialize = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> initialize_api_dl_data,
+);
 
-typedef _dart_zircon_dart_dl_initialize =
-    int Function(ffi.Pointer<ffi.Void> initialize_api_dl_data);
+typedef _dart_zircon_dart_dl_initialize = int Function(
+  ffi.Pointer<ffi.Void> initialize_api_dl_data,
+);

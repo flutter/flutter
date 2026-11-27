@@ -37,7 +37,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     registerHotRestartListener(dispose);
     _appLifecycleState.addListener(_setAppLifecycleState);
     _viewFocusBinding.init();
-    domDocument.body?.prepend(accessibilityPlaceholder);
     _onViewDisposedListener = viewManager.onViewDisposed.listen((_) {
       // Send a metrics changed event to the framework when a view is disposed.
       // View creation/resize is handled by the `_didResize` handler in the
@@ -89,10 +88,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   static EnginePlatformDispatcher get instance => _instance;
   static final EnginePlatformDispatcher _instance = EnginePlatformDispatcher();
 
-  @visibleForTesting
-  DomElement get accessibilityPlaceholder =>
-      EngineSemantics.instance.semanticsHelper.accessibilityPlaceholder;
-
   PlatformConfiguration configuration = PlatformConfiguration(
     locales: parseBrowserLanguages(),
     textScaleFactor: findBrowserTextScaleFactor(),
@@ -114,7 +109,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _removeLocaleChangedListener();
     _appLifecycleState.removeListener(_setAppLifecycleState);
     _viewFocusBinding.dispose();
-    accessibilityPlaceholder.remove();
     _onViewDisposedListener.cancel();
     viewManager.dispose();
   }
@@ -482,16 +476,21 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     ByteData? data,
     ui.PlatformMessageResponseCallback? callback,
   ) {
-    // In widget tests we want to bypass processing of platform messages.
-    var returnImmediately = false;
+    var ignorePlatformMessages = false;
     assert(() {
-      if (ui_web.TestEnvironment.instance.ignorePlatformMessages) {
-        returnImmediately = true;
-      }
+      ignorePlatformMessages = ui_web.TestEnvironment.instance.ignorePlatformMessages;
       return true;
     }());
 
-    if (returnImmediately) {
+    if (ignorePlatformMessages) {
+      // Emulate flutter_tester: platform messages get an empty (null) reply,
+      // as unhandled channels do on native. Schedule it on the root zone so the
+      // real event loop delivers it and it never becomes a FakeAsync timer;
+      // `callback` is already wrapped (_zonedPlatformMessageResponseCallback)
+      // to run in its registration zone.
+      if (callback != null) {
+        Zone.root.createTimer(Duration.zero, () => callback(null));
+      }
       return;
     }
 
@@ -645,7 +644,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         return;
 
       case 'flutter/accessibility':
-        // In widget tests we want to bypass processing of platform messages.
         const codec = StandardMessageCodec();
         final EngineSemantics semantics = EngineSemantics.instance;
         if (semantics.semanticsEnabled) {
@@ -777,7 +775,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///    scheduling of frames.
   ///  * [RendererBinding], the Flutter framework class which manages layout and
   ///    painting.
-  Future<void> render(ui.Scene scene, [ui.FlutterView? view]) async {
+  Future<void> render(ui.Scene scene, [ui.FlutterView? view, ui.Size? size]) async {
     final target = (view ?? implicitView) as EngineFlutterView?;
     assert(target != null, 'Calling render without a FlutterView');
     if (target == null) {
@@ -790,7 +788,8 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     // view hasn't been rendered already in this scope.
     final bool shouldRender = _viewsRenderedInCurrentFrame?.add(target) ?? false;
     if (shouldRender) {
-      final Future<void> sceneRender = renderer.renderScene(scene, target);
+      final ui.Size frameSize = size ?? target.physicalSize;
+      final Future<void> sceneRender = renderer.renderScene(scene, target, size: frameSize);
       // The first frame ends while this render is still in flight, so remember
       // whether it belongs to it instead of asking again below.
       final bool isFirstFrameRender = _isBuildingFirstFrame;
@@ -1024,17 +1023,23 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
     final locales = <ui.Locale>[];
     for (final String language in languages) {
-      final domLocale = DomLocale(language);
-      locales.add(
-        ui.Locale.fromSubtags(
-          languageCode: domLocale.language,
-          scriptCode: domLocale.script,
-          countryCode: domLocale.region,
-        ),
-      );
+      try {
+        final domLocale = DomLocale(language);
+        locales.add(
+          ui.Locale.fromSubtags(
+            languageCode: domLocale.language,
+            scriptCode: domLocale.script,
+            countryCode: domLocale.region,
+          ),
+        );
+      } catch (_) {
+        // Skip tags Intl.Locale rejects (e.g. en-US@posix on Linux).
+      }
     }
 
-    assert(locales.isNotEmpty);
+    if (locales.isEmpty) {
+      return const <ui.Locale>[_defaultLocale];
+    }
     return locales;
   }
 
@@ -1061,6 +1066,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// The setting indicating whether time should always be shown in the 24-hour
   /// format.
+  ///
+  /// The [onAlwaysUse24HourFormatChanged] callback is called whenever this
+  /// value changes.
   ///
   /// This option is used by [showTimePicker].
   @override
@@ -1427,6 +1435,31 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Otherwise zones won't work properly.
   void invokeOnSystemFontFamilyChanged() {
     invoke(_onSystemFontFamilyChanged, _onSystemFontFamilyChangedZone);
+  }
+
+  /// A callback that is invoked whenever [alwaysUse24HourFormat] changes value.
+  ///
+  /// The framework invokes this callback in the same zone in which the
+  /// callback was set.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
+  ///    observe when this callback is invoked.
+  @override
+  ui.VoidCallback? get onAlwaysUse24HourFormatChanged => _onAlwaysUse24HourFormatChanged;
+  ui.VoidCallback? _onAlwaysUse24HourFormatChanged;
+  Zone? _onAlwaysUse24HourFormatChangedZone;
+  @override
+  set onAlwaysUse24HourFormatChanged(ui.VoidCallback? callback) {
+    _onAlwaysUse24HourFormatChanged = callback;
+    _onAlwaysUse24HourFormatChangedZone = Zone.current;
+  }
+
+  /// Engine code should use this method instead of the callback directly.
+  /// Otherwise zones won't work properly.
+  void invokeOnAlwaysUse24HourFormatChanged() {
+    invoke(_onAlwaysUse24HourFormatChanged, _onAlwaysUse24HourFormatChangedZone);
   }
 
   /// Whether the user has requested that [updateSemantics] be called when
@@ -1882,10 +1915,7 @@ class ViewConfiguration {
     this.view,
     this.devicePixelRatio = 1.0,
     this.visible = false,
-    this.viewInsets = ui.ViewPadding.zero as ViewPadding,
-    this.viewPadding = ui.ViewPadding.zero as ViewPadding,
     this.systemGestureInsets = ui.ViewPadding.zero as ViewPadding,
-    this.padding = ui.ViewPadding.zero as ViewPadding,
     this.gestureSettings = const ui.GestureSettings(),
     this.displayFeatures = const <ui.DisplayFeature>[],
     this.displayCornerRadii,
@@ -1895,10 +1925,7 @@ class ViewConfiguration {
     EngineFlutterView? view,
     double? devicePixelRatio,
     bool? visible,
-    ViewPadding? viewInsets,
-    ViewPadding? viewPadding,
     ViewPadding? systemGestureInsets,
-    ViewPadding? padding,
     ui.GestureSettings? gestureSettings,
     List<ui.DisplayFeature>? displayFeatures,
     ui.DisplayCornerRadii? displayCornerRadii,
@@ -1907,10 +1934,7 @@ class ViewConfiguration {
       view: view ?? this.view,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
       visible: visible ?? this.visible,
-      viewInsets: viewInsets ?? this.viewInsets,
-      viewPadding: viewPadding ?? this.viewPadding,
       systemGestureInsets: systemGestureInsets ?? this.systemGestureInsets,
-      padding: padding ?? this.padding,
       gestureSettings: gestureSettings ?? this.gestureSettings,
       displayFeatures: displayFeatures ?? this.displayFeatures,
       displayCornerRadii: displayCornerRadii ?? this.displayCornerRadii,
@@ -1920,10 +1944,7 @@ class ViewConfiguration {
   final EngineFlutterView? view;
   final double devicePixelRatio;
   final bool visible;
-  final ViewPadding viewInsets;
-  final ViewPadding viewPadding;
   final ViewPadding systemGestureInsets;
-  final ViewPadding padding;
   final ui.GestureSettings gestureSettings;
   final List<ui.DisplayFeature> displayFeatures;
   final ui.DisplayCornerRadii? displayCornerRadii;

@@ -4,6 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
 import '../../gallery_localizations.dart';
 
 // BEGIN cupertinoNavigationBarDemo
@@ -54,9 +55,8 @@ class _FirstPage extends StatelessWidget {
             sliver: SliverList.builder(
               itemCount: 20,
               itemBuilder: (BuildContext context, int index) {
-                final String title = GalleryLocalizations.of(
-                  context,
-                )!.starterAppDrawerItem(index + 1);
+                final String title = GalleryLocalizations.of(context)!
+                    .starterAppDrawerItem(index + 1);
                 return ListTile(
                   onTap: () {
                     Navigator.of(context).restorablePushNamed<void>(

@@ -49,11 +49,13 @@ import io.flutter.Log;
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
+import io.flutter.embedding.engine.flags.FlutterEngineFlagsProviderImpl;
 import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
 import io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.plugin.view.SensitiveContentPlugin;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -1041,8 +1043,25 @@ public class FlutterActivity extends Activity
    */
   @NonNull
   @Override
+  @SuppressWarnings("deprecation")
+  public List<String> getFlutterEngineFlags() {
+    if (FlutterActivityAndFragmentDelegate.isGetFlutterShellArgsOverridden(
+        FlutterActivity.class, this)) {
+      // If the user overrides getFlutterShellArgs(), we assume they want to
+      // use the deprecated method, and return the flags from there.
+      return Arrays.asList(getFlutterShellArgs().toArray());
+    }
+    return FlutterEngineFlagsProviderImpl.INSTANCE.getFlags(getIntent());
+  }
+
+  @NonNull
+  @Override
+  @Deprecated
   public FlutterShellArgs getFlutterShellArgs() {
-    return FlutterShellArgs.fromIntent(getIntent());
+    Log.w(
+        TAG,
+        "FlutterShellArgs is deprecated and will be removed in the next stable release. Migrate to getFlutterEngineFlags. See https://docs.flutter.dev/release/breaking-changes/restrict-android-engine-flags-release-mode for details.");
+    return new FlutterShellArgs(FlutterEngineFlagsProviderImpl.INSTANCE.getFlags(getIntent()));
   }
 
   /**
@@ -1053,7 +1072,10 @@ public class FlutterActivity extends Activity
   @Override
   @Nullable
   public String getCachedEngineId() {
-    return getIntent().getStringExtra(EXTRA_CACHED_ENGINE_ID);
+    if (getIntent().hasExtra(EXTRA_CACHED_ENGINE_ID)) {
+      return IntentUtils.safeGetStringExtra(this, EXTRA_CACHED_ENGINE_ID);
+    }
+    return null;
   }
 
   /**
@@ -1064,7 +1086,10 @@ public class FlutterActivity extends Activity
   @Override
   @Nullable
   public String getCachedEngineGroupId() {
-    return getIntent().getStringExtra(EXTRA_CACHED_ENGINE_GROUP_ID);
+    if (getIntent().hasExtra(EXTRA_CACHED_ENGINE_GROUP_ID)) {
+      return IntentUtils.safeGetStringExtra(this, EXTRA_CACHED_ENGINE_GROUP_ID);
+    }
+    return null;
   }
 
   /**
@@ -1079,6 +1104,7 @@ public class FlutterActivity extends Activity
   @Override
   public boolean shouldDestroyEngineWithHost() {
     boolean explicitDestructionRequested =
+        // TODO(camsim99): Migrate to IntentUtils.safeGetBooleanExtra()
         getIntent().getBooleanExtra(EXTRA_DESTROY_ENGINE_WITH_ACTIVITY, false);
     if (getCachedEngineId() != null || delegate.isFlutterEngineFromHost()) {
       // Only destroy a cached engine if explicitly requested by app developer.
@@ -1086,6 +1112,7 @@ public class FlutterActivity extends Activity
     } else {
       // If this Activity created the FlutterEngine, destroy it by default unless
       // explicitly requested not to.
+      // TODO(camsim99): Migrate to IntentUtils.safeGetBooleanExtra()
       return getIntent().getBooleanExtra(EXTRA_DESTROY_ENGINE_WITH_ACTIVITY, true);
     }
   }
@@ -1109,8 +1136,9 @@ public class FlutterActivity extends Activity
    */
   @NonNull
   public String getDartEntrypointFunctionName() {
-    if (getIntent().hasExtra(EXTRA_DART_ENTRYPOINT)) {
-      return getIntent().getStringExtra(EXTRA_DART_ENTRYPOINT);
+    String entrypoint = IntentUtils.safeGetStringExtra(this, EXTRA_DART_ENTRYPOINT);
+    if (entrypoint != null) {
+      return entrypoint;
     }
 
     try {
@@ -1132,7 +1160,10 @@ public class FlutterActivity extends Activity
    */
   @Nullable
   public List<String> getDartEntrypointArgs() {
-    return (List<String>) getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS);
+    if (getIntent().hasExtra(EXTRA_DART_ENTRYPOINT_ARGS)) {
+      return (List<String>) IntentUtils.safeGetSerializableExtra(this, EXTRA_DART_ENTRYPOINT_ARGS);
+    }
+    return null;
   }
 
   /**
@@ -1190,10 +1221,18 @@ public class FlutterActivity extends Activity
    * route is derived from the {@code Intent} through the Intent.getData() instead.
    */
   public String getInitialRoute() {
+    if (getIntent().hasExtra(EXTRA_INITIAL_ROUTE)) {
+      String route = IntentUtils.safeGetStringExtra(this, EXTRA_INITIAL_ROUTE);
+      if (route != null) {
+        return route;
+      }
+    }
+
     try {
-      return FlutterActivityLaunchConfigs.getInitialRoute(getIntent(), this, getMetaData());
+      return FlutterActivityLaunchConfigs.getInitialRouteFromCommandLineOrManifest(
+          this, getMetaData());
     } catch (PackageManager.NameNotFoundException e) {
-      return FlutterActivityLaunchConfigs.getInitialRoute(getIntent(), this, null);
+      return FlutterActivityLaunchConfigs.getInitialRouteFromCommandLineOrManifest(this, null);
     }
   }
 
@@ -1267,6 +1306,7 @@ public class FlutterActivity extends Activity
   @NonNull
   protected BackgroundMode getBackgroundMode() {
     if (getIntent().hasExtra(EXTRA_BACKGROUND_MODE)) {
+      // TODO(camsim99): Migrate to IntentUtils.safeGetStringExtra()
       return BackgroundMode.valueOf(getIntent().getStringExtra(EXTRA_BACKGROUND_MODE));
     } else {
       return BackgroundMode.opaque;
@@ -1457,6 +1497,7 @@ public class FlutterActivity extends Activity
   @Override
   public boolean shouldRestoreAndSaveState() {
     if (getIntent().hasExtra(EXTRA_ENABLE_STATE_RESTORATION)) {
+      // TODO(camsim99): Migrate to IntentUtils.safeGetBooleanExtra()
       return getIntent().getBooleanExtra(EXTRA_ENABLE_STATE_RESTORATION, false);
     }
     if (getCachedEngineId() != null) {

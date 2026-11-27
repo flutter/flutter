@@ -29,7 +29,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -39,7 +38,6 @@
                 "--prebuilt-dart-sdk",
                 "--no-lto",
                 "--rbe",
-                "--no-goma",
                 "--target-dir",
                 "ci/linux_debug_arm64_desktop",
                 "--target-os=linux",
@@ -72,7 +70,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -80,9 +77,8 @@
                 "profile",
                 "--enable-fontconfig",
                 "--prebuilt-dart-sdk",
-                "--no-lto",
+                "--thin-lto",
                 "--rbe",
-                "--no-goma",
                 "--target-dir",
                 "ci/linux_profile_arm64_desktop",
                 "--target-os=linux",
@@ -115,7 +111,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -123,9 +118,8 @@
                 "release",
                 "--enable-fontconfig",
                 "--prebuilt-dart-sdk",
-                "--no-lto",
+                "--thin-lto",
                 "--rbe",
-                "--no-goma",
                 "--target-dir",
                 "ci/linux_release_arm64_desktop",
                 "--target-os=linux",

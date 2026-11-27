@@ -90,6 +90,47 @@ class WindowManagerTest : public WindowsTest {
   }
   FlutterWindowsEngine* engine() { return engine_.get(); }
 
+  // Creates a regular window to act as the parent of a satellite, and returns
+  // its window handle.
+  HWND CreateParentWindow() {
+    return InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+        engine_id(), InternalFlutterWindows_WindowManager_CreateRegularWindow(
+                         engine_id(), regular_creation_request()));
+  }
+
+  // Places a satellite at the origin of its parent's client area, offset by
+  // (20, 30), at its requested size.
+  static void OffsetPositionCallback(const WindowSize& child_size,
+                                     const WindowRect& parent_rect,
+                                     const WindowRect& display_rect,
+                                     WindowRect& output_rect) {
+    output_rect.left = parent_rect.left + 20;
+    output_rect.top = parent_rect.top + 30;
+    output_rect.width = child_size.width;
+    output_rect.height = child_size.height;
+  }
+
+  // Returns a fixed-size, resizable satellite creation request anchored to
+  // |parent|.
+  static SatelliteWindowCreationRequest SatelliteCreationRequest(
+      HWND parent,
+      GetWindowPositionCallback get_position_callback) {
+    return SatelliteWindowCreationRequest{
+        .preferred_size = {.has_preferred_view_size = true,
+                           .preferred_view_width = 200,
+                           .preferred_view_height = 150},
+        .preferred_constraints = {.has_view_constraints = true,
+                                  .view_min_width = 100,
+                                  .view_min_height = 50,
+                                  .view_max_width = 300,
+                                  .view_max_height = 200},
+        .parent = parent,
+        .get_position_callback = get_position_callback,
+        .title = L"Satellite",
+        .sized_to_content = false,
+        .resizable = true};
+  }
+
  private:
   std::unique_ptr<FlutterWindowsEngine> engine_;
   NiceMock<egl::MockContext> mock_egl_context_;
@@ -131,7 +172,7 @@ TEST_F(WindowManagerTest, CreateRegularWindow) {
   const int64_t view_id =
       InternalFlutterWindows_WindowManager_CreateRegularWindow(
           engine_id(), regular_creation_request());
-  EXPECT_EQ(view_id, 0);
+  EXPECT_EQ(view_id, 1);
 }
 
 TEST_F(WindowManagerTest, GetWindowHandle) {
@@ -356,7 +397,7 @@ TEST_F(WindowManagerTest, CreateModelessDialogWindow) {
   const int64_t view_id =
       InternalFlutterWindows_WindowManager_CreateDialogWindow(
           engine_id(), &creation_request);
-  EXPECT_EQ(view_id, 0);
+  EXPECT_EQ(view_id, 1);
 }
 
 TEST_F(WindowManagerTest, CreateModalDialogWindow) {
@@ -383,7 +424,7 @@ TEST_F(WindowManagerTest, CreateModalDialogWindow) {
   const int64_t view_id =
       InternalFlutterWindows_WindowManager_CreateDialogWindow(
           engine_id(), &creation_request);
-  EXPECT_EQ(view_id, 1);
+  EXPECT_EQ(view_id, 2);
 
   const HWND window_handle =
       InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
@@ -459,16 +500,14 @@ TEST_F(WindowManagerTest, CreateTooltipWindow) {
       InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
           engine_id(), parent_view_id);
 
-  auto position_callback = [](const WindowSize& child_size,
-                              const WindowRect& parent_rect,
-                              const WindowRect& output_rect) -> WindowRect* {
-    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + 10;
-    rect->top = parent_rect.top + 10;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
-  };
+  auto position_callback =
+      [](const WindowSize& child_size, const WindowRect& parent_rect,
+         const WindowRect& display_rect, WindowRect& rect) {
+        rect.left = parent_rect.left + 10;
+        rect.top = parent_rect.top + 10;
+        rect.width = child_size.width;
+        rect.height = child_size.height;
+      };
 
   TooltipWindowCreationRequest creation_request{
       .preferred_constraints = {.has_view_constraints = true,
@@ -500,16 +539,14 @@ TEST_F(WindowManagerTest, TooltipWindowHasNoActivateStyle) {
       InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
           engine_id(), parent_view_id);
 
-  auto position_callback = [](const WindowSize& child_size,
-                              const WindowRect& parent_rect,
-                              const WindowRect& output_rect) -> WindowRect* {
-    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + 10;
-    rect->top = parent_rect.top + 10;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
-  };
+  auto position_callback =
+      [](const WindowSize& child_size, const WindowRect& parent_rect,
+         const WindowRect& display_rect, WindowRect& rect) {
+        rect.left = parent_rect.left + 10;
+        rect.top = parent_rect.top + 10;
+        rect.width = child_size.width;
+        rect.height = child_size.height;
+      };
 
   TooltipWindowCreationRequest creation_request{
       .preferred_constraints = {.has_view_constraints = true,
@@ -546,16 +583,14 @@ TEST_F(WindowManagerTest, TooltipWindowDoesNotStealFocus) {
   SetFocus(parent_window_handle);
   HWND focused_before = GetFocus();
 
-  auto position_callback = [](const WindowSize& child_size,
-                              const WindowRect& parent_rect,
-                              const WindowRect& output_rect) -> WindowRect* {
-    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + 10;
-    rect->top = parent_rect.top + 10;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
-  };
+  auto position_callback =
+      [](const WindowSize& child_size, const WindowRect& parent_rect,
+         const WindowRect& display_rect, WindowRect& rect) {
+        rect.left = parent_rect.left + 10;
+        rect.top = parent_rect.top + 10;
+        rect.width = child_size.width;
+        rect.height = child_size.height;
+      };
 
   TooltipWindowCreationRequest creation_request{
       .preferred_constraints = {.has_view_constraints = true,
@@ -590,16 +625,14 @@ TEST_F(WindowManagerTest, TooltipWindowReturnsNoActivateOnMouseClick) {
       InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
           engine_id(), parent_view_id);
 
-  auto position_callback = [](const WindowSize& child_size,
-                              const WindowRect& parent_rect,
-                              const WindowRect& output_rect) -> WindowRect* {
-    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + 10;
-    rect->top = parent_rect.top + 10;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
-  };
+  auto position_callback =
+      [](const WindowSize& child_size, const WindowRect& parent_rect,
+         const WindowRect& display_rect, WindowRect& rect) {
+        rect.left = parent_rect.left + 10;
+        rect.top = parent_rect.top + 10;
+        rect.width = child_size.width;
+        rect.height = child_size.height;
+      };
 
   TooltipWindowCreationRequest creation_request{
       .preferred_constraints = {.has_view_constraints = true,
@@ -645,21 +678,18 @@ TEST_F(WindowManagerTest,
   static int last_width = 0;
   static int last_height = 0;
 
-  auto position_callback = [](const WindowSize& child_size,
-                              const WindowRect& parent_rect,
-                              const WindowRect& output_rect) -> WindowRect* {
-    callback_count++;
-    last_width = child_size.width;
-    last_height = child_size.height;
+  auto position_callback =
+      [](const WindowSize& child_size, const WindowRect& parent_rect,
+         const WindowRect& display_rect, WindowRect& rect) {
+        callback_count++;
+        last_width = child_size.width;
+        last_height = child_size.height;
 
-    // Use malloc since the caller will use free()
-    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + callback_count * 5;
-    rect->top = parent_rect.top + callback_count * 5;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
-  };
+        rect.left = parent_rect.left + callback_count * 5;
+        rect.top = parent_rect.top + callback_count * 5;
+        rect.width = child_size.width;
+        rect.height = child_size.height;
+      };
 
   TooltipWindowCreationRequest creation_request{
       .preferred_constraints = {.has_view_constraints = true,
@@ -725,16 +755,14 @@ TEST_F(WindowManagerTest, CreatePopupWindow) {
       InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
           engine_id(), parent_view_id);
 
-  auto position_callback = [](const WindowSize& child_size,
-                              const WindowRect& parent_rect,
-                              const WindowRect& output_rect) -> WindowRect* {
-    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + 10;
-    rect->top = parent_rect.top + 10;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
-  };
+  auto position_callback =
+      [](const WindowSize& child_size, const WindowRect& parent_rect,
+         const WindowRect& display_rect, WindowRect& rect) {
+        rect.left = parent_rect.left + 10;
+        rect.top = parent_rect.top + 10;
+        rect.width = child_size.width;
+        rect.height = child_size.height;
+      };
 
   PopupWindowCreationRequest creation_request{
       .preferred_constraints = {.has_view_constraints = true,
@@ -766,16 +794,14 @@ TEST_F(WindowManagerTest, PopupWindowHasNoActivateStyle) {
       InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
           engine_id(), parent_view_id);
 
-  auto position_callback = [](const WindowSize& child_size,
-                              const WindowRect& parent_rect,
-                              const WindowRect& output_rect) -> WindowRect* {
-    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + 10;
-    rect->top = parent_rect.top + 10;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
-  };
+  auto position_callback =
+      [](const WindowSize& child_size, const WindowRect& parent_rect,
+         const WindowRect& display_rect, WindowRect& rect) {
+        rect.left = parent_rect.left + 10;
+        rect.top = parent_rect.top + 10;
+        rect.width = child_size.width;
+        rect.height = child_size.height;
+      };
 
   PopupWindowCreationRequest creation_request{
       .preferred_constraints = {.has_view_constraints = true,
@@ -812,16 +838,14 @@ TEST_F(WindowManagerTest, PopupWindowDoesNotStealFocus) {
   SetFocus(parent_window_handle);
   HWND focused_before = GetFocus();
 
-  auto position_callback = [](const WindowSize& child_size,
-                              const WindowRect& parent_rect,
-                              const WindowRect& output_rect) -> WindowRect* {
-    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + 10;
-    rect->top = parent_rect.top + 10;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
-  };
+  auto position_callback =
+      [](const WindowSize& child_size, const WindowRect& parent_rect,
+         const WindowRect& display_rect, WindowRect& rect) {
+        rect.left = parent_rect.left + 10;
+        rect.top = parent_rect.top + 10;
+        rect.width = child_size.width;
+        rect.height = child_size.height;
+      };
 
   PopupWindowCreationRequest creation_request{
       .preferred_constraints = {.has_view_constraints = true,
@@ -846,55 +870,6 @@ TEST_F(WindowManagerTest, PopupWindowDoesNotStealFocus) {
   EXPECT_NE(focused_after, popup_window_handle);
 }
 
-TEST_F(WindowManagerTest, PopupWindowHandlesNullPositionCallback) {
-  IsolateScope isolate_scope(isolate());
-
-  const int64_t parent_view_id =
-      InternalFlutterWindows_WindowManager_CreateRegularWindow(
-          engine_id(), regular_creation_request());
-  const HWND parent_window_handle =
-      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
-          engine_id(), parent_view_id);
-
-  // Simulates the positioner failing (e.g. its anchor was torn down).
-  auto position_callback =
-      [](const WindowSize& child_size, const WindowRect& parent_rect,
-         const WindowRect& output_rect) -> WindowRect* { return nullptr; };
-
-  PopupWindowCreationRequest creation_request{
-      .preferred_constraints = {.has_view_constraints = true,
-                                .view_min_width = 100,
-                                .view_min_height = 50,
-                                .view_max_width = 300,
-                                .view_max_height = 200},
-      .parent = parent_window_handle,
-      .get_position_callback = position_callback};
-
-  const int64_t popup_view_id =
-      InternalFlutterWindows_WindowManager_CreatePopupWindow(engine_id(),
-                                                             &creation_request);
-  HWND popup_window_handle =
-      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
-          engine_id(), popup_view_id);
-  ASSERT_NE(popup_window_handle, nullptr);
-
-  FlutterWindowsView* view =
-      engine()->GetViewFromTopLevelWindow(popup_window_handle);
-  ASSERT_NE(view, nullptr);
-
-  RECT initial_rect = {};
-  ASSERT_TRUE(GetWindowRect(popup_window_handle, &initial_rect));
-
-  // Triggers UpdatePosition via the null positioner; must not crash.
-  view->OnFrameGenerated(150, 100);
-  engine()->task_runner()->ProcessTasks();
-
-  RECT rect_after_null_callback = {};
-  ASSERT_TRUE(GetWindowRect(popup_window_handle, &rect_after_null_callback));
-  EXPECT_EQ(initial_rect.left, rect_after_null_callback.left);
-  EXPECT_EQ(initial_rect.top, rect_after_null_callback.top);
-}
-
 // TODO(team-windows): Fix flakes. See:
 // https://github.com/flutter/flutter/issues/177172
 TEST_F(WindowManagerTest, DISABLED_PopupWindowUpdatesPositionOnViewSizeChange) {
@@ -912,21 +887,18 @@ TEST_F(WindowManagerTest, DISABLED_PopupWindowUpdatesPositionOnViewSizeChange) {
   static int last_width = 0;
   static int last_height = 0;
 
-  auto position_callback = [](const WindowSize& child_size,
-                              const WindowRect& parent_rect,
-                              const WindowRect& output_rect) -> WindowRect* {
-    callback_count++;
-    last_width = child_size.width;
-    last_height = child_size.height;
+  auto position_callback =
+      [](const WindowSize& child_size, const WindowRect& parent_rect,
+         const WindowRect& display_rect, WindowRect& rect) {
+        callback_count++;
+        last_width = child_size.width;
+        last_height = child_size.height;
 
-    // Use malloc since the caller will use free()
-    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + callback_count * 5;
-    rect->top = parent_rect.top + callback_count * 5;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
-  };
+        rect.left = parent_rect.left + callback_count * 5;
+        rect.top = parent_rect.top + callback_count * 5;
+        rect.width = child_size.width;
+        rect.height = child_size.height;
+      };
 
   PopupWindowCreationRequest creation_request{
       .preferred_constraints = {.has_view_constraints = true,
@@ -995,7 +967,7 @@ TEST_F(WindowManagerTest, CreateRegularWindowSizedToContent) {
   const int64_t view_id =
       InternalFlutterWindows_WindowManager_CreateRegularWindow(
           engine_id(), &creation_request);
-  EXPECT_GE(view_id, 0);
+  EXPECT_GE(view_id, 1);
 }
 
 // TODO(team-windows): Fix flakes. See:
@@ -1201,6 +1173,36 @@ TEST_F(WindowManagerTest,
   EXPECT_EQ(style & WS_THICKFRAME, 0L);
 }
 
+TEST_F(WindowManagerTest,
+       OnPreEngineRestartDestroysWindowsWithoutDispatchingMessages) {
+  IsolateScope isolate_scope(isolate());
+
+  static bool received_message = false;
+  WindowingInitRequest init_request{
+      .on_message = [](WindowsMessage* message) { received_message = true; }};
+  InternalFlutterWindows_WindowManager_Initialize(engine_id(), &init_request);
+
+  const int64_t first_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND first_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), first_view_id);
+  const int64_t second_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND second_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), second_view_id);
+
+  received_message = false;
+  EngineModifier{engine()}.Restart();
+
+  EXPECT_FALSE(received_message);
+  EXPECT_FALSE(IsWindow(first_window_handle));
+  EXPECT_FALSE(IsWindow(second_window_handle));
+}
+
 // Verifies that |OnEngineShutdown| destroys popup windows BEFORE clearing
 // |on_message_|, so the WM_DESTROY round-trip reaches the isolate. Without
 // this, |PopupWindowControllerWin32._destroyed| would never be set during
@@ -1223,16 +1225,14 @@ TEST_F(WindowManagerTest, OnEngineShutdownDispatchesWmDestroyForPopupWindow) {
       InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
           engine_id(), parent_view_id);
 
-  auto position_callback = [](const WindowSize& child_size,
-                              const WindowRect& parent_rect,
-                              const WindowRect& output_rect) -> WindowRect* {
-    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + 10;
-    rect->top = parent_rect.top + 10;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
-  };
+  auto position_callback =
+      [](const WindowSize& child_size, const WindowRect& parent_rect,
+         const WindowRect& display_rect, WindowRect& rect) {
+        rect.left = parent_rect.left + 10;
+        rect.top = parent_rect.top + 10;
+        rect.width = child_size.width;
+        rect.height = child_size.height;
+      };
 
   PopupWindowCreationRequest creation_request{
       .preferred_constraints = {.has_view_constraints = true,
@@ -1272,16 +1272,14 @@ TEST_F(WindowManagerTest, OnEngineShutdownDispatchesWmDestroyForTooltipWindow) {
       InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
           engine_id(), parent_view_id);
 
-  auto position_callback = [](const WindowSize& child_size,
-                              const WindowRect& parent_rect,
-                              const WindowRect& output_rect) -> WindowRect* {
-    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + 10;
-    rect->top = parent_rect.top + 10;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
-  };
+  auto position_callback =
+      [](const WindowSize& child_size, const WindowRect& parent_rect,
+         const WindowRect& display_rect, WindowRect& rect) {
+        rect.left = parent_rect.left + 10;
+        rect.top = parent_rect.top + 10;
+        rect.width = child_size.width;
+        rect.height = child_size.height;
+      };
 
   TooltipWindowCreationRequest creation_request{
       .preferred_constraints = {.has_view_constraints = true,
@@ -1294,6 +1292,517 @@ TEST_F(WindowManagerTest, OnEngineShutdownDispatchesWmDestroyForTooltipWindow) {
 
   InternalFlutterWindows_WindowManager_CreateTooltipWindow(engine_id(),
                                                            &creation_request);
+
+  received_messages.clear();
+  engine()->window_manager()->OnEngineShutdown();
+
+  EXPECT_NE(std::find(received_messages.begin(), received_messages.end(),
+                      static_cast<UINT>(WM_DESTROY)),
+            received_messages.end());
+}
+
+TEST_F(WindowManagerTest, CreateSatelliteWindow) {
+  IsolateScope isolate_scope(isolate());
+
+  const HWND parent_window_handle = CreateParentWindow();
+  SatelliteWindowCreationRequest creation_request =
+      SatelliteCreationRequest(parent_window_handle, OffsetPositionCallback);
+
+  const int64_t satellite_view_id =
+      InternalFlutterWindows_WindowManager_CreateSatelliteWindow(
+          engine_id(), &creation_request);
+
+  EXPECT_GE(satellite_view_id, 0);
+  const HWND satellite_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), satellite_view_id);
+  EXPECT_NE(satellite_window_handle, nullptr);
+}
+
+TEST_F(WindowManagerTest, SatelliteWindowUsesPositionCallbackAfterFirstFrame) {
+  IsolateScope isolate_scope(isolate());
+
+  const HWND parent_window_handle = CreateParentWindow();
+  SetWindowPos(parent_window_handle, nullptr, 200, 100, 0, 0,
+               SWP_NOSIZE | SWP_NOZORDER);
+
+  SatelliteWindowCreationRequest creation_request =
+      SatelliteCreationRequest(parent_window_handle, OffsetPositionCallback);
+
+  const int64_t satellite_view_id =
+      InternalFlutterWindows_WindowManager_CreateSatelliteWindow(
+          engine_id(), &creation_request);
+  const HWND satellite_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), satellite_view_id);
+
+  FlutterWindowsView* view =
+      engine()->GetViewFromTopLevelWindow(satellite_window_handle);
+  ASSERT_NE(view, nullptr);
+
+  // The positioner runs once the satellite has rendered its first frame, while
+  // the window is still hidden.
+  view->OnFramePresented();
+  engine()->task_runner()->ProcessTasks();
+
+  // |OffsetPositionCallback| places the satellite at the parent's client-area
+  // origin, offset by (20, 30).
+  RECT parent_client_rect;
+  GetClientRect(parent_window_handle, &parent_client_rect);
+  POINT parent_top_left = {parent_client_rect.left, parent_client_rect.top};
+  ClientToScreen(parent_window_handle, &parent_top_left);
+
+  // The positioner's origin applies to the window rectangle.
+  RECT satellite_rect;
+  GetWindowRect(satellite_window_handle, &satellite_rect);
+
+  EXPECT_EQ(satellite_rect.left, parent_top_left.x + 20);
+  EXPECT_EQ(satellite_rect.top, parent_top_left.y + 30);
+}
+
+TEST_F(WindowManagerTest, SatelliteWindowIsHiddenUntilFirstFrame) {
+  IsolateScope isolate_scope(isolate());
+
+  const HWND parent_window_handle = CreateParentWindow();
+  SatelliteWindowCreationRequest creation_request =
+      SatelliteCreationRequest(parent_window_handle, OffsetPositionCallback);
+
+  const HWND satellite_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(),
+          InternalFlutterWindows_WindowManager_CreateSatelliteWindow(
+              engine_id(), &creation_request));
+  ASSERT_NE(satellite_window_handle, nullptr);
+
+  // The satellite is placed by the positioner before it is shown, so that the
+  // move is never visible to the user.
+  EXPECT_FALSE(IsWindowVisible(satellite_window_handle));
+
+  FlutterWindowsView* view =
+      engine()->GetViewFromTopLevelWindow(satellite_window_handle);
+  ASSERT_NE(view, nullptr);
+  view->OnFramePresented();
+  engine()->task_runner()->ProcessTasks();
+
+  EXPECT_TRUE(IsWindowVisible(satellite_window_handle));
+}
+
+TEST_F(WindowManagerTest, SatelliteWindowHandlesNullPositionCallback) {
+  IsolateScope isolate_scope(isolate());
+
+  const HWND parent_window_handle = CreateParentWindow();
+  SatelliteWindowCreationRequest creation_request =
+      SatelliteCreationRequest(parent_window_handle, nullptr);
+
+  const int64_t satellite_view_id =
+      InternalFlutterWindows_WindowManager_CreateSatelliteWindow(
+          engine_id(), &creation_request);
+
+  EXPECT_GE(satellite_view_id, 0);
+  EXPECT_NE(InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+                engine_id(), satellite_view_id),
+            nullptr);
+}
+
+TEST_F(WindowManagerTest, SatelliteWindowFollowsParentMovement) {
+  IsolateScope isolate_scope(isolate());
+
+  WindowingInitRequest init_request{
+      .on_message = [](WindowsMessage* message) {}};
+  InternalFlutterWindows_WindowManager_Initialize(engine_id(), &init_request);
+
+  const HWND parent_window_handle = CreateParentWindow();
+  SetWindowPos(parent_window_handle, nullptr, 200, 100, 0, 0,
+               SWP_NOSIZE | SWP_NOZORDER);
+
+  SatelliteWindowCreationRequest creation_request =
+      SatelliteCreationRequest(parent_window_handle, OffsetPositionCallback);
+  const HWND satellite_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(),
+          InternalFlutterWindows_WindowManager_CreateSatelliteWindow(
+              engine_id(), &creation_request));
+
+  RECT satellite_rect_before;
+  GetWindowRect(satellite_window_handle, &satellite_rect_before);
+
+  // Move the parent by (+50, +100). SetWindowPos dispatches
+  // WM_WINDOWPOSCHANGED synchronously, so the satellite moves before it
+  // returns.
+  SetWindowPos(parent_window_handle, nullptr, 250, 200, 0, 0,
+               SWP_NOSIZE | SWP_NOZORDER);
+
+  RECT satellite_rect_after;
+  GetWindowRect(satellite_window_handle, &satellite_rect_after);
+
+  EXPECT_EQ(satellite_rect_after.left, satellite_rect_before.left + 50);
+  EXPECT_EQ(satellite_rect_after.top, satellite_rect_before.top + 100);
+}
+
+TEST_F(WindowManagerTest, SatelliteWindowDoesNotMoveWhenParentOnlyResizes) {
+  IsolateScope isolate_scope(isolate());
+
+  WindowingInitRequest init_request{
+      .on_message = [](WindowsMessage* message) {}};
+  InternalFlutterWindows_WindowManager_Initialize(engine_id(), &init_request);
+
+  const HWND parent_window_handle = CreateParentWindow();
+  SetWindowPos(parent_window_handle, nullptr, 200, 100, 0, 0,
+               SWP_NOSIZE | SWP_NOZORDER);
+
+  SatelliteWindowCreationRequest creation_request =
+      SatelliteCreationRequest(parent_window_handle, OffsetPositionCallback);
+  const HWND satellite_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(),
+          InternalFlutterWindows_WindowManager_CreateSatelliteWindow(
+              engine_id(), &creation_request));
+
+  RECT satellite_rect_before;
+  GetWindowRect(satellite_window_handle, &satellite_rect_before);
+
+  SetWindowPos(parent_window_handle, nullptr, 0, 0, 640, 480,
+               SWP_NOMOVE | SWP_NOZORDER);
+
+  RECT satellite_rect_after;
+  GetWindowRect(satellite_window_handle, &satellite_rect_after);
+
+  EXPECT_EQ(satellite_rect_after.left, satellite_rect_before.left);
+  EXPECT_EQ(satellite_rect_after.top, satellite_rect_before.top);
+}
+
+TEST_F(WindowManagerTest, SatelliteWindowKeepsOffsetAfterBeingMoved) {
+  IsolateScope isolate_scope(isolate());
+
+  WindowingInitRequest init_request{
+      .on_message = [](WindowsMessage* message) {}};
+  InternalFlutterWindows_WindowManager_Initialize(engine_id(), &init_request);
+
+  const HWND parent_window_handle = CreateParentWindow();
+  SetWindowPos(parent_window_handle, nullptr, 200, 100, 0, 0,
+               SWP_NOSIZE | SWP_NOZORDER);
+
+  SatelliteWindowCreationRequest creation_request =
+      SatelliteCreationRequest(parent_window_handle, OffsetPositionCallback);
+  const HWND satellite_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(),
+          InternalFlutterWindows_WindowManager_CreateSatelliteWindow(
+              engine_id(), &creation_request));
+
+  // Move the satellite itself, as the user would by dragging it.
+  RECT satellite_rect;
+  GetWindowRect(satellite_window_handle, &satellite_rect);
+  SetWindowPos(satellite_window_handle, nullptr, satellite_rect.left + 40,
+               satellite_rect.top + 60, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+
+  RECT satellite_rect_before;
+  GetWindowRect(satellite_window_handle, &satellite_rect_before);
+  ASSERT_EQ(satellite_rect_before.left, satellite_rect.left + 40);
+  ASSERT_EQ(satellite_rect_before.top, satellite_rect.top + 60);
+
+  // The satellite keeps its new offset from the parent.
+  SetWindowPos(parent_window_handle, nullptr, 250, 200, 0, 0,
+               SWP_NOSIZE | SWP_NOZORDER);
+
+  RECT satellite_rect_after;
+  GetWindowRect(satellite_window_handle, &satellite_rect_after);
+  EXPECT_EQ(satellite_rect_after.left, satellite_rect_before.left + 50);
+  EXPECT_EQ(satellite_rect_after.top, satellite_rect_before.top + 100);
+}
+
+TEST_F(WindowManagerTest, SatelliteWindowFollowsParentClientArea) {
+  IsolateScope isolate_scope(isolate());
+
+  WindowingInitRequest init_request{
+      .on_message = [](WindowsMessage* message) {}};
+  InternalFlutterWindows_WindowManager_Initialize(engine_id(), &init_request);
+
+  const HWND parent_window_handle = CreateParentWindow();
+  SetWindowPos(parent_window_handle, nullptr, 200, 100, 0, 0,
+               SWP_NOSIZE | SWP_NOZORDER);
+
+  SatelliteWindowCreationRequest creation_request =
+      SatelliteCreationRequest(parent_window_handle, OffsetPositionCallback);
+  const HWND satellite_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(),
+          InternalFlutterWindows_WindowManager_CreateSatelliteWindow(
+              engine_id(), &creation_request));
+
+  POINT parent_client_origin_before = {0, 0};
+  ClientToScreen(parent_window_handle, &parent_client_origin_before);
+  RECT satellite_rect_before;
+  GetWindowRect(satellite_window_handle, &satellite_rect_before);
+
+  // Removing the parent's caption moves its client area without moving the
+  // window, much like a DPI change that rescales the title bar.
+  SetWindowLongPtr(
+      parent_window_handle, GWL_STYLE,
+      GetWindowLongPtr(parent_window_handle, GWL_STYLE) & ~WS_CAPTION);
+  SetWindowPos(parent_window_handle, nullptr, 0, 0, 0, 0,
+               SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE |
+                   SWP_FRAMECHANGED);
+
+  POINT parent_client_origin_after = {0, 0};
+  ClientToScreen(parent_window_handle, &parent_client_origin_after);
+  ASSERT_NE(parent_client_origin_after.y, parent_client_origin_before.y);
+
+  RECT satellite_rect_after;
+  GetWindowRect(satellite_window_handle, &satellite_rect_after);
+  EXPECT_EQ(satellite_rect_after.left,
+            satellite_rect_before.left +
+                (parent_client_origin_after.x - parent_client_origin_before.x));
+  EXPECT_EQ(satellite_rect_after.top,
+            satellite_rect_before.top +
+                (parent_client_origin_after.y - parent_client_origin_before.y));
+}
+
+TEST_F(WindowManagerTest, SatelliteWindowCannotBeMinimized) {
+  IsolateScope isolate_scope(isolate());
+
+  const HWND parent_window_handle = CreateParentWindow();
+  SatelliteWindowCreationRequest creation_request =
+      SatelliteCreationRequest(parent_window_handle, OffsetPositionCallback);
+
+  const HWND satellite_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(),
+          InternalFlutterWindows_WindowManager_CreateSatelliteWindow(
+              engine_id(), &creation_request));
+
+  SendMessage(satellite_window_handle, WM_SYSCOMMAND, SC_MINIMIZE, 0);
+
+  EXPECT_FALSE(IsIconic(satellite_window_handle));
+}
+
+TEST_F(WindowManagerTest, SatelliteWindowCanReparent) {
+  IsolateScope isolate_scope(isolate());
+
+  WindowingInitRequest init_request{
+      .on_message = [](WindowsMessage* message) {}};
+  InternalFlutterWindows_WindowManager_Initialize(engine_id(), &init_request);
+
+  const HWND parent1_handle = CreateParentWindow();
+  SetWindowPos(parent1_handle, nullptr, 100, 100, 0, 0,
+               SWP_NOSIZE | SWP_NOZORDER);
+  const HWND parent2_handle = CreateParentWindow();
+  SetWindowPos(parent2_handle, nullptr, 500, 500, 0, 0,
+               SWP_NOSIZE | SWP_NOZORDER);
+
+  SatelliteWindowCreationRequest creation_request =
+      SatelliteCreationRequest(parent1_handle, OffsetPositionCallback);
+  const HWND satellite_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(),
+          InternalFlutterWindows_WindowManager_CreateSatelliteWindow(
+              engine_id(), &creation_request));
+
+  RECT satellite_rect_before;
+  GetWindowRect(satellite_handle, &satellite_rect_before);
+
+  // Reparenting must not move the satellite.
+  InternalFlutterWindows_WindowManager_SetSatelliteParent(satellite_handle,
+                                                          parent2_handle);
+
+  RECT satellite_rect_after;
+  GetWindowRect(satellite_handle, &satellite_rect_after);
+  EXPECT_EQ(satellite_rect_after.left, satellite_rect_before.left);
+  EXPECT_EQ(satellite_rect_after.top, satellite_rect_before.top);
+
+  // The satellite now follows the new parent...
+  RECT parent2_rect;
+  GetWindowRect(parent2_handle, &parent2_rect);
+  SetWindowPos(parent2_handle, nullptr, parent2_rect.left + 30,
+               parent2_rect.top + 40, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+
+  RECT satellite_rect_moved;
+  GetWindowRect(satellite_handle, &satellite_rect_moved);
+  EXPECT_EQ(satellite_rect_moved.left, satellite_rect_after.left + 30);
+  EXPECT_EQ(satellite_rect_moved.top, satellite_rect_after.top + 40);
+
+  // ...and no longer follows the old one.
+  RECT parent1_rect;
+  GetWindowRect(parent1_handle, &parent1_rect);
+  SetWindowPos(parent1_handle, nullptr, parent1_rect.left + 70,
+               parent1_rect.top + 80, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+
+  RECT satellite_rect_final;
+  GetWindowRect(satellite_handle, &satellite_rect_final);
+  EXPECT_EQ(satellite_rect_final.left, satellite_rect_moved.left);
+  EXPECT_EQ(satellite_rect_final.top, satellite_rect_moved.top);
+}
+
+TEST_F(WindowManagerTest, CreateSatelliteWindowSizedToContent) {
+  IsolateScope isolate_scope(isolate());
+
+  const HWND parent_window_handle = CreateParentWindow();
+  SetWindowPos(parent_window_handle, nullptr, 200, 100, 0, 0,
+               SWP_NOSIZE | SWP_NOZORDER);
+
+  SatelliteWindowCreationRequest creation_request =
+      SatelliteCreationRequest(parent_window_handle, OffsetPositionCallback);
+  creation_request.preferred_size = {.has_preferred_view_size = false};
+  creation_request.sized_to_content = true;
+
+  const int64_t satellite_view_id =
+      InternalFlutterWindows_WindowManager_CreateSatelliteWindow(
+          engine_id(), &creation_request);
+  ASSERT_GE(satellite_view_id, 0);
+  const HWND satellite_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), satellite_view_id);
+  ASSERT_NE(satellite_window_handle, nullptr);
+
+  FlutterWindowsView* view =
+      engine()->GetViewFromTopLevelWindow(satellite_window_handle);
+  ASSERT_NE(view, nullptr);
+  EXPECT_TRUE(view->IsSizedToContent());
+}
+
+TEST_F(WindowManagerTest,
+       SatelliteWindowSizedToContentUsesPositionCallbackAfterFirstFrame) {
+  IsolateScope isolate_scope(isolate());
+
+  const HWND parent_window_handle = CreateParentWindow();
+  SetWindowPos(parent_window_handle, nullptr, 200, 100, 0, 0,
+               SWP_NOSIZE | SWP_NOZORDER);
+
+  SatelliteWindowCreationRequest creation_request =
+      SatelliteCreationRequest(parent_window_handle, OffsetPositionCallback);
+  creation_request.preferred_size = {.has_preferred_view_size = false};
+  creation_request.sized_to_content = true;
+
+  const HWND satellite_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(),
+          InternalFlutterWindows_WindowManager_CreateSatelliteWindow(
+              engine_id(), &creation_request));
+  ASSERT_NE(satellite_window_handle, nullptr);
+
+  FlutterWindowsView* view =
+      engine()->GetViewFromTopLevelWindow(satellite_window_handle);
+  ASSERT_NE(view, nullptr);
+
+  // A sized-to-content satellite does not know its size until the first frame,
+  // so the positioner only runs once that frame has been generated.
+  view->OnFrameGenerated(150, 100);
+  engine()->task_runner()->ProcessTasks();
+
+  RECT parent_client_rect;
+  GetClientRect(parent_window_handle, &parent_client_rect);
+  POINT parent_top_left = {parent_client_rect.left, parent_client_rect.top};
+  ClientToScreen(parent_window_handle, &parent_top_left);
+
+  // As on the creation path, the positioner's origin applies to the window
+  // rectangle.
+  RECT satellite_rect;
+  GetWindowRect(satellite_window_handle, &satellite_rect);
+  EXPECT_EQ(satellite_rect.left, parent_top_left.x + 20);
+  EXPECT_EQ(satellite_rect.top, parent_top_left.y + 30);
+}
+
+TEST_F(WindowManagerTest, SatelliteWindowCannotBeReparentedToItself) {
+  IsolateScope isolate_scope(isolate());
+
+  WindowingInitRequest init_request{
+      .on_message = [](WindowsMessage* message) {}};
+  InternalFlutterWindows_WindowManager_Initialize(engine_id(), &init_request);
+
+  const HWND parent_window_handle = CreateParentWindow();
+  SatelliteWindowCreationRequest creation_request =
+      SatelliteCreationRequest(parent_window_handle, OffsetPositionCallback);
+  const HWND satellite_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(),
+          InternalFlutterWindows_WindowManager_CreateSatelliteWindow(
+              engine_id(), &creation_request));
+
+  // Anchoring a satellite to itself would make parent-movement propagation
+  // recurse forever, so the request must be rejected.
+  InternalFlutterWindows_WindowManager_SetSatelliteParent(satellite_handle,
+                                                          satellite_handle);
+
+  RECT parent_rect;
+  GetWindowRect(parent_window_handle, &parent_rect);
+  RECT satellite_rect_before;
+  GetWindowRect(satellite_handle, &satellite_rect_before);
+
+  // The satellite still tracks its original parent.
+  SetWindowPos(parent_window_handle, nullptr, parent_rect.left + 15,
+               parent_rect.top + 25, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+
+  RECT satellite_rect_after;
+  GetWindowRect(satellite_handle, &satellite_rect_after);
+  EXPECT_EQ(satellite_rect_after.left, satellite_rect_before.left + 15);
+  EXPECT_EQ(satellite_rect_after.top, satellite_rect_before.top + 25);
+}
+
+TEST_F(WindowManagerTest, SatelliteWindowCannotBeReparentedToItsOwnSatellite) {
+  IsolateScope isolate_scope(isolate());
+
+  WindowingInitRequest init_request{
+      .on_message = [](WindowsMessage* message) {}};
+  InternalFlutterWindows_WindowManager_Initialize(engine_id(), &init_request);
+
+  const HWND parent_window_handle = CreateParentWindow();
+  SatelliteWindowCreationRequest outer_request =
+      SatelliteCreationRequest(parent_window_handle, OffsetPositionCallback);
+  const HWND outer_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(),
+          InternalFlutterWindows_WindowManager_CreateSatelliteWindow(
+              engine_id(), &outer_request));
+
+  SatelliteWindowCreationRequest inner_request =
+      SatelliteCreationRequest(outer_handle, OffsetPositionCallback);
+  const HWND inner_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(),
+          InternalFlutterWindows_WindowManager_CreateSatelliteWindow(
+              engine_id(), &inner_request));
+
+  // |outer| already anchors |inner|, so anchoring |outer| to |inner| would
+  // close a cycle and must be rejected.
+  InternalFlutterWindows_WindowManager_SetSatelliteParent(outer_handle,
+                                                          inner_handle);
+
+  RECT parent_rect;
+  GetWindowRect(parent_window_handle, &parent_rect);
+  RECT outer_rect_before;
+  GetWindowRect(outer_handle, &outer_rect_before);
+  RECT inner_rect_before;
+  GetWindowRect(inner_handle, &inner_rect_before);
+
+  // Moving the root window still propagates down the chain exactly once.
+  SetWindowPos(parent_window_handle, nullptr, parent_rect.left + 10,
+               parent_rect.top + 20, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+
+  RECT outer_rect_after;
+  GetWindowRect(outer_handle, &outer_rect_after);
+  RECT inner_rect_after;
+  GetWindowRect(inner_handle, &inner_rect_after);
+  EXPECT_EQ(outer_rect_after.left, outer_rect_before.left + 10);
+  EXPECT_EQ(outer_rect_after.top, outer_rect_before.top + 20);
+  EXPECT_EQ(inner_rect_after.left, inner_rect_before.left + 10);
+  EXPECT_EQ(inner_rect_after.top, inner_rect_before.top + 20);
+}
+
+TEST_F(WindowManagerTest, OnEngineShutdownDispatchesWmDestroyForSatellite) {
+  IsolateScope isolate_scope(isolate());
+
+  static std::vector<UINT> received_messages;
+  received_messages.clear();
+  WindowingInitRequest init_request{.on_message = [](WindowsMessage* message) {
+    received_messages.push_back(message->message);
+  }};
+  InternalFlutterWindows_WindowManager_Initialize(engine_id(), &init_request);
+
+  const HWND parent_window_handle = CreateParentWindow();
+  SatelliteWindowCreationRequest creation_request =
+      SatelliteCreationRequest(parent_window_handle, OffsetPositionCallback);
+  InternalFlutterWindows_WindowManager_CreateSatelliteWindow(engine_id(),
+                                                             &creation_request);
 
   received_messages.clear();
   engine()->window_manager()->OnEngineShutdown();

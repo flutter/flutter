@@ -4,12 +4,13 @@
 
 import 'package:flutter_tools/src/localizations/gen_l10n_types.dart';
 import 'package:flutter_tools/src/localizations/message_parser.dart';
+
 import '../src/common.dart';
 
 void main() {
   // Going to test that operator== is overloaded properly since the rest
   // of the test depends on it.
-  testWithoutContext('node equality', () {
+  test('node equality', () {
     final actual = Node(
       ST.placeholderExpr,
       0,
@@ -58,7 +59,7 @@ void main() {
     expect(actual, isNot(equals(wrongChild)));
   });
 
-  testWithoutContext('lexer basic', () {
+  test('lexer basic', () {
     final List<Node> tokens1 = Parser('helloWorld', 'app_en.arb', 'Hello {name}').lexIntoTokens();
     expect(
       tokens1,
@@ -131,7 +132,7 @@ void main() {
     );
   });
 
-  testWithoutContext('lexer recursive', () {
+  test('lexer recursive', () {
     final List<Node> tokens = Parser(
       'plural',
       'app_en.arb',
@@ -172,7 +173,7 @@ void main() {
     );
   });
 
-  testWithoutContext('lexer escaping', () {
+  test('lexer escaping', () {
     final List<Node> tokens1 = Parser(
       'escaping',
       'app_en.arb',
@@ -233,7 +234,7 @@ void main() {
     );
   });
 
-  testWithoutContext('lexer identifier names can be "select" or "plural"', () {
+  test('lexer identifier names can be "select" or "plural"', () {
     final List<Node> tokens = Parser(
       'keywords',
       'app_en.arb',
@@ -245,7 +246,7 @@ void main() {
     expect(tokens[5].type, equals(ST.identifier));
   });
 
-  testWithoutContext('lexer identifier names can contain underscores', () {
+  test('lexer identifier names can contain underscores', () {
     final List<Node> tokens = Parser(
       'keywords',
       'app_en.arb',
@@ -257,7 +258,7 @@ void main() {
     expect(tokens[5].type, equals(ST.identifier));
   });
 
-  testWithoutContext('lexer identifier names can contain the strings select or plural', () {
+  test('lexer identifier names can contain the strings select or plural', () {
     final List<Node> tokens = Parser(
       'keywords',
       'app_en.arb',
@@ -269,7 +270,7 @@ void main() {
     expect(tokens[5].type, equals(ST.identifier));
   });
 
-  testWithoutContext('lexer: lexically correct but syntactically incorrect', () {
+  test('lexer: lexically correct but syntactically incorrect', () {
     final List<Node> tokens = Parser(
       'syntax',
       'app_en.arb',
@@ -293,7 +294,7 @@ void main() {
     );
   });
 
-  testWithoutContext('lexer unmatched single quote', () {
+  test('lexer unmatched single quote', () {
     const message = "here''s an unmatched single quote: '";
     const expectedError = '''
 [app_en.arb:escaping] ICU Lexing Error: Unmatched single quotes.
@@ -311,7 +312,7 @@ void main() {
     );
   });
 
-  testWithoutContext('lexer unexpected character', () {
+  test('lexer unexpected character', () {
     const message = '{ * }';
     const expectedError = '''
 [app_en.arb:lex] ICU Lexing Error: Unexpected character.
@@ -329,7 +330,7 @@ void main() {
     );
   });
 
-  testWithoutContext('relaxed lexer', () {
+  test('relaxed lexer', () {
     final List<Node> tokens1 = Parser(
       'string',
       'app_en.arb',
@@ -376,7 +377,7 @@ void main() {
     );
   });
 
-  testWithoutContext('relaxed lexer complex', () {
+  test('relaxed lexer complex', () {
     const message =
         '{ notPlaceholder } {count,plural, =0{Hello} =1{Hello World} =2{Hello two worlds} few{Hello {count} worlds} many{Hello all {count} worlds} other{Hello other {count} worlds}}';
     final List<Node> tokens = Parser(
@@ -388,7 +389,7 @@ void main() {
     expect(tokens[0].type, equals(ST.string));
   });
 
-  testWithoutContext('parser basic', () {
+  test('parser basic', () {
     expect(
       Parser('helloWorld', 'app_en.arb', 'Hello {name}').parse(),
       equals(
@@ -566,7 +567,7 @@ void main() {
     );
   });
 
-  testWithoutContext('parser escaping', () {
+  test('parser escaping', () {
     expect(
       Parser('escaping', 'app_en.arb', "Flutter''s amazing!", useEscaping: true).parse(),
       equals(
@@ -597,7 +598,7 @@ void main() {
     );
   });
 
-  testWithoutContext('parser recursive', () {
+  test('parser recursive', () {
     expect(
       Parser(
         'pluralGender',
@@ -719,7 +720,7 @@ void main() {
     );
   });
 
-  testWithoutContext('parser unexpected token', () {
+  test('parser unexpected token', () {
     // unexpected token
     const expectedError1 = '''
 [app_en.arb:unexpectedToken] ICU Syntax Error: Expected "}" but found "=".
@@ -767,7 +768,7 @@ void main() {
     );
   });
 
-  testWithoutContext('parser allows select cases with numbers', () {
+  test('parser allows select cases with numbers', () {
     final Node node = Parser(
       'numberSelect',
       'app_en.arb',

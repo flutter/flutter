@@ -12,6 +12,7 @@ import 'package:android_hardware_smoke_test/constants.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:image/image.dart' as img;
 import 'package:test/test.dart';
+
 import 'image_utils.dart';
 
 /// Whether the current environment is LUCI.
@@ -30,9 +31,8 @@ void main() async {
     final String response = await flutterDriver.requestData(
       json.encode(<String, Object?>{keyCommand: commandGetGoldenVariant}),
     );
-    final Map<String, Object?> reply =
-        (json.decode(response) as Map<Object?, Object?>)
-            .cast<String, Object?>();
+    final Map<String, Object?> reply = (json.decode(response) as Map<Object?, Object?>)
+        .cast<String, Object?>();
     final replyVariant = reply[keyGoldenVariant] as String?;
     activeGoldenVariant = switch (replyVariant) {
       final String s when s.isNotEmpty => '.$s',
@@ -55,16 +55,12 @@ void main() async {
   Future<void> templateTest(String testName) async {
     // Ask the app to render the test and return the rendered image bytes
     final String response = await flutterDriver.requestData(
-      json.encode(<String, Object?>{
-        keyTestName: testName,
-        keyPerformAppSideGoldenCompare: false,
-      }),
+      json.encode(<String, Object?>{keyTestName: testName, keyPerformAppSideGoldenCompare: false}),
     );
 
     // Expect a successful reply or skip status
-    final Map<String, Object?> reply =
-        (json.decode(response) as Map<Object?, Object?>)
-            .cast<String, Object?>();
+    final Map<String, Object?> reply = (json.decode(response) as Map<Object?, Object?>)
+        .cast<String, Object?>();
 
     if (reply[keyMessage] == 'Skipped') {
       markTestSkipped('Skipping $testName: ${reply[keyReason]}');
@@ -88,9 +84,7 @@ void main() async {
 
         final img.Image? decoded = img.decodePng(fullBytes);
         if (decoded == null) {
-          throw StateError(
-            'Failed to decode full screen screenshot for $testName',
-          );
+          throw StateError('Failed to decode full screen screenshot for $testName');
         }
 
         final img.Image candidate = cropImage(decoded, x, y, w, h);
@@ -100,18 +94,17 @@ void main() async {
           break;
         }
 
-        io.stderr.writeln(
-          'Captured screenshot is blank/empty (attempt $attempt/$maxAttempts)',
-        );
+        // Avoid including $errorBlankScreenshot here so a transient blank frame that
+        // recovers on retry does not trigger a host-level userspace restart if a later
+        // test fails for an unrelated reason.
+        io.stderr.writeln('Blank screenshot on attempt $attempt/$maxAttempts');
         if (attempt < maxAttempts) {
           await Future<void>.delayed(const Duration(milliseconds: 200));
         }
       }
 
       if (cropped == null) {
-        throw StateError(
-          'Captured screenshot is $errorBlankScreenshot after $maxAttempts attempts.',
-        );
+        throw StateError('$errorBlankScreenshot after $maxAttempts attempts.');
       }
       imageBytes = Uint8List.fromList(img.encodePng(cropped));
     } else {
@@ -121,10 +114,7 @@ void main() async {
 
     // Compare the bytes to a golden file on the host filesystem using the cached variant
 
-    await expectLater(
-      imageBytes,
-      matchesGoldenFile('goldens/$testName$activeGoldenVariant.png'),
-    );
+    await expectLater(imageBytes, matchesGoldenFile('goldens/$testName$activeGoldenVariant.png'));
   }
 
   test('should render and match blueRectangleTest golden', () async {
@@ -151,27 +141,15 @@ void main() async {
     await templateTest('backdropFilterBlurTest');
   }, timeout: Timeout.none);
 
-  test(
-    'should render and match $kPlatformViewTextureLayerTest golden',
-    () async {
-      await templateTest(kPlatformViewTextureLayerTest);
-    },
-    timeout: Timeout.none,
-  );
+  test('should render and match $kPlatformViewTextureLayerTest golden', () async {
+    await templateTest(kPlatformViewTextureLayerTest);
+  }, timeout: Timeout.none);
 
-  test(
-    'should render and match $kPlatformViewHybridCompositionTest golden',
-    () async {
-      await templateTest(kPlatformViewHybridCompositionTest);
-    },
-    timeout: Timeout.none,
-  );
+  test('should render and match $kPlatformViewHybridCompositionTest golden', () async {
+    await templateTest(kPlatformViewHybridCompositionTest);
+  }, timeout: Timeout.none);
 
-  test(
-    'should render and match $kPlatformViewHybridCompositionPlusPlusTest golden',
-    () async {
-      await templateTest(kPlatformViewHybridCompositionPlusPlusTest);
-    },
-    timeout: Timeout.none,
-  );
+  test('should render and match $kPlatformViewHybridCompositionPlusPlusTest golden', () async {
+    await templateTest(kPlatformViewHybridCompositionPlusPlusTest);
+  }, timeout: Timeout.none);
 }

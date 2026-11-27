@@ -2,19 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Display;
+import 'dart:ui' show Display, FlutterView, PlatformDispatcher;
+
 import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 import 'package:flutter/src/widgets/_window.dart'
     show
         BaseWindowController,
-        DialogWindow,
         DialogWindowController,
         DialogWindowControllerDelegate,
-        PopupWindow,
         PopupWindowController,
-        SatelliteWindow,
         SatelliteWindowController,
-        TooltipWindow,
         TooltipWindowController,
         Window,
         WindowController,
@@ -29,8 +26,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'multi_view_testing.dart';
 
 class _StubWindowController extends WindowController {
-  _StubWindowController(WidgetTester tester) : super.empty() {
-    rootView = FakeView(tester.view);
+  _StubWindowController(WidgetTester tester, {FlutterView? rootView}) : super.empty() {
+    this.rootView = rootView ?? FakeView(tester.view);
   }
 
   @override
@@ -331,6 +328,13 @@ class _MutableWindowController extends WindowController {
 }
 
 void main() {
+  // The binding is created by the first testWidgets below and chooses its
+  // windowing owner then: flutter_test installs its test owner only if
+  // windowing is enabled at that moment. Enable it before any test is declared
+  // so that the 'test window controllers' group has a test owner to work with.
+  // Each group then sets the flag for its own tests.
+  isWindowingEnabled = true;
+
   group('Windowing', () {
     group('isWindowingEnabled is false', () {
       setUp(() {
@@ -361,44 +365,22 @@ void main() {
         );
       });
 
-      testWidgets('DialogWindow throws UnsupportedError', (WidgetTester tester) async {
-        expect(
-          () => DialogWindow(
-            controller: _StubDialogWindowController(tester),
-            child: const Text('Test'),
-          ),
-          throwsUnsupportedError,
-        );
-      });
-
-      testWidgets('TooltipWindow throws UnsupportedError', (WidgetTester tester) async {
-        expect(
-          () => TooltipWindow(
-            controller: _StubTooltipWindowController(tester: tester),
-            child: const Text('Test'),
-          ),
-          throwsUnsupportedError,
-        );
-      });
-
-      testWidgets('PopupWindow throws UnsupportedError', (WidgetTester tester) async {
-        expect(
-          () => PopupWindow(
-            controller: _StubPopupWindowController(tester: tester),
-            child: const Text('Test'),
-          ),
-          throwsUnsupportedError,
-        );
-      });
-
-      testWidgets('SatelliteWindow throws UnsupportedError', (WidgetTester tester) async {
-        expect(
-          () => SatelliteWindow(
-            controller: _StubSatelliteWindowController(tester: tester),
-            child: const Text('Test'),
-          ),
-          throwsUnsupportedError,
-        );
+      testWidgets('Window throws UnsupportedError', (WidgetTester tester) async {
+        final controllerBuilders = <BaseWindowController Function()>[
+          () => _StubWindowController(tester),
+          () => _StubDialogWindowController(tester),
+          () => _StubTooltipWindowController(tester: tester),
+          () => _StubPopupWindowController(tester: tester),
+          () => _StubSatelliteWindowController(tester: tester),
+        ];
+        for (final createController in controllerBuilders) {
+          final BaseWindowController controller = createController();
+          addTearDown(controller.dispose);
+          expect(
+            () => Window(controller: controller, child: const Text('Test')),
+            throwsUnsupportedError,
+          );
+        }
       });
 
       testWidgets('Accessing WindowScope.of throws UnsupportedError', (WidgetTester tester) async {
@@ -414,6 +396,46 @@ void main() {
         isWindowingEnabled = true;
       });
 
+      testWidgets(
+        'Window uses TestFlutterView metrics when rootView is resolved from WidgetsBinding.instance.platformDispatcher.view',
+        (WidgetTester tester) async {
+          tester.view.devicePixelRatio = 2.75;
+          addTearDown(tester.view.resetDevicePixelRatio);
+
+          final FlutterView? resolvedView = WidgetsBinding.instance.platformDispatcher.view(
+            id: tester.view.viewId,
+          );
+          expect(resolvedView, allOf(same(tester.view), isA<TestFlutterView>()));
+          expect(
+            PlatformDispatcher.instance.view(id: tester.view.viewId)?.devicePixelRatio,
+            isNot(2.75),
+          );
+
+          final controller = _StubWindowController(tester, rootView: resolvedView);
+          addTearDown(controller.dispose);
+          expect(controller.rootView.devicePixelRatio, 2.75);
+
+          late FlutterView capturedView;
+          late double capturedDevicePixelRatio;
+          await tester.pumpWidget(
+            wrapWithView: false,
+            Window(
+              controller: controller,
+              child: Builder(
+                builder: (BuildContext context) {
+                  capturedView = View.of(context);
+                  capturedDevicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          );
+
+          expect(capturedView, same(tester.view));
+          expect(capturedDevicePixelRatio, 2.75);
+        },
+      );
+
       testWidgets('Window does not throw', (WidgetTester tester) async {
         final controller = _StubWindowController(tester);
         addTearDown(controller.dispose);
@@ -423,12 +445,12 @@ void main() {
         );
       });
 
-      testWidgets('Dialog does not throw', (WidgetTester tester) async {
+      testWidgets('Window with a dialog controller does not throw', (WidgetTester tester) async {
         final controller = _StubDialogWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(controller: controller, child: Container()),
+          Window(controller: controller, child: Container()),
         );
       });
 
@@ -458,7 +480,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -478,7 +500,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -498,7 +520,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -518,7 +540,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -560,7 +582,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -582,7 +604,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -602,7 +624,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -624,7 +646,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -668,7 +690,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -690,7 +712,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -712,7 +734,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -734,7 +756,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -778,7 +800,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -800,7 +822,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -822,7 +844,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -844,7 +866,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -886,7 +908,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -908,7 +930,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -928,7 +950,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -950,7 +972,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -994,7 +1016,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1016,7 +1038,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1038,7 +1060,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1060,7 +1082,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1104,7 +1126,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1126,7 +1148,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1148,7 +1170,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1170,7 +1192,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1214,7 +1236,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1236,7 +1258,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1258,7 +1280,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1280,7 +1302,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1324,7 +1346,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1346,7 +1368,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1368,7 +1390,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1412,7 +1434,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1434,7 +1456,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1456,7 +1478,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1500,7 +1522,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1522,7 +1544,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1544,7 +1566,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1566,7 +1588,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1610,7 +1632,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1632,7 +1654,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1654,7 +1676,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1676,7 +1698,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1720,7 +1742,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1742,7 +1764,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1764,7 +1786,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1786,7 +1808,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1830,7 +1852,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1852,7 +1874,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1874,7 +1896,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1896,7 +1918,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1967,7 +1989,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1989,7 +2011,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -2011,7 +2033,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -2033,7 +2055,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -2077,7 +2099,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -2099,7 +2121,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -2121,7 +2143,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -2143,7 +2165,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          Window(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -2204,14 +2226,227 @@ void main() {
         expect(tester.takeException(), isNull);
       });
 
-      testWidgets('SatelliteWindow does not throw', (WidgetTester tester) async {
+      testWidgets('Window with a satellite controller does not throw', (WidgetTester tester) async {
         final controller = _StubSatelliteWindowController(tester: tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(controller: controller, child: Container()),
+          Window(controller: controller, child: Container()),
+        );
+      });
+
+      group('test window controllers', () {
+        // These tests exercise flutter_test's own window controller doubles
+        // through the test windowing owner the binding installed (see the top of
+        // main). That owner is shared by the whole file, so each test destroys
+        // the windows it creates.
+
+        testWidgets(
+          'Destroying a test window controller removes its view from platformDispatcher',
+          (WidgetTester tester) async {
+            final WindowController controller = WidgetsBinding.instance.windowingOwner
+                .createWindowController(delegate: WindowControllerDelegate(), resizable: true);
+            _destroyOnTearDown(controller);
+            expect(tester.platformDispatcher.views, contains(controller.rootView));
+
+            controller.destroy();
+            expect(tester.platformDispatcher.views, isNot(contains(controller.rootView)));
+          },
+        );
+
+        testWidgets('Creating a test window controller reports exactly one metrics change', (
+          WidgetTester tester,
+        ) async {
+          var metricsChangedCount = 0;
+          final VoidCallback? previousMetricsChanged = tester.platformDispatcher.onMetricsChanged;
+          tester.platformDispatcher.onMetricsChanged = () {
+            previousMetricsChanged?.call();
+            metricsChangedCount += 1;
+          };
+          addTearDown(() {
+            tester.platformDispatcher.onMetricsChanged = previousMetricsChanged;
+          });
+
+          final WindowController controller = WidgetsBinding.instance.windowingOwner
+              .createWindowController(delegate: WindowControllerDelegate(), resizable: true);
+          _destroyOnTearDown(controller);
+
+          // The view is registered with `notify: false` and the controller reports
+          // the change itself once it has assigned `rootView`. Registering with a
+          // notification would report twice, and the first of those would wake
+          // observers while `rootView` is still unassigned.
+          expect(metricsChangedCount, 1);
+          expect(tester.platformDispatcher.views, contains(controller.rootView));
+        });
+
+        testWidgets(
+          'Destroying a test window controller during a metrics change removes its view',
+          (WidgetTester tester) async {
+            final WindowController controller = WidgetsBinding.instance.windowingOwner
+                .createWindowController(delegate: WindowControllerDelegate(), resizable: true);
+            _destroyOnTearDown(controller);
+            final FlutterView rootView = controller.rootView;
+            expect(tester.platformDispatcher.views, contains(rootView));
+
+            final VoidCallback? previousMetricsChanged = tester.platformDispatcher.onMetricsChanged;
+            addTearDown(() {
+              tester.platformDispatcher.onMetricsChanged = previousMetricsChanged;
+            });
+            var destroyed = false;
+            tester.platformDispatcher.onMetricsChanged = () {
+              if (!destroyed) {
+                destroyed = true;
+                controller.destroy();
+              }
+            };
+
+            // Destroying from inside a notification makes the metrics change that
+            // removeTestView reports reentrant, so it is dropped. Removal still has
+            // to take effect: the controller holds the wrapper rather than the view
+            // it was registered with, and matching only the latter left the
+            // destroyed view in the registry permanently.
+            tester.platformDispatcher.notifyMetricsChanged();
+
+            expect(destroyed, isTrue);
+            expect(tester.platformDispatcher.view(id: rootView.viewId), isNull);
+            expect(tester.platformDispatcher.views, isNot(contains(rootView)));
+          },
+        );
+
+        testWidgets('Destroying a test window controller twice is a no-op the second time', (
+          WidgetTester tester,
+        ) async {
+          var destroyedCount = 0;
+          var rootViewPresentDuringDestroyCallback = true;
+          late final WindowController controller;
+          controller = WidgetsBinding.instance.windowingOwner.createWindowController(
+            delegate: _CountingWindowControllerDelegate(() {
+              destroyedCount += 1;
+              rootViewPresentDuringDestroyCallback = tester.platformDispatcher.views.contains(
+                controller.rootView,
+              );
+            }),
+            resizable: true,
+          );
+          _destroyOnTearDown(controller);
+
+          var metricsChangedCount = 0;
+          final VoidCallback? previousMetricsChanged = tester.platformDispatcher.onMetricsChanged;
+          tester.platformDispatcher.onMetricsChanged = () {
+            previousMetricsChanged?.call();
+            metricsChangedCount += 1;
+          };
+          addTearDown(() {
+            tester.platformDispatcher.onMetricsChanged = previousMetricsChanged;
+          });
+
+          controller.destroy();
+          expect(controller.isDestroyed, isTrue);
+          expect(destroyedCount, 1);
+          expect(rootViewPresentDuringDestroyCallback, isFalse);
+          expect(metricsChangedCount, 1);
+          expect(tester.platformDispatcher.views, isNot(contains(controller.rootView)));
+
+          // A second destroy has nothing left to remove, so it must not report a
+          // metrics change: a view that is already gone did not just go.
+          controller.destroy();
+          expect(controller.isDestroyed, isTrue);
+          expect(destroyedCount, 1);
+          expect(metricsChangedCount, 1);
+          expect(tester.takeException(), isNull);
+        });
+
+        testWidgets(
+          'Destroying an active child test window controller restores activation to parent',
+          (WidgetTester tester) async {
+            final WindowController parent = WidgetsBinding.instance.windowingOwner
+                .createWindowController(delegate: WindowControllerDelegate(), resizable: true);
+            _destroyOnTearDown(parent);
+            expect(parent.isActivated, isTrue);
+
+            final DialogWindowController child = WidgetsBinding.instance.windowingOwner
+                .createDialogWindowController(
+                  delegate: DialogWindowControllerDelegate(),
+                  resizable: true,
+                  parent: parent,
+                );
+            _destroyOnTearDown(child);
+            expect(child.isActivated, isTrue);
+            expect(parent.isActivated, isFalse);
+
+            child.destroy();
+            expect(child.isDestroyed, isTrue);
+            expect(child.isActivated, isFalse);
+            expect(parent.isActivated, isTrue);
+            expect(tester.platformDispatcher.views, isNot(contains(child.rootView)));
+            expect(tester.platformDispatcher.views, contains(parent.rootView));
+
+            parent.destroy();
+            expect(parent.isDestroyed, isTrue);
+            expect(parent.isActivated, isFalse);
+            expect(tester.platformDispatcher.views, isNot(contains(parent.rootView)));
+          },
+        );
+
+        testWidgets(
+          'Destroying a parent test window controller destroys child windows without re-activating parent',
+          (WidgetTester tester) async {
+            final WindowController parent = WidgetsBinding.instance.windowingOwner
+                .createWindowController(delegate: WindowControllerDelegate(), resizable: true);
+            _destroyOnTearDown(parent);
+
+            final DialogWindowController child1 = WidgetsBinding.instance.windowingOwner
+                .createDialogWindowController(
+                  delegate: DialogWindowControllerDelegate(),
+                  resizable: true,
+                  parent: parent,
+                );
+            _destroyOnTearDown(child1);
+
+            final DialogWindowController child2 = WidgetsBinding.instance.windowingOwner
+                .createDialogWindowController(
+                  delegate: DialogWindowControllerDelegate(),
+                  resizable: true,
+                  parent: parent,
+                );
+            _destroyOnTearDown(child2);
+
+            parent.destroy();
+            expect(parent.isDestroyed, isTrue);
+            expect(child1.isDestroyed, isTrue);
+            expect(child2.isDestroyed, isTrue);
+            expect(parent.isActivated, isFalse);
+            expect(child1.isActivated, isFalse);
+            expect(child2.isActivated, isFalse);
+            expect(tester.platformDispatcher.views, isNot(contains(parent.rootView)));
+            expect(tester.platformDispatcher.views, isNot(contains(child1.rootView)));
+            expect(tester.platformDispatcher.views, isNot(contains(child2.rootView)));
+          },
         );
       });
     });
   });
+}
+
+// The test windowing owner is shared by every test in this file, so a test must
+// not leave the windows it creates behind: this destroys [controller] at
+// teardown, if the test has not already, and then disposes it.
+void _destroyOnTearDown(BaseWindowController controller) {
+  addTearDown(() {
+    controller.destroy();
+    controller.dispose();
+  });
+}
+
+// Counts the destruction notifications a controller sends, which is how the
+// tests here tell a second `destroy()` that did nothing from one that ran again.
+class _CountingWindowControllerDelegate with WindowControllerDelegate {
+  _CountingWindowControllerDelegate(this._onDestroyed);
+
+  final VoidCallback _onDestroyed;
+
+  @override
+  void onWindowDestroyed() {
+    _onDestroyed();
+  }
 }

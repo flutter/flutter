@@ -247,6 +247,7 @@ Future<void> frameworkTestsRunner() async {
     await runFixTests('flutter_test');
     await runFixTests('integration_test');
     await runFixTests('flutter_driver');
+    await runFixTests('flutter_localizations');
     await runPrivateTests();
 
     // Run java unit tests for integration_test
@@ -286,10 +287,6 @@ Future<void> frameworkTestsRunner() async {
     );
     await testHarnessTestsRunner();
     await runExampleTests();
-    await runFlutterTest(
-      path.join(flutterRoot, 'dev', 'a11y_assessments'),
-      tests: <String>['test'],
-    );
     await runDartTest(path.join(flutterRoot, 'dev', 'bots'));
     await runDartTest(
       path.join(flutterRoot, 'dev', 'devicelab'),

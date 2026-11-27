@@ -38,17 +38,15 @@ class IconTreeShaker {
   IconTreeShaker(
     this._environment,
     DevFSStringContent? fontManifest, {
-    required ProcessManager processManager,
+    required this._processManager,
     required Logger logger,
     required FileSystem fileSystem,
-    required Artifacts artifacts,
-    required TargetPlatform targetPlatform,
-  }) : _processManager = processManager,
-       _logger = logger,
+    required this._artifacts,
+    required this._targetPlatform,
+    this.recordedUsesFileNames,
+  }) : _logger = logger,
        _fs = fileSystem,
-       _artifacts = artifacts,
-       _fontManifest = fontManifest?.string,
-       _targetPlatform = targetPlatform {
+       _fontManifest = fontManifest?.string {
     if (_environment.defines[kIconTreeShakerFlag] == 'true' &&
         _environment.defines[kBuildMode] == 'debug') {
       logger.printError(
@@ -72,7 +70,7 @@ class IconTreeShaker {
   ///
   /// Web targets (such as `WebReleaseBundle`) do not use this field because
   /// their recorded uses inputs are dynamically provided via
-  /// `Dart2WebTarget.buildPatternStems`.
+  /// `WebReleaseBundle.inputs`, `LinkHooks`, and `Dart2WebTarget.outputs`.
   ///
   /// See [Target.inputs].
   static const inputs = <Source>[
@@ -85,6 +83,7 @@ class IconTreeShaker {
 
   final Environment _environment;
   final String? _fontManifest;
+  final List<String>? recordedUsesFileNames;
   Future<void>? _iconDataProcessing;
   Map<String, _IconTreeShakerData>? _iconData;
 
@@ -106,11 +105,9 @@ class IconTreeShaker {
       return;
     }
 
-    final candidates = <String>[
-      'recorded_uses.json',
-      'recorded_uses_js.json',
-      'recorded_uses_wasm.json',
-    ];
+    final List<String> candidates =
+        recordedUsesFileNames ??
+        const <String>['recorded_uses.json', 'recorded_uses_js.json', 'recorded_uses_wasm.json'];
     final recordedUsesFiles = <File>[];
     for (final candidate in candidates) {
       final File file = environment.buildDir.childFile(candidate);

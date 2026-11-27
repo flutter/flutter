@@ -6,6 +6,7 @@
 #define FLUTTER_TXT_SRC_TXT_PARAGRAPH_STYLE_H_
 
 #include <climits>
+#include <optional>
 #include <string>
 
 #include "font_style.h"
@@ -53,6 +54,10 @@ enum TextHeightBehavior {
   kDisableAll = 0x1 | 0x2,
 };
 
+// ParagraphStyle is instantiated rarely (roughly once per paragraph) and is not
+// performance-sensitive, so its fields are ordered for readability rather than
+// for minimal struct padding.
+// NOLINTNEXTLINE(clang-analyzer-optin.performance.Padding)
 class ParagraphStyle {
  public:
   // Default TextStyle. Used in GetTextStyle() to obtain the base TextStyle to
@@ -86,6 +91,15 @@ class ParagraphStyle {
   size_t max_lines = std::numeric_limits<size_t>::max();
   std::u16string ellipsis;
   std::string locale;
+
+  // Whether to render the soft hyphen (U+00AD) glyph at a line-break
+  // opportunity. Defaults to true, which renders the hyphen (Hyphens.manual);
+  // false suppresses it (Hyphens.hidden).
+  bool render_soft_hyphens = true;
+
+  // The string drawn at a soft hyphen line break when render_soft_hyphens is
+  // true. Unset keeps Skia's default, "-"; the empty string draws nothing.
+  std::optional<std::u16string> soft_hyphen_string;
 
   TextStyle GetTextStyle() const;
 

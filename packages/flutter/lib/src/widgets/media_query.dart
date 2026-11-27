@@ -149,9 +149,8 @@ enum _MediaQueryAspect {
 /// {@macro flutter.widgets.media_query.MediaQuery.useSpecific}
 ///
 /// To obtain the entire current [MediaQueryData] for a given [BuildContext],
-/// use the [MediaQuery.of] function. This can be useful if you are going to use
-/// [copyWith] to replace the [MediaQueryData] with one with an updated
-/// property.
+/// use the [MediaQuery.of] function. This allows for one or more properties
+/// to be updated using [copyWith].
 ///
 /// ## Insets and Padding
 ///
@@ -178,11 +177,12 @@ enum _MediaQueryAspect {
 /// configuration of the device and are used and optionally consumed by widgets
 /// that position content within these insets. The padding value defines areas
 /// that might not be completely visible, like the display "notch" on the iPhone
-/// X. The viewInsets value defines areas that aren't visible at all, typically
-/// because they're obscured by the device's keyboard. Similar to viewInsets,
-/// viewPadding does not differentiate padding in areas that may be obscured.
-/// For example, by using the viewPadding property, padding would defer to the
-/// iPhone "safe area" regardless of whether a keyboard is showing.
+/// X. The viewInsets value defines areas reserved for system UI, typically the
+/// device's keyboard (which may be translucent or have rounded corners, leaving
+/// what is painted behind it visible). Unlike padding, viewPadding is not
+/// reduced when the viewInsets overlap it. For example, viewPadding still
+/// includes the iPhone "safe area" at the bottom of the screen while a keyboard
+/// is showing, whereas padding does not.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ceCo8U0XHqw}
 ///
@@ -284,9 +284,11 @@ class MediaQueryData {
   ///  * [WidgetsBindingObserver.didChangeTextScaleFactor] or
   ///    [dart:ui.PlatformDispatcher.onTextScaleFactorChanged],
   ///  * [WidgetsBindingObserver.didChangePlatformBrightness] or
-  ///    [dart:ui.PlatformDispatcher.onPlatformBrightnessChanged].
+  ///    [dart:ui.PlatformDispatcher.onPlatformBrightnessChanged],
+  ///  * [WidgetsBindingObserver.didChangeAlwaysUse24HourFormat] or
+  ///    [dart:ui.PlatformDispatcher.onAlwaysUse24HourFormatChanged].
   ///
-  /// The last three notifications are only relevant if no `platformData` is
+  /// The last four notifications are only relevant if no `platformData` is
   /// provided. If `platformData` is provided, callers should ensure to call
   /// this method again when it changes to keep the constructed [MediaQueryData]
   /// updated.
@@ -296,12 +298,30 @@ class MediaQueryData {
   /// constructor is primarily for use in the implementation of the framework
   /// itself.
   ///
+  /// A [debugViewMetricsOverrides] entry for `view` is applied by the view and
+  /// its [PlatformDispatcher], so it reaches this constructor only through
+  /// what they report: its geometry always, and its platform-wide values only
+  /// when `platformData` does not supply them. An ancestor [MediaQuery] that
+  /// does supply them is not overridden, just as it is not overridden by the
+  /// real platform settings.
+  ///
   /// See also:
   ///
   ///  * [MediaQuery.fromView], which constructs [MediaQueryData] from a provided
   ///    [FlutterView], makes it available to descendant widgets, and sets up
   ///    the appropriate notification listeners to keep the data updated.
   MediaQueryData.fromView(ui.FlutterView view, {MediaQueryData? platformData})
+    : this._fromView(
+        kDebugMode ? debugViewWithMetricsOverrides(view) : view,
+        platformData: platformData,
+      );
+
+  // A hop, so that everything below reads the view that applies the
+  // [debugViewMetricsOverrides] entry registered for `view`: in debug mode, a
+  // view read straight from a PlatformDispatcher the framework wrapped applies
+  // none of its own, and the one [debugViewWithMetricsOverrides] returns for it
+  // does.
+  MediaQueryData._fromView(ui.FlutterView view, {required MediaQueryData? platformData})
     : size = view.physicalSize / view.devicePixelRatio,
       devicePixelRatio = view.devicePixelRatio,
       _textScaleFactor = 1.0, // _textScaler is the source of truth.
@@ -486,11 +506,49 @@ class MediaQueryData {
   ///    platformBrightness defined for a [BuildContext].
   final Brightness platformBrightness;
 
-  /// The parts of the display that are completely obscured by system UI,
-  /// typically by the device's keyboard.
+  /// The parts of the display that are reserved for system UI, typically the
+  /// device's keyboard.
   ///
-  /// When a mobile device's keyboard is visible `viewInsets.bottom`
-  /// corresponds to the top of the keyboard.
+  /// When a mobile device's keyboard is visible, `viewInsets.bottom`
+  /// corresponds to the top of the keyboard. Because the keyboard or other
+  /// system UI may be translucent or have rounded corners, what is painted
+  /// behind it can remain visible. It is typically not interactive, however,
+  /// because the system UI receives the pointer events in the inset area.
+  /// Consider keeping content and controls out of the inset area while
+  /// continuing to paint backgrounds behind the system UI (for example, by
+  /// applying `viewInsets` as padding inside a background surface rather than
+  /// outside it).
+  ///
+  /// {@tool snippet}
+  /// This widget paints its color behind the keyboard and keeps its child above
+  /// the keyboard. The [ColoredBox] is outside the [Padding], so it fills the
+  /// inset area. The child is inside the [Padding], so it does not.
+  ///
+  /// ```dart
+  /// class KeyboardAwareSurface extends StatelessWidget {
+  ///   const KeyboardAwareSurface({super.key, required this.child});
+  ///
+  ///   final Widget child;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return ColoredBox(
+  ///       color: const Color(0xFFFFFFFF),
+  ///       child: Padding(
+  ///         padding: EdgeInsets.only(
+  ///           bottom: MediaQuery.viewInsetsOf(context).bottom,
+  ///         ),
+  ///         child: MediaQuery.removeViewInsets(
+  ///           context: context,
+  ///           removeBottom: true,
+  ///           child: child,
+  ///         ),
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
   ///
   /// This value is independent of the [padding] and [viewPadding]. viewPadding
   /// is measured from the edges of the [MediaQuery] widget's bounds. Padding is
@@ -509,11 +567,10 @@ class MediaQueryData {
   /// The parts of the display that are partially obscured by system UI,
   /// typically by the hardware display "notches" or the system status bar.
   ///
-  /// If you consumed this padding (e.g. by building a widget that envelops or
+  /// If this padding is consumed (e.g. by building a widget that envelops or
   /// accounts for this padding in its layout in such a way that children are
-  /// no longer exposed to this padding), you should remove this padding
-  /// for subsequent descendants in the widget tree by inserting a new
-  /// [MediaQuery] widget using the [MediaQuery.removePadding] factory.
+  /// no longer exposed to this padding), then the [MediaQuery.removePadding] constructor
+  /// should be used to remove this padding for descendants in the widget tree.
   ///
   /// Padding is derived from the values of [viewInsets] and [viewPadding].
   ///
@@ -572,8 +629,8 @@ class MediaQueryData {
   /// to avoid having the left and right edges of the [Slider] from appearing
   /// within the area reserved for system gesture navigation.
   ///
-  /// By default, [Slider]s expand to fill the available width. So, we pad the
-  /// left and right sides.
+  /// By default, [Slider]s expand to fill the available width, so this property
+  /// is used to pad the left and right sides.
   ///
   /// ** See code in examples/api/lib/widgets/media_query/media_query_data.system_gesture_insets.0.dart **
   /// {@end-tool}
@@ -1279,19 +1336,18 @@ class MediaQueryData {
 
 /// Establishes a subtree in which media queries resolve to the given data.
 ///
-/// For example, to learn the size of the current view (e.g.,
-/// the [FlutterView] containing your app), you can use [MediaQuery.sizeOf]:
-/// `MediaQuery.sizeOf(context)`.
+/// For example, [MediaQuery.sizeOf] obtains the size of the current view
+/// using the ancestor MediaQuery's [data].
 ///
 /// Querying the current media using specific methods (for example,
-/// [MediaQuery.sizeOf] or [MediaQuery.paddingOf]) will cause your widget to
+/// [MediaQuery.sizeOf] or [MediaQuery.paddingOf]) will cause the widget to
 /// rebuild automatically whenever that specific property changes.
 ///
 /// {@template flutter.widgets.media_query.MediaQuery.useSpecific}
-/// Querying using [MediaQuery.of] will cause your widget to rebuild
+/// Querying using [MediaQuery.of] will cause the widget to rebuild
 /// automatically whenever _any_ field of the [MediaQueryData] changes (e.g., if
-/// the user rotates their device). Therefore, unless you are concerned with the
-/// entire [MediaQueryData] object changing, prefer using the specific methods
+/// the user rotates their device). When a widget only requires a subset of these fields,
+/// prefer using the specific methods
 /// (for example: [MediaQuery.sizeOf] and [MediaQuery.paddingOf]), as it will
 /// rebuild more efficiently.
 ///
@@ -1299,14 +1355,14 @@ class MediaQueryData {
 /// similar to [MediaQuery.sizeOf] will throw an exception. Alternatively, the
 /// "maybe-" variant methods (such as [MediaQuery.maybeOf] and
 /// [MediaQuery.maybeSizeOf]) can be used, which return null, instead of
-/// throwing, when no [MediaQuery] is in scope.
+/// throwing, if no [MediaQuery] is in scope.
 /// {@endtemplate}
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=A3WrA4zAaPw}
 ///
 /// See also:
 ///
-///  * [WidgetsApp] and [MaterialApp], which introduce a [MediaQuery] and keep
+///  * The [runApp] function, which introduces a [MediaQuery] and keeps
 ///    it up to date with the current screen metrics as they change.
 ///  * [MediaQueryData], the data structure that represents the metrics.
 class MediaQuery extends InheritedModel<_MediaQueryAspect> {
@@ -1573,10 +1629,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// The data from the closest instance of this class that encloses the given
   /// context.
   ///
-  /// You can use this function to query the entire set of data held in the
-  /// current [MediaQueryData] object. When any of that information changes,
-  /// your widget will be scheduled to be rebuilt, keeping your widget
-  /// up-to-date.
+  /// When any [MediaQueryData] information changes, a rebuild is scheduled for
+  /// the provided `context`, to ensure that the widget stays up-to-date.
   ///
   /// Since it is typical that the widget only requires a subset of properties
   /// of the [MediaQueryData] object, prefer using the more specific methods
@@ -1612,16 +1666,10 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// The data from the closest instance of this class that encloses the given
   /// context, if any.
   ///
-  /// Use this function if you want to allow situations where no [MediaQuery] is
-  /// in scope. Prefer using [MediaQuery.of] in situations where a media query
-  /// is always expected to exist.
+  /// Returns `null` if no [MediaQuery] is in scope.
   ///
-  /// If there is no [MediaQuery] in scope, then this function will return null.
-  ///
-  /// You can use this function to query the entire set of data held in the
-  /// current [MediaQueryData] object. When any of that information changes,
-  /// your widget will be scheduled to be rebuilt, keeping your widget
-  /// up-to-date.
+  /// When any [MediaQueryData] information changes, a rebuild is scheduled for
+  /// the provided `context`, to ensure that the widget stays up-to-date.
   ///
   /// Since it is typical that the widget only requires a subset of properties
   /// of the [MediaQueryData] object, prefer using the more specific methods
@@ -2486,6 +2534,17 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
     // have a parent, we get our platform brightness from the PlatformDispatcher
     // and need to update our data in response to the PlatformDispatcher
     // changing its platform brightness setting.
+    if (_parentData == null) {
+      _updateData();
+    }
+  }
+
+  @override
+  void didChangeAlwaysUse24HourFormat() {
+    // If we have a parent, it dictates our 24-hour format preference. If we don't
+    // have a parent, we get our 24-hour format preference from the PlatformDispatcher
+    // and need to update our data in response to the PlatformDispatcher changing
+    // its 24-hour format preference.
     if (_parentData == null) {
       _updateData();
     }

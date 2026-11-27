@@ -103,7 +103,7 @@ void main() {
     );
   });
 
-  testWithoutContext('incremental compile single dart compile', () async {
+  test('incremental compile single dart compile', () async {
     fakeProcessManager.addCommand(
       FakeCommand(
         command: const <String>[
@@ -131,63 +131,133 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext(
-    'incremental compile sends correct package URI for pub workspace member package located under root lib/',
-    () async {
-      final packageConfig = PackageConfig(<Package>[
-        Package(
-          'root',
-          Uri.parse('file:///workspace/'),
-          packageUriRoot: Uri.parse('file:///workspace/lib/'),
-        ),
-        Package(
-          'member',
-          Uri.parse('file:///workspace/lib/member/'),
-          packageUriRoot: Uri.parse('file:///workspace/lib/member/lib/'),
-        ),
-      ]);
+  test('incremental compile exits the tool when dartaotruntime cannot be run', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/193518.
+    fakeProcessManager.excludedExecutables.add('Artifact.engineDartAotRuntime');
 
-      fakeProcessManager.addCommand(
-        FakeCommand(
-          command: const <String>[
-            ...frontendServerCommand,
-            '--initialize-from-dill',
-            expectedCachePath,
-            '--verbosity=error',
-          ],
-          stdout: 'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0',
-          stdin: frontendServerStdIn,
+    await expectLater(
+      asyncGuard(
+        () => generator.recompile(
+          Uri.parse('/path/to/main.dart'),
+          null,
+          outputPath: '/build/',
+          packageConfig: PackageConfig.empty,
+          fs: MemoryFileSystem.test(),
+          projectRootPath: '',
         ),
-      );
+      ),
+      throwsToolExit(
+        message: 'Unable to find dartaotruntime binary at Artifact.engineDartAotRuntime',
+      ),
+    );
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  });
 
-      await generator.recompile(
-        Uri.parse('file:///workspace/lib/main.dart'),
+  test('incremental compile runs the frontend server from source with the Dart binary '
+      'when frontendServerStarterPath is provided', () async {
+    // The starter script is run with dart, so dartaotruntime is not required.
+    fakeProcessManager.excludedExecutables.add('Artifact.engineDartAotRuntime');
+    fakeProcessManager.addCommand(
+      FakeCommand(
+        command: <String>[
+          'Artifact.engineDartBinary',
+          '/path/to/frontend_server_starter.dart',
+          ...frontendServerCommand.skip(2),
+          '--initialize-from-dill',
+          expectedCachePath,
+          '--verbosity=error',
+        ],
+        stdout: 'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0',
+        stdin: frontendServerStdIn,
+      ),
+    );
+    final generatorWithStarter = DefaultResidentCompiler(
+      'sdkroot',
+      buildInfo: const BuildInfo(
+        BuildMode.debug,
         null,
-        outputPath: '/build/',
-        packageConfig: packageConfig,
-        fs: MemoryFileSystem(),
-        projectRootPath: '',
-      );
-      expect(frontendServerStdIn.getAndClear(), 'compile package:root/main.dart\n');
+        trackWidgetCreation: true,
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+        frontendServerStarterPath: '/path/to/frontend_server_starter.dart',
+      ),
+      logger: testLogger,
+      processManager: fakeProcessManager,
+      artifacts: Artifacts.test(),
+      platform: FakePlatform(),
+      fileSystem: MemoryFileSystem.test(),
+      stdoutHandler: generatorStdoutHandler,
+      shutdownHooks: FakeShutdownHooks(),
+      config: Config.test(),
+    );
 
-      await _accept(generator, frontendServerStdIn, '');
-      await _reject(generatorStdoutHandler, generator, frontendServerStdIn, '', '');
+    final CompilerOutput? output = await generatorWithStarter.recompile(
+      Uri.parse('/path/to/main.dart'),
+      null,
+      outputPath: '/build/',
+      packageConfig: PackageConfig.empty,
+      fs: MemoryFileSystem.test(),
+      projectRootPath: '',
+    );
+    expect(frontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
+    expect(output?.outputFilename, equals('/path/to/main.dart.dill'));
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  });
 
-      await _recompile(
-        generatorStdoutHandler,
-        generator,
-        frontendServerStdIn,
-        'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n',
-        mainUri: Uri.parse('file:///workspace/lib/main.dart'),
-        expectedMainUri: 'package:root/main.dart',
-        updatedUris: <Uri>[Uri.parse('file:///workspace/lib/member/lib/foo.dart')],
-        expectedUpdatedUris: <String>['package:member/foo.dart'],
-        packageConfig: packageConfig,
-      );
-    },
-  );
+  test('incremental compile sends correct package URI for pub workspace member package located under root lib/', () async {
+    final packageConfig = PackageConfig(<Package>[
+      Package(
+        'root',
+        Uri.parse('file:///workspace/'),
+        packageUriRoot: Uri.parse('file:///workspace/lib/'),
+      ),
+      Package(
+        'member',
+        Uri.parse('file:///workspace/lib/member/'),
+        packageUriRoot: Uri.parse('file:///workspace/lib/member/lib/'),
+      ),
+    ]);
 
-  testWithoutContext('incremental compile single dart compile with filesystem scheme', () async {
+    fakeProcessManager.addCommand(
+      FakeCommand(
+        command: const <String>[
+          ...frontendServerCommand,
+          '--initialize-from-dill',
+          expectedCachePath,
+          '--verbosity=error',
+        ],
+        stdout: 'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0',
+        stdin: frontendServerStdIn,
+      ),
+    );
+
+    await generator.recompile(
+      Uri.parse('file:///workspace/lib/main.dart'),
+      null,
+      outputPath: '/build/',
+      packageConfig: packageConfig,
+      fs: MemoryFileSystem(),
+      projectRootPath: '',
+    );
+    expect(frontendServerStdIn.getAndClear(), 'compile package:root/main.dart\n');
+
+    await _accept(generator, frontendServerStdIn, '');
+    await _reject(generatorStdoutHandler, generator, frontendServerStdIn, '', '');
+
+    await _recompile(
+      generatorStdoutHandler,
+      generator,
+      frontendServerStdIn,
+      'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n',
+      mainUri: Uri.parse('file:///workspace/lib/main.dart'),
+      expectedMainUri: 'package:root/main.dart',
+      updatedUris: <Uri>[Uri.parse('file:///workspace/lib/member/lib/foo.dart')],
+      expectedUpdatedUris: <String>['package:member/foo.dart'],
+      packageConfig: packageConfig,
+    );
+  });
+
+  test('incremental compile single dart compile with filesystem scheme', () async {
     fakeProcessManager.addCommand(
       FakeCommand(
         command: const <String>[
@@ -219,7 +289,69 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('incremental compile single dart compile abnormally terminates', () async {
+  test('DDC compile forwards compiler diagnostics to stderr', () async {
+    final ddcGenerator = DefaultResidentCompiler(
+      'sdkroot',
+      buildInfo: BuildInfo.debug,
+      logger: testLogger,
+      processManager: fakeProcessManager,
+      artifacts: Artifacts.test(),
+      platform: FakePlatform(),
+      fileSystem: MemoryFileSystem.test(),
+      shutdownHooks: FakeShutdownHooks(),
+      config: Config.test(),
+      targetModel: TargetModel.dartdevc,
+    );
+    const webDartRuntime = 'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript';
+    const webFrontendServer =
+        'Artifact.frontendServerSnapshotForEngineDartSdk'
+        '.TargetPlatform.web_javascript';
+    fakeProcessManager.addCommand(
+      FakeCommand(
+        command: const <String>[
+          webDartRuntime,
+          webFrontendServer,
+          '--sdk-root',
+          'sdkroot/',
+          '--incremental',
+          '--target=dartdevc',
+          '--experimental-emit-debug-metadata',
+          '--output-dill',
+          '/build/',
+          '--packages',
+          '.dart_tool/package_config.json',
+          '-Ddart.vm.profile=false',
+          '-Ddart.vm.product=false',
+          '--enable-asserts',
+          '--track-creation-locations',
+          '--initialize-from-dill',
+          'build/471e67e273aac2e3e05542afef95ef7f.cache.dill.track.dill',
+          '--verbosity=error',
+        ],
+        stdout: 'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 2',
+        stderr: 'compiler stderr',
+        stdin: frontendServerStdIn,
+      ),
+    );
+
+    await ddcGenerator.recompile(
+      Uri.parse('/path/to/main.dart'),
+      null /* invalidatedFiles */,
+      outputPath: '/build/',
+      packageConfig: PackageConfig.empty,
+      fs: MemoryFileSystem(),
+      projectRootPath: '',
+    );
+
+    expect(testLogger.statusText, isEmpty);
+    // The stdout and stderr streams are read independently, so their relative
+    // order is not guaranteed.
+    expect(testLogger.errorText, contains('line1\nline2\n'));
+    expect(testLogger.errorText, contains('compiler stderr\n'));
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  });
+
+  test('incremental compile single dart compile abnormally terminates', () async {
     fakeProcessManager.addCommand(
       FakeCommand(
         command: const <String>[
@@ -248,40 +380,37 @@ void main() {
     );
   });
 
-  testWithoutContext(
-    'incremental compile single dart compile abnormally terminates via exitCode',
-    () async {
-      fakeProcessManager.addCommand(
-        FakeCommand(
-          command: const <String>[
-            ...frontendServerCommand,
-            '--initialize-from-dill',
-            expectedCachePath,
-            '--verbosity=error',
-          ],
-          stdin: frontendServerStdIn,
-          exitCode: 1,
-        ),
-      );
+  test('incremental compile single dart compile abnormally terminates via exitCode', () async {
+    fakeProcessManager.addCommand(
+      FakeCommand(
+        command: const <String>[
+          ...frontendServerCommand,
+          '--initialize-from-dill',
+          expectedCachePath,
+          '--verbosity=error',
+        ],
+        stdin: frontendServerStdIn,
+        exitCode: 1,
+      ),
+    );
 
-      expect(
-        asyncGuard(
-          () => generator.recompile(
-            Uri.parse('/path/to/main.dart'),
-            null,
-            /* invalidatedFiles */
-            outputPath: '/build/',
-            packageConfig: PackageConfig.empty,
-            fs: MemoryFileSystem(),
-            projectRootPath: '',
-          ),
+    expect(
+      asyncGuard(
+        () => generator.recompile(
+          Uri.parse('/path/to/main.dart'),
+          null,
+          /* invalidatedFiles */
+          outputPath: '/build/',
+          packageConfig: PackageConfig.empty,
+          fs: MemoryFileSystem(),
+          projectRootPath: '',
         ),
-        throwsToolExit(message: 'The Dart compiler exited unexpectedly.'),
-      );
-    },
-  );
+      ),
+      throwsToolExit(message: 'The Dart compiler exited unexpectedly.'),
+    );
+  });
 
-  testWithoutContext('incremental compile and recompile', () async {
+  test('incremental compile and recompile', () async {
     final completer = Completer<void>();
     fakeProcessManager.addCommand(
       FakeCommand(
@@ -348,7 +477,7 @@ void main() {
     );
   });
 
-  testWithoutContext('incremental compile and recompile with filesystem scheme', () async {
+  test('incremental compile and recompile with filesystem scheme', () async {
     final completer = Completer<void>();
     fakeProcessManager.addCommand(
       FakeCommand(
@@ -428,99 +557,96 @@ void main() {
     );
   });
 
-  testWithoutContext(
-    'incremental compile and recompile non-entrypoint file with filesystem scheme',
-    () async {
-      final Uri mainUri = Uri.parse('file:///foo/bar/fizz/main.dart');
-      const expectedMainUri = 'scheme:///main.dart';
-      final updatedUris = <Uri>[mainUri, Uri.parse('file:///foo/bar/fizz/other.dart')];
-      const expectedUpdatedUris = <String>[expectedMainUri, 'scheme:///other.dart'];
+  test('incremental compile and recompile non-entrypoint file with filesystem scheme', () async {
+    final Uri mainUri = Uri.parse('file:///foo/bar/fizz/main.dart');
+    const expectedMainUri = 'scheme:///main.dart';
+    final updatedUris = <Uri>[mainUri, Uri.parse('file:///foo/bar/fizz/other.dart')];
+    const expectedUpdatedUris = <String>[expectedMainUri, 'scheme:///other.dart'];
 
-      final completer = Completer<void>();
-      fakeProcessManager.addCommand(
-        FakeCommand(
-          command: const <String>[
-            ...frontendServerCommand,
-            '--filesystem-root',
-            '/foo/bar/fizz',
-            '--filesystem-scheme',
-            'scheme',
-            '--initialize-from-dill',
-            expectedCachePath,
-            '--verbosity=error',
-          ],
-          stdout: 'result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0',
-          stdin: frontendServerStdIn,
-          completer: completer,
-        ),
-      );
-      await generatorWithScheme.recompile(
-        Uri.parse('file:///foo/bar/fizz/main.dart'),
-        null,
-        /* invalidatedFiles */
-        outputPath: '/build/',
-        packageConfig: PackageConfig.empty,
-        fs: MemoryFileSystem(),
-        projectRootPath: '',
-      );
-      expect(frontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
+    final completer = Completer<void>();
+    fakeProcessManager.addCommand(
+      FakeCommand(
+        command: const <String>[
+          ...frontendServerCommand,
+          '--filesystem-root',
+          '/foo/bar/fizz',
+          '--filesystem-scheme',
+          'scheme',
+          '--initialize-from-dill',
+          expectedCachePath,
+          '--verbosity=error',
+        ],
+        stdout: 'result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0',
+        stdin: frontendServerStdIn,
+        completer: completer,
+      ),
+    );
+    await generatorWithScheme.recompile(
+      Uri.parse('file:///foo/bar/fizz/main.dart'),
+      null,
+      /* invalidatedFiles */
+      outputPath: '/build/',
+      packageConfig: PackageConfig.empty,
+      fs: MemoryFileSystem(),
+      projectRootPath: '',
+    );
+    expect(frontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
 
-      // No accept or reject commands should be issued until we
-      // send recompile request.
-      await _accept(generatorWithScheme, frontendServerStdIn, '');
-      await _reject(
-        generatorWithSchemeStdoutHandler,
-        generatorWithScheme,
-        frontendServerStdIn,
-        '',
-        '',
-      );
+    // No accept or reject commands should be issued until we
+    // send recompile request.
+    await _accept(generatorWithScheme, frontendServerStdIn, '');
+    await _reject(
+      generatorWithSchemeStdoutHandler,
+      generatorWithScheme,
+      frontendServerStdIn,
+      '',
+      '',
+    );
 
-      await _recompile(
-        generatorWithSchemeStdoutHandler,
-        generatorWithScheme,
-        frontendServerStdIn,
-        'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n',
-        mainUri: mainUri,
-        expectedMainUri: expectedMainUri,
-        updatedUris: updatedUris,
-        expectedUpdatedUris: expectedUpdatedUris,
-      );
+    await _recompile(
+      generatorWithSchemeStdoutHandler,
+      generatorWithScheme,
+      frontendServerStdIn,
+      'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n',
+      mainUri: mainUri,
+      expectedMainUri: expectedMainUri,
+      updatedUris: updatedUris,
+      expectedUpdatedUris: expectedUpdatedUris,
+    );
 
-      await _accept(generatorWithScheme, frontendServerStdIn, r'^accept\n$');
+    await _accept(generatorWithScheme, frontendServerStdIn, r'^accept\n$');
 
-      await _recompile(
-        generatorWithSchemeStdoutHandler,
-        generatorWithScheme,
-        frontendServerStdIn,
-        'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n',
-        mainUri: mainUri,
-        expectedMainUri: expectedMainUri,
-        updatedUris: updatedUris,
-        expectedUpdatedUris: expectedUpdatedUris,
-      );
-      // No sources returned from reject command.
-      await _reject(
-        generatorWithSchemeStdoutHandler,
-        generatorWithScheme,
-        frontendServerStdIn,
-        'result abc\nabc\n',
-        r'^reject\n$',
-      );
-      completer.complete();
-      expect(frontendServerStdIn.getAndClear(), isEmpty);
-      expect(
-        testLogger.errorText,
-        equals(
-          'line0\nline1\n'
-          'line1\nline2\n'
-          'line1\nline2\n',
-        ),
-      );
-    },
-  );
+    await _recompile(
+      generatorWithSchemeStdoutHandler,
+      generatorWithScheme,
+      frontendServerStdIn,
+      'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n',
+      mainUri: mainUri,
+      expectedMainUri: expectedMainUri,
+      updatedUris: updatedUris,
+      expectedUpdatedUris: expectedUpdatedUris,
+    );
+    // No sources returned from reject command.
+    await _reject(
+      generatorWithSchemeStdoutHandler,
+      generatorWithScheme,
+      frontendServerStdIn,
+      'result abc\nabc\n',
+      r'^reject\n$',
+    );
+    completer.complete();
+    expect(frontendServerStdIn.getAndClear(), isEmpty);
+    expect(
+      testLogger.errorText,
+      equals(
+        'line0\nline1\n'
+        'line1\nline2\n'
+        'line1\nline2\n',
+      ),
+    );
+  });
 
-  testWithoutContext('incremental compile can suppress errors', () async {
+  test('incremental compile can suppress errors', () async {
     final completer = Completer<void>();
     fakeProcessManager.addCommand(
       FakeCommand(
@@ -571,7 +697,7 @@ void main() {
     expect(testLogger.traceText, contains('line1\nline2\n'));
   });
 
-  testWithoutContext('incremental compile and recompile twice', () async {
+  test('incremental compile and recompile twice', () async {
     final completer = Completer<void>();
     fakeProcessManager.addCommand(
       FakeCommand(
@@ -621,7 +747,7 @@ void main() {
     );
   });
 
-  testWithoutContext('incremental compile with dartPluginRegistrant', () async {
+  test('incremental compile with dartPluginRegistrant', () async {
     fakeProcessManager.addCommand(
       FakeCommand(
         command: const <String>[
@@ -663,7 +789,7 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('compile does not pass libraries-spec when using a platform dill', () async {
+  test('compile does not pass libraries-spec when using a platform dill', () async {
     fakeProcessManager.addCommand(
       FakeCommand(
         command: const <String>[

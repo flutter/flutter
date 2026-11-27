@@ -22,11 +22,7 @@ class _TextDrawingCanvasState extends State<TextDrawingCanvas> {
     _textPainter = TextPainter(
       text: const TextSpan(
         text: 'Flutter Text Rendering Test 🐦🙂',
-        style: TextStyle(
-          color: Colors.red,
-          fontSize: 14.0,
-          fontWeight: FontWeight.bold,
-        ),
+        style: TextStyle(color: Colors.red, fontSize: 14.0, fontWeight: FontWeight.bold),
       ),
       textDirection: TextDirection.ltr,
     );
@@ -45,8 +41,7 @@ class _TextDrawingCanvasState extends State<TextDrawingCanvas> {
 }
 
 class _TextDrawingPainter extends CustomPainter {
-  const _TextDrawingPainter({required TextPainter textPainter})
-    : _textPainter = textPainter;
+  const _TextDrawingPainter({required this._textPainter});
 
   final TextPainter _textPainter;
 

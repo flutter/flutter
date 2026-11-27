@@ -588,7 +588,7 @@ class EnginePath implements ui.Path, Collectable {
     final pathCopy2 = EnginePath.fromEnginePath(path2);
     return EnginePath._(
       pathCopy1.constructors,
-      pathCopy1._fillType,
+      null,
       [],
       combineSource: (operation, pathCopy1, pathCopy2),
     );
@@ -616,10 +616,12 @@ class EnginePath implements ui.Path, Collectable {
   /// The constructors used to instantiate backend-specific path and builder implementations.
   BackendPathConstructors constructors;
 
-  ui.PathFillType _fillType;
+  // Combined paths inherit the backend operation's fill rule when first built,
+  // unless the caller explicitly sets a fill type before then.
+  ui.PathFillType? _fillType;
 
   @override
-  ui.PathFillType get fillType => _fillType;
+  ui.PathFillType get fillType => _fillType ?? _backendPathBuilder.fillType;
 
   @override
   set fillType(ui.PathFillType fillType) {
@@ -657,7 +659,11 @@ class EnginePath implements ui.Path, Collectable {
       builder = constructors.createNew();
     }
 
-    builder.fillType = _fillType;
+    if (_fillType == null) {
+      _fillType = builder.fillType;
+    } else {
+      builder.fillType = _fillType!;
+    }
     for (final PathCommand command in _commands) {
       command.apply(builder);
     }
@@ -673,9 +679,17 @@ class EnginePath implements ui.Path, Collectable {
     return _cachedPath!;
   }
 
+  // Invalidated backend paths that must remain alive until the end of the frame
+  // when [collect] is called by the [FrameArena]. Disposing them immediately
+  // here can cause premature deallocation while recorded display list operations
+  // are being rasterized concurrently on the worker thread.
+  List<BackendPath>? _stalePaths;
+
   void _invalidateCachedPath() {
-    _cachedPath?.dispose();
-    _cachedPath = null;
+    if (_cachedPath != null) {
+      (_stalePaths ??= <BackendPath>[]).add(_cachedPath!);
+      _cachedPath = null;
+    }
   }
 
   void _addCommand(PathCommand command) {
@@ -875,6 +889,12 @@ class EnginePath implements ui.Path, Collectable {
 
   @override
   void collect() {
+    if (_stalePaths != null) {
+      for (final BackendPath path in _stalePaths!) {
+        path.dispose();
+      }
+      _stalePaths = null;
+    }
     _cachedPath?.dispose();
     if (!identical(_cachedBuilder, _cachedPath)) {
       _cachedBuilder?.dispose();

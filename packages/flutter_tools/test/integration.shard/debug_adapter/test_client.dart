@@ -60,9 +60,9 @@ class DapTestClient {
       events('output').map((Event e) => OutputEventBody.fromJson(e.body! as Map<String, Object?>));
 
   /// Returns a stream of [StoppedEventBody] events.
-  Stream<StoppedEventBody> get stoppedEvents => events(
-    'stopped',
-  ).map((Event e) => StoppedEventBody.fromJson(e.body! as Map<String, Object?>));
+  Stream<StoppedEventBody> get stoppedEvents =>
+      events('stopped')
+          .map((Event e) => StoppedEventBody.fromJson(e.body! as Map<String, Object?>));
 
   /// Returns a stream of the string output from [OutputEventBody] events.
   Stream<String> get output => outputEvents.map((OutputEventBody output) => output.output);
@@ -99,9 +99,9 @@ class DapTestClient {
       events('dart.serviceExtensionAdded').map((Event e) => e.body! as Map<String, Object?>);
 
   /// Returns a stream of custom 'flutter.serviceExtensionStateChanged' events.
-  Stream<Map<String, Object?>> get serviceExtensionStateChangedEvents => events(
-    'flutter.serviceExtensionStateChanged',
-  ).map((Event e) => e.body! as Map<String, Object?>);
+  Stream<Map<String, Object?>> get serviceExtensionStateChangedEvents =>
+      events('flutter.serviceExtensionStateChanged')
+          .map((Event e) => e.body! as Map<String, Object?>);
 
   /// Returns a stream of 'dart.testNotification' custom events from the
   /// package:test JSON reporter.

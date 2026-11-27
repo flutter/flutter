@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include <cstring>
+#include "flutter/fml/file.h"
+#include "flutter/fml/mapping.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 #include "impeller/base/validation.h"
@@ -10,6 +12,7 @@
 #include "impeller/compiler/compiler_test.h"
 #include "impeller/compiler/source_options.h"
 #include "impeller/compiler/types.h"
+#include "impeller/compiler/utilities.h"
 
 namespace impeller {
 namespace compiler {
@@ -668,6 +671,230 @@ TEST_P(CompilerTestRuntime, Mat2Reflection) {
 TEST_P(CompilerTestUnknownPlatform, MustFailDueToUnknownPlatform) {
   ASSERT_FALSE(
       CanCompileAndReflect("sample.frag", SourceType::kFragmentShader));
+}
+
+TEST(CompilerTest, EarlyReturnWithSamplerWarns) {
+  const std::string shader_source = R"(
+    #version 460 core
+    uniform sampler2D u_texture;
+    uniform vec4 u_array[4];
+    out vec4 fragColor;
+    void main() {
+      vec4 c = texture(u_texture, vec2(0.0));
+      if (c.a < 0.5) {
+        fragColor = vec4(0.0);
+        return;
+      }
+      vec4 total = vec4(0.0);
+      for (int i = 0; i < 4; i++) {
+        total += u_array[i];
+      }
+      fragColor = c + 0.001 * total;
+    }
+  )";
+  auto mapping = std::make_shared<fml::NonOwnedMapping>(
+      reinterpret_cast<const uint8_t*>(shader_source.data()),
+      shader_source.size(), [](auto, auto) {});
+
+  SourceOptions options;
+  options.source_language = SourceLanguage::kGLSL;
+  options.target_platform = TargetPlatform::kRuntimeStageGLES;
+  options.type = SourceType::kFragmentShader;
+  options.file_name = "early_return_test.frag";
+  options.entry_point_name = "main";
+  options.working_directory = std::make_shared<fml::UniqueFD>(
+      flutter::testing::OpenFixturesDirectory());
+
+  Reflector::Options reflector_options;
+  reflector_options.target_platform = TargetPlatform::kRuntimeStageGLES;
+
+  Compiler compiler(mapping, options, reflector_options);
+  EXPECT_TRUE(compiler.IsValid()) << compiler.GetErrorMessages();
+  EXPECT_FALSE(compiler.GetWarningMessages().empty())
+      << "Generated SL:\n"
+      << std::string(reinterpret_cast<const char*>(
+                         compiler.GetSLShaderSource()->GetMapping()),
+                     compiler.GetSLShaderSource()->GetSize());
+  EXPECT_NE(compiler.GetWarningMessages().find("multiple 'return'"),
+            std::string::npos);
+}
+
+TEST(CompilerTest, EarlyReturnWithoutSamplerDoesNotWarn) {
+  const std::string shader_source = R"(
+    #version 460 core
+    out vec4 fragColor;
+    void main() {
+      fragColor = vec4(1.0);
+      if (fragColor.r > 0.5) {
+        return;
+      }
+      fragColor = vec4(0.0);
+    }
+  )";
+  auto mapping = std::make_shared<fml::NonOwnedMapping>(
+      reinterpret_cast<const uint8_t*>(shader_source.data()),
+      shader_source.size(), [](auto, auto) {});
+
+  SourceOptions options;
+  options.source_language = SourceLanguage::kGLSL;
+  options.target_platform = TargetPlatform::kRuntimeStageGLES;
+  options.type = SourceType::kFragmentShader;
+  options.file_name = "no_sampler_test.frag";
+  options.entry_point_name = "main";
+  options.working_directory = std::make_shared<fml::UniqueFD>(
+      flutter::testing::OpenFixturesDirectory());
+
+  Reflector::Options reflector_options;
+  reflector_options.target_platform = TargetPlatform::kRuntimeStageGLES;
+
+  Compiler compiler(mapping, options, reflector_options);
+  EXPECT_TRUE(compiler.IsValid()) << compiler.GetErrorMessages();
+  EXPECT_TRUE(compiler.GetWarningMessages().empty());
+}
+
+TEST(CompilerTest, ReturnInCommentsDoesNotWarn) {
+  const std::string shader_source = R"(
+    #version 460 core
+    uniform sampler2D u_texture;
+    out vec4 fragColor;
+    // single line comment with return;
+    /* multi line comment
+       with return;
+    */
+    void main() {
+      // return; inside main comment
+      fragColor = texture(u_texture, vec2(0.0));
+    }
+  )";
+  auto mapping = std::make_shared<fml::NonOwnedMapping>(
+      reinterpret_cast<const uint8_t*>(shader_source.data()),
+      shader_source.size(), [](auto, auto) {});
+
+  SourceOptions options;
+  options.source_language = SourceLanguage::kGLSL;
+  options.target_platform = TargetPlatform::kRuntimeStageGLES;
+  options.type = SourceType::kFragmentShader;
+  options.file_name = "comment_test.frag";
+  options.entry_point_name = "main";
+  options.working_directory = std::make_shared<fml::UniqueFD>(
+      flutter::testing::OpenFixturesDirectory());
+
+  Reflector::Options reflector_options;
+  reflector_options.target_platform = TargetPlatform::kRuntimeStageGLES;
+
+  Compiler compiler(mapping, options, reflector_options);
+  EXPECT_TRUE(compiler.IsValid()) << compiler.GetErrorMessages();
+  EXPECT_TRUE(compiler.GetWarningMessages().empty());
+}
+
+TEST(CompilerTest, HelperFunctionWithReturnDoesNotWarn) {
+  const std::string shader_source = R"(
+    #version 460 core
+    uniform sampler2D u_texture;
+    out vec4 fragColor;
+    float helper(float val) {
+      if (val > 0.5) {
+        return 1.0;
+      }
+      return 0.0;
+    }
+    void main() {
+      fragColor = texture(u_texture, vec2(helper(0.8)));
+    }
+  )";
+  auto mapping = std::make_shared<fml::NonOwnedMapping>(
+      reinterpret_cast<const uint8_t*>(shader_source.data()),
+      shader_source.size(), [](auto, auto) {});
+
+  SourceOptions options;
+  options.source_language = SourceLanguage::kGLSL;
+  options.target_platform = TargetPlatform::kRuntimeStageGLES;
+  options.type = SourceType::kFragmentShader;
+  options.file_name = "helper_test.frag";
+  options.entry_point_name = "main";
+  options.working_directory = std::make_shared<fml::UniqueFD>(
+      flutter::testing::OpenFixturesDirectory());
+
+  Reflector::Options reflector_options;
+  reflector_options.target_platform = TargetPlatform::kRuntimeStageGLES;
+
+  Compiler compiler(mapping, options, reflector_options);
+  EXPECT_TRUE(compiler.IsValid()) << compiler.GetErrorMessages();
+  EXPECT_TRUE(compiler.GetWarningMessages().empty());
+}
+
+TEST(CompilerTest, EscapeDepfilePathEscapesSpaces) {
+  EXPECT_EQ(EscapeDepfilePath("/Users/me/Application Support/constants.glsl"),
+            "/Users/me/Application\\ Support/constants.glsl");
+  EXPECT_EQ(EscapeDepfilePath("C:\\my code\\a.frag"), "C:\\my\\ code\\a.frag");
+}
+
+TEST(CompilerTest, EscapeDepfilePathDoublesBackslashesBeforeASpace) {
+  // 2N+1 backslashes followed by a space read back as N backslashes followed
+  // by a space, so a run that ends up next to a space has to be doubled.
+  EXPECT_EQ(EscapeDepfilePath("/tmp/trailing slash\\ /a.frag"),
+            "/tmp/trailing\\ slash\\\\\\ /a.frag");
+}
+
+TEST(CompilerTest, EscapeDepfilePathLeavesEverythingElseAlone) {
+  // Backslashes away from a space are copied through verbatim, which is the
+  // only way a Windows path survives.
+  EXPECT_EQ(EscapeDepfilePath("C:\\src\\flutter\\a.frag"),
+            "C:\\src\\flutter\\a.frag");
+  EXPECT_EQ(EscapeDepfilePath("/plain/path/a.frag"), "/plain/path/a.frag");
+  EXPECT_EQ(EscapeDepfilePath(""), "");
+}
+
+TEST(CompilerTest, DepfileEscapesSpacesInTargetsAndDependencies) {
+  // Mirrors an SDK under "~/Library/Application Support", where the bundled
+  // shader_lib include directory has a space in its path.
+  fml::ScopedTemporaryDirectory temp_dir;
+  auto include_fd = std::make_shared<fml::UniqueFD>(fml::OpenDirectory(
+      temp_dir.fd(), "with space",
+      /*create_if_necessary=*/true, fml::FilePermission::kReadWrite));
+  ASSERT_TRUE(include_fd->is_valid());
+  ASSERT_TRUE(fml::WriteAtomically(
+      *include_fd, "common.glsl",
+      fml::DataMapping("vec4 Red() { return vec4(1.0, 0.0, 0.0, 1.0); }\n")));
+
+  const std::string shader_source = R"(
+    #version 460 core
+    #include <common.glsl>
+    out vec4 frag_color;
+    void main() { frag_color = Red(); }
+  )";
+  auto mapping = std::make_shared<fml::DataMapping>(shader_source);
+
+  SourceOptions options;
+  options.source_language = SourceLanguage::kGLSL;
+  options.target_platform = TargetPlatform::kRuntimeStageGLES;
+  options.type = SourceType::kFragmentShader;
+  options.file_name = "in dir/a.frag";
+  options.entry_point_name = "main";
+  // The working directory is searched before include_dirs, so keep the include
+  // out of it to force resolution through the spaced include directory.
+  options.working_directory = std::make_shared<fml::UniqueFD>(
+      fml::OpenDirectory(temp_dir.path().c_str(), /*create_if_necessary=*/false,
+                         fml::FilePermission::kRead));
+  options.include_dirs.push_back(
+      IncludeDir{include_fd, temp_dir.path() + "/with space"});
+
+  Reflector::Options reflector_options;
+  reflector_options.target_platform = TargetPlatform::kRuntimeStageGLES;
+
+  Compiler compiler(mapping, options, reflector_options);
+  ASSERT_TRUE(compiler.IsValid()) << compiler.GetErrorMessages();
+  ASSERT_EQ(compiler.GetIncludedFileNames().size(), 1u);
+
+  auto depfile = compiler.CreateDepfileContents({"out dir/a.iplr"});
+  ASSERT_TRUE(depfile);
+  const std::string contents(
+      reinterpret_cast<const char*>(depfile->GetMapping()), depfile->GetSize());
+
+  EXPECT_TRUE(contents.starts_with("out\\ dir/a.iplr: ")) << contents;
+  EXPECT_NE(contents.find("with\\ space"), std::string::npos) << contents;
+  EXPECT_NE(contents.find(" in\\ dir/a.frag\n"), std::string::npos) << contents;
+  EXPECT_EQ(contents.find("with space"), std::string::npos) << contents;
 }
 
 }  // namespace testing

@@ -45,7 +45,7 @@ void main() {
       );
     });
 
-    testWithoutContext('injects the wrapper when all files are missing', () {
+    test('injects the wrapper when all files are missing', () {
       final Directory sampleAppAndroid = fileSystem.directory('/sample-app/android');
       sampleAppAndroid.createSync(recursive: true);
 
@@ -85,7 +85,7 @@ void main() {
       );
     });
 
-    testWithoutContext('injects the wrapper when some files are missing', () {
+    test('injects the wrapper when some files are missing', () {
       final Directory sampleAppAndroid = fileSystem.directory('/sample-app/android');
       sampleAppAndroid.createSync(recursive: true);
 
@@ -129,76 +129,73 @@ void main() {
       );
     });
 
-    testWithoutContext(
-      'injects the wrapper and the Gradle version is derived from the AGP version',
-      () {
-        const testCases = <String, String>{
-          // AGP version : Gradle version
-          '1.0.0': '2.3',
-          '3.3.1': '4.10.2',
-          '3.0.0': '4.1',
-          '3.0.5': '4.1',
-          '3.0.9': '4.1',
-          '3.1.0': '4.4',
-          '3.2.0': '4.6',
-          '3.3.0': '4.10.2',
-          '3.4.0': '5.6.2',
-          '3.5.0': '5.6.2',
-          '4.0.0': '6.7',
-          '4.0.5': '6.7',
-          '4.1.0': '6.7',
-        };
+    test('injects the wrapper and the Gradle version is derived from the AGP version', () {
+      const testCases = <String, String>{
+        // AGP version : Gradle version
+        '1.0.0': '2.3',
+        '3.3.1': '4.10.2',
+        '3.0.0': '4.1',
+        '3.0.5': '4.1',
+        '3.0.9': '4.1',
+        '3.1.0': '4.4',
+        '3.2.0': '4.6',
+        '3.3.0': '4.10.2',
+        '3.4.0': '5.6.2',
+        '3.5.0': '5.6.2',
+        '4.0.0': '6.7',
+        '4.0.5': '6.7',
+        '4.1.0': '6.7',
+      };
 
-        for (final MapEntry<String, String> entry in testCases.entries) {
-          final Directory sampleAppAndroid = fileSystem.systemTempDirectory.createTempSync(
-            'flutter_android.',
-          );
-          sampleAppAndroid.childFile('build.gradle').writeAsStringSync('''
+      for (final MapEntry<String, String> entry in testCases.entries) {
+        final Directory sampleAppAndroid = fileSystem.systemTempDirectory.createTempSync(
+          'flutter_android.',
+        );
+        sampleAppAndroid.childFile('build.gradle').writeAsStringSync('''
   buildscript {
       dependencies {
           classpath 'com.android.tools.build:gradle:${entry.key}'
       }
   }
   ''');
-          gradleUtils.injectGradleWrapperIfNeeded(sampleAppAndroid);
+        gradleUtils.injectGradleWrapperIfNeeded(sampleAppAndroid);
 
-          expect(sampleAppAndroid.childFile('gradlew').existsSync(), isTrue);
+        expect(sampleAppAndroid.childFile('gradlew').existsSync(), isTrue);
 
-          expect(
-            sampleAppAndroid
-                .childDirectory('gradle')
-                .childDirectory('wrapper')
-                .childFile('gradle-wrapper.jar')
-                .existsSync(),
-            isTrue,
-          );
+        expect(
+          sampleAppAndroid
+              .childDirectory('gradle')
+              .childDirectory('wrapper')
+              .childFile('gradle-wrapper.jar')
+              .existsSync(),
+          isTrue,
+        );
 
-          expect(
-            sampleAppAndroid
-                .childDirectory('gradle')
-                .childDirectory('wrapper')
-                .childFile('gradle-wrapper.properties')
-                .existsSync(),
-            isTrue,
-          );
+        expect(
+          sampleAppAndroid
+              .childDirectory('gradle')
+              .childDirectory('wrapper')
+              .childFile('gradle-wrapper.properties')
+              .existsSync(),
+          isTrue,
+        );
 
-          expect(
-            sampleAppAndroid
-                .childDirectory('gradle')
-                .childDirectory('wrapper')
-                .childFile('gradle-wrapper.properties')
-                .readAsStringSync(),
-            'distributionBase=GRADLE_USER_HOME\n'
-            'distributionPath=wrapper/dists\n'
-            'zipStoreBase=GRADLE_USER_HOME\n'
-            'zipStorePath=wrapper/dists\n'
-            'distributionUrl=https\\://services.gradle.org/distributions/gradle-${entry.value}-all.zip\n',
-          );
-        }
-      },
-    );
+        expect(
+          sampleAppAndroid
+              .childDirectory('gradle')
+              .childDirectory('wrapper')
+              .childFile('gradle-wrapper.properties')
+              .readAsStringSync(),
+          'distributionBase=GRADLE_USER_HOME\n'
+          'distributionPath=wrapper/dists\n'
+          'zipStoreBase=GRADLE_USER_HOME\n'
+          'zipStorePath=wrapper/dists\n'
+          'distributionUrl=https\\://services.gradle.org/distributions/gradle-${entry.value}-all.zip\n',
+        );
+      }
+    });
 
-    testWithoutContext('returns the gradlew path', () {
+    test('returns the gradlew path', () {
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
       androidDirectory.childFile('gradlew').createSync();
       androidDirectory.childFile('gradlew.bat').createSync();
@@ -207,18 +204,19 @@ void main() {
       final FlutterProject flutterProject = FlutterProjectFactory(
         logger: BufferLogger.test(),
         fileSystem: fileSystem,
+        config: FakeConfig(),
       ).fromDirectory(fileSystem.currentDirectory);
 
       expect(gradleUtils.getExecutable(flutterProject), androidDirectory.childFile('gradlew').path);
     });
-    testWithoutContext('getGradleFileName for notWindows', () {
+    test('getGradleFileName for notWindows', () {
       expect(getGradlewFileName(notWindowsPlatform), 'gradlew');
     });
-    testWithoutContext('getGradleFileName for windows', () {
+    test('getGradleFileName for windows', () {
       expect(getGradlewFileName(windowsPlatform), 'gradlew.bat');
     });
 
-    testWithoutContext('returns the gradle properties file', () async {
+    test('returns the gradle properties file', () async {
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
       final Directory wrapperDirectory =
           androidDirectory
@@ -232,7 +230,7 @@ void main() {
       expect(gradleWrapperFile.path, expectedFile.path);
     });
 
-    testWithoutContext('returns the gradle wrapper version', () async {
+    test('returns the gradle wrapper version', () async {
       const expectedVersion = '7.4.2';
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
       final Directory wrapperDirectory =
@@ -252,7 +250,7 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$expectedVers
       );
     });
 
-    testWithoutContext('ignores gradle comments', () async {
+    test('ignores gradle comments', () async {
       const expectedVersion = '7.4.2';
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
       final Directory wrapperDirectory =
@@ -274,7 +272,7 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$expectedVers
       );
     });
 
-    testWithoutContext('returns gradlew version, whitespace, location', () async {
+    test('returns gradlew version, whitespace, location', () async {
       const expectedVersion = '7.4.2';
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
       final Directory wrapperDirectory =
@@ -296,7 +294,7 @@ zipStorePath=wrapper/dists
       );
     });
 
-    testWithoutContext('does not crash on hypothetical new format', () async {
+    test('does not crash on hypothetical new format', () async {
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
       final Directory wrapperDirectory =
           androidDirectory.childDirectory('gradle').childDirectory('wrapper')
@@ -317,7 +315,7 @@ zipStorePath=wrapper/dists
       );
     });
 
-    testWithoutContext('returns the installed gradle version', () async {
+    test('returns the installed gradle version', () async {
       const expectedVersion = '7.4.2';
       const gradleOutput =
           '''
@@ -347,7 +345,7 @@ OS:           Mac OS X 13.2.1 aarch64
       );
     });
 
-    testWithoutContext('returns the installed gradle with whitespace formatting', () async {
+    test('returns the installed gradle with whitespace formatting', () async {
       const expectedVersion = '7.4.2';
       const gradleOutput = 'Gradle   $expectedVersion';
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
@@ -362,12 +360,10 @@ OS:           Mac OS X 13.2.1 aarch64
       );
     });
 
-    testWithoutContext(
-      'returns the AGP version when set in Groovy build file as classpath with single quotes and commented line',
-      () async {
-        const expectedVersion = '7.3.0';
-        final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-        androidDirectory.childFile('build.gradle').writeAsStringSync('''
+    test('returns the AGP version when set in Groovy build file as classpath with single quotes and commented line', () async {
+      const expectedVersion = '7.3.0';
+      final Directory androidDirectory = fileSystem.directory('/android')..createSync();
+      androidDirectory.childFile('build.gradle').writeAsStringSync('''
 buildscript {
     repositories {
         google()
@@ -389,16 +385,13 @@ allprojects {
 }
 ''');
 
-        expect(getAgpVersion(androidDirectory, BufferLogger.test()), expectedVersion);
-      },
-    );
+      expect(getAgpVersion(androidDirectory, BufferLogger.test()), expectedVersion);
+    });
 
-    testWithoutContext(
-      'returns the AGP version when set in Kotlin build file as classpath',
-      () async {
-        const expectedVersion = '7.3.0';
-        final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-        androidDirectory.childFile('build.gradle.kts').writeAsStringSync('''
+    test('returns the AGP version when set in Kotlin build file as classpath', () async {
+      const expectedVersion = '7.3.0';
+      final Directory androidDirectory = fileSystem.directory('/android')..createSync();
+      androidDirectory.childFile('build.gradle.kts').writeAsStringSync('''
 buildscript {
     repositories {
         google()
@@ -418,11 +411,10 @@ allprojects {
 }
 ''');
 
-        expect(getAgpVersion(androidDirectory, BufferLogger.test()), expectedVersion);
-      },
-    );
+      expect(getAgpVersion(androidDirectory, BufferLogger.test()), expectedVersion);
+    });
 
-    testWithoutContext(
+    test(
       'returns the AGP version when set in Groovy build file as compileOnly with double quotes',
       () async {
         const expectedVersion = '7.1.0';
@@ -437,22 +429,19 @@ dependencies {
         expect(getAgpVersion(androidDirectory, BufferLogger.test()), expectedVersion);
       },
     );
-    testWithoutContext(
-      'returns the AGP version when set in Kotlin build file as compileOnly',
-      () async {
-        const expectedVersion = '7.1.0';
-        final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-        androidDirectory.childFile('build.gradle.kts').writeAsStringSync('''
+    test('returns the AGP version when set in Kotlin build file as compileOnly', () async {
+      const expectedVersion = '7.1.0';
+      final Directory androidDirectory = fileSystem.directory('/android')..createSync();
+      androidDirectory.childFile('build.gradle.kts').writeAsStringSync('''
 dependencies {
     // compileOnly("com.android.tools.build:gradle:0.0.1") // Decoy version
     compileOnly("com.android.tools.build:gradle:$expectedVersion")
 }
 ''');
 
-        expect(getAgpVersion(androidDirectory, BufferLogger.test()), expectedVersion);
-      },
-    );
-    testWithoutContext('returns the AGP version when set in Groovy build file as plugin', () async {
+      expect(getAgpVersion(androidDirectory, BufferLogger.test()), expectedVersion);
+    });
+    test('returns the AGP version when set in Groovy build file as plugin', () async {
       const expectedVersion = '6.8';
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
       androidDirectory.childFile('build.gradle').writeAsStringSync('''
@@ -463,7 +452,7 @@ plugins {
       expect(getAgpVersion(androidDirectory, BufferLogger.test()), expectedVersion);
     });
 
-    testWithoutContext('returns the AGP version when set in Kotlin build file as plugin', () async {
+    test('returns the AGP version when set in Kotlin build file as plugin', () async {
       const expectedVersion = '7.2.0';
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
       androidDirectory.childFile('build.gradle.kts').writeAsStringSync('''
@@ -474,37 +463,31 @@ plugins {
       expect(getAgpVersion(androidDirectory, BufferLogger.test()), expectedVersion);
     });
 
-    testWithoutContext(
-      'returns the AGP version when set in Groovy build file as plugin with comment',
-      () async {
-        const expectedVersion = '6.8';
-        final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-        androidDirectory.childFile('build.gradle').writeAsStringSync('''
+    test('returns the AGP version when set in Groovy build file as plugin with comment', () async {
+      const expectedVersion = '6.8';
+      final Directory androidDirectory = fileSystem.directory('/android')..createSync();
+      androidDirectory.childFile('build.gradle').writeAsStringSync('''
 plugins {
     // id 'com.android.application' version '0.1' apply false // Decoy comment
     id 'com.android.application' version '$expectedVersion' apply false
 }
       ''');
-        expect(getAgpVersion(androidDirectory, BufferLogger.test()), expectedVersion);
-      },
-    );
+      expect(getAgpVersion(androidDirectory, BufferLogger.test()), expectedVersion);
+    });
 
-    testWithoutContext(
-      'returns the AGP version when set in Kotlin build file as plugin with comment',
-      () async {
-        const expectedVersion = '7.2.0';
-        final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-        androidDirectory.childFile('build.gradle.kts').writeAsStringSync('''
+    test('returns the AGP version when set in Kotlin build file as plugin with comment', () async {
+      const expectedVersion = '7.2.0';
+      final Directory androidDirectory = fileSystem.directory('/android')..createSync();
+      androidDirectory.childFile('build.gradle.kts').writeAsStringSync('''
 plugins {
     // id("com.android.application") version "0.1.0" apply false // Decoy comment
     id("com.android.application") version "$expectedVersion" apply false
 }
       ''');
-        expect(getAgpVersion(androidDirectory, BufferLogger.test()), expectedVersion);
-      },
-    );
+      expect(getAgpVersion(androidDirectory, BufferLogger.test()), expectedVersion);
+    });
 
-    testWithoutContext('prefers the AGP version when set in Groovy, ignores Kotlin', () async {
+    test('prefers the AGP version when set in Groovy, ignores Kotlin', () async {
       const versionInGroovy = '7.3.0';
       const versionInKotlin = '7.4.2';
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
@@ -552,7 +535,7 @@ allprojects {
       expect(getAgpVersion(androidDirectory, BufferLogger.test()), versionInGroovy);
     });
 
-    testWithoutContext('returns null when AGP version not set', () async {
+    test('returns null when AGP version not set', () async {
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
       androidDirectory.childFile('build.gradle').writeAsStringSync('''
 buildscript {
@@ -573,7 +556,7 @@ allprojects {
 
       expect(getAgpVersion(androidDirectory, BufferLogger.test()), null);
     });
-    testWithoutContext('returns the AGP version when beta', () async {
+    test('returns the AGP version when beta', () async {
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
       androidDirectory.childFile('build.gradle').writeAsStringSync(r'''
 buildscript {
@@ -598,7 +581,7 @@ allprojects {
       expect(getAgpVersion(androidDirectory, BufferLogger.test()), '7.3.0');
     });
 
-    testWithoutContext('returns the AGP version when in Groovy settings as plugin', () async {
+    test('returns the AGP version when in Groovy settings as plugin', () async {
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
       // File must exist and can not have agp defined.
       androidDirectory.childFile('build.gradle').writeAsStringSync(r'');
@@ -617,7 +600,7 @@ pluginManagement {
       expect(getAgpVersion(androidDirectory, BufferLogger.test()), '8.1.0');
     });
 
-    testWithoutContext('returns the AGP version when in Kotlin settings as plugin', () async {
+    test('returns the AGP version when in Kotlin settings as plugin', () async {
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
       // File must exist and cannot have agp defined.
       androidDirectory.childFile('build.gradle.kts').writeAsStringSync(r'');
@@ -635,7 +618,7 @@ pluginManagement {
       expect(getAgpVersion(androidDirectory, BufferLogger.test()), '7.5.0');
     });
 
-    testWithoutContext(
+    test(
       'returns the AGP version when in Kotlin settings as plugin adversarial commenting',
       () async {
         final Directory androidDirectory = fileSystem.directory('/android')..createSync();
@@ -655,7 +638,7 @@ pluginManagement {
         expect(getAgpVersion(androidDirectory, BufferLogger.test()), '7.5.0');
       },
     );
-    testWithoutContext('returns null when agp version is misconfigured', () async {
+    test('returns null when agp version is misconfigured', () async {
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
       androidDirectory.childFile('build.gradle.kts').writeAsStringSync('''
 plugins {
@@ -679,13 +662,13 @@ dependencies {
         // Newer AGP version supports max gradle version.
         GradleAgpTestData(
           true,
-          agpVersion: '9.2',
+          agpVersion: '9.4',
           gradleVersion: maxKnownAndSupportedGradleVersion,
         ),
         // Newer AGP version does not even meet current gradle version requirements.
-        GradleAgpTestData(false, agpVersion: '9.2', gradleVersion: '7.3'),
+        GradleAgpTestData(false, agpVersion: '9.4', gradleVersion: '7.3'),
         // Newer AGP version requires newer gradle version.
-        GradleAgpTestData(true, agpVersion: '9.2', gradleVersion: '9.3.1'),
+        GradleAgpTestData(true, agpVersion: '9.4', gradleVersion: '9.5.0'),
 
         // Template versions of Gradle/AGP.
         GradleAgpTestData(
@@ -701,6 +684,9 @@ dependencies {
 
         // Minimums as defined in
         // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
+        GradleAgpTestData(true, agpVersion: '9.2', gradleVersion: '9.4.1'),
+        // AGP 9.2 fails to apply with "Minimum supported Gradle version is 9.4.1".
+        GradleAgpTestData(false, agpVersion: '9.2', gradleVersion: '9.3.1'),
         GradleAgpTestData(true, agpVersion: '9.0', gradleVersion: '9.0.0'),
         GradleAgpTestData(true, agpVersion: '8.13', gradleVersion: '8.13'),
         GradleAgpTestData(true, agpVersion: '8.12', gradleVersion: '8.13'),
@@ -795,9 +781,13 @@ dependencies {
       }
     });
 
-    FakeCommand createKgpVersionCommand(String kgpV) {
+    FakeCommand createKgpVersionCommand(String kgpV, {String? gradlewPath}) {
+      gradlewPath ??= fileSystem
+          .directory('/android')
+          .childFile(getGradlewFileName(const LocalPlatform()))
+          .path;
       return FakeCommand(
-        command: const <String>['./gradlew', 'kgpVersion', '-q'],
+        command: <String>[gradlewPath, 'kgpVersion', '-q'],
         stdout:
             '''
     KGP Version: $kgpV
@@ -805,7 +795,7 @@ dependencies {
       );
     }
 
-    testWithoutContext('returns the KGP fetched from kgpVersion gradle task', () async {
+    test('returns the KGP fetched from kgpVersion gradle task', () async {
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
       // Three numbered versions.
       const kgpV2 = '1.8.22';
@@ -820,20 +810,42 @@ dependencies {
       ]);
       expect(await getKgpVersion(androidDirectory, BufferLogger.test(), processManager3), kgpV3);
       final processManagerNoGradle = FakeProcessManager.empty();
-      processManagerNoGradle.excludedExecutables = <String>{'./gradlew'};
+      processManagerNoGradle.excludedExecutables = <String>{
+        androidDirectory.childFile('gradlew').path,
+        androidDirectory.childFile('gradlew.bat').path,
+      };
       expect(
         await getKgpVersion(androidDirectory, BufferLogger.test(), processManagerNoGradle),
         null,
       );
     });
 
-    testWithoutContext(
-      'returns the KGP version when in Kotlin DSL Kotlin settings as plugin',
-      () async {
-        final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-        // File must exist and cannot have kgp defined.
-        androidDirectory.childFile('build.gradle.kts').writeAsStringSync(r'');
-        androidDirectory.childFile('settings.gradle.kts').writeAsStringSync(r'''
+    test('executes gradlew.bat on Windows to find KGP version', () async {
+      final Directory androidDirectory = fileSystem.directory('/android')..createSync();
+      // File must exist and cannot have kgp defined.
+      androidDirectory.childFile('build.gradle.kts').writeAsStringSync(r'');
+      const kgpVersion = '2.0.0';
+      final platform = FakePlatform(operatingSystem: 'windows');
+      final String gradlewPath = androidDirectory.childFile('gradlew.bat').path;
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        createKgpVersionCommand(kgpVersion, gradlewPath: gradlewPath),
+      ]);
+      expect(
+        await getKgpVersion(
+          androidDirectory,
+          BufferLogger.test(),
+          processManager,
+          platform: platform,
+        ),
+        kgpVersion,
+      );
+    });
+
+    test('returns the KGP version when in Kotlin DSL Kotlin settings as plugin', () async {
+      final Directory androidDirectory = fileSystem.directory('/android')..createSync();
+      // File must exist and cannot have kgp defined.
+      androidDirectory.childFile('build.gradle.kts').writeAsStringSync(r'');
+      androidDirectory.childFile('settings.gradle.kts').writeAsStringSync(r'''
 pluginManagement {
   plugins {
       id("dev.flutter.flutter-plugin-loader") version "1.0.0"
@@ -843,23 +855,20 @@ pluginManagement {
   }
 }
 ''');
-        final processManager = FakeProcessManager.empty();
-        processManager.excludedExecutables = <String>{'./gradlew'};
+      final processManager = FakeProcessManager.empty();
+      processManager.excludedExecutables = <String>{
+        androidDirectory.childFile('gradlew').path,
+        androidDirectory.childFile('gradlew.bat').path,
+      };
 
-        expect(
-          await getKgpVersion(androidDirectory, BufferLogger.test(), processManager),
-          '1.8.22',
-        );
-      },
-    );
+      expect(await getKgpVersion(androidDirectory, BufferLogger.test(), processManager), '1.8.22');
+    });
 
-    testWithoutContext(
-      'returns the KGP version when in Groovy DSL Kotlin settings as plugin',
-      () async {
-        final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-        // File must exist and cannot have kgp defined.
-        androidDirectory.childFile('build.gradle.kts').writeAsStringSync(r'');
-        androidDirectory.childFile('settings.gradle.kts').writeAsStringSync(r'''
+    test('returns the KGP version when in Groovy DSL Kotlin settings as plugin', () async {
+      final Directory androidDirectory = fileSystem.directory('/android')..createSync();
+      // File must exist and cannot have kgp defined.
+      androidDirectory.childFile('build.gradle.kts').writeAsStringSync(r'');
+      androidDirectory.childFile('settings.gradle.kts').writeAsStringSync(r'''
 pluginManagement {
   plugins {
       id "dev.flutter.flutter-plugin-loader"  version "1.0.0"
@@ -869,15 +878,14 @@ pluginManagement {
   }
 }
 ''');
-        final processManager = FakeProcessManager.empty();
-        processManager.excludedExecutables = <String>{'./gradlew'};
+      final processManager = FakeProcessManager.empty();
+      processManager.excludedExecutables = <String>{
+        androidDirectory.childFile('gradlew').path,
+        androidDirectory.childFile('gradlew.bat').path,
+      };
 
-        expect(
-          await getKgpVersion(androidDirectory, BufferLogger.test(), processManager),
-          '1.8.22',
-        );
-      },
-    );
+      expect(await getKgpVersion(androidDirectory, BufferLogger.test(), processManager), '1.8.22');
+    });
 
     group('validates kgp/gradle versions', () {
       final testData = <GradleKgpTestData>[
@@ -1097,28 +1105,28 @@ pluginManagement {
     });
 
     group('Parse gradle version from distribution url', () {
-      testWithoutContext('null distribution url returns null version', () {
+      test('null distribution url returns null version', () {
         expect(parseGradleVersionFromDistributionUrl(null), null);
       });
 
-      testWithoutContext('unparseable format returns null', () {
+      test('unparseable format returns null', () {
         const distributionUrl = 'aString';
         expect(parseGradleVersionFromDistributionUrl(distributionUrl), null);
       });
 
-      testWithoutContext("recognizable 'all' format returns correct version", () {
+      test("recognizable 'all' format returns correct version", () {
         const distributionUrl =
             r'distributionUrl=https\://services.gradle.org/distributions/gradle-6.7-all.zip';
         expect(parseGradleVersionFromDistributionUrl(distributionUrl), '6.7');
       });
 
-      testWithoutContext("recognizable 'bin' format returns correct version", () {
+      test("recognizable 'bin' format returns correct version", () {
         const distributionUrl =
             r'distributionUrl=https\://services.gradle.org/distributions/gradle-6.7-bin.zip';
         expect(parseGradleVersionFromDistributionUrl(distributionUrl), '6.7');
       });
 
-      testWithoutContext("recognizable 'rc' format returns correct version", () {
+      test("recognizable 'rc' format returns correct version", () {
         const distributionUrl =
             r'distributionUrl=https\://services.gradle.org/distributions/gradle-8.1-rc-3-all.zip';
         expect(parseGradleVersionFromDistributionUrl(distributionUrl), '8.1');
@@ -1195,7 +1203,7 @@ pluginManagement {
       ];
 
       for (final data in testData) {
-        testWithoutContext('(Java, gradle): (${data.javaVersion}, ${data.gradleVersion})', () {
+        test('(Java, gradle): (${data.javaVersion}, ${data.gradleVersion})', () {
           expect(
             validateJavaAndGradle(
               BufferLogger.test(),
@@ -1210,7 +1218,7 @@ pluginManagement {
     });
   });
 
-  testWithoutContext('agp versions validation', () {
+  test('agp versions validation', () {
     final Version? parsedTemplateAndroidGradlePluginVersion = Version.parse(
       templateAndroidGradlePluginVersion,
     );
@@ -1257,7 +1265,7 @@ pluginManagement {
       testLogger = BufferLogger.test();
     });
 
-    testWithoutContext('prefers build.gradle over build.gradle.kts', () async {
+    test('prefers build.gradle over build.gradle.kts', () async {
       const versionInGroovy = '4.0.0';
       const versionInKotlin = '7.4.2';
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
@@ -1428,7 +1436,7 @@ allprojects {
     ];
 
     for (final data in testData) {
-      testWithoutContext('(Java, agp): (${data.javaVersion}, ${data.agpVersion})', () {
+      test('(Java, agp): (${data.javaVersion}, ${data.agpVersion})', () {
         expect(
           validateJavaAndAgp(BufferLogger.test(), javaV: data.javaVersion, agpV: data.agpVersion),
           data.validPair ? isTrue : isFalse,
@@ -1439,7 +1447,7 @@ allprojects {
   });
 
   group('gradle version', () {
-    testWithoutContext('should be compatible with the Android plugin version', () {
+    test('should be compatible with the Android plugin version', () {
       // Granular versions.
       expect(getGradleVersionFor('1.0.0'), '2.3');
       expect(getGradleVersionFor('1.0.1'), '2.3');
@@ -1498,9 +1506,11 @@ allprojects {
       expect(getGradleVersionFor('8.13'), '8.14');
       expect(getGradleVersionFor('9.0.1'), '9.1.0');
       expect(getGradleVersionFor('9.1.0'), '9.3.1');
+      expect(getGradleVersionFor('9.2.0'), '9.4.1');
+      expect(getGradleVersionFor('9.3.1'), '9.5.0');
     });
 
-    testWithoutContext('throws on unsupported versions', () {
+    test('throws on unsupported versions', () {
       expect(
         () => getGradleVersionFor('3.6.0'),
         throwsA(predicate<Exception>((Exception e) => e is ToolExit)),
@@ -1508,237 +1518,243 @@ allprojects {
     });
   });
   group('detecting valid Gradle/AGP versions for given Java version and vice versa', () {
-    testWithoutContext(
-      'getValidGradleVersionRangeForJavaVersion returns valid Gradle version range for Java version',
-      () {
-        final Logger testLogger = BufferLogger.test();
-        // Java version too high.
-        expect(
-          getValidGradleVersionRangeForJavaVersion(
-            testLogger,
-            javaV: oneMajorVersionHigherJavaVersion,
-          ),
+    test('getValidGradleVersionRangeForJavaVersion returns valid Gradle version range for Java version', () {
+      final Logger testLogger = BufferLogger.test();
+      // Java version too high.
+      expect(
+        getValidGradleVersionRangeForJavaVersion(
+          testLogger,
+          javaV: oneMajorVersionHigherJavaVersion,
+        ),
+        isNull,
+      );
+      // Maximum known Java version.
+      // *The test case that follows needs to be updated* when higher versions of Java are supported:
+      expect(
+        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '26'),
+        allOf(
+          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '26.0.2')),
           isNull,
-        );
-        // Maximum known Java version.
-        // *The test case that follows needs to be updated* when higher versions of Java are supported:
-        expect(
-          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '26'),
-          allOf(
-            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '26.0.2')),
-            isNull,
-          ),
-        );
-        // Known supported Java versions.
-        expect(
-          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '25'),
-          allOf(
-            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '25.0.2')),
-            equals(const JavaGradleCompat(javaMin: '25', javaMax: '26', gradleMin: '9.1.0')),
-          ),
-        );
-        expect(
-          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '24'),
-          allOf(
-            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '24.0.2')),
-            equals(const JavaGradleCompat(javaMin: '24', javaMax: '25', gradleMin: '8.14')),
-          ),
-        );
-        expect(
-          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '23'),
-          allOf(
-            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '23.0.2')),
-            equals(const JavaGradleCompat(javaMin: '23', javaMax: '24', gradleMin: '8.10')),
-          ),
-        );
-        expect(
-          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '22'),
-          allOf(
-            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '22.0.2')),
-            equals(const JavaGradleCompat(javaMin: '22', javaMax: '23', gradleMin: '8.7')),
-          ),
-        );
-        expect(
-          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '21'),
-          allOf(
-            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '21.0.2')),
-            equals(const JavaGradleCompat(javaMin: '21', javaMax: '22', gradleMin: '8.4')),
-          ),
-        );
-        expect(
-          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '20'),
-          allOf(
-            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '20.0.2')),
-            equals(const JavaGradleCompat(javaMin: '20', javaMax: '21', gradleMin: '8.1')),
-          ),
-        );
-        expect(
-          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '19'),
-          allOf(
-            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '19.0.2')),
-            equals(const JavaGradleCompat(javaMin: '19', javaMax: '20', gradleMin: '7.6')),
-          ),
-        );
-        expect(
-          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '18'),
-          allOf(
-            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '18.0.2')),
-            equals(const JavaGradleCompat(javaMin: '18', javaMax: '19', gradleMin: '7.5')),
-          ),
-        );
-        expect(
-          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '17'),
-          allOf(
-            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '17.0.2')),
-            equals(const JavaGradleCompat(javaMin: '17', javaMax: '18', gradleMin: '7.3')),
-          ),
-        );
-        expect(
-          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '16'),
-          allOf(
-            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '16.0.2')),
-            equals(
-              const JavaGradleCompat(
-                javaMin: '16',
-                javaMax: '17',
-                gradleMin: '7.0',
-                gradleMax: maxGradleVersionForJavaPre17,
-              ),
+        ),
+      );
+      // Known supported Java versions.
+      expect(
+        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '25'),
+        allOf(
+          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '25.0.2')),
+          equals(const JavaGradleCompat(javaMin: '25', javaMax: '26', gradleMin: '9.1.0')),
+        ),
+      );
+      expect(
+        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '24'),
+        allOf(
+          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '24.0.2')),
+          equals(const JavaGradleCompat(javaMin: '24', javaMax: '25', gradleMin: '8.14')),
+        ),
+      );
+      expect(
+        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '23'),
+        allOf(
+          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '23.0.2')),
+          equals(const JavaGradleCompat(javaMin: '23', javaMax: '24', gradleMin: '8.10')),
+        ),
+      );
+      expect(
+        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '22'),
+        allOf(
+          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '22.0.2')),
+          equals(const JavaGradleCompat(javaMin: '22', javaMax: '23', gradleMin: '8.7')),
+        ),
+      );
+      expect(
+        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '21'),
+        allOf(
+          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '21.0.2')),
+          equals(const JavaGradleCompat(javaMin: '21', javaMax: '22', gradleMin: '8.4')),
+        ),
+      );
+      expect(
+        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '20'),
+        allOf(
+          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '20.0.2')),
+          equals(const JavaGradleCompat(javaMin: '20', javaMax: '21', gradleMin: '8.1')),
+        ),
+      );
+      expect(
+        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '19'),
+        allOf(
+          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '19.0.2')),
+          equals(const JavaGradleCompat(javaMin: '19', javaMax: '20', gradleMin: '7.6')),
+        ),
+      );
+      expect(
+        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '18'),
+        allOf(
+          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '18.0.2')),
+          equals(const JavaGradleCompat(javaMin: '18', javaMax: '19', gradleMin: '7.5')),
+        ),
+      );
+      expect(
+        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '17'),
+        allOf(
+          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '17.0.2')),
+          equals(const JavaGradleCompat(javaMin: '17', javaMax: '18', gradleMin: '7.3')),
+        ),
+      );
+      expect(
+        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '16'),
+        allOf(
+          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '16.0.2')),
+          equals(
+            const JavaGradleCompat(
+              javaMin: '16',
+              javaMax: '17',
+              gradleMin: '7.0',
+              gradleMax: maxGradleVersionForJavaPre17,
             ),
           ),
-        );
-        expect(
-          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '15'),
-          allOf(
-            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '15.0.2')),
-            equals(
-              const JavaGradleCompat(
-                javaMin: '15',
-                javaMax: '16',
-                gradleMin: '6.7',
-                gradleMax: maxGradleVersionForJavaPre17,
-              ),
+        ),
+      );
+      expect(
+        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '15'),
+        allOf(
+          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '15.0.2')),
+          equals(
+            const JavaGradleCompat(
+              javaMin: '15',
+              javaMax: '16',
+              gradleMin: '6.7',
+              gradleMax: maxGradleVersionForJavaPre17,
             ),
           ),
-        );
-        expect(
-          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '14'),
-          allOf(
-            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '14.0.2')),
-            equals(
-              const JavaGradleCompat(
-                javaMin: '14',
-                javaMax: '15',
-                gradleMin: '6.3',
-                gradleMax: maxGradleVersionForJavaPre17,
-              ),
+        ),
+      );
+      expect(
+        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '14'),
+        allOf(
+          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '14.0.2')),
+          equals(
+            const JavaGradleCompat(
+              javaMin: '14',
+              javaMax: '15',
+              gradleMin: '6.3',
+              gradleMax: maxGradleVersionForJavaPre17,
             ),
           ),
-        );
-        expect(
-          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '13'),
-          allOf(
-            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '13.0.2')),
-            equals(
-              const JavaGradleCompat(
-                javaMin: '13',
-                javaMax: '14',
-                gradleMin: '6.0',
-                gradleMax: maxGradleVersionForJavaPre17,
-              ),
+        ),
+      );
+      expect(
+        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '13'),
+        allOf(
+          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '13.0.2')),
+          equals(
+            const JavaGradleCompat(
+              javaMin: '13',
+              javaMax: '14',
+              gradleMin: '6.0',
+              gradleMax: maxGradleVersionForJavaPre17,
             ),
           ),
-        );
-        expect(
-          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '12'),
-          allOf(
-            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '12.0.2')),
-            equals(
-              const JavaGradleCompat(
-                javaMin: '12',
-                javaMax: '13',
-                gradleMin: '5.4',
-                gradleMax: maxGradleVersionForJavaPre17,
-              ),
+        ),
+      );
+      expect(
+        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '12'),
+        allOf(
+          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '12.0.2')),
+          equals(
+            const JavaGradleCompat(
+              javaMin: '12',
+              javaMax: '13',
+              gradleMin: '5.4',
+              gradleMax: maxGradleVersionForJavaPre17,
             ),
           ),
-        );
-        expect(
-          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '11'),
-          allOf(
-            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '11.0.2')),
-            equals(
-              const JavaGradleCompat(
-                javaMin: '11',
-                javaMax: '12',
-                gradleMin: '5.0',
-                gradleMax: maxGradleVersionForJavaPre17,
-              ),
+        ),
+      );
+      expect(
+        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '11'),
+        allOf(
+          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '11.0.2')),
+          equals(
+            const JavaGradleCompat(
+              javaMin: '11',
+              javaMax: '12',
+              gradleMin: '5.0',
+              gradleMax: maxGradleVersionForJavaPre17,
             ),
           ),
-        );
-        expect(
-          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.10'),
-          allOf(
-            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.10.2')),
-            equals(
-              const JavaGradleCompat(
-                javaMin: '1.10',
-                javaMax: '1.11',
-                gradleMin: '4.7',
-                gradleMax: maxGradleVersionForJavaPre17,
-              ),
+        ),
+      );
+      expect(
+        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.10'),
+        allOf(
+          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.10.2')),
+          equals(
+            const JavaGradleCompat(
+              javaMin: '1.10',
+              javaMax: '1.11',
+              gradleMin: '4.7',
+              gradleMax: maxGradleVersionForJavaPre17,
             ),
           ),
-        );
-        expect(
-          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.9'),
-          allOf(
-            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.9.2')),
-            equals(
-              const JavaGradleCompat(
-                javaMin: '1.9',
-                javaMax: '1.10',
-                gradleMin: '4.3',
-                gradleMax: maxGradleVersionForJavaPre17,
-              ),
+        ),
+      );
+      expect(
+        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.9'),
+        allOf(
+          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.9.2')),
+          equals(
+            const JavaGradleCompat(
+              javaMin: '1.9',
+              javaMax: '1.10',
+              gradleMin: '4.3',
+              gradleMax: maxGradleVersionForJavaPre17,
             ),
           ),
-        );
-        // Java 1.8 -- return oldest documented compatibility info
-        expect(
-          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.8'),
-          allOf(
-            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.8.2')),
-            equals(
-              const JavaGradleCompat(
-                javaMin: '1.8',
-                javaMax: '1.9',
-                gradleMin: '2.0',
-                gradleMax: maxGradleVersionForJavaPre17,
-              ),
+        ),
+      );
+      // Java 1.8 -- return oldest documented compatibility info
+      expect(
+        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.8'),
+        allOf(
+          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.8.2')),
+          equals(
+            const JavaGradleCompat(
+              javaMin: '1.8',
+              javaMax: '1.9',
+              gradleMin: '2.0',
+              gradleMax: maxGradleVersionForJavaPre17,
             ),
           ),
-        );
-        // Java version too low.
-        expect(
-          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.7'),
-          allOf(
-            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.7.2')),
-            isNull,
-          ),
-        );
-      },
-    );
+        ),
+      );
+      // Java version too low.
+      expect(
+        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.7'),
+        allOf(equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.7.2')), isNull),
+      );
+    });
 
-    testWithoutContext(
-      'getMinimumAgpVersionForJavaVersion returns minimum AGP version for Java version',
-      () {
-        final Logger testLogger = BufferLogger.test();
-        // Maximum known Java version.
-        // *The test case that follows needs to be updated* as higher versions of AGP are supported:
-        expect(
-          getMinimumAgpVersionForJavaVersion(testLogger, javaV: oneMajorVersionHigherJavaVersion),
+    test('getMinimumAgpVersionForJavaVersion returns minimum AGP version for Java version', () {
+      final Logger testLogger = BufferLogger.test();
+      // Maximum known Java version.
+      // *The test case that follows needs to be updated* as higher versions of AGP are supported:
+      expect(
+        getMinimumAgpVersionForJavaVersion(testLogger, javaV: oneMajorVersionHigherJavaVersion),
+        equals(
+          const JavaAgpCompat(
+            javaMin: '17',
+            javaDefault: '17',
+            agpMin: '8.0',
+            agpMax: maxKnownAndSupportedAgpVersion,
+          ),
+        ),
+      );
+      // Known Java versions.
+      expect(
+        getMinimumAgpVersionForJavaVersion(testLogger, javaV: '17'),
+        allOf(
+          equals(getMinimumAgpVersionForJavaVersion(testLogger, javaV: '17.0.2')),
           equals(
             const JavaAgpCompat(
               javaMin: '17',
@@ -1747,67 +1763,52 @@ allprojects {
               agpMax: maxKnownAndSupportedAgpVersion,
             ),
           ),
-        );
-        // Known Java versions.
-        expect(
-          getMinimumAgpVersionForJavaVersion(testLogger, javaV: '17'),
-          allOf(
-            equals(getMinimumAgpVersionForJavaVersion(testLogger, javaV: '17.0.2')),
-            equals(
-              const JavaAgpCompat(
-                javaMin: '17',
-                javaDefault: '17',
-                agpMin: '8.0',
-                agpMax: maxKnownAndSupportedAgpVersion,
-              ),
-            ),
+        ),
+      );
+      expect(
+        getMinimumAgpVersionForJavaVersion(testLogger, javaV: '15'),
+        allOf(
+          equals(getMinimumAgpVersionForJavaVersion(testLogger, javaV: '15.0.2')),
+          equals(
+            const JavaAgpCompat(javaMin: '11', javaDefault: '11', agpMin: '7.0', agpMax: '7.4'),
           ),
-        );
-        expect(
-          getMinimumAgpVersionForJavaVersion(testLogger, javaV: '15'),
-          allOf(
-            equals(getMinimumAgpVersionForJavaVersion(testLogger, javaV: '15.0.2')),
-            equals(
-              const JavaAgpCompat(javaMin: '11', javaDefault: '11', agpMin: '7.0', agpMax: '7.4'),
-            ),
+        ),
+      );
+      expect(
+        getMinimumAgpVersionForJavaVersion(testLogger, javaV: '11'),
+        allOf(
+          equals(getMinimumAgpVersionForJavaVersion(testLogger, javaV: '11.0.2')),
+          equals(
+            const JavaAgpCompat(javaMin: '11', javaDefault: '11', agpMin: '7.0', agpMax: '7.4'),
           ),
-        );
-        expect(
-          getMinimumAgpVersionForJavaVersion(testLogger, javaV: '11'),
-          allOf(
-            equals(getMinimumAgpVersionForJavaVersion(testLogger, javaV: '11.0.2')),
-            equals(
-              const JavaAgpCompat(javaMin: '11', javaDefault: '11', agpMin: '7.0', agpMax: '7.4'),
-            ),
+        ),
+      );
+      expect(
+        getMinimumAgpVersionForJavaVersion(testLogger, javaV: '1.9'),
+        allOf(
+          equals(getMinimumAgpVersionForJavaVersion(testLogger, javaV: '1.9.2')),
+          equals(
+            const JavaAgpCompat(javaMin: '1.8', javaDefault: '1.8', agpMin: '4.2', agpMax: '4.2'),
           ),
-        );
-        expect(
-          getMinimumAgpVersionForJavaVersion(testLogger, javaV: '1.9'),
-          allOf(
-            equals(getMinimumAgpVersionForJavaVersion(testLogger, javaV: '1.9.2')),
-            equals(
-              const JavaAgpCompat(javaMin: '1.8', javaDefault: '1.8', agpMin: '4.2', agpMax: '4.2'),
-            ),
+        ),
+      );
+      expect(
+        getMinimumAgpVersionForJavaVersion(testLogger, javaV: '1.8'),
+        allOf(
+          equals(getMinimumAgpVersionForJavaVersion(testLogger, javaV: '1.8.2')),
+          equals(
+            const JavaAgpCompat(javaMin: '1.8', javaDefault: '1.8', agpMin: '4.2', agpMax: '4.2'),
           ),
-        );
-        expect(
-          getMinimumAgpVersionForJavaVersion(testLogger, javaV: '1.8'),
-          allOf(
-            equals(getMinimumAgpVersionForJavaVersion(testLogger, javaV: '1.8.2')),
-            equals(
-              const JavaAgpCompat(javaMin: '1.8', javaDefault: '1.8', agpMin: '4.2', agpMax: '4.2'),
-            ),
-          ),
-        );
-        // Java version too low.
-        expect(
-          getMinimumAgpVersionForJavaVersion(testLogger, javaV: '1.7'),
-          allOf(equals(getMinimumAgpVersionForJavaVersion(testLogger, javaV: '1.7.2')), isNull),
-        );
-      },
-    );
+        ),
+      );
+      // Java version too low.
+      expect(
+        getMinimumAgpVersionForJavaVersion(testLogger, javaV: '1.7'),
+        allOf(equals(getMinimumAgpVersionForJavaVersion(testLogger, javaV: '1.7.2')), isNull),
+      );
+    });
 
-    testWithoutContext('getJavaVersionFor returns expected Java version range', () {
+    test('getJavaVersionFor returns expected Java version range', () {
       // Strictly too old Gradle and AGP versions.
       expect(
         getJavaVersionFor(gradleV: '1.9', agpV: '4.1'),
@@ -1877,11 +1878,11 @@ allprojects {
       (agpV: '7.2', gradleV: '7.2.2', expected: const VersionRange('11', '17')),
     ];
     for (final data in agpGradleData) {
-      testWithoutContext('for AGP ${data.agpV}, gradle ${data.gradleV}', () {
+      test('for AGP ${data.agpV}, gradle ${data.gradleV}', () {
         expect(getJavaVersionFor(agpV: data.agpV, gradleV: data.gradleV), data.expected);
       });
     }
-    testWithoutContext('for agp/gradle', () {
+    test('for agp/gradle', () {
       // Max values
       expect(
         getJavaVersionFor(

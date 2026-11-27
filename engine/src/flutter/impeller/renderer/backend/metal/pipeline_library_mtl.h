@@ -7,6 +7,7 @@
 
 #include <Metal/Metal.h>
 
+#include "impeller/base/thread.h"
 #include "impeller/renderer/pipeline_library.h"
 
 namespace impeller {
@@ -24,8 +25,9 @@ class PipelineLibraryMTL final : public PipelineLibrary {
   friend ContextMTL;
 
   id<MTLDevice> device_ = nullptr;
-  PipelineMap pipelines_;
-  ComputePipelineMap compute_pipelines_;
+  Mutex pipelines_mutex_;
+  PipelineMap pipelines_ IPLR_GUARDED_BY(pipelines_mutex_);
+  ComputePipelineMap compute_pipelines_ IPLR_GUARDED_BY(pipelines_mutex_);
 
   explicit PipelineLibraryMTL(id<MTLDevice> device);
 

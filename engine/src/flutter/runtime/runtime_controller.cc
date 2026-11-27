@@ -491,6 +491,11 @@ void RuntimeController::SetNeedsReportTimings(bool value) {
 }
 
 // |PlatformConfigurationClient|
+void RuntimeController::ResetInternalState() {
+  client_.ResetInternalState();
+}
+
+// |PlatformConfigurationClient|
 std::shared_ptr<const fml::Mapping>
 RuntimeController::GetPersistentIsolateData() {
   return persistent_isolate_data_;

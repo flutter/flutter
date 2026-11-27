@@ -724,6 +724,7 @@ class FakePlatformConfigurationClient : public PlatformConfigurationClient {
   void UpdateIsolateDescription(const std::string isolate_name,
                                 int64_t isolate_port) override {}
   void SetNeedsReportTimings(bool value) override {}
+  void ResetInternalState() override {}
   std::shared_ptr<const fml::Mapping> GetPersistentIsolateData() override {
     return nullptr;
   }

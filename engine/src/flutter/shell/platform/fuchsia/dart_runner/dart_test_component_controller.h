@@ -14,7 +14,13 @@
 #include <lib/async/cpp/wait.h>
 #include <lib/fdio/namespace.h>
 #include <lib/fidl/cpp/binding.h>
+// TODO(cbracken): https://github.com/flutter/flutter/issues/192609
+// Remove once the Fuchsia SDK marks bindings_local as maybe_unused in
+// BindingSet::CloseAll.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-variable"
 #include <lib/fidl/cpp/binding_set.h>
+#pragma clang diagnostic pop
 #include <lib/sys/cpp/component_context.h>
 #include <lib/sys/cpp/service_directory.h>
 #include <lib/zx/timer.h>

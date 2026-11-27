@@ -7,6 +7,7 @@ import 'dart:isolate' show ReceivePort;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+
 import 'binary_messenger.dart';
 import 'binding.dart';
 

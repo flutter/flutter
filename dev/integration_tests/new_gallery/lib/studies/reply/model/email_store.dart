@@ -105,8 +105,7 @@ class EmailStore with ChangeNotifier {
       sender: 'Allison Trabucco',
       time: '4 hrs ago',
       subject: 'Free money',
-      message:
-          "You've been selected as a winner in our latest raffle! To claim your prize, click on the link.",
+      message: "You've been selected as a winner in our latest raffle! To claim your prize, click on the link.",
       avatar: '$_avatarsLocation/avatar_3.jpg',
       recipients: 'Jeff',
       inboxType: InboxType.spam,

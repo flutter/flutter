@@ -586,9 +586,8 @@ String _getMessageShownInSemanticsDebugger({
   );
   // ignore: avoid_dynamic_calls
   return semanticsDebuggerPainter.getMessage(
-        tester.renderObject(find.byKey(widgetKey)).debugSemantics,
-      )
-      as String;
+    tester.renderObject(find.byKey(widgetKey)).debugSemantics,
+  ) as String;
 }
 
 dynamic _getSemanticsDebuggerPainter({required Key debuggerKey, required WidgetTester tester}) {

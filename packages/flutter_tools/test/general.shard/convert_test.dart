@@ -19,26 +19,26 @@ void main() {
     nonpassString = 'malformed string => \u{FFFD}';
   });
 
-  testWithoutContext('Decode a normal string', () async {
+  test('Decode a normal string', () async {
     expect(decoder.convert(passedString.codeUnits), passedString);
   });
 
-  testWithoutContext('Decode a string containing a valid replacement character', () async {
+  test('Decode a string containing a valid replacement character', () async {
     expect(
       decoder.convert(utf8ForTesting.encode('normal string => \u{FFFD}')),
       'normal string => \u{FFFD}',
     );
   });
 
-  testWithoutContext('Throw on malformed UTF-8 bytes', () async {
+  test('Throw on malformed UTF-8 bytes', () async {
     expect(() => decoder.convert(<int>[0xc3, 0x28]), throwsToolExit());
   });
 
-  testWithoutContext('Decode a malformed string without throwing', () async {
+  test('Decode a malformed string without throwing', () async {
     expect(utf8AllowMalformed.decode(nonpassString.codeUnits), nonpassString);
   });
 
-  testWithoutContext('Decode invalid UTF-8 bytes from external source', () async {
+  test('Decode invalid UTF-8 bytes from external source', () async {
     final bytes = <int>[
       91,
       78,
@@ -104,23 +104,23 @@ void main() {
     expect(result, contains('\u{FFFD}'));
   });
 
-  testWithoutContext('Decode with reportErrors: false does not warn', () async {
+  test('Decode with reportErrors: false does not warn', () async {
     const silentDecoder = Utf8Decoder(reportErrors: false);
     final String result = silentDecoder.convert(nonpassString.codeUnits);
     expect(result, nonpassString);
   });
 
-  testWithoutContext('Decode empty input', () async {
+  test('Decode empty input', () async {
     expect(decoder.convert(<int>[]), '');
   });
 
-  testWithoutContext('Decode with start and end parameters', () async {
+  test('Decode with start and end parameters', () async {
     const input = 'hello world';
     final List<int> bytes = input.codeUnits;
     expect(decoder.convert(bytes, 6, 11), 'world');
   });
 
-  testWithoutContext('Decode multiple replacement characters', () async {
+  test('Decode multiple replacement characters', () async {
     // Multiple invalid byte sequences
     final bytes = <int>[239, 191, 189, 65, 239, 191, 189];
     final String result = utf8AllowMalformed.decode(bytes);
@@ -128,7 +128,7 @@ void main() {
     expect(result, contains('A'));
   });
 
-  testWithoutContext('Decode valid UTF-8 without replacement characters', () async {
+  test('Decode valid UTF-8 without replacement characters', () async {
     // Valid UTF-8: "hello"
     final bytes = <int>[104, 101, 108, 108, 111];
     final String result = decoder.convert(bytes);
@@ -137,21 +137,21 @@ void main() {
   });
 
   group('utf8AllowMalformed constant', () {
-    testWithoutContext('utf8AllowMalformed decodes malformed UTF-8 silently', () async {
+    test('utf8AllowMalformed decodes malformed UTF-8 silently', () async {
       final bytes = <int>[239, 191, 189]; // Invalid UTF-8 sequence
       final String result = utf8AllowMalformed.decode(bytes);
       // Should decode to replacement character without warnings
       expect(result, contains('\u{FFFD}'));
     });
 
-    testWithoutContext('utf8AllowMalformed decodes valid UTF-8 correctly', () async {
+    test('utf8AllowMalformed decodes valid UTF-8 correctly', () async {
       const input = 'Hello, World!';
       final List<int> bytes = input.codeUnits;
       final String result = utf8AllowMalformed.decode(bytes);
       expect(result, input);
     });
 
-    testWithoutContext('utf8AllowMalformed handles mixed valid/invalid UTF-8', () async {
+    test('utf8AllowMalformed handles mixed valid/invalid UTF-8', () async {
       // Mix of valid ASCII and invalid UTF-8
       final bytes = <int>[72, 101, 108, 108, 111, 239, 191, 189, 87, 111, 114, 108, 100];
       final String result = utf8AllowMalformed.decode(bytes);
@@ -162,7 +162,7 @@ void main() {
   });
 
   group('VM Service log decoding scenario', () {
-    testWithoutContext('Decode base64-encoded invalid UTF-8 from VM Service event', () async {
+    test('Decode base64-encoded invalid UTF-8 from VM Service event', () async {
       // Simulate VM Service event with base64-encoded app log containing invalid UTF-8
       // This is raw bytes that would come from a VM Service event: "App log with error: [invalid byte]"
       final rawBytes = <int>[
@@ -198,7 +198,7 @@ void main() {
       expect(decoded, contains('\u{FFFD}'));
     });
 
-    testWithoutContext('Decode app log with emoji from Bluetooth device', () async {
+    test('Decode app log with emoji from Bluetooth device', () async {
       // Simulate Bluetooth device sending emoji (might be malformed)
       // Emoji 🎵 is F0 9F 8E B5 in UTF-8
       final bytes = <int>[

@@ -377,12 +377,12 @@ half4 main(vec2 fragCoord) {
     final SkRuntimeEffect? invalidEffect = MakeRuntimeEffect(kInvalidSkSlProgram);
     expect(invalidEffect, isNull);
 
-    final SkFloat32List emptyUniforms = mallocFloat32List(0);
+    final JSFloat32Array emptyUniforms = Float32List(0).toJS;
     final SkShader? shader = effect!.makeShader(emptyUniforms);
     expect(shader, isNotNull);
 
     // mismatched uniforms returns null.
-    final SkFloat32List mismatchedUniforms = mallocFloat32List(1);
+    final JSFloat32Array mismatchedUniforms = Float32List(1).toJS;
     final SkShader? invalidShader = effect.makeShader(mismatchedUniforms);
 
     expect(invalidShader, isNull);
@@ -395,17 +395,15 @@ return u_color;
 }
 ''';
 
-    final SkFloat32List uniforms = mallocFloat32List(4);
-    final Float32List uniformData = uniforms.toTypedArray();
+    final uniformData = Float32List(4);
 
     uniformData[0] = 1.0;
     uniformData[1] = 0.0;
     uniformData[2] = 0.0;
     uniformData[3] = 1.0;
 
-    final SkShader? shaderWithUniform = MakeRuntimeEffect(
-      kSkSlProgramWithUniforms,
-    )!.makeShader(uniforms);
+    final SkShader? shaderWithUniform = MakeRuntimeEffect(kSkSlProgramWithUniforms)!
+        .makeShader(uniformData.toJS);
 
     expect(shaderWithUniform, isNotNull);
   });
@@ -1406,36 +1404,11 @@ void _canvasTests() {
   });
 
   test('drawParagraph', () {
-    final builder = CkParagraphBuilder(CkParagraphStyle());
+    final builder = EngineParagraphBuilder(const EngineParagraphStyle());
     builder.addText('Hello');
-    final CkParagraph paragraph = builder.build();
+    final EngineParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: 100));
-    canvas.drawParagraph(paragraph.skiaObject, 10, 20);
-  });
-
-  test('Paragraph converts caret position to charactor position', () {
-    final builder = CkParagraphBuilder(CkParagraphStyle());
-    builder.addText('Hello there');
-    final CkParagraph paragraph = builder.build();
-    paragraph.layout(const ui.ParagraphConstraints(width: 100));
-    ui.TextRange range = paragraph.getWordBoundary(
-      const ui.TextPosition(offset: 5, affinity: ui.TextAffinity.upstream),
-    );
-    expect(range.start, 0);
-    expect(range.end, 5);
-
-    range = paragraph.getWordBoundary(const ui.TextPosition(offset: 5));
-    expect(range.start, 5);
-    expect(range.end, 6);
-  });
-
-  test('Paragraph dispose', () {
-    final builder = CkParagraphBuilder(CkParagraphStyle());
-    builder.addText('Hello');
-    final CkParagraph paragraph = builder.build();
-
-    paragraph.dispose();
-    expect(paragraph.debugDisposed, true);
+    canvas.drawParagraph((paragraph.backendParagraph as CkParagraph).skiaObject, 10, 20);
   });
 
   test('toImage.toByteData', () async {
@@ -1566,7 +1539,7 @@ void _paragraphTests() {
     final SkParagraphStyle paragraphStyle = canvasKit.ParagraphStyle(props);
     final SkParagraphBuilder builder = canvasKit.ParagraphBuilder.MakeFromFontCollection(
       paragraphStyle,
-      (CanvasKitRenderer.instance.fontCollection as SkiaFontCollection).skFontCollection,
+      CanvasKitRenderer.instance.ckFontCollection.skFontCollection,
     );
 
     builder.addText('Hello');
@@ -1659,7 +1632,13 @@ void _paragraphTests() {
     expect(lineMetrics.isHardBreak, isTrue);
     expectAlmost(lineMetrics.baseline, 78.6);
     expectAlmost(lineMetrics.height, 108);
-    expectAlmost(lineMetrics.left, 2.5);
+    // The line starts with letterSpacing 5 and ends with an unspaced "!", so capping the line
+    // shift by the half spacing of the visually last cluster reduces left from 2.5 to 0.
+    // TODO(Rusino): Expect only 0 once https://github.com/flutter/flutter/issues/184815 rolls in.
+    expect(
+      lineMetrics.left,
+      anyOf(within<double>(distance: 0.025, from: 2.5), within<double>(distance: 0.025, from: 0)),
+    );
     expectAlmost(lineMetrics.width, 263);
     expect(lineMetrics.lineNumber, 0);
 
@@ -1704,7 +1683,7 @@ void _paragraphTests() {
     final SkParagraphStyle paragraphStyle = canvasKit.ParagraphStyle(props);
     final SkParagraphBuilder builder = canvasKit.ParagraphBuilder.MakeFromFontCollection(
       paragraphStyle,
-      (CanvasKitRenderer.instance.fontCollection as SkiaFontCollection).skFontCollection,
+      CanvasKitRenderer.instance.ckFontCollection.skFontCollection,
     );
     builder.addText('hello');
 
@@ -1745,49 +1724,41 @@ void _paragraphTests() {
     );
   });
 
-  test(
-    'MakeOnScreenGLSurface test',
-    () {
-      final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
-      final WebGLContext gl = canvas.getGlContext(webGLVersion);
-      final int sampleCount = gl.getParameter(gl.samples);
-      final int stencilBits = gl.getParameter(gl.stencilBits);
+  test('MakeOnScreenGLSurface test', () {
+    final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
+    final WebGLContext gl = canvas.getGlContext(webGLVersion);
+    final int sampleCount = gl.getParameter(gl.samples);
+    final int stencilBits = gl.getParameter(gl.stencilBits);
 
-      final double glContext = canvasKit.GetWebGLContext(
-        canvas,
-        SkWebGLContextOptions(antialias: 0, majorVersion: webGLVersion.toDouble()),
-      );
-      final SkGrContext? grContext = canvasKit.MakeGrContext(glContext);
-      final SkSurface? skSurface = canvasKit.MakeOnScreenGLSurface(
-        grContext!,
-        100,
-        100,
-        SkColorSpaceSRGB,
-        sampleCount,
-        stencilBits,
-      );
+    final double glContext = canvasKit.GetWebGLContext(
+      canvas,
+      SkWebGLContextOptions(antialias: 0, majorVersion: webGLVersion.toDouble()),
+    );
+    final SkGrContext? grContext = canvasKit.MakeGrContext(glContext);
+    final SkSurface? skSurface = canvasKit.MakeOnScreenGLSurface(
+      grContext!,
+      100,
+      100,
+      SkColorSpaceSRGB,
+      sampleCount,
+      stencilBits,
+    );
 
-      expect(skSurface, isNotNull);
-    },
-    skip: isFirefox,
-  ); // Intended: Headless firefox has no webgl support https://github.com/flutter/flutter/issues/109265
+    expect(skSurface, isNotNull);
+  }, skip: isFirefox); // Intended: Headless firefox has no webgl support https://github.com/flutter/flutter/issues/109265
 
-  test(
-    'MakeRenderTarget test',
-    () {
-      final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
+  test('MakeRenderTarget test', () {
+    final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
 
-      final int glContext = canvasKit.GetWebGLContext(
-        canvas,
-        SkWebGLContextOptions(antialias: 0, majorVersion: webGLVersion.toDouble()),
-      ).toInt();
-      final SkGrContext? grContext = canvasKit.MakeGrContext(glContext.toDouble());
-      final SkSurface? surface = canvasKit.MakeRenderTarget(grContext!, 1, 1);
+    final int glContext = canvasKit.GetWebGLContext(
+      canvas,
+      SkWebGLContextOptions(antialias: 0, majorVersion: webGLVersion.toDouble()),
+    ).toInt();
+    final SkGrContext? grContext = canvasKit.MakeGrContext(glContext.toDouble());
+    final SkSurface? surface = canvasKit.MakeRenderTarget(grContext!, 1, 1);
 
-      expect(surface, isNotNull);
-    },
-    skip: isFirefox,
-  ); // Intended: Headless firefox has no webgl support https://github.com/flutter/flutter/issues/109265
+    expect(surface, isNotNull);
+  }, skip: isFirefox); // Intended: Headless firefox has no webgl support https://github.com/flutter/flutter/issues/109265
 
   group('getCanvasKitJsFileNames', () {
     JSAny? oldV8BreakIterator = v8BreakIterator;

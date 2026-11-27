@@ -40,9 +40,10 @@ class HomePage extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).push(
                   CupertinoSheetRoute<void>(
-                    scrollableBuilder:
-                        (BuildContext context, ScrollController controller) =>
-                            _ScrollableSheetBody(scrollController: controller),
+                    scrollableBuilder: (
+                      BuildContext context,
+                      ScrollController controller,
+                    ) => _ScrollableSheetBody(scrollController: controller),
                   ),
                 );
               },

@@ -73,7 +73,8 @@ void main() {
         parsed,
         rootDirectory: '/b/s/w/ir/x/w/flutter',
       );
-      final [LuciTestResult(testId: LuciStructuredTestId(:moduleName, :caseName))] = stripped;
+      final [LuciTestResult(testId: LuciStructuredTestId(:String moduleName, :String caseName))] =
+          stripped;
       expect(moduleName, 'dev/foo/bar_test.dart');
       expect(caseName, 'my test');
 
@@ -104,7 +105,7 @@ void main() {
         workingDirectory: '/b/s/w/ir/x/w/flutter/packages/flutter',
         rootDirectory: '/b/s/w/ir/x/w/flutter',
       );
-      final [LuciTestResult(testId: LuciStructuredTestId(:moduleName))] = results;
+      final [LuciTestResult(testId: LuciStructuredTestId(:String moduleName))] = results;
       expect(moduleName, 'packages/flutter/test/bar_test.dart');
     });
 
@@ -122,7 +123,7 @@ void main() {
       final List<LuciTestResult> results = convertToLuciTestResultsFormat(parsed);
       // The raw test name is `Group: sub\path does x`; ':' becomes '\:' and the
       // backslash becomes '\\'.
-      final [LuciTestResult(testId: LuciStructuredTestId(:caseName))] = results;
+      final [LuciTestResult(testId: LuciStructuredTestId(:String caseName))] = results;
       expect(caseName, r'Group\: sub\\path does x');
     });
 

@@ -96,13 +96,12 @@ class ArchiveCreator {
     required this.httpReader,
     required this.outputDir,
     required this.platform,
-    required ProcessRunner processRunner,
+    required this._processRunner,
     required this.revision,
     required this.strict,
     required this.tempDir,
     this.targetArch,
   }) : assert(revision.length == 40),
-       _processRunner = processRunner,
        _flutter = flutterExecutable,
        _dart = dartExecutable;
 
@@ -164,9 +163,12 @@ class ArchiveCreator {
 
   late final Future<String> _dartArch = (() async {
     // Parse 'arch' out of a string like '... "os_arch"\n'.
-    return (await _runDart(<String>[
-      '--version',
-    ])).trim().split(' ').last.replaceAll('"', '').split('_')[1];
+    return (await _runDart(<String>['--version']))
+        .trim()
+        .split(' ')
+        .last
+        .replaceAll('"', '')
+        .split('_')[1];
   })();
 
   /// Returns a default archive name when given a Git revision.
@@ -360,18 +362,16 @@ class ArchiveCreator {
             if (versions is! List) {
               throw const FormatException('.versions should be a list');
             }
-            final versionDescription =
-                versions.firstWhere(
-                      (dynamic description) {
-                        if (description is! Map) {
-                          throw const FormatException('.versions elements should be maps');
-                        }
-                        return description['version'] == version;
-                      },
-                      orElse: () =>
-                          throw FormatException('Could not find $name-$version in package listing'),
-                    )
-                    as Map<String, dynamic>;
+            final versionDescription = versions.firstWhere(
+              (dynamic description) {
+                if (description is! Map) {
+                  throw const FormatException('.versions elements should be maps');
+                }
+                return description['version'] == version;
+              },
+              orElse: () =>
+                  throw FormatException('Could not find $name-$version in package listing'),
+            ) as Map<String, dynamic>;
             final dynamic downloadUrl = versionDescription['archive_url'];
             if (downloadUrl is! String) {
               throw const FormatException('archive_url should be a string');

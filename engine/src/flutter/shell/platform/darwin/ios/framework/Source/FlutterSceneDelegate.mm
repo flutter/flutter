@@ -102,8 +102,27 @@ FLUTTER_ASSERT_ARC
                          completionHandler:completionHandler];
 }
 
+#pragma mark - Responding to geometry changes
+
+- (void)windowScene:(UIWindowScene*)windowScene
+    didUpdateEffectiveGeometry:(UIWindowSceneGeometry*)previousEffectiveGeometry
+    API_AVAILABLE(ios(26.0)) {
+  [self.sceneLifeCycleDelegate windowScene:windowScene
+                didUpdateEffectiveGeometry:previousEffectiveGeometry];
+}
+
 #pragma mark - Helpers
 
+- (BOOL)registerSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine scene:(UIScene*)scene {
+  return [self.sceneLifeCycleDelegate registerSceneLifeCycleWithFlutterEngine:engine scene:scene];
+}
+
+- (BOOL)unregisterSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine scene:(UIScene*)scene {
+  return [self.sceneLifeCycleDelegate unregisterSceneLifeCycleWithFlutterEngine:engine scene:scene];
+}
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 - (BOOL)registerSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine {
   return [self.sceneLifeCycleDelegate registerSceneLifeCycleWithFlutterEngine:engine];
 }
@@ -111,6 +130,7 @@ FLUTTER_ASSERT_ARC
 - (BOOL)unregisterSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine {
   return [self.sceneLifeCycleDelegate unregisterSceneLifeCycleWithFlutterEngine:engine];
 }
+#pragma GCC diagnostic pop
 
 - (void)moveRootViewControllerFrom:(NSObject<UIApplicationDelegate>*)appDelegate
                                 to:(UIWindowScene*)windowScene {

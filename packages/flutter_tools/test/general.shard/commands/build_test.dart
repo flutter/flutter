@@ -9,34 +9,37 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 
+import '../../src/android_common.dart';
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_build_command.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 
 void main() {
-  testUsingContext('Include only supported sub commands', () {
+  test('Include only supported sub commands', () {
     final logger = BufferLogger.test();
     final fs = MemoryFileSystem.test();
     final BuildCommand command = createFakeBuildCommand(
+      androidBuilder: FakeAndroidBuilder(),
       androidSdk: FakeAndroidSdk(),
+      artifacts: FakeArtifacts(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      cache: FakeCache(),
+      config: FakeConfig(),
+      featureFlags: TestFeatureFlags(),
       fileSystem: fs,
+      fileSystemUtils: FakeFileSystemUtils(),
+      flutterVersion: FakeFlutterVersion(),
       logger: logger,
       osUtils: FakeOperatingSystemUtils(),
-      config: FakeConfig(),
       platform: FakePlatform(),
-      fileSystemUtils: FakeFileSystemUtils(),
-      terminal: FakeTerminal(),
       plistParser: FakePlistParser(),
-      processUtils: FakeProcessUtils(),
       processManager: FakeProcessManager.any(),
+      processUtils: FakeProcessUtils(),
       templateRenderer: FakeTemplateRenderer(),
+      terminal: FakeTerminal(),
       xcode: FakeXcode(),
-      artifacts: FakeArtifacts(),
-      cache: FakeCache(),
-      flutterVersion: FakeFlutterVersion(),
     );
     for (final Command<void> x in command.subcommands.values) {
       expect((x as BuildSubCommand).supported, isTrue);

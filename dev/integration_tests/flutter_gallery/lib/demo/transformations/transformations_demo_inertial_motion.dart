@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math.dart' show Vector2;
 

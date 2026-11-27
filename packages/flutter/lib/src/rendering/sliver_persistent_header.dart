@@ -311,22 +311,24 @@ abstract class RenderSliverPersistentHeader extends RenderSliver
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null && geometry!.visible) {
-      offset += switch (applyGrowthDirectionToAxisDirection(
-        constraints.axisDirection,
-        constraints.growthDirection,
-      )) {
-        AxisDirection.up => Offset(
-          0.0,
-          geometry!.paintExtent - childMainAxisPosition(child!) - childExtent,
-        ),
-        AxisDirection.left => Offset(
-          geometry!.paintExtent - childMainAxisPosition(child!) - childExtent,
-          0.0,
-        ),
-        AxisDirection.right => Offset(childMainAxisPosition(child!), 0.0),
-        AxisDirection.down => Offset(0.0, childMainAxisPosition(child!)),
-      };
-      context.paintChild(child!, offset);
+      final Offset updatedOffset =
+          offset +
+          switch (applyGrowthDirectionToAxisDirection(
+            constraints.axisDirection,
+            constraints.growthDirection,
+          )) {
+            AxisDirection.up => Offset(
+              0.0,
+              geometry!.paintExtent - childMainAxisPosition(child!) - childExtent,
+            ),
+            AxisDirection.left => Offset(
+              geometry!.paintExtent - childMainAxisPosition(child!) - childExtent,
+              0.0,
+            ),
+            AxisDirection.right => Offset(childMainAxisPosition(child!), 0.0),
+            AxisDirection.down => Offset(0.0, childMainAxisPosition(child!)),
+          };
+      context.paintChild(child!, updatedOffset);
     }
   }
 
@@ -511,11 +513,11 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   /// direction.
   RenderSliverFloatingPersistentHeader({
     super.child,
-    TickerProvider? vsync,
+    this._vsync,
     this.snapConfiguration,
     super.stretchConfiguration,
     required this.showOnScreenConfiguration,
-  }) : _vsync = vsync;
+  });
 
   AnimationController? _controller;
   late Animation<double> _animation;

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:math';
+
 import 'package:file/file.dart';
 
 /// Performs a transactional update of a file in Google Cloud Storage.

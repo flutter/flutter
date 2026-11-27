@@ -7,10 +7,30 @@ library;
 
 import 'package:meta/meta.dart';
 
-import 'base/context.dart';
-
-/// The current [FeatureFlags] implementation.
-FeatureFlags get featureFlags => context.get<FeatureFlags>()!;
+/// All current Flutter feature flags.
+const allFlutterFeatures = <Feature>[
+  flutterWebFeature,
+  flutterLinuxDesktopFeature,
+  flutterMacOSDesktopFeature,
+  flutterWindowsDesktopFeature,
+  flutterAndroidFeature,
+  flutterIOSFeature,
+  flutterFuchsiaFeature,
+  flutterCustomDevicesFeature,
+  cliAnimation,
+  nativeAssets,
+  dartDataAssets,
+  recordUse,
+  swiftPackageManager,
+  omitLegacyVersionFile,
+  windowingFeature,
+  lldbDebugging,
+  uiSceneMigration,
+  riscv64,
+  macOSArm64Only,
+  hcpp,
+  toolExtensionsFeature,
+];
 
 /// The interface used to determine if a particular [Feature] is enabled.
 ///
@@ -73,9 +93,6 @@ abstract class FeatureFlags {
   /// Whether desktop windowing is enabled.
   bool get isWindowingEnabled;
 
-  /// Whether accessibility evaluations is enabled.
-  bool get isAccessibilityEvaluationsEnabled;
-
   /// Whether physical iOS devices are debugging with LLDB.
   bool get isLLDBDebuggingEnabled;
 
@@ -100,30 +117,7 @@ abstract class FeatureFlags {
   bool isEnabled(Feature feature);
 
   /// All current Flutter feature flags.
-  List<Feature> get allFeatures => const <Feature>[
-    flutterWebFeature,
-    flutterLinuxDesktopFeature,
-    flutterMacOSDesktopFeature,
-    flutterWindowsDesktopFeature,
-    flutterAndroidFeature,
-    flutterIOSFeature,
-    flutterFuchsiaFeature,
-    flutterCustomDevicesFeature,
-    cliAnimation,
-    nativeAssets,
-    dartDataAssets,
-    recordUse,
-    swiftPackageManager,
-    omitLegacyVersionFile,
-    windowingFeature,
-    accessibilityEvaluationsFeature,
-    lldbDebugging,
-    uiSceneMigration,
-    riscv64,
-    macOSArm64Only,
-    hcpp,
-    toolExtensionsFeature,
-  ];
+  List<Feature> get allFeatures => allFlutterFeatures;
 
   /// All current Flutter feature flags that can be configured.
   ///
@@ -142,7 +136,8 @@ abstract class FeatureFlags {
 /// All current Flutter feature flags that can be configured.
 ///
 /// [Feature.configSetting] is not `null`.
-Iterable<Feature> get allConfigurableFeatures => featureFlags.allConfigurableFeatures;
+Iterable<Feature> get allConfigurableFeatures =>
+    allFlutterFeatures.where((Feature feature) => feature.configSetting != null);
 
 /// The [Feature] for flutter web.
 const flutterWebFeature = Feature.fullyEnabled(
@@ -275,15 +270,6 @@ const windowingFeature = Feature(
   master: FeatureChannelSetting(available: true),
 );
 
-/// Whether accessibility evaluations is enabled.
-const accessibilityEvaluationsFeature = Feature(
-  name: 'support for accessibility evaluations',
-  configSetting: 'enable-accessibility-evaluations',
-  environmentOverride: 'FLUTTER_ACCESSIBILITY_EVALUATIONS',
-  runtimeId: 'accessibility_evaluations',
-  master: FeatureChannelSetting(available: true),
-);
-
 /// Enable LLDB debugging for physical iOS devices. When LLDB debugging is off,
 /// Xcode debugging is used instead.
 ///
@@ -358,6 +344,15 @@ const hcpp = Feature(
   beta: FeatureChannelSetting(available: true, enabledByDefault: true),
   stable: FeatureChannelSetting(available: true),
 );
+
+/// Environment variable that disables all tool extensions when set to `'1'`, `'true'`, or `'yes'`.
+const kFlutterNoExtensionsEnv = 'FLUTTER_NO_EXTENSIONS';
+
+/// Whether [environment] sets [kFlutterNoExtensionsEnv] to a truthy value (`1`, `true`, or `yes`).
+bool isSafeModeActive(Map<String, String> environment) {
+  final String? value = environment[kFlutterNoExtensionsEnv]?.trim().toLowerCase();
+  return value == '1' || value == 'true' || value == 'yes';
+}
 
 /// Enable tool extensions feature.
 const toolExtensionsFeature = Feature(

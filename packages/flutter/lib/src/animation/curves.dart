@@ -136,8 +136,8 @@ class SawTooth extends Curve {
 
   @override
   double transformInternal(double t) {
-    t *= count;
-    return t - t.truncateToDouble();
+    final double scaledT = t * count;
+    return scaledT - scaledT.truncateToDouble();
   }
 
   @override
@@ -742,8 +742,8 @@ class CatmullRomSpline extends Curve2D {
   CatmullRomSpline(
     List<Offset> controlPoints, {
     double tension = 0.0,
-    Offset? startHandle,
-    Offset? endHandle,
+    this._startHandle,
+    this._endHandle,
   }) : assert(tension <= 1.0, 'tension $tension must not be greater than 1.0.'),
        assert(tension >= 0.0, 'tension $tension must not be negative.'),
        assert(
@@ -751,8 +751,6 @@ class CatmullRomSpline extends Curve2D {
          'There must be at least four control points to create a CatmullRomSpline.',
        ),
        _controlPoints = controlPoints,
-       _startHandle = startHandle,
-       _endHandle = endHandle,
        _tension = tension,
        _cubicSegments = <List<Offset>>[];
 
@@ -1267,8 +1265,8 @@ class _DecelerateCurve extends Curve {
     // Intended to match the behavior of:
     // https://android.googlesource.com/platform/frameworks/base/+/main/core/java/android/view/animation/DecelerateInterpolator.java
     // ...as of December 2016.
-    t = 1.0 - t;
-    return 1.0 - t * t;
+    final double invertedT = 1.0 - t;
+    return 1.0 - invertedT * invertedT;
   }
 }
 
@@ -1348,8 +1346,8 @@ class ElasticInCurve extends Curve {
   @override
   double transformInternal(double t) {
     final double s = period / 4.0;
-    t = t - 1.0;
-    return -math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period);
+    final double shiftedT = t - 1.0;
+    return -math.pow(2.0, 10.0 * shiftedT) * math.sin((shiftedT - s) * (math.pi * 2.0) / period);
   }
 
   @override

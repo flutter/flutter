@@ -3,7 +3,7 @@ description: Protocol interfaces and base implementation for Flutter tools exten
 resolution: workspace
 
 environment:
-  sdk: ^3.11.0-0
+  sdk: ^3.13.0-0
 
 dependencies:
   meta: 1.19.0
