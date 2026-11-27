@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -198,4 +199,46 @@ void main() {
 
     recorder.endRecording();
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/197443.
+  for (final TextDirection textDirection in TextDirection.values) {
+    test('ShapedInputBorder does not paint inside the gap ($textDirection)', () async {
+      const inputBorder = ShapedInputBorder(
+        borderSide: BorderSide(width: 4.0),
+        shape: RoundedSuperellipseBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+      );
+      const width = 200;
+      const height = 60;
+      const gapExtent = 50.0;
+      // The label is between x = 40 and x = 90 in both directions.
+      final double gapStart = switch (textDirection) {
+        TextDirection.ltr => 40.0,
+        TextDirection.rtl => 90.0,
+      };
+
+      final recorder = PictureRecorder();
+      inputBorder.paint(
+        Canvas(recorder),
+        Rect.fromLTWH(0.0, 0.0, width.toDouble(), height.toDouble()),
+        gapStart: gapStart,
+        gapExtent: gapExtent,
+        gapPercentage: 1.0,
+        textDirection: textDirection,
+      );
+      final ByteData bytes = (await recorder
+          .endRecording()
+          .toImageSync(width, height)
+          .toByteData())!;
+      int alphaAt(int x, int y) => bytes.getUint8((y * width + x) * 4 + 3);
+
+      // Nothing is painted near the top edge behind the label.
+      for (var x = 40; x < 90; x++) {
+        for (var y = 0; y < 10; y++) {
+          expect(alphaAt(x, y), 0, reason: 'pixel at ($x, $y) should be empty');
+        }
+      }
+      // The top edge is still painted outside of the gap.
+      expect(alphaAt(120, 4), greaterThan(0));
+    });
+  }
 }
