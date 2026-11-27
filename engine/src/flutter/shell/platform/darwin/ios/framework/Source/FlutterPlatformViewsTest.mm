@@ -21,6 +21,8 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsTestHelper.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTouchInterceptingView+Test.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
+#import "flutter/shell/platform/darwin/ios/ios_external_view_embedder.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_layer_conversion.h"
 
 FLUTTER_ASSERT_ARC
@@ -5095,6 +5097,84 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   NSObject* container = [[NSObject alloc] init];
   [touchInterceptorView setFlutterAccessibilityContainer:container];
   XCTAssertEqualObjects([touchInterceptorView accessibilityContainer], container);
+}
+
+- (void)testSubmitFrameAddsAndRemovesOverlay {
+  // Create an IOSContext.
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
+  [engine run];
+  XCTAssertTrue(engine.platformView != nullptr);
+  auto ios_context = engine.platformView->GetIosContext();
+
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      CreateTestPlatformViewsController(self.name);
+  std::unique_ptr<flutter::ExternalViewEmbedder> embedder =
+      std::make_unique<flutter::IOSExternalViewEmbedder>(flutterPlatformViewsController,
+                                                         ios_context);
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id value) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @0,
+                                                       @"viewType" : @"MockFlutterPlatformView",
+                                                       @"gestureBlockingPolicy" : @"eager"
+                                                     }]
+            result:result];
+  // The overlay is created with the pixel format of the Flutter view, so this needs to be a
+  // FlutterView.
+  FlutterView* flutterView =
+      [[FlutterView alloc] initWithDelegate:(id<FlutterViewEngineDelegate>)engine
+                                     opaque:YES
+                            enableWideGamut:NO];
+  flutterView.frame = CGRectMake(0, 0, 500, 500);
+  flutterPlatformViewsController.flutterView = flutterView;
+
+  flutter::DlScalar screenScale = [UIScreen mainScreen].scale;
+  flutter::DlISize frameSize(500 * screenScale, 500 * screenScale);
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
+  flutter::DlMatrix translateMatrix = flutter::DlMatrix::MakeTranslation({10, 10});
+  flutter::MutatorsStack stack;
+  stack.PushTransform(screenScaleMatrix);
+  stack.PushTransform(translateMatrix);
+
+  // Submit a frame that paints a 30x30 point rect above the platform view.
+  embedder->PrepareFlutterView(frameSize, screenScale);
+  embedder->PrerollCompositeEmbeddedView(
+      0, std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix * translateMatrix,
+                                                       flutter::DlSize(100, 100), stack));
+  flutter::DlCanvas* canvas = embedder->CompositeEmbeddedView(0);
+  canvas->DrawRect(flutter::DlRect::MakeXYWH(20 * screenScale, 20 * screenScale, 30 * screenScale,
+                                             30 * screenScale),
+                   flutter::DlPaint(flutter::DlColor::kRed()));
+  embedder->SubmitFlutterView(flutter::kFlutterImplicitViewId, nullptr, nullptr,
+                              CreateTestSurfaceFrame());
+
+  // Verify an overlay that covers the rect was added above the platform view.
+  UIView* clippingView = FindTouchInterceptingView(gMockPlatformView).superview;
+  UIView* overlay = flutterView.subviews.lastObject;
+  XCTAssertEqual(flutterView.subviews.count, 2u);
+  XCTAssertEqual(flutterView.subviews.firstObject, clippingView);
+  XCTAssertEqualObjects(overlay.accessibilityIdentifier, @"platform_view[0].overlay[0]");
+  XCTAssertTrue(CGRectEqualToRect(overlay.frame, CGRectMake(20, 20, 30, 30)));
+
+  // Submit a frame that paints nothing above the platform view.
+  embedder->PrepareFlutterView(frameSize, screenScale);
+  embedder->PrerollCompositeEmbeddedView(
+      0, std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix * translateMatrix,
+                                                       flutter::DlSize(100, 100), stack));
+  embedder->SubmitFlutterView(flutter::kFlutterImplicitViewId, nullptr, nullptr,
+                              CreateTestSurfaceFrame());
+
+  // Verify the overlay was removed.
+  XCTAssertNil(overlay.superview);
+  XCTAssertEqualObjects(flutterView.subviews, @[ clippingView ]);
 }
 
 - (void)testLayerPool {
