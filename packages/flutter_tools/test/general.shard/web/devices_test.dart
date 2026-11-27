@@ -352,6 +352,12 @@ void main() {
           .directory(r'C:\Program Files\Google\Chrome\Application\131.0.6778.86')
           .createSync(recursive: true);
       fileSystem
+          .directory(r'C:\Program Files\Google\Chrome\Application\2026_backup')
+          .createSync(recursive: true);
+      fileSystem
+          .directory(r'C:\Program Files\Google\Chrome\Application\200.0.6778')
+          .createSync(recursive: true);
+      fileSystem
           .file(r'C:\Program Files\Microsoft\Edge\Application\msedge.exe')
           .createSync(recursive: true);
       fileSystem

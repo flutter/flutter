@@ -83,79 +83,54 @@ void main() {
     expect(await androidDevices.getDiagnostics(), isEmpty);
   });
 
-  test(
-    'AndroidDevices returns empty device list and provides diagnostics on failing adb',
-    () async {
-      final logger = BufferLogger.test();
-      final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <String>['adb', 'devices', '-l'],
-          exitCode: 1,
-          stderr: '<stderr from adb>',
-        ),
-        const FakeCommand(
-          command: <String>['adb', 'devices', '-l'],
-          exitCode: 1,
-          stderr: '<stderr from adb>',
-        ),
-      ]);
-      final androidDevices = AndroidDevices(
-        androidSdk: FakeAndroidSdk(),
-        logger: logger,
-        androidWorkflow: androidWorkflow,
-        processManager: processManager,
-        fileSystem: MemoryFileSystem.test(),
-        platform: FakePlatform(),
-        userMessages: UserMessages(),
-      );
+  for (final (description, command, expectedDetails) in const <(String, FakeCommand, String)>[
+    (
+      'on failing adb',
+      FakeCommand(
+        command: <String>['adb', 'devices', '-l'],
+        exitCode: 1,
+        stderr: '<stderr from adb>',
+      ),
+      'Process exited abnormally with exit code 1:\n<stderr from adb>',
+    ),
+    (
+      'when adb fails to start',
+      FakeCommand(
+        command: <String>['adb', 'devices', '-l'],
+        exception: ProcessException('adb', <String>['devices', '-l'], 'Failed to start adb.'),
+      ),
+      'Failed to start adb.',
+    ),
+  ]) {
+    test(
+      'AndroidDevices returns empty device list and provides diagnostics $description',
+      () async {
+        final logger = BufferLogger.test();
+        final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          command,
+          command,
+        ]);
+        final androidDevices = AndroidDevices(
+          androidSdk: FakeAndroidSdk(),
+          logger: logger,
+          androidWorkflow: androidWorkflow,
+          processManager: processManager,
+          fileSystem: MemoryFileSystem.test(),
+          platform: FakePlatform(),
+          userMessages: UserMessages(),
+        );
 
-      const expectedDiagnostic =
-          'Unable to run "adb", check your Android SDK installation and ANDROID_HOME environment variable: adb\n'
-          'Error details: Process exited abnormally with exit code 1:\n'
-          '<stderr from adb>';
+        final expectedDiagnostic =
+            'Unable to run "adb", check your Android SDK installation and ANDROID_HOME environment variable: adb\n'
+            'Error details: $expectedDetails';
 
-      expect(await androidDevices.pollingGetDevices(), isEmpty);
-      expect(logger.traceText, contains(expectedDiagnostic));
-
-      expect(await androidDevices.getDiagnostics(), const <String>[expectedDiagnostic]);
-      expect(processManager, hasNoRemainingExpectations);
-    },
-  );
-
-  test(
-    'AndroidDevices returns empty device list and provides diagnostics when adb fails to start',
-    () async {
-      final logger = BufferLogger.test();
-      final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <String>['adb', 'devices', '-l'],
-          exception: ProcessException('adb', <String>['devices', '-l'], 'Failed to start adb.'),
-        ),
-        const FakeCommand(
-          command: <String>['adb', 'devices', '-l'],
-          exception: ProcessException('adb', <String>['devices', '-l'], 'Failed to start adb.'),
-        ),
-      ]);
-      final androidDevices = AndroidDevices(
-        androidSdk: FakeAndroidSdk(),
-        logger: logger,
-        androidWorkflow: androidWorkflow,
-        processManager: processManager,
-        fileSystem: MemoryFileSystem.test(),
-        platform: FakePlatform(),
-        userMessages: UserMessages(),
-      );
-
-      const expectedDiagnostic =
-          'Unable to run "adb", check your Android SDK installation and ANDROID_HOME environment variable: adb\n'
-          'Error details: Failed to start adb.';
-
-      expect(await androidDevices.pollingGetDevices(), isEmpty);
-      expect(logger.traceText, contains(expectedDiagnostic));
-      expect(await androidDevices.getDiagnostics(), const <String>[expectedDiagnostic]);
-      expect(processManager, hasNoRemainingExpectations);
-    },
-  );
+        expect(await androidDevices.pollingGetDevices(), isEmpty);
+        expect(logger.traceText, contains(expectedDiagnostic));
+        expect(await androidDevices.getDiagnostics(), <String>[expectedDiagnostic]);
+        expect(processManager, hasNoRemainingExpectations);
+      },
+    );
+  }
 
   test('AndroidDevices is disabled if feature is disabled', () {
     final androidDevices = AndroidDevices(

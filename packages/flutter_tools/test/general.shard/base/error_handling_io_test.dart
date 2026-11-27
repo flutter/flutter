@@ -1627,20 +1627,16 @@ Please ensure that the SDK and/or project is installed in a location that has re
       ('paging file too small', kPagingFileTooSmall),
     ]) {
       test('when $name ($errorCode)', () async {
-        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-          FakeCommand(
-            command: const <String>['foo'],
-            exception: ProcessException('foo', const <String>[], 'Low memory', errorCode),
+        final fakeProcessManager = FakeProcessManager.list(
+          List<FakeCommand>.filled(
+            3,
+            FakeCommand(
+              command: const <String>['foo'],
+              exception: ProcessException('foo', const <String>[], 'Low memory', errorCode),
+            ),
+            growable: true,
           ),
-          FakeCommand(
-            command: const <String>['foo'],
-            exception: ProcessException('foo', const <String>[], 'Low memory', errorCode),
-          ),
-          FakeCommand(
-            command: const <String>['foo'],
-            exception: ProcessException('foo', const <String>[], 'Low memory', errorCode),
-          ),
-        ]);
+        );
 
         final ProcessManager processManager = createProcessManager(
           delegate: fakeProcessManager,

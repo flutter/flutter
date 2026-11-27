@@ -188,6 +188,8 @@ abstract class ChromiumDevice extends WebDevice {
     await Future.wait(<Future<void>>[?_logReader?.dispose(), ?portForwarder?.dispose()]);
   }
 
+  static final _windowsVersionDirectoryPattern = RegExp(r'^\d+\.\d+\.\d+\.\d+$');
+
   /// Attempts to read the Chromium browser version from the versioned
   /// subdirectory alongside the browser executable on Windows
   /// (e.g. `...\Application\131.0.2903.70\`), avoiding spawning `reg.exe`.
@@ -196,38 +198,33 @@ abstract class ChromiumDevice extends WebDevice {
     if (!applicationDir.existsSync()) {
       return null;
     }
-    String? highestVersionString;
+    String? highestVersion;
+    List<int>? highestParts;
     for (final FileSystemEntity entity in applicationDir.listSync()) {
-      if (entity is Directory) {
-        final String basename = _fileSystem.path.basename(entity.path);
-        if (Version.parse(basename) != null &&
-            (highestVersionString == null ||
-                _compareVersionStrings(basename, highestVersionString) > 0)) {
-          highestVersionString = basename;
-        }
+      if (entity is! Directory) {
+        continue;
+      }
+      final String basename = _fileSystem.path.basename(entity.path);
+      if (!_windowsVersionDirectoryPattern.hasMatch(basename)) {
+        continue;
+      }
+      final List<int> parts = basename.split('.').map(int.parse).toList();
+      if (highestParts == null || _compareVersionParts(parts, highestParts) > 0) {
+        highestVersion = basename;
+        highestParts = parts;
       }
     }
-    return highestVersionString;
+    return highestVersion;
   }
 
-  // [Version] only compares `major.minor.patch`, whereas Chromium version
-  // directories have 4 components (`<major>.<minor>.<build>.<patch>`).
-  static int _compareVersionStrings(String a, String b) {
-    final List<int?> aParts = a.split('.').map(int.tryParse).toList();
-    final List<int?> bParts = b.split('.').map(int.tryParse).toList();
-    final int length = aParts.length < bParts.length ? aParts.length : bParts.length;
-    for (var i = 0; i < length; i++) {
-      final int? aPart = aParts[i];
-      final int? bPart = bParts[i];
-      if (aPart == null || bPart == null) {
-        return a.compareTo(b);
-      }
-      final int comparison = aPart.compareTo(bPart);
+  static int _compareVersionParts(List<int> a, List<int> b) {
+    for (var i = 0; i < a.length; i++) {
+      final int comparison = a[i].compareTo(b[i]);
       if (comparison != 0) {
         return comparison;
       }
     }
-    return aParts.length.compareTo(bParts.length);
+    return 0;
   }
 }
 
@@ -417,10 +414,7 @@ class WebDevices extends PollingDeviceDiscovery {
     return <Device>[
       if (WebServerDevice.showWebServerDevice) _webServerDevice,
       if (await _chromeDevice.isSupported()) _chromeDevice,
-      if (edgeDevice != null &&
-          await edgeDevice.isSupported() &&
-          await edgeDevice._meetsVersionConstraint())
-        edgeDevice,
+      if (edgeDevice != null && await edgeDevice._meetsVersionConstraint()) edgeDevice,
     ];
   }
 
