@@ -163,6 +163,8 @@ void main() {
     const kPrivilegeNotHeld = 1314;
     const kFatalDeviceHardwareError = 483;
     const kDeviceDoesNotExist = 433;
+    const kInvalidReparseData = 4392;
+    const kReparseTagInvalid = 4393;
 
     late FileExceptionHandler exceptionHandler;
 
@@ -476,6 +478,35 @@ void main() {
       expect(() => file.openSync(), throwsToolExit(message: expectedMessage));
       expect(() => file.createSync(), throwsToolExit(message: expectedMessage));
     });
+
+    for (final (name, errorCode) in const <(String, int)>[
+      ('invalid reparse data', kInvalidReparseData),
+      ('invalid reparse tag', kReparseTagInvalid),
+    ]) {
+      test('when encountering $name ($errorCode)', () async {
+        final fileSystem = ErrorHandlingFileSystem(
+          delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+          platform: windowsPlatform,
+        );
+        final File file = fileSystem.file('file');
+
+        exceptionHandler
+          ..addError(
+            file,
+            FileSystemOp.read,
+            FileSystemException('', file.path, OSError('', errorCode)),
+          )
+          ..addError(
+            file,
+            FileSystemOp.write,
+            FileSystemException('', file.path, OSError('', errorCode)),
+          );
+
+        const expectedMessage = 'The file or directory contains an invalid NTFS reparse point';
+        await expectLater(() => file.writeAsString(''), throwsToolExit(message: expectedMessage));
+        expect(() => file.readAsStringSync(), throwsToolExit(message: expectedMessage));
+      });
+    }
   });
 
   group('throws ToolExit on Linux', () {
