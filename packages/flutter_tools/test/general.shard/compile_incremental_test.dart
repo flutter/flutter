@@ -413,9 +413,9 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/197236.
-  test(
-    'incremental compile does not crash when writing to the stdin of an exited frontend server',
-    () async {
+  for (final nativeAssetsYaml in <Uri?>[null, Uri.parse('file:///build/native_assets.yaml')]) {
+    test('incremental compile does not crash when writing to the stdin of an exited frontend server'
+        '${nativeAssetsYaml != null ? ' with native assets' : ''}', () async {
       // Collect every uncaught error, not only the first one. The stdin sink
       // is created in this zone so that its write errors are reported here.
       final errors = <Object>[];
@@ -424,32 +424,41 @@ void main() {
         runZonedGuarded(() async {
           fakeProcessManager.addCommand(
             FakeCommand(
-              command: const <String>[
+              command: <String>[
                 ...frontendServerCommand,
                 '--initialize-from-dill',
                 expectedCachePath,
+                if (nativeAssetsYaml != null) ...<String>[
+                  '--native-assets',
+                  nativeAssetsYaml.toString(),
+                ],
                 '--verbosity=error',
               ],
-              stdin: IOSink(_BrokenPipeStreamConsumer()),
+              stdin: IOSink(ClosedStdinController()),
               exitCode: 1,
             ),
           );
-          await generator.recompile(
-            Uri.parse('/path/to/main.dart'),
-            null,
-            /* invalidatedFiles */
-            outputPath: '/build/',
-            packageConfig: PackageConfig.empty,
-            fs: MemoryFileSystem.test(),
-            projectRootPath: '',
-          );
-          compileDone.complete();
+          try {
+            await generator.recompile(
+              Uri.parse('/path/to/main.dart'),
+              null,
+              /* invalidatedFiles */
+              outputPath: '/build/',
+              packageConfig: PackageConfig.empty,
+              fs: MemoryFileSystem.test(),
+              projectRootPath: '',
+              nativeAssetsYaml: nativeAssetsYaml,
+            );
+          } finally {
+            compileDone.complete();
+          }
         }, (Object error, StackTrace stackTrace) => errors.add(error)),
       );
       await compileDone.future;
       await pumpEventQueue();
 
       expect(errors, isNot(contains(isA<SocketException>())));
+      expect(errors, isNot(contains(isA<StateError>())));
       expect(
         errors,
         contains(
@@ -460,12 +469,16 @@ void main() {
           ),
         ),
       );
+      // Only the first write is attempted, and it is not logged as sent.
       expect(
-        testLogger.traceText,
-        contains('Failed to write to the frontend server: SocketException'),
+        'Failed to write to the frontend server: SocketException'.allMatches(testLogger.traceText),
+        hasLength(1),
       );
-    },
-  );
+      expect(testLogger.traceText, isNot(contains('<- native-assets')));
+      expect(testLogger.traceText, isNot(contains('<- compile')));
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+  }
 
   test('incremental compile and recompile', () async {
     final completer = Completer<void>();
@@ -952,17 +965,4 @@ Future<void> _reject(
   final String commands = frontendServerStdIn.getAndClear();
   final re = RegExp(expected);
   expect(commands, matches(re));
-}
-
-/// A [StreamConsumer] that fails every write like a pipe whose reader has exited.
-class _BrokenPipeStreamConsumer implements StreamConsumer<List<int>> {
-  @override
-  Future<void> addStream(Stream<List<int>> stream) async {
-    await for (final _ in stream) {
-      throw const SocketException('Write failed', osError: OSError('Broken pipe', 32));
-    }
-  }
-
-  @override
-  Future<void> close() async {}
 }

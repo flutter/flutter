@@ -1015,7 +1015,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
       ...?_filterExtraFrontEndOptions(extraFrontEndOptions),
     ];
     _logger.printTrace(command.join(' '));
-    _server = await _processManager.start(command);
+    final Process server = await _processManager.start(command);
+    _server = server;
     _server?.stdout
         .transform(utf8LineDecoder)
         .listen(
@@ -1045,33 +1046,39 @@ class DefaultResidentCompiler implements ResidentCompiler {
     );
 
     if (nativeAssetsUri != null && nativeAssetsUri.isNotEmpty) {
-      await _writelnToServerStdin('native-assets $nativeAssetsUri');
+      if (!await _writelnToServerStdin(server.stdin, 'native-assets $nativeAssetsUri')) {
+        return _stdoutHandler.compilerOutput?.future;
+      }
     }
 
-    await _writelnToServerStdin('compile $scriptUri');
+    await _writelnToServerStdin(server.stdin, 'compile $scriptUri');
 
     return _stdoutHandler.compilerOutput?.future;
   }
 
-  /// Writes [line] to the stdin of the frontend server process.
+  /// Writes [line] to [stdin], the stdin of the frontend server process.
   ///
   /// If the frontend server exits right after starting, writing to its stdin
   /// fails, for example with a "Broken pipe" [SocketException]. The listeners
   /// on its stdout and exit code already report that failure, so the write
   /// error is only logged.
-  Future<void> _writelnToServerStdin(String line) async {
-    final Process? server = _server;
-    if (server == null) {
-      return;
-    }
+  ///
+  /// Returns whether the write succeeded. After a failed write, [stdin] must
+  /// not be written to again.
+  Future<bool> _writelnToServerStdin(IOSink stdin, String line) async {
+    var succeeded = true;
     await ProcessUtils.writelnToStdinGuarded(
-      stdin: server.stdin,
+      stdin: stdin,
       line: line,
-      onError: (Object error, StackTrace stackTrace) {
+      onError: (Object error, _) {
+        succeeded = false;
         _logger.printTrace('Failed to write to the frontend server: $error');
       },
     );
-    _logger.printTrace('<- $line');
+    if (succeeded) {
+      _logger.printTrace('<- $line');
+    }
+    return succeeded;
   }
 
   @override
