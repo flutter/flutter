@@ -923,6 +923,7 @@ class EditableText extends StatefulWidget {
     )
     ToolbarOptions? toolbarOptions,
     this.autofillHints = const <String>[],
+    this.autofillHintText,
     this.autofillClient,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
@@ -1942,10 +1943,38 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.AutofillConfiguration.autofillHints}
   final Iterable<String>? autofillHints;
 
+  /// Optional text describing the expected input for this text field, sent to
+  /// the platform's autofill service as a hint, for example
+  /// `"Enter your password"`.
+  ///
+  /// This text is not rendered visually by [EditableText]. It is passed to
+  /// [AutofillConfiguration.hintText] to help platform autofill services (such
+  /// as Android's autofill framework or browser autofill heuristics on web)
+  /// identify the expected content type of this field, particularly when
+  /// [autofillHints] is empty.
+  ///
+  /// When [autofillHints] is `null`, autofill is disabled for this field and
+  /// this property is ignored.
+  ///
+  /// If a custom [autofillClient] is provided, it may override this property.
+  ///
+  /// Defaults to `null`.
+  ///
+  /// See also:
+  ///
+  ///  * [AutofillConfiguration.hintText], which receives the value of this
+  ///    property.
+  ///  * [autofillHints], which is the list of hints that identifies the type
+  ///    of this field to the autofill service.
+  ///  * [AutofillHints], which contains commonly used values for
+  ///    [autofillHints].
+  final String? autofillHintText;
+
   /// The [AutofillClient] that controls this input field's autofill behavior.
   ///
   /// When null, this widget's [EditableTextState] will be used as the
-  /// [AutofillClient]. This property may override [autofillHints].
+  /// [AutofillClient]. This property may override [autofillHints] and
+  /// [autofillHintText].
   final AutofillClient? autofillClient;
 
   /// {@macro flutter.material.Material.clipBehavior}
@@ -2478,6 +2507,7 @@ class EditableText extends StatefulWidget {
     properties.add(
       DiagnosticsProperty<Iterable<String>>('autofillHints', autofillHints, defaultValue: null),
     );
+    properties.add(StringProperty('autofillHintText', autofillHintText, defaultValue: null));
     properties.add(
       DiagnosticsProperty<TextHeightBehavior>(
         'textHeightBehavior',
@@ -5423,6 +5453,7 @@ class EditableTextState extends State<EditableText>
             uniqueIdentifier: autofillId,
             autofillHints: autofillHints,
             currentEditingValue: currentTextEditingValue,
+            hintText: widget.autofillHintText,
           )
         : AutofillConfiguration.disabled;
 

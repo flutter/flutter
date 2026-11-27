@@ -682,6 +682,7 @@ void main() {
     expect(editableText.cursorHeight, isNull);
     expect(editableText.textHeightBehavior, isNull);
     expect(editableText.hintLocales, isNull);
+    expect(editableText.autofillHintText, isNull);
   });
 
   testWidgets('when backgroundCursorColor is updated, RenderEditable should be updated', (
@@ -19230,6 +19231,188 @@ void main() {
     // [intended] only applies to platforms where we supply the context menu.
     skip: kIsWeb,
   );
+
+  group('autofillHintText', () {
+    testWidgets('sends autofillHintText in AutofillConfiguration when set', (
+      WidgetTester tester,
+    ) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Center(
+            child: EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              backgroundCursorColor: const Color(0xFF000000),
+              autofillHintText: 'Enter your email',
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(EditableText));
+      await tester.pump();
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.textInputConfiguration.autofillConfiguration.enabled, isTrue);
+      expect(state.textInputConfiguration.autofillConfiguration.hintText, 'Enter your email');
+      expect(
+        tester.testTextInput.setClientArgs?['autofill'],
+        containsPair('hintText', 'Enter your email'),
+      );
+    });
+
+    testWidgets('ignores autofillHintText when autofillHints is null', (WidgetTester tester) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Center(
+            child: EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              backgroundCursorColor: const Color(0xFF000000),
+              autofillHints: null,
+              autofillHintText: 'Enter your email',
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(EditableText));
+      await tester.pump();
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.textInputConfiguration.autofillConfiguration, AutofillConfiguration.disabled);
+      expect(tester.testTextInput.setClientArgs?['autofill'], isNull);
+    });
+
+    testWidgets('updates autofillHintText when widget rebuilds and refocuses', (
+      WidgetTester tester,
+    ) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      Widget buildApp(String? hintText) {
+        return TestWidgetsApp(
+          home: Center(
+            child: EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              backgroundCursorColor: const Color(0xFF000000),
+              autofillHintText: hintText,
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp('Email'));
+      await tester.tap(find.byType(EditableText));
+      await tester.pump();
+      expect(tester.testTextInput.setClientArgs?['autofill'], containsPair('hintText', 'Email'));
+
+      focusNode.unfocus();
+      await tester.pump();
+
+      await tester.pumpWidget(buildApp('Phone number'));
+      await tester.tap(find.byType(EditableText));
+      await tester.pump();
+      expect(
+        tester.testTextInput.setClientArgs?['autofill'],
+        containsPair('hintText', 'Phone number'),
+      );
+    });
+
+    testWidgets('custom autofillClient overrides autofillHintText', (WidgetTester tester) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final editableTextKey = GlobalKey<EditableTextState>();
+      final customClient = _TestHintAutofillClient(
+        editableTextKey: editableTextKey,
+        overrideHintText: 'Custom client hint',
+      );
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Center(
+            child: EditableText(
+              key: editableTextKey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              backgroundCursorColor: const Color(0xFF000000),
+              autofillHintText: 'Ignored hint',
+              autofillClient: customClient,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(EditableText));
+      await tester.pump();
+
+      expect(
+        tester.testTextInput.setClientArgs?['autofill'],
+        containsPair('hintText', 'Custom client hint'),
+      );
+    });
+
+    testWidgets('debugFillProperties includes autofillHintText', (WidgetTester tester) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      final defaultBuilder = DiagnosticPropertiesBuilder();
+      EditableText(
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+        backgroundCursorColor: const Color(0xFF000000),
+      ).debugFillProperties(defaultBuilder);
+      expect(
+        defaultBuilder.properties
+            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+            .map((DiagnosticsNode node) => node.name),
+        isNot(contains('autofillHintText')),
+      );
+
+      final customBuilder = DiagnosticPropertiesBuilder();
+      EditableText(
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+        backgroundCursorColor: const Color(0xFF000000),
+        autofillHintText: 'Enter your email',
+      ).debugFillProperties(customBuilder);
+      expect(
+        customBuilder.properties
+            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+            .map((DiagnosticsNode node) => node.toString()),
+        contains('autofillHintText: "Enter your email"'),
+      );
+    });
+  });
 }
 
 class UnsettableController extends TextEditingController {
@@ -19708,6 +19891,34 @@ class _EditableTextStatefulMenuState extends State<_EditableTextStatefulMenu> {
     return Text(
       'Initial: $initialValue, Current: ${widget.value}',
       textDirection: TextDirection.ltr,
+    );
+  }
+}
+
+class _TestHintAutofillClient implements AutofillClient {
+  _TestHintAutofillClient({required this.editableTextKey, required this.overrideHintText});
+
+  final GlobalKey<EditableTextState> editableTextKey;
+  final String overrideHintText;
+
+  @override
+  String get autofillId => editableTextKey.currentState!.autofillId;
+
+  @override
+  void autofill(TextEditingValue newEditingValue) {
+    editableTextKey.currentState!.autofill(newEditingValue);
+  }
+
+  @override
+  TextInputConfiguration get textInputConfiguration {
+    final EditableTextState state = editableTextKey.currentState!;
+    return state.textInputConfiguration.copyWith(
+      autofillConfiguration: AutofillConfiguration(
+        uniqueIdentifier: autofillId,
+        autofillHints: const <String>[],
+        currentEditingValue: state.currentTextEditingValue,
+        hintText: overrideHintText,
+      ),
     );
   }
 }
