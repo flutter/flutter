@@ -743,6 +743,7 @@ void main() {
       },
       inputs: <String, String>{},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
