@@ -874,7 +874,7 @@ void main() {
     const target = UnpackMacOSVmService();
     const vmServiceArtifact = 'Artifact.vmserviceFramework.TargetPlatform.darwin.profile';
 
-    test('declares expected inputs, outputs, and skips SwiftPM', () async {
+    test('declares expected inputs, outputs, and does not skip SwiftPM', () async {
       expect(target.inputs, const <Source>[
         Source.artifact(Artifact.vmserviceFramework, platform: .darwin, mode: .profile),
       ]);
@@ -899,7 +899,8 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
       );
-      expect(await target.canSkip(swiftPmEnvironment), isTrue);
+      expect(await target.canSkip(swiftPmEnvironment), isFalse);
+      expect(await const ProfileUnpackMacOS().canSkip(swiftPmEnvironment), isTrue);
     });
 
     test('copies, updates permissions, and thins fat framework', () async {

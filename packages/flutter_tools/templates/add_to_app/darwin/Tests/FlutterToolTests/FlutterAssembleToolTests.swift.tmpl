@@ -226,6 +226,527 @@ func runWithAssemble(
   )
 }
 
+@Test(
+  arguments: [
+    (FlutterPlatform.ios, "iphoneos26.2"),
+    (FlutterPlatform.ios, "iphonesimulator26.2"),
+    (FlutterPlatform.macos, "macosx26.2"),
+  ]
+)
+func runVerifyBuildModeAndUpdateIfNeededCopiesVMServiceInProfileMode(
+  targetPlatform: FlutterPlatform,
+  sdkRoot: String
+) async throws {
+  let fixture = VMServiceTestFixture(
+    targetPlatform: targetPlatform,
+    sdkRoot: sdkRoot,
+    targetBuildMode: "Profile"
+  )
+  fixture.configurePackageFrameworks(includeVmService: true)
+  fixture.setInfoPlists(
+    builtProductsModes: ["Release", fixture.expectedFlutterBuildMode],
+    embeddedModes: [fixture.expectedFlutterBuildMode]
+  )
+  fixture.expectFrameworkRsyncs(includeVmService: true)
+
+  try FlutterAssembleToolHelper.run(
+    targetBuildMode: fixture.targetBuildMode,
+    targetPlatform: targetPlatform,
+    env: fixture.env(),
+    fileManager: fixture.fileManager,
+    processManager: fixture.processManager
+  )
+  #expect(fixture.processManager.expectedProcesses.isEmpty)
+  #expect(fixture.fileManager.filesExist[fixture.embeddedVmServicePath] == true)
+  #expect(fixture.fileManager.filesRemoved.isEmpty)
+}
+
+@Test func runInSandboxSucceedsInProfileModeWhenBuildModeMatches() async throws {
+  let fixture = VMServiceTestFixture(
+    targetPlatform: .ios,
+    sdkRoot: "iphoneos26.2",
+    targetBuildMode: "Profile"
+  )
+  fixture.setInfoPlists(builtProductsModes: ["Profile"], embeddedModes: ["Profile"])
+  fixture.fileManager.filesExist[fixture.embeddedVmServicePath] = true
+
+  try FlutterAssembleToolHelper.runInSandbox(
+    appPath: nil,
+    packagePath: fixture.packagePath,
+    targetBuildMode: fixture.targetBuildMode,
+    targetPlatform: fixture.targetPlatform,
+    env: fixture.env(sandboxing: "YES"),
+    fileManager: fixture.fileManager
+  )
+  #expect(fixture.fileManager.filesExist[fixture.embeddedVmServicePath] == true)
+  #expect(fixture.fileManager.filesRemoved.isEmpty)
+  #expect(fixture.fileManager.symlinksCreated.isEmpty)
+}
+
+@Test(
+  arguments: [
+    (FlutterPlatform.ios, "iphoneos26.2"),
+    (FlutterPlatform.ios, "iphonesimulator26.2"),
+    (FlutterPlatform.macos, "macosx26.2"),
+  ]
+)
+func runVerifyBuildModeAndUpdateIfNeededNoOpInProfileModeWhenVMServiceAlreadyEmbedded(
+  targetPlatform: FlutterPlatform,
+  sdkRoot: String
+) async throws {
+  let fixture = VMServiceTestFixture(
+    targetPlatform: targetPlatform,
+    sdkRoot: sdkRoot,
+    targetBuildMode: "Profile"
+  )
+  fixture.fileManager.filesExist[fixture.embeddedVmServicePath] = true
+  fixture.setInfoPlists(
+    builtProductsModes: [fixture.expectedFlutterBuildMode],
+    embeddedModes: [fixture.expectedFlutterBuildMode]
+  )
+
+  try FlutterAssembleToolHelper.run(
+    targetBuildMode: fixture.targetBuildMode,
+    targetPlatform: targetPlatform,
+    env: fixture.env(),
+    fileManager: fixture.fileManager,
+    processManager: fixture.processManager
+  )
+  #expect(fixture.processManager.expectedProcesses.isEmpty)
+  #expect(fixture.fileManager.filesExist[fixture.embeddedVmServicePath] == true)
+  #expect(fixture.fileManager.filesRemoved.isEmpty)
+  #expect(fixture.fileManager.symlinksCreated.isEmpty)
+}
+
+@Test(
+  arguments: [
+    (FlutterPlatform.ios, "iphoneos26.2"),
+    (FlutterPlatform.ios, "iphonesimulator26.2"),
+    (FlutterPlatform.macos, "macosx26.2"),
+  ]
+)
+func runVerifyBuildModeAndUpdateIfNeededEmbedsMissingVMServiceWhenFlutterBuildModeAlreadyMatches(
+  targetPlatform: FlutterPlatform,
+  sdkRoot: String
+) async throws {
+  let fixture = VMServiceTestFixture(
+    targetPlatform: targetPlatform,
+    sdkRoot: sdkRoot,
+    targetBuildMode: "Profile"
+  )
+  fixture.configurePackageFrameworks(includeVmService: true)
+  fixture.setInfoPlists(
+    builtProductsModes: [fixture.expectedFlutterBuildMode],
+    embeddedModes: [fixture.expectedFlutterBuildMode, fixture.expectedFlutterBuildMode]
+  )
+  fixture.expectFrameworkRsyncs(includeVmService: true)
+
+  try FlutterAssembleToolHelper.run(
+    targetBuildMode: fixture.targetBuildMode,
+    targetPlatform: targetPlatform,
+    env: fixture.env(),
+    fileManager: fixture.fileManager,
+    processManager: fixture.processManager
+  )
+  #expect(fixture.processManager.expectedProcesses.isEmpty)
+  #expect(fixture.fileManager.filesExist[fixture.embeddedVmServicePath] == true)
+  #expect(fixture.fileManager.filesRemoved.isEmpty)
+}
+
+@Test(
+  arguments: [
+    (FlutterPlatform.ios, "iphoneos26.2"),
+    (FlutterPlatform.macos, "macosx26.2"),
+  ]
+)
+func runVerifyBuildModeAndUpdateIfNeededRemovesStaleVMServiceFramework(
+  targetPlatform: FlutterPlatform,
+  sdkRoot: String
+) async throws {
+  let fixture = VMServiceTestFixture(
+    targetPlatform: targetPlatform,
+    sdkRoot: sdkRoot,
+    targetBuildMode: "Release"
+  )
+  fixture.configurePackageFrameworks(includeVmService: false)
+  fixture.fileManager.filesExist[fixture.embeddedVmServicePath] = true
+  fixture.setInfoPlists(
+    builtProductsModes: ["Profile", "Release"],
+    embeddedModes: ["Release"]
+  )
+  fixture.expectFrameworkRsyncs(includeVmService: false)
+
+  try FlutterAssembleToolHelper.run(
+    targetBuildMode: fixture.targetBuildMode,
+    targetPlatform: targetPlatform,
+    env: fixture.env(),
+    fileManager: fixture.fileManager,
+    processManager: fixture.processManager
+  )
+  #expect(fixture.processManager.expectedProcesses.isEmpty)
+  #expect(fixture.fileManager.filesRemoved == [fixture.embeddedVmServicePath])
+  #expect(fixture.fileManager.filesExist[fixture.embeddedVmServicePath] == false)
+}
+
+@Test(
+  arguments: [
+    (FlutterPlatform.ios, "iphoneos26.2", "Debug"),
+    (FlutterPlatform.ios, "iphonesimulator26.2", "Debug"),
+    (FlutterPlatform.ios, "iphoneos26.2", "Release"),
+    (FlutterPlatform.macos, "macosx26.2", "Release"),
+  ]
+)
+func runVerifyBuildModeAndUpdateIfNeededRemovesStaleVMServiceWhenFlutterBuildModeAlreadyMatches(
+  targetPlatform: FlutterPlatform,
+  sdkRoot: String,
+  targetBuildMode: String
+) async throws {
+  let fixture = VMServiceTestFixture(
+    targetPlatform: targetPlatform,
+    sdkRoot: sdkRoot,
+    targetBuildMode: targetBuildMode
+  )
+  fixture.configurePackageFrameworks(includeVmService: false)
+  fixture.fileManager.filesExist[fixture.embeddedVmServicePath] = true
+  fixture.setInfoPlists(
+    builtProductsModes: [fixture.expectedFlutterBuildMode],
+    embeddedModes: [fixture.expectedFlutterBuildMode, fixture.expectedFlutterBuildMode]
+  )
+  fixture.expectFrameworkRsyncs(includeVmService: false)
+
+  try FlutterAssembleToolHelper.run(
+    targetBuildMode: targetBuildMode,
+    targetPlatform: targetPlatform,
+    env: fixture.env(),
+    fileManager: fixture.fileManager,
+    processManager: fixture.processManager
+  )
+  #expect(fixture.processManager.expectedProcesses.isEmpty)
+  #expect(fixture.fileManager.filesRemoved == [fixture.embeddedVmServicePath])
+  #expect(fixture.fileManager.filesExist[fixture.embeddedVmServicePath] == false)
+}
+
+@Test(
+  arguments: [
+    (FlutterPlatform.ios, "iphoneos26.2"),
+    (FlutterPlatform.macos, "macosx26.2"),
+  ]
+)
+func runVerifyBuildModeAndUpdateIfNeededFailsWhenVMServiceXCFrameworkMissingInProfileMode(
+  targetPlatform: FlutterPlatform,
+  sdkRoot: String
+) async throws {
+  let fixture = VMServiceTestFixture(
+    targetPlatform: targetPlatform,
+    sdkRoot: sdkRoot,
+    targetBuildMode: "Profile"
+  )
+  fixture.configurePackageFrameworks(includeVmService: false)
+  fixture.fileManager.filesExist[fixture.embeddedVmServicePath] = true
+  fixture.setInfoPlists(builtProductsModes: ["Release"], embeddedModes: [])
+  fixture.expectFrameworkRsyncs(includeVmService: false)
+
+  #expect(throws: XcodeErrorAndExit.self) {
+    try FlutterAssembleToolHelper.run(
+      targetBuildMode: fixture.targetBuildMode,
+      targetPlatform: targetPlatform,
+      env: fixture.env(),
+      fileManager: fixture.fileManager,
+      processManager: fixture.processManager
+    )
+  }
+  #expect(fixture.fileManager.filesRemoved.isEmpty)
+}
+
+@Test
+func runInSandboxProfileToReleaseMismatchWithStaleVMServicePromptsCleanBuildFolder() async throws {
+  let fixture = VMServiceTestFixture(
+    targetPlatform: .ios,
+    sdkRoot: "iphoneos26.2",
+    targetBuildMode: "Release"
+  )
+  fixture.fileManager.symlinkDestinations[fixture.symlinkPath] = "./Profile"
+  fixture.fileManager.filesExist["\(fixture.packagePath)/./Release"] = true
+  fixture.fileManager.filesExist[fixture.embeddedVmServicePath] = true
+  fixture.setInfoPlists(builtProductsModes: ["Profile"], embeddedModes: ["Profile"])
+
+  do {
+    try FlutterAssembleToolHelper.runInSandbox(
+      appPath: nil,
+      packagePath: fixture.packagePath,
+      targetBuildMode: fixture.targetBuildMode,
+      targetPlatform: fixture.targetPlatform,
+      env: fixture.env(sandboxing: "YES"),
+      fileManager: fixture.fileManager
+    )
+    Issue.record("Expected XcodeErrorAndExit")
+  } catch let XcodeErrorAndExit.error(messages) {
+    let combined = messages.joined(separator: "\n")
+    #expect(combined.contains("Clean Build Folder"))
+    #expect(!messages.contains("Please re-run."))
+  }
+  #expect(fixture.fileManager.symlinksCreated[fixture.symlinkPath] == "./Release")
+}
+
+@Test
+func runInSandboxUnexpectedVMServiceUpdatesStaleSymlinkAndPromptsCleanBuildFolder() async throws {
+  let fixture = VMServiceTestFixture(
+    targetPlatform: .ios,
+    sdkRoot: "iphonesimulator26.2",
+    targetBuildMode: "Debug"
+  )
+  fixture.fileManager.symlinkDestinations[fixture.symlinkPath] = "./Profile"
+  fixture.fileManager.filesExist["\(fixture.packagePath)/./Debug"] = true
+  fixture.fileManager.filesExist[fixture.embeddedVmServicePath] = true
+  fixture.setInfoPlists(builtProductsModes: ["debug"], embeddedModes: ["debug"])
+
+  do {
+    try FlutterAssembleToolHelper.runInSandbox(
+      appPath: nil,
+      packagePath: fixture.packagePath,
+      targetBuildMode: fixture.targetBuildMode,
+      targetPlatform: fixture.targetPlatform,
+      env: fixture.env(sandboxing: "YES"),
+      fileManager: fixture.fileManager
+    )
+    Issue.record("Expected XcodeErrorAndExit")
+  } catch let XcodeErrorAndExit.error(messages) {
+    let combined = messages.joined(separator: "\n")
+    #expect(combined.contains("Unexpected VMService.framework"))
+    #expect(combined.contains("Clean Build Folder"))
+    #expect(!messages.contains("Please re-run."))
+  }
+  #expect(fixture.fileManager.symlinksCreated[fixture.symlinkPath] == "./Debug")
+}
+
+@Test
+func runInSandboxUnexpectedVMServiceWhenSymlinkAlreadyMatchesPromptsCleanBuildFolder() async throws
+{
+  let fixture = VMServiceTestFixture(
+    targetPlatform: .ios,
+    sdkRoot: "iphoneos26.2",
+    targetBuildMode: "Release"
+  )
+  fixture.fileManager.symlinkDestinations[fixture.symlinkPath] = "./Release"
+  fixture.fileManager.filesExist[fixture.embeddedVmServicePath] = true
+  fixture.setInfoPlists(builtProductsModes: ["Release"], embeddedModes: ["Release"])
+
+  do {
+    try FlutterAssembleToolHelper.runInSandbox(
+      appPath: nil,
+      packagePath: fixture.packagePath,
+      targetBuildMode: fixture.targetBuildMode,
+      targetPlatform: fixture.targetPlatform,
+      env: fixture.env(sandboxing: "YES"),
+      fileManager: fixture.fileManager
+    )
+    Issue.record("Expected XcodeErrorAndExit")
+  } catch let XcodeErrorAndExit.error(messages) {
+    let combined = messages.joined(separator: "\n")
+    #expect(combined.contains("Unexpected VMService.framework"))
+    #expect(combined.contains("Clean Build Folder"))
+    #expect(!messages.contains("Please re-run."))
+  }
+  #expect(fixture.fileManager.symlinksCreated.isEmpty)
+}
+
+@Test(
+  arguments: [
+    (FlutterPlatform.ios, "iphoneos26.2", true),
+    (FlutterPlatform.ios, "iphoneos26.2", false),
+    (FlutterPlatform.macos, "macosx26.2", true),
+    (FlutterPlatform.macos, "macosx26.2", false),
+  ]
+)
+func runVerifyBuildModeAndUpdateIfNeededChecksOtoolForLinkedVMService(
+  targetPlatform: FlutterPlatform,
+  sdkRoot: String,
+  linksVmService: Bool
+) async throws {
+  let fixture = VMServiceTestFixture(
+    targetPlatform: targetPlatform,
+    sdkRoot: sdkRoot,
+    targetBuildMode: "Release"
+  )
+  fixture.fileManager.symlinkDestinations[fixture.symlinkPath] = "./Profile"
+  fixture.configurePackageFrameworks(includeVmService: false)
+  fixture.fileManager.filesExist[fixture.embeddedVmServicePath] = true
+  fixture.fileManager.filesExist[fixture.binaryPath] = true
+  fixture.setInfoPlists(builtProductsModes: ["Profile"], embeddedModes: ["Release"])
+  fixture.expectFrameworkRsyncs(includeVmService: false)
+  let otoolOutput =
+    linksVmService
+    ? "\(fixture.binaryPath):\n\t@rpath/VMService.framework/VMService (compatibility version 1.0.0)\n"
+    : "\(fixture.binaryPath):\n\t@rpath/App.framework/App (compatibility version 1.0.0)\n"
+  fixture.processManager.expectedProcesses.append(
+    MockProcess(
+      expectedURL: "/usr/bin/otool",
+      expectedArguments: ["-L", fixture.binaryPath],
+      output: otoolOutput
+    )
+  )
+
+  if linksVmService {
+    do {
+      try FlutterAssembleToolHelper.run(
+        targetBuildMode: fixture.targetBuildMode,
+        targetPlatform: targetPlatform,
+        env: fixture.env(includeExecutablePath: true),
+        fileManager: fixture.fileManager,
+        processManager: fixture.processManager
+      )
+      Issue.record("Expected XcodeErrorAndExit")
+    } catch let XcodeErrorAndExit.error(messages) {
+      let combined = messages.joined(separator: "\n")
+      #expect(combined.contains("VMService.framework"))
+      #expect(combined.contains("re-run"))
+    }
+  } else {
+    try FlutterAssembleToolHelper.run(
+      targetBuildMode: fixture.targetBuildMode,
+      targetPlatform: targetPlatform,
+      env: fixture.env(includeExecutablePath: true),
+      fileManager: fixture.fileManager,
+      processManager: fixture.processManager
+    )
+  }
+  #expect(fixture.processManager.expectedProcesses.isEmpty)
+  #expect(fixture.fileManager.symlinksCreated[fixture.symlinkPath] == "./Release")
+  #expect(fixture.fileManager.filesExist[fixture.embeddedVmServicePath] == false)
+}
+
+@Test(
+  arguments: [
+    (FlutterPlatform.ios, "iphoneos26.2", "ios/Flutter/ephemeral/flutter_native_integration.env", true),
+    (FlutterPlatform.ios, "iphoneos26.2", "ios/Flutter/ephemeral/flutter_native_integration.env", false),
+    (FlutterPlatform.macos, "macosx26.2", "macos/Flutter/ephemeral/flutter_native_integration.env", true),
+    (FlutterPlatform.macos, "macosx26.2", "macos/Flutter/ephemeral/flutter_native_integration.env", false),
+  ]
+)
+func runWithAssembleChecksOtoolForLinkedVMService(
+  targetPlatform: FlutterPlatform,
+  sdkRoot: String,
+  exportEnvRelativePath: String,
+  linksVmService: Bool
+) async throws {
+  let fixture = VMServiceTestFixture(
+    targetPlatform: targetPlatform,
+    sdkRoot: sdkRoot,
+    targetBuildMode: "Release"
+  )
+  let flutterAppPath = "/path/to/flutter_app"
+  let flutterRoot = "/path/to/flutter"
+  let appExportedEnvPath = "\(flutterAppPath)/\(exportEnvRelativePath)"
+  fixture.fileManager.symlinkDestinations[fixture.symlinkPath] = "./Profile"
+  fixture.fileManager.filesExist["\(fixture.packagePath)/./Release"] = true
+  fixture.fileManager.filesExist[flutterAppPath] = true
+  fixture.fileManager.filesExist[flutterRoot] = true
+  fixture.fileManager.filesExist[appExportedEnvPath] = true
+  fixture.fileManager.filesExist[fixture.binaryPath] = true
+  fixture.fileManager.fileContents[appExportedEnvPath] = [
+    Data("FLUTTER_ROOT=\(flutterRoot)\nFLUTTER_APPLICATION_PATH=\(flutterAppPath)\n".utf8)
+  ]
+  let otoolOutput =
+    linksVmService
+    ? "\(fixture.binaryPath):\n\t@rpath/VMService.framework/VMService (compatibility version 1.0.0)\n"
+    : "\(fixture.binaryPath):\n\t@rpath/App.framework/App (compatibility version 1.0.0)\n"
+  fixture.processManager.expectedProcesses.append(
+    contentsOf: [
+      MockProcess(
+        expectedURL: "\(flutterRoot)/bin/dart",
+        expectedArguments: [
+          "\(flutterRoot)/packages/flutter_tools/bin/xcode_backend.dart",
+          "build-add-to-app",
+          targetPlatform.rawValue,
+        ]
+      ),
+      MockProcess(
+        expectedURL: "/usr/bin/otool",
+        expectedArguments: ["-L", fixture.binaryPath],
+        output: otoolOutput
+      ),
+    ]
+  )
+
+  let env = fixture.env(
+    includeExecutablePath: true,
+    extra: [
+      "FLUTTER_APPLICATION_PATH": flutterAppPath,
+      "SRCROOT": "/path/to/native_app",
+    ]
+  )
+  if linksVmService {
+    do {
+      try FlutterAssembleToolHelper.run(
+        targetBuildMode: fixture.targetBuildMode,
+        targetPlatform: targetPlatform,
+        env: env,
+        fileManager: fixture.fileManager,
+        processManager: fixture.processManager
+      )
+      Issue.record("Expected XcodeErrorAndExit")
+    } catch let XcodeErrorAndExit.error(messages) {
+      let combined = messages.joined(separator: "\n")
+      #expect(combined.contains("VMService.framework"))
+      #expect(combined.contains("re-run"))
+    }
+  } else {
+    try FlutterAssembleToolHelper.run(
+      targetBuildMode: fixture.targetBuildMode,
+      targetPlatform: targetPlatform,
+      env: env,
+      fileManager: fixture.fileManager,
+      processManager: fixture.processManager
+    )
+  }
+  #expect(fixture.processManager.expectedProcesses.isEmpty)
+  #expect(fixture.fileManager.symlinksCreated[fixture.symlinkPath] == "./Release")
+}
+
+@Test
+func runChecksDebugDylibForLinkedVMService() async throws {
+  let fixture = VMServiceTestFixture(
+    targetPlatform: .ios,
+    sdkRoot: "iphonesimulator26.2",
+    targetBuildMode: "Debug"
+  )
+  let debugDylibPath = "\(fixture.binaryPath).debug.dylib"
+  fixture.fileManager.filesExist[fixture.binaryPath] = true
+  fixture.fileManager.filesExist[debugDylibPath] = true
+  fixture.setInfoPlists(builtProductsModes: ["debug"], embeddedModes: ["debug"])
+  fixture.processManager.expectedProcesses.append(
+    contentsOf: [
+      MockProcess(
+        expectedURL: "/usr/bin/otool",
+        expectedArguments: ["-L", fixture.binaryPath],
+        output: "\(fixture.binaryPath):\n\t@rpath/MyApp.debug.dylib (compatibility version 0.0.0)\n"
+      ),
+      MockProcess(
+        expectedURL: "/usr/bin/otool",
+        expectedArguments: ["-L", debugDylibPath],
+        output: "\(debugDylibPath):\n\t@rpath/VMService.framework/VMService (compatibility version 1.0.0)\n"
+      ),
+    ]
+  )
+
+  do {
+    try FlutterAssembleToolHelper.run(
+      targetBuildMode: fixture.targetBuildMode,
+      targetPlatform: fixture.targetPlatform,
+      env: fixture.env(includeExecutablePath: true),
+      fileManager: fixture.fileManager,
+      processManager: fixture.processManager
+    )
+    Issue.record("Expected XcodeErrorAndExit")
+  } catch let XcodeErrorAndExit.error(messages) {
+    let combined = messages.joined(separator: "\n")
+    #expect(combined.contains(debugDylibPath))
+    #expect(combined.contains("VMService.framework"))
+    #expect(combined.contains("re-run"))
+  }
+  #expect(fixture.processManager.expectedProcesses.isEmpty)
+}
+
 @Test
 func runInSandboxFailsWhenBuildModeWrong() async throws {
   let fileManager = MockFileManager()
@@ -644,4 +1165,140 @@ func plistContentFor(buildMode: String) -> String {
     </dict>
     </plist>
     """
+}
+
+private struct VMServiceTestFixture {
+  let targetPlatform: FlutterPlatform
+  let sdkRoot: String
+  let targetBuildMode: String
+  let fileManager: MockFileManager
+  let processManager: MockFlutterProcessManager
+
+  init(
+    targetPlatform: FlutterPlatform,
+    sdkRoot: String,
+    targetBuildMode: String
+  ) {
+    self.targetPlatform = targetPlatform
+    self.sdkRoot = sdkRoot
+    self.targetBuildMode = targetBuildMode
+    let fm = MockFileManager()
+    self.fileManager = fm
+    self.processManager = MockFlutterProcessManager(fileManager: fm)
+  }
+
+  var flutterBinaryName: String {
+    targetPlatform == .macos ? "FlutterMacOS" : "Flutter"
+  }
+
+  var infoPlistRelativePath: String {
+    targetPlatform == .macos
+      ? "FlutterMacOS.framework/Resources/Info.plist"
+      : "Flutter.framework/Info.plist"
+  }
+
+  var expectedSlice: String {
+    if targetPlatform == .macos {
+      return "macos-arm64_x86_64"
+    }
+    return sdkRoot.contains("simulator") ? "ios-arm64_x86_64-simulator" : "ios-arm64"
+  }
+
+  var expectedFlutterBuildMode: String {
+    (targetPlatform == .ios && sdkRoot.contains("simulator")) ? "debug" : targetBuildMode
+  }
+
+  var buildDir: String { "/Build/Products/\(targetBuildMode)" }
+
+  var frameworksDir: String {
+    targetPlatform == .macos ? "MyApp.app/Contents/Frameworks" : "MyApp.app/Frameworks"
+  }
+
+  var executablePath: String {
+    targetPlatform == .macos ? "MyApp.app/Contents/MacOS/MyApp" : "MyApp.app/MyApp"
+  }
+
+  var binaryPath: String { "\(buildDir)/\(executablePath)" }
+
+  var packagePath: String { "/path/to/SwiftPackages/FlutterNativeIntegration" }
+
+  var symlinkPath: String { "\(packagePath)/FlutterPluginRegistrant" }
+
+  var embeddedVmServicePath: String { "\(buildDir)/\(frameworksDir)/VMService.framework" }
+
+  func configurePackageFrameworks(includeVmService: Bool) {
+    fileManager.filesExist["\(packagePath)/./\(targetBuildMode)"] = true
+    var frameworks = [flutterBinaryName, "App"]
+    if includeVmService {
+      frameworks.append("VMService")
+    }
+    for name in frameworks {
+      let xcframeworkPath = "\(packagePath)/\(targetBuildMode)/Frameworks/\(name).xcframework"
+      fileManager.filesExist[xcframeworkPath] = true
+      fileManager.filesInDirectory[xcframeworkPath] = [
+        URL(fileURLWithPath: "\(xcframeworkPath)/\(expectedSlice)")
+      ]
+    }
+  }
+
+  func setInfoPlists(builtProductsModes: [String], embeddedModes: [String]) {
+    fileManager.fileContents["\(buildDir)/\(infoPlistRelativePath)"] = builtProductsModes.map {
+      Data(plistContentFor(buildMode: $0).utf8)
+    }
+    fileManager.fileContents["\(buildDir)/\(frameworksDir)/\(infoPlistRelativePath)"] =
+      embeddedModes.map {
+        Data(plistContentFor(buildMode: $0).utf8)
+      }
+  }
+
+  func expectFrameworkRsyncs(includeVmService: Bool) {
+    let flutterExtraArgs: [String] =
+      targetPlatform == .macos
+      ? ["--filter", "- Headers", "--filter", "- Modules"]
+      : []
+    var frameworks: [(String, [String])] = [
+      (flutterBinaryName, flutterExtraArgs),
+      ("App", []),
+    ]
+    if includeVmService {
+      frameworks.append(("VMService", []))
+    }
+    for (name, extraArgs) in frameworks {
+      let xcframeworkPath = "\(packagePath)/\(targetBuildMode)/Frameworks/\(name).xcframework"
+      processManager.expectedProcesses.append(
+        MockProcess(
+          expectedURL: "/usr/bin/rsync",
+          expectedArguments: [
+            "-av", "--delete", "--filter", "- .DS_Store/",
+          ] + extraArgs + [
+            "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
+            "\(xcframeworkPath)/\(expectedSlice)/\(name).framework",
+            "\(buildDir)/\(frameworksDir)",
+          ]
+        )
+      )
+    }
+  }
+
+  func env(
+    sandboxing: String = "NO",
+    includeExecutablePath: Bool = false,
+    extra: [String: String] = [:]
+  ) -> [String: String] {
+    var base: [String: String] = [
+      "SDKROOT": sdkRoot,
+      "BUILT_PRODUCTS_DIR": buildDir,
+      "TARGET_BUILD_DIR": buildDir,
+      "FRAMEWORKS_FOLDER_PATH": frameworksDir,
+      "ENABLE_USER_SCRIPT_SANDBOXING": sandboxing,
+      "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH": packagePath,
+    ]
+    if includeExecutablePath {
+      base["EXECUTABLE_PATH"] = executablePath
+    }
+    for (key, value) in extra {
+      base[key] = value
+    }
+    return base
+  }
 }

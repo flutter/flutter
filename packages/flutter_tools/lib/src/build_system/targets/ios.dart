@@ -232,7 +232,13 @@ class DebugUniversalFramework extends Target {
     final Set<String>? iosArchNames = environment.defines[kIosArchs]?.split(' ').toSet();
     final File output = environment.buildDir.childDirectory('App.framework').childFile('App');
     environment.buildDir.createSync(recursive: true);
-    await _createStubAppFramework(output, environment, iosArchNames, sdkRoot);
+    await _createStubFramework(
+      output,
+      environment,
+      iosArchNames,
+      sdkRoot,
+      installName: '@rpath/App.framework/App',
+    );
   }
 }
 
@@ -397,10 +403,38 @@ class UnpackIosVmService extends UnpackDarwin {
   List<Target> get dependencies => const <Target>[];
 
   @override
+  Future<bool> canSkip(Environment environment) async => false;
+
+  @override
   Future<void> build(Environment environment) async {
     final String? archs = environment.defines[kIosArchs];
     if (archs == null) {
       throw MissingDefineException(kIosArchs, name);
+    }
+
+    final String? sdkRoot = environment.defines[kSdkRoot];
+    // Simulator builds use DebugIosApplicationBundle with kBuildMode == 'profile' during
+    // profile Add-to-App builds; compile a simulator stub VMService.framework for XCFramework creation.
+    if (sdkRoot != null &&
+        environmentTypeFromSdkroot(sdkRoot, environment.fileSystem) == .simulator) {
+      final Directory vmServiceFrameworkDir = environment.outputDir.childDirectory(
+        _kVmServiceFrameworkName,
+      );
+      if (vmServiceFrameworkDir.existsSync()) {
+        vmServiceFrameworkDir.deleteSync(recursive: true);
+      }
+      vmServiceFrameworkDir.createSync(recursive: true);
+      vmServiceFrameworkDir
+          .childFile('Info.plist')
+          .writeAsStringSync(_simulatorVmServiceInfoPlist());
+      await _createStubFramework(
+        vmServiceFrameworkDir.childFile(_kVmServiceExecutableName),
+        environment,
+        archs.split(' ').toSet(),
+        sdkRoot,
+        installName: '@rpath/$_kVmServiceFrameworkName/$_kVmServiceExecutableName',
+      );
+      return;
     }
 
     await copyFramework(
@@ -420,6 +454,42 @@ class UnpackIosVmService extends UnpackDarwin {
     await _signFramework(environment, frameworkBinary, .profile);
   }
 }
+
+String _simulatorVmServiceInfoPlist() =>
+    '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>en</string>
+  <key>CFBundleExecutable</key>
+  <string>$_kVmServiceExecutableName</string>
+  <key>CFBundleIdentifier</key>
+  <string>io.flutter.flutter.vmservice</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundleName</key>
+  <string>$_kVmServiceExecutableName</string>
+  <key>CFBundlePackageType</key>
+  <string>FMWK</string>
+  <key>CFBundleShortVersionString</key>
+  <string>1.0</string>
+  <key>CFBundleSignature</key>
+  <string>????</string>
+  <key>CFBundleSupportedPlatforms</key>
+  <array>
+    <string>iPhoneSimulator</string>
+  </array>
+  <key>CFBundleVersion</key>
+  <string>1.0</string>
+  <key>MinimumOSVersion</key>
+  <string>${FlutterDarwinPlatform.ios.deploymentTarget()}</string>
+  <key>BuildMode</key>
+  <string>profile</string>
+</dict>
+</plist>
+''';
 
 // TODO(gaaclarke): Remove this after a reasonable amount of time where the
 // UISceneDelegate migration being on stable. This incurs a minor build time
@@ -844,6 +914,19 @@ class DebugIosApplicationBundle extends IosAssetBundle {
     const DebugIosLLDBInit(),
     ...super.dependencies,
   ];
+
+  @override
+  List<Target> resolveDependencies(Environment environment) {
+    final String? buildMode = environment.defines[kBuildMode];
+    return <Target>[
+      ...dependencies,
+      // Simulator builds in profile Add-to-App commands (`ios-framework` and `swift-package`)
+      // run DebugIosApplicationBundle with kBuildMode == 'profile' and need a simulator
+      // stub VMService.framework so VMService.xcframework includes a simulator variant.
+      if (buildMode != null && BuildMode.fromCliName(buildMode) == .profile)
+        const UnpackIosVmService(),
+    ];
+  }
 }
 
 /// IosAssetBundle with debug symbols, used for Profile and Release builds.
@@ -934,21 +1017,23 @@ Future<void> _updateMinimumOSVersion(File infoPlist, Environment environment) as
   }
 }
 
-/// Create an App.framework for debug iOS targets.
+/// Create a stub framework for iOS targets (such as `App.framework` in debug/simulator
+/// builds or `VMService.framework` in profile simulator builds).
 ///
-/// This framework needs to exist for the Xcode project to link/bundle,
+/// This framework needs to exist for the Xcode project or XCFramework to link/bundle,
 /// but it isn't actually executed. To generate something valid, we compile a trivial
 /// constant.
-Future<void> _createStubAppFramework(
+Future<void> _createStubFramework(
   File outputFile,
   Environment environment,
   Set<String>? iosArchNames,
-  String sdkRoot,
-) async {
+  String sdkRoot, {
+  required String installName,
+}) async {
   try {
     outputFile.createSync(recursive: true);
   } on Exception catch (e) {
-    throwToolExit('Failed to create App.framework stub at ${outputFile.path}: $e');
+    throwToolExit('Failed to create ${outputFile.parent.basename} stub at ${outputFile.path}: $e');
   }
 
   final FileSystem fileSystem = environment.fileSystem;
@@ -977,7 +1062,7 @@ Future<void> _createStubAppFramework(
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-fapplication-extension',
-      '-install_name', '@rpath/App.framework/App',
+      '-install_name', installName,
       '-isysroot', sdkRoot,
       '-o', outputFile.path,
     ]);
@@ -987,7 +1072,9 @@ Future<void> _createStubAppFramework(
     } on FileSystemException {
       // Best effort. Sometimes we can't delete things from system temp.
     } on Exception catch (e) {
-      throwToolExit('Failed to create App.framework stub at ${outputFile.path}: $e');
+      throwToolExit(
+        'Failed to create ${outputFile.parent.basename} stub at ${outputFile.path}: $e',
+      );
     }
   }
 

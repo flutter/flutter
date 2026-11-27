@@ -220,6 +220,9 @@ class UnpackMacOSVmService extends UnpackDarwin {
   List<Target> get dependencies => const <Target>[];
 
   @override
+  Future<bool> canSkip(Environment environment) async => false;
+
+  @override
   Future<void> build(Environment environment) async {
     await copyFramework(
       environment,

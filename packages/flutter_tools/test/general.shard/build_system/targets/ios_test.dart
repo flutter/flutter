@@ -640,6 +640,37 @@ void main() {
     ]);
   });
 
+  test('DebugIosApplicationBundle resolves UnpackIosVmService only in profile mode', () {
+    const bundle = DebugIosApplicationBundle();
+    expect(bundle.dependencies, isNot(contains(const UnpackIosVmService())));
+    expect(bundle.resolveDependencies(environment), isNot(contains(const UnpackIosVmService())));
+
+    final debugEnvironment = Environment.test(
+      fileSystem.currentDirectory,
+      defines: <String, String>{kBuildMode: 'debug'},
+      artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
+      processManager: processManager,
+      logger: logger,
+      fileSystem: fileSystem,
+    );
+    expect(
+      bundle.resolveDependencies(debugEnvironment),
+      isNot(contains(const UnpackIosVmService())),
+    );
+
+    final profileEnvironment = Environment.test(
+      fileSystem.currentDirectory,
+      defines: <String, String>{kBuildMode: 'profile'},
+      artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
+      processManager: processManager,
+      logger: logger,
+      fileSystem: fileSystem,
+    );
+    expect(bundle.resolveDependencies(profileEnvironment), contains(const UnpackIosVmService()));
+  });
+
   test('ReleaseIosApplicationBundle sends archive success event', () async {
     environment.defines[kBuildMode] = 'release';
     environment.defines[kXcodeAction] = 'install';
@@ -1401,7 +1432,7 @@ void main() {
     const target = UnpackIosVmService();
     const vmServiceArtifact = 'Artifact.vmserviceFramework.TargetPlatform.ios.profile';
 
-    test('declares expected inputs, outputs, and skips SwiftPM', () async {
+    test('declares expected inputs, outputs, and does not skip SwiftPM', () async {
       expect(target.inputs, const <Source>[
         Source.artifact(Artifact.vmserviceFramework, platform: .ios, mode: .profile),
       ]);
@@ -1424,7 +1455,106 @@ void main() {
         logger: logger,
         fileSystem: fileSystem,
       );
-      expect(await target.canSkip(swiftPmEnvironment), isTrue);
+      expect(await target.canSkip(swiftPmEnvironment), isFalse);
+      expect(await const ProfileUnpackIOS().canSkip(swiftPmEnvironment), isTrue);
+    });
+
+    test('creates simulator stub VMService.framework when sdkRoot is simulator', () async {
+      final Directory outputDir = fileSystem.directory('output');
+      final Directory vmServiceFrameworkDirectory = outputDir.childDirectory('VMService.framework');
+      final File staleDeviceFile = vmServiceFrameworkDirectory.childFile('stale_device_file')
+        ..createSync(recursive: true);
+      final File vmServiceBinary = vmServiceFrameworkDirectory.childFile('VMService');
+      final File vmServiceInfoPlist = vmServiceFrameworkDirectory.childFile('Info.plist');
+
+      final String vmServiceFrameworkArtifactPath = artifacts.getArtifactPath(
+        Artifact.vmserviceFramework,
+        platform: .ios,
+        mode: .profile,
+      );
+      fileSystem.directory(vmServiceFrameworkArtifactPath).childFile('Info.plist')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('<string>iPhoneOS</string>');
+
+      final testEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        xcode: environment.xcode,
+        defines: <String, String>{
+          kBuildMode: 'profile',
+          kSdkRoot: 'path/to/iPhoneSimulator.sdk',
+          kIosArchs: 'x86_64 arm64',
+          kCodesignIdentity: 'ABC123',
+        },
+      );
+
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'xcrun',
+            'clang',
+            '-x',
+            'c',
+            '-arch',
+            'x86_64',
+            '-arch',
+            'arm64',
+            fileSystem.path.join('/.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc'),
+            '-dynamiclib',
+            '-miphonesimulator-version-min=15.0',
+            '-Xlinker',
+            '-rpath',
+            '-Xlinker',
+            '@executable_path/Frameworks',
+            '-Xlinker',
+            '-rpath',
+            '-Xlinker',
+            '@loader_path/Frameworks',
+            '-fapplication-extension',
+            '-install_name',
+            '@rpath/VMService.framework/VMService',
+            '-isysroot',
+            'path/to/iPhoneSimulator.sdk',
+            '-o',
+            vmServiceBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', vmServiceBinary.path],
+        ),
+        FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', vmServiceBinary.path],
+        ),
+        FakeCommand(
+          command: <String>[
+            'codesign',
+            '--force',
+            '--sign',
+            'ABC123',
+            '--timestamp=none',
+            vmServiceBinary.path,
+          ],
+        ),
+      ]);
+
+      await target.build(testEnvironment);
+
+      expect(processManager, hasNoRemainingExpectations);
+      expect(staleDeviceFile, isNot(exists));
+      expect(vmServiceBinary, exists);
+      expect(vmServiceInfoPlist, exists);
+      final String plistContents = vmServiceInfoPlist.readAsStringSync();
+      expect(plistContents, contains('<string>io.flutter.flutter.vmservice</string>'));
+      expect(plistContents, contains('<string>VMService</string>'));
+      expect(plistContents, contains('<string>iPhoneSimulator</string>'));
+      expect(plistContents, contains('<string>15.0</string>'));
+      expect(plistContents, contains('<string>profile</string>'));
+      expect(plistContents, isNot(contains('iPhoneOS')));
     });
 
     test('copies, updates permissions, skips lipo for single-arch, and codesigns', () async {
