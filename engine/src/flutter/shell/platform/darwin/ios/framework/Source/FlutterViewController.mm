@@ -154,6 +154,7 @@ typedef struct MouseState {
 
 @implementation FlutterViewController {
   flutter::ViewportMetrics _viewportMetrics;
+  FlutterDisplayFeaturesMonitor* _displayFeaturesMonitor API_AVAILABLE(ios(27.1));
   MouseState _mouseState;
   FlutterSplashScreenManager* _splashScreenManager;
 }
@@ -818,6 +819,17 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
     [self.flutterView addGestureRecognizer:_rotationGestureRecognizer];
   }
 
+  if (@available(iOS 27.1, *)) {
+    // Reports the fold and camera regions of a foldable device (iPhone Duo) as
+    // display features. On a device without a hinge nothing is ever reported.
+    __weak FlutterViewController* weakSelf = self;
+    _displayFeaturesMonitor =
+        [[FlutterDisplayFeaturesMonitor alloc] initWithView:self.flutterView
+                                                   onUpdate:^(FlutterDisplayFeatureList* features) {
+                                                     [weakSelf applyDisplayFeatures:features];
+                                                   }];
+  }
+
   [super viewDidLoad];
 }
 
@@ -976,6 +988,9 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
   [self deregisterNotifications];
 
   [self.keyboardInsetManager invalidate];
+  if (@available(iOS 27.1, *)) {
+    [_displayFeaturesMonitor invalidate];
+  }
 
   // TODO(cbracken): https://github.com/flutter/flutter/issues/156222
   // Ensure all delegates are weak and remove this.
@@ -1329,6 +1344,34 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
 #pragma mark - Handle view resizing
 
+- (void)applyDisplayFeatures:(FlutterDisplayFeatureList*)features {
+  const double scale = _viewportMetrics.device_pixel_ratio;
+  std::vector<double> bounds;
+  bounds.reserve(features.bounds.count);
+  for (NSNumber* value in features.bounds) {
+    bounds.push_back(value.doubleValue * scale);
+  }
+  std::vector<int> types;
+  types.reserve(features.types.count);
+  for (NSNumber* value in features.types) {
+    types.push_back(value.intValue);
+  }
+  std::vector<int> states;
+  states.reserve(features.states.count);
+  for (NSNumber* value in features.states) {
+    states.push_back(value.intValue);
+  }
+  if (bounds == _viewportMetrics.physical_display_features_bounds &&
+      types == _viewportMetrics.physical_display_features_type &&
+      states == _viewportMetrics.physical_display_features_state) {
+    return;
+  }
+  _viewportMetrics.physical_display_features_bounds = std::move(bounds);
+  _viewportMetrics.physical_display_features_type = std::move(types);
+  _viewportMetrics.physical_display_features_state = std::move(states);
+  [self updateViewportMetricsIfNeeded];
+}
+
 - (void)updateViewportMetricsIfNeeded {
   if (_shouldIgnoreViewportMetricsUpdatesDuringRotation) {
     return;
@@ -1352,6 +1395,22 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [self setViewportMetricsSize];
   [self checkAndUpdateAutoResizeConstraints];
   [self setViewportMetricsPaddings];
+  if (@available(iOS 27.1, *)) {
+    // This read has to happen during layout. Reserved regions lag the hinge
+    // and UIKit has no notification for them. Instead, a region read made in
+    // viewDidLayoutSubviews is tracked, and UIKit runs layout again when that
+    // region changes. Apple documents the tracking for updateConstraints
+    // ("UIKit tracks the regions you read in updateConstraints() and runs it
+    // again when they change"):
+    // https://developer.apple.com/documentation/uikit/uiview/reservedregion
+    // and lists viewDidLayoutSubviews among the methods with automatic
+    // observation tracking:
+    // https://developer.apple.com/documentation/uikit/automatic-observation-tracking
+    // That pass is the only signal there is while folding, since the view's
+    // bounds stay the same. A change of hinge posture requests a pass too, so
+    // this is the only place regions are read.
+    [_displayFeaturesMonitor refresh];
+  }
   [self updateViewportMetricsIfNeeded];
   [self updateEngineDisplays];
 

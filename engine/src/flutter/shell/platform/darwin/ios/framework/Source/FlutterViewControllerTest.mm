@@ -3302,4 +3302,84 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [appDelegate setMockLaunchEngine:nil];
 }
 
+#pragma mark - Display features
+
+// ViewportMetrics is a C++ struct passed by value, so its contents cannot be
+// captured through OCMock. These tests verify the call into the send path; the
+// values themselves are covered by DisplayFeaturesTests.swift.
+
+- (FlutterDisplayFeatureList*)halfOpenedFold {
+  // The iPhone Duo inner display as measured on the simulator: a 40pt fold
+  // division through the centre of 951x669pt.
+  return [[FlutterDisplayFeatureList alloc] initWithBounds:@[ @455.5, @0, @495.5, @669 ]
+                                                     types:@[ @1 ]
+                                                    states:@[ @2 ]];
+}
+
+- (void)testApplyDisplayFeaturesSendsViewportMetrics {
+  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  mockEngine.viewController = viewController;
+  id mockVC = OCMPartialMock(viewController);
+  OCMExpect([mockVC updateViewportMetricsIfNeeded]);
+
+  [mockVC applyDisplayFeatures:[self halfOpenedFold]];
+
+  OCMVerifyAll(mockVC);
+}
+
+- (void)testApplyingUnchangedDisplayFeaturesDoesNotResend {
+  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  mockEngine.viewController = viewController;
+  id mockVC = OCMPartialMock(viewController);
+  [mockVC applyDisplayFeatures:[self halfOpenedFold]];
+
+  // Layout passes report often; identical features must not flood the engine
+  // with metric updates.
+  OCMReject([mockVC updateViewportMetricsIfNeeded]);
+  [mockVC applyDisplayFeatures:[self halfOpenedFold]];
+
+  OCMVerifyAll(mockVC);
+}
+
+- (void)testApplyingEmptyAfterNonEmptyResendsToClear {
+  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  mockEngine.viewController = viewController;
+  id mockVC = OCMPartialMock(viewController);
+  [mockVC applyDisplayFeatures:[self halfOpenedFold]];
+
+  // Folding shut: the features go away, which is a change and has to be sent.
+  OCMExpect([mockVC updateViewportMetricsIfNeeded]);
+  [mockVC applyDisplayFeatures:[[FlutterDisplayFeatureList alloc] init]];
+
+  OCMVerifyAll(mockVC);
+}
+
+- (void)testApplyingEmptyWhenAlreadyEmptyDoesNotSend {
+  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  mockEngine.viewController = viewController;
+  id mockVC = OCMPartialMock(viewController);
+
+  // A device without a hinge reports empty forever; that must stay silent.
+  OCMReject([mockVC updateViewportMetricsIfNeeded]);
+  [mockVC applyDisplayFeatures:[[FlutterDisplayFeatureList alloc] init]];
+
+  OCMVerifyAll(mockVC);
+}
+
 @end

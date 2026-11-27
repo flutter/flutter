@@ -65,6 +65,7 @@ source_set("InternalFlutterSwift") {
   sources = [
     "framework/Source/AccessibilityFeatures.swift",
     "framework/Source/ConnectionCollection.swift",
+    "framework/Source/DisplayFeatures.swift",
     "framework/Source/DisplayLinkManager.swift",
     "framework/Source/KeyboardInsetManager.swift",
     "framework/Source/LaunchEngine.swift",
@@ -263,6 +264,7 @@ if (enable_ios_unittests) {
     sources = [
       "framework/Source/AccessibilityFeaturesTests.swift",
       "framework/Source/ConnectionCollectionTests.swift",
+      "framework/Source/DisplayFeaturesTests.swift",
       "framework/Source/DisplayLinkManagerTests.swift",
       "framework/Source/FakeUIPressProxy.swift",
       "framework/Source/LaunchEngineTests.swift",

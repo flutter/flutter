@@ -70,6 +70,16 @@ extern NSNotificationName const FlutterViewControllerShowHomeIndicator;
 - (BOOL)stateIsBackground;
 
 /**
+ * Writes display features into the viewport metrics and sends them to the
+ * engine. `features` is in logical pixels; this method scales it by the current
+ * device pixel ratio. Sending is skipped when nothing changed.
+ *
+ * Exposed so the path from features to metrics can be tested without the hinge
+ * hardware.
+ */
+- (void)applyDisplayFeatures:(FlutterDisplayFeatureList*)features;
+
+/**
  * Determines whether a UIScene notification should be handled by this view controller.
  *
  * In multi-scene environments (such as iPadOS split view, macOS Catalyst multi-window, or App
