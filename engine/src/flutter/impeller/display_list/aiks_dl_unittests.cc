@@ -1186,5 +1186,21 @@ TEST_P(AiksTest, DisplayListToTextureWithMipGeneration) {
   EXPECT_FALSE(texture->NeedsMipmapGeneration());
 }
 
+TEST_P(AiksTest, DisplayListToTextureResetsHostBufferOnce) {
+  DisplayListBuilder builder;
+  builder.DrawRect(DlRect::MakeXYWH(0, 0, 10, 10), DlPaint(DlColor::kRed()));
+
+  AiksContext aiks_context(GetContext(), nullptr);
+  HostBuffer& data_host_buffer =
+      aiks_context.GetContentContext().GetTransientsDataBuffer();
+  EXPECT_EQ(data_host_buffer.GetStateForTest().current_frame, 0u);
+
+  auto texture =
+      DisplayListToTexture(builder.Build(), ISize{10, 10}, aiks_context,
+                           /*reset_host_buffer=*/true);
+  ASSERT_NE(texture, nullptr);
+  EXPECT_EQ(data_host_buffer.GetStateForTest().current_frame, 1u);
+}
+
 }  // namespace testing
 }  // namespace impeller

@@ -17,6 +17,13 @@
           }
         ]
       }
+    ],
+    "redirects": [
+      {
+        "regex": "^/flutter/foundation/(?P<page>(?:ChangeNotifier|Listenable|ValueListenable|ValueNotifier)(?:-class\\.html|/.+))$",
+        "destination": "/flutter/package-listen_listen/:page",
+        "type": 301
+      }
     ]
   }
 }

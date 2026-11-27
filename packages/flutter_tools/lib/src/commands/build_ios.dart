@@ -957,7 +957,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   late final Future<BuildInfo> cachedBuildInfo = getBuildInfo();
 
   late final Future<BuildableIOSApp> buildableIOSApp = () async {
-    final app = await applicationPackages?.getPackageForPlatform(
+    final app = await applicationPackages.getPackageForPlatform(
       TargetPlatform.ios,
       buildInfo: await cachedBuildInfo,
     ) as BuildableIOSApp?;
@@ -1028,6 +1028,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       analytics: analytics,
       app: app,
       buildInfo: buildInfo,
+      featureFlags: runner!.featureFlags,
       plistParser: plistParser,
       templateRenderer: _templateRenderer,
       toolContext: toolContext,

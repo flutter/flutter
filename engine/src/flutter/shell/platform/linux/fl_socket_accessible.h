@@ -15,7 +15,7 @@ G_DECLARE_FINAL_TYPE(FlSocketAccessible,
                      SOCKET_ACCESSIBLE,
                      GtkContainerAccessible);
 
-void fl_socket_accessible_embed(FlSocketAccessible* self, gchar* id);
+void fl_socket_accessible_embed(FlSocketAccessible* self, AtkPlug* plug);
 
 G_END_DECLS
 

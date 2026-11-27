@@ -136,6 +136,9 @@ extension type CanvasKit(JSObject _) implements JSObject {
     DomOffscreenCanvas canvas,
     SkWebGLContextOptions options,
   );
+
+  /// Deletes the Emscripten WebGL context registered for [glContext].
+  external void deleteContext(double glContext);
   external SkGrContext? MakeGrContext(double glContext);
   external SkSurface? MakeOnScreenGLSurface(
     SkGrContext grContext,
@@ -1530,16 +1533,6 @@ Float32List toFlatSkPoints(List<ui.Offset> points) {
   for (var i = 0; i < len; i++) {
     result[2 * i] = points[i].dx;
     result[2 * i + 1] = points[i].dy;
-  }
-  return result;
-}
-
-/// Converts a list of [ui.Color] into a flat list of ints.
-Uint32List toFlatColors(List<ui.Color> colors) {
-  final int len = colors.length;
-  final result = Uint32List(len);
-  for (var i = 0; i < len; i++) {
-    result[i] = colors[i].value;
   }
   return result;
 }

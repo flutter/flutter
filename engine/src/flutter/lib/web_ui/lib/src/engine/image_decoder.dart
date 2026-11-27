@@ -116,9 +116,11 @@ class BrowserImageDecoder {
           // color space, typically SRGB, which is what we want.
           colorSpaceConversion: 'default',
 
-          // Flutter doesn't give the developer a way to customize this, so if this
-          // is an animated image we should prefer the animated track.
-          preferAnimation: true,
+          // `preferAnimation` is intentionally omitted. Chrome fails to decode
+          // still AVIF images with "Failed to retrieve track metadata" when it
+          // is set to true. When it is omitted, the browser still selects the
+          // animated track for animated GIF, WebP, and AVIF images.
+          // See https://github.com/flutter/flutter/issues/160600
         ),
       );
 

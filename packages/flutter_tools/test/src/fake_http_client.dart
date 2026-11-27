@@ -66,6 +66,7 @@ class FakeResponse {
     this.statusCode = HttpStatus.ok,
     this.body = const <int>[],
     this.headers = const <String, List<String>>{},
+    this.bodyError,
   });
 
   static const empty = FakeResponse();
@@ -73,6 +74,10 @@ class FakeResponse {
   final int statusCode;
   final List<int> body;
   final Map<String, List<String>> headers;
+
+  /// If non-null, the response body stream emits this error after [body],
+  /// simulating a connection that drops while receiving data.
+  final Exception? bodyError;
 }
 
 /// A fake implementation of the HttpClient used for testing.
@@ -416,8 +421,14 @@ class _FakeHttpClientResponse extends Stream<List<int>> implements HttpClientRes
     void Function()? onDone,
     bool? cancelOnError,
   }) {
-    final response = Stream<List<int>>.fromIterable(<List<int>>[_response.body]);
-    return response.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+    return _body().listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+  }
+
+  Stream<List<int>> _body() async* {
+    yield _response.body;
+    if (_response.bodyError case final Exception error) {
+      throw error;
+    }
   }
 
   @override

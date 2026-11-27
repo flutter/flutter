@@ -42,14 +42,24 @@ class FakeAnimatorDelegate : public Animator::Delegate {
               (override));
 
   MOCK_METHOD(void,
+              OnAnimatorFrameBuilt,
+              (fml::TimePoint build_start, fml::TimePoint build_end),
+              (override));
+
+  MOCK_METHOD(void,
               OnAnimatorDraw,
               (std::shared_ptr<FramePipeline> pipeline),
               (override));
 
   void OnAnimatorDrawLastLayerTrees(
-      std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder) override {}
+      std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder) override {
+    if (on_draw_last_layer_trees_) {
+      on_draw_last_layer_trees_();
+    }
+  }
 
   bool notify_idle_called_ = false;
+  std::function<void()> on_draw_last_layer_trees_;
 };
 
 class CountingVsyncWaiter : public VsyncWaiter {
@@ -269,6 +279,7 @@ TEST_F(ShellTest, AnimatorDoesNotNotifyDelegateIfPipelineIsNotEmpty) {
   // It must always be called when the method 'Animator::Render' is called,
   // regardless of whether the pipeline is empty or not.
   EXPECT_CALL(delegate, OnAnimatorUpdateLatestFrameTargetTime).Times(2);
+  EXPECT_CALL(delegate, OnAnimatorFrameBuilt).Times(2);
   // It will only be called once even though we call the method
   // 'Animator::Render' twice. because it will only be called when the pipeline
   // is empty.
@@ -289,6 +300,128 @@ TEST_F(ShellTest, AnimatorDoesNotNotifyDelegateIfPipelineIsNotEmpty) {
   }
 
   PostTaskSync(task_runners.GetUITaskRunner(), [&] { animator.reset(); });
+}
+
+TEST_F(ShellTest, AnimatorNotifiesFrameBuiltAfterDraw) {
+  FakeAnimatorDelegate delegate;
+  TaskRunners task_runners = {
+      "test",
+      CreateNewThread(),  // platform
+      CreateNewThread(),  // raster
+      CreateNewThread(),  // ui
+      CreateNewThread()   // io
+  };
+
+  auto clock = std::make_shared<ShellTestVsyncClock>();
+  std::shared_ptr<Animator> animator;
+
+  PostTaskSync(task_runners.GetUITaskRunner(), [&] {
+    auto vsync_waiter = static_cast<std::unique_ptr<VsyncWaiter>>(
+        std::make_unique<ShellTestVsyncWaiter>(task_runners, clock));
+    animator = std::make_unique<Animator>(delegate, task_runners,
+                                          std::move(vsync_waiter));
+  });
+
+  fml::AutoResetWaitableEvent frame_built_latch;
+  fml::TimePoint build_start;
+  fml::TimePoint build_end;
+  EXPECT_CALL(delegate, OnAnimatorUpdateLatestFrameTargetTime);
+  {
+    ::testing::InSequence seq;
+    EXPECT_CALL(delegate, OnAnimatorBeginFrame).WillOnce([&] {
+      auto layer_tree = std::make_unique<LayerTree>(nullptr, DlISize(600, 800));
+      animator->Render(kImplicitViewId, std::move(layer_tree), 1.0);
+    });
+    EXPECT_CALL(delegate, OnAnimatorDraw);
+    EXPECT_CALL(delegate, OnAnimatorFrameBuilt)
+        .WillOnce([&](fml::TimePoint start, fml::TimePoint end) {
+          build_start = start;
+          build_end = end;
+          frame_built_latch.Signal();
+        });
+  }
+
+  const fml::TimePoint before = fml::TimePoint::Now();
+  PostTaskSync(task_runners.GetUITaskRunner(),
+               [&] { animator->RequestFrame(); });
+  clock->SimulateVSync();
+  frame_built_latch.Wait();
+  const fml::TimePoint after = fml::TimePoint::Now();
+
+  EXPECT_GE(build_start, before);
+  EXPECT_LE(build_start, build_end);
+  EXPECT_LE(build_end, after);
+
+  PostTaskSync(task_runners.GetUITaskRunner(), [&] { animator.reset(); });
+}
+
+TEST_F(ShellTest, AnimatorDoesNotNotifyFrameBuiltWhenNotRendered) {
+  FakeAnimatorDelegate delegate;
+  TaskRunners task_runners = {
+      "test",
+      CreateNewThread(),  // platform
+      CreateNewThread(),  // raster
+      CreateNewThread(),  // ui
+      CreateNewThread()   // io
+  };
+
+  auto clock = std::make_shared<ShellTestVsyncClock>();
+  std::shared_ptr<Animator> animator;
+
+  PostTaskSync(task_runners.GetUITaskRunner(), [&] {
+    auto vsync_waiter = static_cast<std::unique_ptr<VsyncWaiter>>(
+        std::make_unique<ShellTestVsyncWaiter>(task_runners, clock));
+    animator = std::make_unique<Animator>(delegate, task_runners,
+                                          std::move(vsync_waiter));
+  });
+
+  EXPECT_CALL(delegate, OnAnimatorFrameBuilt).Times(0);
+
+  // Case 1: BeginFrame does not call Render (empty layer_trees_tasks_).
+  fml::AutoResetWaitableEvent begin_frame_latch;
+  EXPECT_CALL(delegate, OnAnimatorBeginFrame).WillOnce([&] {
+    begin_frame_latch.Signal();
+  });
+  PostTaskSync(task_runners.GetUITaskRunner(), [&] {
+    animator->RequestFrame(/*regenerate_layer_trees=*/true);
+  });
+  clock->SimulateVSync();
+  begin_frame_latch.Wait();
+  // Wait for EndFrame() to finish on the UI thread.
+  PostTaskSync(task_runners.GetUITaskRunner(), [] {});
+
+  // Case 2: Reusing the last layer trees (DrawLastLayerTrees).
+  fml::AutoResetWaitableEvent draw_last_latch;
+  delegate.on_draw_last_layer_trees_ = [&] { draw_last_latch.Signal(); };
+  PostTaskSync(task_runners.GetUITaskRunner(), [&] {
+    animator->RequestFrame(/*regenerate_layer_trees=*/false);
+  });
+  clock->SimulateVSync();
+  draw_last_latch.Wait();
+
+  PostTaskSync(task_runners.GetUITaskRunner(), [&] { animator.reset(); });
+}
+
+TEST_F(ShellTest, AnimatorDoesNotNotifyFrameBuiltWhenCommitFails) {
+  FakeAnimatorDelegate delegate;
+
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
+  auto task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+
+  auto vsync_waiter = std::make_unique<CountingVsyncWaiter>(task_runners);
+  Animator animator(delegate, task_runners, std::move(vsync_waiter));
+
+  EXPECT_CALL(delegate, OnAnimatorUpdateLatestFrameTargetTime).Times(1);
+  EXPECT_CALL(delegate, OnAnimatorDraw).Times(0);
+  EXPECT_CALL(delegate, OnAnimatorFrameBuilt).Times(0);
+
+  // Render and end the frame without a preceding BeginFrame, so there is no
+  // active pipeline continuation and committing to the pipeline fails.
+  auto layer_tree = std::make_unique<LayerTree>(nullptr, DlISize(600, 800));
+  animator.Render(kImplicitViewId, std::move(layer_tree), 1.0);
+  animator.OnAllViewsRendered();
 }
 
 }  // namespace testing

@@ -22,7 +22,9 @@ class CkImageDelegate implements BackendImage {
   /// Releases the native memory allocated for the Skia image.
   @override
   void dispose() {
-    skImage.delete();
+    if (!skImage.isDeleted()) {
+      skImage.delete();
+    }
   }
 
   /// Checks if this image delegate wraps a Skia image that is an alias (clone) of another.

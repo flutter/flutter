@@ -13,11 +13,20 @@ import '../utils.dart';
 // of the registry combined, so they get their own shard.
 const String _devtoolsTestsGlob = 'flutter_devtools*.test';
 
-Future<void> customerTestingRunner() =>
-    _runCustomerTesting(<String>['--exclude=$_devtoolsTestsGlob']);
+// Flame only runs its full test suites on Linux, where they take as long as the
+// rest of the registry, so they get their own Linux shard.
+const String _flameTestsGlob = 'flame.test';
+
+Future<void> customerTestingRunner() => _runCustomerTesting(<String>[
+  '--exclude=$_devtoolsTestsGlob',
+  if (Platform.isLinux) '--exclude=$_flameTestsGlob',
+]);
 
 Future<void> customerTestingDevtoolsRunner() =>
     _runCustomerTesting(<String>['--include=$_devtoolsTestsGlob']);
+
+Future<void> customerTestingFlameRunner() =>
+    _runCustomerTesting(<String>['--include=$_flameTestsGlob']);
 
 Future<void> _runCustomerTesting(List<String> ciArguments) async {
   printProgress('${green}Running customer testing$reset');

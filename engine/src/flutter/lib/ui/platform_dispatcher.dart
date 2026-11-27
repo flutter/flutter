@@ -1585,7 +1585,7 @@ class PlatformDispatcher {
   /// [onTextScaleFactorChanged] callback can be used to monitor such changes.
   ///
   /// Instead of directly calling this method, applications should typically use
-  /// [MediaQuery.textScalerOf] to retrive the scaled font size in a widget tree,
+  /// [MediaQuery.textScalerOf] to retrieve the scaled font size in a widget tree,
   /// so text in the app resizes properly when the text scaling preference
   /// changes.
   double scaleFontSize(double unscaledFontSize) {
@@ -2061,7 +2061,10 @@ class _ViewConfiguration {
 
   /// The number of physical pixels on each side of the display rectangle into
   /// which the view can render, but over which the operating system will likely
-  /// place system UI, such as the keyboard, that fully obscures any content.
+  /// place system UI, such as the keyboard.
+  ///
+  /// The system UI may be translucent or have rounded corners, so content
+  /// rendered behind it can remain visible.
   ///
   /// The relationship between this [viewInsets], [viewPadding], and [padding]
   /// are described in more detail in the documentation for [FlutterView].
@@ -2709,6 +2712,10 @@ class ViewConstraints {
 /// the shape of the display, for example [DisplayFeatureState.postureFlat] or
 /// [DisplayFeatureState.postureHalfOpened]. For [DisplayFeatureType.cutout],
 /// the state is not used and has the [DisplayFeatureState.unknown] value.
+///
+/// See also:
+///
+///  * [MediaQuery.displayFeaturesOf], to get the display features in a widget tree.
 class DisplayFeature {
   // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
   // ignore: public_member_api_docs

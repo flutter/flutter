@@ -25,17 +25,22 @@ abstract class SurfaceProvider<C extends Surface, D extends CanvasProvider> {
 
   final List<C> _createdSurfaces = <C>[];
 
+  /// Creates a new [Surface], applies any configured resource cache limit, and
+  /// tracks it until either the surface or this provider is disposed.
   C createSurface() {
     final C surface = surfaceCreateFn(_canvasProvider);
     if (_resourceCacheMaxBytes != null) {
       surface.setSkiaResourceCacheMaxBytes(_resourceCacheMaxBytes!);
     }
     _createdSurfaces.add(surface);
+    surface.onDispose = () => _createdSurfaces.remove(surface);
     return surface;
   }
 
+  /// Disposes all live surfaces created by this provider and clears its
+  /// tracking list.
   void dispose() {
-    for (final C surface in _createdSurfaces) {
+    for (final surface in List<C>.of(_createdSurfaces)) {
       surface.dispose();
     }
     _createdSurfaces.clear();
@@ -82,8 +87,42 @@ abstract class Surface {
   /// `webglcontextlost` event.
   Future<void> recreateContextForCanvas(DomEventTarget newCanvas);
 
+  /// Whether [dispose] has been called on this surface.
+  bool get isDisposed => _isDisposed;
+  bool _isDisposed = false;
+
   /// Disposes of the surface and its resources.
-  void dispose();
+  ///
+  /// Calling this more than once has no effect.
+  ///
+  /// [onDispose] is invoked and cleared even if [disposeResources] throws, so
+  /// the owning [SurfaceProvider] never keeps tracking a disposed surface.
+  ///
+  /// Subclasses must not override this method; implement [disposeResources]
+  /// instead.
+  void dispose() {
+    if (_isDisposed) {
+      return;
+    }
+    _isDisposed = true;
+    try {
+      disposeResources();
+    } finally {
+      final ui.VoidCallback? callback = onDispose;
+      onDispose = null;
+      callback?.call();
+    }
+  }
+
+  /// Releases the resources owned by this surface.
+  ///
+  /// Called exactly once, by [dispose].
+  @protected
+  void disposeResources();
+
+  /// Callback owned by [SurfaceProvider] and invoked when the surface is
+  /// disposed so the provider can unregister it from its tracking list.
+  ui.VoidCallback? onDispose;
 
   /// A [Future] which completes when the [Surface] is initialized and ready to
   /// render pictures.
