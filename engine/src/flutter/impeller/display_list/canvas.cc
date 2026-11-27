@@ -484,11 +484,13 @@ Canvas::Canvas(ContentContext& renderer,
                const RenderTarget& render_target,
                bool is_onscreen,
                bool requires_readback,
-               IRect32 cull_rect)
+               IRect32 cull_rect,
+               bool can_finish_on_external_target)
     : renderer_(renderer),
       render_target_(render_target),
       is_onscreen_(is_onscreen),
       requires_readback_(requires_readback),
+      can_finish_on_external_target_(can_finish_on_external_target),
       clip_coverage_stack_(EntityPassClipStack(
           Rect::MakeSize(render_target.GetRenderTargetSize()))) {
   Initialize(Rect::MakeLTRB(cull_rect.GetLeft(), cull_rect.GetTop(),
@@ -1938,11 +1940,13 @@ void Canvas::SaveLayer(const Paint& paint,
       backdrop_count_ -= backdrop_count;
 
       // The onscreen texture can be flipped to if:
-      // 1. The device supports framebuffer fetch
+      // 1. The device supports framebuffer fetch, or the final target can
+      //    continue the MSAA pass and no root blend needs a backdrop read.
       // 2. There are no more backdrop filters
       // 3. The current render pass is for the onscreen pass.
       const bool should_use_onscreen =
-          renderer_.GetDeviceCapabilities().SupportsFramebufferFetch() &&
+          (renderer_.GetDeviceCapabilities().SupportsFramebufferFetch() ||
+           can_finish_on_external_target_) &&
           backdrop_count_ == 0 && render_passes_.size() == 1u;
       input_texture = FlipBackdrop(
           GetGlobalPassPosition(),                                //
@@ -2578,6 +2582,9 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
   }
 
   if (should_use_onscreen) {
+    if (can_finish_on_external_target_) {
+      render_target_.UseExternalMSAA4ForContinuedPass();
+    }
     ColorAttachment color0 = render_target_.GetColorAttachment(0);
     // When MSAA is being used, we end up overriding the entire backdrop by
     // drawing the previous pass texture, and so we don't have to clear it and

@@ -19,6 +19,8 @@ class AiksContext;
 
 namespace flutter {
 
+class DisplayList;
+
 //------------------------------------------------------------------------------
 /// @brief      Describes a surface whose backing store is managed by the
 ///             embedder. The type of surface depends on the client rendering
@@ -63,6 +65,11 @@ class EmbedderRenderTarget {
   /// @return     The Impeller render target.
   ///
   virtual impeller::RenderTarget* GetImpellerRenderTarget() const = 0;
+
+  /// Returns a copy for this draw. An embedder may reconfigure an external
+  /// framebuffer between uses of a cached backing store.
+  impeller::RenderTarget GetImpellerRenderTargetForDisplayList(
+      const DisplayList& display_list) const;
 
   //----------------------------------------------------------------------------
   /// @brief      Returns the AiksContext that should be used for rendering, if

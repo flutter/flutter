@@ -150,6 +150,9 @@ void RenderTarget::IterateAllAttachments(
 }
 
 SampleCount RenderTarget::GetSampleCount() const {
+  if (use_external_sample_count_ && HasVerifiedExternalMSAA4()) {
+    return SampleCount::kCount4;
+  }
   if (color0_.has_value()) {
     return color0_.value().texture->GetTextureDescriptor().sample_count;
   }

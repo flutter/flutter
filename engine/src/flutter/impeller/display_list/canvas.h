@@ -138,7 +138,8 @@ class Canvas {
                   const RenderTarget& render_target,
                   bool is_onscreen,
                   bool requires_readback,
-                  IRect32 cull_rect);
+                  IRect32 cull_rect,
+                  bool can_finish_on_external_target = false);
 
   ~Canvas() = default;
 
@@ -307,6 +308,7 @@ class Canvas {
   RenderTarget render_target_;
   const bool is_onscreen_;
   bool requires_readback_;
+  const bool can_finish_on_external_target_ = false;
   EntityPassClipStack clip_coverage_stack_;
 
   std::deque<CanvasStackEntry> transform_stack_;

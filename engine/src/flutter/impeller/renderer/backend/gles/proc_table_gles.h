@@ -199,6 +199,7 @@ struct GLProc {
   PROC(GetBooleanv);                         \
   PROC(GetFloatv);                           \
   PROC(GetFramebufferAttachmentParameteriv); \
+  PROC(GetRenderbufferParameteriv);          \
   PROC(GetIntegerv);                         \
   PROC(GetProgramInfoLog);                   \
   PROC(GetProgramiv);                        \

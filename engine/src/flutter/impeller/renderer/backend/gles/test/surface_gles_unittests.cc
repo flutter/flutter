@@ -29,4 +29,30 @@ TEST_P(SurfaceGLESTest, CanWrapNonZeroFBO) {
   ASSERT_EQ(wrapped.value(), fbo);
 }
 
+TEST_P(SurfaceGLESTest, ContinuedMSAAPassUsesOnlyVerifiedAttachment) {
+  auto wrap = [&](GLuint fbo) {
+    return SurfaceGLES::WrapFBO(GetContext(), [] { return true; }, fbo,
+                                PixelFormat::kB8G8R8A8UNormInt, {100, 100});
+  };
+  auto first = wrap(1);
+  auto second = wrap(2);
+  ASSERT_TRUE(first && second);
+  auto target = first->GetRenderTarget();
+  EXPECT_FALSE(target.HasVerifiedExternalMSAA4());
+  target.UseExternalMSAA4ForContinuedPass();
+  EXPECT_EQ(target.GetSampleCount(), SampleCount::kCount1);
+  target.SetVerifiedExternalMSAA4(target.GetColorAttachment(0).texture);
+  EXPECT_TRUE(target.HasVerifiedExternalMSAA4());
+  EXPECT_EQ(target.GetSampleCount(), SampleCount::kCount1);
+
+  auto continued = target;
+  continued.UseExternalMSAA4ForContinuedPass();
+  EXPECT_EQ(continued.GetSampleCount(), SampleCount::kCount4);
+  EXPECT_EQ(target.GetSampleCount(), SampleCount::kCount1);
+  continued.SetColorAttachment(second->GetRenderTarget().GetColorAttachment(0),
+                               0);
+  EXPECT_FALSE(continued.HasVerifiedExternalMSAA4());
+  EXPECT_EQ(continued.GetSampleCount(), SampleCount::kCount1);
+}
+
 }  // namespace impeller::testing

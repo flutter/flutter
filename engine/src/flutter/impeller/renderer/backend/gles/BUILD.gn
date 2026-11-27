@@ -108,6 +108,7 @@ impeller_component("gles") {
     "texture_gles.h",
     "unique_handle_gles.cc",
     "unique_handle_gles.h",
+    "windows_backdrop_target.h",
   ]
 
   if (!is_android && !is_fuchsia) {

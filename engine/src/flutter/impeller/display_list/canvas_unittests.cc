@@ -23,7 +23,8 @@ namespace testing {
 std::unique_ptr<Canvas> CreateTestCanvas(
     ContentContext& context,
     std::optional<Rect> cull_rect = std::nullopt,
-    bool requires_readback = false) {
+    bool requires_readback = false,
+    bool can_finish_on_external_target = false) {
   TextureDescriptor onscreen_desc;
   onscreen_desc.size = {100, 100};
   onscreen_desc.format =
@@ -56,6 +57,13 @@ std::unique_ptr<Canvas> CreateTestCanvas(
   RenderTarget render_target;
   render_target.SetColorAttachment(color0, 0);
 
+  if (can_finish_on_external_target) {
+    return std::make_unique<Canvas>(
+        context, render_target, /*is_onscreen=*/false, requires_readback,
+        IRect32::RoundOut(
+            cull_rect.value_or(Rect::MakeSize(onscreen_desc.size))),
+        can_finish_on_external_target);
+  }
   if (cull_rect.has_value()) {
     return std::make_unique<Canvas>(
         context, render_target, /*is_onscreen=*/false,
@@ -168,6 +176,32 @@ TEST_P(AiksTest, BackdropCountDownNormal) {
                     /*total_content_depth=*/1);
   canvas->Restore();
   EXPECT_FALSE(canvas->RequiresReadback());
+}
+
+TEST_P(AiksTest, LastExternalBackdropWithoutFramebufferFetch) {
+  auto& context = GetContentContext();
+  if (context.GetDeviceCapabilities().SupportsFramebufferFetch() ||
+      !context.GetDeviceCapabilities().SupportsOffscreenMSAA()) {
+    GTEST_SKIP() << "Requires offscreen MSAA without framebuffer fetch.";
+  }
+  const auto blur =
+      flutter::DlImageFilter::MakeBlur(4, 4, flutter::DlTileMode::kClamp);
+  const auto rect = Rect::MakeXYWH(0, 0, 50, 50);
+  for (const bool can_finish : {false, true}) {
+    auto canvas = CreateTestCanvas(context, std::nullopt,
+                                   /*requires_readback=*/true, can_finish);
+    canvas->SetBackdropData({}, 2);
+    canvas->DrawRect(rect, {.color = Color::Azure()});
+    canvas->SaveLayer({}, rect, blur.get(),
+                      ContentBoundsPromise::kContainsContents, 1);
+    canvas->Restore();
+    EXPECT_TRUE(canvas->RequiresReadback());
+    canvas->SaveLayer({}, rect, blur.get(),
+                      ContentBoundsPromise::kContainsContents, 1);
+    canvas->Restore();
+    EXPECT_EQ(!can_finish, canvas->RequiresReadback());
+    canvas->EndReplay();
+  }
 }
 
 TEST_P(AiksTest, BackdropCountDownBackdropId) {
