@@ -223,10 +223,8 @@ class AccessibilityBridge
                                              const SemanticsNode& node);
   void SetIntAttributesFromFlutterUpdate(ui::AXNodeData& node_data,
                                          const SemanticsNode& node);
-  void SetIntListAttributesFromFlutterUpdate(ui::AXNodeData& node_data,
-                                             const SemanticsNode& node);
-  void SetStringListAttributesFromFlutterUpdate(ui::AXNodeData& node_data,
-                                                const SemanticsNode& node);
+  void SetCustomActionsFromFlutterUpdate(ui::AXNodeData& node_data,
+                                         const SemanticsNode& node);
   void SetIdentifierFromFlutterUpdate(ui::AXNodeData& node_data,
                                       const SemanticsNode& node);
   void SetNameFromFlutterUpdate(ui::AXNodeData& node_data,

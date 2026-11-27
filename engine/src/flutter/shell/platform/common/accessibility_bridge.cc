@@ -289,8 +289,7 @@ void AccessibilityBridge::ConvertFlutterUpdate(const SemanticsNode& node,
   SetActionsFromFlutterUpdate(node_data, node);
   SetBooleanAttributesFromFlutterUpdate(node_data, node);
   SetIntAttributesFromFlutterUpdate(node_data, node);
-  SetIntListAttributesFromFlutterUpdate(node_data, node);
-  SetStringListAttributesFromFlutterUpdate(node_data, node);
+  SetCustomActionsFromFlutterUpdate(node_data, node);
   SetIdentifierFromFlutterUpdate(node_data, node);
   SetNameFromFlutterUpdate(node_data, node);
   SetValueFromFlutterUpdate(node_data, node);
@@ -429,9 +428,6 @@ void AccessibilityBridge::SetActionsFromFlutterUpdate(
                     kFlutterSemanticsActionDidLoseAccessibilityFocus) {
     node_data.AddAction(ax::mojom::Action::kClearAccessibilityFocus);
   }
-  if (actions & FlutterSemanticsAction::kFlutterSemanticsActionCustomAction) {
-    node_data.AddAction(ax::mojom::Action::kCustomAction);
-  }
 }
 
 void AccessibilityBridge::SetBooleanAttributesFromFlutterUpdate(
@@ -497,36 +493,31 @@ void AccessibilityBridge::SetIntAttributesFromFlutterUpdate(
   }
 }
 
-void AccessibilityBridge::SetIntListAttributesFromFlutterUpdate(
+void AccessibilityBridge::SetCustomActionsFromFlutterUpdate(
     ui::AXNodeData& node_data,
     const SemanticsNode& node) {
-  FlutterSemanticsAction actions = node.actions;
-  if (actions & FlutterSemanticsAction::kFlutterSemanticsActionCustomAction) {
-    std::vector<int32_t> custom_action_ids;
-    custom_action_ids.reserve(node.custom_accessibility_actions.size());
-    for (size_t i = 0; i < node.custom_accessibility_actions.size(); i++) {
-      custom_action_ids.push_back(node.custom_accessibility_actions[i]);
-    }
-    node_data.AddIntListAttribute(ax::mojom::IntListAttribute::kCustomActionIds,
-                                  custom_action_ids);
+  if (!(node.actions & kFlutterSemanticsActionCustomAction)) {
+    return;
   }
-}
 
-void AccessibilityBridge::SetStringListAttributesFromFlutterUpdate(
-    ui::AXNodeData& node_data,
-    const SemanticsNode& node) {
-  FlutterSemanticsAction actions = node.actions;
-  if (actions & FlutterSemanticsAction::kFlutterSemanticsActionCustomAction) {
-    std::vector<std::string> custom_action_description;
-    for (size_t i = 0; i < node.custom_accessibility_actions.size(); i++) {
-      auto iter = pending_semantics_custom_action_updates_.find(
-          node.custom_accessibility_actions[i]);
-      BASE_DCHECK(iter != pending_semantics_custom_action_updates_.end());
-      custom_action_description.push_back(iter->second.label);
+  std::vector<int32_t> ids;
+  std::vector<std::string> descriptions;
+  for (int32_t id : node.custom_accessibility_actions) {
+    const auto action = pending_semantics_custom_action_updates_.find(id);
+    // Keep the IDs and their descriptions in the same order. A reference
+    // without a definition in this update cannot describe a custom action.
+    if (action != pending_semantics_custom_action_updates_.end()) {
+      ids.push_back(id);
+      descriptions.push_back(action->second.label);
     }
+  }
+  if (!ids.empty()) {
+    node_data.AddAction(ax::mojom::Action::kCustomAction);
+    node_data.AddIntListAttribute(ax::mojom::IntListAttribute::kCustomActionIds,
+                                  ids);
     node_data.AddStringListAttribute(
         ax::mojom::StringListAttribute::kCustomActionDescriptions,
-        custom_action_description);
+        descriptions);
   }
 }
 
