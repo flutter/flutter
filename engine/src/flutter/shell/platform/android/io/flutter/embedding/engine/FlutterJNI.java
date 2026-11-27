@@ -191,6 +191,17 @@ public class FlutterJNI {
 
   private static boolean prefetchDefaultFontManagerCalled = false;
 
+  private static native void nativeSetUpdatedSystemFontsXml(@NonNull String path);
+
+  /**
+   * Registers a version-21 fonts XML listing system fonts updated outside /system (e.g. emoji
+   * updated by Google Play into /data/fonts). Must be called before {@link
+   * #prefetchDefaultFontManager()}; the default font manager is created only once.
+   */
+  public void setUpdatedSystemFontsXml(@NonNull String path) {
+    FlutterJNI.nativeSetUpdatedSystemFontsXml(path);
+  }
+
   private static native void nativeInit(
       @NonNull Context context,
       @NonNull String[] args,

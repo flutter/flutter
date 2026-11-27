@@ -28,6 +28,7 @@
 #include "impeller/base/validation.h"
 #include "impeller/toolkit/android/proc_table.h"
 #include "txt/platform.h"
+#include "txt/platform_android.h"
 
 namespace flutter {
 
@@ -240,6 +241,12 @@ static void PrefetchDefaultFontManager(JNIEnv* env, jclass jcaller) {
   txt::GetDefaultFontManager();
 }
 
+static void SetUpdatedSystemFontsXml(JNIEnv* env,
+                                     jclass jcaller,
+                                     jstring path) {
+  txt::SetUpdatedSystemFontsXml(fml::jni::JavaStringToString(env, path));
+}
+
 bool FlutterMain::Register(JNIEnv* env) {
   static const JNINativeMethod methods[] = {
       {
@@ -252,6 +259,11 @@ bool FlutterMain::Register(JNIEnv* env) {
           .name = "nativePrefetchDefaultFontManager",
           .signature = "()V",
           .fnPtr = reinterpret_cast<void*>(&PrefetchDefaultFontManager),
+      },
+      {
+          .name = "nativeSetUpdatedSystemFontsXml",
+          .signature = "(Ljava/lang/String;)V",
+          .fnPtr = reinterpret_cast<void*>(&SetUpdatedSystemFontsXml),
       },
   };
 

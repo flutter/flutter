@@ -74,6 +74,7 @@ executable("flutter_shell_native_unittests") {
     "//flutter/testing:testing_lib",
     "//flutter/third_party/googletest:gmock",
     "//flutter/third_party/googletest:gtest",
+    "//flutter/txt:android_unittests",
   ]
 }
 

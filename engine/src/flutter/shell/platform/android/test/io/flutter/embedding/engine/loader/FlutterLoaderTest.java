@@ -4,6 +4,7 @@
 
 package io.flutter.embedding.engine.loader;
 
+import static io.flutter.Build.API_LEVELS;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
@@ -26,15 +27,22 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.shadows.ShadowLooper.shadowMainLooper;
 
+import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.graphics.fonts.Font;
+import android.graphics.fonts.FontStyle;
+import android.graphics.fonts.SystemFonts;
 import android.os.Bundle;
+import android.os.LocaleList;
 import android.util.DisplayMetrics;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.FlutterJNI;
+import io.flutter.util.PathUtils;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -42,10 +50,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.robolectric.annotation.Config;
 
 @RunWith(AndroidJUnit4.class)
 public class FlutterLoaderTest {
@@ -747,15 +760,17 @@ public class FlutterLoaderTest {
     ctx.getApplicationInfo().nativeLibraryDir =
         Paths.get("some", "path", "doesnt", "matter").toString();
     assertFalse(flutterLoader.initialized());
-    flutterLoader.startInitialization(ctx);
 
     File realSoFile = File.createTempFile("real", ".so", internalStorageDir);
     File spySymlinkFile = spy(new File(internalStorageDir, "symlink_to_real.so"));
     Files.deleteIfExists(spySymlinkFile.toPath());
 
-    // Simulate a symlink since some filesystems do not support symlinks.
-    when(flutterLoader.getFileFromPath(spySymlinkFile.getPath())).thenReturn(spySymlinkFile);
+    // Simulate a symlink since some filesystems do not support symlinks. Stub the loader before
+    // startInitialization: Mockito stubbing races with spy calls made by the init thread
+    String symlinkPath = spySymlinkFile.getPath();
+    doReturn(spySymlinkFile).when(flutterLoader).getFileFromPath(symlinkPath);
     doReturn(realSoFile.getCanonicalPath()).when(spySymlinkFile).getCanonicalPath();
+    flutterLoader.startInitialization(ctx);
 
     Bundle metadata = new Bundle();
     metadata.putString(
@@ -806,7 +821,6 @@ public class FlutterLoaderTest {
     ctx.getApplicationInfo().nativeLibraryDir =
         Paths.get("some", "path", "doesnt", "matter").toString();
     assertFalse(flutterLoader.initialized());
-    flutterLoader.startInitialization(ctx);
 
     File nonSoFile = File.createTempFile("real", ".somethingElse", internalStorageDir);
     File fileJustOutsideInternalStorage =
@@ -815,14 +829,18 @@ public class FlutterLoaderTest {
     List<File> unsafeFiles = Arrays.asList(nonSoFile, fileJustOutsideInternalStorage);
     Files.deleteIfExists(spySymlinkFile.toPath());
 
+    // Simulate a symlink since some filesystems do not support symlinks. Stub the loader before
+    // startInitialization: Mockito stubbing races with spy calls made by the init thread
+    String symlinkPath = spySymlinkFile.getPath();
+    doReturn(spySymlinkFile).when(flutterLoader).getFileFromPath(symlinkPath);
+    flutterLoader.startInitialization(ctx);
+
     Bundle metadata = new Bundle();
     metadata.putString(
         "io.flutter.embedding.android.AOTSharedLibraryName", spySymlinkFile.getAbsolutePath());
     ctx.getApplicationInfo().metaData = metadata;
 
     for (File unsafeFile : unsafeFiles) {
-      // Simulate a symlink since some filesystems do not support symlinks.
-      when(flutterLoader.getFileFromPath(spySymlinkFile.getPath())).thenReturn(spySymlinkFile);
       doReturn(unsafeFile.getCanonicalPath()).when(spySymlinkFile).getCanonicalPath();
 
       flutterLoader.ensureInitializationComplete(ctx, null);
@@ -1723,5 +1741,212 @@ public class FlutterLoaderTest {
               + "' was found in the arguments passed to FlutterJNI.init",
           arguments.contains(expectedArg));
     }
+  }
+
+  @Test
+  @Config(sdk = API_LEVELS.API_31)
+  @TargetApi(API_LEVELS.API_31)
+  public void deletesStaleUpdatedSystemFontsXmlAndSkipsJniWhenNoUpdatedFonts() throws Exception {
+    File cacheDir = new File(PathUtils.getCacheDirectory(ctx));
+    File xmlFile = new File(cacheDir, "updated_system_fonts.xml");
+    Files.write(xmlFile.toPath(), "<stale/>".getBytes(StandardCharsets.UTF_8));
+    assertTrue(xmlFile.exists());
+
+    Font systemFont = mock(Font.class);
+    when(systemFont.getFile()).thenReturn(new File("/system/fonts/Roboto-Regular.ttf"));
+    Font memoryFont = mock(Font.class);
+    when(memoryFont.getFile()).thenReturn(null);
+
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+    try {
+      FlutterLoader flutterLoader = spy(new FlutterLoader(mockFlutterJNI, executor));
+      doReturn(Arrays.asList(systemFont, memoryFont)).when(flutterLoader).getAvailableSystemFonts();
+
+      flutterLoader.startInitialization(ctx);
+      flutterLoader.ensureInitializationComplete(ctx, null);
+      shadowMainLooper().idle();
+      executor.shutdown();
+      assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
+    } finally {
+      executor.shutdownNow();
+    }
+
+    assertFalse(xmlFile.exists());
+    verify(mockFlutterJNI, never()).setUpdatedSystemFontsXml(anyString());
+    verify(mockFlutterJNI, times(1)).prefetchDefaultFontManager();
+
+    Files.write(xmlFile.toPath(), "<stale/>".getBytes(StandardCharsets.UTF_8));
+    assertNull(FlutterLoader.writeUpdatedSystemFontsXml(ctx, null, new File("/system/fonts")));
+    assertFalse(xmlFile.exists());
+  }
+
+  // A throwing SystemFonts (Robolectric legacy graphics) must yield null, so initialization falls
+  // back to /system fonts. Static mocks are thread-local, hence the direct call on this thread
+  @Test
+  @Config(sdk = API_LEVELS.API_31)
+  @TargetApi(API_LEVELS.API_31)
+  public void getAvailableSystemFontsReturnsNullWhenListingSystemFontsThrows() {
+    FlutterLoader flutterLoader = new FlutterLoader(mock(FlutterJNI.class));
+    try (MockedStatic<SystemFonts> systemFonts = Mockito.mockStatic(SystemFonts.class)) {
+      systemFonts.when(SystemFonts::getAvailableFonts).thenThrow(new NullPointerException());
+
+      assertNull(flutterLoader.getAvailableSystemFonts());
+      systemFonts.verify(SystemFonts::getAvailableFonts);
+    }
+  }
+
+  @Test
+  @Config(sdk = API_LEVELS.API_31)
+  @TargetApi(API_LEVELS.API_31)
+  public void writesUpdatedSystemFontsXmlBeforePrefetchingDefaultFontManager() throws Exception {
+    Font systemFont = mock(Font.class);
+    when(systemFont.getFile()).thenReturn(new File("/system/fonts/NotoColorEmoji.ttf"));
+
+    Font updatedEmoji = mock(Font.class);
+    when(updatedEmoji.getFile()).thenReturn(new File("/data/fonts/files/~~abc/NotoColorEmoji.ttf"));
+    when(updatedEmoji.getStyle())
+        .thenReturn(new FontStyle(FontStyle.FONT_WEIGHT_NORMAL, FontStyle.FONT_SLANT_UPRIGHT));
+    when(updatedEmoji.getLocaleList()).thenReturn(LocaleList.forLanguageTags("und-Zsye,ja-JP"));
+    when(updatedEmoji.getTtcIndex()).thenReturn(0);
+
+    LocaleList specialLocales = mock(LocaleList.class);
+    when(specialLocales.toLanguageTags()).thenReturn("zh-Hans,x\"y");
+    Font updatedItalicTtc = mock(Font.class);
+    when(updatedItalicTtc.getFile())
+        .thenReturn(new File("/data/fonts/files/~~a&b<c>/Font\"1'.ttc"));
+    when(updatedItalicTtc.getStyle())
+        .thenReturn(new FontStyle(FontStyle.FONT_WEIGHT_BOLD, FontStyle.FONT_SLANT_ITALIC));
+    when(updatedItalicTtc.getLocaleList()).thenReturn(specialLocales);
+    when(updatedItalicTtc.getTtcIndex()).thenReturn(2);
+
+    // A new named family installed into /data/fonts replaces no system file, so it is skipped
+    Font newGoogleSans = mock(Font.class);
+    when(newGoogleSans.getFile())
+        .thenReturn(new File("/data/fonts/files/~~gs/GoogleSans-Regular.ttf"));
+    when(newGoogleSans.getStyle())
+        .thenReturn(new FontStyle(FontStyle.FONT_WEIGHT_NORMAL, FontStyle.FONT_SLANT_UPRIGHT));
+    when(newGoogleSans.getLocaleList()).thenReturn(LocaleList.getEmptyLocaleList());
+
+    File systemFontsDir =
+        createSystemFontsDir("NotoColorEmoji.ttf", "Font\"1'.ttc", "Roboto-Regular.ttf");
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+    try {
+      FlutterLoader flutterLoader = spy(new FlutterLoader(mockFlutterJNI, executor));
+      doReturn(Arrays.asList(systemFont, updatedEmoji, newGoogleSans, updatedItalicTtc))
+          .when(flutterLoader)
+          .getAvailableSystemFonts();
+      doReturn(systemFontsDir).when(flutterLoader).getSystemFontsDir();
+
+      flutterLoader.startInitialization(ctx);
+      flutterLoader.ensureInitializationComplete(ctx, null);
+      shadowMainLooper().idle();
+      executor.shutdown();
+      assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
+    } finally {
+      executor.shutdownNow();
+    }
+
+    File cacheDir = new File(PathUtils.getCacheDirectory(ctx));
+    File xmlFile = new File(cacheDir, "updated_system_fonts.xml");
+    assertTrue(xmlFile.exists());
+    assertEquals(0, countUpdatedSystemFontsTempFiles(cacheDir));
+
+    String expectedXml =
+        "<familyset version=\"21\">\n"
+            + "<family lang=\"und-Zsye ja-JP\">"
+            + "<font weight=\"400\" style=\"normal\" index=\"0\">"
+            + "/data/fonts/files/~~abc/NotoColorEmoji.ttf"
+            + "</font></family>\n"
+            + "<family lang=\"zh-Hans x&quot;y\">"
+            + "<font weight=\"700\" style=\"italic\" index=\"2\">"
+            + "/data/fonts/files/~~a&amp;b&lt;c&gt;/Font&quot;1&#39;.ttc"
+            + "</font></family>\n"
+            + "</familyset>\n";
+    String actualXml = new String(Files.readAllBytes(xmlFile.toPath()), StandardCharsets.UTF_8);
+    assertEquals(expectedXml, actualXml);
+
+    InOrder inOrder = Mockito.inOrder(mockFlutterJNI);
+    inOrder.verify(mockFlutterJNI).loadLibrary(ctx);
+    inOrder.verify(mockFlutterJNI).setUpdatedSystemFontsXml(xmlFile.getAbsolutePath());
+    inOrder.verify(mockFlutterJNI).prefetchDefaultFontManager();
+  }
+
+  // Below API 31 the platform has no updated system fonts, so initialization must not list
+  // fonts or call into the engine for them, and must still prefetch the font manager
+  @Test
+  @Config(sdk = API_LEVELS.API_30)
+  public void skipsUpdatedSystemFontsBelowApi31() throws Exception {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+    FlutterLoader flutterLoader = spy(new FlutterLoader(mockFlutterJNI, executor));
+    try {
+      flutterLoader.startInitialization(ctx);
+      flutterLoader.ensureInitializationComplete(ctx, null);
+      shadowMainLooper().idle();
+      executor.shutdown();
+      assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
+    } finally {
+      executor.shutdownNow();
+    }
+
+    verify(flutterLoader, never()).getAvailableSystemFonts();
+    verify(mockFlutterJNI, never()).setUpdatedSystemFontsXml(anyString());
+    verify(mockFlutterJNI, times(1)).prefetchDefaultFontManager();
+  }
+
+  // A failed write (here the XML path is a non-empty directory, so the rename fails) must skip
+  // the engine call, leave no temp file behind, and still prefetch the font manager
+  @Test
+  @Config(sdk = API_LEVELS.API_31)
+  @TargetApi(API_LEVELS.API_31)
+  public void skipsJniAndCleansUpWhenUpdatedSystemFontsXmlCannotBeWritten() throws Exception {
+    File cacheDir = new File(PathUtils.getCacheDirectory(ctx));
+    File xmlFile = new File(cacheDir, "updated_system_fonts.xml");
+    assertTrue(xmlFile.mkdirs());
+    Files.write(new File(xmlFile, "child").toPath(), new byte[] {1});
+
+    Font updatedEmoji = mock(Font.class);
+    when(updatedEmoji.getFile()).thenReturn(new File("/data/fonts/files/~~abc/NotoColorEmoji.ttf"));
+    when(updatedEmoji.getStyle())
+        .thenReturn(new FontStyle(FontStyle.FONT_WEIGHT_NORMAL, FontStyle.FONT_SLANT_UPRIGHT));
+    when(updatedEmoji.getLocaleList()).thenReturn(LocaleList.forLanguageTags("und-Zsye"));
+
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+    try {
+      FlutterLoader flutterLoader = spy(new FlutterLoader(mockFlutterJNI, executor));
+      doReturn(Arrays.asList(updatedEmoji)).when(flutterLoader).getAvailableSystemFonts();
+      doReturn(createSystemFontsDir("NotoColorEmoji.ttf")).when(flutterLoader).getSystemFontsDir();
+
+      flutterLoader.startInitialization(ctx);
+      flutterLoader.ensureInitializationComplete(ctx, null);
+      shadowMainLooper().idle();
+      executor.shutdown();
+      assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
+    } finally {
+      executor.shutdownNow();
+    }
+
+    verify(mockFlutterJNI, never()).setUpdatedSystemFontsXml(anyString());
+    verify(mockFlutterJNI, times(1)).prefetchDefaultFontManager();
+    assertEquals(0, countUpdatedSystemFontsTempFiles(cacheDir));
+  }
+
+  private File createSystemFontsDir(String... fileNames) throws Exception {
+    File dir = new File(ctx.getFilesDir(), "system_fonts");
+    assertTrue(dir.isDirectory() || dir.mkdirs());
+    for (String name : fileNames) {
+      Files.write(new File(dir, name).toPath(), new byte[] {0});
+    }
+    return dir;
+  }
+
+  private static int countUpdatedSystemFontsTempFiles(File cacheDir) {
+    File[] tempFiles =
+        cacheDir.listFiles(
+            (dir, name) -> name.startsWith("updated_system_fonts.xml") && name.endsWith(".tmp"));
+    return tempFiles == null ? 0 : tempFiles.length;
   }
 }
