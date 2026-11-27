@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 
 void main() => runApp(const DataTableExampleApp());
 
-/// An example application that showcases a [DataTable] with single-column sorting.
+/// An example app that shows a [DataTable] sorted by a single column.
 class DataTableExampleApp extends StatelessWidget {
   const DataTableExampleApp({super.key});
 
@@ -53,10 +53,12 @@ class _DataTableExampleState extends State<DataTableExample> {
   /// The column the rows are currently sorted by, or null if not sorted.
   int? _sortColumnIndex;
 
-  /// The order in which the rows are currently sorted.
+  /// Whether the rows are sorted in ascending order.
   bool _sortAscending = true;
 
-  /// DataTable only draws the sort arrow; reordering the rows is up to the app.
+  /// Sorts the rows with [compare] and records the sort column and direction.
+  ///
+  /// [DataTable] only draws the sort arrow; reordering the rows is up to the app.
   void _sort(int columnIndex, bool ascending, Comparator<Person> compare) {
     setState(() {
       _people.sort(
