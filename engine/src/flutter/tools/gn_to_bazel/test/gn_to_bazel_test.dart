@@ -11146,7 +11146,7 @@ build:ios_debug_sim_extension_safe --compilation_mode=opt --//engine/src/flutter
 
 # mac_ios_engine.json: ci/ios_release
 #   --target-dir ci/ios_release --ios --runtime-mode release --xcode-symlinks
-build:ios_release --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_release --//engine/src/flutter/build/bazel:lto
+build:ios_release --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_release --//engine/src/flutter/build/bazel:lto --apple_generate_dsym
 
 # local_engine.json: macos/wasm_release
 #   --web --runtime-mode=release --no-rbe --no-goma

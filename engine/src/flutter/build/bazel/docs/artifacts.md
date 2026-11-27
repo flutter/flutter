@@ -154,6 +154,21 @@ dSYM made without either half has a symbol table and no DWARF. The
 sources the map and the DWARF name are relative to the execution root as
 well (`-ffile-compilation-dir=.`, `docs/toolchains.md`).
 
+A link with LTO takes its code from one object the linker compiles
+itself, and the map names that object too. GN's link tool for shared
+libraries tells the linker where to keep it
+(`-Wl,-object_path_lto,lto_<name>.o`). A Bazel link can leave a file only
+where its rule declared one, and `cc_binary` declares one such place, the
+directory it sets aside for a dSYM under `--apple_generate_dsym`. The
+Apple toolchains have a shared library's link keep the object there
+(`<binary>.dSYM/0.<arch>.lto.o`; the directory holds nothing else, and no
+dSYM), and the aspect passes it on with the link's inputs. The iOS device
+configurations, the Apple builds with LTO, pass the flag. Without it the
+linker names `/tmp/lto.tmp`, writes nothing there, and a dSYM would have
+the debug information of the inputs that were not bitcode -- assembly,
+Swift -- and of nothing else; a universal target or an install that is to
+make a dSYM over such a link fails instead.
+
 The tool's tests over these directories are the apple shard
 (`//:apple_tool_tests`; `packages/flutter_tools/BUILD.bazel`): the 13 files
 of the integration shard that build for macOS or iOS through the tool

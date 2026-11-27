@@ -61,6 +61,10 @@ The wrapped Dart build takes the same two settings as its GN arguments
 (`enable_lto`, `use_thin_lto`), so in a build with LTO the VM is part of
 it, as in GN's: its archives hold bitcode, which the engine's links
 optimize together with the engine's own code.
+On macOS and iOS a build with LTO has a third flag, Bazel's own
+`--apple_generate_dsym` (the iOS device configurations carry it): a
+shared library's link then keeps the object LTO compiles, which a dSYM's
+debug information comes from (`docs/artifacts.md`).
 There is no component build: `.bazelrc` sets `--force_pic` and
 `--dynamic_mode=off`, as GN links everything statically with `-fPIC`.
 

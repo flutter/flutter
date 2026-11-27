@@ -254,12 +254,16 @@ def _gn_build_product(ctx):
 def _build_directory_aspect_impl(target, ctx):
     transitive = []
     link_inputs = []
+    without_lto_object = []
     for attribute in _FOLLOWED_ATTRIBUTES:
         for dep in _targets_of(getattr(ctx.rule.attr, attribute, None)):
             if _CollectedInfo in dep:
                 transitive.append(dep[_CollectedInfo].entries)
                 if dep[_CollectedInfo].link_inputs != None:
                     link_inputs.append(dep[_CollectedInfo].link_inputs)
+                if dep[_CollectedInfo].without_lto_object != None:
+                    without_lto_object.append(dep[_CollectedInfo].without_lto_object)
+    own_without_lto_object = []
     binary = None
     shipped = {}
     if BuildDirectoryInfo in target:
@@ -280,13 +284,33 @@ def _build_directory_aspect_impl(target, ctx):
             # them when a dSYM is made of the binary (universal.bzl): the
             # link's inputs go where the binary goes.
             link_inputs.extend([action.inputs for action in target.actions if action.mnemonic == "CppLink"])
+
+            # The code of a link with LTO comes from one object the linker
+            # compiles itself, which the map names as well. A shared
+            # library's link keeps it in the directory cc_binary declares
+            # under --apple_generate_dsym, the `dsyms` output group
+            # (cc_toolchain_config.bzl's _APPLE_LTO_OBJECT_LINK_FLAGS). A
+            # shared library linked with LTO and without that directory
+            # kept no object; it is remembered, and whatever is to make a
+            # dSYM over it fails rather than write one without the linked
+            # code's debug information (collected_link_inputs).
+            groups = target[OutputGroupInfo] if OutputGroupInfo in target else None
+            shared = ctx.rule.kind == "cc_shared_library" or getattr(ctx.rule.attr, "linkshared", False)
+            if groups != None and hasattr(groups, "dsyms"):
+                link_inputs.append(groups.dsyms)
+            elif shared and ctx.attr._lto[BuildSettingInfo].value and ctx.var["COMPILATION_MODE"] == "opt":
+                own_without_lto_object.append(str(target.label))
     else:
         direct = depset()
+    missing = None
+    if own_without_lto_object or without_lto_object:
+        missing = depset(own_without_lto_object, transitive = without_lto_object)
     return [_CollectedInfo(
         entries = depset(transitive = [direct] + transitive),
         binary = binary,
         shipped = shipped,
         link_inputs = depset(transitive = link_inputs) if link_inputs else None,
+        without_lto_object = missing,
     )]
 
 _CollectedInfo = provider(
@@ -297,7 +321,11 @@ _CollectedInfo = provider(
                   "build root and the binary under exe.unstripped/ or lib.unstripped/ -- else None.",
         "shipped": "For a binary: its files mapped to the copies an archive or install ships.",
         "link_inputs": "On macOS and iOS: a depset of the inputs of the links of the executables and shared " +
-                       "libraries in the closure -- the objects and archives their debug maps name -- or None.",
+                       "libraries in the closure -- the objects and archives their debug maps name, and the " +
+                       "directories with the objects their links with LTO kept -- or None.",
+        "without_lto_object": "On macOS and iOS: a depset of the labels of the shared libraries in the closure " +
+                              "that were linked with LTO and kept no LTO object (a build without " +
+                              "--apple_generate_dsym), or None.",
     },
 )
 
@@ -308,6 +336,7 @@ build_directory_aspect = aspect(
     attr_aspects = _FOLLOWED_ATTRIBUTES,
     attrs = {
         "_stripped": attr.label(default = "//engine/src/flutter/build/bazel:stripped"),
+        "_lto": attr.label(default = "//engine/src/flutter/build/bazel:lto"),
         "_android": attr.label(default = "@platforms//os:android"),
         "_macos": attr.label(default = "@platforms//os:macos"),
         "_ios": attr.label(default = "@platforms//os:ios"),
@@ -328,7 +357,10 @@ def collected_link_inputs(target):
     """The inputs of the links of the Mach-O binaries in `target`'s closure, collected by build_directory_aspect.
 
     What dsymutil reads beside a binary: the binary's debug map names the
-    objects and archives its link read.
+    objects and archives its link read, and the object a link with LTO
+    compiled. For the callers that make a dSYM: fails where a shared
+    library in the closure was linked with LTO and kept no such object,
+    since a dSYM over it would lack the linked code's debug information.
 
     Args:
       target: a target the aspect ran on.
@@ -338,7 +370,13 @@ def collected_link_inputs(target):
     """
     if _CollectedInfo not in target:
         return None
-    return target[_CollectedInfo].link_inputs
+    info = target[_CollectedInfo]
+    if info.without_lto_object != None:
+        fail(("%s: a dSYM over %s would have no debug information of the linked code: the link had LTO " +
+              "and kept no LTO object. Build with --apple_generate_dsym, as the iOS device configurations " +
+              "of //engine/src/flutter/ci/builders:configs.bazelrc do, or without LTO.") %
+             (target.label, ", ".join(info.without_lto_object.to_list())))
+    return info.link_inputs
 
 def binary_entries(target):
     """An executable's or shared library's own (file, path) pairs, or None for any other target.

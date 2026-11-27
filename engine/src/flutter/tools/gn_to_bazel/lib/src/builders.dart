@@ -71,8 +71,9 @@ enum GnFlagEffect {
   target,
 
   /// `--lto`/`--no-lto`: whether the optimized build compiles and links
-  /// with LTO: the `lto` setting for the clang toolchains (Linux, Android);
-  /// the wasm platform's optimized build always has it.
+  /// with LTO: the `lto` setting for the clang toolchains (Linux, Android,
+  /// macOS and iOS, where [appleLtoObjectFlag] goes with it); the wasm
+  /// platform's optimized build always has it.
   lto,
 
   /// `--thin-lto`/`--no-thin-lto`: which LTO a build with LTO has, ThinLTO
@@ -360,6 +361,13 @@ const String ltoSetting = '//engine/src/flutter/build/bazel:lto';
 /// The ThinLTO setting of the Bazel build (build/bazel/BUILD.bazel):
 /// -flto=thin in place of -flto, under [ltoSetting].
 const String thinLtoSetting = '//engine/src/flutter/build/bazel:thin_lto';
+
+/// What a build with LTO for macOS or iOS passes beside [ltoSetting]: under
+/// it `cc_binary` declares a directory beside each binary (Bazel's place
+/// for a dSYM), where a shared library's link keeps the object LTO compiles
+/// (cc_toolchain_config.bzl's `_APPLE_LTO_OBJECT_LINK_FLAGS`). A dSYM of
+/// the library takes the linked code's debug information from that object.
+const String appleLtoObjectFlag = '--apple_generate_dsym';
 
 /// testing/run_tests.py's test types, as the Bazel suites that run the same
 /// tests: `dart` is the Dart tests under flutter_tester with the VM
@@ -724,12 +732,21 @@ final class BuilderBuild {
     // --thin-lto (the Linux profile and release builders), which tools/gn
     // reads in a build with LTO alone; the wasm platform links the
     // optimized build with LTO, as GN's web build does, and has no setting
-    // that turns it off.
+    // that turns it off. A build with LTO for macOS or iOS (the iOS device
+    // builders) also passes the flag under which its shared libraries'
+    // links keep the object LTO compiles ([appleLtoObjectFlag]).
     final wasm = platform == '--platforms=$wasmPlatform';
     if (!unoptimized && lto && !wasm) {
       settings.add('--$ltoSetting');
       if (thinLto) {
         settings.add('--$thinLtoSetting');
+      }
+      final bool apple =
+          macosPlatforms.values.any((String p) => platform == '--platforms=$p') ||
+          platform == '--platforms=$iosDevicePlatform' ||
+          iosSimulatorPlatforms.values.any((String p) => platform == '--platforms=$p');
+      if (apple) {
+        settings.add(appleLtoObjectFlag);
       }
     } else if (!unoptimized && !lto && wasm) {
       unsupported.add('--no-lto (the wasm platform links the optimized build with LTO)');

@@ -26,7 +26,10 @@ the reason), `--lto`/`--no-lto` the `lto` setting
 (`//engine/src/flutter/build/bazel:lto`: `-flto` on the compiles and links
 of the clang toolchains; on in an optimized build
 without `--no-lto`, as `tools/gn` has it, which is CI's Android AOT and iOS
-device builds and linux_benchmarks' `ci/host_release_benchmarks`),
+device builds and linux_benchmarks' `ci/host_release_benchmarks`; a macOS
+or iOS build with it also gets Bazel's `--apple_generate_dsym`, under
+which a shared library's link keeps LTO's object for the dSYM,
+`docs/artifacts.md`),
 `--thin-lto` the `thin_lto` setting beside it
 (`//engine/src/flutter/build/bazel:thin_lto`: `-flto=thin` in place of
 `-flto`, in a build with LTO alone, as `tools/gn` passes `use_thin_lto`;

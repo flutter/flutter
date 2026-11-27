@@ -541,6 +541,31 @@ _ASAN_LINK_FLAGS = ["-fsanitize=address"]
 _LTO_FLAGS = ["-flto"]
 _THIN_LTO_FLAGS = ["-flto=thin"]
 
+# Where an Apple shared library's link with LTO keeps the object it
+# compiles its bitcode inputs into. A Mach-O binary holds no DWARF: its
+# debug map names the objects dsymutil is to read. The code of a link
+# with LTO comes from one object the linker makes itself, and unless
+# told where to keep it lld names /tmp/lto.tmp in the map and writes
+# nothing there: a dSYM made of the binary then has the debug
+# information of the few inputs that were not bitcode (assembly, Swift)
+# and none of the linked code's. GN's solink tool gives every shared
+# library a place (-Wl,-object_path_lto,lto_<name>.o in the build
+# directory). A Bazel link leaves a file only where its rule declared
+# one, and cc_binary declares one such place: the directory it sets
+# aside for a dSYM under --apple_generate_dsym, the build variable
+# dsym_path (Bazel's own Apple toolchain has a wrapper run dsymutil into
+# it; this toolchain has no wrapper for a link). The linker keeps the
+# object there, <binary>.dSYM/0.<arch>.lto.o; the map names it from the
+# execution root as it names every other input (-oso_prefix above); and
+# //build_defs/gn:build_directory.bzl's aspect hands the directory to
+# whatever makes a dSYM of the binary, with the link's inputs. Shared
+# libraries alone, as in GN, whose link tool for executables passes no
+# such flag. The Apple builds with LTO, the iOS device configurations of
+# //engine/src/flutter/ci/builders:configs.bazelrc, pass
+# --apple_generate_dsym; without it the variable is not there and the
+# flag is not passed.
+_APPLE_LTO_OBJECT_LINK_FLAGS = ["-Wl,-object_path_lto,%{dsym_path}"]
+
 def _defines(names):
     return ["-D" + name for name in names]
 
@@ -609,6 +634,7 @@ def _impl(ctx):
     lto_flags = _THIN_LTO_FLAGS if ctx.attr.thin_lto else _LTO_FLAGS
     dbg_defines = _DBG_DEFINES
     nodeps_dynamic_library_link_flags = []
+    lto_object_flag_sets = []
     if android:
         compile_flags = _ANDROID_COMPILE_FLAGS + _defines(_ANDROID_DEFINES)
         link_flags = _ANDROID_LINK_FLAGS
@@ -641,6 +667,17 @@ def _impl(ctx):
         executable_link_flags = _IOS_EXECUTABLE_LINK_FLAGS if ios else _MAC_EXECUTABLE_LINK_FLAGS
         executable_link_libs = []
         dynamic_library_link_libs = []
+        lto_object_flag_sets = [
+            flag_set(
+                actions = [ACTION_NAMES.cpp_link_dynamic_library],
+                flag_groups = [
+                    flag_group(
+                        flags = _APPLE_LTO_OBJECT_LINK_FLAGS,
+                        expand_if_available = "dsym_path",
+                    ),
+                ],
+            ),
+        ]
 
         # The SDK's headers, and its frameworks' (a framework's header is
         # found under System/Library/Frameworks/<name>.framework/Headers).
@@ -733,7 +770,7 @@ def _impl(ctx):
             flag_sets = [
                 flag_set(actions = ALL_CC_COMPILE_ACTION_NAMES, flag_groups = [flag_group(flags = lto_flags)]),
                 flag_set(actions = ALL_CC_LINK_ACTION_NAMES, flag_groups = [flag_group(flags = lto_flags)]),
-            ],
+            ] + lto_object_flag_sets,
         ),
         # Compilation modes; Bazel enables exactly one of dbg/opt/fastbuild.
         _mode_feature("dbg", _DBG_COMPILE_FLAGS + _defines(dbg_defines)),

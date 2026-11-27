@@ -397,15 +397,15 @@ build:ios_debug_sim_arm64 --compilation_mode=opt --//engine/src/flutter/common:r
 
 # mac_ios_engine.json: ci/ios_debug
 #   --target-dir ci/ios_debug --ios --runtime-mode debug --no-rbe --xcode-symlinks --bazel --bazel-rbe
-build:ci_ios_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_debug --//engine/src/flutter/build/bazel:lto
+build:ci_ios_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_debug --//engine/src/flutter/build/bazel:lto --apple_generate_dsym
 
 # mac_ios_engine.json: ci/ios_profile
 #   --target-dir ci/ios_profile --ios --runtime-mode profile --no-rbe --xcode-symlinks --bazel --bazel-rbe
-build:ci_ios_profile --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_profile --//engine/src/flutter/build/bazel:lto
+build:ci_ios_profile --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_profile --//engine/src/flutter/build/bazel:lto --apple_generate_dsym
 
 # mac_ios_engine.json: ci/ios_release
 #   --target-dir ci/ios_release --ios --runtime-mode release --no-rbe --xcode-symlinks --bazel --bazel-rbe
-build:ci_ios_release --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_release --//engine/src/flutter/build/bazel:lto
+build:ci_ios_release --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_release --//engine/src/flutter/build/bazel:lto --apple_generate_dsym
 
 # mac_ios_engine.json: ci/ios_debug_sim_extension_safe
 #   --target-dir ci/ios_debug_sim_extension_safe --ios --runtime-mode debug --simulator --no-lto --darwin-extension-safe --no-rbe --xcode-symlinks --bazel --bazel-rbe
@@ -417,15 +417,15 @@ build:ios_debug_sim_arm64_extension_safe --compilation_mode=opt --//engine/src/f
 
 # mac_ios_engine.json: ci/ios_debug_extension_safe
 #   --target-dir ci/ios_debug_extension_safe --ios --runtime-mode debug --darwin-extension-safe --no-rbe --xcode-symlinks --bazel --bazel-rbe
-build:ios_debug_extension_safe --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_debug --//engine/src/flutter/build/bazel:lto
+build:ios_debug_extension_safe --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_debug --//engine/src/flutter/build/bazel:lto --apple_generate_dsym
 
 # mac_ios_engine.json: ci/ios_profile_extension_safe
 #   --target-dir ci/ios_profile_extension_safe --ios --runtime-mode profile --darwin-extension-safe --no-rbe --xcode-symlinks --bazel --bazel-rbe
-build:ios_profile_extension_safe --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_profile --//engine/src/flutter/build/bazel:lto
+build:ios_profile_extension_safe --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_profile --//engine/src/flutter/build/bazel:lto --apple_generate_dsym
 
 # mac_ios_engine.json: ci/ios_release_extension_safe
 #   --target-dir ci/ios_release_extension_safe --ios --runtime-mode release --darwin-extension-safe --no-rbe --xcode-symlinks --bazel --bazel-rbe
-build:ios_release_extension_safe --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_release --//engine/src/flutter/build/bazel:lto
+build:ios_release_extension_safe --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_release --//engine/src/flutter/build/bazel:lto --apple_generate_dsym
 
 # mac_ios_engine_ddm.json: ci/ios_debug_sim_ddm
 #   --target-dir ci/ios_debug_sim_ddm --ios --runtime-mode debug --simulator --no-lto --no-rbe --xcode-symlinks --gn-args=dart_dynamic_modules=true --bazel --bazel-rbe
@@ -437,11 +437,11 @@ build:ios_debug_sim_arm64_ddm --compilation_mode=opt --//engine/src/flutter/comm
 
 # mac_ios_engine_ddm.json: ci/ios_debug_ddm
 #   --target-dir ci/ios_debug_ddm --ios --runtime-mode debug --no-rbe --xcode-symlinks --gn-args=dart_dynamic_modules=true --bazel --bazel-rbe
-build:ios_debug_ddm --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_debug --//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules --//engine/src/flutter/build/bazel:lto
+build:ios_debug_ddm --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_debug --//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules --//engine/src/flutter/build/bazel:lto --apple_generate_dsym
 
 # mac_ios_engine_ddm.json: ci/ios_release_ddm
 #   --target-dir ci/ios_release_ddm --ios --runtime-mode release --no-rbe --xcode-symlinks --gn-args=dart_dynamic_modules=true --bazel --bazel-rbe
-build:ios_release_ddm --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_release --//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules --//engine/src/flutter/build/bazel:lto
+build:ios_release_ddm --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_release --//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules --//engine/src/flutter/build/bazel:lto --apple_generate_dsym
 
 # mac_release_arm64_tests.json: ci/mac_release_arm64_tests
 #   --target-dir ci/mac_release_arm64_tests --mac --mac-cpu arm64 --runtime-mode release --no-lto --prebuilt-dart-sdk --no-rbe --xcode-symlinks --use-glfw-swiftshader --bazel --bazel-rbe
