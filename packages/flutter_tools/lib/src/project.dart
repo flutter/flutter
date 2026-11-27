@@ -340,7 +340,7 @@ class FlutterProject {
       return;
     }
     for (final String entry in manifest.workspace) {
-      for (final Directory entity in _resolveWorkspacePattern(directory, entry)) {
+      for (final Directory entity in resolveWorkspacePattern(directory, entry)) {
         if (entity.childFile('pubspec.yaml').existsSync()) {
           try {
             _workspaceProjects.add(
@@ -366,7 +366,7 @@ class FlutterProject {
   ///
   /// Supports exact relative paths, single-level glob patterns (e.g. `packages/*`),
   /// and recursive multi-level directory descent (`**`).
-  static List<Directory> _resolveWorkspacePattern(Directory root, String pattern) {
+  static List<Directory> resolveWorkspacePattern(Directory root, String pattern) {
     final List<String> segments = pattern
         .replaceAll(r'\', '/')
         .split('/')

@@ -60,7 +60,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             },
             "timeout": 90
@@ -125,7 +125,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             },
             "timeout": 90
@@ -175,7 +175,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             },
             "timeout": 90
@@ -206,7 +206,7 @@
                 "ci/host_profile",
                 "--runtime-mode",
                 "profile",
-                "--thin-lto",
+                "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--rbe",
@@ -226,7 +226,7 @@
                     "ci/host_profile",
                     "--runtime-mode",
                     "profile",
-                    "--thin-lto",
+                    "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--build-embedder-examples",
                     "--no-rbe"
@@ -234,7 +234,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             },
             "timeout": 90
@@ -254,7 +254,7 @@
                 "ci/host_profile_framework",
                 "--runtime-mode",
                 "profile",
-                "--thin-lto",
+                "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--rbe",
@@ -274,7 +274,7 @@
                     "ci/host_profile_framework",
                     "--runtime-mode",
                     "profile",
-                    "--thin-lto",
+                    "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--build-embedder-examples",
                     "--no-rbe"
@@ -282,7 +282,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             },
             "timeout": 90
@@ -302,7 +302,7 @@
                 "ci/host_profile_gen_snapshot",
                 "--runtime-mode",
                 "profile",
-                "--thin-lto",
+                "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--rbe",
@@ -322,7 +322,7 @@
                     "ci/host_profile_gen_snapshot",
                     "--runtime-mode",
                     "profile",
-                    "--thin-lto",
+                    "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--build-embedder-examples",
                     "--no-rbe"
@@ -330,7 +330,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             },
             "timeout": 90
@@ -362,7 +362,7 @@
                 "ci/host_release",
                 "--runtime-mode",
                 "release",
-                "--thin-lto",
+                "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
@@ -384,7 +384,7 @@
                     "ci/host_release",
                     "--runtime-mode",
                     "release",
-                    "--thin-lto",
+                    "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--build-embedder-examples",
                     "--use-glfw-swiftshader",
@@ -393,7 +393,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             },
             "timeout": 90
@@ -413,7 +413,7 @@
                 "ci/host_release_framework",
                 "--runtime-mode",
                 "release",
-                "--thin-lto",
+                "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
@@ -434,7 +434,7 @@
                     "ci/host_release_framework",
                     "--runtime-mode",
                     "release",
-                    "--thin-lto",
+                    "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--build-embedder-examples",
                     "--use-glfw-swiftshader",
@@ -443,7 +443,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             },
             "timeout": 90
@@ -463,7 +463,7 @@
                 "ci/host_release_gen_snapshot",
                 "--runtime-mode",
                 "release",
-                "--thin-lto",
+                "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
@@ -484,7 +484,7 @@
                     "ci/host_release_gen_snapshot",
                     "--runtime-mode",
                     "release",
-                    "--thin-lto",
+                    "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--build-embedder-examples",
                     "--use-glfw-swiftshader",
@@ -493,7 +493,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             },
             "timeout": 90
@@ -560,7 +560,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             },
             "timeout": 90
@@ -613,7 +613,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             },
             "timeout": 90
@@ -665,7 +665,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             },
             "timeout": 90
@@ -699,7 +699,7 @@
                 "arm64",
                 "--runtime-mode",
                 "profile",
-                "--thin-lto",
+                "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--rbe",
                 "--xcode-symlinks"
@@ -721,14 +721,14 @@
                     "arm64",
                     "--runtime-mode",
                     "profile",
-                    "--thin-lto",
+                    "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe"
                 ]
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             },
             "timeout": 90
@@ -751,7 +751,7 @@
                 "arm64",
                 "--runtime-mode",
                 "profile",
-                "--thin-lto",
+                "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--rbe",
                 "--xcode-symlinks"
@@ -773,14 +773,14 @@
                     "arm64",
                     "--runtime-mode",
                     "profile",
-                    "--thin-lto",
+                    "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe"
                 ]
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             },
             "timeout": 90
@@ -803,7 +803,7 @@
                 "arm64",
                 "--runtime-mode",
                 "profile",
-                "--thin-lto",
+                "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--rbe",
                 "--xcode-symlinks"
@@ -825,14 +825,14 @@
                     "arm64",
                     "--runtime-mode",
                     "profile",
-                    "--thin-lto",
+                    "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe"
                 ]
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             },
             "timeout": 90
@@ -867,7 +867,7 @@
                 "arm64",
                 "--runtime-mode",
                 "release",
-                "--thin-lto",
+                "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--rbe",
                 "--xcode-symlinks",
@@ -891,7 +891,7 @@
                     "arm64",
                     "--runtime-mode",
                     "release",
-                    "--thin-lto",
+                    "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
                     "--use-glfw-swiftshader"
@@ -899,7 +899,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             },
             "timeout": 90
@@ -922,7 +922,7 @@
                 "arm64",
                 "--runtime-mode",
                 "release",
-                "--thin-lto",
+                "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--rbe",
                 "--xcode-symlinks",
@@ -945,7 +945,7 @@
                     "arm64",
                     "--runtime-mode",
                     "release",
-                    "--thin-lto",
+                    "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
                     "--use-glfw-swiftshader"
@@ -953,7 +953,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             },
             "timeout": 90
@@ -976,7 +976,7 @@
                 "arm64",
                 "--runtime-mode",
                 "release",
-                "--thin-lto",
+                "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--rbe",
                 "--xcode-symlinks",
@@ -999,7 +999,7 @@
                     "arm64",
                     "--runtime-mode",
                     "release",
-                    "--thin-lto",
+                    "--no-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
                     "--use-glfw-swiftshader"
@@ -1007,7 +1007,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27b52"
                 }
             },
             "timeout": 90

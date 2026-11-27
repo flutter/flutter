@@ -18,7 +18,7 @@ void main() {
     fileSystem = MemoryFileSystem.test();
   });
 
-  testWithoutContext('WebExpressionCompiler handles successful expression compilation', () async {
+  test('WebExpressionCompiler handles successful expression compilation', () async {
     fileSystem.file('compilerOutput').writeAsStringSync('a');
     final ResidentCompiler residentCompiler = FakeResidentCompiler(
       const CompilerOutput('compilerOutput', 0, <Uri>[]),
@@ -43,7 +43,7 @@ void main() {
     expectResult(result, false, 'a');
   });
 
-  testWithoutContext('WebExpressionCompiler handles compilation error', () async {
+  test('WebExpressionCompiler handles compilation error', () async {
     fileSystem.file('compilerOutput').writeAsStringSync('Error: a');
     final ResidentCompiler residentCompiler = FakeResidentCompiler(
       const CompilerOutput('compilerOutput', 1, <Uri>[]),
@@ -68,7 +68,7 @@ void main() {
     expectResult(result, true, 'Error: a');
   });
 
-  testWithoutContext('WebExpressionCompiler handles internal error', () async {
+  test('WebExpressionCompiler handles internal error', () async {
     final ResidentCompiler residentCompiler = FakeResidentCompiler(null);
     final ExpressionCompiler expressionCompiler = WebExpressionCompiler(
       residentCompiler,

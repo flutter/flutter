@@ -361,6 +361,12 @@ int? _findMatchingClosingBrace(String text, int openBraceIndex) {
   return null;
 }
 
+const String _kAssetManifestKey = 'assetManifest';
+const String _kFontManifestKey = 'fontManifest';
+const String _kExtraAssetsKey = 'extraAssets';
+
+const _manifestBuildConfigKeys = <String>{_kAssetManifestKey, _kFontManifestKey, _kExtraAssetsKey};
+
 String _updateBuildConfigInContent(
   String content,
   WebAssetHashResult hashResult, {
@@ -405,11 +411,11 @@ String _updateBuildConfigInContent(
         );
       }
       final updatedMap = <String, Object?>{
-        ...decoded,
-        if (hashResult.assetManifestBinJson != null)
-          'assetManifest': hashResult.assetManifestBinJson,
-        if (hashResult.fontManifestJson != null) 'fontManifest': hashResult.fontManifestJson,
-        if (hashResult.extraAssets.isNotEmpty) 'extraAssets': hashResult.extraAssets,
+        for (final MapEntry(:key, :value) in decoded.entries)
+          if (!_manifestBuildConfigKeys.contains(key)) key: value,
+        _kAssetManifestKey: ?hashResult.assetManifestBinJson,
+        _kFontManifestKey: ?hashResult.fontManifestJson,
+        if (hashResult.extraAssets.isNotEmpty) _kExtraAssetsKey: hashResult.extraAssets,
       };
       buffer.write(content.substring(cursor, match.start));
       buffer.write('_flutter.buildConfig = ${json.encode(updatedMap)};');
@@ -436,11 +442,6 @@ void injectManifestBuildConfig(Directory outputDir, WebAssetHashResult hashResul
   if (!outputDir.existsSync()) {
     return;
   }
-  if (hashResult.assetManifestBinJson == null &&
-      hashResult.fontManifestJson == null &&
-      hashResult.extraAssets.isEmpty) {
-    return;
-  }
   for (final File file in outputDir.listSync(recursive: true).whereType<File>()) {
     final String basename = file.fileSystem.path.basename(file.path);
     if (basename != 'flutter_bootstrap.js' && basename != 'index.html') {
@@ -458,9 +459,9 @@ void injectManifestBuildConfig(Directory outputDir, WebAssetHashResult hashResul
   if (hashResult.assetManifestBinJson != null) {
     final File bootstrapFile = outputDir.childFile('flutter_bootstrap.js');
     if (!bootstrapFile.existsSync() ||
-        !bootstrapFile.readAsStringSync().contains('"assetManifest"')) {
+        !bootstrapFile.readAsStringSync().contains('"$_kAssetManifestKey"')) {
       throwToolExit(
-        'Failed to inject content-hashed "assetManifest" into ${bootstrapFile.path}. '
+        'Failed to inject content-hashed "$_kAssetManifestKey" into ${bootstrapFile.path}. '
         'Ensure web/flutter_bootstrap.js contains the "{{flutter_build_config}}" placeholder.',
       );
     }

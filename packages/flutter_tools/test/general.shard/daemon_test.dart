@@ -49,7 +49,7 @@ void main() {
   });
 
   group('DaemonConnection receiving end', () {
-    testWithoutContext('redirects input to incoming commands', () async {
+    test('redirects input to incoming commands', () async {
       final commandToSend = <String, dynamic>{'id': 0, 'method': 'some_method'};
       daemonStreams.inputs.add(DaemonMessage(commandToSend));
 
@@ -59,7 +59,7 @@ void main() {
       expect(commandReceived.data, commandToSend);
     });
 
-    testWithoutContext('listenToEvent can receive the right events', () async {
+    test('listenToEvent can receive the right events', () async {
       final Future<List<DaemonEventData>> events = daemonConnection
           .listenToEvent('event1')
           .toList();
@@ -81,7 +81,7 @@ void main() {
   });
 
   group('DaemonConnection sending end', () {
-    testWithoutContext('sending requests', () async {
+    test('sending requests', () async {
       unawaited(daemonConnection.sendRequest('some_method', 'param'));
       final DaemonMessage message = await daemonStreams.outputs.stream.first;
       expect(message.data['id'], isNotNull);
@@ -89,7 +89,7 @@ void main() {
       expect(message.data['params'], 'param');
     });
 
-    testWithoutContext('sending requests without param', () async {
+    test('sending requests without param', () async {
       unawaited(daemonConnection.sendRequest('some_method'));
       final DaemonMessage message = await daemonStreams.outputs.stream.first;
       expect(message.data['id'], isNotNull);
@@ -97,7 +97,7 @@ void main() {
       expect(message.data['params'], isNull);
     });
 
-    testWithoutContext('sending response', () async {
+    test('sending response', () async {
       daemonConnection.sendResponse('1', 'some_data');
       final DaemonMessage message = await daemonStreams.outputs.stream.first;
       expect(message.data['id'], '1');
@@ -106,7 +106,7 @@ void main() {
       expect(message.data['result'], 'some_data');
     });
 
-    testWithoutContext('sending response without data', () async {
+    test('sending response without data', () async {
       daemonConnection.sendResponse('1');
       final DaemonMessage message = await daemonStreams.outputs.stream.first;
       expect(message.data['id'], '1');
@@ -115,7 +115,7 @@ void main() {
       expect(message.data['result'], isNull);
     });
 
-    testWithoutContext('sending error response', () async {
+    test('sending error response', () async {
       daemonConnection.sendErrorResponse('1', 'error', StackTrace.fromString('stack trace'));
       final DaemonMessage message = await daemonStreams.outputs.stream.first;
       expect(message.data['id'], '1');
@@ -124,7 +124,7 @@ void main() {
       expect(message.data['trace'], 'stack trace');
     });
 
-    testWithoutContext('sending events', () async {
+    test('sending events', () async {
       daemonConnection.sendEvent('some_event', '123');
       final DaemonMessage message = await daemonStreams.outputs.stream.first;
       expect(message.data['id'], isNull);
@@ -132,7 +132,7 @@ void main() {
       expect(message.data['params'], '123');
     });
 
-    testWithoutContext('sending events without params', () async {
+    test('sending events without params', () async {
       daemonConnection.sendEvent('some_event');
       final DaemonMessage message = await daemonStreams.outputs.stream.first;
       expect(message.data['id'], isNull);
@@ -142,7 +142,7 @@ void main() {
   });
 
   group('DaemonConnection request and response', () {
-    testWithoutContext('receiving response from requests', () async {
+    test('receiving response from requests', () async {
       final Future<dynamic> requestFuture = daemonConnection.sendRequest('some_method', 'param');
       final DaemonMessage message = await daemonStreams.outputs.stream.first;
 
@@ -155,7 +155,7 @@ void main() {
       expect(await requestFuture, '123');
     });
 
-    testWithoutContext('receiving response from requests without result', () async {
+    test('receiving response from requests without result', () async {
       final Future<dynamic> requestFuture = daemonConnection.sendRequest('some_method', 'param');
       final DaemonMessage message = await daemonStreams.outputs.stream.first;
 
@@ -168,7 +168,7 @@ void main() {
       expect(await requestFuture, null);
     });
 
-    testWithoutContext('receiving error response from requests without result', () async {
+    test('receiving error response from requests without result', () async {
       final Future<dynamic> requestFuture = daemonConnection.sendRequest('some_method', 'param');
       final DaemonMessage message = await daemonStreams.outputs.stream.first;
 
@@ -204,7 +204,7 @@ void main() {
     List<int> testCommandBinary(int id, [int? binarySize]) =>
         utf8.encode('[${json.encode(testCommand(id, binarySize))}]\n');
 
-    testWithoutContext('can parse a single message', () async {
+    test('can parse a single message', () async {
       final inputStream = Stream<List<int>>.fromIterable(<List<int>>[testCommandBinary(10)]);
       final converter = DaemonInputStreamConverter(inputStream);
       final Stream<DaemonMessage> outputStream = converter.convertedStream;
@@ -214,7 +214,7 @@ void main() {
       expect(outputs[0].binary, null);
     });
 
-    testWithoutContext('can parse multiple messages', () async {
+    test('can parse multiple messages', () async {
       final inputStream = Stream<List<int>>.fromIterable(<List<int>>[
         testCommandBinary(10),
         testCommandBinary(20),
@@ -229,65 +229,56 @@ void main() {
       expect(outputs[1].binary, null);
     });
 
-    testWithoutContext(
-      'can parse multiple messages while ignoring non json data in between',
-      () async {
-        final inputStream = Stream<List<int>>.fromIterable(<List<int>>[
-          testCommandBinary(10),
-          utf8.encode('This is not a json data...\n'),
-          testCommandBinary(20),
-        ]);
-        final converter = DaemonInputStreamConverter(inputStream);
-        final Stream<DaemonMessage> outputStream = converter.convertedStream;
-        final List<DaemonMessage> outputs = await outputStream.toList();
-        expect(outputs, hasLength(2));
-        expect(outputs[0].data, testCommand(10));
-        expect(outputs[0].binary, null);
-        expect(outputs[1].data, testCommand(20));
-        expect(outputs[1].binary, null);
-      },
-    );
+    test('can parse multiple messages while ignoring non json data in between', () async {
+      final inputStream = Stream<List<int>>.fromIterable(<List<int>>[
+        testCommandBinary(10),
+        utf8.encode('This is not a json data...\n'),
+        testCommandBinary(20),
+      ]);
+      final converter = DaemonInputStreamConverter(inputStream);
+      final Stream<DaemonMessage> outputStream = converter.convertedStream;
+      final List<DaemonMessage> outputs = await outputStream.toList();
+      expect(outputs, hasLength(2));
+      expect(outputs[0].data, testCommand(10));
+      expect(outputs[0].binary, null);
+      expect(outputs[1].data, testCommand(20));
+      expect(outputs[1].binary, null);
+    });
 
-    testWithoutContext(
-      'can parse multiple messages even when they are split in multiple packets',
-      () async {
-        final List<int> binary1 = testCommandBinary(10);
-        final List<int> binary2 = testCommandBinary(20);
-        final inputStream = Stream<List<int>>.fromIterable(<List<int>>[
-          binary1.sublist(0, 5),
-          binary1.sublist(5, 15),
-          binary1.sublist(15) + binary2.sublist(0, 13),
-          binary2.sublist(13),
-        ]);
-        final converter = DaemonInputStreamConverter(inputStream);
-        final Stream<DaemonMessage> outputStream = converter.convertedStream;
-        final List<DaemonMessage> outputs = await outputStream.toList();
-        expect(outputs, hasLength(2));
-        expect(outputs[0].data, testCommand(10));
-        expect(outputs[0].binary, null);
-        expect(outputs[1].data, testCommand(20));
-        expect(outputs[1].binary, null);
-      },
-    );
+    test('can parse multiple messages even when they are split in multiple packets', () async {
+      final List<int> binary1 = testCommandBinary(10);
+      final List<int> binary2 = testCommandBinary(20);
+      final inputStream = Stream<List<int>>.fromIterable(<List<int>>[
+        binary1.sublist(0, 5),
+        binary1.sublist(5, 15),
+        binary1.sublist(15) + binary2.sublist(0, 13),
+        binary2.sublist(13),
+      ]);
+      final converter = DaemonInputStreamConverter(inputStream);
+      final Stream<DaemonMessage> outputStream = converter.convertedStream;
+      final List<DaemonMessage> outputs = await outputStream.toList();
+      expect(outputs, hasLength(2));
+      expect(outputs[0].data, testCommand(10));
+      expect(outputs[0].binary, null);
+      expect(outputs[1].data, testCommand(20));
+      expect(outputs[1].binary, null);
+    });
 
-    testWithoutContext(
-      'can parse multiple messages even when they are combined in a single packet',
-      () async {
-        final List<int> binary1 = testCommandBinary(10);
-        final List<int> binary2 = testCommandBinary(20);
-        final inputStream = Stream<List<int>>.fromIterable(<List<int>>[binary1 + binary2]);
-        final converter = DaemonInputStreamConverter(inputStream);
-        final Stream<DaemonMessage> outputStream = converter.convertedStream;
-        final List<DaemonMessage> outputs = await outputStream.toList();
-        expect(outputs, hasLength(2));
-        expect(outputs[0].data, testCommand(10));
-        expect(outputs[0].binary, null);
-        expect(outputs[1].data, testCommand(20));
-        expect(outputs[1].binary, null);
-      },
-    );
+    test('can parse multiple messages even when they are combined in a single packet', () async {
+      final List<int> binary1 = testCommandBinary(10);
+      final List<int> binary2 = testCommandBinary(20);
+      final inputStream = Stream<List<int>>.fromIterable(<List<int>>[binary1 + binary2]);
+      final converter = DaemonInputStreamConverter(inputStream);
+      final Stream<DaemonMessage> outputStream = converter.convertedStream;
+      final List<DaemonMessage> outputs = await outputStream.toList();
+      expect(outputs, hasLength(2));
+      expect(outputs[0].data, testCommand(10));
+      expect(outputs[0].binary, null);
+      expect(outputs[1].data, testCommand(20));
+      expect(outputs[1].binary, null);
+    });
 
-    testWithoutContext('can parse a single message with binary stream', () async {
+    test('can parse a single message with binary stream', () async {
       final binary = <int>[1, 2, 3, 4, 5];
       final inputStream = Stream<List<int>>.fromIterable(<List<int>>[
         testCommandBinary(10, binary.length),
@@ -301,7 +292,7 @@ void main() {
       expect(allOutputs[0].binary, binary);
     });
 
-    testWithoutContext(
+    test(
       'can parse a single message with binary stream when messages are combined in a single packet',
       () async {
         final binary = <int>[1, 2, 3, 4, 5];
@@ -317,7 +308,7 @@ void main() {
       },
     );
 
-    testWithoutContext('can parse multiple messages with binary stream', () async {
+    test('can parse multiple messages with binary stream', () async {
       final binary1 = <int>[1, 2, 3, 4, 5];
       final binary2 = <int>[6, 7, 8, 9, 10, 11, 12];
       final inputStream = Stream<List<int>>.fromIterable(<List<int>>[
@@ -336,30 +327,27 @@ void main() {
       expect(allOutputs[1].binary, binary2);
     });
 
-    testWithoutContext(
-      'can parse multiple messages with binary stream when messages are split',
-      () async {
-        final binary1 = <int>[1, 2, 3, 4, 5];
-        final List<int> message1 = testCommandBinary(10, binary1.length);
-        final binary2 = <int>[6, 7, 8, 9, 10, 11, 12];
-        final List<int> message2 = testCommandBinary(20, binary2.length);
-        final inputStream = Stream<List<int>>.fromIterable(<List<int>>[
-          message1.sublist(0, 10),
-          message1.sublist(10) + binary1 + message2.sublist(0, 5),
-          message2.sublist(5) + binary2.sublist(0, 3),
-          binary2.sublist(3, 5),
-          binary2.sublist(5),
-        ]);
-        final converter = DaemonInputStreamConverter(inputStream);
-        final Stream<DaemonMessage> outputStream = converter.convertedStream;
-        final List<_DaemonMessageAndBinary> allOutputs = await _readAllBinaries(outputStream);
-        expect(allOutputs, hasLength(2));
-        expect(allOutputs[0].message.data, testCommand(10, binary1.length));
-        expect(allOutputs[0].binary, binary1);
-        expect(allOutputs[1].message.data, testCommand(20, binary2.length));
-        expect(allOutputs[1].binary, binary2);
-      },
-    );
+    test('can parse multiple messages with binary stream when messages are split', () async {
+      final binary1 = <int>[1, 2, 3, 4, 5];
+      final List<int> message1 = testCommandBinary(10, binary1.length);
+      final binary2 = <int>[6, 7, 8, 9, 10, 11, 12];
+      final List<int> message2 = testCommandBinary(20, binary2.length);
+      final inputStream = Stream<List<int>>.fromIterable(<List<int>>[
+        message1.sublist(0, 10),
+        message1.sublist(10) + binary1 + message2.sublist(0, 5),
+        message2.sublist(5) + binary2.sublist(0, 3),
+        binary2.sublist(3, 5),
+        binary2.sublist(5),
+      ]);
+      final converter = DaemonInputStreamConverter(inputStream);
+      final Stream<DaemonMessage> outputStream = converter.convertedStream;
+      final List<_DaemonMessageAndBinary> allOutputs = await _readAllBinaries(outputStream);
+      expect(allOutputs, hasLength(2));
+      expect(allOutputs[0].message.data, testCommand(10, binary1.length));
+      expect(allOutputs[0].binary, binary1);
+      expect(allOutputs[1].message.data, testCommand(20, binary2.length));
+      expect(allOutputs[1].binary, binary2);
+    });
   });
 
   group('DaemonStreams', () {
@@ -373,25 +361,25 @@ void main() {
       daemonStreams = DaemonStreams(inputStream.stream, outputStream.sink, logger: bufferLogger);
     });
 
-    testWithoutContext('parses the message received on the stream', () async {
+    test('parses the message received on the stream', () async {
       inputStream.add(utf8.encode('[${jsonEncode(testCommand)}]\n'));
       final DaemonMessage command = await daemonStreams.inputStream.first;
       expect(command.data, testCommand);
       expect(command.binary, null);
     });
 
-    testWithoutContext('sends the encoded message through the sink', () async {
+    test('sends the encoded message through the sink', () async {
       daemonStreams.send(testCommand);
       final List<int> commands = await outputStream.stream.first;
       expect(commands, utf8.encode('[${jsonEncode(testCommand)}]\n'));
     });
 
-    testWithoutContext('dispose closes the sink', () async {
+    test('dispose closes the sink', () async {
       await daemonStreams.dispose();
       expect(outputStream.isClosed, true);
     });
 
-    testWithoutContext('handles sending to a closed sink', () async {
+    test('handles sending to a closed sink', () async {
       // Unless the stream is listened to, the call to .close() will never
       // complete
       outputStream.stream.listen((List<int> _) {});
@@ -405,29 +393,26 @@ void main() {
       );
     });
 
-    testWithoutContext(
-      'DaemonStreams.fromSocket guards socket.done against socket reset errors',
-      () async {
-        final doneCompleter = Completer<void>();
-        final socket = FakeSocket(done: doneCompleter.future);
-        DaemonStreams.fromSocket(socket, logger: bufferLogger);
+    test('DaemonStreams.fromSocket guards socket.done against socket reset errors', () async {
+      final doneCompleter = Completer<void>();
+      final socket = FakeSocket(done: doneCompleter.future);
+      DaemonStreams.fromSocket(socket, logger: bufferLogger);
 
-        doneCompleter.completeError(
-          const SocketException(
-            'Error event raised in event handler : error condition has been reset',
-            port: 0,
-          ),
-        );
-        await pumpEventQueue();
+      doneCompleter.completeError(
+        const SocketException(
+          'Error event raised in event handler : error condition has been reset',
+          port: 0,
+        ),
+      );
+      await pumpEventQueue();
 
-        expect(
-          bufferLogger.traceText,
-          contains(
-            'Socket error: SocketException: Error event raised in event handler : error condition has been reset, port = 0',
-          ),
-        );
-      },
-    );
+      expect(
+        bufferLogger.traceText,
+        contains(
+          'Socket error: SocketException: Error event raised in event handler : error condition has been reset, port = 0',
+        ),
+      );
+    });
   });
 }
 

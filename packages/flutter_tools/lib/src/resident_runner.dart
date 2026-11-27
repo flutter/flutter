@@ -49,6 +49,7 @@ import 'run_cold.dart';
 import 'run_hot.dart';
 import 'version.dart';
 import 'vmservice.dart';
+import 'web/web_debug_config.dart';
 import 'windows/visual_studio.dart';
 
 class FlutterDevice {
@@ -61,6 +62,7 @@ class FlutterDevice {
     required this.targetPlatform,
     @visibleForTesting this.logFlushDelay = const Duration(milliseconds: 500),
     this.userIdentifier,
+    @visibleForTesting this._vmServiceConnector = connectToVmService,
   });
 
   final Duration logFlushDelay;
@@ -71,6 +73,7 @@ class FlutterDevice {
     required ToolContext toolContext,
     required BuildInfo buildInfo,
     required String? target,
+    ResidentCompilerFactory residentCompilerFactory = const ResidentCompilerFactory(),
     TargetModel? targetModelOverride,
     String? userIdentifier,
   }) async {
@@ -129,6 +132,7 @@ class FlutterDevice {
   final ToolContext _toolContext;
   final String? userIdentifier;
   final DevelopmentShaderCompiler developmentShaderCompiler;
+  final VMServiceConnector _vmServiceConnector;
 
   DevFSWriter? devFSWriter;
   Future<Uri>? vmServiceUri;
@@ -176,7 +180,7 @@ class FlutterDevice {
         // this may not be the case when scraping logcat for URIs. If this URI is
         // from an old application instance, we shouldn't try and start DDS.
         try {
-          service = await connectToVmService(vmServiceUri, logger: logger);
+          service = await _vmServiceConnector(vmServiceUri, logger: logger);
           await service.dispose();
           break;
         } on vm_service.RPCError catch (e) {
@@ -269,7 +273,7 @@ class FlutterDevice {
     // something went wrong that caused DDS to shutdown early.
     try {
       service = await Future.any<dynamic>(<Future<dynamic>>[
-        connectToVmService(
+        _vmServiceConnector(
           debuggingOptions.enableDds ? (device!.dds.uri ?? vmServiceUri) : vmServiceUri,
           reloadSources: reloadSources,
           restart: restart,

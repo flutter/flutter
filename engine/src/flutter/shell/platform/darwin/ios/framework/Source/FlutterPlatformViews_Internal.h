@@ -7,19 +7,13 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
 
-#include <Metal/Metal.h>
+#import <UIKit/UIKit.h>
 
-#include "flutter/flow/surface.h"
-#include "flutter/fml/memory/weak_ptr.h"
-#include "flutter/fml/task_runner.h"
-#include "flutter/fml/trace_event.h"
-#include "flutter/impeller/base/thread_safety.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewLayer.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewResponder.h"
-#include "flutter/shell/platform/darwin/ios/ios_context.h"
 
 // A UIView that acts as a clipping mask for the |ChildClippingView|.
 //
@@ -31,7 +25,7 @@
 // is replaced with the alpha channel of the |FlutterClippingMaskView|.
 @interface FlutterClippingMaskView : UIView
 
-- (instancetype)initWithFrame:(CGRect)frame screenScale:(CGFloat)screenScale;
+- (instancetype)initWithFrame:(CGRect)frame devicePixelRatio:(CGFloat)devicePixelRatio;
 
 - (void)reset;
 
@@ -70,7 +64,11 @@
 - (instancetype)initWithCapacity:(NSInteger)capacity;
 
 // Reuse a maskView from the pool, or allocate a new one.
-- (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame;
+//
+// `devicePixelRatio` is the number of physical pixels per point that the mask view converts its
+// clips with.
+- (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame
+                                devicePixelRatio:(CGFloat)devicePixelRatio;
 
 // Insert the `maskView` into the pool.
 - (void)insertViewToPoolIfNeeded:(FlutterClippingMaskView*)maskView;
@@ -177,6 +175,17 @@
 @property(nonatomic, readonly) NSObject<FlutterPlatformView>* view;
 @property(nonatomic, readonly) FlutterTouchInterceptingView* touchInterceptor;
 @property(nonatomic, readonly) UIView* rootView;
+
+/// The layer that this platform view was last composited with.
+///
+/// `FlutterPlatformViewsController` composites the platform view in `presentFrame:` only if its
+/// layer in the frame differs from this one.
+///
+/// This value is nil for a new platform view. The controller also sets it to nil in the following
+/// cases, so that the platform view is composited in the next frame that includes it:
+/// * when the platform view is removed from the Flutter view
+/// * when the Flutter view changes
+@property(nonatomic, strong) FlutterPlatformViewLayer* lastCompositedLayer;
 
 @end
 

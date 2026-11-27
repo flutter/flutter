@@ -27,13 +27,21 @@ static bool IsBindableStage(impeller::ShaderStage stage) {
          stage == impeller::ShaderStage::kCompute;
 }
 
-void BindingSet::RetainShader(Shader& shader) {
-  for (const auto& retained : shaders_) {
-    if (retained.get() == &shader) {
+void BindingSet::RetainReflection(Shader& shader) {
+  const auto& reflection = shader.GetReflection();
+  for (const auto& retained : contents_.reflections) {
+    if (retained == reflection) {
       return;
     }
   }
-  shaders_.push_back(fml::RefPtr<Shader>(&shader));
+  contents_.reflections.push_back(reflection);
+}
+
+const std::shared_ptr<const BindingSet::Contents>& BindingSet::Snapshot() {
+  if (!snapshot_) {
+    snapshot_ = std::make_shared<const Contents>(contents_);
+  }
+  return snapshot_;
 }
 
 bool BindingSet::AddUniform(
@@ -58,8 +66,9 @@ bool BindingSet::AddUniform(
     return false;
   }
 
-  RetainShader(shader);
-  buffer_bindings_.push_back(BufferBinding{
+  RetainReflection(shader);
+  snapshot_.reset();
+  contents_.buffer_bindings.push_back(BufferBinding{
       .stage = shader.GetShaderStage(),
       .slot = uniform_struct->slot,
       .metadata = &uniform_struct->metadata,
@@ -91,8 +100,9 @@ bool BindingSet::AddStorageBuffer(
     return false;
   }
 
-  RetainShader(shader);
-  storage_buffer_bindings_.push_back(BufferBinding{
+  RetainReflection(shader);
+  snapshot_.reset();
+  contents_.storage_buffer_bindings.push_back(BufferBinding{
       .stage = shader.GetShaderStage(),
       .slot = storage_buffer->slot,
       .metadata = &storage_buffer->metadata,
@@ -102,11 +112,10 @@ bool BindingSet::AddStorageBuffer(
   return true;
 }
 
-bool BindingSet::AddTexture(
-    Shader& shader,
-    int uniform_texture_index,
-    std::shared_ptr<const impeller::Texture> texture,
-    impeller::raw_ptr<const impeller::Sampler> sampler) {
+bool BindingSet::AddTexture(Shader& shader,
+                            int uniform_texture_index,
+                            std::shared_ptr<const impeller::Texture> texture,
+                            const impeller::SamplerDescriptor& sampler) {
   if (!IsBindableStage(shader.GetShaderStage())) {
     return false;
   }
@@ -115,42 +124,40 @@ bool BindingSet::AddTexture(
   if (!texture_binding) {
     return false;
   }
-  if (!texture || !sampler) {
+  if (!texture) {
     return false;
   }
 
-  RetainShader(shader);
-  texture_bindings_.push_back(TextureBinding{
+  RetainReflection(shader);
+  snapshot_.reset();
+  contents_.texture_bindings.push_back(TextureBinding{
       .stage = shader.GetShaderStage(),
       .slot = texture_binding->slot,
       .metadata = &texture_binding->metadata,
       .texture = std::move(texture),
-      // NOLINTNEXTLINE(performance-move-const-arg)
-      .sampler = std::move(sampler),
+      .sampler_key = impeller::SamplerDescriptor::ToKey(sampler),
   });
   return true;
 }
 
 void BindingSet::Clear() {
-  buffer_bindings_.clear();
-  texture_bindings_.clear();
-  storage_buffer_bindings_.clear();
-  shaders_.clear();
+  contents_ = {};
+  snapshot_.reset();
 }
 
 const std::vector<BindingSet::BufferBinding>& BindingSet::GetBufferBindings()
     const {
-  return buffer_bindings_;
+  return contents_.buffer_bindings;
 }
 
 const std::vector<BindingSet::TextureBinding>& BindingSet::GetTextureBindings()
     const {
-  return texture_bindings_;
+  return contents_.texture_bindings;
 }
 
 const std::vector<BindingSet::BufferBinding>&
 BindingSet::GetStorageBufferBindings() const {
-  return storage_buffer_bindings_;
+  return contents_.storage_buffer_bindings;
 }
 
 }  // namespace gpu
@@ -195,24 +202,24 @@ bool InternalFlutterGpu_BindingSet_AddStorageBuffer(
                                    length_in_bytes);
 }
 
-bool InternalFlutterGpu_BindingSet_AddTexture(flutter::gpu::BindingSet* wrapper,
-                                              flutter::gpu::Context* context,
-                                              flutter::gpu::Shader* shader,
-                                              int uniform_texture_index,
-                                              flutter::gpu::Texture* texture,
-                                              int min_filter,
-                                              int mag_filter,
-                                              int mip_filter,
-                                              int width_address_mode,
-                                              int height_address_mode,
-                                              int max_anisotropy) {
+bool InternalFlutterGpu_BindingSet_AddTexture(
+    flutter::gpu::BindingSet* wrapper,
+    [[maybe_unused]] flutter::gpu::Context* context,
+    flutter::gpu::Shader* shader,
+    int uniform_texture_index,
+    flutter::gpu::Texture* texture,
+    int min_filter,
+    int mag_filter,
+    int mip_filter,
+    int width_address_mode,
+    int height_address_mode,
+    int max_anisotropy) {
   const impeller::SamplerDescriptor sampler_desc =
       flutter::gpu::ToImpellerSamplerDescriptor(
           min_filter, mag_filter, mip_filter, width_address_mode,
           height_address_mode, max_anisotropy);
-  return wrapper->AddTexture(
-      *shader, uniform_texture_index, texture->GetTexture(),
-      context->GetContext().GetSamplerLibrary()->GetSampler(sampler_desc));
+  return wrapper->AddTexture(*shader, uniform_texture_index,
+                             texture->GetTexture(), sampler_desc);
 }
 
 void InternalFlutterGpu_BindingSet_Clear(flutter::gpu::BindingSet* wrapper) {

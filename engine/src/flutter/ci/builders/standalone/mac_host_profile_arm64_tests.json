@@ -16,7 +16,7 @@
         "profile",
         "--mac-cpu",
         "arm64",
-        "--thin-lto",
+        "--no-lto",
         "--prebuilt-dart-sdk",
         "--build-embedder-examples",
         "--rbe",

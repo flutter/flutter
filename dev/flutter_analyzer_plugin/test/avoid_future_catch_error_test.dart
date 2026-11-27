@@ -25,8 +25,8 @@ import 'dart:async';
 // This extension isn't picked up from dart:async, so we just fake it.
 extension MyFutureExtension<T> on Future<T> {
   Future<T> onError<E extends Object>(
-    FutureOr<T> handleError(E error, StackTrace stackTrace), {
-    bool test(E error)?,
+    FutureOr<T> Function(E error, StackTrace stackTrace) handleError, {
+    bool Function(E error)? test,
   }) {
     return this;
   }
@@ -51,8 +51,8 @@ void main() {
 
   test('avoid future catch error', () async {
     await testSuite.assertDiagnostics(_source, <ExpectedDiagnostic>[
-      testSuite.lint(313, 48),
-      testSuite.lint(374, 45),
+      testSuite.lint(331, 48),
+      testSuite.lint(392, 45),
     ]);
   });
 }
