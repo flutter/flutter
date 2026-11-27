@@ -198,11 +198,35 @@ class _BrowserEngineCodec extends EngineCodec {
   }
 }
 
+/// Holds the [ImageSource] and lazily cached backend image reference for
+/// [_StaticEngineCodec] without referencing the codec itself, avoiding
+/// [DomFinalizationRegistry] retain cycles.
+class _StaticCodecState implements EngineImageReferrer {
+  _StaticCodecState(this.source) {
+    assert(() {
+      _debugStackTrace = StackTrace.current;
+      return true;
+    }());
+  }
+
+  final ImageSource source;
+  CountedRef<StackTraceDebugger, BackendImage>? cachedBox;
+  EngineImage? firstFrame;
+
+  @override
+  ui.Image? get trackedImage => firstFrame;
+
+  @override
+  StackTrace get debugStackTrace => _debugStackTrace;
+  late StackTrace _debugStackTrace;
+}
+
 /// An [EngineCodec] that wraps a single static [ImageSource].
 ///
 /// This codec is optimized for static images. Since static images do not animate,
 /// [frameCount] is always 1, and the single frame is resolved synchronously
-/// by querying the backend factory.
+/// by querying the backend factory once and sharing the resulting backend image
+/// across any subsequent [getNextFrame] calls.
 class _StaticEngineCodec extends EngineCodec {
   _StaticEngineCodec(
     ImageSource staticImageSource, {
@@ -214,20 +238,28 @@ class _StaticEngineCodec extends EngineCodec {
     // This guarantees that the native image data (such as an ImageBitmap) remains
     // alive in memory until this codec is disposed or garbage-collected.
     staticImageSource.retain();
-    _ref = UniqueRef<ImageSource>(
+    _ref = UniqueRef<_StaticCodecState>(
       this,
-      staticImageSource,
+      _StaticCodecState(staticImageSource),
       'StaticCodec',
-      onDispose: _releaseSource,
+      onDispose: _disposeState,
     );
   }
 
-  /// Releases [source] without capturing `this` in [UniqueRef]'s disposal closure.
-  static void _releaseSource(ImageSource source) {
-    source.release();
+  /// Releases the cached backend image reference and [ImageSource] without
+  /// capturing `this` in [UniqueRef]'s disposal closure.
+  static void _disposeState(_StaticCodecState state) {
+    final CountedRef<StackTraceDebugger, BackendImage>? cachedBox = state.cachedBox;
+    state.cachedBox = null;
+    try {
+      cachedBox?.unref(state);
+    } finally {
+      state.firstFrame = null;
+      state.source.release();
+    }
   }
 
-  late final UniqueRef<ImageSource> _ref;
+  late final UniqueRef<_StaticCodecState> _ref;
   final int? targetWidth;
   final int? targetHeight;
   final bool allowUpscaling;
@@ -245,8 +277,7 @@ class _StaticEngineCodec extends EngineCodec {
       return;
     }
     _disposed = true;
-    // Release our reference to the image source. If the reference count drops to 0,
-    // the native resources (like the ImageBitmap) will be closed and freed.
+    // Release our reference to the cached backend image and image source.
     _ref.dispose();
   }
 
@@ -255,16 +286,22 @@ class _StaticEngineCodec extends EngineCodec {
     if (_disposed) {
       return Future<ui.FrameInfo>.error(StateError('Cannot call getNextFrame() after dispose()'));
     }
-    final ImageSource source = _ref.nativeObject;
-    // Synchronously instruct the backend renderer to convert the normalized
-    // DOM asset into a backend-specific representation (e.g., uploading to a GPU texture).
-    final BackendImage backendImage = renderer.createImageFromImageSource(source);
-    final ui.Image image = EngineImage(
-      backendImage,
-      source.width,
-      source.height,
-      imageSource: source,
-    );
+    final _StaticCodecState state = _ref.nativeObject;
+    final ImageSource source = state.source;
+    final CountedRef<StackTraceDebugger, BackendImage>? cachedBox = state.cachedBox;
+    final EngineImage image;
+    if (cachedBox != null) {
+      image = EngineImage.cloneOf(cachedBox, source.width, source.height, imageSource: source);
+    } else {
+      // Create the backend image once so multi-threaded Skwasm transfers the
+      // texture source at most once and single-threaded Skwasm does not close
+      // it when an earlier frame handle is disposed while this codec is alive.
+      final BackendImage backendImage = renderer.createImageFromImageSource(source);
+      image = EngineImage(backendImage, source.width, source.height, imageSource: source);
+      image.box.ref(state);
+      state.cachedBox = image.box;
+      state.firstFrame = image;
+    }
     return Future<ui.FrameInfo>.value(AnimatedImageFrameInfo(Duration.zero, image));
   }
 }

@@ -9,6 +9,14 @@ import 'dart:typed_data';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+/// A non-[EngineImage] referrer on [EngineImage.box] (such as a static codec)
+/// that supplies the [ui.Image] to pass to [ui.Image.onDispose] if it is the
+/// last reference dropped.
+abstract interface class EngineImageReferrer implements StackTraceDebugger {
+  /// The [ui.Image] handle reported to [ui.Image.onCreate] for this box.
+  ui.Image? get trackedImage;
+}
+
 /// An engine-specific implementation of the [ui.Image] interface.
 ///
 /// This class acts as a frontend representation of an image, delegating its
@@ -32,7 +40,7 @@ class EngineImage implements ui.Image, StackTraceDebugger {
     // both explicit disposal and GC finalization release it deterministically.
     imageSource?.retain();
     // Wrap the backend image in a reference-counted box.
-    box = CountedRef<EngineImage, BackendImage>(
+    box = CountedRef<StackTraceDebugger, BackendImage>(
       backendImage,
       this,
       'BackendImage',
@@ -98,8 +106,15 @@ class EngineImage implements ui.Image, StackTraceDebugger {
   }
 
   /// Notifies [ui.Image.onDispose] listeners when the last handle is disposed.
-  static void _notifyDisposed(EngineImage image) {
-    ui.Image.onDispose?.call(image);
+  static void _notifyDisposed(StackTraceDebugger referrer) {
+    final ui.Image? image = switch (referrer) {
+      final EngineImage image => image,
+      final EngineImageReferrer owner => owner.trackedImage,
+      _ => null,
+    };
+    if (image != null) {
+      ui.Image.onDispose?.call(image);
+    }
   }
 
   // Initialize debug fields, such as capturing the stack trace when the image is created.
@@ -115,7 +130,7 @@ class EngineImage implements ui.Image, StackTraceDebugger {
   late StackTrace _debugStackTrace;
 
   /// The reference-counted box containing the [BackendImage].
-  late final CountedRef<EngineImage, BackendImage> box;
+  late final CountedRef<StackTraceDebugger, BackendImage> box;
 
   /// The underlying [BackendImage] managed by this [EngineImage].
   BackendImage get backendImage => box.nativeObject;
