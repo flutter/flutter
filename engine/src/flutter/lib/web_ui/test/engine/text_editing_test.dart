@@ -3094,6 +3094,361 @@ Future<void> testMain() async {
       ]);
     });
 
+    // The tests below cover https://github.com/flutter/flutter/issues/196974.
+
+    /// Drives one text input connection of a login form (username and password
+    /// in one autofill group) in the order the framework uses: `setClient`,
+    /// geometry, the field's current value, `show`, then geometry again.
+    void connectLoginField(
+      int clientId, {
+      required String focusedField,
+      String usernameText = '',
+      String passwordText = '',
+      bool enableDeltaModel = false,
+    }) {
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[
+        clientId,
+        createLoginFormConfig(
+          focusedField: focusedField,
+          usernameText: usernameText,
+          passwordText: passwordText,
+          enableDeltaModel: enableDeltaModel,
+        ),
+      ]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        150,
+        50,
+        Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      final text = focusedField == 'username' ? usernameText : passwordText;
+      final setEditingState = MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': text,
+        'selectionBase': text.length,
+        'selectionExtent': text.length,
+        'composingBase': -1,
+        'composingExtent': -1,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
+
+      const show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+    }
+
+    /// The framework closes the connection after the engine reports that it
+    /// was closed, for example when the window loses focus.
+    void closeConnection() {
+      const clearClient = MethodCall('TextInput.clearClient');
+      sendFrameworkMessage(codec.encodeMethodCall(clearClient));
+    }
+
+    /// The `[clientId, text, selectionBase, selectionExtent]` of every
+    /// `TextInputClient.updateEditingState` message sent so far.
+    List<List<Object?>> sentEditingStates() {
+      return spy.messages
+          .where(
+            (PlatformMessage message) => message.methodName == 'TextInputClient.updateEditingState',
+          )
+          .map((PlatformMessage message) {
+            final args = message.methodArguments as List<dynamic>;
+            final state = args[1] as Map<dynamic, dynamic>;
+            return <Object?>[
+              args[0],
+              state['text'],
+              state['selectionBase'],
+              state['selectionExtent'],
+            ];
+          })
+          .toList();
+    }
+
+    Iterable<PlatformMessage> sentAutofillMessages() {
+      return spy.messages.where(
+        (PlatformMessage message) =>
+            message.methodName == 'TextInputClient.updateEditingStateWithTag',
+      );
+    }
+
+    test('multiTextField Autofill keeps a dormant autofill of the refocused field', () async {
+      connectLoginField(123, focusedField: 'username');
+      final usernameElement = textEditing!.strategy.domElement! as DomHTMLInputElement;
+      final passwordElement =
+          textEditing!.strategy.inputConfiguration.autofillGroup!.elements['password']!
+              as DomHTMLInputElement;
+
+      // The window loses focus. The connection closes and the form goes dormant.
+      closeConnection();
+
+      // A password manager fills the dormant form.
+      usernameElement.value = 'user@example.com';
+      passwordElement.value = 'secret';
+
+      // The user focuses the username field again. The framework has not seen
+      // the autofilled values yet.
+      spy.messages.clear();
+      connectLoginField(124, focusedField: 'username');
+
+      final activeElement = textEditing!.strategy.domElement! as DomHTMLInputElement;
+      expect(activeElement.value, 'user@example.com');
+      expect(sentEditingStates().last, <Object?>[124, 'user@example.com', 16, 16]);
+      expect(
+        sentAutofillMessages().map((PlatformMessage message) => message.methodArguments),
+        anyElement(<dynamic>[
+          0,
+          <String, dynamic>{
+            'password': <String, dynamic>{
+              'text': 'secret',
+              'selectionBase': 6,
+              'selectionExtent': 6,
+              'composingBase': -1,
+              'composingExtent': -1,
+            },
+          },
+        ]),
+      );
+    });
+
+    test(
+      'multiTextField Autofill keeps a dormant autofill of another field focused on wake',
+      () async {
+        connectLoginField(123, focusedField: 'username');
+        final usernameElement = textEditing!.strategy.domElement! as DomHTMLInputElement;
+        final passwordElement =
+            textEditing!.strategy.inputConfiguration.autofillGroup!.elements['password']!
+                as DomHTMLInputElement;
+
+        closeConnection();
+
+        usernameElement.value = 'user@example.com';
+        passwordElement.value = 'secret';
+
+        // The user focuses the password field this time.
+        spy.messages.clear();
+        connectLoginField(124, focusedField: 'password');
+
+        final activeElement = textEditing!.strategy.domElement! as DomHTMLInputElement;
+        expect(activeElement.value, 'secret');
+        expect(sentEditingStates().last, <Object?>[124, 'secret', 6, 6]);
+        expect(
+          sentAutofillMessages().map((PlatformMessage message) => message.methodArguments),
+          anyElement(<dynamic>[
+            0,
+            <String, dynamic>{
+              'username': <String, dynamic>{
+                'text': 'user@example.com',
+                'selectionBase': 16,
+                'selectionExtent': 16,
+                'composingBase': -1,
+                'composingExtent': -1,
+              },
+            },
+          ]),
+        );
+      },
+    );
+
+    test(
+      'multiTextField Autofill keeps a dormant autofill after the user typed in the field',
+      () async {
+        // Focus the password field first, so the form records the username's
+        // framework value while the username is not focused.
+        connectLoginField(123, focusedField: 'password');
+        closeConnection();
+
+        // The user focuses the username field and types.
+        connectLoginField(124, focusedField: 'username');
+        final usernameElement = textEditing!.strategy.domElement! as DomHTMLInputElement;
+        usernameElement.value = 'abc';
+        usernameElement.dispatchEvent(createDomEvent('Event', 'input'));
+        expect(sentEditingStates(), anyElement(<Object?>[124, 'abc', 3, 3]));
+
+        // The connection closes and a password manager fills the dormant form.
+        closeConnection();
+        usernameElement.value = 'user@example.com';
+
+        // The user focuses the username field again. The framework holds 'abc'.
+        spy.messages.clear();
+        connectLoginField(125, focusedField: 'username', usernameText: 'abc');
+
+        final activeElement = textEditing!.strategy.domElement! as DomHTMLInputElement;
+        expect(activeElement.value, 'user@example.com');
+        expect(sentEditingStates().last, <Object?>[125, 'user@example.com', 16, 16]);
+      },
+    );
+
+    test('multiTextField Autofill keeps a dormant autofill of the focused field after a geometry update', () async {
+      connectLoginField(123, focusedField: 'username');
+      final usernameElement = textEditing!.strategy.domElement! as DomHTMLInputElement;
+      final passwordElement =
+          textEditing!.strategy.inputConfiguration.autofillGroup!.elements['password']!
+              as DomHTMLInputElement;
+
+      closeConnection();
+
+      usernameElement.value = 'user@example.com';
+      passwordElement.value = 'secret';
+
+      spy.messages.clear();
+      connectLoginField(124, focusedField: 'username');
+
+      // One more geometry update, for example after a layout change.
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        150,
+        50,
+        Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      final activeElement = textEditing!.strategy.domElement! as DomHTMLInputElement;
+      expect(activeElement.value, 'user@example.com');
+    });
+
+    test(
+      'multiTextField Autofill reports a dormant autofill of the focused field as a delta',
+      () async {
+        // The framework holds a non-empty value, so the delta must replace it.
+        connectLoginField(
+          123,
+          focusedField: 'username',
+          usernameText: 'abc',
+          enableDeltaModel: true,
+        );
+        final usernameElement = textEditing!.strategy.domElement! as DomHTMLInputElement;
+        final passwordElement =
+            textEditing!.strategy.inputConfiguration.autofillGroup!.elements['password']!
+                as DomHTMLInputElement;
+
+        closeConnection();
+
+        usernameElement.value = 'user@example.com';
+        passwordElement.value = 'secret';
+
+        spy.messages.clear();
+        connectLoginField(
+          124,
+          focusedField: 'username',
+          usernameText: 'abc',
+          enableDeltaModel: true,
+        );
+
+        final Iterable<PlatformMessage> deltaMessages = spy.messages.where(
+          (PlatformMessage message) =>
+              message.methodName == 'TextInputClient.updateEditingStateWithDeltas',
+        );
+        expect(deltaMessages, isNotEmpty);
+        expect(deltaMessages.last.methodArguments, <dynamic>[
+          124,
+          <String, dynamic>{
+            'deltas': <Map<String, dynamic>>[
+              <String, dynamic>{
+                'oldText': 'abc',
+                'deltaText': 'user@example.com',
+                'deltaStart': 0,
+                'deltaEnd': 3,
+                'selectionBase': 16,
+                'selectionExtent': 16,
+                'composingBase': -1,
+                'composingExtent': -1,
+              },
+            ],
+          },
+        ]);
+      },
+    );
+
+    test('multiTextField Autofill lets a framework change win over a dormant value of the focused field', () async {
+      connectLoginField(123, focusedField: 'username');
+      final usernameElement = textEditing!.strategy.domElement! as DomHTMLInputElement;
+      usernameElement.value = 'abc';
+      usernameElement.dispatchEvent(createDomEvent('Event', 'input'));
+      expect(sentEditingStates(), anyElement(<Object?>[123, 'abc', 3, 3]));
+
+      closeConnection();
+
+      // The app clears the field while the form is dormant. Nothing is
+      // autofilled, so the old element still holds 'abc'.
+      spy.messages.clear();
+      connectLoginField(124, focusedField: 'username');
+
+      final activeElement = textEditing!.strategy.domElement! as DomHTMLInputElement;
+      expect(activeElement.value, '');
+      expect(
+        spy.messages.map((PlatformMessage message) => '${message.methodArguments}'),
+        everyElement(isNot(contains('abc'))),
+      );
+    });
+
+    test(
+      'multiTextField Autofill sends no update on wake when the dormant form was not autofilled',
+      () async {
+        connectLoginField(123, focusedField: 'username');
+        closeConnection();
+
+        spy.messages.clear();
+        connectLoginField(124, focusedField: 'username');
+
+        expect(sentAutofillMessages(), isEmpty);
+        expect(sentEditingStates().map((List<Object?> state) => state[1]), everyElement(''));
+      },
+    );
+
+    test('multiTextField Autofill keeps a second dormant autofill with another account', () async {
+      connectLoginField(123, focusedField: 'username');
+      final firstUsername = textEditing!.strategy.domElement! as DomHTMLInputElement;
+      final firstPassword =
+          textEditing!.strategy.inputConfiguration.autofillGroup!.elements['password']!
+              as DomHTMLInputElement;
+      closeConnection();
+
+      // The first autofill reaches the framework when the username is focused.
+      firstUsername.value = 'alice';
+      firstPassword.value = 'pw-alice';
+      connectLoginField(124, focusedField: 'username');
+      final secondUsername = textEditing!.strategy.domElement! as DomHTMLInputElement;
+      final secondPassword =
+          textEditing!.strategy.inputConfiguration.autofillGroup!.elements['password']!
+              as DomHTMLInputElement;
+      closeConnection();
+
+      // The password manager fills the dormant form again with another account.
+      secondUsername.value = 'bob';
+      secondPassword.value = 'pw-bob';
+
+      spy.messages.clear();
+      connectLoginField(
+        125,
+        focusedField: 'password',
+        usernameText: 'alice',
+        passwordText: 'pw-alice',
+      );
+
+      // Both fields take the second account. Keeping the first account's
+      // password would mix credentials from two accounts.
+      final activeElement = textEditing!.strategy.domElement! as DomHTMLInputElement;
+      expect(activeElement.value, 'pw-bob');
+      expect(sentEditingStates().last, <Object?>[125, 'pw-bob', 6, 6]);
+      expect(
+        sentAutofillMessages().map((PlatformMessage message) => message.methodArguments),
+        anyElement(<dynamic>[
+          0,
+          <String, dynamic>{
+            'username': <String, dynamic>{
+              'text': 'bob',
+              'selectionBase': 3,
+              'selectionExtent': 3,
+              'composingBase': -1,
+              'composingExtent': -1,
+            },
+          },
+        ]),
+      );
+    });
+
     test('Multi-line mode also works', () async {
       final setClient = MethodCall('TextInput.setClient', <dynamic>[123, flutterMultilineConfig]);
       sendFrameworkMessage(codec.encodeMethodCall(setClient));
@@ -4900,6 +5255,61 @@ Map<String, dynamic> createAutofillInfo(String? hint, String uniqueId, {String? 
         'composingExtent': -1,
       },
     };
+
+/// Creates the `TextInput.setClient` configuration of a login form: a username
+/// field and a password field in one autofill group, with `focusedField` (the
+/// `username` or the `password` field) focused.
+///
+/// Unlike [createFlutterConfig], every field carries the given framework value
+/// instead of 'Test'.
+Map<String, dynamic> createLoginFormConfig({
+  required String focusedField,
+  String usernameText = '',
+  String passwordText = '',
+  bool enableDeltaModel = false,
+}) {
+  Map<String, dynamic> loginAutofillInfo(String uniqueId, String text) => <String, dynamic>{
+    'uniqueIdentifier': uniqueId,
+    'hints': <String>[uniqueId],
+    'editingValue': <String, dynamic>{
+      'text': text,
+      'selectionBase': text.length,
+      'selectionExtent': text.length,
+      'selectionAffinity': 'TextAffinity.downstream',
+      'selectionIsDirectional': false,
+      'composingBase': -1,
+      'composingExtent': -1,
+    },
+  };
+
+  final autofillInfos = <String, Map<String, dynamic>>{
+    'username': loginAutofillInfo('username', usernameText),
+    'password': loginAutofillInfo('password', passwordText),
+  };
+  return <String, dynamic>{
+    'inputType': <String, dynamic>{'name': 'TextInputType.text'},
+    'readOnly': false,
+    'obscureText': focusedField == 'password',
+    'autocorrect': true,
+    'inputAction': 'TextInputAction.done',
+    'textCapitalization': 'TextCapitalization.none',
+    'autofill': autofillInfos[focusedField],
+    'fields': <Map<String, Object?>>[
+      for (final Map<String, dynamic> autofillInfo in autofillInfos.values)
+        <String, Object?>{
+          'inputType': <String, Object?>{
+            'name': 'TextInputType.text',
+            'signed': null,
+            'decimal': null,
+          },
+          'textCapitalization': 'TextCapitalization.none',
+          'autofill': autofillInfo,
+        },
+    ],
+    'enableDeltaModel': enableDeltaModel,
+    'enableInteractiveSelection': true,
+  };
+}
 
 List<Map<String, Object?>> createFieldValues(List<String> hints, List<String> uniqueIds) {
   final testFields = <Map<String, Object?>>[];
