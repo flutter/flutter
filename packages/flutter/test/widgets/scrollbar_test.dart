@@ -3909,7 +3909,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     );
   });
 
-  testWidgets('RawScrollbar without mouseCursor preserves the ancestor cursor over the scrollbar', (
+  testWidgets('RawScrollbar without mouseCursor uses the basic cursor over the scrollbar', (
     WidgetTester tester,
   ) async {
     final controller = ScrollController();
@@ -3940,9 +3940,65 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
       pointer: 1,
     );
     addTearDown(gesture.removePointer);
+
+    // The content area keeps the ancestor's I-beam.
+    await gesture.addPointer(location: const Offset(100.0, 100.0));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.text,
+    );
+
+    // The default cursor over the painted scrollbar is the basic arrow.
+    await gesture.moveTo(const Offset(796.0, 5.0));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+
+    await gesture.moveTo(const Offset(100.0, 100.0));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.text,
+    );
+  });
+
+  testWidgets('RawScrollbar.mouseCursor resolving to null preserves the ancestor cursor', (
+    WidgetTester tester,
+  ) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: MouseRegion(
+            cursor: SystemMouseCursors.text,
+            child: RawScrollbar(
+              controller: controller,
+              thumbVisibility: true,
+              mouseCursor: const WidgetStatePropertyAll<MouseCursor?>(null),
+              child: SingleChildScrollView(
+                controller: controller,
+                child: const SizedBox(width: 4000.0, height: 4000.0),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: ui.PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    addTearDown(gesture.removePointer);
     await gesture.addPointer(location: const Offset(796.0, 5.0));
     await tester.pump();
-    // No override: the ancestor's I-beam cursor wins, even over the scrollbar.
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.text,
