@@ -85,6 +85,9 @@ Future<void> main() async {
     // Stub shared.bat to verify git is on PATH.
     writeFile(
       fileSystem.path.join(tempDir.path, 'bin', 'internal', 'shared.bat'),
+      // There's deliberately no /B after EXIT here because we want to exit the
+      // whole process and not fall back to dart.bat's normal behaviour (which
+      // would try to invoke a non-existent dart.exe in the temp SDK folder).
       '@ECHO off\r\nWHERE git\r\nEXIT %ERRORLEVEL%\r\n',
     );
 
@@ -101,7 +104,7 @@ Future<void> main() async {
       ].join(';'),
     };
 
-    /// A helper to run bin/dart.bat with the reduced PATH.
+    // A helper to run bin/dart.bat with the reduced PATH.
     Future<ProcessResult> runDartWithReducedPath() {
       return processManager.run(
         <String>[tempDartBatchPath],
@@ -125,7 +128,7 @@ Future<void> main() async {
     final String mingitPath = fileSystem.path.join(tempDir.path, 'bin', 'mingit', 'cmd', 'git.bat');
     writeFile(mingitPath, '@ECHO off\r\n');
 
-    // With mingit, dart.bat should run without any error and including the path
+    // With mingit, dart.bat should run without any error and include the path
     // to the bundled mingit.
     expect(await runDartWithReducedPath(), ProcessResultMatcher(stdoutPattern: mingitPath));
   });
