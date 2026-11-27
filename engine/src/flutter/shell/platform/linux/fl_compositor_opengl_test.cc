@@ -39,6 +39,18 @@ class FlCompositorOpenGLTest : public flutter::testing::LinuxTest {
   FlCompositorOpenGL* compositor = nullptr;
 };
 
+// The compositor is created on the platform thread when a view is realized.
+// The render context belongs to the raster thread, which doesn't have it
+// current while presenting to a subsurface, so making it current here would
+// take it away and leave the engine unable to render.
+TEST_F(FlCompositorOpenGLTest, NewDoesNotUseRenderContext) {
+  compositor = fl_compositor_opengl_new(opengl_manager);
+
+  EXPECT_NE(epoxy.egl_current_context, EGL_NO_CONTEXT);
+  EXPECT_NE(epoxy.egl_current_context,
+            fl_opengl_manager_get_context(opengl_manager));
+}
+
 // The layers replace the target contents, so a frame with nothing to
 // rasterize (which has no layers) clears the previous frame.
 TEST_F(FlCompositorOpenGLTest, CompositeNoLayers) {
