@@ -5455,6 +5455,34 @@ source_set("x") {
       expect(output, isNot(contains('FLUTTER_LOCAL_DEFINES')));
     });
 
+    test('a target that only takes chromium_code away has no warning set', () async {
+      // OCMock's ocmock_src: GN compiles it with neither chromium_code nor
+      // no_chromium_code, so with no default_warning_flags and no -Werror.
+      // No constant then: the toolchain's copy of the list, which is not
+      // fatal, is all the target gets. Until 11-23 it got the third-party
+      // set, -Werror included, which GN's command lines do not have.
+      final String output = await convert('''
+source_set("x") {
+  sources = [ "x.cc" ]
+  configs -= [ "//build/config/compiler:chromium_code" ]
+  cflags = [ "-Wno-misleading-indentation" ]
+}
+''');
+      expect(output, contains('"-Wno-misleading-indentation"'));
+      expect(output, isNot(contains('_COPTS')));
+      expect(output, isNot(contains('FLUTTER_LOCAL_DEFINES')));
+      // The two lines of a third-party target are one trade in either order.
+      final String traded = await convert('''
+source_set("x") {
+  sources = [ "x.cc" ]
+  configs += [ "//build/config/compiler:no_chromium_code" ]
+  configs -= [ "//build/config/compiler:chromium_code" ]
+}
+''');
+      expect(traded, contains('copts = FLUTTER_THIRD_PARTY_COPTS,'));
+      expect(traded, isNot(contains('FLUTTER_LOCAL_DEFINES')));
+    });
+
     test('keeps language-specific flags apart, drops -std= and repeated files', () async {
       final String output = await convert('''
 source_set("x") {

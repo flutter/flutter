@@ -835,6 +835,13 @@ void _localizeOwnLabels(List<GnTarget> targets, String gnPackage) {
 /// `vk_swiftshader` would be.
 String libraryStem(String name) => name.startsWith('lib') ? name.substring(3) : name;
 
+/// The warning set GN compiles a target with. BUILDCONFIG.gn gives every
+/// target `chromium_code`, a third-party target trades it for
+/// `no_chromium_code`, and both end with default_warning_flags, -Werror
+/// included. A target that takes the first away and adds nothing has
+/// neither: OCMock's `ocmock_src`, whose warnings GN leaves alone.
+enum _WarningSet { chromiumCode, noChromiumCode, none }
+
 final class _Emitter {
   _Emitter(
     this.gnPackage,
@@ -1411,7 +1418,7 @@ final class _Emitter {
             rule,
             variable,
             target,
-            chromiumCode: true,
+            warningSet: _WarningSet.chromiumCode,
             publicConfigs: const <String>{},
             propagatedFlags: propagated,
           );
@@ -1565,7 +1572,7 @@ final class _Emitter {
           interface,
           variable,
           target,
-          chromiumCode: true,
+          warningSet: _WarningSet.chromiumCode,
           publicConfigs: publicConfigs,
           propagatedFlags: unused,
         );
@@ -3988,7 +3995,7 @@ final class _Emitter {
     if (shared) {
       _sharedLibraryOutputs.add('lib${libraryStem(outputName ?? target.name)}.so');
     }
-    var chromiumCode = true;
+    _WarningSet warningSet = _WarningSet.chromiumCode;
     // With an explicit `public` list the headers in `sources` are private.
     final bool explicitPublic = target.variables.containsKey('public');
     // Configs that reach dependents anyway are not inlined privately as well.
@@ -4115,11 +4122,11 @@ final class _Emitter {
       }
     }
     for (final variable in configVariables) {
-      chromiumCode = _configsInto(
+      warningSet = _configsInto(
         rule,
         variable,
         target,
-        chromiumCode: chromiumCode,
+        warningSet: warningSet,
         publicConfigs: publicConfigs,
         propagatedFlags: propagated,
       );
@@ -4172,15 +4179,21 @@ final class _Emitter {
       // GN applies chromium_code (or no_chromium_code) to every target, and
       // //flutter:config (-Wunreachable-code) to engine code: targets that
       // list it, their direct dependents, and dependents through public_deps.
-      // The Bazel toolchain carries the rest.
-      final constant = !chromiumCode
-          ? 'FLUTTER_THIRD_PARTY_COPTS'
-          : _isEngineCode(target)
-          ? 'FLUTTER_COPTS'
-          : 'CHROMIUM_CODE_COPTS';
-      _use('//build_defs/cc:copts.bzl', constant);
-      rule.list('copts').always.insert(0, _Item(constant, quoted: false));
-      if (chromiumCode) {
+      // The Bazel toolchain carries the rest. A target with neither config
+      // (OCMock's ocmock_src takes chromium_code away and adds nothing) gets
+      // no constant: GN gives it no default_warning_flags and no -Werror,
+      // and the toolchain's own copy of that list, which is not fatal, is
+      // all it has here.
+      if (warningSet != _WarningSet.none) {
+        final constant = warningSet == _WarningSet.noChromiumCode
+            ? 'FLUTTER_THIRD_PARTY_COPTS'
+            : _isEngineCode(target)
+            ? 'FLUTTER_COPTS'
+            : 'CHROMIUM_CODE_COPTS';
+        _use('//build_defs/cc:copts.bzl', constant);
+        rule.list('copts').always.insert(0, _Item(constant, quoted: false));
+      }
+      if (warningSet == _WarningSet.chromiumCode) {
         _use('//build_defs/cc:copts.bzl', 'FLUTTER_LOCAL_DEFINES');
         rule
             .list('local_defines')
@@ -4345,7 +4358,7 @@ final class _Emitter {
         rule,
         variable,
         target,
-        chromiumCode: true,
+        warningSet: _WarningSet.chromiumCode,
         publicConfigs: const <String>{},
         propagatedFlags: <ForwardedFlag>[],
       );
@@ -6379,7 +6392,7 @@ final class _Emitter {
   };
 
   /// Applies `configs`, `public_configs` or `all_dependent_configs`;
-  /// returns whether the target is still chromium_code.
+  /// returns the warning set the target is left with.
   ///
   /// A public config becomes a dependency on the header-only library that
   /// stands for it, so that its defines and include directories reach
@@ -6394,15 +6407,15 @@ final class _Emitter {
   /// entry, which Bazel applies to this target's compiles alone -- GN's
   /// private semantics -- except on a binary, which has no such attribute
   /// and no dependents.
-  bool _configsInto(
+  _WarningSet _configsInto(
     _Rule rule,
     GnVariable variable,
     GnTarget target, {
-    required bool chromiumCode,
+    required _WarningSet warningSet,
     required Set<String> publicConfigs,
     required List<ForwardedFlag> propagatedFlags,
   }) {
-    var result = chromiumCode;
+    var result = warningSet;
     final private = variable.name == 'configs';
     for (final GnAssignment assignment in variable.assignments) {
       for (final _Element element in _elements(assignment, withComments: true)) {
@@ -6467,9 +6480,16 @@ final class _Emitter {
             if (!assignment.isUnconditional) {
               throw GnError(assignment.location, 'conditional warning set is not supported');
             }
-            // `configs -= [chromium_code]` and `configs += [no_chromium_code]`
-            // both mean the same thing.
-            result = assignment.op == '-=' ? !chromiumCode : chromiumCode;
+            // `configs += [no_chromium_code]` trades the set, whether
+            // `configs -= [chromium_code]` stands before it or after it.
+            // The removal alone leaves the target with neither.
+            if (assignment.op != '-=') {
+              result = chromiumCode ? _WarningSet.chromiumCode : _WarningSet.noChromiumCode;
+            } else if (chromiumCode && result == _WarningSet.chromiumCode) {
+              result = _WarningSet.none;
+            } else if (!chromiumCode && result == _WarningSet.noChromiumCode) {
+              result = _WarningSet.none;
+            }
           case ConfigDependency(:final String label, :final List<String> copts):
             if (assignment.op == '-=') {
               throw GnError(assignment.location, 'removing config $config is not supported');
