@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -155,6 +156,16 @@ void main() {
           logger: logger,
           operatingSystemUtils: toolContext.os,
           platform: localPlatform,
+        ),
+        pub: Pub.test(
+          botDetector: fakeBotDetector,
+          cache: localCache,
+          fileSystem: localFs,
+          flutterRoot: localCache.flutterRoot,
+          logger: logger,
+          platform: localPlatform,
+          processManager: localProcessManager,
+          stdio: mockStdio,
         ),
         toolContext: toolContext,
       )..addCommand(command);
@@ -674,7 +685,7 @@ flutter:
   });
 
   group('packages test/pub', () {
-    PackagesCommand createCommand({
+    CommandRunner<void> createRunner({
       required FileSystem fs,
       required bool isBot,
       required ProcessManager processManager,
@@ -682,24 +693,34 @@ flutter:
       final logger = BufferLogger.test();
       final platform = FakePlatform(environment: <String, String>{});
       final stdio = FakeStdio()..stdout.terminalColumns = 80;
+      final botDetector = FakeBotDetector(isBot);
       final cache = Cache.test(
-        flutterRoot: '',
+        flutterRoot: '/',
         fileSystem: fs,
         logger: logger,
         platform: platform,
         processManager: processManager,
       );
-      return PackagesCommand(
+      final toolContext = FakeToolContext(
+        botDetector: botDetector,
+        cache: cache,
+        fs: fs,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+        stdio: stdio,
+      );
+      final command = PackagesCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        toolContext: FakeToolContext(
-          botDetector: FakeBotDetector(isBot),
-          cache: cache,
-          fs: fs,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-          stdio: stdio,
-        ),
+        toolContext: toolContext,
+      );
+      final featureFlags = TestFeatureFlags();
+      return createTestCommandRunner(
+        command,
+        null,
+        toolContext,
+        featureFlags,
+        Pub(featureFlags: featureFlags, toolContext: toolContext),
       );
     }
 
@@ -719,8 +740,10 @@ flutter:
           ],
         ),
       );
-      await createTestCommandRunner(
-        createCommand(fs: fs, isBot: false, processManager: processManager),
+      await createRunner(
+        fs: fs,
+        isBot: false,
+        processManager: processManager,
       ).run(<String>['packages', 'test']);
 
       expect(processManager, hasNoRemainingExpectations);
@@ -742,8 +765,10 @@ flutter:
           ],
         ),
       );
-      await createTestCommandRunner(
-        createCommand(fs: fs, isBot: true, processManager: processManager),
+      await createRunner(
+        fs: fs,
+        isBot: true,
+        processManager: processManager,
       ).run(<String>['packages', 'test']);
 
       expect(processManager, hasNoRemainingExpectations);
@@ -767,8 +792,10 @@ flutter:
           stdin: stdin,
         ),
       );
-      await createTestCommandRunner(
-        createCommand(fs: fs, isBot: true, processManager: processManager),
+      await createRunner(
+        fs: fs,
+        isBot: true,
+        processManager: processManager,
       ).run(<String>['packages', '--verbose', 'pub', 'run', '--foo', 'bar']);
 
       expect(processManager, hasNoRemainingExpectations);
@@ -791,8 +818,10 @@ flutter:
           stdin: stdin,
         ),
       );
-      await createTestCommandRunner(
-        createCommand(fs: fs, isBot: true, processManager: processManager),
+      await createRunner(
+        fs: fs,
+        isBot: true,
+        processManager: processManager,
       ).run(<String>['packages', '--verbose', 'pub', 'token', 'list']);
 
       expect(processManager, hasNoRemainingExpectations);
@@ -812,8 +841,10 @@ flutter:
           stdin: IOSink(StreamController<List<int>>().sink),
         ),
       );
-      await createTestCommandRunner(
-        createCommand(fs: MemoryFileSystem.test(), isBot: true, processManager: processManager),
+      await createRunner(
+        fs: MemoryFileSystem.test(),
+        isBot: true,
+        processManager: processManager,
       ).run(<String>['pub', 'upgrade', '-h']);
 
       expect(processManager, hasNoRemainingExpectations);

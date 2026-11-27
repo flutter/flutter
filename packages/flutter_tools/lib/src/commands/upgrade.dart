@@ -476,18 +476,14 @@ class UpgradeCommandRunner {
   /// Update the user's packages.
   @protected
   Future<void> updatePackages(FlutterVersion flutterVersion) async {
-    final ToolContext(
-      :FileSystem fs,
-      :Logger logger,
-      :FlutterProjectFactory projectFactory,
-      :Stdio stdio,
-    ) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
+        _toolContext;
     logger.printStatus('');
     logger.printStatus(flutterVersion.toString());
     final String? projectRoot = findProjectRoot(fs);
     if (projectRoot != null) {
       logger.printStatus('');
-      await Pub(featureFlags: _featureFlags, toolContext: _toolContext, stdio: stdio).get(
+      await Pub(featureFlags: _featureFlags, toolContext: _toolContext).get(
         context: PubContext.pubUpgrade,
         project: projectFactory.fromDirectory(fs.directory(projectRoot)),
         upgrade: true,

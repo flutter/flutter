@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -51,6 +52,17 @@ void main() {
     Cache.enableLocking();
   });
 
+  CommandRunner<void> createPubTestRunner(FlutterCommand command) {
+    final featureFlags = TestFeatureFlags();
+    return createTestCommandRunner(
+      command,
+      null,
+      command.toolContext,
+      featureFlags,
+      Pub(featureFlags: featureFlags, toolContext: command.toolContext),
+    );
+  }
+
   PackagesGetCommand createPackagesGetCommand(
     String commandName,
     String description,
@@ -76,7 +88,7 @@ void main() {
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       toolContext: toolContext,
     );
-    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final CommandRunner<void> runner = createPubTestRunner(command);
     await runner.run(<String>['pub']);
 
     expect(
@@ -99,7 +111,7 @@ void main() {
         ..writeAsStringSync(minimalV2EmbeddingManifest);
 
       final PackagesGetCommand command = createPackagesGetCommand('get', '', PubContext.pubGet);
-      final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+      final CommandRunner<void> commandRunner = createPubTestRunner(command);
 
       await commandRunner.run(<String>['get']);
 
@@ -130,7 +142,7 @@ void main() {
         ..writeAsStringSync(minimalV2EmbeddingManifest);
 
       final PackagesGetCommand command = createPackagesGetCommand('get', '', PubContext.pubGet);
-      final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+      final CommandRunner<void> commandRunner = createPubTestRunner(command);
 
       await commandRunner.run(<String>['get']);
 
@@ -153,7 +165,7 @@ void main() {
     targetDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
 
     final PackagesGetCommand command = createPackagesGetCommand('get', '', PubContext.pubGet);
-    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+    final CommandRunner<void> commandRunner = createPubTestRunner(command);
 
     await commandRunner.run(<String>['get', '--directory=${targetDirectory.path}']);
     final FlutterProject rootProject = FlutterProject.fromDirectoryTest(targetDirectory, logger);
@@ -177,7 +189,7 @@ void main() {
     fileSystem.currentDirectory.childDirectory('target').createSync();
     fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
     final PackagesGetCommand command = createPackagesGetCommand('get', '', PubContext.pubGet);
-    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+    final CommandRunner<void> commandRunner = createPubTestRunner(command);
     await commandRunner.run(<String>['get', '--unknown-flag']);
     expect(
       processManager.lastCommand,
@@ -189,7 +201,7 @@ void main() {
     fileSystem.currentDirectory.childDirectory('target').createSync();
     fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
     final PackagesGetCommand command = createPackagesGetCommand('get', '', PubContext.pubGet);
-    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+    final CommandRunner<void> commandRunner = createPubTestRunner(command);
     await commandRunner.run(<String>['get', '-v']);
     expect(
       processManager.lastCommand,
@@ -208,7 +220,7 @@ void main() {
       ..writeAsStringSync(minimalV2EmbeddingManifest);
 
     final PackagesGetCommand command = createPackagesGetCommand('add', '', PubContext.pubAdd);
-    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+    final CommandRunner<void> commandRunner = createPubTestRunner(command);
     const availableSyntax = <String>[
       'foo:{"path":"../foo"}',
       'foo:{"hosted":"my-pub.dev"}',
@@ -232,7 +244,7 @@ void main() {
       ..writeAsStringSync(minimalV2EmbeddingManifest);
 
     final PackagesGetCommand command = createPackagesGetCommand('get', '', PubContext.pubGet);
-    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+    final CommandRunner<void> commandRunner = createPubTestRunner(command);
 
     await commandRunner.run(<String>['get']);
 
@@ -250,7 +262,7 @@ void main() {
 
   test('pub get throws error on missing directory', () async {
     final PackagesGetCommand command = createPackagesGetCommand('get', '', PubContext.pubGet);
-    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+    final CommandRunner<void> commandRunner = createPubTestRunner(command);
 
     try {
       await commandRunner.run(<String>['get', '--directory=missing_dir']);
@@ -271,7 +283,7 @@ void main() {
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       toolContext: toolContext,
     );
-    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final CommandRunner<void> runner = createPubTestRunner(command);
     await runner.run(<String>['pub', 'outdated', '--json']);
     expect(
       processManager.lastCommand,

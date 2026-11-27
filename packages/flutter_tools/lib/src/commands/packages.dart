@@ -25,7 +25,6 @@ import '../cache.dart';
 import '../context/tool_context.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
-import '../features.dart';
 import '../flutter_plugins.dart';
 import '../package_graph.dart';
 import '../plugins.dart';
@@ -162,8 +161,6 @@ class PackagesTestCommand extends FlutterCommand {
     requiresPubspecYaml();
   }
 
-  late final Pub _pub = _createPub(runner!.featureFlags, toolContext);
-
   @override
   String get name => 'test';
 
@@ -184,7 +181,11 @@ class PackagesTestCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await _pub.batch(<String>['run', 'test', ...argResults!.rest], context: PubContext.runTest);
+    await runner!.pub.batch(<String>[
+      'run',
+      'test',
+      ...argResults!.rest,
+    ], context: PubContext.runTest);
     return FlutterCommandResult.success();
   }
 }
@@ -200,8 +201,6 @@ class PackagesForwardCommand extends FlutterCommand {
       requiresPubspecYaml();
     }
   }
-
-  late final Pub _pub = _createPub(runner!.featureFlags, toolContext);
 
   PubContext context = PubContext.pubForward;
 
@@ -229,7 +228,7 @@ class PackagesForwardCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final List<String> subArgs = argResults!.rest.toList()
       ..removeWhere((String arg) => arg == '--');
-    await _pub.interactively(
+    await runner!.pub.interactively(
       <String>[_commandName, ...subArgs],
       command: _commandName,
       context: context,
@@ -243,8 +242,6 @@ class PackagesPassthroughCommand extends FlutterCommand {
 
   @override
   ArgParser argParser = ArgParser.allowAnything();
-
-  late final Pub _pub = _createPub(runner!.featureFlags, toolContext);
 
   @override
   String get name => 'pub';
@@ -263,7 +260,7 @@ class PackagesPassthroughCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await _pub.interactively(argResults!.rest, command: 'pub', context: _context);
+    await runner!.pub.interactively(argResults!.rest, command: 'pub', context: _context);
     return FlutterCommandResult.success();
   }
 }
@@ -302,8 +299,6 @@ class PackagesGetCommand extends FlutterCommand {
   String get invocation {
     return '${runner!.executableName} pub $_commandName [<arguments...>]';
   }
-
-  late final Pub _pub = _createPub(runner!.featureFlags, toolContext);
 
   /// An [ArgParser] that accepts all options and flags that the
   ///
@@ -386,7 +381,7 @@ class PackagesGetCommand extends FlutterCommand {
     final List<String> subArgs = rest.toList()..removeWhere((String arg) => arg == '--');
     final timer = Stopwatch()..start();
     try {
-      await _pub.interactively(
+      await runner!.pub.interactively(
         <String>[
           name,
           ...subArgs,
@@ -599,8 +594,4 @@ class PackagesGetCommand extends FlutterCommand {
       packagesAndroidEmbeddingVersion: _androidEmbeddingVersion,
     );
   }
-}
-
-Pub _createPub(FeatureFlags featureFlags, ToolContext toolContext) {
-  return Pub(featureFlags: featureFlags, toolContext: toolContext, stdio: toolContext.stdio);
 }
