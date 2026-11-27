@@ -313,7 +313,7 @@ void main() {
         }
       },
       timeout: Timeout.none,
-      // TODO(mattkae): Enable on other platforms once nested popup activation is supported there.
+      // [intended] Nested popup activation is currently only supported on Windows.
       skip: !Platform.isWindows,
     );
   });
