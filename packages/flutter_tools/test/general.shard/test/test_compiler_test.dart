@@ -107,6 +107,110 @@ name: foo
     expect(residentCompiler.didShutdown, true);
   });
 
+  test('TestCompiler reports an error when the compiler produces no output', () async {
+    residentCompiler.compilerOutput = null;
+    final testCompiler = FakeTestCompiler(
+      debugBuild,
+      FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      residentCompiler,
+    );
+
+    final Uri input = Uri.parse('test/foo.dart');
+    expect(
+      await testCompiler.compile(input),
+      TestCompilerFailure(error: 'Unknown Error', mainUri: input),
+    );
+    expect(residentCompiler.didShutdown, true);
+  });
+
+  test('TestCompiler reports an error and keeps compiling when a compile step throws', () async {
+    residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
+    // A directory where the compiled test should be copied makes the copy
+    // throw, like a full disk does.
+    fileSystem.directory('test/foo.dart.dill').createSync(recursive: true);
+    fileSystem.file('test/bar.dart').createSync(recursive: true);
+    final testCompiler = FakeTestCompiler(
+      debugBuild,
+      FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      residentCompiler,
+    );
+
+    final Uri foo = Uri.parse('test/foo.dart');
+    final Uri bar = Uri.parse('test/bar.dart');
+    final Future<TestCompilerResult> fooResult = testCompiler.compile(foo);
+    final Future<TestCompilerResult> barResult = testCompiler.compile(bar);
+
+    expect(
+      await fooResult,
+      isA<TestCompilerFailure>()
+          .having((TestCompilerFailure failure) => failure.mainUri, 'mainUri', foo)
+          .having(
+            (TestCompilerFailure failure) => failure.error,
+            'error',
+            contains('FileSystemException'),
+          ),
+    );
+    expect(residentCompiler.didShutdown, true);
+    expect(await barResult, TestCompilerComplete(outputPath: 'test/bar.dart.dill', mainUri: bar));
+  });
+
+  test('TestCompiler keeps compiling when shutting down the compiler throws', () async {
+    residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
+    residentCompiler.shutdownError = Exception('shutdown failed');
+    // Fail the first compile, which shuts the compiler down.
+    fileSystem.directory('test/foo.dart.dill').createSync(recursive: true);
+    fileSystem.file('test/bar.dart').createSync(recursive: true);
+    final testLogger = BufferLogger.test();
+    final testCompiler = FakeTestCompiler(
+      debugBuild,
+      FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      residentCompiler,
+      logger: testLogger,
+    );
+
+    final Uri foo = Uri.parse('test/foo.dart');
+    final Uri bar = Uri.parse('test/bar.dart');
+    final Future<TestCompilerResult> fooResult = testCompiler.compile(foo);
+    final Future<TestCompilerResult> barResult = testCompiler.compile(bar);
+
+    expect(await fooResult, isA<TestCompilerFailure>());
+    expect(residentCompiler.didShutdown, true);
+    expect(await barResult, TestCompilerComplete(outputPath: 'test/bar.dart.dill', mainUri: bar));
+    expect(
+      testLogger.traceText,
+      contains('Failed to shut down compiler: Exception: shutdown failed'),
+    );
+  });
+
+  test('TestCompiler records test timings before reporting a failed compile', () async {
+    residentCompiler.compilerOutput = const CompilerOutput(
+      'abc.dill',
+      1,
+      <Uri>[],
+      errorMessage: 'A big bad happened',
+    );
+    final testTimeRecorder = TestTimeRecorder(logger);
+    final testCompiler = FakeTestCompiler(
+      debugBuild,
+      FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      residentCompiler,
+      testTimeRecorder: testTimeRecorder,
+    );
+
+    final Uri input = Uri.parse('test/foo.dart');
+    expect(
+      await testCompiler.compile(input),
+      TestCompilerFailure(error: 'A big bad happened', mainUri: input),
+    );
+    // The compile phase is already stopped, so this doesn't hit its assert.
+    testTimeRecorder.print();
+
+    final List<String> logPhaseMessages = logger.messages
+        .where((String m) => m.startsWith('Runtime for phase '))
+        .toList();
+    expect(logPhaseMessages, hasLength(TestTimePhases.values.length));
+  });
+
   test('TestCompiler records test timings when provided TestTimeRecorder', () async {
     residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
     final testTimeRecorder = TestTimeRecorder(logger);
@@ -362,6 +466,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
 
   CompilerOutput? compilerOutput;
   bool didShutdown = false;
+  Exception? shutdownError;
   final invalidatedFilesPerCall = <List<Uri>>[];
 
   @override
@@ -394,6 +499,10 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   @override
   Future<Object> shutdown() async {
     didShutdown = true;
+    final Exception? error = shutdownError;
+    if (error != null) {
+      throw error;
+    }
     return Object();
   }
 }

@@ -198,12 +198,12 @@ class TestCompiler {
   }
 
   Future<void> _shutdown() async {
-    // Check for null in case this instance is shut down before the
-    // lazily-created compiler has been created.
-    if (compiler != null) {
-      await compiler!.shutdown();
-      compiler = null;
-    }
+    // Clear [compiler] before awaiting, so that a shutdown that throws doesn't
+    // leave it set for the next compilation. It is null if this instance is
+    // shut down before the lazily-created compiler has been created.
+    final ResidentCompiler? activeCompiler = compiler;
+    compiler = null;
+    await activeCompiler?.shutdown();
   }
 
   Future<void> dispose() async {
@@ -255,93 +255,105 @@ class TestCompiler {
       logger.printTrace('Compiling ${request.mainUri}');
       final compilerTime = Stopwatch()..start();
       final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);
-      var firstCompile = false;
-      if (compiler == null) {
-        compiler = await createCompiler();
-        firstCompile = true;
-      }
-
-      final invalidatedRegistrantFiles = <Uri>[];
-      if (flutterProject != null) {
-        final File mainFile = fs.file(request.mainUri);
-        final LanguageVersion languageVersion = determineLanguageVersion(
-          mainFile,
-          buildInfo.packageConfig.packageOf(request.mainUri),
-          cache.flutterRoot,
-        );
-        if (languageVersion != _registrantLanguageVersion) {
-          // (Re)generate the registrant. The output is keyed only on the plugin
-          // set (stable for one `flutter test` run) and the entrypoint's
-          // language version, so we can skip this work when the language
-          // version matches the previous compilation.
-          await generateMainDartWithPluginRegistrant(
-            flutterProject!,
-            buildInfo.packageConfig,
-            mainFile,
-            flutterRoot: cache.flutterRoot,
-            logger: logger,
-            templateRenderer: templateRenderer,
-          );
-          invalidatedRegistrantFiles.add(flutterProject!.dartPluginRegistrant.absolute.uri);
-          _registrantLanguageVersion = languageVersion;
+      TestCompilerResult result;
+      try {
+        var firstCompile = false;
+        if (compiler == null) {
+          compiler = await createCompiler();
+          firstCompile = true;
         }
-      }
 
-      final CompilerOutput? compilerOutput = await compiler!.recompile(
-        request.mainUri,
-        <Uri>[request.mainUri, ...invalidatedRegistrantFiles],
-        outputPath: outputDill.path,
-        packageConfig: buildInfo.packageConfig,
-        projectRootPath: flutterProject?.directory.absolute.path,
-        checkDartPluginRegistry: true,
-        fs: fs,
-      );
-      final String? outputPath = compilerOutput?.outputFilename;
-
-      // In case compiler didn't produce output or reported compilation
-      // errors, pass [null] upwards to the consumer and shutdown the
-      // compiler to avoid reusing compiler that might have gotten into
-      // a weird state.
-      if (outputPath == null || compilerOutput!.errorCount > 0) {
-        request._result.complete(
-          TestCompilerFailure(
-            error: compilerOutput!.errorMessage ?? 'Unknown Error',
-            mainUri: request.mainUri,
-          ),
-        );
-        await _shutdown();
-      } else {
-        if (shouldCopyDillFile) {
-          final String path = request.mainUri.toFilePath(windows: platform.isWindows);
-          final File outputFile = fs.file(outputPath);
-          final File kernelReadyToRun = await outputFile.copy('$path.dill');
-          final File testCache = fs.file(testFilePath);
-          if (firstCompile ||
-              !testCache.existsSync() ||
-              (testCache.lengthSync() < outputFile.lengthSync())) {
-            // The idea is to keep the cache file up-to-date and include as
-            // much as possible in an effort to re-use as many packages as
-            // possible.
-            if (!testCache.parent.existsSync()) {
-              testCache.parent.createSync(recursive: true);
-            }
-            await outputFile.copy(testFilePath);
+        final invalidatedRegistrantFiles = <Uri>[];
+        if (flutterProject != null) {
+          final File mainFile = fs.file(request.mainUri);
+          final LanguageVersion languageVersion = determineLanguageVersion(
+            mainFile,
+            buildInfo.packageConfig.packageOf(request.mainUri),
+            cache.flutterRoot,
+          );
+          if (languageVersion != _registrantLanguageVersion) {
+            // (Re)generate the registrant. The output is keyed only on the plugin
+            // set (stable for one `flutter test` run) and the entrypoint's
+            // language version, so we can skip this work when the language
+            // version matches the previous compilation.
+            await generateMainDartWithPluginRegistrant(
+              flutterProject!,
+              buildInfo.packageConfig,
+              mainFile,
+              flutterRoot: cache.flutterRoot,
+              logger: logger,
+              templateRenderer: templateRenderer,
+            );
+            invalidatedRegistrantFiles.add(flutterProject!.dartPluginRegistrant.absolute.uri);
+            _registrantLanguageVersion = languageVersion;
           }
-          request._result.complete(
-            TestCompilerComplete(outputPath: kernelReadyToRun.path, mainUri: request.mainUri),
+        }
+
+        final CompilerOutput? compilerOutput = await compiler!.recompile(
+          request.mainUri,
+          <Uri>[request.mainUri, ...invalidatedRegistrantFiles],
+          outputPath: outputDill.path,
+          packageConfig: buildInfo.packageConfig,
+          projectRootPath: flutterProject?.directory.absolute.path,
+          checkDartPluginRegistry: true,
+          fs: fs,
+        );
+
+        // In case compiler didn't produce output or reported compilation
+        // errors, pass [null] upwards to the consumer and shutdown the
+        // compiler to avoid reusing compiler that might have gotten into
+        // a weird state.
+        if (compilerOutput == null || compilerOutput.errorCount > 0) {
+          result = TestCompilerFailure(
+            error: compilerOutput?.errorMessage ?? 'Unknown Error',
+            mainUri: request.mainUri,
           );
         } else {
-          request._result.complete(
-            TestCompilerComplete(outputPath: outputPath, mainUri: request.mainUri),
-          );
+          final String outputPath = compilerOutput.outputFilename;
+          if (shouldCopyDillFile) {
+            final String path = request.mainUri.toFilePath(windows: platform.isWindows);
+            final File outputFile = fs.file(outputPath);
+            final File kernelReadyToRun = await outputFile.copy('$path.dill');
+            final File testCache = fs.file(testFilePath);
+            if (firstCompile ||
+                !testCache.existsSync() ||
+                (testCache.lengthSync() < outputFile.lengthSync())) {
+              // The idea is to keep the cache file up-to-date and include as
+              // much as possible in an effort to re-use as many packages as
+              // possible.
+              if (!testCache.parent.existsSync()) {
+                testCache.parent.createSync(recursive: true);
+              }
+              await outputFile.copy(testFilePath);
+            }
+            result = TestCompilerComplete(
+              outputPath: kernelReadyToRun.path,
+              mainUri: request.mainUri,
+            );
+          } else {
+            result = TestCompilerComplete(outputPath: outputPath, mainUri: request.mainUri);
+          }
+          compiler!.accept();
+          compiler!.reset();
         }
-        compiler!.accept();
-        compiler!.reset();
+      } on Object catch (error, stackTrace) {
+        // Fail this request and keep going: otherwise this test and every
+        // test queued behind it waits forever for its compilation result.
+        logger.printTrace('Compilation failed for ${request.mainUri}: $error\n$stackTrace');
+        result = TestCompilerFailure(error: error.toString(), mainUri: request.mainUri);
       }
-      logger.printTrace('Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');
-      testTimeRecorder?.stop(TestTimePhases.Compile, testTimeRecorderStopwatch!);
+      if (result is TestCompilerFailure) {
+        try {
+          await _shutdown();
+        } on Object catch (error, stackTrace) {
+          logger.printTrace('Failed to shut down compiler: $error\n$stackTrace');
+        }
+      }
       // Only remove now when we finished processing the element
       compilationQueue.removeAt(0);
+      logger.printTrace('Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');
+      testTimeRecorder?.stop(TestTimePhases.Compile, testTimeRecorderStopwatch!);
+      request._result.complete(result);
     }
   }
 }
