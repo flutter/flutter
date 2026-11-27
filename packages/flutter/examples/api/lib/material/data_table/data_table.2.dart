@@ -58,7 +58,7 @@ class _DataTableExampleState extends State<DataTableExample> {
 
   /// Sorts the rows with [compare] and records the sort column and direction.
   ///
-  /// [DataTable] only draws the sort arrow; reordering the rows is up to the app.
+  /// [DataTable] only draws the sort arrow; the app must reorder the rows.
   void _sort(int columnIndex, bool ascending, Comparator<Person> compare) {
     setState(() {
       _people.sort(
