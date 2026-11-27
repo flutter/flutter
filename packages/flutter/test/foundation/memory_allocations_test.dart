@@ -224,9 +224,8 @@ Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
   count++;
   count++;
   image.dispose();
-  count++;
 
-  return count;
+  return count + 1;
 }
 
 Future<Image> _createImage() async {

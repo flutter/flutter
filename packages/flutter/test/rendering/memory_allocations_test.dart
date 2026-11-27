@@ -67,7 +67,6 @@ Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
   renderObject.dispose();
   count++;
   layer.dispose();
-  count++;
 
-  return count;
+  return count + 1;
 }

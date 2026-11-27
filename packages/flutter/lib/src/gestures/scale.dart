@@ -505,8 +505,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     for (final _PointerPanZoomData p in _pointerPanZooms.values) {
       factor += p.rotation;
     }
-    factor -= _initialPanZoomRotationFactor;
-    return factor;
+    return factor - _initialPanZoomRotationFactor;
   }
 
   @override

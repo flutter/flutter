@@ -4060,8 +4060,8 @@ void main() {
         viewType: 'webview',
         onCreatePlatformView: (PlatformViewCreationParams params) {
           params.onPlatformViewCreated(params.id);
-          focusChanged = params.onFocusChanged;
           controller = FakePlatformViewController(params.id);
+          focusChanged = params.onFocusChanged;
           return controller;
         },
         surfaceFactory: (BuildContext context, PlatformViewController controller) {
@@ -4124,8 +4124,8 @@ void main() {
         viewType: 'test',
         onCreatePlatformView: (PlatformViewCreationParams params) {
           viewId = params.id;
-          params.onPlatformViewCreated(params.id);
           controller = FakePlatformViewController(params.id);
+          params.onPlatformViewCreated(params.id);
           return controller;
         },
         surfaceFactory: (BuildContext context, PlatformViewController controller) {
@@ -4179,8 +4179,8 @@ void main() {
         final platformViewLink = PlatformViewLink(
           viewType: 'test',
           onCreatePlatformView: (PlatformViewCreationParams params) {
-            params.onPlatformViewCreated(params.id);
             controller = FakePlatformViewController(params.id);
+            params.onPlatformViewCreated(params.id);
             return controller;
           },
           surfaceFactory: (BuildContext context, PlatformViewController controller) {

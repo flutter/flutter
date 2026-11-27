@@ -574,24 +574,21 @@ abstract final class MatrixUtils {
     //  [0.0, 1.0, 0.0, 0.0],
     //  [0.0, 0.0, 1.0, -radius],
     //  [0.0, 0.0, 0.0, 1.0]]
-    var result = Matrix4.identity()
+    final result = Matrix4.identity()
       ..setEntry(3, 2, -perspective)
       ..setEntry(2, 3, -radius)
       ..setEntry(3, 3, perspective * radius + 1.0);
 
     // Model matrix by first translating the object from the origin of the world
     // by radius in the z axis and then rotating against the world.
-    result =
-        result *
-                (switch (orientation) {
-                      Axis.horizontal => Matrix4.rotationY(angle),
-                      Axis.vertical => Matrix4.rotationX(angle),
-                    } *
-                    Matrix4.translationValues(0.0, 0.0, radius))
-            as Matrix4;
-
     // Essentially perspective * view * model.
-    return result;
+    return result *
+            (switch (orientation) {
+                  Axis.horizontal => Matrix4.rotationY(angle),
+                  Axis.vertical => Matrix4.rotationX(angle),
+                } *
+                Matrix4.translationValues(0.0, 0.0, radius))
+        as Matrix4;
   }
 
   /// Returns a matrix that transforms every point to [offset].
