@@ -42,8 +42,12 @@ reflectors generate a superset of information") and Vulkan's move under
 `vk/`, which is why `impellerc_compile` declares its outputs at analysis
 time from a platform-selected `subdir` rather than predeclaring them: one
 rule instance, either layout, no two rules claiming
-`impeller/entity/solid_fill.vert.h`. Off the Apple platforms the Metal
-targets are incompatible and a wildcard build skips them.
+`impeller/entity/solid_fill.vert.h`. There Vulkan's impellerc is given the
+invocation's `--metal-version` as well, as GN's is (it reads the option for
+Metal output alone); and `vulkan_exclusions` and `gles_exclusions` leave
+shaders out of their own backends only, so Metal compiles every shader. Off
+the Apple platforms the Metal targets are incompatible and a wildcard build
+skips them.
 
 The tools run in Bazel's exec configuration -- GN's `host_toolchain` for
 `compiled_action` -- which on a host build means `impellerc`'s closure

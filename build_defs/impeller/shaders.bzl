@@ -284,7 +284,8 @@ impellerc_compile = rule(
             doc = "--gles-language-version, 0 for none.",
         ),
         "metal": attr.bool(
-            doc = "The Metal backend (shaders_mtl.gni): --metal-version is passed, the invoker's or 1.2.",
+            doc = "Whether --metal-version is passed, the invoker's or 1.2: the Metal backend " +
+                  "(shaders_mtl.gni), and Vulkan's where Metal is enabled (shaders_vk.gni).",
         ),
         "metal_version": attr.string(
             doc = "GN's metal_version, when the invoker sets it (a select() over the platform in the generated files, None off Apple).",
@@ -500,12 +501,15 @@ def impeller_shaders(
       vulkan_language_version: GN's `vulkan_language_version`, which only
         malioc reads; accepted.
       metal_version: the Metal language version for the Metal backend's
-        impellerc and the metal compiler (GN's default "1.2"); the
-        generated files pass a select() over the platform, None elsewhere.
+        impellerc and the metal compiler (GN's default "1.2"), passed to
+        the Vulkan backend's impellerc as well where Metal is enabled;
+        the generated files pass a select() over the platform, None
+        elsewhere.
       use_half_textures: --use-half-textures for the Metal backend.
       require_framebuffer_fetch: --require-framebuffer-fetch for GLES.
       gles_exclusions: shaders not compiled for GLES.
-      vulkan_exclusions: shaders not compiled for Vulkan.
+      vulkan_exclusions: shaders not compiled for Vulkan (Metal compiles
+        every shader).
       entry_point_prefix: --entry-point-prefix.
       target_compatible_with: applied to every target created, since GN
         defines the whole set under one condition (or not at all).
@@ -539,8 +543,33 @@ def impeller_shaders(
         if backend.opengles and not enable_opengles:
             continue
         metal = backend.tag in _METAL_TAGS
-        exclusions = gles_exclusions if backend.opengles else vulkan_exclusions
+
+        # shaders.gni: GLES leaves out gles_exclusions and Vulkan
+        # vulkan_exclusions; Metal compiles every shader.
+        if backend.opengles:
+            exclusions = gles_exclusions
+        elif metal:
+            exclusions = []
+        else:
+            exclusions = vulkan_exclusions
         backend_shaders = [shader for shader in shaders if shader not in exclusions]
+
+        # --metal-version goes to the Metal backend's impellerc
+        # (shaders_mtl.gni) and, where impeller_enable_metal holds, to
+        # Vulkan's as well: shaders_vk.gni's `invoker.metal_version`
+        # finds impeller_shaders' own variable, which is set whenever
+        # Metal is on, because GN looks a scope's member up through the
+        # scopes that enclose the invocation. impellerc reads the
+        # option for Metal output alone.
+        if metal:
+            passes_metal_version = True
+        elif backend.tag == "vk":
+            passes_metal_version = select({
+                _METAL: True,
+                "//conditions:default": False,
+            })
+        else:
+            passes_metal_version = False
         tag = backend.tag + "_" + name
 
         # The backend's targets exist where shaders.gni builds the backend.
@@ -566,12 +595,12 @@ def impeller_shaders(
             flags = backend.flags,
             defines = backend.defines,
             gles_language_version = version or 0,
-            # shaders_mtl.gni alone passes metal_version on (the invoker's,
-            # or 1.2, which the rule supplies): a select() over the
-            # platform in the generated files, with None off Apple, which
-            # Bazel reads as the attribute's default.
-            metal = metal,
-            metal_version = metal_version if metal else None,
+            # The invoker's metal_version, or 1.2, which the rule
+            # supplies: a select() over the platform in the generated
+            # files, with None off Apple, which Bazel reads as the
+            # attribute's default.
+            metal = passes_metal_version,
+            metal_version = metal_version if (metal or backend.tag == "vk") else None,
             use_half_textures = use_half_textures and metal,
             require_framebuffer_fetch = require_framebuffer_fetch and backend.opengles,
             minify = minify_gles if backend.opengles else False,
