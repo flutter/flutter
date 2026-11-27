@@ -791,6 +791,114 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/197466.
+  testWidgets(
+    'selection rects only cover the visible part of a field inside a scroll view',
+    (WidgetTester tester) async {
+      final log = <List<SelectionRect>>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (
+        MethodCall methodCall,
+      ) async {
+        if (methodCall.method == 'TextInput.setSelectionRects') {
+          final args = methodCall.arguments as List<dynamic>;
+          final selectionRects = <SelectionRect>[];
+          for (final dynamic rect in args) {
+            selectionRects.add(
+              SelectionRect(
+                position: (rect as List<dynamic>)[4] as int,
+                bounds: Rect.fromLTWH(
+                  rect[0] as double,
+                  rect[1] as double,
+                  rect[2] as double,
+                  rect[3] as double,
+                ),
+              ),
+            );
+          }
+          log.add(selectionRects);
+        }
+        return null;
+      });
+
+      final outerScrollController = ScrollController();
+      addTearDown(outerScrollController.dispose);
+      // Each character is 14 wide and the field 20 wide, so every character
+      // gets a line of its own: 1000 lines of 14 pixels.
+      controller.value = TextEditingValue(
+        text: 'a' * 1000,
+        selection: const TextSelection.collapsed(offset: 0),
+      );
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: SizedBox(
+                width: 20,
+                // 10 lines are visible at a time.
+                height: 140,
+                child: SingleChildScrollView(
+                  controller: outerScrollController,
+                  child: EditableText(
+                    controller: controller,
+                    maxLines: null,
+                    focusNode: focusNode,
+                    cursorWidth: 0,
+                    style: const TextStyle(),
+                    cursorColor: _blue,
+                    backgroundCursorColor: _grey,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(log, isEmpty);
+
+      List<int> positions(List<SelectionRect> rects) =>
+          rects.map((SelectionRect rect) => rect.position).toList();
+
+      await tester.showKeyboard(find.byType(EditableText));
+      expect(outerScrollController.offset, 0);
+      // The visible lines (0 to 9) and a margin of one viewport height below
+      // them, not all 1000 lines.
+      expect(positions(log.single), List<int>.generate(20, (int i) => i));
+      expect(
+        log.single.first,
+        const SelectionRect(position: 0, bounds: Rect.fromLTRB(0.0, 0.0, 14.0, 14.0)),
+      );
+      log.clear();
+
+      await tester.pumpAndSettle();
+      expect(log, isEmpty);
+
+      // Scroll the enclosing scroll view out of the area covered so far: lines
+      // 100 to 109 are visible.
+      outerScrollController.jumpTo(1400);
+      await tester.pump();
+      // The visible lines, a margin of one viewport height on each side, and
+      // line 89, whose bottom edge touches the top of the margin.
+      expect(positions(log.single), List<int>.generate(31, (int i) => i + 89));
+      expect(
+        log.single.firstWhere((SelectionRect rect) => rect.position == 100),
+        const SelectionRect(position: 100, bounds: Rect.fromLTRB(0.0, 1400.0, 14.0, 1414.0)),
+      );
+      log.clear();
+
+      // Scrolling within the area already covered doesn't send the rects again.
+      outerScrollController.jumpTo(1450);
+      await tester.pump();
+      expect(log, isEmpty);
+
+      // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
+    },
+    skip: kIsWeb, // [intended]
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
+  );
+
   // Regression test for https://github.com/flutter/flutter/issues/159259.
   testWidgets(
     'showToolbar does nothing and returns false when already shown during Scribble selection',
