@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'button_tester.dart';
 import 'semantics_tester.dart';
+import 'test_page_tester.dart';
 import 'utils.dart';
 
 void main() {
@@ -3956,13 +3957,16 @@ void main() {
 
     final focusIntentWithCallback = RequestFocusIntent(
       nodeA,
-      requestFocusCallback: (
-        FocusNode node, {
-        double? alignment,
-        ScrollPositionAlignmentPolicy? alignmentPolicy,
-        Curve? curve,
-        Duration? duration,
-      }) => calledCallback = true,
+      requestFocusCallback:
+          (
+            FocusNode node, {
+            double? alignment,
+            ScrollPositionAlignmentPolicy? alignmentPolicy,
+            Curve? curve,
+            Duration? duration,
+          }) {
+            calledCallback = true;
+          },
     );
 
     RequestFocusAction().invoke(focusIntentWithCallback);
@@ -4205,24 +4209,6 @@ void main() {
       expect(enabledButton2Node.hasPrimaryFocus, isTrue);
     },
   );
-}
-
-class TestPage<T> extends Page<T> {
-  const TestPage({required this.child, super.key, super.name});
-
-  final Widget child;
-
-  @override
-  Route<T> createRoute(BuildContext context) {
-    return PageRouteBuilder<T>(
-      settings: this,
-      pageBuilder: (
-        BuildContext context,
-        Animation<double> animation,
-        Animation<double> secondaryAnimation,
-      ) => child,
-    );
-  }
 }
 
 /// Used to test removal of nodes while sorting.

@@ -13,7 +13,6 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  adaptive_breakpoints: any
   animations: any
   collection: any
   flutter_localized_locales: any
@@ -236,4 +235,4 @@ flutter:
       fonts:
         - asset: packages/flutter_gallery_assets/fonts/GalleryIcons.ttf
 
-# PUBSPEC CHECKSUM: ltolmu
+# PUBSPEC CHECKSUM: ebfeeh

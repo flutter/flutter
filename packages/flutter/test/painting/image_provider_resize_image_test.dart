@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';
 import '../rendering/rendering_tester.dart';
+import 'image_test_utils.dart';
 
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
@@ -21,6 +22,25 @@ void main() {
   });
 
   group('ResizeImage', () {
+    test('fails to decode when a given width or height is 0', () async {
+      final image = MemoryImage(Uint8List.fromList(kBlueSquarePng));
+      // The constructor accepts 0. The failure occurs at decode time.
+      for (final resizedImage in <ResizeImage>[
+        for (final policy in <ResizeImagePolicy>[
+          ResizeImagePolicy.exact,
+          ResizeImagePolicy.fit,
+        ]) ...[
+          ResizeImage(image, width: 0, policy: policy),
+          ResizeImage(image, height: 0, policy: policy),
+        ],
+        ResizeImage(image, width: 0, height: 10, policy: ResizeImagePolicy.cover),
+        ResizeImage(image, width: 10, height: 0, policy: ResizeImagePolicy.cover),
+      ]) {
+        expect(await _resolveAndGetError(resizedImage), isAssertionError);
+        PaintingBinding.instance.imageCache.clear();
+      }
+    });
+
     group('equality and hashCode', () {
       test('Two identical instances should be equal and have same hashCode', () {
         final bytes = Uint8List.fromList(kTransparentImage);
@@ -47,8 +67,15 @@ void main() {
         final bytes = Uint8List.fromList(kTransparentImage);
         final resizeImage1 = ResizeImage(MemoryImage(bytes), width: 100, height: 200);
         final resizeImage2 = ResizeImage(MemoryImage(bytes), width: 150, height: 200);
+        final resizeImage3 = ResizeImage(
+          MemoryImage(bytes),
+          width: 100,
+          height: 200,
+          policy: ResizeImagePolicy.cover,
+        );
 
         expect(resizeImage1 == resizeImage2, isFalse);
+        expect(resizeImage1 == resizeImage3, isFalse);
       });
 
       test('Reflexivity: instance should be equal to itself', () {
@@ -217,6 +244,152 @@ void main() {
         expect(resizedImageSize, const Size(1, 1));
       });
 
+      group('with policy=cover', () {
+        test('covers a landscape rect with a square image', () async {
+          final rawImage = MemoryImage(Uint8List.fromList(kBlueSquarePng));
+          await _expectImageSize(rawImage, const Size(50, 50));
+          final resizedImage = ResizeImage(
+            rawImage,
+            width: 20,
+            height: 10,
+            policy: ResizeImagePolicy.cover,
+          );
+          await _expectImageSize(resizedImage, const Size(20, 20));
+        });
+
+        test('covers a square with a portrait image', () async {
+          final rawImage = MemoryImage(Uint8List.fromList(kBluePortraitPng));
+          await _expectImageSize(rawImage, const Size(50, 100));
+          final resizedImage = ResizeImage(
+            rawImage,
+            width: 30,
+            height: 30,
+            policy: ResizeImagePolicy.cover,
+          );
+          await _expectImageSize(resizedImage, const Size(30, 60));
+        });
+
+        test('covers a tall rect with a portrait image', () async {
+          final rawImage = MemoryImage(Uint8List.fromList(kBluePortraitPng));
+          await _expectImageSize(rawImage, const Size(50, 100));
+          final resizedImage = ResizeImage(
+            rawImage,
+            width: 10,
+            height: 40,
+            policy: ResizeImagePolicy.cover,
+          );
+          await _expectImageSize(resizedImage, const Size(20, 40));
+        });
+
+        test('covers a square with a landscape image', () async {
+          final rawImage = MemoryImage(Uint8List.fromList(kBlueLandscapePng));
+          await _expectImageSize(rawImage, const Size(100, 50));
+          final resizedImage = ResizeImage(
+            rawImage,
+            width: 30,
+            height: 30,
+            policy: ResizeImagePolicy.cover,
+          );
+          await _expectImageSize(resizedImage, const Size(60, 30));
+        });
+
+        test('covers a wide rect with a landscape image', () async {
+          final rawImage = MemoryImage(Uint8List.fromList(kBlueLandscapePng));
+          await _expectImageSize(rawImage, const Size(100, 50));
+          final resizedImage = ResizeImage(
+            rawImage,
+            width: 40,
+            height: 5,
+            policy: ResizeImagePolicy.cover,
+          );
+          await _expectImageSize(resizedImage, const Size(40, 20));
+        });
+
+        test('leaves image as-is if the box needs upscaling', () async {
+          final rawImage = MemoryImage(Uint8List.fromList(kBluePortraitPng));
+          await _expectImageSize(rawImage, const Size(50, 100));
+          final resizedImage = ResizeImage(
+            rawImage,
+            width: 60,
+            height: 60,
+            policy: ResizeImagePolicy.cover,
+          );
+          await _expectImageSize(resizedImage, const Size(50, 100));
+        });
+
+        test('leaves image as-is if a rounded side reaches the intrinsic size', () async {
+          // Mirrored inputs must give mirrored outputs.
+          final landscape = MemoryImage(Uint8List.fromList(kBlueLandscapePng));
+          await _expectImageSize(landscape, const Size(100, 50));
+          await _expectImageSize(
+            ResizeImage(landscape, width: 99, height: 1, policy: ResizeImagePolicy.cover),
+            const Size(100, 50),
+          );
+          final portrait = MemoryImage(Uint8List.fromList(kBluePortraitPng));
+          await _expectImageSize(portrait, const Size(50, 100));
+          await _expectImageSize(
+            ResizeImage(portrait, width: 1, height: 99, policy: ResizeImagePolicy.cover),
+            const Size(50, 100),
+          );
+        });
+
+        test('scales up when allowUpscaling is true', () async {
+          final rawImage = MemoryImage(Uint8List.fromList(kBluePortraitPng));
+          await _expectImageSize(rawImage, const Size(50, 100));
+          final resizedImage = ResizeImage(
+            rawImage,
+            width: 60,
+            height: 60,
+            policy: ResizeImagePolicy.cover,
+            allowUpscaling: true,
+          );
+          await _expectImageSize(resizedImage, const Size(60, 120));
+        });
+
+        test('rounds the other side up', () async {
+          final rawImage = MemoryImage(Uint8List.fromList(kBlueLandscapePng));
+          await _expectImageSize(rawImage, const Size(100, 50));
+          final resizedImage = ResizeImage(
+            rawImage,
+            width: 15,
+            height: 1,
+            policy: ResizeImagePolicy.cover,
+          );
+          await _expectImageSize(resizedImage, const Size(15, 8));
+        });
+
+        test('does not add a pixel when the scale is exact', () async {
+          final rawImage = MemoryImage(Uint8List.fromList(kBlueSquarePng));
+          await _expectImageSize(rawImage, const Size(50, 50));
+          final resizedImage = ResizeImage(
+            rawImage,
+            width: 7,
+            height: 1,
+            policy: ResizeImagePolicy.cover,
+          );
+          await _expectImageSize(resizedImage, const Size(7, 7));
+        });
+
+        test('useLogicalSize scales the box by devicePixelRatio', () async {
+          // Source image is 50x50. 10x20 logical pixels at 2x is a 20x40 box;
+          // covering it with a square image gives 40x40.
+          final rawImage = MemoryImage(Uint8List.fromList(kBlueSquarePng));
+          final resizedImage = ResizeImage(
+            rawImage,
+            width: 10,
+            height: 20,
+            policy: ResizeImagePolicy.cover,
+            useLogicalSize: true,
+          );
+          const config = ImageConfiguration(devicePixelRatio: 2.0);
+          final Size resizedImageSize = await _resolveAndGetSize(
+            resizedImage,
+            configuration: config,
+          );
+          expect(resizedImageSize, const Size(40, 40));
+        });
+      });
+
       group('with policy=fit and allowResize=false', () {
         test('constrains square image to bounded portrait rect', () async {
           final rawImage = MemoryImage(Uint8List.fromList(kBlueSquarePng));
@@ -379,9 +552,30 @@ void main() {
           );
           await _expectImageSize(resizedImage, const Size(50, 50));
         });
+
+        test('does not derive a side of 0 for a very thin image', () async {
+          final rawImage = MemoryImage(await _createPng(4000, 1));
+          await _expectImageSize(
+            ResizeImage(rawImage, width: 100, policy: ResizeImagePolicy.fit),
+            const Size(100, 1),
+          );
+          final tallImage = MemoryImage(await _createPng(1, 4000));
+          await _expectImageSize(
+            ResizeImage(tallImage, height: 100, policy: ResizeImagePolicy.fit),
+            const Size(1, 100),
+          );
+        });
       });
 
       group('with policy=fit and allowResize=true', () {
+        test('does not derive a side of 0 for a very thin image', () async {
+          final rawImage = MemoryImage(await _createPng(4000, 1));
+          await _expectImageSize(
+            ResizeImage(rawImage, width: 100, policy: ResizeImagePolicy.fit, allowUpscaling: true),
+            const Size(100, 1),
+          );
+        });
+
         test('constrains square image to bounded portrait rect', () async {
           final rawImage = MemoryImage(Uint8List.fromList(kBlueSquarePng));
           await _expectImageSize(rawImage, const Size(50, 50));
@@ -584,7 +778,19 @@ void main() {
           await _expectImageSize(resizedImage, const Size(25, 25));
         });
       });
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/73120);
+    });
+
+    test('policy=cover asserts when width or height is null', () {
+      final rawImage = MemoryImage(Uint8List.fromList(kBlueSquarePng));
+      expect(
+        () => ResizeImage(rawImage, width: 10, policy: ResizeImagePolicy.cover),
+        throwsAssertionError,
+      );
+      expect(
+        () => ResizeImage(rawImage, height: 10, policy: ResizeImagePolicy.cover),
+        throwsAssertionError,
+      );
+    });
 
     test('does not resize when no size is passed', () async {
       final bytes = Uint8List.fromList(kTransparentImage);
@@ -688,7 +894,34 @@ void main() {
       await completer.future;
       expect(isAsync, true);
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/107000
+    test('delegates createStream to the wrapped provider', () {
+      final resizeImage = ResizeImage(CustomStreamImageProvider(), width: 10);
+      const configuration = ImageConfiguration(size: Size(20, 30), devicePixelRatio: 2.0);
+
+      expect(
+        resizeImage.resolve(configuration),
+        isA<CustomImageStream>().having(
+          (CustomImageStream s) => s.configuration,
+          'configuration',
+          same(configuration),
+        ),
+      );
+    });
   });
+}
+
+Future<Uint8List> _createPng(int width, int height) async {
+  final recorder = ui.PictureRecorder();
+  ui.Canvas(recorder).drawRect(
+    ui.Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
+    ui.Paint()..color = const ui.Color(0xFF0000FF),
+  );
+  final ui.Image image = await recorder.endRecording().toImage(width, height);
+  final ByteData? data = await image.toByteData(format: ui.ImageByteFormat.png);
+  image.dispose();
+  return data!.buffer.asUint8List();
 }
 
 Future<void> _expectImageSize(ImageProvider<Object> imageProvider, Size size) async {
@@ -708,6 +941,19 @@ Future<Size> _resolveAndGetSize(
     completer.complete(Size(width.toDouble(), height.toDouble()));
   });
   stream.addListener(listener);
+  return completer.future;
+}
+
+Future<Object> _resolveAndGetError(ImageProvider imageProvider) {
+  final completer = Completer<Object>();
+  imageProvider
+      .resolve(ImageConfiguration.empty)
+      .addListener(
+        ImageStreamListener(
+          (ImageInfo image, bool synchronousCall) => completer.complete(image),
+          onError: (Object error, StackTrace? stackTrace) => completer.complete(error),
+        ),
+      );
   return completer.future;
 }
 

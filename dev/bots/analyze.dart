@@ -431,10 +431,8 @@ Future<void> verifyToolTestsEndInTestDart(String workingDirectory) async {
   final String toolsTestPath = path.join(workingDirectory, 'packages', 'flutter_tools', 'test');
   final violations = <String>[];
 
-  // detect files that contains calls to test(), testUsingContext(), and testWithoutContext()
-  final callsTestFunctionPattern = RegExp(
-    r'^ *(test\(.*\)|testUsingContext\(.*\)|testWithoutContext\(.*\))',
-  );
+  // detect files that contain calls to test()
+  final callsTestFunctionPattern = RegExp(r'^ *test\(.*\)');
 
   await for (final File file in _allFiles(toolsTestPath, 'dart', minimumMatches: 300)) {
     final bool isValidTestFile = file.path.endsWith('_test.dart');
@@ -1630,7 +1628,10 @@ Future<void> lintKotlinTemplatedFiles(String workingDirectory) async {
       .listSync(recursive: true)
       .toList()
       .whereType<File>()
-      .where((File file) => _kKotlinExtList.contains(path.extension(file.path, 2)));
+      .where((File file) => _kKotlinExtList.contains(path.extension(file.path, 2)))
+      // Skip Pigeon-generated files, as they are intentionally not autoformatted
+      // to minimize diffs when developers re-run Pigeon generation.
+      .where((File file) => !path.basename(file.path).contains('.g.kt'));
 
   if (files.isEmpty) {
     foundError(<String>['No Kotlin template files found']);

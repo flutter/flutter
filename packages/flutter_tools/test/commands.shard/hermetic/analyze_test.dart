@@ -24,7 +24,7 @@ const _kFlutterRoot = '/data/flutter';
 const SIGABRT = -6;
 
 void main() {
-  testWithoutContext('analyze generate correct errors message', () async {
+  test('analyze generate correct errors message', () async {
     expect(
       AnalyzeBase.generateErrorsMessage(issueCount: 0, seconds: '0.1'),
       'No issues found! (ran in 0.1s)',
@@ -54,8 +54,11 @@ void main() {
       platform = FakePlatform();
       logger = BufferLogger.test();
       processManager = FakeProcessManager.empty();
+      // Setup repo roots
+      const homePath = '/home/user/flutter';
       toolContext = FakeToolContext(
         artifacts: Artifacts.test(),
+        cache: FakeCache(fileSystem: fileSystem, flutterRoot: homePath),
         fs: fileSystem,
         logger: logger,
         platform: platform,
@@ -68,15 +71,12 @@ void main() {
       );
       runner = createTestCommandRunner(command);
 
-      // Setup repo roots
-      const homePath = '/home/user/flutter';
-      Cache.flutterRoot = homePath;
       for (final dir in <String>['dev', 'examples', 'packages']) {
         fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
       }
     });
 
-    testWithoutContext('SIGABRT throws Exception', () async {
+    test('SIGABRT throws Exception', () async {
       const stderr = 'Something bad happened!';
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
@@ -88,6 +88,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
             '--no-with-fine-dependencies',
             '--suppress-analytics',
           ],
@@ -107,7 +108,7 @@ void main() {
       );
     });
 
-    testWithoutContext('Analysis server premature exit with 255 throws ToolExit', () async {
+    test('Analysis server premature exit with 255 throws ToolExit', () async {
       const stderr = 'Fatal error in analyzer';
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
@@ -118,6 +119,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
             '--no-with-fine-dependencies',
             '--suppress-analytics',
           ],
@@ -139,7 +141,7 @@ void main() {
       );
     });
 
-    testWithoutContext('--flutter-repo analyzes everything in the flutterRoot', () async {
+    test('--flutter-repo analyzes everything in the flutterRoot', () async {
       final process = MockLspServerProcess();
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
@@ -151,6 +153,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
             '--no-with-fine-dependencies',
             '--suppress-analytics',
           ],
@@ -172,7 +175,41 @@ void main() {
       );
     });
 
-    testWithoutContext('--no-plugins passes --no-plugins to language-server', () async {
+    test('only the latest diagnostics published for a file are reported', () async {
+      final process = MockLspServerProcess();
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'Artifact.engineDartSdkPath/bin/dart',
+            'language-server',
+            '--dart-sdk',
+            'Artifact.engineDartSdkPath',
+            '--disable-server-feature-completion',
+            '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
+            '--no-with-fine-dependencies',
+            '--suppress-analytics',
+          ],
+          process: process,
+        ),
+      ]);
+      final Uri targetUri = Uri.parse('file:///directoryA/foo');
+      await process.runSimulatedAnalysis(diagnosticsFor: targetUri);
+      await process.runSimulatedAnalysis(diagnosticsFor: targetUri, diagnosticsCount: 2);
+
+      await expectLater(
+        runner.run(<String>['analyze']),
+        throwsA(
+          isA<ToolExit>().having(
+            (ToolExit e) => e.message,
+            'message',
+            startsWith('2 issues found.'),
+          ),
+        ),
+      );
+    });
+
+    test('--no-plugins passes --no-plugins to language-server', () async {
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -182,6 +219,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
             '--no-with-fine-dependencies',
             '--no-plugins',
             '--suppress-analytics',
@@ -193,7 +231,7 @@ void main() {
       await expectLater(runner.run(<String>['analyze', '--no-plugins']), throwsA(isA<ToolExit>()));
     });
 
-    testWithoutContext('--benchmark passes --no-plugins to language-server by default', () async {
+    test('--benchmark passes --no-plugins to language-server by default', () async {
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -203,6 +241,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
             '--no-with-fine-dependencies',
             '--no-plugins',
             '--suppress-analytics',
@@ -214,7 +253,7 @@ void main() {
       await expectLater(runner.run(<String>['analyze', '--benchmark']), throwsA(isA<ToolExit>()));
     });
 
-    testWithoutContext('--benchmark with --plugins enables plugins', () async {
+    test('--benchmark with --plugins enables plugins', () async {
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -224,7 +263,9 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
             '--no-with-fine-dependencies',
+            '--plugins',
             '--suppress-analytics',
           ],
           exitCode: 255,
@@ -236,41 +277,174 @@ void main() {
         throwsA(isA<ToolExit>()),
       );
     });
+
+    Future<void> expectServerArgs({
+      required List<String> analyzeArgs,
+      required List<String> expectedServerFlags,
+      bool isRunningOnBot = false,
+    }) async {
+      final localProcessManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'Artifact.engineDartSdkPath/bin/dart',
+            'language-server',
+            '--dart-sdk',
+            'Artifact.engineDartSdkPath',
+            '--disable-server-feature-completion',
+            '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
+            '--no-with-fine-dependencies',
+            ...expectedServerFlags,
+            '--suppress-analytics',
+          ],
+          exitCode: 255,
+          stderr: 'error',
+        ),
+      ]);
+      final localCommand = AnalyzeCommand(
+        allProjectValidators: <ProjectValidator>[],
+        suppressAnalytics: true,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          botDetector: FakeBotDetector(isRunningOnBot),
+          cache: FakeCache(fileSystem: fileSystem, flutterRoot: '/home/user/flutter'),
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: localProcessManager,
+        ),
+      );
+      final CommandRunner<void> localRunner = createTestCommandRunner(localCommand);
+      await expectLater(
+        localRunner.run(<String>['analyze', ...analyzeArgs]),
+        throwsA(isA<ToolExit>()),
+      );
+      expect(localProcessManager, hasNoRemainingExpectations);
+    }
+
+    test('--plugins passes --plugins to language-server', () async {
+      await expectServerArgs(
+        analyzeArgs: <String>['--plugins'],
+        expectedServerFlags: <String>['--plugins'],
+      );
+    });
+
+    test('plugin trust flags pass expected flags to language-server', () async {
+      await expectServerArgs(
+        analyzeArgs: <String>['--trust-plugins'],
+        expectedServerFlags: <String>['--trust-plugins'],
+      );
+      await expectServerArgs(
+        analyzeArgs: <String>['--always-trust-plugins'],
+        expectedServerFlags: <String>['--always-trust-plugins'],
+      );
+      await expectServerArgs(
+        analyzeArgs: <String>['--never-trust-plugins'],
+        expectedServerFlags: <String>['--never-trust-plugins'],
+      );
+    });
+
+    test('plugin trust flags are mutually exclusive', () async {
+      for (final args in const <List<String>>[
+        <String>['--trust-plugins', '--always-trust-plugins'],
+        <String>['--trust-plugins', '--never-trust-plugins'],
+        <String>['--always-trust-plugins', '--never-trust-plugins'],
+        <String>['--trust-plugins', '--always-trust-plugins', '--never-trust-plugins'],
+      ]) {
+        await expectLater(
+          runner.run(<String>['analyze', ...args]),
+          throwsToolExit(
+            message:
+                'Cannot specify more than one of "--trust-plugins", '
+                '"--always-trust-plugins", and "--never-trust-plugins".',
+          ),
+        );
+      }
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    test('plugin trust flags are not negatable', () async {
+      for (final flag in const <String>[
+        '--no-trust-plugins',
+        '--no-always-trust-plugins',
+        '--no-never-trust-plugins',
+      ]) {
+        await expectLater(runner.run(<String>['analyze', flag]), throwsA(isA<UsageException>()));
+      }
+    });
+
+    test('enables plugins by default when running on a bot', () async {
+      await expectServerArgs(
+        analyzeArgs: const <String>[],
+        expectedServerFlags: <String>['--plugins'],
+        isRunningOnBot: true,
+      );
+      await expectServerArgs(
+        analyzeArgs: <String>['--no-plugins'],
+        expectedServerFlags: <String>['--no-plugins'],
+        isRunningOnBot: true,
+      );
+      await expectServerArgs(
+        analyzeArgs: <String>['--benchmark'],
+        expectedServerFlags: <String>['--no-plugins'],
+        isRunningOnBot: true,
+      );
+      await expectServerArgs(
+        analyzeArgs: <String>['--never-trust-plugins'],
+        expectedServerFlags: <String>['--never-trust-plugins'],
+        isRunningOnBot: true,
+      );
+      await expectServerArgs(
+        analyzeArgs: <String>['--trust-plugins'],
+        expectedServerFlags: <String>['--plugins', '--trust-plugins'],
+        isRunningOnBot: true,
+      );
+      await expectServerArgs(
+        analyzeArgs: <String>['--always-trust-plugins'],
+        expectedServerFlags: <String>['--plugins', '--always-trust-plugins'],
+        isRunningOnBot: true,
+      );
+    });
   });
 
-  testWithoutContext('analyze inRepo', () {
+  test('analyze inRepo', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.directory(_kFlutterRoot).createSync(recursive: true);
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
       'flutter_analysis_test.',
     );
-    Cache.flutterRoot = _kFlutterRoot;
 
     // Absolute paths
-    expect(inRepo(<String>[tempDir.path], fileSystem), isFalse);
-    expect(inRepo(<String>[fileSystem.path.join(tempDir.path, 'foo')], fileSystem), isFalse);
-    expect(inRepo(<String>[Cache.flutterRoot!], fileSystem), isTrue);
-    expect(inRepo(<String>[fileSystem.path.join(Cache.flutterRoot!, 'foo')], fileSystem), isTrue);
+    expect(inRepo(<String>[tempDir.path], fileSystem, _kFlutterRoot), isFalse);
+    expect(
+      inRepo(<String>[fileSystem.path.join(tempDir.path, 'foo')], fileSystem, _kFlutterRoot),
+      isFalse,
+    );
+    expect(inRepo(<String>[_kFlutterRoot], fileSystem, _kFlutterRoot), isTrue);
+    expect(
+      inRepo(<String>[fileSystem.path.join(_kFlutterRoot, 'foo')], fileSystem, _kFlutterRoot),
+      isTrue,
+    );
 
     // Relative paths
-    fileSystem.currentDirectory = Cache.flutterRoot;
-    expect(inRepo(<String>['.'], fileSystem), isTrue);
-    expect(inRepo(<String>['foo'], fileSystem), isTrue);
+    fileSystem.currentDirectory = _kFlutterRoot;
+    expect(inRepo(<String>['.'], fileSystem, _kFlutterRoot), isTrue);
+    expect(inRepo(<String>['foo'], fileSystem, _kFlutterRoot), isTrue);
     fileSystem.currentDirectory = tempDir.path;
-    expect(inRepo(<String>['.'], fileSystem), isFalse);
-    expect(inRepo(<String>['foo'], fileSystem), isFalse);
+    expect(inRepo(<String>['.'], fileSystem, _kFlutterRoot), isFalse);
+    expect(inRepo(<String>['foo'], fileSystem, _kFlutterRoot), isFalse);
 
     // Ensure no exceptions
-    inRepo(null, fileSystem);
-    inRepo(<String>[], fileSystem);
+    inRepo(null, fileSystem, _kFlutterRoot);
+    inRepo(<String>[], fileSystem, _kFlutterRoot);
   });
 }
 
-bool inRepo(List<String>? fileList, FileSystem fileSystem) {
+bool inRepo(List<String>? fileList, FileSystem fileSystem, String flutterRoot) {
   if (fileList == null || fileList.isEmpty) {
     fileList = <String>[fileSystem.path.current];
   }
-  final String root = fileSystem.path.normalize(fileSystem.path.absolute(Cache.flutterRoot!));
+  final String root = fileSystem.path.normalize(fileSystem.path.absolute(flutterRoot));
   final String prefix = root + fileSystem.path.separator;
   for (String file in fileList) {
     file = fileSystem.path.normalize(fileSystem.path.absolute(file));

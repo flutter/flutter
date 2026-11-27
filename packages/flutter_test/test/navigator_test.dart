@@ -36,7 +36,7 @@ void main() {
               },
             ),
             '/2' => _TestTransitionRoute<void>(
-              pageTransitionsBuilder: const _TestSlightRightPageTransitionsBuilder(),
+              pageTransitionsBuilder: const _TestSlideRightPageTransitionsBuilder(),
               transitionDurationOverride: const Duration(milliseconds: 456),
               reverseTransitionDurationOverride: const Duration(milliseconds: 567),
               builder: (BuildContext context) {
@@ -88,7 +88,7 @@ void main() {
               },
             ),
             '/4' => _TestTransitionRoute<void>(
-              pageTransitionsBuilder: const _TestSlightRightPageTransitionsBuilder(),
+              pageTransitionsBuilder: const _TestSlideRightPageTransitionsBuilder(),
               builder: (BuildContext context) {
                 return Center(
                   child: Column(
@@ -144,7 +144,7 @@ void main() {
     await tester.tap(find.text('Next'));
     expect(
       observer.transitionDuration,
-      const _TestSlightRightPageTransitionsBuilder().transitionDuration,
+      const _TestSlideRightPageTransitionsBuilder().transitionDuration,
     );
 
     await observer.pumpPastTransition(tester);
@@ -157,7 +157,7 @@ void main() {
     await tester.tap(find.text('Back'));
     expect(
       observer.transitionDuration,
-      const _TestSlightRightPageTransitionsBuilder().reverseTransitionDuration,
+      const _TestSlideRightPageTransitionsBuilder().reverseTransitionDuration,
     );
 
     await observer.pumpPastTransition(tester);
@@ -216,8 +216,8 @@ void main() {
   });
 }
 
-class _TestSlightRightPageTransitionsBuilder extends PageTransitionsBuilder {
-  const _TestSlightRightPageTransitionsBuilder();
+class _TestSlideRightPageTransitionsBuilder extends PageTransitionsBuilder {
+  const _TestSlideRightPageTransitionsBuilder();
 
   @override
   Widget buildTransitions<T>(

@@ -9,7 +9,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
-import io.flutter.embedding.engine.FlutterEngineFlags;
+import io.flutter.embedding.engine.flags.FlutterEngineFlags;
 
 /** Loads application information given a Context. */
 public final class ApplicationInfoLoader {

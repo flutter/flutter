@@ -18,7 +18,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -29,8 +28,7 @@
                 "arm64",
                 "--runtime-mode",
                 "profile",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/fuchsia_profile_arm64",
             "description": "Produces profile mode artifacts to target arm64 Fuchsia from a Linux host.",
@@ -48,7 +46,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -59,8 +56,7 @@
                 "arm64",
                 "--runtime-mode",
                 "release",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/fuchsia_release_arm64",
             "description": "Produces release mode artifacts to target arm64 Fuchsia from a Linux host.",
@@ -78,7 +74,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -90,8 +85,7 @@
                 "--runtime-mode",
                 "debug",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/fuchsia_debug_arm64",
             "description": "Produces debug mode artifacts to target arm64 Fuchsia from a Linux host.",
@@ -124,7 +118,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -135,8 +128,7 @@
                 "x64",
                 "--runtime-mode",
                 "profile",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/fuchsia_profile_x64",
             "description": "Produces profile mode artifacts to target x64 Fuchsia from a Linux host.",
@@ -154,7 +146,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "run_fuchsia_emu": true,
                 "use_rbe": true
             },
@@ -166,8 +157,7 @@
                 "x64",
                 "--runtime-mode",
                 "release",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/fuchsia_release_x64",
             "description": "Produces release mode artifacts to target x64 Fuchsia from a Linux host.",
@@ -185,7 +175,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "run_fuchsia_emu": true,
                 "use_rbe": true
             },
@@ -198,8 +187,7 @@
                 "--runtime-mode",
                 "debug",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/fuchsia_debug_x64",
             "description": "Produces debug mode artifacts to target x64 Fuchsia from a Linux host.",

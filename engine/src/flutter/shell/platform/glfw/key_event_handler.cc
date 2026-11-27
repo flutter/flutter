@@ -44,7 +44,7 @@ struct UTF8CodePointInfo {
 // Creates a [UTF8CodePointInfo] from a given byte. [first_byte] must be the
 // first byte in the code point.
 UTF8CodePointInfo GetUTF8CodePointInfo(int first_byte) {
-  UTF8CodePointInfo byte_info;
+  UTF8CodePointInfo byte_info{};
 
   // The order matters. Otherwise, it is possible that comparing against i.e.
   // kThreeByteMask and kFourByteMask could be both true.

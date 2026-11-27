@@ -17,6 +17,9 @@ class DlSkPaintDispatchHelper : public virtual DlOpReceiver {
  public:
   explicit DlSkPaintDispatchHelper(SkScalar opacity = SK_Scalar1)
       : current_color_(DlColor::kBlack()), opacity_(opacity) {
+    // SkPaint defaults to non-anti-aliased. Explicitly set it to match
+    // DlPaint's default.
+    paint_.setAntiAlias(DlPaint::kDefaultAntiAlias);
     if (opacity < SK_Scalar1) {
       paint_.setAlphaf(opacity);
     }

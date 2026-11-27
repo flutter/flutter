@@ -63,11 +63,11 @@ class FrameTiming {
 
  private:
   fml::TimePoint data_[kCount];
-  uint64_t frame_number_;
-  size_t layer_cache_count_;
-  size_t layer_cache_bytes_;
-  size_t picture_cache_count_;
-  size_t picture_cache_bytes_;
+  uint64_t frame_number_ = 0;
+  size_t layer_cache_count_ = 0;
+  size_t layer_cache_bytes_ = 0;
+  size_t picture_cache_count_ = 0;
+  size_t picture_cache_bytes_ = 0;
 };
 
 using TaskObserverAdd =
@@ -88,6 +88,8 @@ using MappingCallback = std::function<std::unique_ptr<fml::Mapping>(void)>;
 using Mappings = std::vector<std::unique_ptr<const fml::Mapping>>;
 using MappingsCallback = std::function<Mappings(void)>;
 
+using FrameBuiltCallback =
+    std::function<void(fml::TimePoint build_start, fml::TimePoint build_end)>;
 using FrameRasterizedCallback = std::function<void(const FrameTiming&)>;
 
 class DartIsolate;
@@ -243,6 +245,14 @@ struct Settings {
   // Whether to use SDFs for rendering in Impeller.
   bool impeller_use_sdfs = false;
 
+  // Whether the origin of the default framebuffer (framebuffer 0) is the
+  // top-left of the window rather than OpenGL's usual bottom-left.
+  //
+  // Set by embedders whose window surface is created with an inverted Y axis,
+  // such as ANGLE's EGL_SURFACE_ORIENTATION_INVERT_Y_ANGLE. Only meaningful
+  // for OpenGL ES backends.
+  bool impeller_top_left_default_framebuffer_origin = false;
+
   // Log a warning during shell initialization if Impeller is not enabled.
   bool warn_on_impeller_opt_out = false;
 
@@ -333,6 +343,12 @@ struct Settings {
   fml::UniqueFD::element_type assets_dir =
       fml::UniqueFD::traits_type::InvalidValue();
   std::string assets_path;
+
+  // Callback invoked synchronously on the UI thread with the frame's build
+  // start and end timestamps (FrameTiming::kBuildStart /
+  // FrameTiming::kBuildFinish) once a built frame is committed to the pipeline.
+  // Not called for frames that reuse the last layer trees or fail to commit.
+  FrameBuiltCallback frame_built_callback;
 
   // Callback to handle the timings of a rasterized frame. This is called as
   // soon as a frame is rasterized.

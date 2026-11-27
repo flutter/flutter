@@ -13,6 +13,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 void main() {
   const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
@@ -24,12 +25,12 @@ void main() {
   );
 
   group('Xcode validation', () {
-    testWithoutContext('Emits missing status when Xcode is not installed', () async {
+    test('Emits missing status when Xcode is not installed', () async {
       final ProcessManager processManager = FakeProcessManager.any();
       final xcode = Xcode.test(
-        processManager: processManager,
+        toolContext: FakeToolContext.macosHost(processManager: processManager),
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-          processManager: processManager,
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
           version: null,
         ),
       );
@@ -45,7 +46,7 @@ void main() {
       expect(result.messages.last.message, contains('Xcode not installed'));
     });
 
-    testWithoutContext('Emits missing status when Xcode installation is incomplete', () async {
+    test('Emits missing status when Xcode installation is incomplete', () async {
       final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['/usr/bin/xcode-select', '--print-path'],
@@ -55,9 +56,9 @@ void main() {
         kx64CheckCommand,
       ]);
       final xcode = Xcode.test(
-        processManager: processManager,
+        toolContext: FakeToolContext.macosHost(processManager: processManager),
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-          processManager: processManager,
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
           version: null,
         ),
       );
@@ -72,12 +73,12 @@ void main() {
       expect(result.messages.last.message, contains('Xcode installation is incomplete'));
     });
 
-    testWithoutContext('Emits partial status when Xcode version too low', () async {
+    test('Emits partial status when Xcode version too low', () async {
       final ProcessManager processManager = FakeProcessManager.any();
       final xcode = Xcode.test(
-        processManager: processManager,
+        toolContext: FakeToolContext.macosHost(processManager: processManager),
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-          processManager: processManager,
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
           version: Version(7, 0, 1),
         ),
       );
@@ -95,7 +96,7 @@ void main() {
       expect(hasOutdatedError, isTrue);
     });
 
-    testWithoutContext('Emits partial status when Xcode below recommended version', () async {
+    test('Emits partial status when Xcode below recommended version', () async {
       final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['/usr/bin/xcode-select', '--print-path'],
@@ -111,9 +112,9 @@ void main() {
         ),
       ]);
       final xcode = Xcode.test(
-        processManager: processManager,
+        toolContext: FakeToolContext.macosHost(processManager: processManager),
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-          processManager: processManager,
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
           version: Version(15, 4, null),
         ),
       );
@@ -137,7 +138,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     }, skip: false); // [intended] Skip this test when minimum and required check versions converge.
 
-    testWithoutContext('Emits partial status when Xcode EULA not signed', () async {
+    test('Emits partial status when Xcode EULA not signed', () async {
       final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['/usr/bin/xcode-select', '--print-path'],
@@ -153,8 +154,10 @@ void main() {
         const FakeCommand(command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted']),
       ]);
       final xcode = Xcode.test(
-        processManager: processManager,
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+        toolContext: FakeToolContext.macosHost(processManager: processManager),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
+        ),
       );
       final validator = XcodeValidator(
         xcode: xcode,
@@ -168,7 +171,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('Emits partial status when simctl is not installed', () async {
+    test('Emits partial status when simctl is not installed', () async {
       final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['/usr/bin/xcode-select', '--print-path'],
@@ -183,8 +186,10 @@ void main() {
         ),
       ]);
       final xcode = Xcode.test(
-        processManager: processManager,
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+        toolContext: FakeToolContext.macosHost(processManager: processManager),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
+        ),
       );
       final validator = XcodeValidator(
         xcode: xcode,
@@ -198,7 +203,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('Emits partial status when unable to find simulator SDK', () async {
+    test('Emits partial status when unable to find simulator SDK', () async {
       final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['/usr/bin/xcode-select', '--print-path'],
@@ -213,8 +218,10 @@ void main() {
         ),
       ]);
       final xcode = Xcode.test(
-        processManager: processManager,
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+        toolContext: FakeToolContext.macosHost(processManager: processManager),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
+        ),
       );
       final validator = XcodeValidator(
         xcode: xcode,
@@ -228,7 +235,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('Emits partial status when unable to get simulator runtimes', () async {
+    test('Emits partial status when unable to get simulator runtimes', () async {
       final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['/usr/bin/xcode-select', '--print-path'],
@@ -244,8 +251,10 @@ void main() {
         ),
       ]);
       final xcode = Xcode.test(
-        processManager: processManager,
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+        toolContext: FakeToolContext.macosHost(processManager: processManager),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
+        ),
       );
       final validator = XcodeValidator(
         xcode: xcode,
@@ -262,46 +271,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext(
-      'Emits partial status with hint when simulator runtimes do not match SDK',
-      () async {
-        final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>['/usr/bin/xcode-select', '--print-path'],
-            stdout: '/Library/Developer/CommandLineTools',
-          ),
-          kWhichSysctlCommand,
-          kx64CheckCommand,
-          const FakeCommand(command: <String>['xcrun', 'clang']),
-          const FakeCommand(command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted']),
-          const FakeCommand(
-            command: <String>['xcrun', '--sdk', 'iphonesimulator', '--show-sdk-platform-version'],
-            stdout: '17.0',
-          ),
-        ]);
-        final xcode = Xcode.test(
-          processManager: processManager,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
-        );
-        final simulatorUtils = FakeIOSSimulatorUtils(
-          runtimes: <IOSSimulatorRuntime>[
-            IOSSimulatorRuntime.fromJson(<String, String>{'version': '16.0'}),
-          ],
-        );
-        final validator = XcodeValidator(
-          xcode: xcode,
-          userMessages: UserMessages(),
-          iosSimulatorUtils: simulatorUtils,
-        );
-        final ValidationResult result = await validator.validate();
-        expect(result.type, ValidationType.partial);
-        expect(result.messages.last.type, ValidationMessageType.hint);
-        expect(result.messages.last.message, contains('iOS 17.0 Simulator not installed'));
-        expect(processManager, hasNoRemainingExpectations);
-      },
-    );
-
-    testWithoutContext('Succeeds when all checks pass', () async {
+    test('Emits partial status with hint when simulator runtimes do not match SDK', () async {
       final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['/usr/bin/xcode-select', '--print-path'],
@@ -317,8 +287,48 @@ void main() {
         ),
       ]);
       final xcode = Xcode.test(
-        processManager: processManager,
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+        toolContext: FakeToolContext.macosHost(processManager: processManager),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
+        ),
+      );
+      final simulatorUtils = FakeIOSSimulatorUtils(
+        runtimes: <IOSSimulatorRuntime>[
+          IOSSimulatorRuntime.fromJson(<String, String>{'version': '16.0'}),
+        ],
+      );
+      final validator = XcodeValidator(
+        xcode: xcode,
+        userMessages: UserMessages(),
+        iosSimulatorUtils: simulatorUtils,
+      );
+      final ValidationResult result = await validator.validate();
+      expect(result.type, ValidationType.partial);
+      expect(result.messages.last.type, ValidationMessageType.hint);
+      expect(result.messages.last.message, contains('iOS 17.0 Simulator not installed'));
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    test('Succeeds when all checks pass', () async {
+      final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['/usr/bin/xcode-select', '--print-path'],
+          stdout: '/Library/Developer/CommandLineTools',
+        ),
+        kWhichSysctlCommand,
+        kx64CheckCommand,
+        const FakeCommand(command: <String>['xcrun', 'clang']),
+        const FakeCommand(command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted']),
+        const FakeCommand(
+          command: <String>['xcrun', '--sdk', 'iphonesimulator', '--show-sdk-platform-version'],
+          stdout: '17.0',
+        ),
+      ]);
+      final xcode = Xcode.test(
+        toolContext: FakeToolContext.macosHost(processManager: processManager),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
+        ),
       );
       final simulatorUtils = FakeIOSSimulatorUtils(
         runtimes: <IOSSimulatorRuntime>[

@@ -57,10 +57,9 @@ void main() {
     expect(currentTransform(wrapped), equals(m2 * m1));
 
     result.publicPushTransform(m3);
-    // ignore: avoid_dynamic_calls
-    expect(currentTransform(result), equals(m3 * m2 * m1));
-    // ignore: avoid_dynamic_calls
-    expect(currentTransform(wrapped), equals(m3 * m2 * m1));
+
+    expect(currentTransform(result), equals(m3.multiplied(m2).multiplied(m1)));
+    expect(currentTransform(wrapped), equals(m3.multiplied(m2).multiplied(m1)));
 
     result.publicPopTransform();
     result.publicPopTransform();
@@ -103,10 +102,8 @@ void main() {
     expect(currentTransform(wrapped), equals(m1 * m3));
 
     result.publicPushTransform(m2);
-    // ignore: avoid_dynamic_calls
-    expect(currentTransform(result), equals(m2 * m1 * m3));
-    // ignore: avoid_dynamic_calls
-    expect(currentTransform(wrapped), equals(m2 * m1 * m3));
+    expect(currentTransform(result), equals(m2.multiplied(m1).multiplied(m3)));
+    expect(currentTransform(wrapped), equals(m2.multiplied(m1).multiplied(m3)));
 
     result.publicPopTransform();
     result.publicPopTransform();
@@ -117,8 +114,7 @@ void main() {
     result.publicPushOffset(o3);
     result.publicPushTransform(m1);
 
-    // ignore: avoid_dynamic_calls
-    expect(currentTransform(result), equals(m1 * m3 * m2));
+    expect(currentTransform(result), equals(m1.multiplied(m3).multiplied(m2)));
 
     result.publicPopTransform();
 

@@ -99,6 +99,7 @@ class MockDelegate : public Engine::Delegate {
               RequestViewFocusChange,
               (const ViewFocusChangeRequest&),
               (override));
+  MOCK_METHOD(void, OnEngineResetInternalState, (), (override));
 };
 
 class MockResponse : public PlatformMessageResponse {
@@ -152,6 +153,7 @@ class MockRuntimeDelegate : public RuntimeDelegate {
               RequestViewFocusChange,
               (const ViewFocusChangeRequest&),
               (override));
+  MOCK_METHOD(void, ResetInternalState, (), (override));
 };
 
 class MockRuntimeController : public RuntimeController {
@@ -170,10 +172,29 @@ class MockRuntimeController : public RuntimeController {
               (override));
   MOCK_METHOD(DartVM*, GetDartVM, (), (const, override));
   MOCK_METHOD(bool, NotifyIdle, (fml::TimeDelta), (override));
+  MOCK_METHOD(bool,
+              LaunchRootIsolate,
+              (const Settings&,
+               const fml::closure&,
+               std::optional<std::string>,
+               std::optional<std::string>,
+               const std::vector<std::string>&,
+               std::unique_ptr<IsolateConfiguration>,
+               std::shared_ptr<NativeAssetsManager>,
+               std::optional<int64_t>),
+              (override));
 };
 
 class MockFontCollection : public FontCollection {
  public:
+  MOCK_METHOD(void,
+              SetupDefaultFontManager,
+              (uint32_t font_initialization_data),
+              (override));
+  MOCK_METHOD(void,
+              DeferDefaultFontManager,
+              (uint32_t font_initialization_data),
+              (override));
   MOCK_METHOD(void,
               RegisterFonts,
               (const std::shared_ptr<AssetManager>& asset_manager),
@@ -230,15 +251,9 @@ class EngineTest : public testing::FixtureTest {
   }
 
  protected:
-  void SetUp() override {
-    settings_ = CreateSettingsForFixture();
-    dispatcher_maker_ = [](PointerDataDispatcher::Delegate&) {
-      return nullptr;
-    };
-  }
+  void SetUp() override { settings_ = CreateSettingsForFixture(); }
 
   MockDelegate delegate_;
-  PointerDataDispatcherMaker dispatcher_maker_;
   ThreadHost thread_host_;
   TaskRunners task_runners_;
   Settings settings_;
@@ -254,7 +269,6 @@ TEST_F(EngineTest, Create) {
   PostUITaskSync([this] {
     auto engine = std::make_unique<Engine>(
         /*delegate=*/delegate_,
-        /*dispatcher_maker=*/dispatcher_maker_,
         /*image_decoder_task_runner=*/image_decoder_task_runner_,
         /*task_runners=*/task_runners_,
         /*settings=*/settings_,
@@ -276,7 +290,6 @@ TEST_F(EngineTest, DispatchPlatformMessageUnknown) {
         .WillRepeatedly(::testing::Return(false));
     auto engine = std::make_unique<Engine>(
         /*delegate=*/delegate_,
-        /*dispatcher_maker=*/dispatcher_maker_,
         /*image_decoder_task_runner=*/image_decoder_task_runner_,
         /*task_runners=*/task_runners_,
         /*settings=*/settings_,
@@ -303,7 +316,6 @@ TEST_F(EngineTest, DispatchPlatformMessageInitialRoute) {
         .WillRepeatedly(::testing::Return(false));
     auto engine = std::make_unique<Engine>(
         /*delegate=*/delegate_,
-        /*dispatcher_maker=*/dispatcher_maker_,
         /*image_decoder_task_runner=*/image_decoder_task_runner_,
         /*task_runners=*/task_runners_,
         /*settings=*/settings_,
@@ -337,7 +349,6 @@ TEST_F(EngineTest, DispatchPlatformMessageInitialRouteIgnored) {
         .WillRepeatedly(::testing::Return(true));
     auto engine = std::make_unique<Engine>(
         /*delegate=*/delegate_,
-        /*dispatcher_maker=*/dispatcher_maker_,
         /*image_decoder_task_runner=*/image_decoder_task_runner_,
         /*task_runners=*/task_runners_,
         /*settings=*/settings_,
@@ -370,7 +381,6 @@ TEST_F(EngineTest, SpawnSharesFontLibrary) {
         .WillRepeatedly(::testing::Return(vm_ref.get()));
     auto engine = std::make_unique<Engine>(
         /*delegate=*/delegate_,
-        /*dispatcher_maker=*/dispatcher_maker_,
         /*image_decoder_task_runner=*/image_decoder_task_runner_,
         /*task_runners=*/task_runners_,
         /*settings=*/settings_,
@@ -380,9 +390,8 @@ TEST_F(EngineTest, SpawnSharesFontLibrary) {
         /*runtime_controller=*/std::move(mock_runtime_controller),
         /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
 
-    auto spawn =
-        engine->Spawn(delegate_, dispatcher_maker_, settings_, nullptr,
-                      std::string(), io_manager_, snapshot_delegate_, nullptr);
+    auto spawn = engine->Spawn(delegate_, settings_, nullptr, std::string(),
+                               io_manager_, snapshot_delegate_, nullptr);
     EXPECT_TRUE(spawn != nullptr);
     EXPECT_EQ(&engine->GetFontCollection(), &spawn->GetFontCollection());
   });
@@ -398,7 +407,6 @@ TEST_F(EngineTest, SpawnWithCustomInitialRoute) {
         .WillRepeatedly(::testing::Return(vm_ref.get()));
     auto engine = std::make_unique<Engine>(
         /*delegate=*/delegate_,
-        /*dispatcher_maker=*/dispatcher_maker_,
         /*image_decoder_task_runner=*/image_decoder_task_runner_,
         /*task_runners=*/task_runners_,
         /*settings=*/settings_,
@@ -408,9 +416,8 @@ TEST_F(EngineTest, SpawnWithCustomInitialRoute) {
         /*runtime_controller=*/std::move(mock_runtime_controller),
         /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
 
-    auto spawn =
-        engine->Spawn(delegate_, dispatcher_maker_, settings_, nullptr, "/foo",
-                      io_manager_, snapshot_delegate_, nullptr);
+    auto spawn = engine->Spawn(delegate_, settings_, nullptr, "/foo",
+                               io_manager_, snapshot_delegate_, nullptr);
     EXPECT_TRUE(spawn != nullptr);
     ASSERT_EQ("/foo", spawn->InitialRoute());
   });
@@ -426,7 +433,6 @@ TEST_F(EngineTest, SpawnWithCustomSettings) {
         .WillRepeatedly(::testing::Return(vm_ref.get()));
     auto engine = std::make_unique<Engine>(
         /*delegate=*/delegate_,
-        /*dispatcher_maker=*/dispatcher_maker_,
         /*image_decoder_task_runner=*/image_decoder_task_runner_,
         /*task_runners=*/task_runners_,
         /*settings=*/settings_,
@@ -440,8 +446,8 @@ TEST_F(EngineTest, SpawnWithCustomSettings) {
     custom_settings.persistent_isolate_data =
         std::make_shared<fml::DataMapping>("foo");
     auto spawn =
-        engine->Spawn(delegate_, dispatcher_maker_, custom_settings, nullptr,
-                      std::string(), io_manager_, snapshot_delegate_, nullptr);
+        engine->Spawn(delegate_, custom_settings, nullptr, std::string(),
+                      io_manager_, snapshot_delegate_, nullptr);
     EXPECT_TRUE(spawn != nullptr);
     auto new_persistent_isolate_data =
         const_cast<RuntimeController*>(spawn->GetRuntimeController())
@@ -467,7 +473,6 @@ TEST_F(EngineTest, PassesLoadDartDeferredLibraryErrorToRuntime) {
         .Times(1);
     auto engine = std::make_unique<Engine>(
         /*delegate=*/delegate_,
-        /*dispatcher_maker=*/dispatcher_maker_,
         /*image_decoder_task_runner=*/image_decoder_task_runner_,
         /*task_runners=*/task_runners_,
         /*settings=*/settings_,
@@ -495,7 +500,6 @@ TEST_F(EngineTest, SpawnedEngineInheritsAssetManager) {
     //     .WillOnce(::testing::Return());
     auto engine = std::make_unique<Engine>(
         /*delegate=*/delegate_,
-        /*dispatcher_maker=*/dispatcher_maker_,
         /*image_decoder_task_runner=*/image_decoder_task_runner_,
         /*task_runners=*/task_runners_,
         /*settings=*/settings_,
@@ -512,9 +516,8 @@ TEST_F(EngineTest, SpawnedEngineInheritsAssetManager) {
     engine->UpdateAssetManager(asset_manager);
     EXPECT_EQ(engine->GetAssetManager(), asset_manager);
 
-    auto spawn =
-        engine->Spawn(delegate_, dispatcher_maker_, settings_, nullptr,
-                      std::string(), io_manager_, snapshot_delegate_, nullptr);
+    auto spawn = engine->Spawn(delegate_, settings_, nullptr, std::string(),
+                               io_manager_, snapshot_delegate_, nullptr);
     EXPECT_TRUE(spawn != nullptr);
     EXPECT_EQ(engine->GetAssetManager(), spawn->GetAssetManager());
   });
@@ -534,7 +537,6 @@ TEST_F(EngineTest, UpdateAssetManagerWithEqualManagers) {
         .WillOnce(::testing::Return());
     auto engine = std::make_unique<Engine>(
         /*delegate=*/delegate_,
-        /*dispatcher_maker=*/dispatcher_maker_,
         /*image_decoder_task_runner=*/image_decoder_task_runner_,
         /*task_runners=*/task_runners_,
         /*settings=*/settings_,
@@ -561,6 +563,106 @@ TEST_F(EngineTest, UpdateAssetManagerWithEqualManagers) {
     engine->UpdateAssetManager(asset_manager_2);
     // Didn't change because they're equivalent.
     EXPECT_EQ(engine->GetAssetManager(), asset_manager);
+  });
+}
+
+TEST_F(EngineTest, RunDefersDefaultFontManagerWhenPrefetched) {
+  PostUITaskSync([this] {
+    settings_.prefetched_default_font_manager = true;
+    settings_.font_initialization_data = 42u;
+
+    MockRuntimeDelegate client;
+    auto mock_runtime_controller =
+        std::make_unique<MockRuntimeController>(client, task_runners_);
+    EXPECT_CALL(*mock_runtime_controller, IsRootIsolateRunning())
+        .WillOnce(::testing::Return(false));
+    EXPECT_CALL(*mock_runtime_controller,
+                LaunchRootIsolate(::testing::_, ::testing::_, ::testing::_,
+                                  ::testing::_, ::testing::_, ::testing::_,
+                                  ::testing::_, ::testing::_))
+        .WillOnce([](const Settings&,
+                     const fml::closure& root_isolate_create_callback,
+                     const std::optional<std::string>&,
+                     const std::optional<std::string>&,
+                     const std::vector<std::string>&,
+                     std::unique_ptr<IsolateConfiguration>,
+                     const std::shared_ptr<NativeAssetsManager>&,
+                     std::optional<int64_t>) {
+          root_isolate_create_callback();
+          return true;
+        });
+
+    auto mock_font_collection = std::make_shared<MockFontCollection>();
+    EXPECT_CALL(*mock_font_collection, RegisterFonts(::testing::_))
+        .WillOnce(::testing::Return());
+    EXPECT_CALL(*mock_font_collection, DeferDefaultFontManager(42u)).Times(1);
+    EXPECT_CALL(*mock_font_collection, SetupDefaultFontManager(::testing::_))
+        .Times(0);
+
+    auto engine = std::make_unique<Engine>(
+        /*delegate=*/delegate_,
+        /*image_decoder_task_runner=*/image_decoder_task_runner_,
+        /*task_runners=*/task_runners_,
+        /*settings=*/settings_,
+        /*animator=*/std::move(animator_),
+        /*io_manager=*/io_manager_,
+        /*font_collection=*/mock_font_collection,
+        /*runtime_controller=*/std::move(mock_runtime_controller),
+        /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
+
+    auto configuration = RunConfiguration::InferFromSettings(settings_);
+    EXPECT_EQ(engine->Run(std::move(configuration)),
+              Engine::RunStatus::Success);
+  });
+}
+
+TEST_F(EngineTest, RunDoesNotDeferDefaultFontManagerWhenNotPrefetched) {
+  PostUITaskSync([this] {
+    settings_.prefetched_default_font_manager = false;
+
+    MockRuntimeDelegate client;
+    auto mock_runtime_controller =
+        std::make_unique<MockRuntimeController>(client, task_runners_);
+    EXPECT_CALL(*mock_runtime_controller, IsRootIsolateRunning())
+        .WillOnce(::testing::Return(false));
+    EXPECT_CALL(*mock_runtime_controller,
+                LaunchRootIsolate(::testing::_, ::testing::_, ::testing::_,
+                                  ::testing::_, ::testing::_, ::testing::_,
+                                  ::testing::_, ::testing::_))
+        .WillOnce([](const Settings&,
+                     const fml::closure& root_isolate_create_callback,
+                     const std::optional<std::string>&,
+                     const std::optional<std::string>&,
+                     const std::vector<std::string>&,
+                     std::unique_ptr<IsolateConfiguration>,
+                     const std::shared_ptr<NativeAssetsManager>&,
+                     std::optional<int64_t>) {
+          root_isolate_create_callback();
+          return true;
+        });
+
+    auto mock_font_collection = std::make_shared<MockFontCollection>();
+    EXPECT_CALL(*mock_font_collection, RegisterFonts(::testing::_))
+        .WillOnce(::testing::Return());
+    EXPECT_CALL(*mock_font_collection, DeferDefaultFontManager(::testing::_))
+        .Times(0);
+    EXPECT_CALL(*mock_font_collection, SetupDefaultFontManager(::testing::_))
+        .Times(0);
+
+    auto engine = std::make_unique<Engine>(
+        /*delegate=*/delegate_,
+        /*image_decoder_task_runner=*/image_decoder_task_runner_,
+        /*task_runners=*/task_runners_,
+        /*settings=*/settings_,
+        /*animator=*/std::move(animator_),
+        /*io_manager=*/io_manager_,
+        /*font_collection=*/mock_font_collection,
+        /*runtime_controller=*/std::move(mock_runtime_controller),
+        /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
+
+    auto configuration = RunConfiguration::InferFromSettings(settings_);
+    EXPECT_EQ(engine->Run(std::move(configuration)),
+              Engine::RunStatus::Success);
   });
 }
 

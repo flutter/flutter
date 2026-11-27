@@ -68,7 +68,10 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final FlutterProject project = FlutterProject.fromDirectory(environment.projectDir);
+    final FlutterProject project = FlutterProject.fromDirectory(
+      environment.projectDir,
+      logger: environment.logger,
+    );
     validator = DeferredComponentsGenSnapshotValidator(
       environment,
       title: title,

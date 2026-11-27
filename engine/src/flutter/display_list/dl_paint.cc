@@ -13,6 +13,7 @@ DlPaint::DlPaint(DlColor color)
       draw_style_(static_cast<unsigned>(DlDrawStyle::kDefaultStyle)),
       stroke_cap_(static_cast<unsigned>(DlStrokeCap::kDefaultCap)),
       stroke_join_(static_cast<unsigned>(DlStrokeJoin::kDefaultJoin)),
+      is_anti_alias_(kDefaultAntiAlias),
       color_(color),
       stroke_width_(kDefaultWidth),
       stroke_miter_(kDefaultMiter) {}

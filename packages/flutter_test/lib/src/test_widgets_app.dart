@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'widget_tester.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 /// A minimal [WidgetsApp] wrapper for use in widget tests.

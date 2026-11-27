@@ -18,7 +18,11 @@ Future<void> addToAppLifeCycleRunner() async {
       'integration_tests',
       'ios_add2app_life_cycle',
     );
-    await runCommand('./build_and_test.sh', <String>[], workingDirectory: addToAppDir);
+    await runCommand(
+      path.join(addToAppDir, 'build_and_test.sh'),
+      <String>[],
+      workingDirectory: addToAppDir,
+    );
   } else {
     throw Exception('Only iOS has add-to-add lifecycle tests at this time.');
   }

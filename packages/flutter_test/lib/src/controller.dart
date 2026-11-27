@@ -6,6 +6,7 @@
 ///
 /// @docImport 'package:flutter/scheduler.dart';
 /// @docImport 'package:flutter_driver/flutter_driver.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart' as flutter_test;
 ///
 /// @docImport 'binding.dart';
 /// @docImport 'finders.dart';
@@ -1151,7 +1152,7 @@ abstract class WidgetController {
         kind: kind,
         view: view,
       );
-      await gesture.up();
+      await gesture.up(view: view);
     });
   }
 
@@ -1184,6 +1185,113 @@ abstract class WidgetController {
         kind: kind,
         view: view,
       );
+    });
+  }
+
+  /// Dispatch a hover sequence at the center of the given widget, assuming it is
+  /// exposed.
+  ///
+  /// {@macro flutter.flutter_test.WidgetController.tap.warnIfMissed}
+  ///
+  /// {@template flutter.flutter_test.WidgetController.startHover}
+  /// This method dispatches a [PointerAddedEvent] (via [TestGesture.addPointer])
+  /// followed by a [PointerHoverEvent] (via [TestGesture.moveTo]) at the target
+  /// location. For hit-tested widgets at that location:
+  ///
+  ///  * [MouseRegion.onEnter] is fired once when the [PointerAddedEvent] is
+  ///    processed (for mouse and stylus pointers tracked by [MouseTracker]).
+  ///  * [MouseRegion.onHover] and [Listener.onPointerHover] are each fired once
+  ///    when the subsequent [PointerHoverEvent] is processed.
+  ///
+  /// The return value is a [TestGesture] object that can be used to continue the
+  /// hover (e.g. moving the pointer with [TestGesture.moveTo] or
+  /// [TestGesture.moveBy], or dispatching a down event with [TestGesture.down]).
+  ///
+  /// By default, `kind` is [PointerDeviceKind.mouse] because touch pointers
+  /// ([PointerDeviceKind.touch]) cannot generate hover events.
+  ///
+  /// No mouse or stylus device may already be connected to [MouseTracker] when
+  /// this method is called (for example, from an active hover gesture or a prior
+  /// [tap], [press], or [drag] with [PointerDeviceKind.mouse] or
+  /// [PointerDeviceKind.stylus]). If a previous gesture returned a [TestGesture]
+  /// (such as [startHover], [press], [startGesture], or [createGesture]), call
+  /// [TestGesture.removePointer] on it before starting a new hover gesture (or
+  /// reuse it with [TestGesture.moveTo] / [TestGesture.moveBy]). Because
+  /// one-shot helpers like [tap] and [drag] discard their [TestGesture] without
+  /// removing the pointer, use a method that returns a [TestGesture] instead
+  /// when combining mouse or stylus interactions with [startHover]. Callers
+  /// should also clean up the pointer at the end of the test:
+  ///
+  /// ```dart
+  /// testWidgets('MyWidget', (WidgetTester tester) async {
+  ///   final TestGesture gesture = await tester.startHover(find.text('target'));
+  ///   addTearDown(gesture.removePointer);
+  /// });
+  /// ```
+  /// {@endtemplate}
+  ///
+  /// In multi-view tests, [startHover] resolves the target [FlutterView] from
+  /// `finder` for the initial hover events, but follow-up calls on the returned
+  /// [TestGesture] (such as [TestGesture.moveTo], [TestGesture.down], or
+  /// [TestGesture.removePointer]) must explicitly pass `view` if targeting a
+  /// view other than [view].
+  ///
+  /// See also:
+  ///
+  ///  * [press], which dispatches a pointer down sequence.
+  ///  * [startHoverAt], which starts a hover gesture at a specific location.
+  Future<TestGesture> startHover(
+    finders.FinderBase<Element> finder, {
+    int? pointer,
+    bool warnIfMissed = true,
+    PointerDeviceKind kind = PointerDeviceKind.mouse,
+  }) {
+    final FlutterView? view = _maybeViewOf(finder);
+    return startHoverAt(
+      getCenter(finder, warnIfMissed: warnIfMissed, callee: 'startHover'),
+      pointer: pointer,
+      kind: kind,
+      view: view,
+    );
+  }
+
+  /// Dispatch a hover sequence at the given location.
+  ///
+  /// {@macro flutter.flutter_test.WidgetController.startHover}
+  ///
+  /// In multi-view tests, if `view` is provided, follow-up calls on the returned
+  /// [TestGesture] (such as [TestGesture.moveTo], [TestGesture.down], or
+  /// [TestGesture.removePointer]) must also explicitly pass `view`.
+  ///
+  /// See also:
+  ///
+  ///  * [startHover], which starts a hover gesture at the center of a widget.
+  Future<TestGesture> startHoverAt(
+    Offset location, {
+    int? pointer,
+    PointerDeviceKind kind = PointerDeviceKind.mouse,
+    FlutterView? view,
+  }) {
+    assert(
+      kind != PointerDeviceKind.touch && kind != PointerDeviceKind.trackpad,
+      'Touch and trackpad pointers cannot generate hover events.',
+    );
+    assert(
+      !binding.mouseTracker.mouseIsConnected,
+      'A mouse or stylus pointer is already connected to MouseTracker (for '
+      'example, from an active hover gesture or a prior tap, press, or drag '
+      'with PointerDeviceKind.mouse or PointerDeviceKind.stylus). If the '
+      'previous gesture returned a TestGesture, call removePointer() on it '
+      'before starting a new hover gesture (or use moveTo() / moveBy() on it). '
+      'One-shot helpers like tap() and drag() discard their TestGesture '
+      'without removing the pointer, so use startHover(), press(), or '
+      'startGesture() instead when combining mouse or stylus gestures.',
+    );
+    return TestAsyncUtils.guard<TestGesture>(() async {
+      final TestGesture gesture = await createGesture(pointer: pointer, kind: kind);
+      await gesture.addPointer(location: location, view: view);
+      await gesture.moveTo(location, view: view);
+      return gesture;
     });
   }
 
@@ -1234,7 +1342,7 @@ abstract class WidgetController {
         view: view,
       );
       await pump(kLongPressTimeout + kPressTimeout);
-      await gesture.up();
+      await gesture.up(view: view);
     });
   }
 
@@ -1351,6 +1459,7 @@ abstract class WidgetController {
           testPointer.move(
             startLocation + initialOffset,
             timeStamp: Duration(microseconds: timeStamp.round()),
+            view: view,
           ),
         );
         timeStamp += initialOffsetDelay.inMicroseconds;
@@ -1748,6 +1857,7 @@ abstract class WidgetController {
     bool warnIfMissed = true,
     FlutterView? view,
   }) {
+    final FlutterView? viewOfFinder = view ?? _maybeViewOf(finder);
     return timedDragFrom(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'timedDrag'),
       offset,
@@ -1755,7 +1865,7 @@ abstract class WidgetController {
       pointer: pointer,
       buttons: buttons,
       frequency: frequency,
-      view: view,
+      view: viewOfFinder,
     );
   }
 
@@ -1787,20 +1897,26 @@ abstract class WidgetController {
       startLocation,
       for (int t = 0; t <= intervals; t += 1) startLocation + offset * (t / intervals),
     ];
+    // All events of the gesture must target the same view: omitting the view
+    // id from any of them would silently dispatch it to a different view (or
+    // nowhere at all) in multi-view applications.
+    final int viewId =
+        view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView!.viewId;
     final records = <PointerEventRecord>[
       PointerEventRecord(Duration.zero, <PointerEvent>[
-        PointerAddedEvent(
+        PointerAddedEvent(position: startLocation, viewId: viewId),
+        PointerDownEvent(
           position: startLocation,
-          viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView!.viewId,
+          pointer: pointer,
+          buttons: buttons,
+          viewId: viewId,
         ),
-        PointerDownEvent(position: startLocation, pointer: pointer, buttons: buttons),
       ]),
       ...<PointerEventRecord>[
         for (int t = 0; t <= intervals; t += 1)
           PointerEventRecord(timeStamps[t], <PointerEvent>[
             PointerMoveEvent(
-              viewId:
-                  view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView!.viewId,
+              viewId: viewId,
               timeStamp: timeStamps[t],
               position: offsets[t + 1],
               delta: offsets[t + 1] - offsets[t],
@@ -1811,7 +1927,7 @@ abstract class WidgetController {
       ],
       PointerEventRecord(duration, <PointerEvent>[
         PointerUpEvent(
-          viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView!.viewId,
+          viewId: viewId,
           timeStamp: duration,
           position: offsets.last,
           pointer: pointer,
@@ -2473,18 +2589,23 @@ abstract class WidgetController {
     bool continuous = false,
   }) {
     return TestAsyncUtils.guard<void>(() async {
+      // The gesture is performed on the widget found by `view`, so its events
+      // must be dispatched to the view that widget renders into. In an
+      // application without an implicit view, falling back to the implicit
+      // view would crash.
+      final FlutterView? dragView = _maybeViewOf(view);
       TestGesture? gesture;
       while (maxIteration > 0 && finder.evaluate().isEmpty) {
         if (continuous) {
-          gesture ??= await startGesture(getCenter(view, warnIfMissed: true));
-          await gesture.moveBy(moveStep);
+          gesture ??= await startGesture(getCenter(view, warnIfMissed: true), view: dragView);
+          await gesture.moveBy(moveStep, view: dragView);
         } else {
           await drag(view, moveStep);
         }
         await pump(duration);
         maxIteration -= 1;
       }
-      await gesture?.up();
+      await gesture?.up(view: dragView);
       await Scrollable.ensureVisible(element(finder));
     });
   }

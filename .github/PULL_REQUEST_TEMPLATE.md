@@ -32,7 +32,7 @@ If this change needs to override an active code freeze, provide a comment explai
 
 <!-- Links -->
 [Contributor Guide]: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#overview
-[AI contribution guidelines]: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#ai-contribution-guidelines
+[AI contribution guidelines]: https://github.com/flutter/flutter/blob/main/CONTRIBUTING.ai.md
 [Tree Hygiene]: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md
 [test-exempt]: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#tests
 [Flutter Style Guide]: https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md

@@ -6,7 +6,6 @@
 
 #include <algorithm>
 
-#include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/sampler_vk.h"
 
 namespace impeller {
@@ -19,16 +18,9 @@ SamplerLibraryVK::SamplerLibraryVK(
 
 SamplerLibraryVK::~SamplerLibraryVK() = default;
 
-void SamplerLibraryVK::ApplyWorkarounds(const WorkaroundsVK& workarounds) {
-  mips_disabled_workaround_ = workarounds.broken_mipmap_generation;
-}
-
 raw_ptr<const Sampler> SamplerLibraryVK::GetSampler(
     const SamplerDescriptor& desc) {
   SamplerDescriptor desc_copy = desc;
-  if (mips_disabled_workaround_) {
-    desc_copy.mip_filter = MipFilter::kBase;
-  }
   // Clamp to the device limit before keying the cache so that all values
   // beyond the limit share one sampler. The limit is 1 (disabled) when the
   // samplerAnisotropy feature is unavailable. The upper bound is floored at 1
@@ -38,19 +30,33 @@ raw_ptr<const Sampler> SamplerLibraryVK::GetSampler(
                            std::max<uint32_t>(1u, max_sampler_anisotropy_)));
 
   uint64_t p_key = SamplerDescriptor::ToKey(desc_copy);
-  for (const auto& [key, value] : samplers_) {
-    if (key == p_key) {
-      return raw_ptr(value);
+  {
+    Lock lock(samplers_mutex_);
+    if (auto sampler = FindSampler(p_key)) {
+      return sampler;
     }
   }
   auto device_holder = device_holder_.lock();
   if (!device_holder || !device_holder->GetDevice()) {
     return raw_ptr<const Sampler>(nullptr);
   }
-  samplers_.push_back(std::make_pair(
-      p_key,
-      std::make_shared<SamplerVK>(device_holder->GetDevice(), desc_copy)));
+  auto sampler =
+      std::make_shared<SamplerVK>(device_holder->GetDevice(), desc_copy);
+  Lock lock(samplers_mutex_);
+  if (auto existing = FindSampler(p_key)) {
+    return existing;
+  }
+  samplers_.push_back(std::make_pair(p_key, std::move(sampler)));
   return raw_ptr(samplers_.back().second);
+}
+
+raw_ptr<const Sampler> SamplerLibraryVK::FindSampler(uint64_t key) const {
+  for (const auto& [sampler_key, sampler] : samplers_) {
+    if (sampler_key == key) {
+      return raw_ptr(sampler);
+    }
+  }
+  return raw_ptr<const Sampler>(nullptr);
 }
 
 }  // namespace impeller

@@ -8,6 +8,12 @@ a few times before landing. Here's how you do that.
 > [!Warning]
 > Ensure you have followed the prerequisites in [dev/bots/README.md](../../dev/bots/README.md)
 
+> [!Tip]
+> If you only need to run an existing builder against your PR (no recipe or
+> bot changes), `bb add` is simpler and puts the results in the builder's
+> history. See [Using `bb` and `led` with LUCI](Using-bb-and-led.md) for when
+> to use which, and for login and permission setup.
+
 1. Collect the following:
 
     1. `PR_NUMBER`

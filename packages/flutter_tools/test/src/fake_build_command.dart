@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/config.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -29,6 +28,7 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 
@@ -54,6 +54,7 @@ BuildCommand createFakeBuildCommand({
   PlistParser? plistParser,
   ProcessManager? processManager,
   ProcessUtils? processUtils,
+  TemplatePathProvider? templatePathProvider,
   TemplateRenderer? templateRenderer,
   AnsiTerminal? terminal,
   ToolContext? toolContext,
@@ -61,97 +62,63 @@ BuildCommand createFakeBuildCommand({
   Xcode? xcode,
   XcodeProjectInterpreter? xcodeProjectInterpreter,
 }) {
-  var effectiveFileSystem = fileSystem;
-  if (effectiveFileSystem == null) {
-    try {
-      effectiveFileSystem = context.get<FileSystem>();
-    } on Object {
-      // testWithoutContext or not provided.
-    }
-  }
-  final FileSystem fs = effectiveFileSystem ?? MemoryFileSystem.test();
-
-  var effectivePlatform = platform;
-  if (effectivePlatform == null) {
-    try {
-      effectivePlatform = context.get<Platform>();
-    } on Object {
-      // testWithoutContext or not provided.
-    }
-  }
-  final Platform resolvedPlatform = effectivePlatform ?? FakePlatform();
-
-  var effectiveFeatureFlags = featureFlags;
-  if (effectiveFeatureFlags == null) {
-    try {
-      effectiveFeatureFlags = context.get<FeatureFlags>();
-    } on Object {
-      // testWithoutContext or not provided.
-    }
-  }
-
-  var effectiveLogger = logger;
-  if (effectiveLogger == null) {
-    try {
-      effectiveLogger = context.get<Logger>();
-    } on Object {
-      // testWithoutContext or not provided.
-    }
-  }
-  final Logger resolvedLogger = effectiveLogger ?? BufferLogger.test();
-
-  var effectiveProcessManager = processManager;
-  if (effectiveProcessManager == null) {
-    try {
-      effectiveProcessManager = context.get<ProcessManager>();
-    } on Object {
-      // testWithoutContext or not provided.
-    }
-  }
-  final ProcessManager resolvedProcessManager = effectiveProcessManager ?? FakeProcessManager.any();
-
-  var effectiveOsUtils = osUtils;
-  if (effectiveOsUtils == null) {
-    try {
-      effectiveOsUtils = context.get<OperatingSystemUtils>();
-    } on Object {
-      // testWithoutContext or not provided.
-    }
-  }
-  final OperatingSystemUtils resolvedOsUtils = effectiveOsUtils ?? FakeOperatingSystemUtils();
-
+  final FileSystem fs = fileSystem ?? MemoryFileSystem.test();
+  final Platform targetPlatform = platform ?? FakePlatform();
+  final Logger targetLogger = logger ?? BufferLogger.test();
+  final ProcessManager targetProcessManager = processManager ?? FakeProcessManager.any();
+  final OperatingSystemUtils targetOsUtils = osUtils ?? FakeOperatingSystemUtils();
+  final FeatureFlags targetFeatureFlags = featureFlags ?? TestFeatureFlags();
+  final appleCtx = FakeAppleContext(
+    plistParser: plistParser ?? FakePlistParser(),
+    xcode: xcode ?? FakeXcode(),
+    xcodeProjectInterpreter: xcodeProjectInterpreter,
+  );
+  final Cache targetCache = cache ?? FakeCache();
+  final TemplatePathProvider targetTemplatePathProvider =
+      templatePathProvider ?? TemplatePathProvider(flutterRoot: targetCache.flutterRoot);
+  final ToolContext targetToolContext =
+      toolContext ??
+      FakeToolContext(
+        artifacts: artifacts ?? FakeArtifacts(),
+        cache: targetCache,
+        config: config ?? FakeConfig(),
+        fs: fs,
+        flutterVersion: flutterVersion ?? FakeFlutterVersion(),
+        logger: targetLogger,
+        os: targetOsUtils,
+        platform: targetPlatform,
+        processManager: targetProcessManager,
+        processUtils:
+            processUtils ??
+            ProcessUtils(processManager: targetProcessManager, logger: targetLogger),
+        projectFactory: FlutterProjectFactory(
+          config: config ?? FakeConfig(),
+          featureFlags: targetFeatureFlags,
+          fileSystem: fs,
+          logger: targetLogger,
+          plistParser: appleCtx.plistParser,
+          xcode: appleCtx.xcode,
+          xcodeProjectInterpreter: appleCtx.xcodeProjectInterpreter,
+        ),
+        terminal: terminal ?? FakeTerminal(),
+      );
   final command = BuildCommand(
     androidBuilder: androidBuilder ?? FakeAndroidBuilder(),
     androidContext: FakeAndroidContext(androidSdk: androidSdk),
-    appleContext: FakeAppleContext(
-      plistParser: plistParser ?? FakePlistParser(),
-      xcode: xcode ?? FakeXcode(),
-      xcodeProjectInterpreter: xcodeProjectInterpreter,
-    ),
+    appleContext: appleCtx,
     buildSystem: buildSystem ?? FakeBuildSystem(),
-    featureFlags: effectiveFeatureFlags ?? TestFeatureFlags(),
+    featureFlags: targetFeatureFlags,
+    templatePathProvider: targetTemplatePathProvider,
     templateRenderer: templateRenderer ?? FakeTemplateRenderer(),
-    toolContext:
-        toolContext ??
-        FakeToolContext(
-          artifacts: artifacts ?? FakeArtifacts(),
-          cache: cache ?? FakeCache(),
-          config: config ?? FakeConfig(),
-          fs: fs,
-          flutterVersion: flutterVersion ?? FakeFlutterVersion(),
-          logger: resolvedLogger,
-          os: resolvedOsUtils,
-          platform: resolvedPlatform,
-          processManager: resolvedProcessManager,
-          processUtils:
-              processUtils ??
-              ProcessUtils(processManager: resolvedProcessManager, logger: resolvedLogger),
-          terminal: terminal ?? FakeTerminal(),
-        ),
+    toolContext: targetToolContext,
     verboseHelp: verboseHelp,
   );
   final ApplicationPackageFactory packageFactory =
-      applicationPackageFactory ?? FakeIOSApplicationPackageFactory(fileSystem: fs);
+      applicationPackageFactory ??
+      FakeIOSApplicationPackageFactory(
+        templatePathProvider: targetTemplatePathProvider,
+        toolContext: targetToolContext,
+      );
   command.applicationPackages = packageFactory;
   for (final Command<void> subcommand in command.subcommands.values) {
     if (subcommand is FlutterCommand) {
@@ -162,9 +129,10 @@ BuildCommand createFakeBuildCommand({
 }
 
 class FakeIOSApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
-  FakeIOSApplicationPackageFactory({required this.fileSystem});
+  FakeIOSApplicationPackageFactory({required this.templatePathProvider, required this.toolContext});
 
-  final FileSystem fileSystem;
+  final TemplatePathProvider templatePathProvider;
+  final ToolContext toolContext;
 
   @override
   Future<ApplicationPackage?> getPackageForPlatform(
@@ -175,10 +143,17 @@ class FakeIOSApplicationPackageFactory extends Fake implements ApplicationPackag
     if (platform != TargetPlatform.ios) {
       return null;
     }
-    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
+    final FlutterProject project = projectFactory.fromDirectory(fs.currentDirectory);
     if (!project.ios.exists) {
       return null;
     }
-    return BuildableIOSApp(project.ios, 'com.example.test', 'Runner');
+    return BuildableIOSApp(
+      project.ios,
+      'com.example.test',
+      'Runner',
+      templatePathProvider: templatePathProvider,
+      toolContext: toolContext,
+    );
   }
 }

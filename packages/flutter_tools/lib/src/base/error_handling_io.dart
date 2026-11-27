@@ -25,7 +25,6 @@ import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import 'common.dart' show ToolExit, throwToolExit;
-import 'context.dart';
 import 'platform.dart';
 
 // The Flutter tool hits file system and process errors that only the end-user can address.
@@ -55,9 +54,6 @@ const int kSystemCodeSharingViolation = 32;
 
 /// On Windows this is error code 33: ERROR_LOCK_VIOLATION.
 const int kSystemCodeLockViolation = 33;
-
-/// On Windows this is error code 145: ERROR_DIR_NOT_EMPTY.
-const int kSystemCodeDirNotEmpty = 145;
 
 /// On Windows this is error code 1224: ERROR_USER_MAPPED_FILE.
 const int kSystemCodeUserMappedSectionOpened = 1224;
@@ -258,7 +254,7 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
   @override
   String readAsStringSync({Encoding encoding = utf8}) {
     return _runSync<String>(
-      () => delegate.readAsStringSync(),
+      () => delegate.readAsStringSync(encoding: encoding),
       platform: _platform,
       failureMessage: 'Flutter failed to read a file at "${delegate.path}"',
       posixPermissionSuggestion: _posixPermissionSuggestion(<String>[delegate.path]),
@@ -1037,7 +1033,6 @@ bool _isWindowsTransientLock(int errorCode) {
   return errorCode == kSystemCodeAccessDenied ||
       errorCode == kSystemCodeSharingViolation ||
       errorCode == kSystemCodeLockViolation ||
-      errorCode == kSystemCodeDirNotEmpty ||
       errorCode == kSystemCodeUserMappedSectionOpened;
 }
 
@@ -1216,31 +1211,56 @@ class ErrorHandlingProcessManager extends ProcessManager {
   Map<String, String>? _propagateAnalyticsEnvironment(Map<String, String>? environment) {
     // Create a mutable copy of the environment map upfront to avoid redundant allocations later.
     final environmentResult = <String, String>{...?environment};
-    Analytics? analytics;
-    try {
-      analytics = _analytics();
-    } on ContextDependencyCycleException {
-      // This exception is thrown during early startup bootstrapping of the Flutter CLI.
-      // Specifically, `FlutterVersion` runs a synchronous `git log` command during its own
-      // construction to resolve version metadata. Because process execution is intercepted
-      // by this manager, looking up `Analytics` (which in turn depends on `FlutterVersion`)
-      // triggers a circular dependency cycle (`FlutterVersion -> Process -> Analytics -> FlutterVersion`).
-      // Catching `ContextDependencyCycleException` breaks this cycle, allowing us to safely
-      // skip analytics environment propagation for these early initialization commands.
-    }
+    final Analytics analytics = _analytics();
 
     // Propagate the unified analytics suppression flag.
-    if (analytics != null) {
-      environmentResult[DashEnvVar.suppressAnalytics.name] = (!analytics.telemetryEnabled)
-          .toString();
+    //
+    // If suppression was requested, either by this process's environment or by
+    // the caller-supplied environment, always propagate it so that sub-tools
+    // never report when a root tool has asked them not to.
+    //
+    // Otherwise (including an inherited or caller-supplied value other than
+    // `true`), suppress sub-tools whenever this tool would not send analytics
+    // itself. Unlike `telemetryEnabled`, `okToSend` is also false until this
+    // tool's consent message has been shown, including for the rest of the
+    // invocation that shows it (a first run, or a consent message version
+    // bump), and when analytics are suppressed for this invocation
+    // (`--suppress-analytics`).
+    //
+    // This matches `areAnalyticsSuppressed` in `package:unified_analytics`
+    // (which uses case-sensitive `bool.parse`) and the `dart` CLI: only the
+    // exact string `true` requests suppression.
+    final String suppressKey = DashEnvVar.suppressAnalytics.name;
+    final bool suppressionRequested =
+        _platform.environment[suppressKey] == 'true' || environmentResult[suppressKey] == 'true';
+    if (suppressionRequested) {
+      environmentResult[suppressKey] = 'true';
+    } else {
+      environmentResult[suppressKey] = (!analytics.okToSend).toString();
     }
 
-    // Propagate the parent tool identifier down to the spawned process.
-    final String? parentTool = _platform.environment[DashEnvVar.tool.name];
+    // Propagate the root tool identifier down to the spawned process.
+    //
+    // This matches how `package:unified_analytics` resolves the root tool for
+    // this process (`DASH__TOOL` if it names a tool that can be a root tool,
+    // otherwise this tool), so the sub-tool reports the same root tool as this
+    // process. An invalid label or a shared component (for example
+    // `analysis-server`) is never passed on, and a caller-supplied value is
+    // ignored.
     environmentResult[DashEnvVar.tool.name] =
-        parentTool ?? environmentResult[DashEnvVar.tool.name] ?? DashTool.flutterTool.label;
+        _asRootToolLabel(_platform.environment[DashEnvVar.tool.name]) ?? DashTool.flutterTool.label;
 
     return environmentResult;
+  }
+
+  /// Returns [label] if it names a [DashTool] that can be a root tool, or
+  /// `null` otherwise.
+  static String? _asRootToolLabel(String? label) {
+    if (label == null) {
+      return null;
+    }
+    final DashTool? tool = DashTool.values.where((DashTool t) => t.label == label).firstOrNull;
+    return (tool?.canBeRootTool ?? false) ? label : null;
   }
 
   @override
@@ -1332,10 +1352,8 @@ void _onFileSystemException({
   final int errorCode = exception.osError?.errorCode ?? 0;
   if (platform.isWindows) {
     _handleWindowsException(exception, failureMessage, errorCode);
-  } else if (platform.isLinux) {
+  } else if (platform.isLinux || platform.isMacOS) {
     _handlePosixException(exception, failureMessage, errorCode, posixPermissionSuggestion);
-  } else if (platform.isMacOS) {
-    _handleMacOSException(exception, failureMessage, errorCode, posixPermissionSuggestion);
   }
 }
 
@@ -1356,31 +1374,12 @@ void _onProcessException({
   }
 }
 
-String _formatNameTooLongMessage(Exception e, String? message) =>
-    '${message != null ? "$message. " : ""}The filename or path is too long.\n'
-    '$e\n'
-    'Consider moving your project to a shorter path.';
-
-String _formatDirectoryNotEmptyMessage(Exception e, String? message) =>
-    '${message != null ? "$message. " : ""}The directory is not empty.\n'
-    '$e\n'
-    'This can happen if another process or background service (such as Finder, '
-    'Spotlight, or cloud sync) modified the directory while it was being deleted. '
-    'Try running "flutter clean" and try again.';
-
-String _formatOperationNotSupportedMessage(Exception e, String? message) =>
-    '${message != null ? "$message. " : ""}The file system does not support this operation (such as symbolic links).\n'
-    '$e\n'
-    'Please ensure that the project and Flutter SDK are located on a file system '
-    'that supports symbolic links (for example, ext4, APFS, or NTFS rather than exFAT or FAT32).';
-
 void _handlePosixException(
   Exception e,
   String? message,
   int errorCode,
-  String? posixPermissionSuggestion, {
-  bool isLinux = true,
-}) {
+  String? posixPermissionSuggestion,
+) {
   // From:
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno.h
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno-base.h
@@ -1388,13 +1387,9 @@ void _handlePosixException(
   const eperm = 1;
   const enoent = 2;
   const eacces = 13;
-  const enotdir = 20;
-  const eisdir = 21;
+  const exdev = 18;
   const enospc = 28;
   const erofs = 30;
-  const enametoolong = 36;
-  const enotempty = 39;
-  const eopnotsupp = 95;
   // Catch errors and bail when:
   final String? errorMessage = switch (errorCode) {
     enoent =>
@@ -1402,14 +1397,12 @@ void _handlePosixException(
           '\n$e\n'
           'This can sometimes happen if the file was deleted or moved while the tool was running.'
           ' Try running "flutter clean" and try again.',
-    enotdir =>
-      '${message != null ? "$message. " : ""}A component of the path is not a directory.'
-          '\n$e\n'
-          'Please ensure that the directory path is valid and refers to a directory.',
-    eisdir =>
-      '${message != null ? "$message. " : ""}The path refers to a directory rather than a file.'
-          '\n$e\n'
-          'Please ensure that the file path is valid and refers to a file.',
+    exdev =>
+      '${message != null && message.isNotEmpty ? '$message.\n' : ''}'
+          'A file system operation failed across different volumes or mount points.\n'
+          '$e\n'
+          'Ensure that the project, build output, and temporary directories are on the same '
+          'writable volume, or check external volume and security software settings.',
     enospc =>
       '$message. The target device is full.'
           '\n$e\n'
@@ -1441,9 +1434,6 @@ void _handlePosixException(
       }
       return errorBuffer.toString();
     }(),
-    enametoolong when isLinux => _formatNameTooLongMessage(e, message),
-    enotempty when isLinux => _formatDirectoryNotEmptyMessage(e, message),
-    eopnotsupp when isLinux => _formatOperationNotSupportedMessage(e, message),
     _ => null,
   };
   _throwFileSystemException(errorMessage);
@@ -1458,9 +1448,6 @@ void _handleMacOSException(
   // https://github.com/apple/darwin-xnu/blob/main/bsd/dev/dtrace/scripts/errno.d
   const ebadarch = 86;
   const eagain = 35;
-  const eopnotsupp = 45;
-  const enametoolong = 63;
-  const enotempty = 66;
   if (errorCode == ebadarch) {
     final errorBuffer = StringBuffer();
     if (message != null) {
@@ -1486,14 +1473,7 @@ void _handleMacOSException(
     );
     throwToolExit(errorBuffer.toString());
   }
-  final String? errorMessage = switch (errorCode) {
-    eopnotsupp => _formatOperationNotSupportedMessage(e, message),
-    enametoolong => _formatNameTooLongMessage(e, message),
-    enotempty => _formatDirectoryNotEmptyMessage(e, message),
-    _ => null,
-  };
-  _throwFileSystemException(errorMessage);
-  _handlePosixException(e, message, errorCode, posixPermissionSuggestion, isLinux: false);
+  _handlePosixException(e, message, errorCode, posixPermissionSuggestion);
 }
 
 void _handleWindowsException(Exception e, String? message, int errorCode) {
@@ -1506,8 +1486,6 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
   const kSharingViolation = 32;
   const kLockViolation = 33;
   const kDeviceFull = 112;
-  const kInvalidName = 123;
-  const kDirNotEmpty = 145;
   const kFilenameExcedRange = 206;
   const kDeviceDoesNotExist = 433;
   const kSystemIntegrityPolicyViolation = 454;
@@ -1515,8 +1493,6 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
   const kUserMappedSectionOpened = 1224;
   const kAccessDisabledByPolicy = 1260;
   const kPrivilegeNotHeld = 1314;
-  const kInvalidReparseData = 4392;
-  const kReparseTagInvalid = 4393;
   const kApplicationControlPolicyBlocked = 4551;
 
   // Catch errors and bail when:
@@ -1534,20 +1510,11 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
       '$message. The target device is full.'
           '\n$e\n'
           'Free up space and try again.',
-    kInvalidName =>
-      '${message != null ? "$message. " : ""}The filename, directory name, or volume label syntax is incorrect.'
-          '\n$e\n'
-          'Please ensure that the path does not contain invalid characters or syntax.',
-    kDirNotEmpty =>
-      '${message != null ? "$message. " : ""}The directory is not empty.'
-          '\n$e\n'
-          'This can happen if another program (such as an antivirus scanner or file indexer) '
-          'is holding an open handle to a file inside the directory. '
-          'Try closing other programs or running "flutter clean" and try again.',
     kFilenameExcedRange =>
-      '${message != null ? "$message. " : ""}The filename or extension is too long.'
-          '\n$e\n'
-          'Consider moving your project to a shorter path or enabling Windows Long Paths support.',
+      '${message != null ? "$message. " : ""}The filename or extension is too long.\n'
+          '$e\n'
+          'Please consider moving the Flutter SDK and/or project to a shorter path, '
+          'or enabling long paths on Windows.',
     kSharingViolation || kLockViolation || kUserMappedSectionOpened =>
       '$message. The file is being used by another program.'
           '\n$e\n'
@@ -1560,10 +1527,6 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
       '$message. The device was not found.'
           '\n$e\n'
           'Verify the device is mounted and try again.',
-    kInvalidReparseData || kReparseTagInvalid =>
-      '${message != null ? "$message. " : ""}The file or directory contains an invalid NTFS reparse point (symbolic link or cloud storage placeholder).'
-          '\n$e\n'
-          'If this project is in a cloud-synced folder (such as OneDrive), ensure all files are downloaded locally ("Always keep on this device") or move the project to a local directory.',
     kApplicationControlPolicyBlocked ||
     kAccessDisabledByPolicy ||
     kSystemIntegrityPolicyViolation =>

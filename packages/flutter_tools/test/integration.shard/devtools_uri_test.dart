@@ -26,7 +26,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/126691
-  testWithoutContext('flutter run --start-paused prints DevTools URI', () async {
+  test('flutter run --start-paused prints DevTools URI', () async {
     final completer = Completer<void>();
     const matcher = 'The Flutter DevTools debugger and profiler on';
 

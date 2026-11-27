@@ -102,9 +102,9 @@ class AndroidContextGLSkia : public AndroidContext {
 
  private:
   fml::RefPtr<AndroidEnvironmentGL> environment_;
-  EGLConfig config_;
-  EGLContext context_;
-  EGLContext resource_context_;
+  EGLConfig config_ = nullptr;
+  EGLContext context_ = nullptr;
+  EGLContext resource_context_ = nullptr;
   bool valid_ = false;
   TaskRunners task_runners_;
 

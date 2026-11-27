@@ -112,12 +112,12 @@ abstract class UrlStrategy {
   /// Moves forwards or backwards through the history stack.
   ///
   /// A negative [count] value causes a backward move in the history stack. And
-  /// a positive [count] value causs a forward move.
+  /// a positive [count] value causes a forward move.
   ///
   /// Examples:
   ///
   /// * `go(-2)` moves back 2 steps in history.
-  /// * `go(3)` moves forward 3 steps in hisotry.
+  /// * `go(3)` moves forward 3 steps in history.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/go
   Future<void> go(int count);

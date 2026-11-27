@@ -29,6 +29,11 @@ external TypefaceHandle typefaceCreate(SkDataHandle fontData);
 @Native<Void Function(TypefaceHandle)>(symbol: 'typeface_dispose', isLeaf: true)
 external void typefaceDispose(TypefaceHandle handle);
 
+/// Returns the family name embedded in the font. The caller owns the returned
+/// string and must free it with `skStringFree`.
+@Native<SkStringHandle Function(TypefaceHandle)>(symbol: 'typeface_getFamilyName', isLeaf: true)
+external SkStringHandle typefaceGetFamilyName(TypefaceHandle handle);
+
 @Native<Void Function(FontCollectionHandle, TypefaceHandle, SkStringHandle)>(
   symbol: 'fontCollection_registerTypeface',
   isLeaf: true,

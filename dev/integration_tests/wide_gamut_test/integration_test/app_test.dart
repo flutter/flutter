@@ -116,7 +116,7 @@ class _HasColor extends Matcher {
 }
 
 /// Precache the Display P3 test image so it is fully decoded before we take a
-/// screenshot. Must be called after [pumpAndSettle] so a [BuildContext] exists.
+/// screenshot. Must be called after [WidgetTester.pumpAndSettle] so a [BuildContext] exists.
 Future<void> _precacheP3Image(WidgetTester tester) async {
   final BuildContext context = tester.element(find.byType(app.MyApp));
   await tester.runAsync(() => precacheImage(MemoryImage(base64Decode(app.displayP3Logo)), context));

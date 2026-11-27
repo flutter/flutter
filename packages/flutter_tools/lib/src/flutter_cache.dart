@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
+import 'android/android_sdk.dart';
+import 'android/gradle_utils.dart';
 import 'android/java.dart';
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
@@ -18,17 +20,19 @@ import 'base/process.dart';
 import 'cache.dart';
 import 'dart/package_map.dart';
 import 'dart/pub.dart';
-import 'globals.dart' as globals;
 import 'project.dart';
 
 /// An implementation of the [Cache] which provides all of Flutter's default artifacts.
 class FlutterCache extends Cache {
   FlutterCache({
-    required Logger logger,
     required super.fileSystem,
-    required Platform platform,
+    required super.isLocalEngineBuilder,
+    required Logger logger,
     required super.osUtils,
+    required Platform platform,
     required FlutterProjectFactory projectFactory,
+    required Pub Function() pub,
+    super.flutterRoot,
     super.stdio,
   }) : super(logger: logger, platform: platform, artifacts: <ArtifactSet>[]) {
     registerArtifact(MaterialFonts(this));
@@ -56,8 +60,8 @@ class FlutterCache extends Cache {
         logger: logger,
         // flutter root and pub must be lazily initialized to avoid accessing
         // before the version is determined.
-        flutterRoot: () => Cache.flutterRoot!,
-        pub: () => pub,
+        flutterRoot: () => flutterRoot,
+        pub: pub,
         projectFactory: projectFactory,
       ),
     );
@@ -404,12 +408,21 @@ class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
 ///
 /// Set [Java] to `null` to indicate that no Java/JDK installation could be found.
 class AndroidMavenArtifacts extends ArtifactSet {
-  AndroidMavenArtifacts(this.cache, {required this._java, required this._platform})
-    : super(DevelopmentArtifact.androidMaven);
+  AndroidMavenArtifacts(
+    this.cache, {
+    required this._java,
+    required this._platform,
+    required this._processUtils,
+    this._androidSdk,
+    this._gradleUtils,
+  }) : super(DevelopmentArtifact.androidMaven);
 
   final Java? _java;
   final Platform _platform;
+  final ProcessUtils _processUtils;
   final Cache cache;
+  final AndroidSdk? _androidSdk;
+  final GradleUtils? _gradleUtils;
 
   @override
   Future<void> update(
@@ -421,21 +434,25 @@ class AndroidMavenArtifacts extends ArtifactSet {
   }) async {
     // TODO(andrewkolos): Should this really be no-op if the Android SDK
     // is unavailable? https://github.com/flutter/flutter/issues/127848
-    if (globals.androidSdk == null) {
+    final AndroidSdk? androidSdk = _androidSdk;
+    if (androidSdk == null) {
       return;
     }
     final Directory tempDir = cache.getRoot().createTempSync('flutter_gradle_wrapper.');
-    globals.gradleUtils?.injectGradleWrapperIfNeeded(tempDir);
+    _gradleUtils?.injectGradleWrapperIfNeeded(tempDir);
 
     final Status status = logger.startProgress('Downloading Android Maven dependencies...');
     final File gradle = tempDir.childFile(_platform.isWindows ? 'gradlew.bat' : 'gradlew');
     try {
       final String gradleExecutable = gradle.absolute.path;
-      final String flutterSdk = globals.fsUtils.escapePath(Cache.flutterRoot!);
-      final RunResult processResult = await globals.processUtils.run(<String>[
+      final String flutterSdk = FileSystemUtils(
+        fileSystem: fileSystem,
+        platform: _platform,
+      ).escapePath(cache.flutterRoot);
+      final RunResult processResult = await _processUtils.run(<String>[
         gradleExecutable,
         '-b',
-        globals.fs.path.join(
+        fileSystem.path.join(
           flutterSdk,
           'packages',
           'flutter_tools',
@@ -452,7 +469,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
     } finally {
       status.stop();
       tempDir.deleteSync(recursive: true);
-      globals.androidSdk?.reinitialize();
+      androidSdk.reinitialize();
     }
   }
 

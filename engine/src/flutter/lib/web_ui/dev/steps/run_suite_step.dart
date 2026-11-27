@@ -137,9 +137,8 @@ class RunSuiteStep implements PipelineStep {
       await test.main(testArgs);
     } finally {
       io.Directory.current = originalCwd;
+      await browserEnvironment.cleanup();
     }
-
-    await browserEnvironment.cleanup();
 
     // Since we are just calling `main()` on the test executable, it will modify
     // the exit code. We use this as a signal that there were some tests that failed.

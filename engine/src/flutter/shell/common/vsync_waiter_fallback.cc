@@ -25,11 +25,8 @@ static fml::TimePoint SnapToNextTick(fml::TimePoint value,
 
 }  // namespace
 
-VsyncWaiterFallback::VsyncWaiterFallback(const TaskRunners& task_runners,
-                                         bool for_testing)
-    : VsyncWaiter(task_runners),
-      phase_(fml::TimePoint::Now()),
-      for_testing_(for_testing) {}
+VsyncWaiterFallback::VsyncWaiterFallback(const TaskRunners& task_runners)
+    : VsyncWaiter(task_runners), phase_(fml::TimePoint::Now()) {}
 
 VsyncWaiterFallback::~VsyncWaiterFallback() = default;
 
@@ -52,8 +49,7 @@ void VsyncWaiterFallback::AwaitVSync() {
   task_runners_.GetUITaskRunner()->PostTaskForTime(
       [frame_start_time, frame_target_time, weak_this]() {
         if (auto vsync_waiter = weak_this.lock()) {
-          vsync_waiter->FireCallback(frame_start_time, frame_target_time,
-                                     !vsync_waiter->for_testing_);
+          vsync_waiter->FireCallback(frame_start_time, frame_target_time);
         }
       },
       frame_start_time);

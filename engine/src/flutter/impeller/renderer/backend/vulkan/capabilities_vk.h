@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_CAPABILITIES_VK_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_CAPABILITIES_VK_H_
 
+#include <array>
 #include <cstdint>
 #include <map>
 #include <optional>
@@ -276,6 +277,9 @@ class CapabilitiesVK final : public Capabilities,
   bool SupportsManuallyMippedTextures() const override;
 
   // |Capabilities|
+  bool SupportsTextureArrays() const override;
+
+  // |Capabilities|
   bool SupportsExtendedRangeFormats() const override;
 
   // |Capabilities|
@@ -311,6 +315,9 @@ class CapabilitiesVK final : public Capabilities,
 
   // |Capabilities|
   bool NeedsPartitionedHostBuffer() const override;
+
+  // |Capabilities|
+  ComputeLimits GetComputeLimits() const override;
 
   //----------------------------------------------------------------------------
   /// @return     If fixed-rate compression for non-onscreen surfaces is

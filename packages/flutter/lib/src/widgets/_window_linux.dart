@@ -14,6 +14,7 @@
 //
 // See: https://github.com/flutter/flutter/issues/30701.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi' as ffi;
 import 'dart:io';
@@ -43,6 +44,14 @@ To try experimental windowing APIs:
 
 See: https://github.com/flutter/flutter/issues/30701.
 ''';
+
+FlutterView _flutterViewForId(int viewId) {
+  final FlutterView? view = WidgetsBinding.instance.platformDispatcher.view(id: viewId);
+  if (view == null) {
+    throw StateError('No FlutterView with viewId $viewId was found on the platform dispatcher.');
+  }
+  return view;
+}
 
 /// [WindowingOwner] implementation for Linux.
 ///
@@ -336,9 +345,7 @@ abstract mixin class BaseWindowControllerLinux {
     _view = _FlView(engine, isSizedToContent: isSizedToContent);
     _viewMonitor = _FlViewMonitor(_view, onFirstFrame: onFirstFrame);
     final int viewId = _view.getId();
-    rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
-      (FlutterView view) => view.viewId == viewId,
-    );
+    rootView = _flutterViewForId(viewId);
     _view.show();
     _window.add(_view);
   }
@@ -806,6 +813,14 @@ class DialogWindowControllerLinux extends DialogWindowController
         _window.present();
       },
     );
+
+    // Popups stay open while they have a dialog descendant, see
+    // PopupWindowControllerLinux._hasOpenDialog.
+    for (var ancestor = parent; ancestor != null; ancestor = _parentOf(ancestor)) {
+      if (ancestor is PopupWindowControllerLinux) {
+        ancestor._dialogDescendants.add(this);
+      }
+    }
   }
 
   final DialogWindowControllerDelegate _delegate;
@@ -874,6 +889,17 @@ class TooltipWindowControllerLinux extends TooltipWindowController
   final TooltipWindowControllerDelegate _delegate;
 }
 
+/// Returns the window [window] was created as a child of, if any.
+BaseWindowController? _parentOf(BaseWindowController window) {
+  return switch (window) {
+    WindowController() => null,
+    DialogWindowController(:final BaseWindowController? parent) => parent,
+    TooltipWindowController(:final BaseWindowController parent) => parent,
+    PopupWindowController(:final BaseWindowController parent) => parent,
+    SatelliteWindowController(:final BaseWindowController parent) => parent,
+  };
+}
+
 /// Implementation of [PopupWindowController] for the Linux platform.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
@@ -928,14 +954,75 @@ class PopupWindowControllerLinux extends PopupWindowController
       positioner: positioner,
       description: 'popup',
     );
+    _watchForDeactivation();
   }
 
   final PopupWindowControllerDelegate _delegate;
   Offset? _offsetFromParent;
 
+  // The top level window this popup belongs to, watched so the popup can be
+  // closed when another window receives input focus.
+  late final BaseWindowController _toplevel;
+  bool _toplevelWasActive = false;
+
+  // Dialogs opened from this popup or its descendants. Registered by
+  // DialogWindowControllerLinux.
+  final List<DialogWindowControllerLinux> _dialogDescendants = <DialogWindowControllerLinux>[];
+
+  // A dialog opened from this popup takes input focus from the top level
+  // window, so the popup is kept open while such a dialog exists.
+  bool get _hasOpenDialog {
+    _dialogDescendants.removeWhere((DialogWindowControllerLinux dialog) => dialog.isDestroyed);
+    return _dialogDescendants.isNotEmpty;
+  }
+
   @override
   Offset get offsetFromParent {
     return _offsetFromParent ?? Offset.zero;
+  }
+
+  @override
+  void destroy() {
+    _toplevel.removeListener(_onToplevelChanged);
+    super.destroy();
+  }
+
+  // A popup never takes input focus, so the top level window it belongs to
+  // stays active while it is open. That window becoming inactive means focus
+  // has moved to another window, possibly in another application.
+  void _watchForDeactivation() {
+    BaseWindowController window = _parent;
+    while (true) {
+      if (window is PopupWindowController) {
+        window = window.parent;
+      } else if (window is TooltipWindowController) {
+        window = window.parent;
+      } else {
+        break;
+      }
+    }
+    _toplevel = window;
+    _toplevelWasActive = _toplevelWindow()?.isActive() ?? false;
+    _toplevel.addListener(_onToplevelChanged);
+  }
+
+  // Null once the top level window has been destroyed.
+  _GtkWindow? _toplevelWindow() => _owner.registrar._windowForViewId(_toplevel.rootView.viewId);
+
+  void _onToplevelChanged() {
+    final _GtkWindow? toplevelWindow = _toplevelWindow();
+    final bool wasActive = _toplevelWasActive;
+    final bool isActive = toplevelWindow?.isActive() ?? false;
+    _toplevelWasActive = isActive;
+    if (toplevelWindow == null || (wasActive && !isActive && !_hasOpenDialog)) {
+      // Deferred so the native window is not destroyed while GTK is still
+      // emitting the signal that caused this change.
+      scheduleMicrotask(() {
+        if (!isDestroyed) {
+          destroy();
+        }
+      });
+    }
   }
 }
 
@@ -1062,10 +1149,10 @@ String? _nativeToString(ffi.Pointer<ffi.Uint8> value) {
 
 /// Wraps GObject.
 class _GObject {
-  /// Creates a wrapper to an existing [GObject] in [instance].
+  /// Creates a wrapper to an existing GObject in [instance].
   const _GObject(this.instance);
 
-  /// The pointer to the underlying [GObject].
+  /// The pointer to the underlying GObject.
   final ffi.Pointer<ffi.NativeType> instance;
 
   /// Drop reference to this object.
@@ -1079,7 +1166,7 @@ class _GObject {
 
 /// Wraps GtkContainer.
 class _GtkContainer extends _GtkWidget {
-  /// Creates a wrapper to an existing [GtkContainer] in [instance].
+  /// Creates a wrapper to an existing GtkContainer in [instance].
   const _GtkContainer(super.instance);
 
   /// Adds [child] widget to this container.
@@ -1098,7 +1185,7 @@ class _GtkContainer extends _GtkWidget {
 
 /// Wraps GtkWidget.
 class _GtkWidget extends _GObject {
-  /// Creates a wrapper to an existing [GtkWidget] in [instance].
+  /// Creates a wrapper to an existing GtkWidget in [instance].
   const _GtkWidget(super.instance);
 
   /// Creates the GDK resources associated with a widget.
@@ -1224,13 +1311,13 @@ class _GtkWidget extends _GObject {
 
 /// Wraps GdkVisual.
 class _GdkVisual extends _GObject {
-  /// Creates a wrapper to an existing [GdkVisual] in [instance].
+  /// Creates a wrapper to an existing GdkVisual in [instance].
   const _GdkVisual(super.instance);
 }
 
 /// Wraps GdkScreen.
 class _GdkScreen extends _GObject {
-  /// Creates a wrapper to an existing [GdkScreen] in [instance].
+  /// Creates a wrapper to an existing GdkScreen in [instance].
   const _GdkScreen(super.instance);
 
   /// Gets the visual that supports translucent windows, or null if this screen
@@ -1261,7 +1348,7 @@ class _GdkScreen extends _GObject {
 
 /// Wraps GdkWindow.
 class _GdkWindow extends _GObject {
-  /// Creates a wrapper to an existing [GdkWindow] in [instance].
+  /// Creates a wrapper to an existing GdkWindow in [instance].
   const _GdkWindow(super.instance);
 
   /// Gets the window state.

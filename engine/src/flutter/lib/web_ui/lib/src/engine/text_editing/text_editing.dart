@@ -463,8 +463,32 @@ class EngineAutofillForm {
       shouldHideElement: !_isWebKit,
       shouldDisablePointerEvents: _isWebKit,
     );
+    _hideSyntheticElementFromAssistiveTechnology(synthetic);
     elements[id] = synthetic;
     formElement!.append(synthetic);
+  }
+
+  /// Hides a synthetic autofill element from screen readers and keyboard
+  /// navigation in semantics mode.
+  ///
+  /// Synthetic elements exist for the browser's autofill and form submission.
+  /// The semantics tree already exposes each field through its own element, so
+  /// a synthetic copy would show up as an extra, unlabeled control, and the
+  /// dormant form keeps it in the page for the rest of the session. Browser
+  /// autofill does not read ARIA, so credential save and autofill keep working
+  /// through these elements.
+  ///
+  /// Without semantics, password manager extensions fill these elements, and
+  /// some of them skip elements hidden from assistive technology, so they are
+  /// left untouched.
+  ///
+  /// See: https://github.com/flutter/flutter/issues/195174
+  void _hideSyntheticElementFromAssistiveTechnology(DomHTMLElement element) {
+    if (!associateFocusedElementByAttribute) {
+      return;
+    }
+    element.setAttribute('aria-hidden', 'true');
+    element.tabIndex = -1;
   }
 
   /// Makes the form dormant.
@@ -529,6 +553,7 @@ class EngineAutofillForm {
           shouldHideElement: !_isWebKit,
           shouldDisablePointerEvents: _isWebKit,
         );
+        _hideSyntheticElementFromAssistiveTechnology(htmlElement);
       }
 
       elements[field.autofillInfo.uniqueIdentifier] = htmlElement;
@@ -592,7 +617,7 @@ class EngineAutofillForm {
   /// On the other hand, overall for text editing there is already a lifecycle
   /// for subscriptions: All the subscriptions of the DOM elements are to the
   /// `subscriptions` property of [DefaultTextEditingStrategy].
-  /// [TextEditingStrategy] manages all subscription lifecyle. All
+  /// [TextEditingStrategy] manages all subscription lifecycle. All
   /// listeners with no exceptions are added during
   /// [TextEditingStrategy.addEventHandlers] method call and all
   /// listeners are removed during [TextEditingStrategy.disable] method call.
@@ -798,7 +823,7 @@ class TextEditingDeltaState {
   ///
   /// For a deletion, the length and the direction of the deletion (backward or forward)
   /// are calculated by comparing the new and last editing states.
-  /// If the deletion is backward, the length is susbtracted from the [deltaEnd]
+  /// If the deletion is backward, the length is subtracted from the [deltaEnd]
   /// that we set when beforeinput was fired to determine the [deltaStart].
   /// If the deletion is forward, [deltaStart] is set to the new editing state baseOffset
   /// and [deltaEnd] is set to [deltaStart] incremented by the length of the deletion.
@@ -1364,14 +1389,14 @@ abstract class TextEditingStrategy {
 
   /// Update the element's position.
   ///
-  /// The position will be updated everytime Flutter Framework sends
+  /// The position will be updated every time Flutter Framework sends
   /// 'TextInput.setEditableSizeAndTransform' message.
   void updateElementPlacement(EditableTextGeometry geometry);
 
   /// Set editing state of the element.
   ///
   /// This includes text and selection relelated states. The editing state will
-  /// be updated everytime Flutter Framework sends 'TextInput.setEditingState'
+  /// be updated every time Flutter Framework sends 'TextInput.setEditingState'
   /// message.
   void setEditingState(EditingState editingState);
 
@@ -1614,6 +1639,18 @@ abstract class DefaultTextEditingStrategy
   }
 
   void applyConfiguration(InputConfiguration config) {
+    // A `TextInput.updateConfig` message only describes the focused field, so
+    // the [EngineAutofillForm] decoded from it has no DOM form. While the
+    // editing element is part of a live form, keep that form. Otherwise
+    // [disable] would remove the element from the form instead of letting the
+    // form go dormant, and the next connection could not reuse it.
+    if (isEnabled && config.autofillGroup != null) {
+      final EngineAutofillForm? activeGroup = inputConfiguration.autofillGroup;
+      if (activeGroup?.formElement != null) {
+        config = config.copyWith(autofillGroup: activeGroup);
+      }
+    }
+
     inputConfiguration = config;
 
     if (config.readOnly) {
@@ -1761,9 +1798,17 @@ abstract class DefaultTextEditingStrategy
 
   @override
   void setEditingState(EditingState? editingState) {
+    final String? previousText = lastEditingState?.text;
     lastEditingState = editingState;
     if (!isEnabled || !editingState!.isValid) {
       return;
+    }
+    // Writing different text into the element ends any composition in
+    // progress, and Chrome does so without a `compositionend` event. This
+    // happens when an input formatter rejects a dead key character. Forget the
+    // composition so its stale range is not reported back to the framework.
+    if (editingState.text != previousText) {
+      resetComposition();
     }
     lastEditingState!.applyToDomElement(domElement);
   }
@@ -2293,7 +2338,7 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 /// Firefox behaviour for text editing.
 ///
 /// Selections are different in Firefox. [addEventHandlers] strategy is
-/// impelemented diefferently in Firefox.
+/// implemented differently in Firefox.
 class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   FirefoxTextEditingStrategy(super.owner);
 

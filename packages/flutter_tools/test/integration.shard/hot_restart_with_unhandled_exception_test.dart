@@ -30,7 +30,7 @@ void main() {
   });
 
   // Possible regression test for https://github.com/flutter/flutter/issues/161466
-  testWithoutContext("Hot restart doesn't hang when an unhandled exception is "
+  test("Hot restart doesn't hang when an unhandled exception is "
       'thrown in the UI isolate', () async {
     await flutter.run(withDebugger: true, startPaused: true, pauseOnExceptions: true);
     final VmService vmService = await vmServiceConnectUri(flutter.vmServiceWsUri.toString());

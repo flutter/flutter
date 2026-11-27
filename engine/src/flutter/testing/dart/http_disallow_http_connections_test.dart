@@ -59,14 +59,14 @@ Future<bool> _supportsIPv6() async {
 void main() {
   test('testWithLocalIP', () async {
     await bindServerAndTest(await getLocalHostIP(), (HttpClient httpClient, Uri httpUri) async {
-      asyncExpectThrows<UnsupportedError>(() async => httpClient.getUrl(httpUri));
-      asyncExpectThrows<UnsupportedError>(
+      await asyncExpectThrows<UnsupportedError>(() async => httpClient.getUrl(httpUri));
+      await asyncExpectThrows<UnsupportedError>(
         () async => runZoned(
           () => httpClient.getUrl(httpUri),
           zoneValues: <dynamic, dynamic>{#flutter.io.allow_http: 'foo'},
         ),
       );
-      asyncExpectThrows<UnsupportedError>(
+      await asyncExpectThrows<UnsupportedError>(
         () async => runZoned(
           () => httpClient.getUrl(httpUri),
           zoneValues: <dynamic, dynamic>{#flutter.io.allow_http: false},
@@ -81,10 +81,10 @@ void main() {
 
   test('testWithHostname', () async {
     await bindServerAndTest(Platform.localHostname, (HttpClient httpClient, Uri httpUri) async {
-      asyncExpectThrows<UnsupportedError>(() async => httpClient.getUrl(httpUri));
+      await asyncExpectThrows<UnsupportedError>(() async => httpClient.getUrl(httpUri));
 
       final mockFoo = _MockZoneValue('foo');
-      asyncExpectThrows<UnsupportedError>(
+      await asyncExpectThrows<UnsupportedError>(
         () async => runZoned(
           () => httpClient.getUrl(httpUri),
           zoneValues: <dynamic, dynamic>{#flutter.io.allow_http: mockFoo},
@@ -93,7 +93,7 @@ void main() {
       expect(mockFoo.checked, isTrue);
 
       final mockFalse = _MockZoneValue(false);
-      asyncExpectThrows<UnsupportedError>(
+      await asyncExpectThrows<UnsupportedError>(
         () async => runZoned(
           () => httpClient.getUrl(httpUri),
           zoneValues: <dynamic, dynamic>{#flutter.io.allow_http: mockFalse},

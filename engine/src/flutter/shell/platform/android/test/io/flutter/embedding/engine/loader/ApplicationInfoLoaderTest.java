@@ -19,7 +19,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import io.flutter.embedding.engine.FlutterEngineFlags;
+import io.flutter.embedding.engine.flags.FlutterEngineFlags;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

@@ -61,9 +61,11 @@ class SharedThreadMerger
   std::mutex mutex_;
   bool enabled_ = false;
 
-  /// The |MergeWithLease| or |ExtendLeaseTo| method will record the caller
-  /// into this lease_term_by_caller_ map, |UnMergeNowIfLastOne|
-  /// method will remove the caller from this lease_term_by_caller_.
+  /// Active leases keyed by caller. |MergeWithLease| and |ExtendLeaseTo|
+  /// record leases; |DecrementLease| removes them when they reach zero, and
+  /// |UnMergeNowIfLastOne| removes its caller's lease immediately. A caller
+  /// without a lease may still draw while another caller keeps the queues
+  /// merged.
   std::map<RasterThreadMergerId, std::atomic_size_t> lease_term_by_caller_;
 
   bool IsAllLeaseTermsZeroUnSafe() const;

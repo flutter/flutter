@@ -45,6 +45,7 @@ base class Texture extends NativeFieldWrapperClass1 {
     this.enableShaderReadUsage,
     this.enableShaderWriteUsage,
     this.mipLevelCount,
+    this.layerCount,
   ) : _gpuContext = gpuContext {
     if (sampleCount != 1 && sampleCount != 4) {
       throw Exception("Only a sample count of 1 or 4 is currently supported");
@@ -61,6 +62,7 @@ base class Texture extends NativeFieldWrapperClass1 {
       enableShaderReadUsage,
       enableShaderWriteUsage,
       mipLevelCount,
+      layerCount,
     );
     if (!_valid) {
       // The engine logs the specific reason (for example, a compressed format
@@ -84,7 +86,8 @@ base class Texture extends NativeFieldWrapperClass1 {
       enableRenderTargetUsage = true,
       enableShaderReadUsage = true,
       enableShaderWriteUsage = false,
-      mipLevelCount = 1;
+      mipLevelCount = 1,
+      layerCount = 1;
 
   /// Wraps the GPU texture that backs [image] as a Flutter GPU [Texture],
   /// without copying any pixel data.
@@ -101,7 +104,7 @@ base class Texture extends NativeFieldWrapperClass1 {
   /// yet when this is called. Throws if [image] has no compatible texture.
   factory Texture.fromImage(GpuContext gpuContext, ui.Image image) {
     final Int32List info = _imageTextureInfo(gpuContext, image);
-    if (info.length != 10) {
+    if (info.length != 11) {
       throw Exception(
         'Texture.fromImage could not wrap the image because it is not backed '
         'by a compatible GPU texture. Use an image from the asynchronous '
@@ -125,7 +128,8 @@ base class Texture extends NativeFieldWrapperClass1 {
       enableRenderTargetUsage = info[6] != 0,
       enableShaderReadUsage = info[7] != 0,
       enableShaderWriteUsage = info[8] != 0,
-      mipLevelCount = info[9] {
+      mipLevelCount = info[9],
+      layerCount = info[10] {
     _valid = _initializeFromImage(gpuContext, image);
     if (!_valid) {
       throw Exception("Texture.fromImage failed to wrap the image texture");
@@ -159,9 +163,23 @@ base class Texture extends NativeFieldWrapperClass1 {
   /// [Texture.fullMipCount] to compute the maximum for a given size.
   final int mipLevelCount;
 
+  /// The number of layers allocated for this texture. Always 1 for texture
+  /// types other than [TextureType.texture2DArray].
+  final int layerCount;
+
   /// The number of slices in this texture. Determined by [textureType]:
-  /// 1 for 2D and external textures, 6 for cubemap textures.
-  int get sliceCount => textureType == TextureType.textureCube ? 6 : 1;
+  /// 1 for 2D and external textures, 6 for cubemap textures, and
+  /// [layerCount] for 2D array textures.
+  int get sliceCount {
+    switch (textureType) {
+      case TextureType.textureCube:
+        return 6;
+      case TextureType.texture2DArray:
+        return layerCount;
+      default:
+        return 1;
+    }
+  }
 
   /// Returns the width of the texture at [mipLevel], clamped at 1.
   int getMipLevelWidth(int mipLevel) {
@@ -202,9 +220,10 @@ base class Texture extends NativeFieldWrapperClass1 {
   /// [mipLevel] selects which mip level to write to. Defaults to 0 (base
   /// level). Must be in the range `[0, mipLevelCount)`.
   ///
-  /// [slice] selects which slice to write to for cubemap textures, where
-  /// each face is a separate slice in the order
-  /// `+X, -X, +Y, -Y, +Z, -Z`. Must be 0 for non-cubemap textures.
+  /// [slice] selects which slice to write to. For cubemap textures each face
+  /// is a separate slice in the order `+X, -X, +Y, -Y, +Z, -Z`; for 2D array
+  /// textures each layer is a slice, in the range `[0, layerCount)`. Must be
+  /// 0 for other texture types.
   ///
   /// The length of [sourceBytes] must exactly match the size returned by
   /// [getMipLevelSizeInBytes] for the requested [mipLevel]. For
@@ -269,6 +288,7 @@ base class Texture extends NativeFieldWrapperClass1 {
       Bool,
       Bool,
       Int,
+      Int,
     )
   >(symbol: 'InternalFlutterGpu_Texture_Initialize')
   external bool _initialize(
@@ -283,6 +303,7 @@ base class Texture extends NativeFieldWrapperClass1 {
     bool enableShaderReadUsage,
     bool enableShaderWriteUsage,
     int mipLevelCount,
+    int layerCount,
   );
 
   @Native<Bool Function(Pointer<Void>, Pointer<Void>, Handle, Int, Int)>(

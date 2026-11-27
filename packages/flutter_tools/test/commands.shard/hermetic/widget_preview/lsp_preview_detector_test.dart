@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
@@ -22,7 +21,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import 'package:watcher/watcher.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 
 const String _kProjectRootPath = '/project';
@@ -45,6 +44,7 @@ void main() {
     late ShutdownHooks shutdownHooks;
     late List<FlutterWidgetPreviews> detectedChanges;
     late List<String> detectedPubspecChanges;
+    late List<String> detectedNonDartFileChanges;
     late LspPreviewDetector detector;
 
     setUp(() async {
@@ -63,23 +63,26 @@ void main() {
       shutdownHooks = ShutdownHooks();
       detectedChanges = <FlutterWidgetPreviews>[];
       detectedPubspecChanges = <String>[];
+      detectedNonDartFileChanges = <String>[];
 
       detector = LspPreviewDetector(
-        platform: platform,
-        previewAnalytics: previewAnalytics,
-        project: project,
-        fs: fs,
-        logger: logger,
+        dtd: fakeDtd,
         onChangeDetected: detectedChanges.add,
         onPubspecChangeDetected: detectedPubspecChanges.add,
-        dtd: fakeDtd,
-        processManager: FakeProcessManager.any(),
-        terminal: Terminal.test(),
+        previewAnalytics: previewAnalytics,
+        project: project,
         suppressAnalytics: false,
-        artifacts: Artifacts.test(),
-        shutdownHooks: shutdownHooks,
-        watcherBuilder: (_) => fakeWatcher,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fs,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+          shutdownHooks: shutdownHooks,
+        ),
         analysisServerFactory: () async => fakeAnalysisServer,
+        onNonDartFileChangeDetected: detectedNonDartFileChanges.add,
+        watcherBuilder: (_) => fakeWatcher,
       );
       await detector.initialize();
     });
@@ -104,7 +107,7 @@ void main() {
       await detector.mutex.runGuarded(() async {});
     }
 
-    testWithoutContext('reports preview reload timing when files are modified', () async {
+    test('reports preview reload timing when files are modified', () async {
       expectNPreviewReloadTimingEvents(0);
       expect(detectedChanges, isEmpty);
       expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
@@ -122,67 +125,61 @@ void main() {
       expect(fakeAnalysisServer.waitForAnalysisCallCount, 2);
     });
 
-    testWithoutContext(
-      'does not report preview reload timing when pubspec.yaml is modified',
-      () async {
-        expectNPreviewReloadTimingEvents(0);
-        expect(detectedPubspecChanges, isEmpty);
+    test('does not report preview reload timing when pubspec.yaml is modified', () async {
+      expectNPreviewReloadTimingEvents(0);
+      expect(detectedPubspecChanges, isEmpty);
 
-        await emitEvent(WatchEvent(ChangeType.MODIFY, _kPubspecPath));
+      await emitEvent(WatchEvent(ChangeType.MODIFY, _kPubspecPath));
 
-        expect(detectedPubspecChanges, <String>[_kPubspecPath]);
-        expectNPreviewReloadTimingEvents(0);
-        expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
-      },
-    );
+      expect(detectedPubspecChanges, <String>[_kPubspecPath]);
+      expectNPreviewReloadTimingEvents(0);
+      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+    });
 
-    testWithoutContext(
-      'does not report preview reload timing when non-Dart file is modified',
-      () async {
-        expectNPreviewReloadTimingEvents(0);
-        expect(detectedChanges, isEmpty);
-        expect(detectedPubspecChanges, isEmpty);
+    test('notifies onNonDartFileChangeDetected and does not report preview reload timing when non-Dart file is modified', () async {
+      expectNPreviewReloadTimingEvents(0);
+      expect(detectedChanges, isEmpty);
+      expect(detectedPubspecChanges, isEmpty);
+      expect(detectedNonDartFileChanges, isEmpty);
 
-        await emitEvent(WatchEvent(ChangeType.MODIFY, _kNonDartFilePath));
+      await emitEvent(WatchEvent(ChangeType.MODIFY, _kNonDartFilePath));
 
-        expect(detectedChanges, isEmpty);
-        expect(detectedPubspecChanges, isEmpty);
-        expectNPreviewReloadTimingEvents(0);
-        expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
-      },
-    );
+      expect(detectedChanges, isEmpty);
+      expect(detectedPubspecChanges, isEmpty);
+      expect(detectedNonDartFileChanges, <String>[_kNonDartFilePath]);
+      expectNPreviewReloadTimingEvents(0);
+      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+    });
 
-    testWithoutContext('does not report preview reload timing for ignored directories', () async {
+    test('does not report preview reload timing for ignored directories', () async {
       expectNPreviewReloadTimingEvents(0);
 
       await emitEvent(WatchEvent(ChangeType.MODIFY, _kIgnoredDartToolPath));
 
       expect(detectedChanges, isEmpty);
       expect(detectedPubspecChanges, isEmpty);
+      expect(detectedNonDartFileChanges, isEmpty);
       expectNPreviewReloadTimingEvents(0);
       expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
     });
 
-    testWithoutContext(
-      'resets reload timing stopwatch on DTD exception and does not report timing',
-      () async {
-        fakeDtd.shouldThrow = true;
-        expectNPreviewReloadTimingEvents(0);
+    test('resets reload timing stopwatch on DTD exception and does not report timing', () async {
+      fakeDtd.shouldThrow = true;
+      expectNPreviewReloadTimingEvents(0);
 
-        await emitEvent(WatchEvent(ChangeType.MODIFY, _kDartFilePath));
+      await emitEvent(WatchEvent(ChangeType.MODIFY, _kDartFilePath));
 
-        expect(detectedChanges, isEmpty);
-        expectNPreviewReloadTimingEvents(0);
+      expect(detectedChanges, isEmpty);
+      expectNPreviewReloadTimingEvents(0);
 
-        fakeDtd.shouldThrow = false;
-        await emitEvent(WatchEvent(ChangeType.MODIFY, _kDartFilePath));
+      fakeDtd.shouldThrow = false;
+      await emitEvent(WatchEvent(ChangeType.MODIFY, _kDartFilePath));
 
-        expect(detectedChanges, hasLength(1));
-        expectNPreviewReloadTimingEvents(1);
-      },
-    );
+      expect(detectedChanges, hasLength(1));
+      expectNPreviewReloadTimingEvents(1);
+    });
 
-    testWithoutContext(
+    test(
       'resets reload timing stopwatch on analysis server exception and does not report timing',
       () async {
         fakeAnalysisServer.shouldThrow = true;
@@ -200,6 +197,44 @@ void main() {
         expectNPreviewReloadTimingEvents(1);
       },
     );
+
+    test('does not launch analysis server and waits for analysis over DTD when connected to an existing DTD instance', () async {
+      await detector.dispose();
+
+      fakeDtd = FakeWidgetPreviewDtdServices()..dtdUri = Uri.parse('ws://127.0.0.1:12345');
+      detector = LspPreviewDetector(
+        dtd: fakeDtd,
+        onChangeDetected: detectedChanges.add,
+        onPubspecChangeDetected: detectedPubspecChanges.add,
+        previewAnalytics: previewAnalytics,
+        project: project,
+        suppressAnalytics: false,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fs,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+          shutdownHooks: shutdownHooks,
+        ),
+        analysisServerFactory: () async => fakeAnalysisServer,
+        watcherBuilder: (_) => fakeWatcher,
+      );
+      await detector.initialize();
+
+      expect(detector.analysisServer, isNull);
+      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+      expect(fakeDtd.waitForAnalysisCallCount, 0);
+
+      await detector.waitForAnalysis();
+      expect(fakeDtd.waitForAnalysisCallCount, 1);
+      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+
+      await emitEvent(WatchEvent(ChangeType.MODIFY, _kDartFilePath));
+      expect(detectedChanges, hasLength(1));
+      expect(fakeDtd.waitForAnalysisCallCount, 2);
+      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+    });
   });
 }
 
@@ -254,13 +289,24 @@ class FakeAnalysisServer extends Fake implements AnalysisServer {
 
 class FakeWidgetPreviewDtdServices extends Fake implements WidgetPreviewDtdServices {
   @override
-  bool lspServiceAvailable = false;
+  Uri? dtdUri;
 
-  @override
-  Uri get dtdUri => Uri.parse('ws://127.0.0.1:12345');
-
+  int waitForAnalysisCallCount = 0;
   bool shouldThrow = false;
   FlutterWidgetPreviews? nextUpdate;
+
+  @override
+  Future<void> launchAndConnect({required AnalysisServer analysisServer}) async {
+    dtdUri = Uri.parse('ws://127.0.0.1:12345');
+  }
+
+  @override
+  Future<void> waitForAnalysis({Duration delay = const Duration(milliseconds: 100)}) async {
+    if (shouldThrow) {
+      throw StateError('Fake DTD error');
+    }
+    waitForAnalysisCallCount++;
+  }
 
   @override
   Future<FlutterWidgetPreviews> getFlutterWidgetPreviews() async {

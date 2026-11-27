@@ -136,7 +136,7 @@ enum FlutterDarwinPlatform {
   }
 
   /// Returns the corresponding build directory for the platform.
-  String buildDirectory({Config? config, FileSystem? fileSystem}) {
+  String buildDirectory({required Config config, required FileSystem fileSystem}) {
     switch (this) {
       case FlutterDarwinPlatform.ios:
         return getIosBuildDirectory(config: config, fileSystem: fileSystem);

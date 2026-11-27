@@ -5,9 +5,8 @@
 import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:flutter_analyzer_plugin/src/rules/repository_link_syntax.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
-@reflectiveTest
 class RepositoryLinkSyntaxTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -17,9 +16,19 @@ class RepositoryLinkSyntaxTest extends AnalysisRuleTest {
 
   @override
   String get analysisRule => RepositoryLinkSyntax.code.name;
+}
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_valid_repository_links() async {
+void main() {
+  late RepositoryLinkSyntaxTest testSuite;
+
+  setUp(() {
+    testSuite = RepositoryLinkSyntaxTest();
+    testSuite.setUp();
+  });
+
+  tearDown(() => testSuite.tearDown());
+
+  test('valid repository links', () async {
     const source = r'''
 // https://github.com/flutter/flutter/tree/main/file1
 // https://flutter.googlesource.com/+/main/file1
@@ -43,11 +52,10 @@ void main() {
   final String interpolated = '$name: https://github.com/flutter/flutter/tree/main/file1';
 }
 ''';
-    await assertNoDiagnostics(source);
-  }
+    await testSuite.assertNoDiagnostics(source);
+  });
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_banned_master_in_comments() async {
+  test('banned master in comments', () async {
     const source = '''
 // Check out https://android.googlesource.com/+/master/file1
 // Check out https://chromium.googlesource.com/+/master/file1
@@ -59,53 +67,44 @@ void main() {
 // Check out https://raw.githubusercontent.com/flutter/flutter/blob/master/file1
 void main() {}
 ''';
-    await assertDiagnostics(source, [
-      lint(0, 60),
-      lint(61, 61),
-      lint(123, 60),
-      lint(184, 57),
-      lint(242, 60),
-      lint(303, 55),
-      lint(359, 65),
-      lint(425, 80),
+    await testSuite.assertDiagnostics(source, [
+      testSuite.lint(0, 60),
+      testSuite.lint(61, 61),
+      testSuite.lint(123, 60),
+      testSuite.lint(184, 57),
+      testSuite.lint(242, 60),
+      testSuite.lint(303, 55),
+      testSuite.lint(359, 65),
+      testSuite.lint(425, 80),
     ]);
-  }
+  });
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_banned_master_in_string_literal() async {
+  test('banned master in string literal', () async {
     const source = '''
 void main() {
   const String s = 'https://github.com/flutter/flutter/tree/master/file1';
 }
 ''';
-    await assertDiagnostics(source, [lint(33, 54)]);
-  }
+    await testSuite.assertDiagnostics(source, [testSuite.lint(33, 54)]);
+  });
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_banned_master_in_interpolated_string() async {
+  test('banned master in interpolated string', () async {
     const source = r'''
 void main() {
   final String foo = 'bar';
   final String s = '$foo https://flutter.googlesource.com/+/master/file1';
 }
 ''';
-    await assertDiagnostics(source, [lint(61, 54)]);
-  }
+    await testSuite.assertDiagnostics(source, [testSuite.lint(61, 54)]);
+  });
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_banned_master_in_adjacent_strings() async {
+  test('banned master in adjacent strings', () async {
     const source = '''
 void main() {
   const String s = 'https://github.com/flutter/'
       'flutter/tree/master/file1';
 }
 ''';
-    await assertDiagnostics(source, [lint(33, 63)]);
-  }
-}
-
-void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(RepositoryLinkSyntaxTest);
+    await testSuite.assertDiagnostics(source, [testSuite.lint(33, 63)]);
   });
 }

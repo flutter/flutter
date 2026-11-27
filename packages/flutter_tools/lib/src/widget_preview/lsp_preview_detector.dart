@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:watcher/watcher.dart';
 
 import '../artifacts.dart';
@@ -13,7 +12,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/terminal.dart';
+import '../context/tool_context.dart';
 import '../dart/analysis.dart';
 import '../project.dart';
 import 'analytics.dart';
@@ -30,42 +29,38 @@ Watcher _defaultWatcherBuilder(String path) {
 
 class LspPreviewDetector {
   LspPreviewDetector({
-    required this.platform,
-    required this.previewAnalytics,
-    required this.project,
-    required this.fs,
-    required this.logger,
+    required this.dtd,
     required this.onChangeDetected,
     required this.onPubspecChangeDetected,
-    required this.dtd,
-    required this.processManager,
-    required this.terminal,
+    required this.previewAnalytics,
+    required this.project,
     required this.suppressAnalytics,
+    required this.toolContext,
     this.analysisServerFactory,
-    required this.artifacts,
-    required this.shutdownHooks,
-    @visibleForTesting this.watcherBuilder = _defaultWatcherBuilder,
+    this.onNonDartFileChangeDetected,
     @visibleForTesting this.onPackageConfigChangeDetected,
+    @visibleForTesting this.watcherBuilder = _defaultWatcherBuilder,
   }) : projectRoot = project.directory;
 
-  final Artifacts artifacts;
-  final ShutdownHooks shutdownHooks;
-  final Platform platform;
+  final ToolContext toolContext;
   final WidgetPreviewAnalytics previewAnalytics;
   final FlutterProject project;
   final Directory projectRoot;
-  final FileSystem fs;
-  final Logger logger;
   final void Function(FlutterWidgetPreviews) onChangeDetected;
   final void Function(String path) onPubspecChangeDetected;
+  final void Function(String path)? onNonDartFileChangeDetected;
   @visibleForTesting
   final void Function(String path)? onPackageConfigChangeDetected;
   final WatcherBuilder watcherBuilder;
   final WidgetPreviewDtdServices dtd;
-  final ProcessManager processManager;
-  final Terminal terminal;
   final bool suppressAnalytics;
   final Future<AnalysisServer> Function()? analysisServerFactory;
+
+  Artifacts get artifacts => toolContext.artifacts;
+  FileSystem get fs => toolContext.fs;
+  Logger get logger => toolContext.logger;
+  Platform get platform => toolContext.platform;
+  ShutdownHooks get shutdownHooks => toolContext.shutdownHooks;
 
   AnalysisServer? get analysisServer => _analysisServer;
   AnalysisServer? _analysisServer;
@@ -117,20 +112,15 @@ class LspPreviewDetector {
       // file watcher finished initializing.
       project.reloadManifest(logger: logger, fs: fs);
 
-      if (!dtd.lspServiceAvailable) {
+      if (dtd.dtdUri == null) {
         logger.printStatus('Launching analysis server...');
         _analysisServer = analysisServerFactory != null
             ? await analysisServerFactory!()
             : await launchAnalysisServer();
         await _analysisServer!.start();
 
-        final Uri? dtdUri = dtd.dtdUri;
-        if (dtdUri != null) {
-          await _analysisServer!.connectToDtd(dtdUri: dtdUri);
-        } else {
-          logger.printTrace('Launching a fresh DTD instance...');
-          await dtd.launchAndConnect(analysisServer: _analysisServer!);
-        }
+        logger.printTrace('Launching a fresh DTD instance...');
+        await dtd.launchAndConnect(analysisServer: _analysisServer!);
       }
     });
   }
@@ -143,12 +133,8 @@ class LspPreviewDetector {
     final analysisServer = AnalysisServer(
       artifacts.getArtifactPath(Artifact.engineDartSdkPath),
       [projectRoot.path],
-      fileSystem: fs,
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
-      terminal: terminal,
       suppressAnalytics: suppressAnalytics,
+      toolContext: toolContext,
       protocolTrafficLog: protocolTrafficLog,
     );
     return analysisServer;
@@ -185,18 +171,29 @@ class LspPreviewDetector {
     });
   }
 
+  /// Returns a [Future] that completes when the analysis server has completed
+  /// any in-progress initialization or analysis.
+  Future<void> waitForAnalysis() async {
+    if (_analysisServer != null) {
+      await _analysisServer!.waitForAnalysis();
+    } else {
+      await dtd.waitForAnalysis();
+    }
+  }
+
   Future<void> _fileAddedOrUpdated({required String filePath}) async {
     if (filePath.isPubspec) {
       onPubspecChangeDetected(filePath);
       return;
     }
     if (!filePath.isDartFile) {
+      onNonDartFileChangeDetected?.call(filePath);
       return;
     }
     previewAnalytics.startPreviewReloadStopwatch();
     FlutterWidgetPreviews? result;
     try {
-      await _analysisServer?.waitForAnalysis();
+      await waitForAnalysis();
       var retries = 5;
       while (retries > 0) {
         if (_disposed || shutdownHooks.isShuttingDown) {

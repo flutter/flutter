@@ -9,6 +9,7 @@ on:
 
 jobs:
   check-engine-changes:
+    if: ${{ github.repository == 'flutter/flutter' }}
     permissions:
       contents: read
     runs-on: ubuntu-latest

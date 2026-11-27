@@ -35,6 +35,11 @@ class OffscreenCanvasRasterizer extends Rasterizer {
   final Map<EngineFlutterView, OffscreenCanvasViewRasterizer> _viewRasterizers =
       <EngineFlutterView, OffscreenCanvasViewRasterizer>{};
 
+  /// Removes the [view] rasterizer from the registry.
+  void _removeViewRasterizer(EngineFlutterView view) {
+    _viewRasterizers.remove(view);
+  }
+
   @override
   void setResourceCacheMaxBytes(int bytes) {
     _surfaceProvider.setSkiaResourceCacheMaxBytes(bytes);
@@ -43,9 +48,10 @@ class OffscreenCanvasRasterizer extends Rasterizer {
   @override
   void dispose() {
     _surfaceProvider.dispose();
-    for (final OffscreenCanvasViewRasterizer viewRasterizer in _viewRasterizers.values) {
+    for (final viewRasterizer in List<OffscreenCanvasViewRasterizer>.of(_viewRasterizers.values)) {
       viewRasterizer.dispose();
     }
+    _viewRasterizers.clear();
   }
 
   @override
@@ -64,10 +70,11 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
     createCanvas: () => RenderCanvas(),
   );
 
+  // Nothing to prepare. The shared offscreen surface is resized as part of
+  // each `rasterize` call. Resizing it here, as a separate step, would let
+  // another view resize it again before this view renders.
   @override
-  Future<void> prepareToDraw() async {
-    await rasterizer.offscreenSurface.setSize(currentFrameSize);
-  }
+  Future<void> prepareToDraw() => Future<void>.value();
 
   @override
   Future<void> rasterize(
@@ -78,23 +85,31 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
     if (displayCanvases.length != pictures.length) {
       throw ArgumentError('Called rasterize() with a different number of canvases and pictures.');
     }
-    recorder?.recordRasterStart();
     if (browserSupportsCreateImageBitmap) {
       final List<DomImageBitmap> bitmaps = await rasterizer.offscreenSurface
-          .rasterizeToImageBitmaps(pictures);
-      for (var i = 0; i < displayCanvases.length; i++) {
+          .rasterizeToImageBitmaps(currentFrameSize, pictures);
+      for (var i = 0; i < bitmaps.length; i++) {
         (displayCanvases[i] as RenderCanvas).render(bitmaps[i]);
       }
     } else {
-      for (var i = 0; i < displayCanvases.length; i++) {
-        await rasterizer.offscreenSurface.rasterizeToCanvas(pictures[i]);
-        (displayCanvases[i] as RenderCanvas).renderWithNoBitmapSupport(
-          rasterizer.offscreenSurface.canvasImageSource,
+      await rasterizer.offscreenSurface.rasterizeToCanvasSource(currentFrameSize, pictures, (
+        int index,
+        DomCanvasImageSource source,
+      ) {
+        (displayCanvases[index] as RenderCanvas).renderWithNoBitmapSupport(
+          source,
           currentFrameSize.height,
           currentFrameSize,
         );
-      }
+      });
     }
     recorder?.recordRasterFinish();
+  }
+
+  @override
+  void dispose() {
+    rasterizer._removeViewRasterizer(view);
+    displayFactory.dispose();
+    super.dispose();
   }
 }

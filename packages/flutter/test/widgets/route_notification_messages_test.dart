@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('!chrome')
-library;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'test_page_tester.dart';
 
 class OnTapPage extends StatelessWidget {
   const OnTapPage({super.key, required this.id, required this.onTap});
@@ -106,7 +105,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Navigator(
-          pages: const <Page<void>>[TestPage(name: '/')],
+          pages: const <Page<void>>[TestPage(name: '/', child: Placeholder())],
           onPopPage: (Route<void> route, void result) => false,
         ),
       ),
@@ -119,8 +118,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Navigator(
           pages: const <Page<void>>[
-            TestPage(name: '/'),
-            TestPage(name: '/abc'),
+            TestPage(name: '/', child: Placeholder()),
+            TestPage(name: '/abc', child: Placeholder()),
           ],
           onPopPage: (Route<void> route, void result) => false,
         ),
@@ -216,11 +215,14 @@ void main() {
               onTap: () {
                 // Create a route with no name.
                 final Route<void> route = PageRouteBuilder<void>(
-                  pageBuilder: (
-                    BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                  ) => const Text('Nameless Route'),
+                  pageBuilder:
+                      (
+                        BuildContext context,
+                        Animation<double> animation,
+                        Animation<double> secondaryAnimation,
+                      ) {
+                        return const Text('Nameless Route');
+                      },
                 );
                 Navigator.push<void>(context, route);
               },
@@ -358,20 +360,4 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
 
   @override
   Widget build(BuildContext context) => builder(context, routeInformation);
-}
-
-class TestPage extends Page<void> {
-  const TestPage({super.key, super.name});
-
-  @override
-  Route<void> createRoute(BuildContext context) {
-    return PageRouteBuilder<void>(
-      settings: this,
-      pageBuilder: (
-        BuildContext context,
-        Animation<double> animation,
-        Animation<double> secondaryAnimation,
-      ) => const Placeholder(),
-    );
-  }
 }

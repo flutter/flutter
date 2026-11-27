@@ -405,7 +405,9 @@ struct DlJobRenderer : public MatrixClipJobRenderer {
               DlCanvas* canvas,
               const RenderJobInfo& info) override {
     FML_DCHECK(info.opacity == 1.0f);
-    DlPaint paint;
+    // Some tests assume non-anti-aliased rendering. Anti-aliasing is tested
+    // explicitly in RenderWithAttributes.
+    DlPaint paint = DlPaint().setAntiAlias(false);
     dl_setup_({env, canvas, paint});
     setup_paint_ = paint;
     setup_matrix_ = canvas->GetMatrix();

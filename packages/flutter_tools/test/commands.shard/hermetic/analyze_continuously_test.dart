@@ -19,7 +19,6 @@ import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/project_validator.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -28,7 +27,6 @@ import 'analysis_server_mock.dart';
 void main() {
   setUpAll(() {
     Cache.disableLocking();
-    Cache.flutterRoot = getFlutterRoot();
   });
 
   late Directory tempDir;
@@ -73,7 +71,7 @@ void main() {
   ''');
   }
 
-  testUsingContext('AnalysisServer success', () async {
+  test('AnalysisServer success', () async {
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
       'flutter_analysis_test.',
     );
@@ -98,12 +96,14 @@ void main() {
     final server = AnalysisServer(
       'Artifact.engineDartSdkPath',
       <String>[tempDir.path],
-      fileSystem: fileSystem,
-      platform: FakePlatform(),
-      processManager: processManager,
-      logger: logger,
-      terminal: terminal,
       suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+        terminal: terminal,
+      ),
     );
 
     var errorCount = 0;
@@ -119,7 +119,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext(
+  test(
     'AnalysisServer handles server-initiated requests with same ID as outstanding request',
     () async {
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
@@ -146,12 +146,14 @@ void main() {
       final server = AnalysisServer(
         'Artifact.engineDartSdkPath',
         <String>[tempDir.path],
-        fileSystem: fileSystem,
-        platform: FakePlatform(),
-        processManager: processManager,
-        logger: logger,
-        terminal: terminal,
         suppressAnalytics: true,
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+          terminal: terminal,
+        ),
       );
 
       await server.start();
@@ -189,7 +191,61 @@ void main() {
     },
   );
 
-  testUsingContext('AnalysisServer handles non-ASCII project path', () async {
+  test(
+    'AnalysisServer does not throw when progress notifications arrive during or after dispose',
+    () async {
+      final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
+        'flutter_analysis_test.',
+      );
+      createSampleProject(tempDir);
+
+      final process = MockLspServerProcess();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            fileSystem.path.join('Artifact.engineDartSdkPath', 'bin', 'dart'),
+            'language-server',
+            '--dart-sdk',
+            'Artifact.engineDartSdkPath',
+            '--disable-server-feature-completion',
+            '--disable-server-feature-search',
+            '--suppress-analytics',
+          ],
+          process: process,
+        ),
+      ]);
+
+      final server = AnalysisServer(
+        'Artifact.engineDartSdkPath',
+        <String>[tempDir.path],
+        suppressAnalytics: true,
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+          terminal: terminal,
+        ),
+      );
+
+      final analyzingEvents = <bool>[];
+      server.onAnalyzing.listen(analyzingEvents.add);
+
+      await server.start();
+
+      // Queue a progress notification immediately before calling dispose(), and
+      // send another progress notification after dispose() completes.
+      process.startSimulatedAnalysis();
+      await server.dispose();
+      process.endSimulatedAnalysis();
+      await pumpEventQueue();
+
+      expect(analyzingEvents, isEmpty);
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
+
+  test('AnalysisServer handles non-ASCII project path', () async {
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
       'flutter_analysis_test_’_dir.',
     );
@@ -214,12 +270,14 @@ void main() {
     final server = AnalysisServer(
       'Artifact.engineDartSdkPath',
       <String>[tempDir.path],
-      fileSystem: fileSystem,
-      platform: FakePlatform(),
-      processManager: processManager,
-      logger: logger,
-      terminal: terminal,
       suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+        terminal: terminal,
+      ),
     );
 
     var errorCount = 0;
@@ -235,7 +293,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext('AnalysisServer errors', () async {
+  test('AnalysisServer errors', () async {
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
       'flutter_analysis_test.',
     );
@@ -260,12 +318,14 @@ void main() {
     final server = AnalysisServer(
       'Artifact.engineDartSdkPath',
       <String>[tempDir.path],
-      fileSystem: fileSystem,
-      platform: FakePlatform(),
-      processManager: processManager,
-      logger: logger,
-      terminal: terminal,
       suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+        terminal: terminal,
+      ),
     );
 
     var errorCount = 0;
@@ -281,7 +341,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext('Returns no errors when source is error-free', () async {
+  test('Returns no errors when source is error-free', () async {
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
       'flutter_analysis_test.',
     );
@@ -306,12 +366,14 @@ void main() {
     final server = AnalysisServer(
       'Artifact.engineDartSdkPath',
       <String>[tempDir.path],
-      fileSystem: fileSystem,
-      platform: FakePlatform(),
-      processManager: processManager,
-      logger: logger,
-      terminal: terminal,
       suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+        terminal: terminal,
+      ),
     );
 
     var errorCount = 0;
@@ -326,7 +388,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext('Can run AnalysisService without suppressing analytics', () async {
+  test('Can run AnalysisService without suppressing analytics', () async {
     final process = MockLspServerProcess();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
@@ -337,6 +399,7 @@ void main() {
           'Artifact.engineDartSdkPath',
           '--disable-server-feature-completion',
           '--disable-server-feature-search',
+          '--client-id=flutter-analyze',
         ],
         process: process,
       ),
@@ -355,7 +418,7 @@ void main() {
       ),
     );
 
-    final commandRunner = TestFlutterCommandRunner();
+    final commandRunner = TestFlutterCommandRunner(toolContext: command.toolContext);
     commandRunner.addCommand(command);
     unawaited(commandRunner.run(<String>['analyze', '--watch']));
     await process.initializeRequest;
@@ -363,7 +426,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext('Can run AnalysisService with customized cache location', () async {
+  test('Can run AnalysisService with customized cache location', () async {
     final process = MockLspServerProcess();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
@@ -374,6 +437,7 @@ void main() {
           'Artifact.engineDartSdkPath',
           '--disable-server-feature-completion',
           '--disable-server-feature-search',
+          '--client-id=flutter-analyze',
           '--suppress-analytics',
         ],
         process: process,
@@ -393,7 +457,7 @@ void main() {
       ),
     );
 
-    final commandRunner = TestFlutterCommandRunner();
+    final commandRunner = TestFlutterCommandRunner(toolContext: command.toolContext);
     commandRunner.addCommand(command);
     unawaited(commandRunner.run(<String>['analyze', '--watch']));
     await process.initializeRequest;
@@ -401,7 +465,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext('Can run AnalysisService with customized cache location --watch', () async {
+  test('Can run AnalysisService with customized cache location --watch', () async {
     final process = MockLspServerProcess();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
@@ -412,6 +476,7 @@ void main() {
           'Artifact.engineDartSdkPath',
           '--disable-server-feature-completion',
           '--disable-server-feature-search',
+          '--client-id=flutter-analyze',
           '--suppress-analytics',
         ],
         process: process,
@@ -431,7 +496,7 @@ void main() {
       ),
     );
 
-    final commandRunner = TestFlutterCommandRunner();
+    final commandRunner = TestFlutterCommandRunner(toolContext: command.toolContext);
     commandRunner.addCommand(command);
     unawaited(commandRunner.run(<String>['analyze', '--watch']));
     await process.initializeRequest;
@@ -452,7 +517,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext('AnalysisService --watch skips errors from non-files', () async {
+  test('AnalysisService --watch skips errors from non-files', () async {
     final process = MockLspServerProcess();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
@@ -463,6 +528,7 @@ void main() {
           'Artifact.engineDartSdkPath',
           '--disable-server-feature-completion',
           '--disable-server-feature-search',
+          '--client-id=flutter-analyze',
           '--suppress-analytics',
         ],
         process: process,
@@ -482,7 +548,7 @@ void main() {
       ),
     );
 
-    final commandRunner = TestFlutterCommandRunner();
+    final commandRunner = TestFlutterCommandRunner(toolContext: command.toolContext);
     commandRunner.addCommand(command);
     unawaited(commandRunner.run(<String>['analyze', '--watch']));
     await process.initializeRequest;
@@ -501,61 +567,59 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext(
-    'AnalysisService --watch does not crash when the VM service is enabled',
-    () async {
-      // Pretend the VM service was enabled by sending SIGQUIT (CTRL + \) to ensure we don't try to
-      // invoke json.decode(...) on the VM service message.
-      //
-      // Regression test for https://github.com/flutter/flutter/issues/58391.
-      final process = MockLspServerProcess();
-      final processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: const <String>[
-            'Artifact.engineDartSdkPath/bin/dart',
-            'language-server',
-            '--dart-sdk',
-            'Artifact.engineDartSdkPath',
-            '--disable-server-feature-completion',
-            '--disable-server-feature-search',
-            '--suppress-analytics',
-          ],
-          process: process,
-        ),
-      ]);
+  test('AnalysisService --watch does not crash when the VM service is enabled', () async {
+    // Pretend the VM service was enabled by sending SIGQUIT (CTRL + \) to ensure we don't try to
+    // invoke json.decode(...) on the VM service message.
+    //
+    // Regression test for https://github.com/flutter/flutter/issues/58391.
+    final process = MockLspServerProcess();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>[
+          'Artifact.engineDartSdkPath/bin/dart',
+          'language-server',
+          '--dart-sdk',
+          'Artifact.engineDartSdkPath',
+          '--disable-server-feature-completion',
+          '--disable-server-feature-search',
+          '--client-id=flutter-analyze',
+          '--suppress-analytics',
+        ],
+        process: process,
+      ),
+    ]);
 
-      final artifacts = Artifacts.test();
-      final command = AnalyzeCommand(
-        allProjectValidators: <ProjectValidator>[],
-        suppressAnalytics: true,
-        toolContext: FakeToolContext(
-          artifacts: artifacts,
-          fs: MemoryFileSystem.test(),
-          logger: logger,
-          platform: FakePlatform(),
-          processManager: processManager,
-        ),
-      );
+    final artifacts = Artifacts.test();
+    final command = AnalyzeCommand(
+      allProjectValidators: <ProjectValidator>[],
+      suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        artifacts: artifacts,
+        fs: MemoryFileSystem.test(),
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+      ),
+    );
 
-      final commandRunner = TestFlutterCommandRunner();
-      commandRunner.addCommand(command);
-      unawaited(commandRunner.run(<String>['analyze', '--watch']));
-      await process.initializeRequest;
-      process
-        ..triggerVmServiceUriBanner()
-        ..triggerSimulatedAnalysis(diagnosticsFor: Uri.parse('file:///directoryA/foo'));
+    final commandRunner = TestFlutterCommandRunner(toolContext: command.toolContext);
+    commandRunner.addCommand(command);
+    unawaited(commandRunner.run(<String>['analyze', '--watch']));
+    await process.initializeRequest;
+    process
+      ..triggerVmServiceUriBanner()
+      ..triggerSimulatedAnalysis(diagnosticsFor: Uri.parse('file:///directoryA/foo'));
 
-      while (!logger.statusText.contains('analyzed 1 file')) {
-        await Future<void>.delayed(const Duration(milliseconds: 100));
-      }
+    while (!logger.statusText.contains('analyzed 1 file')) {
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    }
 
-      expect(logger.statusText, contains('No issues found!'));
-      expect(logger.errorText, isEmpty);
-      expect(processManager, hasNoRemainingExpectations);
-    },
-  );
+    expect(logger.statusText, contains('No issues found!'));
+    expect(logger.errorText, isEmpty);
+    expect(processManager, hasNoRemainingExpectations);
+  });
 
-  testUsingContext('AnalysisService --watch handles errors coming and going', () async {
+  test('AnalysisService --watch handles errors coming and going', () async {
     final process = MockLspServerProcess();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
@@ -566,6 +630,7 @@ void main() {
           'Artifact.engineDartSdkPath',
           '--disable-server-feature-completion',
           '--disable-server-feature-search',
+          '--client-id=flutter-analyze',
           '--suppress-analytics',
         ],
         process: process,
@@ -585,7 +650,7 @@ void main() {
       ),
     );
 
-    final commandRunner = TestFlutterCommandRunner();
+    final commandRunner = TestFlutterCommandRunner(toolContext: command.toolContext);
     commandRunner.addCommand(command);
     unawaited(commandRunner.run(<String>['analyze', '--watch']));
     await process.initializeRequest;
@@ -616,5 +681,82 @@ void main() {
     );
     expect(logger.errorText, isEmpty);
     expect(processManager, hasNoRemainingExpectations);
+  });
+
+  test('AnalysisService --watch forwards plugin trust flags', () async {
+    Future<void> expectWatchServerFlags({
+      required List<String> analyzeArgs,
+      required List<String> expectedFlags,
+      bool isRunningOnBot = false,
+    }) async {
+      final process = MockLspServerProcess();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'Artifact.engineDartSdkPath/bin/dart',
+            'language-server',
+            '--dart-sdk',
+            'Artifact.engineDartSdkPath',
+            '--disable-server-feature-completion',
+            '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
+            ...expectedFlags,
+            '--suppress-analytics',
+          ],
+          process: process,
+        ),
+      ]);
+
+      final command = AnalyzeCommand(
+        allProjectValidators: <ProjectValidator>[],
+        suppressAnalytics: true,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          botDetector: FakeBotDetector(isRunningOnBot),
+          fs: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+          processManager: processManager,
+        ),
+      );
+
+      unawaited(
+        createTestCommandRunner(command).run(<String>['analyze', '--watch', ...analyzeArgs]),
+      );
+      await process.initializeRequest;
+
+      expect(processManager, hasNoRemainingExpectations);
+    }
+
+    await expectWatchServerFlags(
+      analyzeArgs: <String>['--plugins'],
+      expectedFlags: <String>['--plugins'],
+    );
+    await expectWatchServerFlags(
+      analyzeArgs: <String>['--no-plugins'],
+      expectedFlags: <String>['--no-plugins'],
+    );
+    await expectWatchServerFlags(
+      analyzeArgs: <String>['--trust-plugins'],
+      expectedFlags: <String>['--trust-plugins'],
+    );
+    await expectWatchServerFlags(
+      analyzeArgs: <String>['--always-trust-plugins'],
+      expectedFlags: <String>['--always-trust-plugins'],
+    );
+    await expectWatchServerFlags(
+      analyzeArgs: <String>['--never-trust-plugins'],
+      expectedFlags: <String>['--never-trust-plugins'],
+    );
+    await expectWatchServerFlags(
+      analyzeArgs: const <String>[],
+      expectedFlags: <String>['--plugins'],
+      isRunningOnBot: true,
+    );
+    await expectWatchServerFlags(
+      analyzeArgs: <String>['--never-trust-plugins'],
+      expectedFlags: <String>['--never-trust-plugins'],
+      isRunningOnBot: true,
+    );
   });
 }

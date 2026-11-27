@@ -405,7 +405,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   /// The plain text message for this tooltip.
   ///
-  /// This value will either come from [widget.message] or [widget.richMessage].
+  /// This value will either come from [Tooltip.message] or
+  /// [Tooltip.richMessage].
   String get _tooltipMessage => widget.message ?? widget.richMessage!.toPlainText();
 
   /// {@macro flutter.widgets.RawTooltipState.ensureTooltipVisible}

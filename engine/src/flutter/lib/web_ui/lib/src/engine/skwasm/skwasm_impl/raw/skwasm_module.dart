@@ -32,5 +32,13 @@ external bool skwasmIsWimp();
 @Native<Bool Function()>(symbol: 'skwasm_isHeavy', isLeaf: true)
 external bool skwasmIsHeavy();
 
+/// Whether this skwasm binary was built with the builtin (Skia) animated image
+/// codecs.
+///
+/// This is decoupled from [skwasmIsHeavy] because `wimp_heavy` has builtin ICU
+/// but does not yet have an Impeller-compatible animated image implementation.
+@Native<Bool Function()>(symbol: 'skwasm_supportsAnimatedImages', isLeaf: true)
+external bool skwasmSupportsAnimatedImages();
+
 @Native<Void Function(Pointer<Uint32>)>(symbol: 'skwasm_getLiveObjectCounts', isLeaf: true)
 external void skwasmGetLiveObjectCounts(Pointer<Uint32> objectCounts);

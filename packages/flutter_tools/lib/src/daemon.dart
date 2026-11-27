@@ -181,8 +181,17 @@ class DaemonStreams {
     : this(stdio.stdin, stdio.stdout, logger: logger);
 
   /// Creates a [DaemonStreams] that uses [Socket] as the underlying streams.
-  DaemonStreams.fromSocket(Socket socket, {required Logger logger})
-    : this(socket, socket, logger: logger);
+  factory DaemonStreams.fromSocket(Socket socket, {required Logger logger}) {
+    // We have to listen to socket.done. Otherwise when the connection is
+    // reset, we will receive an uncatchable exception.
+    // https://github.com/dart-lang/sdk/issues/25518
+    unawaited(
+      socket.done.handleError((Object error, StackTrace stackTrace) {
+        logger.printTrace('Socket error: $error\n$stackTrace');
+      }),
+    );
+    return DaemonStreams(socket, socket, logger: logger);
+  }
 
   /// Connects to a server and creates a [DaemonStreams] from the connection as the underlying streams.
   factory DaemonStreams.connect(String host, int port, {required Logger logger}) {
@@ -191,8 +200,30 @@ class DaemonStreams {
     final outputStreamController = StreamController<List<int>>();
     socketFuture.then<void>(
       (Socket socket) {
-        inputStreamController.addStream(socket);
-        socket.addStream(outputStreamController.stream);
+        // We have to listen to socket.done. Otherwise when the connection is
+        // reset, we will receive an uncatchable exception.
+        // https://github.com/dart-lang/sdk/issues/25518
+        unawaited(
+          socket.done.handleError((Object error, StackTrace stackTrace) {
+            logger.printTrace('Socket error: $error\n$stackTrace');
+          }),
+        );
+        unawaited(
+          inputStreamController.addStream(socket).handleError((
+            Object error,
+            StackTrace stackTrace,
+          ) {
+            logger.printTrace('Error adding socket to input stream: $error\n$stackTrace');
+          }),
+        );
+        unawaited(
+          socket.addStream(outputStreamController.stream).handleError((
+            Object error,
+            StackTrace stackTrace,
+          ) {
+            logger.printTrace('Error adding output stream to socket: $error\n$stackTrace');
+          }),
+        );
       },
       onError: (Object error, StackTrace stackTrace) {
         logger.printError('Socket error: $error');

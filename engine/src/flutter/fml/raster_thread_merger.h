@@ -53,10 +53,9 @@ class RasterThreadMerger
       TaskQueueId platform_id,
       TaskQueueId raster_id);
 
-  // Un-merges the threads now if current caller is the last merged caller,
-  // and it resets the lease term to 0, otherwise it will remove
-  // the caller record and return. The multiple caller records were recorded
-  // after |MergeWithLease| or |ExtendLeaseTo| method.
+  // Removes this caller's lease and un-merges the threads if no other caller
+  // has an active lease. Leases are recorded by |MergeWithLease| or
+  // |ExtendLeaseTo|.
   //
   // Must be executed on the raster task runner.
   //
@@ -69,16 +68,18 @@ class RasterThreadMerger
   // When task queues are statically merged this method becomes no-op.
   void ExtendLeaseTo(size_t lease_term);
 
-  // Returns |RasterThreadStatus::kUnmergedNow| if this call resulted in
-  // splitting the raster and platform threads. Reduces the lease term by 1.
+  // Reduces this caller's active lease by 1 and removes it when it expires.
+  // A caller without a lease is ignored while other callers keep the threads
+  // merged. Returns |RasterThreadStatus::kUnmergedNow| only if this call
+  // un-merges the raster and platform threads after all leases expire.
   //
   // If the task queues are the same, we consider them statically merged.
   // When task queues are statically merged this method becomes no-op.
   RasterThreadStatus DecrementLease();
 
-  // The method is locked by current instance, and asks the shared instance of
-  // SharedThreadMerger and the merging state is determined by the
-  // lease_term_ counter.
+  // Returns whether the task queues are statically merged or the shared
+  // merger has an active lease from any caller. This caller need not have
+  // an active lease for the threads to be merged.
   bool IsMerged();
 
   // Waits until the threads are merged.
