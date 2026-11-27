@@ -1287,4 +1287,205 @@ void main() {
       expect(find.text('Item 1'), findsOneWidget);
     },
   );
+
+  testWidgets('ListView with spacing positions children and computes maxScrollExtent', (
+    WidgetTester tester,
+  ) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          controller: controller,
+          spacing: 20.0,
+          children: List<Widget>.generate(
+            10,
+            (int i) => SizedBox(height: 100.0, child: Text('Item $i')),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.text('Item 0')).dy, 0.0);
+    expect(tester.getTopLeft(find.text('Item 1')).dy, 120.0);
+    expect(tester.getTopLeft(find.text('Item 2')).dy, 240.0);
+    expect(tester.getTopLeft(find.text('Item 3')).dy, 360.0);
+    expect(tester.getTopLeft(find.text('Item 4')).dy, 480.0);
+
+    // Total extent: 10 * 100 + 9 * 20 = 1180.0.
+    // Viewport height: 600.0.
+    // Exact maxScrollExtent once the end is reached: 1180.0 - 600.0 = 580.0.
+    controller.jumpTo(controller.position.maxScrollExtent);
+    await tester.pump();
+    controller.jumpTo(controller.position.maxScrollExtent);
+    await tester.pump();
+    expect(controller.offset, 580.0);
+    expect(tester.getBottomLeft(find.text('Item 9')).dy, 600.0);
+  });
+
+  testWidgets('ListView.builder with spacing across all extent modes', (WidgetTester tester) async {
+    // 1. Standard SliverList
+    final controller1 = ScrollController();
+    addTearDown(controller1.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          controller: controller1,
+          spacing: 20.0,
+          itemCount: 10,
+          itemBuilder: (BuildContext context, int index) {
+            return SizedBox(height: 100.0, child: Text('Item $index'));
+          },
+        ),
+      ),
+    );
+    expect(tester.getTopLeft(find.text('Item 0')).dy, 0.0);
+    expect(tester.getTopLeft(find.text('Item 1')).dy, 120.0);
+    expect(tester.getTopLeft(find.text('Item 2')).dy, 240.0);
+
+    // 2. Fixed itemExtent
+    final controller2 = ScrollController();
+    addTearDown(controller2.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          controller: controller2,
+          spacing: 20.0,
+          itemExtent: 100.0,
+          itemCount: 10,
+          itemBuilder: (BuildContext context, int index) => Text('Fixed $index'),
+        ),
+      ),
+    );
+    expect(tester.getTopLeft(find.text('Fixed 0')).dy, 0.0);
+    expect(tester.getTopLeft(find.text('Fixed 1')).dy, 120.0);
+    expect(controller2.position.maxScrollExtent, 580.0);
+
+    // 3. itemExtentBuilder
+    final controller3 = ScrollController();
+    addTearDown(controller3.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          controller: controller3,
+          spacing: 10.0,
+          itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
+            return index.isEven ? 50.0 : 80.0;
+          },
+          itemCount: 6,
+          itemBuilder: (BuildContext context, int index) => Text('Varied $index'),
+        ),
+      ),
+    );
+    // 0: 0..50, 1: 60..140, 2: 150..200, 3: 210..290
+    expect(tester.getTopLeft(find.text('Varied 0')).dy, 0.0);
+    expect(tester.getTopLeft(find.text('Varied 1')).dy, 60.0);
+    expect(tester.getTopLeft(find.text('Varied 2')).dy, 150.0);
+    expect(tester.getTopLeft(find.text('Varied 3')).dy, 210.0);
+
+    // 4. prototypeItem
+    final controller4 = ScrollController();
+    addTearDown(controller4.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          controller: controller4,
+          spacing: 20.0,
+          prototypeItem: const SizedBox(height: 100.0),
+          itemCount: 10,
+          itemBuilder: (BuildContext context, int index) => Text('Proto $index'),
+        ),
+      ),
+    );
+    expect(tester.getTopLeft(find.text('Proto 0')).dy, 0.0);
+    expect(tester.getTopLeft(find.text('Proto 1')).dy, 120.0);
+    expect(controller4.position.maxScrollExtent, 580.0);
+  });
+
+  testWidgets('ListView horizontal with spacing and dynamic updates', (WidgetTester tester) async {
+    var spacing = 15.0;
+    late StateSetter stateSetter;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return ListView(
+              scrollDirection: Axis.horizontal,
+              spacing: spacing,
+              children: const <Widget>[
+                SizedBox(width: 100.0, child: Text('A')),
+                SizedBox(width: 100.0, child: Text('B')),
+                SizedBox(width: 100.0, child: Text('C')),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.text('A')).dx, 0.0);
+    expect(tester.getTopLeft(find.text('B')).dx, 115.0);
+    expect(tester.getTopLeft(find.text('C')).dx, 230.0);
+
+    stateSetter(() {
+      spacing = 30.0;
+    });
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.text('A')).dx, 0.0);
+    expect(tester.getTopLeft(find.text('B')).dx, 130.0);
+    expect(tester.getTopLeft(find.text('C')).dx, 260.0);
+  });
+
+  testWidgets('ListView with spacing and reverse: true', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          reverse: true,
+          spacing: 20.0,
+          children: const <Widget>[
+            SizedBox(height: 100.0, child: Text('First')),
+            SizedBox(height: 100.0, child: Text('Second')),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.getBottomLeft(find.text('First')).dy, 600.0);
+    expect(tester.getBottomLeft(find.text('Second')).dy, 480.0);
+  });
+
+  testWidgets('ListView with spacing and Scrollable.ensureVisible', (WidgetTester tester) async {
+    final GlobalKey targetKey = GlobalKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          spacing: 20.0,
+          children: List<Widget>.generate(15, (int i) {
+            return SizedBox(key: i == 6 ? targetKey : null, height: 100.0, child: Text('Item $i'));
+          }),
+        ),
+      ),
+    );
+
+    // Item 6 is at offset 720..820, which is outside the 600px viewport
+    // but within the 250px cacheExtent so it is built.
+    expect(tester.getTopLeft(find.text('Item 6', skipOffstage: false)).dy, 720.0);
+    await Scrollable.ensureVisible(targetKey.currentContext!);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Item 6'), findsOneWidget);
+    // Item 6 is brought into view at the top of the viewport (alignment 0.0).
+    expect(tester.getTopLeft(find.text('Item 6')).dy, 0.0);
+    expect(tester.getBottomLeft(find.text('Item 6')).dy, 100.0);
+  });
 }

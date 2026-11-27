@@ -166,7 +166,8 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
 ///    inserted into or removed from a grid.
 class SliverList extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places box children in a linear array.
-  const SliverList({super.key, required super.delegate});
+  const SliverList({super.key, required super.delegate, this.spacing = 0.0})
+    : assert(spacing >= 0.0);
 
   /// A sliver that places multiple box children in a linear array along the main
   /// axis.
@@ -217,7 +218,9 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
     int semanticIndexOffset = 0,
-  }) : super(
+    this.spacing = 0.0,
+  }) : assert(spacing >= 0.0),
+       super(
          delegate: SliverChildBuilderDelegate(
            itemBuilder,
            findChildIndexCallback: findChildIndexCallback,
@@ -300,7 +303,8 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
-  }) : assert(
+  }) : spacing = 0.0,
+       assert(
          findItemIndexCallback == null || findChildIndexCallback == null,
          'Cannot provide both findItemIndexCallback and findChildIndexCallback. '
          'Use findItemIndexCallback as findChildIndexCallback is deprecated.',
@@ -370,7 +374,9 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
-  }) : super(
+    this.spacing = 0.0,
+  }) : assert(spacing >= 0.0),
+       super(
          delegate: SliverChildListDelegate(
            children,
            addAutomaticKeepAlives: addAutomaticKeepAlives,
@@ -379,6 +385,11 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
          ),
        );
 
+  /// The spacing between children along the main axis.
+  ///
+  /// Defaults to 0.0. Must not be negative.
+  final double spacing;
+
   @override
   SliverMultiBoxAdaptorElement createElement() =>
       SliverMultiBoxAdaptorElement(this, replaceMovedChildren: true);
@@ -386,7 +397,18 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   @override
   RenderSliverList createRenderObject(BuildContext context) {
     final element = context as SliverMultiBoxAdaptorElement;
-    return RenderSliverList(childManager: element);
+    return RenderSliverList(childManager: element, spacing: spacing);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSliverList renderObject) {
+    renderObject.spacing = spacing;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('spacing', spacing, defaultValue: 0.0));
   }
 }
 
@@ -441,7 +463,12 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
 class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places box children with the same main axis extent
   /// in a linear array.
-  const SliverFixedExtentList({super.key, required super.delegate, required this.itemExtent});
+  const SliverFixedExtentList({
+    super.key,
+    required super.delegate,
+    required this.itemExtent,
+    this.spacing = 0.0,
+  }) : assert(spacing >= 0.0);
 
   /// A sliver that places multiple box children in a linear array along the main
   /// axis.
@@ -500,7 +527,9 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
     int semanticIndexOffset = 0,
-  }) : super(
+    this.spacing = 0.0,
+  }) : assert(spacing >= 0.0),
+       super(
          delegate: SliverChildBuilderDelegate(
            itemBuilder,
            findChildIndexCallback: findChildIndexCallback,
@@ -550,7 +579,9 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
-  }) : super(
+    this.spacing = 0.0,
+  }) : assert(spacing >= 0.0),
+       super(
          delegate: SliverChildListDelegate(
            children,
            addAutomaticKeepAlives: addAutomaticKeepAlives,
@@ -562,15 +593,33 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
   /// The extent the children are forced to have in the main axis.
   final double itemExtent;
 
+  /// The spacing between children along the main axis.
+  ///
+  /// Defaults to 0.0. Must not be negative.
+  final double spacing;
+
   @override
   RenderSliverFixedExtentList createRenderObject(BuildContext context) {
     final element = context as SliverMultiBoxAdaptorElement;
-    return RenderSliverFixedExtentList(childManager: element, itemExtent: itemExtent);
+    return RenderSliverFixedExtentList(
+      childManager: element,
+      itemExtent: itemExtent,
+      spacing: spacing,
+    );
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderSliverFixedExtentList renderObject) {
-    renderObject.itemExtent = itemExtent;
+    renderObject
+      ..itemExtent = itemExtent
+      ..spacing = spacing;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('itemExtent', itemExtent));
+    properties.add(DoubleProperty('spacing', spacing, defaultValue: 0.0));
   }
 }
 
@@ -607,7 +656,8 @@ class SliverVariedExtentList extends SliverMultiBoxAdaptorWidget {
     super.key,
     required super.delegate,
     required this.itemExtentBuilder,
-  });
+    this.spacing = 0.0,
+  }) : assert(spacing >= 0.0);
 
   /// A sliver that places multiple box children in a linear array along the main
   /// axis.
@@ -631,7 +681,9 @@ class SliverVariedExtentList extends SliverMultiBoxAdaptorWidget {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
-  }) : super(
+    this.spacing = 0.0,
+  }) : assert(spacing >= 0.0),
+       super(
          delegate: SliverChildBuilderDelegate(
            itemBuilder,
            findChildIndexCallback: findChildIndexCallback,
@@ -658,7 +710,9 @@ class SliverVariedExtentList extends SliverMultiBoxAdaptorWidget {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
-  }) : super(
+    this.spacing = 0.0,
+  }) : assert(spacing >= 0.0),
+       super(
          delegate: SliverChildListDelegate(
            children,
            addAutomaticKeepAlives: addAutomaticKeepAlives,
@@ -676,18 +730,32 @@ class SliverVariedExtentList extends SliverMultiBoxAdaptorWidget {
   /// for performance.
   final ItemExtentBuilder itemExtentBuilder;
 
+  /// The spacing between children along the main axis.
+  ///
+  /// Defaults to 0.0. Must not be negative.
+  final double spacing;
+
   @override
   RenderSliverVariedExtentList createRenderObject(BuildContext context) {
     final element = context as SliverMultiBoxAdaptorElement;
     return RenderSliverVariedExtentList(
       childManager: element,
       itemExtentBuilder: itemExtentBuilder,
+      spacing: spacing,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderSliverVariedExtentList renderObject) {
-    renderObject.itemExtentBuilder = itemExtentBuilder;
+    renderObject
+      ..itemExtentBuilder = itemExtentBuilder
+      ..spacing = spacing;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('spacing', spacing, defaultValue: 0.0));
   }
 }
 
