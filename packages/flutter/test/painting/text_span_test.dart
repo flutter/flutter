@@ -286,6 +286,42 @@ void main() {
     expect(textSpan.getSpanForPosition(const TextPosition(offset: 1)).runtimeType, TextSpan);
     expect(textSpan.getSpanForPosition(const TextPosition(offset: 2)).runtimeType, WidgetSpan);
     expect(textSpan.getSpanForPosition(const TextPosition(offset: 3)).runtimeType, TextSpan);
+
+    // Upstream affinity resolves the trailing edge to the WidgetSpan.
+    expect(
+      textSpan
+          .getSpanForPosition(const TextPosition(offset: 3, affinity: TextAffinity.upstream))
+          .runtimeType,
+      WidgetSpan,
+    );
+
+    // Upstream affinity resolves the leading edge to the preceding TextSpan.
+    expect(
+      (textSpan.getSpanForPosition(
+        const TextPosition(offset: 2, affinity: TextAffinity.upstream),
+      ) as TextSpan?)?.text,
+      'b',
+    );
+  });
+
+  test('GetSpanForPosition with adjacent WidgetSpans', () {
+    const first = WidgetSpan(child: SizedBox(width: 10, height: 10));
+    const second = WidgetSpan(child: SizedBox(width: 20, height: 20));
+    const textSpan = TextSpan(children: <InlineSpan>[first, second]);
+
+    // Affinity selects the WidgetSpan on the corresponding side of the boundary.
+    expect(
+      textSpan.getSpanForPosition(const TextPosition(offset: 1, affinity: TextAffinity.upstream)),
+      same(first),
+    );
+    expect(textSpan.getSpanForPosition(const TextPosition(offset: 1)), same(second));
+
+    // At the end of the text only upstream affinity resolves to a span.
+    expect(
+      textSpan.getSpanForPosition(const TextPosition(offset: 2, affinity: TextAffinity.upstream)),
+      same(second),
+    );
+    expect(textSpan.getSpanForPosition(const TextPosition(offset: 2)), isNull);
   });
 
   test('TextSpan computeSemanticsInformation', () {
