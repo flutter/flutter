@@ -10,7 +10,6 @@ import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 
 /// Fake Windows version of [OperatingSystemUtils] to use for testing.

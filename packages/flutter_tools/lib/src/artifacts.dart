@@ -48,10 +48,6 @@ enum Artifact {
   icuData('icudtl.dat'),
   platformKernelDill('platform_strong.dill'),
   platformLibrariesJson('libraries.json'),
-
-  /// The framework directory of the VM service on iOS and macOS in profile mode.
-  vmserviceFramework('VMService.framework'),
-  vmserviceKernelDill('vmservice_snapshot.dill'),
   flutterPatchedSdkPath('', isPatchedSdk: true),
 
   /// The root directory of the dart SDK.
@@ -516,8 +512,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.genSnapshotArm64:
       case Artifact.genSnapshotRiscv64:
       case Artifact.genSnapshotX64:
-      case Artifact.vmserviceKernelDill:
-      case Artifact.vmserviceFramework:
         return _fileSystem.path.join(engineDir, artifact.getFileName(_platform));
       case Artifact.engineDartSdkPath:
       case Artifact.engineDartBinary:
@@ -600,9 +594,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsDesktopPath:
       case Artifact.flutterToolsFileGenerators:
         return _getHostArtifactPath(artifact, platform, mode);
-      case Artifact.vmserviceFramework:
-      case Artifact.vmserviceKernelDill:
-        return _fileSystem.path.join(engineDir, artifact.getFileName(_platform));
     }
   }
 
@@ -618,8 +609,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.genSnapshotRiscv64:
       case Artifact.genSnapshotX64:
       case Artifact.flutterXcframework:
-      case Artifact.vmserviceFramework:
-      case Artifact.vmserviceKernelDill:
         final String artifactFileName = artifact.getFileName(_platform);
         final String engineDir = _getEngineArtifactsPath(platform, mode)!;
         return _fileSystem.path.join(engineDir, artifactFileName);
@@ -706,8 +695,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
       case Artifact.flutterToolsFileGenerators:
-      case Artifact.vmserviceFramework:
-      case Artifact.vmserviceKernelDill:
         return _getHostArtifactPath(artifact, platform, mode);
     }
   }
@@ -796,8 +783,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.linuxDesktopPath:
       case Artifact.windowsDesktopPath:
       case Artifact.linuxHeaders:
-      case Artifact.vmserviceKernelDill:
-      case Artifact.vmserviceFramework:
         // TODO(zanderso): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
         // https://github.com/flutter/flutter/issues/38935
@@ -1124,8 +1109,6 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case Artifact.icuData:
       case Artifact.flutterXcframework:
       case Artifact.flutterMacOSXcframework:
-      case Artifact.vmserviceKernelDill:
-      case Artifact.vmserviceFramework:
         return fs.path.join(localEngineInfo.targetOutPath, artifactFileName);
       case Artifact.platformKernelDill:
         if (platform?.os == .fuchsia) {
@@ -1344,8 +1327,6 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         case Artifact.fuchsiaFlutterRunner:
         case Artifact.fontSubset:
         case Artifact.flutterToolsFileGenerators:
-        case Artifact.vmserviceFramework:
-        case Artifact.vmserviceKernelDill:
           break;
       }
     }

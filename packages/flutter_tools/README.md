@@ -58,13 +58,11 @@ change needs an exception, say why in a comment at the site.
 
 #### Dependency injection
 
-- Do not reintroduce ambient global singletons or add new `context.get<T>()`
-  lookups on the Zone-based `AppContext` in `lib/`. Pass `FileSystem`,
-  `Logger`, `ProcessManager`, `Platform`, `Analytics`, and similar
-  dependencies in through the constructor or as method parameters.
-- Use `test` unless the code under test still reads from
-  the `AppContext`. If a test for new code needs `overrides:`, inject the
-  dependency instead.
+- Do not reintroduce ambient global singletons or Zone-based context lookups
+  in `lib/`. Pass `FileSystem`, `Logger`, `ProcessManager`, `Platform`,
+  `Analytics`, and similar dependencies in through the constructor (or via
+  `ToolContext`) or as method parameters.
+- Use `test` with explicit dependency injection and fakes from `test/src/`.
 
 #### Host I/O
 
@@ -184,8 +182,7 @@ Unit tests in `general.shard` and `commands.shard/hermetic` do not
 touch the host file system, clock, network, environment variables, or
 subprocesses. Use the fakes in `test/src/`:
 
-- `test(...)` unless the code under test still depends on
-  the `AppContext`.
+- `test(...)` with explicit fakes from `test/src/`.
 - One `MemoryFileSystem.test()` per test, created in `setUp` and passed
   to every object under test. With two file systems, the code writes to
   one and the assertion reads the other. `MemoryFileSystem.test()` uses a
@@ -195,8 +192,7 @@ subprocesses. Use the fakes in `test/src/`:
   `FakeProcessManager.empty()` for subprocesses. Do not write a separate
   `ProcessManager` fake. After the code under test runs, check
   `expect(processManager, hasNoRemainingExpectations)` to catch an early
-  exit. Inject a `ProcessManager`, not a `ProcessUtils`;
-  `testUsingContext` fails if `ProcessUtils` is overridden.
+  exit. Inject a `ProcessManager`, not a `ProcessUtils`.
 - `BufferLogger.test()` for the logger. Assert on `logger.statusText`,
   `logger.errorText`, `logger.warningText`, or `logger.traceText`.
 - `FakePlatform(operatingSystem: ..., environment: ...)` for the
@@ -212,8 +208,7 @@ subprocesses. Use the fakes in `test/src/`:
 
 Test file names end in `_test.dart`; the test runner skips other names.
 `dev/bots/analyze.dart` fails if a file in a `*.shard/` directory calls
-`test` or `testUsingContext` and does not have
-that suffix.
+`test` and does not have that suffix.
 
 A test that needs the real file system, a real subprocess, or more than
 two seconds belongs in `integration.shard`.
