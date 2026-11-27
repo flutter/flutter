@@ -150,7 +150,9 @@ the link's sandbox, which no longer exists once the link is over; and with
 `--dsym` the universal targets take the inputs of the builds' links as
 their own (`build_directory.bzl`'s aspect gathers them beside each Mach-O
 binary), so `dsymutil`, which runs from the execution root, finds them. A
-dSYM made without either half has a symbol table and no DWARF.
+dSYM made without either half has a symbol table and no DWARF. The
+sources the map and the DWARF name are relative to the execution root as
+well (`-ffile-compilation-dir=.`, `docs/toolchains.md`).
 
 The tool's tests over these directories are the apple shard
 (`//:apple_tool_tests`; `packages/flutter_tools/BUILD.bazel`): the 13 files

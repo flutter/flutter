@@ -447,10 +447,17 @@ target's, `MACOS_CFLAGS_OBJC`); `_DEBUG` without `_GLIBCXX_DEBUG`; `-g2` in
 every mode and `-Wl,-dead_strip` in opt (symbol_level is 2 on a Mac);
 links with `-nostdlib++ -Wl,-search_paths_first` and the three rpaths of
 `mac_dynamic_flags`, executables with `-Wl,-pie` and the
-`@executable_path/Frameworks` rpath of GN's `link` tool. Left out: GN's
-`-fdebug-prefix-map=<checkout>/engine/src/=` (Bazel's paths are
-execution-root relative already, as on Linux) and `-L.`, the GN output
-directory. Three things differ in kind from the Linux toolchains: Bazel's
+`@executable_path/Frameworks` rpath of GN's `link` tool. Where GN has
+`-fdebug-prefix-map=<checkout>/engine/src/=`, these have
+`-ffile-compilation-dir=.`: the directory a compile records in debug
+information is `.`, the execution root, which the sources' names are
+relative to. On Linux Bazel gives a compile `PWD=/proc/self/cwd` and
+clang records that, the same from every sandbox and worker; a Mac has no
+`/proc`, and without the flag each compile there records its own sandbox
+-- in the object, in the debug map of whatever links it, in the dSYM --,
+a path that is gone when the compile ends, and no two builds of an
+object are the same file. Left out: `-L.`, the GN output directory.
+Three things differ in kind from the Linux toolchains: Bazel's
 own link features take their Mach-O forms (`target_libc = "macosx"`: an
 alwayslink library is `-force_load`ed, rpaths say `@loader_path`, and the
 archive action speaks libtool -- `-static -o` -- so the package's

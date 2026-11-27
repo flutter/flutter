@@ -57,9 +57,10 @@ load("//build_defs/cc:copts.bzl", "ANDROID_TOOLCHAIN_WARNING_FLAGS", "MACOS_TOOL
 # that prints `__FILE__` reads the same under both -- the devicelab's
 # android_intent_parsing_test looks for `[INFO:flutter` in logcat (the
 # first presubmit run of the Bazel-built Android engine, PR #195825).
-# Debug info keeps the execution-root paths (GN's
-# -fdebug-prefix-map=<checkout>/engine/src/= strips an absolute prefix that
-# Bazel's never have).
+# Debug info keeps the execution-root paths: a source's name there is
+# relative already, where GN's -fdebug-prefix-map=<checkout>/engine/src/=
+# has an absolute prefix to strip. The directory the names are relative
+# to is _APPLE_DEBUG_DIR_FLAGS' matter, below.
 FILE_PREFIX_FLAGS = ["-fmacro-prefix-map=engine/src/="]
 
 _COMMON_COMPILE_FLAGS = [
@@ -108,24 +109,36 @@ _ANDROID_COMPILE_FLAGS = _COMMON_COMPILE_FLAGS + [
     "-fno-short-enums",
 ] + _ANDROID_WARNING_COMPILE_FLAGS
 
+# The directory a compile records as its own in debug information
+# (DW_AT_comp_dir, which a Mach-O link copies into the debug map before
+# each source's name), for the Apple platforms' compiles: `.`, the
+# execution root. GN's -fdebug-prefix-map=<checkout>/engine/src/= leaves
+# a path relative to the checkout there. Without a flag clang records the
+# directory it runs in. On Linux Bazel gives a compile
+# PWD=/proc/self/cwd, clang records that, and every sandbox and worker
+# writes the same; a Mac has no /proc, and a compile there recorded its
+# own sandbox: a path that is gone when the compile ends, in the object,
+# in the debug map of whatever links it and in the dSYM, and no two
+# builds of an object the same file. (A Mac's compiles on the Linux
+# workers recorded /proc/self/cwd; with the flag both record `.`, as
+# Chromium's do.)
+_APPLE_DEBUG_DIR_FLAGS = ["-ffile-compilation-dir=."]
+
 # macOS (//build/config/compiler:compiler under is_mac): the stack
 # protector on every function rather than on the ones with buffers, and
-# neither -pipe nor -pthread, which GN passes on Linux alone. Not here:
-# GN's -fdebug-prefix-map=<checkout>/engine/src/=, which strips the
-# checkout's absolute path from debug info; Bazel compiles with paths
-# relative to the execution root already, as on Linux.
+# neither -pipe nor -pthread, which GN passes on Linux alone.
 _MAC_COMPILE_FLAGS = [
     "-no-canonical-prefixes",
     "-fno-strict-aliasing",
     "-fstack-protector-all",
-] + FILE_PREFIX_FLAGS + _MAC_WARNING_COMPILE_FLAGS
+] + FILE_PREFIX_FLAGS + _APPLE_DEBUG_DIR_FLAGS + _MAC_WARNING_COMPILE_FLAGS
 
 # iOS's (//build/config/compiler:compiler under is_ios): the Mac's without
 # the stack protector, which GN gives neither iOS nor the web.
 _IOS_COMPILE_FLAGS = [
     "-no-canonical-prefixes",
     "-fno-strict-aliasing",
-] + FILE_PREFIX_FLAGS + _MAC_WARNING_COMPILE_FLAGS
+] + FILE_PREFIX_FLAGS + _APPLE_DEBUG_DIR_FLAGS + _MAC_WARNING_COMPILE_FLAGS
 
 # The architecture (//build/config/compiler:compiler), per target CPU:
 # x64's `-m64 -march=x86-64`, arm64's `--target=aarch64-linux-gnu` with the
