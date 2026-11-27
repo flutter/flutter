@@ -7,6 +7,7 @@ library skwasm_impl;
 
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:typed_data';
 
 final class RawSkString extends Opaque {}
 
@@ -45,6 +46,28 @@ SkStringHandle skStringFromDartString(String string) {
     stringDataPointer[i] = rawUtf8Bytes[i];
   }
   return stringHandle;
+}
+
+/// Decodes the UTF-8 contents of [handle] into a Dart string.
+///
+/// Does not free [handle].
+String skStringToDartString(SkStringHandle handle) {
+  return utf8.decode(skStringGetData(handle).toUint8List(skStringGetLength(handle)));
+}
+
+/// Using a specialized local extension rather than a generic List<int>.generate
+/// prevents dart2wasm from dynamically boxing the primitive integers into
+/// heap-allocated objects ($BoxedInt / struct allocations) during copy blocks.
+/// Explicitly masks the signed Int8 values to positive unsigned bytes (& 0xFF)
+/// to guarantee correct decoding by the UTF-8 decoder.
+extension on Pointer<Int8> {
+  Uint8List toUint8List(int length) {
+    final list = Uint8List(length);
+    for (int i = length - 1; i >= 0; i--) {
+      list[i] = this[i] & 0xFF;
+    }
+    return list;
+  }
 }
 
 SkString16Handle skString16FromDartString(String string) {

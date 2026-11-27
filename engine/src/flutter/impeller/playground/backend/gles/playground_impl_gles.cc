@@ -363,10 +363,10 @@ std::unique_ptr<Surface> PlaygroundImplGLES::AcquireSurfaceFrame(
   );
 }
 
-fml::Status PlaygroundImplGLES::SetCapabilities(
+absl::Status PlaygroundImplGLES::SetCapabilities(
     const std::shared_ptr<Capabilities>& capabilities) {
-  return fml::Status(
-      fml::StatusCode::kUnimplemented,
+  return absl::Status(
+      absl::StatusCode::kUnimplemented,
       "PlaygroundImplGLES doesn't support setting the capabilities.");
 }
 

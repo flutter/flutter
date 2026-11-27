@@ -6,6 +6,7 @@
 
 #include <CoreGraphics/CGColorSpace.h>
 
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #include "fml/platform/darwin/cf_utils.h"
 

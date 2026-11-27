@@ -6,10 +6,27 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import 'json_utils.dart';
+
 /// A template representation used to generate an entire Flutter project.
 ///
 /// Extensions implement this class to define custom project templates.
 abstract base class ProjectTemplate {
+  /// Map key for [hidden].
+  static const String hiddenKey = 'hidden';
+
+  /// Map key for [name].
+  static const String nameKey = 'name';
+
+  /// Map key for [templateDependencies].
+  static const String templateDependenciesKey = 'templateDependencies';
+
+  /// Map key for [templatePath].
+  static const String templatePathKey = 'templatePath';
+
+  /// Map key for [templateSources].
+  static const String templateSourcesKey = 'templateSources';
+
   /// The name of this project template.
   String get name;
 
@@ -33,11 +50,11 @@ abstract base class ProjectTemplate {
   /// Serializes the template metadata into a JSON-compatible map.
   Map<String, Object?> toMap() {
     return <String, Object?>{
-      'name': name,
-      'hidden': hidden,
-      'templateDependencies': templateDependencies.toList(),
-      'templateSources': templateSources.toList(),
-      'templatePath': templatePath,
+      nameKey: name,
+      hiddenKey: hidden,
+      templateDependenciesKey: templateDependencies.toList(),
+      templateSourcesKey: templateSources.toList(),
+      templatePathKey: templatePath,
     };
   }
 }
@@ -58,21 +75,12 @@ final class ExtensionProjectTemplate extends ProjectTemplate {
   });
 
   factory ExtensionProjectTemplate.fromJson(Map<String, Object?> json) {
-    final Set<String> templateDependencies = switch (json['templateDependencies']) {
-      final List<Object?> list => list.whereType<String>().toSet(),
-      _ => const <String>{},
-    };
-    final Set<String> templateSources = switch (json['templateSources']) {
-      final List<Object?> list => list.whereType<String>().toSet(),
-      _ => const <String>{},
-    };
-
     return ExtensionProjectTemplate(
-      hidden: json['hidden'] == true,
-      name: json['name'] as String? ?? '',
-      templateDependencies: templateDependencies,
-      templatePath: json['templatePath'] as String? ?? '',
-      templateSources: templateSources,
+      hidden: json.optionalField<bool>(ProjectTemplate.hiddenKey, defaultValue: false),
+      name: json.optionalField<String>(ProjectTemplate.nameKey, defaultValue: ''),
+      templateDependencies: json.stringIterable(ProjectTemplate.templateDependenciesKey).toSet(),
+      templatePath: json.optionalField<String>(ProjectTemplate.templatePathKey, defaultValue: ''),
+      templateSources: json.stringIterable(ProjectTemplate.templateSourcesKey).toSet(),
     );
   }
 

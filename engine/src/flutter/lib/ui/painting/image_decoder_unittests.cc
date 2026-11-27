@@ -946,6 +946,27 @@ TEST(ImageDecoderTest, VerifySimpleDecoding) {
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
+#if IMPELLER_SUPPORTS_RENDERING
+TEST(ImageDecoderTest, ClampToMaxTextureSizeKeepsAspectRatio) {
+  const impeller::ISize max_texture_size(10, 10);
+  // Sizes that already fit are unchanged.
+  EXPECT_EQ(ImageDecoderImpeller::ClampToMaxTextureSize(SkISize::Make(10, 4),
+                                                        max_texture_size),
+            SkISize::Make(10, 4));
+  // Wide and tall sizes are shrunk by a single factor.
+  EXPECT_EQ(ImageDecoderImpeller::ClampToMaxTextureSize(SkISize::Make(60, 20),
+                                                        max_texture_size),
+            SkISize::Make(10, 3));
+  EXPECT_EQ(ImageDecoderImpeller::ClampToMaxTextureSize(SkISize::Make(20, 60),
+                                                        max_texture_size),
+            SkISize::Make(3, 10));
+  // Each side stays at least one pixel.
+  EXPECT_EQ(ImageDecoderImpeller::ClampToMaxTextureSize(SkISize::Make(1000, 1),
+                                                        max_texture_size),
+            SkISize::Make(10, 1));
+}
+#endif  // IMPELLER_SUPPORTS_RENDERING
+
 TEST(ImageDecoderTest, ImagesWithTransparencyArePremulAlpha) {
   auto data = flutter::testing::OpenFixtureAsSkData("heart_end.png");
   ASSERT_TRUE(data);
@@ -1051,7 +1072,9 @@ TEST_F(ImageDecoderFixtureTest,
         return false;
       }
 
-      codec = fml::MakeRefCounted<MultiFrameCodec>(std::move(gif_generator));
+      const SkISize gif_size = gif_generator->GetInfo().dimensions();
+      codec = fml::MakeRefCounted<MultiFrameCodec>(std::move(gif_generator),
+                                                   gif_size);
       codec->getNextFrame(closure);
       codec = nullptr;
       isolate_latch.Signal();

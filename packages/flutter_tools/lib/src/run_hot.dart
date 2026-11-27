@@ -67,9 +67,12 @@ class HotRunner extends ResidentRunner {
   HotRunner(
     super.flutterDevices, {
     required super.analytics,
+    required super.applicationPackageFactory,
+    required super.assetBundleFactory,
     required super.buildSystem,
     required super.buildTargets,
     required super.debuggingOptions,
+    required super.featureFlags,
     required super.target,
     required super.toolContext,
     required super.xcode,
@@ -594,7 +597,7 @@ class HotRunner extends ResidentRunner {
         _swap ? 'main.dart.swap.dill' : 'main.dart.dill',
       );
       final Uri deviceAssetsDirectoryUri = device.devFS!.baseUri!.resolveUri(
-        fileSystem.path.toUri(getAssetBuildDirectory()),
+        fileSystem.path.toUri(getAssetBuildDirectory(config, fileSystem)),
       );
       futures.add(_launchInView(device, deviceEntryUri, deviceAssetsDirectoryUri));
     }
@@ -1101,7 +1104,7 @@ class HotRunner extends ResidentRunner {
   Future<void> confirmAssetDirectory(FlutterDevice device, List<FlutterView> views) async {
     if (!device.devFS!.hasSetAssetDirectory) {
       final Uri deviceAssetsDirectoryUri = device.devFS!.baseUri!.resolveUri(
-        fileSystem.path.toUri(getAssetBuildDirectory()),
+        fileSystem.path.toUri(getAssetBuildDirectory(config, fileSystem)),
       );
       final List<FlutterView> activeViews = views
           .where((FlutterView view) => view.uiIsolate != null)

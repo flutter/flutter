@@ -13,10 +13,12 @@ import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 void main() {
-  testWithoutContext('iOS workflow is disabled if feature is disabled', () {
+  test('iOS workflow is disabled if feature is disabled', () {
     final iosWorkflow = IOSWorkflow(
       platform: FakePlatform(operatingSystem: 'macOS'),
-      xcode: Xcode.test(processManager: FakeProcessManager.any()),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+      ),
       featureFlags: TestFeatureFlags(isIOSEnabled: false),
     );
 
@@ -25,10 +27,12 @@ void main() {
     expect(iosWorkflow.canListDevices, false);
   });
 
-  testWithoutContext('iOS workflow is disabled on Linux', () {
+  test('iOS workflow is disabled on Linux', () {
     final iosWorkflow = IOSWorkflow(
       platform: FakePlatform(),
-      xcode: Xcode.test(processManager: FakeProcessManager.any()),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+      ),
       featureFlags: TestFeatureFlags(),
     );
 
@@ -37,10 +41,12 @@ void main() {
     expect(iosWorkflow.canListDevices, false);
   });
 
-  testWithoutContext('iOS workflow is disabled on windows', () {
+  test('iOS workflow is disabled on windows', () {
     final iosWorkflow = IOSWorkflow(
       platform: FakePlatform(operatingSystem: 'windows'),
-      xcode: Xcode.test(processManager: FakeProcessManager.any()),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+      ),
       featureFlags: TestFeatureFlags(),
     );
 
@@ -49,7 +55,7 @@ void main() {
     expect(iosWorkflow.canListDevices, false);
   });
 
-  testWithoutContext('iOS workflow applies on macOS, no Xcode or simctl', () {
+  test('iOS workflow applies on macOS, no Xcode or simctl', () {
     final xcodeProcessManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted'],
@@ -59,9 +65,9 @@ void main() {
     final iosWorkflow = IOSWorkflow(
       platform: FakePlatform(operatingSystem: 'macos'),
       xcode: Xcode.test(
-        processManager: xcodeProcessManager,
+        toolContext: FakeToolContext.macosHost(processManager: xcodeProcessManager),
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
           version: null,
         ),
       ),
@@ -75,11 +81,11 @@ void main() {
     expect(xcodeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('iOS workflow can list devices even when Xcode version is too low', () {
+  test('iOS workflow can list devices even when Xcode version is too low', () {
     final xcode = Xcode.test(
-      processManager: FakeProcessManager.any(),
+      toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
       xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         version: Version(1, 0, 0),
       ),
     );
@@ -98,11 +104,11 @@ void main() {
     expect(iosWorkflow.canListEmulators, false);
   });
 
-  testWithoutContext('iOS workflow can launch devices when Xcode is set up', () {
+  test('iOS workflow can launch devices when Xcode is set up', () {
     final xcode = Xcode.test(
-      processManager: FakeProcessManager.any(),
+      toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
       xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         version: Version(1000, 0, 0),
       ),
     );

@@ -32,10 +32,6 @@ struct Paint {
       FilterInput::Ref,
       const Matrix& effect_transform,
       Entity::RenderingMode rendering_mode)>;
-  using MaskFilterProc = std::function<std::shared_ptr<FilterContents>(
-      FilterInput::Ref,
-      bool is_solid_color,
-      const Matrix& effect_transform)>;
   using ColorSourceProc = std::function<std::shared_ptr<ColorSourceContents>()>;
 
   /// @brief Whether or not a save layer with the provided paint can perform the
@@ -65,7 +61,6 @@ struct Paint {
 
     std::shared_ptr<FilterContents> CreateMaskBlur(
         const FilterInput::Ref& input,
-        bool is_solid_color,
         const Matrix& ctm) const;
 
     std::shared_ptr<Contents> CreateMaskBlur(
@@ -137,10 +132,6 @@ struct Paint {
       ContentContext& renderer,
       const Geometry* geometry,
       const std::optional<Matrix>& geometry_transform = std::nullopt) const;
-
-  std::shared_ptr<Contents> WithMaskBlur(std::shared_ptr<Contents> input,
-                                         bool is_solid_color,
-                                         const Matrix& ctm) const;
 
   std::shared_ptr<FilterContents> WithImageFilter(
       ContentContext& renderer,

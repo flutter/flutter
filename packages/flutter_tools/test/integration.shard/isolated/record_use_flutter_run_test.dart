@@ -24,7 +24,7 @@ void main() {
     // prints. See https://github.com/flutter/flutter/issues/159668
     // So this test only does `flutter run` for the hostOS.
     for (final device in <String>[hostOs]) {
-      testWithoutContext('flutter run on $device --release', () async {
+      test('flutter run on $device --release', () async {
         final ProcessTestResult result = await runFlutter(
           <String>['run', '-v', '-d', device, '--release'],
           appRoot.path,

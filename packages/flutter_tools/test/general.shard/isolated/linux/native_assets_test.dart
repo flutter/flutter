@@ -14,13 +14,13 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/linux/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:test/fake.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
+import '../../../src/fakes.dart';
 import '../fake_native_assets_build_runner.dart';
 
 void main() {
@@ -40,6 +40,7 @@ void main() {
       fileSystem.currentDirectory,
       inputs: <String, String>{},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
@@ -48,37 +49,29 @@ void main() {
     projectUri = environment.projectDir.uri;
   });
 
-  testUsingContext(
-    'does not throw if clang not present but no native assets present',
-    overrides: <Type, Generator>{
-      ProcessManager: () => FakeProcessManager.empty(),
-      FileSystem: () => fileSystem,
-    },
-    () async {
-      final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
-      await packageConfig.create(recursive: true);
+  test('does not throw if clang not present but no native assets present', () async {
+    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.create(recursive: true);
 
-      await runFlutterSpecificHooks(
-        environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
-        targetPlatform: TargetPlatform.linux_x64,
-        projectUri: projectUri,
-        fileSystem: fileSystem,
-        buildRunner: _BuildRunnerWithoutClang(),
-        buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
-        buildDataAssets: true,
-        recordedUsesFile: null,
-      );
-      expect(
-        (globals.logger as BufferLogger).traceText,
-        isNot(contains('Running build hooks for ')),
-      );
-    },
-  );
+    await runFlutterSpecificHooks(
+      environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+      targetPlatform: TargetPlatform.linux_x64,
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+      featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
+      logger: logger,
+      buildRunner: _BuildRunnerWithoutClang(),
+      buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
+      buildDataAssets: true,
+      recordedUsesFile: null,
+    );
+    expect(logger.traceText, isNot(contains('Running build hooks for ')));
+  });
 
   // This logic is mocked in the other tests to avoid having test order
   // randomization causing issues with what processes are invoked.
   // Exercise the parsing of the process output in this separate test.
-  testWithoutContext('cCompilerConfigLinux', () async {
+  test('cCompilerConfigLinux', () async {
     if (!const LocalPlatform().isLinux) {
       return;
     }
@@ -107,7 +100,7 @@ CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
     expect(result.linker, Uri.file('/some/path/to/ld.lld'));
   });
 
-  testWithoutContext('cCompilerConfigLinux gcc linker', () async {
+  test('cCompilerConfigLinux gcc linker', () async {
     if (!const LocalPlatform().isLinux) {
       return;
     }
@@ -137,7 +130,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld
     expect(result.linker, Uri.file('/usr/bin/ld'));
   });
 
-  testWithoutContext('cCompilerConfigLinux missing CMakeCache', () async {
+  test('cCompilerConfigLinux missing CMakeCache', () async {
     if (!const LocalPlatform().isLinux) {
       return;
     }
@@ -145,7 +138,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld
     expect(cCompilerConfigLinux(cmakeDirectory: environment.buildDir), throwsA(isA<ToolExit>()));
   });
 
-  testWithoutContext('cCompilerConfigLinux missing entry', () async {
+  test('cCompilerConfigLinux missing entry', () async {
     if (!const LocalPlatform().isLinux) {
       return;
     }
@@ -159,7 +152,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld
     expect(cCompilerConfigLinux(cmakeDirectory: environment.outputDir), throwsA(isA<ToolExit>()));
   });
 
-  testWithoutContext('cCompilerConfigLinux invalid paths', () async {
+  test('cCompilerConfigLinux invalid paths', () async {
     if (!const LocalPlatform().isLinux) {
       return;
     }
@@ -173,7 +166,7 @@ CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
     expect(cCompilerConfigLinux(cmakeDirectory: environment.outputDir), throwsA(isA<ToolExit>()));
   });
 
-  testWithoutContext('cCompilerConfigLinux with missing binaries when not required', () async {
+  test('cCompilerConfigLinux with missing binaries when not required', () async {
     if (!const LocalPlatform().isLinux) {
       return;
     }
@@ -182,22 +175,19 @@ CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
     expect(cCompilerConfigLinux(), completes);
   });
 
-  testWithoutContext(
-    'cCompilerConfigLinux missing CMakeCache and throwIfNotFound: false',
-    () async {
-      if (!const LocalPlatform().isLinux) {
-        return;
-      }
+  test('cCompilerConfigLinux missing CMakeCache and throwIfNotFound: false', () async {
+    if (!const LocalPlatform().isLinux) {
+      return;
+    }
 
-      final CCompilerConfig? result = await cCompilerConfigLinux(
-        cmakeDirectory: environment.buildDir,
-        throwIfNotFound: false,
-      );
-      expect(result, isNull);
-    },
-  );
+    final CCompilerConfig? result = await cCompilerConfigLinux(
+      cmakeDirectory: environment.buildDir,
+      throwIfNotFound: false,
+    );
+    expect(result, isNull);
+  });
 
-  testWithoutContext('cCompilerConfigLinux missing entry and throwIfNotFound: false', () async {
+  test('cCompilerConfigLinux missing entry and throwIfNotFound: false', () async {
     if (!const LocalPlatform().isLinux) {
       return;
     }
@@ -215,7 +205,7 @@ CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
     expect(result, isNull);
   });
 
-  testWithoutContext('cCompilerConfigLinux invalid paths and throwIfNotFound: false', () async {
+  test('cCompilerConfigLinux invalid paths and throwIfNotFound: false', () async {
     if (!const LocalPlatform().isLinux) {
       return;
     }
@@ -233,7 +223,7 @@ CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
     expect(result, isNull);
   });
 
-  testWithoutContext(
+  test(
     'cCompilerConfigLinux FileSystemException on resolveSymbolicLinks and throwIfNotFound: false',
     () async {
       if (!const LocalPlatform().isLinux) {
@@ -261,7 +251,7 @@ CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
     },
   );
 
-  testWithoutContext(
+  test(
     'cCompilerConfigLinux FileSystemException on resolveSymbolicLinks and throwIfNotFound: true',
     () async {
       if (!const LocalPlatform().isLinux) {

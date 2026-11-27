@@ -14,6 +14,7 @@
 //
 // See: https://github.com/flutter/flutter/issues/30701.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi' as ffi;
 import 'dart:io';
@@ -812,6 +813,14 @@ class DialogWindowControllerLinux extends DialogWindowController
         _window.present();
       },
     );
+
+    // Popups stay open while they have a dialog descendant, see
+    // PopupWindowControllerLinux._hasOpenDialog.
+    for (var ancestor = parent; ancestor != null; ancestor = _parentOf(ancestor)) {
+      if (ancestor is PopupWindowControllerLinux) {
+        ancestor._dialogDescendants.add(this);
+      }
+    }
   }
 
   final DialogWindowControllerDelegate _delegate;
@@ -880,6 +889,17 @@ class TooltipWindowControllerLinux extends TooltipWindowController
   final TooltipWindowControllerDelegate _delegate;
 }
 
+/// Returns the window [window] was created as a child of, if any.
+BaseWindowController? _parentOf(BaseWindowController window) {
+  return switch (window) {
+    WindowController() => null,
+    DialogWindowController(:final BaseWindowController? parent) => parent,
+    TooltipWindowController(:final BaseWindowController parent) => parent,
+    PopupWindowController(:final BaseWindowController parent) => parent,
+    SatelliteWindowController(:final BaseWindowController parent) => parent,
+  };
+}
+
 /// Implementation of [PopupWindowController] for the Linux platform.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
@@ -934,14 +954,75 @@ class PopupWindowControllerLinux extends PopupWindowController
       positioner: positioner,
       description: 'popup',
     );
+    _watchForDeactivation();
   }
 
   final PopupWindowControllerDelegate _delegate;
   Offset? _offsetFromParent;
 
+  // The top level window this popup belongs to, watched so the popup can be
+  // closed when another window receives input focus.
+  late final BaseWindowController _toplevel;
+  bool _toplevelWasActive = false;
+
+  // Dialogs opened from this popup or its descendants. Registered by
+  // DialogWindowControllerLinux.
+  final List<DialogWindowControllerLinux> _dialogDescendants = <DialogWindowControllerLinux>[];
+
+  // A dialog opened from this popup takes input focus from the top level
+  // window, so the popup is kept open while such a dialog exists.
+  bool get _hasOpenDialog {
+    _dialogDescendants.removeWhere((DialogWindowControllerLinux dialog) => dialog.isDestroyed);
+    return _dialogDescendants.isNotEmpty;
+  }
+
   @override
   Offset get offsetFromParent {
     return _offsetFromParent ?? Offset.zero;
+  }
+
+  @override
+  void destroy() {
+    _toplevel.removeListener(_onToplevelChanged);
+    super.destroy();
+  }
+
+  // A popup never takes input focus, so the top level window it belongs to
+  // stays active while it is open. That window becoming inactive means focus
+  // has moved to another window, possibly in another application.
+  void _watchForDeactivation() {
+    BaseWindowController window = _parent;
+    while (true) {
+      if (window is PopupWindowController) {
+        window = window.parent;
+      } else if (window is TooltipWindowController) {
+        window = window.parent;
+      } else {
+        break;
+      }
+    }
+    _toplevel = window;
+    _toplevelWasActive = _toplevelWindow()?.isActive() ?? false;
+    _toplevel.addListener(_onToplevelChanged);
+  }
+
+  // Null once the top level window has been destroyed.
+  _GtkWindow? _toplevelWindow() => _owner.registrar._windowForViewId(_toplevel.rootView.viewId);
+
+  void _onToplevelChanged() {
+    final _GtkWindow? toplevelWindow = _toplevelWindow();
+    final bool wasActive = _toplevelWasActive;
+    final bool isActive = toplevelWindow?.isActive() ?? false;
+    _toplevelWasActive = isActive;
+    if (toplevelWindow == null || (wasActive && !isActive && !_hasOpenDialog)) {
+      // Deferred so the native window is not destroyed while GTK is still
+      // emitting the signal that caused this change.
+      scheduleMicrotask(() {
+        if (!isDestroyed) {
+          destroy();
+        }
+      });
+    }
   }
 }
 

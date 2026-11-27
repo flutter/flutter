@@ -42,9 +42,9 @@ Future<void> testMain() async {
     EnginePlatformDispatcher.instance.viewManager.registerView(view3);
 
     await Future.wait([
-      renderer.renderScene(paintRect(rect, red), view1),
-      renderer.renderScene(paintRect(rect, green), view2),
-      renderer.renderScene(paintRect(rect, blue), view3),
+      renderer.renderScene(paintRect(rect, red), view1, size: view1.physicalSize),
+      renderer.renderScene(paintRect(rect, green), view2, size: view2.physicalSize),
+      renderer.renderScene(paintRect(rect, blue), view3, size: view3.physicalSize),
     ]);
 
     await matchGoldenFile(

@@ -144,6 +144,13 @@ class Manager {
   // Initialize the D3D11 device.
   bool InitializeDevice();
 
+  // Enable Direct3D's multithread protection on ANGLE's D3D11 device so that
+  // the render and resource contexts' threads cannot use its immediate
+  // context at the same time.
+  //
+  // See: https://github.com/flutter/flutter/issues/196618
+  void EnableMultithreadProtection();
+
   void CleanUp();
 
   // Whether the manager was initialized successfully.

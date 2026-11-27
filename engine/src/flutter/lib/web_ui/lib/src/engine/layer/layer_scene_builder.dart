@@ -21,25 +21,39 @@ class LayerScene implements ui.Scene {
   }
 
   @override
-  Future<ui.Image> toImage(int width, int height) {
+  Future<ui.Image> toImage(int width, int height) async {
     final ui.Picture picture = layerTree.flatten(ui.Size(width.toDouble(), height.toDouble()));
-    return picture.toImage(width, height);
+    try {
+      return await picture.toImage(width, height);
+    } finally {
+      // The flattened picture is an implementation detail of this method and
+      // is never exposed to the caller, so it must be disposed here.
+      picture.dispose();
+    }
   }
 
   @override
   ui.Image toImageSync(int width, int height) {
     final ui.Picture picture = layerTree.flatten(ui.Size(width.toDouble(), height.toDouble()));
-    return picture.toImageSync(width, height);
+    try {
+      return picture.toImageSync(width, height);
+    } finally {
+      // The flattened picture is an implementation detail of this method and
+      // is never exposed to the caller, so it must be disposed here.
+      picture.dispose();
+    }
   }
 }
 
 class LayerSceneBuilder implements ui.SceneBuilder {
   LayerSceneBuilder() : rootLayer = RootLayer() {
-    currentLayer = rootLayer;
+    _layerStack.add(rootLayer);
   }
 
   final RootLayer rootLayer;
-  late ContainerLayer currentLayer;
+  final List<ContainerLayer> _layerStack = <ContainerLayer>[];
+
+  ContainerLayer get currentLayer => _layerStack.last;
 
   @override
   void addPerformanceOverlay(int enabledOptions, ui.Rect bounds) {
@@ -105,11 +119,9 @@ class LayerSceneBuilder implements ui.SceneBuilder {
 
   @override
   void pop() {
-    if (currentLayer == rootLayer) {
-      // Don't pop the root layer. It must always be there.
-      return;
+    if (_layerStack.length > 1) {
+      _layerStack.removeLast();
     }
-    currentLayer = currentLayer.parent!;
   }
 
   @override
@@ -212,7 +224,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
 
   T pushLayer<T extends ContainerLayer>(T layer) {
     currentLayer.add(layer);
-    currentLayer = layer;
+    _layerStack.add(layer);
     return layer;
   }
 

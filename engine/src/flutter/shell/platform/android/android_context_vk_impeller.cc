@@ -55,23 +55,33 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
   // identified, before the (expensive) remainder of Vulkan setup runs.
   auto selection = impeller::ContextVK::SelectDevice(std::move(settings));
   if (!selection.ok()) {
+    FML_LOG(INFO) << "Could not select a Vulkan device: "
+                  << selection.status().message();
     return nullptr;
   }
   if (selection->driver_info->IsKnownBadDriver()) {
-    FML_LOG(INFO)
-        << "Known bad Vulkan driver encountered, falling back to OpenGLES.";
+    FML_LOG(INFO) << "Known bad Vulkan driver encountered.";
+    selection->driver_info->DumpToLog();
     return nullptr;
   }
 
   auto context = selection->CreateContext();
+  if (!context) {
+    FML_LOG(INFO)
+        << "Could not set up the Vulkan context on the selected device.";
+    return nullptr;
+  }
 
   if (!p_settings.quiet) {
-    if (context && impeller::CapabilitiesVK::Cast(*context->GetCapabilities())
-                       .AreValidationsEnabled()) {
-      FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Vulkan with "
-                            "Validation Layers).";
-    } else if (context) {
-      FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Vulkan).";
+    const char* backend_name =
+        p_settings.impeller_flags.use_sdfs ? "VulkanSDF" : "Vulkan";
+    if (impeller::CapabilitiesVK::Cast(*context->GetCapabilities())
+            .AreValidationsEnabled()) {
+      FML_LOG(IMPORTANT) << "Using the Impeller rendering backend ("
+                         << backend_name << " with Validation Layers).";
+    } else {
+      FML_LOG(IMPORTANT) << "Using the Impeller rendering backend ("
+                         << backend_name << ").";
     }
   }
 

@@ -33,7 +33,7 @@ class PlaygroundImpl {
 
   Vector2 GetContentScale() const;
 
-  virtual fml::Status SetCapabilities(
+  virtual absl::Status SetCapabilities(
       const std::shared_ptr<Capabilities>& capabilities) = 0;
 
   virtual Playground::GLProcAddressResolver CreateGLProcAddressResolver() const;

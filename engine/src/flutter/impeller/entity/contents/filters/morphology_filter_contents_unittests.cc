@@ -41,6 +41,37 @@ class MorphologyFilterContentsTest : public EntityPlayground {
 
 INSTANTIATE_PLAYGROUND_SUITE(MorphologyFilterContentsTest);
 
+TEST(MorphologyFilterContentsTest, DilateSourceCoverage) {
+  auto contents = FilterContents::MakeMorphology(
+      FilterInput::Make(Rect()), Radius{10}, Radius{20},
+      FilterContents::MorphType::kDilate);
+
+  EXPECT_EQ(contents->GetSourceCoverage({}, Rect::MakeLTRB(20, 30, 120, 130)),
+            Rect::MakeLTRB(10, 10, 130, 150));
+}
+
+TEST(MorphologyFilterContentsTest, DilateSourceCoverageWithEffectTransform) {
+  auto contents = FilterContents::MakeMorphology(
+      FilterInput::Make(Rect()), Radius{10}, Radius{20},
+      FilterContents::MorphType::kDilate);
+  Matrix transform =
+      Matrix::MakeTranslation({100, -200, 0}) * Matrix::MakeScale({-2, 3, 1});
+  contents->SetEffectTransform(transform);
+
+  EXPECT_EQ(
+      contents->GetSourceCoverage(transform, Rect::MakeLTRB(20, 30, 120, 130)),
+      Rect::MakeLTRB(0, -30, 140, 190));
+}
+
+TEST(MorphologyFilterContentsTest, ErodeSourceCoverage) {
+  auto contents = FilterContents::MakeMorphology(
+      FilterInput::Make(Rect()), Radius{10}, Radius{20},
+      FilterContents::MorphType::kErode);
+
+  EXPECT_EQ(contents->GetSourceCoverage({}, Rect::MakeLTRB(20, 30, 120, 130)),
+            Rect::MakeLTRB(10, 10, 130, 150));
+}
+
 TEST_P(MorphologyFilterContentsTest, RenderCoverageMatchesGetCoverage) {
   std::shared_ptr<Texture> texture = MakeTexture(ISize(100, 100));
   ASSERT_NE(texture, nullptr);

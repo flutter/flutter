@@ -12,7 +12,8 @@ import 'package:flutter_tools/src/build_system/targets/android.dart';
 import 'package:flutter_tools/src/build_system/targets/deferred_components.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
+import '../../../src/fakes.dart';
 
 // These tests perform a simple check to verify if the check/task was executed at all.
 // Detailed per-check tests are in android/deferred_components_setup_validator_test.dart.
@@ -25,7 +26,7 @@ void main() {
     fileSystem = MemoryFileSystem.test();
   });
 
-  testUsingContext('checkAppAndroidManifestComponentLoadingUnitMapping checks runs', () async {
+  test('checkAppAndroidManifestComponentLoadingUnitMapping checks runs', () async {
     final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
@@ -33,6 +34,7 @@ void main() {
       projectDir: fileSystem.directory('project')..createSync(),
       defines: <String, String>{kDeferredComponents: 'true'},
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.empty(),
       fileSystem: fileSystem,
       logger: logger,
@@ -59,7 +61,7 @@ void main() {
     );
   });
 
-  testUsingContext('checkAgainstLoadingUnitsCache checks runs', () async {
+  test('checkAgainstLoadingUnitsCache checks runs', () async {
     final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
@@ -67,6 +69,7 @@ void main() {
       projectDir: fileSystem.directory('project')..createSync(),
       defines: <String, String>{kDeferredComponents: 'true'},
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.empty(),
       fileSystem: fileSystem,
       logger: logger,
@@ -92,7 +95,7 @@ void main() {
     );
   });
 
-  testUsingContext('writeLoadingUnitsCache task runs', () async {
+  test('writeLoadingUnitsCache task runs', () async {
     final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
@@ -100,6 +103,7 @@ void main() {
       projectDir: fileSystem.directory('project')..createSync(),
       defines: <String, String>{kDeferredComponents: 'true'},
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.empty(),
       fileSystem: fileSystem,
       logger: logger,

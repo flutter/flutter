@@ -4,9 +4,9 @@
 
 #include "flutter/lib/gpu/binding_set.h"
 
+#include <array>
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <utility>
 
 #include "gtest/gtest.h"
@@ -26,7 +26,7 @@ constexpr size_t kTextureIndex = 2;
 // A shader declaring one uniform struct ("FrameInfo") and one texture
 // ("tex"), which is all a binding set resolves against.
 fml::RefPtr<Shader> MakeShader(impeller::ShaderStage stage) {
-  std::unordered_map<std::string, Shader::UniformBinding> uniform_structs;
+  absl::flat_hash_map<std::string, Shader::UniformBinding> uniform_structs;
   uniform_structs["FrameInfo"] = Shader::UniformBinding{
       .slot =
           impeller::ShaderUniformSlot{
@@ -39,7 +39,7 @@ fml::RefPtr<Shader> MakeShader(impeller::ShaderStage stage) {
       .size_in_bytes = 64,
   };
 
-  std::unordered_map<std::string, Shader::TextureBinding> uniform_textures;
+  absl::flat_hash_map<std::string, Shader::TextureBinding> uniform_textures;
   Shader::TextureBinding texture_binding;
   texture_binding.slot = impeller::SampledImageSlot{
       .name = "tex",
@@ -55,6 +55,31 @@ fml::RefPtr<Shader> MakeShader(impeller::ShaderStage stage) {
                       /*code_mapping=*/nullptr, /*inputs=*/{}, /*layouts=*/{},
                       std::move(uniform_structs), std::move(uniform_textures),
                       /*descriptor_set_layouts=*/{});
+}
+
+constexpr size_t kParticlesBinding = 4;
+
+// A compute shader declaring one storage buffer ("Particles").
+fml::RefPtr<Shader> MakeComputeShader() {
+  absl::flat_hash_map<std::string, Shader::StorageBufferBinding>
+      storage_buffers;
+  storage_buffers["Particles"] = Shader::StorageBufferBinding{
+      .slot =
+          impeller::ShaderUniformSlot{
+              .name = "Particles",
+              .ext_res_0 = kParticlesBinding,
+              .set = 0,
+              .binding = kParticlesBinding,
+          },
+      .metadata = impeller::ShaderMetadata{.name = "Particles", .members = {}},
+      .size_in_bytes = 16,
+      .runtime_array_stride = 32,
+  };
+  return Shader::Make("library", "Entrypoint", impeller::ShaderStage::kCompute,
+                      /*code_mapping=*/nullptr, /*inputs=*/{}, /*layouts=*/{},
+                      /*uniform_structs=*/{}, /*uniform_textures=*/{},
+                      /*descriptor_set_layouts=*/{}, std::move(storage_buffers),
+                      std::array<uint32_t, 3>{64, 1, 1});
 }
 
 std::shared_ptr<impeller::DeviceBuffer> MakeBuffer(size_t size) {
@@ -122,9 +147,9 @@ TEST(FlutterGpuBindingSetTest, AddUniformRejectsAViewPastTheEndOfTheBuffer) {
   EXPECT_TRUE(set->GetBufferBindings().empty());
 }
 
-// Only the vertex and fragment stages take bindings from a render pass.
-TEST(FlutterGpuBindingSetTest, AddRejectsNonRenderStages) {
-  auto shader = MakeShader(impeller::ShaderStage::kCompute);
+// Only the vertex, fragment and compute stages take bindings from a pass.
+TEST(FlutterGpuBindingSetTest, AddRejectsUnknownStages) {
+  auto shader = MakeShader(impeller::ShaderStage::kUnknown);
   auto set = fml::MakeRefCounted<BindingSet>();
   auto buffer = MakeBuffer(128);
 
@@ -134,17 +159,33 @@ TEST(FlutterGpuBindingSetTest, AddRejectsNonRenderStages) {
   EXPECT_TRUE(set->GetBufferBindings().empty());
 }
 
+// A compute pass replays a set's compute bindings, and a render pass skips
+// them.
+TEST(FlutterGpuBindingSetTest, AddAcceptsComputeStageUniformsAndTextures) {
+  auto shader = MakeShader(impeller::ShaderStage::kCompute);
+  auto set = fml::MakeRefCounted<BindingSet>();
+  auto buffer = MakeBuffer(128);
+  auto texture = MakeTexture();
+
+  EXPECT_TRUE(set->AddUniform(*shader, /*uniform_struct_index=*/0, buffer,
+                              /*offset_in_bytes=*/0,
+                              /*length_in_bytes=*/64));
+  EXPECT_TRUE(set->AddTexture(*shader, /*uniform_texture_index=*/0, texture,
+                              impeller::SamplerDescriptor{}));
+  ASSERT_EQ(set->GetBufferBindings().size(), 1u);
+  EXPECT_EQ(set->GetBufferBindings()[0].stage, impeller::ShaderStage::kCompute);
+  ASSERT_EQ(set->GetTextureBindings().size(), 1u);
+  EXPECT_EQ(set->GetTextureBindings()[0].stage,
+            impeller::ShaderStage::kCompute);
+}
+
 TEST(FlutterGpuBindingSetTest, AddTextureResolvesTheShaderBinding) {
   auto shader = MakeShader(impeller::ShaderStage::kFragment);
   auto set = fml::MakeRefCounted<BindingSet>();
   auto texture = MakeTexture();
-  std::shared_ptr<const impeller::Sampler> sampler =
-      std::make_shared<impeller::testing::MockSampler>(
-          impeller::SamplerDescriptor{});
 
-  EXPECT_TRUE(
-      set->AddTexture(*shader, /*uniform_texture_index=*/0, texture,
-                      impeller::raw_ptr<const impeller::Sampler>(sampler)));
+  EXPECT_TRUE(set->AddTexture(*shader, /*uniform_texture_index=*/0, texture,
+                              impeller::SamplerDescriptor{}));
 
   ASSERT_EQ(set->GetTextureBindings().size(), 1u);
   const BindingSet::TextureBinding& binding = set->GetTextureBindings()[0];
@@ -159,13 +200,9 @@ TEST(FlutterGpuBindingSetTest, AddTextureRejectsAnOutOfRangeIndex) {
   auto shader = MakeShader(impeller::ShaderStage::kFragment);
   auto set = fml::MakeRefCounted<BindingSet>();
   auto texture = MakeTexture();
-  std::shared_ptr<const impeller::Sampler> sampler =
-      std::make_shared<impeller::testing::MockSampler>(
-          impeller::SamplerDescriptor{});
 
-  EXPECT_FALSE(
-      set->AddTexture(*shader, /*uniform_texture_index=*/1, texture,
-                      impeller::raw_ptr<const impeller::Sampler>(sampler)));
+  EXPECT_FALSE(set->AddTexture(*shader, /*uniform_texture_index=*/1, texture,
+                               impeller::SamplerDescriptor{}));
   EXPECT_TRUE(set->GetTextureBindings().empty());
 }
 
@@ -176,20 +213,98 @@ TEST(FlutterGpuBindingSetTest, ClearDropsEveryBinding) {
   auto set = fml::MakeRefCounted<BindingSet>();
   auto buffer = MakeBuffer(128);
   auto texture = MakeTexture();
-  std::shared_ptr<const impeller::Sampler> sampler =
-      std::make_shared<impeller::testing::MockSampler>(
-          impeller::SamplerDescriptor{});
 
   ASSERT_TRUE(set->AddUniform(*shader, /*uniform_struct_index=*/0, buffer,
                               /*offset_in_bytes=*/0, /*length_in_bytes=*/64));
-  ASSERT_TRUE(
-      set->AddTexture(*shader, /*uniform_texture_index=*/0, texture,
-                      impeller::raw_ptr<const impeller::Sampler>(sampler)));
+  ASSERT_TRUE(set->AddTexture(*shader, /*uniform_texture_index=*/0, texture,
+                              impeller::SamplerDescriptor{}));
+
+  auto compute_shader = MakeComputeShader();
+  ASSERT_TRUE(set->AddStorageBuffer(*compute_shader,
+                                    /*storage_buffer_index=*/0, buffer,
+                                    /*offset_in_bytes=*/0,
+                                    /*length_in_bytes=*/48));
 
   set->Clear();
 
   EXPECT_TRUE(set->GetBufferBindings().empty());
   EXPECT_TRUE(set->GetTextureBindings().empty());
+  EXPECT_TRUE(set->GetStorageBufferBindings().empty());
+}
+
+TEST(FlutterGpuBindingSetTest, AddStorageBufferResolvesTheShaderBinding) {
+  auto shader = MakeComputeShader();
+  auto set = fml::MakeRefCounted<BindingSet>();
+  auto buffer = MakeBuffer(256);
+
+  EXPECT_TRUE(set->AddStorageBuffer(*shader, /*storage_buffer_index=*/0, buffer,
+                                    /*offset_in_bytes=*/64,
+                                    /*length_in_bytes=*/80));
+
+  ASSERT_EQ(set->GetStorageBufferBindings().size(), 1u);
+  EXPECT_TRUE(set->GetBufferBindings().empty());
+  const BindingSet::BufferBinding& binding = set->GetStorageBufferBindings()[0];
+  EXPECT_EQ(binding.stage, impeller::ShaderStage::kCompute);
+  EXPECT_EQ(binding.slot.binding, kParticlesBinding);
+  // The metadata is the shader's own, which identifies the binding.
+  EXPECT_EQ(binding.metadata, &shader->GetStorageBuffer("Particles")->metadata);
+  EXPECT_EQ(binding.metadata->name, "Particles");
+  EXPECT_EQ(binding.view.GetRange().offset, 64u);
+  EXPECT_EQ(binding.view.GetRange().length, 80u);
+}
+
+TEST(FlutterGpuBindingSetTest, AddStorageBufferRejectsInvalidEntries) {
+  auto shader = MakeComputeShader();
+  auto set = fml::MakeRefCounted<BindingSet>();
+  auto buffer = MakeBuffer(64);
+
+  // No storage buffer at that index.
+  EXPECT_FALSE(set->AddStorageBuffer(*shader, /*storage_buffer_index=*/1,
+                                     buffer, /*offset_in_bytes=*/0,
+                                     /*length_in_bytes=*/16));
+  // Past the end of the buffer.
+  EXPECT_FALSE(set->AddStorageBuffer(*shader, /*storage_buffer_index=*/0,
+                                     buffer, /*offset_in_bytes=*/32,
+                                     /*length_in_bytes=*/48));
+  EXPECT_FALSE(set->AddStorageBuffer(*shader, /*storage_buffer_index=*/0,
+                                     /*buffer=*/nullptr,
+                                     /*offset_in_bytes=*/0,
+                                     /*length_in_bytes=*/16));
+  EXPECT_TRUE(set->GetStorageBufferBindings().empty());
+}
+
+// Storage buffers in vertex and fragment shaders need the OpenGL ES tiering
+// that has not landed, so only compute shaders take them.
+TEST(FlutterGpuBindingSetTest, AddStorageBufferRejectsRenderStages) {
+  auto shader = MakeShader(impeller::ShaderStage::kFragment);
+  auto set = fml::MakeRefCounted<BindingSet>();
+  auto buffer = MakeBuffer(64);
+
+  EXPECT_FALSE(set->AddStorageBuffer(*shader, /*storage_buffer_index=*/0,
+                                     buffer, /*offset_in_bytes=*/0,
+                                     /*length_in_bytes=*/16));
+  EXPECT_TRUE(set->GetStorageBufferBindings().empty());
+}
+
+// Recordings hold a snapshot of the set, so a set mutated after it was bound
+// cannot change a draw that was already recorded.
+TEST(FlutterGpuBindingSetTest, SnapshotIsUnaffectedByLaterMutation) {
+  auto shader = MakeShader(impeller::ShaderStage::kFragment);
+  auto set = fml::MakeRefCounted<BindingSet>();
+  auto buffer = MakeBuffer(128);
+
+  ASSERT_TRUE(set->AddUniform(*shader, /*uniform_struct_index=*/0, buffer,
+                              /*offset_in_bytes=*/0, /*length_in_bytes=*/64));
+  auto first = set->Snapshot();
+  EXPECT_EQ(set->Snapshot(), first);
+  ASSERT_EQ(first->buffer_bindings.size(), 1u);
+  ASSERT_EQ(first->reflections.size(), 1u);
+  EXPECT_EQ(first->reflections[0], shader->GetReflection());
+
+  set->Clear();
+  EXPECT_EQ(first->buffer_bindings.size(), 1u);
+  EXPECT_NE(set->Snapshot(), first);
+  EXPECT_TRUE(set->Snapshot()->buffer_bindings.empty());
 }
 
 }  // namespace

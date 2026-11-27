@@ -12,6 +12,8 @@ import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 import 'package:test/test.dart';
 
+import 'temp_git_repo_utils.dart';
+
 //////////////////////////////////////////////////////////////////////
 //                                                                  //
 //  ✨ THINKING OF MOVING/REFACTORING THIS FILE? READ ME FIRST! ✨  //
@@ -81,7 +83,7 @@ void main() {
     tmpDir = localFs.systemTempDirectory.createTempSync('content_aware_hash.');
     testRoot = _FlutterRootUnderTest.fromPath(tmpDir.childDirectory('flutter').path);
 
-    environment = <String, String>{};
+    environment = <String, String>{...kDisableGitAutoMaintenanceEnvironment};
 
     if (const LocalPlatform().isWindows || usePowershellOnPosix) {
       // Copy a minimal set of environment variables needed to run the update_engine_version script in PowerShell.
@@ -104,15 +106,12 @@ void main() {
       ..deps.createSync(recursive: true);
   });
 
-  tearDown(() {
+  tearDown(() async {
     // Git adds a lot of files, we don't want to test for them.
-    final Directory gitDir = testRoot.root.childDirectory('.git');
-    if (gitDir.existsSync()) {
-      gitDir.deleteSync(recursive: true);
-    }
+    await deleteTempDirectory(testRoot.root.childDirectory('.git'));
 
     // Now do cleanup so even if the next step fails, we still deleted tmp.
-    tmpDir.deleteSync(recursive: true);
+    await deleteTempDirectory(tmpDir);
   });
 
   /// Runs `bin/internal/content_aware_hash.{sh|ps1}` and returns the process result.
