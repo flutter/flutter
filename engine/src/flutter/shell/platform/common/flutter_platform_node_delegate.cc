@@ -87,8 +87,12 @@ int FlutterPlatformNodeDelegate::GetChildCount() const {
 gfx::NativeViewAccessible FlutterPlatformNodeDelegate::ChildAtIndex(int index) {
   auto bridge_ptr = bridge_.lock();
   BASE_DCHECK(bridge_ptr);
-  AccessibilityNodeId child = ax_node_->GetUnignoredChildAtIndex(index)->id();
-  return bridge_ptr->GetNativeAccessibleFromId(child);
+  const ui::AXNode* child = ax_node_->GetUnignoredChildAtIndex(index);
+  if (!child) {
+    // An accessibility client can still hold an index from an older tree.
+    return nullptr;
+  }
+  return bridge_ptr->GetNativeAccessibleFromId(child->id());
 }
 
 gfx::Rect FlutterPlatformNodeDelegate::GetBoundsRect(
