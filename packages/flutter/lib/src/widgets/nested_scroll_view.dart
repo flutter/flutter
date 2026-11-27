@@ -1456,8 +1456,8 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
 ///
 /// Bodies recover their own overscroll before competing for the header. While
 /// waiting, each body advances on its own clock until it reaches an outer phase.
-/// The last arrival supplies the shared header's velocity; the others retain
-/// their body offsets. After that header phase, all bodies resume independently.
+/// The last arrival supplies the shared header's velocity. The other bodies
+/// retain their offsets while the header moves.
 /// A group with no outer phases is independent from the start.
 ///
 /// All position activities read the same cached frame state. Replacing a
@@ -1467,10 +1467,10 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
 /// Only a time newer than [_time] advances the group, so x, dx, and isDone reads
 /// by different positions at the same time observe the same handoff.
 ///
-/// A dependent group either waits for all bodies or starts with a header leader.
-/// Once waiting ends, only that leader advances the header. Header completion
-/// releases all bodies, each from its retained offset and the leader's arrival
-/// velocity. Settled recoveries do not participate in header selection. If a
+/// A dependent group either waits for the participating bodies or starts with a
+/// header leader. Only the leader advances the header. When it reaches the
+/// boundary, the waiting bodies resume from their retained offsets with the
+/// leader's arrival velocity. Bodies whose recovery has settled stay idle. If a
 /// participant stops before its boundary and all others are waiting or done,
 /// the group stops without starting the header. Detaching all bodies switches
 /// to an outer-only simulation; newly attached bodies do not join this group.
@@ -1504,14 +1504,14 @@ class _NestedBallisticGroup {
   _NestedScrollPosition outer;
   final _simulations = <_NestedScrollPosition, _NestedCoordinatedSimulation>{};
   _NestedCoordinatedSimulation? _leader;
-  // True until every participating body arrives at an outer phase. It becomes
-  // false when the last arrival is selected as leader and is never re-enabled.
+  // Waiting ends when every participant has arrived and a leader is selected,
+  // or when no participants remain after recovery.
   late bool _waiting;
   // True when no trajectory needs a header phase, either at construction or
   // after every recovery settles. Bodies then advance independently.
   late bool _independent;
-  // Changes from false to true once the leader completes (or skips) its header
-  // phase. The leader's arrival then starts every parked body's final phase.
+  // True once the leader releases the waiting bodies at the header boundary,
+  // or when all recoveries settle without a header phase.
   bool _released = false;
   double _time = 0.0;
   Simulation? _outerOnly;
@@ -1878,8 +1878,7 @@ class _NestedPhase {
 
   const _NestedPhase.body({this.end, this.bodyOuter}) : outer = false;
 
-  // After the only body detaches, the header uses its own coordinates and has
-  // no remaining phase boundary.
+  // After this trajectory's body detaches, the header uses its own coordinates.
   const _NestedPhase.outerOnly() : outer = true, end = null, bodyOuter = null;
 
   final bool outer;
@@ -1907,17 +1906,17 @@ class _NestedPhase {
 /// settles at the body boundary without requesting a header phase. Forward
 /// motion collapses the header before moving even an already scrolled body;
 /// reverse motion drains the body before expanding the header. The final body
-/// phase uses its translated bounds to handle terminal overscroll. Zero velocity
-/// follows the same phase selection and lets the relevant physics decide whether
-/// a simulation is needed.
+/// phase uses its translated bounds to handle terminal overscroll.
 ///
 /// Each phase records its owner and a combined-coordinate end, or null for a
 /// terminal phase. From an in-range start, positive velocity selects header then
 /// body; negative velocity selects body-to-start, header, then body. Already
-/// completed parts are omitted, and zero velocity selects only the body. An
-/// out-of-range start first selects recovery to the nearest body boundary, then
-/// rebuilds the list from that boundary's position and velocity. A bodyOuter
-/// value translates the body's own bounds by the stationary header position.
+/// completed parts are omitted. At zero velocity this trajectory selects the
+/// terminal body phase. If all bodies are in range, the coordinator separately
+/// asks the outer physics to settle the header at zero velocity.
+/// An out-of-range start first selects recovery to the nearest body boundary,
+/// then rebuilds the list from that boundary's position and velocity. A
+/// bodyOuter value translates the body's bounds by the stationary header position.
 ///
 /// Future-phase candidates avoid restarting a trajectory that the next physics
 /// would continue unchanged. They share the active segment's starting state and
@@ -1937,9 +1936,9 @@ class _NestedPhase {
 /// its epoch. Position absorption retains that clock: replacing the active
 /// owner restarts its segment at the current state; replacing an inactive owner
 /// discards only that owner's candidates. Dimension updates retain a trajectory
-/// only if it reproduces the current state. If a single body detaches, the
-/// trajectory switches to outer-only coordinates; groups handle their own
-/// participant removal before advancing their trajectories.
+/// only if it reproduces the current state. If the trajectory keeps driving the
+/// header after its body detaches, it switches to outer-only coordinates. Groups
+/// handle participant removal before advancing their trajectories.
 class _NestedCoordinatedSimulation extends Simulation {
   _NestedCoordinatedSimulation(
     this.coordinator,
@@ -2072,8 +2071,8 @@ class _NestedCoordinatedSimulation extends Simulation {
   }
 
   final _NestedScrollCoordinator coordinator;
-  // Set only when a single attached body detaches. Thereafter this trajectory
-  // owns just the outer position, and never switches back to combined space.
+  // Set when this trajectory's body detaches and it continues driving only the
+  // outer position. Other attached bodies may already have settled.
   bool _independentOuter = false;
   _NestedScrollPosition outer;
   _NestedScrollPosition inner;
