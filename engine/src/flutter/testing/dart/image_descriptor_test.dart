@@ -11,6 +11,28 @@ import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 void main() {
+  test('invalid encoded image reports an asynchronous error', () async {
+    final ImmutableBuffer buffer = await ImmutableBuffer.fromUint8List(
+      Uint8List.fromList(<int>[1, 2, 3]),
+    );
+    try {
+      // Calling encoded must return a Future, rather than throw immediately.
+      final Future<ImageDescriptor> descriptor = ImageDescriptor.encoded(buffer);
+      await expectLater(
+        descriptor,
+        throwsA(
+          isException.having(
+            (Exception error) => error.toString(),
+            'message',
+            contains('Invalid image data'),
+          ),
+        ),
+      );
+    } finally {
+      buffer.dispose();
+    }
+  });
+
   test('basic image descriptor - encoded - greyscale', () async {
     final Uint8List bytes = await readFile('2x2.png');
     final ImmutableBuffer buffer = await ImmutableBuffer.fromUint8List(bytes);
