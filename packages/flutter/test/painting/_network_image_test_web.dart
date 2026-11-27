@@ -8,6 +8,7 @@ import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/src/painting/_network_image_web.dart' hide NetworkImage;
 import 'package:flutter/src/painting/_web_image_info_web.dart';
 import 'package:flutter/src/web.dart' as web_shim;
@@ -20,7 +21,7 @@ import '../image_data.dart';
 import '../widgets/web_platform_view_registry_utils.dart';
 import '_test_http_request.dart';
 
-late final ui.Image testImage;
+late ui.Image testImage;
 
 void runTests() {
   _TestBinding.ensureInitialized();
@@ -30,6 +31,12 @@ void runTests() {
     testImage = await createTestImage();
     fakePlatformViewRegistry = FakePlatformViewRegistry();
     ui_web.debugOverridePlatformViewRegistry(fakePlatformViewRegistry);
+  });
+
+  setUp(() async {
+    if (testImage.debugDisposed) {
+      testImage = await createTestImage();
+    }
   });
 
   tearDown(() {
@@ -390,6 +397,222 @@ void runTests() {
     expect(imageCache.currentSize, 0);
     // The test passes if there are no crashes.
   });
+
+  // The tests below check that a cached animated NetworkImage only decodes
+  // frames while something is listening to it.
+  void setUpHttpRequest() {
+    httpRequestFactory = () {
+      final testHttpRequest = TestHttpRequest()
+        ..status = 200
+        ..mockEvent = MockEvent('load', web.Event('load'))
+        ..response = Uint8List.fromList(kTransparentImage).buffer;
+      return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
+    };
+  }
+
+  Future<void> pumpFor(WidgetTester tester, int count) async {
+    for (var i = 0; i < count; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+  }
+
+  testWidgets('Cached animated NetworkImage stops decoding frames when no widget shows it', (
+    WidgetTester tester,
+  ) async {
+    addTearDown(imageCache.clear);
+    setUpHttpRequest();
+    final codec = _LoopingCodec();
+    _TestBinding.instance.overrideCodec = codec;
+    final provider = NetworkImage(_uniqueUrl(tester.testDescription));
+
+    // Shown: the animation runs.
+    await tester.pumpWidget(Image(image: provider));
+    await tester.pump();
+    await pumpFor(tester, 10);
+    expect(codec.framesDecoded, greaterThan(2));
+
+    // Unmounted: still cached, but no widget shows it.
+    await tester.pumpWidget(const SizedBox());
+    final ImageCacheStatus status = imageCache.statusForKey(provider);
+    expect(status.keepAlive, isTrue);
+    expect(status.live, isFalse);
+
+    // Let an in-flight decode finish.
+    await pumpFor(tester, 3);
+    final int snapshot = codec.framesDecoded;
+
+    // Paused: no new frames and no scheduled frame callbacks.
+    await pumpFor(tester, 10);
+    expect(codec.framesDecoded, snapshot);
+    expect(SchedulerBinding.instance.transientCallbackCount, 0);
+
+    // Shown again: the animation resumes.
+    await tester.pumpWidget(Image(image: provider));
+    await pumpFor(tester, 5);
+    expect(codec.framesDecoded, greaterThan(snapshot));
+  });
+
+  testWidgets(
+    'A listener re-attached to a paused cached NetworkImage receives exactly one synchronous frame',
+    (WidgetTester tester) async {
+      addTearDown(imageCache.clear);
+      setUpHttpRequest();
+      final codec = _LoopingCodec();
+      _TestBinding.instance.overrideCodec = codec;
+      final provider = NetworkImage(_uniqueUrl(tester.testDescription));
+
+      final ImageStream stream = provider.resolve(ImageConfiguration.empty);
+      var receivedFirstImage = false;
+      final listenerA = ImageStreamListener((ImageInfo info, bool _) {
+        receivedFirstImage = true;
+        info.dispose();
+      });
+      stream.addListener(listenerA);
+      await tester.pump();
+      await pumpFor(tester, 2);
+      expect(receivedFirstImage, isTrue);
+
+      // No listeners: the animation pauses.
+      stream.removeListener(listenerA);
+      await pumpFor(tester, 3);
+
+      // A new listener gets the current frame once, not a second copy
+      // replayed by the inner completer.
+      final synchronousCalls = <bool>[];
+      final listenerB = ImageStreamListener((ImageInfo info, bool synchronousCall) {
+        synchronousCalls.add(synchronousCall);
+        info.dispose();
+      });
+      stream.addListener(listenerB);
+      expect(synchronousCalls, <bool>[true]);
+
+      // The animation has resumed.
+      await pumpFor(tester, 3);
+      expect(synchronousCalls.length, greaterThan(1));
+      stream.removeListener(listenerB);
+      imageCache.clear();
+      SchedulerBinding.instance.scheduleFrame();
+      await tester.pump();
+    },
+  );
+
+  testWidgets('Evicting a paused cached animated NetworkImage disposes its codec', (
+    WidgetTester tester,
+  ) async {
+    addTearDown(imageCache.clear);
+    setUpHttpRequest();
+    final codec = _LoopingCodec();
+    _TestBinding.instance.overrideCodec = codec;
+    final provider = NetworkImage(_uniqueUrl(tester.testDescription));
+
+    await tester.pumpWidget(Image(image: provider));
+    await tester.pump();
+    await pumpFor(tester, 3);
+    expect(codec.framesDecoded, greaterThan(0));
+
+    // Paused in the cache: the codec stays alive.
+    await tester.pumpWidget(const SizedBox());
+    await pumpFor(tester, 3);
+    expect(codec.disposed, isFalse);
+
+    // Evicted: the codec is disposed. The cache releases its handle after the
+    // next frame.
+    expect(imageCache.evict(provider), isTrue);
+    SchedulerBinding.instance.scheduleFrame();
+    await tester.pump();
+    expect(codec.disposed, isTrue);
+    expect(imageCache.statusForKey(provider).untracked, isTrue);
+  });
+
+  testWidgets(
+    'Re-attaching a listener with onError after a decode error does not report an unhandled error',
+    (WidgetTester tester) async {
+      setUpHttpRequest();
+      _TestBinding.instance.overrideCodec = _LoopingCodec(
+        onFrame: (int frameNumber) {
+          if (frameNumber == 0) {
+            throw StateError('decode failed');
+          }
+          return Completer<void>().future;
+        },
+      );
+      final provider = NetworkImage(_uniqueUrl(tester.testDescription));
+      // Bypass the ImageCache, whose pending listener would stay attached
+      // until the first frame.
+      final ImageStreamCompleter completer = provider.loadImage(
+        provider,
+        _TestBinding.instance.instantiateImageCodecWithSize,
+      );
+      ImageStreamCompleterHandle? handle = completer.keepAlive();
+      addTearDown(() => handle?.dispose());
+
+      final errorsA = <Object>[];
+      final listenerA = ImageStreamListener(
+        (ImageInfo info, bool _) => info.dispose(),
+        onError: (Object e, _) => errorsA.add(e),
+      );
+      completer.addListener(listenerA);
+      await tester.pump();
+      expect(errorsA, <Matcher>[isStateError]);
+      expect(tester.takeException(), isNull);
+
+      completer.removeListener(listenerA);
+
+      // Re-subscribing replays the already forwarded error, which must not be
+      // reported again as unhandled. listenerB still gets it once.
+      final errorsB = <Object>[];
+      final listenerB = ImageStreamListener(
+        (ImageInfo info, bool _) => info.dispose(),
+        onError: (Object e, _) => errorsB.add(e),
+      );
+      completer.addListener(listenerB);
+      expect(errorsB, <Matcher>[isStateError]);
+      expect(tester.takeException(), isNull);
+
+      completer.removeListener(listenerB);
+      handle.dispose();
+      handle = null;
+      await tester.pump();
+    },
+  );
+
+  testWidgets(
+    'Resuming Image without errorBuilder after a paused decode error reports the error once',
+    (WidgetTester tester) async {
+      addTearDown(imageCache.clear);
+      setUpHttpRequest();
+      final frame0 = Completer<void>();
+      final frame1 = Completer<void>();
+      final codec = _LoopingCodec(
+        onFrame: (int frameNumber) => switch (frameNumber) {
+          0 => frame0.future,
+          1 => frame1.future,
+          _ => Completer<void>().future,
+        },
+      );
+      _TestBinding.instance.overrideCodec = codec;
+      final provider = NetworkImage(_uniqueUrl(tester.testDescription));
+
+      await tester.pumpWidget(TickerMode(enabled: true, child: Image(image: provider)));
+      await tester.pump();
+      frame0.complete();
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(codec.framesDecoded, 2);
+
+      // Paused: an in-flight decode fails, but nothing is reported yet.
+      await tester.pumpWidget(TickerMode(enabled: false, child: Image(image: provider)));
+      frame1.completeError(StateError('decode failed'));
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+
+      // Resumed: the error is reported exactly once.
+      await tester.pumpWidget(TickerMode(enabled: true, child: Image(image: provider)));
+      expect(tester.takeException(), isStateError);
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(find.textContaining('decode failed'), findsOneWidget);
+    },
+  );
 
   testWidgets('Can handle gestures when using a Platform View', (WidgetTester tester) async {
     final testImg = TestImgElement();
@@ -943,11 +1166,40 @@ class _TwoFrameCodec implements ui.Codec {
   void dispose() {}
 }
 
-class _TestFrameInfo implements ui.FrameInfo {
-  _TestFrameInfo(this.image);
+class _LoopingCodec implements ui.Codec {
+  _LoopingCodec({this.onFrame});
+
+  final _OnFrameCallback? onFrame;
+  int framesDecoded = 0;
+  bool disposed = false;
 
   @override
-  final Duration duration = Duration.zero;
+  int get frameCount => 2;
+
+  @override
+  int get repetitionCount => -1;
+
+  @override
+  Future<ui.FrameInfo> getNextFrame() async {
+    final int frameNumber = framesDecoded;
+    framesDecoded += 1;
+    if (onFrame != null) {
+      await onFrame!(frameNumber);
+    }
+    return _TestFrameInfo(testImage.clone(), duration: const Duration(milliseconds: 100));
+  }
+
+  @override
+  void dispose() {
+    disposed = true;
+  }
+}
+
+class _TestFrameInfo implements ui.FrameInfo {
+  _TestFrameInfo(this.image, {this.duration = Duration.zero});
+
+  @override
+  final Duration duration;
 
   @override
   final ui.Image image;

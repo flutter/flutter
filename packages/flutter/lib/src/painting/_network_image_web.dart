@@ -266,7 +266,10 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 /// An [ImageStreamCompleter] that delegates to another [ImageStreamCompleter]
 /// that is loaded asynchronously.
 ///
-/// This completer keeps its child completer alive until this completer is disposed.
+/// The child completer is kept alive with a keep-alive handle until this
+/// completer is disposed, but is only listened to while this completer has
+/// listeners, so that a child such as [MultiFrameImageStreamCompleter] can
+/// pause decoding when nothing is listening.
 class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
   _ForwardingImageStreamCompleter(
     this.task, {
@@ -282,7 +285,10 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
           return;
         }
         completer = value;
-        completer.addListener(listener);
+        _completerHandle = completer.keepAlive();
+        if (hasListeners) {
+          _subscribeToCompleter();
+        }
       },
       onError: (Object error, StackTrace stack) {
         reportError(
@@ -300,9 +306,32 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
   bool resolved = false;
   late final ImageStreamCompleter completer;
 
+  /// Keeps [completer] alive while this completer is not listening to it.
+  ///
+  /// Without it, [completer] would be disposed as soon as this completer
+  /// removes [_innerListener]. Released in [onDisposed].
+  ImageStreamCompleterHandle? _completerHandle;
+
+  /// Whether [_innerListener] is currently added to [completer].
+  ///
+  /// This is true only while this completer has listeners of its own, so that
+  /// [completer] sees no listeners, and can pause, when nothing is listening.
+  bool _subscribed = false;
+
+  /// The last error forwarded from [completer] to this completer.
+  ///
+  /// When this completer subscribes again, [completer] immediately replays
+  /// its last error. If that error was already forwarded, the replay is
+  /// ignored so it is not reported twice.
+  Object? _lastForwardedError;
+
   bool _disposed = false;
 
-  late final ImageStreamListener listener = ImageStreamListener(
+  // reportErrors is false because this completer reports forwarded errors to
+  // its own listeners. An error that reaches [completer] while this completer
+  // is not subscribed is kept by [completer] and forwarded when a listener is
+  // added again, instead of being sent to FlutterError.onError by [completer].
+  late final ImageStreamListener _innerListener = ImageStreamListener(
     (ImageInfo image, bool synchronousCall) {
       setImage(image);
     },
@@ -310,16 +339,63 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
       reportImageChunkEvent(event);
     },
     onError: (Object exception, StackTrace? stackTrace) {
+      if (identical(exception, _lastForwardedError)) {
+        return;
+      }
+      _lastForwardedError = exception;
       reportError(exception: exception, stack: stackTrace);
     },
+    reportErrors: false,
   );
 
   @override
-  void onDisposed() {
-    if (resolved) {
-      completer.removeListener(listener);
+  void addListener(ImageStreamListener listener) {
+    // Subscribe before adding, so the child's synchronous replay of its
+    // current frame lands in setImage while this completer has no listeners
+    // yet. The new listener then receives exactly one frame, from
+    // super.addListener's own replay.
+    if (!_disposed && !hasListeners) {
+      _subscribeToCompleter();
     }
+    super.addListener(listener);
+  }
+
+  @override
+  void removeListener(ImageStreamListener listener) {
+    super.removeListener(listener);
+    // super.removeListener may already have disposed this completer (no
+    // listeners and no handles), in which case onDisposed unsubscribed and
+    // this is a no-op.
+    if (!hasListeners) {
+      _unsubscribeFromCompleter();
+    }
+  }
+
+  void _subscribeToCompleter() {
+    if (!resolved || _subscribed) {
+      return;
+    }
+    // Set before calling addListener: the child may synchronously emit a
+    // frame, and a listener reacting to it may remove itself, re-entering
+    // _unsubscribeFromCompleter.
+    _subscribed = true;
+    completer.addListener(_innerListener);
+  }
+
+  void _unsubscribeFromCompleter() {
+    if (!_subscribed) {
+      return;
+    }
+    _subscribed = false;
+    completer.removeListener(_innerListener);
+  }
+
+  @override
+  void onDisposed() {
     _disposed = true;
+    _unsubscribeFromCompleter();
+    _completerHandle?.dispose();
+    _completerHandle = null;
     super.onDisposed();
   }
 }
