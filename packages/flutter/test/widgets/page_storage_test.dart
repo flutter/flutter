@@ -35,6 +35,69 @@ void main() {
     expect(PageStorage.of(builderElement).readState(builderElement), equals(storedValue));
   });
 
+  testWidgets('PageStorage read and write by namespace', (WidgetTester tester) async {
+    const Key builderKey = PageStorageKey<String>('builderKey');
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: StatefulBuilder(
+          key: builderKey,
+          builder: (BuildContext context, StateSetter setter) {
+            final PageStorageBucket bucket = PageStorage.of(context);
+            bucket.writeState(context, 'default');
+            bucket.writeState(context, 'text', namespace: Text);
+            bucket.writeState(context, 'placeholder', namespace: Placeholder);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    final Element builderElement = tester.element(find.byKey(builderKey));
+    final PageStorageBucket bucket = PageStorage.of(builderElement);
+    expect(bucket.readState(builderElement), 'default');
+    expect(bucket.readState(builderElement, namespace: Text), 'text');
+    expect(bucket.readState(builderElement, namespace: Placeholder), 'placeholder');
+    expect(bucket.readState(builderElement, namespace: SizedBox), isNull);
+  });
+
+  testWidgets('PageStorage asserts when both identifier and namespace are provided', (
+    WidgetTester tester,
+  ) async {
+    const Key builderKey = PageStorageKey<String>('builderKey');
+    await tester.pumpWidget(const TestWidgetsApp(home: SizedBox(key: builderKey)));
+
+    final Element builderElement = tester.element(find.byKey(builderKey));
+    final PageStorageBucket bucket = PageStorage.of(builderElement);
+    expect(
+      () => bucket.writeState(builderElement, 'text', identifier: 1, namespace: Text),
+      throwsAssertionError,
+    );
+    expect(
+      () => bucket.readState(builderElement, identifier: 1, namespace: Text),
+      throwsAssertionError,
+    );
+  });
+
+  testWidgets('PageStorage does not save by namespace without a PageStorageKey', (
+    WidgetTester tester,
+  ) async {
+    const builderKey = Key('builderKey');
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: StatefulBuilder(
+          key: builderKey,
+          builder: (BuildContext context, StateSetter setter) {
+            PageStorage.of(context).writeState(context, 'text', namespace: Text);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    final Element builderElement = tester.element(find.byKey(builderKey));
+    expect(PageStorage.of(builderElement).readState(builderElement, namespace: Text), isNull);
+  });
+
   testWidgets('PageStorage read and write by identifier', (WidgetTester tester) async {
     late StateSetter setState;
     var storedValue = 0;
