@@ -314,6 +314,7 @@ if (enable_ios_unittests) {
       "framework/Source/FlutterKeyboardManagerTest.mm",
       "framework/Source/FlutterMetalLayerTest.mm",
       "framework/Source/FlutterPlatformPluginTest.mm",
+      "framework/Source/FlutterPlatformViewsControllerObjCTest.m",
       "framework/Source/FlutterPlatformViewsTest.mm",
       "framework/Source/FlutterPlatformViewsTestHelper.h",
       "framework/Source/FlutterPlatformViewsTestHelper.mm",

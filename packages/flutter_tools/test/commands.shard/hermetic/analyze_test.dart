@@ -265,6 +265,7 @@ void main() {
             '--disable-server-feature-search',
             '--client-id=flutter-analyze',
             '--no-with-fine-dependencies',
+            '--plugins',
             '--suppress-analytics',
           ],
           exitCode: 255,
@@ -274,6 +275,134 @@ void main() {
       await expectLater(
         runner.run(<String>['analyze', '--benchmark', '--plugins']),
         throwsA(isA<ToolExit>()),
+      );
+    });
+
+    Future<void> expectServerArgs({
+      required List<String> analyzeArgs,
+      required List<String> expectedServerFlags,
+      bool isRunningOnBot = false,
+    }) async {
+      final localProcessManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'Artifact.engineDartSdkPath/bin/dart',
+            'language-server',
+            '--dart-sdk',
+            'Artifact.engineDartSdkPath',
+            '--disable-server-feature-completion',
+            '--disable-server-feature-search',
+            '--client-id=flutter-analyze',
+            '--no-with-fine-dependencies',
+            ...expectedServerFlags,
+            '--suppress-analytics',
+          ],
+          exitCode: 255,
+          stderr: 'error',
+        ),
+      ]);
+      final localCommand = AnalyzeCommand(
+        allProjectValidators: <ProjectValidator>[],
+        suppressAnalytics: true,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          botDetector: FakeBotDetector(isRunningOnBot),
+          cache: FakeCache(fileSystem: fileSystem, flutterRoot: '/home/user/flutter'),
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: localProcessManager,
+        ),
+      );
+      final CommandRunner<void> localRunner = createTestCommandRunner(localCommand);
+      await expectLater(
+        localRunner.run(<String>['analyze', ...analyzeArgs]),
+        throwsA(isA<ToolExit>()),
+      );
+      expect(localProcessManager, hasNoRemainingExpectations);
+    }
+
+    test('--plugins passes --plugins to language-server', () async {
+      await expectServerArgs(
+        analyzeArgs: <String>['--plugins'],
+        expectedServerFlags: <String>['--plugins'],
+      );
+    });
+
+    test('plugin trust flags pass expected flags to language-server', () async {
+      await expectServerArgs(
+        analyzeArgs: <String>['--trust-plugins'],
+        expectedServerFlags: <String>['--trust-plugins'],
+      );
+      await expectServerArgs(
+        analyzeArgs: <String>['--always-trust-plugins'],
+        expectedServerFlags: <String>['--always-trust-plugins'],
+      );
+      await expectServerArgs(
+        analyzeArgs: <String>['--never-trust-plugins'],
+        expectedServerFlags: <String>['--never-trust-plugins'],
+      );
+    });
+
+    test('plugin trust flags are mutually exclusive', () async {
+      for (final args in const <List<String>>[
+        <String>['--trust-plugins', '--always-trust-plugins'],
+        <String>['--trust-plugins', '--never-trust-plugins'],
+        <String>['--always-trust-plugins', '--never-trust-plugins'],
+        <String>['--trust-plugins', '--always-trust-plugins', '--never-trust-plugins'],
+      ]) {
+        await expectLater(
+          runner.run(<String>['analyze', ...args]),
+          throwsToolExit(
+            message:
+                'Cannot specify more than one of "--trust-plugins", '
+                '"--always-trust-plugins", and "--never-trust-plugins".',
+          ),
+        );
+      }
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    test('plugin trust flags are not negatable', () async {
+      for (final flag in const <String>[
+        '--no-trust-plugins',
+        '--no-always-trust-plugins',
+        '--no-never-trust-plugins',
+      ]) {
+        await expectLater(runner.run(<String>['analyze', flag]), throwsA(isA<UsageException>()));
+      }
+    });
+
+    test('enables plugins by default when running on a bot', () async {
+      await expectServerArgs(
+        analyzeArgs: const <String>[],
+        expectedServerFlags: <String>['--plugins'],
+        isRunningOnBot: true,
+      );
+      await expectServerArgs(
+        analyzeArgs: <String>['--no-plugins'],
+        expectedServerFlags: <String>['--no-plugins'],
+        isRunningOnBot: true,
+      );
+      await expectServerArgs(
+        analyzeArgs: <String>['--benchmark'],
+        expectedServerFlags: <String>['--no-plugins'],
+        isRunningOnBot: true,
+      );
+      await expectServerArgs(
+        analyzeArgs: <String>['--never-trust-plugins'],
+        expectedServerFlags: <String>['--never-trust-plugins'],
+        isRunningOnBot: true,
+      );
+      await expectServerArgs(
+        analyzeArgs: <String>['--trust-plugins'],
+        expectedServerFlags: <String>['--plugins', '--trust-plugins'],
+        isRunningOnBot: true,
+      );
+      await expectServerArgs(
+        analyzeArgs: <String>['--always-trust-plugins'],
+        expectedServerFlags: <String>['--plugins', '--always-trust-plugins'],
+        isRunningOnBot: true,
       );
     });
   });

@@ -91,12 +91,29 @@ abstract class AnalyzeBase {
   bool get isBenchmarking => argResults['benchmark'] as bool;
   String? get protocolTrafficLog => argResults['protocol-traffic-log'] as String?;
 
+  bool _boolFlag(String name) => argResults.options.contains(name) && argResults.flag(name);
+
   @protected
-  bool get usePlugins {
+  bool get trustPlugins => _boolFlag('trust-plugins');
+
+  @protected
+  bool get alwaysTrustPlugins => _boolFlag('always-trust-plugins');
+
+  @protected
+  bool get neverTrustPlugins => _boolFlag('never-trust-plugins');
+
+  @protected
+  bool? get usePlugins {
     if (argResults.options.contains('plugins') && argResults.wasParsed('plugins')) {
-      return argResults['plugins'] as bool;
+      return argResults.flag('plugins');
     }
-    return !isBenchmarking;
+    if (isBenchmarking) {
+      return false;
+    }
+    if (!neverTrustPlugins && toolContext.botDetector.isRunningOnBot) {
+      return true;
+    }
+    return null;
   }
 
   /// Generate an analysis summary for both [AnalyzeOnce], [AnalyzeContinuously].
