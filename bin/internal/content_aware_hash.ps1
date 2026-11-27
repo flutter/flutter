@@ -25,50 +25,7 @@ $flutterRoot = (Get-Item $progName).parent.parent.FullName
 # engine: all the code in the engine folder
 # bin/internal/release-candidate-branch.version: release marker
 $trackedFiles = "DEPS", "engine", "bin/internal/release-candidate-branch.version"
-$baseRef = "HEAD"
-$currentBranch = (git -C "$flutterRoot" rev-parse --abbrev-ref HEAD).Trim()
-
-# By default, the content hash is based on HEAD.
-# For local development branches, we want to base the hash on the merge-base
-# with the remote tracking branch, so that we don't rebuild the world every
-# time we make a change to the engine.
-#
-# The following conditions are exceptions where we want to use HEAD.
-# 1. The current branch is a release branch (main, master, stable, beta).
-# 2. The current branch is a GitHub temporary merge branch.
-# 3. The current branch is a release candidate branch.
-# 4. The current checkout is a shallow clone.
-# 5. There is no current branch. E.g. running on CI/CD.
-$isShallow = Test-Path -Path (Join-Path "$flutterRoot" ".git/shallow")
-if (($currentBranch -ne "main") -and
-    ($currentBranch -ne "master") -and
-    ($currentBranch -ne "stable") -and
-    ($currentBranch -ne "beta") -and
-    (-not (($currentBranch -eq "HEAD") -and (-not [string]::IsNullOrEmpty($env:LUCI_CONTEXT)))) -and
-    (-not $currentBranch.StartsWith("gh-readonly-queue/master/pr-")) -and
-    (-not ($currentBranch -like "flutter-*-candidate.*")) -and
-    (-not $isShallow)) {
-
-    # This is a development branch. Find the merge-base.
-    # We will fallback to origin if upstream is not detected.
-    $remote = "origin"
-    $ErrorActionPreference = 'SilentlyContinue'
-    git -C "$flutterRoot" remote get-url upstream *> $null
-    if ($LASTEXITCODE -eq 0) {
-        $remote = "upstream"
-    }
-
-    # Try to find the merge-base with master, then main.
-    $mergeBase = (git -C "$flutterRoot" merge-base HEAD "$remote/master" 2>$null).Trim()
-    if ([string]::IsNullOrEmpty($mergeBase)) {
-        $mergeBase = (git -C "$flutterRoot" merge-base HEAD "$remote/main" 2>$null).Trim()
-    }
-    $ErrorActionPreference = "Stop"
-
-    if ($mergeBase) {
-        $baseRef = "$mergeBase"
-    }
-}
+$baseRef = if ($args.Count -gt 0 -and -not [string]::IsNullOrEmpty($args[0])) { $args[0] } else { "HEAD" }
 
 # Removing the "cmd" requirement enables powershell usage on other hosts
 # 1. git ls-tree | Out-String - combines output of pipeline into a single string
@@ -79,6 +36,17 @@ if (($currentBranch -ne "main") -and
 # 3. Out-File -NoNewline -Encoding ascii outputs 8bit ascii
 # 4. git hash-object with stdin from a pipeline consumes UTF-16, so consume
 #.   the contents of hash.txt
-(git -C "$flutterRoot" ls-tree "$baseRef" -- $trackedFiles | Out-String) -replace "`r`n", "`n"  | Out-File -NoNewline -Encoding ascii hash.txt
-git hash-object hash.txt
-Remove-Item hash.txt
+$lsTreeOutput = git -C "$flutterRoot" ls-tree "$baseRef" -- $trackedFiles
+if ($LASTEXITCODE -ne 0) {
+    exit $LASTEXITCODE
+}
+$hashTmp = [System.IO.Path]::GetTempFileName()
+try {
+    ($lsTreeOutput | Out-String) -replace "`r`n", "`n" | Out-File -NoNewline -Encoding ascii $hashTmp
+    git hash-object $hashTmp
+    if ($LASTEXITCODE -ne 0) {
+        exit $LASTEXITCODE
+    }
+} finally {
+    Remove-Item $hashTmp -Force -ErrorAction SilentlyContinue
+}

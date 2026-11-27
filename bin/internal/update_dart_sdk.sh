@@ -21,11 +21,20 @@ DART_SDK_PATH_OLD="$DART_SDK_PATH.old"
 ENGINE_STAMP="$FLUTTER_ROOT/bin/cache/engine-dart-sdk.stamp"
 OS="$(uname -s)"
 
-ENGINE_VERSION=$(< "$FLUTTER_ROOT/bin/cache/engine.stamp")
+ENGINE_VERSION_STAMP="$FLUTTER_ROOT/bin/cache/engine.stamp"
+ENGINE_FALLBACK_STAMP="$FLUTTER_ROOT/bin/cache/engine_fallback.stamp"
+ENGINE_VERSION=$(< "$ENGINE_VERSION_STAMP")
+ENGINE_VERSION="${ENGINE_VERSION//[[:space:]]/}"
 ENGINE_REALM=$(< "$FLUTTER_ROOT/bin/cache/engine.realm")
 ENGINE_REALM="${ENGINE_REALM//[[:space:]]/}"
 
-if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != "$(< "$ENGINE_STAMP")" ]; then
+INSTALLED_ENGINE_VERSION=""
+if [ -f "$ENGINE_STAMP" ]; then
+  INSTALLED_ENGINE_VERSION=$(< "$ENGINE_STAMP")
+  INSTALLED_ENGINE_VERSION="${INSTALLED_ENGINE_VERSION//[[:space:]]/}"
+fi
+
+if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != "$INSTALLED_ENGINE_VERSION" ]; then
   command -v curl > /dev/null 2>&1 || {
     >&2 echo
     >&2 echo 'Missing "curl" tool. Unable to download Dart SDK.'
@@ -146,31 +155,115 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != "$(< "$ENGINE_STAMP")" ]; 
     verbose_curl="--verbose"
   fi
 
-  curl ${verbose_curl} --retry 3 --continue-at - --location --output "$DART_SDK_ZIP" "$DART_SDK_URL" 2>&1 || {
-    curlExitCode=$?
-    # Handle range errors specially: retry again with disabled ranges (`--continue-at -` argument)
-    # When this could happen:
-    # - missing support of ranges in proxy servers
-    # - curl with broken handling of completed downloads
-    #   This is not a proper fix, but doesn't require any user input
-    # - mirror of flutter storage without support of ranges
-    #
-    # 33  HTTP range error. The range "command" didn't work.
-    # https://man7.org/linux/man-pages/man1/curl.1.html#EXIT_CODES
-    if [ "$curlExitCode" -ne 33 ]; then
-      exit "$curlExitCode"
-    fi
-    curl ${verbose_curl} --retry 3 --location --output "$DART_SDK_ZIP" "$DART_SDK_URL" 2>&1
-  } || {
-    >&2 echo
-    >&2 echo "Failed to retrieve the Dart SDK from: $DART_SDK_URL"
-    >&2 echo "If you're located in China, please see this page:"
-    >&2 echo "  https://flutter.dev/community/china"
-    >&2 echo
-    rm -f -- "$DART_SDK_ZIP"
-    rm -rf -- "$DART_SDK_PATH_TEMP"
-    exit 1
+  download_dart_sdk() {
+    local url="$1"
+    curl ${verbose_curl} --fail --retry 3 --continue-at - --location --output "$DART_SDK_ZIP" "$url" 2>&1 || {
+      local curlExitCode=$?
+      # Handle range errors specially: retry again with disabled ranges (`--continue-at -` argument)
+      # When this could happen:
+      # - missing support of ranges in proxy servers
+      # - curl with broken handling of completed downloads
+      #   This is not a proper fix, but doesn't require any user input
+      # - mirror of flutter storage without support of ranges
+      #
+      # 33  HTTP range error. The range "command" didn't work.
+      # https://man7.org/linux/man-pages/man1/curl.1.html#EXIT_CODES
+      if [ "$curlExitCode" -ne 33 ]; then
+        return "$curlExitCode"
+      fi
+      curl ${verbose_curl} --fail --retry 3 --location --output "$DART_SDK_ZIP" "$url" 2>&1
+    }
   }
+
+  write_fallback_stamps() {
+    local target_version="$1"
+    local actual_version="$2"
+    local fb_tmp="$ENGINE_FALLBACK_STAMP.tmp.$$"
+    local es_tmp="$ENGINE_VERSION_STAMP.tmp.$$"
+    echo "${target_version}:${actual_version}" > "$fb_tmp" && mv "$fb_tmp" "$ENGINE_FALLBACK_STAMP"
+    echo "${actual_version}" > "$es_tmp" && mv "$es_tmp" "$ENGINE_VERSION_STAMP"
+  }
+
+  ORIGINAL_ENGINE_VERSION=""
+  if ! download_dart_sdk "$DART_SDK_URL"; then
+    rm -f -- "$DART_SDK_ZIP"
+
+    STRICT_ENGINE_VERSION=false
+    case "${FLUTTER_STRICT_ENGINE_VERSION}" in
+      1|[Tt][Rr][Uu][Ee])
+        STRICT_ENGINE_VERSION=true
+        ;;
+      0|[Ff][Aa][Ll][Ss][Ee])
+        STRICT_ENGINE_VERSION=false
+        ;;
+      *)
+        if [ -n "${LUCI_CONTEXT}" ]; then
+          STRICT_ENGINE_VERSION=true
+        fi
+        ;;
+    esac
+
+    FALLBACK_ENGINE_VERSION=""
+    if [ "$STRICT_ENGINE_VERSION" = "false" ] && [ -z "$ENGINE_REALM" ] && [ -z "$FLUTTER_PREBUILT_ENGINE_VERSION" ]; then
+      unset GIT_DIR
+      unset GIT_INDEX_FILE
+      unset GIT_WORK_TREE
+      if [ -z "$(git -C "$FLUTTER_ROOT" ls-files bin/internal/engine.version 2>/dev/null)" ]; then
+        set +e
+        MERGEBASE=$(git -C "$FLUTTER_ROOT" merge-base HEAD upstream/master 2>/dev/null || \
+          git -C "$FLUTTER_ROOT" merge-base HEAD origin/master 2>/dev/null || \
+          git -C "$FLUTTER_ROOT" merge-base HEAD upstream/main 2>/dev/null || \
+          git -C "$FLUTTER_ROOT" merge-base HEAD origin/main 2>/dev/null)
+        if [ -n "$MERGEBASE" ]; then
+          FALLBACK_ENGINE_VERSION=$("$FLUTTER_ROOT/bin/internal/content_aware_hash.sh" "$MERGEBASE" 2>/dev/null)
+          FALLBACK_ENGINE_VERSION="${FALLBACK_ENGINE_VERSION//[[:space:]]/}"
+        fi
+        set -e
+      fi
+    fi
+
+    if [ -n "$FALLBACK_ENGINE_VERSION" ] && [ "$FALLBACK_ENGINE_VERSION" != "$ENGINE_VERSION" ]; then
+      >&2 echo "================================================================================"
+      >&2 echo "WARNING: Engine artifacts for $ENGINE_VERSION are not available."
+      >&2 echo "This usually happens when you have local engine changes or are on a commit that"
+      >&2 echo "has not finished building on CI yet."
+      >&2 echo "Falling back to engine artifacts from merge-base ($FALLBACK_ENGINE_VERSION)."
+      >&2 echo "Set FLUTTER_STRICT_ENGINE_VERSION=true to fail instead of falling back, or"
+      >&2 echo "delete bin/cache/engine_fallback.stamp to retry downloading $ENGINE_VERSION."
+      >&2 echo "================================================================================"
+      ORIGINAL_ENGINE_VERSION="$ENGINE_VERSION"
+      ENGINE_VERSION="$FALLBACK_ENGINE_VERSION"
+
+      if [ -f "$ENGINE_STAMP" ] && [ "$ENGINE_VERSION" = "$INSTALLED_ENGINE_VERSION" ] && [ -d "$DART_SDK_PATH" ]; then
+        rm -rf -- "$DART_SDK_PATH_TEMP"
+        write_fallback_stamps "$ORIGINAL_ENGINE_VERSION" "$ENGINE_VERSION"
+        exit 0
+      fi
+
+      DART_SDK_URL="$DART_SDK_BASE_URL/flutter_infra_release/flutter/$ENGINE_VERSION/$DART_ZIP_NAME"
+      >&2 echo "Downloading $OS $ARCH Dart SDK from Flutter engine $ENGINE_VERSION..."
+      download_dart_sdk "$DART_SDK_URL" || {
+        >&2 echo
+        >&2 echo "Failed to retrieve the Dart SDK from: $DART_SDK_URL"
+        >&2 echo "If you're located in China, please see this page:"
+        >&2 echo "  https://flutter.dev/community/china"
+        >&2 echo
+        rm -f -- "$DART_SDK_ZIP"
+        rm -rf -- "$DART_SDK_PATH_TEMP"
+        exit 1
+      }
+    else
+      >&2 echo
+      >&2 echo "Failed to retrieve the Dart SDK from: $DART_SDK_URL"
+      >&2 echo "If you're located in China, please see this page:"
+      >&2 echo "  https://flutter.dev/community/china"
+      >&2 echo
+      rm -f -- "$DART_SDK_ZIP"
+      rm -rf -- "$DART_SDK_PATH_TEMP"
+      exit 1
+    fi
+  fi
+
   unzip -o -q "$DART_SDK_ZIP" -d "$DART_SDK_PATH_TEMP" || {
     >&2 echo
     >&2 echo "It appears that the downloaded file is corrupt; please try again."
@@ -211,6 +304,9 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != "$(< "$ENGINE_STAMP")" ]; 
   }
   rm -rf -- "$DART_SDK_PATH_TEMP"
 
+  if [ -n "$ORIGINAL_ENGINE_VERSION" ]; then
+    write_fallback_stamps "$ORIGINAL_ENGINE_VERSION" "$ENGINE_VERSION"
+  fi
   echo "$ENGINE_VERSION" > "$ENGINE_STAMP"
 
   # delete any temporary sdk path

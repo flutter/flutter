@@ -36,6 +36,17 @@ $flutterRoot = (Get-Item $progName).parent.parent.FullName
 # Generate a bin/cache directory, which won't initially exist for a fresh checkout.
 New-Item -Path "$flutterRoot/bin/cache" -ItemType Directory -Force | Out-Null
 
+$fallbackStamp = "$flutterRoot/bin/cache/engine_fallback.stamp"
+
+$strictEngineVersion = $false
+if ($env:FLUTTER_STRICT_ENGINE_VERSION -match "^(1|true)$") {
+  $strictEngineVersion = $true
+} elseif ($env:FLUTTER_STRICT_ENGINE_VERSION -match "^(0|false)$") {
+  $strictEngineVersion = $false
+} elseif (-not [string]::IsNullOrEmpty($env:LUCI_CONTEXT)) {
+  $strictEngineVersion = $true
+}
+
 # Check if FLUTTER_PREBUILT_ENGINE_VERSION is set
 #
 # This is intended for systems where we intentionally want to (ephemerally) use
@@ -45,6 +56,9 @@ New-Item -Path "$flutterRoot/bin/cache" -ItemType Directory -Force | Out-Null
 # If set, it takes precedence over any other source of engine version.
 if (![string]::IsNullOrEmpty($env:FLUTTER_PREBUILT_ENGINE_VERSION)) {
   $engineVersion = $env:FLUTTER_PREBUILT_ENGINE_VERSION
+  if (Test-Path -Path $fallbackStamp) {
+    Remove-Item -Path $fallbackStamp -Force -ErrorAction SilentlyContinue
+  }
 
 # Check if bin/internal/engine.version exists and is a tracked file in git.
 #
@@ -53,13 +67,28 @@ if (![string]::IsNullOrEmpty($env:FLUTTER_PREBUILT_ENGINE_VERSION)) {
 #
 # If set, it takes precedence over the git hash.
 } elseif (git -C "$flutterRoot" ls-files bin/internal/engine.version) {
-  $engineVersion = Get-Content -Path "$flutterRoot/bin/internal/engine.version"
+  $engineVersion = (Get-Content -Path "$flutterRoot/bin/internal/engine.version" | Out-String).Trim()
+  if (Test-Path -Path $fallbackStamp) {
+    Remove-Item -Path $fallbackStamp -Force -ErrorAction SilentlyContinue
+  }
 
-# Fallback to using git to triangulate which upstream/master (or origin/master)
-# the current branch is forked from, which would be the last version of the
-# engine artifacts built from CI.
+# Otherwise, compute the content-aware hash of the engine and DEPS at HEAD.
+# If a previous run fell back to merge-base artifacts for this exact content
+# hash (recorded in engine_fallback.stamp), reuse the fallback hash so we do
+# not retry downloading the missing hash on every invocation.
 } else {
-  $engineVersion = Invoke-Expression "& '$flutterRoot/bin/internal/content_aware_hash.ps1'"
+  $engineVersion = (& "$flutterRoot/bin/internal/content_aware_hash.ps1" | Out-String).Trim()
+  if ((-not $strictEngineVersion) -and [string]::IsNullOrEmpty($env:FLUTTER_REALM) -and (Test-Path -Path $fallbackStamp)) {
+    $fallbackContent = (Get-Content -Path $fallbackStamp -ErrorAction SilentlyContinue | Out-String).Trim()
+    $parts = $fallbackContent -split ":", 2
+    if (($parts.Count -eq 2) -and ($parts[0] -eq $engineVersion) -and (-not [string]::IsNullOrEmpty($parts[1]))) {
+      $engineVersion = $parts[1]
+    } else {
+      Remove-Item -Path $fallbackStamp -Force -ErrorAction SilentlyContinue
+    }
+  } elseif (Test-Path -Path $fallbackStamp) {
+    Remove-Item -Path $fallbackStamp -Force -ErrorAction SilentlyContinue
+  }
 }
 
 # Write the engine version out so downstream tools know what to look for.

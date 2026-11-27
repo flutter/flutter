@@ -123,25 +123,54 @@ function upgrade_flutter () (
 
   local revision="$(git -C "$FLUTTER_ROOT" rev-parse HEAD)"
   local compilekey="$revision:$FLUTTER_TOOL_ARGS"
+  local engine_stamp="$FLUTTER_ROOT/bin/cache/engine.stamp"
+  local engine_dart_sdk_stamp="$FLUTTER_ROOT/bin/cache/engine-dart-sdk.stamp"
+  local engine_fallback_stamp="$FLUTTER_ROOT/bin/cache/engine_fallback.stamp"
+  local engine_stamp_val=""
+  local engine_dart_sdk_stamp_val=""
+  if [[ -f "$engine_stamp" ]]; then
+    engine_stamp_val="$(< "$engine_stamp")"
+    engine_stamp_val="${engine_stamp_val//[[:space:]]/}"
+  fi
+  if [[ -f "$engine_dart_sdk_stamp" ]]; then
+    engine_dart_sdk_stamp_val="$(< "$engine_dart_sdk_stamp")"
+    engine_dart_sdk_stamp_val="${engine_dart_sdk_stamp_val//[[:space:]]/}"
+  fi
 
   # Invalidate cache if:
   #  * SNAPSHOT_PATH is not a file, or
   #  * STAMP_PATH is not a file, or
   #  * STAMP_PATH is an empty file, or
   #  * Contents of STAMP_PATH is not what we are going to compile, or
-  #  * pubspec.yaml last modified after pubspec.lock
+  #  * pubspec.yaml last modified after pubspec.lock, or
+  #  * engine.stamp exists and does not match engine-dart-sdk.stamp
   if [[ ! -f "$SNAPSHOT_PATH" || \
         ! -s "$STAMP_PATH" || \
         "$(< "$STAMP_PATH")" != "$compilekey" || \
-        "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
+        "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" || \
+        ( -f "$engine_stamp" && ( ! -f "$engine_dart_sdk_stamp" || "$engine_stamp_val" != "$engine_dart_sdk_stamp_val" ) ) ]]; then
     # Waits for the update lock to be acquired. Placing this check inside the
     # conditional allows the majority of flutter/dart installations to bypass
     # the lock entirely, but as a result this required a second verification that
     # the SDK is up to date.
     _wait_for_lock
 
+    if [[ -f "$engine_fallback_stamp" ]]; then
+      "$FLUTTER_ROOT/bin/internal/update_engine_version.sh"
+    fi
+    engine_stamp_val=""
+    engine_dart_sdk_stamp_val=""
+    if [[ -f "$engine_stamp" ]]; then
+      engine_stamp_val="$(< "$engine_stamp")"
+      engine_stamp_val="${engine_stamp_val//[[:space:]]/}"
+    fi
+    if [[ -f "$engine_dart_sdk_stamp" ]]; then
+      engine_dart_sdk_stamp_val="$(< "$engine_dart_sdk_stamp")"
+      engine_dart_sdk_stamp_val="${engine_dart_sdk_stamp_val//[[:space:]]/}"
+    fi
+
     # A different shell process might have updated the tool/SDK.
-    if [[ -f "$SNAPSHOT_PATH" && -s "$STAMP_PATH" && "$(< "$STAMP_PATH")" == "$compilekey" && "$FLUTTER_TOOLS_DIR/pubspec.yaml" -ot "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
+    if [[ -f "$SNAPSHOT_PATH" && -s "$STAMP_PATH" && "$(< "$STAMP_PATH")" == "$compilekey" && "$FLUTTER_TOOLS_DIR/pubspec.yaml" -ot "$FLUTTER_TOOLS_DIR/pubspec.lock" && ( ! -f "$engine_stamp" || ( -f "$engine_dart_sdk_stamp" && "$engine_stamp_val" == "$engine_dart_sdk_stamp_val" ) ) ]]; then
       exit $?
     fi
 

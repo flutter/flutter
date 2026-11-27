@@ -37,6 +37,23 @@ FLUTTER_ROOT="$(dirname "$(dirname "$(dirname "${BASH_SOURCE[0]}")")")"
 # Generate a bin/cache directory, which won't initially exist for a fresh checkout.
 mkdir -p "$FLUTTER_ROOT/bin/cache"
 
+FALLBACK_STAMP="$FLUTTER_ROOT/bin/cache/engine_fallback.stamp"
+
+STRICT_ENGINE_VERSION=false
+case "${FLUTTER_STRICT_ENGINE_VERSION}" in
+  1|[Tt][Rr][Uu][Ee])
+    STRICT_ENGINE_VERSION=true
+    ;;
+  0|[Ff][Aa][Ll][Ss][Ee])
+    STRICT_ENGINE_VERSION=false
+    ;;
+  *)
+    if [ -n "${LUCI_CONTEXT}" ]; then
+      STRICT_ENGINE_VERSION=true
+    fi
+    ;;
+esac
+
 # Check if FLUTTER_PREBUILT_ENGINE_VERSION is set
 #
 # This is intended for systems where we intentionally want to (ephemerally) use
@@ -46,6 +63,9 @@ mkdir -p "$FLUTTER_ROOT/bin/cache"
 # If set, it takes precedence over any other source of engine version.
 if [ -n "${FLUTTER_PREBUILT_ENGINE_VERSION}" ]; then
   ENGINE_VERSION="${FLUTTER_PREBUILT_ENGINE_VERSION}"
+  if [ -f "$FALLBACK_STAMP" ]; then
+    rm -f "$FALLBACK_STAMP"
+  fi
 
 # Check if bin/internal/engine.version exists and is a tracked file in git.
 #
@@ -55,12 +75,30 @@ if [ -n "${FLUTTER_PREBUILT_ENGINE_VERSION}" ]; then
 # If set, it takes precedence over the git hash.
 elif [ -n "$(git -C "$FLUTTER_ROOT" ls-files bin/internal/engine.version)" ]; then
   ENGINE_VERSION="$(< "$FLUTTER_ROOT/bin/internal/engine.version")"
+  ENGINE_VERSION="${ENGINE_VERSION//[[:space:]]/}"
+  if [ -f "$FALLBACK_STAMP" ]; then
+    rm -f "$FALLBACK_STAMP"
+  fi
 
-# Fallback to using git to triangulate which upstream/master (or origin/master)
-# the current branch is forked from, which would be the last version of the
-# engine artifacts built from CI.
+# Otherwise, compute the content-aware hash of the engine and DEPS at HEAD.
+# If a previous run fell back to merge-base artifacts for this exact content
+# hash (recorded in engine_fallback.stamp), reuse the fallback hash so we do
+# not retry downloading the missing hash on every invocation.
 else
   ENGINE_VERSION=$("$FLUTTER_ROOT/bin/internal/content_aware_hash.sh")
+  if [ "$STRICT_ENGINE_VERSION" != "true" ] && [ -z "${FLUTTER_REALM}" ] && [ -f "$FALLBACK_STAMP" ]; then
+    FALLBACK_CONTENT=$(< "$FALLBACK_STAMP")
+    FALLBACK_CONTENT="${FALLBACK_CONTENT//[[:space:]]/}"
+    FALLBACK_TARGET="${FALLBACK_CONTENT%%:*}"
+    FALLBACK_ACTUAL="${FALLBACK_CONTENT#*:}"
+    if [ "$FALLBACK_TARGET" = "$ENGINE_VERSION" ] && [ -n "$FALLBACK_ACTUAL" ] && [ "$FALLBACK_ACTUAL" != "$FALLBACK_CONTENT" ]; then
+      ENGINE_VERSION="$FALLBACK_ACTUAL"
+    else
+      rm -f "$FALLBACK_STAMP"
+    fi
+  elif [ -f "$FALLBACK_STAMP" ]; then
+    rm -f "$FALLBACK_STAMP"
+  fi
 fi
 
 # Write the engine version out so downstream tools know what to look for.
