@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
+import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
@@ -151,8 +152,75 @@ void main() {
       await emitEvent(WatchEvent(ChangeType.MODIFY, nestedPubspecPath));
 
       expect(detectedPubspecChanges, isEmpty);
+      expect(detectedNonDartFileChanges, isEmpty);
       expectNPreviewReloadTimingEvents(0);
       expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+    });
+
+    test('detects changes to glob-matched workspace member pubspec.yaml', () async {
+      project.manifest = FlutterManifest.createFromString(
+        '''
+name: workspace_root
+workspace:
+  - packages/*
+''',
+        logger: logger,
+      )!;
+      final String newMemberPubspecPath = fs.path.join(
+        _kProjectRootPath,
+        'packages',
+        'new_pkg',
+        'pubspec.yaml',
+      );
+      fs.file(newMemberPubspecPath).createSync(recursive: true);
+
+      await emitEvent(WatchEvent(ChangeType.ADD, newMemberPubspecPath));
+
+      expect(detectedPubspecChanges, <String>[newMemberPubspecPath]);
+      expect(detectedNonDartFileChanges, isEmpty);
+      expectNPreviewReloadTimingEvents(0);
+      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+    });
+
+    test('detects pubspec.yaml changes when project root is symlinked', () async {
+      final Directory realRoot = fs.directory('/private/var/folders/project')
+        ..createSync(recursive: true);
+      final Link symlinkRoot = fs.link('/var/folders/project')..createSync(realRoot.path, recursive: true);
+      final File realPubspec = realRoot.childFile('pubspec.yaml')..writeAsStringSync('name: app\n');
+
+      final symlinkProject = FakeFlutterProject(fs.directory(symlinkRoot.path));
+      final symlinkWatcher = FakeWatcher();
+      final symlinkPubspecChanges = <String>[];
+      final symlinkDetector = LspPreviewDetector(
+        dtd: fakeDtd,
+        onChangeDetected: (_) {},
+        onPubspecChangeDetected: symlinkPubspecChanges.add,
+        previewAnalytics: previewAnalytics,
+        project: symlinkProject,
+        suppressAnalytics: false,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fs,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+          shutdownHooks: shutdownHooks,
+        ),
+        analysisServerFactory: () async => fakeAnalysisServer,
+        onNonDartFileChangeDetected: (_) {},
+        watcherBuilder: (_) => symlinkWatcher,
+      );
+      addTearDown(() async {
+        await symlinkDetector.dispose();
+        await symlinkWatcher.close();
+      });
+      await symlinkDetector.initialize();
+
+      symlinkWatcher.emitEvent(WatchEvent(ChangeType.MODIFY, realPubspec.path));
+      await pumpEventQueue();
+      await symlinkDetector.mutex.runGuarded(() async {});
+
+      expect(symlinkPubspecChanges, <String>[realPubspec.path]);
     });
 
     test(
@@ -264,10 +332,13 @@ void main() {
 }
 
 class FakeFlutterProject extends Fake implements FlutterProject {
-  FakeFlutterProject(this.directory);
+  FakeFlutterProject(this.directory) : manifest = FlutterManifest.empty(logger: BufferLogger.test());
 
   @override
   final Directory directory;
+
+  @override
+  FlutterManifest manifest;
 
   @override
   File get pubspecFile => directory.childFile('pubspec.yaml');

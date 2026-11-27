@@ -10,6 +10,8 @@ import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:collection/collection.dart';
+import 'package:glob/glob.dart';
+import 'package:path/path.dart' as path;
 
 import '../base/file_system.dart';
 import '../project.dart';
@@ -130,16 +132,131 @@ class PreviewDetectorMutex {
 
 /// Convenience extensions for examining [FlutterProject] in widget preview context.
 extension FlutterProjectPreviewExtension on FlutterProject {
+  /// Returns whether [pubspecPath] corresponds to the root `pubspec.yaml` of
+  /// this project.
+  bool isRootPubspec(String pubspecPath) {
+    final FileSystem fs = directory.fileSystem;
+    return _resolveSymlinksAndCanonicalize(fs, pubspecPath) ==
+        _resolveSymlinksAndCanonicalize(fs, pubspecFile.path);
+  }
+
   /// Returns whether [pubspecPath] corresponds to the `pubspec.yaml` of this
-  /// project or one of its workspace projects.
-  bool isPubspecForProject({required String pubspecPath, required FileSystem fs}) {
-    final String canonicalPubspecPath = fs.path.canonicalize(pubspecPath);
-    if (fs.path.canonicalize(pubspecFile.path) == canonicalPubspecPath) {
+  /// project or one of its workspace projects (including glob-matched entries).
+  bool isPubspecForProject(String pubspecPath) {
+    final FileSystem fs = directory.fileSystem;
+    final String resolvedPubspecPath = _resolveSymlinksAndCanonicalize(fs, pubspecPath);
+    if (resolvedPubspecPath == _resolveSymlinksAndCanonicalize(fs, pubspecFile.path)) {
       return true;
     }
+
+    if (fs.path.basename(resolvedPubspecPath) == 'pubspec.yaml' &&
+        manifest.workspace.isNotEmpty) {
+      final String resolvedRootDir = _resolveSymlinksAndCanonicalize(fs, directory.path);
+      final String candidateDir = fs.path.dirname(resolvedPubspecPath);
+      final String relativeDir = fs.path.relative(candidateDir, from: resolvedRootDir);
+      if (relativeDir != '.' &&
+          !relativeDir.startsWith('..') &&
+          !fs.path.isAbsolute(relativeDir)) {
+        final List<String> dirSegments = fs.path
+            .split(relativeDir)
+            .where((String s) => s.isNotEmpty && s != '.')
+            .toList();
+        final bool hasIgnoredSegment = dirSegments.any(
+          (String segment) => segment.startsWith('.') || segment == 'build',
+        );
+        if (!hasIgnoredSegment) {
+          for (final String pattern in manifest.workspace) {
+            final List<String> patternSegments = pattern
+                .replaceAll(r'\', '/')
+                .split('/')
+                .where((String s) => s.isNotEmpty && s != '.')
+                .toList();
+            if (patternSegments.isNotEmpty &&
+                _matchesWorkspacePattern(dirSegments, patternSegments, fs.path)) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+
     return workspaceProjects.any(
       (FlutterProject workspaceProject) =>
-          fs.path.canonicalize(workspaceProject.pubspecFile.path) == canonicalPubspecPath,
+          _resolveSymlinksAndCanonicalize(fs, workspaceProject.pubspecFile.path) ==
+          resolvedPubspecPath,
     );
   }
+}
+
+/// Resolves symlinks for [rawPath] (walking up to the nearest existing ancestor
+/// if [rawPath] does not exist on disk) before canonicalizing.
+String _resolveSymlinksAndCanonicalize(FileSystem fs, String rawPath) {
+  String current = fs.path.canonicalize(rawPath);
+  final trailingSegments = <String>[];
+  while (true) {
+    if (fs.typeSync(current) != FileSystemEntityType.notFound) {
+      try {
+        final String resolved = fs.directory(current).resolveSymbolicLinksSync();
+        if (trailingSegments.isEmpty) {
+          return fs.path.canonicalize(resolved);
+        }
+        return fs.path.canonicalize(
+          fs.path.joinAll(<String>[resolved, ...trailingSegments.reversed]),
+        );
+      } on FileSystemException {
+        break;
+      }
+    }
+    final String parent = fs.path.dirname(current);
+    if (parent == current) {
+      break;
+    }
+    trailingSegments.add(fs.path.basename(current));
+    current = parent;
+  }
+  return fs.path.canonicalize(rawPath);
+}
+
+bool _matchesWorkspacePattern(
+  List<String> dirSegments,
+  List<String> patternSegments,
+  path.Context pathContext, [
+  int dirIndex = 0,
+  int patternIndex = 0,
+]) {
+  while (patternIndex < patternSegments.length) {
+    final String patternSegment = patternSegments[patternIndex];
+    if (patternSegment == '**') {
+      // Collapse consecutive '**' segments.
+      while (patternIndex + 1 < patternSegments.length &&
+          patternSegments[patternIndex + 1] == '**') {
+        patternIndex++;
+      }
+      if (patternIndex == patternSegments.length - 1) {
+        return true;
+      }
+      for (var nextDir = dirIndex; nextDir <= dirSegments.length; nextDir++) {
+        if (_matchesWorkspacePattern(
+          dirSegments,
+          patternSegments,
+          pathContext,
+          nextDir,
+          patternIndex + 1,
+        )) {
+          return true;
+        }
+      }
+      return false;
+    }
+    if (dirIndex >= dirSegments.length) {
+      return false;
+    }
+    final glob = Glob(patternSegment, context: pathContext);
+    if (!glob.matches(dirSegments[dirIndex])) {
+      return false;
+    }
+    dirIndex++;
+    patternIndex++;
+  }
+  return dirIndex == dirSegments.length;
 }

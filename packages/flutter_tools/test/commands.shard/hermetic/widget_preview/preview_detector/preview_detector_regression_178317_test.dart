@@ -27,11 +27,14 @@ void main() {
     late BufferLogger logger;
 
     var changeCounter = 0;
+    final detectedPubspecPaths = <String>[];
     void onChangeDetected(_) {
       changeCounter++;
     }
 
     setUp(() {
+      changeCounter = 0;
+      detectedPubspecPaths.clear();
       final String flutterRoot = getFlutterRoot();
       fs = MemoryFileSystem.test(
         style: const LocalPlatform().isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
@@ -54,7 +57,7 @@ void main() {
         logger: logger,
         fs: fs,
         onChangeDetected: onChangeDetected,
-        onPubspecChangeDetected: onChangeDetected,
+        onPubspecChangeDetected: detectedPubspecPaths.add,
         watcherBuilder: (_) => watcher,
       );
     });
@@ -83,6 +86,23 @@ void main() {
       // Changes to .dart sources under ephemeral directories or sources that don't have valid
       // analysis contexts shouldn't trigger the change detection callback.
       expect(changeCounter, 0);
+    });
+
+    test('ignores changes to pubspec.yaml in nested non-project directories', () async {
+      await previewDetector.initialize();
+
+      final File nestedPubspec = fs.file(
+        fs.path.join(project.directory.path, '.claude', 'worktrees', 'unrelated', 'pubspec.yaml'),
+      )..createSync(recursive: true);
+
+      watcher.controller.add(WatchEvent(ChangeType.MODIFY, nestedPubspec.path));
+      await pumpEventQueue();
+      expect(detectedPubspecPaths, isEmpty);
+
+      project.pubspecFile.createSync(recursive: true);
+      watcher.controller.add(WatchEvent(ChangeType.MODIFY, project.pubspecFile.path));
+      await pumpEventQueue();
+      expect(detectedPubspecPaths, <String>[project.pubspecFile.path]);
     });
   });
 }

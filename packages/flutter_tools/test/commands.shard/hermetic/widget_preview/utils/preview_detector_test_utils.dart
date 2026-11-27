@@ -20,7 +20,7 @@ import 'package:flutter_tools/src/widget_preview/preview_manifest.dart';
 import 'package:meta/meta.dart';
 
 import '../../../../src/common.dart';
-import '../../../../src/fake_process_manager.dart';
+import '../../../../src/context.dart';
 import '../../../../src/fakes.dart';
 import 'preview_project.dart';
 
@@ -54,16 +54,27 @@ void initializeTestPreviewDetectorState() {
 }
 
 @isTest
-void testPreviewDetector(String description, FutureOr<void> Function(PreviewDetector) testMethod) {
-  test(description, () async {
-    PreviewDetector? previewDetector;
-    try {
-      previewDetector = createTestPreviewDetector();
-      await testMethod(previewDetector);
-    } finally {
-      await previewDetector?.dispose();
-    }
-  });
+void testPreviewDetector(
+  String description,
+  FutureOr<void> Function(PreviewDetector) testMethod, {
+  Map<Type, Generator> overrides = const <Type, Generator>{},
+}) {
+  testUsingContext(
+    description,
+    () async {
+      PreviewDetector? previewDetector;
+      try {
+        previewDetector = createTestPreviewDetector();
+        await testMethod(previewDetector);
+      } finally {
+        await previewDetector?.dispose();
+      }
+    },
+    overrides: {
+      FlutterProjectFactory: () =>
+          FlutterProjectFactory(fileSystem: _fs, logger: BufferLogger.test(), config: FakeConfig()),
+    },
+  );
 }
 
 PreviewDetector createTestPreviewDetector() {
@@ -119,11 +130,6 @@ void _onPubspecChangeDetectedRoot(String path) {
   _onPubspecChangeDetected?.call(path);
 }
 
-/// Allows tests to register a custom callback for pubspec change events.
-void setOnPubspecChangeDetected(void Function(String path)? callback) {
-  _onPubspecChangeDetected = callback;
-}
-
 void _onPackageConfigChangeDetectedRoot(String path) {
   _onPackageConfigChangeDetected?.call(path);
 }
@@ -162,12 +168,11 @@ Future<String> waitForPubspecChangeDetected({
   required FutureOr<void> Function() changeOperation,
 }) async {
   final completer = Completer<String>();
-  final void Function(String path)? previousCallback = _onPubspecChangeDetected;
   _onPubspecChangeDetected = (String path) {
-    previousCallback?.call(path);
-    if (!completer.isCompleted) {
-      completer.complete(path);
+    if (completer.isCompleted) {
+      return;
     }
+    completer.complete(path);
   };
   // Short delay to allow the file watcher (especially FSEvents on macOS) to
   // fully initialize and start listening for events before we trigger the
