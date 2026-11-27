@@ -87,6 +87,8 @@ class Evaluation {
 ///    requirements specified by [WCAG](https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html#contrast-ratiodef).
 ///  * [labeledTapTargetGuideline], which enforces that all nodes with a tap or
 ///    long press action also have a label.
+///  * [labeledImageGuideline], which enforces that all image nodes have a
+///    label, value, hint, or tooltip.
 abstract class AccessibilityGuideline {
   /// A const constructor allows subclasses to be const.
   const AccessibilityGuideline();
@@ -262,6 +264,71 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
     if ((data.label.isEmpty) && (data.tooltip.isEmpty)) {
       result += Evaluation.fail(
         '$node: expected tappable node to have semantic label, '
+        'but none was found.',
+      );
+    }
+    return result;
+  }
+}
+
+/// A guideline which enforces that all image nodes have a label, value, hint,
+/// or tooltip.
+///
+/// See also:
+///  * [AccessibilityGuideline], which provides a general overview of
+///    accessibility guidelines and how to use them.
+@visibleForTesting
+class LabeledImageGuideline extends AccessibilityGuideline {
+  const LabeledImageGuideline._();
+
+  @override
+  String get description => 'Images should have a semantic label';
+
+  @override
+  FutureOr<Evaluation> evaluate(WidgetTester tester) {
+    var result = const Evaluation.pass();
+
+    for (final RenderView view in tester.binding.renderViews) {
+      final SemanticsNode? root = view.owner?.semanticsOwner?.rootSemanticsNode;
+      if (root != null) {
+        result += _traverse(root);
+      }
+    }
+
+    return result;
+  }
+
+  Evaluation _traverse(SemanticsNode node) {
+    var result = const Evaluation.pass();
+    // Children of a hidden node do not inherit the hidden flag, so skip the whole subtree.
+    if (node.flagsCollection.isHidden) {
+      return result;
+    }
+    node.visitChildren((SemanticsNode child) {
+      result += _traverse(child);
+      return true;
+    });
+    if (node.isMergedIntoParent || node.isInvisible) {
+      return result;
+    }
+    final SemanticsData data = node.getSemanticsData();
+    if (!data.flagsCollection.isImage) {
+      return result;
+    }
+    // Tappable images are reported by LabeledTapTargetGuideline instead.
+    if (data.hasAction(ui.SemanticsAction.tap) || data.hasAction(ui.SemanticsAction.longPress)) {
+      return result;
+    }
+    // A button with an image is exposed as a button, not as an image.
+    if (data.flagsCollection.isButton) {
+      return result;
+    }
+    if (data.label.trim().isEmpty &&
+        data.value.trim().isEmpty &&
+        data.hint.trim().isEmpty &&
+        data.tooltip.trim().isEmpty) {
+      result += Evaluation.fail(
+        '$node: expected image node to have a label, value, hint, or tooltip, '
         'but none was found.',
       );
     }
@@ -820,3 +887,19 @@ const AccessibilityGuideline textContrastGuideline = MinimumTextContrastGuidelin
 ///  * [AccessibilityGuideline], which provides a general overview of
 ///    accessibility guidelines and how to use them.
 const AccessibilityGuideline labeledTapTargetGuideline = LabeledTapTargetGuideline._();
+
+/// A guideline which enforces that all image nodes have a label, value, hint,
+/// or tooltip.
+///
+/// Image nodes that also have a tap or long press action are left to
+/// [labeledTapTargetGuideline].
+///
+/// This guideline only sees nodes that keep the image flag. An [Image] without
+/// an [Image.semanticLabel] does not force a node of its own, so its flag can
+/// be absorbed into an enclosing node that has an unrelated label, and that
+/// node passes. A decorative image should set [Image.excludeFromSemantics].
+///
+/// See also:
+///  * [AccessibilityGuideline], which provides a general overview of
+///    accessibility guidelines and how to use them.
+const AccessibilityGuideline labeledImageGuideline = LabeledImageGuideline._();

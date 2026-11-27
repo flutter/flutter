@@ -203,6 +203,59 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets(
+    'accessibilityEvaluations service extension returns violations for UnlabeledImageEvaluation',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Center(
+            child: Semantics(image: true, child: const SizedBox.square(dimension: 48.0)),
+          ),
+        ),
+      );
+
+      final Map<String, Object?> result = await _runEvaluation(tester, <String, String>{
+        'type': AccessibilityEvaluationType.unlabeledImage.name,
+      });
+
+      final violations = result['result']! as List<Object?>;
+      expect(violations, hasLength(1));
+      expect(
+        (violations.single! as Map<String, Object?>)['message'].toString(),
+        contains('expected image node to have a label, value, hint, or tooltip'),
+      );
+
+      handle.dispose();
+    },
+  );
+
+  testWidgets('accessibilityEvaluations service extension returns empty list for labeled image', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: Semantics(
+            image: true,
+            label: 'A cat',
+            child: const SizedBox.square(dimension: 48.0),
+          ),
+        ),
+      ),
+    );
+
+    final Map<String, Object?> result = await _runEvaluation(tester, <String, String>{
+      'type': AccessibilityEvaluationType.unlabeledImage.name,
+    });
+    expect(result['result'], isEmpty);
+
+    handle.dispose();
+  });
+
   testWidgets('accessibilityEvaluations service extension honors targetSize parameter', (
     WidgetTester tester,
   ) async {

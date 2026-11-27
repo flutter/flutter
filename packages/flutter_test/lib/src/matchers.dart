@@ -1294,6 +1294,7 @@ Matcher isAccessibilityAnnouncement(
 ///   * [iOSTapTargetGuideline], for iOS minimum tappable area guidelines.
 ///   * [textContrastGuideline], for WCAG minimum text contrast guidelines.
 ///   * [labeledTapTargetGuideline], for enforcing labels on tappable areas.
+///   * [labeledImageGuideline], for enforcing labels on images.
 AsyncMatcher meetsGuideline(AccessibilityGuideline guideline) {
   return _MatchesAccessibilityGuideline(guideline);
 }
