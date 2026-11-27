@@ -81,16 +81,16 @@ void main() {
 
         await expectLater(
           () => handlers['build']!(<String, Object?>{
-            BuildService.buildModeParam: 'debug',
-            BuildService.dartObfuscationParam: false,
-            BuildService.flutterRootParam: '/flutter',
-            BuildService.mainPathParam: '/project/lib/main.dart',
-            BuildService.outputDirParam: '/project/build/linux_extension/x64/debug',
-            BuildService.projectRootParam: '/project',
-            BuildService.resolvedArtifactsParam: const <String, String>{},
+            ExtensionBuildContext.buildModeKey: 'debug',
+            ExtensionBuildContext.dartObfuscationKey: false,
+            ExtensionBuildContext.flutterRootKey: '/flutter',
+            ExtensionBuildContext.mainPathKey: '/project/lib/main.dart',
+            ExtensionBuildContext.outputDirKey: '/project/build/linux_extension/x64/debug',
+            ExtensionBuildContext.projectRootKey: '/project',
+            ExtensionBuildContext.resolvedArtifactsKey: const <String, String>{},
             BuildService.targetNameParam: LinuxBuildService.customLinuxBuildTargetName,
-            BuildService.trackWidgetCreationParam: true,
-            BuildService.treeShakeIconsParam: false,
+            ExtensionBuildContext.trackWidgetCreationKey: true,
+            ExtensionBuildContext.treeShakeIconsKey: false,
           }),
           throwsA(
             isA<ToolExtensionException>().having(
@@ -103,16 +103,16 @@ void main() {
 
         await expectLater(
           () => handlers['build']!(<String, Object?>{
-            BuildService.buildModeParam: 'debug',
-            BuildService.dartObfuscationParam: false,
-            BuildService.flutterRootParam: '/flutter',
-            BuildService.mainPathParam: '/project/lib/main.dart',
-            BuildService.outputDirParam: '/project/build/linux_extension/x64/debug',
-            BuildService.projectRootParam: '/project',
-            BuildService.resolvedArtifactsParam: const <String, String>{},
+            ExtensionBuildContext.buildModeKey: 'debug',
+            ExtensionBuildContext.dartObfuscationKey: false,
+            ExtensionBuildContext.flutterRootKey: '/flutter',
+            ExtensionBuildContext.mainPathKey: '/project/lib/main.dart',
+            ExtensionBuildContext.outputDirKey: '/project/build/linux_extension/x64/debug',
+            ExtensionBuildContext.projectRootKey: '/project',
+            ExtensionBuildContext.resolvedArtifactsKey: const <String, String>{},
             BuildService.targetNameParam: 'unknown-target',
-            BuildService.trackWidgetCreationParam: true,
-            BuildService.treeShakeIconsParam: false,
+            ExtensionBuildContext.trackWidgetCreationKey: true,
+            ExtensionBuildContext.treeShakeIconsKey: false,
           }),
           throwsA(
             isA<ToolExtensionException>().having(
@@ -125,17 +125,17 @@ void main() {
 
         await expectLater(
           () => handlers['assemble']!(<String, Object?>{
-            BuildService.buildDirParam: '/project/.dart_tool/flutter_build',
-            BuildService.buildModeParam: 'debug',
-            BuildService.dartObfuscationParam: false,
-            BuildService.flutterRootParam: '/flutter',
-            BuildService.mainPathParam: '/project/lib/main.dart',
-            BuildService.outputDirParam: '/project/build/linux_extension/x64/debug',
-            BuildService.projectRootParam: '/project',
-            BuildService.resolvedArtifactsParam: const <String, String>{},
+            ExtensionAssembleContext.buildDirKey: '/project/.dart_tool/flutter_build',
+            ExtensionBuildContext.buildModeKey: 'debug',
+            ExtensionBuildContext.dartObfuscationKey: false,
+            ExtensionBuildContext.flutterRootKey: '/flutter',
+            ExtensionBuildContext.mainPathKey: '/project/lib/main.dart',
+            ExtensionBuildContext.outputDirKey: '/project/build/linux_extension/x64/debug',
+            ExtensionBuildContext.projectRootKey: '/project',
+            ExtensionBuildContext.resolvedArtifactsKey: const <String, String>{},
             BuildService.targetNameParam: 'unknown-assemble-target',
-            BuildService.trackWidgetCreationParam: true,
-            BuildService.treeShakeIconsParam: false,
+            ExtensionBuildContext.trackWidgetCreationKey: true,
+            ExtensionBuildContext.treeShakeIconsKey: false,
           }),
           throwsA(
             isA<ToolExtensionException>().having(
@@ -266,30 +266,30 @@ void main() {
     group('build RPC parameter validation', () {
       const validParams = <String, Object?>{
         BuildService.targetNameParam: 'custom-linux-build',
-        BuildService.projectRootParam: '/project',
-        BuildService.mainPathParam: '/project/lib/main.dart',
-        BuildService.buildModeParam: 'debug',
-        BuildService.dartObfuscationParam: false,
-        BuildService.flutterRootParam: '/flutter',
-        BuildService.outputDirParam: '/out',
-        BuildService.buildDirParam: '/build',
-        BuildService.resolvedArtifactsParam: <String, String>{},
-        BuildService.trackWidgetCreationParam: true,
-        BuildService.treeShakeIconsParam: false,
+        ExtensionBuildContext.projectRootKey: '/project',
+        ExtensionBuildContext.mainPathKey: '/project/lib/main.dart',
+        ExtensionBuildContext.buildModeKey: 'debug',
+        ExtensionBuildContext.dartObfuscationKey: false,
+        ExtensionBuildContext.flutterRootKey: '/flutter',
+        ExtensionBuildContext.outputDirKey: '/out',
+        ExtensionAssembleContext.buildDirKey: '/build',
+        ExtensionBuildContext.resolvedArtifactsKey: <String, String>{},
+        ExtensionBuildContext.trackWidgetCreationKey: true,
+        ExtensionBuildContext.treeShakeIconsKey: false,
       };
 
       final commonInvalidCases = <(String description, Map<String, Object?> overrides, String expectedMessage)>[
         (
           'invalid codeSizeDirectory URI',
           <String, Object?>{
-            BuildService.codeSizeDirectoryParam: 'file:///project/code_size_no_slash',
+            ExtensionBuildContext.codeSizeDirectoryKey: 'file:///project/code_size_no_slash',
           },
-          'Invalid "${BuildService.codeSizeDirectoryParam}": expected trailing-slash-terminated absolute file: URI',
+          'Invalid "${ExtensionBuildContext.codeSizeDirectoryKey}": expected trailing-slash-terminated absolute file: URI',
         ),
         (
           'invalid splitDebugInfo URI',
-          <String, Object?>{BuildService.splitDebugInfoParam: 'relative/symbols/'},
-          'Invalid "${BuildService.splitDebugInfoParam}": expected trailing-slash-terminated absolute file: URI',
+          <String, Object?>{ExtensionBuildContext.splitDebugInfoKey: 'relative/symbols/'},
+          'Invalid "${ExtensionBuildContext.splitDebugInfoKey}": expected trailing-slash-terminated absolute file: URI',
         ),
         (
           'missing targetName',
@@ -298,60 +298,60 @@ void main() {
         ),
         (
           'missing projectRoot',
-          <String, Object?>{BuildService.projectRootParam: null},
-          'Missing required "${BuildService.projectRootParam}" (expected String).',
+          <String, Object?>{ExtensionBuildContext.projectRootKey: null},
+          'Missing required "${ExtensionBuildContext.projectRootKey}" (expected String).',
         ),
         (
           'relative projectRoot',
-          <String, Object?>{BuildService.projectRootParam: 'relative/path'},
-          'Missing or invalid "${BuildService.projectRootParam}" parameter.',
+          <String, Object?>{ExtensionBuildContext.projectRootKey: 'relative/path'},
+          'Missing or invalid "${ExtensionBuildContext.projectRootKey}" parameter.',
         ),
         (
           'missing flutterRoot',
-          <String, Object?>{BuildService.flutterRootParam: null},
-          'Missing required "${BuildService.flutterRootParam}" (expected String).',
+          <String, Object?>{ExtensionBuildContext.flutterRootKey: null},
+          'Missing required "${ExtensionBuildContext.flutterRootKey}" (expected String).',
         ),
         (
           'relative flutterRoot',
-          <String, Object?>{BuildService.flutterRootParam: 'relative/flutter'},
-          'Missing or invalid "${BuildService.flutterRootParam}" parameter.',
+          <String, Object?>{ExtensionBuildContext.flutterRootKey: 'relative/flutter'},
+          'Missing or invalid "${ExtensionBuildContext.flutterRootKey}" parameter.',
         ),
         (
           'missing mainPath',
-          <String, Object?>{BuildService.mainPathParam: null},
-          'Missing required "${BuildService.mainPathParam}" (expected String).',
+          <String, Object?>{ExtensionBuildContext.mainPathKey: null},
+          'Missing required "${ExtensionBuildContext.mainPathKey}" (expected String).',
         ),
         (
           'missing buildMode',
-          <String, Object?>{BuildService.buildModeParam: null},
-          'Missing required "${BuildService.buildModeParam}" (expected String).',
+          <String, Object?>{ExtensionBuildContext.buildModeKey: null},
+          'Missing required "${ExtensionBuildContext.buildModeKey}" (expected String).',
         ),
         (
           'invalid buildMode',
-          <String, Object?>{BuildService.buildModeParam: 'invalid_mode'},
-          'Missing or invalid "${BuildService.buildModeParam}" parameter.',
+          <String, Object?>{ExtensionBuildContext.buildModeKey: 'invalid_mode'},
+          'Missing or invalid "${ExtensionBuildContext.buildModeKey}" parameter.',
         ),
         (
           'missing outputDir',
-          <String, Object?>{BuildService.outputDirParam: null},
-          'Missing required "${BuildService.outputDirParam}" (expected String).',
+          <String, Object?>{ExtensionBuildContext.outputDirKey: null},
+          'Missing required "${ExtensionBuildContext.outputDirKey}" (expected String).',
         ),
         (
           'relative outputDir',
-          <String, Object?>{BuildService.outputDirParam: 'relative/output'},
-          'Missing or invalid "${BuildService.outputDirParam}" parameter.',
+          <String, Object?>{ExtensionBuildContext.outputDirKey: 'relative/output'},
+          'Missing or invalid "${ExtensionBuildContext.outputDirKey}" parameter.',
         ),
         (
           'missing resolvedArtifacts',
-          <String, Object?>{BuildService.resolvedArtifactsParam: null},
-          'Missing required "${BuildService.resolvedArtifactsParam}" (expected Map<String, Object?>).',
+          <String, Object?>{ExtensionBuildContext.resolvedArtifactsKey: null},
+          'Missing required "${ExtensionBuildContext.resolvedArtifactsKey}" (expected Map<String, Object?>).',
         ),
         (
           'non-string resolvedArtifacts value',
           <String, Object?>{
-            BuildService.resolvedArtifactsParam: <String, Object?>{'genSnapshot': 123},
+            ExtensionBuildContext.resolvedArtifactsKey: <String, Object?>{'genSnapshot': 123},
           },
-          'Invalid "${BuildService.resolvedArtifactsParam}" parameter: Invalid "genSnapshot": expected String, got int.',
+          'Invalid "genSnapshot" value: expected String, got int.',
         ),
       ];
 
@@ -382,13 +382,13 @@ void main() {
           <(String description, Map<String, Object?> overrides, String expectedMessage)>[
             (
               'missing buildDir',
-              <String, Object?>{BuildService.buildDirParam: null},
-              'Missing required "${BuildService.buildDirParam}" (expected String).',
+              <String, Object?>{ExtensionAssembleContext.buildDirKey: null},
+              'Missing required "${ExtensionAssembleContext.buildDirKey}" (expected String).',
             ),
             (
               'relative buildDir',
-              <String, Object?>{BuildService.buildDirParam: 'relative/build'},
-              'Missing or invalid "${BuildService.buildDirParam}" parameter.',
+              <String, Object?>{ExtensionAssembleContext.buildDirKey: 'relative/build'},
+              'Missing or invalid "${ExtensionAssembleContext.buildDirKey}" parameter.',
             ),
           ];
 

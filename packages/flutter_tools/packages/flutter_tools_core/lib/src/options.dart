@@ -10,10 +10,6 @@ import 'json_utils.dart';
 const _listEquality = ListEquality<String>();
 const _mapEquality = MapEquality<String, String>();
 
-int _stringMapHash(Map<String, String> map) => Object.hashAllUnordered(<int>[
-  for (final MapEntry(:String key, :String value) in map.entries) Object.hash(key, value),
-]);
-
 /// Describes a custom boolean CLI flag registered by a `TemplateService` on
 /// `flutter create` or by a `BuildTarget` on `flutter build <name>`.
 ///
@@ -164,7 +160,8 @@ final class ExtensionOption {
     this.hide = false,
     this.mandatory = false,
     this.valueHelp,
-  }) : assert(name != '');
+  }) : assert(name != ''),
+       assert(!mandatory || defaultsTo == null);
 
   /// Deserializes an [ExtensionOption] from a JSON-serializable map.
   factory ExtensionOption.fromJson(Map<String, Object?> json) {
@@ -178,15 +175,27 @@ final class ExtensionOption {
     final Map<String, String>? allowedHelp = json[allowedHelpKey] != null
         ? json.stringMap(allowedHelpKey)
         : null;
+    final String? defaultsTo = json.nullableField<String>(defaultsToKey);
+    final bool mandatory = json.optionalField<bool>(mandatoryKey, defaultValue: false);
+    if (mandatory && defaultsTo != null) {
+      throw FormatException(
+        'Invalid ExtensionOption "$name": cannot be both mandatory and specify "$defaultsToKey".',
+      );
+    }
+    if (defaultsTo != null && allowed != null && !allowed.contains(defaultsTo)) {
+      throw FormatException(
+        'Invalid "$defaultsToKey" in ExtensionOption "$name": "$defaultsTo" is not in "$allowedKey".',
+      );
+    }
     return ExtensionOption(
       help: json.requiredField<String>(helpKey),
       name: name,
       allowed: allowed,
       allowedHelp: allowedHelp,
-      defaultsTo: json.nullableField<String>(defaultsToKey),
+      defaultsTo: defaultsTo,
       deprecated: json.nullableField<String>(deprecatedKey),
       hide: json.optionalField<bool>(hideKey, defaultValue: false),
-      mandatory: json.optionalField<bool>(mandatoryKey, defaultValue: false),
+      mandatory: mandatory,
       valueHelp: json.nullableField<String>(valueHelpKey),
     );
   }
@@ -307,8 +316,8 @@ final class ExtensionOption {
 
   @override
   int get hashCode => Object.hash(
-    allowed == null ? null : Object.hashAll(allowed!),
-    allowedHelp == null ? null : _stringMapHash(allowedHelp!),
+    _listEquality.hash(allowed),
+    _mapEquality.hash(allowedHelp),
     defaultsTo,
     deprecated,
     help,

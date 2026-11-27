@@ -128,7 +128,7 @@ class ExtensionBuildContext {
     mainPath: json.requiredField<String>(mainPathKey),
     outputDir: _parseDirectoryUri(json, outputDirKey),
     projectRoot: _parseDirectoryUri(json, projectRootKey),
-    resolvedArtifacts: _parseRequiredStringMap(json, resolvedArtifactsKey),
+    resolvedArtifacts: json.stringMap(resolvedArtifactsKey),
     trackWidgetCreation: json.requiredField<bool>(trackWidgetCreationKey),
     treeShakeIcons: json.requiredField<bool>(treeShakeIconsKey),
     buildFlags: _parseOptionalBoolMap(json, buildFlagsKey),
@@ -414,7 +414,7 @@ class ExtensionAssembleContext {
     mainPath: json.requiredField<String>(ExtensionBuildContext.mainPathKey),
     outputDir: _parseDirectoryUri(json, ExtensionBuildContext.outputDirKey),
     projectRoot: _parseDirectoryUri(json, ExtensionBuildContext.projectRootKey),
-    resolvedArtifacts: _parseRequiredStringMap(json, ExtensionBuildContext.resolvedArtifactsKey),
+    resolvedArtifacts: json.stringMap(ExtensionBuildContext.resolvedArtifactsKey),
     trackWidgetCreation: json.requiredField<bool>(ExtensionBuildContext.trackWidgetCreationKey),
     treeShakeIcons: json.requiredField<bool>(ExtensionBuildContext.treeShakeIconsKey),
     buildName: json.nullableField<String>(ExtensionBuildContext.buildNameKey),
@@ -1120,45 +1120,11 @@ Uri _parseDirectoryUri(Map<String, Object?> json, String key) {
   return uri.path.endsWith('/') ? uri : uri.replace(path: '${uri.path}/');
 }
 
-Uri? _parseOptionalDirectoryUri(Map<String, Object?> json, String key) {
-  final String? raw = json.nullableField<String>(key);
-  if (raw == null) {
-    return null;
-  }
-  final Uri? uri = Uri.tryParse(raw);
-  if (uri == null || !uri.isValidDirectoryUri) {
-    throw FormatException(
-      'Invalid "$key": expected trailing-slash-terminated absolute file: URI, got "$raw".',
-    );
-  }
-  return uri;
-}
+Uri? _parseOptionalDirectoryUri(Map<String, Object?> json, String key) =>
+    json[key] == null ? null : json.directoryUri(key);
 
-Map<String, String> _parseRequiredStringMap(Map<String, Object?> json, String key) {
-  final Map<String, Object?> raw = json.requiredField<Map<String, Object?>>(key);
-  return _parseStringMap(raw, key);
-}
-
-Map<String, String> _parseOptionalStringMap(Map<String, Object?> json, String key) {
-  final Map<String, Object?>? raw = json.nullableField<Map<String, Object?>>(key);
-  if (raw == null) {
-    return const <String, String>{};
-  }
-  return _parseStringMap(raw, key);
-}
-
-Map<String, String> _parseStringMap(Map<String, Object?> raw, String key) {
-  final result = <String, String>{};
-  for (final MapEntry(key: String entryKey, :Object? value) in raw.entries) {
-    if (value is! String) {
-      throw FormatException(
-        'Invalid "$key" parameter: Invalid "$entryKey": expected String, got ${value.runtimeType}.',
-      );
-    }
-    result[entryKey] = value;
-  }
-  return result;
-}
+Map<String, String> _parseOptionalStringMap(Map<String, Object?> json, String key) =>
+    json[key] == null ? const <String, String>{} : json.stringMap(key);
 
 Map<String, Object?> _parseOptionalConfigurationMap(Map<String, Object?> json, String key) {
   final Map<String, Object?>? raw = json.nullableField<Map<String, Object?>>(key);

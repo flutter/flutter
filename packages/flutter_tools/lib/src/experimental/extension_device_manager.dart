@@ -646,7 +646,11 @@ class ExtensionBackedDevice extends Device {
       return LaunchResult.failed();
     }
 
-    final String targetMainPath = mainPath ?? 'lib/main.dart';
+    final Directory projectDir = _fileSystem.currentDirectory;
+    final String targetMainPath = _fileSystem
+        .file(mainPath ?? _fileSystem.path.join('lib', 'main.dart'))
+        .absolute
+        .path;
     logger.printTrace('Building application using extension target "$buildTargetName"...');
 
     final List<ExtensionBuildTarget> targets = await _buildManager.getBuildTargets();
@@ -658,7 +662,6 @@ class ExtensionBackedDevice extends Device {
       return LaunchResult.failed();
     }
 
-    final Directory projectDir = _fileSystem.currentDirectory;
     final Directory buildOutputDir = projectDir.childDirectory(
       _config != null ? getBuildDirectory(_config, _fileSystem) : 'build',
     );
@@ -692,14 +695,19 @@ class ExtensionBackedDevice extends Device {
     final ExtensionBuildResult result;
     try {
       result = await _buildManager.build(
-        buildMode: buildMode,
-        flutterRoot: _fileSystem.directory(flutterRootPath).uri,
-        mainPath: targetMainPath,
-        outputDir: outputDir.uri,
-        projectRoot: projectDir.uri,
-        resolvedArtifacts: resolvedArtifacts,
+        context: ExtensionBuildContext(
+          buildMode: buildMode,
+          flutterRoot: _fileSystem.directory(flutterRootPath).uri,
+          mainPath: targetMainPath,
+          outputDir: outputDir.uri,
+          projectRoot: projectDir.uri,
+          resolvedArtifacts: resolvedArtifacts,
+          targetDeviceId: id,
+          targetPlatform: selectedTargetPlatform,
+          trackWidgetCreation: buildMode == BuildMode.debug,
+          treeShakeIcons: buildMode.isPrecompiled,
+        ),
         targetName: buildTargetName,
-        targetPlatform: selectedTargetPlatform,
       );
     } on ToolExtensionException catch (e) {
       logger.printError(e.message.isNotEmpty ? 'Build failed: ${e.message}' : 'Build failed.');

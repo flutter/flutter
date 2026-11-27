@@ -326,13 +326,21 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
         );
         continue;
       }
-      argParser.addFlag(
-        flag.name,
-        defaultsTo: flag.defaultsTo,
-        help: flag.help,
-        hide: !verboseHelp && (flag.hide || flag.deprecated != null),
-        negatable: flag.negatable,
-      );
+      try {
+        argParser.addFlag(
+          flag.name,
+          defaultsTo: flag.defaultsTo,
+          help: flag.help,
+          hide: !verboseHelp && (flag.hide || flag.deprecated != null),
+          negatable: flag.negatable,
+        );
+      } on ArgumentError catch (e) {
+        logger.printWarning(
+          'Skipping invalid custom build flag "--${flag.name}" on build target "${target.name}" '
+          'from extension "$extensionName": ${e.message}',
+        );
+        continue;
+      }
       _registeredFlags.add(flag);
     }
 
@@ -344,16 +352,24 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
         );
         continue;
       }
-      argParser.addOption(
-        option.name,
-        allowed: option.allowed,
-        allowedHelp: option.allowedHelp,
-        defaultsTo: option.defaultsTo,
-        help: option.help,
-        hide: !verboseHelp && (option.hide || option.deprecated != null),
-        mandatory: option.mandatory,
-        valueHelp: option.valueHelp,
-      );
+      try {
+        argParser.addOption(
+          option.name,
+          allowed: option.allowed,
+          allowedHelp: option.allowedHelp,
+          defaultsTo: option.defaultsTo,
+          help: option.help,
+          hide: !verboseHelp && (option.hide || option.deprecated != null),
+          mandatory: option.mandatory,
+          valueHelp: option.valueHelp,
+        );
+      } on ArgumentError catch (e) {
+        logger.printWarning(
+          'Skipping invalid custom build option "--${option.name}" on build target "${target.name}" '
+          'from extension "$extensionName": ${e.message}',
+        );
+        continue;
+      }
       _registeredOptions.add(option);
     }
   }
@@ -428,42 +444,48 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
       final List<String> ids when ids.isNotEmpty => ids.first,
       _ => null,
     };
-    final Uri? splitDebugInfo = switch (buildInfo.splitDebugInfoPath) {
-      final String raw when raw.isNotEmpty =>
-        (fs.path.isRelative(raw) ? projectDir.childDirectory(raw) : fs.directory(raw)).uri,
-      _ => null,
-    };
-    final Uri? codeSizeDirectory = switch (buildInfo.codeSizeDirectory) {
-      final String raw when raw.isNotEmpty =>
-        (fs.path.isRelative(raw) ? projectDir.childDirectory(raw) : fs.directory(raw)).uri,
-      _ => null,
-    };
+    final Uri? splitDebugInfo = resolveOptionalDirectoryUri(
+      buildInfo.splitDebugInfoPath,
+      baseDir: projectDir,
+      fileSystem: fs,
+    );
+    final Uri? codeSizeDirectory = resolveOptionalDirectoryUri(
+      buildInfo.codeSizeDirectory,
+      baseDir: projectDir,
+      fileSystem: fs,
+    );
+    final Map<String, String> dartDefines = parseExtensionDartDefines(buildInfo.dartDefines);
+    if (!target.supportsFlavors) {
+      dartDefines.remove(kAppFlavor);
+    }
 
     final ExtensionBuildResult result;
     try {
       result = await _buildManager.build(
-        buildFlags: buildFlags,
-        buildMode: buildInfo.mode,
-        buildName: buildInfo.buildName ?? flutterProject.manifest.buildName,
-        buildNumber: buildInfo.buildNumber ?? flutterProject.manifest.buildNumber,
-        buildOptions: buildOptions,
-        codeSizeDirectory: codeSizeDirectory,
-        dartDefines: parseExtensionDartDefines(buildInfo.dartDefines),
-        dartObfuscation: buildInfo.dartObfuscation,
-        extraFrontEndOptions: buildInfo.extraFrontEndOptions,
-        extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
-        flavor: target.supportsFlavors ? buildInfo.flavor : null,
-        flutterRoot: fs.directory(cache.flutterRoot).uri,
-        mainPath: fs.file(targetFile).absolute.path,
-        outputDir: outputDir.uri,
-        projectRoot: projectDir.uri,
-        resolvedArtifacts: resolvedArtifacts,
-        splitDebugInfo: splitDebugInfo,
-        targetDeviceId: targetDeviceId,
+        context: ExtensionBuildContext(
+          buildFlags: buildFlags,
+          buildMode: buildInfo.mode,
+          buildName: buildInfo.buildName ?? flutterProject.manifest.buildName,
+          buildNumber: buildInfo.buildNumber ?? flutterProject.manifest.buildNumber,
+          buildOptions: buildOptions,
+          codeSizeDirectory: codeSizeDirectory,
+          dartDefines: dartDefines,
+          dartObfuscation: buildInfo.dartObfuscation,
+          extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+          extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
+          flavor: target.supportsFlavors ? buildInfo.flavor : null,
+          flutterRoot: fs.directory(cache.flutterRoot).uri,
+          mainPath: fs.file(targetFile).absolute.path,
+          outputDir: outputDir.uri,
+          projectRoot: projectDir.uri,
+          resolvedArtifacts: resolvedArtifacts,
+          splitDebugInfo: splitDebugInfo,
+          targetDeviceId: targetDeviceId,
+          targetPlatform: selectedTargetPlatform,
+          trackWidgetCreation: buildInfo.trackWidgetCreation,
+          treeShakeIcons: buildInfo.treeShakeIcons,
+        ),
         targetName: target.name,
-        targetPlatform: selectedTargetPlatform,
-        trackWidgetCreation: buildInfo.trackWidgetCreation,
-        treeShakeIcons: buildInfo.treeShakeIcons,
       );
     } on ToolExtensionException catch (e) {
       throwToolExit(e.message.isNotEmpty ? 'Build failed: ${e.message}' : 'Build failed.');

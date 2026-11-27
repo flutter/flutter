@@ -225,12 +225,13 @@ void main() {
         environment: <String, String>{...baseEnv, 'FLUTTER_TOOL_EXTENSIONS': 'true'},
       );
 
+      expect(result.exitCode, 0, reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}');
       if (isLinux) {
-        expect(result.exitCode, 0, reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}');
         expect(result.stdout, contains('--[no-]bundle-metadata'));
         expect(result.stdout, contains('--bundle-label'));
       } else {
-        expect(result.exitCode, isNot(0));
+        expect(result.stdout, isNot(contains('--[no-]bundle-metadata')));
+        expect(result.stdout, isNot(contains('--bundle-label')));
       }
     },
   );

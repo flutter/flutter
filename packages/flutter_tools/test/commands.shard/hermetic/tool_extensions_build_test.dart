@@ -56,60 +56,61 @@ final class _RecordingExtensionBuildManager extends ExtensionBuildManager {
       );
 
   final ExtensionBuildResult resultToReturn;
-  Map<String, Object?>? lastBuildArgs;
+  ExtensionBuildContext? lastBuildContext;
+  String? lastTargetName;
 
   @override
   Future<ExtensionBuildResult> build({
-    required BuildMode buildMode,
-    required Uri flutterRoot,
-    required String mainPath,
-    required Uri outputDir,
-    required Uri projectRoot,
-    required Map<String, String> resolvedArtifacts,
+    required ExtensionBuildContext context,
     required String targetName,
-    Map<String, bool> buildFlags = const <String, bool>{},
-    String? buildName,
-    String? buildNumber,
-    Map<String, String> buildOptions = const <String, String>{},
-    Uri? codeSizeDirectory,
-    Map<String, String> dartDefines = const <String, String>{},
-    bool dartObfuscation = false,
-    List<String> extraFrontEndOptions = const <String>[],
-    List<String> extraGenSnapshotOptions = const <String>[],
-    String? flavor,
-    Uri? splitDebugInfo,
-    String? targetDeviceId,
-    String? targetPlatform,
-    bool? trackWidgetCreation,
-    bool? treeShakeIcons,
   }) async {
-    lastBuildArgs = <String, Object?>{
-      'buildFlags': buildFlags,
-      'buildMode': buildMode,
-      'buildName': buildName,
-      'buildNumber': buildNumber,
-      'buildOptions': buildOptions,
-      'codeSizeDirectory': codeSizeDirectory,
-      'dartDefines': dartDefines,
-      'dartObfuscation': dartObfuscation,
-      'extraFrontEndOptions': extraFrontEndOptions,
-      'extraGenSnapshotOptions': extraGenSnapshotOptions,
-      'flavor': flavor,
-      'flutterRoot': flutterRoot,
-      'mainPath': mainPath,
-      'outputDir': outputDir,
-      'projectRoot': projectRoot,
-      'resolvedArtifacts': resolvedArtifacts,
-      'splitDebugInfo': splitDebugInfo,
-      'targetDeviceId': targetDeviceId,
-      'targetName': targetName,
-      'targetPlatform': targetPlatform,
-      'trackWidgetCreation': trackWidgetCreation,
-      'treeShakeIcons': treeShakeIcons,
-    };
+    lastBuildContext = context;
+    lastTargetName = targetName;
     return resultToReturn;
   }
 }
+
+ExtensionBuildContext _testBuildContext({
+  BuildMode buildMode = .debug,
+  Uri? codeSizeDirectory,
+  Uri? flutterRoot,
+  String mainPath = '/lib/main.dart',
+  Uri? outputDir,
+  Uri? projectRoot,
+  Uri? splitDebugInfo,
+}) => ExtensionBuildContext(
+  buildMode: buildMode,
+  codeSizeDirectory: codeSizeDirectory,
+  flutterRoot: flutterRoot ?? Uri.parse('/flutter'),
+  mainPath: mainPath,
+  outputDir: outputDir ?? Uri.parse('/out'),
+  projectRoot: projectRoot ?? Uri.parse('/'),
+  resolvedArtifacts: const <String, String>{},
+  splitDebugInfo: splitDebugInfo,
+  trackWidgetCreation: buildMode == BuildMode.debug,
+  treeShakeIcons: buildMode.isPrecompiled,
+);
+
+ExtensionAssembleContext _testAssembleContext({
+  Uri? buildDir,
+  BuildMode buildMode = .debug,
+  Map<String, Object?> configuration = const <String, Object?>{},
+  Uri? flutterRoot,
+  String mainPath = '/lib/main.dart',
+  Uri? outputDir,
+  Uri? projectRoot,
+}) => ExtensionAssembleContext(
+  buildDir: buildDir ?? Uri.parse('/build'),
+  buildMode: buildMode,
+  configuration: configuration,
+  flutterRoot: flutterRoot ?? Uri.parse('/flutter'),
+  mainPath: mainPath,
+  outputDir: outputDir ?? Uri.parse('/out'),
+  projectRoot: projectRoot ?? Uri.parse('/'),
+  resolvedArtifacts: const <String, String>{},
+  trackWidgetCreation: buildMode == BuildMode.debug,
+  treeShakeIcons: buildMode.isPrecompiled,
+);
 
 final class _TestBuildTarget extends BuildTarget {
   const _TestBuildTarget({
@@ -610,12 +611,7 @@ void main() {
 
       await expectLater(
         () => buildManager.build(
-          buildMode: .debug,
-          flutterRoot: Uri.parse('/flutter'),
-          mainPath: '/lib/main.dart',
-          outputDir: Uri.parse('/build'),
-          projectRoot: Uri.parse('/'),
-          resolvedArtifacts: const <String, String>{},
+          context: _testBuildContext(outputDir: Uri.parse('/build')),
           targetName: 'custom-linux-build',
         ),
         throwsA(
@@ -629,13 +625,10 @@ void main() {
 
       await expectLater(
         () => buildManager.assemble(
-          buildDir: Uri.parse('/.dart_tool/flutter_build'),
-          buildMode: .debug,
-          flutterRoot: Uri.parse('/flutter'),
-          mainPath: '/lib/main.dart',
-          outputDir: Uri.parse('/build'),
-          projectRoot: Uri.parse('/'),
-          resolvedArtifacts: const <String, String>{},
+          context: _testAssembleContext(
+            buildDir: Uri.parse('/.dart_tool/flutter_build'),
+            outputDir: Uri.parse('/build'),
+          ),
           targetName: 'custom-linux-assemble-only-debug',
         ),
         throwsA(
@@ -791,12 +784,7 @@ void main() {
 
       await expectLater(
         () => buildManager.build(
-          buildMode: .debug,
-          flutterRoot: Uri.parse('/flutter'),
-          mainPath: '/lib/main.dart',
-          outputDir: Uri.parse('/out'),
-          projectRoot: Uri.parse('relative/path'),
-          resolvedArtifacts: const <String, String>{},
+          context: _testBuildContext(projectRoot: Uri.parse('relative/path')),
           targetName: 'custom-linux-build',
         ),
         throwsArgumentError,
@@ -804,12 +792,7 @@ void main() {
 
       await expectLater(
         () => buildManager.build(
-          buildMode: .debug,
-          flutterRoot: Uri.parse('relative/flutter'),
-          mainPath: '/lib/main.dart',
-          outputDir: Uri.parse('/out'),
-          projectRoot: Uri.parse('/'),
-          resolvedArtifacts: const <String, String>{},
+          context: _testBuildContext(flutterRoot: Uri.parse('relative/flutter')),
           targetName: 'custom-linux-build',
         ),
         throwsArgumentError,
@@ -817,12 +800,7 @@ void main() {
 
       await expectLater(
         () => buildManager.build(
-          buildMode: .debug,
-          flutterRoot: Uri.parse('/flutter'),
-          mainPath: '/lib/main.dart',
-          outputDir: Uri.parse('relative/out'),
-          projectRoot: Uri.parse('/'),
-          resolvedArtifacts: const <String, String>{},
+          context: _testBuildContext(outputDir: Uri.parse('relative/out')),
           targetName: 'custom-linux-build',
         ),
         throwsArgumentError,
@@ -830,13 +808,10 @@ void main() {
 
       await expectLater(
         () => buildManager.build(
-          buildMode: .release,
-          codeSizeDirectory: Uri.parse('file:///no_trailing_slash'),
-          flutterRoot: Uri.parse('/flutter'),
-          mainPath: '/lib/main.dart',
-          outputDir: Uri.parse('/out'),
-          projectRoot: Uri.parse('/'),
-          resolvedArtifacts: const <String, String>{},
+          context: _testBuildContext(
+            buildMode: .release,
+            codeSizeDirectory: Uri.parse('file:///no_trailing_slash'),
+          ),
           targetName: 'custom-linux-build',
         ),
         throwsArgumentError,
@@ -844,13 +819,10 @@ void main() {
 
       await expectLater(
         () => buildManager.build(
-          buildMode: .release,
-          flutterRoot: Uri.parse('/flutter'),
-          mainPath: '/lib/main.dart',
-          outputDir: Uri.parse('/out'),
-          projectRoot: Uri.parse('/'),
-          resolvedArtifacts: const <String, String>{},
-          splitDebugInfo: Uri.parse('file:///no_trailing_slash'),
+          context: _testBuildContext(
+            buildMode: .release,
+            splitDebugInfo: Uri.parse('file:///no_trailing_slash'),
+          ),
           targetName: 'custom-linux-build',
         ),
         throwsArgumentError,
@@ -858,13 +830,7 @@ void main() {
 
       await expectLater(
         () => buildManager.assemble(
-          buildDir: Uri.parse('relative/build'),
-          buildMode: .debug,
-          flutterRoot: Uri.parse('/flutter'),
-          mainPath: '/lib/main.dart',
-          outputDir: Uri.parse('/out'),
-          projectRoot: Uri.parse('/'),
-          resolvedArtifacts: const <String, String>{},
+          context: _testAssembleContext(buildDir: Uri.parse('relative/build')),
           targetName: 'custom-linux-assemble-only-debug',
         ),
         throwsArgumentError,
@@ -872,13 +838,7 @@ void main() {
 
       await expectLater(
         () => buildManager.assemble(
-          buildDir: Uri.parse('/build'),
-          buildMode: .debug,
-          flutterRoot: Uri.parse('relative/flutter'),
-          mainPath: '/lib/main.dart',
-          outputDir: Uri.parse('/out'),
-          projectRoot: Uri.parse('/'),
-          resolvedArtifacts: const <String, String>{},
+          context: _testAssembleContext(flutterRoot: Uri.parse('relative/flutter')),
           targetName: 'custom-linux-assemble-only-debug',
         ),
         throwsArgumentError,
@@ -903,15 +863,7 @@ void main() {
       );
 
       await expectLater(
-        () => buildManager.build(
-          buildMode: .debug,
-          flutterRoot: Uri.parse('/flutter'),
-          mainPath: '/lib/main.dart',
-          outputDir: Uri.parse('/out'),
-          projectRoot: Uri.parse('/'),
-          resolvedArtifacts: const <String, String>{},
-          targetName: 'non-existent-target',
-        ),
+        () => buildManager.build(context: _testBuildContext(), targetName: 'non-existent-target'),
         throwsA(
           isA<ToolExtensionException>().having(
             (ToolExtensionException e) => e.message,
@@ -923,13 +875,7 @@ void main() {
 
       await expectLater(
         () => buildManager.assemble(
-          buildDir: Uri.parse('/build'),
-          buildMode: .debug,
-          flutterRoot: Uri.parse('/flutter'),
-          mainPath: '/lib/main.dart',
-          outputDir: Uri.parse('/out'),
-          projectRoot: Uri.parse('/'),
-          resolvedArtifacts: const <String, String>{},
+          context: _testAssembleContext(),
           targetName: 'non-existent-assemble-target',
         ),
         throwsA(
@@ -977,12 +923,7 @@ void main() {
         );
 
         final ExtensionBuildResult buildResult = await buildManager.build(
-          buildMode: .debug,
-          flutterRoot: Uri.parse('/flutter'),
-          mainPath: '/lib/main.dart',
-          outputDir: Uri.parse('/out'),
-          projectRoot: Uri.parse('/'),
-          resolvedArtifacts: const <String, String>{},
+          context: _testBuildContext(),
           targetName: 'shared-target',
         );
         expect(buildResult.aotSnapshotFileName, 'libapp.so');
@@ -1001,13 +942,7 @@ void main() {
         );
 
         await buildManager.assemble(
-          buildDir: Uri.parse('/build'),
-          buildMode: .debug,
-          flutterRoot: Uri.parse('/flutter'),
-          mainPath: '/lib/main.dart',
-          outputDir: Uri.parse('/out'),
-          projectRoot: Uri.parse('/'),
-          resolvedArtifacts: const <String, String>{},
+          context: _testAssembleContext(),
           targetName: 'shared-assemble-target',
         );
 
@@ -1256,17 +1191,17 @@ void main() {
         featureFlags,
       ).run(<String>['custom-hermetic-build', '--no-pub']);
 
-      expect(fakeBuildManager.lastBuildArgs, isNotNull);
-      expect(fakeBuildManager.lastBuildArgs!['targetName'], equals('custom-hermetic-build'));
-      expect(fakeBuildManager.lastBuildArgs!['mainPath'], equals('/lib/main.dart'));
-      expect(fakeBuildManager.lastBuildArgs!['buildName'], equals('2.4.6'));
-      expect(fakeBuildManager.lastBuildArgs!['buildNumber'], equals('88'));
-      expect(fakeBuildManager.lastBuildArgs!['flutterRoot'], equals(fs.directory('/flutter').uri));
+      expect(fakeBuildManager.lastBuildContext, isNotNull);
+      expect(fakeBuildManager.lastTargetName, equals('custom-hermetic-build'));
+      expect(fakeBuildManager.lastBuildContext!.mainPath, equals('/lib/main.dart'));
+      expect(fakeBuildManager.lastBuildContext!.buildName, equals('2.4.6'));
+      expect(fakeBuildManager.lastBuildContext!.buildNumber, equals('88'));
+      expect(fakeBuildManager.lastBuildContext!.flutterRoot, equals(fs.directory('/flutter').uri));
       expect(
-        fakeBuildManager.lastBuildArgs!['outputDir'],
+        fakeBuildManager.lastBuildContext!.outputDir,
         equals(fs.directory('/build/custom/linux-x64/release').uri),
       );
-      expect(fakeBuildManager.lastBuildArgs!['resolvedArtifacts'], isA<Map<String, String>>());
+      expect(fakeBuildManager.lastBuildContext!.resolvedArtifacts, isA<Map<String, String>>());
     });
 
     test('ExtensionBuildSubCommand resolves {OUTPUT_DIR} using custom build-dir from Config', () async {
@@ -1300,7 +1235,7 @@ void main() {
         featureFlags,
       ).run(<String>['custom-hermetic-build', '--no-pub']);
       expect(
-        buildManager.lastBuildArgs!['outputDir'],
+        buildManager.lastBuildContext!.outputDir,
         equals(fs.directory('/custom_build_root/custom/linux-x64/release').uri),
       );
     });
@@ -1524,7 +1459,10 @@ void main() {
       final logger = BufferLogger.test();
       final config = Config.test()
         ..setValue('extensions', <String, Object?>{
-          'capturing_extension': <String, Object?>{'custom-embedder-sdk': '/opt/nested-sdk'},
+          'capturing_extension': <String, Object?>{
+            'custom-embedder-sdk': '/opt/nested-sdk',
+            'unset-embedder-profile': true,
+          },
         });
       final platform = FakePlatform(
         environment: const <String, String>{'CUSTOM_EMBEDDER_ENABLED': 'false'},
@@ -1762,10 +1700,36 @@ void main() {
         throwsA(isA<UsageException>()),
       );
 
-      // Default mode falls back to BuildMode.debug, and manifest default-flavor is suppressed.
+      // Default mode falls back to BuildMode.debug, and manifest default-flavor is suppressed
+      // from both flavor and FLUTTER_APP_FLAVOR in dartDefines.
       await createRestrictedRunner().run(<String>['restricted-target', '--no-pub']);
-      expect(buildManager.lastBuildArgs!['buildMode'], BuildMode.debug);
-      expect(buildManager.lastBuildArgs!['flavor'], isNull);
+      expect(buildManager.lastBuildContext!.buildMode, BuildMode.debug);
+      expect(buildManager.lastBuildContext!.flavor, isNull);
+      expect(buildManager.lastBuildContext!.dartDefines.containsKey('FLUTTER_APP_FLAVOR'), isFalse);
+
+      // Invalid custom flag/option definitions log warnings instead of crashing ArgParser registration.
+      final invalidOptionLogger = BufferLogger.test();
+      final invalidOptionTarget = ExtensionBuildTarget(
+        description: 'Target with invalid CLI flags and options.',
+        flags: const <ExtensionFlag>[ExtensionFlag(help: 'Bad flag', name: '-bad-flag')],
+        name: 'invalid-cli-target',
+        options: const <ExtensionOption>[ExtensionOption(help: 'Bad option', name: '-bad-option')],
+        outputDir: '{OUTPUT_DIR}/invalid/{BUILD_MODE}',
+        targetPlatforms: const <String>{'linux-x64'},
+      );
+      ExtensionBuildSubCommand(
+        buildManager: buildManager,
+        target: invalidOptionTarget,
+        toolContext: FakeToolContext(cache: cache, fs: fs, logger: invalidOptionLogger),
+        verboseHelp: false,
+      );
+      expect(
+        invalidOptionLogger.warningText,
+        allOf(
+          contains('Skipping invalid custom build flag "---bad-flag"'),
+          contains('Skipping invalid custom build option "---bad-option"'),
+        ),
+      );
     });
 
     test('ExtensionBuildSubCommand runs SizeAnalyzer when supportsSizeAnalysis and bundleDirectoryUri are active and errors on missing files', () async {
@@ -1817,7 +1781,7 @@ void main() {
       ]);
 
       expect(
-        buildManager.lastBuildArgs!['codeSizeDirectory'],
+        buildManager.lastBuildContext!.codeSizeDirectory,
         equals(Uri.parse('file:///code_size/')),
       );
       final File analysisJson = fs.file(
@@ -2001,24 +1965,24 @@ void main() {
       config.setValue('custom-embedder-sdk', '/live-unhashed-sdk');
       capturedAssembleContexts.clear();
       await buildManager.assemble(
-        buildDir: Uri.directory('/project/.dart_tool/flutter_build/hash1'),
-        buildMode: .debug,
-        configuration: const <String, Object?>{'custom-embedder-sdk': '/hashed-env-sdk'},
-        flutterRoot: Uri.directory('/flutter'),
-        mainPath: '/project/lib/main.dart',
-        outputDir: Uri.directory('/out'),
-        projectRoot: Uri.directory('/project'),
-        resolvedArtifacts: const <String, String>{},
+        context: _testAssembleContext(
+          buildDir: Uri.directory('/project/.dart_tool/flutter_build/hash1'),
+          configuration: const <String, Object?>{'custom-embedder-sdk': '/hashed-env-sdk'},
+          flutterRoot: Uri.directory('/flutter'),
+          mainPath: '/project/lib/main.dart',
+          outputDir: Uri.directory('/out'),
+          projectRoot: Uri.directory('/project'),
+        ),
         targetName: 'capturing-assemble',
       );
       await buildManager.assemble(
-        buildDir: Uri.directory('/project/.dart_tool/flutter_build/hash2'),
-        buildMode: .debug,
-        flutterRoot: Uri.directory('/flutter'),
-        mainPath: '/project/lib/main.dart',
-        outputDir: Uri.directory('/out'),
-        projectRoot: Uri.directory('/project'),
-        resolvedArtifacts: const <String, String>{},
+        context: _testAssembleContext(
+          buildDir: Uri.directory('/project/.dart_tool/flutter_build/hash2'),
+          flutterRoot: Uri.directory('/flutter'),
+          mainPath: '/project/lib/main.dart',
+          outputDir: Uri.directory('/out'),
+          projectRoot: Uri.directory('/project'),
+        ),
         targetName: 'capturing-assemble',
       );
       await pumpEventQueue();
@@ -2051,12 +2015,12 @@ void main() {
 
       await expectLater(
         () => buildManager.build(
-          buildMode: .debug,
-          flutterRoot: Uri.directory('/flutter'),
-          mainPath: '/project/lib/main.dart',
-          outputDir: Uri.directory('/project/build/custom_os'),
-          projectRoot: Uri.directory('/project'),
-          resolvedArtifacts: const <String, String>{},
+          context: _testBuildContext(
+            flutterRoot: Uri.directory('/flutter'),
+            mainPath: '/project/lib/main.dart',
+            outputDir: Uri.directory('/project/build/custom_os'),
+            projectRoot: Uri.directory('/project'),
+          ),
           targetName: 'custom-os-bundle',
         ),
         throwsA(

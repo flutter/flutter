@@ -819,7 +819,6 @@ void main() {
         defaultsTo: 'gzip',
         deprecated: 'Use --archive-format instead.',
         hide: true,
-        mandatory: true,
         valueHelp: 'format',
       );
       final Map<String, Object?> map = option.toMap();
@@ -833,13 +832,20 @@ void main() {
       expect(map[ExtensionOption.defaultsToKey], 'gzip');
       expect(map[ExtensionOption.deprecatedKey], 'Use --archive-format instead.');
       expect(map[ExtensionOption.hideKey], isTrue);
-      expect(map[ExtensionOption.mandatoryKey], isTrue);
+      expect(map[ExtensionOption.mandatoryKey], isFalse);
       expect(map[ExtensionOption.valueHelpKey], 'format');
 
       final parsed = ExtensionOption.fromJson(map);
       expect(parsed, equals(option));
       expect(parsed.hashCode, equals(option.hashCode));
       expect(parsed.toString(), contains('compression'));
+
+      const mandatoryOption = ExtensionOption(
+        help: 'Required profile.',
+        name: 'profile',
+        mandatory: true,
+      );
+      expect(ExtensionOption.fromJson(mandatoryOption.toMap()), equals(mandatoryOption));
 
       const defaultOption = ExtensionOption(help: 'Default option', name: 'default-option');
       expect(defaultOption.hide, isFalse);
@@ -861,6 +867,24 @@ void main() {
           'name': 'opt',
           'help': 'h',
           'mandatory': 'yes',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionOption.fromJson(const <String, Object?>{
+          'name': 'opt',
+          'help': 'h',
+          'mandatory': true,
+          'defaultsTo': 'val',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionOption.fromJson(const <String, Object?>{
+          'name': 'opt',
+          'help': 'h',
+          'allowed': <String>['a', 'b'],
+          'defaultsTo': 'c',
         }),
         throwsFormatException,
       );

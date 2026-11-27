@@ -44,18 +44,27 @@ const _standardAssembleDefineKeys = <String>{
   kUseLocalCanvasKitFlag,
 };
 
-/// Encodes [configuration] deterministically (sorted by key) into a JSON
-/// string suitable for [Environment.defines].
-String encodeExtensionConfigDefines(Map<String, Object?> configuration) {
-  final List<String> sortedKeys = configuration.keys.toList()..sort();
-  final sorted = <String, Object?>{for (final String key in sortedKeys) key: configuration[key]};
-  return json.encode(sorted);
+/// Resolves an optional directory path (relative to [baseDir] or absolute)
+/// into a trailing-slash directory [Uri], returning `null` when [rawPath] is
+/// null or empty.
+Uri? resolveOptionalDirectoryUri(
+  String? rawPath, {
+  required Directory baseDir,
+  required FileSystem fileSystem,
+}) {
+  if (rawPath == null || rawPath.isEmpty) {
+    return null;
+  }
+  return (fileSystem.path.isRelative(rawPath)
+          ? baseDir.childDirectory(rawPath)
+          : fileSystem.directory(rawPath))
+      .uri;
 }
 
 /// Encodes per-target extension configurations deterministically (sorted by
 /// target name and configuration key) into a JSON string suitable for
 /// [Environment.defines].
-String encodeTargetExtensionConfigDefines(Map<String, Map<String, Object?>> targetConfigurations) {
+String encodeExtensionConfigDefines(Map<String, Map<String, Object?>> targetConfigurations) {
   final List<String> sortedTargets = targetConfigurations.keys.toList()..sort();
   final sorted = <String, Map<String, Object?>>{};
   for (final targetName in sortedTargets) {
@@ -66,35 +75,20 @@ String encodeTargetExtensionConfigDefines(Map<String, Map<String, Object?>> targ
   return json.encode(sorted);
 }
 
-/// Decodes a [kExtensionConfigDefines] JSON string back into a configuration map.
-///
-/// Supports both a flat `Map<String, Object?>` encoding and a per-target
-/// `Map<String, Map<String, Object?>>` encoding (when [targetName] is provided).
-Map<String, Object?>? decodeExtensionConfigDefines(String? encoded, {String? targetName}) {
+/// Decodes [targetName]'s configuration map from a per-target
+/// [kExtensionConfigDefines] JSON string.
+Map<String, Object?>? decodeExtensionConfigDefines(String? encoded, {required String targetName}) {
   if (encoded == null || encoded.isEmpty) {
     return null;
   }
   try {
-    final Object? decoded = json.decode(encoded);
-    if (decoded case final Map<String, Object?> map) {
-      final bool isPerTargetMap =
-          map.isNotEmpty && map.values.every((Object? value) => value is Map<String, Object?>);
-      if (isPerTargetMap) {
-        if (targetName == null) {
-          return null;
-        }
-        if (map[targetName] case final Map<String, Object?> targetMap) {
-          return <String, Object?>{
-            for (final MapEntry(:String key, :Object? value) in targetMap.entries)
-              if (value is bool || value is String) key: value,
-          };
-        }
-        return null;
+    if (json.decode(encoded) case final Map<String, Object?> map) {
+      if (map[targetName] case final Map<String, Object?> targetMap) {
+        return <String, Object?>{
+          for (final MapEntry(:String key, :Object? value) in targetMap.entries)
+            if (value is bool || value is String) key: value,
+        };
       }
-      return <String, Object?>{
-        for (final MapEntry(:String key, :Object? value) in map.entries)
-          if (value is bool || value is String) key: value,
-      };
     }
   } on FormatException {
     // Ignore malformed JSON defines.
@@ -215,7 +209,13 @@ class ExtensionTarget extends Target {
       :Directory outputDir,
       :Directory projectDir,
     ) = environment;
-    final String mainPath = defines[kTargetFile] ?? fileSystem.path.join('lib', 'main.dart');
+    final String rawMainPath = defines[kTargetFile] ?? fileSystem.path.join('lib', 'main.dart');
+    final String mainPath =
+        (fileSystem.path.isRelative(rawMainPath)
+                ? projectDir.childFile(rawMainPath)
+                : fileSystem.file(rawMainPath))
+            .absolute
+            .path;
     final String? buildMode = defines[kBuildMode];
     if (buildMode == null) {
       throw MissingDefineException(kBuildMode, name);
@@ -236,24 +236,16 @@ class ExtensionTarget extends Target {
       decodeDartDefines(defines, kDartDefines),
     );
     final dartObfuscation = defines[kDartObfuscation] == 'true';
-    final String? rawSplitDebugInfo = defines[kSplitDebugInfo];
-    final Uri? splitDebugInfo = switch (rawSplitDebugInfo) {
-      final String raw when raw.isNotEmpty =>
-        (fileSystem.path.isRelative(raw)
-                ? projectDir.childDirectory(raw)
-                : fileSystem.directory(raw))
-            .uri,
-      _ => null,
-    };
-    final String? rawCodeSizeDir = defines[kCodeSizeDirectory];
-    final Uri? codeSizeDirectory = switch (rawCodeSizeDir) {
-      final String raw when raw.isNotEmpty =>
-        (fileSystem.path.isRelative(raw)
-                ? projectDir.childDirectory(raw)
-                : fileSystem.directory(raw))
-            .uri,
-      _ => null,
-    };
+    final Uri? splitDebugInfo = resolveOptionalDirectoryUri(
+      defines[kSplitDebugInfo],
+      baseDir: projectDir,
+      fileSystem: fileSystem,
+    );
+    final Uri? codeSizeDirectory = resolveOptionalDirectoryUri(
+      defines[kCodeSizeDirectory],
+      baseDir: projectDir,
+      fileSystem: fileSystem,
+    );
     final List<String> extraFrontEndOptions = decodeCommaSeparated(defines, kExtraFrontEndOptions);
     final List<String> extraGenSnapshotOptions = decodeCommaSeparated(
       defines,
@@ -284,28 +276,30 @@ class ExtensionTarget extends Target {
 
     try {
       await _buildManager.assemble(
-        buildDir: buildDir.uri,
-        buildMode: mode,
-        buildName: buildName,
-        buildNumber: buildNumber,
-        codeSizeDirectory: codeSizeDirectory,
-        configuration: configuration,
-        dartDefines: dartDefines,
-        dartObfuscation: dartObfuscation,
-        extraDefines: extraDefines,
-        extraFrontEndOptions: extraFrontEndOptions,
-        extraGenSnapshotOptions: extraGenSnapshotOptions,
-        flavor: flavor,
-        flutterRoot: environment.flutterRootDir.uri,
-        mainPath: mainPath,
-        outputDir: outputDir.uri,
-        projectRoot: projectDir.uri,
-        resolvedArtifacts: resolvedArtifacts,
-        splitDebugInfo: splitDebugInfo,
+        context: ExtensionAssembleContext(
+          buildDir: buildDir.uri,
+          buildMode: mode,
+          buildName: buildName,
+          buildNumber: buildNumber,
+          codeSizeDirectory: codeSizeDirectory,
+          configuration: configuration ?? const <String, Object?>{},
+          dartDefines: dartDefines,
+          dartObfuscation: dartObfuscation,
+          extraDefines: extraDefines,
+          extraFrontEndOptions: extraFrontEndOptions,
+          extraGenSnapshotOptions: extraGenSnapshotOptions,
+          flavor: flavor,
+          flutterRoot: environment.flutterRootDir.uri,
+          mainPath: mainPath,
+          outputDir: outputDir.uri,
+          projectRoot: projectDir.uri,
+          resolvedArtifacts: resolvedArtifacts,
+          splitDebugInfo: splitDebugInfo,
+          targetPlatform: targetPlatform,
+          trackWidgetCreation: trackWidgetCreation,
+          treeShakeIcons: treeShakeIcons,
+        ),
         targetName: assembleTarget.name,
-        targetPlatform: targetPlatform,
-        trackWidgetCreation: trackWidgetCreation,
-        treeShakeIcons: treeShakeIcons,
       );
     } on ToolExtensionException catch (e) {
       throw ExtensionAssembleException(assembleTarget.name, errorMessage: e.message);

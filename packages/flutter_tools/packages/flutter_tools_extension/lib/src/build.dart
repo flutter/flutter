@@ -168,81 +168,8 @@ abstract base class BuildService extends ToolExtensionService {
   /// RPC method identifier to trigger a custom `flutter assemble` target.
   static const String assembleMethod = 'build.assemble';
 
-  /// RPC parameter key for the intermediate build directory (used by [assembleMethod]).
-  static const String buildDirParam = ExtensionAssembleContext.buildDirKey;
-
-  /// RPC parameter key for custom boolean build flags.
-  static const String buildFlagsParam = ExtensionBuildContext.buildFlagsKey;
-
-  /// RPC parameter key for the build mode.
-  static const String buildModeParam = ExtensionBuildContext.buildModeKey;
-
-  /// RPC parameter key for the build name.
-  static const String buildNameParam = ExtensionBuildContext.buildNameKey;
-
-  /// RPC parameter key for the build number.
-  static const String buildNumberParam = ExtensionBuildContext.buildNumberKey;
-
-  /// RPC parameter key for custom string build options.
-  static const String buildOptionsParam = ExtensionBuildContext.buildOptionsKey;
-
-  /// RPC parameter key for the code size analysis output directory URI.
-  static const String codeSizeDirectoryParam = ExtensionBuildContext.codeSizeDirectoryKey;
-
-  /// RPC parameter key for the extension's owned `flutter config` snapshot.
-  static const String configurationParam = ExtensionBuildContext.configurationKey;
-
-  /// RPC parameter key for compile-time Dart defines.
-  static const String dartDefinesParam = ExtensionBuildContext.dartDefinesKey;
-
-  /// RPC parameter key for whether Dart symbol obfuscation is enabled.
-  static const String dartObfuscationParam = ExtensionBuildContext.dartObfuscationKey;
-
-  /// RPC parameter key for non-standard `flutter assemble` defines.
-  static const String extraDefinesParam = ExtensionAssembleContext.extraDefinesKey;
-
-  /// RPC parameter key for extra front-end compiler options.
-  static const String extraFrontEndOptionsParam = ExtensionBuildContext.extraFrontEndOptionsKey;
-
-  /// RPC parameter key for extra `gen_snapshot` options.
-  static const String extraGenSnapshotOptionsParam =
-      ExtensionBuildContext.extraGenSnapshotOptionsKey;
-
-  /// RPC parameter key for the application flavor.
-  static const String flavorParam = ExtensionBuildContext.flavorKey;
-
-  /// RPC parameter key for the Flutter SDK root directory.
-  static const String flutterRootParam = ExtensionBuildContext.flutterRootKey;
-
-  /// RPC parameter key for the main entrypoint path.
-  static const String mainPathParam = ExtensionBuildContext.mainPathKey;
-
-  /// RPC parameter key for the output directory.
-  static const String outputDirParam = ExtensionBuildContext.outputDirKey;
-
-  /// RPC parameter key for the project root path.
-  static const String projectRootParam = ExtensionBuildContext.projectRootKey;
-
-  /// RPC parameter key for the map of resolved engine artifacts.
-  static const String resolvedArtifactsParam = ExtensionBuildContext.resolvedArtifactsKey;
-
-  /// RPC parameter key for the split debug info directory URI.
-  static const String splitDebugInfoParam = ExtensionBuildContext.splitDebugInfoKey;
-
-  /// RPC parameter key for the target device ID.
-  static const String targetDeviceIdParam = ExtensionBuildContext.targetDeviceIdKey;
-
   /// RPC parameter key for the target name.
   static const String targetNameParam = 'targetName';
-
-  /// RPC parameter key for the active target platform identifier.
-  static const String targetPlatformParam = ExtensionBuildContext.targetPlatformKey;
-
-  /// RPC parameter key for whether widget creation tracking is enabled.
-  static const String trackWidgetCreationParam = ExtensionBuildContext.trackWidgetCreationKey;
-
-  /// RPC parameter key for whether icon tree shaking is enabled.
-  static const String treeShakeIconsParam = ExtensionBuildContext.treeShakeIconsKey;
 
   static const String _getBuildTargetsRpcMethod = 'getBuildTargets';
   static const String _getAssembleTargetsRpcMethod = 'getAssembleTargets';
