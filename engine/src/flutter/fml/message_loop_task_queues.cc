@@ -91,14 +91,14 @@ TaskSourceGrade MessageLoopTaskQueues::GetCurrentTaskSourceGrade() {
 
 void MessageLoopTaskQueues::RegisterTask(
     TaskQueueId queue_id,
-    const fml::closure& task,
+    fml::closure task,
     fml::TimePoint target_time,
     fml::TaskSourceGrade task_source_grade) {
   std::lock_guard guard(queue_mutex_);
   size_t order = order_++;
   const auto& queue_entry = queue_entries_.at(queue_id);
   queue_entry->task_source->RegisterTask(
-      {order, task, target_time, task_source_grade});
+      {order, std::move(task), target_time, task_source_grade});
   TaskQueueId loop_to_wake = queue_id;
   if (queue_entry->subsumed_by != kUnmerged) {
     loop_to_wake = queue_entry->subsumed_by;
@@ -132,9 +132,9 @@ fml::closure MessageLoopTaskQueues::GetNextTaskToRun(TaskQueueId queue_id,
   if (top.task.GetTargetTime() > from_time) {
     return nullptr;
   }
-  fml::closure invocation = top.task.GetTask();
   const auto task_source_grade = top.task.GetTaskSourceGrade();
-  queue_entries_.at(top.task_queue_id)->task_source->PopTask(task_source_grade);
+  fml::closure invocation = queue_entries_.at(top.task_queue_id)
+                                ->task_source->PopTask(task_source_grade);
   tls_task_source_grade.reset(new TaskSourceGradeHolder{task_source_grade});
   return invocation;
 }

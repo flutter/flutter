@@ -2,10 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <array>
 #include <atomic>
+#include <cstdint>
+#include <memory>
 #include <thread>
+#include <type_traits>
+#include <vector>
 
+#include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
+#include "flutter/fml/message_loop_task_queues.h"
 #include "flutter/fml/task_source.h"
 #include "flutter/fml/time/chrono_timestamp_provider.h"
 #include "flutter/fml/time/time_delta.h"
@@ -95,6 +102,93 @@ TEST(TaskSourceTests, OrderingMultiTaskHeapsSecondaryPaused) {
   second_task.task.GetTask()();
   task_source.PopTask(second_task.task.GetTaskSourceGrade());
   ASSERT_EQ(value, 1);
+}
+
+TEST(TaskSourceTests, NonSboClosuresAreMovedWithoutCopying) {
+  static_assert(std::is_nothrow_move_constructible_v<DelayedTask>,
+                "DelayedTask must be nothrow movable for vector reallocations");
+
+  struct CopyCountingCallable {
+    std::shared_ptr<int> copies;
+    std::array<uint8_t, 64> payload{};
+    int id = 0;
+    std::vector<int>* order = nullptr;
+
+    CopyCountingCallable(std::shared_ptr<int> c,
+                         int task_id,
+                         std::vector<int>* order_out)
+        : copies(std::move(c)), id(task_id), order(order_out) {}
+
+    CopyCountingCallable(const CopyCountingCallable& other)
+        : copies(other.copies),
+          payload(other.payload),
+          id(other.id),
+          order(other.order) {
+      ++(*copies);
+    }
+
+    CopyCountingCallable(CopyCountingCallable&&) noexcept = default;
+    CopyCountingCallable& operator=(const CopyCountingCallable&) = default;
+    CopyCountingCallable& operator=(CopyCountingCallable&&) noexcept = default;
+
+    void operator()() const { order->push_back(id); }
+  };
+
+  const auto base = ChronoTicksSinceEpoch();
+  constexpr int kNumTasks = 32;
+  std::vector<int> expected_order;
+  expected_order.reserve(kNumTasks);
+  for (int i = kNumTasks; i >= 1; --i) {
+    expected_order.push_back(i);
+  }
+
+  // Exercise both primary (kUnspecified) and secondary (kDartEventLoop) heaps.
+  for (TaskSourceGrade grade :
+       {TaskSourceGrade::kUnspecified, TaskSourceGrade::kDartEventLoop}) {
+    auto copy_count = std::make_shared<int>(0);
+    std::vector<int> order;
+    TaskSource task_source(TaskQueueId(1));
+
+    // Reverse timestamps force heap sift-up and vector reallocations.
+    for (int i = 1; i <= kNumTasks; ++i) {
+      fml::closure task(CopyCountingCallable(copy_count, i, &order));
+      task_source.RegisterTask({static_cast<size_t>(i), std::move(task),
+                                base - fml::TimeDelta::FromMicroseconds(i),
+                                grade});
+    }
+
+    for (int i = 0; i < kNumTasks; ++i) {
+      auto top = task_source.Top();
+      fml::closure invocation =
+          task_source.PopTask(top.task.GetTaskSourceGrade());
+      invocation();
+    }
+
+    EXPECT_EQ(*copy_count, 0);
+    EXPECT_EQ(order, expected_order);
+  }
+
+  // Exercise end-to-end MessageLoopTaskQueues RegisterTask -> GetNextTaskToRun.
+  auto task_queues = MessageLoopTaskQueues::GetInstance();
+  TaskQueueId queue_id = task_queues->CreateTaskQueue();
+  ScopedCleanupClosure dispose_queue(
+      [task_queues, queue_id] { task_queues->Dispose(queue_id); });
+
+  auto copy_count = std::make_shared<int>(0);
+  std::vector<int> order;
+  for (int i = 1; i <= kNumTasks; ++i) {
+    fml::closure task(CopyCountingCallable(copy_count, i, &order));
+    task_queues->RegisterTask(queue_id, std::move(task),
+                              base - fml::TimeDelta::FromMicroseconds(i),
+                              (i % 2 == 0) ? TaskSourceGrade::kDartEventLoop
+                                           : TaskSourceGrade::kUnspecified);
+  }
+  while (fml::closure invocation =
+             task_queues->GetNextTaskToRun(queue_id, base)) {
+    invocation();
+  }
+  EXPECT_EQ(*copy_count, 0);
+  EXPECT_EQ(order, expected_order);
 }
 
 }  // namespace testing

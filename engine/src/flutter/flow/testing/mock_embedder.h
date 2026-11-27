@@ -5,6 +5,8 @@
 #ifndef FLUTTER_FLOW_TESTING_MOCK_EMBEDDER_H_
 #define FLUTTER_FLOW_TESTING_MOCK_EMBEDDER_H_
 
+#include <deque>
+
 #include "flutter/flow/embedded_views.h"
 
 namespace flutter {

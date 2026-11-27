@@ -5,6 +5,8 @@
 #ifndef FLUTTER_FML_TASK_SOURCE_H_
 #define FLUTTER_FML_TASK_SOURCE_H_
 
+#include <vector>
+
 #include "flutter/fml/delayed_task.h"
 #include "flutter/fml/task_queue_id.h"
 #include "flutter/fml/task_source_grade.h"
@@ -49,10 +51,11 @@ class TaskSource {
 
   /// Adds a task to the corresponding task heap as dictated by the
   /// `TaskSourceGrade` of the `DelayedTask`.
-  void RegisterTask(const DelayedTask& task);
+  void RegisterTask(DelayedTask task);
 
-  /// Pops the task heap corresponding to the `TaskSourceGrade`.
-  void PopTask(TaskSourceGrade grade);
+  /// Pops and returns the closure from the task heap corresponding to the
+  /// `TaskSourceGrade`.
+  fml::closure PopTask(TaskSourceGrade grade);
 
   /// Returns the number of pending tasks. Excludes the tasks from the secondary
   /// heap if it's paused.
@@ -73,8 +76,8 @@ class TaskSource {
 
  private:
   const fml::TaskQueueId task_queue_id_;
-  fml::DelayedTaskQueue primary_task_queue_;
-  fml::DelayedTaskQueue secondary_task_queue_;
+  std::vector<DelayedTask> primary_task_queue_;
+  std::vector<DelayedTask> secondary_task_queue_;
   int secondary_pause_requests_ = 0;
 
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(TaskSource);

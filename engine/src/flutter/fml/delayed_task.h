@@ -5,7 +5,7 @@
 #ifndef FLUTTER_FML_DELAYED_TASK_H_
 #define FLUTTER_FML_DELAYED_TASK_H_
 
-#include <queue>
+#include <cstddef>
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/task_source_grade.h"
@@ -16,15 +16,20 @@ namespace fml {
 class DelayedTask {
  public:
   DelayedTask(size_t order,
-              const fml::closure& task,
+              fml::closure task,
               fml::TimePoint target_time,
               fml::TaskSourceGrade task_source_grade);
 
-  DelayedTask(const DelayedTask& other);
+  DelayedTask(const DelayedTask& other) = default;
+  DelayedTask(DelayedTask&& other) = default;
+  DelayedTask& operator=(const DelayedTask& other) = default;
+  DelayedTask& operator=(DelayedTask&& other) = default;
 
   ~DelayedTask();
 
   const fml::closure& GetTask() const;
+
+  fml::closure TakeTask();
 
   fml::TimePoint GetTargetTime() const;
 
@@ -38,10 +43,6 @@ class DelayedTask {
   fml::TimePoint target_time_;
   fml::TaskSourceGrade task_source_grade_;
 };
-
-using DelayedTaskQueue = std::priority_queue<DelayedTask,
-                                             std::deque<DelayedTask>,
-                                             std::greater<DelayedTask>>;
 
 }  // namespace fml
 

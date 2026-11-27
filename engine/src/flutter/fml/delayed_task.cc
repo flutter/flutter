@@ -6,23 +6,27 @@
 
 #include "flutter/fml/delayed_task.h"
 
+#include <utility>
+
 namespace fml {
 
 DelayedTask::DelayedTask(size_t order,
-                         const fml::closure& task,
+                         fml::closure task,
                          fml::TimePoint target_time,
                          fml::TaskSourceGrade task_source_grade)
     : order_(order),
-      task_(task),
+      task_(std::move(task)),
       target_time_(target_time),
       task_source_grade_(task_source_grade) {}
 
 DelayedTask::~DelayedTask() = default;
 
-DelayedTask::DelayedTask(const DelayedTask& other) = default;
-
 const fml::closure& DelayedTask::GetTask() const {
   return task_;
+}
+
+fml::closure DelayedTask::TakeTask() {
+  return std::move(task_);
 }
 
 fml::TimePoint DelayedTask::GetTargetTime() const {

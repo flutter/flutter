@@ -77,7 +77,7 @@ class MessageLoopTaskQueues {
   // Tasks methods.
 
   void RegisterTask(TaskQueueId queue_id,
-                    const fml::closure& task,
+                    fml::closure task,
                     fml::TimePoint target_time,
                     fml::TaskSourceGrade task_source_grade =
                         fml::TaskSourceGrade::kUnspecified);
