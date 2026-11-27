@@ -156,7 +156,7 @@ static size_t AppendToExistingAtlas(
 
   for (size_t i = 0; i < extra_pairs.size(); i++) {
     ISize glyph_size = ISize::Ceil(glyph_sizes[i].GetSize());
-    IPoint16 location_in_atlas;
+    IPoint16 location_in_atlas{};
     if (!rect_packer->AddRect(glyph_size.width + kPadding,   //
                               glyph_size.height + kPadding,  //
                               &location_in_atlas             //
@@ -187,7 +187,7 @@ static size_t PairsFitInAtlasOfSize(
 
   for (size_t i = start_index; i < pairs.size(); i++) {
     ISize glyph_size = ISize::Ceil(glyph_sizes[i].GetSize());
-    IPoint16 location_in_atlas;
+    IPoint16 location_in_atlas{};
     if (!rect_packer->AddRect(glyph_size.width + kPadding,   //
                               glyph_size.height + kPadding,  //
                               &location_in_atlas             //

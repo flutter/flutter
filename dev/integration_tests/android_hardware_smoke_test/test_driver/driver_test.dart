@@ -94,16 +94,17 @@ void main() async {
           break;
         }
 
-        io.stderr.writeln('Captured screenshot is blank/empty (attempt $attempt/$maxAttempts)');
+        // Avoid including $errorBlankScreenshot here so a transient blank frame that
+        // recovers on retry does not trigger a host-level userspace restart if a later
+        // test fails for an unrelated reason.
+        io.stderr.writeln('Blank screenshot on attempt $attempt/$maxAttempts');
         if (attempt < maxAttempts) {
           await Future<void>.delayed(const Duration(milliseconds: 200));
         }
       }
 
       if (cropped == null) {
-        throw StateError(
-          'Captured screenshot is $errorBlankScreenshot after $maxAttempts attempts.',
-        );
+        throw StateError('$errorBlankScreenshot after $maxAttempts attempts.');
       }
       imageBytes = Uint8List.fromList(img.encodePng(cropped));
     } else {

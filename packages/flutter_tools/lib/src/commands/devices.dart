@@ -7,7 +7,6 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
-import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../doctor.dart';
@@ -21,15 +20,14 @@ class DevicesCommand extends FlutterCommand {
     required super.toolContext,
     super.verboseHelp,
   }) {
-    addMachineOutputFlag(verboseHelp: verboseHelp);
+    CommonOptions.machine.addTo(argParser, verboseHelp: verboseHelp);
     argParser.addOption(
       'timeout',
       abbr: 't',
       help: '(deprecated) This option has been replaced by "--${FlutterOptions.kDeviceTimeout}".',
       hide: !verboseHelp,
     );
-    usesDeviceTimeoutOption();
-    usesDeviceConnectionOption();
+    registerOptionBundle(const DeviceDiscoveryOptionsBundle());
   }
 
   final DeviceManager _deviceManager;
@@ -43,9 +41,6 @@ class DevicesCommand extends FlutterCommand {
 
   @override
   final String category = FlutterCommandCategory.tools;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   Duration? get deviceDiscoveryTimeout {

@@ -1,0 +1,19 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Adds one to every element of the buffer, so each dispatch reads what the
+// previous dispatch wrote.
+layout(local_size_x = 32) in;
+
+layout(std430) buffer;
+
+layout(binding = 0) buffer Data {
+  uint values[];
+}
+data;
+
+void main() {
+  uint ident = gl_GlobalInvocationID.x;
+  data.values[ident] = data.values[ident] + 1u;
+}

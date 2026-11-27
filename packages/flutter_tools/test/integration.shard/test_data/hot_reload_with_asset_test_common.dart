@@ -31,7 +31,7 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
       tryToDelete(tempDir);
     });
 
-    testWithoutContext('hot reload/restart do not need to sync assets on reload', () async {
+    test('hot reload/restart do not need to sync assets on reload', () async {
       final onFirstLoad = Completer<void>();
       final onSecondLoad = Completer<void>();
       final onThirdLoad = Completer<void>();

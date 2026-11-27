@@ -7,11 +7,13 @@ import 'dart:async';
 import 'package:dwds/dwds.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../artifacts.dart';
 import '../asset.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -21,14 +23,13 @@ import '../build_info.dart';
 import '../build_system/tools/asset_transformer.dart';
 import '../build_system/tools/shader_compiler.dart';
 import '../compile.dart';
+import '../context/tool_context.dart';
 import '../devfs.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../vmservice.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
-import '../web/compile.dart';
-import '../web/devfs_config.dart';
+import '../web/web_debug_config.dart';
 import '../web_template.dart';
 import 'web_asset_server.dart';
 
@@ -60,37 +61,33 @@ class WebDevFS implements DevFS {
   WebDevFS({
     required this.packagesFilePath,
     required this.urlTunneller,
-    required this.useSseForDebugProxy,
-    required this.useSseForDebugBackend,
-    required this.useSseForInjectedClient,
     required this.buildInfo,
     required this.enableDwds,
     required this.ddsConfig,
     required this.entrypoint,
     required this.expressionCompiler,
     required this.chromiumLauncher,
-    required this.nativeNullAssertions,
-    required this.webDevServerConfig,
-    required this.webRenderer,
-    required this.isWasm,
+    required this.webConfig,
     required this.useLocalCanvasKit,
     required this.rootDirectory,
+    required this._toolContext,
     this.useDwdsWebSocketConnection = false,
-    required this.webCrossOriginIsolation,
-    required this.fileSystem,
-    required this.logger,
-    required this.platform,
     this.testMode = false,
-    this._webDefines = const <String, String>{},
   }) {
+    final ToolContext(
+      :Artifacts artifacts,
+      :FileSystem fs,
+      :Logger logger,
+      :ProcessManager processManager,
+    ) = _toolContext;
     _assetTransformer = DevelopmentAssetTransformer(
       transformer: AssetTransformer(
-        processManager: globals.processManager,
-        fileSystem: fileSystem,
-        dartBinaryPath: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
+        processManager: processManager,
+        fileSystem: fs,
+        dartBinaryPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
         buildMode: buildInfo.mode,
       ),
-      fileSystem: fileSystem,
+      fileSystem: fs,
       logger: logger,
     );
   }
@@ -98,27 +95,17 @@ class WebDevFS implements DevFS {
   final Uri entrypoint;
   final String packagesFilePath;
   final UrlTunneller? urlTunneller;
-  final bool useSseForDebugProxy;
-  final bool useSseForDebugBackend;
-  final bool useSseForInjectedClient;
   final BuildInfo buildInfo;
   final bool enableDwds;
   final DartDevelopmentServiceConfiguration ddsConfig;
   final bool testMode;
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
-  final bool nativeNullAssertions;
   late final DevelopmentAssetTransformer _assetTransformer;
-  final WebRendererMode webRenderer;
-  final bool isWasm;
   final bool useLocalCanvasKit;
-  final WebDevServerConfig webDevServerConfig;
   final bool useDwdsWebSocketConnection;
-  final bool webCrossOriginIsolation;
-  final FileSystem fileSystem;
-  final Logger logger;
-  final Platform platform;
-  final Map<String, String> _webDefines;
+  final WebDebugConfig webConfig;
+  final ToolContext _toolContext;
 
   late WebAssetServer webAssetServer;
 
@@ -146,6 +133,7 @@ class WebDevFS implements DevFS {
     bool useDebugExtension, {
     @visibleForTesting VmServiceFactory vmServiceFactory = createVmServiceDelegate,
   }) {
+    final Logger logger = _toolContext.logger;
     final firstConnection = Completer<ConnectionResult>();
     // Note there is an asynchronous gap between this being set to true and
     // [firstConnection] completing; thus test the boolean to determine if
@@ -203,25 +191,16 @@ class WebDevFS implements DevFS {
     webAssetServer = await WebAssetServer.start(
       chromiumLauncher,
       urlTunneller,
-      useSseForDebugProxy,
-      useSseForDebugBackend,
-      useSseForInjectedClient,
       buildInfo,
       enableDwds,
       ddsConfig,
       entrypoint,
       expressionCompiler,
-      webRenderer: webRenderer,
-      isWasm: isWasm,
       useLocalCanvasKit: useLocalCanvasKit,
       testMode: testMode,
-      webDevServerConfig: webDevServerConfig,
+      webConfig: webConfig,
       useDwdsWebSocketConnection: useDwdsWebSocketConnection,
-      fileSystem: fileSystem,
-      logger: logger,
-      platform: platform,
-      crossOriginIsolation: webCrossOriginIsolation,
-      webDefines: _webDefines,
+      toolContext: _toolContext,
     );
     return baseUri;
   }
@@ -254,14 +233,16 @@ class WebDevFS implements DevFS {
   final Directory rootDirectory;
 
   Future<void> _validateTemplateFile(String filename) async {
-    final File file = fileSystem.currentDirectory.childDirectory('web').childFile(filename);
+    final File file = _toolContext.fs.currentDirectory.childDirectory('web').childFile(filename);
     if (!file.existsSync()) {
       return;
     }
 
     final template = WebTemplate(await file.readAsString());
     for (final WebTemplateWarning warning in template.getWarnings()) {
-      logger.printWarning('Warning: In $filename:${warning.lineNumber}: ${warning.warningText}');
+      _toolContext.logger.printWarning(
+        'Warning: In $filename:${warning.lineNumber}: ${warning.warningText}',
+      );
     }
   }
 
@@ -284,26 +265,27 @@ class WebDevFS implements DevFS {
     String? projectRootPath,
     File? dartPluginRegistrant,
   }) async {
+    final ToolContext(:Config config, :FileSystem fs, :Logger logger, :Platform platform) =
+        _toolContext;
     _shaderPathsToEvict.clear();
     _assetPathsToEvict.clear();
     lastPackageConfig = packageConfig;
-    final File mainFile = fileSystem.file(mainUri);
+    final File mainFile = fs.file(mainUri);
     final String outputDirectoryPath = mainFile.parent.path;
 
     if (bundleFirstUpload) {
-      webAssetServer.entrypointCacheDirectory = fileSystem.directory(outputDirectoryPath);
+      webAssetServer.entrypointCacheDirectory = fs.directory(outputDirectoryPath);
       generator.addFileSystemRoot(outputDirectoryPath);
-      final String entrypoint = fileSystem.path.basename(mainFile.path);
+      final String entrypoint = fs.path.basename(mainFile.path);
       webAssetServer.writeBytes(entrypoint, mainFile.readAsBytesSync());
       webAssetServer.writeBytes('ddc_module_loader.js', ddcModuleLoaderJS.readAsBytesSync());
       webAssetServer.writeBytes('flutter.js', flutterJs.readAsBytesSync());
       webAssetServer.writeBytes('stack_trace_mapper.js', stackTraceMapper.readAsBytesSync());
       webAssetServer.writeFile('manifest.json', '{"info":"manifest not generated in run mode."}');
       webAssetServer.writeFile(
-        'flutter_service_worker.js',
-        '// Service worker not loaded in run mode.',
+        'version.json',
+        FlutterProject.current(fs, logger: logger).getVersionInfo(),
       );
-      webAssetServer.writeFile('version.json', FlutterProject.current().getVersionInfo());
       webAssetServer.writeFile(
         'main.dart.js',
         generateDDCLibraryBundleBootstrapScript(
@@ -319,7 +301,7 @@ class WebDevFS implements DevFS {
         'main_module.bootstrap.js',
         generateDDCLibraryBundleMainModule(
           entrypoint: entrypoint,
-          nativeNullAssertions: nativeNullAssertions,
+          nativeNullAssertions: webConfig.nativeNullAssertions,
           onLoadEndBootstrap: onLoadEndBootstrap,
           isCi: platform.environment.containsKey(kLuciEnvName),
         ),
@@ -327,8 +309,8 @@ class WebDevFS implements DevFS {
     }
     var syncedBytes = 0;
     if (bundle != null) {
-      final String assetDirectory = fileSystem.path.absolute(getAssetBuildDirectory());
-      final Directory assetDir = fileSystem.directory(assetDirectory);
+      final String assetDirectory = fs.path.absolute(getAssetBuildDirectory(config, fs));
+      final Directory assetDir = fs.directory(assetDirectory);
 
       if (bundleFirstUpload && assetDir.existsSync()) {
         try {
@@ -350,7 +332,7 @@ class WebDevFS implements DevFS {
           assetDirectory: assetDirectory,
           assetTransformer: _assetTransformer,
           shaderCompiler: shaderCompiler,
-          fileSystem: fileSystem,
+          fileSystem: fs,
           rootDirectoryPath: rootDirectory.path,
           assetPathsToEvict: _assetPathsToEvict,
           shaderPathsToEvict: _shaderPathsToEvict,
@@ -367,8 +349,7 @@ class WebDevFS implements DevFS {
         return UpdateFSReport();
       }
       if (dirtyEntries.isNotEmpty) {
-        await LocalDevFSWriter(fileSystem: fileSystem)
-            .write(dirtyEntries, fileSystem.path.toUri(assetDirectory));
+        await LocalDevFSWriter(fileSystem: fs).write(dirtyEntries, fs.path.toUri(assetDirectory));
       }
     }
     await _validateTemplateFile('index.html');
@@ -395,7 +376,7 @@ class WebDevFS implements DevFS {
       outputPath: dillOutputPath,
       packageConfig: packageConfig,
       projectRootPath: projectRootPath,
-      fs: fileSystem,
+      fs: fs,
       dartPluginRegistrant: dartPluginRegistrant,
       recompileRestart: fullRestart,
     );
@@ -423,7 +404,7 @@ class WebDevFS implements DevFS {
     File metadataFile;
     late List<String> modules;
     try {
-      final Directory parentDirectory = fileSystem.directory(outputDirectoryPath);
+      final Directory parentDirectory = fs.directory(outputDirectoryPath);
       codeFile = parentDirectory.childFile('${compilerOutput.outputFilename}.sources');
       manifestFile = parentDirectory.childFile('${compilerOutput.outputFilename}.json');
       sourcemapFile = parentDirectory.childFile('${compilerOutput.outputFilename}.map');
@@ -449,40 +430,46 @@ class WebDevFS implements DevFS {
   }
 
   @visibleForTesting
-  File get ddcModuleLoaderJS => fileSystem.file(
-    fileSystem.path.join(
-      globals.artifacts!.getArtifactPath(
-        Artifact.engineDartSdkPath,
-        platform: TargetPlatform.web_javascript,
+  File get ddcModuleLoaderJS {
+    final ToolContext(:Artifacts artifacts, :FileSystem fs) = _toolContext;
+    return fs.file(
+      fs.path.join(
+        artifacts.getArtifactPath(
+          Artifact.engineDartSdkPath,
+          platform: TargetPlatform.web_javascript,
+        ),
+        'lib',
+        'dev_compiler',
+        'ddc',
+        'ddc_module_loader.js',
       ),
-      'lib',
-      'dev_compiler',
-      'ddc',
-      'ddc_module_loader.js',
-    ),
-  );
+    );
+  }
 
   @visibleForTesting
-  File get flutterJs => fileSystem.file(
-    fileSystem.path.join(
-      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
-      'flutter.js',
-    ),
-  );
+  File get flutterJs {
+    final ToolContext(:Artifacts artifacts, :FileSystem fs) = _toolContext;
+    return fs.file(
+      fs.path.join(artifacts.getHostArtifact(HostArtifact.flutterJsDirectory).path, 'flutter.js'),
+    );
+  }
 
   @visibleForTesting
-  File get stackTraceMapper => fileSystem.file(
-    fileSystem.path.join(
-      globals.artifacts!.getArtifactPath(
-        Artifact.engineDartSdkPath,
-        platform: TargetPlatform.web_javascript,
+  File get stackTraceMapper {
+    final ToolContext(:Artifacts artifacts, :FileSystem fs) = _toolContext;
+    return fs.file(
+      fs.path.join(
+        artifacts.getArtifactPath(
+          Artifact.engineDartSdkPath,
+          platform: TargetPlatform.web_javascript,
+        ),
+        'lib',
+        'dev_compiler',
+        'web',
+        'dart_stack_trace_mapper.js',
       ),
-      'lib',
-      'dev_compiler',
-      'web',
-      'dart_stack_trace_mapper.js',
-    ),
-  );
+    );
+  }
 
   @override
   void resetLastCompiled() {

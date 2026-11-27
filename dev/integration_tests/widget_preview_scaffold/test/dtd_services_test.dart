@@ -5,23 +5,25 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
 import 'package:flutter_tools/src/widget_preview/persistent_preferences.dart';
 import 'package:test/fake.dart';
 import 'package:widget_preview_scaffold/src/dtd/dtd_services.dart';
 
-import '../../../../packages/flutter_tools/test/src/common.dart';
-import '../../../../packages/flutter_tools/test/src/context.dart';
-import '../../../../packages/flutter_tools/test/src/fakes.dart';
 import '../../../../packages/flutter_tools/test/commands.shard/permeable/utils/project_testing_utils.dart';
+import '../../../../packages/flutter_tools/test/integration.shard/test_utils.dart'
+    show fileSystem, platform, processManager;
+import '../../../../packages/flutter_tools/test/src/common.dart';
+import '../../../../packages/flutter_tools/test/src/fakes.dart';
 
 class FakeFlutterProject extends Fake implements FlutterProject {
   FakeFlutterProject();
@@ -47,8 +49,25 @@ void main() {
   });
 
   Future<WidgetPreviewDtdServices> launchDtdServer({
+    LoggingProcessManager? dtdProcessManager,
     void Function()? onHotRestartPreviewerRequest,
   }) async {
+    final resolvedProcessManager = dtdProcessManager ?? processManager;
+    final String flutterRoot = getFlutterRoot();
+    final cache = Cache.test(
+      rootOverride: fileSystem.directory(flutterRoot),
+      flutterRoot: flutterRoot,
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      processManager: resolvedProcessManager,
+    );
+    final artifacts = CachedArtifacts(
+      fileSystem: fileSystem,
+      cache: cache,
+      platform: platform,
+      operatingSystemUtils: cache.osUtils,
+    );
     final server = WidgetPreviewDtdServices(
       previewAnalytics: WidgetPreviewAnalytics(
         analytics: getInitializedFakeAnalyticsInstance(
@@ -63,8 +82,8 @@ void main() {
       shutdownHooks: ShutdownHooks(),
       dtdLauncher: DtdLauncher(
         logger: logger,
-        artifacts: globals.artifacts!,
-        processManager: globals.processManager,
+        artifacts: artifacts,
+        processManager: resolvedProcessManager,
       ),
       onHotRestartPreviewerRequest: onHotRestartPreviewerRequest ?? () {},
       project: FakeFlutterProject(),
@@ -75,7 +94,7 @@ void main() {
   }
 
   group('$WidgetPreviewDtdServices', () {
-    testUsingContext(
+    test(
       'handles ${WidgetPreviewDtdServices.kHotRestartPreviewer} invocations',
       () async {
         // Start DTD and register the widget preview DTD services with a custom handler for hot
@@ -83,6 +102,7 @@ void main() {
         final hotRestartRequestCompleter = Completer<void>();
         dtdServer = await launchDtdServer(
           onHotRestartPreviewerRequest: hotRestartRequestCompleter.complete,
+          dtdProcessManager: loggingProcessManager,
         );
 
         // Connect to the DTD instance and invoke the hot restart endpoint.
@@ -94,14 +114,15 @@ void main() {
         // Ensure the custom handler is actually invoked.
         await hotRestartRequestCompleter.future;
       },
-      overrides: <Type, Generator>{ProcessManager: () => loggingProcessManager},
     );
 
-    testUsingContext(
+    test(
       'handles ${WidgetPreviewDtdServices.kGetDevToolsUri} invocation',
       () async {
         // Start DTD and register the widget preview DTD services.
-        dtdServer = await launchDtdServer();
+        dtdServer = await launchDtdServer(
+          dtdProcessManager: loggingProcessManager,
+        );
 
         // Connect to the DTD instance and invoke the getDevToolsUri endpoint.
         final dtd = WidgetPreviewScaffoldDtdServices();
@@ -116,60 +137,54 @@ void main() {
         final actualDevToolsUri = await dtdServer.devToolsServerAddress;
         expect(await devToolsUriResponseFuture, actualDevToolsUri);
       },
-      overrides: <Type, Generator>{ProcessManager: () => loggingProcessManager},
     );
 
-    testUsingContext(
-      'can set and retreive values from $PersistentPreferences',
-      () async {
-        dtdServer = await launchDtdServer();
+    test('can set and retreive values from $PersistentPreferences', () async {
+      dtdServer = await launchDtdServer();
 
-        // The properties file should be created by the PersistentProperties constructor.
-        final File preferencesFile = dtdServer.preferences.file;
-        expect(preferencesFile.existsSync(), true);
+      // The properties file should be created by the PersistentProperties constructor.
+      final File preferencesFile = dtdServer.preferences.file;
+      expect(preferencesFile.existsSync(), true);
 
-        // Connect to the DTD instance.
-        final dtd = WidgetPreviewScaffoldDtdServices();
-        await dtd.connect(dtdUri: dtdServer.dtdUri);
+      // Connect to the DTD instance.
+      final dtd = WidgetPreviewScaffoldDtdServices();
+      await dtd.connect(dtdUri: dtdServer.dtdUri);
 
-        const kTestKey = 'myKey';
+      const kTestKey = 'myKey';
 
-        // The preferences file should be empty.
-        expect(await dtd.getPreference(kTestKey), null);
-        expect(preferencesFile.readAsStringSync(), isEmpty);
+      // The preferences file should be empty.
+      expect(await dtd.getPreference(kTestKey), null);
+      expect(preferencesFile.readAsStringSync(), isEmpty);
 
-        // Set a preference and ensure it's read back.
-        const kFirstValue = 'foo';
-        await dtd.setPreference(kTestKey, kFirstValue);
-        expect(await dtd.getPreference(kTestKey), kFirstValue);
-        expect(json.decode(preferencesFile.readAsStringSync()), {
-          kTestKey: kFirstValue,
-        });
+      // Set a preference and ensure it's read back.
+      const kFirstValue = 'foo';
+      await dtd.setPreference(kTestKey, kFirstValue);
+      expect(await dtd.getPreference(kTestKey), kFirstValue);
+      expect(json.decode(preferencesFile.readAsStringSync()), {
+        kTestKey: kFirstValue,
+      });
 
-        // Overwrite kTestKey and ensure it's read back.
-        const kSecondValue = 'bar';
-        await dtd.setPreference(kTestKey, kSecondValue);
-        expect(await dtd.getPreference(kTestKey), kSecondValue);
-        expect(json.decode(preferencesFile.readAsStringSync()), {
-          kTestKey: kSecondValue,
-        });
+      // Overwrite kTestKey and ensure it's read back.
+      const kSecondValue = 'bar';
+      await dtd.setPreference(kTestKey, kSecondValue);
+      expect(await dtd.getPreference(kTestKey), kSecondValue);
+      expect(json.decode(preferencesFile.readAsStringSync()), {
+        kTestKey: kSecondValue,
+      });
 
-        // Write a flag.
-        const kFlagKey = 'flag';
-        await dtd.setPreference(kFlagKey, true);
-        expect(await dtd.getFlag(kFlagKey), true);
-        expect(json.decode(preferencesFile.readAsStringSync()), {
-          kFlagKey: true,
-          kTestKey: kSecondValue,
-        });
+      // Write a flag.
+      const kFlagKey = 'flag';
+      await dtd.setPreference(kFlagKey, true);
+      expect(await dtd.getFlag(kFlagKey), true);
+      expect(json.decode(preferencesFile.readAsStringSync()), {
+        kFlagKey: true,
+        kTestKey: kSecondValue,
+      });
 
-        // Remove an entry.
-        await dtd.setPreference(kTestKey, null);
-        expect(await dtd.getPreference(kTestKey), null);
-        expect(json.decode(preferencesFile.readAsStringSync()), {
-          kFlagKey: true,
-        });
-      },
-    );
+      // Remove an entry.
+      await dtd.setPreference(kTestKey, null);
+      expect(await dtd.getPreference(kTestKey), null);
+      expect(json.decode(preferencesFile.readAsStringSync()), {kFlagKey: true});
+    });
   });
 }

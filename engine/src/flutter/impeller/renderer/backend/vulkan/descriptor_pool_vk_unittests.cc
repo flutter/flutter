@@ -28,7 +28,8 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimMakesDescriptorPoolAvailable) {
   {
     // Fetch a pool (which will be created).
     DescriptorPoolVK pool = DescriptorPoolVK(context);
-    pool.AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
+    EXPECT_TRUE(
+        pool.AllocateDescriptorSets({}, /*pipeline_key=*/0, *context).ok());
   }
 
   std::shared_ptr<DescriptorPoolVK> pool =
@@ -52,7 +53,8 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimDropsDescriptorPoolIfSizeIsExceeded) {
     for (size_t i = 0u; i < 33; i++) {
       std::unique_ptr<DescriptorPoolVK> pool =
           std::make_unique<DescriptorPoolVK>(context);
-      pool->AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
+      EXPECT_TRUE(
+          pool->AllocateDescriptorSets({}, /*pipeline_key=*/0, *context).ok());
       pools.push_back(std::move(pool));
     }
   }
@@ -70,7 +72,8 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimDropsDescriptorPoolIfSizeIsExceeded) {
     for (size_t i = 0u; i < 33; i++) {
       std::shared_ptr<DescriptorPoolVK> pool =
           context->GetDescriptorPoolRecycler()->GetDescriptorPool();
-      pool->AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
+      EXPECT_TRUE(
+          pool->AllocateDescriptorSets({}, /*pipeline_key=*/0, *context).ok());
       pools.push_back(std::move(pool));
     }
   }
@@ -112,13 +115,15 @@ TEST(DescriptorPoolRecyclerVKTest, DescriptorsAreRecycled) {
 
   {
     DescriptorPoolVK pool = DescriptorPoolVK(context);
-    pool.AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
+    EXPECT_TRUE(
+        pool.AllocateDescriptorSets({}, /*pipeline_key=*/0, *context).ok());
   }
 
   // Should reuse the same descriptor set allocated above.
   std::shared_ptr<DescriptorPoolVK> pool =
       context->GetDescriptorPoolRecycler()->GetDescriptorPool();
-  pool->AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
+  EXPECT_TRUE(
+      pool->AllocateDescriptorSets({}, /*pipeline_key=*/0, *context).ok());
 
   std::shared_ptr<std::vector<std::string>> called =
       GetMockVulkanFunctions(context->GetDevice());
@@ -127,7 +132,8 @@ TEST(DescriptorPoolRecyclerVKTest, DescriptorsAreRecycled) {
       1);
 
   // Should allocate a new descriptor set.
-  pool->AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
+  EXPECT_TRUE(
+      pool->AllocateDescriptorSets({}, /*pipeline_key=*/0, *context).ok());
   EXPECT_EQ(
       std::count(called->begin(), called->end(), "vkAllocateDescriptorSets"),
       2);

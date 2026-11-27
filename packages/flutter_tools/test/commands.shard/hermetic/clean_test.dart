@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/clean.dart';
+import 'package:flutter_tools/src/experimental/extension_clean_manager.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -38,7 +39,7 @@ void main() {
       Cache.disableLocking();
       xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
       xcode = Xcode.test(
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         xcodeProjectInterpreter: xcodeProjectInterpreter,
       );
     });
@@ -58,7 +59,7 @@ void main() {
         buildDirectory.createSync(recursive: true);
       });
 
-      testWithoutContext(
+      test(
         '$CleanCommand removes build and .dart_tool and ephemeral directories, cleans Xcode for iOS and macOS',
         () async {
           final FlutterProject projectUnderTest = setupProjectUnderTest(fs.currentDirectory, true);
@@ -110,7 +111,7 @@ void main() {
         },
       );
 
-      testWithoutContext('$CleanCommand does not clean Xcode by default', () async {
+      test('$CleanCommand does not clean Xcode by default', () async {
         final FlutterProject projectUnderTest = setupProjectUnderTest(fs.currentDirectory, true);
         xcodeProjectInterpreter.isInstalled = true;
         xcodeProjectInterpreter.version = Version(1000, 0, 0);
@@ -133,35 +134,32 @@ void main() {
         expect(xcodeProjectInterpreter.workspaces, isEmpty);
       });
 
-      testWithoutContext(
-        '$CleanCommand stops progress status for each deleted directory',
-        () async {
-          setupProjectUnderTest(fs.currentDirectory, false);
-          final stdio = FakeStdio();
-          final stdoutLogger = StdoutLogger(
-            terminal: AnsiTerminal(stdio: stdio, platform: FakePlatform()),
-            stdio: stdio,
-            outputPreferences: OutputPreferences.test(),
-          );
-          final CommandRunner<void> runner = createTestCommandRunner(
-            createCleanCommand(
-              fs: fs,
-              logger: stdoutLogger,
-              xcode: xcode,
-              xcodeProjectInterpreter: xcodeProjectInterpreter,
-            ),
-          );
-          await runner.run(<String>['clean']);
+      test('$CleanCommand stops progress status for each deleted directory', () async {
+        setupProjectUnderTest(fs.currentDirectory, false);
+        final stdio = FakeStdio();
+        final stdoutLogger = StdoutLogger(
+          terminal: AnsiTerminal(stdio: stdio, platform: FakePlatform()),
+          stdio: stdio,
+          outputPreferences: OutputPreferences.test(),
+        );
+        final CommandRunner<void> runner = createTestCommandRunner(
+          createCleanCommand(
+            fs: fs,
+            logger: stdoutLogger,
+            xcode: xcode,
+            xcodeProjectInterpreter: xcodeProjectInterpreter,
+          ),
+        );
+        await runner.run(<String>['clean']);
 
-          final String output = stdio.writtenToStdout.join();
-          expect(output, contains('Deleting build...'));
-          expect(output, contains('Deleting .dart_tool...'));
-          expect(output, contains('Deleting ephemeral...'));
-          expect(output.endsWith('\n'), isTrue);
-        },
-      );
+        final String output = stdio.writtenToStdout.join();
+        expect(output, contains('Deleting build...'));
+        expect(output, contains('Deleting .dart_tool...'));
+        expect(output, contains('Deleting ephemeral...'));
+        expect(output.endsWith('\n'), isTrue);
+      });
 
-      testWithoutContext('$CleanCommand does not clean the example directory by default', () async {
+      test('$CleanCommand does not clean the example directory by default', () async {
         setupProjectUnderTest(fs.currentDirectory, true);
         final FlutterProject exampleProject = setupProjectUnderTest(
           fs.currentDirectory.childDirectory('example'),
@@ -201,86 +199,80 @@ void main() {
         ]);
       });
 
-      testWithoutContext(
-        '$CleanCommand cleans the example directory with --include-example',
-        () async {
-          final FlutterProject projectUnderTest = setupProjectUnderTest(fs.currentDirectory, true);
-          final FlutterProject exampleProject = setupProjectUnderTest(
-            fs.currentDirectory.childDirectory('example'),
-            true,
-          );
-          final Directory exampleBuildDir = exampleProject.directory.childDirectory('build');
-          exampleBuildDir.createSync(recursive: true);
+      test('$CleanCommand cleans the example directory with --include-example', () async {
+        final FlutterProject projectUnderTest = setupProjectUnderTest(fs.currentDirectory, true);
+        final FlutterProject exampleProject = setupProjectUnderTest(
+          fs.currentDirectory.childDirectory('example'),
+          true,
+        );
+        final Directory exampleBuildDir = exampleProject.directory.childDirectory('build');
+        exampleBuildDir.createSync(recursive: true);
 
-          xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(1000, 0, 0);
+        xcodeProjectInterpreter.isInstalled = true;
+        xcodeProjectInterpreter.version = Version(1000, 0, 0);
 
-          final CommandRunner<void> runner = createTestCommandRunner(
-            createCleanCommand(
-              fs: fs,
-              logger: logger,
-              xcode: xcode,
-              xcodeProjectInterpreter: xcodeProjectInterpreter,
-            ),
-          );
-          await runner.run(<String>['clean', '--include-example', '--include-xcode-workspace']);
+        final CommandRunner<void> runner = createTestCommandRunner(
+          createCleanCommand(
+            fs: fs,
+            logger: logger,
+            xcode: xcode,
+            xcodeProjectInterpreter: xcodeProjectInterpreter,
+          ),
+        );
+        await runner.run(<String>['clean', '--include-example', '--include-xcode-workspace']);
 
-          expect(buildDirectory, isNot(exists));
-          expect(projectUnderTest.dartTool, isNot(exists));
+        expect(buildDirectory, isNot(exists));
+        expect(projectUnderTest.dartTool, isNot(exists));
 
-          expect(exampleBuildDir, isNot(exists));
-          expect(exampleProject.dartTool, isNot(exists));
-          expect(exampleProject.android.ephemeralDirectory, isNot(exists));
+        expect(exampleBuildDir, isNot(exists));
+        expect(exampleProject.dartTool, isNot(exists));
+        expect(exampleProject.android.ephemeralDirectory, isNot(exists));
 
-          expect(exampleProject.ios.ephemeralDirectory, isNot(exists));
-          expect(exampleProject.ios.ephemeralModuleDirectory, isNot(exists));
-          expect(exampleProject.ios.generatedXcodePropertiesFile, isNot(exists));
-          expect(exampleProject.ios.generatedEnvironmentVariableExportScript, isNot(exists));
-          expect(exampleProject.ios.deprecatedCompiledDartFramework, isNot(exists));
-          expect(exampleProject.ios.deprecatedProjectFlutterFramework, isNot(exists));
-          expect(exampleProject.ios.flutterPodspec, isNot(exists));
+        expect(exampleProject.ios.ephemeralDirectory, isNot(exists));
+        expect(exampleProject.ios.ephemeralModuleDirectory, isNot(exists));
+        expect(exampleProject.ios.generatedXcodePropertiesFile, isNot(exists));
+        expect(exampleProject.ios.generatedEnvironmentVariableExportScript, isNot(exists));
+        expect(exampleProject.ios.deprecatedCompiledDartFramework, isNot(exists));
+        expect(exampleProject.ios.deprecatedProjectFlutterFramework, isNot(exists));
+        expect(exampleProject.ios.flutterPodspec, isNot(exists));
 
-          expect(exampleProject.linux.ephemeralDirectory, isNot(exists));
-          expect(exampleProject.macos.ephemeralDirectory, isNot(exists));
-          expect(exampleProject.windows.ephemeralDirectory, isNot(exists));
-          expect(exampleProject.flutterPluginsDependenciesFile, isNot(exists));
+        expect(exampleProject.linux.ephemeralDirectory, isNot(exists));
+        expect(exampleProject.macos.ephemeralDirectory, isNot(exists));
+        expect(exampleProject.windows.ephemeralDirectory, isNot(exists));
+        expect(exampleProject.flutterPluginsDependenciesFile, isNot(exists));
 
-          expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
-            CleanWorkspaceCall('/ios/Runner.xcworkspace', 'Runner', false),
-            CleanWorkspaceCall('/ios/Runner.xcworkspace', 'custom-scheme', false),
-            CleanWorkspaceCall('/macos/Runner.xcworkspace', 'Runner', false),
-            CleanWorkspaceCall('/macos/Runner.xcworkspace', 'custom-scheme', false),
-            CleanWorkspaceCall('/example/ios/Runner.xcworkspace', 'Runner', false),
-            CleanWorkspaceCall('/example/ios/Runner.xcworkspace', 'custom-scheme', false),
-            CleanWorkspaceCall('/example/macos/Runner.xcworkspace', 'Runner', false),
-            CleanWorkspaceCall('/example/macos/Runner.xcworkspace', 'custom-scheme', false),
-          ]);
-        },
-      );
+        expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
+          CleanWorkspaceCall('/ios/Runner.xcworkspace', 'Runner', false),
+          CleanWorkspaceCall('/ios/Runner.xcworkspace', 'custom-scheme', false),
+          CleanWorkspaceCall('/macos/Runner.xcworkspace', 'Runner', false),
+          CleanWorkspaceCall('/macos/Runner.xcworkspace', 'custom-scheme', false),
+          CleanWorkspaceCall('/example/ios/Runner.xcworkspace', 'Runner', false),
+          CleanWorkspaceCall('/example/ios/Runner.xcworkspace', 'custom-scheme', false),
+          CleanWorkspaceCall('/example/macos/Runner.xcworkspace', 'Runner', false),
+          CleanWorkspaceCall('/example/macos/Runner.xcworkspace', 'custom-scheme', false),
+        ]);
+      });
 
-      testWithoutContext(
-        '$CleanCommand warns when --include-example is passed but no example exists',
-        () async {
-          setupProjectUnderTest(fs.currentDirectory, true);
-          // No example directory created.
+      test('$CleanCommand warns when --include-example is passed but no example exists', () async {
+        setupProjectUnderTest(fs.currentDirectory, true);
+        // No example directory created.
 
-          xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(1000, 0, 0);
-          final CommandRunner<void> runner = createTestCommandRunner(
-            createCleanCommand(
-              fs: fs,
-              logger: logger,
-              xcode: xcode,
-              xcodeProjectInterpreter: xcodeProjectInterpreter,
-            ),
-          );
-          await runner.run(<String>['clean', '--include-example', '--include-xcode-workspace']);
+        xcodeProjectInterpreter.isInstalled = true;
+        xcodeProjectInterpreter.version = Version(1000, 0, 0);
+        final CommandRunner<void> runner = createTestCommandRunner(
+          createCleanCommand(
+            fs: fs,
+            logger: logger,
+            xcode: xcode,
+            xcodeProjectInterpreter: xcodeProjectInterpreter,
+          ),
+        );
+        await runner.run(<String>['clean', '--include-example', '--include-xcode-workspace']);
 
-          expect(logger.statusText, contains('No example app found'));
-        },
-      );
+        expect(logger.statusText, contains('No example app found'));
+      });
 
-      testWithoutContext('$CleanCommand removes a specific xcode scheme --scheme', () async {
+      test('$CleanCommand removes a specific xcode scheme --scheme', () async {
         setupProjectUnderTest(fs.currentDirectory, true);
         // Xcode is installed and version satisfactory.
         xcodeProjectInterpreter.isInstalled = true;
@@ -301,7 +293,7 @@ void main() {
         ]);
       });
 
-      testWithoutContext('$CleanCommand does not run when there is no xcworkspace', () async {
+      test('$CleanCommand does not run when there is no xcworkspace', () async {
         setupProjectUnderTest(fs.currentDirectory, false);
         // Xcode is installed and version satisfactory.
         xcodeProjectInterpreter.isInstalled = true;
@@ -319,7 +311,7 @@ void main() {
         expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[]);
       });
 
-      testWithoutContext('$CleanCommand throws when given an invalid value for --scheme', () async {
+      test('$CleanCommand throws when given an invalid value for --scheme', () async {
         setupProjectUnderTest(fs.currentDirectory, true);
         // Xcode is installed and version satisfactory.
         xcodeProjectInterpreter.isInstalled = true;
@@ -341,7 +333,7 @@ void main() {
         );
       });
 
-      testWithoutContext('$CleanCommand cleans Xcode verbosely for iOS and macOS', () async {
+      test('$CleanCommand cleans Xcode verbosely for iOS and macOS', () async {
         setupProjectUnderTest(fs.currentDirectory, true);
         // Xcode is installed and version satisfactory.
         xcodeProjectInterpreter.isInstalled = true;
@@ -382,7 +374,7 @@ void main() {
         logger = BufferLogger.test();
       });
 
-      testWithoutContext('$CleanCommand prints a helpful error message on Windows', () async {
+      test('$CleanCommand prints a helpful error message on Windows', () async {
         xcodeProjectInterpreter.isInstalled = false;
 
         final File file = fileSystem.file('file')..createSync();
@@ -407,7 +399,7 @@ void main() {
         );
       });
 
-      testWithoutContext('$CleanCommand handles missing delete permissions', () async {
+      test('$CleanCommand handles missing delete permissions', () async {
         final handler = FileExceptionHandler();
 
         // Ensures we handle ErrorHandlingFileSystem appropriately in prod.
@@ -443,7 +435,7 @@ void main() {
         expect(throwingFile, exists);
       });
 
-      testWithoutContext(
+      test(
         '$CleanCommand invokes gradlew --stop and retries deletion when --stop-gradle flag is passed',
         () async {
           xcodeProjectInterpreter.isInstalled = false;
@@ -491,7 +483,7 @@ void main() {
         },
       );
 
-      testWithoutContext(
+      test(
         '$CleanCommand prompts user and invokes gradlew --stop when locked on Windows interactively',
         () async {
           xcodeProjectInterpreter.isInstalled = false;
@@ -540,7 +532,7 @@ void main() {
         },
       );
 
-      testWithoutContext(
+      test(
         '$CleanCommand prompts user but skips gradlew --stop when user declines prompt',
         () async {
           xcodeProjectInterpreter.isInstalled = false;
@@ -582,8 +574,57 @@ void main() {
           );
         },
       );
+
+      test(
+        '$CleanCommand invokes ExtensionCleanManager with configured build-dir before deleting .dart_tool',
+        () async {
+          xcodeProjectInterpreter.isInstalled = false;
+          final FlutterProject projectUnderTest = setupProjectUnderTest(
+            fileSystem.currentDirectory,
+            false,
+          );
+          final config = Config.test(directory: fileSystem.directory('/'))
+            ..setValue('build-dir', 'custom_build_out');
+
+          final fakeCleanManager = FakeExtensionCleanManager();
+          final CleanCommand command = createCleanCommand(
+            config: config,
+            extensionCleanManager: fakeCleanManager,
+            fs: fileSystem,
+            logger: logger,
+            xcode: xcode,
+            xcodeProjectInterpreter: xcodeProjectInterpreter,
+          );
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+          await runner.run(<String>['clean']);
+
+          expect(fakeCleanManager.cleanedProjects, hasLength(1));
+          expect(
+            fakeCleanManager.buildDirectories.single.path,
+            projectUnderTest.directory.childDirectory('custom_build_out').path,
+          );
+          expect(fakeCleanManager.dartToolExistedDuringClean, isTrue);
+          expect(fakeCleanManager.packageConfigExistedDuringClean, isTrue);
+          expect(projectUnderTest.dartTool, isNot(exists));
+        },
+      );
     });
   });
+}
+
+class FakeExtensionCleanManager extends Fake implements ExtensionCleanManager {
+  final cleanedProjects = <FlutterProject>[];
+  final buildDirectories = <Directory>[];
+  bool dartToolExistedDuringClean = false;
+  bool packageConfigExistedDuringClean = false;
+
+  @override
+  Future<void> cleanProject(FlutterProject project, {required Directory buildDirectory}) async {
+    cleanedProjects.add(project);
+    buildDirectories.add(buildDirectory);
+    dartToolExistedDuringClean = project.dartTool.existsSync();
+    packageConfigExistedDuringClean = project.packageConfig.existsSync();
+  }
 }
 
 class FakeTerminal extends Fake implements AnsiTerminal {
@@ -610,7 +651,6 @@ class FakeTerminal extends Fake implements AnsiTerminal {
 }
 
 FlutterProject setupProjectUnderTest(Directory currentDirectory, bool setupXcodeWorkspace) {
-  // This needs to be run within testWithoutContext and not setUp since FlutterProject uses context.
   final FlutterProject projectUnderTest = FlutterProject.fromDirectoryTest(currentDirectory);
   if (setupXcodeWorkspace) {
     projectUnderTest.ios.hostAppRoot
@@ -700,6 +740,7 @@ class CleanWorkspaceCall {
 }
 
 CleanCommand createCleanCommand({
+  ExtensionCleanManager? extensionCleanManager,
   FileSystem? fs,
   Logger? logger,
   Platform? platform,
@@ -718,6 +759,7 @@ CleanCommand createCleanCommand({
   final ProcessManager resolvedProcessManager = processManager ?? FakeProcessManager.any();
   final Logger resolvedLogger = logger ?? BufferLogger.test();
   return CleanCommand(
+    extensionCleanManager: extensionCleanManager,
     toolContext: FakeToolContext(
       fs: resolvedFs,
       logger: resolvedLogger,
@@ -733,7 +775,9 @@ CleanCommand createCleanCommand({
       stdio: FakeStdio(),
     ),
     verbose: verbose,
-    xcode: xcode ?? Xcode.test(processManager: resolvedProcessManager),
+    xcode:
+        xcode ??
+        Xcode.test(toolContext: FakeToolContext.macosHost(processManager: resolvedProcessManager)),
     xcodeProjectInterpreter: xcodeProjectInterpreter ?? FakeXcodeProjectInterpreter(),
   );
 }

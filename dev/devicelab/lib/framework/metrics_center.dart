@@ -67,12 +67,17 @@ List<MetricPoint> parse(
   final String gitSha = (resultsJson['CommitSha'] as String).trim();
   final metricPoints = <MetricPoint>[];
   for (final scoreKey in scoreKeys) {
+    // `<task>/<score>` keys come from TaskResult.merge.
+    final (String name, String subResult) = switch (scoreKey.indexOf('/')) {
+      -1 => (taskName, scoreKey),
+      final int i => (scoreKey.substring(0, i), scoreKey.substring(i + 1)),
+    };
     var tags = <String, String>{
       kGithubRepoKey: kFlutterFrameworkRepo,
       kGitRevisionKey: gitSha,
       'branch': gitBranch,
-      kNameKey: taskName,
-      kSubResultKey: scoreKey,
+      kNameKey: name,
+      kSubResultKey: subResult,
     };
     // Append additional benchmark tags, which will surface in Skia Perf dashboards.
     tags = mergeMaps<String, String>(

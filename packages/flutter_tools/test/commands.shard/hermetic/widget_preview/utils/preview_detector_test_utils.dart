@@ -20,7 +20,7 @@ import 'package:flutter_tools/src/widget_preview/preview_manifest.dart';
 import 'package:meta/meta.dart';
 
 import '../../../../src/common.dart';
-import '../../../../src/context.dart';
+import '../../../../src/fake_process_manager.dart';
 import '../../../../src/fakes.dart';
 import 'preview_project.dart';
 
@@ -54,27 +54,16 @@ void initializeTestPreviewDetectorState() {
 }
 
 @isTest
-void testPreviewDetector(
-  String description,
-  FutureOr<void> Function(PreviewDetector) testMethod, {
-  Map<Type, Generator> overrides = const <Type, Generator>{},
-}) {
-  testUsingContext(
-    description,
-    () async {
-      PreviewDetector? previewDetector;
-      try {
-        previewDetector = createTestPreviewDetector();
-        await testMethod(previewDetector);
-      } finally {
-        await previewDetector?.dispose();
-      }
-    },
-    overrides: {
-      FlutterProjectFactory: () =>
-          FlutterProjectFactory(fileSystem: _fs, logger: BufferLogger.test()),
-    },
-  );
+void testPreviewDetector(String description, FutureOr<void> Function(PreviewDetector) testMethod) {
+  test(description, () async {
+    PreviewDetector? previewDetector;
+    try {
+      previewDetector = createTestPreviewDetector();
+      await testMethod(previewDetector);
+    } finally {
+      await previewDetector?.dispose();
+    }
+  });
 }
 
 PreviewDetector createTestPreviewDetector() {
@@ -82,9 +71,12 @@ PreviewDetector createTestPreviewDetector() {
     throw StateError('$initializeTestPreviewDetectorState was not called!');
   }
   _projectRoot = _fs.systemTempDirectory.createTempSync('root');
-  final FlutterProject project = FlutterProject.fromDirectory(_projectRoot!);
+  final FlutterProject project = FlutterProject.fromDirectory(
+    _projectRoot!,
+    logger: BufferLogger.test(),
+  );
 
-  final String sdkPath = _fs.path.join(Cache.flutterRoot!, 'bin', 'cache', 'dart-sdk');
+  final String sdkPath = _fs.path.join(getFlutterRoot(), 'bin', 'cache', 'dart-sdk');
   final Artifacts artifacts = FakeArtifacts(sdkPath: sdkPath);
 
   return PreviewDetector(
@@ -113,7 +105,7 @@ PreviewManifest createPreviewManifest() {
   }
   return PreviewManifest(
     logger: BufferLogger.test(),
-    rootProject: FlutterProject.fromDirectory(_projectRoot!),
+    rootProject: FlutterProject.fromDirectory(_projectRoot!, logger: BufferLogger.test()),
     fs: _fs,
     cache: Cache.test(processManager: FakeProcessManager.any()),
   );

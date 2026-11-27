@@ -68,12 +68,12 @@ class SemanticsHelper {
   }
 
   /// Stops waiting for the user to enable semantics and removes all
-  /// placeholders.
+  /// placeholders, as soon as that is safe to do.
   ///
   /// This is used when semantics is enabled programmatically and therefore the
   /// placeholders are no longer needed.
-  void dispose() {
-    _semanticsEnabler.dispose();
+  void retirePlaceholders() {
+    _semanticsEnabler.retirePlaceholders();
   }
 }
 
@@ -196,6 +196,10 @@ abstract class SemanticsEnabler {
     }
     _placeholderByViewRoot.clear();
   }
+
+  /// Stops waiting for the user to enable semantics because semantics was
+  /// enabled some other way, for example by the app.
+  void retirePlaceholders();
 
   DomElement _prepareAccessibilityPlaceholder();
 
@@ -332,6 +336,15 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
       ..height = '1px';
     return placeholder;
   }
+
+  /// Removes the placeholders right away.
+  ///
+  /// The desktop placeholder is 1x1 and offscreen in the document body, so a
+  /// gesture on a view never targets it.
+  @override
+  void retirePlaceholders() {
+    removeAllPlaceholders();
+  }
 }
 
 @visibleForTesting
@@ -365,6 +378,10 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
   /// See https://github.com/flutter/flutter/issues/194104
   bool _schedulePlaceholderRemoval = false;
 
+  /// Whether a pointer or touch gesture has started and has not ended or been
+  /// canceled yet.
+  bool _isGestureInProgress = false;
+
   /// Hosts the placeholder inside the view it belongs to.
   ///
   /// This placeholder fills its host so that touch exploration can find it
@@ -386,15 +403,21 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
       return true;
     }
 
+    // The event type can also be click for VoiceOver.
+    final bool isGestureEnd =
+        event.type == 'touchend' ||
+        event.type == 'pointerup' ||
+        event.type == 'touchcancel' ||
+        event.type == 'pointercancel' ||
+        event.type == 'click';
+    if (event.type == 'pointerdown' || event.type == 'touchstart') {
+      _isGestureInProgress = true;
+    } else if (isGestureEnd) {
+      _isGestureInProgress = false;
+    }
+
     if (_schedulePlaceholderRemoval) {
-      // The event type can also be click for VoiceOver.
-      final bool removeNow =
-          event.type == 'touchend' ||
-          event.type == 'pointerup' ||
-          event.type == 'touchcancel' ||
-          event.type == 'pointercancel' ||
-          event.type == 'click';
-      if (removeNow) {
+      if (isGestureEnd) {
         removeAllPlaceholders();
       }
       return true;
@@ -531,6 +554,23 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
       ..bottom = '0';
 
     return placeholder;
+  }
+
+  /// Waits for the gesture in progress, if any, to end before removing the
+  /// placeholders.
+  ///
+  /// A placeholder can be the target of a drag that is still going on when the
+  /// app enables semantics. Removing it right away could lose the drag's
+  /// pointerup. See [_schedulePlaceholderRemoval].
+  @override
+  void retirePlaceholders() {
+    semanticsActivationTimer?.cancel();
+    semanticsActivationTimer = null;
+    if (_isGestureInProgress) {
+      _schedulePlaceholderRemoval = true;
+    } else {
+      removeAllPlaceholders();
+    }
   }
 
   @override

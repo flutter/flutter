@@ -118,13 +118,6 @@ ThemeData _baseTheme({
         borderRadius: BorderRadius.all(kCardRadius),
       ),
     ),
-    listTileTheme: ListTileThemeData(
-      dense: true,
-      tileColor: backgroundColor.brighten(),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(kCardRadius),
-      ),
-    ),
     dropdownMenuTheme: DropdownMenuThemeData(textStyle: theme.regularTextStyle),
     primaryTextTheme: _devToolsTextTheme(theme, theme.primaryTextTheme),
     textTheme: _devToolsTextTheme(theme, theme.textTheme),

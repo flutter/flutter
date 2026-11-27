@@ -32,7 +32,10 @@ void testMain() {
         final pictures = <ui.Picture>[];
         pictures.add(_createPicture());
 
-        expect(() => surface.rasterizeToImageBitmaps(pictures), throwsUnsupportedError);
+        expect(
+          () => surface.rasterizeToImageBitmaps(const BitmapSize(10, 10), pictures),
+          throwsUnsupportedError,
+        );
       },
     );
 
@@ -46,10 +49,11 @@ void testMain() {
         (OffscreenCanvasProvider canvasProvider) => CkOffscreenSurface(canvasProvider),
       );
 
+      final EngineFlutterView implicitView = EnginePlatformDispatcher.instance.implicitView!;
       final OffscreenCanvasViewRasterizer viewRasterizer = rasterizer.createViewRasterizer(
-        EnginePlatformDispatcher.instance.implicitView!,
+        implicitView,
       );
-      await viewRasterizer.draw(layerTree, null);
+      await viewRasterizer.draw(layerTree, implicitView.physicalSize, null);
     });
   });
 }

@@ -180,5 +180,49 @@ Future<void> doTests() async {
         expect(viewManager.findViewForElement(child3), isNull);
       });
     });
+
+    group('safeBlur', () {
+      late DomElement host;
+      late EngineFlutterView view;
+      late DomHTMLInputElement input;
+
+      setUp(() {
+        host = createDomElement('div');
+        domDocument.body!.append(host);
+        view = EngineFlutterView(platformDispatcher, host);
+        viewManager.registerView(view);
+        // The view root must be focusable to receive the focus. In an app,
+        // ViewFocusBinding sets its tabindex.
+        view.dom.rootElement.setAttribute('tabindex', '-1');
+        input = createDomHTMLInputElement();
+        view.dom.rootElement.append(input);
+      });
+
+      tearDown(() {
+        viewManager.disposeAndUnregisterView(view.viewId);
+        host.remove();
+      });
+
+      test('transfers focus to the view root', () async {
+        input.focusWithoutScroll();
+        expect(domDocument.activeElement, input);
+
+        await viewManager.safeBlur(input);
+
+        expect(domDocument.activeElement, view.dom.rootElement);
+      });
+
+      test('keeps focus on an element that was refocused', () async {
+        input.focusWithoutScroll();
+        input.blur();
+        expect(domDocument.activeElement, isNot(input));
+
+        final Future<void> pending = viewManager.safeBlur(input);
+        input.focusWithoutScroll();
+        await pending;
+
+        expect(domDocument.activeElement, input);
+      });
+    });
   });
 }

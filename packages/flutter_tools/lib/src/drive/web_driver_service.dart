@@ -10,6 +10,8 @@ import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:webdriver/async_io.dart' as async_io;
 
+import '../application_package.dart';
+import '../asset.dart';
 import '../base/common.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -22,9 +24,12 @@ import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../features.dart' show FeatureFlags;
+import '../hook_runner.dart' show FlutterHookRunner;
 import '../project.dart';
 import '../resident_runner.dart';
 import '../web/chrome_constants.dart';
+import '../web/web_debug_config.dart';
 import '../web/web_runner.dart';
 import 'drive_service.dart';
 
@@ -32,17 +37,26 @@ import 'drive_service.dart';
 class WebDriverService extends DriverService {
   WebDriverService({
     required this._analytics,
+    required this._applicationPackageFactory,
+    required this._assetBundleFactory,
     required this.buildSystem,
     required this.buildTargets,
     required this._dartSdkPath,
-    required this._toolContext,
+    required this._featureFlags,
+    required super.toolContext,
+    this._flutterHookRunner,
+    this._webRunnerFactory,
   });
 
   final Analytics _analytics;
+  final ApplicationPackageFactory _applicationPackageFactory;
+  final AssetBundleFactory _assetBundleFactory;
   final BuildSystem buildSystem;
   final BuildTargets buildTargets;
   final String _dartSdkPath;
-  final ToolContext _toolContext;
+  final FeatureFlags _featureFlags;
+  final FlutterHookRunner? _flutterHookRunner;
+  final WebRunnerFactory? _webRunnerFactory;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
@@ -67,39 +81,45 @@ class WebDriverService extends DriverService {
     String? userIdentifier,
     String? mainPath,
     Map<String, Object> platformArgs = const <String, Object>{},
-    Map<String, String> webDefines = const <String, String>{},
   }) async {
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      toolContext: _toolContext,
+      toolContext: toolContext,
       buildInfo: buildInfo,
       target: mainPath,
       userIdentifier: userIdentifier,
     );
-    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
     final webConfig = WebDebugConfig(
       devServerConfig: debuggingOptions.webConfig.devServerConfig,
       renderer: debuggingOptions.webConfig.renderer,
       useWasm: debuggingOptions.webConfig.useWasm,
+      webDefines: debuggingOptions.webConfig.webDefines,
     );
-    _residentRunner = webRunnerFactory!.createWebRunner(
+    _residentRunner = _webRunnerFactory!.createWebRunner(
       flutterDevice,
-      target: mainPath,
+      analytics: _analytics,
+      applicationPackageFactory: _applicationPackageFactory,
+      assetBundleFactory: _assetBundleFactory,
+      buildSystem: buildSystem,
+      buildTargets: buildTargets,
       debuggingOptions: buildInfo.isRelease
-          ? DebuggingOptions.disabled(buildInfo, webConfig: webConfig)
+          ? DebuggingOptions.disabled(
+              buildInfo,
+              platformOptions: <PlatformDebuggingOptions>[webConfig],
+            )
           : DebuggingOptions.enabled(
               buildInfo,
               disablePortPublication: debuggingOptions.disablePortPublication,
-              webConfig: webConfig,
+              platformOptions: <PlatformDebuggingOptions>[webConfig],
             ),
+      featureFlags: _featureFlags,
+      flutterHookRunner: _flutterHookRunner,
+      flutterProject: projectFactory.fromDirectory(fs.currentDirectory),
       platformArgs: platformArgs,
       stayResident: true,
-      webDefines: webDefines,
-      flutterProject: projectFactory.fromDirectory(fs.currentDirectory),
-      analytics: _analytics,
-      buildSystem: buildSystem,
-      buildTargets: buildTargets,
-      toolContext: _toolContext,
+      target: mainPath,
+      toolContext: toolContext,
     );
     final appStartedCompleter = Completer<void>.sync();
     final Future<int?> runFuture = _residentRunner.run(
@@ -144,8 +164,7 @@ class WebDriverService extends DriverService {
 
   @override
   Future<int> startTest(String testFile, DriveTestSpecification spec) async {
-    final ToolContext(:Logger logger, :Platform platform, :ProcessUtils processUtils) =
-        _toolContext;
+    final ToolContext(:Logger logger, :Platform platform, :ProcessUtils processUtils) = toolContext;
     late async_io.WebDriver webDriver;
     final Browser browser = Browser.fromCliName(spec.browserName);
     final isAndroidChrome = browser == Browser.androidChrome;
@@ -198,6 +217,21 @@ class WebDriverService extends DriverService {
       throwToolExit(
         'Unable to start a WebDriver session for web testing.\n'
         'Make sure you have the correct WebDriver server (e.g. chromedriver) running at ${spec.driverPort}.\n'
+        'For instructions on how to obtain and run a WebDriver server, see:\n'
+        'https://flutter.dev/to/integration-test-on-web\n',
+      );
+    } on async_io.WebDriverException catch (error) {
+      // The WebDriver server is reachable, but it could not create a browser
+      // session. This typically happens when the browser fails to launch, when
+      // the browser and WebDriver server versions do not match, or when the
+      // session request times out.
+      throwToolExit(
+        'Unable to start a WebDriver session for web testing.\n'
+        'The WebDriver server running at ${spec.driverPort} could not create a browser session:\n'
+        '$error\n'
+        'Make sure the WebDriver server matches --browser-name=${spec.browserName}, '
+        'the browser is installed, and its version is compatible with the WebDriver server '
+        '(e.g. chromedriver must match the installed Chrome version).\n'
         'For instructions on how to obtain and run a WebDriver server, see:\n'
         'https://flutter.dev/to/integration-test-on-web\n',
       );

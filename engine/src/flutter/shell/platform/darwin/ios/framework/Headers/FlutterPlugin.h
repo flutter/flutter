@@ -288,6 +288,14 @@ typedef enum {
  * Provides registration context for the application or plugins.
  */
 @protocol FlutterBaseRegistrar <NSObject>
+
+/**
+ * The unique identifier for the `FlutterEngine` associated with this registrar.
+ *
+ * This corresponds to `PlatformDispatcher.instance.engineId` in Dart.
+ */
+@property(nonatomic, readonly) int64_t engineIdentifier;
+
 /**
  * Returns a `FlutterBinaryMessenger` for creating Dart/iOS communication
  * channels to be used by the application or a plugin.

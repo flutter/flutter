@@ -203,7 +203,8 @@ void ImageDescriptor::instantiateCodec(Dart_Handle codec_handle,
         target_height,                                    //
         ToImageDecoderTargetPixelFormat(destination_format));
   } else {
-    ui_codec = fml::MakeRefCounted<MultiFrameCodec>(generator_);
+    ui_codec = fml::MakeRefCounted<MultiFrameCodec>(
+        generator_, SkISize::Make(target_width, target_height));
   }
   ui_codec->AssociateWithDartWrapper(codec_handle);
 }

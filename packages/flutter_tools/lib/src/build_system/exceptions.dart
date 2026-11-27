@@ -95,18 +95,31 @@ class MissingDefineException implements Exception {
   }
 }
 
+/// An exception thrown when an extension-defined assemble target fails.
+class ExtensionAssembleException implements Exception {
+  const ExtensionAssembleException(this.target, {this.errorMessage});
+
+  /// The name of the assemble target that failed.
+  final String target;
+
+  /// The optional failure message returned by the tool extension.
+  final String? errorMessage;
+
+  @override
+  String toString() {
+    final String? message = errorMessage;
+    return message != null && message.isNotEmpty
+        ? 'Extension assemble target "$target" failed: $message'
+        : 'Extension assemble target "$target" failed.';
+  }
+}
+
 /// An exception thrown when a compiler (such as the frontend server) fails
 /// to compile code, and has already emitted the compilation error messages to
 /// the logger.
 class CompilerException implements Exception {
-  const CompilerException([this.message]);
-
-  /// An optional message describing the compilation failure.
-  final String? message;
+  const CompilerException();
 
   @override
-  String toString() => switch (message) {
-    null || '' => 'compilation failed',
-    final String msg => 'compilation failed: $msg',
-  };
+  String toString() => 'compilation failed';
 }

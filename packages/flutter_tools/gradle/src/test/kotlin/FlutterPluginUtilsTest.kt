@@ -35,6 +35,7 @@ import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.PluginManager
+import org.gradle.api.plugins.UnknownPluginException
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.kotlin.dsl.support.serviceOf
@@ -1818,8 +1819,8 @@ class FlutterPluginUtilsTest {
                         val appPluginManager = testProject.appPluginManager
                         val plugin1Manager = testProject.plugin1Manager
 
-                        every { appPluginManager.apply("kotlin-android") } throws Exception("KGP not on classpath")
-                        every { plugin1Manager.apply("kotlin-android") } throws Exception("KGP not on classpath")
+                        every { appPluginManager.apply("kotlin-android") } throws UnknownPluginException("KGP not on classpath")
+                        every { plugin1Manager.apply("kotlin-android") } throws UnknownPluginException("KGP not on classpath")
 
                         executeDetectApplyingKotlinGradlePlugin(testProject)
 
@@ -1835,6 +1836,36 @@ class FlutterPluginUtilsTest {
                                         it.contains(BUILT_IN_KOTLIN_DOCS)
                                 }
                             )
+                        }
+                    }
+
+                    @Test
+                    fun `propagates a KGP failure that is not a missing plugin`(
+                        @TempDir tempDir: Path
+                    ) {
+                        val testProject =
+                            setupTest(
+                                tempDir = tempDir,
+                                agpVersion = templateAgpVersion,
+                                builtInKotlin = "false",
+                                appConfig =
+                                    SubprojectConfig(
+                                        "app",
+                                        declarativelyAppliedPlugins = listOf("com.android.application")
+                                    ),
+                                pluginConfigs = emptyList()
+                            )
+                        val kgpFailure = GradleException("KGP rejected android.newDsl=true")
+                        every { testProject.appPluginManager.apply("kotlin-android") } throws kgpFailure
+
+                        val thrown =
+                            assertThrows<GradleException> {
+                                detectApplyingKotlinGradlePlugin(testProject.appProject)
+                            }
+
+                        assertEquals(kgpFailure, thrown)
+                        verify(exactly = 0) {
+                            mockLogger.quiet(match { it.contains("KGP was not found on the classpath") })
                         }
                     }
                 }
@@ -1930,8 +1961,8 @@ class FlutterPluginUtilsTest {
                         val appPluginManager = testProject.appPluginManager
                         val plugin1Manager = testProject.plugin1Manager
 
-                        every { appPluginManager.apply("kotlin-android") } throws Exception("KGP not on classpath")
-                        every { plugin1Manager.apply("kotlin-android") } throws Exception("KGP not on classpath")
+                        every { appPluginManager.apply("kotlin-android") } throws UnknownPluginException("KGP not on classpath")
+                        every { plugin1Manager.apply("kotlin-android") } throws UnknownPluginException("KGP not on classpath")
 
                         executeDetectApplyingKotlinGradlePlugin(testProject)
 

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:args/args.dart';
+
 import '../../base/common.dart';
 import '../flutter_command.dart';
 
@@ -25,6 +27,22 @@ extension SafeArgResults on FlutterCommand {
       descriptor.wasProvided(argResults, globalResults: globalResults);
 
   /// Returns whether [descriptor] is registered on this command (or globally).
-  bool hasOption(OptionDescriptor<Object?> descriptor) =>
-      descriptor.isRegistered(argResults, globalResults: globalResults);
+  bool hasOption(OptionDescriptor<Object?> descriptor) => switch (descriptor.scope) {
+    OptionScope.local => _isRegisteredLocally(descriptor),
+    OptionScope.global => descriptor.isRegistered(argResults, globalResults: globalResults),
+    OptionScope.any =>
+      _isRegisteredLocally(descriptor) ||
+          descriptor.isRegistered(argResults, globalResults: globalResults),
+  };
+
+  bool _isRegisteredLocally(OptionDescriptor<Object?> descriptor) {
+    if (descriptor.isRegisteredOnParser(argParser)) {
+      return true;
+    }
+    final ArgParser? baseParser = baseArgParser;
+    return baseParser != null &&
+        !identical(baseParser, argParser) &&
+        argParser.options.containsKey(descriptor.name) &&
+        descriptor.isRegisteredOnParser(baseParser);
+  }
 }

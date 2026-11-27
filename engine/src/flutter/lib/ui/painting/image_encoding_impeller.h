@@ -8,9 +8,9 @@
 #include "flutter/common/task_runners.h"
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/fml/memory/weak_ptr.h"
-#include "flutter/fml/status_or.h"
 #include "flutter/fml/synchronization/sync_switch.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace impeller {
 class Context;
@@ -29,7 +29,7 @@ class ImageEncodingImpeller {
   /// Visible for testing.
   static void ConvertDlImageToSkImage(
       const sk_sp<DlImage>& dl_image,
-      std::function<void(fml::StatusOr<sk_sp<SkImage>>)> encode_task,
+      std::function<void(absl::StatusOr<sk_sp<SkImage>>)> encode_task,
       const fml::TaskRunnerAffineWeakPtr<SnapshotDelegate>& snapshot_delegate,
       const std::shared_ptr<impeller::Context>& impeller_context);
 
@@ -37,7 +37,7 @@ class ImageEncodingImpeller {
   /// `encode_task` is executed with the resulting `SkImage`.
   static void ConvertImageToRaster(
       const sk_sp<DlImage>& dl_image,
-      std::function<void(fml::StatusOr<sk_sp<SkImage>>)> encode_task,
+      std::function<void(absl::StatusOr<sk_sp<SkImage>>)> encode_task,
       const fml::RefPtr<fml::TaskRunner>& raster_task_runner,
       const fml::RefPtr<fml::TaskRunner>& io_task_runner,
       const fml::TaskRunnerAffineWeakPtr<SnapshotDelegate>& snapshot_delegate,

@@ -27,6 +27,10 @@ std::unique_ptr<SkCodec> getCodecForData(SkData* data) {
 }
 }  // namespace
 
+SKWASM_EXPORT bool skwasm_supportsAnimatedImages() {
+  return true;
+}
+
 SKWASM_EXPORT SkAnimatedImage* animatedImage_create(SkData* data,
                                                     int target_width,
                                                     int target_height) {

@@ -32,7 +32,7 @@ class TestMetalSurfaceImpl : public TestMetalSurface {
   const TestMetalContext& test_metal_context_;
   bool is_valid_ = false;
   sk_sp<SkSurface> surface_;
-  TestMetalContext::TextureInfo texture_info_;
+  TestMetalContext::TextureInfo texture_info_{};
 
   // |TestMetalSurface|
   bool IsValid() const override;

@@ -17,7 +17,6 @@ import 'asset.dart';
 import 'base/command_help.dart';
 import 'base/common.dart';
 import 'base/config.dart';
-import 'base/context.dart';
 import 'base/dds.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
@@ -40,6 +39,7 @@ import 'context/tool_context.dart';
 import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
+import 'features.dart' show FeatureFlags;
 import 'hook_runner.dart' show FlutterHookRunner;
 import 'ios/application_package.dart';
 import 'ios/devices.dart';
@@ -49,6 +49,8 @@ import 'run_cold.dart';
 import 'run_hot.dart';
 import 'version.dart';
 import 'vmservice.dart';
+import 'web/web_debug_config.dart';
+import 'windows/visual_studio.dart';
 
 class FlutterDevice {
   FlutterDevice(
@@ -60,6 +62,7 @@ class FlutterDevice {
     required this.targetPlatform,
     @visibleForTesting this.logFlushDelay = const Duration(milliseconds: 500),
     this.userIdentifier,
+    @visibleForTesting this._vmServiceConnector = connectToVmService,
   });
 
   final Duration logFlushDelay;
@@ -70,6 +73,7 @@ class FlutterDevice {
     required ToolContext toolContext,
     required BuildInfo buildInfo,
     required String? target,
+    ResidentCompilerFactory residentCompilerFactory = const ResidentCompilerFactory(),
     TargetModel? targetModelOverride,
     String? userIdentifier,
   }) async {
@@ -128,6 +132,7 @@ class FlutterDevice {
   final ToolContext _toolContext;
   final String? userIdentifier;
   final DevelopmentShaderCompiler developmentShaderCompiler;
+  final VMServiceConnector _vmServiceConnector;
 
   DevFSWriter? devFSWriter;
   Future<Uri>? vmServiceUri;
@@ -156,8 +161,13 @@ class FlutterDevice {
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
   }) async {
-    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
-        _toolContext;
+    final ToolContext(
+      :Artifacts artifacts,
+      :FlutterVersion flutterVersion,
+      :FileSystem fs,
+      :Logger logger,
+      :FlutterProjectFactory projectFactory,
+    ) = _toolContext;
     this.vmServiceUri ??= Future<Uri>.value(vmServiceUri);
     // FYI, this message is used as a sentinel in tests.
     logger.printTrace('Connecting to service protocol: $vmServiceUri');
@@ -170,7 +180,7 @@ class FlutterDevice {
         // this may not be the case when scraping logcat for URIs. If this URI is
         // from an old application instance, we shouldn't try and start DDS.
         try {
-          service = await connectToVmService(vmServiceUri, logger: logger);
+          service = await _vmServiceConnector(vmServiceUri, logger: logger);
           await service.dispose();
           break;
         } on vm_service.RPCError catch (e) {
@@ -215,6 +225,7 @@ class FlutterDevice {
         try {
           await device!.dds.startDartDevelopmentServiceFromDebuggingOptions(
             vmServiceUri,
+            artifacts: artifacts,
             debuggingOptions: debuggingOptions,
             appName:
                 'Kind: Flutter - Device: ${device!.displayName} - '
@@ -262,12 +273,13 @@ class FlutterDevice {
     // something went wrong that caused DDS to shutdown early.
     try {
       service = await Future.any<dynamic>(<Future<dynamic>>[
-        connectToVmService(
+        _vmServiceConnector(
           debuggingOptions.enableDds ? (device!.dds.uri ?? vmServiceUri) : vmServiceUri,
           reloadSources: reloadSources,
           restart: restart,
           compileExpression: compileExpression,
           flutterProject: projectFactory.fromDirectory(fs.currentDirectory),
+          flutterVersion: flutterVersion,
           printStructuredErrorLogMethod: printStructuredErrorLogMethod,
           device: device,
           logger: logger,
@@ -372,7 +384,7 @@ class FlutterDevice {
     );
 
     final TargetPlatform targetPlatform = await device!.targetPlatform;
-    package = await ApplicationPackageFactory.instance!.getPackageForPlatform(
+    package = await hotRunner.applicationPackageFactory.getPackageForPlatform(
       targetPlatform,
       buildInfo: hotRunner.debuggingOptions.buildInfo,
       applicationBinary: hotRunner.applicationBinary,
@@ -426,7 +438,7 @@ class FlutterDevice {
     final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
         _toolContext;
     final TargetPlatform targetPlatform = await device!.targetPlatform;
-    package = await ApplicationPackageFactory.instance!.getPackageForPlatform(
+    package = await coldRunner.applicationPackageFactory.getPackageForPlatform(
       targetPlatform,
       buildInfo: coldRunner.debuggingOptions.buildInfo,
       applicationBinary: coldRunner.applicationBinary,
@@ -611,107 +623,76 @@ abstract class ResidentHandlers {
   }
 
   /// Dump the application's current widget tree to the terminal.
-  Future<bool> debugDumpApp() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
-      for (final view in views) {
-        final String data = await device.vmService!.flutterDebugDumpApp(
-          isolateId: view.uiIsolate!.id!,
-        );
-        logger.printStatus(data);
-      }
-    }
-    return true;
-  }
+  Future<bool> debugDumpApp() => _debugDumpTree(
+    (FlutterVmService vmService, String isolateId) =>
+        vmService.flutterDebugDumpApp(isolateId: isolateId),
+  );
 
   /// Dump the application's current render tree to the terminal.
-  Future<bool> debugDumpRenderTree() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
-      for (final view in views) {
-        final String data = await device.vmService!.flutterDebugDumpRenderTree(
-          isolateId: view.uiIsolate!.id!,
-        );
-        logger.printStatus(data);
-      }
-    }
-    return true;
-  }
+  Future<bool> debugDumpRenderTree() => _debugDumpTree(
+    (FlutterVmService vmService, String isolateId) =>
+        vmService.flutterDebugDumpRenderTree(isolateId: isolateId),
+  );
 
   /// Dump the application's current layer tree to the terminal.
   Future<bool> debugDumpLayerTree() async {
-    if (!supportsServiceProtocol || !isRunningDebug) {
+    if (!isRunningDebug) {
       return false;
     }
-    for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
-      for (final view in views) {
-        final String data = await device.vmService!.flutterDebugDumpLayerTree(
-          isolateId: view.uiIsolate!.id!,
-        );
-        logger.printStatus(data);
-      }
-    }
-    return true;
+    return _debugDumpTree(
+      (FlutterVmService vmService, String isolateId) =>
+          vmService.flutterDebugDumpLayerTree(isolateId: isolateId),
+    );
   }
 
+  /// Dump the application's current focus tree to the terminal.
   Future<bool> debugDumpFocusTree() async {
-    if (!supportsServiceProtocol || !isRunningDebug) {
+    if (!isRunningDebug) {
       return false;
     }
-    for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
-      for (final view in views) {
-        final String data = await device.vmService!.flutterDebugDumpFocusTree(
-          isolateId: view.uiIsolate!.id!,
-        );
-        logger.printStatus(data);
-      }
-    }
-    return true;
+    return _debugDumpTree(
+      (FlutterVmService vmService, String isolateId) =>
+          vmService.flutterDebugDumpFocusTree(isolateId: isolateId),
+    );
   }
 
   /// Dump the application's current semantics tree to the terminal.
   ///
   /// If semantics are not enabled, nothing is returned.
-  Future<bool> debugDumpSemanticsTreeInTraversalOrder() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
-      for (final view in views) {
-        final String data = await device.vmService!.flutterDebugDumpSemanticsTreeInTraversalOrder(
-          isolateId: view.uiIsolate!.id!,
-        );
-        logger.printStatus(data);
-      }
-    }
-    return true;
-  }
+  Future<bool> debugDumpSemanticsTreeInTraversalOrder() => _debugDumpTree(
+    (FlutterVmService vmService, String isolateId) =>
+        vmService.flutterDebugDumpSemanticsTreeInTraversalOrder(isolateId: isolateId),
+  );
 
   /// Dump the application's current semantics tree to the terminal.
   ///
   /// If semantics are not enabled, nothing is returned.
-  Future<bool> debugDumpSemanticsTreeInInverseHitTestOrder() async {
+  Future<bool> debugDumpSemanticsTreeInInverseHitTestOrder() => _debugDumpTree(
+    (FlutterVmService vmService, String isolateId) =>
+        vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(isolateId: isolateId),
+  );
+
+  /// Returns whether at least one Flutter view was dumped.
+  Future<bool> _debugDumpTree(
+    Future<String> Function(FlutterVmService vmService, String isolateId) dumpCall,
+  ) async {
     if (!supportsServiceProtocol) {
       return false;
     }
+    var dumped = false;
     for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
-      for (final view in views) {
-        final String data = await device.vmService!
-            .flutterDebugDumpSemanticsTreeInInverseHitTestOrder(isolateId: view.uiIsolate!.id!);
-        logger.printStatus(data);
+      if (device?.vmService case final vmService?) {
+        final List<FlutterView> views = await vmService.getFlutterViews();
+        for (final view in views) {
+          if (view.uiIsolate?.id case final isolateId?) {
+            final String data = await dumpCall(vmService, isolateId);
+            logger.printStatus(data);
+            dumped = true;
+          }
+        }
       }
     }
-    return true;
+    return dumped;
   }
 
   /// Toggle the "paint size" debugging feature.
@@ -959,9 +940,12 @@ abstract class ResidentRunner extends ResidentHandlers {
   ResidentRunner(
     this.flutterDevices, {
     required this.analytics,
+    required this.applicationPackageFactory,
+    required AssetBundleFactory assetBundleFactory,
     required this.buildSystem,
     required this.buildTargets,
     required this.debuggingOptions,
+    required this.featureFlags,
     required this.target,
     required this.toolContext,
     required this.xcode,
@@ -978,7 +962,7 @@ abstract class ResidentRunner extends ResidentHandlers {
        artifactDirectory = dillOutputPath == null
            ? toolContext.fs.systemTempDirectory.createTempSync('flutter_tool.')
            : toolContext.fs.file(dillOutputPath).parent,
-       assetBundle = AssetBundleFactory.instance.createBundle(),
+       assetBundle = assetBundleFactory.createBundle(),
        commandHelp = CommandHelp(
          logger: toolContext.logger,
          terminal: toolContext.terminal,
@@ -1021,8 +1005,10 @@ abstract class ResidentRunner extends ResidentHandlers {
   /// The injected dependencies used by this runner.
   final ToolContext toolContext;
   final Analytics analytics;
+  final ApplicationPackageFactory applicationPackageFactory;
   final BuildTargets buildTargets;
   final BuildSystem buildSystem;
+  final FeatureFlags featureFlags;
 
   @override
   final List<FlutterDevice> flutterDevices;
@@ -1054,11 +1040,16 @@ abstract class ResidentRunner extends ResidentHandlers {
     cacheDir: cache.getRoot(),
     engineVersion: flutterVersion.engineRevision,
     fileSystem: fileSystem,
-    flutterRootDir: fileSystem.directory(Cache.flutterRoot),
+    flutterRootDir: fileSystem.directory(cache.flutterRoot),
     outputDir: fileSystem.directory(getBuildDirectory(config, fileSystem)),
     processManager: processManager,
     platform: platform,
     analytics: analytics,
+    androidSdkBuilder: null,
+    featureFlags: featureFlags,
+    projectFactory: toolContext.projectFactory,
+    visualStudio: VisualStudio(toolContext: toolContext),
+    xcode: xcode,
     projectDir: fileSystem.directory(projectRootPath),
     packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
     generateDartPluginRegistry: generateDartPluginRegistry,
@@ -1180,12 +1171,10 @@ abstract class ResidentRunner extends ResidentHandlers {
     _lastBuild = await buildSystem.buildIncremental(compositeTarget, _environment, _lastBuild);
     if (!_lastBuild!.success) {
       for (final ExceptionMeasurement exceptionMeasurement in _lastBuild!.exceptions.values) {
-        if (exceptionMeasurement.fatal || logger.isVerbose) {
-          logger.printError(
-            exceptionMeasurement.exception.toString(),
-            stackTrace: logger.isVerbose ? exceptionMeasurement.stackTrace : null,
-          );
-        }
+        logger.printError(
+          exceptionMeasurement.exception.toString(),
+          stackTrace: logger.isVerbose ? exceptionMeasurement.stackTrace : null,
+        );
       }
     }
     logger.printTrace('complete');
@@ -2045,8 +2034,6 @@ String nextPlatform(String currentPlatform) {
 
 /// A launcher for the devtools debugger and analysis tool.
 abstract class DevtoolsLauncher {
-  static DevtoolsLauncher? get instance => context.get<DevtoolsLauncher>();
-
   /// Serve Dart DevTools and return the host and port they are available on.
   ///
   /// This method must return a future that is guaranteed not to fail, because it

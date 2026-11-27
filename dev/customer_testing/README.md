@@ -12,5 +12,12 @@ cd dev/customer_testing
 dart ci.dart [sha]
 ```
 
+To run a subset of the registry, pass `--include=<glob>` or `--exclude=<glob>`,
+matched against the `registry/*.test` file names:
+
+```sh
+dart ci.dart --include=flutter_devtools*.test
+```
+
 Or, to update the SHA for our CI, edit and send a PR for
 [`tests.version`](tests.version).

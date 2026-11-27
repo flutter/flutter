@@ -6,9 +6,9 @@ import 'package:meta/meta.dart';
 
 import '../../artifacts.dart';
 import '../../base/io.dart';
+import '../../base/logger.dart';
 import '../../build_info.dart';
 import '../../darwin/darwin.dart';
-import '../../globals.dart' as globals show stdio;
 import '../build_system.dart';
 
 abstract class UnpackDarwin extends Target {
@@ -71,12 +71,14 @@ abstract class UnpackDarwin extends Target {
         printXcodeWarning(
           'Failed to make the framework writable. This may cause the build to '
           'fail when using lipo.\nError: $copiedPath: ${chmodResult.stderr}',
+          logger: environment.logger,
         );
       }
     } on ProcessException catch (e) {
       printXcodeWarning(
         'Failed to make the framework writable. This may cause the build to '
         'fail when using lipo.\nError: $copiedPath: $e',
+        logger: environment.logger,
       );
     }
   }
@@ -153,8 +155,19 @@ abstract class UnpackDarwin extends Target {
 /// If the issue occurs in a specific file, include the [filePath] as an absolute path.
 /// If the issue occurs at a specific line in the file, include the [lineNumber] as well.
 /// The [filePath] and [lineNumber] are optional.
-void printXcodeWarning(String warning, {String? filePath, int? lineNumber}) {
-  _printXcodeLog(XcodeLogType.warning, warning, filePath: filePath, lineNumber: lineNumber);
+void printXcodeWarning(
+  String warning, {
+  required Logger logger,
+  String? filePath,
+  int? lineNumber,
+}) {
+  _printXcodeLog(
+    XcodeLogType.warning,
+    warning,
+    logger: logger,
+    filePath: filePath,
+    lineNumber: lineNumber,
+  );
 }
 
 /// Log error message to the Xcode build logs. Log will show as red with an icon and may cause the build to fail.
@@ -162,8 +175,14 @@ void printXcodeWarning(String warning, {String? filePath, int? lineNumber}) {
 /// If the issue occurs in a specific file, include the [filePath] as an absolute path.
 /// If the issue occurs at a specific line in the file, include the [lineNumber] as well.
 /// The [filePath] and [lineNumber] are optional.
-void printXcodeError(String error, {String? filePath, int? lineNumber}) {
-  _printXcodeLog(XcodeLogType.error, error, filePath: filePath, lineNumber: lineNumber);
+void printXcodeError(String error, {required Logger logger, String? filePath, int? lineNumber}) {
+  _printXcodeLog(
+    XcodeLogType.error,
+    error,
+    logger: logger,
+    filePath: filePath,
+    lineNumber: lineNumber,
+  );
 }
 
 /// Log note message to the Xcode build logs. Log will show with no special color or icon.
@@ -171,8 +190,14 @@ void printXcodeError(String error, {String? filePath, int? lineNumber}) {
 /// If the issue occurs in a specific file, include the [filePath] as an absolute path.
 /// If the issue occurs at a specific line in the file, include the [lineNumber] as well.
 /// The [filePath] and [lineNumber] are optional.
-void printXcodeNote(String note, {String? filePath, int? lineNumber}) {
-  _printXcodeLog(XcodeLogType.note, note, filePath: filePath, lineNumber: lineNumber);
+void printXcodeNote(String note, {required Logger logger, String? filePath, int? lineNumber}) {
+  _printXcodeLog(
+    XcodeLogType.note,
+    note,
+    logger: logger,
+    filePath: filePath,
+    lineNumber: lineNumber,
+  );
 }
 
 /// Log [message] to the Xcode build logs.
@@ -188,7 +213,13 @@ void printXcodeNote(String note, {String? filePath, int? lineNumber}) {
 ///
 /// See Apple's documentation:
 /// https://developer.apple.com/documentation/xcode/running-custom-scripts-during-a-build#Log-errors-and-warnings-from-your-script
-void _printXcodeLog(XcodeLogType logType, String message, {String? filePath, int? lineNumber}) {
+void _printXcodeLog(
+  XcodeLogType logType,
+  String message, {
+  required Logger logger,
+  String? filePath,
+  int? lineNumber,
+}) {
   var linePath = '';
   if (filePath != null) {
     linePath = '$filePath:';
@@ -203,7 +234,12 @@ void _printXcodeLog(XcodeLogType logType, String message, {String? filePath, int
   }
 
   // Must be printed to stderr to be streamed to the Flutter tool in xcode_backend.dart.
-  globals.stdio.stderrWrite('$linePath${logType.name}: $message\n');
+  // Save and restore hadErrorOutput so Xcode warnings and notes do not trip --fatal-warnings.
+  final bool hadErrorOutput = logger.hadErrorOutput;
+  logger.printError('$linePath${logType.name}: $message', wrap: false);
+  if (logType != XcodeLogType.error) {
+    logger.hadErrorOutput = hadErrorOutput;
+  }
 }
 
 enum XcodeLogType { error, warning, note }

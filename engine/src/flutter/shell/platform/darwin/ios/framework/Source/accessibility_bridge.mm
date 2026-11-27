@@ -286,9 +286,13 @@ static void ReplaceSemanticsObject(SemanticsObject* oldObject,
   // `newObject` should represent the same id as `oldObject`.
   FML_DCHECK(oldObject.node.id == newObject.uid);
   NSNumber* nodeId = @(oldObject.node.id);
-  NSUInteger positionInChildlist = [oldObject.parent.children indexOfObject:oldObject];
+  SemanticsObject* parent = oldObject.parent;
+  NSUInteger positionInChildlist = [parent.children indexOfObjectIdenticalTo:oldObject];
   oldObject.children = @[];
-  [oldObject.parent replaceChildAtIndex:positionInChildlist withChild:newObject];
+  oldObject.childrenInHitTestOrder = @[];
+  [parent replaceChildAtIndex:positionInChildlist withChild:newObject];
+  // Hit-test and traversal orders can differ, so match the old object by identity.
+  [parent replaceChildInHitTestOrder:oldObject withChild:newObject];
   [objects removeObjectForKey:nodeId];
   objects[nodeId] = newObject;
 }
@@ -407,10 +411,12 @@ bool AccessibilityBridge::AccessibilityElementsWereInstalledByBridge(NSArray* el
     return false;
   }
   id element = elements.firstObject;
-  if (![element isKindOfClass:[SemanticsObjectContainer class]]) {
-    return false;
+  SemanticsObject* semanticsObject = nil;
+  if ([element isKindOfClass:[SemanticsObjectContainer class]]) {
+    semanticsObject = ((SemanticsObjectContainer*)element).semanticsObject;
+  } else if ([element isKindOfClass:[FlutterSemanticsScrollView class]]) {
+    semanticsObject = ((FlutterSemanticsScrollView*)element).semanticsObject;
   }
-  SemanticsObject* semanticsObject = ((SemanticsObjectContainer*)element).semanticsObject;
   return semanticsObject && semanticsObject.bridge == this;
 }
 

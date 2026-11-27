@@ -21,6 +21,13 @@ struct PlaygroundSwitches {
   std::optional<std::chrono::milliseconds> timeout;
   bool enable_vulkan_validation = false;
   //----------------------------------------------------------------------------
+  /// Enable the synchronization validation feature of the Vulkan validation
+  /// layers. This implies `enable_vulkan_validation`. Synchronization
+  /// validation adds significant CPU overhead so it is only intended to be
+  /// enabled for a select set of tests.
+  ///
+  bool enable_vulkan_sync_validation = false;
+  //----------------------------------------------------------------------------
   /// Seek a SwiftShader library in known locations and use it when running
   /// Vulkan. It is a fatal error to provide this option and not have the test
   /// find a SwiftShader implementation.
