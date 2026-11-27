@@ -203,6 +203,10 @@ _MAC_DEFINES = [
     "_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS",
 ]
 
+# iOS's: the Mac's without USE_OPENSSL, which //build/config/crypto.gni
+# gives every platform but iOS (`use_openssl = !is_ios`).
+_IOS_DEFINES = [define for define in _MAC_DEFINES if define != "USE_OPENSSL=1"]
+
 # Android's (//build/config:feature_flags, //build/config/compiler:compiler
 # and :runtime_library under is_android, the libc++ configs): no large-file
 # defines (bionic is 64-bit-offset throughout), the NDK's ANDROID and
@@ -608,7 +612,10 @@ def _impl(ctx):
             "%sysroot%/usr/include/" + ctx.file.crt_begin_so.dirname.split("/")[-2],
         ]
     elif mac:
-        compile_flags = (_IOS_COMPILE_FLAGS if ios else _MAC_COMPILE_FLAGS) + _defines(_MAC_DEFINES)
+        if ios:
+            compile_flags = _IOS_COMPILE_FLAGS + _defines(_IOS_DEFINES)
+        else:
+            compile_flags = _MAC_COMPILE_FLAGS + _defines(_MAC_DEFINES)
         cxx_flags = cxx_flags + _MAC_STDLIB_FLAGS
         objcxx_flags = _MAC_OBJCXX_FLAGS
         link_flags = _IOS_LINK_FLAGS if ios else _MAC_LINK_FLAGS
