@@ -832,6 +832,57 @@ void main() {
       expect(stdio.writtenToStderr.join(), isNot(contains('Downloading')));
     });
 
+    test('do not print welcome when --machine is provided', () async {
+      final fakeFlutterVersion = FakeFlutterVersion();
+      final Analytics analytics = Analytics.fake(
+        tool: DashTool.flutterTool,
+        homeDirectory: fs.currentDirectory,
+        dartVersion: fakeFlutterVersion.dartSdkVersion,
+        fs: fs,
+        flutterChannel: fakeFlutterVersion.channel,
+        flutterVersion: fakeFlutterVersion.getVersionString(),
+      );
+      final stdio = FakeStdio();
+      final platform = FakePlatform(
+        environment: <String, String>{'FLUTTER_ROOT': '/sdk', 'HOME': '/'},
+      );
+      final terminal = AnsiTerminal(stdio: stdio, platform: platform);
+      final outputPreferences = OutputPreferences.test();
+      final loggerFactory = LoggerFactory(
+        outputPreferences: outputPreferences,
+        terminal: terminal,
+        stdio: stdio,
+      );
+      final Logger logger = loggerFactory.createLogger(
+        daemon: false,
+        machine: true,
+        verbose: false,
+        prefixedErrors: false,
+        widgetPreviews: false,
+        windows: platform.isWindows,
+      );
+      final ToolDependencies toolDependencies = await _bootstrapForTest(
+        analytics: analytics,
+        botDetector: const FakeBotDetector(false),
+        fs: fs,
+        logger: logger,
+        outputPreferences: outputPreferences,
+        platform: platform,
+        stdio: stdio,
+        terminal: terminal,
+      );
+      await runner.run(
+        <String>['--version', '--machine'],
+        (ToolDependencies toolDependencies) => <FlutterCommand>[],
+        // This flutterVersion disables crash reporting.
+        flutterVersion: '[user-branch]/',
+        toolDependencies: toolDependencies,
+      );
+
+      expect(stdio.writtenToStdout.join(), isNot(contains(analytics.getConsentMessage)));
+      expect(analytics.shouldShowMessage, isTrue);
+    });
+
     test('binds bootstrapped DeviceManager into runner for command execution', () async {
       late final _DeviceManagerRecordingFlutterCommand command;
       final ToolDependencies toolDependencies = await _bootstrapForTest(fs: fs);

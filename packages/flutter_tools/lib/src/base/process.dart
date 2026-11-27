@@ -680,7 +680,9 @@ Future<int> exitWithHooks(
   required Logger logger,
   required ShutdownHooks shutdownHooks,
 }) async {
-  if (analytics.shouldShowMessage) {
+  // Suppress the consent notice in machine mode to avoid corrupting machine-readable
+  // output streams (e.g. JSON/daemon), and defer marking it as shown until an interactive run.
+  if (analytics.shouldShowMessage && !logger.isMachine) {
     logger.printStatus(analytics.getConsentMessage);
     analytics.clientShowedMessage();
 
