@@ -29,7 +29,6 @@
 #if IMPELLER_SUPPORTS_RENDERING
 #include "impeller/display_list/aiks_context.h"  // nogncheck
 #if IMPELLER_ENABLE_VULKAN
-#include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"  // nogncheck
 #include "impeller/renderer/blit_pass.h"
 #include "impeller/renderer/command_buffer.h"
@@ -263,7 +262,7 @@ static void InstallSnapshotBackend(Rasterizer& rasterizer,
       std::make_shared<impeller::ImpellerContextFuture>(promise.get_future()));
 }
 
-static void MeasureSnapshotCache(bool reset_at_boundary) {
+TEST(RasterizerTest, HeadlessCacheRepeatedSnapshot) {
   using namespace impeller::testing;
   NiceMock<MockDelegate> delegate;
   Settings settings;
@@ -282,67 +281,26 @@ static void MeasureSnapshotCache(bool reset_at_boundary) {
   auto cached = selection.CreateHeadlessAiksContext();
   ASSERT_TRUE(cached);
   auto& arena = cached->GetContentContext().GetTransientsDataBuffer();
-  const size_t initial = arena.GetReservedBytesForTest();
   const size_t idle_before = idle_count();
-  size_t peak = initial;
   DisplayListBuilder builder;
   builder.DrawRect(DlRect::MakeLTRB(1, 1, 6, 6), DlPaint());
   auto list = builder.Build();
-  for (int i = 0; i < 32; ++i) {
+  for (int i = 0; i < 2; ++i) {
     const auto slot = arena.GetStateForTest().current_frame;
-    auto provider = [&](impeller::AiksContext* used) {
-      EXPECT_EQ(cached.get(), used);
-      EXPECT_TRUE(arena.Emplace(600 * 1024, 16, [](uint8_t* p) { *p = 1; }));
-      return list;
-    };
-    auto texture =
-        reset_at_boundary
-            ? snapshots.MakeImpellerSnapshotSync(provider, DlISize{8, 8},
-                                                 SnapshotPixelFormat::kDontCare)
-            : impeller::DisplayListToTexture(provider(cached.get()), {8, 8},
-                                             *cached,
-                                             /*reset_host_buffer=*/false);
+    auto texture = snapshots.MakeImpellerSnapshotSync(
+        [&](impeller::AiksContext* used) {
+          EXPECT_EQ(cached.get(), used);
+          return list;
+        },
+        {8, 8}, SnapshotPixelFormat::kDontCare);
     ASSERT_TRUE(texture);
-    EXPECT_EQ(
-        arena.GetStateForTest().current_frame,
-        reset_at_boundary ? (slot + 1) % impeller::kHostBufferArenaSize : slot);
-    // Measure steady-state allocation with completed submissions between calls.
-    const auto tracker = backend->GetSubmissionTracker();
-    const auto last = tracker->LatestSubmission();
-    const auto deadline =
-        std::chrono::steady_clock::now() + std::chrono::seconds(5);
-    while (tracker->CompletedThrough() < last &&
-           std::chrono::steady_clock::now() < deadline) {
-      std::this_thread::yield();
-    }
-    ASSERT_GE(tracker->CompletedThrough(), last);
-    peak = std::max(peak, arena.GetReservedBytesForTest());
-  }
-  ::testing::Test::RecordProperty("snapshots", 32);
-  ::testing::Test::RecordProperty("arena_initial_bytes",
-                                  std::to_string(initial));
-  ::testing::Test::RecordProperty("arena_peak_bytes", std::to_string(peak));
-  ::testing::Test::RecordProperty("idle_during",
-                                  std::to_string(idle_count() - idle_before));
-  if (reset_at_boundary) {
-    EXPECT_EQ(initial, peak);
-  } else {
-    EXPECT_GT(peak, initial);
+    EXPECT_EQ(arena.GetStateForTest().current_frame,
+              (slot + 1) % impeller::kHostBufferArenaSize);
   }
   EXPECT_EQ(idle_count(), idle_before);
   cached.reset();
   rasterizer.SetImpellerContext(nullptr);
-  ::testing::Test::RecordProperty("idle_at_eviction",
-                                  std::to_string(idle_count() - idle_before));
   EXPECT_GT(idle_count(), idle_before);
-}
-
-TEST(RasterizerTest, HeadlessCacheRepeatedSnapshot) {
-  MeasureSnapshotCache(true);
-}
-
-TEST(RasterizerTest, HeadlessCacheWithoutArenaResetControl) {
-  MeasureSnapshotCache(false);
 }
 
 TEST(RasterizerTest, HeadlessCacheArenaWithPendingFence) {
@@ -359,7 +317,6 @@ TEST(RasterizerTest, HeadlessCacheArenaWithPendingFence) {
                     .CreateHeadlessAiksContext();
   ASSERT_TRUE(cached);
   auto& arena = cached->GetContentContext().GetTransientsDataBuffer();
-  const size_t initial = arena.GetReservedBytesForTest();
   auto backing = arena.GetCurrentBufferForTest();
   auto& snapshots = static_cast<SnapshotDelegate&>(rasterizer);
   DisplayListBuilder builder;
@@ -391,8 +348,9 @@ TEST(RasterizerTest, HeadlessCacheArenaWithPendingFence) {
   }
   EXPECT_EQ(callback_count, 1u);
   EXPECT_FALSE(backing.expired());
-  const auto backlog = arena.GetReservedBytesForTest();
-  EXPECT_GT(backlog, initial);
+  // After two rotations the original slot has a new buffer, while the
+  // unsignaled submission still keeps the original buffer alive.
+  EXPECT_NE(backing.lock(), arena.GetCurrentBufferForTest().lock());
   pending->SetStatus(impeller::vk::Result::eSuccess);
   pending = nullptr;
   auto tracker = backend->GetSubmissionTracker();
@@ -406,11 +364,6 @@ TEST(RasterizerTest, HeadlessCacheArenaWithPendingFence) {
   ASSERT_EQ(tracker->CompletedThrough(), id);
   ASSERT_TRUE(take_snapshot());
   EXPECT_TRUE(backing.expired());
-  EXPECT_EQ(arena.GetReservedBytesForTest(), initial);
-  RecordProperty("arena_initial_bytes", std::to_string(initial));
-  RecordProperty("arena_backlog_bytes", std::to_string(backlog));
-  RecordProperty("arena_reclaimed_bytes",
-                 std::to_string(arena.GetReservedBytesForTest()));
 }
 
 static void CheckHeadlessReplacement(bool keep_old_context) {

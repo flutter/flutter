@@ -103,21 +103,6 @@ HostBuffer::TestStateQuery HostBuffer::GetStateForTest() {
   };
 }
 
-size_t HostBuffer::GetReservedBytesForTest() const {
-  size_t bytes = 0;
-  for (const auto& slot : device_buffers_) {
-    for (const auto& buffer : slot) {
-      bytes += buffer->GetDeviceBufferDescriptor().size;
-    }
-  }
-  for (const auto& entry : retired_buffers_) {
-    for (const auto& buffer : entry.second) {
-      bytes += buffer->GetDeviceBufferDescriptor().size;
-    }
-  }
-  return bytes;
-}
-
 bool HostBuffer::MaybeCreateNewBuffer() {
   current_buffer_++;
   if (current_buffer_ >= device_buffers_[frame_index_].size()) {

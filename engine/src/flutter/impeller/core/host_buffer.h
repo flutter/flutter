@@ -147,7 +147,6 @@ class HostBuffer {
   std::weak_ptr<const DeviceBuffer> GetCurrentBufferForTest() const {
     return GetCurrentBuffer();
   }
-  size_t GetReservedBytesForTest() const;
 
  private:
   [[nodiscard]] std::tuple<Range, std::shared_ptr<DeviceBuffer>, DeviceBuffer*>
