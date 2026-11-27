@@ -38,7 +38,7 @@ Uri _scriptUri() {
 }
 
 @pragma('vm:external-name', 'ScheduleMicrotask')
-external void _scheduleMicrotask(void callback());
+external void _scheduleMicrotask(void Function() callback);
 
 @pragma('vm:entry-point')
 _getScheduleMicrotaskClosure() => _scheduleMicrotask;

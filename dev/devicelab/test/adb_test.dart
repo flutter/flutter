@@ -91,6 +91,30 @@ void main() {
       });
     });
 
+    group('toggleFixedPerformanceMode', () {
+      test('enables fixed performance mode', () async {
+        FakeDevice.resetLog();
+        await device.toggleFixedPerformanceMode(true);
+        expectLog(<CommandArgs>[
+          cmd(
+            command: 'cmd',
+            arguments: <String>['power', 'set-fixed-performance-mode-enabled', 'true'],
+          ),
+        ]);
+      });
+
+      test('disables fixed performance mode', () async {
+        FakeDevice.resetLog();
+        await device.toggleFixedPerformanceMode(false);
+        expectLog(<CommandArgs>[
+          cmd(
+            command: 'cmd',
+            arguments: <String>['power', 'set-fixed-performance-mode-enabled', 'false'],
+          ),
+        ]);
+      });
+    });
+
     group('wakeUp', () {
       test('when awake', () async {
         FakeDevice.pretendAwake();

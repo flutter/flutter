@@ -9,7 +9,7 @@ import 'test_utils.dart';
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/84270 .
-  testWithoutContext(
+  test(
     'dart command will not expand variables on windows',
     () async {
       final ProcessResult result = await processManager.run(<String>[
