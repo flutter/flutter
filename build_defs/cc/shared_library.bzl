@@ -45,6 +45,13 @@ file, `lib<output_name>.<extension>`, compatible with Linux alone
 (`linux_output_extension`); `lib<output_name>.so` is then the other
 non-Apple platforms'.
 
+On Linux and on Android the link names the library in it, as GN's solink
+tool does for every ELF library (build/toolchain/gcc_toolchain.gni:
+`-Wl,-soname=` and the file's name, libflutter.so, libvulkan.so.1). A
+client linked against the file by its path then records that name; without
+a SONAME the linker records the path the client's link gave it, which is a
+path of the build.
+
 A GN target that lists a shared_library in its deps links against the
 library (the iOS shell's test library, ios_test_flutter, against OCMock's
 dylib). Bazel's C++ rules take no cc_binary in deps, so the macro also
@@ -100,6 +107,13 @@ def flutter_shared_library(name, output_name, linux_output_extension = None, app
         if apple_install_name and file == dylib:
             # The dylib's link alone: -install_name is ld64's word.
             attributes["linkopts"] = attributes.get("linkopts", []) + ["-Wl,-install_name," + apple_install_name]
+        if file != dylib:
+            # GN's solink tool for ELF: the library's own name as its SONAME.
+            attributes["linkopts"] = attributes.get("linkopts", []) + select({
+                "@platforms//os:android": ["-Wl,-soname=" + file],
+                _LINUX: ["-Wl,-soname=" + file],
+                "//conditions:default": [],
+            })
         cc_binary(
             name = file,
             linkshared = True,
