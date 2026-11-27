@@ -266,6 +266,19 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
                             gl.TexSubImage3D.IsAvailable() &&
                             gl.CompressedTexSubImage3D.IsAvailable();
 
+  // GL_TEXTURE_3D is core on desktop GL and OpenGL ES 3.0. The array-texture
+  // extensions above resolve the same 3D entry points on ES 2.0 but only
+  // accept GL_TEXTURE_2D_ARRAY, so require the version as well as the procs.
+  supports_texture_3d_ = desc->GetGlVersion().major_version >= 3 &&
+                         gl.TexImage3D.IsAvailable() &&
+                         gl.TexSubImage3D.IsAvailable();
+  if (supports_texture_3d_) {
+    GLint value = 0;
+    gl.GetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &value);
+    max_texture_3d_size_ = value > 0 ? static_cast<uint32_t>(value) : 0u;
+    supports_texture_3d_ = max_texture_3d_size_ > 0;
+  }
+
   // Anisotropic filtering is not part of any core GL or GLES version; it is
   // always gated on GL_EXT_texture_filter_anisotropic. The query and the
   // texture parameter are applied with core ES 2.0 entry points (GetFloatv
@@ -320,6 +333,14 @@ bool CapabilitiesGLES::SupportsTextureMaxLevel() const {
 
 bool CapabilitiesGLES::SupportsTextureArrays() const {
   return supports_texture_array_;
+}
+
+bool CapabilitiesGLES::SupportsTexture3D() const {
+  return supports_texture_3d_;
+}
+
+uint32_t CapabilitiesGLES::GetMaximumTexture3DSize() const {
+  return max_texture_3d_size_;
 }
 
 size_t CapabilitiesGLES::GetMaxTextureUnits(ShaderStage stage) const {

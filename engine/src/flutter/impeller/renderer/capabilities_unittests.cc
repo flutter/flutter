@@ -113,6 +113,13 @@ TEST(CapabilitiesTest, SupportsTextureCompression) {
       astc_hdr->SupportsTextureCompression(CompressedTextureFamily::kASTCHDR));
 }
 
+TEST(CapabilitiesTest, StandardCapabilitiesSupportTexture3D) {
+  // StandardCapabilities backs the Metal backend.
+  auto capabilities = CapabilitiesBuilder().Build();
+  EXPECT_TRUE(capabilities->SupportsTexture3D());
+  EXPECT_EQ(capabilities->GetMaximumTexture3DSize(), 2048u);
+}
+
 TEST(CapabilitiesTest, MinUniformAlignment) {
   auto defaults = CapabilitiesBuilder().Build();
   EXPECT_EQ(defaults->GetMinimumUniformAlignment(), 256u);

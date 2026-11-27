@@ -95,6 +95,23 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return _getSupportsTextureArrays();
   }
 
+  /// Whether 3D textures ([TextureType.texture3D]) can be created, uploaded,
+  /// and sampled by shaders. True on Metal and Vulkan. Currently false on the
+  /// GLES backend, where shader bundles do not yet carry a shader variant
+  /// that can declare a `sampler3D`.
+  bool get doesSupportTexture3D {
+    return _getSupportsTexture3D();
+  }
+
+  /// The largest width, height, or depth of a 3D texture, or 0 when
+  /// [doesSupportTexture3D] is false.
+  ///
+  /// Vulkan only guarantees 256, so check this before creating a large
+  /// volume rather than assuming a size. Metal supports 2048.
+  int get maxTexture3DSize {
+    return _getMaximumTexture3DSize();
+  }
+
   /// The maximum anisotropy clamp supported by device samplers (see
   /// [SamplerOptions.maxAnisotropy]).
   ///
@@ -231,6 +248,10 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     /// The number of layers to allocate for a [TextureType.texture2DArray]
     /// texture. Must be 1 (the default) for all other texture types.
     int layerCount = 1,
+
+    /// The depth, in texels, of a [TextureType.texture3D] texture. Must be 1
+    /// (the default) for all other texture types.
+    int depth = 1,
   }) {
     final resolvedTextureType =
         textureType ??
@@ -262,6 +283,42 @@ base class GpuContext extends NativeFieldWrapperClass1 {
         '2D array textures are not supported by this GpuContext. Check '
         'GpuContext.doesSupportTextureArrays before creating one.',
       );
+    }
+    if (depth < 1) {
+      throw ArgumentError('depth ($depth) must be at least 1');
+    }
+    if (depth > 1 && resolvedTextureType != TextureType.texture3D) {
+      throw ArgumentError(
+        'depth ($depth) must be 1 for textures of type $resolvedTextureType',
+      );
+    }
+    if (resolvedTextureType == TextureType.texture3D) {
+      if (!doesSupportTexture3D) {
+        throw ArgumentError(
+          '3D textures are not supported by this GpuContext. Check '
+          'GpuContext.doesSupportTexture3D before creating one.',
+        );
+      }
+      final int maxSize = maxTexture3DSize;
+      if (width > maxSize || height > maxSize || depth > maxSize) {
+        throw ArgumentError(
+          'A ${width}x${height}x$depth 3D texture exceeds this device\'s '
+          'maximum of $maxSize per dimension (GpuContext.maxTexture3DSize)',
+        );
+      }
+      if (enableRenderTargetUsage ||
+          enableShaderWriteUsage ||
+          !enableShaderReadUsage ||
+          sampleCount != 1 ||
+          mipLevelCount != 1 ||
+          format.isCompressed) {
+        throw ArgumentError(
+          '3D textures can only be used as sample-only textures with a single '
+          'mip level (sampleCount=1, mipLevelCount=1, '
+          'enableShaderReadUsage=true, no render target, no shader write, and '
+          'an uncompressed format)',
+        );
+      }
     }
     if (format.isCompressed) {
       if (enableRenderTargetUsage ||
@@ -297,6 +354,7 @@ base class GpuContext extends NativeFieldWrapperClass1 {
       enableShaderWriteUsage,
       mipLevelCount,
       layerCount,
+      depth,
     );
     // `Texture._initialize` throws on failure, so `result` is always valid here.
     return result;
@@ -522,6 +580,16 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     symbol: 'InternalFlutterGpu_Context_GetSupportsTextureArrays',
   )
   external bool _getSupportsTextureArrays();
+
+  @Native<Bool Function(Pointer<Void>)>(
+    symbol: 'InternalFlutterGpu_Context_GetSupportsTexture3D',
+  )
+  external bool _getSupportsTexture3D();
+
+  @Native<Uint32 Function(Pointer<Void>)>(
+    symbol: 'InternalFlutterGpu_Context_GetMaximumTexture3DSize',
+  )
+  external int _getMaximumTexture3DSize();
 
   @Native<Int Function(Pointer<Void>)>(
     symbol: 'InternalFlutterGpu_Context_GetMaxSamplerAnisotropy',

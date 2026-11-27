@@ -272,6 +272,26 @@ extern bool InternalFlutterGpu_Context_GetSupportsTextureArrays(
   return wrapper->GetContext().GetCapabilities()->SupportsTextureArrays();
 }
 
+extern bool InternalFlutterGpu_Context_GetSupportsTexture3D(
+    flutter::gpu::Context* wrapper) {
+  // Shader bundles do not carry an OpenGL ES 3.0 shader variant yet, so user
+  // shaders cannot declare a sampler3D on the GLES backend. See the same
+  // restriction on InternalFlutterGpu_Context_GetSupportsTextureArrays.
+  if (wrapper->GetContext().GetBackendType() ==
+      impeller::Context::BackendType::kOpenGLES) {
+    return false;
+  }
+  return wrapper->GetContext().GetCapabilities()->SupportsTexture3D();
+}
+
+extern uint32_t InternalFlutterGpu_Context_GetMaximumTexture3DSize(
+    flutter::gpu::Context* wrapper) {
+  if (!InternalFlutterGpu_Context_GetSupportsTexture3D(wrapper)) {
+    return 0u;
+  }
+  return wrapper->GetContext().GetCapabilities()->GetMaximumTexture3DSize();
+}
+
 extern int InternalFlutterGpu_Context_GetMaxSamplerAnisotropy(
     flutter::gpu::Context* wrapper) {
   return wrapper->GetContext().GetCapabilities()->GetMaxSamplerAnisotropy();

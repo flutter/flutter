@@ -562,6 +562,15 @@ bool CapabilitiesVK::SupportsTextureArrays() const {
   return true;
 }
 
+bool CapabilitiesVK::SupportsTexture3D() const {
+  // VK_IMAGE_TYPE_3D sampling is core in Vulkan 1.0.
+  return true;
+}
+
+uint32_t CapabilitiesVK::GetMaximumTexture3DSize() const {
+  return device_properties_.limits.maxImageDimension3D;
+}
+
 void CapabilitiesVK::SetOffscreenFormat(PixelFormat pixel_format) const {
   default_color_format_ = pixel_format;
 }

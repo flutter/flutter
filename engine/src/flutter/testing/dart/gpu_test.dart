@@ -206,6 +206,16 @@ Future<gpu.RenderPipeline> createArrayTextureRenderPipeline() async {
   return gpu.gpuContext.createRenderPipeline(vertex!, fragment!);
 }
 
+Future<gpu.RenderPipeline> createTexture3DRenderPipeline() async {
+  final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromAsset('test.shaderbundle');
+  assert(library != null);
+  final gpu.Shader? vertex = library!['TextureVertex'];
+  assert(vertex != null);
+  final gpu.Shader? fragment = library['Texture3DFragment'];
+  assert(fragment != null);
+  return gpu.gpuContext.createRenderPipeline(vertex!, fragment!);
+}
+
 class RenderPassState {
   RenderPassState(this.renderTexture, this.commandBuffer, this.renderPass);
 
@@ -2845,6 +2855,163 @@ void main() async {
         (value - layerValues[slice]).abs(),
         lessThanOrEqualTo(1),
         reason: 'Expected layer $slice value ${layerValues[slice]}, got $value',
+      );
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('GpuContext reports 3D texture support and limits', () async {
+    final bool supported = gpu.gpuContext.doesSupportTexture3D;
+    final int maxSize = gpu.gpuContext.maxTexture3DSize;
+    if (supported) {
+      // Vulkan and OpenGL ES 3.0 guarantee at least 256.
+      expect(maxSize, greaterThanOrEqualTo(256));
+    } else {
+      expect(maxSize, 0);
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('GpuContext.createTexture validates 3D textures', () async {
+    // depth is only meaningful for 3D textures.
+    expect(
+      () => gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 4, 4, depth: 2),
+      throwsArgumentError,
+    );
+    expect(
+      () => gpu.gpuContext.createTexture(
+        gpu.StorageMode.hostVisible,
+        4,
+        4,
+        textureType: gpu.TextureType.texture3D,
+        enableRenderTargetUsage: false,
+        depth: 0,
+      ),
+      throwsArgumentError,
+    );
+    if (!gpu.gpuContext.doesSupportTexture3D) {
+      return;
+    }
+    // 3D textures are sample-only and have a single mip level.
+    expect(
+      () => gpu.gpuContext.createTexture(
+        gpu.StorageMode.hostVisible,
+        4,
+        4,
+        textureType: gpu.TextureType.texture3D,
+        depth: 2,
+      ),
+      throwsArgumentError,
+    );
+    expect(
+      () => gpu.gpuContext.createTexture(
+        gpu.StorageMode.hostVisible,
+        4,
+        4,
+        textureType: gpu.TextureType.texture3D,
+        enableRenderTargetUsage: false,
+        mipLevelCount: 2,
+        depth: 2,
+      ),
+      throwsArgumentError,
+    );
+    final int tooBig = gpu.gpuContext.maxTexture3DSize + 1;
+    expect(
+      () => gpu.gpuContext.createTexture(
+        gpu.StorageMode.hostVisible,
+        4,
+        4,
+        textureType: gpu.TextureType.texture3D,
+        enableRenderTargetUsage: false,
+        depth: tooBig,
+      ),
+      throwsArgumentError,
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('Texture.overwrite fills each depth slice of a 3D texture', () async {
+    if (!gpu.gpuContext.doesSupportTexture3D) {
+      return;
+    }
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible,
+      4,
+      4,
+      textureType: gpu.TextureType.texture3D,
+      enableRenderTargetUsage: false,
+      depth: 3,
+    );
+    expect(texture.textureType, gpu.TextureType.texture3D);
+    expect(texture.depth, 3);
+    expect(texture.sliceCount, 3);
+    // Each upload covers one depth slice.
+    expect(texture.getBaseMipLevelSizeInBytes(), 4 * 4 * 4);
+    final slice = Uint8List(4 * 4 * 4);
+    for (var z = 0; z < 3; z++) {
+      texture.overwrite(slice.buffer.asByteData(), slice: z);
+    }
+    expect(() => texture.overwrite(slice.buffer.asByteData(), slice: 3), throwsException);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('sampling a 3D texture reads the selected depth slice', () async {
+    if (!gpu.gpuContext.doesSupportTexture3D) {
+      return;
+    }
+
+    // Each depth slice is a solid gray with a distinct, ascending intensity so
+    // the check below is independent of RGBA/BGRA channel order.
+    const sliceValues = <int>[0x28, 0x78, 0xDC];
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible,
+      4,
+      4,
+      textureType: gpu.TextureType.texture3D,
+      enableRenderTargetUsage: false,
+      depth: sliceValues.length,
+    );
+    final slice = Uint8List(4 * 4 * 4);
+    for (var z = 0; z < sliceValues.length; z++) {
+      slice.fillRange(0, slice.length, sliceValues[z]);
+      texture.overwrite(slice.buffer.asByteData(), slice: z);
+    }
+
+    final gpu.RenderPipeline pipeline = await createTexture3DRenderPipeline();
+    for (var z = 0; z < sliceValues.length; z++) {
+      final RenderPassState state = createSimpleRenderPass();
+      state.renderPass.bindPipeline(pipeline);
+
+      // A fullscreen quad with white vertex colors, so the sampled value
+      // passes through unmodified.
+      final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+      final gpu.BufferView vertices = transients.emplace(
+        float32(<double>[
+          -1, -1, 0, 0, 0, 1, 1, 1, 1, //
+          1, -1, 0, 1, 0, 1, 1, 1, 1, //
+          1, 1, 0, 1, 1, 1, 1, 1, 1, //
+          -1, -1, 0, 0, 0, 1, 1, 1, 1, //
+          1, 1, 0, 1, 1, 1, 1, 1, 1, //
+          -1, 1, 0, 0, 1, 1, 1, 1, 1, //
+        ]),
+      );
+      state.renderPass.bindVertexBuffer(vertices);
+      state.renderPass.bindUniform(
+        pipeline.vertexShader.getUniformSlot('VertInfo'),
+        transients.emplace(mvpUBO(Matrix4.identity())),
+      );
+      // Sample the center of slice z, so linear filtering does not blend in
+      // the neighboring slices.
+      state.renderPass.bindUniform(
+        pipeline.fragmentShader.getUniformSlot('FragInfo'),
+        transients.emplace(float32(<double>[(z + 0.5) / sliceValues.length])),
+      );
+      state.renderPass.bindTexture(pipeline.fragmentShader.getUniformSlot('tex'), texture);
+      state.renderPass.draw(6);
+      state.commandBuffer.submit();
+
+      final ByteData pixels = await readTextureBytes(state.renderTexture);
+      final int value = pixels.getUint8(0);
+      expect(
+        (value - sliceValues[z]).abs(),
+        lessThanOrEqualTo(1),
+        reason: 'Expected slice $z value ${sliceValues[z]}, got $value',
       );
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));

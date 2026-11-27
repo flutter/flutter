@@ -125,11 +125,15 @@ bool TextureMTL::OnSetContents(const uint8_t* contents,
     return false;
   }
 
+  // A 3D texture has a single slice; its depth slices are addressed by the
+  // region's z origin instead.
+  const bool is_3d = desc.type == TextureType::kTexture3D;
   const auto region =
-      MTLRegionMake2D(0u, 0u, desc.size.width, desc.size.height);
+      MTLRegionMake3D(0u, 0u, is_3d ? slice : 0u, desc.size.width,
+                      desc.size.height, 1u);
   [aquire_proc_() replaceRegion:region                            //
                     mipmapLevel:0u                                //
-                          slice:slice                             //
+                          slice:is_3d ? 0u : slice                //
                       withBytes:contents                          //
                     bytesPerRow:desc.GetBytesPerRow()             //
                   bytesPerImage:desc.GetByteSizeOfBaseMipLevel()  //

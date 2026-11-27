@@ -197,6 +197,8 @@ constexpr GLenum ToTextureType(TextureType type) {
       return GL_TEXTURE_CUBE_MAP;
     case TextureType::kTexture2DArray:
       return GL_TEXTURE_2D_ARRAY;
+    case TextureType::kTexture3D:
+      return GL_TEXTURE_3D;
     case TextureType::kTextureExternalOES:
       return GL_TEXTURE_EXTERNAL_OES;
   }
@@ -213,6 +215,8 @@ constexpr std::optional<GLenum> ToTextureTarget(TextureType type) {
       return GL_TEXTURE_CUBE_MAP;
     case TextureType::kTexture2DArray:
       return GL_TEXTURE_2D_ARRAY;
+    case TextureType::kTexture3D:
+      return GL_TEXTURE_3D;
     case TextureType::kTextureExternalOES:
       return GL_TEXTURE_EXTERNAL_OES;
   }

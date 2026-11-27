@@ -269,15 +269,19 @@ bool BlitPassVK::OnCopyBufferToTextureCommand(
   dst_barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader |
                           vk::PipelineStageFlagBits::eTransfer;
 
+  // A 3D texture has a single array layer; its depth slices are addressed by
+  // the z offset instead.
+  const bool is_3d =
+      destination->GetTextureDescriptor().type == TextureType::kTexture3D;
   vk::BufferImageCopy image_copy;
   image_copy.setBufferOffset(source.GetRange().offset);
   image_copy.setBufferRowLength(0);
   image_copy.setBufferImageHeight(0);
   image_copy.setImageSubresource(vk::ImageSubresourceLayers(
-      vk::ImageAspectFlagBits::eColor, mip_level, slice, 1));
+      vk::ImageAspectFlagBits::eColor, mip_level, is_3d ? 0u : slice, 1));
   image_copy.imageOffset.x = destination_region.GetX();
   image_copy.imageOffset.y = destination_region.GetY();
-  image_copy.imageOffset.z = 0u;
+  image_copy.imageOffset.z = is_3d ? static_cast<int32_t>(slice) : 0;
   image_copy.imageExtent.width = destination_region.GetWidth();
   image_copy.imageExtent.height = destination_region.GetHeight();
   image_copy.imageExtent.depth = 1u;

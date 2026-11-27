@@ -97,6 +97,9 @@ MTLTextureDescriptor* ToMTLTextureDescriptor(const TextureDescriptor& desc) {
   if (desc.type == TextureType::kTexture2DArray) {
     mtl_desc.arrayLength = desc.array_layer_count;
   }
+  if (desc.type == TextureType::kTexture3D) {
+    mtl_desc.depth = desc.depth;
+  }
   mtl_desc.usage = MTLTextureUsageUnknown;
   if (desc.usage & TextureUsage::kUnknown) {
     mtl_desc.usage |= MTLTextureUsageUnknown;
