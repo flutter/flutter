@@ -4643,7 +4643,10 @@ executable("other_swift_unittests") {
       // assembled in the build directory, found through -F$root_out_dir --
       // a directory no cc rule can name; the rule assembles the bundle the
       // deps place and sets the search path itself, so the flag goes and
-      // the rest of the flags stay.
+      // the rest of the flags stay. Its one file is first-party code, as
+      // any target's that keeps chromium_code: the warning set with -Werror
+      // and the config's defines, so that a warning in a header the
+      // umbrella imports fails the check as it fails GN's.
       final String output = await convert(r'''
 copy("copy_headers") {
   sources = [ "Foo.h" ]
@@ -4670,12 +4673,14 @@ shared_library("verify_framework_module") {
           'framework_module_check(\n'
           '    name = "verify_framework_module",\n'
           '    srcs = ["UmbrellaImportTests.m"],\n'
+          '    copts = CHROMIUM_CODE_COPTS,\n'
           '    framework = "Foo.framework",\n'
           '    linkopts = [\n'
           '        "-fapplication-extension",\n'
           '        "-Xlinker",\n'
           '        "-fatal_warnings",\n'
           '    ],\n'
+          '    local_defines = FLUTTER_LOCAL_DEFINES,\n'
           '    deps = [":copy_headers"],\n'
           ')\n',
         ),

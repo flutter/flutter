@@ -4184,22 +4184,7 @@ final class _Emitter {
       // no constant: GN gives it no default_warning_flags and no -Werror,
       // and the toolchain's own copy of that list, which is not fatal, is
       // all it has here.
-      if (warningSet != _WarningSet.none) {
-        final constant = warningSet == _WarningSet.noChromiumCode
-            ? 'FLUTTER_THIRD_PARTY_COPTS'
-            : _isEngineCode(target)
-            ? 'FLUTTER_COPTS'
-            : 'CHROMIUM_CODE_COPTS';
-        _use('//build_defs/cc:copts.bzl', constant);
-        rule.list('copts').always.insert(0, _Item(constant, quoted: false));
-      }
-      if (warningSet == _WarningSet.chromiumCode) {
-        _use('//build_defs/cc:copts.bzl', 'FLUTTER_LOCAL_DEFINES');
-        rule
-            .list('local_defines')
-            .always
-            .insert(0, const _Item('FLUTTER_LOCAL_DEFINES', quoted: false));
-      }
+      _warningSetInto(rule, target, warningSet);
       // GN links every object of a source_set into the dependent binary,
       // whereas a static_library is an archive the linker picks from. Code
       // that registers itself from static initializers (gtest suites in a
@@ -4270,6 +4255,29 @@ final class _Emitter {
       // GN's name for the library or executable, for dependents and the
       // command line.
       rules.add(_Rule('alias', target.name, const <String>[])..scalars['actual'] = '":$name"');
+    }
+  }
+
+  /// The warning set's constant at the head of [rule]'s copts and, for
+  /// chromium_code, the config's defines at the head of its local defines:
+  /// what GN's chromium_code or no_chromium_code gives a target that
+  /// compiles. With neither config, nothing.
+  void _warningSetInto(_Rule rule, GnTarget target, _WarningSet warningSet) {
+    if (warningSet != _WarningSet.none) {
+      final constant = warningSet == _WarningSet.noChromiumCode
+          ? 'FLUTTER_THIRD_PARTY_COPTS'
+          : _isEngineCode(target)
+          ? 'FLUTTER_COPTS'
+          : 'CHROMIUM_CODE_COPTS';
+      _use('//build_defs/cc:copts.bzl', constant);
+      rule.list('copts').always.insert(0, _Item(constant, quoted: false));
+    }
+    if (warningSet == _WarningSet.chromiumCode) {
+      _use('//build_defs/cc:copts.bzl', 'FLUTTER_LOCAL_DEFINES');
+      rule
+          .list('local_defines')
+          .always
+          .insert(0, const _Item('FLUTTER_LOCAL_DEFINES', quoted: false));
     }
   }
 
@@ -4353,16 +4361,21 @@ final class _Emitter {
     // No `frameworks` (the iOS shell's check compiles against the bundle
     // and links nothing of it): the rule takes the one bundle the deps
     // place.
+    _WarningSet warningSet = _WarningSet.chromiumCode;
     for (final variable in configVariables) {
-      _configsInto(
+      warningSet = _configsInto(
         rule,
         variable,
         target,
-        warningSet: _WarningSet.chromiumCode,
+        warningSet: warningSet,
         publicConfigs: const <String>{},
         propagatedFlags: <ForwardedFlag>[],
       );
     }
+    // The check's one file is first-party code to GN: -Wall -Wextra, the
+    // warning list with -Werror, chromium_code's defines. A warning in a
+    // header the umbrella imports fails the check there, and so here.
+    _warningSetInto(rule, target, warningSet);
     rules.add(rule);
   }
 

@@ -9,7 +9,7 @@ load("@engine_version//:version.bzl", "ENGINE_VERSION")
 load("@host_platform//:host.bzl", "HOST_CLANG")
 load("@macos_sdk//:sdk.bzl", "MACOS_PLATFORM_PATH")
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
-load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
+load("//build_defs/cc:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
 load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
 load("//build_defs/cc:shared_library.bzl", "flutter_shared_library")
 load("//build_defs/cc:swift_library.bzl", "flutter_swift_library")
@@ -968,12 +968,14 @@ gn_generated_file(
 framework_module_check(
     name = "_generate_symlinks_and_verify_framework_module",
     srcs = ["framework/Source/FlutterUmbrellaImportTests.m"],
+    copts = CHROMIUM_CODE_COPTS,
     framework = "FlutterMacOS.framework",
     linkopts = [
         "-fapplication-extension",
         "-Xlinker",
         "-fatal_warnings",
     ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "@platforms//os:macos": [],
         "//conditions:default": ["@platforms//:incompatible"],

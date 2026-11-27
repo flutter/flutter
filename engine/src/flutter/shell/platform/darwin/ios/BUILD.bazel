@@ -10,7 +10,7 @@ load("@engine_version//:version.bzl", "ENGINE_VERSION")
 load("@host_platform//:host.bzl", "HOST_CLANG")
 load("@macos_sdk//:sdk.bzl", "IPHONEOS_PLATFORM_PATH", "IPHONESIMULATOR_PLATFORM_PATH")
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//build_defs/cc:copts.bzl", "FLUTTER_CFLAGS_OBJC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_CFLAGS_OBJC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
 load("//build_defs/cc:shared_library.bzl", "flutter_shared_library")
 load("//build_defs/cc:swift_library.bzl", "flutter_swift_library")
@@ -1195,13 +1195,14 @@ gn_copy(
 framework_module_check(
     name = "copy_and_verify_framework_module",
     srcs = ["framework/Source/FlutterUmbrellaImport.m"],
-    copts = [
+    copts = CHROMIUM_CODE_COPTS + [
         "-fapplication-extension",  # from //build/config/ios:ios_application_extension
     ],
     linkopts = [
         "-Xlinker",
         "-fatal_warnings",
     ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "@platforms//os:ios": [],
         "//conditions:default": ["@platforms//:incompatible"],
