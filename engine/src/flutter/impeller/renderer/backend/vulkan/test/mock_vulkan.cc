@@ -188,6 +188,22 @@ class MockDevice final {
     }
   }
 
+  void SetQueuePresentCallback(std::function<void()> callback) {
+    Lock lock(queue_present_callback_mutex_);
+    queue_present_callback_ = std::move(callback);
+  }
+
+  void RunQueuePresentCallback() {
+    std::function<void()> callback;
+    {
+      Lock lock(queue_present_callback_mutex_);
+      callback = std::exchange(queue_present_callback_, {});
+    }
+    if (callback) {
+      callback();
+    }
+  }
+
   void AddQueryPoolResultCount(uint32_t query_count) {
     Lock lock(called_functions_mutex_);
     query_pool_result_counts_.push_back(query_count);
@@ -230,6 +246,10 @@ class MockDevice final {
   Mutex queue_submit_callback_mutex_;
   std::function<void(MockFence*)> queue_submit_callback_
       IPLR_GUARDED_BY(queue_submit_callback_mutex_);
+
+  Mutex queue_present_callback_mutex_;
+  std::function<void()> queue_present_callback_
+      IPLR_GUARDED_BY(queue_present_callback_mutex_);
 
   MockQueue queue_;
   std::atomic<uint64_t> next_mock_timestamp_{1000000u};
@@ -949,6 +969,7 @@ VkResult vkQueuePresentKHR(VkQueue queue,
                            const VkPresentInfoKHR* pPresentInfo) {
   const MockQueue* mock_queue = reinterpret_cast<const MockQueue*>(queue);
   mock_queue->device().AddCalledFunction("vkQueuePresentKHR");
+  mock_queue->device().RunQueuePresentCallback();
   return VK_SUCCESS;
 }
 
@@ -1611,6 +1632,11 @@ void SetMockVulkanQueueSubmitCallback(
     VkDevice device,
     std::function<void(MockFence*)> callback) {
   MockDevice::Unwrap(device)->SetQueueSubmitCallback(std::move(callback));
+}
+
+void SetMockVulkanQueuePresentCallback(VkDevice device,
+                                       std::function<void()> callback) {
+  MockDevice::Unwrap(device)->SetQueuePresentCallback(std::move(callback));
 }
 
 size_t GetMockVulkanFunctionCallCount(VkDevice device,

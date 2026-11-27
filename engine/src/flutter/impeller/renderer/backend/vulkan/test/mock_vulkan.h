@@ -69,6 +69,10 @@ class MockFence final {
 void SetMockVulkanQueueSubmitCallback(VkDevice device,
                                       std::function<void(MockFence*)> callback);
 
+// Installs a one-shot callback for the next queue presentation on this device.
+void SetMockVulkanQueuePresentCallback(VkDevice device,
+                                       std::function<void()> callback);
+
 void SetNextMockIdleCallback(VkDevice device, std::function<void()> callback);
 
 size_t GetMockVulkanFunctionCallCount(VkDevice device,

@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <cstring>
 #include <optional>
 #include <string_view>
+#include <thread>
 
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
@@ -490,6 +492,94 @@ TEST(ContextVKTest, CreateAcceptsKnownBadDriversByDefault) {
   ASSERT_NE(context, nullptr);
   EXPECT_TRUE(context->IsValid());
   EXPECT_TRUE(context->GetDriverInfo()->IsKnownBadDriver());
+}
+
+TEST(ContextVKTest, DeviceWaitIdleExcludesQueueSubmitAndPresent) {
+  struct QueueCall {
+    const char* name;
+    vk::Result (*invoke)(QueueVK&);
+  };
+  const QueueCall queue_calls[] = {
+      {"vkQueueSubmit(SubmitInfo)",
+       [](QueueVK& queue) {
+         return queue.Submit(vk::SubmitInfo{}, vk::Fence{});
+       }},
+      {"vkQueueSubmit(Fence)",
+       [](QueueVK& queue) { return queue.Submit(vk::Fence{}); }},
+      {"vkQueuePresentKHR",
+       [](QueueVK& queue) { return queue.Present(vk::PresentInfoKHR{}); }},
+  };
+
+  for (const auto& [name, invoke_queue_call] : queue_calls) {
+    for (const bool idle_first : {false, true}) {
+      SCOPED_TRACE(::testing::Message()
+                   << name
+                   << (idle_first ? " after vkDeviceWaitIdle"
+                                  : " before vkDeviceWaitIdle"));
+
+      std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
+      ASSERT_NE(context, nullptr);
+      auto const device = context->GetDevice();
+      const std::shared_ptr<QueueVK>& queue = context->GetGraphicsQueue();
+      const bool queue_first = !idle_first;
+      fml::ManualResetWaitableEvent first_entered;
+      fml::ManualResetWaitableEvent second_attempted;
+      fml::ManualResetWaitableEvent second_entered;
+      fml::ManualResetWaitableEvent release_first;
+
+      const auto observe_host_call = [&](bool first) {
+        if (first) {
+          first_entered.Signal();
+          EXPECT_FALSE(
+              release_first.WaitWithTimeout(fml::TimeDelta::FromSeconds(5)));
+        } else {
+          second_entered.Signal();
+        }
+      };
+      SetNextMockIdleCallback(
+          device, [&, idle_first] { observe_host_call(idle_first); });
+      if (std::strcmp(name, "vkQueuePresentKHR") == 0) {
+        SetMockVulkanQueuePresentCallback(
+            device, [&, queue_first] { observe_host_call(queue_first); });
+      } else {
+        SetMockVulkanQueueSubmitCallback(device, [&, queue_first](MockFence*) {
+          observe_host_call(queue_first);
+        });
+      }
+
+      vk::Result queue_result = vk::Result::eErrorUnknown;
+      const auto invoke = [&](bool idle) {
+        if (idle) {
+          context->GetIdleWaiter()->WaitIdle();
+        } else {
+          queue_result = invoke_queue_call(*queue);
+        }
+      };
+
+      std::thread first([&] { invoke(!queue_first); });
+      EXPECT_FALSE(
+          first_entered.WaitWithTimeout(fml::TimeDelta::FromSeconds(5)));
+
+      std::thread second([&] {
+        second_attempted.Signal();
+        invoke(queue_first);
+      });
+      EXPECT_FALSE(
+          second_attempted.WaitWithTimeout(fml::TimeDelta::FromSeconds(5)));
+      const bool overlapped = !second_entered.WaitWithTimeout(
+          fml::TimeDelta::FromMilliseconds(200));
+      release_first.Signal();
+      first.join();
+      second.join();
+      SetMockVulkanQueueSubmitCallback(device, {});
+      SetMockVulkanQueuePresentCallback(device, {});
+      SetNextMockIdleCallback(device, {});
+      EXPECT_TRUE(second_entered.IsSignaledForTest());
+      EXPECT_EQ(queue_result, vk::Result::eSuccess);
+      EXPECT_FALSE(overlapped)
+          << "vkDeviceWaitIdle overlapped a same-device queue host call";
+    }
+  }
 }
 
 }  // namespace testing
