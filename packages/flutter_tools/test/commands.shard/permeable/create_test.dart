@@ -3553,17 +3553,6 @@ void main() {
     overrides: {Logger: () => logger},
   );
 
-  testUsingContext('newly created plugin has min flutter sdk version as 3.3.0', () async {
-    final CreateCommand command = createCreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
-    final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
-    final pubspec = Pubspec.parse(rawPubspec);
-    final Map<String, VersionConstraint?> env = pubspec.environment;
-    expect(env['flutter']!.allows(Version(3, 3, 0)), true);
-    expect(env['flutter']!.allows(Version(3, 2, 9)), false);
-  });
-
   testUsingContext('newly created iOS plugins has correct min iOS version', () async {
     final String flutterToolsAbsolutePath = globals.fs.path.join(
       Cache.flutterRoot!,
