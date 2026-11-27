@@ -70,8 +70,9 @@ extern void skwasm_dispatchTriggerContextLoss(unsigned long thread_id,
 extern void skwasm_triggerContextLossOnCanvas();
 extern void skwasm_reportContextLossTriggered(Skwasm::Surface* surface,
                                               uint32_t callback_id);
-extern void skwasm_reportContextLost(Skwasm::Surface* surface,
-                                     uint32_t callback_id);
+extern void skwasm_reportContextLost(
+    Skwasm::Surface::CallbackHandler* callback_handler,
+    uint32_t callback_id);
 extern void skwasm_destroyContext(uint32_t context_handle);
 extern void skwasm_dispatchTransferCanvas(unsigned long thread_id,
                                           Skwasm::Surface* surface,

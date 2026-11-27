@@ -34,7 +34,7 @@ CallbackId surfaceSetCanvas(SurfaceHandle handle, JSAny canvas) =>
 @pragma('wasm:import', 'skwasm.surface_setCanvas')
 external WasmI32 surfaceSetCanvasImpl(WasmI32 surfaceHandle, WasmExternRef? frame);
 
-@Native<Int32 Function(SurfaceHandle, Int, Int)>(symbol: 'surface_setSize', isLeaf: true)
+@Native<Uint32 Function(SurfaceHandle, Int, Int)>(symbol: 'surface_setSize', isLeaf: true)
 external CallbackId surfaceSetSize(SurfaceHandle surface, int width, int height);
 
 @Native<UnsignedLong Function(SurfaceHandle)>(symbol: 'surface_getThreadId', isLeaf: true)
@@ -43,7 +43,7 @@ external int surfaceGetThreadId(SurfaceHandle handle);
 @Native<Int Function(SurfaceHandle)>(symbol: 'surface_getGlContext', isLeaf: true)
 external int surfaceGetGlContext(SurfaceHandle handle);
 
-@Native<Int32 Function(SurfaceHandle)>(symbol: 'surface_triggerContextLoss', isLeaf: true)
+@Native<Uint32 Function(SurfaceHandle)>(symbol: 'surface_triggerContextLoss', isLeaf: true)
 external CallbackId surfaceTriggerContextLoss(SurfaceHandle handle);
 
 @Native<Void Function(SurfaceHandle, OnRenderCallbackHandle)>(
@@ -61,7 +61,7 @@ external void surfaceDestroy(SurfaceHandle surface);
 )
 external void surfaceSetResourceCacheLimitBytes(SurfaceHandle surface, int bytes);
 
-@Native<Int32 Function(SurfaceHandle, Pointer<PictureHandle>, Int, Int, Int, Bool)>(
+@Native<Uint32 Function(SurfaceHandle, Pointer<PictureHandle>, Int, Int, Int, Bool)>(
   symbol: 'surface_renderPictures',
   isLeaf: true,
 )
@@ -74,7 +74,7 @@ external CallbackId surfaceRenderPictures(
   bool captureImageBitmaps,
 );
 
-@Native<Int32 Function(SurfaceHandle, ImageHandle, Int)>(
+@Native<Uint32 Function(SurfaceHandle, ImageHandle, Int)>(
   symbol: 'surface_rasterizeImage',
   isLeaf: true,
 )

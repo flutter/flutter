@@ -457,8 +457,9 @@ abstract class Renderer {
     _onViewCreatedListener.cancel();
     _onViewDisposedListener.cancel();
     rasterizers.values.forEach(_disposeRasterizer);
+    // The rasterizer also owns pictureToImageSurface, which Skwasm shares with
+    // any frames that are still rasterizing.
     rasterizer.dispose();
-    pictureToImageSurface.dispose();
   }
 
   /// Clears the state of this renderer. Used in tests.

@@ -112,6 +112,8 @@ Future<void> testMain() async {
   });
 
   test('Platform view slot coordinates are anchored to top-left even in RTL document', () async {
+    EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1);
+    addTearDown(() => EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(null));
     final String? previousDir = domDocument.documentElement!.getAttribute('dir');
     try {
       domDocument.documentElement!.setAttribute('dir', 'rtl');

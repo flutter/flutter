@@ -22,8 +22,81 @@ abstract class Rasterizer {
   /// Disposes this rasterizer and all [ViewRasterizer]s that it created.
   void dispose();
 
-  @visibleForTesting
+  /// Provides the surfaces used by this rasterizer.
   SurfaceProvider get surfaceProvider;
+}
+
+/// Owns the view rasterizers that share a [SurfaceProvider].
+abstract class SurfaceRasterizer<V extends ViewRasterizer> extends Rasterizer {
+  SurfaceRasterizer() {
+    assert(() {
+      registerHotRestartListener(dispose);
+      return true;
+    }());
+  }
+
+  final Map<EngineFlutterView, V> _views = <EngineFlutterView, V>{};
+
+  /// Includes disposed views whose frames are still using their canvases.
+  int _liveFactories = 0;
+  bool _disposed = false;
+
+  /// The view rasterizers currently registered with this surface provider.
+  @protected
+  Iterable<V> get activeViews => _views.values;
+
+  /// Builds the rasterizer for a newly registered view.
+  @protected
+  V buildViewRasterizer(EngineFlutterView view);
+
+  @override
+  V createViewRasterizer(EngineFlutterView view) {
+    if (_disposed) {
+      throw StateError('Cannot create a view after disposing the rasterizer.');
+    }
+    return _views.putIfAbsent(view, () {
+      final V rasterizer = buildViewRasterizer(view);
+      rasterizer._owner = this;
+      _liveFactories++;
+      return rasterizer;
+    });
+  }
+
+  void _unregisterView(EngineFlutterView view) {
+    _views.remove(view);
+  }
+
+  void _disposeViewFactory(ViewRasterizer rasterizer) {
+    try {
+      rasterizer.displayFactory.dispose();
+    } finally {
+      _liveFactories--;
+      if (_disposed && _liveFactories == 0) {
+        surfaceProvider.dispose();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    if (_disposed) {
+      return;
+    }
+    _disposed = true;
+    if (_liveFactories == 0) {
+      surfaceProvider.dispose();
+      return;
+    }
+    for (final V rasterizer in _views.values.toList()) {
+      rasterizer.dispose();
+    }
+  }
+
+  @override
+  Surface createPictureToImageSurface() => surfaceProvider.createSurface();
+
+  @override
+  void setResourceCacheMaxBytes(int bytes) => surfaceProvider.setSkiaResourceCacheMaxBytes(bytes);
 }
 
 /// Composites Flutter content into a [FlutterView]. Manages the creation of
@@ -38,6 +111,15 @@ abstract class ViewRasterizer {
 
   /// The queue of render requests for this view.
   final RenderQueue queue = RenderQueue();
+
+  SurfaceRasterizer<ViewRasterizer>? _owner;
+
+  /// Whether [PlatformViewEmbedder.submitFrame] is still using the display canvases. Their factory
+  /// and the shared surface provider must outlive that work, even on failure.
+  bool _submittingFrame = false;
+
+  /// Whether this rasterizer has been disposed.
+  bool get isDisposed => _isDisposed;
 
   /// The size of the current frame being rasterized.
   BitmapSize currentFrameSize = BitmapSize.zero;
@@ -97,7 +179,15 @@ abstract class ViewRasterizer {
       recorder?.recordRasterFinish();
       return;
     }
-    await viewEmbedder.submitFrame(recorder);
+    _submittingFrame = true;
+    try {
+      await viewEmbedder.submitFrame(recorder);
+    } finally {
+      _submittingFrame = false;
+      if (_isDisposed) {
+        _owner?._disposeViewFactory(this);
+      }
+    }
     if (presentationTimer != null) {
       presentationTimer.stop();
       Profiler.instance.benchmark(
@@ -119,6 +209,10 @@ abstract class ViewRasterizer {
     List<ui.Picture> pictures,
     FrameTimingRecorder? recorder,
   );
+
+  /// Publishes staged canvas contents with the composition's DOM update.
+  /// Rasterizers that draw directly need no additional commit.
+  void commitFrame() {}
 
   /// Get a [DisplayCanvas] to use as an overlay.
   DisplayCanvas getOverlay() {
@@ -146,8 +240,15 @@ abstract class ViewRasterizer {
   ///
   /// After this is called, [draw] does nothing.
   void dispose() {
+    if (_isDisposed) {
+      return;
+    }
     _isDisposed = true;
+    _owner?._unregisterView(view);
     viewEmbedder.dispose();
+    if (!_submittingFrame) {
+      _owner?._disposeViewFactory(this);
+    }
   }
 
   /// Clears the state. Used in tests.
