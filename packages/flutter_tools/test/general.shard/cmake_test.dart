@@ -632,6 +632,72 @@ void main() {
       ]),
     );
   });
+
+  for (final testCase
+      in <
+        ({
+          String name,
+          String flutterRoot,
+          CmakeBasedProject Function(FlutterProject) createProject,
+          String library,
+          String subdir,
+        })
+      >[
+        (
+          name: 'Windows',
+          flutterRoot: _kTestWindowsFlutterRoot,
+          createProject: WindowsProject.fromFlutter,
+          library: 'libvmservice_snapshot.dll',
+          subdir: 'data',
+        ),
+        (
+          name: 'Linux',
+          flutterRoot: _kTestFlutterRoot,
+          createProject: LinuxProject.fromFlutter,
+          library: 'libvmservice_snapshot.so',
+          subdir: 'lib',
+        ),
+      ]) {
+    test('generated config emits profile-only ${testCase.library} install on ${testCase.name}', () {
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      final CmakeBasedProject cmakeProject = testCase.createProject(project);
+      const buildInfo = BuildInfo(
+        BuildMode.release,
+        null,
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      );
+
+      writeGeneratedCmakeConfig(
+        testCase.flutterRoot,
+        cmakeProject,
+        buildInfo,
+        <String, String>{},
+        logger,
+      );
+
+      expect(
+        cmakeProject.generatedCmakeConfigFile.readAsStringSync(),
+        contains('''
+set(_FLUTTER_VMSERVICE_LIBRARY "\${CMAKE_CURRENT_LIST_DIR}/${testCase.library}")
+set(_FLUTTER_VMSERVICE_LIBRARY "\${_FLUTTER_VMSERVICE_LIBRARY}" PARENT_SCOPE)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.19)
+  cmake_language(DEFER DIRECTORY "\${PROJECT_SOURCE_DIR}" CALL install
+    FILES "\${_FLUTTER_VMSERVICE_LIBRARY}"
+    DESTINATION "\${CMAKE_INSTALL_PREFIX}/${testCase.subdir}"
+    CONFIGURATIONS Profile
+    COMPONENT Runtime
+    OPTIONAL)
+else()
+  install(FILES "\${_FLUTTER_VMSERVICE_LIBRARY}"
+    DESTINATION "\${CMAKE_INSTALL_PREFIX}/${testCase.subdir}"
+    CONFIGURATIONS Profile
+    COMPONENT Runtime
+    OPTIONAL)
+endif()'''),
+      );
+    });
+  }
 }
 
 class _FakeProject implements CmakeBasedProject {

@@ -8,6 +8,9 @@ import 'base/logger.dart';
 import 'build_info.dart';
 import 'cmake_project.dart';
 
+const _kWindowsVmServiceLibrary = 'libvmservice_snapshot.dll';
+const _kLinuxVmServiceLibrary = 'libvmservice_snapshot.so';
+
 /// Extracts the `BINARY_NAME` from a project's CMake file.
 ///
 /// Returns `null` if it cannot be found.
@@ -128,6 +131,37 @@ list(APPEND FLUTTER_TOOL_ENVIRONMENT
     buffer.writeln('  "$key=$configValue"');
   });
   buffer.writeln(')');
+
+  // Install the profile-mode VM service snapshot library from generated config
+  // so existing projects with checked-in CMakeLists.txt bundle it too. Defer
+  // to the end of the project directory when supported so the install runs
+  // after parent cleanup rules (e.g., Linux REMOVE_RECURSE under CMP0082 NEW).
+  final ({String library, String subdir})? vmServiceInstall = switch (project) {
+    WindowsProject() => (library: _kWindowsVmServiceLibrary, subdir: 'data'),
+    LinuxProject() => (library: _kLinuxVmServiceLibrary, subdir: 'lib'),
+    _ => null,
+  };
+  if (vmServiceInstall case (:final String library, :final String subdir)) {
+    buffer.write('''
+
+set(_FLUTTER_VMSERVICE_LIBRARY "\${CMAKE_CURRENT_LIST_DIR}/$library")
+set(_FLUTTER_VMSERVICE_LIBRARY "\${_FLUTTER_VMSERVICE_LIBRARY}" PARENT_SCOPE)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.19)
+  cmake_language(DEFER DIRECTORY "\${PROJECT_SOURCE_DIR}" CALL install
+    FILES "\${_FLUTTER_VMSERVICE_LIBRARY}"
+    DESTINATION "\${CMAKE_INSTALL_PREFIX}/$subdir"
+    CONFIGURATIONS Profile
+    COMPONENT Runtime
+    OPTIONAL)
+else()
+  install(FILES "\${_FLUTTER_VMSERVICE_LIBRARY}"
+    DESTINATION "\${CMAKE_INSTALL_PREFIX}/$subdir"
+    CONFIGURATIONS Profile
+    COMPONENT Runtime
+    OPTIONAL)
+endif()
+''');
+  }
 
   project.generatedCmakeConfigFile
     ..createSync(recursive: true)
