@@ -23,7 +23,7 @@ void testMain() {
     canvas.drawRect(const ui.Rect.fromLTWH(200, 200, 10, 10), ui.Paint());
     final ui.Picture picture = recorder.endRecording();
 
-    final pictureLayer = PictureLayer(picture as LayerPicture, ui.Offset.zero, false, false);
+    final pictureLayer = PictureLayer(picture as EnginePicture, ui.Offset.zero, false, false);
 
     final rootLayer = RootLayer();
     rootLayer.children.add(pictureLayer);
@@ -50,7 +50,7 @@ void testMain() {
     final ui.Picture picture = recorder.endRecording();
 
     final pictureLayer = PictureLayer(
-      picture as LayerPicture,
+      picture as EnginePicture,
       const ui.Offset(50, 50), // Position the picture inside the clip.
       false,
       false,
@@ -87,7 +87,7 @@ void testMain() {
     final ui.Picture picture = recorder.endRecording();
 
     final pictureLayer = PictureLayer(
-      picture as LayerPicture,
+      picture as EnginePicture,
       const ui.Offset(5, 5), // Position the picture inside the clip.
       false,
       false,
@@ -124,7 +124,7 @@ void testMain() {
     final ui.Picture picture = recorder.endRecording();
 
     final pictureLayer = PictureLayer(
-      picture as LayerPicture,
+      picture as EnginePicture,
       const ui.Offset(25, 25), // Position the picture.
       false,
       false,
@@ -171,7 +171,7 @@ void testMain() {
     picture.dispose();
 
     final pictureLayer = PictureLayer(
-      picture as LayerPicture,
+      picture as EnginePicture,
       const ui.Offset(10, 10),
       false,
       false,
@@ -210,7 +210,12 @@ void testMain() {
     final ui.Picture picture = recorder.endRecording();
     picture.dispose();
 
-    final pictureLayer = PictureLayer(picture as LayerPicture, const ui.Offset(5, 5), false, false);
+    final pictureLayer = PictureLayer(
+      picture as EnginePicture,
+      const ui.Offset(5, 5),
+      false,
+      false,
+    );
     final rootLayer = RootLayer();
     rootLayer.children.add(pictureLayer);
 

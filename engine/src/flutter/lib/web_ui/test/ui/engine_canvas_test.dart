@@ -27,9 +27,11 @@ Future<void> testMain() async {
     recorder.endRecording().dispose();
   });
 
-  test('ui.Canvas rejects a recorder that is already recording', () {
+  test('ui.Canvas rejects a recorder that is already recording', () async {
+    const bounds = ui.Rect.fromLTRB(0, 0, 4, 4);
     final recorder = ui.PictureRecorder();
-    ui.Canvas(recorder);
+    final canvas = ui.Canvas(recorder, bounds);
+    canvas.drawRect(bounds, ui.Paint()..color = const ui.Color(0xFFFF0000));
 
     expect(
       () => ui.Canvas(recorder),
@@ -41,7 +43,16 @@ Future<void> testMain() async {
         ),
       ),
     );
-    recorder.endRecording().dispose();
+
+    // The rejected call leaves the first canvas recording.
+    expect(recorder.isRecording, isTrue);
+    canvas.drawRect(bounds, ui.Paint()..color = const ui.Color(0xFF00FF00));
+    final ui.Picture picture = recorder.endRecording();
+    final ui.Image image = await picture.toImage(1, 1);
+    final ByteData bytes = (await image.toByteData())!;
+    expect(bytes.buffer.asUint8List(bytes.offsetInBytes, 4), <int>[0, 255, 0, 255]);
+    image.dispose();
+    picture.dispose();
   });
 
   test('drawAtlas with empty colors draws the same pixels as null colors', () async {
@@ -92,7 +103,7 @@ Future<void> testMain() async {
       canvas.drawPicture(inner);
     });
 
-    final PictureImageTracker? tracker = (outer as LayerPicture).imageTracker;
+    final PictureImageTracker? tracker = (outer as EnginePicture).imageTracker;
     expect(tracker, isNotNull);
     expect(tracker!.isEmpty, isFalse);
 
@@ -180,7 +191,7 @@ Future<void> testMain() async {
     final ui.Picture picture = recorder.endRecording();
 
     // Nothing that was rejected may keep the image alive.
-    expect((picture as LayerPicture).imageTracker, isNull);
+    expect((picture as EnginePicture).imageTracker, isNull);
     shader.dispose();
     image.dispose();
     expect(source.debugIsClosed, isTrue);
@@ -380,7 +391,7 @@ Future<void> testMain() async {
         )
         in emptyCalls.entries) {
       final ui.Picture picture = drawPicture(call);
-      expect((picture as LayerPicture).imageTracker, isNull, reason: name);
+      expect((picture as EnginePicture).imageTracker, isNull, reason: name);
       pictures.add(picture);
     }
 
@@ -409,7 +420,7 @@ Future<void> testMain() async {
     final foreignPictureTracker = PictureImageTracker()..recordImage(pictureImage);
     pictureImage.dispose();
     expect(pictureSource.debugIsClosed, isFalse);
-    final foreignPicture = _ForeignLayerPicture(foreignPictureTracker);
+    final foreignPicture = EnginePicture(ForeignBackendPicture(), foreignPictureTracker);
 
     const rect = ui.Rect.fromLTRB(0, 0, 4, 4);
     final recorder = ui.PictureRecorder();
@@ -465,7 +476,7 @@ Future<void> testMain() async {
     expect(superellipseTracker.isEmpty, isTrue);
 
     final ui.Picture picture = recorder.endRecording();
-    expect((picture as LayerPicture).imageTracker, isNull);
+    expect((picture as EnginePicture).imageTracker, isNull);
 
     foreignImage.dispose();
     expect(foreignSource.debugIsClosed, isTrue);
@@ -474,7 +485,7 @@ Future<void> testMain() async {
     shaderImage.dispose();
     expect(shaderSource.debugIsClosed, isTrue);
 
-    foreignPictureTracker.releaseAll();
+    foreignPicture.dispose();
     expect(pictureSource.debugIsClosed, isTrue);
 
     picture.dispose();
@@ -486,19 +497,6 @@ class _ThrowingImageFilter extends EngineImageFilter {
   BackendImageFilter getBackendFilter({required ui.TileMode defaultBlurTileMode}) {
     throw StateError('filter failed');
   }
-}
-
-class _ForeignLayerPicture implements LayerPicture {
-  _ForeignLayerPicture(this.imageTracker);
-
-  @override
-  final PictureImageTracker? imageTracker;
-
-  @override
-  bool get debugDisposed => false;
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 final Float64List _identity = Float64List.fromList(<double>[

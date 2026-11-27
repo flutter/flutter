@@ -41,7 +41,7 @@ void setUpCanvasKitTest({
 /// layers.
 Future<void> matchPictureGolden(
   String goldenFile,
-  CkPicture picture, {
+  ui.Picture picture, {
   required ui.Rect region,
 }) async {
   final sb = LayerSceneBuilder();

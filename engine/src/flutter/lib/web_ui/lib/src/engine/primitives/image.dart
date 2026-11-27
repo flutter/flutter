@@ -18,16 +18,18 @@ import 'package:ui/ui.dart' as ui;
 class EngineImage implements ui.Image, StackTraceDebugger {
   /// Creates an [EngineImage] wrapping a [BackendImage].
   ///
-  /// Increments the reference count of the optional [imageSource] and any
-  /// sources in [imageTracker] to prevent them from being eagerly closed until
-  /// [box] is disposed or collected.
+  /// Increments the reference count of the optional [imageSource] to prevent
+  /// it from being eagerly closed until [box] is disposed or collected.
+  ///
+  /// Takes ownership of [retainedTracker], which is released together with
+  /// [backendImage] once every handle sharing [box] is disposed or collected.
   EngineImage(
     BackendImage backendImage,
     this.width,
     this.height, {
     this.imageSource,
-    PictureImageTracker? imageTracker,
-  }) : imageTracker = _retainTracker(imageTracker) {
+    this.retainedTracker,
+  }) {
     // Retain the image source for the lifetime of the shared reference box so
     // both explicit disposal and GC finalization release it deterministically.
     imageSource?.retain();
@@ -36,7 +38,7 @@ class EngineImage implements ui.Image, StackTraceDebugger {
       backendImage,
       this,
       'BackendImage',
-      onDispose: _createDisposer(imageSource, this.imageTracker),
+      onDispose: _createDisposer(imageSource, retainedTracker),
       onDisposed: _notifyDisposed,
     );
     // Initialize the debug stack trace.
@@ -48,19 +50,13 @@ class EngineImage implements ui.Image, StackTraceDebugger {
   /// Creates a clone of an existing [EngineImage] sharing the same [box].
   ///
   /// Increments the reference count of [box], which retains [imageSource] and
-  /// [imageTracker] until all clones sharing [box] are disposed or collected.
-  EngineImage.cloneOf(this.box, this.width, this.height, {this.imageSource, this.imageTracker}) {
+  /// [retainedTracker] until all clones sharing [box] are disposed or
+  /// collected.
+  EngineImage.cloneOf(this.box, this.width, this.height, {this.imageSource, this.retainedTracker}) {
     // Initialize the debug stack trace.
     _init();
     // Reference the shared box.
     box.ref(this);
-  }
-
-  static PictureImageTracker? _retainTracker(PictureImageTracker? tracker) {
-    if (tracker == null || tracker.isEmpty) {
-      return null;
-    }
-    return PictureImageTracker()..recordFrom(tracker);
   }
 
   static void _disposeBackendImage(BackendImage backendImage) {
@@ -129,9 +125,13 @@ class EngineImage implements ui.Image, StackTraceDebugger {
   /// An optional [ImageSource] from which this image was loaded.
   final ImageSource? imageSource;
 
-  /// Retained [ImageSource]s from a recorded picture when this image is backed
-  /// by a deferred picture (such as `SkwasmPicture.toImageSync`).
-  final PictureImageTracker? imageTracker;
+  /// The [ImageSource]s recorded into the picture this image was rendered
+  /// from, when the image renders that picture lazily (see
+  /// [BackendPicture.toImageSyncIsDeferred]).
+  ///
+  /// They stay open until every handle sharing [box] is disposed, and pictures
+  /// that draw this image retain them as well.
+  final PictureImageTracker? retainedTracker;
 
   // Track whether this image has been disposed to prevent double disposal and use-after-free bugs.
   bool _disposed = false;
@@ -175,7 +175,7 @@ class EngineImage implements ui.Image, StackTraceDebugger {
       width,
       height,
       imageSource: imageSource,
-      imageTracker: imageTracker,
+      retainedTracker: retainedTracker,
     );
   }
 

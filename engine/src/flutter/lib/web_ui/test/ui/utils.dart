@@ -211,6 +211,30 @@ class ForeignVertices implements EngineVertices {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+/// A [BackendPicture] that belongs to no renderer, so drawing it fails.
+class ForeignBackendPicture implements BackendPicture {
+  @override
+  void dispose() {}
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+/// A [BackendPicture] whose [toImageSync] throws, as a backend does when it
+/// fails to rasterize a picture.
+class ThrowingBackendPicture implements BackendPicture {
+  @override
+  BackendImage toImageSync(int width, int height, TargetPixelFormat targetFormat) {
+    throw StateError('toImageSync failed');
+  }
+
+  @override
+  void dispose() {}
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 /// A [BackendCanvas] whose [drawPath] throws after [translate] succeeds.
 class ThrowingBackendCanvas implements BackendCanvas {
   @override
@@ -223,6 +247,57 @@ class ThrowingBackendCanvas implements BackendCanvas {
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+/// Creates a [width]x[height] [EngineImage] filled with opaque [color] and
+/// backed by an `ImageBitmap` [ImageSource], which pictures retain while they
+/// reference the image.
+Future<EngineImage> createImageBitmapImage({
+  int width = 4,
+  int height = 4,
+  Color color = const Color(0xFF00FF00),
+}) async {
+  final DomImageData data = createBlankDomImageData(width, height);
+  final int argb = color.toARGB32();
+  for (var i = 0; i < data.data.length; i += 4) {
+    data.data[i] = (argb >> 16) & 0xFF;
+    data.data[i + 1] = (argb >> 8) & 0xFF;
+    data.data[i + 2] = argb & 0xFF;
+    data.data[i + 3] = (argb >> 24) & 0xFF;
+  }
+  final image = renderer.createImageFromImageBitmap(await createImageBitmap(data)) as EngineImage;
+  assert(image.imageSource != null);
+  return image;
+}
+
+/// A [Finalizer] that records its attachments instead of registering them with
+/// the browser, so tests can simulate garbage collection with [collect].
+class RecordingFinalizer implements Finalizer {
+  /// The attachments that have not been detached yet.
+  final List<({Object target, Object value, Object? detach})> registeredPairs =
+      <({Object target, Object value, Object? detach})>[];
+
+  /// The attachments whose finalization target is [target].
+  List<({Object target, Object value, Object? detach})> pairsFor(Object target) =>
+      registeredPairs.where((pair) => identical(pair.target, target)).toList();
+
+  @override
+  void attach(Object target, Object value, {Object? detach}) {
+    registeredPairs.add((target: target, value: value, detach: detach));
+  }
+
+  @override
+  void detach(Object detach) {
+    registeredPairs.removeWhere((pair) => identical(pair.detach, detach));
+  }
+
+  /// Simulates garbage collection of [target] by collecting every [UniqueRef]
+  /// attached to it.
+  void collect(Object target) {
+    for (final ({Object target, Object value, Object? detach}) pair in pairsFor(target)) {
+      (pair.value as UniqueRef<dynamic>).collect();
+    }
+  }
 }
 
 /// Draws the [Picture]. This is in preparation for a golden test.

@@ -6,57 +6,23 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../layer/layer_painting.dart';
-import '../primitives/canvas.dart';
-import '../primitives/image.dart';
-import '../primitives/image_source.dart';
+import '../backend/canvas.dart';
+import '../backend/image.dart';
+import '../backend/picture.dart';
 import '../util.dart';
 import 'canvas.dart';
 import 'canvaskit_api.dart';
 import 'image.dart';
-import 'native_memory.dart';
 import 'renderer.dart';
 import 'surface.dart';
 
-/// Implements [ui.Picture] on top of [SkPicture].
-class CkPicture implements LayerPicture, StackTraceDebugger {
-  CkPicture(SkPicture skPicture, [this.imageTracker]) : _isClone = false {
-    _ref = CkCountedRef<CkPicture, SkPicture>(
-      skPicture,
-      this,
-      'Picture',
-      onDispose: _createDisposer(imageTracker),
-    );
-    _initStackTrace();
-  }
+/// The CanvasKit [BackendPicture], wrapping an [SkPicture].
+class CkPicture implements BackendPicture {
+  /// Wraps [skiaObject], which this picture owns.
+  CkPicture(this.skiaObject);
 
-  CkPicture._clone(CkCountedRef<CkPicture, SkPicture> ref, this.imageTracker) : _isClone = true {
-    _ref = ref;
-    ref.ref(this);
-    _initStackTrace();
-  }
-
-  /// Builds the [CkCountedRef] disposal callback without capturing `this`, so
-  /// `DomFinalizationRegistry`'s strongly held `UniqueRef` does not retain
-  /// [_ref] and prevent garbage collection.
-  static void Function(SkPicture)? _createDisposer(PictureImageTracker? tracker) {
-    if (tracker == null) {
-      return null;
-    }
-    return (SkPicture _) {
-      tracker.releaseAll();
-    };
-  }
-
-  final bool _isClone;
-
-  /// Retained image sources for images recorded onto this picture.
-  @override
-  final PictureImageTracker? imageTracker;
-
-  late final CkCountedRef<CkPicture, SkPicture> _ref;
-
-  SkPicture get skiaObject => _ref.nativeObject;
+  /// The underlying CanvasKit picture.
+  final SkPicture skiaObject;
 
   @override
   ui.Rect get cullRect => fromSkRect(skiaObject.cullRect());
@@ -65,87 +31,15 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
   int get approximateBytesUsed => skiaObject.approximateBytesUsed();
 
   @override
-  bool get debugDisposed {
-    bool? result;
-    assert(() {
-      result = _isDisposed;
-      return true;
-    }());
-
-    if (result != null) {
-      return result!;
-    }
-
-    throw StateError('Picture.debugDisposed is only available when asserts are enabled.');
-  }
-
-  /// This is set to true when [dispose] is called and is never reset back to
-  /// false.
-  ///
-  /// This extra flag is necessary on top of [rawSkiaObject] because
-  /// [rawSkiaObject] being null does not indicate permanent deletion.
-  bool _isDisposed = false;
-
-  /// The stack trace taken when [dispose] was called.
-  ///
-  /// Returns null if [dispose] has not been called. Returns null in non-debug
-  /// modes.
-  StackTrace? _debugDisposalStackTrace;
-
-  /// Throws an [AssertionError] if this picture was disposed.
-  ///
-  /// The [mainErrorMessage] is used as the first line in the error message. It
-  /// is expected to end with a period, e.g. "Failed to draw picture." The full
-  /// message will also explain that the error is due to the fact that the
-  /// picture was disposed and include the stack trace taken when the picture
-  /// was disposed.
-  bool debugCheckNotDisposed(String mainErrorMessage) {
-    if (_isDisposed) {
-      throw StateError(
-        '$mainErrorMessage\n'
-        'The picture has been disposed. When the picture was disposed the '
-        'stack trace was:\n'
-        '$_debugDisposalStackTrace',
-      );
-    }
-    return true;
-  }
+  bool get toImageSyncIsDeferred => false;
 
   @override
-  void dispose() {
-    assert(debugCheckNotDisposed('Cannot dispose picture.'));
-    if (_isDisposed) {
-      return;
-    }
-    assert(() {
-      _debugDisposalStackTrace = StackTrace.current;
-      return true;
-    }());
-    if (!_isClone) {
-      ui.Picture.onDispose?.call(this);
-    }
-    _isDisposed = true;
-    _ref.unref(this);
-  }
-
-  @override
-  Future<ui.Image> toImage(int width, int height) async {
-    return toImageSync(width, height);
-  }
-
-  @override
-  EngineImage toImageSync(
-    int width,
-    int height, {
-    ui.TargetPixelFormat targetFormat = ui.TargetPixelFormat.dontCare,
-  }) {
-    assert(debugCheckNotDisposed('Cannot convert picture to image.'));
-
+  BackendImage toImageSync(int width, int height, ui.TargetPixelFormat targetFormat) {
     final CkSurface surface = CanvasKitRenderer.instance.pictureToImageSurface;
     surface.setSize(BitmapSize(width, height));
     final SkSurface skiaSurface = surface.skSurface!;
 
-    final canvas = EngineCanvas(CkCanvas(skiaSurface.getCanvas()));
+    final canvas = CkCanvas(skiaSurface.getCanvas());
     canvas.clear(const ui.Color(0x00000000));
     canvas.drawPicture(this);
     final SkImage skImage = skiaSurface.makeImageSnapshot();
@@ -169,30 +63,36 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
     if (rasterImage == null) {
       throw StateError('Unable to convert image pixels into SkImage.');
     }
-    return EngineImage(
-      CkImageDelegate(rasterImage),
-      rasterImage.width().toInt(),
-      rasterImage.height().toInt(),
-    );
+    return CkImageDelegate(rasterImage);
   }
 
   @override
-  LayerPicture clone() {
-    return CkPicture._clone(_ref, imageTracker);
+  void dispose() {
+    if (!(skiaObject as SkDeletable).isDeleted()) {
+      skiaObject.delete();
+    }
   }
+}
 
-  void _initStackTrace() {
-    assert(() {
-      _debugStackTrace = StackTrace.current;
-      return true;
-    }());
-  }
-
-  late StackTrace _debugStackTrace;
+/// The CanvasKit [BackendPictureRecorder], wrapping an [SkPictureRecorder].
+class CkPictureRecorder implements BackendPictureRecorder {
+  SkPictureRecorder? _skRecorder;
 
   @override
-  StackTrace get debugStackTrace => _debugStackTrace;
+  BackendCanvas beginRecording(ui.Rect cullRect) {
+    final SkPictureRecorder recorder = _skRecorder = SkPictureRecorder();
+    return CkCanvas(recorder.beginRecording(toSkRect(cullRect)));
+  }
 
   @override
-  bool get isDisposed => _isDisposed;
+  BackendPicture endRecording() => CkPicture(_skRecorder!.finishRecordingAsPicture());
+
+  @override
+  void dispose() {
+    final SkPictureRecorder? recorder = _skRecorder;
+    if (recorder != null && !(recorder as SkDeletable).isDeleted()) {
+      recorder.delete();
+    }
+    _skRecorder = null;
+  }
 }

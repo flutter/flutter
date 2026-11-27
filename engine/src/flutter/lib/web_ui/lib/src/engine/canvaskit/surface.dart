@@ -446,11 +446,11 @@ abstract class CkSurface extends Surface {
     if (isDisposed) {
       return;
     }
-    _drawPicture(picture as CkPicture);
+    _drawPicture(picture as EnginePicture);
   }
 
   /// Synchronously clears the surface, draws [picture] into it, and flushes.
-  void _drawPicture(CkPicture picture) {
+  void _drawPicture(EnginePicture picture) {
     final canvas = EngineCanvas(CkCanvas(_skSurface!.getCanvas()));
     canvas.clear(const ui.Color(0x00000000));
     canvas.drawPicture(picture);
@@ -498,7 +498,7 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     setSize(size);
     final bitmapFutures = <Future<DomImageBitmap>>[];
     for (final picture in pictures) {
-      _drawPicture(picture as CkPicture);
+      _drawPicture(picture as EnginePicture);
       bitmapFutures.add(createImageBitmap(_canvas));
     }
     return Future.wait(bitmapFutures);
@@ -515,7 +515,7 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     // can resize or draw into the canvas while `onRendered` reads from it.
     setSize(size);
     for (var i = 0; i < pictures.length; i++) {
-      _drawPicture(pictures[i] as CkPicture);
+      _drawPicture(pictures[i] as EnginePicture);
       onRendered(i, canvasImageSource);
     }
   }

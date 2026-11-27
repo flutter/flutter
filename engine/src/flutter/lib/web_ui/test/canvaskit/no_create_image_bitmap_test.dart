@@ -32,8 +32,8 @@ void testMain() {
 
       expect(browserSupportsCreateImageBitmap, isFalse);
 
-      final recorder = CkPictureRecorder();
-      final EngineCanvas canvas = recorder.beginRecording(region);
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, region);
 
       final gradient = ui.Gradient.linear(
         ui.Offset(region.left + region.width / 4, region.height / 2),

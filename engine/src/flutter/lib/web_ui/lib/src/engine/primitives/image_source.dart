@@ -399,13 +399,11 @@ class PictureImageTracker {
 
   /// Extracts and records any underlying [ImageSource]s retained by [image].
   void recordImage(ui.Image image) {
-    if (image case EngineImage(:final imageSource, :final imageTracker)) {
+    if (image case EngineImage(:final imageSource, :final retainedTracker)) {
       if (imageSource != null) {
         recordSource(imageSource);
       }
-      if (imageTracker != null) {
-        recordFrom(imageTracker);
-      }
+      recordFrom(retainedTracker);
     }
   }
 
@@ -418,6 +416,15 @@ class PictureImageTracker {
         samplerImages.forEach(recordImage);
       }
     }
+  }
+
+  /// Returns a new tracker that independently retains every source retained
+  /// by this tracker, or null if this tracker retains none.
+  PictureImageTracker? clone() {
+    if (isEmpty || _released) {
+      return null;
+    }
+    return PictureImageTracker()..recordFrom(this);
   }
 
   /// Merges all retained sources from [other] into this tracker.

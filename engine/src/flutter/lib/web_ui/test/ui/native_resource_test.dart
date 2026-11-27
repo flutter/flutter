@@ -89,7 +89,7 @@ Future<void> testMain() async {
       expect(disposeCount, 0);
       expect(lastCreatedPicture, same(picture1));
 
-      final LayerPicture picture2 = (picture1 as LayerPicture).clone();
+      final EnginePicture picture2 = (picture1 as EnginePicture).clone();
       expect(createCount, 1);
       expect(disposeCount, 0);
 

@@ -11,6 +11,7 @@ import 'image.dart';
 import 'paint.dart';
 import 'paragraph.dart';
 import 'path.dart';
+import 'picture.dart';
 import 'vertices.dart';
 
 /// The backend side of a recording canvas: one method per native canvas
@@ -26,9 +27,6 @@ import 'vertices.dart';
 ///    take frontend (`Engine*`) objects, FFI pointers or JS interop types.
 ///  * They don't validate arguments, track images, or create or dispose
 ///    paints. The caller owns every [BackendPaint] it passes in.
-///
-/// [drawPicture] is a temporary exception that takes a [ui.Picture], until
-/// `PictureRecorder` and `Picture` are unified.
 abstract class BackendCanvas {
   void save();
 
@@ -136,7 +134,7 @@ abstract class BackendCanvas {
   );
 
   /// Draws [picture], which must have been recorded by the same renderer.
-  void drawPicture(ui.Picture picture);
+  void drawPicture(BackendPicture picture);
 
   void drawParagraph(BackendParagraph paragraph, ui.Offset offset);
 

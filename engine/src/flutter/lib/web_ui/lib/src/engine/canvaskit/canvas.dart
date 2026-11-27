@@ -298,7 +298,7 @@ class CkCanvas implements BackendCanvas {
   }
 
   @override
-  void drawPicture(ui.Picture picture) {
+  void drawPicture(BackendPicture picture) {
     _skCanvas.drawPicture((picture as CkPicture).skiaObject);
   }
 

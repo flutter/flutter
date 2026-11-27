@@ -227,15 +227,14 @@ class PrerollVisitor extends LayerVisitor<void> {
 /// A layer visitor which measures the pictures that make up the scene and
 /// prepares for them to be optimized into few canvases.
 class MeasureVisitor extends LayerVisitor<void> {
-  MeasureVisitor(BitmapSize size, this.viewEmbedder)
-    : measuringRecorder = ui.PictureRecorder() as LayerPictureRecorder {
+  MeasureVisitor(BitmapSize size, this.viewEmbedder) : measuringRecorder = EnginePictureRecorder() {
     measuringCanvas = ui.Canvas(measuringRecorder, ui.Offset.zero & size.toSize()) as LayerCanvas;
   }
 
   /// A stack of image filters which apply their transforms to measured bounds.
   List<EngineImageFilter> imageFilterStack = <EngineImageFilter>[];
 
-  final LayerPictureRecorder measuringRecorder;
+  final EnginePictureRecorder measuringRecorder;
 
   /// A Canvas which records the scene operations. Used to measure pictures
   /// in the scene.
