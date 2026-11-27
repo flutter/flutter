@@ -1535,6 +1535,45 @@ ${List<String>.generate(200, (int i) => '[CHROME STDOUT]: line-${i + 50}').join(
       expect(testLogger.errorText, isNot(contains('Last 200 lines of Chrome output:')));
     });
   });
+
+  group('findChromeExecutable on linux', () {
+    final Platform linux = FakePlatform(environment: <String, String>{});
+
+    test('returns google-chrome when it can be run', () {
+      expect(findChromeExecutable(linux, fileSystem, processManager), kLinuxExecutable);
+    });
+
+    test('prefers chromium over chromium-browser when google-chrome cannot be run', () {
+      processManager.excludedExecutables = <String>{kLinuxExecutable};
+
+      expect(findChromeExecutable(linux, fileSystem, processManager), 'chromium');
+    });
+
+    test('returns chromium-browser when google-chrome and chromium cannot be run', () {
+      processManager.excludedExecutables = <String>{kLinuxExecutable, 'chromium'};
+
+      expect(findChromeExecutable(linux, fileSystem, processManager), 'chromium-browser');
+    });
+
+    test('returns google-chrome when no browser can be run', () {
+      processManager.excludedExecutables = <String>{kLinuxExecutable, ...kLinuxChromiumExecutables};
+
+      expect(findChromeExecutable(linux, fileSystem, processManager), kLinuxExecutable);
+    });
+
+    test('returns $kChromeEnvironment when it is set', () {
+      processManager.excludedExecutables = <String>{kLinuxExecutable};
+
+      expect(
+        findChromeExecutable(
+          FakePlatform(environment: <String, String>{kChromeEnvironment: '/opt/chrome/chrome'}),
+          fileSystem,
+          processManager,
+        ),
+        '/opt/chrome/chrome',
+      );
+    });
+  });
 }
 
 /// Fake chrome connection that fails to get tabs a few times.

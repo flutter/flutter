@@ -41,7 +41,7 @@ void main() {
         platform: platform,
         processManager: processManager,
         operatingSystemUtils: FakeOperatingSystemUtils(),
-        browserFinder: (Platform platform, FileSystem fileSystem) => 'chrome',
+        browserFinder: (_, _, _) => 'chrome',
         logger: logger,
       );
       final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(

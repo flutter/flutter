@@ -191,7 +191,7 @@ void main() {
 
   test('Chrome device is not listed when Chrome cannot be run', () async {
     final processManager = FakeProcessManager.empty();
-    processManager.excludedExecutables = <String>{kLinuxExecutable};
+    processManager.excludedExecutables = <String>{kLinuxExecutable, ...kLinuxChromiumExecutables};
     final webDevices = WebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
@@ -250,6 +250,31 @@ void main() {
 
     // Verify caching works correctly.
     expect(await chromeDevice.sdkNameAndVersion, 'ABC');
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
+  test('Chrome uses chromium on linux when google-chrome cannot be run', () async {
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['chromium', '--version'],
+        stdout: 'Chromium 120.0.6099.224',
+      ),
+    ]);
+    processManager.excludedExecutables = <String>{kLinuxExecutable};
+    final webDevices = WebDevices(
+      featureFlags: TestFeatureFlags(isWebEnabled: true),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      platform: FakePlatform(environment: <String, String>{}),
+      processManager: processManager,
+    );
+
+    final GoogleChromeDevice chromeDevice = (await webDevices.pollingGetDevices())
+        .whereType<GoogleChromeDevice>()
+        .first;
+
+    expect(await chromeDevice.isSupported(), true);
+    expect(await chromeDevice.sdkNameAndVersion, 'Chromium 120.0.6099.224');
     expect(processManager, hasNoRemainingExpectations);
   });
 

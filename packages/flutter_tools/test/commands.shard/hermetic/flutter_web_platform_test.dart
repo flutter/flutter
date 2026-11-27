@@ -165,7 +165,7 @@ void main() {
       platform: platform,
       processManager: processManager,
       operatingSystemUtils: operatingSystemUtils,
-      browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
+      browserFinder: (_, _, _) => 'chrome',
       logger: logger,
     );
     final server = FakeServer();
@@ -267,7 +267,7 @@ void main() {
       platform: platform,
       processManager: processManager,
       operatingSystemUtils: operatingSystemUtils,
-      browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
+      browserFinder: (_, _, _) => 'chrome',
       logger: logger,
     );
     // Generating the bootstrap requires a merged metadata file written during
@@ -375,7 +375,7 @@ void main() {
           platform: testPlatform,
           processManager: processManager,
           operatingSystemUtils: operatingSystemUtils,
-          browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
+          browserFinder: (_, _, _) => 'chrome',
           logger: logger,
         );
         final server = FakeServer();
@@ -510,7 +510,7 @@ void main() {
       platform: platform,
       processManager: processManager,
       operatingSystemUtils: operatingSystemUtils,
-      browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
+      browserFinder: (_, _, _) => 'chrome',
       logger: logger,
     );
     final server = FakeServer();
@@ -568,7 +568,7 @@ void main() {
       platform: platform,
       processManager: processManager,
       operatingSystemUtils: operatingSystemUtils,
-      browserFinder: (Platform platform, FileSystem fileSystem) => 'chrome',
+      browserFinder: (_, _, _) => 'chrome',
       logger: logger,
     );
     final chromium = Chromium(
