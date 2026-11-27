@@ -5,8 +5,12 @@
 #ifndef FLUTTER_TXT_SRC_SKIA_PARAGRAPH_SKIA_H_
 #define FLUTTER_TXT_SRC_SKIA_PARAGRAPH_SKIA_H_
 
+#include <cstdint>
+#include <memory>
 #include <optional>
+#include <unordered_map>
 
+#include "display_list/dl_text.h"
 #include "txt/paragraph.h"
 
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
@@ -81,6 +85,7 @@ class ParagraphSkia : public Paragraph {
   std::vector<flutter::DlPaint> dl_paints_;
   std::optional<std::vector<LineMetrics>> line_metrics_;
   std::vector<TextStyle> line_metrics_styles_;
+  std::unordered_map<uint32_t, std::shared_ptr<flutter::DlText>> dl_text_cache_;
   const bool impeller_enabled_;
 };
 
