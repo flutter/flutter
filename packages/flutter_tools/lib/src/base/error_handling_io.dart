@@ -55,6 +55,9 @@ const int kSystemCodeSharingViolation = 32;
 /// On Windows this is error code 33: ERROR_LOCK_VIOLATION.
 const int kSystemCodeLockViolation = 33;
 
+/// On Windows this is error code 267: ERROR_DIRECTORY.
+const int kSystemCodeDirectoryNameInvalid = 267;
+
 /// On Windows this is error code 1224: ERROR_USER_MAPPED_FILE.
 const int kSystemCodeUserMappedSectionOpened = 1224;
 
@@ -723,7 +726,16 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
   @override
   bool existsSync() {
     return _runSync<bool>(
-      () => delegate.existsSync(),
+      () {
+        try {
+          return delegate.existsSync();
+        } on FileSystemException catch (e) {
+          if (_platform.isWindows && e.osError?.errorCode == kSystemCodeDirectoryNameInvalid) {
+            return false;
+          }
+          rethrow;
+        }
+      },
       platform: _platform,
       failureMessage: 'Flutter failed to check for directory existence at "${delegate.path}"',
       posixPermissionSuggestion: _posixPermissionSuggestion(delegate.parent.path),
@@ -732,8 +744,17 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
 
   @override
   Future<bool> exists() async {
-    // ignore: avoid_slow_async_io
-    return _run<bool>(() => delegate.exists(), platform: _platform);
+    return _run<bool>(() async {
+      try {
+        // ignore: avoid_slow_async_io
+        return await delegate.exists();
+      } on FileSystemException catch (e) {
+        if (_platform.isWindows && e.osError?.errorCode == kSystemCodeDirectoryNameInvalid) {
+          return false;
+        }
+        rethrow;
+      }
+    }, platform: _platform);
   }
 
   @override
@@ -1502,6 +1523,10 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
           '\n$e\n'
           'This can sometimes happen if the file was deleted or moved while the tool was running.'
           ' Try running "flutter clean" and try again.',
+    kSystemCodeDirectoryNameInvalid =>
+      '${message != null && message.isNotEmpty ? "$message. " : ""}The directory name is invalid.'
+          '\n$e\n'
+          'Please ensure that the directory path is valid and refers to a directory.',
     kAccessDenied || kWriteProtect || kPrivilegeNotHeld =>
       '$message. The flutter tool cannot access the file or directory.\n'
           'Please ensure that the SDK and/or project is installed in a location '
