@@ -10,6 +10,7 @@ import android.app.Activity
 import android.os.Build
 import android.os.SystemClock
 import android.view.MotionEvent
+import android.view.View
 import io.flutter.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -19,6 +20,7 @@ import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
+import io.flutter.plugin.platform.PlatformViewsController
 
 class NativeDriverSupportPlugin :
     ActivityAware,
@@ -28,6 +30,7 @@ class NativeDriverSupportPlugin :
     private lateinit var channel: MethodChannel
     private var activity: Activity? = null
     private var flutterRenderer: FlutterRenderer? = null
+    private var platformViewsController: PlatformViewsController? = null
     private var isFlutterUiDisplayed = false
     private val pendingDisplayResults = mutableListOf<MethodChannel.Result>()
 
@@ -52,12 +55,14 @@ class NativeDriverSupportPlugin :
         channel.setMethodCallHandler(this)
         flutterRenderer = binding.flutterEngine.renderer
         flutterRenderer?.addIsDisplayingFlutterUiListener(displayListener)
+        platformViewsController = binding.flutterEngine.platformViewsController
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
         flutterRenderer?.removeIsDisplayingFlutterUiListener(displayListener)
         flutterRenderer = null
+        platformViewsController = null
         isFlutterUiDisplayed = false
         for (result in pendingDisplayResults) {
             result.error("DETACHED", "Engine detached before frame was displayed", null)
@@ -124,7 +129,7 @@ class NativeDriverSupportPlugin :
                 }
 
                 // Fail if not found.
-                val found = selector.find(activity.window.decorView.rootView)
+                val found = findTargetView(activity, selector)
                 if (found == null) {
                     result.error("VIEW_NOT_FOUND", "No view was found", call.arguments())
                     return
@@ -148,6 +153,19 @@ class NativeDriverSupportPlugin :
                 result.notImplemented()
             }
         }
+    }
+
+    private fun findTargetView(
+        activity: Activity,
+        selector: NativeSelector
+    ): View? {
+        selector.find(activity.window.decorView.rootView)?.let { return it }
+        val controller = platformViewsController ?: return null
+        for (viewId in 0 until 64) {
+            val platformView = controller.getPlatformViewById(viewId) ?: continue
+            selector.find(platformView.rootView)?.let { return it }
+        }
+        return null
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
