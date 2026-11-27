@@ -200,6 +200,8 @@ void main() {
         3, 4, 5, // col 1
         6, 7, 8, // col 2
         9, 10, 11, // col 3 (in cached area)
+        12, 13, 14, // col 4 (in cached area)
+        15, 16, 17, // col 5 (in cached area)
       ]),
     );
     log.clear();
@@ -221,12 +223,15 @@ void main() {
     expect(
       log,
       equals(<int>[
+        24, 25, 26, // col 8 (in cached area)
+        27, 28, 29, // col 9 (in cached area)
         30, 31, 32, // col 10 (in cached area)
         33, 34, 35, // col 11
         36, 37, 38, // col 12
         39, 40, 41, // col 13
         42, 43, 44, // col 14
         45, 46, 47, // col 15 (in cached area)
+        48, 49, 50, // col 16 (in cached area)
       ]),
     );
     log.clear();
@@ -249,12 +254,13 @@ void main() {
     expect(
       log,
       equals(<int>[
-        6, 7, 8, // col2 (in cached area)
-        9, 10, 11, // col 3
-        12, 13, 14, // col 4
-        15, 16, 17, // col 5
-        18, 19, 20, // col 6
-        21, 22, 23, // col 7 (in cached area)
+        23, 22, 21, // (in cached area)
+        20, 19, 18,
+        17, 16, 15,
+        14, 13, 12,
+        11, 10, 9,
+        8, 7, 6, // (in cached area)
+        5, 4, 3, // (in cached area)
       ]),
     );
     log.clear();
@@ -300,6 +306,7 @@ void main() {
         8, 9, 10, 11, // row 2
         12, 13, 14, 15, // row 3 (in cached area)
         16, 17, 18, 19, // row 4 (in cached area)
+        20, 21, 22, 23, // row 5 (in cached area)
       ]),
     );
     for (var i = 0; i < 12; i++) {
@@ -335,6 +342,7 @@ void main() {
         8, 9, 10, 11, // row 2
         12, 13, 14, 15, // row 3 (in cached area)
         16, 17, 18, 19, // row 4 (in cached area)
+        20, 21, 22, 23, // row 5 (in cached area)
       ]),
     );
     log.clear();
@@ -399,6 +407,7 @@ void main() {
         8, 9, 10, 11, // row 2
         12, 13, 14, 15, // row 3 (in cached area)
         16, 17, 18, 19, // row 4 (in cached area)
+        20, 21, 22, 23, // row 5 (in cached area)
       ]),
     );
     for (var i = 0; i < 12; i++) {
@@ -434,6 +443,7 @@ void main() {
         8, 9, 10, 11, // row 2
         12, 13, 14, 15, // row 3 (in cached area)
         16, 17, 18, 19, // row 4 (in cached area)
+        20, 21, 22, 23, // row 5 (in cached area)
       ]),
     );
     log.clear();

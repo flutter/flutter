@@ -69,6 +69,21 @@ void main() {
                           children: <TestSemantics>[
                             TestSemantics(
                               flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                              label: 'Item 12a',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                              label: 'item 12b',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                               label: 'Item 13a',
                               textDirection: TextDirection.ltr,
                             ),
@@ -138,6 +153,21 @@ void main() {
                             TestSemantics(
                               flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                               label: 'item 19b',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                              label: 'Item 20a',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                              label: 'item 20b',
                               textDirection: TextDirection.ltr,
                             ),
                           ],
@@ -219,6 +249,16 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                          label: 'Item 12a',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                          label: 'item 12b',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                           label: 'Item 13a',
                           textDirection: TextDirection.ltr,
                         ),
@@ -261,6 +301,16 @@ void main() {
                         TestSemantics(
                           flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                           label: 'item 19b',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                          label: 'Item 20a',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                          label: 'item 20b',
                           textDirection: TextDirection.ltr,
                         ),
                       ],
@@ -331,6 +381,16 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                          label: 'Item 10',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                          label: 'Item 11',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                           label: 'Item 12',
                           textDirection: TextDirection.ltr,
                         ),
@@ -373,6 +433,16 @@ void main() {
                         TestSemantics(
                           flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                           label: 'Item 25',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                          label: 'Item 26',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                          label: 'Item 27',
                           textDirection: TextDirection.ltr,
                         ),
                       ],
@@ -445,6 +515,16 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                          label: 'Item 12a',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                          label: 'item 12b',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                           label: 'Item 13a',
                           textDirection: TextDirection.ltr,
                         ),
@@ -487,6 +567,16 @@ void main() {
                         TestSemantics(
                           flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                           label: 'item 19b',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                          label: 'Item 20a',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                          label: 'item 20b',
                           textDirection: TextDirection.ltr,
                         ),
                       ],
@@ -648,6 +738,16 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                          label: '-3a',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                          label: '-3b',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                           label: '-2a',
                           textDirection: TextDirection.ltr,
                         ),
@@ -690,6 +790,16 @@ void main() {
                         TestSemantics(
                           flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                           label: '4b',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                          label: '5a',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                          label: '5b',
                           textDirection: TextDirection.ltr,
                         ),
                       ],
