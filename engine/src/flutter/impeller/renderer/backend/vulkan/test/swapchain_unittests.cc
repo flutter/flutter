@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <atomic>
+
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "gtest/gtest.h"
 #include "impeller/core/formats.h"
@@ -140,7 +142,7 @@ TEST(SwapchainTest, CachesRenderPassOnSwapchainImage) {
 }
 
 TEST(SwapchainTest, NoFenceWaitAfterAcquireNextImageFailure) {
-  bool wait_for_fences_called = false;
+  std::atomic_bool wait_for_fences_called = false;
   auto const context =
       MockVulkanContextBuilder()
           .SetAcquireNextImageCallback(
@@ -162,7 +164,7 @@ TEST(SwapchainTest, NoFenceWaitAfterAcquireNextImageFailure) {
   EXPECT_FALSE(image);
 
   swapchain->AcquireNextDrawable();
-  EXPECT_FALSE(wait_for_fences_called);
+  EXPECT_FALSE(wait_for_fences_called.load());
 }
 
 TEST(SwapchainTest, SwapchainSizeChangeDoesNotAcquireDrawable) {

@@ -110,6 +110,8 @@ class MockDevice final {
     return get_pipeline_cache_data_callback_;
   }
 
+  std::function<std::remove_pointer_t<PFN_vkWaitForFences>> wait_for_fences;
+
   // Get the MockDevice wrapped by a VkDevice handle and check that the
   // VkDevice has not been destroyed.
   static MockDevice* Unwrap(VkDevice vk_device) {
@@ -460,9 +462,11 @@ VkResult vkCreateDevice(VkPhysicalDevice physicalDevice,
   MockPhysicalDevice* mock_physical_device =
       reinterpret_cast<MockPhysicalDevice*>(physicalDevice);
   *pDevice = reinterpret_cast<VkDevice>(mock_physical_device->CreateDevice());
-  // The mock state is thread-local, but vkGetPipelineCacheData is usually
-  // called on a worker thread, so store the callback on the device.
+  // The builder state is thread-local. Worker threads read these callbacks
+  // from the device.
   if (g_mock_vulkan_state) {
+    MockDevice::Unwrap(*pDevice)->wait_for_fences =
+        GetMockVulkanState().wait_for_fences_callback;
     MockDevice::Unwrap(*pDevice)->SetGetPipelineCacheDataCallback(
         GetMockVulkanState().get_pipeline_cache_data_callback);
   }
@@ -867,9 +871,9 @@ VkResult vkWaitForFences(VkDevice device,
                          const VkFence* pFences,
                          VkBool32 waitAll,
                          uint64_t timeout) {
-  if (g_mock_vulkan_state && GetMockVulkanState().wait_for_fences_callback) {
-    return GetMockVulkanState().wait_for_fences_callback(
-        device, fenceCount, pFences, waitAll, timeout);
+  const auto& callback = MockDevice::Unwrap(device)->wait_for_fences;
+  if (callback) {
+    return callback(device, fenceCount, pFences, waitAll, timeout);
   }
   return VK_SUCCESS;
 }

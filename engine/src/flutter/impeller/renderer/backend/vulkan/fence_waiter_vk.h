@@ -11,7 +11,6 @@
 #include <thread>
 #include <vector>
 
-#include "flutter/fml/closure.h"
 #include "impeller/renderer/backend/vulkan/device_holder_vk.h"
 #include "third_party/abseil-cpp/absl/status/status.h"
 
@@ -33,11 +32,12 @@ class FenceWaiterVK {
   /// @brief Invokes the [submit_callback] synchronously and adds the fence to
   ///        the wait set if it succeeds.  The [completion_callback] will be
   ///        called when the submitted command completes and the fence is
-  ///        signaled.
+  ///        signaled (true), or when the submission fails after device loss
+  ///        (false). A rejected submission does not invoke this callback.
   absl::Status AddFence(
       vk::UniqueFence fence,
       const std::function<absl::Status(vk::Fence)>& submit_callback,
-      fml::closure completion_callback);
+      std::function<void(bool signaled)> completion_callback);
 
  private:
   friend class ContextVK;
@@ -48,12 +48,14 @@ class FenceWaiterVK {
   std::condition_variable wait_set_cv_;
   WaitSet wait_set_;
   bool terminate_ = false;
+  bool device_lost_ = false;
 
   explicit FenceWaiterVK(std::weak_ptr<DeviceHolderVK> device_holder);
 
   void Main();
 
   bool Wait();
+  void DrainAfterDeviceLoss(const vk::Device& device);
   void WaitUntilEmpty();
 
   FenceWaiterVK(const FenceWaiterVK&) = delete;

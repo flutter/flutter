@@ -80,17 +80,18 @@ absl::Status CommandQueueVK::Submit(
   uint64_t submission_id = tracker->RecordSubmission();
 
   // This will be called later when the command completes.
-  auto fence_complete_callback = [completion_callback, tracker, submission_id,
-                                  tracked_objects =
-                                      std::move(tracked_objects)]() mutable {
-    // Ensure tracked objects are destructed before calling any final
-    // callbacks.
-    tracked_objects.clear();
-    tracker->RecordCompletion(submission_id);
-    if (completion_callback) {
-      completion_callback(CommandBuffer::Status::kCompleted);
-    }
-  };
+  auto fence_complete_callback =
+      [completion_callback, tracker, submission_id,
+       tracked_objects = std::move(tracked_objects)](bool signaled) mutable {
+        // Ensure tracked objects are destructed before calling any final
+        // callbacks.
+        tracked_objects.clear();
+        tracker->RecordCompletion(submission_id);
+        if (completion_callback) {
+          completion_callback(signaled ? CommandBuffer::Status::kCompleted
+                                       : CommandBuffer::Status::kError);
+        }
+      };
 
   // Submit will proceed, call callback with true when it is done and do not
   // call when `reset` is collected.
