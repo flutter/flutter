@@ -145,6 +145,45 @@ TEST_P(TextContentsTest, SimpleComputeVertexData) {
   EXPECT_RECT_NEAR(uv_rect, Rect::MakeXYWH(1.0, 1.0, 52, 52));
 }
 
+// Glyphs that aren't in the atlas, for example because they didn't fit, are
+// skipped, and only the glyphs that were written are reported so that the
+// uninitialized remainder of the vertex buffer isn't drawn.
+TEST_P(TextContentsTest, ComputeVertexDataSkipsGlyphsMissingFromAtlas) {
+  std::shared_ptr<TypographerContext> context = TypographerContextSkia::Make();
+  std::shared_ptr<GlyphAtlasContext> atlas_context =
+      context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
+  std::shared_ptr<HostBuffer> data_host_buffer = HostBuffer::Create(
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+  ASSERT_TRUE(context && context->IsValid());
+
+  // Both frames must use the same typeface so that the font is in the atlas.
+  auto mapping = flutter::testing::OpenFixtureAsSkData("ahem.ttf");
+  ASSERT_TRUE(mapping);
+  SkFont sk_font(txt::GetDefaultFontManager()->makeFromData(mapping), 50);
+
+  // The atlas only contains "1".
+  std::shared_ptr<GlyphAtlas> atlas = CreateGlyphAtlas(
+      *GetContext(), context.get(), *data_host_buffer,
+      GlyphAtlas::Type::kAlphaBitmap, Matrix(), atlas_context,
+      MakeTextFrameFromTextBlobSkia(SkTextBlob::MakeFromString("1", sk_font)),
+      /*offset=*/{0, 0});
+  ASSERT_TRUE(atlas && atlas->IsValid());
+
+  std::shared_ptr<TextFrame> text_frame =
+      MakeTextFrameFromTextBlobSkia(SkTextBlob::MakeFromString("212", sk_font));
+  std::vector<GlyphAtlasPipeline::VertexShader::PerVertexData> data(3 * 4);
+  size_t written_glyph_count =
+      TextContents::ComputeVertexData(data.data(),
+                                      /*entity_transform=*/Matrix(),
+                                      /*frame=*/text_frame,
+                                      /*position=*/Point(0, 0),
+                                      /*screen_transform=*/Matrix(),
+                                      /*glyph_properties=*/GlyphProperties{},
+                                      /*atlas=*/atlas);
+  EXPECT_EQ(written_glyph_count, 1u);
+}
+
 TEST_P(TextContentsTest, SimpleComputeVertexData2x) {
 #ifndef FML_OS_MACOSX
   GTEST_SKIP() << "Results aren't stable across linux and macos.";
