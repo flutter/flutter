@@ -35,11 +35,11 @@ that on an Android device like so:
 > `lib/library/file/class_name.member_name.n.dart`
 
 The naming scheme for the files is similar to the hierarchy under
-[packages/flutter/lib/src](../../packages/flutter/lib/src), except that the
+[packages/flutter/lib/src](../../lib/src), except that the
 files are represented as directories (without the `.dart` suffix), and each
 sample in the file is a separate file in that directory. So, for the example
 above, where the examples are from the
-[packages/flutter/lib/src/animation/curves.dart](../../packages/flutter/lib/src/animation/curves.dart)
+[packages/flutter/lib/src/animation/curves.dart](../../lib/src/animation/curves.dart)
 file, the `Curve2D` class, the first sample (hence the index "0") for that
 symbol resides in the file named
 [lib/animation/curves/curve2_d.0.dart](lib/animation/curves/curve2_d.0.dart).

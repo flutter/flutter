@@ -172,7 +172,7 @@ The reviewer of the PR should first:
 
 Only tech leads (currently limited to Googlers) are permitted to add the
 `test-exempt` label. If you're not sure who the tech lead is for the changed area,
-reach out on the [Discord](./contributing/Chat.md) #hackers channel.
+reach out on the [Discord](./Chat.md) #hackers channel.
 
 For PRs that are authored or reviewed by a tech lead, that tech lead is responsible
 for ensuring that a second tech lead reviews the PR and approves the test exemption.

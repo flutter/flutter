@@ -501,7 +501,7 @@ hardware, the test suite implements a two-layered recovery mechanism:
 * **Mechanism**:
   * **On Host (CI)**: If `flutter drive` fails due to a blank screenshot or
     fatal graphics error in logcat, the host suite runner
-    ([`run_android_hardware_smoke_tests.dart`](../../../bots/suite_runners/run_android_hardware_smoke_tests.dart))
+    ([`run_android_hardware_smoke_tests.dart`](../../bots/suite_runners/run_android_hardware_smoke_tests.dart))
     restarts Android userspace (`adb shell stop` and `adb shell start`) so
     `SurfaceFlinger` rebinds cleanly against the active host renderer before
     retrying (up to 2 attempts total). If the target app crashes during native

@@ -19,7 +19,7 @@ All of the Android SDK/NDK versions noted in `gradle_utils.dart`
 (`compileSdkVersion`, `minSdkVersion`, `targetSdkVersion`, `ndkVersion`)
 versions should match the values in Flutter Gradle Plugin (`FlutterExtension`),
 so updating any of these versions also requires an update in
-[FlutterExtension](../../../gradle/src/main/kotlin/FlutterExtention.kt).
+[FlutterExtension](../../../gradle/src/main/kotlin/FlutterExtension.kt).
 
 When updating the Android `compileSdkVersion`, `minSdkVersion`, or
 `targetSdkVersion`, make sure that:
@@ -78,7 +78,7 @@ necessary steps to ensure we are testing this version in CI.
 Gradle version is up-to-date.
 - Update the `_javaGradleCompatList` that contains the Java/Gradle
 compatibility information known to the tool.
-- Update the test cases in [gradle_utils_test.dart](../../..test/general.shard/android/gradle_utils_test.dart) that test compatibility between Java and Gradle versions
+- Update the test cases in [gradle_utils_test.dart](../../../test/general.shard/android/gradle_utils_test.dart) that test compatibility between Java and Gradle versions
 (relevant tests should fail if you do not fix them preemptively, but should also
 be marked inline).
 - Update the test cases in [create_test.dart](../../../test/commands.shard/permeable/create_test.dart) that test for a warning for Java/Gradle incompatibilities as needed
