@@ -6,6 +6,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device_discovery.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
@@ -82,34 +83,54 @@ void main() {
     expect(await androidDevices.getDiagnostics(), isEmpty);
   });
 
-  test('AndroidDevices throwsToolExit on failing adb', () {
-    final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      const FakeCommand(
+  for (final (description, command, expectedDetails) in const <(String, FakeCommand, String)>[
+    (
+      'on failing adb',
+      FakeCommand(
         command: <String>['adb', 'devices', '-l'],
         exitCode: 1,
         stderr: '<stderr from adb>',
       ),
-    ]);
-    final androidDevices = AndroidDevices(
-      androidSdk: FakeAndroidSdk(),
-      logger: BufferLogger.test(),
-      androidWorkflow: androidWorkflow,
-      processManager: processManager,
-      fileSystem: MemoryFileSystem.test(),
-      platform: FakePlatform(),
-      userMessages: UserMessages(),
-    );
-
-    expect(
-      androidDevices.pollingGetDevices(),
-      throwsToolExit(
-        message:
-            'Unable to run "adb", check your Android SDK installation and ANDROID_HOME environment variable: adb\n'
-            'Error details: Process exited abnormally with exit code 1:\n'
-            '<stderr from adb>',
+      'Process exited abnormally with exit code 1:\n<stderr from adb>',
+    ),
+    (
+      'when adb fails to start',
+      FakeCommand(
+        command: <String>['adb', 'devices', '-l'],
+        exception: ProcessException('adb', <String>['devices', '-l'], 'Failed to start adb.'),
       ),
+      'Failed to start adb.',
+    ),
+  ]) {
+    test(
+      'AndroidDevices returns empty device list and provides diagnostics $description',
+      () async {
+        final logger = BufferLogger.test();
+        final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          command,
+          command,
+        ]);
+        final androidDevices = AndroidDevices(
+          androidSdk: FakeAndroidSdk(),
+          logger: logger,
+          androidWorkflow: androidWorkflow,
+          processManager: processManager,
+          fileSystem: MemoryFileSystem.test(),
+          platform: FakePlatform(),
+          userMessages: UserMessages(),
+        );
+
+        final expectedDiagnostic =
+            'Unable to run "adb", check your Android SDK installation and ANDROID_HOME environment variable: adb\n'
+            'Error details: $expectedDetails';
+
+        expect(await androidDevices.pollingGetDevices(), isEmpty);
+        expect(logger.traceText, contains(expectedDiagnostic));
+        expect(await androidDevices.getDiagnostics(), <String>[expectedDiagnostic]);
+        expect(processManager, hasNoRemainingExpectations);
+      },
     );
-  });
+  }
 
   test('AndroidDevices is disabled if feature is disabled', () {
     final androidDevices = AndroidDevices(

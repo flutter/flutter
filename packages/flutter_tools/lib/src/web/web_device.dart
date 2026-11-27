@@ -187,6 +187,45 @@ abstract class ChromiumDevice extends WebDevice {
   Future<void> dispose() async {
     await Future.wait(<Future<void>>[?_logReader?.dispose(), ?portForwarder?.dispose()]);
   }
+
+  static final _windowsVersionDirectoryPattern = RegExp(r'^\d+\.\d+\.\d+\.\d+$');
+
+  /// Attempts to read the Chromium browser version from the versioned
+  /// subdirectory alongside the browser executable on Windows
+  /// (e.g. `...\Application\131.0.2903.70\`), avoiding spawning `reg.exe`.
+  String? _readVersionFromApplicationDirectory() {
+    final Directory applicationDir = _fileSystem.file(chromeLauncher.findExecutable()).parent;
+    if (!applicationDir.existsSync()) {
+      return null;
+    }
+    String? highestVersion;
+    List<int>? highestParts;
+    for (final FileSystemEntity entity in applicationDir.listSync()) {
+      if (entity is! Directory) {
+        continue;
+      }
+      final String basename = _fileSystem.path.basename(entity.path);
+      if (!_windowsVersionDirectoryPattern.hasMatch(basename)) {
+        continue;
+      }
+      final List<int> parts = basename.split('.').map(int.parse).toList();
+      if (highestParts == null || _compareVersionParts(parts, highestParts) > 0) {
+        highestVersion = basename;
+        highestParts = parts;
+      }
+    }
+    return highestVersion;
+  }
+
+  static int _compareVersionParts(List<int> a, List<int> b) {
+    for (var i = 0; i < a.length; i++) {
+      final int comparison = a[i].compareTo(b[i]);
+      if (comparison != 0) {
+        return comparison;
+      }
+    }
+    return 0;
+  }
 }
 
 /// The Google Chrome browser based on Chromium.
@@ -218,6 +257,10 @@ class GoogleChromeDevice extends ChromiumDevice {
     // See https://bugs.chromium.org/p/chromium/issues/detail?id=158372
     var version = 'unknown';
     if (_platform.isWindows) {
+      final String? directoryVersion = _readVersionFromApplicationDirectory();
+      if (directoryVersion != null) {
+        return 'Google Chrome $directoryVersion';
+      }
       if (_processManager.canRun('reg')) {
         final ProcessResult result = await _processManager.run(<String>[
           r'reg',
@@ -277,6 +320,13 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
   late final Future<String> sdkNameAndVersion = _getSdkNameAndVersion();
 
   Future<String> _getSdkNameAndVersion() async {
+    if (!await isSupported()) {
+      return '';
+    }
+    final String? directoryVersion = _readVersionFromApplicationDirectory();
+    if (directoryVersion != null) {
+      return 'Microsoft Edge $directoryVersion';
+    }
     if (_processManager.canRun('reg')) {
       final ProcessResult result = await _processManager.run(<String>[
         r'reg',
