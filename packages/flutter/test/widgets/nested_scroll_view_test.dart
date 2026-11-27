@@ -21,6 +21,9 @@ class _PhysicsScrollBehavior extends ScrollBehavior {
 
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) => physics;
+
+  @override
+  bool shouldNotify(_PhysicsScrollBehavior oldDelegate) => physics != oldDelegate.physics;
 }
 
 class _RecordingBallisticPhysics extends ClampingScrollPhysics {
@@ -209,6 +212,102 @@ Widget buildTest({
   );
 }
 
+void _testDetachedBallisticGroup() {
+  void testFling(double velocity, {bool holdAtEdge = false}) {
+    testWidgets('NestedScrollView stops a detached group at the header edge '
+        '(velocity: $velocity, hold: $holdAtEdge)', (WidgetTester tester) async {
+      final key = GlobalKey<NestedScrollViewState>();
+      final notifications = <ScrollNotification>[];
+      var taps = 0;
+      Widget fixture({required bool showLists}) => NotificationListener<ScrollNotification>(
+        onNotification: (ScrollNotification notification) {
+          if (notification.depth == 0) {
+            notifications.add(notification);
+          }
+          return false;
+        },
+        child: _buildBallisticTestWidget(
+          key,
+          physics: const BouncingScrollPhysics(),
+          body: showLists
+              ? Row(
+                  children: <Widget>[
+                    for (var i = 0; i < 2; i++)
+                      Expanded(
+                        child: ListView(
+                          primary: true,
+                          children: const <Widget>[SizedBox(height: 2000)],
+                        ),
+                      ),
+                  ],
+                )
+              : GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => taps++,
+                  child: const SizedBox.expand(),
+                ),
+        ),
+      );
+
+      await tester.pumpWidget(fixture(showLists: true));
+      final ScrollPosition outer = key.currentState!.outerController.position;
+      expect(key.currentState!.innerController.positions, hasLength(2));
+      outer.jumpTo((outer.minScrollExtent + outer.maxScrollExtent) / 2);
+      await tester.pumpAndSettle();
+      final double target = velocity > 0 ? outer.maxScrollExtent : outer.minScrollExtent;
+      _flingBallisticBody(
+        key.currentState!.innerController.positions.first,
+        velocity,
+        update: true,
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 16));
+      await tester.pumpWidget(fixture(showLists: false));
+      expect(key.currentState!.innerController.hasClients, isFalse);
+      expect(outer.isScrollingNotifier.value, isTrue);
+      expect(outer.pixels, isNot(target));
+      notifications.clear();
+
+      ScrollHoldController? hold;
+      void interrupt() {
+        if (outer.pixels == target) {
+          hold = outer.hold(() {});
+        }
+      }
+
+      if (holdAtEdge) {
+        outer.addListener(interrupt);
+      }
+      for (var frame = 0; frame < 30 && outer.pixels != target; frame++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(outer.pixels, target);
+      if (holdAtEdge) {
+        outer.removeListener(interrupt);
+        expect(outer.activity, isA<HoldScrollActivity>());
+        hold!.cancel();
+      } else {
+        expect(outer.isScrollingNotifier.value, isFalse);
+        expect(outer.activity!.velocity, 0.0);
+        expect(outer.activity!.shouldIgnorePointer, isFalse);
+        expect(notifications.whereType<ScrollEndNotification>(), hasLength(1));
+        expect(
+          notifications.whereType<UserScrollNotification>().single.direction,
+          ScrollDirection.idle,
+        );
+        await tester.tapAt(const Offset(100, 300));
+        expect(taps, 1);
+      }
+      await tester.pumpAndSettle();
+      expect(tester.binding.transientCallbackCount, 0);
+    });
+  }
+
+  testFling(1000.0);
+  testFling(-1000.0);
+  testFling(1000.0, holdAtEdge: true);
+}
+
 // Uses only widgets-layer building blocks so ballistic coverage does not
 // depend on Material defaults or SliverAppBar layout.
 Widget _buildBallisticTestWidget(
@@ -331,6 +430,7 @@ class _KeepAliveBallisticBodyState extends State<_KeepAliveBallisticBody>
 }
 
 void main() {
+  _testBallisticOffsets();
   testWidgets('NestedScrollView starts the header at the settled recovery time', (
     WidgetTester tester,
   ) async {
@@ -2609,6 +2709,8 @@ void main() {
     outer = key.currentState!.outerController.position;
     expect(outer.pixels, before);
     expect(outer.physics.createBallisticSimulation(outer, 1000), isA<BouncingScrollSimulation>());
+    final ScrollPosition inner = key.currentState!.innerController.position;
+    expect(inner.physics.createBallisticSimulation(inner, 1000), isA<BouncingScrollSimulation>());
     await tester.pump(const Duration(milliseconds: 16));
     expect(outer.pixels, greaterThan(before));
     await tester.pumpAndSettle();
@@ -3087,6 +3189,30 @@ void main() {
     });
   }
 
+  testWidgets('A bodyless header clamps immediately when released after shrinking', (
+    WidgetTester tester,
+  ) async {
+    final key = GlobalKey<NestedScrollViewState>();
+    Widget fixture(double extent) => _buildBallisticTestWidget(
+      key,
+      physics: const BouncingScrollPhysics(),
+      headerExtent: extent,
+      body: const SizedBox.expand(),
+    );
+    await tester.pumpWidget(fixture(340.0));
+    final ScrollPosition outer = key.currentState!.outerController.position;
+    expect(key.currentState!.innerController.hasClients, isFalse);
+    outer.jumpTo(180.0);
+    _flingBallisticBody(outer, 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+    await tester.pumpWidget(fixture(80.0));
+    expect(outer.pixels, greaterThan(outer.maxScrollExtent));
+    outer.hold(() {}).cancel();
+    expect(outer.pixels, outer.maxScrollExtent);
+    expect(outer.isScrollingNotifier.value, isFalse);
+  });
+
   testWidgets('NestedScrollView keeps a hold started when the header reaches its boundary', (
     WidgetTester tester,
   ) async {
@@ -3130,6 +3256,8 @@ void main() {
     hold!.cancel();
     await tester.pumpAndSettle();
   });
+
+  _testDetachedBallisticGroup();
 
   const bouncingFirstBody = true;
   testWidgets('NestedScrollView preserves a waiting body activity during a fling '
@@ -3240,6 +3368,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.hasRunningAnimations, isFalse);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}));
+
+  _testOuterBoundaryConditions();
 
   testWidgets('ScrollDirection test', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/107101
@@ -6767,6 +6897,109 @@ double appBarHeight(WidgetTester tester) =>
 
 enum _BodyLength { short, long }
 
+class _HalfDragPhysics extends ScrollPhysics {
+  const _HalfDragPhysics({super.parent});
+
+  @override
+  _HalfDragPhysics applyTo(ScrollPhysics? ancestor) =>
+      _HalfDragPhysics(parent: buildParent(ancestor));
+
+  @override
+  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) =>
+      super.applyPhysicsToUserOffset(position, offset) / 2.0;
+}
+
+class _RejectDragFractionPhysics extends ScrollPhysics {
+  const _RejectDragFractionPhysics(this.fraction, {super.parent});
+
+  final double fraction;
+
+  @override
+  _RejectDragFractionPhysics applyTo(ScrollPhysics? ancestor) =>
+      _RejectDragFractionPhysics(fraction, parent: buildParent(ancestor));
+
+  @override
+  double applyBoundaryConditions(ScrollMetrics position, double value) =>
+      (value - position.pixels) * fraction;
+}
+
+void _testOuterBoundaryConditions() {
+  void dragUp(ScrollPosition position) {
+    final Drag drag = position.drag(DragStartDetails(), () {});
+    drag.update(
+      DragUpdateDetails(
+        globalPosition: Offset.zero,
+        primaryDelta: -40.0,
+        delta: const Offset(0.0, -40.0),
+      ),
+    );
+    drag.end(DragEndDetails(primaryVelocity: 0.0));
+  }
+
+  for (final inherited in <bool>[true, false]) {
+    testWidgets('outer scroll behavior applies drag physics once (inherited: $inherited)', (
+      WidgetTester tester,
+    ) async {
+      final key = GlobalKey<NestedScrollViewState>();
+      const behavior = _PhysicsScrollBehavior(_HalfDragPhysics());
+      await tester.pumpWidget(
+        _buildBallisticTestWidget(
+          key,
+          inheritedBehavior: inherited ? behavior : null,
+          scrollBehavior: inherited ? null : behavior,
+          body: const SizedBox.expand(),
+        ),
+      );
+      final ScrollPosition outer = key.currentState!.outerController.position;
+      dragUp(outer);
+      expect(outer.pixels, 20.0);
+      await tester.pumpAndSettle();
+    });
+  }
+
+  for (final fraction in <double>[1.0, 0.5]) {
+    testWidgets('custom outer boundary conditions pass rejected drag to the body ($fraction)', (
+      WidgetTester tester,
+    ) async {
+      final key = GlobalKey<NestedScrollViewState>();
+      await tester.pumpWidget(
+        _buildBallisticTestWidget(key, physics: _RejectDragFractionPhysics(fraction)),
+      );
+      final ScrollPosition outer = key.currentState!.outerController.position;
+      final ScrollPosition inner = key.currentState!.innerController.position;
+      dragUp(inner);
+      expect(outer.pixels, 40.0 * (1.0 - fraction));
+      expect(inner.pixels, 40.0 * fraction);
+      await tester.pumpAndSettle();
+    });
+  }
+
+  testWidgets('custom outer boundary conditions compose with both header extents', (
+    WidgetTester tester,
+  ) async {
+    final key = GlobalKey<NestedScrollViewState>();
+    await tester.pumpWidget(
+      _buildBallisticTestWidget(key, physics: const _RejectDragFractionPhysics(0.5)),
+    );
+    final ScrollPosition outer = key.currentState!.outerController.position;
+    final ScrollMetrics middle = outer.copyWith(pixels: 100.0);
+    expect(middle.minScrollExtent, 0.0);
+    expect(middle.maxScrollExtent, 200.0);
+    for (final direction in <double>[-1.0, 1.0]) {
+      // The custom rejection alone keeps the proposed movement in range.
+      expect(
+        outer.physics.applyBoundaryConditions(middle, middle.pixels + direction * 150.0),
+        direction * 75.0,
+      );
+      // Even after the custom rejection, the proposal crosses the header edge.
+      expect(
+        outer.physics.applyBoundaryConditions(middle, middle.pixels + direction * 250.0),
+        direction * 150.0,
+      );
+    }
+  });
+}
+
 class TestHeader extends SliverPersistentHeaderDelegate {
   const TestHeader({this.key, required this.minExtent, required this.maxExtent});
   final Key? key;
@@ -6852,6 +7085,189 @@ class _TestLayoutExtentIsNegative extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+void _testBallisticOffsets() {
+  for (final (double header, int count) in <(double, int)>[(100, 1), (200, 2)]) {
+    testWidgets('NestedScrollView applies an immediately settled body recovery ($count bodies)', (
+      WidgetTester tester,
+    ) async {
+      final key = GlobalKey<NestedScrollViewState>();
+      await tester.pumpWidget(
+        _buildBallisticTestWidget(
+          key,
+          physics: const BouncingScrollPhysics(),
+          body: Row(
+            children: <Widget>[
+              for (var index = 0; index < count; index += 1)
+                Expanded(
+                  child: ListView(
+                    primary: true,
+                    physics: const BouncingScrollPhysics(),
+                    children: const <Widget>[SizedBox(height: 620)],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+      final ScrollPosition outer = key.currentState!.outerController.position;
+      final ScrollPosition inner = key.currentState!.innerController.positions.first;
+      outer.jumpTo(header);
+      await tester.pumpAndSettle();
+
+      for (final distance in <double>[0.01, 1e-14]) {
+        for (final below in <bool>[true, false]) {
+          final double edge = below ? inner.minScrollExtent : inner.maxScrollExtent;
+          inner.setPixels(below ? edge - distance : edge + distance);
+          expect(inner.outOfRange, isTrue);
+          double? lastUpdate;
+          void recordUpdate() => lastUpdate = inner.pixels;
+          inner.addListener(recordUpdate);
+          inner.hold(() {}).cancel();
+          await tester.pumpAndSettle();
+          inner.removeListener(recordUpdate);
+          expect(lastUpdate, edge);
+          expect(inner.pixels, edge);
+          expect(inner.isScrollingNotifier.value, isFalse);
+          expect(outer.pixels, header);
+        }
+      }
+    });
+  }
+
+  testWidgets('NestedScrollView preserves a tiny overscroll when the body declines recovery', (
+    WidgetTester tester,
+  ) async {
+    final key = GlobalKey<NestedScrollViewState>();
+    await tester.pumpWidget(
+      _buildBallisticTestWidget(
+        key,
+        bodyPhysics: const _NoBallisticPhysics(parent: BouncingScrollPhysics()),
+      ),
+    );
+    final ScrollPosition outer = key.currentState!.outerController.position;
+    final ScrollPosition inner = key.currentState!.innerController.position;
+    outer.jumpTo(outer.maxScrollExtent);
+    inner.setPixels(-1e-15);
+    inner.hold(() {}).cancel();
+    await tester.pumpAndSettle();
+    expect(inner.pixels, -1e-15);
+    expect(inner.isScrollingNotifier.value, isFalse);
+  });
+
+  for (final physics in <ScrollPhysics>[
+    const BouncingScrollPhysics(),
+    const ClampingScrollPhysics(),
+  ]) {
+    for (final minimum in <double>[0, -100.25]) {
+      testWidgets(
+        'NestedScrollView ballistic offsets reach the exact body minimum ($physics, $minimum)',
+        (WidgetTester tester) async {
+          final key = GlobalKey<NestedScrollViewState>();
+          const center = ValueKey<String>('center');
+          bool? bodyScrolled;
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: NestedScrollView(
+                key: key,
+                physics: physics,
+                headerSliverBuilder: (context, innerBoxIsScrolled) {
+                  bodyScrolled = innerBoxIsScrolled;
+                  return const <Widget>[SliverToBoxAdapter(child: SizedBox(height: 200))];
+                },
+                body: CustomScrollView(
+                  primary: true,
+                  center: center,
+                  physics: physics,
+                  slivers: <Widget>[
+                    SliverToBoxAdapter(child: SizedBox(height: -minimum)),
+                    const SliverToBoxAdapter(key: center, child: SizedBox(height: 2000)),
+                  ],
+                ),
+              ),
+            ),
+          );
+          final ScrollPosition outer = key.currentState!.outerController.position;
+          final ScrollPosition inner = key.currentState!.innerController.position;
+          outer.jumpTo(outer.maxScrollExtent);
+          expect(inner.minScrollExtent, minimum);
+          inner.setPixels(minimum == 0 ? 1e-15 : minimum + 0.1);
+          await tester.pumpAndSettle();
+          expect(bodyScrolled, isTrue);
+          _flingBallisticBody(inner, -1500.0);
+          await tester.pumpAndSettle();
+          expect(outer.pixels, outer.minScrollExtent);
+          expect(inner.pixels, inner.minScrollExtent);
+          expect(bodyScrolled, isFalse);
+        },
+      );
+    }
+  }
+
+  testWidgets('NestedScrollView ballistic offsets preserve the body at a forward header handoff', (
+    WidgetTester tester,
+  ) async {
+    final key = GlobalKey<NestedScrollViewState>();
+    await tester.pumpWidget(
+      _buildBallisticTestWidget(
+        key,
+        physics: const ClampingScrollPhysics(),
+        bodyPhysics: const _NoBallisticPhysics(),
+      ),
+    );
+    final ScrollPosition outer = key.currentState!.outerController.position;
+    final ScrollPosition inner = key.currentState!.innerController.position;
+    const offset = 80.3;
+    outer.jumpTo(180.2);
+    inner.setPixels(offset);
+    _flingBallisticBody(inner, 1000.0);
+    await tester.pumpAndSettle();
+    expect(outer.pixels, outer.maxScrollExtent);
+    expect(inner.pixels, offset);
+  });
+
+  for (final count in <int>[1, 2]) {
+    testWidgets(
+      'NestedScrollView ballistic offsets honor zero-velocity header snapping ($count bodies)',
+      (WidgetTester tester) async {
+        final key = GlobalKey<NestedScrollViewState>();
+        await tester.pumpWidget(
+          _buildBallisticTestWidget(
+            key,
+            physics: const PageScrollPhysics(),
+            body: Row(
+              children: <Widget>[
+                for (var index = 0; index < count; index += 1)
+                  Expanded(
+                    child: ListView(
+                      primary: true,
+                      children: const <Widget>[SizedBox(height: 2000)],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+        final ScrollPosition outer = key.currentState!.outerController.position;
+        final Iterable<ScrollPosition> bodies = key.currentState!.innerController.positions;
+        final Drag drag = outer.drag(DragStartDetails(), () {});
+        drag.update(
+          DragUpdateDetails(
+            primaryDelta: -100,
+            delta: const Offset(0, -100),
+            globalPosition: Offset.zero,
+          ),
+        );
+        expect(outer.pixels, 100);
+        drag.end(DragEndDetails(primaryVelocity: 0));
+        await tester.pumpAndSettle();
+        expect(outer.pixels, outer.minScrollExtent);
+        expect(bodies.map((body) => body.pixels), everyElement(0));
+      },
     );
   }
 }
