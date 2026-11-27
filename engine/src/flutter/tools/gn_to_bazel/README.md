@@ -451,7 +451,10 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    the caller's block into `invoker` and runs the body with `target_name`, so
    the targets it defines are ordinary targets (the first one named
    `target_name` takes the invocation's comments). `forward_variables_from`,
-   `target(type, name)`, scope values (`x.member`, `defined(x.member)`),
+   `target(type, name)`, scope values (`x.member`, `defined(x.member)`; a
+   member an `invoker` lacks is read from the scopes around the invocation,
+   as GN reads it, and so is a name given to `forward_variables_from`, whose
+   `"*"` takes the caller's block alone),
    `get_path_info(p, "abspath")` (of a path or a list of them; `"extension"`,
    `"name"` and `"file"` of a path), `string_replace()`, a list's element by
    index (`list[i]`, nested lists included) and its comparison with `""`,

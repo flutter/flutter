@@ -2274,6 +2274,53 @@ my_other_lib("y") {
         expect(y.variables.containsKey('missing'), isFalse);
       });
 
+      test('reads an invoker member through the scopes that enclose the invocation', () {
+        // GN looks `invoker.x` up in the invocation's block and then in the
+        // scopes around the invocation (Scope::GetValue; the invoker keeps
+        // its containing scope): impeller's shaders_vk.gni reads
+        // impeller_shaders' own `metal_version` that way. With names,
+        // forward_variables_from() reads the same way; with "*" it takes the
+        // block's own variables alone.
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'lib/templates.gni': '''
+template("inner") {
+  source_set(target_name) {
+    forward_variables_from(invoker, [ "sources", "testonly" ])
+    defines = []
+    if (defined(invoker.flavour)) {
+      defines += [ "FLAVOUR_" + invoker.flavour ]
+    }
+    if (defined(invoker.absent)) {
+      defines += [ "ABSENT" ]
+    }
+    forward_variables_from(invoker, "*", [ "sources", "testonly" ])
+  }
+}
+
+template("outer") {
+  flavour = "vanilla"
+  testonly = true
+  inner(target_name) {
+    sources = invoker.sources
+  }
+}
+''',
+          'a/BUILD.gn': '''
+import("//lib/templates.gni")
+
+outer("x") {
+  sources = [ "a.cc" ]
+}
+''',
+        });
+        final GnFileEvaluation evaluation = evaluateIn(tree, '//a/BUILD.gn');
+        final GnTarget x = evaluation.targets.single;
+        expect(strings(x, 'sources'), <String>['a.cc']);
+        expect(strings(x, 'defines'), <String>['FLAVOUR_vanilla']);
+        expect(x.variables.containsKey('testonly'), isTrue);
+        expect(x.variables.containsKey('flavour'), isFalse);
+      });
+
       test('defines target_name in the invocation block, as GN does', () {
         // impeller/display_list's local templates read invoker.target_name
         // (GN's FillTargetBlockScope sets it in the block's scope); the

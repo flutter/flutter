@@ -677,10 +677,23 @@ final class GnExpandedString extends GnValue {
 
 /// A GN scope held in a variable: `x = { a = [...] }`, or a template's
 /// `invoker`. Members are read as `x.a`.
+///
+/// A member an `invoker` does not have itself is read from the scopes that
+/// enclose the template's invocation: GN's Scope::GetValue searches a
+/// scope's containing scopes, and an invocation's scope keeps its own (a
+/// `{ ... }` literal's is detached). So `defined(invoker.x)` holds, and
+/// `invoker.x` reads, when the invocation's block does not set `x` but the
+/// file or the template around it does: shaders_vk.gni's
+/// `invoker.metal_version` is impeller_shaders' own variable.
 final class GnScopeValue extends GnValue {
-  const GnScopeValue(this.variables);
+  const GnScopeValue(this.variables) : _enclosing = null;
+
+  const GnScopeValue._invoker(this.variables, this._enclosing);
 
   final Map<String, GnVariable> variables;
+
+  /// The scope a template's invocation stands in, for an `invoker`.
+  final _Scope? _enclosing;
 
   @override
   String toString() => '{${variables.keys.join(', ')}}';
@@ -2346,7 +2359,7 @@ final class _Evaluator {
     bodyScope.variables['invoker'] = GnVariable('invoker', isList: false)
       ..assignments.add(
         GnAssignment(call.location, Condition.always, '=', <GnValue>[
-          GnScopeValue(invokerScope.variables),
+          GnScopeValue._invoker(invokerScope.variables, scope),
         ]),
       );
     bodyScope.variables['target_name'] = GnVariable('target_name', isList: false)
@@ -2370,7 +2383,7 @@ final class _Evaluator {
     if (fromNode is! GnIdentifier) {
       throw GnError(fromNode.location, 'forward_variables_from() needs a scope variable');
     }
-    final Map<String, GnVariable> from = _scopeVariables(fromNode.name, fromNode.location, scope);
+    final GnScopeValue from = _scopeValue(fromNode.name, fromNode.location, scope);
     final Set<String> excluded = call.args.length == 3
         ? _stringList(call.args[2], scope).toSet()
         : const <String>{};
@@ -2378,7 +2391,7 @@ final class _Evaluator {
     if (what is GnLiteral && what.isString && what.stringValue == '*') {
       // "*": everything set directly on the scope, clobbering -- except the
       // invocation's `target_name`, which the body defines itself.
-      for (final MapEntry<String, GnVariable> e in from.entries) {
+      for (final MapEntry<String, GnVariable> e in from.variables.entries) {
         if (!excluded.contains(e.key) && e.key != 'target_name') {
           scope.variables[e.key] = _copy(e.value, forwarded: true);
         }
@@ -2389,7 +2402,10 @@ final class _Evaluator {
       if (excluded.contains(name)) {
         continue;
       }
-      final GnVariable? variable = from[name];
+      // A name the scope does not set itself is found in the scopes that
+      // enclose an invocation, as GN's ForwardValuesFromList finds it
+      // (Scope::GetValue); "*" above takes the scope's own values alone.
+      final GnVariable? variable = from.variables[name] ?? from._enclosing?.lookup(name);
       if (variable == null) {
         continue;
       }
@@ -2419,15 +2435,31 @@ final class _Evaluator {
     ];
   }
 
-  /// The variables of the scope held by [name] (`invoker`, or a variable
-  /// assigned a `{ ... }` block).
-  Map<String, GnVariable> _scopeVariables(String name, GnLocation location, _Scope scope) {
+  /// The scope held by [name] (`invoker`, or a variable assigned a
+  /// `{ ... }` block).
+  GnScopeValue _scopeValue(String name, GnLocation location, _Scope scope) {
     final GnVariable? variable = scope.lookup(name);
     final List<GnValue>? items = variable?.unconditionalItems;
     if (items == null || items.length != 1 || items.single is! GnScopeValue) {
       throw GnError(location, '$name is not a scope');
     }
-    return (items.single as GnScopeValue).variables;
+    return items.single as GnScopeValue;
+  }
+
+  /// What `base.member` reads: the scope's own variable or, for an
+  /// `invoker`, what the name reads as in the scopes that enclose the
+  /// invocation ([GnScopeValue]). Null when neither has it.
+  _Expression? _scopeMember(String base, String member, GnNode node, _Scope scope) {
+    final GnScopeValue held = _scopeValue(base, node.location, scope);
+    final GnVariable? own = held.variables[member];
+    if (own != null) {
+      return _variableItems(own, node);
+    }
+    final _Scope? enclosing = held._enclosing;
+    if (enclosing != null && _isDefinedName(member, enclosing)) {
+      return _variableValue(member, node, enclosing);
+    }
+    return null;
   }
 
   // -------------------------------------------------------------------------
@@ -2690,11 +2722,11 @@ final class _Evaluator {
         if (index is! GnIdentifier) {
           throw GnError(node.location, 'only scope.member and list[index] access is supported');
         }
-        final GnVariable? member = _scopeVariables(base, node.location, scope)[index.name];
+        final _Expression? member = _scopeMember(base, index.name, node, scope);
         if (member == null) {
           throw GnError(node.location, '$base has no member ${index.name}');
         }
-        return _variableItems(member, node);
+        return member;
       case GnBlock():
         // `x = { ... }`: a scope value.
         final blockScope = _Scope(scope);
@@ -3684,10 +3716,9 @@ final class _Evaluator {
         // `${scope.member}` (ANGLE's templates name their invoker's
         // strings inside labels and file names): the member's string.
         final String memberName = match.group(4)!;
-        final GnVariable? member = scope == null
+        final GnValue? value = scope == null
             ? null
-            : _scopeVariables(base, node.location, scope)[memberName];
-        final GnValue? value = member == null ? null : _variableItems(member, node).scalar;
+            : _scopeMember(base, memberName, node, scope)?.scalar;
         if (value is! GnStringValue) {
           throw GnError(
             node.location,
@@ -4085,17 +4116,26 @@ final class _Evaluator {
     }
   }
 
+  bool _isDefinedName(String name, _Scope scope) {
+    return scope.lookup(name) != null ||
+        assumptions[name] != null ||
+        settings.externalVariables.contains(name);
+  }
+
   bool _isDefined(GnNode what, _Scope scope) {
     switch (what) {
       case GnIdentifier(:final String name):
-        return scope.lookup(name) != null ||
-            assumptions[name] != null ||
-            settings.externalVariables.contains(name);
+        return _isDefinedName(name, scope);
       case GnAccessor(:final String base, :final GnNode index):
         if (index is! GnIdentifier) {
           throw GnError(what.location, 'only defined(scope.member) is supported');
         }
-        return _scopeVariables(base, what.location, scope).containsKey(index.name);
+        // The scope's own variable or, for an `invoker`, a name the scopes
+        // that enclose the invocation define ([GnScopeValue]).
+        final GnScopeValue held = _scopeValue(base, what.location, scope);
+        final _Scope? enclosing = held._enclosing;
+        return held.variables.containsKey(index.name) ||
+            (enclosing != null && _isDefinedName(index.name, enclosing));
       default:
         throw GnError(what.location, 'only defined(variable) is supported');
     }
