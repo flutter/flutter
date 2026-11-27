@@ -267,6 +267,11 @@ final _undefinedTaskPattern = RegExp(r'Task .+ not found in root project.');
 
 final _assembleTaskPattern = RegExp(r'assemble(\S+)');
 
+// Android Gradle Plugin creates `debug` and `release` by default, and the
+// Flutter Gradle plugin (`FlutterPlugin.kt`) adds `profile` via
+// `buildTypes.create("profile")`. Keep this in sync if those defaults change.
+const _defaultBuildTypes = <String>{'debug', 'profile', 'release'};
+
 /// Handler when a flavor is undefined.
 @visibleForTesting
 final flavorUndefinedHandler = GradleHandledError(
@@ -301,14 +306,16 @@ final flavorUndefinedHandler = GradleHandledError(
             }
           }
         }
-        for (final variant1 in variants) {
-          for (final variant2 in variants) {
-            if (variant2.startsWith(variant1) && variant2 != variant1) {
-              final String buildType = variant2.substring(variant1.length);
-              if (variants.contains(buildType)) {
-                productFlavors.add(variant1);
-              }
-            }
+        for (final variant in variants) {
+          if (_defaultBuildTypes.contains(variant)) {
+            continue;
+          }
+          // `assemble<Flavor><BuildType>` tasks are only generated for complete
+          // flavor combinations across all flavor dimensions.
+          if (_defaultBuildTypes.any(
+            (String buildType) => variants.contains('$variant$buildType'),
+          )) {
+            productFlavors.add(variant);
           }
         }
         final errorMessage =
