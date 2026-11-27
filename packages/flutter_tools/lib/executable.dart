@@ -266,6 +266,7 @@ List<FlutterCommand> generateCommands({
       buildTargets: toolDependencies.buildTargets,
       deviceManager: toolDependencies.deviceManager,
       devtoolsLauncher: toolDependencies.devtoolsLauncher,
+      emulatorManager: toolDependencies.emulatorManager,
       flutterHookRunner: toolDependencies.flutterHookRunner,
       hidden: !verboseHelp,
       toolContext: toolContext,

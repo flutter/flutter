@@ -6,19 +6,26 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode, Category;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
+import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 const _primaryDeviceId = 'custom_device_1';
@@ -115,6 +122,115 @@ final class _StreamingTestDeviceService extends DeviceService {
       DeviceService.deviceIdParam: deviceId,
     });
   }
+}
+
+final class _TestEmulatorDeviceService extends DeviceService {
+  _TestEmulatorDeviceService({
+    this.emulatorPlatform,
+    this.emulators = const <TargetEmulator>[],
+    this.onCreateEmulator,
+    this.onGetEmulatorPlatform,
+    this.onGetEmulators,
+    this.onLaunchEmulator,
+  });
+
+  final String? emulatorPlatform;
+  final List<TargetEmulator> emulators;
+  final FutureOr<TargetEmulator> Function(String? name)? onCreateEmulator;
+  final FutureOr<String?> Function()? onGetEmulatorPlatform;
+  final FutureOr<List<TargetEmulator>> Function()? onGetEmulators;
+  final FutureOr<void> Function(String emulatorId, bool coldBoot)? onLaunchEmulator;
+
+  @override
+  Future<List<TargetDevice>> getDevices() async => const <TargetDevice>[];
+
+  @override
+  Future<bool> isSupportedForProject({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+  }) async => false;
+
+  @override
+  Future<bool> launchApp({
+    required ExtensionDebuggingOptions debuggingOptions,
+    required String deviceId,
+    required Uri executableUri,
+  }) async => false;
+
+  @override
+  Future<Uri?> getVmServiceUri({required String deviceId}) async => null;
+
+  @override
+  Future<bool> stopApp({required String deviceId}) async => false;
+
+  @override
+  Future<String?> getEmulatorPlatform() async =>
+      onGetEmulatorPlatform != null ? await onGetEmulatorPlatform!() : emulatorPlatform;
+
+  @override
+  Future<List<TargetEmulator>> getEmulators() async =>
+      onGetEmulators != null ? await onGetEmulators!() : emulators;
+
+  @override
+  Future<void> launchEmulator({required String emulatorId, bool coldBoot = false}) async =>
+      onLaunchEmulator != null
+      ? await onLaunchEmulator!(emulatorId, coldBoot)
+      : super.launchEmulator(emulatorId: emulatorId, coldBoot: coldBoot);
+
+  @override
+  Future<TargetEmulator> createEmulator({String? name}) async =>
+      onCreateEmulator != null ? await onCreateEmulator!(name) : super.createEmulator(name: name);
+}
+
+ExtensionEntryPoint _deviceEntryPoint(DeviceService service, {String extensionName = 'test_ext'}) {
+  return (SendPort sendPort) {
+    unawaited(
+      ToolExtensionEntryPoint.run(
+        sendPort,
+        <ToolExtensionService>[service],
+        extensionName: extensionName,
+        supportedPlatforms: const <String>{'linux'},
+      ),
+    );
+  };
+}
+
+ExtensionManager _createExtensionManager({
+  required List<ExtensionEntryPoint> entryPoints,
+  required Logger logger,
+  FeatureFlags? featureFlags,
+}) {
+  final manager = ExtensionManager(
+    entryPoints: entryPoints,
+    featureFlags: featureFlags ?? TestFeatureFlags(isToolExtensionsEnabled: true),
+    hostPlatform: HostPlatform.linux_x64,
+    logger: logger,
+  );
+  addTearDown(manager.dispose);
+  return manager;
+}
+
+EmulatorManager _createEmulatorManager({
+  required Logger logger,
+  AndroidSdk? androidSdk,
+  ExtensionManager? extensionManager,
+  FeatureFlags? featureFlags,
+  ProcessManager? processManager,
+}) {
+  final FeatureFlags flags = featureFlags ?? TestFeatureFlags(isToolExtensionsEnabled: true);
+  return EmulatorManager(
+    androidSdkBuilder: androidSdk != null ? () => androidSdk : null,
+    androidWorkflow: AndroidWorkflow(androidSdkBuilder: () => androidSdk, featureFlags: flags),
+    extensionManager: extensionManager,
+    iosWorkflow: null,
+    javaBuilder: androidSdk != null ? FakeJava.new : () => null,
+    toolContext: FakeToolContext(
+      fs: MemoryFileSystem.test(),
+      logger: logger,
+      processManager: processManager ?? FakeProcessManager.empty(),
+    ),
+    xcode: null,
+  );
 }
 
 final class _FakeExtensionBuildManager extends ExtensionBuildManager {
@@ -721,6 +837,659 @@ void main() {
       ]);
     });
   });
+
+  group('DeviceService emulator RPCs', () {
+    late BufferLogger logger;
+
+    setUp(() {
+      logger = BufferLogger.test();
+    });
+
+    test('DeviceService.isValidPlatformName validates CLI platform identifiers', () {
+      for (final valid in const <String>['custom_os', 'custom-embedder-2', 'android']) {
+        expect(DeviceService.isValidPlatformName(valid), isTrue, reason: valid);
+      }
+      for (final invalid in const <String>['', 'CustomOs', '1custom', 'custom os']) {
+        expect(DeviceService.isValidPlatformName(invalid), isFalse, reason: invalid);
+      }
+    });
+
+    test('default DeviceService returns null platform, empty emulators, and UnsupportedError or INVALID_PARAMS', () async {
+      final ExtensionConnection conn = await ExtensionConnection.spawn(
+        _deviceEntryPoint(_TestEmulatorDeviceService()),
+        logger: logger,
+      );
+      addTearDown(conn.dispose);
+      final client = ExtensionDeviceClient(conn, logger: logger);
+
+      expect(await client.getEmulatorPlatform(), isNull);
+      expect(await client.getEmulators(), isEmpty);
+      await expectLater(
+        client.launchEmulator(emulatorId: 'any_id', coldBoot: true),
+        throwsA(
+          isA<UnsupportedError>().having(
+            (UnsupportedError e) => e.message,
+            'message',
+            'Launching emulator any_id is not supported.',
+          ),
+        ),
+      );
+      await expectLater(
+        client.createEmulator(name: 'any_name'),
+        throwsA(
+          isA<UnsupportedError>().having(
+            (UnsupportedError e) => e.message,
+            'message',
+            'Creating emulators is not supported.',
+          ),
+        ),
+      );
+
+      const invalidRequests = <(String, Map<String, Object?>)>[
+        (DeviceService.launchEmulatorMethod, <String, Object?>{}),
+        (DeviceService.launchEmulatorMethod, <String, Object?>{DeviceService.emulatorIdParam: ''}),
+        (DeviceService.launchEmulatorMethod, <String, Object?>{DeviceService.emulatorIdParam: 42}),
+        (
+          DeviceService.launchEmulatorMethod,
+          <String, Object?>{
+            DeviceService.emulatorIdParam: 'ext_emu_1',
+            DeviceService.coldBootParam: 'true',
+          },
+        ),
+        (
+          DeviceService.createEmulatorMethod,
+          <String, Object?>{DeviceService.emulatorNameParam: ''},
+        ),
+        (
+          DeviceService.createEmulatorMethod,
+          <String, Object?>{DeviceService.emulatorNameParam: 42},
+        ),
+      ];
+      for (final (String method, Map<String, Object?> params) in invalidRequests) {
+        await expectLater(
+          conn.sendRequest(method, params: params),
+          throwsA(
+            isA<json_rpc.RpcException>().having(
+              (json_rpc.RpcException e) => e.code,
+              'code',
+              error_code.INVALID_PARAMS,
+            ),
+          ),
+        );
+      }
+    });
+
+    test(
+      'getEmulatorPlatform, getEmulators, launchEmulator, and createEmulator round-trip over RPC',
+      () async {
+        final verifyPort = ReceivePort();
+        addTearDown(verifyPort.close);
+        final Stream<Map<String, Object?>> events = verifyPort
+            .cast<Map<String, Object?>>()
+            .asBroadcastStream();
+        final SendPort verifySendPort = verifyPort.sendPort;
+
+        final ExtensionConnection conn = await ExtensionConnection.spawn(
+          _deviceEntryPoint(
+            _TestEmulatorDeviceService(
+              emulatorPlatform: 'custom_sim',
+              emulators: const <TargetEmulator>[
+                TargetEmulator(
+                  id: 'ext_emu_1',
+                  name: 'Extension Emulator 1',
+                  category: Category.mobile,
+                  manufacturer: 'Custom Vendor',
+                ),
+              ],
+              onLaunchEmulator: (String emulatorId, bool coldBoot) {
+                verifySendPort.send(<String, Object?>{
+                  _eventTypeKey: 'launch',
+                  DeviceService.emulatorIdParam: emulatorId,
+                  DeviceService.coldBootParam: coldBoot,
+                });
+              },
+              onCreateEmulator: (String? name) {
+                verifySendPort.send(<String, Object?>{
+                  _eventTypeKey: 'create',
+                  DeviceService.emulatorNameParam: name,
+                });
+                final String resolvedId = name ?? 'auto_custom_sim';
+                return TargetEmulator(
+                  id: resolvedId,
+                  name: 'Created $resolvedId',
+                  category: Category.desktop,
+                );
+              },
+            ),
+          ),
+          logger: logger,
+        );
+        addTearDown(conn.dispose);
+        final client = ExtensionDeviceClient(conn, logger: logger);
+
+        expect(await client.getEmulatorPlatform(), 'custom_sim');
+        expect(await client.getEmulators(), const <TargetEmulator>[
+          TargetEmulator(
+            id: 'ext_emu_1',
+            name: 'Extension Emulator 1',
+            category: Category.mobile,
+            manufacturer: 'Custom Vendor',
+          ),
+        ]);
+
+        final Future<Map<String, Object?>> launchEvent = events.firstWhere(
+          (Map<String, Object?> e) => e[_eventTypeKey] == 'launch',
+        );
+        await client.launchEmulator(emulatorId: 'ext_emu_1', coldBoot: true);
+        expect(await launchEvent, <String, Object?>{
+          _eventTypeKey: 'launch',
+          DeviceService.emulatorIdParam: 'ext_emu_1',
+          DeviceService.coldBootParam: true,
+        });
+
+        final Future<Map<String, Object?>> autoCreateEvent = events.firstWhere(
+          (Map<String, Object?> e) => e[_eventTypeKey] == 'create',
+        );
+        expect(
+          await client.createEmulator(name: ''),
+          const TargetEmulator(
+            id: 'auto_custom_sim',
+            name: 'Created auto_custom_sim',
+            category: Category.desktop,
+          ),
+        );
+        expect(await autoCreateEvent, <String, Object?>{
+          _eventTypeKey: 'create',
+          DeviceService.emulatorNameParam: null,
+        });
+
+        final Future<Map<String, Object?>> namedCreateEvent = events.firstWhere(
+          (Map<String, Object?> e) => e[_eventTypeKey] == 'create',
+        );
+        expect(
+          await client.createEmulator(name: 'custom_sim_2'),
+          const TargetEmulator(
+            id: 'custom_sim_2',
+            name: 'Created custom_sim_2',
+            category: Category.desktop,
+          ),
+        );
+        expect(await namedCreateEvent, <String, Object?>{
+          _eventTypeKey: 'create',
+          DeviceService.emulatorNameParam: 'custom_sim_2',
+        });
+      },
+    );
+  });
+
+  group('ExtensionEmulators and ExtensionEmulator', () {
+    late BufferLogger logger;
+
+    setUp(() {
+      logger = BufferLogger.test();
+    });
+
+    test('isolates faults across extensions and queries live emulators on each read', () async {
+      final queryPort = ReceivePort();
+      addTearDown(queryPort.close);
+      final SendPort querySendPort = queryPort.sendPort;
+      var queryCount = 0;
+      final StreamSubscription<Object?> sub = queryPort.listen((_) => queryCount++);
+      addTearDown(sub.cancel);
+
+      final ExtensionManager manager = _createExtensionManager(
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[
+          _deviceEntryPoint(
+            _TestEmulatorDeviceService(
+              onGetEmulatorPlatform: () => throw StateError('Platform query failed'),
+              onGetEmulators: () => throw StateError('Discovery failed'),
+            ),
+            extensionName: 'failing_device_ext',
+          ),
+          _deviceEntryPoint(
+            _TestEmulatorDeviceService(
+              onGetEmulators: () {
+                querySendPort.send(null);
+                return const <TargetEmulator>[
+                  TargetEmulator(
+                    id: 'healthy_emu',
+                    name: 'Healthy Emulator',
+                    category: Category.desktop,
+                    manufacturer: 'Acme',
+                  ),
+                ];
+              },
+            ),
+            extensionName: 'healthy_device_ext',
+          ),
+        ],
+      );
+
+      final discovery = ExtensionEmulators(extensionManager: manager, logger: logger);
+      expect(discovery.supportsPlatform, isTrue);
+      expect(discovery.canListAnything, isTrue);
+      expect(discovery.canLaunchAnything, isTrue);
+
+      expect(await discovery.hasEmulatorSources(), isTrue);
+      expect(queryCount, 1);
+      final List<Emulator> emulators = await discovery.emulators;
+      expect(queryCount, 2);
+      expect(emulators, hasLength(1));
+      expect(emulators.single.id, 'healthy_emu');
+      expect(emulators.single.name, 'Healthy Emulator');
+      expect(emulators.single.manufacturer, 'Acme');
+      expect(emulators.single.category, Category.desktop);
+      expect(emulators.single.platformType, PlatformType.custom);
+      expect(logger.warningText, contains('failing_device_ext'));
+
+      await discovery.emulators;
+      expect(queryCount, 3);
+    });
+
+    test(
+      'ExtensionEmulator.launch forwards coldBoot and formats RPC, domain, and local errors',
+      () async {
+        final launchedCalls = <(String, bool)>[];
+        final service = _TestEmulatorDeviceService(
+          onLaunchEmulator: (String emulatorId, bool coldBoot) {
+            launchedCalls.add((emulatorId, coldBoot));
+            if (emulatorId == 'empty_err_emu') {
+              throw json_rpc.RpcException(-32000, '');
+            }
+            if (emulatorId != 'ok_emu') {
+              throw StateError('Simulator binary missing');
+            }
+          },
+        );
+
+        final okEmulator = ExtensionEmulator(
+          deviceService: service,
+          logger: logger,
+          targetEmulator: const TargetEmulator(id: 'ok_emu', name: 'OK Emulator'),
+        );
+        expect(okEmulator.category, Category.other);
+        expect(okEmulator.platformType, PlatformType.custom);
+        await okEmulator.launch(coldBoot: true);
+        expect(launchedCalls, <(String, bool)>[('ok_emu', true)]);
+
+        await expectLater(
+          () => ExtensionEmulator(
+            deviceService: service,
+            logger: logger,
+            targetEmulator: const TargetEmulator(id: 'bad_emu', name: 'Bad Emulator'),
+          ).launch(),
+          throwsToolExit(
+            message: 'Failed to launch emulator "bad_emu": Bad state: Simulator binary missing',
+          ),
+        );
+        expect(launchedCalls, <(String, bool)>[('ok_emu', true), ('bad_emu', false)]);
+
+        await expectLater(
+          () => ExtensionEmulator(
+            deviceService: service,
+            logger: logger,
+            targetEmulator: const TargetEmulator(id: 'empty_err_emu', name: 'Empty Error Emulator'),
+          ).launch(),
+          throwsToolExit(message: 'Failed to launch emulator "empty_err_emu".'),
+        );
+      },
+    );
+
+    test(
+      'surfaces default SDK UnsupportedError (-32002) cleanly on launchEmulator and createEmulator',
+      () async {
+        // Omit `onLaunchEmulator` and `onCreateEmulator` so the real SDK default
+        // `throw UnsupportedError(...)` executes in the extension isolate and
+        // round-trips over JSON-RPC `ToolExtensionException.unsupportedCapabilityErrorCode`.
+        final ExtensionManager manager = _createExtensionManager(
+          logger: logger,
+          entryPoints: <ExtensionEntryPoint>[
+            _deviceEntryPoint(
+              _TestEmulatorDeviceService(
+                emulatorPlatform: 'readonly_os',
+                emulators: const <TargetEmulator>[
+                  TargetEmulator(id: 'unsupported_emu', name: 'Unsupported Emulator'),
+                ],
+              ),
+              extensionName: 'readonly_emu_ext',
+            ),
+          ],
+        );
+
+        final discovery = ExtensionEmulators(extensionManager: manager, logger: logger);
+        final List<Emulator> emulators = await discovery.emulators;
+        expect(emulators, hasLength(1));
+
+        await expectLater(
+          () => emulators.single.launch(coldBoot: true),
+          throwsToolExit(
+            message:
+                'Extension "readonly_emu_ext": Failed to launch emulator "unsupported_emu": '
+                'Launching emulator unsupported_emu is not supported.',
+          ),
+        );
+
+        final CreateEmulatorResult? failedCreate = await discovery.createEmulator(
+          platform: 'readonly_os',
+          name: 'sim_1',
+        );
+        expect(failedCreate?.success, isFalse);
+        expect(
+          failedCreate?.error,
+          'Extension "readonly_emu_ext": Creating emulators is not supported.',
+        );
+      },
+    );
+
+    test('sorts extensions lexicographically by extensionName when deduplicating create platforms '
+        'and TargetEmulator.id collisions and surfaces ToolExtensionException cleanly', () async {
+      // Register `zeta_custom_ext` BEFORE `alpha_custom_ext` in `entryPoints` so
+      // registration order differs from lexicographical `<package_name>` order.
+      final ExtensionManager manager = _createExtensionManager(
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[
+          _deviceEntryPoint(_TestEmulatorDeviceService(), extensionName: 'default_device_ext'),
+          _deviceEntryPoint(
+            _TestEmulatorDeviceService(emulatorPlatform: 'android'),
+            extensionName: 'android_collision_ext',
+          ),
+          _deviceEntryPoint(
+            _TestEmulatorDeviceService(emulatorPlatform: 'Invalid Name!'),
+            extensionName: 'invalid_name_ext',
+          ),
+          _deviceEntryPoint(
+            _TestEmulatorDeviceService(
+              onGetEmulatorPlatform: () =>
+                  throw const ToolExtensionException('Emulator SDK is not configured.'),
+              onGetEmulators: () =>
+                  throw const ToolExtensionException('Emulator list command failed.'),
+            ),
+            extensionName: 'domain_error_ext',
+          ),
+          _deviceEntryPoint(
+            _TestEmulatorDeviceService(
+              emulatorPlatform: 'custom_os',
+              emulators: const <TargetEmulator>[
+                TargetEmulator(id: 'shared_emu', name: 'Zeta Shared Emulator'),
+                TargetEmulator(id: 'zeta_only', name: 'Zeta Only Emulator'),
+              ],
+              onLaunchEmulator: (String _, bool _) =>
+                  throw const ToolExtensionException('Zeta launch should not be called.'),
+              onCreateEmulator: (String? name) =>
+                  TargetEmulator(id: name ?? 'zeta_ext_sim', name: 'Zeta Ext Sim'),
+            ),
+            extensionName: 'zeta_custom_ext',
+          ),
+          _deviceEntryPoint(
+            _TestEmulatorDeviceService(
+              emulatorPlatform: 'custom_os',
+              emulators: const <TargetEmulator>[
+                TargetEmulator(id: 'shared_emu', name: 'Alpha Shared Emulator'),
+                TargetEmulator(id: 'shared_emu', name: 'Alpha Duplicate Entry'),
+                TargetEmulator(id: 'alpha_only', name: 'Alpha Only Emulator'),
+              ],
+              onLaunchEmulator: (String _, bool _) =>
+                  throw const ToolExtensionException('Simulator binary not found.'),
+              onCreateEmulator: (String? name) {
+                if (name == 'fail_create') {
+                  throw const ToolExtensionException('No system image installed.');
+                }
+                return TargetEmulator(id: name ?? 'alpha_ext_sim', name: 'Alpha Ext Sim');
+              },
+            ),
+            extensionName: 'alpha_custom_ext',
+          ),
+        ],
+      );
+
+      final discovery = ExtensionEmulators(extensionManager: manager, logger: logger);
+      expect(await discovery.hasEmulatorSources(), isTrue);
+      expect(await discovery.getCreatePlatforms(), equals(<String>['custom_os']));
+      final String warningsAfterFirstLoad = logger.warningText;
+      expect(warningsAfterFirstLoad, isNot(contains('default_device_ext')));
+      expect(warningsAfterFirstLoad, isNot(contains('ToolExtensionException:')));
+      expect(
+        warningsAfterFirstLoad,
+        contains(
+          'Ignoring emulator platform "android" from tool extension '
+          '(package:android_collision_ext): "android" is reserved for built-in Android emulators.',
+        ),
+      );
+      expect(
+        warningsAfterFirstLoad,
+        contains(
+          'Ignoring invalid emulator platform "Invalid Name!" from tool extension '
+          '(package:invalid_name_ext): platform identifiers must match lowercase ASCII letters, '
+          'digits, underscores, or hyphens.',
+        ),
+      );
+      expect(
+        warningsAfterFirstLoad,
+        contains('Extension "domain_error_ext": Emulator SDK is not configured.'),
+      );
+      expect(
+        warningsAfterFirstLoad,
+        contains(
+          'Duplicate emulator platform "custom_os" registered by tool extension '
+          '(package:zeta_custom_ext) and tool extension (package:alpha_custom_ext); keeping '
+          'tool extension (package:alpha_custom_ext).',
+        ),
+      );
+
+      // Memoized across hasEmulatorSources, getCreatePlatforms, and createEmulator;
+      // `alpha_custom_ext` wins over `zeta_custom_ext`.
+      final CreateEmulatorResult? created = await discovery.createEmulator(platform: 'custom_os');
+      expect(created?.success, isTrue);
+      expect(created?.emulatorName, 'alpha_ext_sim');
+      expect(logger.warningText, equals(warningsAfterFirstLoad));
+
+      final CreateEmulatorResult? failed = await discovery.createEmulator(
+        platform: 'custom_os',
+        name: 'fail_create',
+      );
+      expect(failed?.success, isFalse);
+      expect(failed?.error, 'Extension "alpha_custom_ext": No system image installed.');
+
+      logger.clear();
+      final List<Emulator> emulators = await discovery.emulators;
+      expect(
+        emulators.map((Emulator e) => (e.id, e.name)).toList(),
+        equals(<(String, String)>[
+          ('shared_emu', 'Alpha Shared Emulator'),
+          ('alpha_only', 'Alpha Only Emulator'),
+          ('zeta_only', 'Zeta Only Emulator'),
+        ]),
+      );
+      expect(
+        logger.warningText,
+        contains('Extension "domain_error_ext": Emulator list command failed.'),
+      );
+      expect(
+        logger.warningText,
+        contains(
+          'Duplicate emulator ID "shared_emu" returned by tool extension '
+          '(package:alpha_custom_ext); keeping the first entry.',
+        ),
+      );
+      expect(
+        logger.warningText,
+        contains(
+          'Duplicate emulator ID "shared_emu" registered by tool extension '
+          '(package:zeta_custom_ext) and tool extension (package:alpha_custom_ext); keeping '
+          'tool extension (package:alpha_custom_ext).',
+        ),
+      );
+      expect(logger.warningText, isNot(contains('ToolExtensionException:')));
+      await expectLater(
+        () => emulators.first.launch(),
+        throwsToolExit(
+          message:
+              'Extension "alpha_custom_ext": Failed to launch emulator "shared_emu": '
+              'Simulator binary not found.',
+        ),
+      );
+    });
+
+    test(
+      'EmulatorManager does not spawn extensions when disabled, in safe mode, or omitted',
+      () async {
+        void shouldNotSpawnEntryPoint(SendPort sendPort) {
+          fail('Extension isolate should not spawn when extensions are disabled or in safe mode.');
+        }
+
+        final disabledFlags = TestFeatureFlags();
+        final ExtensionManager disabledExtManager = _createExtensionManager(
+          entryPoints: <ExtensionEntryPoint>[shouldNotSpawnEntryPoint],
+          featureFlags: disabledFlags,
+          logger: logger,
+        );
+        final ExtensionManager safeModeExtManager = _createExtensionManager(
+          entryPoints: <ExtensionEntryPoint>[shouldNotSpawnEntryPoint],
+          logger: logger,
+        )..disable();
+
+        for (final extManager in <ExtensionManager?>[
+          disabledExtManager,
+          safeModeExtManager,
+          null,
+        ]) {
+          final EmulatorManager emulatorManager = _createEmulatorManager(
+            extensionManager: extManager,
+            featureFlags: disabledFlags,
+            logger: logger,
+          );
+          expect(await emulatorManager.hasExtensionEmulatorSources(), isFalse);
+          expect(await emulatorManager.getAvailableCreatePlatforms(), isEmpty);
+          expect(await emulatorManager.getAllAvailableEmulators(), isEmpty);
+          expect((await emulatorManager.createEmulator(platform: 'custom_os')).success, isFalse);
+          expect(extManager?.connections ?? const <ExtensionConnection>[], isEmpty);
+        }
+      },
+    );
+
+    test(
+      'EmulatorManager discovers emulators and routes createEmulator across Android and extensions',
+      () async {
+        final ExtensionManager extManager = _createExtensionManager(
+          logger: logger,
+          entryPoints: <ExtensionEntryPoint>[
+            _deviceEntryPoint(
+              _TestEmulatorDeviceService(
+                emulatorPlatform: 'custom_os',
+                emulators: const <TargetEmulator>[
+                  TargetEmulator(id: 'ext_emu', name: 'Extension Emulator'),
+                ],
+                onCreateEmulator: (String? name) {
+                  if (name == 'fail_me') {
+                    throw StateError('Disk full while creating image');
+                  }
+                  final String id = name ?? 'custom_os_default';
+                  return TargetEmulator(id: id, name: 'Custom $id');
+                },
+              ),
+              extensionName: 'custom_os_ext',
+            ),
+          ],
+        );
+        final EmulatorManager emulatorManager = _createEmulatorManager(
+          extensionManager: extManager,
+          logger: logger,
+        );
+
+        expect(await emulatorManager.hasExtensionEmulatorSources(), isTrue);
+        expect(await emulatorManager.getAvailableCreatePlatforms(), <String>['custom_os']);
+
+        final List<Emulator> matching = await emulatorManager.getEmulatorsMatching('ext_emu');
+        expect(matching.single.id, 'ext_emu');
+        expect(matching.single.name, 'Extension Emulator');
+
+        expect(
+          (await emulatorManager.createEmulator(platform: 'custom_os')).emulatorName,
+          'custom_os_default',
+        );
+        expect(
+          (await emulatorManager.createEmulator(
+            name: 'sim_alpha',
+            platform: 'custom_os',
+          )).emulatorName,
+          'sim_alpha',
+        );
+
+        final CreateEmulatorResult failedResult = await emulatorManager.createEmulator(
+          name: 'fail_me',
+          platform: 'custom_os',
+        );
+        expect(failedResult.success, isFalse);
+        expect(failedResult.error, startsWith('Extension "custom_os_ext": '));
+        expect(failedResult.error, contains('Disk full while creating image'));
+
+        final CreateEmulatorResult unknownResult = await emulatorManager.createEmulator(
+          platform: 'unknown_os',
+        );
+        expect(unknownResult.success, isFalse);
+        expect(
+          unknownResult.error,
+          'Unknown emulator creation platform "unknown_os". Available platforms: custom_os.',
+        );
+
+        final EmulatorManager androidAndExtManager = _createEmulatorManager(
+          androidSdk: _FakeAndroidSdk(),
+          extensionManager: extManager,
+          logger: logger,
+          processManager: FakeProcessManager.list(<FakeCommand>[
+            const FakeCommand(
+              command: <String>['avdmanager', 'list', 'device', '-c'],
+              stdout: 'pixel\n',
+            ),
+            const FakeCommand(
+              command: <String>['avdmanager', 'create', 'avd', '-n', 'temp'],
+              stderr: 'system-images;android-27;google_apis_playstore;x86\n',
+              exitCode: 1,
+            ),
+            const FakeCommand(
+              command: <String>[
+                'avdmanager',
+                'create',
+                'avd',
+                '-n',
+                'default_android_avd',
+                '-k',
+                'system-images;android-27;google_apis_playstore;x86',
+                '-d',
+                'pixel',
+              ],
+            ),
+          ]),
+        );
+        expect(await androidAndExtManager.getAvailableCreatePlatforms(), <String>[
+          'android',
+          'custom_os',
+        ]);
+        final CreateEmulatorResult androidResult = await androidAndExtManager.createEmulator(
+          name: 'default_android_avd',
+        );
+        expect(androidResult.success, isTrue);
+        expect(androidResult.emulatorName, 'default_android_avd');
+      },
+    );
+
+    test('linuxExtensionEntryPoint does not advertise emulator sources or create platforms in production', () async {
+      final EmulatorManager emulatorManager = _createEmulatorManager(
+        extensionManager: _createExtensionManager(
+          entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+          logger: logger,
+        ),
+        logger: logger,
+      );
+
+      expect(await emulatorManager.hasExtensionEmulatorSources(), isFalse);
+      expect(await emulatorManager.getAvailableCreatePlatforms(), isEmpty);
+      expect(await emulatorManager.getAllAvailableEmulators(), isEmpty);
+      expect(logger.warningText, isEmpty);
+      expect(logger.errorText, isEmpty);
+    });
+  });
 }
 
 final class _DomainErrorDeviceService extends DeviceService {
@@ -757,4 +1526,21 @@ final class _DomainErrorDeviceService extends DeviceService {
 
   @override
   Future<void> stopLogStream({required String deviceId}) async {}
+}
+
+final class _FakeAndroidSdk extends Fake implements AndroidSdk {
+  @override
+  String? get avdManagerPath => 'avdmanager';
+
+  @override
+  String? get emulatorPath => 'emulator';
+
+  @override
+  String? get adbPath => 'adb';
+
+  @override
+  String? getAvdManagerPath() => avdManagerPath;
+
+  @override
+  String getAvdPath() => 'avd';
 }
