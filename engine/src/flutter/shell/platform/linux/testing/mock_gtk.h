@@ -95,6 +95,15 @@ class MockGtk {
               g_object_set,
               (GObject * object, const gchar* property_name, gint value));
 
+  // Opt in to widget realization/querying while keeping GL operations mocked.
+  bool realize_widgets = false;
+  MOCK_METHOD(GdkGLContext*,
+              gdk_window_create_gl_context,
+              (GdkWindow * window, GError** error));
+  MOCK_METHOD(gboolean,
+              gdk_gl_context_realize,
+              (GdkGLContext * context, GError** error));
+
   GThread* thread;
 };
 
