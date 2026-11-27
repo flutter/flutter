@@ -433,6 +433,7 @@ mixin CreateBase on FlutterCommand {
       'windows': windows,
       'year': DateTime.now().year,
       'dartSdkVersionBounds': dartSdkVersionBounds,
+      'flutterSdkVersionBounds': '>=${flutterVersion.frameworkVersion}',
       'implementationTests': implementationTests,
       'agpVersion': agpVersion,
       'agpVersionForModule': gradle.templateAndroidGradlePluginVersionForModule,

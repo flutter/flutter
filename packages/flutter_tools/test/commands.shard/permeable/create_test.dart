@@ -41,6 +41,7 @@ import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/template.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:process/process.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
@@ -132,6 +133,7 @@ CachedArtifacts _createLocalArtifacts({Platform? platform}) {
 
 ToolContext _createToolContext({
   FileSystem? fs,
+  FlutterVersion? flutterVersion,
   Platform? platform,
   ProcessManager? processManager,
 }) {
@@ -156,7 +158,7 @@ ToolContext _createToolContext({
     ),
     botDetector: fakeBotDetector,
     cache: cache,
-    flutterVersion: fakeFlutterVersion,
+    flutterVersion: flutterVersion ?? fakeFlutterVersion,
     fs: resolvedFs,
     logger: logger,
     platform: resolvedPlatform,
@@ -528,6 +530,38 @@ void main() {
       expectedGitignoreLines: flutterPluginsIgnores,
     );
     return _runFlutterTest(projectDir);
+  });
+
+  test('package project sets dynamic flutter SDK version bounds in pubspec.yaml', () async {
+    const expectedFlutterVersion = '3.13.0';
+    final CreateCommand command = createCreateCommand(
+      toolContext: _createToolContext(
+        flutterVersion: FakeFlutterVersion(frameworkVersion: expectedFlutterVersion),
+      ),
+    );
+    final CommandRunner<void> runner = _createCommandRunner(command);
+
+    await runner.run(<String>['create', '--template=package', '--no-pub', projectDir.path]);
+
+    final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
+    final pubspec = Pubspec.parse(rawPubspec);
+    expect(pubspec.environment['flutter'], VersionConstraint.parse('>=$expectedFlutterVersion'));
+  });
+
+  test('plugin project sets dynamic flutter SDK version bounds in pubspec.yaml', () async {
+    const expectedFlutterVersion = '3.13.0';
+    final CreateCommand command = createCreateCommand(
+      toolContext: _createToolContext(
+        flutterVersion: FakeFlutterVersion(frameworkVersion: expectedFlutterVersion),
+      ),
+    );
+    final CommandRunner<void> runner = _createCommandRunner(command);
+
+    await runner.run(<String>['create', '--template=plugin', '--no-pub', projectDir.path]);
+
+    final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
+    final pubspec = Pubspec.parse(rawPubspec);
+    expect(pubspec.environment['flutter'], VersionConstraint.parse('>=$expectedFlutterVersion'));
   });
 
   test('can create a plugin project', () async {
@@ -3218,17 +3252,6 @@ void main() {
       );
     },
   );
-
-  test('newly created plugin has min flutter sdk version as 3.3.0', () async {
-    final CreateCommand command = createCreateCommand();
-    final CommandRunner<void> runner = _createCommandRunner(command);
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
-    final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
-    final pubspec = Pubspec.parse(rawPubspec);
-    final Map<String, VersionConstraint?> env = pubspec.environment;
-    expect(env['flutter']!.allows(Version(3, 3, 0)), true);
-    expect(env['flutter']!.allows(Version(3, 2, 9)), false);
-  });
 
   test('newly created iOS plugins has correct min iOS version', () async {
     final String flutterToolsAbsolutePath = localFs.path.join(
