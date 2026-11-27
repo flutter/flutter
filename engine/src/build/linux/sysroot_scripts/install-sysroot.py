@@ -25,6 +25,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from urllib.request import urlopen
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SRC_DIR = os.path.dirname(os.path.dirname(os.path.dirname(SCRIPT_DIR)))
@@ -102,6 +103,44 @@ def GetSysrootDict(sysroots_json_path, target_platform, target_arch):
     if sysroot_key not in sysroots:
         raise Error("No sysroot for: %s %s" % (target_platform, target_arch))
     return sysroots[sysroot_key]
+
+
+def PatchAtkVersionHeader(sysroot):
+    """Patch atkversion.h in the sysroot to add C linkage declarations.
+
+    The atkversion.h header in at-spi2-core (used by Debian Bullseye and
+    Trixie sysroots) lacks G_BEGIN_DECLS/G_END_DECLS, causing link failures
+    when the header is included from C++ code.  This was fixed upstream in
+    https://gitlab.gnome.org/GNOME/at-spi2-core/-/merge_requests/219
+    but the fix has not yet propagated to all Debian stable releases.
+    """
+    atkversion = os.path.join(sysroot, "usr", "include", "atk-1.0", "atk",
+                              "atkversion.h")
+    if not os.path.exists(atkversion):
+        return
+    with open(atkversion, "r", encoding="utf-8") as f:
+        content = f.read()
+    if "G_BEGIN_DECLS" in content:
+        return  # Already patched
+    begin_anchor = "#include <glib.h>\n"
+    begin_replacement = "#include <glib.h>\n\nG_BEGIN_DECLS\n"
+    end_anchor = '#endif /* __ATK_VERSION_H__ */'
+    end_replacement = 'G_END_DECLS\n\n#endif /* __ATK_VERSION_H__ */'
+    if begin_anchor not in content:
+        raise Error("atkversion.h: anchor not found: %s" % begin_anchor)
+    if end_anchor not in content:
+        raise Error("atkversion.h: anchor not found: %s" % end_anchor)
+    content = content.replace(begin_anchor, begin_replacement, 1)
+    content = content.replace(end_anchor, end_replacement, 1)
+    # Write atomically so an interrupted run cannot leave a truncated header.
+    with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=os.path.dirname(atkversion),
+            delete=False) as f:
+        f.write(content)
+        temp_path = f.name
+    os.replace(temp_path, atkversion)
+
+
 def InstallSysroot(sysroots_json_path, target_platform, target_arch):
     sysroot_dict = GetSysrootDict(sysroots_json_path, target_platform,
                                   target_arch)
@@ -120,6 +159,7 @@ def InstallSysroot(sysroots_json_path, target_platform, target_arch):
             os.path.join(sysroot, ".*_is_first_class_gcs")):
         with open(stamp) as s:
             if s.read() == url:
+                PatchAtkVersionHeader(sysroot)
                 return
     print("Installing Debian %s %s root image: %s" %
           (target_platform, target_arch, sysroot))
@@ -145,6 +185,7 @@ def InstallSysroot(sysroots_json_path, target_platform, target_arch):
         raise Error("Tarball sha256sum is wrong."
                     "Expected %s, actual: %s" % (tarball_sha256sum, sha256sum))
     subprocess.check_call(["tar", "mxf", tarball, "-C", sysroot])
+    PatchAtkVersionHeader(sysroot)
     os.remove(tarball)
     with open(stamp, "w") as s:
         s.write(url)
