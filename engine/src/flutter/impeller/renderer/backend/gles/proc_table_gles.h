@@ -270,6 +270,7 @@ void(glDepthRange)(GLdouble n, GLdouble f);
   PROC(RenderbufferStorageMultisample);    \
   PROC(BlitFramebuffer);                   \
   PROC(InvalidateFramebuffer);             \
+  PROC(VertexAttribIPointer);              \
   PROC(VertexAttribDivisor);               \
   PROC(DrawArraysInstanced);               \
   PROC(DrawElementsInstanced);
