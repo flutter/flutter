@@ -135,7 +135,6 @@ abstract class DriverService {
     String? userIdentifier,
     String? mainPath,
     Map<String, Object> platformArgs = const <String, Object>{},
-    Map<String, String> webDefines = const <String, String>{},
   });
 
   /// If --use-existing-app is provided, configured the correct VM Service URI.
@@ -187,7 +186,6 @@ class FlutterDriverService extends DriverService {
     String? userIdentifier,
     Map<String, Object> platformArgs = const <String, Object>{},
     String? mainPath,
-    Map<String, String> webDefines = const <String, String>{},
   }) async {
     if (buildInfo.isRelease) {
       throwToolExit(
@@ -199,12 +197,12 @@ class FlutterDriverService extends DriverService {
     }
     _device = device;
     final TargetPlatform targetPlatform = await device.targetPlatform;
-    _applicationPackage = await _applicationPackageFactory.getPackageForPlatform(
+    final ApplicationPackage? package = await _applicationPackageFactory.getPackageForPlatform(
       targetPlatform,
       buildInfo: buildInfo,
       applicationBinary: applicationBinary,
     );
-    if (_applicationPackage == null) {
+    if (package == null) {
       String? hint;
       if (applicationBinary == null) {
         final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
@@ -216,12 +214,13 @@ class FlutterDriverService extends DriverService {
       }
       throwToolExit(<String>['No application found for $targetPlatform.', ?hint].join('\n'));
     }
+    _applicationPackage = package;
     var attempt = 0;
     LaunchResult? result;
     var prebuiltApplication = applicationBinary != null;
     while (attempt < _kLaunchAttempts) {
       result = await device.startApp(
-        _applicationPackage,
+        package,
         mainPath: mainPath,
         route: route,
         debuggingOptions: debuggingOptions,

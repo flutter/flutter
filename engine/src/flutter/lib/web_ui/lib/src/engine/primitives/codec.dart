@@ -87,6 +87,9 @@ class _BrowserEngineCodec extends EngineCodec {
 
   @override
   void dispose() {
+    if (_disposed) {
+      return;
+    }
     _disposed = true;
     _ref.dispose();
   }
@@ -202,18 +205,29 @@ class _BrowserEngineCodec extends EngineCodec {
 /// by querying the backend factory.
 class _StaticEngineCodec extends EngineCodec {
   _StaticEngineCodec(
-    this._staticImageSource, {
+    ImageSource staticImageSource, {
     this.targetWidth,
     this.targetHeight,
     this.allowUpscaling = true,
   }) : super._() {
     // Retain the underlying image source to increment its reference count.
     // This guarantees that the native image data (such as an ImageBitmap) remains
-    // alive in memory as long as this codec exists.
-    _staticImageSource.retain();
+    // alive in memory until this codec is disposed or garbage-collected.
+    staticImageSource.retain();
+    _ref = UniqueRef<ImageSource>(
+      this,
+      staticImageSource,
+      'StaticCodec',
+      onDispose: _releaseSource,
+    );
   }
 
-  final ImageSource _staticImageSource;
+  /// Releases [source] without capturing `this` in [UniqueRef]'s disposal closure.
+  static void _releaseSource(ImageSource source) {
+    source.release();
+  }
+
+  late final UniqueRef<ImageSource> _ref;
   final int? targetWidth;
   final int? targetHeight;
   final bool allowUpscaling;
@@ -227,10 +241,13 @@ class _StaticEngineCodec extends EngineCodec {
 
   @override
   void dispose() {
+    if (_disposed) {
+      return;
+    }
     _disposed = true;
     // Release our reference to the image source. If the reference count drops to 0,
     // the native resources (like the ImageBitmap) will be closed and freed.
-    _staticImageSource.release();
+    _ref.dispose();
   }
 
   @override
@@ -238,14 +255,15 @@ class _StaticEngineCodec extends EngineCodec {
     if (_disposed) {
       return Future<ui.FrameInfo>.error(StateError('Cannot call getNextFrame() after dispose()'));
     }
+    final ImageSource source = _ref.nativeObject;
     // Synchronously instruct the backend renderer to convert the normalized
     // DOM asset into a backend-specific representation (e.g., uploading to a GPU texture).
-    final BackendImage backendImage = renderer.createImageFromImageSource(_staticImageSource);
+    final BackendImage backendImage = renderer.createImageFromImageSource(source);
     final ui.Image image = EngineImage(
       backendImage,
-      _staticImageSource.width,
-      _staticImageSource.height,
-      imageSource: _staticImageSource,
+      source.width,
+      source.height,
+      imageSource: source,
     );
     return Future<ui.FrameInfo>.value(AnimatedImageFrameInfo(Duration.zero, image));
   }
@@ -300,6 +318,9 @@ class _SkiaEngineCodec extends EngineCodec {
 
   @override
   void dispose() {
+    if (_disposed) {
+      return;
+    }
     _disposed = true;
     _ref.dispose();
   }

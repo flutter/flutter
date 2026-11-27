@@ -359,6 +359,10 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     await app.runner.waitForAppToFinish();
   }
 
+  /// Factory used to construct the [ResidentCompiler] for the attached device.
+  @protected
+  ResidentCompilerFactory get residentCompilerFactory => const ResidentCompilerFactory();
+
   Future<ResidentRunner> _discoverVmServiceAndCreateResidentRunner({required Device device}) async {
     final Future<Uri> vmServiceUri = _discoverVmService(device: device);
     vmServiceUri.ignore();
@@ -369,6 +373,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       device,
       toolContext: toolContext,
       buildInfo: buildInfo,
+      residentCompilerFactory: residentCompilerFactory,
       target: targetFile,
       targetModelOverride: TargetModel(getValue(DebuggingOptionDescriptors.fuchsiaTargetModel)),
       userIdentifier: userIdentifier,

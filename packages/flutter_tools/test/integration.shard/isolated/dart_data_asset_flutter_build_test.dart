@@ -23,7 +23,7 @@ void main() {
 
   group('dart data assets', () {
     for (final target in <String>[hostOs, 'web']) {
-      testWithoutContext('flutter build $target', () async {
+      test('flutter build $target', () async {
         final assets = <String, String>{'id1.txt': 'content1', 'id2.txt': 'content2'};
         final available = <String>['id1.txt'];
         writeAssets(assets, appRoot);
@@ -72,44 +72,39 @@ void main() {
         }
       });
 
-      testWithoutContext(
-        'flutter build $target rebuilds when data asset file is deleted',
-        () async {
-          final assets = <String, String>{'id1.txt': 'content1'};
-          writeAssets(assets, appRoot);
-          writeHookLibrary(appRoot, assets, available: <String>['id1.txt']);
-          writeHelperLibrary(appRoot, 'version1', assets.keys.toList());
+      test('flutter build $target rebuilds when data asset file is deleted', () async {
+        final assets = <String, String>{'id1.txt': 'content1'};
+        writeAssets(assets, appRoot);
+        writeHookLibrary(appRoot, assets, available: <String>['id1.txt']);
+        writeHelperLibrary(appRoot, 'version1', assets.keys.toList());
 
-          ProcessTestResult result = await runFlutter(
-            <String>['build', '-v', target],
-            appRoot.path,
-            <Transition>[Barrier.contains('Built build${Platform.pathSeparator}$target')],
+        ProcessTestResult result = await runFlutter(
+          <String>['build', '-v', target],
+          appRoot.path,
+          <Transition>[Barrier.contains('Built build${Platform.pathSeparator}$target')],
+        );
+        if (result.exitCode != 0) {
+          throw Exception(
+            'first flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
           );
-          if (result.exitCode != 0) {
-            throw Exception(
-              'first flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
-            );
-          }
+        }
 
-          final File fileToDelete = dependencyRoot
-              .childDirectory('data')
-              .childFile('generated.txt');
-          expect(fileToDelete.existsSync(), true);
-          fileToDelete.deleteSync();
+        final File fileToDelete = dependencyRoot.childDirectory('data').childFile('generated.txt');
+        expect(fileToDelete.existsSync(), true);
+        fileToDelete.deleteSync();
 
-          // Second build should re-run the build_hooks target and succeed.
-          result = await runFlutter(
-            <String>['build', '-v', target],
-            appRoot.path,
-            <Transition>[Barrier.contains('Built build${Platform.pathSeparator}$target')],
+        // Second build should re-run the build_hooks target and succeed.
+        result = await runFlutter(
+          <String>['build', '-v', target],
+          appRoot.path,
+          <Transition>[Barrier.contains('Built build${Platform.pathSeparator}$target')],
+        );
+        if (result.exitCode != 0) {
+          throw Exception(
+            'second flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
           );
-          if (result.exitCode != 0) {
-            throw Exception(
-              'second flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
-            );
-          }
-        },
-      );
+        }
+      });
     }
   });
 }

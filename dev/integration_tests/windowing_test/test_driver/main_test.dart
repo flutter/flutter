@@ -258,6 +258,7 @@ void main() {
         expect(data['popupDestroyed'], true);
       },
       timeout: Timeout.none,
+      // [intended] Popups are only closed on focus loss on Linux.
       skip: Platform.isLinux ? false : 'Popups are only closed on focus loss on Linux.',
     );
 
@@ -273,6 +274,7 @@ void main() {
         expect(data['popupDestroyed'], false);
       },
       timeout: Timeout.none,
+      // [intended] Popups are only closed on focus loss on Linux.
       skip: Platform.isLinux ? false : 'Popups are only closed on focus loss on Linux.',
     );
 

@@ -260,7 +260,10 @@ class DriveCommand extends RunCommandBase {
   String? get applicationBinaryPath => getValue(CommonOptions.useApplicationBinary);
 
   Future<Device?> get targetedDevice async {
-    return findTargetDevice(includeDevicesUnsupportedByProject: applicationBinaryPath != null);
+    return findTargetDevice(
+      includeDevicesUnsupportedByProject:
+          applicationBinaryPath != null || getValue(_useExistingApp) != null,
+    );
   }
 
   // Wireless iOS devices need `publish-port` to be enabled because it requires mDNS.
@@ -409,7 +412,6 @@ class DriveCommand extends RunCommandBase {
             if (traceStartup) 'trace-startup': traceStartup,
             if (web) 'no-launch-chrome': true,
           },
-          webDefines: extractWebDefines(),
         );
       } else {
         final Uri? uri = Uri.tryParse(useExistingApp);
