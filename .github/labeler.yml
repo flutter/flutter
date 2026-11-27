@@ -12,6 +12,7 @@
       - '**/*accessibility*'
       - '**/semantics/*'
       - '**/*semantics*'
+      - '**/labeler.yml/**'
 
 'a: animation':
   - changed-files:
