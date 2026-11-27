@@ -131,23 +131,41 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  test('incremental compile exits the tool when dartaotruntime cannot be run', () async {
+  test('incremental compile exits the tool with cache deletion advice when dartaotruntime cannot run', () async {
     // Regression test for https://github.com/flutter/flutter/issues/193518.
-    fakeProcessManager.excludedExecutables.add('Artifact.engineDartAotRuntime');
+    final fileSystem = MemoryFileSystem.test();
+    final generatorWithMissingRuntime = DefaultResidentCompiler(
+      'sdkroot',
+      buildInfo: BuildInfo.debug,
+      logger: testLogger,
+      processManager: fakeProcessManager..excludedExecutables.add('Artifact.engineDartAotRuntime'),
+      artifacts: FakeArtifacts(fileSystem: fileSystem, sdkPath: '/bin/cache/dart-sdk'),
+      platform: FakePlatform(),
+      fileSystem: fileSystem,
+      stdoutHandler: generatorStdoutHandler,
+      shutdownHooks: FakeShutdownHooks(),
+      config: Config.test(),
+    );
 
     await expectLater(
       asyncGuard(
-        () => generator.recompile(
+        () => generatorWithMissingRuntime.recompile(
           Uri.parse('/path/to/main.dart'),
           null,
           outputPath: '/build/',
           packageConfig: PackageConfig.empty,
-          fs: MemoryFileSystem.test(),
+          fs: fileSystem,
           projectRootPath: '',
         ),
       ),
       throwsToolExit(
-        message: 'Unable to find dartaotruntime binary at Artifact.engineDartAotRuntime',
+        message:
+            'Unable to find dartaotruntime binary at Artifact.engineDartAotRuntime.\n'
+            'The Dart SDK cache appears to be incomplete or corrupted (often caused '
+            'by antivirus software quarantining files).\n'
+            'Please delete /bin/cache and re-run your command '
+            'to re-download the Dart SDK. '
+            'If this issue persists, add your Flutter SDK directory to your antivirus exclusions.',
       ),
     );
     expect(fakeProcessManager, hasNoRemainingExpectations);

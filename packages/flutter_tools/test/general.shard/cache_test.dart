@@ -1734,6 +1734,62 @@ void main() {
     expect(dartSdkVersionFormat.allMatches(currentDartSdkVersion).length, 1);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/188450.
+  group('Dart SDK cache integrity', () {
+    late FileSystem fileSystem;
+    late Cache cache;
+    late File versionFile;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      cache = Cache.test(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.empty(),
+      );
+      versionFile = (cache.getCacheDir(
+        'dart-sdk/bin/resources/devtools',
+        shouldCreate: false,
+      )..createSync(recursive: true)).childFile('version.json');
+    });
+
+    test('returns devToolsVersion when version.json is valid', () {
+      versionFile.writeAsStringSync('{"version": "2.3.4"}');
+
+      expect(cache.devToolsVersion, '2.3.4');
+    });
+
+    test('throws ToolExit when version.json is missing', () {
+      expect(
+        () => cache.devToolsVersion,
+        throwsToolExit(
+          message:
+              'Could not read the DevTools version from ${versionFile.path}.\n'
+              'The Dart SDK cache appears to be incomplete or corrupted (often caused '
+              'by antivirus software quarantining files).\n'
+              'Please delete ${cache.getRoot().path} and re-run your command to re-download the Dart SDK. '
+              'If this issue persists, add your Flutter SDK directory to your antivirus exclusions.',
+        ),
+      );
+    });
+
+    for (final content in const <String>[
+      '{invalid json}',
+      '[]',
+      '{"not-version": "1.0.0"}',
+      '{"version": 123}',
+    ]) {
+      test('throws ToolExit when version.json contains $content', () {
+        versionFile.writeAsStringSync(content);
+
+        expect(
+          () => cache.devToolsVersion,
+          throwsToolExit(message: 'Could not read the DevTools version from ${versionFile.path}.'),
+        );
+      });
+    }
+  });
+
   group('AndroidMavenArtifacts', () {
     MemoryFileSystem? memoryFileSystem;
     Cache? cache;

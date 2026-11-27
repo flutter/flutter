@@ -458,39 +458,49 @@ class Cache {
     }
   }
 
-  String get devToolsVersion {
-    if (_devToolsVersion == null) {
-      const devToolsDirPath = 'dart-sdk/bin/resources/devtools';
-      final Directory devToolsDir = getCacheDir(devToolsDirPath, shouldCreate: false);
-      if (!devToolsDir.existsSync()) {
-        throw Exception('Could not find directory at ${devToolsDir.path}');
-      }
-      final versionFilePath = '${devToolsDir.path}/version.json';
-      final File versionFile = _fileSystem.file(versionFilePath);
-      if (!versionFile.existsSync()) {
-        throw Exception('Could not find file at $versionFilePath');
-      }
-      final dynamic data = jsonDecode(versionFile.readAsStringSync());
-      if (data is! Map<String, Object?>) {
-        throw Exception(
-          "Expected object of type 'Map<String, Object?>' but got one of type '${data.runtimeType}'",
-        );
-      }
-      final Object? version = data['version'];
-      if (version == null) {
-        throw Exception('Could not parse DevTools version from $version');
-      }
-      if (version is! String) {
-        throw Exception(
-          "Could not parse DevTools version. Expected object of type 'String', but got one of type '${version.runtimeType}'",
-        );
-      }
-      return _devToolsVersion = version;
-    }
-    return _devToolsVersion!;
-  }
+  /// The version of DevTools currently bundled in the Dart SDK cache.
+  ///
+  /// Throws a [ToolExit] with recovery instructions if `version.json` is
+  /// missing or malformed.
+  String get devToolsVersion => _devToolsVersion ??= _readDevToolsVersion();
 
   String? _devToolsVersion;
+
+  String _readDevToolsVersion() {
+    const devToolsDirPath = 'dart-sdk/bin/resources/devtools';
+    final File versionFile = getCacheDir(
+      devToolsDirPath,
+      shouldCreate: false,
+    ).childFile('version.json');
+    if (versionFile.existsSync()) {
+      try {
+        if (jsonDecode(versionFile.readAsStringSync()) case {'version': final String version}) {
+          return version;
+        }
+      } on FormatException catch (e) {
+        _logger.printTrace('Failed to parse DevTools version file: $e');
+      }
+    }
+
+    throwDartSdkCacheCorruptionToolExit(
+      cacheDir: getRoot(),
+      message: 'Could not read the DevTools version from ${versionFile.path}.',
+    );
+  }
+
+  /// Throws a [ToolExit] with recovery instructions for a missing, incomplete,
+  /// or corrupted Dart SDK cache in [cacheDir].
+  static Never throwDartSdkCacheCorruptionToolExit({
+    required Directory cacheDir,
+    required String message,
+  }) {
+    throwToolExit(
+      '''
+$message
+The Dart SDK cache appears to be incomplete or corrupted (often caused by antivirus software quarantining files).
+Please delete ${cacheDir.path} and re-run your command to re-download the Dart SDK. If this issue persists, add your Flutter SDK directory to your antivirus exclusions.''',
+    );
+  }
 
   /// The current version of Dart used to build Flutter and run the tool.
   String get dartSdkVersion {
