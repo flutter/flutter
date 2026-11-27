@@ -27,10 +27,16 @@
 
 set -e
 
-# When called from a submodule hook; these will override `git -C dir`
+# When called from a git hook or worktree; these will override `git -C dir`.
+# Keep in sync with Git._kGitEnvironmentVariables in
+# packages/flutter_tools/lib/src/git.dart.
 unset GIT_DIR
 unset GIT_INDEX_FILE
 unset GIT_WORK_TREE
+unset GIT_OBJECT_DIRECTORY
+unset GIT_ALTERNATE_OBJECT_DIRECTORIES
+unset GIT_QUARANTINE_PATH
+unset GIT_COMMON_DIR
 
 FLUTTER_ROOT="$(dirname "$(dirname "$(dirname "${BASH_SOURCE[0]}")")")"
 

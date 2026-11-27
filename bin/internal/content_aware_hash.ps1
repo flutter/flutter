@@ -12,10 +12,16 @@
 
 $ErrorActionPreference = "Stop"
 
-# When called from a submodule hook; these will override `git -C dir`
+# When called from a git hook or worktree; these will override `git -C dir`.
+# Keep in sync with Git._kGitEnvironmentVariables in
+# packages/flutter_tools/lib/src/git.dart.
 $env:GIT_DIR = $null
 $env:GIT_INDEX_FILE = $null
 $env:GIT_WORK_TREE = $null
+$env:GIT_OBJECT_DIRECTORY = $null
+$env:GIT_ALTERNATE_OBJECT_DIRECTORIES = $null
+$env:GIT_QUARANTINE_PATH = $null
+$env:GIT_COMMON_DIR = $null
 
 $progName = Split-Path -parent $MyInvocation.MyCommand.Definition
 $flutterRoot = (Get-Item $progName).parent.parent.FullName

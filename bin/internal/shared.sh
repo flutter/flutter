@@ -118,6 +118,20 @@ function _wait_for_lock () {
 function upgrade_flutter () (
   mkdir -p "$FLUTTER_ROOT/bin/cache"
 
+  # Unset Git environment variables that may be inherited (e.g. from a git hook
+  # in a user repository or linked worktree) so git commands target $FLUTTER_ROOT.
+  # Keep in sync with Git._kGitEnvironmentVariables in
+  # packages/flutter_tools/lib/src/git.dart.
+  # Since upgrade_flutter runs in a subshell, the caller's environment is
+  # preserved for the user command executed after upgrade_flutter returns.
+  unset GIT_DIR
+  unset GIT_INDEX_FILE
+  unset GIT_WORK_TREE
+  unset GIT_OBJECT_DIRECTORY
+  unset GIT_ALTERNATE_OBJECT_DIRECTORIES
+  unset GIT_QUARANTINE_PATH
+  unset GIT_COMMON_DIR
+
   # Ensure the engine.version is populated
   "$FLUTTER_ROOT/bin/internal/update_engine_version.sh"
 
