@@ -198,12 +198,12 @@ class TestCompiler {
   }
 
   Future<void> _shutdown() async {
-    // Check for null in case this instance is shut down before the
-    // lazily-created compiler has been created.
-    if (compiler != null) {
-      await compiler!.shutdown();
-      compiler = null;
-    }
+    // Clear [compiler] before awaiting, so that a shutdown that throws doesn't
+    // leave it set for the next compilation. It is null if this instance is
+    // shut down before the lazily-created compiler has been created.
+    final ResidentCompiler? activeCompiler = compiler;
+    compiler = null;
+    await activeCompiler?.shutdown();
   }
 
   Future<void> dispose() async {
@@ -255,6 +255,7 @@ class TestCompiler {
       logger.printTrace('Compiling ${request.mainUri}');
       final compilerTime = Stopwatch()..start();
       final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);
+      TestCompilerResult result;
       try {
         var firstCompile = false;
         if (compiler == null) {
@@ -297,21 +298,18 @@ class TestCompiler {
           checkDartPluginRegistry: true,
           fs: fs,
         );
-        final String? outputPath = compilerOutput?.outputFilename;
 
         // In case compiler didn't produce output or reported compilation
         // errors, pass [null] upwards to the consumer and shutdown the
         // compiler to avoid reusing compiler that might have gotten into
         // a weird state.
-        if (outputPath == null || compilerOutput!.errorCount > 0) {
-          request._result.complete(
-            TestCompilerFailure(
-              error: compilerOutput?.errorMessage ?? 'Unknown Error',
-              mainUri: request.mainUri,
-            ),
+        if (compilerOutput == null || compilerOutput.errorCount > 0) {
+          result = TestCompilerFailure(
+            error: compilerOutput?.errorMessage ?? 'Unknown Error',
+            mainUri: request.mainUri,
           );
-          await _shutdown();
         } else {
+          final String outputPath = compilerOutput.outputFilename;
           if (shouldCopyDillFile) {
             final String path = request.mainUri.toFilePath(windows: platform.isWindows);
             final File outputFile = fs.file(outputPath);
@@ -328,37 +326,34 @@ class TestCompiler {
               }
               await outputFile.copy(testFilePath);
             }
-            request._result.complete(
-              TestCompilerComplete(outputPath: kernelReadyToRun.path, mainUri: request.mainUri),
+            result = TestCompilerComplete(
+              outputPath: kernelReadyToRun.path,
+              mainUri: request.mainUri,
             );
           } else {
-            request._result.complete(
-              TestCompilerComplete(outputPath: outputPath, mainUri: request.mainUri),
-            );
+            result = TestCompilerComplete(outputPath: outputPath, mainUri: request.mainUri);
           }
           compiler!.accept();
           compiler!.reset();
         }
-      } on Object catch (error) {
-        // Complete the request and keep going: otherwise this test and every
+      } on Object catch (error, stackTrace) {
+        // Fail this request and keep going: otherwise this test and every
         // test queued behind it waits forever for its compilation result.
-        if (!request._result.isCompleted) {
-          request._result.complete(
-            TestCompilerFailure(error: error.toString(), mainUri: request.mainUri),
-          );
-        }
-        await _shutdown();
-      } finally {
-        // Only remove now when we finished processing the element. Do it
-        // first so that nothing below can skip it and stall the queue.
-        compilationQueue.removeAt(0);
-        logger.printTrace(
-          'Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms',
-        );
-        if (testTimeRecorderStopwatch != null) {
-          testTimeRecorder?.stop(TestTimePhases.Compile, testTimeRecorderStopwatch);
+        logger.printTrace('Compilation failed for ${request.mainUri}: $error\n$stackTrace');
+        result = TestCompilerFailure(error: error.toString(), mainUri: request.mainUri);
+      }
+      if (result is TestCompilerFailure) {
+        try {
+          await _shutdown();
+        } on Object catch (error, stackTrace) {
+          logger.printTrace('Failed to shut down compiler: $error\n$stackTrace');
         }
       }
+      // Only remove now when we finished processing the element
+      compilationQueue.removeAt(0);
+      logger.printTrace('Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');
+      testTimeRecorder?.stop(TestTimePhases.Compile, testTimeRecorderStopwatch!);
+      request._result.complete(result);
     }
   }
 }
