@@ -414,6 +414,22 @@ final class BuildRunner extends Runner {
   /// Returns the empty string if the command fails or the build has no Swift
   /// targets.
   Future<String> _getSwiftCompilationDatabase() async {
+    if (_isSiso) {
+      final String sisoPath = p.join(
+        engineSrcDir.parent.parent.path,
+        'third_party',
+        'siso',
+        'siso',
+      );
+      final String outDir = p.join(engineSrcDir.path, 'out', build.ninja.config);
+      final ProcessRunnerResult result = await processRunner.runProcess(
+        <String>[sisoPath, 'ninja', '-t', 'compdb', 'swift'],
+        workingDirectory: io.Directory(outDir),
+        failOk: true,
+      );
+      return result.exitCode == 0 ? result.stdout : '';
+    }
+
     final String ninjaPath = p.join(
       engineSrcDir.parent.parent.path,
       'third_party',
@@ -638,6 +654,10 @@ final class BuildRunner extends Runner {
   }
 
   Future<bool> _runNinja(RunnerEventHandler eventHandler) async {
+    if (_isSiso) {
+      return _runSiso(eventHandler);
+    }
+
     if (_isRbe) {
       if (!await _bootstrapRbe(eventHandler)) {
         return false;
@@ -721,6 +741,70 @@ final class BuildRunner extends Runner {
     return success;
   }
 
+  Future<bool> _runSiso(RunnerEventHandler eventHandler) async {
+    final String sisoPath = p.join(engineSrcDir.parent.parent.path, 'third_party', 'siso', 'siso');
+    final String outDir = p.join(engineSrcDir.path, 'out', build.ninja.config);
+    final command = <String>[
+      sisoPath,
+      'ninja',
+      '-C',
+      outDir,
+      if (!_isRbe) '-offline',
+      ...extraNinjaArgs,
+      ...build.ninja.targets,
+    ];
+    final environment = <String, String>{
+      'SISO_CREDENTIAL_HELPER': 'google-application-default',
+      'SISO_PROJECT': 'flutter-rbe-prod',
+      'SISO_REAPI_INSTANCE': 'default',
+    };
+    eventHandler(RunnerStart('${build.name}: siso', command, DateTime.now(), environment));
+    final ProcessRunnerResult processResult;
+    if (dryRun) {
+      processResult = _dryRunResult;
+    } else {
+      final bool shouldEmitAnsi =
+          (io.stdout.supportsAnsiEscapes && io.Platform.environment['CLICOLOR_FORCE'] != '0') ||
+          io.Platform.environment['CLICOLOR_FORCE'] == '1';
+      final io.Process process = await processRunner.processManager.start(
+        command,
+        workingDirectory: engineSrcDir.path,
+        environment: {...environment, if (shouldEmitAnsi) 'CLICOLOR_FORCE': '1'},
+      );
+      final stderrOutput = <int>[];
+      final stdoutOutput = <int>[];
+      final stdoutComplete = Completer<void>();
+      final stderrComplete = Completer<void>();
+
+      process.stdout.transform<String>(const Utf8Decoder()).transform(const LineSplitter()).listen((
+        String line,
+      ) {
+        if (_ninjaProgress(eventHandler, command, line)) {
+          return;
+        }
+        // TODO(157816): Forward errors to `et`.
+        line = fixGccPaths(line, outDir);
+        final List<int> bytes = utf8.encode('$line\n');
+        stdoutOutput.addAll(bytes);
+      }, onDone: () async => stdoutComplete.complete());
+
+      process.stderr.listen(stderrOutput.addAll, onDone: () async => stderrComplete.complete());
+
+      await Future.wait<void>(<Future<void>>[stdoutComplete.future, stderrComplete.future]);
+      final int exitCode = await process.exitCode;
+
+      processResult = ProcessRunnerResult(
+        exitCode,
+        stdoutOutput, // stdout.
+        stderrOutput, // stderr.
+        <int>[], // combined,
+        pid: process.pid, // pid,
+      );
+    }
+    eventHandler(RunnerResult('${build.name}: siso', command, DateTime.now(), processResult));
+    return processResult.exitCode == 0;
+  }
+
   // Parse lines of the form '[6232/6269] LINK ./accessibility_unittests'.
   // Returns false if the line is not a ninja progress line.
   bool _ninjaProgress(RunnerEventHandler eventHandler, List<String> command, String line) {
@@ -756,6 +840,7 @@ final class BuildRunner extends Runner {
     return true;
   }
 
+  late final bool _isSiso = _mergedGnArgs.contains('--siso');
   late final bool _isRbe = _mergedGnArgs.contains('--rbe');
 
   Future<bool> _runGenerators(RunnerEventHandler eventHandler) async {

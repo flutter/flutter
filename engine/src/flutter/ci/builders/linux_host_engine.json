@@ -43,6 +43,7 @@
                 "debug",
                 "--prebuilt-dart-sdk",
                 "--no-lto",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/host_debug",
@@ -92,6 +93,7 @@
                 "release",
                 "--prebuilt-dart-sdk",
                 "--thin-lto",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/host_release",

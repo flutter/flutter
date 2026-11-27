@@ -19,6 +19,7 @@
         "--simulator-cpu",
         "arm64",
         "--darwin-extension-safe",
+        "--siso",
         "--rbe",
         "--xcode-symlinks",
         "--target-dir",

@@ -29,6 +29,7 @@
                 "debug",
                 "--simulator",
                 "--no-lto",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -74,6 +75,7 @@
                 "--simulator",
                 "--simulator-cpu=arm64",
                 "--no-lto",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -117,6 +119,7 @@
                 "--ios",
                 "--runtime-mode",
                 "debug",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -161,6 +164,7 @@
                 "--ios",
                 "--runtime-mode",
                 "profile",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -205,6 +209,7 @@
                 "--ios",
                 "--runtime-mode",
                 "release",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -252,6 +257,7 @@
                 "--simulator",
                 "--no-lto",
                 "--darwin-extension-safe",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -299,6 +305,7 @@
                 "--simulator-cpu=arm64",
                 "--no-lto",
                 "--darwin-extension-safe",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -344,6 +351,7 @@
                 "--runtime-mode",
                 "debug",
                 "--darwin-extension-safe",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -390,6 +398,7 @@
                 "--runtime-mode",
                 "profile",
                 "--darwin-extension-safe",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],
@@ -436,6 +445,7 @@
                 "--runtime-mode",
                 "release",
                 "--darwin-extension-safe",
+                "--siso",
                 "--rbe",
                 "--xcode-symlinks"
             ],

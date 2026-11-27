@@ -144,6 +144,7 @@ See `flutter run --help` for a listing
       hostBuild,
       concurrency: plan.concurrency ?? 0,
       extraGnArgs: plan.toGnArgs(),
+      useSiso: plan.useSiso,
       enableRbe: plan.useRbe,
       rbeConfig: plan.toRbeConfig(),
     );
@@ -158,6 +159,7 @@ See `flutter run --help` for a listing
         plan.build,
         concurrency: plan.concurrency ?? 0,
         extraGnArgs: plan.toGnArgs(),
+        useSiso: plan.useSiso,
         enableRbe: plan.useRbe,
         targets: buildTargetsForShell,
         rbeConfig: plan.toRbeConfig(),

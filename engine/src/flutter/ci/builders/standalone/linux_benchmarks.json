@@ -14,6 +14,7 @@
         "release",
         "--prebuilt-dart-sdk",
         "--build-embedder-examples",
+        "--siso",
         "--rbe"
     ],
     "name": "ci/host_release_benchmarks",

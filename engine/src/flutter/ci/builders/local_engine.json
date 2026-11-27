@@ -17,6 +17,7 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
+        "--siso",
         "--rbe"
       ],
       "name": "macos/ios_debug",
@@ -49,6 +50,7 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
+        "--siso",
         "--rbe"
       ],
       "name": "macos/ios_debug_unopt",
@@ -80,6 +82,7 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
+        "--siso",
         "--rbe"
       ],
       "name": "macos/ios_profile",
@@ -111,6 +114,7 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
+        "--siso",
         "--rbe"
       ],
       "name": "macos/ios_release",
@@ -143,6 +147,7 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
+        "--siso",
         "--rbe"
       ],
       "name": "macos/ios_debug_sim",
@@ -174,6 +179,7 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
+        "--siso",
         "--rbe"
       ],
       "name": "macos/android_debug_arm64",
@@ -204,6 +210,7 @@
         "--android-cpu=arm64",
         "--no-stripped",
         "--no-lto",
+        "--siso",
         "--rbe"
       ],
       "name": "linux/android_debug_arm64",
@@ -229,6 +236,7 @@
         "--android-cpu=riscv64",
         "--no-stripped",
         "--no-lto",
+        "--siso",
         "--rbe"
       ],
       "name": "linux/android_debug_riscv64",
@@ -255,6 +263,7 @@
         "--android-cpu=x64",
         "--no-stripped",
         "--no-lto",
+        "--siso",
         "--rbe"
       ],
       "name": "linux/android_debug_unopt_x64",
@@ -307,6 +316,7 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
+        "--siso",
         "--rbe"
       ],
       "name": "macos/android_debug_unopt",
@@ -339,6 +349,7 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
+        "--siso",
         "--rbe"
       ],
       "name": "macos/android_debug_unopt_arm64",
@@ -370,6 +381,7 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
+                "--siso",
         "--rbe"
       ],
       "name": "macos/android_profile_arm64",
@@ -400,6 +412,7 @@
         "--android-cpu=arm64",
         "--no-stripped",
         "--no-lto",
+        "--siso",
         "--rbe"
       ],
       "name": "linux/android_profile_arm64",
@@ -451,6 +464,7 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
+        "--siso",
         "--rbe"
       ],
       "name": "macos/android_release_arm64",
@@ -481,6 +495,7 @@
         "--android-cpu=arm64",
         "--no-stripped",
         "--no-lto",
+        "--siso",
         "--rbe"
       ],
       "name": "linux/android_release_arm64",
@@ -531,6 +546,7 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
+        "--siso",
         "--rbe"
       ],
       "name": "macos/host_debug",
@@ -562,6 +578,7 @@
         "--mac-cpu",
         "arm64",
         "--xcode-symlinks",
+        "--siso",
         "--rbe"
       ],
       "name": "macos/host_profile_arm64",
@@ -593,6 +610,7 @@
         "--mac-cpu",
         "arm64",
         "--xcode-symlinks",
+        "--siso",
         "--rbe"
       ],
       "name": "macos/host_release_arm64",
@@ -622,6 +640,7 @@
         "debug",
         "--no-stripped",
         "--no-lto",
+        "--siso",
         "--rbe"
       ],
       "name": "linux/host_debug",
@@ -671,6 +690,7 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
+        "--siso",
         "--rbe"
       ],
       "name": "macos/host_profile",
@@ -700,6 +720,7 @@
         "profile",
         "--no-stripped",
         "--no-lto",
+        "--siso",
         "--rbe"
       ],
       "name": "linux/host_profile",
@@ -749,6 +770,7 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
+        "--siso",
         "--rbe"
       ],
       "name": "macos/host_release",
@@ -778,6 +800,7 @@
         "release",
         "--no-stripped",
         "--no-lto",
+        "--siso",
         "--rbe",
         "--xcode-symlinks"
       ],

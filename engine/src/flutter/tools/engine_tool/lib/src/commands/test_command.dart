@@ -42,7 +42,12 @@ et test //flutter/fml:fml_benchmarks  # Run a single test target in `//flutter/f
   Future<int> run() async {
     final plan = BuildPlan.fromArgResults(argResults!, environment, builds: builds);
 
-    if (!await ensureBuildDir(environment, plan.build, enableRbe: plan.useRbe)) {
+    if (!await ensureBuildDir(
+      environment,
+      plan.build,
+      useSiso: plan.useSiso,
+      enableRbe: plan.useRbe,
+    )) {
       return 1;
     }
 
@@ -78,6 +83,7 @@ et test //flutter/fml:fml_benchmarks  # Run a single test target in `//flutter/f
       plan.build,
       concurrency: plan.concurrency ?? 0,
       targets: testTargets.map((target) => target.label).toList(),
+      useSiso: plan.useSiso,
       enableRbe: plan.useRbe,
       rbeConfig: plan.toRbeConfig(),
     );

@@ -38,6 +38,7 @@
                 "debug",
                 "--prebuilt-dart-sdk",
                 "--no-lto",
+                "--siso",
                 "--rbe",
                 "--gn-args=dart_dynamic_modules=true"
             ],

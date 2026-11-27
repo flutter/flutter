@@ -29,6 +29,7 @@
         "debug",
         "--simulator",
         "--no-lto",
+        "--siso",
         "--rbe",
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true"
@@ -76,6 +77,7 @@
         "--simulator",
         "--simulator-cpu=arm64",
         "--no-lto",
+        "--siso",
         "--rbe",
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true"
@@ -121,6 +123,7 @@
         "--ios",
         "--runtime-mode",
         "debug",
+        "--siso",
         "--rbe",
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true"
@@ -167,6 +170,7 @@
         "--ios",
         "--runtime-mode",
         "release",
+        "--siso",
         "--rbe",
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true"

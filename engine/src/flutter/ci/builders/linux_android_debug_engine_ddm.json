@@ -38,6 +38,7 @@
                 "--android-cpu=arm64",
                 "--no-lto",
                 "--gn-args=dart_dynamic_modules=true",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/android_debug_arm64_ddm",
@@ -76,6 +77,7 @@
                 "--android-cpu=x64",
                 "--no-lto",
                 "--gn-args=dart_dynamic_modules=true",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/android_debug_x64_ddm",

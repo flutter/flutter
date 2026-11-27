@@ -19,6 +19,7 @@
         "--prebuilt-dart-sdk",
         "--mac-cpu",
         "arm64",
+        "--siso",
         "--rbe",
         "--xcode-symlinks",
         "--use-glfw-swiftshader"

@@ -7,6 +7,7 @@ import("//build/toolchain/ccache.gni")
 import("//build/toolchain/clang.gni")
 import("//build/toolchain/gcc_toolchain.gni")
 import("//build/toolchain/rbe.gni")
+import("//build/toolchain/siso.gni")
 import("//build/toolchain/toolchain.gni")
 
 # The Android GCC toolchains share most of the same parameters, so we have this
@@ -36,7 +37,7 @@ template("android_toolchain") {
     solink_libs_section_prefix = "$android_ndk_lib/crtbegin_so.o"
     solink_libs_section_postfix = "$android_ndk_lib/crtend_so.o"
 
-    if (use_rbe) {
+    if (use_rbe && !use_siso) {
       remote_wrapper = ""
       if (host_os == "linux") {
         remote_wrapper =

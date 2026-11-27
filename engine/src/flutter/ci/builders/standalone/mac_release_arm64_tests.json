@@ -25,6 +25,7 @@
         "release",
         "--no-lto",
         "--prebuilt-dart-sdk",
+        "--siso",
         "--rbe",
         "--xcode-symlinks",
         "--use-glfw-swiftshader"

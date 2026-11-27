@@ -25,6 +25,7 @@ final class TestBuilderConfig {
   void addBuild({
     required String name,
     required TestDroneDimension dimension,
+    bool useSiso = false,
     bool enableRbe = false,
     bool? enableLto,
     String description = 'A default description.',

@@ -20,6 +20,7 @@
         "--prebuilt-dart-sdk",
         "--build-embedder-examples",
         "--use-glfw-swiftshader",
+        "--siso",
         "--rbe",
         "--xcode-symlinks"
     ],

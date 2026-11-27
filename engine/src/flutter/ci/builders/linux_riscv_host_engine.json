@@ -42,6 +42,7 @@
                 "--enable-fontconfig",
                 "--no-prebuilt-dart-sdk",
                 "--thin-lto",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/linux_profile_riscv64",
@@ -89,6 +90,7 @@
                 "--enable-fontconfig",
                 "--no-prebuilt-dart-sdk",
                 "--no-lto",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/linux_debug_riscv64",
@@ -136,6 +138,7 @@
                 "--enable-fontconfig",
                 "--no-prebuilt-dart-sdk",
                 "--thin-lto",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/linux_release_riscv64",

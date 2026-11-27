@@ -42,6 +42,7 @@
                 "--android-cpu",
                 "arm64",
                 "--gn-args=dart_dynamic_modules=true",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/android_release_arm64_ddm",
@@ -97,6 +98,7 @@
                 "--android-cpu",
                 "x64",
                 "--gn-args=dart_dynamic_modules=true",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/android_release_x64_ddm",
