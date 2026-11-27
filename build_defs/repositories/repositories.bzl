@@ -433,13 +433,16 @@ def _convert_gn(rctx, fetched):
     # Each package's directory is the repository's own (_link_tree's
     # `packages`): a BUILD file written through a symlink would be one more
     # file of the synced tree, which GN and git see (or of a fetched tree,
-    # which other repositories read).
-    foreign = [str(checkout.realpath)] + [str(tree.realpath) for tree in fetched.values()]
+    # which other repositories read). Asked of the repository's directory
+    # and not of the checkout's: the output base may itself be inside the
+    # checkout -- tools/gn --bazel and dev/bots/test.dart keep theirs in
+    # .bazel_ci/ --, and there every directory of the repository is one of
+    # the checkout's as well.
+    repository = str(rctx.path(".").realpath)
     for package in _gn_packages(rctx):
         real = str(rctx.path(package).realpath)
-        for root in foreign:
-            if real.startswith(root + "/"):
-                fail("synced_repository(%s): %s is a symlink out of the repository (into %s); its BUILD file would be written there" % (rctx.name, package, root))
+        if not real.startswith(repository + "/"):
+            fail("synced_repository(%s): %s is a symlink out of the repository (to %s); its BUILD file would be written there" % (rctx.name, package, real))
 
     converter = checkout.get_child(_CONVERTER)
     packages = checkout.get_child(_ENGINE_PACKAGE_CONFIG)
