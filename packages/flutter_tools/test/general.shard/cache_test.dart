@@ -1053,7 +1053,7 @@ void main() {
       cache,
       platform: FakePlatform(operatingSystem: 'macos'),
     );
-    iosUsbArtifacts.location.createSync();
+    iosUsbArtifacts.location.createSync(recursive: true);
     final File ideviceSyslogFile = iosUsbArtifacts.location.childFile('idevicesyslog')
       ..createSync();
 
@@ -1072,7 +1072,7 @@ void main() {
       cache,
       platform: FakePlatform(operatingSystem: 'macos'),
     );
-    iosUsbArtifacts.location.createSync();
+    iosUsbArtifacts.location.createSync(recursive: true);
     final File iproxy = iosUsbArtifacts.location.childFile('iproxy')..createSync();
 
     expect(iosUsbArtifacts.isUpToDateInner(fileSystem), true);
@@ -1090,7 +1090,7 @@ void main() {
       cache,
       platform: FakePlatform(operatingSystem: 'macos'),
     );
-    iosUsbArtifacts.location.createSync();
+    iosUsbArtifacts.location.createSync(recursive: true);
 
     expect(iosUsbArtifacts.isUpToDateInner(fileSystem), true);
   });
@@ -1828,6 +1828,45 @@ void main() {
 
       expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
     });
+  });
+
+  test('read-only cache lookups and isUpToDateInner do not create cache directories', () {
+    final fs = MemoryFileSystem.test();
+    final platform = FakePlatform();
+    final testCache = Cache.test(
+      fileSystem: fs,
+      platform: platform,
+      processManager: FakeProcessManager.empty(),
+    );
+
+    testCache.getCacheArtifacts();
+    testCache.getArtifactDirectory('engine');
+    expect(FlutterSdk(testCache, platform: platform).isUpToDateInner(fs), isFalse);
+    expect(GradleWrapper(testCache).isUpToDateInner(fs), isFalse);
+    expect(fs.directory('/bin/cache/artifacts').existsSync(), isFalse);
+    expect(fs.directory('/bin/cache/pkg').existsSync(), isFalse);
+  });
+
+  test('CachedArtifact.update creates bin/cache/artifacts with 755 permissions only for artifacts under it', () async {
+    final fs = MemoryFileSystem.test();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(command: <String>['chmod', '755', '/bin/cache/artifacts']),
+    ]);
+    final testCache = Cache.test(fileSystem: fs, processManager: processManager);
+    await FakeSimpleArtifact(testCache)
+        .update(FakeArtifactUpdater(), BufferLogger.test(), fs, FakeOperatingSystemUtils());
+    expect(processManager.hasRemainingExpectations, isFalse);
+
+    final webFs = MemoryFileSystem.test();
+    webFs.file('/bin/cache/engine.stamp')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('1234');
+    final webProcessManager = FakeProcessManager.empty();
+    final webCache = Cache.test(fileSystem: webFs, processManager: webProcessManager);
+    await FlutterWebSdk(webCache)
+        .update(FakeArtifactUpdater(), BufferLogger.test(), webFs, FakeOperatingSystemUtils());
+    expect(webFs.directory('/bin/cache/artifacts').existsSync(), isFalse);
+    expect(webProcessManager.hasRemainingExpectations, isFalse);
   });
 
   test('Cache.flutterRoot precedence prefers explicit flutterRoot, then rootOverride, then defaultFlutterRoot', () {

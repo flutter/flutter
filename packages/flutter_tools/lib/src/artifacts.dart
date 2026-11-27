@@ -447,7 +447,7 @@ class CachedArtifacts implements Artifacts {
         final String artifactFileName = artifact.getFileName(_platform);
         return _cache.getArtifactDirectory('libimobiledevice').childFile(artifactFileName);
       case HostArtifact.skyEnginePath:
-        final Directory dartPackageDirectory = _cache.getCacheDir('pkg');
+        final Directory dartPackageDirectory = _cache.getCacheDir('pkg', shouldCreate: false);
         final String path = _fileSystem.path.join(
           dartPackageDirectory.path,
           artifact.getFileName(_platform),
@@ -805,7 +805,7 @@ class CachedArtifacts implements Artifacts {
           artifact.getFileName(_platform, mode),
         );
       case Artifact.skyEnginePath:
-        final Directory dartPackageDirectory = _cache.getCacheDir('pkg');
+        final Directory dartPackageDirectory = _cache.getCacheDir('pkg', shouldCreate: false);
         return _fileSystem.path.join(dartPackageDirectory.path, artifact.getFileName(_platform));
       case Artifact.fontSubset:
         return _cache

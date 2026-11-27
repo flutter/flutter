@@ -573,6 +573,7 @@ class GradleWrapper extends CachedArtifact {
     final String gradleWrapper = fileSystem.path.join('gradle', 'wrapper', 'gradle-wrapper.jar');
     final Directory wrapperDir = cache.getCacheDir(
       fileSystem.path.join('artifacts', 'gradle_wrapper'),
+      shouldCreate: false,
     );
     if (!fileSystem.directory(wrapperDir).existsSync()) {
       return false;
