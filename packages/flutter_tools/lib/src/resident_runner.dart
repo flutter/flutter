@@ -383,15 +383,15 @@ class FlutterDevice {
       'on ${device!.displayName} in $modeName mode...',
     );
 
-    final TargetPlatform targetPlatform = await device!.targetPlatform;
-    package = await hotRunner.applicationPackageFactory.getPackageForPlatform(
-      targetPlatform,
+    package = await hotRunner.applicationPackageFactory.getPackageForDevice(
+      device!,
       buildInfo: hotRunner.debuggingOptions.buildInfo,
       applicationBinary: hotRunner.applicationBinary,
     );
     final ApplicationPackage? applicationPackage = package;
 
     if (applicationPackage == null) {
+      final TargetPlatform targetPlatform = await device!.targetPlatform;
       var message = 'No application found for $targetPlatform.';
       final String? hint = await getMissingPackageHintForPlatform(
         targetPlatform,
@@ -437,15 +437,15 @@ class FlutterDevice {
   Future<int> runCold({required ColdRunner coldRunner, String? route}) async {
     final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
         _toolContext;
-    final TargetPlatform targetPlatform = await device!.targetPlatform;
-    package = await coldRunner.applicationPackageFactory.getPackageForPlatform(
-      targetPlatform,
+    package = await coldRunner.applicationPackageFactory.getPackageForDevice(
+      device!,
       buildInfo: coldRunner.debuggingOptions.buildInfo,
       applicationBinary: coldRunner.applicationBinary,
     );
     final ApplicationPackage? applicationPackage = package;
 
     if (applicationPackage == null) {
+      final TargetPlatform targetPlatform = await device!.targetPlatform;
       var message = 'No application found for $targetPlatform.';
       final String? hint = await getMissingPackageHintForPlatform(
         targetPlatform,

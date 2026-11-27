@@ -19,6 +19,8 @@ abstract final class LinuxArtifacts {
 }
 
 const String _kLinuxX64Platform = 'linux-x64';
+const String _kCustomLinuxOutputSubdir = 'linux_extension/x64';
+const String _kBundleDir = 'bundle';
 const String _kFlutterAssets = 'flutter_assets';
 const String _kLibFlutterLinuxGtk = 'libflutter_linux_gtk.so';
 const String _kIcuData = 'icudtl.dat';
@@ -33,7 +35,7 @@ final class CustomLinuxBuildTarget extends BuildTarget {
     : super(
         description: 'A custom Linux build target from prototype extension.',
         outputDir:
-            '${BuiltInPlaceholders.outputDir}/linux_extension/x64/${BuiltInPlaceholders.buildMode}',
+            '${BuiltInPlaceholders.outputDir}/$_kCustomLinuxOutputSubdir/${BuiltInPlaceholders.buildMode}',
         targetPlatform: _kLinuxX64Platform,
       );
 
@@ -129,15 +131,20 @@ list(APPEND FLUTTER_TOOL_ENVIRONMENT
       );
     }
 
-    final String? appName = _getCmakeBinaryName(projectDir.uri);
+    final String? appName = getLinuxCmakeBinaryName(projectDir.uri);
     if (appName == null) {
       return const ExtensionBuildResult(
         success: false,
         errorMessage: 'Could not find BINARY_NAME in linux/CMakeLists.txt.',
       );
     }
-    final executableFile = File('${outputDir.path}/bundle/$appName');
-    return ExtensionBuildResult(success: true, executableUri: executableFile.absolute.uri);
+    return ExtensionBuildResult(
+      success: true,
+      executableUri: customLinuxBundleExecutableUri(
+        binaryName: appName,
+        outputDir: outputDir.absolute.uri,
+      ),
+    );
   }
 }
 
@@ -236,7 +243,9 @@ final class CustomLinuxAssembleOnlyDebug extends AssembleTarget {
   }
 }
 
-String? _getCmakeBinaryName(Uri projectDirUri) {
+/// Parses `BINARY_NAME` from `<projectDirUri>/linux/CMakeLists.txt`, or returns
+/// `null` if the file or declaration is absent.
+String? getLinuxCmakeBinaryName(Uri projectDirUri) {
   final cmakeFile = File.fromUri(projectDirUri.resolve('linux/CMakeLists.txt'));
   if (!cmakeFile.existsSync()) {
     return null;
@@ -252,6 +261,25 @@ String? _getCmakeBinaryName(Uri projectDirUri) {
     }
   }
   return null;
+}
+
+/// Resolves the Linux executable `file:` [Uri] inside a build [outputDir] for
+/// [binaryName].
+Uri customLinuxBundleExecutableUri({required String binaryName, required Uri outputDir}) {
+  return outputDir.resolve('$_kBundleDir/$binaryName');
+}
+
+/// Resolves the expected Linux executable `file:` [Uri] under [buildDirectory]
+/// for [buildMode] and [binaryName].
+Uri customLinuxExecutableUri({
+  required String binaryName,
+  required Uri buildDirectory,
+  required BuildMode buildMode,
+}) {
+  return customLinuxBundleExecutableUri(
+    binaryName: binaryName,
+    outputDir: buildDirectory.resolve('$_kCustomLinuxOutputSubdir/${buildMode.cliName}/'),
+  );
 }
 
 /// Prototype Linux [BuildService] implementation.
