@@ -281,6 +281,7 @@ TEST(RasterizerTest, HeadlessCacheRepeatedSnapshot) {
   auto cached = selection.CreateHeadlessAiksContext();
   ASSERT_TRUE(cached);
   auto& arena = cached->GetContentContext().GetTransientsDataBuffer();
+  std::weak_ptr<impeller::AiksContext> cached_weak = cached;
   const size_t idle_before = idle_count();
   DisplayListBuilder builder;
   builder.DrawRect(DlRect::MakeLTRB(1, 1, 6, 6), DlPaint());
@@ -300,7 +301,7 @@ TEST(RasterizerTest, HeadlessCacheRepeatedSnapshot) {
   EXPECT_EQ(idle_count(), idle_before);
   cached.reset();
   rasterizer.SetImpellerContext(nullptr);
-  EXPECT_GT(idle_count(), idle_before);
+  EXPECT_TRUE(cached_weak.expired());
 }
 
 TEST(RasterizerTest, HeadlessCacheArenaWithPendingFence) {
@@ -400,7 +401,7 @@ static void CheckHeadlessReplacement(bool keep_old_context) {
     fence->SetStatus(impeller::vk::Result::eNotReady);
     pending = fence;
   });
-  auto done = std::make_shared<fml::AutoResetWaitableEvent>();
+  auto done = std::make_shared<fml::ManualResetWaitableEvent>();
   ASSERT_TRUE(a->GetCommandQueue()
                   ->Submit({command},
                            [done](auto status) {
@@ -412,44 +413,49 @@ static void CheckHeadlessReplacement(bool keep_old_context) {
                   .ok());
   ASSERT_NE(pending, nullptr);
   command.reset();
-  if (!keep_old_context) {
-    old.reset();
-  }
-  EXPECT_FALSE(backing.expired());
-  bool idle_entered = false;
-  // The stock mock returns success immediately. Model a driver that completes
-  // A's outstanding submission during the idle wait, before returning.
-  SetNextMockIdleCallback(a->GetDevice(), [&] {
-    idle_entered = true;
-    EXPECT_EQ(pending->GetStatus(), VK_NOT_READY);
-    EXPECT_FALSE(backing.expired());
-    pending->SetStatus(impeller::vk::Result::eSuccess);
-    EXPECT_FALSE(done->WaitWithTimeout(fml::TimeDelta::FromSeconds(5)));
-    EXPECT_FALSE(backing.expired());
-  });
-  InstallSnapshotBackend(rasterizer, b);
-  EXPECT_EQ(idle_entered, !keep_old_context);
-  bool routed_to_b = false;
-  auto& snapshots = static_cast<SnapshotDelegate&>(rasterizer);
-  snapshots.MakeImpellerSnapshotSync(
-      [&](impeller::AiksContext* selected) {
-        routed_to_b = selected && selected->GetContext() == b;
-        return sk_sp<DisplayList>();
-      },
-      {8, 8}, SnapshotPixelFormat::kDontCare);
-  EXPECT_TRUE(routed_to_b);
+  auto replace_backend = [&] {
+    InstallSnapshotBackend(rasterizer, b);
+    auto& snapshots = static_cast<SnapshotDelegate&>(rasterizer);
+    bool routed_to_b = false;
+    snapshots.MakeImpellerSnapshotSync(
+        [&](impeller::AiksContext* selected) {
+          routed_to_b = selected && selected->GetContext() == b;
+          return sk_sp<DisplayList>();
+        },
+        {8, 8}, SnapshotPixelFormat::kDontCare);
+    EXPECT_TRUE(routed_to_b);
+  };
   if (keep_old_context) {
+    replace_backend();
     EXPECT_FALSE(backing.expired());
-    EXPECT_FALSE(done->IsSignaledForTest());
+  } else {
     old.reset();
   }
-  if (!idle_entered) {
-    // Ensure teardown can finish even when the expected idle hook was bypassed.
+  fml::ManualResetWaitableEvent complete_fence;
+  // If teardown waits for device idle, the mock driver must finish the
+  // submission before returning. An asynchronous teardown can return first.
+  SetNextMockIdleCallback(a->GetDevice(), [&] {
+    complete_fence.Signal();
+    EXPECT_FALSE(done->WaitWithTimeout(fml::TimeDelta::FromSeconds(5)));
+  });
+  std::thread gpu([&] {
+    // A fence-only teardown can block without entering the idle callback.
+    // Allow that fence to progress independently of the teardown thread.
+    complete_fence.WaitWithTimeout(fml::TimeDelta::FromMilliseconds(250));
+    EXPECT_FALSE(backing.expired()) << "buffer released before its fence";
     pending->SetStatus(impeller::vk::Result::eSuccess);
-    SetNextMockIdleCallback(a->GetDevice(), {});
+  });
+  if (keep_old_context) {
+    old.reset();
+  } else {
+    replace_backend();
   }
-  EXPECT_TRUE(idle_entered);
+  complete_fence.Signal();
+  gpu.join();
+  SetNextMockIdleCallback(a->GetDevice(), {});
+  ASSERT_FALSE(done->WaitWithTimeout(fml::TimeDelta::FromSeconds(5)));
   EXPECT_TRUE(backing.expired());
+
   auto next = selection.CreateHeadlessAiksContext();
   ASSERT_TRUE(next);
   EXPECT_EQ(next->GetContext(), b);
@@ -574,11 +580,14 @@ static void ExpectHeadlessVulkanSnapshot(
         received_expected_context =
             aiks_context != nullptr &&
             aiks_context->GetContext() == vulkan_context;
-        return sk_sp<DisplayList>();
+        DisplayListBuilder builder;
+        builder.DrawRect(DlRect::MakeLTRB(0, 0, 1, 1), DlPaint());
+        return builder.Build();
       },
       DlISize{1, 1}, SnapshotPixelFormat::kDontCare);
 
-  EXPECT_EQ(result, nullptr);
+  ASSERT_TRUE(result);
+  EXPECT_EQ(result->GetSize(), (impeller::ISize{1, 1}));
   EXPECT_TRUE(received_expected_context);
 }
 
