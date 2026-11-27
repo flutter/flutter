@@ -32,6 +32,8 @@
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/playground/widgets.h"
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
+#include "impeller/typographer/glyph_atlas.h"
 #include "third_party/imgui/imgui.h"
 
 namespace impeller {
@@ -1889,6 +1891,51 @@ TEST_P(DisplayListTest,
   ASSERT_TRUE(it != backdrop_data.end());
   EXPECT_FALSE(it->second.coverage_union.IsEmpty());
   EXPECT_EQ(it->second.coverage_union, Rect::MakeLTRB(0, 0, 1000, 1000));
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/190519 and
+// https://github.com/flutter/flutter/issues/197306.
+//
+// Text that is too large for the glyph atlas is rendered as a path, so it
+// must not be added to the glyph atlas. Otherwise the atlas can fail to grow,
+// which prevents all of the other text in the frame from rendering.
+TEST_P(DisplayListTest, FirstPassDispatcherSkipsTextRenderedAsPath) {
+  AiksContext aiks_context(GetContext(),
+                           std::make_shared<TypographerContextSkia>());
+  ContentContext& content_context = aiks_context.GetContentContext();
+
+  flutter::DisplayListBuilder builder;
+  builder.DrawText(
+      flutter::DlTextImpeller::MakeFromBlob(
+          SkTextBlob::MakeFromString("hello", CreateTestFontOfSize(12))),
+      10, 20, flutter::DlPaint());
+  // A glyph that is wider than the glyph atlas (4096px) at this scale.
+  builder.Save();
+  builder.Scale(48, 48);
+  builder.DrawText(
+      flutter::DlTextImpeller::MakeFromBlob(
+          SkTextBlob::MakeFromString("W", CreateTestFontOfSize(200))),
+      0, 0, flutter::DlPaint());
+  builder.Restore();
+  auto display_list = builder.Build();
+
+  FirstPassDispatcher collector(content_context, Matrix(),
+                                Rect::MakeLTRB(0, 0, 1000, 1000));
+  display_list->Dispatch(collector);
+
+  const std::shared_ptr<GlyphAtlas>& atlas =
+      content_context.GetLazyGlyphAtlas()->CreateOrGetGlyphAtlas(
+          *GetContext(), content_context.GetTransientsDataBuffer(),
+          GlyphAtlas::Type::kAlphaBitmap);
+  ASSERT_TRUE(atlas && atlas->IsValid());
+
+  // Only the glyphs of the small text are in the atlas.
+  EXPECT_GT(atlas->GetGlyphCount(), 0u);
+  atlas->IterateGlyphs([](const ScaledFont& scaled_font,
+                          const SubpixelGlyph& glyph, const Rect& rect) {
+    EXPECT_EQ(scaled_font.font.GetMetrics().point_size, 12);
+    return true;
+  });
 }
 
 }  // namespace testing

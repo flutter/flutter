@@ -1165,6 +1165,13 @@ void FirstPassDispatcher::drawText(const std::shared_ptr<flutter::DlText>& text,
     return;
   }
 
+  // Text that is rendered as a path doesn't need to be in the glyph atlas.
+  // Adding it anyway can make the atlas fail to grow, which would prevent all
+  // other text in the frame from rendering.
+  if (Canvas::GetTextFramePath(*text_frame, matrix_).has_value()) {
+    return;
+  }
+
   properties.stroke = paint_.GetStroke();
 
   if (text_frame->HasColor()) {
