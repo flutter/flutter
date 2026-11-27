@@ -72,6 +72,21 @@ toolchain's flags before `copts`, so the architecture flags alone are
 emitted after them (the `flutter_arch_flags` feature, behind an explicit
 `user_compile_flags`); `-m<feature>` flags are indifferent to the order.
 
+A second one is on the link line. GN's optimized Linux and Android links say
+`-Wl,--as-needed` among their first flags, ahead of every library, so a `-l`
+library that nothing refers to is no `NEEDED` entry of the output. Bazel
+emits the features a toolchain does not define ahead of all that it defines,
+a target's `linkopts` among them (`user_link_flags`), so the flag came after
+a target's own `-l` options: `libflutter_linux_gtk.so` listed three of
+pkg-config's GTK libraries as needed that GN's does not (`libcairo-gobject`,
+`libgdk_pixbuf`, `libharfbuzz`; GTK loads them anyway). `--as-needed` is
+therefore a feature of its own (`flutter_as_needed`) ahead of an explicit
+`user_link_flags`, and both are ahead of the toolchain's other link flags,
+which keep their place after a target's own, as GN has a config's `ldflags`
+after a target's. The objects and the libraries Bazel itself names
+(`libraries_to_link`) stay ahead of it: a shared library of the build is a
+`NEEDED` entry whether anything refers to it or not.
+
 Two details keep warnings equivalent to GN's. GN's `default_warning_flags`
 (`-Werror` included) apply to every target, third-party code included, which
 is kept building with `-Wno-*` flags. The list lives in `copts.bzl`:

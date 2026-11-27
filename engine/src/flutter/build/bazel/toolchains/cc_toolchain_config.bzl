@@ -496,7 +496,8 @@ _IOS_OPT_COMPILE_FLAGS = ["-Os", "-g2", "-fno-ident", "-fdata-sections", "-ffunc
 # ... and --as-needed, which GN leaves out under a sanitizer (functions the
 # sanitizers interpose can make the linker drop a library that is needed,
 # crbug.com/234010): a library nothing references is no NEEDED entry (the
-# Vulkan validation layer's libdl).
+# Vulkan validation layer's libdl). Ahead of a target's own libraries on the
+# link line, as in GN's: the `flutter_as_needed` feature.
 _OPT_AS_NEEDED_LINK_FLAGS = ["-Wl,--as-needed"]
 
 # Android's optimized build (//build/config/compiler:optimize under
@@ -586,7 +587,8 @@ def _impl(ctx):
 
     cxx_flags = _LINUX_CXX_FLAGS + cxx_include_flags
     objcxx_flags = []
-    opt_link_flags = _OPT_LINK_FLAGS + ([] if ctx.attr.asan else _OPT_AS_NEEDED_LINK_FLAGS)
+    opt_link_flags = _OPT_LINK_FLAGS
+    as_needed_link_flags = [] if ctx.attr.asan else _OPT_AS_NEEDED_LINK_FLAGS
     lto_flags = _THIN_LTO_FLAGS if ctx.attr.thin_lto else _LTO_FLAGS
     dbg_defines = _DBG_DEFINES
     nodeps_dynamic_library_link_flags = []
@@ -612,6 +614,7 @@ def _impl(ctx):
         link_flags = _IOS_LINK_FLAGS if ios else _MAC_LINK_FLAGS
         opt_compile_flags = _IOS_OPT_COMPILE_FLAGS if ios else _MAC_OPT_COMPILE_FLAGS
         opt_link_flags = _MAC_OPT_LINK_FLAGS
+        as_needed_link_flags = []
         dbg_defines = _MAC_DBG_DEFINES
         complete_link_flags = []
         nodeps_dynamic_library_link_flags = _MAC_NODEPS_DYNAMIC_LIBRARY_LINK_FLAGS
@@ -649,6 +652,42 @@ def _impl(ctx):
         _flag_feature("flutter_c_flags", [ACTION_NAMES.c_compile, ACTION_NAMES.objc_compile], _LINUX_C_FLAGS),
         _flag_feature("flutter_cxx_flags", ALL_CPP_COMPILE_ACTION_NAMES, cxx_flags),
         _flag_feature("flutter_objcxx_flags", [ACTION_NAMES.objcpp_compile], objcxx_flags),
+        # The first of a link's flags that are the toolchain's: --as-needed in
+        # an optimized build, and after it a target's own linkopts (Bazel's
+        # `user_link_flags` feature, defined here for its place: of the legacy
+        # features Bazel does not find in this list, a link's go ahead of the
+        # whole list, which put every -l of a target's own ahead of
+        # --as-needed -- a NEEDED entry each, referred to or not; the GTK
+        # embedding listed three of pkg-config's libraries that GN's does
+        # not). GN has --as-needed among a link's first flags. The
+        # toolchain's other link flags stay after a target's own, as GN has
+        # a config's ldflags after a target's. The objects and the libraries
+        # Bazel itself names (`libraries_to_link`) stay ahead of all of it: a
+        # shared library of the build is a NEEDED entry whether anything
+        # refers to it or not.
+        feature(
+            name = "flutter_as_needed",
+            enabled = True,
+            requires = [feature_set(features = ["opt"])],
+            flag_sets = [
+                flag_set(actions = ALL_CC_LINK_ACTION_NAMES, flag_groups = [flag_group(flags = as_needed_link_flags)]),
+            ] if as_needed_link_flags else [],
+        ),
+        feature(
+            name = "user_link_flags",
+            flag_sets = [
+                flag_set(
+                    actions = ALL_CC_LINK_ACTION_NAMES,
+                    flag_groups = [
+                        flag_group(
+                            flags = ["%{user_link_flags}"],
+                            iterate_over = "user_link_flags",
+                            expand_if_available = "user_link_flags",
+                        ),
+                    ],
+                ),
+            ],
+        ),
         # AddressSanitizer, when the build asks for it (the `asan` attribute,
         # which BUILD.bazel selects on //engine/src/flutter/build/bazel:asan).
         feature(
