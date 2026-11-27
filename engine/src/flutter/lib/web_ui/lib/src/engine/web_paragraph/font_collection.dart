@@ -128,15 +128,18 @@ class WebFontCollection implements FlutterFontCollection {
     // through the returned future.
     try {
       final DomFontFace fontFace = createDomFontFace(family, list);
+      await fontFace.load();
       if (fontFace.status == 'error') {
         // Font failed to load.
         return false;
       }
       domDocument.fonts!.add(fontFace);
+      await domDocument.fonts!.ready;
 
       // There might be paragraph measurements for this new font before it is
       // loaded. They were measured using fallback fonts, so we should clear the
       // cache.
+      invalidateLayoutContextFont();
       // TODO(jlavrova): https://github.com/flutter/flutter/issues/168001
     } catch (e) {
       // Failures here will throw a DomException. Return false.
