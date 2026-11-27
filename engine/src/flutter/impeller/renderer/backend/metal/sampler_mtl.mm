@@ -13,8 +13,4 @@ SamplerMTL::SamplerMTL(const SamplerDescriptor& desc, id<MTLSamplerState> state)
 
 SamplerMTL::~SamplerMTL() = default;
 
-id<MTLSamplerState> SamplerMTL::GetMTLSamplerState() const {
-  return state_;
-}
-
 }  // namespace impeller
