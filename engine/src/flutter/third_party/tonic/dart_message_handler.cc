@@ -85,31 +85,39 @@ void DartMessageHandler::OnHandleMessage(DartState* dart_state) {
   if (Dart_IsPausedOnStart()) {
     // We are paused on isolate start. Only handle service messages until we are
     // requested to resume.
+    bool resume = false;
     if (Dart_HasServiceMessages()) {
-      bool resume = Dart_HandleServiceMessages();
-      if (!resume) {
-        return;
-      }
-      Dart_SetPausedOnStart(false);
-      // We've resumed, handle normal messages that are in the queue.
-      result = Dart_HandleMessage();
-      error = CheckAndHandleError(result);
-      dart_state->MessageEpilogue(result);
-      if (!Dart_CurrentIsolate()) {
-        isolate_exited_ = true;
-        return;
-      }
+      resume = Dart_HandleServiceMessages();
+    }
+    // An OOB `resume` service message may have already been processed by
+    // `Thread::HandleInterrupts()` during an embedder `Dart_Invoke` call before
+    // this message loop task ran, clearing `Dart_ShouldPauseOnStart()`.
+    if (!resume && Dart_ShouldPauseOnStart()) {
+      return;
+    }
+    Dart_SetPausedOnStart(false);
+    // We've resumed, handle normal messages that are in the queue.
+    result = Dart_HandleMessage();
+    error = CheckAndHandleError(result);
+    dart_state->MessageEpilogue(result);
+    if (!Dart_CurrentIsolate()) {
+      isolate_exited_ = true;
+      return;
     }
   } else if (Dart_IsPausedOnExit()) {
     // We are paused on isolate exit. Only handle service messages until we are
     // requested to resume.
+    bool resume = false;
     if (Dart_HasServiceMessages()) {
-      bool resume = Dart_HandleServiceMessages();
-      if (!resume) {
-        return;
-      }
-      Dart_SetPausedOnExit(false);
+      resume = Dart_HandleServiceMessages();
     }
+    // An OOB `resume` service message may have already been processed by
+    // `Thread::HandleInterrupts()` during an embedder `Dart_Invoke` call before
+    // this message loop task ran, clearing `Dart_ShouldPauseOnExit()`.
+    if (!resume && Dart_ShouldPauseOnExit()) {
+      return;
+    }
+    Dart_SetPausedOnExit(false);
   } else {
     // We are processing messages normally.
     result = Dart_HandleMessage();

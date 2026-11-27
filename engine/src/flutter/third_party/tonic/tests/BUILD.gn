@@ -16,6 +16,7 @@ executable("tonic_unittests") {
 
   sources = [
     "../file_loader/file_loader_unittests.cc",
+    "dart_message_handler_unittest.cc",
     "dart_persistent_handle_unittest.cc",
     "dart_state_unittest.cc",
     "dart_weak_persistent_handle_unittest.cc",

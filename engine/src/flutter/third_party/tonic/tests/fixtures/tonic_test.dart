@@ -185,3 +185,23 @@ void callMyTestMethod() {
     signalDone();
   }
 }
+
+// Test helpers for DartMessageHandler pause-on-start and pause-on-exit
+// resumption.
+
+int _embedderCallbackCount = 0;
+
+@pragma('vm:entry-point')
+void pauseOnStartMain() {
+  signalDone();
+}
+
+@pragma('vm:never-inline')
+int _embedderCallbackBody() => ++_embedderCallbackCount;
+
+@pragma('vm:entry-point')
+int embedderCallback() {
+  // Call a non-inlined helper so AOT's CheckStackOverflowElimination retains
+  // the prologue interrupt check that drains pending OOB messages.
+  return _embedderCallbackBody();
+}
