@@ -20,6 +20,10 @@ the parity classes in the Phase 0 reports were measured.
         --compile-commands=engine/src/out/host_debug_unopt/compile_commands.json \\
         --engine-only
 
+A Mac's and iOS's Objective-C(++) compiles are `ObjcCompile` actions, read
+like the others when the query asks for them
+(`mnemonic("CppCompile|ObjcCompile", ...)`).
+
 Both sides are normalized to a set of flags per source file (paths relative
 to engine/src): output and dependency-file arguments go, include directories
 become engine-relative (Bazel's bazel-out mirrors and virtual-include trees
@@ -156,7 +160,8 @@ def normalize(args, side, out_dir):
     token = token.strip('"').strip("'")
     if skip:
       skip = False
-    elif token in ('-o', '-MF', '-c', '-x', '-I', '-isystem', '-iquote', '-include', '--em-config'):
+    elif token in ('-o', '-MF', '-c', '-x', '-I', '-isystem', '-iquote', '-include', '--em-config',
+                   '-isysroot'):
       skip = token != '-c'
     else:
       ordered.append(token.replace('"', '').replace("'", ''))
@@ -197,6 +202,11 @@ def normalize(args, side, out_dir):
     if token.startswith('--sysroot='):
       flags.add('--sysroot=<sysroot>')
       continue
+    if token == '-isysroot':
+      # An Apple SDK: each build names its own link to the same directory.
+      next(it, None)
+      flags.add('-isysroot <sdk>')
+      continue
     if token.endswith(SOURCE_SUFFIXES) and not token.startswith('-'):
       continue
     if token.startswith('-D'):
@@ -228,7 +238,7 @@ def bazel_commands(aquery_path):
   commands = {}
   chosen = {}
   for action in aquery.get('actions', []):
-    if action.get('mnemonic') != 'CppCompile':
+    if action.get('mnemonic') not in ('CppCompile', 'ObjcCompile'):
       continue
     rank = ranks.get(action.get('configurationId'), 0)
     if rank == 2:
@@ -340,10 +350,10 @@ def gn_commands(compile_commands_path, wanted, toolchain=None):
   toolchain_of = {}
   for entry in entries:
     directory = entry['directory']
-    # out/<config>, relative to engine/src, from the absolute directory.
-    out_dir = os.path.join(
-        os.path.basename(os.path.dirname(directory)), os.path.basename(directory)
-    )
+    # The build directory relative to engine/src, from the absolute one:
+    # out/<config>, or out/ci/<config> as the builders name theirs.
+    marker = directory.rfind('/out/')
+    out_dir = directory[marker + 1:] if marker >= 0 else os.path.basename(directory)
     source = os.path.normpath(os.path.join(out_dir, entry['file']))
     if source not in wanted:
       continue
