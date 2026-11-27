@@ -68,6 +68,33 @@ name: foo
   });
 
   test(
+    'TestCompiler logs diagnostics from a successful compile when the caller reports failures',
+    () async {
+      const warning = 'Warning: example diagnostic';
+      residentCompiler.compilerOutput = const CompilerOutput(
+        'abc.dill',
+        0,
+        <Uri>[],
+        errorMessage: '$warning\n',
+      );
+      final testCompiler = FakeTestCompiler(
+        debugBuild,
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        residentCompiler,
+        logger: logger,
+        reportCompilationFailure: false,
+      );
+
+      final Uri input = Uri.parse('test/foo.dart');
+      expect(
+        await testCompiler.compile(input),
+        TestCompilerComplete(outputPath: 'test/foo.dart.dill', mainUri: input),
+      );
+      expect(logger.messages.where((String message) => message == warning), hasLength(1));
+    },
+  );
+
+  test(
     'TestCompiler does not try to cache the dill file when precompiled dill is passed',
     () async {
       residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
@@ -325,6 +352,7 @@ class FakeTestCompiler extends TestCompiler {
     Logger? logger,
     Platform? platform,
     super.precompiledDillPath,
+    super.reportCompilationFailure,
     ProcessManager? processManager,
     ShutdownHooks? shutdownHooks,
     super.templateRenderer = const MustacheTemplateRenderer(),
