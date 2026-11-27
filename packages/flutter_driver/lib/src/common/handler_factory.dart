@@ -34,6 +34,24 @@ import 'text.dart';
 import 'text_input_action.dart' show SendTextInputAction;
 import 'wait.dart';
 
+/// Returns the [ui.ImageByteFormat] that corresponds to [format].
+///
+/// The two enums are matched by name rather than by index, because the set of
+/// [ui.ImageByteFormat] values differs between platforms. For example, the web
+/// engine does not support [ScreenshotFormat.rawExtendedRgba128], so on the web
+/// [ScreenshotFormat.png] and [ui.ImageByteFormat.png] have different indices.
+///
+/// Throws a [DriverError] if [format] is not supported on the current platform.
+@visibleForTesting
+ui.ImageByteFormat imageByteFormatFor(ScreenshotFormat format) {
+  for (final ui.ImageByteFormat value in ui.ImageByteFormat.values) {
+    if (value.name == format.name) {
+      return value;
+    }
+  }
+  throw DriverError('Screenshot format "${format.name}" is not supported on this platform.');
+}
+
 /// A factory which creates [Finder]s from [SerializableFinder]s.
 mixin CreateFinderFactory {
   /// Creates the flutter widget finder from [SerializableFinder].
@@ -385,7 +403,7 @@ mixin CommandHandlerFactory {
     final ContainerLayer? layer = renderView.layer;
     final offsetLayer = layer! as OffsetLayer;
     final ui.Image image = await offsetLayer.toImage(renderView.paintBounds);
-    final ui.ImageByteFormat format = ui.ImageByteFormat.values[screenshotCommand.format.index];
+    final ui.ImageByteFormat format = imageByteFormatFor(screenshotCommand.format);
     final ByteData buffer = (await image.toByteData(format: format))!;
     return ScreenshotResult(buffer.buffer.asUint8List());
   }
