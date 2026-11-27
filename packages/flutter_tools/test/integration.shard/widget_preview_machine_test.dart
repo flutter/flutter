@@ -8,7 +8,6 @@ import 'dart:convert';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
-import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
 import 'package:http/http.dart';
 import 'package:process/process.dart';
 
@@ -45,7 +44,6 @@ final launchEvents = <ExpectedEvent>[
 void main() {
   late Directory tempDir;
   Process? process;
-  DtdLauncher? dtdLauncher;
   final project = BasicProject();
   const ProcessManager processManager = LocalProcessManager();
 
@@ -57,8 +55,6 @@ void main() {
   tearDown(() async {
     process?.kill();
     process = null;
-    await dtdLauncher?.dispose();
-    dtdLauncher = null;
     tryToDelete(tempDir);
   });
 

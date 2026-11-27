@@ -71,10 +71,9 @@ Future<Stream<String>> startWidgetPreview({
   Uri? dtdUri,
   bool useWebServer = false,
   Uri? devToolsServerAddress,
-  bool legacyPreviewDetection = false,
   ProcessManager processManager = _processManager, // Allow overriding for testing if needed
 }) async {
-  if (dtdUri != null && !legacyPreviewDetection) {
+  if (dtdUri != null) {
     final logger = BufferLogger.test();
     final Artifacts artifacts = createWidgetPreviewTestArtifacts(
       logger: logger,
@@ -111,7 +110,6 @@ Future<Stream<String>> startWidgetPreview({
     if (dtdUri != null) '--${WidgetPreviewStartCommand.kDtdUrl}=$dtdUri',
     if (devToolsServerAddress != null)
       '--${FlutterCommand.kDevToolsServerAddress}=$devToolsServerAddress',
-    if (legacyPreviewDetection) '--legacy-preview-detection',
   ], workingDirectory: tempDir.path);
 
   addTearDown(() async {
@@ -168,7 +166,6 @@ Future<Stream<String>> runWidgetPreview({
   Uri? dtdUri,
   bool useWebServer = false,
   Uri? devToolsServerAddress,
-  bool legacyPreviewDetection = false,
   ProcessManager processManager = _processManager,
 }) async {
   expect(expectedMessages, isNotEmpty);
@@ -178,7 +175,6 @@ Future<Stream<String>> runWidgetPreview({
     dtdUri: dtdUri,
     useWebServer: useWebServer,
     devToolsServerAddress: devToolsServerAddress,
-    legacyPreviewDetection: legacyPreviewDetection,
     processManager: processManager,
   );
 
@@ -213,15 +209,6 @@ Future<Stream<String>> runWidgetPreview({
 
 void runFlutterClean(Directory tempDir, [ProcessManager processManager = _processManager]) {
   processManager.runSync(<String>[flutterBin, 'clean'], workingDirectory: tempDir.path);
-}
-
-Future<DTDResponse> getPreviews(DartToolingDaemon dtdConnection) async {
-  if (platform.isWindows) {
-    // Give the slow Windows filesystem and analysis server plenty of time
-    // to finish subsequent analysis runs and rebuild the semantic model.
-    await Future<void>.delayed(const Duration(seconds: 2));
-  }
-  return dtdConnection.call('Lsp', 'dart/workspace/getFlutterWidgetPreviews');
 }
 
 /// Polls DTD for widget previews until the [predicate] is met, or [timeout] is reached.

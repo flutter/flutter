@@ -408,20 +408,12 @@ void main() {
     required Directory? rootProject,
     List<String>? arguments,
     FeatureFlags? featureFlags,
-    bool legacyDetection = false,
     Future<AnalysisServer> Function()? analysisServerFactoryOverride,
   }) async {
     // This might get changed during the test, so keep track of the original directory.
     final Directory current = fs.currentDirectory;
     await runWidgetPreviewCommand(
-      <String>[
-        'start',
-        if (legacyDetection) '--legacy-preview-detection',
-        ...?arguments,
-        '--no-launch-previewer',
-        '--verbose',
-        ?rootProject?.path,
-      ],
+      <String>['start', ...?arguments, '--no-launch-previewer', '--verbose', ?rootProject?.path],
       featureFlags: featureFlags,
       analysisServerFactoryOverride: analysisServerFactoryOverride,
     );
@@ -785,70 +777,6 @@ List<_i1.WidgetPreview> previews() => [
           );
 
           await startWidgetPreview(rootProject: rootProject);
-          expectSinglePreviewLaunchTimingEvent();
-        },
-      );
-    });
-
-    group('Legacy preview detection', () {
-      test(
-        'start finds existing previews and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
-        () async {
-          final Directory rootProject = await createRootProject();
-          rootProject
-              .childDirectory('lib')
-              .childFile('foo.dart')
-              .writeAsStringSync(samplePreviewFile);
-
-          await startWidgetPreview(rootProject: rootProject, legacyDetection: true);
-
-          final File generatedFile = rootProject
-              .childDirectory('.widget_preview')
-              .childFile(PreviewCodeGenerator.getGeneratedPreviewFilePath(fs));
-
-          expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
-          expectSinglePreviewLaunchTimingEvent();
-        },
-      );
-
-      test(
-        'start finds existing previews in the CWD and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
-        () async {
-          final Directory rootProject = await createRootProject();
-          rootProject
-              .childDirectory('lib')
-              .childFile('foo.dart')
-              .writeAsStringSync(samplePreviewFile);
-
-          // Try to execute using the CWD.
-          fs.currentDirectory = rootProject;
-          await startWidgetPreview(rootProject: null, legacyDetection: true);
-
-          final File generatedFile = rootProject
-              .childDirectory('.widget_preview')
-              .childFile(PreviewCodeGenerator.getGeneratedPreviewFilePath(fs));
-
-          expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
-          expectSinglePreviewLaunchTimingEvent();
-        },
-      );
-
-      test(
-        'start finds existing previews in the provided directory and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
-        () async {
-          final Directory rootProject = await createRootProject();
-          rootProject
-              .childDirectory('lib')
-              .childFile('foo.dart')
-              .writeAsStringSync(samplePreviewFile);
-
-          await startWidgetPreview(rootProject: rootProject, legacyDetection: true);
-
-          final File generatedFile = rootProject
-              .childDirectory('.widget_preview')
-              .childFile(PreviewCodeGenerator.getGeneratedPreviewFilePath(fs));
-
-          expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
           expectSinglePreviewLaunchTimingEvent();
         },
       );
