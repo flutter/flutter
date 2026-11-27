@@ -8,7 +8,9 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/async_guard.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -409,6 +411,74 @@ void main() {
       throwsToolExit(message: 'The Dart compiler exited unexpectedly.'),
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/197236.
+  for (final nativeAssetsYaml in <Uri?>[null, Uri.parse('file:///build/native_assets.yaml')]) {
+    test('incremental compile does not crash when writing to the stdin of an exited frontend server'
+        '${nativeAssetsYaml != null ? ' with native assets' : ''}', () async {
+      // Collect every uncaught error, not only the first one. The stdin sink
+      // is created in this zone so that its write errors are reported here.
+      final errors = <Object>[];
+      final compileDone = Completer<void>();
+      unawaited(
+        runZonedGuarded(() async {
+          fakeProcessManager.addCommand(
+            FakeCommand(
+              command: <String>[
+                ...frontendServerCommand,
+                '--initialize-from-dill',
+                expectedCachePath,
+                if (nativeAssetsYaml != null) ...<String>[
+                  '--native-assets',
+                  nativeAssetsYaml.toString(),
+                ],
+                '--verbosity=error',
+              ],
+              stdin: IOSink(ClosedStdinController()),
+              exitCode: 1,
+            ),
+          );
+          try {
+            await generator.recompile(
+              Uri.parse('/path/to/main.dart'),
+              null,
+              /* invalidatedFiles */
+              outputPath: '/build/',
+              packageConfig: PackageConfig.empty,
+              fs: MemoryFileSystem.test(),
+              projectRootPath: '',
+              nativeAssetsYaml: nativeAssetsYaml,
+            );
+          } finally {
+            compileDone.complete();
+          }
+        }, (Object error, StackTrace stackTrace) => errors.add(error)),
+      );
+      await compileDone.future;
+      await pumpEventQueue();
+
+      expect(errors, isNot(contains(isA<SocketException>())));
+      expect(errors, isNot(contains(isA<StateError>())));
+      expect(
+        errors,
+        contains(
+          isA<ToolExit>().having(
+            (ToolExit e) => e.message,
+            'message',
+            'The Dart compiler exited unexpectedly.',
+          ),
+        ),
+      );
+      // Only the first write is attempted, and it is not logged as sent.
+      expect(
+        'Failed to write to the frontend server: SocketException'.allMatches(testLogger.traceText),
+        hasLength(1),
+      );
+      expect(testLogger.traceText, isNot(contains('<- native-assets')));
+      expect(testLogger.traceText, isNot(contains('<- compile')));
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+  }
 
   test('incremental compile and recompile', () async {
     final completer = Completer<void>();
