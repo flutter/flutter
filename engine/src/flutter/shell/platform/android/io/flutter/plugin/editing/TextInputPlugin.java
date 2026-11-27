@@ -8,7 +8,9 @@ import static io.flutter.Build.API_LEVELS;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.LocaleList;
@@ -58,6 +60,13 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
   @NonNull private PlatformViewsController platformViewsController;
   @NonNull private PlatformViewsController2 platformViewsController2;
   @Nullable private Rect lastClientRect;
+  // The transform from the local coordinate system of the current client to the coordinate system
+  // of mView, in logical pixels.
+  @Nullable private Matrix lastClientTransform;
+  // The bounds of the current client in its local coordinate system.
+  @Nullable private RectF lastClientBounds;
+  // The caret rect in the local coordinate system of the current client.
+  @Nullable private RectF lastCaretRect;
   private ImeSyncDeferringInsetsCallback imeSyncCallback;
 
   // Initialize the "last seen" text editing values to a non-null value.
@@ -162,6 +171,11 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
           }
 
           @Override
+          public void setCaretRect(double x, double y, double width, double height) {
+            saveCaretRect(x, y, width, height);
+          }
+
+          @Override
           public void clearClient() {
             clearTextInputClient();
           }
@@ -238,6 +252,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     platformViewsController2.detachTextInputPlugin();
     textInputChannel.setTextInputMethodHandler(null);
     notifyViewExited();
+    setInputTarget(InputTarget.Type.NO_TARGET, 0);
     mEditable.removeEditingStateListener(this);
     if (imeSyncCallback != null) {
       imeSyncCallback.remove();
@@ -393,6 +408,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
             keyboardManager,
             mEditable,
             outAttrs);
+    connection.setEditableGeometry(lastClientTransform, lastClientBounds, lastCaretRect);
     outAttrs.initialSelStart = mEditable.getSelectionStart();
     outAttrs.initialSelEnd = mEditable.getSelectionEnd();
 
@@ -440,7 +456,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     if ((inputTarget.type == InputTarget.Type.VIRTUAL_DISPLAY_PLATFORM_VIEW
             || inputTarget.type == InputTarget.Type.PHYSICAL_DISPLAY_PLATFORM_VIEW)
         && inputTarget.id == platformViewId) {
-      inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, 0);
+      setInputTarget(InputTarget.Type.NO_TARGET, 0);
       notifyViewExited();
       mImm.hideSoftInputFromWindow(mView.getApplicationWindowToken(), 0);
       mImm.restartInput(mView);
@@ -480,7 +496,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     // Call notifyViewExited on the previous field.
     notifyViewExited();
     this.configuration = configuration;
-    inputTarget = new InputTarget(InputTarget.Type.FRAMEWORK_CLIENT, client);
+    setInputTarget(InputTarget.Type.FRAMEWORK_CLIENT, client);
 
     mEditable.removeEditingStateListener(this);
     mEditable =
@@ -503,12 +519,11 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       // Not asking for focus here specifically manifested in a bug on API 28 devices where the
       // platform view's request to show a keyboard was ignored.
       mView.requestFocus();
-      inputTarget = new InputTarget(InputTarget.Type.VIRTUAL_DISPLAY_PLATFORM_VIEW, platformViewId);
+      setInputTarget(InputTarget.Type.VIRTUAL_DISPLAY_PLATFORM_VIEW, platformViewId);
       mImm.restartInput(mView);
       mRestartInputPending = false;
     } else {
-      inputTarget =
-          new InputTarget(InputTarget.Type.PHYSICAL_DISPLAY_PLATFORM_VIEW, platformViewId);
+      setInputTarget(InputTarget.Type.PHYSICAL_DISPLAY_PLATFORM_VIEW, platformViewId);
       lastInputConnection = null;
     }
   }
@@ -597,6 +612,35 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
             (int) (minMax[2] * density),
             (int) Math.ceil(minMax[1] * density),
             (int) Math.ceil(minMax[3] * density));
+
+    // Convert the column-major 4x4 matrix to a row-major 3x3 matrix by dropping the z row and
+    // column, since the client lies in the z = 0 plane and the depth of the result isn't used.
+    lastClientTransform = new Matrix();
+    lastClientTransform.setValues(
+        new float[] {
+          (float) matrix[0], (float) matrix[4], (float) matrix[12],
+          (float) matrix[1], (float) matrix[5], (float) matrix[13],
+          (float) matrix[3], (float) matrix[7], (float) matrix[15]
+        });
+    lastClientBounds = new RectF(0, 0, (float) width, (float) height);
+    updateEditableGeometry();
+  }
+
+  private void saveCaretRect(double x, double y, double width, double height) {
+    // The framework sends a rect with a negative size when the caret rect is unknown.
+    lastCaretRect =
+        width < 0 || height < 0
+            ? null
+            : new RectF((float) x, (float) y, (float) (x + width), (float) (y + height));
+    updateEditableGeometry();
+  }
+
+  // Sends the latest geometry of the current client to its input connections.
+  private void updateEditableGeometry() {
+    if (inputTarget.type == InputTarget.Type.FRAMEWORK_CLIENT) {
+      // The input method may still be monitoring an earlier input connection.
+      mEditable.notifyEditableGeometryChanged(lastClientTransform, lastClientBounds, lastCaretRect);
+    }
   }
 
   @VisibleForTesting
@@ -622,15 +666,25 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     notifyViewExited();
     configuration = null;
     updateAutofillConfigurationIfNeeded(null);
-    inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, 0);
-    unlockPlatformViewInputConnection();
     lastClientRect = null;
+    setInputTarget(InputTarget.Type.NO_TARGET, 0);
+    unlockPlatformViewInputConnection();
     // When the IME is hidden, we need to restart the input method manager to accomodate
     // some keyboards like the Samsung keyboard that may be caching old state.
     WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(mView);
     if (insets != null && !insets.isVisible(WindowInsetsCompat.Type.ime())) {
       mImm.restartInput(mView);
     }
+  }
+
+  private void setInputTarget(InputTarget.Type type, int id) {
+    if (inputTarget.type == InputTarget.Type.FRAMEWORK_CLIENT) {
+      mEditable.notifyTextInputClientDetached();
+    }
+    lastClientTransform = null;
+    lastClientBounds = null;
+    lastCaretRect = null;
+    inputTarget = new InputTarget(type, id);
   }
 
   private static class InputTarget {

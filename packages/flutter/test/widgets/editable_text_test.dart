@@ -6565,7 +6565,7 @@ void main() {
   });
 
   group('setCaretRect', () {
-    Widget builder() {
+    Widget builder({int maxLines = 1}) {
       return MaterialApp(
         home: MediaQuery(
           data: const MediaQueryData(),
@@ -6579,6 +6579,7 @@ void main() {
                   focusNode: focusNode,
                   style: textStyle,
                   cursorColor: Colors.blue,
+                  maxLines: maxLines,
                   selectionControls: materialTextSelectionControls,
                   keyboardType: TextInputType.text,
                   onChanged: (String value) {},
@@ -6630,6 +6631,32 @@ void main() {
           ),
         ),
       );
+    });
+
+    testWidgets('uses the caret affinity at a soft wrap', (WidgetTester tester) async {
+      controller.text = 'abcde';
+      await tester.pumpWidget(Center(child: SizedBox(width: 64, child: builder(maxLines: 2))));
+      await tester.showKeyboard(find.byType(EditableText));
+
+      for (final (TextAffinity affinity, Offset position) in <(TextAffinity, Offset)>[
+        (TextAffinity.upstream, const Offset(56, 0)),
+        (TextAffinity.downstream, const Offset(0, 14)),
+      ]) {
+        tester.testTextInput.log.clear();
+        controller.selection = TextSelection.collapsed(offset: 4, affinity: affinity);
+        await tester.pump();
+
+        expect(
+          tester.testTextInput.log,
+          contains(
+            matchesMethodCall(
+              'TextInput.setCaretRect',
+              args: allOf(containsPair('x', position.dx), containsPair('y', position.dy)),
+            ),
+          ),
+          reason: affinity.toString(),
+        );
+      }
     });
 
     testWidgets('only send updates when necessary', (WidgetTester tester) async {

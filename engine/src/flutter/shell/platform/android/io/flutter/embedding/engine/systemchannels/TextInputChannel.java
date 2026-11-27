@@ -131,6 +131,19 @@ public class TextInputChannel {
                 result.error("error", exception.getMessage(), null);
               }
               break;
+            case "TextInput.setCaretRect":
+              try {
+                final JSONObject arguments = (JSONObject) args;
+                final double x = arguments.getDouble("x");
+                final double y = arguments.getDouble("y");
+                final double width = arguments.getDouble("width");
+                final double height = arguments.getDouble("height");
+                textInputMethodHandler.setCaretRect(x, y, width, height);
+                result.success(null);
+              } catch (JSONException exception) {
+                result.error("error", exception.getMessage(), null);
+              }
+              break;
             case "TextInput.clearClient":
               textInputMethodHandler.clearClient();
               result.success(null);
@@ -443,6 +456,21 @@ public class TextInputChannel {
      *     system of the FlutterView that owns the current client.
      */
     void setEditableSizeAndTransform(double width, double height, @NonNull double[] transform);
+
+    /**
+     * Sets the location of the caret of the current text input client.
+     *
+     * <p>The rect is in the local coordinate system of the text input client, which is mapped to
+     * the coordinate system of the FlutterView by the transform passed to {@link
+     * #setEditableSizeAndTransform}. The width and height are negative if the caret rect is
+     * unknown.
+     *
+     * @param x the x coordinate of the top left corner of the caret rect.
+     * @param y the y coordinate of the top left corner of the caret rect.
+     * @param width the width of the caret rect.
+     * @param height the height of the caret rect.
+     */
+    default void setCaretRect(double x, double y, double width, double height) {}
 
     /**
      * Sets the current text selection, composing ranges, and raw string contents for the active
