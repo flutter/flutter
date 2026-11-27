@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
-
 import '../dom.dart';
 
 /// Various types of inputs used in text fields.
@@ -76,16 +74,11 @@ abstract class EngineInputType {
 
   /// Given a [domElement], set attributes that are specific to this input type.
   void configureInputMode(DomHTMLElement domElement) {
-    if (inputmodeAttribute == null) {
-      return;
-    }
-
-    // Only apply `inputmode` in mobile browsers so that the right virtual
-    // keyboard shows up.
-    if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs ||
-        ui_web.browser.operatingSystem == ui_web.OperatingSystem.android ||
-        inputmodeAttribute == EngineInputType.none.inputmodeAttribute) {
-      domElement.setAttribute('inputmode', inputmodeAttribute!);
+    final String? inputmode = inputmodeAttribute;
+    if (inputmode == null) {
+      domElement.removeAttribute('inputmode');
+    } else {
+      domElement.setAttribute('inputmode', inputmode);
     }
   }
 }

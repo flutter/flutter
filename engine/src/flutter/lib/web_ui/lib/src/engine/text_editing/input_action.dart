@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
-
 import '../dom.dart';
 
 /// Various input action types used in text fields.
@@ -76,16 +74,11 @@ abstract class EngineInputAction {
 
   /// Given a [domElement], set attributes that are specific to this input action.
   void configureInputAction(DomHTMLElement domElement) {
-    if (enterkeyhintAttribute == null) {
-      return;
-    }
-
-    // Only apply `enterkeyhint` in mobile browsers so that the right virtual
-    // keyboard shows up.
-    if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs ||
-        ui_web.browser.operatingSystem == ui_web.OperatingSystem.android ||
-        enterkeyhintAttribute == EngineInputAction.none.enterkeyhintAttribute) {
-      domElement.setAttribute('enterkeyhint', enterkeyhintAttribute!);
+    final String? enterkeyhint = enterkeyhintAttribute;
+    if (enterkeyhint == null) {
+      domElement.removeAttribute('enterkeyhint');
+    } else {
+      domElement.setAttribute('enterkeyhint', enterkeyhint);
     }
   }
 }

@@ -453,7 +453,8 @@ class EngineAutofillForm {
       // A synthetic placeholder already represents this field.
       return;
     }
-    final DomHTMLElement synthetic = field.inputType.createDomElement();
+    // The -1 tab index value makes this element not reachable by keyboard.
+    final DomHTMLElement synthetic = field.inputType.createDomElement()..tabIndex = -1;
     field.autofillInfo.applyToDomElement(synthetic);
     // Preserve the value the user (or autofill) just put in the real element so
     // the field still submits correctly for credential save.
@@ -468,10 +469,12 @@ class EngineAutofillForm {
     formElement!.append(synthetic);
   }
 
-  /// Hides a synthetic autofill element from screen readers and keyboard
-  /// navigation in semantics mode.
+  /// Hides a synthetic autofill element from screen readers in semantics mode.
   ///
   /// Synthetic elements exist for the browser's autofill and form submission.
+  /// They always use `tabIndex = -1` so keyboard and IME focus traversal cannot
+  /// land on them (see https://github.com/flutter/flutter/issues/195741).
+  ///
   /// The semantics tree already exposes each field through its own element, so
   /// a synthetic copy would show up as an extra, unlabeled control, and the
   /// dormant form keeps it in the page for the rest of the session. Browser
@@ -479,8 +482,8 @@ class EngineAutofillForm {
   /// through these elements.
   ///
   /// Without semantics, password manager extensions fill these elements, and
-  /// some of them skip elements hidden from assistive technology, so they are
-  /// left untouched.
+  /// some of them skip elements hidden with `aria-hidden="true"`, so ARIA
+  /// hiding is skipped in that mode.
   ///
   /// See: https://github.com/flutter/flutter/issues/195174
   void _hideSyntheticElementFromAssistiveTechnology(DomHTMLElement element) {
@@ -488,7 +491,6 @@ class EngineAutofillForm {
       return;
     }
     element.setAttribute('aria-hidden', 'true');
-    element.tabIndex = -1;
   }
 
   /// Makes the form dormant.
@@ -539,7 +541,8 @@ class EngineAutofillForm {
         // Do not create the focused element here since it is created already. Use the provided one.
         htmlElement = focusedElement;
       } else {
-        htmlElement = field.inputType.createDomElement();
+        // The -1 tab index value makes this element not reachable by keyboard.
+        htmlElement = field.inputType.createDomElement()..tabIndex = -1;
         field.autofillInfo.applyToDomElement(htmlElement);
 
         // Safari does not respect elements that are invisible (or
@@ -1663,9 +1666,7 @@ abstract class DefaultTextEditingStrategy
       activeDomElement.setAttribute('type', 'password');
     }
 
-    if (config.inputType.inputmodeAttribute == 'none') {
-      activeDomElement.setAttribute('inputmode', 'none');
-    }
+    config.inputType.configureInputMode(activeDomElement);
 
     final EngineInputAction action = EngineInputAction.fromName(config.inputAction);
     action.configureInputAction(activeDomElement);
@@ -2085,9 +2086,6 @@ abstract class DefaultTextEditingStrategy
 ///
 /// [disable] is also different since the [_positionInputElementTimer]
 /// also needs to be cleaned.
-///
-/// inputmodeAttribute needs to be set for mobile devices. Due to this
-/// [initializeTextEditing] is different.
 class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   IOSTextEditingStrategy(super.owner);
 
@@ -2126,7 +2124,6 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     required OnActionCallback onAction,
   }) {
     super.initializeTextEditing(inputConfig, onChange: onChange, onAction: onAction);
-    inputConfig.inputType.configureInputMode(activeDomElement);
     if (hasAutofillGroup) {
       placeForm();
     }
@@ -2265,9 +2262,6 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
 /// Android behaviour for text editing.
 ///
-/// inputmodeAttribute needs to be set for mobile devices. Due to this
-/// [initializeTextEditing] is different.
-///
 /// Keyboard acts differently than other devices. [addEventHandlers] handles
 /// this case as an extra.
 class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
@@ -2280,7 +2274,6 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     required OnActionCallback onAction,
   }) {
     super.initializeTextEditing(inputConfig, onChange: onChange, onAction: onAction);
-    inputConfig.inputType.configureInputMode(activeDomElement);
     if (hasAutofillGroup) {
       placeForm();
     } else {
