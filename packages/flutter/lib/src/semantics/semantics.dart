@@ -4311,13 +4311,14 @@ class SemanticsNode with DiagnosticableTreeMixin {
     final Int32List childrenInTraversalOrder;
     final Int32List childrenInHitTestOrder;
     if (!hasChildren || mergeAllDescendantsIntoThisNode) {
-      if (_isTraversalParent && !kIsWeb) {
+      final Set<Object> effectiveParentIds = _effectiveTraversalParentIdentifiers;
+      if (!kIsWeb && effectiveParentIds.isNotEmpty) {
         // If the current node is a traversal parent node but it has no
         // children in hit-test order, it means childrenInTraversalOrder will
         // only contain its traversalChildren in _traversalChildNodes map.
         final traversalChildren = <SemanticsNode>[];
         if (owner != null) {
-          for (final Object parentId in _effectiveTraversalParentIdentifiers) {
+          for (final parentId in effectiveParentIds) {
             final Set<SemanticsNode>? nodes = owner!._traversalChildNodes[parentId];
             if (nodes != null) {
               for (final SemanticsNode node in nodes) {
@@ -4468,8 +4469,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
     // need to be grafted. To fix the traversal order, get the according traversal
     // children from _traversalChildNodes and add them to the children list
     // of this current node.
-    if (_isTraversalParent && owner != null) {
-      for (final Object parentId in _effectiveTraversalParentIdentifiers) {
+    final Set<Object> effectiveParentIds = _effectiveTraversalParentIdentifiers;
+    if (owner != null && effectiveParentIds.isNotEmpty) {
+      for (final parentId in effectiveParentIds) {
         final Set<SemanticsNode>? traversalChildren = owner!._traversalChildNodes[parentId];
         if (traversalChildren != null) {
           // When traversal children are grafted from other branches, make sure
@@ -5362,8 +5364,9 @@ class SemanticsOwner extends ChangeNotifier {
           // Do not serialize nodes that are dropped from the tree due to a
           // missing traversal parent, as they would be orphans in the update.
           node._dirty = false;
-          if (node._isTraversalParent) {
-            node._effectiveTraversalParentIdentifiers.forEach(_traversalParentNodes.remove);
+          final Set<Object> effectiveParentIds = node._effectiveTraversalParentIdentifiers;
+          if (effectiveParentIds.isNotEmpty) {
+            effectiveParentIds.forEach(_traversalParentNodes.remove);
           }
         } else {
           node._addToUpdate(builder, customSemanticsActionIds);
