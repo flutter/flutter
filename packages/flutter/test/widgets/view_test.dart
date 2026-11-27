@@ -4,12 +4,26 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'multi_view_testing.dart';
+
+// The test binding reuses the root [View] [State] across tests, so view-focus
+// and app-lifecycle flags can leak from earlier tests in the same shard.
+void _resetViewFocusAndLifecycle(WidgetTester tester) {
+  tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+  tester.platformDispatcher.notifyViewFocusChanged(
+    ViewFocusEvent(
+      viewId: tester.view.viewId,
+      state: ViewFocusState.focused,
+      direction: ViewFocusDirection.undefined,
+    ),
+  );
+}
 
 void main() {
   const green = Color(0xff00ff00);
@@ -557,6 +571,108 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(FocusManager.instance.rootScope.hasPrimaryFocus, isFalse);
   });
+
+  testWidgets('View.hasFocusOf tracks ViewFocusEvents', (WidgetTester tester) async {
+    late BuildContext viewContext;
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          viewContext = context;
+          return const SizedBox.shrink();
+        },
+      ),
+    );
+    _resetViewFocusAndLifecycle(tester);
+    await tester.pump();
+    addTearDown(() => _resetViewFocusAndLifecycle(tester));
+
+    expect(View.hasFocusOf(viewContext), isTrue);
+    expect(View.maybeHasFocusOf(viewContext), isTrue);
+
+    tester.platformDispatcher.notifyViewFocusChanged(
+      ViewFocusEvent(
+        viewId: tester.view.viewId,
+        state: ViewFocusState.unfocused,
+        direction: ViewFocusDirection.undefined,
+      ),
+    );
+    await tester.pump();
+    expect(View.hasFocusOf(viewContext), isFalse);
+    expect(View.maybeHasFocusOf(viewContext), isFalse);
+
+    tester.platformDispatcher.notifyViewFocusChanged(
+      ViewFocusEvent(
+        viewId: tester.view.viewId,
+        state: ViewFocusState.focused,
+        direction: ViewFocusDirection.undefined,
+      ),
+    );
+    await tester.pump();
+    expect(View.hasFocusOf(viewContext), isTrue);
+    expect(View.maybeHasFocusOf(viewContext), isTrue);
+  });
+
+  testWidgets('View.hasFocusOf becomes false when the app is inactive on desktop', (
+    WidgetTester tester,
+  ) async {
+    late BuildContext viewContext;
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          viewContext = context;
+          return const SizedBox.shrink();
+        },
+      ),
+    );
+    _resetViewFocusAndLifecycle(tester);
+    await tester.pump();
+    addTearDown(() => _resetViewFocusAndLifecycle(tester));
+
+    expect(View.hasFocusOf(viewContext), isTrue);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    await tester.pump();
+    expect(View.hasFocusOf(viewContext), isFalse);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+    expect(View.hasFocusOf(viewContext), isTrue);
+  }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets(
+    'View.hasFocusOf ignores app lifecycle on iOS and Android',
+    (WidgetTester tester) async {
+      late BuildContext viewContext;
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            viewContext = context;
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+      _resetViewFocusAndLifecycle(tester);
+      await tester.pump();
+      addTearDown(() => _resetViewFocusAndLifecycle(tester));
+
+      expect(View.hasFocusOf(viewContext), isTrue);
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      await tester.pump();
+      expect(View.hasFocusOf(viewContext), isTrue);
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+      expect(View.hasFocusOf(viewContext), isTrue);
+    },
+    // Web always mirrors lifecycle (same policy as [FocusManager]); this test
+    // is about native mobile embedders only.
+    skip: kIsWeb, // [intended]
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.iOS,
+    }),
+  );
 
   // A screen reader can move focus straight to a control instead of tabbing
   // into the view. On web that arrives as a SemanticsAction.focus for the
