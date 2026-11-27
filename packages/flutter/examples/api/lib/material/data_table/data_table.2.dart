@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 
 void main() => runApp(const DataTableExampleApp());
 
+/// An example application that showcases a [DataTable] with single-column sorting.
 class DataTableExampleApp extends StatelessWidget {
   const DataTableExampleApp({super.key});
 
@@ -22,6 +23,7 @@ class DataTableExampleApp extends StatelessWidget {
   }
 }
 
+/// A simple representation of a person with a name, age, and role.
 class Person {
   const Person({required this.name, required this.age, required this.role});
 
@@ -30,6 +32,7 @@ class Person {
   final String role;
 }
 
+/// A widget that displays a [DataTable] of people and allows sorting them.
 class DataTableExample extends StatefulWidget {
   const DataTableExample({super.key});
 
@@ -47,13 +50,13 @@ class _DataTableExampleState extends State<DataTableExample> {
     const Person(name: 'Olivia', age: 24, role: 'Researcher'),
   ];
 
-  // The column the rows are currently sorted by, or null if not sorted.
+  /// The column the rows are currently sorted by, or null if not sorted.
   int? _sortColumnIndex;
 
-  // The order in which the rows are currently sorted.
+  /// The order in which the rows are currently sorted.
   bool _sortAscending = true;
 
-  // DataTable only draws the sort arrow; reordering the rows is up to the app.
+  /// DataTable only draws the sort arrow; reordering the rows is up to the app.
   void _sort(int columnIndex, bool ascending, Comparator<Person> compare) {
     setState(() {
       _people.sort(
