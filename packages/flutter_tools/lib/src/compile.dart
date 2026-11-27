@@ -353,11 +353,10 @@ class KernelCompiler {
 
     final List<String> commandToStartFrontendServer = _commandToStartFrontendServer(
       artifacts: _artifacts,
+      processManager: _processManager,
       fileSystem: _fileSystem,
       frontendServerStarterPath: frontendServerStarterPath,
-      logger: _logger,
       platform: platform,
-      processManager: _processManager,
     );
 
     final List<String> command =
@@ -431,11 +430,10 @@ class KernelCompiler {
 /// message instead of crashing when the process fails to start.
 List<String> _commandToStartFrontendServer({
   required Artifacts artifacts,
+  required ProcessManager processManager,
   required FileSystem fileSystem,
   required String? frontendServerStarterPath,
-  required Logger logger,
   required TargetPlatform? platform,
-  required ProcessManager processManager,
 }) {
   if (frontendServerStarterPath != null && frontendServerStarterPath.isNotEmpty) {
     return <String>[
@@ -448,21 +446,20 @@ List<String> _commandToStartFrontendServer({
     platform: platform,
   );
   if (!processManager.canRun(engineDartAotRuntimePath)) {
+    if (artifacts.localEngineInfo != null) {
+      throwToolExit(
+        'Unable to find dartaotruntime binary at $engineDartAotRuntimePath. '
+        'Rebuild your local engine to generate the missing binary.',
+      );
+    }
     if (artifacts.usesLocalArtifacts) {
-      if (artifacts.localEngineInfo != null) {
-        throwToolExit(
-          'Unable to find dartaotruntime binary at $engineDartAotRuntimePath. '
-          'Rebuild your local engine to generate the missing binary.',
-        );
-      }
       throwToolExit('Unable to find dartaotruntime binary at $engineDartAotRuntimePath.');
     }
     // Derive the cache directory from the Dart SDK path's parent so that the
     // public Artifacts interface does not require changes.
     final String dartSdkDir = artifacts.getArtifactPath(Artifact.engineDartSdkPath);
-    Cache.invalidateDartSdkAndThrowToolExit(
+    Cache.throwDartSdkCacheCorruptionToolExit(
       cacheDir: fileSystem.directory(dartSdkDir).parent,
-      logger: logger,
       message: 'Unable to find dartaotruntime binary at $engineDartAotRuntimePath.',
     );
   }
@@ -995,11 +992,10 @@ class DefaultResidentCompiler implements ResidentCompiler {
         : null;
     final List<String> commandToStartFrontendServer = _commandToStartFrontendServer(
       artifacts: artifacts,
+      processManager: _processManager,
       fileSystem: _fileSystem,
       frontendServerStarterPath: frontendServerStarterPath,
-      logger: _logger,
       platform: platform,
-      processManager: _processManager,
     );
 
     final command = <String>[

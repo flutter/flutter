@@ -131,13 +131,10 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('incremental compile exits the tool and invalidates stamps when dartaotruntime cannot run', () async {
+  testWithoutContext('incremental compile exits the tool with cache deletion advice when dartaotruntime cannot run', () async {
     // Regression test for https://github.com/flutter/flutter/issues/193518.
     final fileSystem = MemoryFileSystem.test();
-    final Directory cacheDir = fileSystem.directory('/bin/cache')..createSync(recursive: true);
-    final File engineStamp = cacheDir.childFile('engine-dart-sdk.stamp')..createSync();
-    final File toolsStamp = cacheDir.childFile('flutter_tools.stamp')..createSync();
-    final generatorWithInvalidation = DefaultResidentCompiler(
+    final generatorWithMissingRuntime = DefaultResidentCompiler(
       'sdkroot',
       buildInfo: BuildInfo.debug,
       logger: testLogger,
@@ -152,7 +149,7 @@ void main() {
 
     await expectLater(
       asyncGuard(
-        () => generatorWithInvalidation.recompile(
+        () => generatorWithMissingRuntime.recompile(
           Uri.parse('/path/to/main.dart'),
           null,
           outputPath: '/build/',
@@ -164,14 +161,13 @@ void main() {
       throwsToolExit(
         message:
             'Unable to find dartaotruntime binary at Artifact.engineDartAotRuntime.\n'
-            'The Dart SDK cache appears to be incomplete (often caused by antivirus '
-            'software quarantining files) and has been invalidated.\n'
-            'Please re-run your command to automatically re-download the Dart SDK. '
+            'The Dart SDK cache appears to be incomplete or corrupted (often caused '
+            'by antivirus software quarantining files).\n'
+            'Please delete /bin/cache and re-run your command '
+            'to re-download the Dart SDK. '
             'If this issue persists, add your Flutter SDK directory to your antivirus exclusions.',
       ),
     );
-    expect(engineStamp.existsSync(), isFalse);
-    expect(toolsStamp.existsSync(), isFalse);
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 

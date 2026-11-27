@@ -47,9 +47,6 @@ const kFlutterToolsScriptFileName =
     'flutter_tools.dart'; // in //flutter/packages/flutter_tools/bin/
 const kFlutterEnginePackageName = 'sky_engine';
 
-const _kDevToolsPathSegments = <String>['dart-sdk', 'bin', 'resources', 'devtools'];
-const _kDevToolsVersionJson = 'version.json';
-
 /// A tag for a set of development artifacts that need to be cached.
 class DevelopmentArtifact {
   const DevelopmentArtifact._(this.name, {this.feature});
@@ -463,79 +460,40 @@ class Cache {
 
   /// The version of DevTools currently bundled in the Dart SDK cache.
   ///
-  /// Invalidates the Dart SDK cache stamps and throws a [ToolExit] if
-  /// `version.json` is missing or malformed.
+  /// Throws a [ToolExit] with recovery instructions if `version.json` is
+  /// missing or malformed.
   String get devToolsVersion => _devToolsVersion ??= _readDevToolsVersion();
 
   String? _devToolsVersion;
 
   String _readDevToolsVersion() {
+    const devToolsDirPath = 'dart-sdk/bin/resources/devtools';
     final File versionFile = getCacheDir(
-      _fileSystem.path.joinAll(_kDevToolsPathSegments),
+      devToolsDirPath,
       shouldCreate: false,
-    ).childFile(_kDevToolsVersionJson);
-    try {
-      final String devToolsVersionJson = ErrorHandlingFileSystem.noExitOnFailure(
-        versionFile.readAsStringSync,
-      );
-      if (jsonDecode(devToolsVersionJson) case {'version': final String version}
-          when version.trim().isNotEmpty) {
-        return version;
+    ).childFile('version.json');
+    if (versionFile.existsSync()) {
+      try {
+        if (jsonDecode(versionFile.readAsStringSync()) case {'version': final String version}) {
+          return version;
+        }
+      } on FormatException catch (e) {
+        _logger.printTrace('Failed to parse DevTools version file: $e');
       }
-    } on FileSystemException catch (e) {
-      _logger.printTrace('Failed to read DevTools version file: $e');
-    } on FormatException catch (e) {
-      _logger.printTrace('Failed to parse DevTools version file: $e');
     }
 
-    invalidateDartSdkAndThrowToolExit(
+    throwDartSdkCacheCorruptionToolExit(
       cacheDir: getRoot(),
-      logger: _logger,
       message: 'Could not read the DevTools version from ${versionFile.path}.',
     );
   }
 
-  static const _kEngineDartSdkStamp = 'engine-dart-sdk';
-  static const _kFlutterToolsStamp = 'flutter_tools';
-
-  /// Invalidates the Dart SDK cache stamps in [cacheDir] and throws a [ToolExit]
-  /// with recovery instructions.
-  ///
-  /// Deletes both `engine-dart-sdk.stamp` (checked by `shared.bat`) and
-  /// `flutter_tools.stamp` (checked by `shared.sh`) so the next invocation
-  /// re-downloads the Dart SDK. Does not delete `dart-sdk/` in-process, as
-  /// the running Dart binary lives there and `update_dart_sdk.{sh,ps1}`
-  /// safely moves the existing directory aside.
-  static Never invalidateDartSdkAndThrowToolExit({
+  /// Throws a [ToolExit] with recovery instructions for a missing, incomplete,
+  /// or corrupted Dart SDK cache in [cacheDir].
+  static Never throwDartSdkCacheCorruptionToolExit({
     required Directory cacheDir,
-    required Logger logger,
     required String message,
   }) {
-    final stamps = <File>[
-      cacheDir.childFile('$_kEngineDartSdkStamp.stamp'),
-      cacheDir.childFile('$_kFlutterToolsStamp.stamp'),
-    ];
-    var deletedAny = false;
-    for (final stamp in stamps) {
-      try {
-        deletedAny =
-            ErrorHandlingFileSystem.noExitOnFailure(
-              () => ErrorHandlingFileSystem.deleteIfExists(stamp),
-            ) ||
-            deletedAny;
-      } on FileSystemException catch (e) {
-        logger.printTrace('Failed to delete ${stamp.basename}: $e');
-      }
-    }
-    final bool invalidated = deletedAny && !stamps.any((File stamp) => stamp.existsSync());
-    if (invalidated) {
-      throwToolExit(
-        '''
-$message
-The Dart SDK cache appears to be incomplete (often caused by antivirus software quarantining files) and has been invalidated.
-Please re-run your command to automatically re-download the Dart SDK. If this issue persists, add your Flutter SDK directory to your antivirus exclusions.''',
-      );
-    }
     throwToolExit(
       '''
 $message
