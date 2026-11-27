@@ -171,6 +171,16 @@ void main() {
     }
   });
 
+  (String executable, List<String> args) updateEngineVersionCommand() {
+    if (const LocalPlatform().isWindows) {
+      return ('powershell', <String>[testRoot.binInternalUpdateEngineVersion.path]);
+    }
+    if (usePowershellOnPosix) {
+      return ('pwsh', <String>[testRoot.binInternalUpdateEngineVersion.path]);
+    }
+    return (testRoot.binInternalUpdateEngineVersion.path, <String>[]);
+  }
+
   /// Runs `bin/internal/update_engine_version.{sh|ps1}` and returns the process result.
   ///
   /// If the exit code is 0, it is considered a success, and files should exist as a side-effect.
@@ -179,18 +189,7 @@ void main() {
   /// - On POSIX, if [usePowershellOnPosix] is set, `pwsh` is used (to run `update_engine_version.ps1`);
   /// - Otherwise, `update_engine_version.sh` is used.
   io.ProcessResult runUpdateEngineVersion() {
-    final String executable;
-    final List<String> args;
-    if (const LocalPlatform().isWindows) {
-      executable = 'powershell';
-      args = <String>[testRoot.binInternalUpdateEngineVersion.path];
-    } else if (usePowershellOnPosix) {
-      executable = 'pwsh';
-      args = <String>[testRoot.binInternalUpdateEngineVersion.path];
-    } else {
-      executable = testRoot.binInternalUpdateEngineVersion.path;
-      args = <String>[];
-    }
+    final (String executable, List<String> args) = updateEngineVersionCommand();
     return run(executable, args);
   }
 
@@ -381,99 +380,157 @@ void main() {
     });
   });
 
+  test(
+    'preserves existing engine.stamp and engine.realm when unchanged and updates when changed',
+    () {
+      initGitRepoWithBlankInitialCommit();
+      environment['FLUTTER_PREBUILT_ENGINE_VERSION'] = '123abc';
+      environment['FLUTTER_REALM'] = 'flutter_archives_v2';
+      runUpdateEngineVersion();
+
+      expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching('123abc'));
+      expect(testRoot.binCacheEngineRealm, _hasFileContentsMatching('flutter_archives_v2'));
+
+      final oldTime = DateTime(2020);
+      testRoot.binCacheEngineStamp.setLastModifiedSync(oldTime);
+      testRoot.binCacheEngineRealm.setLastModifiedSync(oldTime);
+
+      runUpdateEngineVersion();
+
+      expect(testRoot.binCacheEngineStamp.lastModifiedSync(), oldTime);
+      expect(testRoot.binCacheEngineRealm.lastModifiedSync(), oldTime);
+
+      environment['FLUTTER_PREBUILT_ENGINE_VERSION'] = '456def';
+      environment['FLUTTER_REALM'] = 'flutter_archives_v3';
+      runUpdateEngineVersion();
+
+      expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching('456def'));
+      expect(testRoot.binCacheEngineRealm, _hasFileContentsMatching('flutter_archives_v3'));
+      expect(testRoot.binCacheEngineStamp.lastModifiedSync(), isNot(oldTime));
+      expect(testRoot.binCacheEngineRealm.lastModifiedSync(), isNot(oldTime));
+    },
+  );
+
   group('concurrent execution', () {
     setUp(() {
       initGitRepoWithBlankInitialCommit();
       environment['FLUTTER_PREBUILT_ENGINE_VERSION'] = '123abc';
     });
 
-    test(
-      'writes to engine.stamp atomically without truncation',
-      () async {
-        // Run the script once first to ensure the file exists.
+    Future<void> expectAtomicConcurrentReplacement({
+      required String envKey,
+      required File targetFile,
+      required String valueA,
+      required String valueB,
+    }) async {
+      environment[envKey] = valueA;
+      runUpdateEngineVersion();
+      expect(targetFile.readAsStringSync().trim(), valueA);
+
+      // Verify replacement happens via atomic rename rather than in-place truncation:
+      // a hard link to the original inode must retain the old value after an update.
+      final File hardLink = tmpDir.childFile('${targetFile.basename}.hardlink');
+      run('ln', <String>[targetFile.path, hardLink.path]);
+      try {
+        environment[envKey] = valueB;
         runUpdateEngineVersion();
+        expect(hardLink, _hasFileContentsMatching(valueA));
+        expect(targetFile, _hasFileContentsMatching(valueB));
+      } finally {
+        if (hardLink.existsSync()) {
+          hardLink.deleteSync();
+        }
+      }
 
-        final File stampFile = testRoot.binCacheEngineStamp;
-        expect(stampFile.readAsStringSync().trim(), '123abc');
+      var isRunning = true;
+      var emptyReads = 0;
+      var totalReads = 0;
 
-        var isRunning = true;
-        var emptyReads = 0;
-        var totalReads = 0;
-
-        // Start a tight read loop
-        final readFuture = Future<void>(() async {
-          while (isRunning) {
-            try {
-              final String content = stampFile.readAsStringSync();
-              totalReads++;
-              if (content.trim().isEmpty) {
-                emptyReads++;
-              }
-            } on io.FileSystemException {
-              // Ignore FileSystemExceptions (e.g., Windows sharing violations).
-              // A true atomic replacement might still cause a sharing violation on Windows
-              // if Dart is reading the file at the exact moment it's being replaced.
-              // What we strictly care about for this race condition is that a SUCCESSFUL
-              // read NEVER returns an empty string (which indicates non-atomic truncation).
+      // Start a tight read loop
+      final readFuture = Future<void>(() async {
+        while (isRunning) {
+          try {
+            final String content = targetFile.readAsStringSync();
+            totalReads++;
+            if (content.trim().isEmpty) {
+              emptyReads++;
             }
-            await Future<void>.delayed(Duration.zero);
+          } on io.FileSystemException {
+            // Ignore FileSystemExceptions (e.g., Windows sharing violations).
+            // A true atomic replacement might still cause a sharing violation on Windows
+            // if Dart is reading the file at the exact moment it's being replaced.
+            // What we strictly care about for this race condition is that a SUCCESSFUL
+            // read NEVER returns an empty string (which indicates non-atomic truncation).
           }
-        });
-
-        // Spawn multiple writers in parallel
-        const numWriters = 20;
-        final writers = <Future<io.ProcessResult>>[];
-
-        for (var i = 0; i < numWriters; i++) {
-          final String executable;
-          final List<String> args;
-          if (const LocalPlatform().isWindows) {
-            executable = 'powershell';
-            args = <String>[testRoot.binInternalUpdateEngineVersion.path];
-          } else if (usePowershellOnPosix) {
-            executable = 'pwsh';
-            args = <String>[testRoot.binInternalUpdateEngineVersion.path];
-          } else {
-            executable = testRoot.binInternalUpdateEngineVersion.path;
-            args = <String>[];
-          }
-
-          writers.add(
-            io.Process.run(
-              executable,
-              args,
-              environment: environment,
-              workingDirectory: testRoot.root.absolute.path,
-              includeParentEnvironment: false,
-            ),
-          );
+          await Future<void>.delayed(Duration.zero);
         }
+      });
 
-        final List<io.ProcessResult> results = await Future.wait<io.ProcessResult>(writers);
+      // Spawn multiple writers in parallel
+      const numWriters = 20;
+      final writers = <Future<io.ProcessResult>>[];
+      final (String executable, List<String> args) = updateEngineVersionCommand();
 
-        // Stop the reader
-        isRunning = false;
-        await readFuture;
+      for (var i = 0; i < numWriters; i++) {
+        writers.add(
+          io.Process.run(
+            executable,
+            args,
+            environment: <String, String>{...environment, envKey: i.isEven ? valueA : valueB},
+            workingDirectory: testRoot.root.absolute.path,
+            includeParentEnvironment: false,
+          ),
+        );
+      }
 
-        for (final result in results) {
-          expect(
-            result.exitCode,
-            0,
-            reason:
-                'Writer process failed with exit code ${result.exitCode}:\n'
-                'STDOUT:\n${result.stdout}\n'
-                'STDERR:\n${result.stderr}',
-          );
-        }
+      final List<io.ProcessResult> results = await Future.wait<io.ProcessResult>(writers);
 
-        // Assert that we never read an empty file during concurrent writes
+      // Stop the reader
+      isRunning = false;
+      await readFuture;
+
+      for (final result in results) {
         expect(
-          emptyReads,
+          result.exitCode,
           0,
           reason:
-              'Race condition detected: engine.stamp was empty $emptyReads times out of $totalReads reads',
+              'Writer process failed with exit code ${result.exitCode}:\n'
+              'STDOUT:\n${result.stdout}\n'
+              'STDERR:\n${result.stderr}',
         );
-      },
+      }
+
+      // Assert that we never read an empty file during concurrent writes
+      expect(
+        emptyReads,
+        0,
+        reason:
+            'Race condition detected: ${targetFile.basename} was empty $emptyReads times out of $totalReads reads',
+      );
+    }
+
+    test(
+      'writes to engine.stamp atomically without truncation',
+      () => expectAtomicConcurrentReplacement(
+        envKey: 'FLUTTER_PREBUILT_ENGINE_VERSION',
+        targetFile: testRoot.binCacheEngineStamp,
+        valueA: '123abc',
+        valueB: '456def',
+      ),
+      // [intended] Windows-specific file locking limitation
+      skip: const LocalPlatform().isWindows
+          ? 'Windows file locking makes concurrent file operations unreliable'
+          : null,
+    );
+
+    test(
+      'writes to engine.realm atomically without truncation',
+      () => expectAtomicConcurrentReplacement(
+        envKey: 'FLUTTER_REALM',
+        targetFile: testRoot.binCacheEngineRealm,
+        valueA: 'flutter_archives_v2',
+        valueB: 'flutter_archives_v3',
+      ),
       // [intended] Windows-specific file locking limitation
       skip: const LocalPlatform().isWindows
           ? 'Windows file locking makes concurrent file operations unreliable'
