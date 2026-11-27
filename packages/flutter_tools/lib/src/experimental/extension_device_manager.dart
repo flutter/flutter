@@ -88,41 +88,28 @@ final class ExtensionDeviceClient extends DeviceService {
   }
 
   @override
-  Future<bool> launchApp({
+  Future<void> launchApp({
+    required String appId,
     required ExtensionDebuggingOptions debuggingOptions,
     required String deviceId,
     required Uri executableUri,
+    bool prebuiltApplication = false,
   }) async {
     _logger.printTrace(
-      'ExtensionDeviceClient launching app "$executableUri" on "$deviceId" via RPC '
+      'ExtensionDeviceClient launching app "$appId" ("$executableUri") on "$deviceId" via RPC '
       '("${DeviceService.launchAppMethod}")...',
     );
-    try {
-      final Object? rawResult = await connection.sendRequest(
-        DeviceService.launchAppMethod,
-        params: <String, Object?>{
-          DeviceService.debuggingOptionsParam: debuggingOptions.toMap(),
-          DeviceService.deviceIdParam: deviceId,
-          DeviceService.executableUriParam: executableUri.toString(),
-        },
-        // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
-        // https://github.com/flutter/flutter/issues/193955.
-        timeout: null,
-      );
-      if (rawResult case final bool launched) {
-        return launched;
-      }
-      _logger.printError(
-        'ExtensionDeviceClient received invalid response for "${DeviceService.launchAppMethod}": '
-        'expected bool, got ${rawResult.runtimeType}.',
-      );
-    } on ToolExtensionException catch (err) {
-      _logger.printError('Extension "${connection.extensionName}": ${err.message}');
-    } on Object catch (err, stack) {
-      _logger.printError('ExtensionDeviceClient failed to launch app on "$deviceId": $err');
-      _logger.printTrace('$stack');
-    }
-    return false;
+    await connection.sendRequest(
+      DeviceService.launchAppMethod,
+      params: <String, Object?>{
+        DeviceService.appIdParam: appId,
+        DeviceService.debuggingOptionsParam: debuggingOptions.toMap(),
+        DeviceService.deviceIdParam: deviceId,
+        DeviceService.executableUriParam: executableUri.toString(),
+        if (prebuiltApplication) DeviceService.prebuiltApplicationParam: prebuiltApplication,
+      },
+      timeout: null,
+    );
   }
 
   @override
@@ -135,8 +122,6 @@ final class ExtensionDeviceClient extends DeviceService {
       final Object? rawResult = await connection.sendRequest(
         DeviceService.getVmServiceUriMethod,
         params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
-        // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
-        // https://github.com/flutter/flutter/issues/193955.
         timeout: null,
       );
       if (rawResult case {DeviceService.vmServiceUriKey: final String uriStr}) {
@@ -168,30 +153,18 @@ final class ExtensionDeviceClient extends DeviceService {
   }
 
   @override
-  Future<bool> stopApp({required String deviceId}) async {
+  Future<void> stopApp({required String deviceId, String? appId}) async {
     _logger.printTrace(
       'ExtensionDeviceClient stopping app on "$deviceId" via RPC '
       '("${DeviceService.stopAppMethod}")...',
     );
-    try {
-      final Object? rawResult = await connection.sendRequest(
-        DeviceService.stopAppMethod,
-        params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
-      );
-      if (rawResult case final bool stopped) {
-        return stopped;
-      }
-      _logger.printError(
-        'ExtensionDeviceClient received invalid response for "${DeviceService.stopAppMethod}": '
-        'expected bool, got ${rawResult.runtimeType}.',
-      );
-    } on ToolExtensionException catch (err) {
-      _logger.printError('Extension "${connection.extensionName}": ${err.message}');
-    } on Object catch (err, stack) {
-      _logger.printError('ExtensionDeviceClient failed to stop app on "$deviceId": $err');
-      _logger.printTrace('$stack');
-    }
-    return false;
+    await connection.sendRequest(
+      DeviceService.stopAppMethod,
+      params: <String, Object?>{
+        DeviceService.appIdParam: ?appId,
+        DeviceService.deviceIdParam: deviceId,
+      },
+    );
   }
 
   @override
@@ -629,24 +602,87 @@ class ExtensionBackedDevice extends Device {
     String? route,
     String? userIdentifier,
   }) async {
-    // TODO(bkonyi): Forward additional BuildInfo and DebuggingOptions fields
-    // (e.g. dartDefines, flavor), https://github.com/flutter/flutter/issues/190753.
-    final BuildMode buildMode = debuggingOptions.buildInfo.mode;
-
-    if (prebuiltApplication) {
-      logger.printError(
-        'Prebuilt application bundles are not supported yet for tool extension devices.',
+    if (package == null) {
+      throw StateError('Cannot start an application on $name without an ApplicationPackage.');
+    }
+    final isPrebuilt = package is PrebuiltApplicationPackage;
+    final Uri? executableUri;
+    if (isPrebuilt) {
+      final FileSystemEntity binaryEntity = package.applicationPackage;
+      if (!binaryEntity.existsSync()) {
+        logger.printError('Prebuilt application binary does not exist: ${binaryEntity.path}');
+        return LaunchResult.failed();
+      }
+      final Uri resolvedUri = binaryEntity.absolute.uri;
+      if (!resolvedUri.isValidArtifactUri) {
+        logger.printError('Invalid prebuilt application binary URI: $resolvedUri');
+        return LaunchResult.failed();
+      }
+      executableUri = resolvedUri;
+    } else {
+      executableUri = await _buildApplicationExecutableUri(
+        buildMode: debuggingOptions.buildInfo.mode,
+        mainPath: mainPath,
       );
+    }
+    if (executableUri == null) {
       return LaunchResult.failed();
     }
 
+    final bool debuggingEnabled = debuggingOptions.debuggingEnabled;
+    final traceStartup = platformArgs?['trace-startup'] == true;
+    try {
+      await _deviceService.launchApp(
+        appId: package.id,
+        debuggingOptions: ExtensionDebuggingOptions(
+          buildMode: debuggingOptions.buildInfo.mode,
+          dartEntrypointArgs: debuggingOptions.dartEntrypointArgs,
+          debuggingEnabled: debuggingEnabled,
+          deviceVmServicePort: debuggingOptions.deviceVmServicePort,
+          engineSwitches: debuggingOptions.computeFlutterEngineSwitches(
+            route: route,
+            traceStartup: traceStartup,
+          ),
+          hostVmServicePort: debuggingOptions.hostVmServicePort,
+          route: route,
+          uninstallFirst: debuggingOptions.uninstallFirst,
+        ),
+        deviceId: id,
+        executableUri: executableUri,
+        prebuiltApplication: isPrebuilt,
+      );
+    } on Object catch (e, stack) {
+      logger.printError(
+        'Failed to launch application on $name ("${connection.extensionName}"): '
+        '${e is ToolExtensionException ? e.message : e}',
+      );
+      logger.printTrace('$stack');
+      return LaunchResult.failed();
+    }
+
+    if (debuggingEnabled) {
+      final Uri? vmServiceUri = await _deviceService.getVmServiceUri(deviceId: id);
+      if (vmServiceUri == null) {
+        logger.printError('Error waiting for a debug connection.');
+        return LaunchResult.failed();
+      }
+      return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
+    }
+
+    return LaunchResult.succeeded();
+  }
+
+  Future<Uri?> _buildApplicationExecutableUri({
+    required BuildMode buildMode,
+    required String? mainPath,
+  }) async {
     final String? buildTargetName = _targetDevice.buildTarget;
     if (buildTargetName == null) {
       logger.printError('Device $name does not specify a buildTarget for launching applications.');
-      return LaunchResult.failed();
+      return null;
     }
 
-    final String targetMainPath = mainPath ?? 'lib/main.dart';
+    final String absoluteMainPath = _fileSystem.file(mainPath ?? 'lib/main.dart').absolute.path;
     logger.printTrace('Building application using extension target "$buildTargetName"...');
 
     final List<ExtensionBuildTarget> targets = await _buildManager.getBuildTargets();
@@ -655,7 +691,7 @@ class ExtensionBackedDevice extends Device {
         .firstOrNull;
     if (target == null) {
       logger.printError('No tool extension provides build target "$buildTargetName" for $name.');
-      return LaunchResult.failed();
+      return null;
     }
 
     final Directory projectDir = _fileSystem.currentDirectory;
@@ -688,7 +724,7 @@ class ExtensionBackedDevice extends Device {
     final ExtensionBuildResult result = await _buildManager.build(
       buildMode: buildMode,
       flutterRoot: _fileSystem.directory(flutterRootPath).uri,
-      mainPath: targetMainPath,
+      mainPath: absoluteMainPath,
       outputDir: outputDir.uri,
       projectRoot: projectDir.uri,
       resolvedArtifacts: resolvedArtifacts,
@@ -701,45 +737,32 @@ class ExtensionBackedDevice extends Device {
             ? 'Build failed: $errorMessage'
             : 'Build failed.',
       );
-      return LaunchResult.failed();
+      return null;
     }
-    final Uri? executableUri = result.executableUri;
-    if (executableUri == null || !executableUri.isValidFileUri) {
+    final Uri? builtExecutableUri = result.executableUri;
+    if (builtExecutableUri == null || !builtExecutableUri.isValidArtifactUri) {
       logger.printError(
         'Extension build target "$buildTargetName" did not return a valid executableUri.',
       );
-      return LaunchResult.failed();
+      return null;
     }
-
-    final bool debuggingEnabled = debuggingOptions.debuggingEnabled;
-    final bool launched = await _deviceService.launchApp(
-      debuggingOptions: ExtensionDebuggingOptions(
-        buildMode: buildMode,
-        debuggingEnabled: debuggingEnabled,
-      ),
-      deviceId: id,
-      executableUri: executableUri,
-    );
-    if (!launched) {
-      logger.printError('Failed to launch application on $name.');
-      return LaunchResult.failed();
-    }
-
-    if (debuggingEnabled) {
-      final Uri? vmServiceUri = await _deviceService.getVmServiceUri(deviceId: id);
-      if (vmServiceUri == null) {
-        logger.printError('Error waiting for a debug connection.');
-        return LaunchResult.failed();
-      }
-      return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
-    }
-
-    return LaunchResult.succeeded();
+    return builtExecutableUri;
   }
 
   @override
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
-    return _deviceService.stopApp(deviceId: id);
+    final String? appId = app != null && app.id.isNotEmpty ? app.id : null;
+    try {
+      await _deviceService.stopApp(appId: appId, deviceId: id);
+      return true;
+    } on Object catch (e, stack) {
+      logger.printError(
+        'Failed to stop application on $name ("${connection.extensionName}"): '
+        '${e is ToolExtensionException ? e.message : e}',
+      );
+      logger.printTrace('$stack');
+      return false;
+    }
   }
 
   @override

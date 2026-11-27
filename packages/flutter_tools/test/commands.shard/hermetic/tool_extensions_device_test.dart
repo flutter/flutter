@@ -19,23 +19,31 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/commands/logs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/drive/drive_service.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
+import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
+import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart'
     show
         BuiltInPlaceholders,
         ExtensionBuildResult,
         ExtensionDebuggingOptions,
         ExtensionFlutterProject,
-        TargetDevice;
+        TargetDevice,
+        ToolExtensionException;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 import 'package:test/fake.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
+import '../../src/fake_vm_services.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -97,6 +105,14 @@ final class _FakeTestDeviceService extends DeviceService {
         targetPlatform: 'linux-x64',
       ),
       TargetDevice(
+        category: Category.other,
+        id: 'custom_os_test_device',
+        name: 'Custom OS Extension Device',
+        buildTarget: 'fake-test-build',
+        sdkNameAndVersion: 'Custom OS 1.0',
+        targetPlatform: 'custom-os',
+      ),
+      TargetDevice(
         category: Category.desktop,
         id: 'no_target_device',
         name: 'No Target Device',
@@ -133,39 +149,50 @@ final class _FakeTestDeviceService extends DeviceService {
   }) async => deviceId == 'fake_test_device';
 
   @override
-  Future<bool> launchApp({
+  Future<void> launchApp({
+    required String appId,
     required ExtensionDebuggingOptions debuggingOptions,
     required String deviceId,
     required Uri executableUri,
+    bool prebuiltApplication = false,
   }) async {
-    if (deviceId == 'fake_test_device') {
+    if (deviceId == 'fake_test_device' || deviceId == 'custom_os_test_device') {
+      final validUri = prebuiltApplication
+          ? executableUri == Uri.parse('file:///tmp/prebuilt_bundle/app')
+          : executableUri == Uri.parse('file:///tmp/fake_bundle/app');
       final bool launched =
-          executableUri == Uri.file('/tmp/fake_bundle/app') &&
-          debuggingOptions ==
-              const ExtensionDebuggingOptions(buildMode: .debug, debuggingEnabled: true);
-      if (launched) {
-        _runningDevices.add(deviceId);
+          appId.isNotEmpty &&
+          validUri &&
+          debuggingOptions.buildMode == .debug &&
+          debuggingOptions.debuggingEnabled &&
+          debuggingOptions.engineSwitches.contains('enable-dart-profiling=true');
+      if (!launched) {
+        throw const ToolExtensionException('Invalid launch configuration.');
       }
-      return launched;
+      _runningDevices.add(deviceId);
+      return;
     }
     if (deviceId == 'missing_vm_service_device') {
       _runningDevices.add(deviceId);
-      return true;
+      return;
     }
-    return false;
+    throw const ToolExtensionException('Simulated launch failure.');
   }
 
   @override
   Future<Uri?> getVmServiceUri({required String deviceId}) async {
-    if (deviceId == 'fake_test_device' && _runningDevices.contains(deviceId)) {
+    if ((deviceId == 'fake_test_device' || deviceId == 'custom_os_test_device') &&
+        _runningDevices.contains(deviceId)) {
       return Uri.parse('http://127.0.0.1:8181/abcd=/');
     }
     return null;
   }
 
   @override
-  Future<bool> stopApp({required String deviceId}) async {
-    return _runningDevices.remove(deviceId);
+  Future<void> stopApp({required String deviceId, String? appId}) async {
+    if (!_runningDevices.remove(deviceId)) {
+      throw const ToolExtensionException('Application is not running.');
+    }
   }
 }
 
@@ -200,17 +227,21 @@ final class _CustomLogStreamingDeviceService extends DeviceService {
   }) async => true;
 
   @override
-  Future<bool> launchApp({
+  Future<void> launchApp({
+    required String appId,
     required ExtensionDebuggingOptions debuggingOptions,
     required String deviceId,
     required Uri executableUri,
-  }) async => false;
+    bool prebuiltApplication = false,
+  }) async {
+    throw const ToolExtensionException('Launching is not supported.');
+  }
 
   @override
   Future<Uri?> getVmServiceUri({required String deviceId}) async => null;
 
   @override
-  Future<bool> stopApp({required String deviceId}) async => false;
+  Future<void> stopApp({required String deviceId, String? appId}) async {}
 
   @override
   Future<void> startLogStream({required String deviceId}) async {
@@ -219,11 +250,14 @@ final class _CustomLogStreamingDeviceService extends DeviceService {
   }
 }
 
-void _fakeAppLaunchExtensionEntryPoint(SendPort sendPort) {
-  ToolExtensionEntryPoint.run(
-    sendPort,
-    <ToolExtensionService>[_FakeTestBuildService(), _FakeTestDeviceService()],
-    supportedPlatforms: const <String>{'linux'},
+void _fakeAppLaunchEntryPoint(SendPort sendPort) {
+  unawaited(
+    ToolExtensionEntryPoint.run(
+      sendPort,
+      <ToolExtensionService>[_FakeTestBuildService(), _FakeTestDeviceService()],
+      extensionName: 'fake_test_ext',
+      supportedPlatforms: const <String>{'linux'},
+    ),
   );
 }
 
@@ -514,7 +548,7 @@ flutter:
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
           logger: logger,
-          entryPoints: <ExtensionEntryPoint>[_fakeAppLaunchExtensionEntryPoint],
+          entryPoints: <ExtensionEntryPoint>[_fakeAppLaunchEntryPoint],
           featureFlags: featureFlags,
         );
         addTearDown(manager.dispose);
@@ -537,32 +571,240 @@ flutter:
         final (_, _, _, List<Device> devices) = await setUpTestDevices();
         final Device device = devices.firstWhere((Device d) => d.id == 'fake_test_device');
 
+        await expectLater(
+          device.startApp(null, debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug)),
+          throwsStateError,
+        );
+
+        final appPackage = ExtensionBackedApplicationPackage(id: 'test_app');
         final LaunchResult launchResult = await device.startApp(
-          null,
+          appPackage,
           mainPath: 'lib/main.dart',
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         );
         expect(launchResult.started, isTrue);
         expect(launchResult.vmServiceUri, Uri.parse('http://127.0.0.1:8181/abcd=/'));
-        expect(await device.stopApp(null), isTrue);
+        expect(await device.stopApp(appPackage), isTrue);
       });
 
-      test('fails when prebuiltApplication is true', () async {
-        final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
+      test('supports prebuilt application launch when PrebuiltExtensionBackedApplicationPackage is provided and fails when binary is missing', () async {
+        final (_, BufferLogger logger, MemoryFileSystem fileSystem, List<Device> devices) =
+            await setUpTestDevices();
         final Device device = devices.firstWhere((Device d) => d.id == 'fake_test_device');
 
-        final LaunchResult prebuiltResult = await device.startApp(
-          null,
+        final File nonexistentBinary = fileSystem.file('/tmp/prebuilt_bundle/missing');
+        final LaunchResult nonexistentResult = await device.startApp(
+          PrebuiltExtensionBackedApplicationPackage(
+            applicationPackage: nonexistentBinary,
+            id: 'test_app',
+          ),
           prebuiltApplication: true,
-          debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         );
-        expect(prebuiltResult.started, isFalse);
+        expect(nonexistentResult.started, isFalse);
         expect(
           logger.errorText,
-          contains(
-            'Prebuilt application bundles are not supported yet for tool extension devices.',
+          contains('Prebuilt application binary does not exist: /tmp/prebuilt_bundle/missing'),
+        );
+
+        final File prebuiltBinary = fileSystem.file('/tmp/prebuilt_bundle/app')
+          ..createSync(recursive: true);
+        final prebuiltPackage = PrebuiltExtensionBackedApplicationPackage(
+          applicationPackage: prebuiltBinary,
+          id: 'test_app',
+        );
+        final LaunchResult prebuiltLaunchResult = await device.startApp(
+          prebuiltPackage,
+          prebuiltApplication: true,
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        );
+        expect(prebuiltLaunchResult.started, isTrue);
+        expect(prebuiltLaunchResult.vmServiceUri, Uri.parse('http://127.0.0.1:8181/abcd=/'));
+        expect(await device.stopApp(prebuiltPackage), isTrue);
+      });
+
+      test('FlutterApplicationPackageFactory resolves ExtensionBackedApplicationPackage and PrebuiltExtensionBackedApplicationPackage for TargetPlatform.unsupported', () async {
+        final fileSystem = MemoryFileSystem.test();
+        fileSystem.currentDirectory
+            .childFile('pubspec.yaml')
+            .writeAsStringSync('name: custom_embedder_app\n');
+        final logger = BufferLogger.test();
+        final factory = FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            projectFactory: FlutterProjectFactory(
+              config: FakeConfig(),
+              fileSystem: fileSystem,
+              logger: logger,
+            ),
           ),
         );
+
+        final ApplicationPackage? buildablePkg = await factory.getPackageForPlatform(
+          TargetPlatform.unsupported,
+          buildInfo: BuildInfo.debug,
+        );
+        expect(buildablePkg, isA<ExtensionBackedApplicationPackage>());
+        expect(buildablePkg, isNot(isA<PrebuiltApplicationPackage>()));
+        expect(buildablePkg!.id, 'custom_embedder_app');
+
+        final File binaryFile = fileSystem.file('/tmp/custom_app.bundle')
+          ..createSync(recursive: true);
+        final ApplicationPackage? prebuiltPkg = await factory.getPackageForPlatform(
+          TargetPlatform.unsupported,
+          buildInfo: BuildInfo.debug,
+          applicationBinary: binaryFile,
+        );
+        expect(prebuiltPkg, isA<PrebuiltExtensionBackedApplicationPackage>());
+        expect(prebuiltPkg, isA<PrebuiltApplicationPackage>());
+        expect(
+          (prebuiltPkg! as PrebuiltApplicationPackage).applicationPackage.path,
+          binaryFile.path,
+        );
+
+        final Directory bundleDir = fileSystem.directory('/tmp/CustomApp.app')
+          ..createSync(recursive: true);
+        final ApplicationPackage? prebuiltDirPkg = await factory.getPackageForPlatform(
+          TargetPlatform.unsupported,
+          buildInfo: BuildInfo.debug,
+          applicationBinary: fileSystem.file(bundleDir.path),
+        );
+        expect(prebuiltDirPkg, isA<PrebuiltExtensionBackedApplicationPackage>());
+        expect(
+          (prebuiltDirPkg! as PrebuiltApplicationPackage).applicationPackage,
+          isA<Directory>(),
+        );
+
+        final disabledFactory = FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          featureFlags: TestFeatureFlags(),
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            projectFactory: FlutterProjectFactory(
+              config: FakeConfig(),
+              fileSystem: fileSystem,
+              logger: logger,
+            ),
+          ),
+        );
+        await expectLater(
+          disabledFactory.getPackageForPlatform(
+            TargetPlatform.unsupported,
+            buildInfo: BuildInfo.debug,
+          ),
+          throwsUnsupportedError,
+        );
+      });
+
+      test('FlutterDriverService.start launches buildable and prebuilt apps on custom TargetPlatform.unsupported extension device', () async {
+        final (_, BufferLogger logger, MemoryFileSystem fileSystem, List<Device> devices) =
+            await setUpTestDevices();
+        final Device customOsDevice = devices.firstWhere(
+          (Device d) => d.id == 'custom_os_test_device',
+        );
+        expect(await customOsDevice.targetPlatform, TargetPlatform.unsupported);
+
+        final toolContext = FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          projectFactory: FlutterProjectFactory(
+            config: FakeConfig(),
+            fileSystem: fileSystem,
+            logger: logger,
+          ),
+        );
+        final packageFactory = FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: toolContext,
+        );
+        final fakeVm = vm_service.VM(
+          isolates: <vm_service.IsolateRef>[
+            vm_service.Isolate(
+              id: '1',
+              pauseEvent: vm_service.Event(kind: vm_service.EventKind.kResume, timestamp: 0),
+              breakpoints: <vm_service.Breakpoint>[],
+              libraries: <vm_service.LibraryRef>[
+                vm_service.LibraryRef(id: '1', uri: 'file:///lib/main.dart', name: ''),
+              ],
+              livePorts: 0,
+              name: 'main',
+              number: '1',
+              pauseOnExit: false,
+              runnable: true,
+              startTime: 0,
+              isSystemIsolate: false,
+              isolateFlags: <vm_service.IsolateFlag>[],
+            ),
+          ],
+          pid: 1,
+          hostCPU: '',
+          isolateGroups: <vm_service.IsolateGroupRef>[],
+          targetCPU: '',
+          startTime: 0,
+          name: 'dart',
+          architectureBits: 64,
+          operatingSystem: '',
+          version: '',
+          systemIsolateGroups: <vm_service.IsolateGroupRef>[],
+          systemIsolates: <vm_service.IsolateRef>[],
+        );
+        final getVmRequest = FakeVmServiceRequest(
+          method: 'getVM',
+          args: const <String, Object>{},
+          jsonResponse: fakeVm.toJson(),
+        );
+        final fakeVmServiceHost = FakeVmServiceHost(
+          requests: <FakeVmServiceRequest>[getVmRequest, getVmRequest],
+        );
+
+        final driverService = FlutterDriverService(
+          applicationPackageFactory: packageFactory,
+          dartSdkPath: 'dart',
+          devtoolsLauncher: FakeDevtoolsLauncher(),
+          logFlushDelay: Duration.zero,
+          toolContext: toolContext,
+          vmServiceConnector: (
+            Uri httpUri, {
+            ReloadSources? reloadSources,
+            Restart? restart,
+            CompileExpression? compileExpression,
+            FlutterProject? flutterProject,
+            FlutterVersion? flutterVersion,
+            PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+            CompressionOptions compression = CompressionOptions.compressionDefault,
+            Device? device,
+            required Logger logger,
+          }) async => fakeVmServiceHost.vmService,
+        );
+
+        await driverService.start(
+          BuildInfo.debug,
+          customOsDevice,
+          DebuggingOptions.enabled(BuildInfo.debug, enableDds: false),
+        );
+        expect(await customOsDevice.stopApp(null), isTrue);
+
+        final File prebuiltBinary = fileSystem.file('/tmp/prebuilt_bundle/app')
+          ..createSync(recursive: true);
+        await driverService.start(
+          BuildInfo.debug,
+          customOsDevice,
+          DebuggingOptions.enabled(BuildInfo.debug, enableDds: false),
+          applicationBinary: prebuiltBinary,
+        );
+        expect(await customOsDevice.stopApp(null), isTrue);
+        expect(logger.errorText, isEmpty);
       });
 
       test('fails when device does not specify a buildTarget', () async {
@@ -570,7 +812,7 @@ flutter:
         final Device noTargetDevice = devices.firstWhere((Device d) => d.id == 'no_target_device');
 
         final LaunchResult noTargetResult = await noTargetDevice.startApp(
-          null,
+          ExtensionBackedApplicationPackage(id: 'test_app'),
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         );
         expect(noTargetResult.started, isFalse);
@@ -587,27 +829,30 @@ flutter:
         );
 
         final LaunchResult failingBuildResult = await failingBuildDevice.startApp(
-          null,
+          ExtensionBackedApplicationPackage(id: 'test_app'),
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         );
         expect(failingBuildResult.started, isFalse);
         expect(logger.errorText, contains('Build failed: Simulated build error'));
       });
 
-      test('fails when DeviceService.launchApp returns false', () async {
+      test('fails when DeviceService.launchApp throws ToolExtensionException', () async {
         final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
         final Device failingLaunchDevice = devices.firstWhere(
           (Device d) => d.id == 'failing_launch_device',
         );
 
         final LaunchResult failingLaunchResult = await failingLaunchDevice.startApp(
-          null,
+          ExtensionBackedApplicationPackage(id: 'test_app'),
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         );
         expect(failingLaunchResult.started, isFalse);
         expect(
           logger.errorText,
-          contains('Failed to launch application on Failing Launch Device.'),
+          contains(
+            'Failed to launch application on Failing Launch Device ("fake_test_ext"): '
+            'Simulated launch failure.',
+          ),
         );
       });
 
@@ -619,14 +864,23 @@ flutter:
             (Device d) => d.id == 'missing_vm_service_device',
           );
 
+          final appPackage = ExtensionBackedApplicationPackage(id: 'test_app');
           final LaunchResult result = await missingVmServiceDevice.startApp(
-            null,
+            appPackage,
             debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
           );
           expect(result.started, isFalse);
           expect(logger.errorText, contains('Error waiting for a debug connection.'));
-          expect(await missingVmServiceDevice.stopApp(null), isTrue);
-          expect(await missingVmServiceDevice.stopApp(null), isFalse);
+          logger.clear();
+          expect(await missingVmServiceDevice.stopApp(appPackage), isTrue);
+          expect(await missingVmServiceDevice.stopApp(appPackage), isFalse);
+          expect(
+            logger.errorText,
+            contains(
+              'Failed to stop application on Missing VM Service Device ("fake_test_ext"): '
+              'Application is not running.',
+            ),
+          );
         },
       );
     });

@@ -109,6 +109,7 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
     ToolContext? toolContext,
     bool verboseHelp = false,
   }) {
+    final FeatureFlags resolvedFeatureFlags = featureFlags ?? TestFeatureFlags();
     final ToolContext resolvedToolContext = toolContext ?? FakeToolContext();
     final PlistParser resolvedPlistParser = plistParser ?? FakePlistParser();
     final TemplatePathProvider resolvedTemplatePathProvider =
@@ -121,6 +122,7 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
           applicationPackageFactory ??
           FlutterApplicationPackageFactory(
             androidSdkBuilder: () => null,
+            featureFlags: resolvedFeatureFlags,
             plistParserBuilder: () => resolvedPlistParser,
             templatePathProvider: resolvedTemplatePathProvider,
             toolContext: resolvedToolContext,
@@ -130,7 +132,7 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
       devtoolsLauncher: devtoolsLauncher ?? FakeDevtoolsLauncher(),
       doctor: doctor ?? FakeDoctor(),
       extensionManager: extensionManager ?? FakeExtensionManager(),
-      featureFlags: featureFlags ?? TestFeatureFlags(),
+      featureFlags: resolvedFeatureFlags,
       plistParser: resolvedPlistParser,
       pub: pub ?? const ThrowingPub(),
       templatePathProvider: resolvedTemplatePathProvider,

@@ -12,8 +12,9 @@ import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'build.dart';
 
 class _RunningApp {
-  _RunningApp({required this.process, required this.vmServiceCompleter});
+  _RunningApp({required this.appId, required this.process, required this.vmServiceCompleter});
 
+  final String appId;
   final Process process;
   final Completer<Uri?> vmServiceCompleter;
 }
@@ -57,31 +58,57 @@ final class LinuxDeviceService extends DeviceService {
   }
 
   @override
-  Future<bool> launchApp({
+  Future<void> launchApp({
+    required String appId,
     required ExtensionDebuggingOptions debuggingOptions,
     required String deviceId,
     required Uri executableUri,
+    bool prebuiltApplication = false,
   }) async {
     if (deviceId != customLinuxDeviceId) {
-      return false;
+      throw ToolExtensionException('Unknown device "$deviceId".');
     }
-    final executable = File.fromUri(executableUri);
+    final String artifactPath = executableUri.toFilePath();
+    final File executable;
+    if (FileSystemEntity.isDirectorySync(artifactPath)) {
+      if (appId == '.' || appId == '..' || appId.contains('/') || appId.contains(r'\')) {
+        throw ToolExtensionException(
+          'Invalid application identifier "$appId" for bundle directory "$artifactPath".',
+        );
+      }
+      executable = File('${Directory(artifactPath).path}${Platform.pathSeparator}$appId');
+    } else {
+      executable = File(artifactPath);
+    }
     if (!executable.existsSync()) {
-      return false;
+      throw ToolExtensionException('Application executable does not exist: ${executable.path}');
     }
 
     // Stop any existing process for this device.
     await stopApp(deviceId: deviceId);
 
     final uriCompleter = Completer<Uri?>();
+    final environment = <String, String>{};
+    final List<String> engineSwitches = debuggingOptions.engineSwitches;
+    for (var i = 0; i < engineSwitches.length; i++) {
+      environment['FLUTTER_ENGINE_SWITCH_${i + 1}'] = engineSwitches[i];
+    }
+    if (engineSwitches.isNotEmpty) {
+      environment['FLUTTER_ENGINE_SWITCHES'] = engineSwitches.length.toString();
+    }
 
     try {
       final Process process = await Process.start(
         executable.path,
-        const <String>[],
+        debuggingOptions.dartEntrypointArgs,
+        environment: environment.isEmpty ? null : environment,
         workingDirectory: executable.parent.path,
       );
-      final runningApp = _RunningApp(process: process, vmServiceCompleter: uriCompleter);
+      final runningApp = _RunningApp(
+        appId: appId,
+        process: process,
+        vmServiceCompleter: uriCompleter,
+      );
       _runningApps[deviceId] = runningApp;
 
       void checkVmServiceUri(String line) {
@@ -113,13 +140,11 @@ final class LinuxDeviceService extends DeviceService {
           }
         }),
       );
-
-      return true;
-    } on ProcessException {
+    } on ProcessException catch (error) {
       if (!uriCompleter.isCompleted) {
         uriCompleter.complete();
       }
-      return false;
+      throw ToolExtensionException('Failed to start "${executable.path}": ${error.message}');
     }
   }
 
@@ -133,17 +158,24 @@ final class LinuxDeviceService extends DeviceService {
   }
 
   @override
-  Future<bool> stopApp({required String deviceId}) async {
+  Future<void> stopApp({required String deviceId, String? appId}) async {
+    if (deviceId != customLinuxDeviceId) {
+      throw ToolExtensionException('Unknown device "$deviceId".');
+    }
     final _RunningApp? runningApp = _runningApps[deviceId];
-    if (runningApp == null || !runningApp.process.kill()) {
-      return false;
+    if (runningApp == null || (appId != null && runningApp.appId != appId)) {
+      return;
+    }
+    if (!runningApp.process.kill()) {
+      throw ToolExtensionException(
+        'Failed to stop application "${runningApp.appId}" on "$deviceId".',
+      );
     }
     _runningApps.remove(deviceId);
     if (!runningApp.vmServiceCompleter.isCompleted) {
       runningApp.vmServiceCompleter.complete();
     }
     await runningApp.process.exitCode;
-    return true;
   }
 
   @override
