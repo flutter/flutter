@@ -7174,6 +7174,50 @@ class _RejectDragFractionPhysics extends ScrollPhysics {
 }
 
 void _testDetachedBallisticGroup() {
+  for (final startNewDrag in <bool>[false, true]) {
+    testWidgets('NestedScrollView updates direction after its last moving body detaches '
+        '(new drag: $startNewDrag)', (WidgetTester tester) async {
+      final key = GlobalKey<NestedScrollViewState>();
+      final directions = <ScrollDirection>[];
+      Widget fixture(int bodies) =>
+          _buildBallisticGroupTestWidget(key, count: bodies, notifications: directions);
+      await tester.pumpWidget(fixture(1));
+      final ScrollPosition outer = key.currentState!.outerController.position;
+      final ScrollPosition inner = key.currentState!.innerController.position;
+      outer.jumpTo(outer.maxScrollExtent);
+      inner.jumpTo(150);
+      _flingBallisticBody(inner, 1000, update: true);
+      expect(outer.isScrollingNotifier.value, isFalse);
+      expect(inner.isScrollingNotifier.value, isTrue);
+      expect(outer.userScrollDirection, ScrollDirection.reverse);
+      directions.clear();
+      if (startNewDrag) {
+        // Start the next drag before any callbacks queued by detach run.
+        tester.binding.addPostFrameCallback((Duration _) {
+          outer
+              .drag(DragStartDetails(), () {})
+              .update(
+                DragUpdateDetails(
+                  globalPosition: Offset.zero,
+                  primaryDelta: 1,
+                  delta: const Offset(0, 1),
+                ),
+              );
+        });
+      }
+      await tester.pumpWidget(fixture(0));
+      expect(key.currentState!.innerController.hasClients, isFalse);
+      final ScrollDirection expected = startNewDrag
+          ? ScrollDirection.forward
+          : ScrollDirection.idle;
+      expect(outer.userScrollDirection, expected);
+      expect(directions, <ScrollDirection>[expected]);
+      // Dispose the entire NestedScrollView, including any ongoing drag.
+      await tester.pumpWidget(const SizedBox.shrink());
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   void testFling(double velocity, {bool holdAtEdge = false}) {
     testWidgets('NestedScrollView stops a detached group at the header edge '
         '(velocity: $velocity, hold: $holdAtEdge)', (WidgetTester tester) async {

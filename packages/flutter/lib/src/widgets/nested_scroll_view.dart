@@ -722,7 +722,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   // Activities finish independently; an idle header must not mark a moving
   // body idle. The outer position can still be unattached during construction.
   void updateUserScrollDirectionIfIdle() {
-    if (_outerPosition?.isScrollingNotifier.value != true &&
+    if (_outerPosition?.isScrollingNotifier.value == false &&
         _innerPositions.every((position) => !position.isScrollingNotifier.value)) {
       updateUserScrollDirection(ScrollDirection.idle);
     }
@@ -1123,10 +1123,10 @@ class _NestedScrollController extends ScrollController {
     (position as _NestedScrollPosition).setParent(null);
     position.removeListener(_scheduleUpdateShadow);
     super.detach(position);
-    _scheduleUpdateShadow();
+    _scheduleUpdateShadow(checkScrollDirection: position.isScrollingNotifier.value);
   }
 
-  void _scheduleUpdateShadow() {
+  void _scheduleUpdateShadow({bool checkScrollDirection = false}) {
     // We do this asynchronously for attach() so that the new position has had
     // time to be initialized, and we do it asynchronously for detach() and from
     // the position change notifications because those happen synchronously
@@ -1134,6 +1134,11 @@ class _NestedScrollController extends ScrollController {
     // result is usually animated, the lag incurred is no big deal.
     SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
       coordinator.updateShadow();
+      // A detached position may have been the last one scrolling, or it may
+      // have transferred its activity to a replacement in the same frame.
+      if (checkScrollDirection && coordinator._state.mounted) {
+        coordinator.updateUserScrollDirectionIfIdle();
+      }
     }, debugLabel: 'NestedScrollController.updateShadow');
   }
 
