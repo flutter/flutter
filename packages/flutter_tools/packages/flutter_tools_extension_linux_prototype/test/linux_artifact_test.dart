@@ -13,7 +13,7 @@ void main() {
   const testTargetPlatform = 'linux-x64';
 
   final testArtifacts = <ArtifactDependency>[
-    ArtifactDependency(
+    ArtifactDependency.remote(
       name: testArtifactName,
       sha256: testSha256,
       url: Uri.parse('https://example.com/linux-x64/artifacts.zip'),

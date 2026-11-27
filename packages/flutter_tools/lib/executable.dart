@@ -201,6 +201,7 @@ List<FlutterCommand> generateCommands({
     AssembleCommand(
       androidContext: toolDependencies.androidContext,
       buildSystem: toolDependencies.buildSystem,
+      extensionArtifactManager: toolDependencies.extensionArtifactManager,
       extensionBuildManager: toolDependencies.extensionBuildManager,
       featureFlags: featureFlags,
       toolContext: toolContext,
@@ -223,6 +224,7 @@ List<FlutterCommand> generateCommands({
       androidContext: toolDependencies.androidContext,
       appleContext: toolDependencies.appleContext,
       buildSystem: toolDependencies.buildSystem,
+      extensionArtifactManager: toolDependencies.extensionArtifactManager,
       extensionBuildManager: toolDependencies.extensionBuildManager,
       featureFlags: featureFlags,
       templatePathProvider: toolDependencies.templatePathProvider,
@@ -326,6 +328,7 @@ List<FlutterCommand> generateCommands({
       logger: logger,
       platform: platform,
       featureFlags: featureFlags,
+      extensionArtifactManager: toolDependencies.extensionArtifactManager,
       toolContext: toolContext,
     ),
     RunCommand(

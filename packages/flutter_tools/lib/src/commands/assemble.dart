@@ -29,6 +29,7 @@ import '../cache.dart';
 import '../context/android_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
+import '../experimental/extension_artifact_manager.dart';
 import '../experimental/extension_build_manager.dart';
 import '../features.dart';
 import '../macos/xcode.dart';
@@ -111,6 +112,7 @@ class AssembleCommand extends FlutterCommand {
     required this._featureFlags,
     required super.toolContext,
     required this._xcode,
+    this._extensionArtifactManager,
     this._extensionBuildManager,
     super.verboseHelp = false,
   }) {
@@ -192,6 +194,7 @@ class AssembleCommand extends FlutterCommand {
 
   final AndroidContext _androidContext;
   final BuildSystem _buildSystem;
+  final ExtensionArtifactManager? _extensionArtifactManager;
   final ExtensionBuildManager? _extensionBuildManager;
   final FeatureFlags _featureFlags;
   final Xcode? _xcode;
@@ -243,6 +246,7 @@ class AssembleCommand extends FlutterCommand {
     };
     if (_extensionBuildManager case final ExtensionBuildManager extensionBuildManager?
         when argumentResults.rest.any((String targetName) => !targetMap.containsKey(targetName))) {
+      final extensionTargets = <String, (ExtensionAssembleTarget, String)>{};
       for (final ExtensionAssembleTarget target
           in await extensionBuildManager.getAssembleTargets()) {
         final String extensionName = extensionBuildManager.extensionNameForAssembleTarget(
@@ -254,6 +258,33 @@ class AssembleCommand extends FlutterCommand {
           );
           continue;
         }
+        extensionTargets[target.name] = (target, extensionName);
+      }
+
+      final reachableNames = <String>{};
+      final pending = <String>[...argumentResults.rest];
+      while (pending.isNotEmpty) {
+        final String current = pending.removeLast();
+        if (extensionTargets[current] case (final ExtensionAssembleTarget target, _)
+            when reachableNames.add(current)) {
+          pending.addAll(target.dependencies);
+        }
+      }
+
+      final ExtensionArtifactManager? artifactManager = _extensionArtifactManager;
+      for (final targetName in reachableNames) {
+        final (ExtensionAssembleTarget target, String extensionName) =
+            extensionTargets[targetName]!;
+        final (:Set<String> artifactNames, :Set<String> targetPlatforms) =
+            customArtifactRequestsForAssembleTarget(target);
+        final Map<String, ResolvedExtensionArtifact> extensionArtifacts =
+            artifactManager != null && artifactNames.isNotEmpty
+            ? await artifactManager.ensureArtifactsDownloaded(
+                artifactNames: artifactNames,
+                extensionName: extensionName,
+                targetPlatforms: targetPlatforms,
+              )
+            : const <String, ResolvedExtensionArtifact>{};
         targetMap[target.name] = ExtensionTarget(
           assembleTarget: target,
           buildManager: extensionBuildManager,
@@ -266,6 +297,7 @@ class AssembleCommand extends FlutterCommand {
             }
             return dependency;
           },
+          extensionArtifacts: extensionArtifacts,
         );
       }
     }
