@@ -14,6 +14,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/lib/gpu/binding_set.h"
 #include "flutter/lib/gpu/compute_pipeline.h"
+#include "flutter/lib/gpu/pipeline_state.h"
 #include "flutter/lib/gpu/render_pipeline.h"
 #include "flutter/lib/gpu/shader.h"
 #include "impeller/core/device_buffer.h"
@@ -22,7 +23,6 @@
 #include "impeller/core/texture.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
-#include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/render_target.h"
 
 namespace flutter {
@@ -68,8 +68,7 @@ struct Op : OpHeader {
 
 struct SetPipelineStateOp : Op<RecordedOp::kSetPipelineState> {
   const RenderPipeline::Core* core;
-  /// The draw state, without shaders or a vertex layout.
-  const impeller::PipelineDescriptor* descriptor;
+  PipelineState state;
 };
 
 struct BindUniformOp : Op<RecordedOp::kBindUniform> {

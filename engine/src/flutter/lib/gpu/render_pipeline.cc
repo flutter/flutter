@@ -110,19 +110,26 @@ bool RenderPipeline::Core::BindToPipelineDescriptor(
 
 std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>
 RenderPipeline::Core::Resolve(impeller::Context& context,
-                              const impeller::PipelineDescriptor& state) const {
-  // A reload replaced some shader's code, possibly this pipeline's, so a state
-  // that failed to build may build now.
+                              const PipelineState& state) const {
+  // A reload replaced some shader's code, possibly this pipeline's. Recordings
+  // retain what they used, so in-flight work is unaffected.
   const uint64_t generation = Shader::GetRegistrationGeneration();
   if (generation != resolved_generation_) {
     resolved_generation_ = generation;
+    resolved_.clear();
     std::scoped_lock lock(failed_mutex_);
     failed_keys_.clear();
     has_failures_.store(false, std::memory_order_relaxed);
   }
 
-  std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>> pipeline;
-  impeller::PipelineDescriptor descriptor = state;
+  if (auto found = resolved_.find(state); found != resolved_.end()) {
+    return found->second;
+  }
+
+  std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>& pipeline =
+      resolved_[state];
+
+  impeller::PipelineDescriptor descriptor = state.ToDescriptor();
   if (BindToPipelineDescriptor(*context.GetShaderLibrary(), descriptor)) {
     auto& library = *context.GetPipelineLibrary();
     pipeline =
@@ -139,19 +146,18 @@ RenderPipeline::Core::Resolve(impeller::Context& context,
   }
   if (!pipeline) {
     std::scoped_lock lock(failed_mutex_);
-    failed_keys_.insert(state.GetHash());
+    failed_keys_.insert(absl::HashOf(state));
     has_failures_.store(true, std::memory_order_relaxed);
   }
   return pipeline;
 }
 
-bool RenderPipeline::Core::HasBuildFailed(
-    const impeller::PipelineDescriptor& state) const {
+bool RenderPipeline::Core::HasBuildFailed(const PipelineState& state) const {
   if (!has_failures_.load(std::memory_order_relaxed)) {
     return false;
   }
   std::scoped_lock lock(failed_mutex_);
-  return failed_keys_.contains(state.GetHash());
+  return failed_keys_.contains(absl::HashOf(state));
 }
 
 bool RenderPipeline::BindToPipelineDescriptor(

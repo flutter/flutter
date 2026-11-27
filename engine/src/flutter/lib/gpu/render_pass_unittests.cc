@@ -95,10 +95,10 @@ TEST(FlutterGpuRenderPassTest, SetDepthWriteEnableHonorsArgument) {
   auto render_pass = fml::MakeRefCounted<RenderPass>();
 
   InternalFlutterGpu_RenderPass_SetDepthWriteEnable(render_pass.get(), true);
-  EXPECT_TRUE(render_pass->GetDepthAttachmentDescriptor().depth_write_enabled);
+  EXPECT_TRUE(render_pass->GetPipelineState().depth.depth_write_enabled);
 
   InternalFlutterGpu_RenderPass_SetDepthWriteEnable(render_pass.get(), false);
-  EXPECT_FALSE(render_pass->GetDepthAttachmentDescriptor().depth_write_enabled);
+  EXPECT_FALSE(render_pass->GetPipelineState().depth.depth_write_enabled);
 }
 
 // Draws memoize the built pipeline until the pipeline-affecting state
@@ -139,8 +139,28 @@ TEST(FlutterGpuRenderPassTest, PipelineStateMutationsMarkStateDirty) {
   EXPECT_TRUE(render_pass->IsPipelineStateDirtyForTesting());
 
   render_pass->ClearPipelineStateDirtyForTesting();
-  render_pass->SetPipeline(MakeRenderPipeline());
+  auto pipeline = MakeRenderPipeline();
+  render_pass->SetPipeline(*pipeline);
   EXPECT_TRUE(render_pass->IsPipelineStateDirtyForTesting());
+}
+
+// Rebinding is a leaf call from Dart, which can't run the Dart API, and
+// releasing the last reference to a pipeline's wrapper does. So a pass must
+// not be what keeps the wrapper alive.
+TEST(FlutterGpuRenderPassTest, BindingAPipelineDoesNotRetainItsWrapper) {
+  auto render_pass = fml::MakeRefCounted<RenderPass>();
+  auto pipeline = MakeRenderPipeline();
+  std::weak_ptr<const RenderPipeline::Core> core = pipeline->GetCore();
+
+  render_pass->SetPipeline(*pipeline);
+  EXPECT_TRUE(pipeline->HasOneRef());
+
+  pipeline = nullptr;
+  EXPECT_FALSE(core.expired());
+
+  auto other = MakeRenderPipeline();
+  render_pass->SetPipeline(*other);
+  EXPECT_TRUE(core.expired());
 }
 
 // Callers re-send the same fixed-function state and rebind the same pipeline
@@ -154,14 +174,17 @@ TEST(FlutterGpuRenderPassTest, RedundantPipelineStateAssignmentsAreIgnored) {
   render_pass->SetWindingOrder(impeller::WindingOrder::kCounterClockwise);
   render_pass->SetPrimitiveType(impeller::PrimitiveType::kTriangleStrip);
   render_pass->SetPolygonMode(impeller::PolygonMode::kLine);
-  render_pass->SetPipeline(pipeline);
+  render_pass->SetPipeline(*pipeline);
 
   render_pass->ClearPipelineStateDirtyForTesting();
   render_pass->SetCullMode(impeller::CullMode::kBackFace);
   render_pass->SetWindingOrder(impeller::WindingOrder::kCounterClockwise);
   render_pass->SetPrimitiveType(impeller::PrimitiveType::kTriangleStrip);
   render_pass->SetPolygonMode(impeller::PolygonMode::kLine);
-  render_pass->SetPipeline(pipeline);
+  render_pass->SetPipeline(*pipeline);
+  InternalFlutterGpu_RenderPass_SetColorBlendEnable(render_pass.get(), 0,
+                                                    false);
+  InternalFlutterGpu_RenderPass_SetDepthWriteEnable(render_pass.get(), false);
   EXPECT_FALSE(render_pass->IsPipelineStateDirtyForTesting());
 
   // A real change still dirties.
@@ -177,7 +200,7 @@ TEST(FlutterGpuRenderPassTest, DrawsRecordPipelineStateOnlyWhenItChanges) {
   auto command_buffer = fml::MakeRefCounted<CommandBuffer>(context);
   auto render_pass = MakeBegunRenderPass(*command_buffer);
   auto pipeline = MakeRenderPipeline();
-  render_pass->SetPipeline(pipeline);
+  render_pass->SetPipeline(*pipeline);
 
   EXPECT_TRUE(render_pass->Draw(3, 1, /*indexed=*/false));
   EXPECT_TRUE(render_pass->Draw(3, 1, /*indexed=*/false));
@@ -198,7 +221,7 @@ TEST(FlutterGpuRenderPassTest, EndedPassesRecordNothing) {
   auto command_buffer = fml::MakeRefCounted<CommandBuffer>(context);
   auto render_pass = MakeBegunRenderPass(*command_buffer);
   auto pipeline = MakeRenderPipeline();
-  render_pass->SetPipeline(pipeline);
+  render_pass->SetPipeline(*pipeline);
   EXPECT_TRUE(render_pass->Draw(3, 1, /*indexed=*/false));
 
   {
@@ -218,7 +241,7 @@ TEST(FlutterGpuRenderPassTest, PassesEndedByALaterPassRecordNothing) {
   auto command_buffer = fml::MakeRefCounted<CommandBuffer>(context);
   auto first = MakeBegunRenderPass(*command_buffer);
   auto pipeline = MakeRenderPipeline();
-  first->SetPipeline(pipeline);
+  first->SetPipeline(*pipeline);
 
   impeller::ScopedValidationDisable disable_validation;
   auto second = MakeBegunRenderPass(*command_buffer);
