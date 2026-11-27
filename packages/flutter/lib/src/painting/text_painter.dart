@@ -412,10 +412,15 @@ class _TextLayout {
     );
   }
 
+  bool get _mayEllipsize => _paragraph.didExceedMaxLines && _painter.ellipsis != null;
+
+  double get _parentWidthExtent =>
+      _mayEllipsize ? max(maxIntrinsicLineExtent, longestLine) : maxIntrinsicLineExtent;
+
   double _contentWidthFor(double minWidth, double maxWidth, TextWidthBasis widthBasis) {
     return switch (widthBasis) {
       TextWidthBasis.longestLine => clampDouble(longestLine, minWidth, maxWidth),
-      TextWidthBasis.parent => clampDouble(maxIntrinsicLineExtent, minWidth, maxWidth),
+      TextWidthBasis.parent => clampDouble(_parentWidthExtent, minWidth, maxWidth),
     };
   }
 }
@@ -429,15 +434,21 @@ class _TextPainterLayoutCacheWithOffset {
     this.layout,
     this.textAlignment,
     this.layoutMaxWidth,
-    this.contentWidth,
-  ) : assert(textAlignment >= 0.0 && textAlignment <= 1.0),
-      assert(!layoutMaxWidth.isNaN),
-      assert(!contentWidth.isNaN);
+    this.contentWidth, {
+    this.hasInfiniteMaxWidth = false,
+  }) : assert(textAlignment >= 0.0 && textAlignment <= 1.0),
+       assert(!layoutMaxWidth.isNaN),
+       assert(!contentWidth.isNaN);
 
   final _TextLayout layout;
 
   // The input width used to lay out the paragraph.
   final double layoutMaxWidth;
+
+  // Whether the `layout` call that produced this cache had an infinite
+  // `maxWidth` (even if the paragraph was re-laid out at a finite width to
+  // avoid an infinite paint offset).
+  final bool hasInfiniteMaxWidth;
 
   // The content width the text painter should report in TextPainter.width.
   // This is also used to compute `paintOffset`.
@@ -500,13 +511,15 @@ class _TextPainterLayoutCacheWithOffset {
     }
 
     final double maxIntrinsicWidth = paragraph.maxIntrinsicWidth;
-    // Skip line breaking if the input width remains the same, of there will be
-    // no soft breaks.
+    // Skip line breaking if the input width remains the same, or if there will
+    // be no soft breaks and no ellipsis that might refit against the new width.
     final bool skipLineBreaking =
         maxWidth ==
             layoutMaxWidth // Same input max width so relayout is unnecessary.
             ||
-        ((paragraph.width - maxIntrinsicWidth) > -precisionErrorTolerance &&
+        (hasInfiniteMaxWidth && maxWidth.isInfinite) ||
+        (!layout._mayEllipsize &&
+            (paragraph.width - maxIntrinsicWidth) > -precisionErrorTolerance &&
             (maxWidth - maxIntrinsicWidth) > -precisionErrorTolerance);
     if (skipLineBreaking) {
       // Adjust the content width in case the TextWidthBasis changed.
@@ -1298,7 +1311,9 @@ class TextPainter {
     final bool adjustMaxWidth = !maxWidth.isFinite && paintOffsetAlignment != 0;
     final double? adjustedMaxWidth = !adjustMaxWidth
         ? maxWidth
-        : cachedLayout?.layout.maxIntrinsicLineExtent;
+        : (cachedLayout != null && !cachedLayout.layout._mayEllipsize
+              ? cachedLayout.layout.maxIntrinsicLineExtent
+              : null);
     final double layoutMaxWidth = adjustedMaxWidth ?? maxWidth;
 
     // Only rebuild the paragraph when there're layout changes, even when
@@ -1319,13 +1334,14 @@ class TextPainter {
     // as compared to shaping.
     if (adjustedMaxWidth == null && minWidth.isFinite) {
       assert(maxWidth.isInfinite);
-      final double newInputWidth = layout.maxIntrinsicLineExtent;
+      final double newInputWidth = layout._parentWidthExtent;
       paragraph.layout(ui.ParagraphConstraints(width: newInputWidth));
       newLayoutCache = _TextPainterLayoutCacheWithOffset(
         layout,
         paintOffsetAlignment,
         newInputWidth,
         contentWidth,
+        hasInfiniteMaxWidth: true,
       );
     } else {
       newLayoutCache = _TextPainterLayoutCacheWithOffset(
@@ -1333,6 +1349,7 @@ class TextPainter {
         paintOffsetAlignment,
         layoutMaxWidth,
         contentWidth,
+        hasInfiniteMaxWidth: maxWidth.isInfinite,
       );
     }
     _layoutCache = newLayoutCache;

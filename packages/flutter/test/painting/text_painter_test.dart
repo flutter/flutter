@@ -2088,6 +2088,181 @@ void main() {
       areCreateAndDispose,
     );
   });
+
+  group('hard-break ellipsis', () {
+    test('width includes ellipsis under loose constraints', () {
+      const style = TextStyle(fontSize: 10);
+
+      // "AAA" is 30 wide and "\u2026" is 10 wide in the Ahem test font.
+      final painter = TextPainter(
+        text: const TextSpan(text: 'AAA\nBBB', style: style),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+        ellipsis: '\u2026',
+      )..layout(maxWidth: 100);
+      expect(painter.didExceedMaxLines, isTrue);
+      expect(painter.maxIntrinsicWidth, 30);
+      expect(painter.width, 40);
+      expect(painter.computeLineMetrics().single.width, 30);
+      painter.dispose();
+
+      // When the offered maxWidth cannot fit "AAA\u2026", SkParagraph trims to
+      // "AA\u2026" (20 + 10 = 30) and width stays within maxWidth.
+      final narrow = TextPainter(
+        text: const TextSpan(text: 'AAA\nBBB', style: style),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+        ellipsis: '\u2026',
+      )..layout(maxWidth: 35);
+      expect(narrow.didExceedMaxLines, isTrue);
+      expect(narrow.width, 30);
+      expect(narrow.computeLineMetrics().single.width, 20);
+      narrow.dispose();
+
+      // Without an ellipsis, didExceedMaxLines does not widen the box.
+      final noEllipsis = TextPainter(
+        text: const TextSpan(text: 'AAA\nBBB', style: style),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+      )..layout(maxWidth: 100);
+      expect(noEllipsis.didExceedMaxLines, isTrue);
+      expect(noEllipsis.width, 30);
+      noEllipsis.dispose();
+
+      // Soft wrap is unaffected.
+      final softWrap = TextPainter(
+        text: const TextSpan(text: 'AAAAAA', style: style),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+        ellipsis: '\u2026',
+      )..layout(maxWidth: 45);
+      expect(softWrap.didExceedMaxLines, isTrue);
+      expect(softWrap.width, 45);
+      softWrap.dispose();
+
+      // Lone ellipsis on an empty visible line wider than the hidden line.
+      final loneEllipsis = TextPainter(
+        text: const TextSpan(text: '\nB', style: style),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+        ellipsis: '...',
+      )..layout(maxWidth: 100);
+      expect(loneEllipsis.didExceedMaxLines, isTrue);
+      expect(loneEllipsis.maxIntrinsicWidth, 10);
+      expect(loneEllipsis.width, 30);
+      loneEllipsis.dispose();
+
+      // maxLines > 1 and textScaler.
+      final multiLine = TextPainter(
+        text: const TextSpan(text: 'A\nBB\nC', style: style),
+        textDirection: TextDirection.ltr,
+        maxLines: 2,
+        ellipsis: '\u2026',
+        textScaler: const TextScaler.linear(2),
+      )..layout(maxWidth: 200);
+      expect(multiLine.didExceedMaxLines, isTrue);
+      expect(multiLine.maxIntrinsicWidth, 40);
+      expect(multiLine.width, 60);
+      multiLine.dispose();
+    });
+
+    test('relayouts when maxWidth changes across widths >= maxIntrinsicWidth', () {
+      const style = TextStyle(fontSize: 10);
+      for (final TextWidthBasis basis in TextWidthBasis.values) {
+        final painter = TextPainter(
+          text: const TextSpan(text: 'AAA\nBBB', style: style),
+          textDirection: TextDirection.ltr,
+          maxLines: 1,
+          ellipsis: '\u2026',
+          textWidthBasis: basis,
+        );
+
+        painter.layout(maxWidth: 100);
+        expect(painter.width, 40, reason: '$basis wide');
+        expect(painter.computeLineMetrics().single.width, 30, reason: '$basis wide');
+
+        painter.layout(maxWidth: 35);
+        expect(painter.width, 30, reason: '$basis narrow');
+        expect(painter.computeLineMetrics().single.width, 20, reason: '$basis narrow');
+
+        painter.layout(maxWidth: 100);
+        expect(painter.width, 40, reason: '$basis wide again');
+        expect(painter.computeLineMetrics().single.width, 30, reason: '$basis wide again');
+
+        painter.dispose();
+      }
+    });
+
+    test('alignment and infinite width preserve full line and ellipsis', () {
+      const style = TextStyle(fontSize: 10);
+      for (final TextDirection direction in TextDirection.values) {
+        for (final TextAlign align in TextAlign.values) {
+          for (final maxWidth in <double>[100, double.infinity]) {
+            final painter = TextPainter(
+              text: const TextSpan(text: 'AAA\nBBB', style: style),
+              textDirection: direction,
+              textAlign: align,
+              maxLines: 1,
+              ellipsis: '\u2026',
+            )..layout(maxWidth: maxWidth);
+
+            final List<ui.LineMetrics> lines = painter.computeLineMetrics();
+            final ui.LineMetrics line = lines.single;
+            expect(painter.width, 40, reason: '$direction $align maxWidth=$maxWidth');
+            expect(line.width, 30, reason: '$direction $align maxWidth=$maxWidth');
+            expect(line.left, 0, reason: '$direction $align maxWidth=$maxWidth');
+
+            // Repeated layout with the same maxWidth must hit the layout cache
+            // (including infinite maxWidth for non-left-aligned/RTL text).
+            painter.layout(maxWidth: maxWidth);
+            expect(
+              identical(painter.computeLineMetrics(), lines),
+              isTrue,
+              reason: '$direction $align maxWidth=$maxWidth cache hit',
+            );
+            painter.dispose();
+          }
+        }
+      }
+
+      // Transitioning from a narrow width to infinite width on non-left-aligned
+      // text must not reuse the narrow width or maxIntrinsicWidth.
+      for (final (TextAlign align, TextDirection direction) in <(TextAlign, TextDirection)>[
+        (TextAlign.center, TextDirection.ltr),
+        (TextAlign.right, TextDirection.ltr),
+        (TextAlign.start, TextDirection.rtl),
+      ]) {
+        final painter = TextPainter(
+          text: const TextSpan(text: 'AAA\nBBB', style: style),
+          textDirection: direction,
+          textAlign: align,
+          maxLines: 1,
+          ellipsis: '\u2026',
+        );
+        painter.layout(maxWidth: 35);
+        expect(painter.computeLineMetrics().single.width, 20);
+
+        painter.layout();
+        expect(painter.width, 40, reason: '$direction $align');
+        expect(painter.computeLineMetrics().single.width, 30, reason: '$direction $align');
+
+        // Repeated infinite layout hits the cache even after a finite->infinite transition.
+        final List<ui.LineMetrics> cachedLines = painter.computeLineMetrics();
+        painter.layout();
+        expect(identical(painter.computeLineMetrics(), cachedLines), isTrue);
+
+        // Infinite minWidth -> finite minWidth still re-computes layout, then caches again.
+        painter.layout(minWidth: double.infinity);
+        expect(painter.width, double.infinity);
+        painter.layout();
+        expect(painter.width, 40);
+        final List<ui.LineMetrics> postInfLines = painter.computeLineMetrics();
+        painter.layout();
+        expect(identical(painter.computeLineMetrics(), postInfLines), isTrue);
+        painter.dispose();
+      }
+    });
+  });
 }
 
 class MockCanvas extends Fake implements Canvas {}
