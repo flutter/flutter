@@ -265,6 +265,13 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   supports_texture_array_ = gl.TexImage3D.IsAvailable() &&
                             gl.TexSubImage3D.IsAvailable() &&
                             gl.CompressedTexSubImage3D.IsAvailable();
+  if (supports_texture_array_) {
+    // GL_MAX_ARRAY_TEXTURE_LAYERS shares its value with the
+    // GL_EXT_texture_array and GL_NV_texture_array enums.
+    GLint value = 0;
+    gl.GetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &value);
+    max_texture_array_layers_ = value > 0 ? static_cast<uint32_t>(value) : 0u;
+  }
 
   // Anisotropic filtering is not part of any core GL or GLES version; it is
   // always gated on GL_EXT_texture_filter_anisotropic. The query and the
@@ -320,6 +327,10 @@ bool CapabilitiesGLES::SupportsTextureMaxLevel() const {
 
 bool CapabilitiesGLES::SupportsTextureArrays() const {
   return supports_texture_array_;
+}
+
+uint32_t CapabilitiesGLES::GetMaximumTextureArrayLayers() const {
+  return max_texture_array_layers_;
 }
 
 size_t CapabilitiesGLES::GetMaxTextureUnits(ShaderStage stage) const {

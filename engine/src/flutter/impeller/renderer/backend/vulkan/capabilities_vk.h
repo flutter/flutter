@@ -280,6 +280,9 @@ class CapabilitiesVK final : public Capabilities,
   bool SupportsTextureArrays() const override;
 
   // |Capabilities|
+  uint32_t GetMaximumTextureArrayLayers() const override;
+
+  // |Capabilities|
   bool SupportsExtendedRangeFormats() const override;
 
   // |Capabilities|

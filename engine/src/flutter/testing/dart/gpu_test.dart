@@ -1390,6 +1390,56 @@ void main() async {
     expect(gpu.gpuContext.maxSamplerAnisotropy, greaterThanOrEqualTo(1));
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  test('GpuContext reports texture size limits', () async {
+    final int width = gpu.gpuContext.maxTextureWidth;
+    final int height = gpu.gpuContext.maxTextureHeight;
+    // OpenGL ES 3.0 guarantees 2048; Vulkan and Metal exceed it.
+    expect(width, greaterThanOrEqualTo(2048));
+    expect(height, greaterThanOrEqualTo(2048));
+    // A render target can never be larger than a texture.
+    expect(gpu.gpuContext.maxRenderTargetWidth, lessThanOrEqualTo(width));
+    expect(gpu.gpuContext.maxRenderTargetHeight, lessThanOrEqualTo(height));
+
+    final int layers = gpu.gpuContext.maxTextureArrayLayers;
+    if (gpu.gpuContext.doesSupportTextureArrays) {
+      // Vulkan and OpenGL ES 3.0 guarantee 256 layers.
+      expect(layers, greaterThanOrEqualTo(256));
+    } else {
+      expect(layers, 0);
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('GpuContext.createTexture rejects sizes over the device limits', () async {
+    expect(
+      () => gpu.gpuContext.createTexture(
+        gpu.StorageMode.devicePrivate,
+        gpu.gpuContext.maxTextureWidth + 1,
+        1,
+      ),
+      throwsArgumentError,
+    );
+    expect(
+      () => gpu.gpuContext.createTexture(
+        gpu.StorageMode.devicePrivate,
+        1,
+        gpu.gpuContext.maxTextureHeight + 1,
+      ),
+      throwsArgumentError,
+    );
+    if (gpu.gpuContext.doesSupportTextureArrays) {
+      expect(
+        () => gpu.gpuContext.createTexture(
+          gpu.StorageMode.hostVisible,
+          4,
+          4,
+          textureType: gpu.TextureType.texture2DArray,
+          layerCount: gpu.gpuContext.maxTextureArrayLayers + 1,
+        ),
+        throwsArgumentError,
+      );
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   test('GpuContext.maxRenderTargetWidth and Height report a usable size', () async {
     // OpenGL ES 3.0 and up guarantee a GL_MAX_TEXTURE_SIZE of at least 2048
     // (OpenGL ES 2.0 only 64), and Vulkan's and Metal's minimums exceed it.

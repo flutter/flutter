@@ -104,6 +104,34 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return _getMaxSamplerAnisotropy();
   }
 
+  /// The widest 2D texture, in pixels, that can be created.
+  ///
+  /// It's the device's own limit: on Vulkan, `maxImageDimension2D`, on OpenGL
+  /// ES, `GL_MAX_TEXTURE_SIZE`, and on Metal, the maximum for the device's GPU
+  /// family (16384 on most devices). Textures that are only sampled can use
+  /// this size; render targets are limited by [maxRenderTargetWidth], which
+  /// may be smaller.
+  int get maxTextureWidth {
+    return _getMaximumTextureSize(0);
+  }
+
+  /// The tallest 2D texture, in pixels, that can be created.
+  ///
+  /// See [maxTextureWidth].
+  int get maxTextureHeight {
+    return _getMaximumTextureSize(1);
+  }
+
+  /// The largest `layerCount` of a [TextureType.texture2DArray] texture, or 0
+  /// when [doesSupportTextureArrays] is false.
+  ///
+  /// It's the device's own limit: on Vulkan, `maxImageArrayLayers`, on OpenGL
+  /// ES, `GL_MAX_ARRAY_TEXTURE_LAYERS`, and 2048 on Metal. Vulkan and OpenGL
+  /// ES 3.0 only guarantee 256, so check this before creating a deep array.
+  int get maxTextureArrayLayers {
+    return _getMaximumTextureArrayLayers();
+  }
+
   /// The widest texture, in pixels, that can be created and attached to a
   /// render pass (see [ColorAttachment.texture] and
   /// [DepthStencilAttachment.texture]).
@@ -251,6 +279,21 @@ base class GpuContext extends NativeFieldWrapperClass1 {
       throw ArgumentError(
         'layerCount ($layerCount) must be 1 for textures of type '
         '$resolvedTextureType',
+      );
+    }
+    if (width > maxTextureWidth || height > maxTextureHeight) {
+      throw ArgumentError(
+        'A ${width}x$height texture exceeds this device\'s maximum texture '
+        'size of ${maxTextureWidth}x$maxTextureHeight '
+        '(GpuContext.maxTextureWidth and maxTextureHeight)',
+      );
+    }
+    if (resolvedTextureType == TextureType.texture2DArray &&
+        doesSupportTextureArrays &&
+        layerCount > maxTextureArrayLayers) {
+      throw ArgumentError(
+        'layerCount ($layerCount) exceeds this device\'s maximum of '
+        '$maxTextureArrayLayers (GpuContext.maxTextureArrayLayers)',
       );
     }
     if (resolvedTextureType == TextureType.texture2DArray && sampleCount != 1) {
@@ -532,6 +575,16 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     symbol: 'InternalFlutterGpu_Context_GetMaximumRenderTargetSize',
   )
   external int _getMaximumRenderTargetSize(int dimension);
+
+  @Native<Uint32 Function(Pointer<Void>, Int)>(
+    symbol: 'InternalFlutterGpu_Context_GetMaximumTextureSize',
+  )
+  external int _getMaximumTextureSize(int dimension);
+
+  @Native<Uint32 Function(Pointer<Void>)>(
+    symbol: 'InternalFlutterGpu_Context_GetMaximumTextureArrayLayers',
+  )
+  external int _getMaximumTextureArrayLayers();
 
   @Native<Bool Function(Pointer<Void>, Int)>(
     symbol: 'InternalFlutterGpu_Context_SupportsTextureCompression',

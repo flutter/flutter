@@ -120,6 +120,9 @@ class CapabilitiesGLES final
   bool SupportsTextureArrays() const override;
 
   // |Capabilities|
+  uint32_t GetMaximumTextureArrayLayers() const override;
+
+  // |Capabilities|
   bool SupportsOffscreenMSAA() const override;
 
   // |Capabilities|
@@ -204,6 +207,7 @@ class CapabilitiesGLES final
   bool supports_32bit_primitive_indices_ = false;
   bool supports_texture_max_level_ = false;
   bool supports_texture_array_ = false;
+  uint32_t max_texture_array_layers_ = 0;
   bool needs_texture_upload_rebind_ = false;
   bool needs_separate_uniform_buffers_ = false;
   bool is_angle_ = false;

@@ -105,6 +105,12 @@ class StandardCapabilities final : public Capabilities {
   bool SupportsTextureArrays() const override { return true; }
 
   // |Capabilities|
+  uint32_t GetMaximumTextureArrayLayers() const override {
+    // Every Metal GPU family supports an arrayLength of up to 2048.
+    return 2048u;
+  }
+
+  // |Capabilities|
   bool SupportsExtendedRangeFormats() const override {
     return supports_extended_range_formats_;
   }

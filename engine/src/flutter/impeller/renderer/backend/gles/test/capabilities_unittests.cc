@@ -127,6 +127,19 @@ TEST(CapabilitiesGLES, SupportsTextureArrayViaEXTExtension) {
   EXPECT_TRUE(capabilities->SupportsTextureArrays());
 }
 
+TEST(CapabilitiesGLES, ReportsTextureArrayLayerLimitOnES3) {
+  auto mock_gles = MockGLES::Init(std::nullopt, "OpenGL ES 3.0");
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  EXPECT_EQ(capabilities->GetMaximumTextureArrayLayers(), 256u);
+}
+
+TEST(CapabilitiesGLES, NoTextureArrayLayersWithoutArraySupport) {
+  auto const extensions = std::vector<const char*>{"GL_KHR_debug"};
+  auto mock_gles = MockGLES::Init(extensions, "OpenGL ES 2.0");
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  EXPECT_EQ(capabilities->GetMaximumTextureArrayLayers(), 0u);
+}
+
 TEST(CapabilitiesGLES, MaxShaderCompilerThreadsIsZeroWithoutExtension) {
   auto mock_gles = MockGLES::Init();
   auto capabilities = mock_gles->GetProcTable().GetCapabilities();
