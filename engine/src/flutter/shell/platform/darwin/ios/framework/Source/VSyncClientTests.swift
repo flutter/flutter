@@ -73,7 +73,7 @@ struct VSyncClientTests {
       callbackStartTime = startTime
       callbackTargetTime = targetTime
     }
-    let link = try #require(vsyncClient.displayLink)
+    let link = try #require(await threadTaskRunner.run { vsyncClient.displayLink })
 
     await threadTaskRunner.run { vsyncClient.onDisplayLink(link) }
 
@@ -96,7 +96,7 @@ struct VSyncClientTests {
       callbackStartTime = startTime
       callbackTargetTime = targetTime
     }
-    let link = try #require(vsyncClient.displayLink)
+    let link = try #require(await threadTaskRunner.run { vsyncClient.displayLink })
 
     await threadTaskRunner.run { vsyncClient.onDisplayLink(link) }
 
@@ -125,7 +125,7 @@ struct VSyncClientTests {
       isVariableRefreshRateEnabled: false,
       maxRefreshRate: 60.0
     ) { _, _ in }
-    let link = try #require(vsyncClient.displayLink)
+    let link = try #require(await threadTaskRunner.run { vsyncClient.displayLink })
 
     let pausedWhenDisallowed = await threadTaskRunner.run { () -> Bool in
       vsyncClient.allowPauseAfterVsync = false
@@ -151,7 +151,7 @@ struct VSyncClientTests {
       isVariableRefreshRateEnabled: true,
       maxRefreshRate: maxFrameRate
     ) { _, _ in }
-    let link = try #require(vsyncClient.displayLink)
+    let link = try #require(await threadTaskRunner.run { vsyncClient.displayLink })
 
     if #available(iOS 15.0, *) {
       let range = await threadTaskRunner.run { link.preferredFrameRateRange }
@@ -173,7 +173,7 @@ struct VSyncClientTests {
       isVariableRefreshRateEnabled: false,
       maxRefreshRate: maxFrameRate
     ) { _, _ in }
-    let link = try #require(vsyncClient.displayLink)
+    let link = try #require(await threadTaskRunner.run { vsyncClient.displayLink })
 
     if #available(iOS 15.0, *) {
       let range = await threadTaskRunner.run { link.preferredFrameRateRange }
@@ -192,7 +192,7 @@ struct VSyncClientTests {
       isVariableRefreshRateEnabled: false,
       maxRefreshRate: 60.0
     ) { _, _ in }
-    let link = try #require(vsyncClient.displayLink)
+    let link = try #require(await threadTaskRunner.run { vsyncClient.displayLink })
 
     let (initiallyPaused, pausedAfterAwait, pausedAfterPause) = await threadTaskRunner.run {
       () -> (Bool, Bool, Bool) in
@@ -207,6 +207,29 @@ struct VSyncClientTests {
     #expect(initiallyPaused)
     #expect(pausedAfterAwait == false)
     #expect(pausedAfterPause)
+  }
+
+  /// Verifies that `await()` called before the display link is created is not lost: the display
+  /// link is created unpaused, so vsync callbacks start as soon as it is scheduled.
+  @Test func awaitBeforeDisplayLinkCreationIsApplied() async throws {
+    // Hold the runner's thread so the display link creation dispatched by init cannot run yet.
+    let gate = DispatchSemaphore(value: 0)
+    threadTaskRunner.postTask { gate.wait() }
+
+    let vsyncClient = VSyncClient(
+      taskRunner: threadTaskRunner,
+      isVariableRefreshRateEnabled: false,
+      maxRefreshRate: 60.0
+    ) { _, _ in }
+    vsyncClient.await()
+    #expect(vsyncClient.displayLink == nil)
+    #expect(vsyncClient.isPaused == false)
+    gate.signal()
+
+    let link = try #require(await threadTaskRunner.run { vsyncClient.displayLink })
+    let linkPaused = await threadTaskRunner.run { link.isPaused }
+    #expect(linkPaused == false)
+    vsyncClient.invalidate()
   }
 
   @Test func releasesLinkOnInvalidation() async {
