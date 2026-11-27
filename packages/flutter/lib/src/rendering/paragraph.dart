@@ -1003,9 +1003,7 @@ class RenderParagraph extends RenderBox
     );
     _textPainter
       ..maxLines = _maxLines
-      ..ellipsis = _overflow == TextOverflow.ellipsis && !(_maxLines == null && softWrap)
-          ? _kEllipsis
-          : null;
+      ..ellipsis = _effectiveEllipsis;
     _layoutTextWithConstraints(constraints);
     positionInlineChildren(_textPainter.inlinePlaceholderBoxes!);
 
