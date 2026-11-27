@@ -35,12 +35,15 @@ ios_swift_lib_paths.
 
 The bridging header's imports are the deps' headers: their include
 directories go to swiftc.py as `-I` (which it hands to both Swift and its
-clang importer) and their defines as `-D`. The Swift compiler is Xcode's,
-through /usr/bin/swiftc and xcode-select or DEVELOPER_DIR (--action_env),
-as `metal` is for the shaders; the SDK is named by its path (@macos_sdk's,
-the same Xcode the toolchain's sysroot comes from), so the action's key
-carries it and an Xcode change recompiles. Off the Apple platforms the
-toolchains have no Swift and the converter marks the target incompatible.
+clang importer). Their defines do not: GN's tool has `{{include_dirs}}`
+in its command and no `{{defines}}`, so a Swift compile, and the clang
+importer reading its bridging header, see none of the build's defines.
+The Swift compiler is Xcode's, through /usr/bin/swiftc and xcode-select or
+DEVELOPER_DIR (--action_env), as `metal` is for the shaders; the SDK is
+named by its path (@macos_sdk's, the same Xcode the toolchain's sysroot
+comes from), so the action's key carries it and an Xcode change recompiles.
+Off the Apple platforms the toolchains have no Swift and the converter
+marks the target incompatible.
 
 The converter emits one for a GN source_set whose sources are `.swift`
 (`bridge_header`, `swiftflags` and `public` as attributes):
@@ -236,7 +239,7 @@ def _flutter_swift_library_impl(ctx):
     target_out_dir = paths.join(ctx.bin_dir.path, ctx.label.package, out_dir)
 
     # The deps' compilation context: the bridging header's imports, as -I
-    # (swiftc.py hands it to Swift and to its clang importer) and -D; the
+    # (swiftc.py hands it to Swift and to its clang importer); the
     # target's own `includes` as cc_library takes them (GN's include_dirs:
     # the package's generated directory), each the source directory and
     # its twin under the bin directory.
@@ -275,9 +278,11 @@ def _flutter_swift_library_impl(ctx):
     module_directories = depset(transitive = [m.directories for m in modules])
     module_inputs = depset(transitive = [m.files for m in modules])
     args.add_all(module_directories, before_each = "-I")
-    args.add_all(compilation.framework_includes, before_each = "-F")
-    args.add_all(compilation.defines, before_each = "-D")
-    args.add_all(compilation.local_defines, before_each = "-D")
+
+    # Nothing else of the dependencies reaches the compile: GN's command is
+    # `{{include_dirs}} {{module_dirs}} {{swiftflags}}`, without
+    # {{defines}} and {{framework_dirs}} (a framework directory a module
+    # needs is in its swiftflags, as test_config's is).
     apple = _apple_platform(ctx)
     args.add("-sdk", apple.sdk)
     args.add("-target", apple.target)
@@ -380,7 +385,7 @@ flutter_swift_library = rule(
         "deps": attr.label_list(
             providers = [CcInfo],
             aspects = [_swift_modules_aspect],
-            doc = "What the bridging header imports (their headers, include directories and defines reach the " +
+            doc = "What the bridging header imports (their headers and include directories reach the " +
                   "compile) and the Swift modules the sources import, directly or through a C++ library " +
                   "(the aspect gathers them: GN's {{module_dirs}}).",
         ),
