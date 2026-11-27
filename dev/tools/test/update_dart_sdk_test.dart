@@ -16,74 +16,73 @@ import 'package:test/test.dart';
 
 const String _kInitialEngineVersion = 'engine-version-initial';
 const String _kUpdatedEngineVersion = 'engine-version-updated';
-const String _kExtraFileName = 'extra_file.txt';
-const String _kAnotherFileName = 'another_new_file.txt';
 const String _kLicenseFileName = 'LICENSE.dart_sdk_archive.md';
+const String _kEntitlementsFileName = 'entitlements.txt';
+const String _kWithoutEntitlementsFileName = 'without_entitlements.txt';
+const String _kDartBinaryPath = 'dart-sdk/bin/dart';
+const String _kDartVersionPath = 'dart-sdk/version';
+const String _kForcePowershellEnv = 'FORCE_POWERSHELL';
+const String _kStorageBaseUrlEnv = 'FLUTTER_STORAGE_BASE_URL';
+const String _kHeadMethod = 'HEAD';
+
+Directory _findFlutterRoot(FileSystem fileSystem) {
+  Directory current = fileSystem.currentDirectory;
+  while (!current.childFile('DEPS').existsSync()) {
+    if (current.path == current.parent.path) {
+      throw StateError('Could not resolve Flutter root from ${fileSystem.currentDirectory.path}');
+    }
+    current = current.parent;
+  }
+  return current;
+}
+
+List<int> _createZip(Map<String, String> files) {
+  final archive = Archive();
+  for (final MapEntry(:key, :value) in files.entries) {
+    final List<int> data = utf8.encode(value);
+    archive.addFile(ArchiveFile(key, data.length, data));
+  }
+  return ZipEncoder().encode(archive)!;
+}
 
 void main() {
-  final usePowershellOnPosix = io.Platform.environment['FORCE_POWERSHELL'] == 'true';
-
   const FileSystem localFs = LocalFileSystem();
-  final flutterRoot = _FlutterRootUnderTest.findWithin(forcePowershell: usePowershellOnPosix);
+  const Platform platform = LocalPlatform();
+  final usePowershellOnPosix = io.Platform.environment[_kForcePowershellEnv] == 'true';
+  final bool usePowershell = platform.isWindows || usePowershellOnPosix;
+  final scriptName = 'update_dart_sdk.${usePowershell ? 'ps1' : 'sh'}';
+  final Directory flutterRoot = _findFlutterRoot(localFs);
 
   late Directory tmpDir;
-  late _FlutterRootUnderTest testRoot;
-  late Map<String, String> environment;
+  late Directory testRoot;
+  late Directory cacheDir;
+  late File updateScript;
   late io.HttpServer mockStorageServer;
-  late Map<String, List<int>> serverFiles;
-
-  void printIfNotEmpty(String prefix, String string) {
-    if (string.isNotEmpty) {
-      for (final String s in LineSplitter.split(string)) {
-        print('$prefix:>$s<');
-      }
-    }
-  }
-
-  Future<io.ProcessResult> run(String executable, List<String> args, {String? workingPath}) async {
-    print('Running "$executable ${args.join(" ")}"${workingPath != null ? ' $workingPath' : ''}');
-    final io.ProcessResult result = await io.Process.run(
-      executable,
-      args,
-      environment: <String, String>{...io.Platform.environment, ...environment},
-      workingDirectory: workingPath ?? testRoot.root.absolute.path,
-    );
-    if (result.exitCode != 0) {
-      fail(
-        'Failed running "$executable $args" (exit code = ${result.exitCode}),'
-        '\nstdout: ${result.stdout}'
-        '\nstderr: ${result.stderr}',
-      );
-    }
-    printIfNotEmpty('stdout', (result.stdout as String).trim());
-    printIfNotEmpty('stderr', (result.stderr as String).trim());
-    return result;
-  }
-
-  setUpAll(() async {
-    if (usePowershellOnPosix) {
-      final io.ProcessResult result = io.Process.runSync('pwsh', <String>['--version']);
-      print('Using Powershell (${result.stdout}) on POSIX for local debugging and testing');
-    }
-  });
+  late Map<String, List<int>> serverZips;
 
   setUp(() async {
     tmpDir = localFs.systemTempDirectory.createTempSync('update_dart_sdk_test.');
-    testRoot = _FlutterRootUnderTest.fromPath(
-      tmpDir.childDirectory('flutter').path,
-      forcePowershell: usePowershellOnPosix,
-    );
+    testRoot = tmpDir.childDirectory('flutter');
+    cacheDir = testRoot.childDirectory(localFs.path.join('bin', 'cache'))
+      ..createSync(recursive: true);
+    updateScript = testRoot.childFile(localFs.path.join('bin', 'internal', scriptName));
+    updateScript.parent.createSync(recursive: true);
+    flutterRoot
+        .childFile(localFs.path.join('bin', 'internal', scriptName))
+        .copySync(updateScript.path);
+    cacheDir.childFile('engine.realm').writeAsStringSync('');
 
-    serverFiles = <String, List<int>>{};
+    serverZips = <String, List<int>>{};
     mockStorageServer = await io.HttpServer.bind(io.InternetAddress.loopbackIPv4, 0);
     mockStorageServer.listen((io.HttpRequest request) async {
       await request.drain<void>();
-      final String path = request.uri.path;
-      for (final MapEntry(:key, :value) in serverFiles.entries) {
-        if (path.contains(key)) {
+      for (final MapEntry(:key, :value) in serverZips.entries) {
+        if (request.uri.pathSegments.contains(key)) {
           request.response.headers.contentType = io.ContentType.binary;
           request.response.headers.contentLength = value.length;
-          request.response.add(value);
+          if (request.method != _kHeadMethod) {
+            request.response.add(value);
+          }
           await request.response.close();
           return;
         }
@@ -91,16 +90,6 @@ void main() {
       request.response.statusCode = io.HttpStatus.notFound;
       await request.response.close();
     });
-
-    environment = <String, String>{
-      'FLUTTER_STORAGE_BASE_URL':
-          'http://${mockStorageServer.address.host}:${mockStorageServer.port}',
-    };
-
-    flutterRoot.binInternalUpdateDartSdk.copySyncRecursive(testRoot.binInternalUpdateDartSdk.path);
-
-    testRoot.binCacheEngineStamp.parent.createSync(recursive: true);
-    testRoot.binCacheEngineRealm.writeAsStringSync('');
   });
 
   tearDown(() async {
@@ -110,195 +99,96 @@ void main() {
     }
   });
 
-  Future<io.ProcessResult> runUpdateDartSdk() {
+  Future<void> runUpdateDartSdk() async {
     final String executable;
     final List<String> args;
-    if (const LocalPlatform().isWindows) {
+    if (platform.isWindows) {
       executable = 'powershell';
-      args = <String>[testRoot.binInternalUpdateDartSdk.path];
+      args = <String>['-ExecutionPolicy', 'Bypass', '-NoProfile', '-File', updateScript.path];
     } else if (usePowershellOnPosix) {
       executable = 'pwsh';
-      args = <String>[testRoot.binInternalUpdateDartSdk.path];
+      args = <String>['-ExecutionPolicy', 'Bypass', '-NoProfile', '-File', updateScript.path];
     } else {
-      executable = testRoot.binInternalUpdateDartSdk.path;
+      executable = updateScript.path;
       args = <String>[];
     }
-    return run(executable, args);
-  }
 
-  List<int> createDartSdkZip(Map<String, String> files) {
-    final archive = Archive();
-    for (final MapEntry(:key, :value) in files.entries) {
-      final List<int> data = utf8.encode(value);
-      archive.addFile(ArchiveFile(key, data.length, data));
+    final io.ProcessResult result = await io.Process.run(
+      executable,
+      args,
+      environment: <String, String>{
+        ...io.Platform.environment,
+        _kStorageBaseUrlEnv: 'http://${mockStorageServer.address.host}:${mockStorageServer.port}',
+      },
+      workingDirectory: testRoot.absolute.path,
+    );
+    if (result.exitCode != 0) {
+      fail(
+        'Failed running "$executable ${args.join(' ')}" (exit code = ${result.exitCode})\n'
+        'stdout: ${result.stdout}\n'
+        'stderr: ${result.stderr}',
+      );
     }
-    return ZipEncoder().encode(archive)!;
   }
 
-  test('extracts all archive contents and updates without conflicts', () async {
-    testRoot.binCacheEngineStamp.writeAsStringSync(_kInitialEngineVersion);
+  void expectCacheFiles(Map<String, String> expected) {
+    for (final MapEntry(:key, :value) in expected.entries) {
+      final File file = cacheDir.childFile(localFs.path.joinAll(key.split('/')));
+      expect(file.existsSync(), isTrue, reason: 'Expected $key to exist in bin/cache');
+      expect(file.readAsStringSync(), value, reason: 'Unexpected content for $key');
+    }
+  }
 
-    final List<int> initialZip = createDartSdkZip(<String, String>{
-      'dart-sdk/bin/dart': 'initial dart binary',
-      'dart-sdk/version': '3.0.0',
+  test('extracts Dart SDK and license without conflicts and drops extra top-level files', () async {
+    const initialExpected = <String, String>{
+      _kDartBinaryPath: 'initial dart binary',
+      _kDartVersionPath: '3.0.0',
       _kLicenseFileName: 'initial license content',
-      _kExtraFileName: 'initial extra content',
-      'extra_dir/file.txt': 'initial directory file content',
+    };
+    cacheDir.childFile('engine.stamp').writeAsStringSync(_kInitialEngineVersion);
+    serverZips[_kInitialEngineVersion] = _createZip(<String, String>{
+      ...initialExpected,
+      _kEntitlementsFileName: 'initial entitlements',
+      _kWithoutEntitlementsFileName: 'initial without entitlements',
     });
-
-    serverFiles[_kInitialEngineVersion] = initialZip;
-    serverFiles['dart-sdk-'] = initialZip;
 
     await runUpdateDartSdk();
 
-    expect(testRoot.binCacheEngineDartSdkStamp.existsSync(), isTrue);
-    expect(testRoot.binCacheEngineDartSdkStamp.readAsStringSync().trim(), _kInitialEngineVersion);
-    expect(testRoot.binCacheDartSdk.childDirectory('bin').childFile('dart').existsSync(), isTrue);
-    expect(
-      testRoot.binCacheDartSdk.childDirectory('bin').childFile('dart').readAsStringSync(),
-      'initial dart binary',
-    );
-    expect(testRoot.binCache.childFile(_kLicenseFileName).existsSync(), isTrue);
-    expect(
-      testRoot.binCache.childFile(_kLicenseFileName).readAsStringSync(),
-      'initial license content',
-    );
-    expect(testRoot.binCache.childFile(_kExtraFileName).existsSync(), isTrue);
-    expect(
-      testRoot.binCache.childFile(_kExtraFileName).readAsStringSync(),
-      'initial extra content',
-    );
-    expect(
-      testRoot.binCache.childDirectory('extra_dir').childFile('file.txt').existsSync(),
-      isTrue,
-    );
-    expect(
-      testRoot.binCache.childDirectory('extra_dir').childFile('file.txt').readAsStringSync(),
-      'initial directory file content',
-    );
+    final File dartSdkStamp = cacheDir.childFile('engine-dart-sdk.stamp');
+    expect(dartSdkStamp.existsSync(), isTrue);
+    expect(dartSdkStamp.readAsStringSync().trim(), _kInitialEngineVersion);
+    expectCacheFiles(initialExpected);
+    expect(cacheDir.childFile(_kEntitlementsFileName).existsSync(), isFalse);
+    expect(cacheDir.childFile(_kWithoutEntitlementsFileName).existsSync(), isFalse);
 
-    // Now simulate an update with a new engine version and updated/additional files.
-    testRoot.binCacheEngineStamp.writeAsStringSync(_kUpdatedEngineVersion);
-
-    final List<int> updatedZip = createDartSdkZip(<String, String>{
-      'dart-sdk/bin/dart': 'updated dart binary',
-      'dart-sdk/version': '3.1.0',
+    // Simulate an update with a new engine version and updated archive contents.
+    const updatedExpected = <String, String>{
+      _kDartBinaryPath: 'updated dart binary',
+      _kDartVersionPath: '3.1.0',
       _kLicenseFileName: 'updated license content',
-      _kExtraFileName: 'updated extra content',
-      'extra_dir/file.txt': 'updated directory file content',
-      _kAnotherFileName: 'another file content',
+    };
+    cacheDir.childFile('engine.stamp').writeAsStringSync(_kUpdatedEngineVersion);
+    serverZips[_kUpdatedEngineVersion] = _createZip(<String, String>{
+      ...updatedExpected,
+      _kEntitlementsFileName: 'updated entitlements',
+      _kWithoutEntitlementsFileName: 'updated without entitlements',
     });
-
-    serverFiles[_kUpdatedEngineVersion] = updatedZip;
-    serverFiles['dart-sdk-'] = updatedZip;
 
     await runUpdateDartSdk();
 
-    expect(testRoot.binCacheEngineDartSdkStamp.existsSync(), isTrue);
-    expect(testRoot.binCacheEngineDartSdkStamp.readAsStringSync().trim(), _kUpdatedEngineVersion);
-    expect(testRoot.binCacheDartSdk.childDirectory('bin').childFile('dart').existsSync(), isTrue);
-    expect(
-      testRoot.binCacheDartSdk.childDirectory('bin').childFile('dart').readAsStringSync(),
-      'updated dart binary',
-    );
-    expect(testRoot.binCache.childFile(_kLicenseFileName).existsSync(), isTrue);
-    expect(
-      testRoot.binCache.childFile(_kLicenseFileName).readAsStringSync(),
-      'updated license content',
-    );
-    expect(testRoot.binCache.childFile(_kExtraFileName).existsSync(), isTrue);
-    expect(
-      testRoot.binCache.childFile(_kExtraFileName).readAsStringSync(),
-      'updated extra content',
-    );
-    expect(
-      testRoot.binCache.childDirectory('extra_dir').childFile('file.txt').existsSync(),
-      isTrue,
-    );
-    expect(
-      testRoot.binCache.childDirectory('extra_dir').childFile('file.txt').readAsStringSync(),
-      'updated directory file content',
-    );
-    expect(testRoot.binCache.childFile(_kAnotherFileName).existsSync(), isTrue);
-    expect(
-      testRoot.binCache.childFile(_kAnotherFileName).readAsStringSync(),
-      'another file content',
-    );
+    expect(dartSdkStamp.existsSync(), isTrue);
+    expect(dartSdkStamp.readAsStringSync().trim(), _kUpdatedEngineVersion);
+    expectCacheFiles(updatedExpected);
+    expect(cacheDir.childFile(_kEntitlementsFileName).existsSync(), isFalse);
+    expect(cacheDir.childFile(_kWithoutEntitlementsFileName).existsSync(), isFalse);
 
-    // Ensure no leftover .old files remain in cache
-    final List<FileSystemEntity> leftoverOld = testRoot.binCache
+    final List<FileSystemEntity> leftoverArtifacts = cacheDir
         .listSync()
-        .where((FileSystemEntity entity) => entity.basename.contains('.old'))
+        .where(
+          (FileSystemEntity entity) =>
+              entity.basename.contains('.old') || entity.basename.endsWith('.tmp'),
+        )
         .toList();
-    expect(leftoverOld, isEmpty);
+    expect(leftoverArtifacts, isEmpty);
   });
-}
-
-final class _FlutterRootUnderTest {
-  factory _FlutterRootUnderTest.fromPath(
-    String path, {
-    FileSystem fileSystem = const LocalFileSystem(),
-    Platform platform = const LocalPlatform(),
-    bool forcePowershell = false,
-  }) {
-    final Directory root = fileSystem.directory(path);
-    return _FlutterRootUnderTest._(
-      root,
-      binCache: root.childDirectory(fileSystem.path.join('bin', 'cache')),
-      binCacheDartSdk: root.childDirectory(fileSystem.path.join('bin', 'cache', 'dart-sdk')),
-      binCacheEngineStamp: root.childFile(fileSystem.path.join('bin', 'cache', 'engine.stamp')),
-      binCacheEngineRealm: root.childFile(fileSystem.path.join('bin', 'cache', 'engine.realm')),
-      binCacheEngineDartSdkStamp: root.childFile(
-        fileSystem.path.join('bin', 'cache', 'engine-dart-sdk.stamp'),
-      ),
-      binInternalUpdateDartSdk: root.childFile(
-        fileSystem.path.join(
-          'bin',
-          'internal',
-          'update_dart_sdk.${platform.isWindows || forcePowershell ? 'ps1' : 'sh'}',
-        ),
-      ),
-    );
-  }
-
-  factory _FlutterRootUnderTest.findWithin({
-    String? path,
-    FileSystem fileSystem = const LocalFileSystem(),
-    bool forcePowershell = false,
-  }) {
-    path ??= fileSystem.currentDirectory.path;
-    Directory current = fileSystem.directory(path);
-    while (!current.childFile('DEPS').existsSync()) {
-      if (current.path == current.parent.path) {
-        throw ArgumentError.value(path, 'path', 'Could not resolve flutter root');
-      }
-      current = current.parent;
-    }
-    return _FlutterRootUnderTest.fromPath(current.path, forcePowershell: forcePowershell);
-  }
-
-  const _FlutterRootUnderTest._(
-    this.root, {
-    required this.binCache,
-    required this.binCacheDartSdk,
-    required this.binCacheEngineStamp,
-    required this.binCacheEngineRealm,
-    required this.binCacheEngineDartSdkStamp,
-    required this.binInternalUpdateDartSdk,
-  });
-
-  final Directory root;
-  final Directory binCache;
-  final Directory binCacheDartSdk;
-  final File binCacheEngineStamp;
-  final File binCacheEngineRealm;
-  final File binCacheEngineDartSdkStamp;
-  final File binInternalUpdateDartSdk;
-}
-
-extension on File {
-  void copySyncRecursive(String newPath) {
-    fileSystem.directory(fileSystem.path.dirname(newPath)).createSync(recursive: true);
-    copySync(newPath);
-  }
 }
