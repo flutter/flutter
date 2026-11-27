@@ -243,6 +243,8 @@ void PlatformViewAndroid::NotifySurfaceWindowChanged(
 
 void PlatformViewAndroid::NotifyDestroyed() {
   ++*surface_generation_;
+  // There is no longer a first window draw to yield a vsync to.
+  yield_next_vsync_->store(false, std::memory_order_release);
   PlatformView::NotifyDestroyed();
 
   if (android_surface_) {
@@ -255,6 +257,10 @@ void PlatformViewAndroid::NotifyDestroyed() {
         });
     latch.Wait();
   }
+}
+
+void PlatformViewAndroid::SetYieldNextVsync(bool should_yield) {
+  yield_next_vsync_->store(should_yield, std::memory_order_release);
 }
 
 void PlatformViewAndroid::NotifyChanged(const DlISize& size) {
@@ -452,7 +458,7 @@ void PlatformViewAndroid::RegisterImageTexture(
 
 // |PlatformView|
 std::unique_ptr<VsyncWaiter> PlatformViewAndroid::CreateVSyncWaiter() {
-  return std::make_unique<VsyncWaiterAndroid>(task_runners_);
+  return std::make_unique<VsyncWaiterAndroid>(task_runners_, yield_next_vsync_);
 }
 
 // |PlatformView|

@@ -16,13 +16,17 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.robolectric.shadows.ShadowLooper.shadowMainLooper;
 
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
+import android.os.Handler;
 import android.os.LocaleList;
+import android.os.Looper;
+import android.os.MessageQueue;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
@@ -31,13 +35,19 @@ import io.flutter.embedding.engine.renderer.FlutterUiResizeListener;
 import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
+import io.flutter.util.HandlerCompat;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
 import org.robolectric.util.ReflectionHelpers;
+import org.robolectric.util.ReflectionHelpers.ClassParameter;
 
 @RunWith(AndroidJUnit4.class)
 @TargetApi(API_LEVELS.API_24) // LocaleList and scriptCode are API 24+.
@@ -387,6 +397,79 @@ public class FlutterJNITest {
     }
   }
 
+  @Test
+  public void postToMainLooperOrRun_queuesBehindPendingMessagesOnMainLooper() {
+    List<String> order = new ArrayList<>();
+    new Handler(Looper.getMainLooper()).post(() -> order.add("pending"));
+
+    FlutterJNI.postToMainLooperOrRun(() -> order.add("deferred"));
+
+    // Nothing runs inline on the main looper.
+    assertTrue(order.isEmpty());
+
+    shadowMainLooper().idle();
+
+    assertEquals(Arrays.asList("pending", "deferred"), order);
+  }
+
+  @Test
+  public void postToMainLooperOrRun_runsImmediatelyOffMainLooper() throws InterruptedException {
+    AtomicReference<Thread> ranOnThread = new AtomicReference<>();
+    Thread thread =
+        new Thread(
+            () -> FlutterJNI.postToMainLooperOrRun(() -> ranOnThread.set(Thread.currentThread())));
+
+    thread.start();
+    thread.join();
+
+    // The runnable ran on the calling thread, without waiting for the main looper.
+    assertEquals(thread, ranOnThread.get());
+  }
+
+  @Test
+  public void postToMainLooperOrRun_isHeldBehindSyncBarrier() {
+    List<String> order = new ArrayList<>();
+    MessageQueue queue = Looper.getMainLooper().getQueue();
+    // ViewRootImpl posts a sync barrier like this one while a view traversal is pending.
+    int barrierToken = ReflectionHelpers.callInstanceMethod(queue, "postSyncBarrier");
+    try {
+      // An asynchronous message is not held back by the barrier.
+      HandlerCompat.createAsyncHandler(Looper.getMainLooper()).post(() -> order.add("async"));
+      FlutterJNI.postToMainLooperOrRun(() -> order.add("deferred"));
+
+      shadowMainLooper().idle();
+
+      assertEquals(Arrays.asList("async"), order);
+    } finally {
+      ReflectionHelpers.callInstanceMethod(
+          queue, "removeSyncBarrier", ClassParameter.from(int.class, barrierToken));
+    }
+
+    shadowMainLooper().idle();
+
+    assertEquals(Arrays.asList("async", "deferred"), order);
+  }
+
+  @Test
+  public void setYieldNextVsync_forwardsToNativeWhenAttached() {
+    FlutterJNITester flutterJNI = new FlutterJNITester(/*attached=*/ true);
+
+    flutterJNI.setYieldNextVsync(true);
+    flutterJNI.setYieldNextVsync(false);
+
+    assertEquals(Arrays.asList(true, false), flutterJNI.yieldNextVsyncCalls);
+  }
+
+  @Test
+  public void setYieldNextVsync_isNoOpWhenDetached() {
+    FlutterJNITester flutterJNI = new FlutterJNITester(/*attached=*/ false);
+
+    flutterJNI.setYieldNextVsync(true);
+    flutterJNI.setYieldNextVsync(false);
+
+    assertTrue(flutterJNI.yieldNextVsyncCalls.isEmpty());
+  }
+
   static class FlutterJNITester extends FlutterJNI {
     FlutterJNITester(boolean attached) {
       this.isAttached = attached;
@@ -395,6 +478,7 @@ public class FlutterJNITest {
     final boolean isAttached;
     boolean semanticsEnabled = false;
     int flags = 0;
+    final List<Boolean> yieldNextVsyncCalls = new ArrayList<>();
 
     @Override
     public boolean isAttached() {
@@ -409,6 +493,11 @@ public class FlutterJNITest {
     @Override
     public void setAccessibilityFeaturesInNative(int flags) {
       this.flags = flags;
+    }
+
+    @Override
+    public void setYieldNextVsyncInNative(boolean shouldYield) {
+      yieldNextVsyncCalls.add(shouldYield);
     }
   }
 }

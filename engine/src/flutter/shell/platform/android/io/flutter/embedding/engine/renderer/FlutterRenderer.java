@@ -1393,6 +1393,17 @@ public class FlutterRenderer implements TextureRegistry {
     flutterJNI.scheduleFrame();
   }
 
+  /**
+   * Arms or disarms yielding this engine's next NDK choreographer vsync callback to the main looper
+   * so a pending Android view traversal can run ahead of Flutter's next frame.
+   *
+   * <p>This is only meant for {@code FlutterActivityAndFragmentDelegate}; apps and plugins should
+   * not call it.
+   */
+  public void setYieldNextVsync(boolean shouldYield) {
+    flutterJNI.setYieldNextVsync(shouldYield);
+  }
+
   private void unregisterTexture(long textureId) {
     flutterJNI.unregisterTexture(textureId);
   }

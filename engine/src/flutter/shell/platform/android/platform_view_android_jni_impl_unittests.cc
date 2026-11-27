@@ -8,11 +8,14 @@
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
+#include "flutter/fml/thread.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
 #include "flutter/shell/platform/android/jni/jni_mock.h"
 #include "flutter/shell/platform/android/jni/mock_jni_env.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 #include "flutter/shell/platform/android/platform_view_android_jni_impl.h"
+#include "flutter/shell/platform/android/vsync_waiter_android.h"
+#include "flutter/testing/post_task_sync.h"
 #include "impeller/toolkit/android/proc_table.h"
 
 namespace flutter {
@@ -323,6 +326,204 @@ TEST_F(PlatformViewAndroidJNIImplTest, SetViewportMetricsEmptyArrays) {
                        reinterpret_cast<jlong>(holder.get()), 1.0f, 100, 100, 0,
                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, bounds, type, state,
                        0, 0, 0, 0, 0, 0, 0, 0);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       VsyncWaiterDeferralPostsToMainLooperAndRunsDeferredCallback) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+
+  using SetYieldNextVsyncFn = void (*)(JNIEnv*, jobject, jlong, jboolean);
+  using RunDeferredVsyncFn = void (*)(JNIEnv*, jclass, jlong);
+  SetYieldNextVsyncFn set_yield_next_vsync = nullptr;
+  RunDeferredVsyncFn run_deferred_vsync = nullptr;
+
+  const jclass kPlaceholderClass = reinterpret_cast<jclass>(100);
+  const jfieldID kPlaceholderFieldID = reinterpret_cast<jfieldID>(200);
+  const jmethodID kPlaceholderMethodID = reinterpret_cast<jmethodID>(300);
+  const jmethodID kPostVsyncMethodID = reinterpret_cast<jmethodID>(301);
+
+  EXPECT_CALL(mock_env, GetObjectRefType(_))
+      .WillRepeatedly(Return(JNILocalRefType));
+  EXPECT_CALL(mock_env, NewLocalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env, DeleteLocalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env, NewGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env, DeleteGlobalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env, FindClass(_)).WillRepeatedly(Return(kPlaceholderClass));
+  EXPECT_CALL(mock_env, GetFieldID(_, _, _))
+      .WillRepeatedly(Return(kPlaceholderFieldID));
+  EXPECT_CALL(mock_env, GetMethodID(_, _, _))
+      .WillRepeatedly(Return(kPlaceholderMethodID));
+  EXPECT_CALL(mock_env, GetStaticFieldID(_, _, _))
+      .WillRepeatedly(Return(kPlaceholderFieldID));
+  EXPECT_CALL(mock_env, GetStaticMethodID(_, _, _))
+      .WillRepeatedly([&](jclass, const char* name, const char* sig) {
+        if (strcmp(name, "postVsyncToMainLooper") == 0 &&
+            strcmp(sig, "(J)V") == 0) {
+          return kPostVsyncMethodID;
+        }
+        return kPlaceholderMethodID;
+      });
+  EXPECT_CALL(mock_env, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+  EXPECT_CALL(mock_env, RegisterNatives(_, _, _))
+      .WillRepeatedly([&](jclass, const JNINativeMethod* methods,
+                          jint nMethods) {
+        for (jint i = 0; i < nMethods; ++i) {
+          if (strcmp(methods[i].name, "nativeSetYieldNextVsync") == 0 &&
+              strcmp(methods[i].signature, "(JZ)V") == 0) {
+            set_yield_next_vsync =
+                reinterpret_cast<SetYieldNextVsyncFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name, "nativeRunDeferredVsync") == 0 &&
+                     strcmp(methods[i].signature, "(J)V") == 0) {
+            run_deferred_vsync =
+                reinterpret_cast<RunDeferredVsyncFn>(methods[i].fnPtr);
+          }
+        }
+        return 0;
+      });
+
+  ASSERT_TRUE(PlatformViewAndroid::Register(&mock_env));
+  ASSERT_TRUE(VsyncWaiterAndroid::Register(&mock_env));
+  ASSERT_NE(set_yield_next_vsync, nullptr);
+  ASSERT_NE(run_deferred_vsync, nullptr);
+
+  // Stub NDK AChoreographer so the test deterministically drives OnVsyncFromNDK
+  // on a fresh merged platform/UI thread.
+  auto& proc_table = impeller::android::GetMutableProcTable();
+  auto* real_get_instance = proc_table.AChoreographer_getInstance.proc;
+  auto* real_post_cb64 = proc_table.AChoreographer_postFrameCallback64.proc;
+  static AChoreographer_frameCallback64 pending_frame_cb;
+  static void* pending_frame_data;
+  pending_frame_cb = nullptr;
+  pending_frame_data = nullptr;
+  proc_table.AChoreographer_getInstance.proc = []() -> AChoreographer* {
+    return reinterpret_cast<AChoreographer*>(0x4004);
+  };
+  proc_table.AChoreographer_postFrameCallback64.proc =
+      [](AChoreographer*, AChoreographer_frameCallback64 cb, void* data) {
+        pending_frame_cb = cb;
+        pending_frame_data = data;
+      };
+  struct RestoreChoreographerProcs {
+    impeller::android::ProcTable& table;
+    decltype(real_get_instance) get_instance;
+    decltype(real_post_cb64) post_cb64;
+    ~RestoreChoreographerProcs() {
+      table.AChoreographer_getInstance.proc = get_instance;
+      table.AChoreographer_postFrameCallback64.proc = post_cb64;
+    }
+  } restore{proc_table, real_get_instance, real_post_cb64};
+
+  fml::Thread merged_thread("merged_platform_ui");
+  std::unique_ptr<AndroidShellHolder> holder;
+  std::shared_ptr<VsyncWaiter> waiter;
+  PostTaskSync(merged_thread.GetTaskRunner(), [&]() {
+    Settings settings;
+    settings.enable_software_rendering = false;
+    settings.merged_platform_ui_thread =
+        Settings::MergedPlatformUIThread::kEnabled;
+    holder = std::make_unique<AndroidShellHolder>(
+        settings, std::make_shared<JNIMock>(),
+        AndroidRenderingAPI::kImpellerOpenGLES);
+    waiter = std::shared_ptr<VsyncWaiter>(
+        static_cast<PlatformView*>(holder->GetPlatformView().get())
+            ->CreateVSyncWaiter());
+  });
+  ASSERT_NE(waiter, nullptr);
+
+  jobject jcaller = reinterpret_cast<jobject>(123);
+  PostTaskSync(merged_thread.GetTaskRunner(), [&]() {
+    set_yield_next_vsync(&mock_env, jcaller,
+                         reinterpret_cast<jlong>(holder.get()), JNI_TRUE);
+  });
+
+  // Frame 1 (armed): OnVsyncFromNDK posts via postVsyncToMainLooper, checks
+  // fml::jni::CheckException(env) with no pending JNI exception (JNI_FALSE),
+  // and holds the frame callback until nativeRunDeferredVsync executes.
+  jlong deferred_callback_ptr = 0;
+  bool exception_checked = false;
+  EXPECT_CALL(mock_env,
+              CallStaticVoidMethodV(kPlaceholderClass, kPostVsyncMethodID, _))
+      .WillOnce([&](jclass, jmethodID, va_list args) {
+        deferred_callback_ptr = va_arg(args, jlong);
+      });
+  EXPECT_CALL(mock_env, ExceptionCheck()).WillOnce([&]() {
+    exception_checked = true;
+    return JNI_FALSE;
+  });
+
+  int vsync_fired_count = 0;
+  bool got_valid_recorder = false;
+  PostTaskSync(merged_thread.GetTaskRunner(), [&]() {
+    waiter->AsyncWaitForVsync(
+        [&](std::unique_ptr<FrameTimingsRecorder> recorder) {
+          got_valid_recorder = (recorder != nullptr);
+          ++vsync_fired_count;
+        });
+  });
+  ASSERT_NE(pending_frame_cb, nullptr);
+
+  PostTaskSync(merged_thread.GetTaskRunner(), [&]() {
+    auto cb = pending_frame_cb;
+    void* data = pending_frame_data;
+    pending_frame_cb = nullptr;
+    pending_frame_data = nullptr;
+    cb(1000000, data);
+  });
+  EXPECT_TRUE(exception_checked);
+  ASSERT_NE(deferred_callback_ptr, 0);
+  EXPECT_EQ(vsync_fired_count, 0);
+
+  PostTaskSync(merged_thread.GetTaskRunner(), [&]() {
+    run_deferred_vsync(&mock_env, kPlaceholderClass, deferred_callback_ptr);
+  });
+  // Flush the UI task posted by VsyncWaiter::FireCallback.
+  PostTaskSync(merged_thread.GetTaskRunner(), []() {});
+  EXPECT_EQ(vsync_fired_count, 1);
+  EXPECT_TRUE(got_valid_recorder);
+
+  // Frame 2 (not re-armed): OnVsyncFromNDK fires directly without deferring.
+  EXPECT_CALL(mock_env, CallStaticVoidMethodV(_, _, _)).Times(0);
+  PostTaskSync(merged_thread.GetTaskRunner(), [&]() {
+    waiter->AsyncWaitForVsync(
+        [&](std::unique_ptr<FrameTimingsRecorder>) { ++vsync_fired_count; });
+  });
+  ASSERT_NE(pending_frame_cb, nullptr);
+  PostTaskSync(merged_thread.GetTaskRunner(), [&]() {
+    auto cb = pending_frame_cb;
+    void* data = pending_frame_data;
+    pending_frame_cb = nullptr;
+    pending_frame_data = nullptr;
+    cb(2000000, data);
+  });
+  PostTaskSync(merged_thread.GetTaskRunner(), []() {});
+  EXPECT_EQ(vsync_fired_count, 2);
+
+  // Also verify JNI disarming (nativeSetYieldNextVsync(..., JNI_FALSE)) skips
+  // deferral on the next AChoreographer callback.
+  PostTaskSync(merged_thread.GetTaskRunner(), [&]() {
+    set_yield_next_vsync(&mock_env, jcaller,
+                         reinterpret_cast<jlong>(holder.get()), JNI_TRUE);
+    set_yield_next_vsync(&mock_env, jcaller,
+                         reinterpret_cast<jlong>(holder.get()), JNI_FALSE);
+    waiter->AsyncWaitForVsync(
+        [&](std::unique_ptr<FrameTimingsRecorder>) { ++vsync_fired_count; });
+  });
+  ASSERT_NE(pending_frame_cb, nullptr);
+  PostTaskSync(merged_thread.GetTaskRunner(), [&]() {
+    auto cb = pending_frame_cb;
+    void* data = pending_frame_data;
+    pending_frame_cb = nullptr;
+    pending_frame_data = nullptr;
+    cb(3000000, data);
+  });
+  PostTaskSync(merged_thread.GetTaskRunner(), []() {});
+  EXPECT_EQ(vsync_fired_count, 3);
+
+  PostTaskSync(merged_thread.GetTaskRunner(), [&]() {
+    waiter.reset();
+    holder.reset();
+  });
 }
 
 // The load order is exercised with an injected loader rather than real

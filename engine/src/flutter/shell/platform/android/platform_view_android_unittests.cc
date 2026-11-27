@@ -17,6 +17,7 @@
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/jni/jni_mock.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
+#include "flutter/shell/platform/android/vsync_waiter_android.h"
 #include "flutter/testing/post_task_sync.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -556,6 +557,140 @@ TEST_F(DefaultPipelineWarmUpTest, DoesNotWarmDefaultPipelinesForVulkan) {
   FlushRasterThread();
 }
 #endif  // !SLIMPELLER
+
+class VsyncYieldTest : public ::testing::Test {
+ protected:
+  VsyncYieldTest()
+      : platform_thread_("platform"),
+        ui_thread_("ui"),
+        task_runners_("VsyncYieldTest",
+                      platform_thread_.GetTaskRunner(),
+                      nullptr,
+                      ui_thread_.GetTaskRunner(),
+                      nullptr) {
+    ON_CALL(delegate_, OnPlatformViewGetSettings())
+        .WillByDefault(ReturnRef(settings_));
+  }
+
+  std::unique_ptr<PlatformViewAndroid> CreatePlatformView() {
+    std::unique_ptr<PlatformViewAndroid> view;
+    PostTaskSync(platform_thread_.GetTaskRunner(), [&]() {
+      view = std::make_unique<PlatformViewAndroid>(delegate_, task_runners_,
+                                                   std::make_shared<JNIMock>(),
+                                                   /*android_context=*/nullptr);
+    });
+    return view;
+  }
+
+  void DestroyPlatformView(std::unique_ptr<PlatformViewAndroid>& view) {
+    PostTaskSync(platform_thread_.GetTaskRunner(), [&]() { view.reset(); });
+  }
+
+  static std::shared_ptr<VsyncWaiter> CreateWaiter(PlatformViewAndroid& view) {
+    return std::shared_ptr<VsyncWaiter>(
+        static_cast<PlatformView&>(view).CreateVSyncWaiter());
+  }
+
+  bool ShouldYieldOnPlatformThread(
+      const std::weak_ptr<VsyncWaiter>& weak_waiter) {
+    bool should_yield = false;
+    PostTaskSync(platform_thread_.GetTaskRunner(), [&]() {
+      should_yield = VsyncWaiterAndroid::ShouldYieldVsync(weak_waiter);
+    });
+    return should_yield;
+  }
+
+  bool ShouldYieldOnUIThread(const std::weak_ptr<VsyncWaiter>& weak_waiter) {
+    bool should_yield = false;
+    PostTaskSync(ui_thread_.GetTaskRunner(), [&]() {
+      should_yield = VsyncWaiterAndroid::ShouldYieldVsync(weak_waiter);
+    });
+    return should_yield;
+  }
+
+  fml::RefPtr<fml::TaskRunner> GetPlatformTaskRunner() const {
+    return platform_thread_.GetTaskRunner();
+  }
+
+ private:
+  fml::Thread platform_thread_;
+  fml::Thread ui_thread_;
+  TaskRunners task_runners_;
+  Settings settings_;
+  NiceMock<MockPlatformViewDelegate> delegate_;
+};
+
+TEST_F(VsyncYieldTest, YieldsAtMostOnceOnPlatformThreadWhenArmed) {
+  std::unique_ptr<PlatformViewAndroid> view = CreatePlatformView();
+  std::shared_ptr<VsyncWaiter> waiter = CreateWaiter(*view);
+
+  EXPECT_FALSE(ShouldYieldOnPlatformThread(waiter));
+
+  view->SetYieldNextVsync(true);
+  EXPECT_TRUE(ShouldYieldOnPlatformThread(waiter));
+  EXPECT_FALSE(ShouldYieldOnPlatformThread(waiter));
+
+  DestroyPlatformView(view);
+}
+
+TEST_F(VsyncYieldTest, SetYieldNextVsyncFalseDisarmsPendingYield) {
+  std::unique_ptr<PlatformViewAndroid> view = CreatePlatformView();
+  std::shared_ptr<VsyncWaiter> waiter = CreateWaiter(*view);
+
+  view->SetYieldNextVsync(true);
+  view->SetYieldNextVsync(false);
+  EXPECT_FALSE(ShouldYieldOnPlatformThread(waiter));
+
+  DestroyPlatformView(view);
+}
+
+TEST_F(VsyncYieldTest, OffPlatformThreadClearsFlagWithoutYielding) {
+  std::unique_ptr<PlatformViewAndroid> view = CreatePlatformView();
+  std::shared_ptr<VsyncWaiter> waiter = CreateWaiter(*view);
+
+  view->SetYieldNextVsync(true);
+  EXPECT_FALSE(ShouldYieldOnUIThread(waiter));
+  EXPECT_FALSE(ShouldYieldOnPlatformThread(waiter));
+
+  DestroyPlatformView(view);
+}
+
+TEST_F(VsyncYieldTest, NotifyDestroyedDisarmsPendingYield) {
+  std::unique_ptr<PlatformViewAndroid> view = CreatePlatformView();
+  std::shared_ptr<VsyncWaiter> waiter = CreateWaiter(*view);
+
+  view->SetYieldNextVsync(true);
+  PostTaskSync(GetPlatformTaskRunner(), [&]() { view->NotifyDestroyed(); });
+  EXPECT_FALSE(ShouldYieldOnPlatformThread(waiter));
+
+  DestroyPlatformView(view);
+}
+
+TEST_F(VsyncYieldTest, YieldStateIsIsolatedPerEngine) {
+  std::unique_ptr<PlatformViewAndroid> view_a = CreatePlatformView();
+  std::unique_ptr<PlatformViewAndroid> view_b = CreatePlatformView();
+  std::shared_ptr<VsyncWaiter> waiter_a = CreateWaiter(*view_a);
+  std::shared_ptr<VsyncWaiter> waiter_b = CreateWaiter(*view_b);
+
+  view_a->SetYieldNextVsync(true);
+  EXPECT_FALSE(ShouldYieldOnPlatformThread(waiter_b));
+  EXPECT_TRUE(ShouldYieldOnPlatformThread(waiter_a));
+
+  DestroyPlatformView(view_b);
+  DestroyPlatformView(view_a);
+}
+
+TEST_F(VsyncYieldTest, ExpiredWaiterDoesNotYield) {
+  std::unique_ptr<PlatformViewAndroid> view = CreatePlatformView();
+  std::shared_ptr<VsyncWaiter> waiter = CreateWaiter(*view);
+  std::weak_ptr<VsyncWaiter> weak_waiter = waiter;
+
+  view->SetYieldNextVsync(true);
+  waiter.reset();
+  EXPECT_FALSE(ShouldYieldOnPlatformThread(weak_waiter));
+
+  DestroyPlatformView(view);
+}
 
 }  // namespace testing
 }  // namespace flutter

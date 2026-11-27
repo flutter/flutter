@@ -12,6 +12,7 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
 import android.os.Build;
+import android.os.Handler;
 import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -338,6 +339,54 @@ public class FlutterJNI {
   }
 
   private native void nativeOnVsync(long frameDelayNanos, long refreshPeriodNanos, long cookie);
+
+  private static native void nativeRunDeferredVsync(long callbackPtr);
+
+  // Called by native to yield one vsync to Android's ViewRootImpl traversal after the first frame.
+  @SuppressWarnings("unused")
+  private static void postVsyncToMainLooper(final long callbackPtr) {
+    postToMainLooperOrRun(() -> nativeRunDeferredVsync(callbackPtr));
+  }
+
+  /**
+   * Arms or disarms yielding this engine's next NDK choreographer vsync callback to a main-looper
+   * message so a pending Android view traversal can run ahead of Flutter's next frame.
+   */
+  @UiThread
+  public void setYieldNextVsync(boolean shouldYield) {
+    ensureRunningOnMainThread();
+    if (isAttached()) {
+      setYieldNextVsyncInNative(shouldYield);
+    }
+  }
+
+  @VisibleForTesting
+  public void setYieldNextVsyncInNative(boolean shouldYield) {
+    nativeSetYieldNextVsync(nativeShellHolderId, shouldYield);
+  }
+
+  private native void nativeSetYieldNextVsync(long nativeShellHolderId, boolean shouldYield);
+
+  /**
+   * Queues {@code runnable} behind the messages already pending on the main looper when called on
+   * the main thread. Otherwise, or if it cannot be queued, runs it immediately, so that it always
+   * runs exactly once.
+   *
+   * <p>The message must be a regular synchronous one. While a view traversal is pending, {@code
+   * ViewRootImpl} holds synchronous messages back behind a sync barrier, which is what lets the
+   * traversal run before {@code runnable}. An asynchronous handler would bypass that barrier, so do
+   * not use one here.
+   */
+  @VisibleForTesting
+  static void postToMainLooperOrRun(@NonNull Runnable runnable) {
+    final Looper mainLooper = Looper.getMainLooper();
+    if (mainLooper != null
+        && Looper.myLooper() == mainLooper
+        && new Handler(mainLooper).post(runnable)) {
+      return;
+    }
+    runnable.run();
+  }
 
   /**
    * Notifies the engine that the Choreographer has signaled a vsync.

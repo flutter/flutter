@@ -607,6 +607,15 @@ static void ScheduleFrame(JNIEnv* env, jobject jcaller, jlong shell_holder) {
   ANDROID_SHELL_HOLDER->GetPlatformView()->ScheduleFrame();
 }
 
+static void SetYieldNextVsync(JNIEnv* env,
+                              jobject jcaller,
+                              jlong shell_holder,
+                              jboolean should_yield) {
+  if (auto platform_view = ANDROID_SHELL_HOLDER->GetPlatformView()) {
+    platform_view->SetYieldNextVsync(should_yield);
+  }
+}
+
 static void InvokePlatformMessageResponseCallback(JNIEnv* env,
                                                   jobject jcaller,
                                                   jlong shell_holder,
@@ -889,6 +898,11 @@ bool RegisterApi(JNIEnv* env) {
           .name = "nativeScheduleFrame",
           .signature = "(J)V",
           .fnPtr = reinterpret_cast<void*>(&ScheduleFrame),
+      },
+      {
+          .name = "nativeSetYieldNextVsync",
+          .signature = "(JZ)V",
+          .fnPtr = reinterpret_cast<void*>(&SetYieldNextVsync),
       },
       {
           .name = "nativeUnregisterTexture",

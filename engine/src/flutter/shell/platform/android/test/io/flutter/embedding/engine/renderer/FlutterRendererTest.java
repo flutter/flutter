@@ -1170,4 +1170,15 @@ public class FlutterRendererTest {
     producer.waitOnFence(image);
     verify(fence, times(1)).close();
   }
+
+  @Test
+  public void itForwardsSetYieldNextVsyncToFlutterJNI() {
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+
+    flutterRenderer.setYieldNextVsync(true);
+    flutterRenderer.setYieldNextVsync(false);
+
+    verify(fakeFlutterJNI, times(1)).setYieldNextVsync(true);
+    verify(fakeFlutterJNI, times(1)).setYieldNextVsync(false);
+  }
 }
