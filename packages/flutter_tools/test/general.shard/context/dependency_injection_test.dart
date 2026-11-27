@@ -15,7 +15,10 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
+import 'package:flutter_tools/src/context/web_context.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/flutter_device_manager.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
@@ -90,6 +93,7 @@ void main() {
       expect(dependencies.toolContext, isNotNull);
       expect(dependencies.appleContext, isNotNull);
       expect(dependencies.androidContext, isNotNull);
+      expect(dependencies.webContext, isNotNull);
 
       // Verify that core overrides were correctly propagated
       fs.file('/test_override.txt').writeAsStringSync('propagated');
@@ -623,6 +627,60 @@ void main() {
       expect(context.xcodeProjectInterpreter, same(mockXcodeProjectInterpreter));
       expect(context.xcodeProjectInterpreter, same(mockXcodeProjectInterpreter));
       expect(xcodeProjectInterpreterEvaluations, 1);
+    });
+  });
+
+  group('WebContext', () {
+    test('lazily evaluates and memoizes builders', () {
+      var chromiumLauncherEvaluations = 0;
+      var webWorkflowEvaluations = 0;
+      final fakeLauncher = FakeChromiumLauncher();
+      final fakeWorkflow = FakeWebWorkflow();
+
+      final webContext = WebContext(
+        chromiumLauncherBuilder: () {
+          chromiumLauncherEvaluations++;
+          return fakeLauncher;
+        },
+        webWorkflowBuilder: () {
+          webWorkflowEvaluations++;
+          return fakeWorkflow;
+        },
+      );
+
+      expect(chromiumLauncherEvaluations, 0);
+      expect(webWorkflowEvaluations, 0);
+
+      expect(webContext.chromiumLauncher, same(fakeLauncher));
+      expect(webContext.chromiumLauncher, same(fakeLauncher));
+      expect(chromiumLauncherEvaluations, 1);
+
+      expect(webContext.webWorkflow, same(fakeWorkflow));
+      expect(webContext.webWorkflow, same(fakeWorkflow));
+      expect(webWorkflowEvaluations, 1);
+    });
+
+    test('ToolDependencies.bootstrap asserts if both webContext and webFlutterDeviceBuilder are provided', () async {
+      await expectLater(
+        () => ToolDependencies.bootstrap(
+          templateRenderer: FakeTemplateRenderer(),
+          webContext: FakeWebContext(),
+          webFlutterDeviceBuilder: (
+            Device device, {
+            required Object buildInfo,
+            required Object developmentShaderCompiler,
+            required Object flutterProject,
+            required Object? generator,
+            required Object targetPlatform,
+            required ToolContext toolContext,
+            Map<String, Object?> platformArgs = const <String, Object?>{},
+            Object? urlTunneller,
+            String? userIdentifier,
+            Object? webConfig,
+          }) => throw UnimplementedError(),
+        ),
+        throwsAssertionError,
+      );
     });
   });
 }

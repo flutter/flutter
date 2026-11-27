@@ -684,11 +684,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             .childFile('main.dart')
             .absolute
             .path;
-        final FlutterDevice flutterDevice = await FlutterDevice.create(
-          device,
-          toolContext: toolContext,
+        final FlutterDevice flutterDevice = await device.createFlutterDevice(
           buildInfo: debuggingOptions.buildInfo,
-          target: target,
+          debuggingOptions: debuggingOptions,
+          flutterProject: widgetPreviewScaffoldProject,
+          toolContext: toolContext,
         );
 
         if (boolArg(kLaunchPreviewer)) {

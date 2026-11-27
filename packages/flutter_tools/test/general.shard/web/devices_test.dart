@@ -3,32 +3,78 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/net.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
+import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
+import 'package:flutter_tools/src/context/web_context.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_debug_config.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
+import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
+WebDevices _createWebDevices({
+  FeatureFlags? featureFlags,
+  FileSystem? fileSystem,
+  Logger? logger,
+  Platform? platform,
+  ProcessManager? processManager,
+}) {
+  final FeatureFlags resolvedFeatureFlags = featureFlags ?? TestFeatureFlags(isWebEnabled: true);
+  final FileSystem resolvedFileSystem = fileSystem ?? MemoryFileSystem.test();
+  final Logger resolvedLogger = logger ?? BufferLogger.test();
+  final Platform resolvedPlatform = platform ?? FakePlatform(environment: <String, String>{});
+  final ProcessManager resolvedProcessManager = processManager ?? FakeProcessManager.any();
+  return WebDevices(
+    featureFlags: resolvedFeatureFlags,
+    fileSystem: resolvedFileSystem,
+    logger: resolvedLogger,
+    platform: resolvedPlatform,
+    processManager: resolvedProcessManager,
+    webContext: WebContext(
+      chromiumLauncherBuilder: () => ChromiumLauncher(
+        browserFinder: findChromeExecutable,
+        fileSystem: resolvedFileSystem,
+        logger: resolvedLogger,
+        operatingSystemUtils: OperatingSystemUtils(
+          fileSystem: resolvedFileSystem,
+          logger: resolvedLogger,
+          platform: resolvedPlatform,
+          processManager: resolvedProcessManager,
+        ),
+        platform: resolvedPlatform,
+        processManager: resolvedProcessManager,
+      ),
+      webWorkflowBuilder: () =>
+          WebWorkflow(featureFlags: resolvedFeatureFlags, platform: resolvedPlatform),
+    ),
+  );
+}
+
 void main() {
   test('No web devices listed if feature is disabled', () async {
-    final webDevices = WebDevices(
-      featureFlags: TestFeatureFlags(),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
-      platform: FakePlatform(environment: <String, String>{}),
-      processManager: FakeProcessManager.any(),
-    );
+    final WebDevices webDevices = _createWebDevices(featureFlags: TestFeatureFlags());
 
     expect(await webDevices.pollingGetDevices(), isEmpty);
   });
@@ -75,8 +121,9 @@ void main() {
     expect(chromeDevice.supportsFlutterExit, false);
     expect(chromeDevice.supportsScreenshot, false);
     expect(await chromeDevice.isLocalEmulator, false);
-    expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
-    expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
+    final DeviceLogReader logReader = chromeDevice.getLogReader();
+    expect(logReader, isA<WebDeviceLogReader>());
+    expect(chromeDevice.getLogReader(), same(logReader));
     expect(await chromeDevice.portForwarder!.forward(1), 1);
 
     expect(chromeDevice.supportsRuntimeMode(BuildMode.debug), true);
@@ -103,8 +150,9 @@ void main() {
     expect(chromeDevice.supportsFlutterExit, false);
     expect(chromeDevice.supportsScreenshot, false);
     expect(await chromeDevice.isLocalEmulator, false);
-    expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
-    expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
+    final DeviceLogReader logReader = chromeDevice.getLogReader();
+    expect(logReader, isA<WebDeviceLogReader>());
+    expect(chromeDevice.getLogReader(), same(logReader));
     expect(await chromeDevice.portForwarder!.forward(1), 1);
 
     expect(chromeDevice.supportsRuntimeMode(BuildMode.debug), true);
@@ -124,8 +172,9 @@ void main() {
     expect(device.supportsFlutterExit, false);
     expect(device.supportsScreenshot, false);
     expect(await device.isLocalEmulator, false);
-    expect(device.getLogReader(), isA<NoOpDeviceLogReader>());
-    expect(device.getLogReader(), isA<NoOpDeviceLogReader>());
+    final DeviceLogReader logReader = device.getLogReader();
+    expect(logReader, isA<WebDeviceLogReader>());
+    expect(device.getLogReader(), same(logReader));
     expect(await device.portForwarder!.forward(1), 1);
 
     expect(device.supportsRuntimeMode(BuildMode.debug), true);
@@ -166,25 +215,13 @@ void main() {
   });
 
   test('Chrome device is listed when Chrome can be run', () async {
-    final webDevices = WebDevices(
-      featureFlags: TestFeatureFlags(isWebEnabled: true),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
-      platform: FakePlatform(environment: <String, String>{}),
-      processManager: FakeProcessManager.any(),
-    );
+    final WebDevices webDevices = _createWebDevices();
 
     expect(await webDevices.pollingGetDevices(), contains(isA<GoogleChromeDevice>()));
   });
 
   test('Has well known device ids chrome, edge, and web-server', () async {
-    final webDevices = WebDevices(
-      featureFlags: TestFeatureFlags(isWebEnabled: true),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
-      platform: FakePlatform(environment: <String, String>{}),
-      processManager: FakeProcessManager.any(),
-    );
+    final WebDevices webDevices = _createWebDevices();
 
     expect(webDevices.wellKnownIds, <String>['chrome', 'web-server', 'edge']);
   });
@@ -192,39 +229,21 @@ void main() {
   test('Chrome device is not listed when Chrome cannot be run', () async {
     final processManager = FakeProcessManager.empty();
     processManager.excludedExecutables = <String>{kLinuxExecutable};
-    final webDevices = WebDevices(
-      featureFlags: TestFeatureFlags(isWebEnabled: true),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
-      platform: FakePlatform(environment: <String, String>{}),
-      processManager: processManager,
-    );
+    final WebDevices webDevices = _createWebDevices(processManager: processManager);
 
     expect(await webDevices.pollingGetDevices(), isNot(contains(isA<GoogleChromeDevice>())));
   });
 
   test('Web Server device is listed if enabled via showWebServerDevice', () async {
     WebServerDevice.showWebServerDevice = true;
-    final webDevices = WebDevices(
-      featureFlags: TestFeatureFlags(isWebEnabled: true),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
-      platform: FakePlatform(environment: <String, String>{}),
-      processManager: FakeProcessManager.any(),
-    );
+    final WebDevices webDevices = _createWebDevices();
 
     expect(await webDevices.pollingGetDevices(), contains(isA<WebServerDevice>()));
   });
 
   test('Web Server device is not listed if disabled via showWebServerDevice', () async {
     WebServerDevice.showWebServerDevice = false;
-    final webDevices = WebDevices(
-      featureFlags: TestFeatureFlags(isWebEnabled: true),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
-      platform: FakePlatform(environment: <String, String>{}),
-      processManager: FakeProcessManager.any(),
-    );
+    final WebDevices webDevices = _createWebDevices();
 
     expect(await webDevices.pollingGetDevices(), isNot(contains(isA<WebServerDevice>())));
   });
@@ -233,13 +252,7 @@ void main() {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[kLinuxExecutable, '--version'], stdout: 'ABC'),
     ]);
-    final webDevices = WebDevices(
-      featureFlags: TestFeatureFlags(isWebEnabled: true),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
-      platform: FakePlatform(environment: <String, String>{}),
-      processManager: processManager,
-    );
+    final WebDevices webDevices = _createWebDevices(processManager: processManager);
 
     final GoogleChromeDevice chromeDevice = (await webDevices.pollingGetDevices())
         .whereType<GoogleChromeDevice>()
@@ -276,10 +289,7 @@ void main() {
         stdout: r'HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon\ version REG_SZ 74.0.0 A',
       ),
     ]);
-    final webDevices = WebDevices(
-      featureFlags: TestFeatureFlags(isWebEnabled: true),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+    final WebDevices webDevices = _createWebDevices(
       platform: FakePlatform(operatingSystem: 'windows', environment: <String, String>{}),
       processManager: processManager,
     );
@@ -347,10 +357,7 @@ void main() {
         stdout: r'HKEY_CURRENT_USER\Software\Microsoft\Edge\BLBeacon\ version REG_SZ 72.0.478.44 ',
       ),
     ]);
-    final webDevices = WebDevices(
-      featureFlags: TestFeatureFlags(isWebEnabled: true),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+    final WebDevices webDevices = _createWebDevices(
       platform: FakePlatform(operatingSystem: 'windows', environment: <String, String>{}),
       processManager: processManager,
     );
@@ -359,20 +366,11 @@ void main() {
   });
 
   test('Edge is not support on non-windows platform', () async {
-    final webDevices = WebDevices(
-      featureFlags: TestFeatureFlags(isWebEnabled: true),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
-      platform: FakePlatform(environment: <String, String>{}),
-      processManager: FakeProcessManager.empty(),
-    );
+    final WebDevices webDevices = _createWebDevices(processManager: FakeProcessManager.empty());
 
     expect((await webDevices.pollingGetDevices()).whereType<MicrosoftEdgeDevice>(), isEmpty);
 
-    final macosWebDevices = WebDevices(
-      featureFlags: TestFeatureFlags(isWebEnabled: true),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+    final WebDevices macosWebDevices = _createWebDevices(
       platform: FakePlatform(operatingSystem: 'macos', environment: <String, String>{}),
       processManager: FakeProcessManager.empty(),
     );
@@ -417,6 +415,229 @@ void main() {
     url: 'file://path',
     matcher: throwsToolExit(message: '"file://path" is not a valid HTTP URL.'),
   );
+
+  group('WebDeviceLogReader', () {
+    test(
+      'provideVmService streams Stdout and Stderr preserving whitespace and cleans up on dispose',
+      () async {
+        final stdoutController = StreamController<vm_service.Event>.broadcast();
+        final stderrController = StreamController<vm_service.Event>.broadcast();
+        final listenedStreams = <String>[];
+        final vmService = _FakeVmService(
+          onStdoutEvent: stdoutController.stream,
+          onStderrEvent: stderrController.stream,
+          onStreamListen: (String streamId) {
+            listenedStreams.add(streamId);
+            if (streamId == vm_service.EventStreams.kStdout) {
+              // Verify RPCError when already subscribed is ignored and subscription continues.
+              throw vm_service.RPCError(
+                'streamListen',
+                vm_service.RPCErrorKind.kStreamAlreadySubscribed.code,
+                'Stream already subscribed',
+              );
+            }
+          },
+        );
+        final flutterVmService = _FakeFlutterVmService(vmService);
+
+        final logReader = WebDeviceLogReader('test-app');
+        expect(logReader.name, 'test-app');
+
+        final received = <String>[];
+        var streamClosed = false;
+        logReader.logLines.listen(received.add, onDone: () => streamClosed = true);
+
+        await logReader.provideVmService(flutterVmService);
+        expect(listenedStreams, <String>[
+          vm_service.EventStreams.kStdout,
+          vm_service.EventStreams.kStderr,
+        ]);
+
+        stdoutController.add(
+          vm_service.Event(bytes: base64.encode(utf8.encode('  leading and trailing  \n'))),
+        );
+        stderrController.add(
+          vm_service.Event(bytes: base64.encode(utf8.encode('\terror output \t'))),
+        );
+        await pumpEventQueue();
+
+        expect(received, <String>['  leading and trailing  ', '\terror output \t']);
+
+        await logReader.dispose();
+        expect(streamClosed, isTrue);
+        expect(stdoutController.hasListener, isFalse);
+        expect(stderrController.hasListener, isFalse);
+
+        // Emitting after dispose does not throw or deliver messages.
+        stdoutController.add(vm_service.Event(bytes: base64.encode(utf8.encode('after dispose'))));
+        await pumpEventQueue();
+        expect(received, hasLength(2));
+
+        await stdoutController.close();
+        await stderrController.close();
+      },
+    );
+
+    test('provideVmService rethrows non-already-subscribed RPCError', () async {
+      final stdoutController = StreamController<vm_service.Event>.broadcast();
+      final stderrController = StreamController<vm_service.Event>.broadcast();
+      final vmService = _FakeVmService(
+        onStdoutEvent: stdoutController.stream,
+        onStderrEvent: stderrController.stream,
+        onStreamListen: (String streamId) {
+          throw vm_service.RPCError(
+            'streamListen',
+            vm_service.RPCErrorKind.kInternalError.code,
+            'Internal error',
+          );
+        },
+      );
+      final logReader = WebDeviceLogReader('test-app');
+
+      await expectLater(
+        () => logReader.provideVmService(_FakeFlutterVmService(vmService)),
+        throwsA(
+          isA<vm_service.RPCError>().having(
+            (vm_service.RPCError error) => error.code,
+            'code',
+            vm_service.RPCErrorKind.kInternalError.code,
+          ),
+        ),
+      );
+
+      await logReader.dispose();
+      await stdoutController.close();
+      await stderrController.close();
+    });
+  });
+
+  group('WebDevice.createFlutterDevice', () {
+    test('falls back to default FlutterDevice when builder is null', () async {
+      final toolContext = FakeToolContext(
+        artifacts: Artifacts.test(),
+        processManager: FakeProcessManager.any(),
+      );
+      final device = WebServerDevice(logger: BufferLogger.test());
+
+      final FlutterDevice flutterDevice = await device.createFlutterDevice(
+        buildInfo: BuildInfo.debug,
+        toolContext: toolContext,
+      );
+
+      expect(flutterDevice.device, same(device));
+      expect(flutterDevice.targetPlatform, TargetPlatform.web_javascript);
+      expect(flutterDevice.generator, isNotNull);
+    });
+
+    test('throws StateError when builder is provided without flutterProject', () async {
+      final toolContext = FakeToolContext(
+        artifacts: Artifacts.test(),
+        processManager: FakeProcessManager.any(),
+      );
+      final device = WebServerDevice(
+        logger: BufferLogger.test(),
+        webFlutterDeviceBuilder: (
+          Device device, {
+          required BuildInfo buildInfo,
+          required DevelopmentShaderCompiler developmentShaderCompiler,
+          required FlutterProject flutterProject,
+          required ResidentCompiler? generator,
+          required TargetPlatform targetPlatform,
+          required ToolContext toolContext,
+          Map<String, Object?> platformArgs = const <String, Object?>{},
+          UrlTunneller? urlTunneller,
+          String? userIdentifier,
+          WebDebugConfig webConfig = const WebDebugConfig(),
+        }) => throw AssertionError('Should not be called'),
+      );
+
+      await expectLater(
+        () => device.createFlutterDevice(buildInfo: BuildInfo.debug, toolContext: toolContext),
+        throwsA(
+          isA<StateError>().having(
+            (StateError error) => error.message,
+            'message',
+            'flutterProject is required when webFlutterDeviceBuilder is provided.',
+          ),
+        ),
+      );
+    });
+
+    test('invokes builder with generator and urlTunneller gated by buildMode, useWasm, and enableExposeUrl', () async {
+      final toolContext = FakeToolContext(
+        artifacts: Artifacts.test(),
+        processManager: FakeProcessManager.any(),
+      );
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
+        toolContext.fs.currentDirectory,
+      );
+      Future<String> fakeTunneller(String url) async => url;
+
+      ResidentCompiler? capturedGenerator;
+      UrlTunneller? capturedTunneller;
+      WebDebugConfig? capturedWebConfig;
+      final device = WebServerDevice(
+        logger: BufferLogger.test(),
+        webFlutterDeviceBuilder:
+            (
+              Device device, {
+              required BuildInfo buildInfo,
+              required DevelopmentShaderCompiler developmentShaderCompiler,
+              required FlutterProject flutterProject,
+              required ResidentCompiler? generator,
+              required TargetPlatform targetPlatform,
+              required ToolContext toolContext,
+              Map<String, Object?> platformArgs = const <String, Object?>{},
+              UrlTunneller? urlTunneller,
+              String? userIdentifier,
+              WebDebugConfig webConfig = const WebDebugConfig(),
+            }) {
+              capturedGenerator = generator;
+              capturedTunneller = urlTunneller;
+              capturedWebConfig = webConfig;
+              return FlutterDevice(
+                device,
+                buildInfo: buildInfo,
+                developmentShaderCompiler: developmentShaderCompiler,
+                generator: generator,
+                targetPlatform: targetPlatform,
+                toolContext: toolContext,
+                userIdentifier: userIdentifier,
+              );
+            },
+      );
+
+      // Debug JS with enableExposeUrl: true -> generator created and urlTunneller forwarded.
+      await device.createFlutterDevice(
+        buildInfo: BuildInfo.debug,
+        debuggingOptions: DebuggingOptions.enabled(
+          BuildInfo.debug,
+          platformOptions: const <PlatformDebuggingOptions>[WebDebugConfig(enableExposeUrl: true)],
+        ),
+        flutterProject: flutterProject,
+        toolContext: toolContext,
+        urlTunneller: fakeTunneller,
+      );
+      expect(capturedGenerator, isNotNull);
+      expect(capturedTunneller, same(fakeTunneller));
+      expect(capturedWebConfig?.enableExposeUrl, isTrue);
+
+      // Debug Wasm with enableExposeUrl: false -> no generator and urlTunneller withheld.
+      await device.createFlutterDevice(
+        buildInfo: BuildInfo.debug,
+        debuggingOptions: DebuggingOptions.enabled(
+          BuildInfo.debug,
+          platformOptions: const <PlatformDebuggingOptions>[WebDebugConfig(useWasm: true)],
+        ),
+        flutterProject: flutterProject,
+        toolContext: toolContext,
+        urlTunneller: fakeTunneller,
+      );
+      expect(capturedGenerator, isNull);
+      expect(capturedTunneller, isNull);
+      expect(capturedWebConfig?.useWasm, isTrue);
+    });
+  });
 }
 
 /// A test implementation of the [ChromiumLauncher] that launches a fixed instance.
@@ -492,3 +713,32 @@ class _OnceClosableChromium extends Fake implements Chromium {
 }
 
 class _UnimplementedChromium extends Fake implements Chromium {}
+
+class _FakeFlutterVmService extends Fake implements FlutterVmService {
+  _FakeFlutterVmService(this.service);
+
+  @override
+  final vm_service.VmService service;
+}
+
+class _FakeVmService extends Fake implements vm_service.VmService {
+  _FakeVmService({
+    required this.onStdoutEvent,
+    required this.onStderrEvent,
+    required this._onStreamListen,
+  });
+
+  final void Function(String streamId) _onStreamListen;
+
+  @override
+  final Stream<vm_service.Event> onStdoutEvent;
+
+  @override
+  final Stream<vm_service.Event> onStderrEvent;
+
+  @override
+  Future<vm_service.Success> streamListen(String streamId) async {
+    _onStreamListen(streamId);
+    return vm_service.Success();
+  }
+}

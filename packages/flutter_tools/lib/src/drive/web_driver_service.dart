@@ -82,19 +82,31 @@ class WebDriverService extends DriverService {
     String? mainPath,
     Map<String, Object> platformArgs = const <String, Object>{},
   }) async {
-    final FlutterDevice flutterDevice = await FlutterDevice.create(
-      device,
-      toolContext: toolContext,
-      buildInfo: buildInfo,
-      target: mainPath,
-      userIdentifier: userIdentifier,
-    );
     final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
+    final FlutterProject flutterProject = projectFactory.fromDirectory(fs.currentDirectory);
     final webConfig = WebDebugConfig(
       devServerConfig: debuggingOptions.webConfig.devServerConfig,
       renderer: debuggingOptions.webConfig.renderer,
       useWasm: debuggingOptions.webConfig.useWasm,
       webDefines: debuggingOptions.webConfig.webDefines,
+    );
+    final webDebuggingOptions = buildInfo.isRelease
+        ? DebuggingOptions.disabled(
+            buildInfo,
+            platformOptions: <PlatformDebuggingOptions>[webConfig],
+          )
+        : DebuggingOptions.enabled(
+            buildInfo,
+            disablePortPublication: debuggingOptions.disablePortPublication,
+            platformOptions: <PlatformDebuggingOptions>[webConfig],
+          );
+    final FlutterDevice flutterDevice = await device.createFlutterDevice(
+      buildInfo: buildInfo,
+      debuggingOptions: webDebuggingOptions,
+      flutterProject: flutterProject,
+      platformArgs: platformArgs,
+      toolContext: toolContext,
+      userIdentifier: userIdentifier,
     );
     _residentRunner = _webRunnerFactory!.createWebRunner(
       flutterDevice,
@@ -103,19 +115,10 @@ class WebDriverService extends DriverService {
       assetBundleFactory: _assetBundleFactory,
       buildSystem: buildSystem,
       buildTargets: buildTargets,
-      debuggingOptions: buildInfo.isRelease
-          ? DebuggingOptions.disabled(
-              buildInfo,
-              platformOptions: <PlatformDebuggingOptions>[webConfig],
-            )
-          : DebuggingOptions.enabled(
-              buildInfo,
-              disablePortPublication: debuggingOptions.disablePortPublication,
-              platformOptions: <PlatformDebuggingOptions>[webConfig],
-            ),
+      debuggingOptions: webDebuggingOptions,
       featureFlags: _featureFlags,
       flutterHookRunner: _flutterHookRunner,
-      flutterProject: projectFactory.fromDirectory(fs.currentDirectory),
+      flutterProject: flutterProject,
       platformArgs: platformArgs,
       stayResident: true,
       target: mainPath,

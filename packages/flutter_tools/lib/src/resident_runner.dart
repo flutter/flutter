@@ -67,15 +67,22 @@ class FlutterDevice {
 
   final Duration logFlushDelay;
 
-  /// Create a [FlutterDevice] with optional code generation enabled.
-  static Future<FlutterDevice> create(
+  /// Creates the [DevelopmentShaderCompiler] and optional [ResidentCompiler]
+  /// for [device] and [buildInfo].
+  static Future<
+    ({
+      DevelopmentShaderCompiler developmentShaderCompiler,
+      ResidentCompiler? generator,
+      TargetPlatform targetPlatform,
+    })
+  >
+  createCompilers(
     Device device, {
-    required ToolContext toolContext,
     required BuildInfo buildInfo,
-    required String? target,
+    required ToolContext toolContext,
+    bool createGenerator = true,
     ResidentCompilerFactory residentCompilerFactory = const ResidentCompilerFactory(),
     TargetModel? targetModelOverride,
-    String? userIdentifier,
   }) async {
     final ToolContext(
       :Artifacts artifacts,
@@ -88,8 +95,7 @@ class FlutterDevice {
     ) = toolContext;
 
     final TargetPlatform targetPlatform = await device.targetPlatform;
-
-    final shaderCompiler = DevelopmentShaderCompiler(
+    final developmentShaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: ShaderCompiler(
         artifacts: artifacts,
         logger: logger,
@@ -100,27 +106,55 @@ class FlutterDevice {
       fileSystem: fs,
       logger: logger,
     );
-
-    final ResidentCompiler generator = residentCompilerFactory.create(
-      artifacts: artifacts,
-      processManager: processManager,
-      logger: logger,
-      fileSystem: fs,
-      platform: platform,
-      shutdownHooks: shutdownHooks,
-      config: config,
-      targetPlatform: targetPlatform,
-      buildInfo: buildInfo,
-      targetModelOverride: targetModelOverride,
-    );
-
-    return FlutterDevice(
-      device,
-      toolContext: toolContext,
-      buildInfo: buildInfo,
-      developmentShaderCompiler: shaderCompiler,
+    final ResidentCompiler? generator = createGenerator
+        ? residentCompilerFactory.create(
+            artifacts: artifacts,
+            processManager: processManager,
+            logger: logger,
+            fileSystem: fs,
+            platform: platform,
+            shutdownHooks: shutdownHooks,
+            config: config,
+            targetPlatform: targetPlatform,
+            buildInfo: buildInfo,
+            targetModelOverride: targetModelOverride,
+          )
+        : null;
+    return (
+      developmentShaderCompiler: developmentShaderCompiler,
       generator: generator,
       targetPlatform: targetPlatform,
+    );
+  }
+
+  /// Creates a standard [FlutterDevice] backed by the default [ResidentCompiler]
+  /// and [DevelopmentShaderCompiler].
+  static Future<FlutterDevice> createDefault(
+    Device device, {
+    required BuildInfo buildInfo,
+    required ToolContext toolContext,
+    ResidentCompilerFactory residentCompilerFactory = const ResidentCompilerFactory(),
+    TargetModel? targetModelOverride,
+    String? userIdentifier,
+  }) async {
+    final (
+      :DevelopmentShaderCompiler developmentShaderCompiler,
+      :ResidentCompiler? generator,
+      :TargetPlatform targetPlatform,
+    ) = await createCompilers(
+      device,
+      buildInfo: buildInfo,
+      residentCompilerFactory: residentCompilerFactory,
+      targetModelOverride: targetModelOverride,
+      toolContext: toolContext,
+    );
+    return FlutterDevice(
+      device,
+      buildInfo: buildInfo,
+      developmentShaderCompiler: developmentShaderCompiler,
+      generator: generator,
+      targetPlatform: targetPlatform,
+      toolContext: toolContext,
       userIdentifier: userIdentifier,
     );
   }

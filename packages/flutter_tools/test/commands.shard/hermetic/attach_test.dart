@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -1435,6 +1436,42 @@ void main() {
       };
       expect(hiddenInVerboseMode, isEmpty);
     });
+
+    test(
+      'passes flutterProject and residentCompilerFactory to device.createFlutterDevice',
+      () async {
+        final device = _RecordingAndroidDevice(id: '1')
+          ..portForwarder = const NoOpDevicePortForwarder()
+          ..onGetLogReader = () => NoOpDeviceLogReader('test');
+        final hotRunner = FakeHotRunner()
+          ..exited = false
+          ..isWaitingForVmService = false
+          ..onAttach = (
+            Completer<DebugConnectionInfo>? connectionInfoCompleter,
+            Completer<void>? appStartedCompleter,
+            bool enableDevTools,
+          ) async => 0;
+        final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+        const customCompilerFactory = _CustomResidentCompilerFactory();
+
+        testDeviceManager.devices = <Device>[device];
+
+        final command = _TestAttachCommand(
+          assetBundleFactory: _FakeAssetBundleFactory(),
+          buildSystem: buildSystem,
+          buildTargets: const BuildTargetsImpl(),
+          devtoolsLauncher: FakeDevtoolsLauncher(),
+          hotRunnerFactory: hotRunnerFactory,
+          residentCompilerFactory: customCompilerFactory,
+          toolContext: createToolContext(),
+          xcode: null,
+        );
+        await createCommandRunner(command).run(<String>['attach']);
+
+        expect(device.capturedFlutterProject?.directory.path, testFileSystem.currentDirectory.path);
+        expect(device.capturedResidentCompilerFactory, same(customCompilerFactory));
+      },
+    );
   });
 }
 
@@ -1707,7 +1744,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   Uri get uri => Uri.parse('http://localhost:8181');
 }
 
-class FakeAndroidDevice extends Fake implements AndroidDevice {
+class FakeAndroidDevice extends Fake with DefaultCreateFlutterDevice implements AndroidDevice {
   FakeAndroidDevice({required this.id});
 
   @override
@@ -1803,7 +1840,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   }
 }
 
-class FakeIOSDevice extends Fake implements IOSDevice {
+class FakeIOSDevice extends Fake with DefaultCreateFlutterDevice implements IOSDevice {
   FakeIOSDevice({
     this._mdnsVmServiceDiscovery,
     this._portForwarder,
@@ -1915,7 +1952,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   }
 }
 
-class FakeIOSSimulator extends Fake implements IOSSimulator {
+class FakeIOSSimulator extends Fake with DefaultCreateFlutterDevice implements IOSSimulator {
   @override
   final name = 'name';
 
@@ -2090,4 +2127,58 @@ class _FakeAssetBundleFactory extends Fake implements AssetBundleFactory {
     logger: BufferLogger.test(),
     platform: FakePlatform(),
   ).createBundle();
+}
+
+class _CustomResidentCompilerFactory extends ResidentCompilerFactory {
+  const _CustomResidentCompilerFactory();
+}
+
+class _TestAttachCommand extends AttachCommand {
+  _TestAttachCommand({
+    required super.assetBundleFactory,
+    required super.buildSystem,
+    required super.buildTargets,
+    required super.devtoolsLauncher,
+    required super.toolContext,
+    required super.xcode,
+    required this.residentCompilerFactory,
+    super.hotRunnerFactory,
+  });
+
+  @override
+  final ResidentCompilerFactory residentCompilerFactory;
+}
+
+class _RecordingAndroidDevice extends FakeAndroidDevice {
+  _RecordingAndroidDevice({required super.id});
+
+  FlutterProject? capturedFlutterProject;
+  ResidentCompilerFactory? capturedResidentCompilerFactory;
+
+  @override
+  Future<FlutterDevice> createFlutterDevice({
+    required BuildInfo buildInfo,
+    required ToolContext toolContext,
+    DebuggingOptions? debuggingOptions,
+    FlutterProject? flutterProject,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    ResidentCompilerFactory residentCompilerFactory = const ResidentCompilerFactory(),
+    TargetModel? targetModelOverride,
+    UrlTunneller? urlTunneller,
+    String? userIdentifier,
+  }) {
+    capturedFlutterProject = flutterProject;
+    capturedResidentCompilerFactory = residentCompilerFactory;
+    return super.createFlutterDevice(
+      buildInfo: buildInfo,
+      debuggingOptions: debuggingOptions,
+      flutterProject: flutterProject,
+      platformArgs: platformArgs,
+      residentCompilerFactory: residentCompilerFactory,
+      targetModelOverride: targetModelOverride,
+      toolContext: toolContext,
+      urlTunneller: urlTunneller,
+      userIdentifier: userIdentifier,
+    );
+  }
 }

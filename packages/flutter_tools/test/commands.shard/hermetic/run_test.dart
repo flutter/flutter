@@ -2097,7 +2097,7 @@ class TestDeviceManager extends DeviceManager {
   }
 }
 
-class FakeDevice extends Fake implements Device {
+class FakeDevice extends Fake with DefaultCreateFlutterDevice implements Device {
   FakeDevice({
     this._isLocalEmulator = false,
     this._targetPlatform = TargetPlatform.ios,

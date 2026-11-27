@@ -1759,7 +1759,7 @@ bool _notEvent(DaemonMessage message) => message.data['event'] == null;
 
 bool _isConnectedEvent(DaemonMessage message) => message.data['event'] == 'daemon.connected';
 
-class FakeAndroidDevice extends Fake implements AndroidDevice {
+class FakeAndroidDevice extends Fake with DefaultCreateFlutterDevice implements AndroidDevice {
   @override
   final id = 'device';
 
