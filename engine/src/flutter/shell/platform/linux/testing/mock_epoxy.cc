@@ -160,8 +160,11 @@ EGLContext _eglCreateContext(EGLDisplay dpy,
     return EGL_NO_CONTEXT;
   }
 
+  // Give each context its own handle, so tests can tell which one is in use.
+  static MockContext mock_contexts[64];
+  static size_t next_mock_context = 0;
   mock_error = EGL_SUCCESS;
-  return &mock_context;
+  return &mock_contexts[next_mock_context++ % G_N_ELEMENTS(mock_contexts)];
 }
 
 EGLContext _eglGetCurrentContext() {
@@ -364,6 +367,10 @@ EGLBoolean _eglMakeCurrent(EGLDisplay dpy,
                            EGLContext ctx) {
   if (!check_display(dpy) || !check_initialized(dpy)) {
     return EGL_FALSE;
+  }
+
+  if (mock != nullptr) {
+    mock->egl_current_context = ctx;
   }
 
   return bool_success();

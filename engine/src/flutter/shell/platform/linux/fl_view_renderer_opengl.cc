@@ -59,7 +59,9 @@ static void get_frame_size(FlViewRendererOpenGL* self,
 static gboolean redraw_cb(gpointer user_data) {
   g_autoptr(FlViewRendererOpenGL) self = FL_VIEW_RENDERER_OPENGL(user_data);
 
-  if (self->compositor == nullptr) {
+  // Nothing to do if the widget was destroyed after the frame was presented.
+  if (self->compositor == nullptr ||
+      !gtk_widget_get_realized(GTK_WIDGET(self))) {
     return G_SOURCE_REMOVE;
   }
 
@@ -89,8 +91,16 @@ static gboolean redraw_cb(gpointer user_data) {
 static void wait_for_frame(FlViewRendererOpenGL* self,
                            GdkWindow* window,
                            gint scale_factor) {
+  // Waiting runs Flutter tasks, and the UI isolate runs on this thread, so it
+  // runs Dart code. That code can destroy the window being drawn, in which
+  // case there is no frame to wait for.
+  g_autoptr(GdkWindow) window_ref = GDK_WINDOW(g_object_ref(window));
   gint64 expiry_time = g_get_monotonic_time() + kRenderTimeoutMicroseconds;
   while (true) {
+    if (gdk_window_is_destroyed(window)) {
+      break;
+    }
+
     size_t width = gdk_window_get_width(window) * scale_factor;
     size_t height = gdk_window_get_height(window) * scale_factor;
     size_t frame_width, frame_height;
@@ -167,6 +177,13 @@ static gboolean fl_view_renderer_opengl_draw(GtkWidget* widget, cairo_t* cr) {
     wait_for_frame(self, window, scale_factor);
   }
 
+  // The window may have been destroyed while waiting, leaving nothing to draw
+  // into.
+  if (gdk_window_is_destroyed(window)) {
+    g_mutex_unlock(&self->frame_mutex);
+    return TRUE;
+  }
+
   // The frame is drawn from an OpenGL texture, so make a context current that
   // can access it. This is deliberately not cleared once the frame is drawn -
   // GTK makes the context it needs current before using OpenGL but doesn't
@@ -220,10 +237,7 @@ static void fl_view_renderer_opengl_present_layers(FlViewRenderer* renderer,
 static void fl_view_renderer_opengl_dispose(GObject* object) {
   FlViewRendererOpenGL* self = FL_VIEW_RENDERER_OPENGL(object);
 
-  g_clear_object(&self->engine);
   g_clear_object(&self->render_context);
-  g_clear_object(&self->task_runner);
-  g_mutex_clear(&self->frame_mutex);
 
   G_OBJECT_CLASS(fl_view_renderer_opengl_parent_class)->dispose(object);
 }
@@ -231,12 +245,17 @@ static void fl_view_renderer_opengl_dispose(GObject* object) {
 static void fl_view_renderer_opengl_finalize(GObject* object) {
   FlViewRendererOpenGL* self = FL_VIEW_RENDERER_OPENGL(object);
 
-  // The compositor is released here rather than in dispose() so it outlives a
-  // forced dispose (e.g. gtk_widget_destroy()) and is only freed once the last
-  // reference is dropped. This keeps it alive for the raster thread, which
-  // holds a strong reference on the view (and thus this renderer) while
-  // presenting.
+  // Everything present_layers and wait_for_frame use is released here rather
+  // than in dispose() so it outlives a forced dispose (e.g.
+  // gtk_widget_destroy()) and is only freed once the last reference is
+  // dropped. This keeps it alive for the raster thread, which holds a strong
+  // reference on the view (and thus this renderer) while presenting, and for
+  // the GTK thread if the window is destroyed by a task run while it waits for
+  // a frame.
   g_clear_object(&self->compositor);
+  g_clear_object(&self->engine);
+  g_clear_object(&self->task_runner);
+  g_mutex_clear(&self->frame_mutex);
   g_clear_object(&self->frame);
 
   G_OBJECT_CLASS(fl_view_renderer_opengl_parent_class)->finalize(object);

@@ -260,12 +260,11 @@ static void fl_view_present_layers(FlRenderable* renderable,
                                    size_t layers_count) {
   FlView* self = FL_VIEW(renderable);
 
-  // If widget was destroyed then dispose will have been called and the
-  // renderer will be null.
-  if (self->renderer == nullptr) {
-    return;
-  }
-
+  // This runs on the raster thread, which holds a reference to this view for
+  // as long as it does. The renderer is only released when the view is
+  // finalized, so it is valid here even if the GTK thread destroys the widget
+  // while a frame is being presented; the renderer ignores frames once it has
+  // nothing to show them in.
   fl_view_renderer_present_layers(self->renderer, layers, layers_count);
 }
 
@@ -576,7 +575,6 @@ static void fl_view_dispose(GObject* object) {
                           nullptr);
   }
 
-  g_clear_object(&self->renderer);
   g_clear_object(&self->engine);
   g_clear_object(&self->window_state_monitor);
   g_clear_object(&self->scrolling_manager);
@@ -586,6 +584,18 @@ static void fl_view_dispose(GObject* object) {
   g_clear_object(&self->cancellable);
 
   G_OBJECT_CLASS(fl_view_parent_class)->dispose(object);
+}
+
+static void fl_view_finalize(GObject* object) {
+  FlView* self = FL_VIEW(object);
+
+  // The renderer is released here rather than in dispose() so it outlives a
+  // forced dispose (e.g. gtk_widget_destroy()). The raster thread uses it in
+  // fl_view_present_layers() while holding a reference to this view, which
+  // doesn't stop the GTK thread from disposing the view under it.
+  g_clear_object(&self->renderer);
+
+  G_OBJECT_CLASS(fl_view_parent_class)->finalize(object);
 }
 
 // Implements GtkWidget::realize.
@@ -661,6 +671,7 @@ static void fl_view_class_init(FlViewClass* klass) {
   GObjectClass* object_class = G_OBJECT_CLASS(klass);
   object_class->notify = fl_view_notify;
   object_class->dispose = fl_view_dispose;
+  object_class->finalize = fl_view_finalize;
 
   GtkWidgetClass* widget_class = GTK_WIDGET_CLASS(klass);
   widget_class->realize = fl_view_realize;

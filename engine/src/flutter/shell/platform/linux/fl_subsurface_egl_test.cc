@@ -175,6 +175,22 @@ TEST_F(FlSubsurfaceEGLTest, PresentDifferentSizeSwapsStaleBuffer) {
                             nullptr);
 }
 
+// A driver that acquires the buffer for a frame when the surface is next used,
+// rather than when the previous frame is swapped, gives one of the size the
+// window was resized to. There is then no stale buffer to swap away, which
+// would commit a buffer that is replaced without ever being shown.
+TEST_F(FlSubsurfaceEGLTest, PresentDifferentSizeWithResizedBuffer) {
+  g_autoptr(FlSubsurfaceEGL) egl = CreateEGL();
+  ASSERT_NE(egl, nullptr);
+
+  epoxy.egl_surface_width = kBufferWidth + 50;
+  epoxy.egl_surface_height = kBufferHeight + 50;
+  EXPECT_CALL(epoxy, eglSwapBuffers).Times(1);
+
+  fl_subsurface_egl_present(egl, 1, kBufferWidth + 50, kBufferHeight + 50,
+                            nullptr);
+}
+
 // The whole frame is still written, rather than being aligned against the size
 // of the buffer that was swapped away.
 TEST_F(FlSubsurfaceEGLTest, PresentDifferentSizeWritesWholeFrame) {

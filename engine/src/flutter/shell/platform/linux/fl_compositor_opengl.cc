@@ -56,7 +56,14 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager) {
   self->shader = fl_compositor_opengl_shader_new(opengl_manager);
 
   // Determine once whether glBlitFramebuffer is available on this driver.
-  fl_opengl_manager_make_current(opengl_manager);
+  //
+  // This runs on the platform thread, so it must not use the render context,
+  // which belongs to the raster thread. Making that current here normally
+  // fails, as it is current there. But while the raster thread is presenting
+  // to a subsurface it has another context current, and then this would take
+  // the render context and never give it back, leaving the engine unable to
+  // render another frame. The platform context shares the same driver.
+  fl_opengl_manager_make_platform_current(opengl_manager);
   self->can_blit = fl_opengl_manager_can_blit(opengl_manager);
   self->can_fence = fl_opengl_manager_can_fence(opengl_manager);
 
