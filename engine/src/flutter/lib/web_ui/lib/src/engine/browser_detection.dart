@@ -82,6 +82,43 @@ bool? _cachedIsChrome110OrOlder;
 /// Used in tests to simulate the detection of Chrome 110 or older on Windows.
 bool? debugIsChrome110OrOlder;
 
+final RegExp _chromeMajorVersionRegexp = RegExp(r'Chrom(e|ium)\/([0-9]+)\.');
+
+int? _parseChromeMajorVersion(String userAgent) {
+  final RegExpMatch? match = _chromeMajorVersionRegexp.firstMatch(userAgent);
+  return match != null ? int.parse(match.group(2)!) : null;
+}
+
+/// Detects whether the browser is Chromium 137 or older.
+///
+/// Older Chromium builds (including Huawei Browser 16's Chromium 114 engine)
+/// exhibit `OffscreenCanvas.transferToImageBitmap()` shared-image flickering
+/// (https://github.com/flutter/flutter/issues/166980) and software-compositing
+/// defects fixed in Chrome 138 (https://crbug.com/428198855), so CanvasKit
+/// keeps `createImageBitmap` on these versions.
+bool get isChrome137OrOlder {
+  if (debugIsChrome137OrOlder != null) {
+    return debugIsChrome137OrOlder!;
+  }
+  return _cachedIsChrome137OrOlder ??= () {
+    final int? version = _parseChromeMajorVersion(ui_web.browser.userAgent);
+    return version != null && version <= 137;
+  }();
+}
+
+bool? _cachedIsChrome137OrOlder;
+
+/// Resets the cached [isChrome137OrOlder] result so tests can re-evaluate
+/// different user-agent strings.
+@visibleForTesting
+void debugResetChrome137OrOlderCache() {
+  _cachedIsChrome137OrOlder = null;
+}
+
+/// Used in tests to simulate Chromium 137 or older.
+@visibleForTesting
+bool? debugIsChrome137OrOlder;
+
 /// Returns true if the browser is iOS Safari, false otherwise.
 bool get isIosSafari => debugEmulateIosSafari || _isActualIosSafari;
 

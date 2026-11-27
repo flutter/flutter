@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
+
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import 'common.dart';
 
@@ -872,6 +876,479 @@ void testMain() {
           surface.dispose();
         },
       );
+
+      test('rasterizeToImageBitmaps renders consecutive same-size frames with intact orientation and transparency', () async {
+        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+        addTearDown(surface.dispose);
+        await surface.initialized;
+
+        ui.Picture drawQuadrant(ui.Rect rect, ui.Color color) {
+          final recorder = ui.PictureRecorder();
+          ui.Canvas(recorder).drawRect(rect, ui.Paint()..color = color);
+          return recorder.endRecording();
+        }
+
+        final recorder1 = ui.PictureRecorder();
+        ui.Canvas(recorder1)
+          ..drawRect(
+            const ui.Rect.fromLTWH(0, 0, 10, 10),
+            ui.Paint()..color = const ui.Color(0xFFFF0000),
+          )
+          ..drawRect(
+            const ui.Rect.fromLTWH(10, 10, 10, 10),
+            ui.Paint()..color = const ui.Color(0xFF0000FF),
+          );
+        final List<DomImageBitmap> frame1 = await surface.rasterizeToImageBitmaps(
+          const BitmapSize(20, 20),
+          <ui.Picture>[recorder1.endRecording()],
+        );
+        final SkSurface? skSurface1 = surface.skSurface;
+        expect(surface.supportsWebGl, isTrue);
+        expect(frame1.single.width, 20);
+        expect(frame1.single.height, 20);
+        expect(readBitmapPixel(frame1.single, 2, 2), <int>[255, 0, 0, 255]);
+        expect(readBitmapPixel(frame1.single, 18, 18), <int>[0, 0, 255, 255]);
+        expect(readBitmapPixel(frame1.single, 18, 2), <int>[0, 0, 0, 0]);
+        expect(readBitmapPixel(frame1.single, 2, 18), <int>[0, 0, 0, 0]);
+
+        // Frame 2 at identical size (`setSize` no-op) must reuse `skSurface1`,
+        // clear Frame 1's pixels, and leave `frame1.single` untouched.
+        final List<DomImageBitmap> frame2 = await surface.rasterizeToImageBitmaps(
+          const BitmapSize(20, 20),
+          <ui.Picture>[
+            drawQuadrant(const ui.Rect.fromLTWH(0, 10, 10, 10), const ui.Color(0xFF00FF00)),
+          ],
+        );
+        expect(identical(surface.skSurface, skSurface1), isTrue);
+        expect(readBitmapPixel(frame2.single, 2, 18), <int>[0, 255, 0, 255]);
+        expect(readBitmapPixel(frame2.single, 2, 2), <int>[0, 0, 0, 0]);
+        expect(readBitmapPixel(frame2.single, 18, 18), <int>[0, 0, 0, 0]);
+        expect(readBitmapPixel(frame1.single, 2, 2), <int>[255, 0, 0, 255]);
+
+        // Frame 3 at identical size.
+        final List<DomImageBitmap> frame3 = await surface.rasterizeToImageBitmaps(
+          const BitmapSize(20, 20),
+          <ui.Picture>[
+            drawQuadrant(const ui.Rect.fromLTWH(10, 0, 10, 10), const ui.Color(0xFFFFFF00)),
+          ],
+        );
+        expect(identical(surface.skSurface, skSurface1), isTrue);
+        expect(readBitmapPixel(frame3.single, 18, 2), <int>[255, 255, 0, 255]);
+        expect(readBitmapPixel(frame3.single, 2, 18), <int>[0, 0, 0, 0]);
+      });
+
+      test('rasterizeToImageBitmaps renders multiple pictures with clips and blurs without FBO corruption', () async {
+        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+        addTearDown(surface.dispose);
+        await surface.initialized;
+
+        // Picture 0 exercises offscreen FBO blur + RRect clip before switching back to FBO 0.
+        final rec0 = ui.PictureRecorder();
+        ui.Canvas(rec0)
+          ..save()
+          ..clipRRect(ui.RRect.fromRectXY(const ui.Rect.fromLTWH(0, 0, 10, 10), 2, 2))
+          ..drawRect(
+            const ui.Rect.fromLTWH(2, 2, 6, 6),
+            ui.Paint()
+              ..color = const ui.Color(0x88000000)
+              ..maskFilter = const ui.MaskFilter.blur(ui.BlurStyle.normal, 2),
+          )
+          ..drawRect(
+            const ui.Rect.fromLTWH(0, 0, 10, 10),
+            ui.Paint()..color = const ui.Color(0xFFFF0000),
+          )
+          ..restore();
+
+        final rec1 = ui.PictureRecorder();
+        ui.Canvas(rec1)
+          ..save()
+          ..clipRect(const ui.Rect.fromLTWH(10, 10, 10, 10))
+          ..drawRect(
+            const ui.Rect.fromLTWH(10, 10, 10, 10),
+            ui.Paint()..color = const ui.Color(0xFF00FF00),
+          )
+          ..restore();
+
+        final rec2 = ui.PictureRecorder();
+        ui.Canvas(rec2)
+          ..drawRect(
+            const ui.Rect.fromLTWH(12, 2, 4, 4),
+            ui.Paint()
+              ..color = const ui.Color(0x88000000)
+              ..maskFilter = const ui.MaskFilter.blur(ui.BlurStyle.normal, 2),
+          )
+          ..drawRect(
+            const ui.Rect.fromLTWH(0, 10, 10, 10),
+            ui.Paint()..color = const ui.Color(0xFF0000FF),
+          );
+
+        final List<DomImageBitmap> bitmaps = await surface.rasterizeToImageBitmaps(
+          const BitmapSize(20, 20),
+          <ui.Picture>[rec0.endRecording(), rec1.endRecording(), rec2.endRecording()],
+        );
+        expect(bitmaps, hasLength(3));
+        expect(surface.supportsWebGl, isTrue);
+
+        expect(readBitmapPixel(bitmaps[0], 5, 5), <int>[255, 0, 0, 255]);
+        expect(readBitmapPixel(bitmaps[0], 15, 15), <int>[0, 0, 0, 0]);
+
+        expect(readBitmapPixel(bitmaps[1], 15, 15), <int>[0, 255, 0, 255]);
+        expect(readBitmapPixel(bitmaps[1], 5, 5), <int>[0, 0, 0, 0]);
+
+        expect(readBitmapPixel(bitmaps[2], 5, 15), <int>[0, 0, 255, 255]);
+        expect(readBitmapPixel(bitmaps[2], 5, 5), <int>[0, 0, 0, 0]);
+      });
+
+      test(
+        'rasterizeToImageBitmaps in software mode renders multi-picture and consecutive frames',
+        () async {
+          CkSurface.debugForceGLFailure = true;
+          final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+          addTearDown(surface.dispose);
+          await surface.initialized;
+          expect(surface.supportsWebGl, isFalse);
+          expect(surface.isSoftware, isTrue);
+
+          final recRed = ui.PictureRecorder();
+          ui.Canvas(recRed).drawRect(
+            const ui.Rect.fromLTWH(0, 0, 10, 10),
+            ui.Paint()..color = const ui.Color(0xFFFF0000),
+          );
+          final recGreen = ui.PictureRecorder();
+          ui.Canvas(recGreen).drawRect(
+            const ui.Rect.fromLTWH(10, 10, 10, 10),
+            ui.Paint()..color = const ui.Color(0xFF00FF00),
+          );
+
+          final List<DomImageBitmap> call1 = await surface.rasterizeToImageBitmaps(
+            const BitmapSize(20, 20),
+            <ui.Picture>[recRed.endRecording(), recGreen.endRecording()],
+          );
+          final SkSurface? swSurface1 = surface.skSurface;
+          expect(call1, hasLength(2));
+          expect(readBitmapPixel(call1[0], 2, 2), <int>[255, 0, 0, 255]);
+          expect(readBitmapPixel(call1[0], 18, 18), <int>[0, 0, 0, 0]);
+          expect(readBitmapPixel(call1[1], 18, 18), <int>[0, 255, 0, 255]);
+          expect(readBitmapPixel(call1[1], 2, 2), <int>[0, 0, 0, 0]);
+
+          final recBlue = ui.PictureRecorder();
+          ui.Canvas(recBlue).drawRect(
+            const ui.Rect.fromLTWH(0, 0, 20, 20),
+            ui.Paint()..color = const ui.Color(0xFF0000FF),
+          );
+          final List<DomImageBitmap> call2 = await surface.rasterizeToImageBitmaps(
+            const BitmapSize(20, 20),
+            <ui.Picture>[recBlue.endRecording()],
+          );
+          expect(identical(surface.skSurface, swSurface1), isTrue);
+          expect(readBitmapPixel(call2.single, 2, 2), <int>[0, 0, 255, 255]);
+          expect(readBitmapPixel(call2.single, 18, 18), <int>[0, 0, 255, 255]);
+          // Previously transferred software bitmap must retain its own pixels.
+          expect(readBitmapPixel(call1[0], 2, 2), <int>[255, 0, 0, 255]);
+        },
+      );
+
+      test('rasterizeToImageBitmaps at the same size while context loss is pending recovers and captures the picture', () async {
+        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+        addTearDown(surface.dispose);
+        await surface.initialized;
+        surface.setSize(const BitmapSize(100, 100));
+        final DomEventTarget lostCanvas = surface.canvas;
+
+        // Lose context without resizing (`setSize(100x100)` is a no-op, while
+        // `transferToImageBitmap()` on a lost WebGL context would throw
+        // `InvalidStateError` unless the surface recovers first).
+        await surface.triggerContextLoss();
+
+        final rec = ui.PictureRecorder();
+        ui.Canvas(rec).drawRect(
+          const ui.Rect.fromLTWH(0, 0, 100, 100),
+          ui.Paint()..color = const ui.Color(0xFF00FF00),
+        );
+        final List<DomImageBitmap> pendingBitmaps = await surface.rasterizeToImageBitmaps(
+          const BitmapSize(100, 100),
+          <ui.Picture>[rec.endRecording()],
+        );
+        expect(pendingBitmaps, hasLength(1));
+        expect(readBitmapPixel(pendingBitmaps.single, 50, 50), <int>[0, 255, 0, 255]);
+
+        final DomEventTarget recoveredCanvas = surface.canvas;
+        expect(identical(recoveredCanvas, lostCanvas), isFalse);
+        await surface.handledContextLossEvent;
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        expect(identical(surface.canvas, recoveredCanvas), isTrue);
+
+        final rec2 = ui.PictureRecorder();
+        ui.Canvas(rec2).drawRect(
+          const ui.Rect.fromLTWH(0, 0, 100, 100),
+          ui.Paint()..color = const ui.Color(0xFF0000FF),
+        );
+        final List<DomImageBitmap> recoveredBitmaps = await surface.rasterizeToImageBitmaps(
+          const BitmapSize(100, 100),
+          <ui.Picture>[rec2.endRecording()],
+        );
+        expect(readBitmapPixel(recoveredBitmaps.single, 50, 50), <int>[0, 0, 255, 255]);
+      });
+
+      test('rasterizeToImageBitmaps recovers from mid-frame context loss on second picture and closes partial bitmaps', () async {
+        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+        addTearDown(surface.dispose);
+        await surface.initialized;
+        surface.setSize(const BitmapSize(20, 20));
+        final DomEventTarget lostCanvas = surface.canvas;
+
+        final imageBitmapProto =
+            (globalContext['ImageBitmap']! as JSObject)['prototype']! as JSObject;
+        final originalClose = imageBitmapProto['close']! as JSFunction;
+        var closedCount = 0;
+        imageBitmapProto['close'] = ((JSObject thisArg) {
+          closedCount++;
+          originalClose.callAsFunction(thisArg);
+        }).toJSCaptureThis;
+        addTearDown(() {
+          imageBitmapProto['close'] = originalClose;
+        });
+
+        final JSObject skSurfaceObj = surface.skSurface!;
+        final originalFlush = skSurfaceObj['flush']! as JSFunction;
+        var flushCount = 0;
+        skSurfaceObj['flush'] = (() {
+          flushCount++;
+          originalFlush.callAsFunction(skSurfaceObj);
+          if (flushCount == 2) {
+            surface.triggerContextLoss();
+          }
+        }).toJS;
+
+        final recRed = ui.PictureRecorder();
+        ui.Canvas(recRed).drawRect(
+          const ui.Rect.fromLTWH(0, 0, 20, 20),
+          ui.Paint()..color = const ui.Color(0xFFFF0000),
+        );
+        final recGreen = ui.PictureRecorder();
+        ui.Canvas(recGreen).drawRect(
+          const ui.Rect.fromLTWH(0, 0, 20, 20),
+          ui.Paint()..color = const ui.Color(0xFF00FF00),
+        );
+
+        final List<DomImageBitmap> bitmaps = await surface.rasterizeToImageBitmaps(
+          const BitmapSize(20, 20),
+          <ui.Picture>[recRed.endRecording(), recGreen.endRecording()],
+        );
+        expect(flushCount, 2);
+        expect(closedCount, 1);
+        expect(bitmaps, hasLength(2));
+        expect(readBitmapPixel(bitmaps[0], 10, 10), <int>[255, 0, 0, 255]);
+        expect(readBitmapPixel(bitmaps[1], 10, 10), <int>[0, 255, 0, 255]);
+
+        final DomEventTarget recoveredCanvas = surface.canvas;
+        expect(identical(recoveredCanvas, lostCanvas), isFalse);
+        await surface.handledContextLossEvent;
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        expect(identical(surface.canvas, recoveredCanvas), isTrue);
+      });
+
+      test('rasterizeToImageBitmaps falls back to software when WebGL stays lost', () async {
+        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+        addTearDown(surface.dispose);
+        await surface.initialized;
+        surface.setSize(const BitmapSize(20, 20));
+
+        // Lose the replacement context right away so attempt 2 also fails.
+        final originalMakeSurface = canvasKit['MakeOnScreenGLSurface']! as JSFunction;
+        canvasKit['MakeOnScreenGLSurface'] =
+            ((
+                  JSAny? grContext,
+                  JSAny? width,
+                  JSAny? height,
+                  JSAny? colorSpace,
+                  JSAny? sampleCount,
+                  JSAny? stencil,
+                ) {
+                  final JSAny? skSurface = originalMakeSurface.callMethodVarArgs<JSAny?>(
+                    'call'.toJS,
+                    <JSAny?>[canvasKit, grContext, width, height, colorSpace, sampleCount, stencil],
+                  );
+                  (surface.canvas as DomOffscreenCanvas)
+                      .getGlContext(webGLVersion)
+                      .loseContextExtension
+                      .loseContext();
+                  return skSurface;
+                })
+                .toJS;
+        addTearDown(() {
+          canvasKit['MakeOnScreenGLSurface'] = originalMakeSurface;
+        });
+
+        await surface.triggerContextLoss();
+
+        final recorder = ui.PictureRecorder();
+        ui.Canvas(recorder).drawRect(
+          const ui.Rect.fromLTWH(0, 0, 20, 20),
+          ui.Paint()..color = const ui.Color(0xFF00FF00),
+        );
+        final List<DomImageBitmap> bitmaps = await surface.rasterizeToImageBitmaps(
+          const BitmapSize(20, 20),
+          <ui.Picture>[recorder.endRecording()],
+        );
+        expect(surface.isSoftware, isTrue);
+        expect(readBitmapPixel(bitmaps.single, 10, 10), <int>[0, 255, 0, 255]);
+
+        final DomEventTarget softwareCanvas = surface.canvas;
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        expect(identical(surface.canvas, softwareCanvas), isTrue);
+      });
+
+      test('rasterizeToImageBitmaps keeps createImageBitmap on Chrome 137 or older', () async {
+        addTearDown(() {
+          ui_web.browser.debugUserAgentOverride = null;
+          debugResetChrome137OrOlderCache();
+          debugIsChrome137OrOlder = null;
+        });
+
+        bool checkUa(String ua) {
+          ui_web.browser.debugUserAgentOverride = ua;
+          debugResetChrome137OrOlderCache();
+          return isChrome137OrOlder;
+        }
+
+        // Huawei Browser 16 (Chromium 114, https://github.com/flutter/flutter/issues/166980)
+        // and Chrome 137 match; Chrome 138+ and non-Chromium browsers do not.
+        expect(
+          checkUa(
+            'Mozilla/5.0 (Linux; Android 10; MED-LX9) AppleWebKit/537.36 '
+            '(KHTML, like Gecko) Chrome/114.0.5735.196 HuaweiBrowser/16.0.9.302 Mobile Safari/537.36',
+          ),
+          isTrue,
+        );
+        expect(
+          checkUa(
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
+            '(KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
+          ),
+          isTrue,
+        );
+        expect(
+          checkUa(
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
+            '(KHTML, like Gecko) Chrome/138.0.7204.149 Safari/537.36',
+          ),
+          isFalse,
+        );
+        expect(
+          checkUa('Mozilla/5.0 (X11; Linux x86_64; rv:148.0) Gecko/20100101 Firefox/148.0'),
+          isFalse,
+        );
+        ui_web.browser.debugUserAgentOverride = null;
+        debugResetChrome137OrOlderCache();
+
+        debugIsChrome137OrOlder = true;
+        final offscreenProto =
+            (globalContext['OffscreenCanvas']! as JSObject)['prototype']! as JSObject;
+        final originalTransfer = offscreenProto['transferToImageBitmap']! as JSFunction;
+        var transferCalls = 0;
+        offscreenProto['transferToImageBitmap'] = ((JSObject thisArg) {
+          transferCalls++;
+          return originalTransfer.callAsFunction(thisArg);
+        }).toJSCaptureThis;
+        addTearDown(() {
+          offscreenProto['transferToImageBitmap'] = originalTransfer;
+        });
+
+        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+        addTearDown(surface.dispose);
+        await surface.initialized;
+
+        final recRed = ui.PictureRecorder();
+        ui.Canvas(recRed).drawRect(
+          const ui.Rect.fromLTWH(0, 0, 20, 20),
+          ui.Paint()..color = const ui.Color(0xFFFF0000),
+        );
+        final recBlue = ui.PictureRecorder();
+        ui.Canvas(recBlue).drawRect(
+          const ui.Rect.fromLTWH(0, 0, 20, 20),
+          ui.Paint()..color = const ui.Color(0xFF0000FF),
+        );
+
+        final List<DomImageBitmap> bitmaps = await surface.rasterizeToImageBitmaps(
+          const BitmapSize(20, 20),
+          <ui.Picture>[recRed.endRecording(), recBlue.endRecording()],
+        );
+        expect(transferCalls, 0);
+        expect(bitmaps, hasLength(2));
+        expect(readBitmapPixel(bitmaps[0], 10, 10), <int>[255, 0, 0, 255]);
+        expect(readBitmapPixel(bitmaps[1], 10, 10), <int>[0, 0, 255, 255]);
+      });
+
+      test('rasterizeToImageBitmaps falls back to createImageBitmap when transferToImageBitmap throws on a live context', () async {
+        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+        addTearDown(surface.dispose);
+        await surface.initialized;
+        surface.setSize(const BitmapSize(20, 20));
+
+        final imageBitmapProto =
+            (globalContext['ImageBitmap']! as JSObject)['prototype']! as JSObject;
+        final originalClose = imageBitmapProto['close']! as JSFunction;
+        var closedCount = 0;
+        imageBitmapProto['close'] = ((JSObject thisArg) {
+          closedCount++;
+          originalClose.callAsFunction(thisArg);
+        }).toJSCaptureThis;
+        addTearDown(() {
+          imageBitmapProto['close'] = originalClose;
+        });
+
+        final offscreenProto =
+            (globalContext['OffscreenCanvas']! as JSObject)['prototype']! as JSObject;
+        final originalTransfer = offscreenProto['transferToImageBitmap']! as JSFunction;
+        var transferCalls = 0;
+        offscreenProto['transferToImageBitmap'] = ((JSObject thisArg) {
+          transferCalls++;
+          if (transferCalls == 2) {
+            throw StateError('ImageBitmap construction failed');
+          }
+          return originalTransfer.callAsFunction(thisArg);
+        }).toJSCaptureThis;
+        addTearDown(() {
+          offscreenProto['transferToImageBitmap'] = originalTransfer;
+        });
+
+        final recRed = ui.PictureRecorder();
+        ui.Canvas(recRed).drawRect(
+          const ui.Rect.fromLTWH(0, 0, 20, 20),
+          ui.Paint()..color = const ui.Color(0xFFFF0000),
+        );
+        final recGreen = ui.PictureRecorder();
+        ui.Canvas(recGreen).drawRect(
+          const ui.Rect.fromLTWH(0, 0, 20, 20),
+          ui.Paint()..color = const ui.Color(0xFF00FF00),
+        );
+
+        final List<DomImageBitmap> bitmaps = await surface.rasterizeToImageBitmaps(
+          const BitmapSize(20, 20),
+          <ui.Picture>[recRed.endRecording(), recGreen.endRecording()],
+        );
+        expect(transferCalls, 2);
+        expect(closedCount, 1);
+        expect(surface.supportsWebGl, isTrue);
+        expect(bitmaps, hasLength(2));
+        expect(readBitmapPixel(bitmaps[0], 10, 10), <int>[255, 0, 0, 255]);
+        expect(readBitmapPixel(bitmaps[1], 10, 10), <int>[0, 255, 0, 255]);
+
+        // Subsequent frames on this surface keep using `createImageBitmap`
+        // without retrying `transferToImageBitmap`.
+        final recBlue = ui.PictureRecorder();
+        ui.Canvas(recBlue).drawRect(
+          const ui.Rect.fromLTWH(0, 0, 20, 20),
+          ui.Paint()..color = const ui.Color(0xFF0000FF),
+        );
+        final List<DomImageBitmap> nextBitmaps = await surface.rasterizeToImageBitmaps(
+          const BitmapSize(20, 20),
+          <ui.Picture>[recBlue.endRecording()],
+        );
+        expect(transferCalls, 2);
+        expect(readBitmapPixel(nextBitmaps.single, 10, 10), <int>[0, 0, 255, 255]);
+      });
     });
   });
 }

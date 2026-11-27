@@ -484,24 +484,105 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     return canvasKit.MakeOffscreenSWCanvasSurface(canvas as DomOffscreenCanvas);
   }
 
+  bool _transferToImageBitmapFailed = false;
+
+  bool get _shouldUseTransferToImageBitmap => !_transferToImageBitmapFailed && !isChrome137OrOlder;
+
   @override
   Future<List<DomImageBitmap>> rasterizeToImageBitmaps(
     BitmapSize size,
     List<ui.Picture> pictures,
   ) async {
     await _initialized.future;
-    // Everything from here until all bitmaps have been requested must be
-    // synchronous so that no other operation can resize or draw into the
-    // canvas in between. `createImageBitmap` copies the canvas contents at the
-    // time it is called; only the resolution of the returned promise is
-    // asynchronous.
+    // Everything up to bitmap capture (or initiating `createImageBitmap`) must
+    // be synchronous so that no other operation can resize or draw into the
+    // canvas in between.
     setSize(size);
-    final bitmapFutures = <Future<DomImageBitmap>>[];
+    if (!_shouldUseTransferToImageBitmap) {
+      return _rasterizeViaCreateImageBitmap(pictures);
+    }
+
+    final List<DomImageBitmap>? bitmaps = _tryCaptureBitmaps(pictures);
+    if (bitmaps != null) {
+      return bitmaps;
+    }
+    if (!_shouldUseTransferToImageBitmap) {
+      return _rasterizeViaCreateImageBitmap(pictures);
+    }
+
+    // Context lost: retry on a fresh canvas.
+    onContextLost();
+    final List<DomImageBitmap>? retriedBitmaps = _tryCaptureBitmaps(pictures);
+    if (retriedBitmaps != null) {
+      return retriedBitmaps;
+    }
+    if (!_shouldUseTransferToImageBitmap) {
+      return _rasterizeViaCreateImageBitmap(pictures);
+    }
+
+    // Lost again: fall back to software rendering.
+    _markWebGlFailed('WebGL context remained lost after recovery.');
+    _recreateSkSurface();
+    final List<DomImageBitmap>? softwareBitmaps = _tryCaptureBitmaps(pictures);
+    if (softwareBitmaps != null) {
+      return softwareBitmaps;
+    }
+    return _rasterizeViaCreateImageBitmap(pictures);
+  }
+
+  /// Draws [pictures] and transfers each into a [DomImageBitmap], or closes any
+  /// partial bitmaps and returns `null` if the WebGL context was lost or
+  /// `transferToImageBitmap()` failed on a live context.
+  ///
+  /// Blink throws `InvalidStateError` from `transferToImageBitmap()` on a lost
+  /// WebGL context, whereas Gecko and WebKit silently return a blank bitmap, so
+  /// `isContextLost()` is checked explicitly as well.
+  List<DomImageBitmap>? _tryCaptureBitmaps(List<ui.Picture> pictures) {
+    final offscreenCanvas = canvas as DomOffscreenCanvas;
+    final WebGLContext? gl = supportsWebGl ? _webGlContextOf(offscreenCanvas) : null;
+    final bitmaps = <DomImageBitmap>[];
     for (final picture in pictures) {
       _drawPicture(picture as CkPicture);
-      bitmapFutures.add(createImageBitmap(_canvas));
+      if (!isDisposed && gl != null && gl.isContextLost()) {
+        _closeBitmaps(bitmaps);
+        return null;
+      }
+      try {
+        bitmaps.add(offscreenCanvas.transferToImageBitmap());
+      } catch (error, stackTrace) {
+        _closeBitmaps(bitmaps);
+        _handleTransferError(error, stackTrace, gl);
+        return null;
+      }
     }
-    return Future.wait(bitmapFutures);
+    return bitmaps;
+  }
+
+  void _handleTransferError(Object error, StackTrace stackTrace, WebGLContext? gl) {
+    if (isDisposed || error is UnsupportedError) {
+      Error.throwWithStackTrace(error, stackTrace);
+    }
+    if (gl == null || !gl.isContextLost()) {
+      _transferToImageBitmapFailed = true;
+    }
+  }
+
+  Future<List<DomImageBitmap>> _rasterizeViaCreateImageBitmap(List<ui.Picture> pictures) {
+    if (!isDisposed && supportsWebGl && _webGlContextOf(canvas).isContextLost()) {
+      onContextLost();
+    }
+    final snapshotPromises = <Future<DomImageBitmap>>[];
+    for (final picture in pictures) {
+      _drawPicture(picture as CkPicture);
+      snapshotPromises.add(createImageBitmap(canvasImageSource));
+    }
+    return Future.wait(snapshotPromises);
+  }
+
+  static void _closeBitmaps(List<DomImageBitmap> bitmaps) {
+    for (final bitmap in bitmaps) {
+      bitmap.close();
+    }
   }
 
   @override
