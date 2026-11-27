@@ -15,7 +15,12 @@ libraries. For each exported library the archive holds the object files of
 the GN target's dependency closure, stopping at the other exported targets
 and at `archive_boundaries` (ICU, which `@icu` provides); the `cc_library`
 facades in `dart_wrap/BUILD.bazel` mirror those dependencies, and the action
-fails if two archives would contain the same object.
+fails if two archives would contain the same object. Each facade links its
+archive whole (a `cc_import` with `alwayslink`): the archives hold the
+objects of GN source sets, every one of which GN links into the binary that
+depends on them, and the VM relies on it (a `DEFINE_FLAG` registers its flag
+from a static initializer, in files that in some modes hold nothing else);
+no object being in two archives, none is linked twice.
 
 The inputs are the trees GN reads, declared as filegroups: `build_tree` in
 the overlays (`@dart`, `@icu`, `@zlib`, `@boringssl`, libc++ and the sysroot)

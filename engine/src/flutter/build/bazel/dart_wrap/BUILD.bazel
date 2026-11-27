@@ -29,7 +29,7 @@ load(
     "HOST_OS",
     "HOST_OS_CONSTRAINT",
 )
-load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_import", "cc_library")
 load("//build_defs/gn:gn_build.bzl", "gn_build")
 load(
     "//build_defs/gn:macos_args.bzl",
@@ -599,10 +599,23 @@ alias(
 
 # ---------------------------------------------------------------------------
 # Library facades: one per exported GN library, with the GN target's deps,
-# libs and the headers the engine includes from it. Each is an archive a
-# link takes members from by reference, as GN's links do (the libraries are
-# static_library targets there), so none is alwayslink, which buildifier
-# would otherwise ask of a library without headers of its own.
+# libs and the headers the engine includes from it, over the library's
+# archive, which is linked whole (`<name>_archive`, a cc_import with
+# alwayslink: alwayslink on a cc_library does not reach a prebuilt archive
+# among its srcs). Whole, because what the archive holds GN links object by
+# object: the libraries of runtime/bin and third_party are source sets, and
+# libdart_jit and libdart_aotruntime are static libraries of four files
+# over the VM's source sets (libdart_vm, libdart_compiler, libdart_lib),
+# whose objects the wrapped build archives with them. GN puts every object
+# of a source set into the binary that depends on it, and the VM counts on
+# that: it registers its flags from static initializers (DEFINE_FLAG), and
+# a file that holds nothing else in a given mode -- debugger.cc,
+# profiler.cc and isolate_reload.cc in a product VM, cpuid.cc off x86,
+# aot_call_specializer.cc in a JIT VM -- is an archive member no symbol
+# refers to, which a link by reference leaves out, flags and all (the
+# first Bazel-built engines lacked two to four of GN's static initializers
+# for it). The code nothing reaches goes at the link, as in GN's
+# (--gc-sections, -dead_strip).
 # ---------------------------------------------------------------------------
 
 # runtime/vm/BUILD.gn's libdart_vm_config, the VM's public config: objc on
@@ -617,17 +630,23 @@ _VM_MAC_LINKOPTS = select({
 # buildifier: disable=no-hdrs-no-alwayslink
 cc_library(
     name = "libdart_jit",
-    srcs = [":libdart_jit.a"],
     # runtime/vm/BUILD.gn's libs: dl, and pthread except on Android, where
     # bionic has it in libc -- which the Linux toolchains' -pthread link
     # flag already names, so dl alone is listed; and objc on a Mac.
     linkopts = ["-ldl"] + _VM_MAC_LINKOPTS,
     deps = [
+        ":libdart_jit_archive",
         ":libdouble_conversion",
         ":libprotozero",
         "@dart//:dart_api_headers",
         "@icu//:icuuc",
     ],
+)
+
+cc_import(
+    name = "libdart_jit_archive",
+    static_library = ":libdart_jit.a",
+    alwayslink = True,
 )
 
 # //flutter/third_party/dart/runtime:libdart_aotruntime -- the VM for AOT
@@ -637,14 +656,20 @@ cc_library(
 # buildifier: disable=no-hdrs-no-alwayslink
 cc_library(
     name = "libdart_aotruntime",
-    srcs = [":libdart_aotruntime.a"],
     linkopts = ["-ldl"] + _VM_MAC_LINKOPTS,
     deps = [
+        ":libdart_aotruntime_archive",
         ":libdouble_conversion",
         ":libprotozero",
         "@dart//:dart_api_headers",
         "@icu//:icuuc",
     ],
+)
+
+cc_import(
+    name = "libdart_aotruntime_archive",
+    static_library = ":libdart_aotruntime.a",
+    alwayslink = True,
 )
 
 # //flutter/third_party/dart/runtime/bin:libdart_builtin -- shared by the
@@ -653,7 +678,6 @@ cc_library(
 # buildifier: disable=no-hdrs-no-alwayslink
 cc_library(
     name = "libdart_builtin",
-    srcs = [":libdart_builtin.a"],
     linkopts = ["-ldl"] + select({
         ":apple": [
             "-framework",
@@ -661,7 +685,16 @@ cc_library(
         ],
         "//conditions:default": [],
     }),
-    deps = ["@dart//:dart_api_headers"],
+    deps = [
+        ":libdart_builtin_archive",
+        "@dart//:dart_api_headers",
+    ],
+)
+
+cc_import(
+    name = "libdart_builtin_archive",
+    static_library = ":libdart_builtin.a",
+    alwayslink = True,
 )
 
 # //flutter/third_party/dart/runtime/bin:common_embedder_dart_io -- dart:io
@@ -672,7 +705,6 @@ cc_library(
 # buildifier: disable=no-hdrs-no-alwayslink
 cc_library(
     name = "common_embedder_dart_io",
-    srcs = [":libcommon_embedder_dart_io.a"],
     linkopts = ["-ldl"] + select({
         ":apple": [
             "-framework",
@@ -687,6 +719,7 @@ cc_library(
         "//conditions:default": [],
     }),
     deps = [
+        ":common_embedder_dart_io_archive",
         ":libdart_builtin",
         "//engine/src/flutter/third_party/boringssl",
         "@dart//:runtime_bin_headers",
@@ -694,15 +727,27 @@ cc_library(
     ],
 )
 
+cc_import(
+    name = "common_embedder_dart_io_archive",
+    static_library = ":libcommon_embedder_dart_io.a",
+    alwayslink = True,
+)
+
 # //flutter/third_party/dart/runtime/bin:elf_loader
 cc_library(
     name = "elf_loader",
-    srcs = [":libelf_loader.a"],
     linkopts = ["-ldl"],
     deps = [
+        ":elf_loader_archive",
         ":libdart_builtin",
         "@dart//:runtime_bin_headers",
     ],
+)
+
+cc_import(
+    name = "elf_loader_archive",
+    static_library = ":libelf_loader.a",
+    alwayslink = True,
 )
 
 # //flutter/third_party/dart/runtime/bin:native_assets_api (its header is
@@ -710,8 +755,16 @@ cc_library(
 # buildifier: disable=no-hdrs-no-alwayslink
 cc_library(
     name = "native_assets_api",
-    srcs = [":libnative_assets_api.a"],
-    deps = ["@dart//:dart_api_headers"],
+    deps = [
+        ":native_assets_api_archive",
+        "@dart//:dart_api_headers",
+    ],
+)
+
+cc_import(
+    name = "native_assets_api_archive",
+    static_library = ":libnative_assets_api.a",
+    alwayslink = True,
 )
 
 # //flutter/third_party/dart/third_party/double-conversion/src:libdouble_conversion,
@@ -720,8 +773,16 @@ cc_library(
 # buildifier: disable=no-hdrs-no-alwayslink
 cc_library(
     name = "libdouble_conversion",
-    srcs = [":libdouble_conversion.a"],
-    deps = ["@dart//:double_conversion_headers"],
+    deps = [
+        ":libdouble_conversion_archive",
+        "@dart//:double_conversion_headers",
+    ],
+)
+
+cc_import(
+    name = "libdouble_conversion_archive",
+    static_library = ":libdouble_conversion.a",
+    alwayslink = True,
 )
 
 # //flutter/third_party/dart/third_party/perfetto:libprotozero. Only linked,
@@ -729,5 +790,11 @@ cc_library(
 # buildifier: disable=no-hdrs-no-alwayslink
 cc_library(
     name = "libprotozero",
-    srcs = [":libprotozero.a"],
+    deps = [":libprotozero_archive"],
+)
+
+cc_import(
+    name = "libprotozero_archive",
+    static_library = ":libprotozero.a",
+    alwayslink = True,
 )
