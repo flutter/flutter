@@ -26,6 +26,7 @@ const DebugViewMetricsOverride _fullyPopulated = DebugViewMetricsOverride(
   boldText: true,
   reduceMotion: true,
   highContrast: true,
+  reduceTransparency: true,
   onOffSwitchLabels: true,
   supportsAnnounce: false,
   autoPlayAnimatedImages: false,
@@ -64,6 +65,7 @@ final Map<String, _MetricChange> _perMetricChange = <String, _MetricChange>{
   'boldText': (DebugViewMetricsOverride o) => o.copyWith(boldText: false),
   'reduceMotion': (DebugViewMetricsOverride o) => o.copyWith(reduceMotion: false),
   'highContrast': (DebugViewMetricsOverride o) => o.copyWith(highContrast: false),
+  'reduceTransparency': (DebugViewMetricsOverride o) => o.copyWith(reduceTransparency: false),
   'onOffSwitchLabels': (DebugViewMetricsOverride o) => o.copyWith(onOffSwitchLabels: false),
   'supportsAnnounce': (DebugViewMetricsOverride o) => o.copyWith(supportsAnnounce: true),
   'autoPlayAnimatedImages': (DebugViewMetricsOverride o) =>
@@ -159,6 +161,7 @@ void main() {
         boldText: true,
         reduceMotion: true,
         highContrast: true,
+        reduceTransparency: true,
         onOffSwitchLabels: true,
         supportsAnnounce: false,
         autoPlayAnimatedImages: false,
