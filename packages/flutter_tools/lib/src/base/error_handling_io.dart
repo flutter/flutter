@@ -1493,6 +1493,8 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
   const kUserMappedSectionOpened = 1224;
   const kAccessDisabledByPolicy = 1260;
   const kPrivilegeNotHeld = 1314;
+  const kInvalidReparseData = 4392;
+  const kReparseTagInvalid = 4393;
   const kApplicationControlPolicyBlocked = 4551;
 
   // Catch errors and bail when:
@@ -1527,6 +1529,12 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
       '$message. The device was not found.'
           '\n$e\n'
           'Verify the device is mounted and try again.',
+    kInvalidReparseData || kReparseTagInvalid =>
+      '${message != null ? "$message. " : ""}The file or directory contains an invalid NTFS '
+          'reparse point (such as a symbolic link or cloud storage placeholder like OneDrive).\n'
+          '$e\n'
+          'Please ensure that cloud-synced files are downloaded locally, or move the project '
+          'to a local directory and try again.',
     kApplicationControlPolicyBlocked ||
     kAccessDisabledByPolicy ||
     kSystemIntegrityPolicyViolation =>

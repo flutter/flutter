@@ -1382,6 +1382,15 @@ void handleSymlinkException(
         'drive as your Flutter SDK.',
       );
     }
+  } else if ((platform.isLinux && e.osError?.errorCode == 95) ||
+      (platform.isMacOS && e.osError?.errorCode == 45)) {
+    // EOPNOTSUPP (95) on Linux, ENOTSUP (45) on macOS.
+    throwToolExit(
+      'Creating symlink from $source to $destination failed because the '
+      'underlying file system does not support symbolic links.\n'
+      'Try moving your Flutter project to a native file system that supports '
+      'symbolic links.',
+    );
   }
 }
 

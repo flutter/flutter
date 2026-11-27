@@ -2904,6 +2904,47 @@ iosPrefix: FLT
       );
     });
 
+    for (final (operatingSystem, errorCode, nonMatchingErrorCode) in const <(String, int, int)>[
+      ('linux', 95, 45),
+      ('macos', 45, 95),
+    ]) {
+      test(
+        'Symlink failures give file system instructions on $operatingSystem for unsupported symlink errno ($errorCode)',
+        () {
+          final Platform platform = FakePlatform(operatingSystem: operatingSystem);
+          final os = FakeOperatingSystemUtils('');
+
+          expect(
+            () => handleSymlinkException(
+              FileSystemException('', '', OSError('', errorCode)),
+              platform: platform,
+              os: os,
+              source: pubCachePath,
+              destination: ephemeralPackagePath,
+            ),
+            throwsToolExit(
+              message:
+                  'Creating symlink from $pubCachePath to $ephemeralPackagePath failed because the '
+                  'underlying file system does not support symbolic links.',
+            ),
+          );
+
+          for (final code in <int>[nonMatchingErrorCode, 999]) {
+            expect(
+              () => handleSymlinkException(
+                FileSystemException('', '', OSError('', code)),
+                platform: platform,
+                os: os,
+                source: pubCachePath,
+                destination: ephemeralPackagePath,
+              ),
+              returnsNormally,
+            );
+          }
+        },
+      );
+    }
+
     group('injectPlugins in release mode', () {
       const testPluginName = 'test_plugin';
 
