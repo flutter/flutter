@@ -195,6 +195,13 @@ def _strip(ctx, binary, directory, flag):
     )
     return stripped
 
+def _is_apple(ctx):
+    """Whether the aspect's target is built for macOS or iOS."""
+    return (
+        ctx.target_platform_has_constraint(ctx.attr._macos[platform_common.ConstraintValueInfo]) or
+        ctx.target_platform_has_constraint(ctx.attr._ios[platform_common.ConstraintValueInfo])
+    )
+
 def _binary_entries(target, ctx):
     # GN's link tools write an executable to exe.unstripped/ and
     # `llvm-objcopy --strip-all` it into the build root, always; a shared
@@ -210,10 +217,7 @@ def _binary_entries(target, ctx):
     # jar packages.
     shared = ctx.rule.kind == "cc_shared_library" or getattr(ctx.rule.attr, "linkshared", False)
     android = ctx.target_platform_has_constraint(ctx.attr._android[platform_common.ConstraintValueInfo])
-    apple = (
-        ctx.target_platform_has_constraint(ctx.attr._macos[platform_common.ConstraintValueInfo]) or
-        ctx.target_platform_has_constraint(ctx.attr._ios[platform_common.ConstraintValueInfo])
-    )
+    apple = _is_apple(ctx)
     entries = []
     shipped = {}
     for binary in target[DefaultInfo].files.to_list():
@@ -249,10 +253,13 @@ def _gn_build_product(ctx):
 
 def _build_directory_aspect_impl(target, ctx):
     transitive = []
+    link_inputs = []
     for attribute in _FOLLOWED_ATTRIBUTES:
         for dep in _targets_of(getattr(ctx.rule.attr, attribute, None)):
             if _CollectedInfo in dep:
                 transitive.append(dep[_CollectedInfo].entries)
+                if dep[_CollectedInfo].link_inputs != None:
+                    link_inputs.append(dep[_CollectedInfo].link_inputs)
     binary = None
     shipped = {}
     if BuildDirectoryInfo in target:
@@ -266,12 +273,20 @@ def _build_directory_aspect_impl(target, ctx):
         # GN writes an executable or a shared library into the build root.
         binary, shipped = _binary_entries(target, ctx)
         direct = depset(binary)
+        if _is_apple(ctx):
+            # A Mach-O binary's debug map names the objects and archives
+            # its link read, by their paths from the execution root
+            # (cc_toolchain_config.bzl's -oso_prefix), and dsymutil opens
+            # them when a dSYM is made of the binary (universal.bzl): the
+            # link's inputs go where the binary goes.
+            link_inputs.extend([action.inputs for action in target.actions if action.mnemonic == "CppLink"])
     else:
         direct = depset()
     return [_CollectedInfo(
         entries = depset(transitive = [direct] + transitive),
         binary = binary,
         shipped = shipped,
+        link_inputs = depset(transitive = link_inputs) if link_inputs else None,
     )]
 
 _CollectedInfo = provider(
@@ -281,6 +296,8 @@ _CollectedInfo = provider(
         "binary": "For an executable or shared library: its own (file, path) pairs -- the stripped copy at the " +
                   "build root and the binary under exe.unstripped/ or lib.unstripped/ -- else None.",
         "shipped": "For a binary: its files mapped to the copies an archive or install ships.",
+        "link_inputs": "On macOS and iOS: a depset of the inputs of the links of the executables and shared " +
+                       "libraries in the closure -- the objects and archives their debug maps name -- or None.",
     },
 )
 
@@ -306,6 +323,22 @@ build_directory_aspect = aspect(
 def collected_build_directory_entries(target):
     """The (file, path) pairs collected over `target`'s closure by build_directory_aspect."""
     return target[_CollectedInfo].entries.to_list()
+
+def collected_link_inputs(target):
+    """The inputs of the links of the Mach-O binaries in `target`'s closure, collected by build_directory_aspect.
+
+    What dsymutil reads beside a binary: the binary's debug map names the
+    objects and archives its link read.
+
+    Args:
+      target: a target the aspect ran on.
+
+    Returns:
+      A depset of files, or None where the closure links no Mach-O binary.
+    """
+    if _CollectedInfo not in target:
+        return None
+    return target[_CollectedInfo].link_inputs
 
 def binary_entries(target):
     """An executable's or shared library's own (file, path) pairs, or None for any other target.

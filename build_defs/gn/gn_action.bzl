@@ -222,7 +222,7 @@ def _src_path(ctx, path):
 def _gen_path(ctx, path):
     return ctx.bin_dir.path + "/" + _src_path(ctx, path)
 
-def run_python(ctx, script, arguments, inputs, outputs, mnemonic, progress_message, tools = [], env = {}):
+def run_python(ctx, script, arguments, inputs, outputs, mnemonic, progress_message, tools = [], env = {}, transitive_inputs = []):
     """Runs a Python script with the checkout's hermetic interpreter.
 
     For rules whose attrs include PYTHON_ATTRS. The script runs from the
@@ -239,6 +239,8 @@ def run_python(ctx, script, arguments, inputs, outputs, mnemonic, progress_messa
       tools: the programs the script runs, with the files they load (the
         interpreter is added).
       env: environment variables for the script, beside the interpreter's.
+      transitive_inputs: depsets of further files the script reads (the
+        inputs of the links whose debug maps dsymutil follows, universal.bzl).
     """
     args = ctx.actions.args()
 
@@ -251,7 +253,7 @@ def run_python(ctx, script, arguments, inputs, outputs, mnemonic, progress_messa
         # (dart_pkg, the snapshots), which is what the list holds.
         # buildifier: disable=pass-args-to-actions
         arguments = [args] + arguments,
-        inputs = depset([script] + inputs),
+        inputs = depset([script] + inputs, transitive = transitive_inputs),
         tools = depset(tools, transitive = [ctx.attr._python_runtime[DefaultInfo].files]),
         outputs = outputs,
         mnemonic = mnemonic,

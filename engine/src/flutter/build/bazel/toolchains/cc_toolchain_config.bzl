@@ -300,6 +300,19 @@ _LINUX_LINK_FLAGS = [
 LINUX_X64_LINK_FLAGS = ["-m64"]
 LINUX_ARM64_LINK_FLAGS = ["--target=aarch64-linux-gnu"]
 
+# Not GN's, and for the Apple platforms' links alone. A Mach-O link writes
+# no DWARF into the binary: its debug map (the symbol table's OSO entries)
+# names each object and archive the link read, and dsymutil and the
+# debuggers open those. The linker records absolute paths. GN's are paths
+# of its build directory, which stays; a sandboxed link's are paths of its
+# sandbox, which is gone when the link ends, and a dSYM made afterwards has
+# no DWARF in it. -oso_prefix drops a prefix from the recorded paths, `.`
+# being the directory the link runs in, the execution root: the map then
+# names `bazel-out/<configuration>/bin/...`, the same from every sandbox
+# and machine, which dsymutil resolves when it runs from the execution
+# root with those files among its inputs (//build_defs/dist:universal.bzl).
+_APPLE_DEBUG_MAP_LINK_FLAGS = ["-Wl,-oso_prefix,."]
+
 # macOS's links (//build/config/compiler:compiler under is_mac,
 # //build/config/mac:mac_dynamic_flags, which BUILDCONFIG.gn gives every
 # executable and shared library): the engine's own libc++ again, and the
@@ -313,12 +326,12 @@ _MAC_LINK_FLAGS = [
     "-Wl,-rpath,@loader_path/.",
     "-Wl,-rpath,/usr/local/lib/.",
     "-Wl,-rpath,@loader_path/../../..",
-]
+] + _APPLE_DEBUG_MAP_LINK_FLAGS
 
 # iOS's links: the engine's own libc++ again; mac_dynamic_flags and
 # mac_executable_flags are the desktop's alone (BUILDCONFIG.gn gives them
 # under is_mac), so no search-path or rpath flags, no -pie.
-_IOS_LINK_FLAGS = ["-nostdlib++"]
+_IOS_LINK_FLAGS = ["-nostdlib++"] + _APPLE_DEBUG_MAP_LINK_FLAGS
 
 # Android's links (//build/config/compiler:compiler under is_android,
 # //build/config/android:runtime_library, build/toolchain/android/BUILD.gn):

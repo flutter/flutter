@@ -125,6 +125,17 @@ builds both slices (the macOS toolchains cross-build); `lipo`, `strip` and
 (`flutter/buildtools/mac-<cpu>/clang`). Linux skips the targets as
 incompatible.
 
+A release framework's dSYM is `dsymutil`'s over the fat binary, as in the
+recipe. A Mach-O binary holds no DWARF, only a debug map that names the
+objects and archives its link read, and `dsymutil` opens those. The Apple
+toolchains link with `-Wl,-oso_prefix,.`, so the map names them from the
+execution root (`bazel-out/<configuration>/bin/...`) and not by the path of
+the link's sandbox, which no longer exists once the link is over; and with
+`--dsym` the universal targets take the inputs of the builds' links as
+their own (`build_directory.bzl`'s aspect gathers them beside each Mach-O
+binary), so `dsymutil`, which runs from the execution root, finds them. A
+dSYM made without either half has a symbol table and no DWARF.
+
 The tool's tests over these directories are the apple shard
 (`//:apple_tool_tests`; `packages/flutter_tools/BUILD.bazel`): the 13 files
 of the integration shard that build for macOS or iOS through the tool

@@ -28,10 +28,17 @@ scratch directory too, and the declared outputs are copied out of it
 (universal.py). Nothing here reads GN; the targets live in the archives
 appendix (tools/gn_to_bazel's manifest) beside the archives the recipe
 uploads them in.
+
+In release the scripts also write the framework's dSYM (`--dsym`): dsymutil
+follows the fat binary's debug maps to the objects and archives each
+build's link read. The maps name those from the execution root (the Apple
+toolchains' -oso_prefix), where the script runs, and the links' inputs are
+inputs of the action, so dsymutil finds them; GN's recipe finds them in the
+build directories the links ran in.
 """
 
 load("//build_defs/config:platforms.bzl", "RUNTIME_MODE_FLAG", "runtime_mode_platform_base", "runtime_mode_platform_name")
-load("//build_defs/gn:build_directory.bzl", "BuildDirectoryInfo", "build_directory_aspect", "collected_build_directory_entries")
+load("//build_defs/gn:build_directory.bzl", "BuildDirectoryInfo", "build_directory_aspect", "collected_build_directory_entries", "collected_link_inputs")
 load("//build_defs/gn:gn_action.bzl", "PYTHON_ATTRS", "run_python")
 
 # The engine's platforms, whose runtime-mode children the split names
@@ -88,6 +95,11 @@ def _apple_universal_impl(ctx):
     # Each build's part of its build directory: the entries of its deps'
     # closures under the paths the script reads, by their build-directory
     # paths (a framework bundle's links among them, made again as links).
+    # With `--dsym` the script runs dsymutil, which follows each binary's
+    # debug map to the objects and archives its link read: inputs then,
+    # or the dSYM is a symbol table without DWARF.
+    with_dsym = "--dsym" in ctx.attr.args
+    debug_inputs = []
     for key in ctx.attr.builds:
         args.add("--build", key)
         staged = {}
@@ -95,6 +107,9 @@ def _apple_universal_impl(ctx):
             for file, path in collected_build_directory_entries(dep):
                 if [prefix for prefix in ctx.attr.stage if path == prefix or path.startswith(prefix + "/")]:
                     staged[path] = file
+            link_inputs = collected_link_inputs(dep) if with_dsym else None
+            if link_inputs != None:
+                debug_inputs.append(link_inputs)
         if not staged:
             fail("%s: the %s build's deps place nothing under %s in the build directory" % (ctx.label, key, ctx.attr.stage))
         for path, file in sorted(staged.items()):
@@ -130,6 +145,7 @@ def _apple_universal_impl(ctx):
         script = ctx.file._wrapper,
         arguments = [args],
         inputs = inputs,
+        transitive_inputs = debug_inputs,
         outputs = outputs,
         mnemonic = "AppleUniversal",
         progress_message = "Joining the %s builds for %%{label}" % ", ".join(ctx.attr.builds.keys()),
