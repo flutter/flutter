@@ -49,6 +49,10 @@ void MessageLoopWin::Terminate() {
 }
 
 void MessageLoopWin::WakeUp(fml::TimePoint time_point) {
+  if (time_point == fml::TimePoint::Max()) {
+    FML_CHECK(CancelWaitableTimer(timer_.get()));
+    return;
+  }
   LARGE_INTEGER due_time = {0};
   fml::TimePoint now = fml::TimePoint::Now();
   if (time_point > now) {

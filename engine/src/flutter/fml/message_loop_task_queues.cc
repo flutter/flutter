@@ -21,19 +21,10 @@ const size_t TaskQueueId::kInvalid = ULONG_MAX - 1;
 
 namespace {
 
-// iOS prior to version 9 prevents c++11 thread_local and __thread specifier,
-// having us resort to boxed enum containers.
-class TaskSourceGradeHolder {
- public:
-  TaskSourceGrade task_source_grade;
+thread_local TaskSourceGrade tls_task_source_grade =
+    TaskSourceGrade::kUnspecified;
 
-  explicit TaskSourceGradeHolder(TaskSourceGrade task_source_grade_arg)
-      : task_source_grade(task_source_grade_arg) {}
-};
 }  // namespace
-
-static thread_local std::unique_ptr<TaskSourceGradeHolder>
-    tls_task_source_grade;
 
 TaskQueueEntry::TaskQueueEntry(TaskQueueId created_for_arg)
     : subsumed_by(kUnmerged), created_for(created_for_arg) {
@@ -55,10 +46,7 @@ TaskQueueId MessageLoopTaskQueues::CreateTaskQueue() {
   return loop_id;
 }
 
-MessageLoopTaskQueues::MessageLoopTaskQueues() : order_(0) {
-  tls_task_source_grade.reset(
-      new TaskSourceGradeHolder{TaskSourceGrade::kUnspecified});
-}
+MessageLoopTaskQueues::MessageLoopTaskQueues() = default;
 
 MessageLoopTaskQueues::~MessageLoopTaskQueues() = default;
 
@@ -86,7 +74,7 @@ void MessageLoopTaskQueues::DisposeTasks(TaskQueueId queue_id) {
 }
 
 TaskSourceGrade MessageLoopTaskQueues::GetCurrentTaskSourceGrade() {
-  return tls_task_source_grade.get()->task_source_grade;
+  return tls_task_source_grade;
 }
 
 void MessageLoopTaskQueues::RegisterTask(
@@ -95,7 +83,7 @@ void MessageLoopTaskQueues::RegisterTask(
     fml::TimePoint target_time,
     fml::TaskSourceGrade task_source_grade) {
   std::lock_guard guard(queue_mutex_);
-  size_t order = order_++;
+  uint64_t order = order_++;
   const auto& queue_entry = queue_entries_.at(queue_id);
   queue_entry->task_source->RegisterTask(
       {order, task, target_time, task_source_grade});
@@ -123,19 +111,20 @@ fml::closure MessageLoopTaskQueues::GetNextTaskToRun(TaskQueueId queue_id,
   }
   TaskSource::TopTask top = PeekNextTaskUnlocked(queue_id);
 
-  if (!HasPendingTasksUnlocked(queue_id)) {
-    WakeUpUnlocked(queue_id, fml::TimePoint::Max());
-  } else {
-    WakeUpUnlocked(queue_id, GetNextWakeTimeUnlocked(queue_id));
-  }
-
   if (top.task.GetTargetTime() > from_time) {
+    WakeUpUnlocked(queue_id, top.task.GetTargetTime());
     return nullptr;
   }
   fml::closure invocation = top.task.GetTask();
   const auto task_source_grade = top.task.GetTaskSourceGrade();
   queue_entries_.at(top.task_queue_id)->task_source->PopTask(task_source_grade);
-  tls_task_source_grade.reset(new TaskSourceGradeHolder{task_source_grade});
+  tls_task_source_grade = task_source_grade;
+
+  if (!HasPendingTasksUnlocked(queue_id)) {
+    WakeUpUnlocked(queue_id, fml::TimePoint::Max());
+  } else {
+    WakeUpUnlocked(queue_id, GetNextWakeTimeUnlocked(queue_id));
+  }
   return invocation;
 }
 

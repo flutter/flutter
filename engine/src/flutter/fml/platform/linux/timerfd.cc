@@ -36,18 +36,20 @@ namespace fml {
 #endif
 
 bool TimerRearm(int fd, fml::TimePoint time_point) {
-  uint64_t nano_secs = time_point.ToEpochDelta().ToNanoseconds();
-
-  // "0" will disarm the timer, desired behavior is to immediately
-  // trigger the timer.
-  if (nano_secs < 1) {
-    nano_secs = 1;
-  }
-
   struct itimerspec spec = {};
-  spec.it_value.tv_sec = static_cast<time_t>(nano_secs / NSEC_PER_SEC);
-  spec.it_value.tv_nsec = nano_secs % NSEC_PER_SEC;
-  spec.it_interval = spec.it_value;  // single expiry.
+  if (time_point != fml::TimePoint::Max()) {
+    uint64_t nano_secs = time_point.ToEpochDelta().ToNanoseconds();
+
+    // "0" will disarm the timer, desired behavior is to immediately
+    // trigger the timer.
+    if (nano_secs < 1) {
+      nano_secs = 1;
+    }
+
+    spec.it_value.tv_sec = static_cast<time_t>(nano_secs / NSEC_PER_SEC);
+    spec.it_value.tv_nsec = nano_secs % NSEC_PER_SEC;
+    spec.it_interval = spec.it_value;  // single expiry.
+  }
 
   int result = ::timerfd_settime(fd, TFD_TIMER_ABSTIME, &spec, nullptr);
   if (result != 0) {

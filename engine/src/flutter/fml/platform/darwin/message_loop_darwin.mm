@@ -72,6 +72,10 @@ void MessageLoopDarwin::Terminate() {
 }
 
 void MessageLoopDarwin::WakeUp(fml::TimePoint time_point) {
+  if (time_point == fml::TimePoint::Max()) {
+    CFRunLoopTimerSetNextFireDate(delayed_wake_timer_, kDistantFuture);
+    return;
+  }
   // Rearm the timer. The time bases used by CoreFoundation and FXL are
   // different and must be accounted for.
   CFRunLoopTimerSetNextFireDate(

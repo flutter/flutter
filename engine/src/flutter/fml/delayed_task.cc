@@ -8,7 +8,7 @@
 
 namespace fml {
 
-DelayedTask::DelayedTask(size_t order,
+DelayedTask::DelayedTask(uint64_t order,
                          const fml::closure& task,
                          fml::TimePoint target_time,
                          fml::TaskSourceGrade task_source_grade)

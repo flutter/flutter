@@ -5,6 +5,7 @@
 #ifndef FLUTTER_FML_DELAYED_TASK_H_
 #define FLUTTER_FML_DELAYED_TASK_H_
 
+#include <cstdint>
 #include <queue>
 
 #include "flutter/fml/closure.h"
@@ -15,7 +16,7 @@ namespace fml {
 
 class DelayedTask {
  public:
-  DelayedTask(size_t order,
+  DelayedTask(uint64_t order,
               const fml::closure& task,
               fml::TimePoint target_time,
               fml::TaskSourceGrade task_source_grade);
@@ -33,7 +34,7 @@ class DelayedTask {
   bool operator>(const DelayedTask& other) const;
 
  private:
-  size_t order_;
+  uint64_t order_;
   fml::closure task_;
   fml::TimePoint target_time_;
   fml::TaskSourceGrade task_source_grade_;
