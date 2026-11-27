@@ -1740,8 +1740,16 @@ TEST_P(EmbedderTestMultiBackend,
           backing_store.did_update = true;
           ConfigureBackingStore(backing_store, backend, true);
 
+          // Skia clears the whole frame into the root slice before painting,
+          // so its root region is the full surface. Impeller does not record
+          // that clear, so its region is the one picture actually drawn there,
+          // which sits at (10, 10).
+          // TODO(https://github.com/flutter/flutter/issues/192973): Expect the
+          // same region from both once they agree.
           FlutterRect paint_region_rects[] = {
-              FlutterRectMakeLTRB(0, 0, 800, 600),
+              backend == EmbedderTestContextType::kVulkanImpellerContext
+                  ? FlutterRectMakeLTRB(10, 10, 800, 600)
+                  : FlutterRectMakeLTRB(0, 0, 800, 600),
           };
           FlutterRegion paint_region = {
               .struct_size = sizeof(FlutterRegion),
@@ -5609,7 +5617,8 @@ INSTANTIATE_TEST_SUITE_P(
     EmbedderTestGlVk,
     EmbedderTestMultiBackend,
     ::testing::Values(EmbedderTestContextType::kOpenGLContext,
-                      EmbedderTestContextType::kVulkanContext));
+                      EmbedderTestContextType::kVulkanContext,
+                      EmbedderTestContextType::kVulkanImpellerContext));
 
 }  // namespace flutter::testing
 

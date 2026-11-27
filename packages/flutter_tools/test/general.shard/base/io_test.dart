@@ -17,7 +17,7 @@ import '../../src/fs_safety.dart';
 import '../../src/io.dart';
 
 void main() {
-  testWithoutContext('IOOverrides can inject a memory file system', () async {
+  test('IOOverrides can inject a memory file system', () async {
     final memoryFileSystem = MemoryFileSystem.test();
     final flutterIOOverrides = FlutterIOOverrides(fileSystem: memoryFileSystem);
     await io.IOOverrides.runWithIOOverrides(() async {
@@ -64,7 +64,7 @@ void main() {
     }, flutterIOOverrides);
   });
 
-  testWithoutContext('ProcessSignal signals are properly delegated', () async {
+  test('ProcessSignal signals are properly delegated', () async {
     final signal = FakeProcessSignal();
     final signalUnderTest = ProcessSignal(signal);
 
@@ -73,15 +73,15 @@ void main() {
     expect(signalUnderTest, await signalUnderTest.watch().first);
   });
 
-  testWithoutContext('ProcessSignal toString() works', () async {
+  test('ProcessSignal toString() works', () async {
     expect(io.ProcessSignal.sigint.toString(), ProcessSignal.sigint.toString());
   });
 
-  testWithoutContext('exit throws a StateError if called without being overridden', () {
+  test('exit throws a StateError if called without being overridden', () {
     expect(() => exit(0), throwsAssertionError);
   });
 
-  testWithoutContext('exit does not throw a StateError if overridden', () {
+  test('exit does not throw a StateError if overridden', () {
     try {
       setExitFunctionForTests((int value) {});
 
@@ -91,11 +91,11 @@ void main() {
     }
   });
 
-  testWithoutContext('test_api defines the Declarer in a known place', () {
+  test('test_api defines the Declarer in a known place', () {
     expect(Zone.current[#test.declarer], isNotNull);
   });
 
-  testWithoutContext('listNetworkInterfaces() uses overrides', () async {
+  test('listNetworkInterfaces() uses overrides', () async {
     setNetworkInterfaceLister(
       ({bool? includeLoopback, bool? includeLinkLocal, InternetAddressType? type}) async =>
           <NetworkInterface>[],
@@ -106,7 +106,7 @@ void main() {
     resetNetworkInterfaceLister();
   });
 
-  testWithoutContext('Does not listen to Posix process signals on windows', () async {
+  test('Does not listen to Posix process signals on windows', () async {
     final windows = FakePlatform(operatingSystem: 'windows');
     final linux = FakePlatform();
     final fakeSignalA = FakeProcessSignal();
@@ -118,39 +118,36 @@ void main() {
     expect(await PosixProcessSignal(fakeSignalB, platform: linux).watch().first, isNotNull);
   });
 
-  testWithoutContext(
-    'FSGuardIOOverrides isolates filesystem modifications to system temp directory',
-    () {
-      io.IOOverrides.runWithIOOverrides(() {
-        final tempFile = io.File(path.join(io.Directory.systemTemp.path, 'fs_guard_test_safe.txt'));
-        addTearDown(() {
-          if (tempFile.existsSync()) {
-            tempFile.deleteSync();
-          }
-        });
-        // Writing under system temp should succeed
-        tempFile.writeAsStringSync('safe-content');
-        expect(tempFile.readAsStringSync(), 'safe-content');
+  test('FSGuardIOOverrides isolates filesystem modifications to system temp directory', () {
+    io.IOOverrides.runWithIOOverrides(() {
+      final tempFile = io.File(path.join(io.Directory.systemTemp.path, 'fs_guard_test_safe.txt'));
+      addTearDown(() {
+        if (tempFile.existsSync()) {
+          tempFile.deleteSync();
+        }
+      });
+      // Writing under system temp should succeed
+      tempFile.writeAsStringSync('safe-content');
+      expect(tempFile.readAsStringSync(), 'safe-content');
 
-        // Modifying outside system temp should fail and throw our guarded exception
-        final String root = path.rootPrefix(io.Directory.current.absolute.path);
-        final unsafeFile = io.File(path.join(root, 'tmp_unsafe_outside_temp.txt'));
-        expect(unsafeFile.existsSync(), false);
-        expect(
-          () => unsafeFile.writeAsStringSync('unsafe-content'),
-          throwsA(
-            isA<io.FileSystemException>().having(
-              (e) => e.message,
-              'message',
-              contains('Test attempted to modify file outside of temp directory'),
-            ),
+      // Modifying outside system temp should fail and throw our guarded exception
+      final String root = path.rootPrefix(io.Directory.current.absolute.path);
+      final unsafeFile = io.File(path.join(root, 'tmp_unsafe_outside_temp.txt'));
+      expect(unsafeFile.existsSync(), false);
+      expect(
+        () => unsafeFile.writeAsStringSync('unsafe-content'),
+        throwsA(
+          isA<io.FileSystemException>().having(
+            (e) => e.message,
+            'message',
+            contains('Test attempted to modify file outside of temp directory'),
           ),
-        );
-      }, FSGuardIOOverrides());
-    },
-  );
+        ),
+      );
+    }, FSGuardIOOverrides());
+  });
 
-  testWithoutContext('FSGuardIOOverrides resolves symlinks for temp directory', () {
+  test('FSGuardIOOverrides resolves symlinks for temp directory', () {
     final io.Directory baseDir = io.Directory.systemTemp.createTempSync('fs_guard_symlink_test_');
     addTearDown(() => baseDir.deleteSync(recursive: true));
 
@@ -174,74 +171,60 @@ void main() {
     }, mockOverrides);
   });
 
-  testWithoutContext(
-    'Stdio.stdoutWrite does not crash if stdout throws FileSystemException',
-    () async {
-      final mockStdout = CrashingStdout(asyncError: true);
-      final stdio = Stdio.test(stdout: mockStdout, stderr: FakeIOSink());
+  test('Stdio.stdoutWrite does not crash if stdout throws FileSystemException', () async {
+    final mockStdout = CrashingStdout(asyncError: true);
+    final stdio = Stdio.test(stdout: mockStdout, stderr: FakeIOSink());
 
-      Object? printed;
-      var crashed = false;
-      await runZonedGuarded(
-        () async {
-          stdio.stdoutWrite('test message');
-          await Future<void>.delayed(Duration.zero);
+    Object? printed;
+    var crashed = false;
+    await runZonedGuarded(
+      () async {
+        stdio.stdoutWrite('test message');
+        await Future<void>.delayed(Duration.zero);
+      },
+      (Object error, StackTrace stackTrace) {
+        crashed = true;
+      },
+      zoneSpecification: ZoneSpecification(
+        print: (Zone self, ZoneDelegate parent, Zone association, String line) {
+          printed = line;
+          throw const io.FileSystemException('writeFrom failed', '', io.OSError('Broken pipe', 32));
         },
-        (Object error, StackTrace stackTrace) {
-          crashed = true;
+      ),
+    );
+    expect(printed, 'test message');
+    expect(crashed, false);
+  });
+
+  test('Stdio.stdoutWrite does not crash if stdout is already done and print throws', () async {
+    final mockStdout = CrashingStdout(asyncError: false);
+    final stdio = Stdio.test(stdout: mockStdout, stderr: FakeIOSink());
+
+    // Access stdout to register the done listener.
+    stdio.stdout;
+
+    mockStdout.completeDone();
+    await Future<void>.delayed(Duration.zero);
+
+    Object? printed;
+    var crashed = false;
+    runZonedGuarded(
+      () {
+        stdio.stdoutWrite('test message');
+      },
+      (Object error, StackTrace stackTrace) {
+        crashed = true;
+      },
+      zoneSpecification: ZoneSpecification(
+        print: (Zone self, ZoneDelegate parent, Zone association, String line) {
+          printed = line;
+          throw const io.FileSystemException('writeFrom failed', '', io.OSError('Broken pipe', 32));
         },
-        zoneSpecification: ZoneSpecification(
-          print: (Zone self, ZoneDelegate parent, Zone association, String line) {
-            printed = line;
-            throw const io.FileSystemException(
-              'writeFrom failed',
-              '',
-              io.OSError('Broken pipe', 32),
-            );
-          },
-        ),
-      );
-      expect(printed, 'test message');
-      expect(crashed, false);
-    },
-  );
-
-  testWithoutContext(
-    'Stdio.stdoutWrite does not crash if stdout is already done and print throws',
-    () async {
-      final mockStdout = CrashingStdout(asyncError: false);
-      final stdio = Stdio.test(stdout: mockStdout, stderr: FakeIOSink());
-
-      // Access stdout to register the done listener.
-      stdio.stdout;
-
-      mockStdout.completeDone();
-      await Future<void>.delayed(Duration.zero);
-
-      Object? printed;
-      var crashed = false;
-      runZonedGuarded(
-        () {
-          stdio.stdoutWrite('test message');
-        },
-        (Object error, StackTrace stackTrace) {
-          crashed = true;
-        },
-        zoneSpecification: ZoneSpecification(
-          print: (Zone self, ZoneDelegate parent, Zone association, String line) {
-            printed = line;
-            throw const io.FileSystemException(
-              'writeFrom failed',
-              '',
-              io.OSError('Broken pipe', 32),
-            );
-          },
-        ),
-      );
-      expect(printed, 'test message');
-      expect(crashed, false);
-    },
-  );
+      ),
+    );
+    expect(printed, 'test message');
+    expect(crashed, false);
+  });
 }
 
 class FakeProcessSignal extends Fake implements io.ProcessSignal {

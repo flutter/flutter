@@ -24,7 +24,7 @@ void main() {
     logger = BufferLogger.test();
   });
 
-  testWithoutContext('parses executable name from cmake file', () async {
+  test('parses executable name from cmake file', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
 
@@ -37,7 +37,7 @@ void main() {
     expect(name, 'hello');
   });
 
-  testWithoutContext('defaults executable name to null if cmake config does not exist', () async {
+  test('defaults executable name to null if cmake config does not exist', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
 
@@ -46,7 +46,7 @@ void main() {
     expect(name, isNull);
   });
 
-  testWithoutContext('generates config', () async {
+  test('generates config', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
     const buildInfo = BuildInfo(
@@ -90,7 +90,7 @@ void main() {
     expect(configLines, isNot(contains(startsWith('set(FLUTTER_APP_FLAVOR'))));
   });
 
-  testWithoutContext('generates config with flavor', () async {
+  test('generates config with flavor', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
     const buildInfo = BuildInfo(
@@ -112,7 +112,7 @@ void main() {
     expect(configLines, contains(r'set(FLUTTER_APP_FLAVOR "apple" PARENT_SCOPE)'));
   });
 
-  testWithoutContext('config escapes backslashes', () async {
+  test('config escapes backslashes', () async {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
 
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
@@ -163,7 +163,7 @@ void main() {
     );
   });
 
-  testWithoutContext('generated config uses pubspec version', () async {
+  test('generated config uses pubspec version', () async {
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('version: 1.2.3+4');
@@ -198,7 +198,7 @@ void main() {
     );
   });
 
-  testWithoutContext('generated config uses build name', () async {
+  test('generated config uses build name', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
     const buildInfo = BuildInfo(
@@ -230,7 +230,7 @@ void main() {
     );
   });
 
-  testWithoutContext('generated config uses build number', () async {
+  test('generated config uses build number', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
     const buildInfo = BuildInfo(
@@ -262,7 +262,7 @@ void main() {
     );
   });
 
-  testWithoutContext('generated config uses build name and build number', () async {
+  test('generated config uses build name and build number', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
     const buildInfo = BuildInfo(
@@ -295,7 +295,7 @@ void main() {
     );
   });
 
-  testWithoutContext('generated config uses build name over pubspec version', () async {
+  test('generated config uses build name over pubspec version', () async {
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('version: 9.9.9+9');
@@ -331,7 +331,7 @@ void main() {
     );
   });
 
-  testWithoutContext('generated config uses build number over pubspec version', () async {
+  test('generated config uses build number over pubspec version', () async {
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('version: 1.2.3+4');
@@ -367,47 +367,44 @@ void main() {
     );
   });
 
-  testWithoutContext(
-    'generated config uses build name and build number over pubspec version',
-    () async {
-      fileSystem.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync('version: 9.9.9+9');
+  test('generated config uses build name and build number over pubspec version', () async {
+    fileSystem.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync('version: 9.9.9+9');
 
-      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-      final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
-      const buildInfo = BuildInfo(
-        BuildMode.release,
-        null,
-        buildName: '1.2.3',
-        buildNumber: '4',
-        treeShakeIcons: false,
-        packageConfigPath: '.dart_tool/package_config.json',
-      );
-      final environment = <String, String>{};
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
+    const buildInfo = BuildInfo(
+      BuildMode.release,
+      null,
+      buildName: '1.2.3',
+      buildNumber: '4',
+      treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
+    );
+    final environment = <String, String>{};
 
-      writeGeneratedCmakeConfig(_kTestFlutterRoot, cmakeProject, buildInfo, environment, logger);
+    writeGeneratedCmakeConfig(_kTestFlutterRoot, cmakeProject, buildInfo, environment, logger);
 
-      final File cmakeConfig = cmakeProject.generatedCmakeConfigFile;
+    final File cmakeConfig = cmakeProject.generatedCmakeConfigFile;
 
-      expect(cmakeConfig, exists);
+    expect(cmakeConfig, exists);
 
-      final List<String> configLines = cmakeConfig.readAsLinesSync();
+    final List<String> configLines = cmakeConfig.readAsLinesSync();
 
-      expect(
-        configLines,
-        containsAll(<String>[
-          'set(FLUTTER_VERSION "1.2.3+4" PARENT_SCOPE)',
-          'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
-          'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
-          'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
-          'set(FLUTTER_VERSION_BUILD 4 PARENT_SCOPE)',
-        ]),
-      );
-    },
-  );
+    expect(
+      configLines,
+      containsAll(<String>[
+        'set(FLUTTER_VERSION "1.2.3+4" PARENT_SCOPE)',
+        'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
+        'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
+        'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
+        'set(FLUTTER_VERSION_BUILD 4 PARENT_SCOPE)',
+      ]),
+    );
+  });
 
-  testWithoutContext('generated config ignores invalid build name', () async {
+  test('generated config ignores invalid build name', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
     const buildInfo = BuildInfo(
@@ -444,7 +441,7 @@ void main() {
     );
   });
 
-  testWithoutContext('generated config ignores invalid build number', () async {
+  test('generated config ignores invalid build number', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
     const buildInfo = BuildInfo(
@@ -482,7 +479,7 @@ void main() {
     );
   });
 
-  testWithoutContext('generated config handles non-numeric build number', () async {
+  test('generated config handles non-numeric build number', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
     const buildInfo = BuildInfo(
@@ -517,7 +514,7 @@ void main() {
     );
   });
 
-  testWithoutContext('generated config handles complex build number', () async {
+  test('generated config handles complex build number', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
     const buildInfo = BuildInfo(
@@ -552,95 +549,89 @@ void main() {
     );
   });
 
-  testWithoutContext(
-    'generated config warns on Windows project with non-numeric build number',
-    () async {
-      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-      final CmakeBasedProject cmakeProject = WindowsProject.fromFlutter(project);
-      const buildInfo = BuildInfo(
-        BuildMode.release,
-        null,
-        buildName: '1.2.3',
-        buildNumber: 'hello',
-        treeShakeIcons: false,
-        packageConfigPath: '.dart_tool/package_config.json',
-      );
-      final environment = <String, String>{};
+  test('generated config warns on Windows project with non-numeric build number', () async {
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final CmakeBasedProject cmakeProject = WindowsProject.fromFlutter(project);
+    const buildInfo = BuildInfo(
+      BuildMode.release,
+      null,
+      buildName: '1.2.3',
+      buildNumber: 'hello',
+      treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
+    );
+    final environment = <String, String>{};
 
-      writeGeneratedCmakeConfig(_kTestFlutterRoot, cmakeProject, buildInfo, environment, logger);
+    writeGeneratedCmakeConfig(_kTestFlutterRoot, cmakeProject, buildInfo, environment, logger);
 
-      expect(
-        logger.warningText,
-        contains(
-          'Warning: build identifier hello in version 1.2.3+hello is not numeric and '
-          'cannot be converted into a Windows build version number. Defaulting to 0.\n'
-          'This may cause issues with Windows installers.',
-        ),
-      );
+    expect(
+      logger.warningText,
+      contains(
+        'Warning: build identifier hello in version 1.2.3+hello is not numeric and '
+        'cannot be converted into a Windows build version number. Defaulting to 0.\n'
+        'This may cause issues with Windows installers.',
+      ),
+    );
 
-      final File cmakeConfig = cmakeProject.generatedCmakeConfigFile;
+    final File cmakeConfig = cmakeProject.generatedCmakeConfigFile;
 
-      expect(cmakeConfig, exists);
+    expect(cmakeConfig, exists);
 
-      final List<String> configLines = cmakeConfig.readAsLinesSync();
+    final List<String> configLines = cmakeConfig.readAsLinesSync();
 
-      expect(
-        configLines,
-        containsAll(<String>[
-          'set(FLUTTER_VERSION "1.2.3+hello" PARENT_SCOPE)',
-          'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
-          'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
-          'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
-          'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
-        ]),
-      );
-    },
-  );
+    expect(
+      configLines,
+      containsAll(<String>[
+        'set(FLUTTER_VERSION "1.2.3+hello" PARENT_SCOPE)',
+        'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
+        'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
+        'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
+        'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
+      ]),
+    );
+  });
 
-  testWithoutContext(
-    'generated config warns on Windows project with complex build number',
-    () async {
-      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-      final CmakeBasedProject cmakeProject = WindowsProject.fromFlutter(project);
-      const buildInfo = BuildInfo(
-        BuildMode.release,
-        null,
-        buildName: '1.2.3',
-        buildNumber: '4.5',
-        treeShakeIcons: false,
-        packageConfigPath: '.dart_tool/package_config.json',
-      );
-      final environment = <String, String>{};
+  test('generated config warns on Windows project with complex build number', () async {
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final CmakeBasedProject cmakeProject = WindowsProject.fromFlutter(project);
+    const buildInfo = BuildInfo(
+      BuildMode.release,
+      null,
+      buildName: '1.2.3',
+      buildNumber: '4.5',
+      treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
+    );
+    final environment = <String, String>{};
 
-      writeGeneratedCmakeConfig(_kTestFlutterRoot, cmakeProject, buildInfo, environment, logger);
+    writeGeneratedCmakeConfig(_kTestFlutterRoot, cmakeProject, buildInfo, environment, logger);
 
-      expect(
-        logger.warningText,
-        contains(
-          'Warning: build identifier 4.5 in version 1.2.3+4.5 is not numeric and '
-          'cannot be converted into a Windows build version number. Defaulting to 0.\n'
-          'This may cause issues with Windows installers.',
-        ),
-      );
+    expect(
+      logger.warningText,
+      contains(
+        'Warning: build identifier 4.5 in version 1.2.3+4.5 is not numeric and '
+        'cannot be converted into a Windows build version number. Defaulting to 0.\n'
+        'This may cause issues with Windows installers.',
+      ),
+    );
 
-      final File cmakeConfig = cmakeProject.generatedCmakeConfigFile;
+    final File cmakeConfig = cmakeProject.generatedCmakeConfigFile;
 
-      expect(cmakeConfig, exists);
+    expect(cmakeConfig, exists);
 
-      final List<String> configLines = cmakeConfig.readAsLinesSync();
+    final List<String> configLines = cmakeConfig.readAsLinesSync();
 
-      expect(
-        configLines,
-        containsAll(<String>[
-          'set(FLUTTER_VERSION "1.2.3+4.5" PARENT_SCOPE)',
-          'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
-          'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
-          'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
-          'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
-        ]),
-      );
-    },
-  );
+    expect(
+      configLines,
+      containsAll(<String>[
+        'set(FLUTTER_VERSION "1.2.3+4.5" PARENT_SCOPE)',
+        'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
+        'set(FLUTTER_VERSION_MINOR 2 PARENT_SCOPE)',
+        'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
+        'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
+      ]),
+    );
+  });
 }
 
 class _FakeProject implements CmakeBasedProject {
