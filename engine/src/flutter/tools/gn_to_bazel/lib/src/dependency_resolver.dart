@@ -62,6 +62,15 @@ typedef ForwardedFlag = ({Condition condition, GnValue flag, String variable});
 ForwardedFlag forwardedUnder(Condition condition, ForwardedFlag flag) =>
     (condition: condition.and(flag.condition), flag: flag.flag, variable: flag.variable);
 
+/// A config whose `ldflags` a target hands the links of its dependents, and
+/// when. GN applies a dependency's `public_configs` to the dependent, and a
+/// config's ldflags take effect where the dependent links -- an executable,
+/// a shared library -- and nowhere else: unlike `libs` and `frameworks`
+/// they do not travel on from a library to whatever links it, unless the
+/// dependency on the library is a public one. `config` is the config's GN
+/// label (`//dir:name`).
+typedef ForwardedLinkConfig = ({Condition condition, String config});
+
 /// Resolves what other GN files say about their targets: the flags a target
 /// (`//dir:name`) hands its dependents, and the target itself.
 final class DependencyResolver {
@@ -84,10 +93,17 @@ final class DependencyResolver {
   /// not evaluate.
   final Map<String, GnFileEvaluation?> _evaluations = <String, GnFileEvaluation?>{};
   final Map<String, List<ForwardedFlag>> _flags = <String, List<ForwardedFlag>>{};
+  final Map<String, List<ForwardedLinkConfig>> _linkConfigs = <String, List<ForwardedLinkConfig>>{};
 
   /// The flags [label] (`//dir:name`) hands its dependents; empty when it
   /// hands none, or when its file cannot say.
   List<ForwardedFlag> flagsOf(String label) => _flags.putIfAbsent(label, () => _derive(label));
+
+  /// The configs with ldflags that [label] (`//dir:name`) hands the links
+  /// of its dependents ([publicLinkConfigsOf]); empty when it hands none,
+  /// or when its file cannot say.
+  List<ForwardedLinkConfig> linkConfigsOf(String label) =>
+      _linkConfigs.putIfAbsent(label, () => _deriveLinkConfigs(label));
 
   /// The evaluation of the `BUILD.gn` of [directory] (`//flutter/fml`), or
   /// null when the file is absent or does not evaluate.
@@ -129,6 +145,13 @@ final class DependencyResolver {
     return configs.length == 1 ? configs.single : null;
   }
 
+  /// The config() [label] names ([configOf]), unless the tables hold the
+  /// config's effect (`configEffects`: a toolchain's config, whose file the
+  /// converter does not read, or one a hand-written library stands for):
+  /// null then.
+  GnTarget? unmappedConfigOf(String label) =>
+      configEffects.containsKey(label) ? null : configOf(label);
+
   List<ForwardedFlag> _derive(String label) {
     final int colon = label.indexOf(':');
     if (colon < 0 || !label.startsWith('//')) {
@@ -163,6 +186,35 @@ final class DependencyResolver {
       }
     }
     return flags;
+  }
+
+  List<ForwardedLinkConfig> _deriveLinkConfigs(String label) {
+    final int colon = label.indexOf(':');
+    if (colon < 0 || !label.startsWith('//')) {
+      return const <ForwardedLinkConfig>[];
+    }
+    final String directory = label.substring(0, colon);
+    final String name = label.substring(colon + 1);
+    final GnFileEvaluation? evaluation = _evaluate(directory);
+    if (evaluation == null) {
+      return const <ForwardedLinkConfig>[];
+    }
+    final configs = <ForwardedLinkConfig>[];
+    for (final GnTarget target in evaluation.targets) {
+      if (target.rule != 'config' && target.name == name) {
+        for (final ForwardedLinkConfig config in publicLinkConfigsOf(
+          target,
+          gnPackage: directory,
+          configAt: unmappedConfigOf,
+          forwarded: linkConfigsOf,
+        )) {
+          if (!configs.contains(config)) {
+            configs.add(config);
+          }
+        }
+      }
+    }
+    return configs;
   }
 
   GnFileEvaluation? _evaluate(String directory) {
@@ -301,6 +353,88 @@ List<ForwardedFlag> publicFlagsOf(
   }
   return flags;
 }
+
+/// The configs with ldflags [target] hands the links of its dependents,
+/// each under the condition it does so: those of its `public_configs` that
+/// bring `ldflags` ([bringsLdflags]; [configAt] finds a config by its GN
+/// label) or that the tables map to a library of link flags
+/// ([isLinkFlagsLibrary]), under the condition the config is listed, and
+/// those its public_deps hand on ([forwarded]), under the condition of the
+/// dependency. Its `all_dependent_configs` are not among them: those reach
+/// every dependent, which a dependency on the config's ldflags library
+/// does by itself (starlark_emitter.dart's _configsInto).
+List<ForwardedLinkConfig> publicLinkConfigsOf(
+  GnTarget target, {
+  required String gnPackage,
+  required GnTarget? Function(String label) configAt,
+  required List<ForwardedLinkConfig> Function(String label) forwarded,
+}) {
+  final configs = <ForwardedLinkConfig>[];
+  for (final GnListItem item
+      in target.variables['public_configs']?.liveItems ?? const <GnListItem>[]) {
+    final GnValue value = item.value;
+    if (value is! GnStringValue) {
+      continue;
+    }
+    final String label = absoluteGnLabel(value.value, package: gnPackage, implicitName: true);
+    if (isLinkFlagsLibrary(label)) {
+      configs.add((condition: item.condition, config: label));
+      continue;
+    }
+    final GnTarget? config = configAt(label);
+    if (config != null && bringsLdflags(config, label: label, configAt: configAt)) {
+      configs.add((condition: item.condition, config: label));
+    }
+  }
+  for (final GnListItem item
+      in target.variables['public_deps']?.liveItems ?? const <GnListItem>[]) {
+    final GnValue value = item.value;
+    if (value is! GnStringValue) {
+      continue;
+    }
+    for (final ForwardedLinkConfig config in forwarded(
+      absoluteGnLabel(value.value, package: gnPackage, implicitName: true),
+    )) {
+      configs.add((condition: item.condition.and(config.condition), config: config.config));
+    }
+  }
+  return configs;
+}
+
+/// Whether [config], the config() of GN label [label] (`//dir:name`),
+/// brings `ldflags` to what it applies to, under any condition: its own,
+/// or those of a config it lists in `configs`, which GN applies wherever
+/// it applies the config itself (ANGLE's angle_backend_config lists the
+/// Metal backend's config, whose ldflags link Metal weakly). [configAt]
+/// finds a listed config by its GN label; null stands for one that brings
+/// none the converter can see -- a config the tables hold the effect of,
+/// or one of a file the converter does not read.
+bool bringsLdflags(
+  GnTarget config, {
+  required String label,
+  required GnTarget? Function(String label) configAt,
+}) {
+  if (config.variables['ldflags']?.liveItems.isNotEmpty ?? false) {
+    return true;
+  }
+  final String package = label.substring(0, label.indexOf(':'));
+  for (final GnListItem item in config.variables['configs']?.liveItems ?? const <GnListItem>[]) {
+    final GnValue value = item.value;
+    if (value is! GnStringValue) {
+      continue;
+    }
+    final String listed = absoluteGnLabel(value.value, package: package, implicitName: true);
+    final GnTarget? other = configAt(listed);
+    if (other != null && bringsLdflags(other, label: listed, configAt: configAt)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/// What follows a config's name in the name of the library that holds its
+/// ldflags (starlark_emitter.dart's _convertConfig).
+const String ldflagsSuffix = '_ldflags';
 
 /// The compiler flags of [config], each under the condition it is set
 /// -- `-std=` aside: GN's compiler config sets the standard after every

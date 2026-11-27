@@ -267,7 +267,6 @@ flutter_objc_library(
         ":ios_gpu_configuration_config",
         "//engine/src:include_root",
         "//engine/src/flutter:config",
-        "//engine/src/flutter/build/bazel:ios_application_extension",
         "//engine/src/flutter/common",
         "//engine/src/flutter/common/graphics",
         "//engine/src/flutter/fml",
@@ -387,10 +386,7 @@ cc_library(
         ],
         "//conditions:default": [],
     }),
-    implementation_deps = [
-        "//engine/src/flutter/build/bazel:ios_application_extension",
-        "//engine/src/flutter/shell/platform/darwin/common:config",
-    ],
+    implementation_deps = ["//engine/src/flutter/shell/platform/darwin/common:config"],
     linkopts = [
         "-framework",
         "AudioToolbox",
@@ -569,16 +565,6 @@ flutter_swift_library(
         "-framework",
         "Testing",
     ] + select({
-        ":when_is_ios_and_use_ios_simulator": [
-            "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_is_ios_and_not_use_ios_simulator": [
-            "-miphoneos-version-min=15.0",  # is_ios && !(use_ios_simulator)
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_is_ios_and_use_ios_simulator": [
             "-F" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
         ],
@@ -771,6 +757,7 @@ flutter_objc_library(
         "//engine/src/flutter/shell/platform/darwin/common:availability_version_check",
         "//engine/src/flutter/shell/platform/darwin/common:framework_common",
         "//engine/src/flutter/shell/platform/darwin/common:test_config",
+        "//engine/src/flutter/shell/platform/darwin/common:test_config_ldflags",
         "//engine/src/flutter/shell/platform/darwin/common:test_utils_swift",
         "//engine/src/flutter/shell/platform/embedder:embedder_as_internal_library",
         "//engine/src/flutter/shell/platform/embedder:embedder_test_utils",
@@ -883,6 +870,7 @@ flutter_shared_library(
         "//engine/src/flutter/shell/platform/darwin/common:availability_version_check",
         "//engine/src/flutter/shell/platform/darwin/common:framework_common",
         "//engine/src/flutter/shell/platform/darwin/common:test_config",
+        "//engine/src/flutter/shell/platform/darwin/common:test_config_ldflags",
         "//engine/src/flutter/shell/platform/darwin/common:test_utils_swift",
         "//engine/src/flutter/shell/platform/embedder:embedder_as_internal_library",
         "//engine/src/flutter/shell/platform/embedder:embedder_test_utils",

@@ -324,6 +324,7 @@ flutter_android_device_test(
     deps = [
         ":unittests_lib",
         "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from //flutter/testing
     ],
 )
 

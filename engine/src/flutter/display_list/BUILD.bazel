@@ -220,6 +220,7 @@ flutter_cc_test(
         "//engine/src/flutter/display_list/testing:display_list_testing",
         "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
         "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from //flutter/testing
         "//engine/src/flutter/testing:skia",
     ],
 )
@@ -251,6 +252,7 @@ flutter_cc_test(
         "//engine/src/flutter/display_list/testing:display_list_testing",
         "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
         "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from //flutter/testing
         "//engine/src/flutter/txt",
         "@abseil-cpp//absl/strings",
         "@abseil_cpp_tree//:root_includes",
@@ -420,6 +422,7 @@ flutter_shared_library(
     deps = [
         ":display_list_benchmarks_source",
         "//engine/src/flutter/benchmarking:benchmark_library_config",
+        "//engine/src/flutter/benchmarking:benchmark_library_config_ldflags",
         "//engine/src/flutter/benchmarking:benchmarking_library",
         "//engine/src/flutter/build/bazel/toolchains:cxx_runtime",
     ],

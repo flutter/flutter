@@ -426,7 +426,9 @@ config_setting(
 # app-extension-safe (-fapplication-extension on its Objective-C compiles
 # and its links). A GN config of flags alone, which the converter inlines
 # as copts on the target listing it and carries through this library's
-# linkopts to its link (configEffects).
+# linkopts to the link of a target that lists it: the framework's dylib,
+# and not the test library that links the framework's sources, which GN
+# links without the flag (configEffects: a library of link flags alone).
 cc_library(
     name = "ios_application_extension",
     linkopts = ["-fapplication-extension"],

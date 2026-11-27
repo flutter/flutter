@@ -229,6 +229,7 @@ flutter_display_test(
         "//engine/src/flutter/impeller/fixtures",
         "//engine/src/flutter/impeller/playground:pipeline_variant_recorder",
         "//engine/src/flutter/impeller/renderer:renderer_unittests_golden",
+        "@angle//:shared_library_public_config_ldflags",  # from //flutter/third_party/angle:libEGL
         "@googletest//:gtest",
         "@googletest_tree//:root_includes",
         "@googletest_tree//:third_party_dir_includes",

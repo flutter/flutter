@@ -234,6 +234,7 @@ flutter_cc_test(
         "//engine/src/flutter/shell/common:shell_test_fixture_sources",
         "//engine/src/flutter/testing",
         "//engine/src/flutter/testing:dart",
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from //flutter/shell/common:shell_test_fixture_sources
         "//engine/src/flutter/testing:fixture_test",
         "//engine/src/flutter/third_party/tonic",
         "@skia",
@@ -275,6 +276,7 @@ flutter_cc_test(
         "//engine/src/flutter/fml",
         "//engine/src/flutter/lib/snapshot",
         "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from //flutter/testing
         "//engine/src/flutter/testing:fixture_test",
     ],
 )
@@ -315,6 +317,7 @@ flutter_cc_test(
         "//engine/src/flutter/fml",
         "//engine/src/flutter/lib/snapshot",
         "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from //flutter/testing
         "//engine/src/flutter/testing:fixture_test",
     ],
 )

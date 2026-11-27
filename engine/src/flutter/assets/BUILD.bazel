@@ -57,5 +57,6 @@ flutter_cc_test(
         ":assets_fixtures",
         "//engine/src:include_root",
         "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from //flutter/testing
     ],
 )

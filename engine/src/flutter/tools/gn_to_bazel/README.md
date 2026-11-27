@@ -516,8 +516,21 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    libGLESv2 from beside it) and any
    `cc_library` of the same file that would declare the same `.so` made
    `linkstatic`, `config` to a header-only
-   `cc_library` carrying the defines, include directories and link flags that
-   dependents list in `deps`, known `.gni` templates to the matching Bazel
+   `cc_library` carrying the defines, include directories, libraries and
+   frameworks that dependents list in `deps` -- and, for a config that has
+   `ldflags` or lists one that has, to a second one, `<name>_ldflags`. GN
+   gives ldflags to the link of the target a config applies to and to no
+   other: on a `source_set` they do nothing, and a dependent's link gets
+   them through `public_configs` (direct dependents, and on along
+   `public_deps`) or `all_dependent_configs`. Bazel hands a library's
+   `linkopts` to everything that links it, so only what GN applies the
+   ldflags to depends on the second library: `flutter_tester` reaches
+   SwiftShader's WSI, whose public config links Metal weakly, through a
+   static library, and loads Metal as GN's does; the driver, WSI's direct
+   dependent, loads it weakly. A config the tables map to a library of
+   link flags alone (`ConfigDependency`'s `linkFlags`: the two
+   exported-symbols lists, the iOS application-extension flag) goes the
+   same way. Known `.gni` templates become the matching Bazel
    macros. GN's `deps` and `public_deps` both become `deps`: GN's include
    paths make every header of every transitive dependency visible, private
    or not, and `gn check` follows only the first edge, so a header that
@@ -533,10 +546,11 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    inlined instead (its defines as `local_defines`, its flags as `copts`),
    since a dependency's `defines` would leak to dependents where GN's
    private configs never do; a header-only target drops their defines and
-   flags, as GN applies them to no compile, and keeps their link flags
-   (`libs`, `ldflags`: inlined, or carried by the config's library as an
+   flags, as GN applies them to no compile, and keeps their libraries
+   (`libs`, `frameworks`: inlined, or carried by the config's library as an
    `implementation_deps` entry), which GN hands to every link that reaches
-   the target whether or not it compiles. The configs a target inherits through its
+   the target whether or not it compiles; a private config's `ldflags` go
+   nowhere from a library, as in GN. The configs a target inherits through its
    dependencies' `all_dependent_configs` become public `deps` of the
    target, so that Skia's `SK_VULKAN` and friends reach the engine as they
    do under GN. A public config's compiler flags cannot ride a dependency:

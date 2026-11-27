@@ -3599,6 +3599,10 @@ cc_library(
 
 cc_library(
     name = "dynamic_symbols",
+)
+
+cc_library(
+    name = "dynamic_symbols_ldflags",
     linkopts = [
         "-rdynamic",  # is_clang && is_linux
     ],
@@ -3612,6 +3616,7 @@ cc_test(
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":dynamic_symbols",
+        ":dynamic_symbols_ldflags",
         ":example",
         "//engine/src:include_root",
         "//engine/src/flutter/testing",
@@ -4592,18 +4597,42 @@ executable("common_swift_unittests") {
 }
 ''';
         final String output = await convert(commonGn, gnPackage: '//flutter/common');
+        // The framework stays with the config's library, for every link
+        // that reaches it, as GN's `frameworks` travel; the ldflags are a
+        // library of their own, for the links GN gives them to.
         expect(
           output,
           contains(
             'cc_library(\n'
             '    name = "swift_testing_config",\n'
             '    linkopts = [\n'
-            '        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",\n'
-            '        "-Wl,-rpath," + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",\n'
             '        "-framework",\n'
             '        "Testing",\n'
             '    ],\n'
+            ')\n'
+            '\n'
+            'cc_library(\n'
+            '    name = "swift_testing_config_ldflags",\n'
+            '    linkopts = [\n'
+            '        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",\n'
+            '        "-Wl,-rpath," + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",\n'
+            '    ],\n'
             ')\n',
+          ),
+        );
+        // A module links nothing: the framework goes to whatever links it,
+        // the ldflags do not.
+        expect(
+          output,
+          contains(
+            '    name = "swift_testing_main",\n'
+            '    testonly = True,\n'
+            '    srcs = ["SwiftTestingMain.swift"],\n'
+            '    linkopts = [\n'
+            '        "-framework",\n'
+            '        "Testing",\n'
+            '    ],\n'
+            '    swiftflags = [\n',
           ),
         );
         expect(
@@ -4626,6 +4655,7 @@ executable("common_swift_unittests") {
             '    }),\n'
             '    deps = [\n'
             '        ":swift_testing_config",\n'
+            '        ":swift_testing_config_ldflags",\n'
             '        ":swift_testing_main",\n'
             '        ":test_config",\n'
             '        "//engine/src:include_root",\n'
@@ -4644,8 +4674,9 @@ executable("common_swift_unittests") {
         expect(output, contains('        ":common_swift_unittests_swift",\n'));
         expect(output, isNot(contains('textual_hdrs')));
         // The same configs listed by a suite of another file: a dependency on
-        // each config's library, the flags inlined, the nested `:config` of
-        // the remote file resolved in its own package.
+        // each config's library and on the ldflags library of the one that
+        // has ldflags, the flags inlined, the nested `:config` of the remote
+        // file resolved in its own package.
         final GnSourceTree tree = sourceTree(<String, String>{
           'flutter/common/BUILD.gn': commonGn,
           'flutter/example/BUILD.gn': '''
@@ -4671,6 +4702,7 @@ executable("other_swift_unittests") {
             '    deps = [\n'
             '        "//engine/src:include_root",\n'
             '        "//engine/src/flutter/common:swift_testing_config",\n'
+            '        "//engine/src/flutter/common:swift_testing_config_ldflags",\n'
             '        "//engine/src/flutter/common:swift_testing_main",\n'
             '        "//engine/src/flutter/common:test_config",\n'
             '    ],\n',
@@ -5615,7 +5647,6 @@ cc_library(
     hdrs = ["include/lib.h"],
     copts = CHROMIUM_CODE_COPTS,
     includes = ["src"],
-    linkopts = ["-Wl,--private"],
     local_defines = FLUTTER_LOCAL_DEFINES + ["IMPLEMENTATION=1"] + select({
         "//engine/src/flutter/build/bazel:unoptimized": [
             "DEBUG_ONLY",  # is_debug
@@ -5630,7 +5661,9 @@ cc_library(
 '''),
       );
       // A headers-only target has nothing to compile the private defines
-      // into; what remains of the config still applies.
+      // into; what remains of the config still applies. Not its ldflags, on
+      // either library: a library links nothing, and GN hands a private
+      // config's ldflags to nobody else.
       expect(
         output,
         contains('''
@@ -5638,16 +5671,230 @@ cc_library(
     name = "headers_only_private_config",
     hdrs = ["src/other.h"],
     includes = ["src"],
-    linkopts = ["-Wl,--private"],
 )
 '''),
       );
       // The private config is still a target of its own, for anyone who
-      // lists it publicly.
+      // lists it publicly, and its ldflags a second one, for a target that
+      // links.
       expect(
         output,
         contains('cc_library(\n    name = "private_config",\n    defines = ["IMPLEMENTATION=1"],'),
       );
+      expect(
+        output,
+        contains(
+          'cc_library(\n'
+          '    name = "private_config_ldflags",\n'
+          '    linkopts = ["-Wl,--private"],\n'
+          ')\n',
+        ),
+      );
+    });
+
+    test("a config's ldflags reach the links GN gives them to, and no others", () {
+      // GN gives a config's ldflags to the link of the target the config
+      // applies to. On a source_set they do nothing; a public config's reach
+      // the direct dependents and whoever a public_deps chain hands the
+      // config to; an all_dependent_config's reach every dependent. Bazel
+      // hands a library's linkopts to everything that links it, so the
+      // ldflags are a library of their own, `<config>_ldflags`, which only
+      // those targets depend on (SwiftShader's WSI links Metal weakly in a
+      // public config: its driver does, and flutter_tester, which reaches
+      // WSI through a static library, does not).
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/lib/BUILD.gn': '''
+config("link_config") {
+  defines = [ "WITH_LINK=1" ]
+  ldflags = [ "-Wl,--flag" ]
+}
+
+config("outer_config") {
+  configs = [ ":link_config" ]
+}
+
+source_set("leaf") {
+  sources = [ "leaf.cc" ]
+  public_configs = [ ":link_config" ]
+}
+
+source_set("through_private") {
+  sources = [ "private.cc" ]
+  deps = [ ":leaf" ]
+}
+
+source_set("through_public") {
+  sources = [ "public.cc" ]
+  public_deps = [ ":leaf" ]
+}
+
+source_set("outer") {
+  sources = [ "outer.cc" ]
+  public_configs = [ ":outer_config" ]
+}
+
+source_set("everywhere") {
+  sources = [ "everywhere.cc" ]
+  all_dependent_configs = [ ":link_config" ]
+}
+
+source_set("inherits") {
+  sources = [ "inherits.cc" ]
+  deps = [ ":everywhere" ]
+}
+
+shared_library("shared") {
+  sources = [ "shared.cc" ]
+  public_configs = [ ":link_config" ]
+}
+
+source_set("exporting") {
+  sources = [ "exporting.cc" ]
+  public_configs = [ "//flutter:export_dynamic_symbols" ]
+}
+
+source_set("exporting_privately") {
+  sources = [ "exporting_privately.cc" ]
+  configs += [ "//flutter:export_dynamic_symbols" ]
+}
+''',
+        'flutter/app/BUILD.gn': '''
+executable("direct") {
+  sources = [ "main.cc" ]
+  deps = [ "//flutter/lib:leaf" ]
+}
+
+executable("indirect") {
+  sources = [ "main.cc" ]
+  deps = [ "//flutter/lib:through_private" ]
+}
+
+executable("forwarded") {
+  sources = [ "main.cc" ]
+  deps = [ "//flutter/lib:through_public" ]
+}
+
+executable("nested") {
+  sources = [ "main.cc" ]
+  deps = [ "//flutter/lib:outer" ]
+}
+
+executable("own") {
+  sources = [ "main.cc" ]
+  configs += [ "//flutter/lib:outer_config" ]
+}
+
+executable("of_shared") {
+  sources = [ "main.cc" ]
+  deps = [ "//flutter/lib:shared" ]
+}
+
+executable("exports") {
+  sources = [ "main.cc" ]
+  deps = [ "//flutter/lib:exporting" ]
+}
+
+executable("exports_itself") {
+  sources = [ "main.cc" ]
+  deps = [ "//flutter/lib:exporting_privately" ]
+  configs += [ "//flutter:export_dynamic_symbols" ]
+}
+
+executable("exports_nothing") {
+  sources = [ "main.cc" ]
+  deps = [ "//flutter/lib:exporting_privately" ]
+}
+''',
+      });
+      // The text of the rule [name] of [output], up to its closing line.
+      String rule(String output, String name) {
+        final int start = output.indexOf('    name = "$name",\n');
+        expect(start, isNonNegative, reason: 'no rule $name');
+        return output.substring(start, output.indexOf('\n)\n', start));
+      }
+
+      final String lib = emitBuildFile(
+        evaluateIn(tree, '//flutter/lib/BUILD.gn'),
+        gnPackage: '//flutter/lib',
+        tree: tree,
+      );
+      // The config's library carries what Bazel may hand to everyone; the
+      // ldflags are the second library's.
+      expect(
+        lib,
+        contains(
+          'cc_library(\n'
+          '    name = "link_config",\n'
+          '    defines = ["WITH_LINK=1"],\n'
+          ')\n'
+          '\n'
+          'cc_library(\n'
+          '    name = "link_config_ldflags",\n'
+          '    linkopts = ["-Wl,--flag"],\n'
+          ')\n',
+        ),
+      );
+      // A config that lists it brings them along wherever it applies: its
+      // ldflags library depends on the other's.
+      expect(
+        lib,
+        contains(
+          'cc_library(\n'
+          '    name = "outer_config",\n'
+          '    deps = [":link_config"],\n'
+          ')\n'
+          '\n'
+          'cc_library(\n'
+          '    name = "outer_config_ldflags",\n'
+          '    deps = [":link_config_ldflags"],\n'
+          ')\n',
+        ),
+      );
+      // A library links nothing: neither the one that lists the config
+      // publicly nor a library that depends on it takes the ldflags.
+      for (final name in <String>['leaf', 'through_private', 'through_public', 'outer']) {
+        expect(rule(lib, name), isNot(contains('_ldflags')), reason: name);
+      }
+      // One that hands the config to every dependent hands on its ldflags
+      // too, and so does whatever inherits the config from it.
+      expect(rule(lib, 'everywhere'), contains('        ":link_config_ldflags",\n'));
+      expect(rule(lib, 'inherits'), contains('        ":link_config_ldflags",\n'));
+      // A shared library links with its public config's ldflags. Its import,
+      // which everything that links against it takes, has the config alone:
+      // the direct dependents take the ldflags themselves (below).
+      expect(rule(lib, 'shared'), contains('        ":link_config_ldflags",\n'));
+      expect(rule(lib, 'shared'), contains('    interface_deps = [":link_config"],\n'));
+
+      final String app = emitBuildFile(
+        evaluateIn(tree, '//flutter/app/BUILD.gn'),
+        gnPackage: '//flutter/app',
+        tree: tree,
+      );
+      const linkLibrary = '"//engine/src/flutter/lib:link_config_ldflags"';
+      const outerLibrary = '"//engine/src/flutter/lib:outer_config_ldflags"';
+      // A direct dependent of the library links with them; one that reaches
+      // it through another library's private dependency does not; one that
+      // reaches it along public_deps does.
+      expect(rule(app, 'direct'), contains(linkLibrary));
+      expect(rule(app, 'indirect'), isNot(contains('_ldflags')));
+      expect(rule(app, 'forwarded'), contains(linkLibrary));
+      // The config that lists another: through a dependency's public config,
+      // and listed by the target itself.
+      expect(rule(app, 'nested'), contains(outerLibrary));
+      expect(rule(app, 'own'), contains(outerLibrary));
+      // A direct dependent of the shared library.
+      expect(rule(app, 'of_shared'), contains(linkLibrary));
+      // A config the tables map to a library of its link flags alone
+      // (//flutter:export_dynamic_symbols) goes the same way: no library
+      // depends on that library; the links GN gives the flags to do -- a
+      // direct dependent of a public listing, a target that lists the
+      // config itself -- and a dependent of a private listing does not.
+      const symbols = '"//engine/src/flutter:export_dynamic_symbols"';
+      expect(rule(lib, 'exporting'), isNot(contains(symbols)));
+      expect(rule(lib, 'exporting_privately'), isNot(contains(symbols)));
+      expect(rule(app, 'exports'), contains(symbols));
+      expect(rule(app, 'exports_itself'), contains(symbols));
+      expect(rule(app, 'exports_nothing'), isNot(contains(symbols)));
     });
 
     test('lays files out by package in an external repository', () async {

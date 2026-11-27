@@ -42,6 +42,7 @@ flutter_cc_test(
         "//engine/src/flutter/runtime",
         "//engine/src/flutter/runtime:libdart",
         "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from //flutter/testing
         "//engine/src/flutter/testing:fixture_test",
         "//engine/src/flutter/third_party/tonic",
         "@dart//:dart_api_headers",

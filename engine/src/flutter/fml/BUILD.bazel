@@ -554,6 +554,7 @@ flutter_objc_library(
         ":fml",
         ":fml_fixtures",
         "//engine/src:include_root",
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from //flutter/testing:run_all_unittests
         "//engine/src/flutter/testing:run_all_unittests",
         "//engine/src/flutter/testing:testing_core",
         "@dart//:dart_api_headers",
@@ -615,6 +616,7 @@ flutter_cc_test(
         ":fml",
         ":fml_fixtures",
         "//engine/src:include_root",
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from //flutter/testing:run_all_unittests
         "//engine/src/flutter/testing:run_all_unittests",
         "//engine/src/flutter/testing:testing_core",
         "@dart//:dart_api_headers",

@@ -14,6 +14,10 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "dynamic_symbols",
+)
+
+cc_library(
+    name = "dynamic_symbols_ldflags",
     linkopts = select({
         "@platforms//os:linux": [
             "-rdynamic",  # is_clang && is_linux

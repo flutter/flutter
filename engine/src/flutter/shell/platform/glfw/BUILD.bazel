@@ -108,6 +108,7 @@ flutter_cc_test(
         "//engine/src:include_root",
         "//engine/src/flutter/shell/platform/embedder:embedder_headers",
         "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from //flutter/testing
     ],
 )
 

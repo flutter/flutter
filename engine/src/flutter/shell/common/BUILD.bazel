@@ -900,6 +900,7 @@ flutter_cc_test(
         "//engine/src/flutter/runtime:libdart",
         "//engine/src/flutter/shell/profiling:profiling_unittests",
         "//engine/src/flutter/shell/version",
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from :shell_test_fixture_sources
         "//engine/src/flutter/testing:fixture_test",
         "@googletest//:gtest",
         "@googletest_tree//:root_includes",
@@ -907,6 +908,12 @@ flutter_cc_test(
     ] + select({
         "//engine/src/flutter/shell:enable_gl": [
             "//engine/src/flutter/build/bazel/gl_wrap:angle",  # shell_enable_gl
+            "@angle//:angle_backend_config_ldflags",  # from //flutter/third_party/angle:libGLESv2_static
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_gl_and_is_mac": [
+            "@angle//src/libANGLE/renderer/metal:angle_metal_backend_config_ldflags",  # from //flutter/third_party/angle:libGLESv2_static
         ],
         "//conditions:default": [],
     }),

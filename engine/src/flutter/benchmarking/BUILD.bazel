@@ -27,6 +27,10 @@ cc_library(
 
 cc_library(
     name = "benchmark_library_config",
+)
+
+cc_library(
+    name = "benchmark_library_config_ldflags",
     linkopts = select({
         "@platforms//os:ios": [
             "-Wl,-exported_symbol,_RunBenchmarks",  # is_ios

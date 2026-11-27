@@ -435,8 +435,10 @@ flutter_swift_library(
         "//engine/src:include_root",
         "//engine/src/flutter/shell/platform/darwin/common:config",
         "//engine/src/flutter/shell/platform/darwin/common:swift_testing_config",
+        "//engine/src/flutter/shell/platform/darwin/common:swift_testing_config_ldflags",
         "//engine/src/flutter/shell/platform/darwin/common:swift_testing_main",
         "//engine/src/flutter/shell/platform/darwin/common:test_config",
+        "//engine/src/flutter/shell/platform/darwin/common:test_config_ldflags",
         "//engine/src/flutter/shell/platform/darwin/common:test_utils_swift",
     ],
 )
@@ -461,8 +463,10 @@ cc_test(
         "//engine/src:include_root",
         "//engine/src/flutter/shell/platform/darwin/common:config",
         "//engine/src/flutter/shell/platform/darwin/common:swift_testing_config",
+        "//engine/src/flutter/shell/platform/darwin/common:swift_testing_config_ldflags",
         "//engine/src/flutter/shell/platform/darwin/common:swift_testing_main",
         "//engine/src/flutter/shell/platform/darwin/common:test_config",
+        "//engine/src/flutter/shell/platform/darwin/common:test_config_ldflags",
         "//engine/src/flutter/shell/platform/darwin/common:test_utils_swift",
         "@macos_sdk//:macos_developer",  # !(is_ios) && is_mac
     ],
@@ -541,6 +545,7 @@ flutter_objc_library(
         "//engine/src/flutter/shell/platform/common:common_cpp_enums",
         "//engine/src/flutter/shell/platform/common:common_cpp_isolate_scope",
         "//engine/src/flutter/shell/platform/darwin/common:framework_common",
+        "//engine/src/flutter/shell/platform/darwin/common:test_config_ldflags",  # from //flutter/shell/platform/darwin/common:test_utils_swift
         "//engine/src/flutter/shell/platform/darwin/common:test_utils_swift",
         "//engine/src/flutter/shell/platform/darwin/graphics",
         "//engine/src/flutter/shell/platform/embedder:embedder_as_internal_library",
@@ -548,6 +553,7 @@ flutter_objc_library(
         "//engine/src/flutter/testing",
         "//engine/src/flutter/testing:autoreleasepool_test",
         "//engine/src/flutter/testing:dart",
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from //flutter/testing
         "//engine/src/flutter/testing:skia",
         "//engine/src/flutter/testing:testing_lib",
         "@macos_sdk//:macos_developer",  # from //flutter/shell/platform/darwin/common:test_utils_swift
@@ -607,6 +613,7 @@ cc_test(
         "//engine/src/flutter/shell/platform/common:common_cpp_enums",
         "//engine/src/flutter/shell/platform/common:common_cpp_isolate_scope",
         "//engine/src/flutter/shell/platform/darwin/common:framework_common",
+        "//engine/src/flutter/shell/platform/darwin/common:test_config_ldflags",  # from //flutter/shell/platform/darwin/common:test_utils_swift
         "//engine/src/flutter/shell/platform/darwin/common:test_utils_swift",
         "//engine/src/flutter/shell/platform/darwin/graphics",
         "//engine/src/flutter/shell/platform/embedder:embedder_as_internal_library",
@@ -614,6 +621,7 @@ cc_test(
         "//engine/src/flutter/testing",
         "//engine/src/flutter/testing:autoreleasepool_test",
         "//engine/src/flutter/testing:dart",
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from //flutter/testing
         "//engine/src/flutter/testing:skia",
         "//engine/src/flutter/testing:testing_lib",
         "@macos_sdk//:macos_developer",  # from //flutter/shell/platform/darwin/common:test_utils_swift

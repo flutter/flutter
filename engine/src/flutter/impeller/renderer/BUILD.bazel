@@ -257,7 +257,6 @@ cc_library(
     deps = [
         ":renderer",
         "//engine/src:include_root",
-        "//engine/src/flutter:export_dynamic_symbols",
         "//engine/src/flutter/impeller:impeller_public_config",
         "//engine/src/flutter/impeller/fixtures:flutter_gpu_fixtures",
         "//engine/src/flutter/impeller/playground:playground_test",

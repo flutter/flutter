@@ -47,7 +47,15 @@ too: `ldflags` in the target's ninja file under `out/<dir>/obj/`, written by
 `tools/gn` with the builder's flags and without `--bazel`, against
 `bazel aquery --include_param_files 'mnemonic("CppLink", <target>)'`.
 That comparison found `--as-needed` on SwiftShader's driver in the ASan
-build, where GN's link has none.
+build, where GN's link has none. The flags a GN config brings to a link
+(a weak framework, an exported-symbols list, an rpath, `-rdynamic`) are
+compared the same way over every executable, test and shipped library of
+a configuration, GN's read from the `ldflags` of each link's ninja file
+after `gn gen` alone: a library's `linkopts` travel to every link in
+Bazel, a config's `ldflags` do not in GN, and the difference shows on
+binaries nobody thought to look at (`flutter_tester` linked Metal weakly,
+the iOS test library was linked `-fapplication-extension`, and
+`impeller_golden_tests` lacked an rpath GN gives it).
 `bazel query 'tests(<suite>)' | wc -l` says what a suite
 holds on this host before a run. Disk: the framework tests' kernels and the
 engine's extra configurations write on the order of a gigabyte a minute at

@@ -107,6 +107,7 @@ flutter_cc_test(
         "//engine/src/flutter/shell/platform/android/surface:surface_mock",
         "//engine/src/flutter/testing",
         "//engine/src/flutter/testing:dart",
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from //flutter/testing
         "//engine/src/flutter/testing:skia",
     ],
 )

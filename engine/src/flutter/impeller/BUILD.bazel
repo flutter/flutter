@@ -213,8 +213,10 @@ flutter_display_test(
     }),
     deps = [
         ":impeller_public_config",
+        "//engine/src/flutter:export_dynamic_symbols",  # from renderer:renderer_dart_unittests
         "//engine/src/flutter/impeller/renderer:renderer_dart_unittests",
         "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from //flutter/testing
     ],
 )
 

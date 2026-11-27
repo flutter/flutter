@@ -46,6 +46,14 @@ cc_library(
 # the underlying issue is fixed.
 cc_library(
     name = "disable_fatal_link_warnings",
+    target_compatible_with = select({
+        "@platforms//os:linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+cc_library(
+    name = "disable_fatal_link_warnings_ldflags",
     linkopts = ["-Wl,--no-fatal-warnings"],
     target_compatible_with = select({
         "@platforms//os:linux": [],
@@ -457,6 +465,7 @@ flutter_display_test(
         "//engine/src/flutter/shell/platform/linux/config:wayland_client",
         "//engine/src/flutter/shell/platform/linux/config:wayland_egl",
         "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from //flutter/testing
     ],
 )
 

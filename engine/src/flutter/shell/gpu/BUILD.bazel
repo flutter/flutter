@@ -531,6 +531,7 @@ flutter_cc_test(
         "//engine/src/flutter/impeller:impeller_public_config",
         "//engine/src/flutter/impeller/fixtures",
         "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from //flutter/testing
     ] + select({
         "@platforms//os:macos": [
             ":gpu_surface_metal_unittests",  # is_mac

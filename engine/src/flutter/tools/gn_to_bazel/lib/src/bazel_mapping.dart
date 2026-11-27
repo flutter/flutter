@@ -1203,12 +1203,27 @@ sealed class ConfigEffect {
 
 /// The config is a dependency on a Bazel target carrying its defines and
 /// include directories, plus the compiler flags it applies ([copts]), which
-/// no dependency can carry and the listing target gets inlined.
+/// no dependency can carry and the listing target gets inlined. With
+/// [linkFlags], the target carries the config's `ldflags` and nothing a
+/// compile reads. GN gives ldflags to the link of the target the config
+/// applies to and to no other, where Bazel hands a library's linkopts to
+/// everything that links it; so only a target that links depends on such a
+/// library -- one that lists the config, or receives it from a dependency's
+/// public configs -- as on a converted config's `<name>_ldflags` library
+/// (starlark_emitter.dart's _convertConfig).
 final class ConfigDependency extends ConfigEffect {
-  const ConfigDependency(this.label, {this.copts = const <String>[]});
+  const ConfigDependency(this.label, {this.copts = const <String>[], this.linkFlags = false});
 
   final String label;
   final List<String> copts;
+  final bool linkFlags;
+}
+
+/// Whether the tables map the config of GN label [label] (`//dir:name`) to
+/// a library of its link flags alone ([ConfigDependency.linkFlags]).
+bool isLinkFlagsLibrary(String label) {
+  final ConfigEffect? effect = configEffects[label];
+  return effect is ConfigDependency && effect.linkFlags;
 }
 
 /// The config is implied by something else (a dependency that already
@@ -1275,11 +1290,15 @@ const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
   '//flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers_config': ConfigDependency(
     '@vulkan-headers//:vulkan_headers_config',
   ),
+  // The two lists of symbols a binary keeps in its dynamic symbol table:
+  // ldflags and their linker input alone, by hand in the root file.
   '//flutter:export_dynamic_symbols': ConfigDependency(
     '//engine/src/flutter:export_dynamic_symbols',
+    linkFlags: true,
   ),
   '//flutter:export_dynamic_test_symbols': ConfigDependency(
     '//engine/src/flutter:export_dynamic_test_symbols',
+    linkFlags: true,
   ),
   '//flutter/common:flutter_config': ConfigDependency('//engine/src/flutter/common:flutter_config'),
   // The accessibility tree's public config (its root as an include
@@ -1371,10 +1390,14 @@ const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
   // on the Objective-C compiles and the link (the iOS embedding is built
   // app-extension-safe): the flag inlined on the listing target's compiles
   // (every source of it, where GN gives it to the Objective-C ones -- the
-  // targets are Objective-C), the link's through the library's linkopts.
+  // targets are Objective-C), the link's through the library's linkopts,
+  // on the links GN gives it to: the framework's dylib lists the config
+  // and links with the flag; the framework's source_set lists it too, and
+  // the test library that links the source_set gets none of it.
   '//build/config/ios:ios_application_extension': ConfigDependency(
     '//engine/src/flutter/build/bazel:ios_application_extension',
     copts: <String>['-fapplication-extension'],
+    linkFlags: true,
   ),
   '//build/config/compiler:rtti': ConfigCopts(<(Condition, List<String>)>[]),
   // //build/config/compiler:default_optimization, a default config that is

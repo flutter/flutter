@@ -530,6 +530,7 @@ cc_binary(
             "//engine/src/flutter/testing:test_swangle_utils",  # impeller_supports_rendering
             "//engine/src/flutter/testing:test_swiftshader_utils",  # impeller_supports_rendering
             "@abseil-cpp//absl/status:statusor",  # impeller_supports_rendering
+            "@angle//:angle_backend_config_ldflags",  # from //flutter/testing:test_swangle_utils
         ],
         "//engine/src/flutter/impeller/tools:opengles": [
             ":tester_opengles_gpu_configuration",  # impeller_supports_rendering
@@ -537,6 +538,7 @@ cc_binary(
             "//engine/src/flutter/testing:test_swangle_utils",  # impeller_supports_rendering
             "//engine/src/flutter/testing:test_swiftshader_utils",  # impeller_supports_rendering
             "@abseil-cpp//absl/status:statusor",  # impeller_supports_rendering
+            "@angle//:angle_backend_config_ldflags",  # from //flutter/testing:test_swangle_utils
         ],
         "//engine/src/flutter/impeller/tools:vulkan": [
             ":tester_opengles_gpu_configuration",  # impeller_supports_rendering
@@ -544,6 +546,12 @@ cc_binary(
             "//engine/src/flutter/testing:test_swangle_utils",  # impeller_supports_rendering
             "//engine/src/flutter/testing:test_swiftshader_utils",  # impeller_supports_rendering
             "@abseil-cpp//absl/status:statusor",  # impeller_supports_rendering
+            "@angle//:angle_backend_config_ldflags",  # from //flutter/testing:test_swangle_utils
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+            "@angle//src/libANGLE/renderer/metal:angle_metal_backend_config_ldflags",  # from //flutter/testing:test_swangle_utils
         ],
         "//conditions:default": [],
     }),

@@ -98,6 +98,7 @@ flutter_objc_library(
         "//engine/src:include_root",
         "//engine/src/flutter:config",
         "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from //flutter/testing
     ],
     alwayslink = True,
 )
@@ -121,5 +122,6 @@ cc_test(
         "//engine/src:include_root",
         "//engine/src/flutter:config",
         "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from //flutter/testing
     ],
 )

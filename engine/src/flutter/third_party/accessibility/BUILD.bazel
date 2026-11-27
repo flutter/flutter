@@ -107,6 +107,7 @@ flutter_objc_library(
         "//engine/src:include_root",
         "//engine/src/flutter/testing",  # is_mac || is_win
         "//engine/src/flutter/testing:dart",  # is_mac || is_win
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from //flutter/testing
     ],
     alwayslink = True,
 )
@@ -183,6 +184,7 @@ cc_test(
         "//engine/src:include_root",
         "//engine/src/flutter/testing",  # is_mac || is_win
         "//engine/src/flutter/testing:dart",  # is_mac || is_win
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from //flutter/testing
     ],
 )
 

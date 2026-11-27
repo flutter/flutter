@@ -1558,6 +1558,10 @@ final class _Emitter {
   /// headers through ocmock_src's all-dependent config: the Mac's T28).
   /// Private deps stay out, as GN keeps their headers from dependents'
   /// checks; the rule's own `deps`, which carry them, link the library.
+  /// The ldflags of its public configs stay out too: GN gives those to the
+  /// links of its direct dependents, which take them by themselves
+  /// ([_propagatedLinkConfigsInto]), where the import would hand them to
+  /// everything that links it.
   void _sharedLibraryInterfaceInto(_Rule rule, GnTarget target, Set<String> publicConfigs) {
     final interface = _Rule(rule.kind, rule.name, const <String>[]);
     final GnVariable? publicDeps = target.variables['public_deps'];
@@ -1575,6 +1579,7 @@ final class _Emitter {
           warningSet: _WarningSet.chromiumCode,
           publicConfigs: publicConfigs,
           propagatedFlags: unused,
+          links: false,
         );
       }
     }
@@ -1599,11 +1604,18 @@ final class _Emitter {
 
   /// The configs [target] inherits through `all_dependent_configs` as
   /// dependencies on their libraries, each under the condition it reaches
-  /// the target.
+  /// the target -- and on their ldflags libraries ([_convertConfig]): GN
+  /// applies such a config to every dependent, and so to its link.
   void _inheritedConfigsInto(_Rule rule, GnTarget target) {
     for (final MapEntry<String, Condition> inherited
         in (inheritedConfigs[target.name] ?? const <String, Condition>{}).entries) {
       rule.list('deps').addUnique(inherited.value, _Item(_localLabel(inherited.key)));
+      final String label = _gnLabel(inherited.key);
+      final GnTarget? config = _configAt(label);
+      if (config != null && _bringsLdflags(config, label)) {
+        final ldflags = _Item(_localLabel('${inherited.key}$ldflagsSuffix'));
+        rule.list('deps').addUnique(inherited.value, ldflags);
+      }
     }
   }
 
@@ -3596,8 +3608,10 @@ final class _Emitter {
   /// Swift compile besides the include directories (its `tool("swift")`
   /// takes `{{swiftflags}}` and `{{include_dirs}}`; cflags, defines and the
   /// rest apply to no Swift compile). A config's `lib_dirs` is darwin_sdk.gni's
-  /// Swift library directories or nothing (the rule carries them); its link
-  /// flags go to whatever links the module, as a cc_library's would.
+  /// Swift library directories or nothing (the rule carries them); its
+  /// libraries and frameworks go to whatever links the module, as a
+  /// cc_library's would, and its ldflags to the links GN gives them to
+  /// ([_convertConfig]).
   void _convertSwiftTarget(GnTarget target) {
     _use('//build_defs/cc:swift_library.bzl', 'flutter_swift_library');
     final rule = _Rule('flutter_swift_library', target.name, target.comments);
@@ -3630,8 +3644,11 @@ final class _Emitter {
           _frameworkDirsInto(rule, variable, Condition.always);
         case 'libs':
         case 'frameworks':
-        case 'ldflags':
           _linkFlagsInto(rule, variable);
+        case 'ldflags':
+          // A module links nothing: a source_set's ldflags do nothing in
+          // GN and reach nobody.
+          break;
         case 'configs':
         case 'public_configs':
         case 'all_dependent_configs':
@@ -3684,15 +3701,30 @@ final class _Emitter {
               applied,
               package: config.startsWith(':') ? null : _gnPackageOf(_gnLabel(config)),
             );
+            // A config the module hands every dependent: its ldflags too,
+            // for their links (_convertConfig).
+            if (variable.name == 'all_dependent_configs' &&
+                _bringsLdflags(known, _gnLabel(config))) {
+              final String library = bazelLabel(
+                '${_gnLabel(config)}$ldflagsSuffix',
+                package: gnPackage,
+                location: assignment.location,
+              );
+              rule.list('deps').addUnique(element.condition, _Item(_localLabel(library)));
+            }
             continue;
           }
           final ConfigEffect? effect = configEffects[config] ?? configEffects[_gnLabel(config)];
           switch (effect) {
-            case ConfigDependency(:final String label):
+            case ConfigDependency(:final String label, :final bool linkFlags):
               // The config's defines and include directories, for the
               // bridging header's imports; its compiler flags apply to no
-              // Swift compile.
-              rule.list('deps').addUnique(element.condition, _item(label, element));
+              // Swift compile. A library of link flags alone is a module's
+              // dependency only where the module hands the config to every
+              // dependent (_convertConfig).
+              if (!linkFlags || variable.name == 'all_dependent_configs') {
+                rule.list('deps').addUnique(element.condition, _item(label, element));
+              }
             case ConfigWarningSet() || ConfigImplied() || ConfigToolchain() || ConfigCopts():
               // C and C++ compiler settings: nothing of a Swift compile.
               break;
@@ -3757,8 +3789,12 @@ final class _Emitter {
           _libraryDirsInto(rule, variable, under);
         case 'framework_dirs':
           _frameworkDirsInto(rule, variable, under);
-        case 'libs' || 'frameworks' || 'ldflags':
+        case 'libs' || 'frameworks':
           _linkFlagsInto(rule, variable, under: under);
+        case 'ldflags':
+          // A module links nothing. The ldflags reach the links GN gives
+          // them to through the config's ldflags library (_convertConfig).
+          break;
         case 'configs':
           _forEachItem(variable, into: rule.list('deps'), (_Element e) {
             // A config's own configs: of its file -- this one, or the
@@ -4048,6 +4084,10 @@ final class _Emitter {
         case 'public_configs':
         case 'all_dependent_configs':
           configVariables.add(variable);
+        case 'ldflags' when library:
+          // A library links nothing: the ldflags of a source_set or a
+          // static_library do nothing in GN and reach nobody.
+          break;
         case 'libs':
         case 'frameworks':
         case 'ldflags':
@@ -4137,6 +4177,13 @@ final class _Emitter {
     // warnings and the Vulkan headers' -Wno-redundant-parens).
     for (final variable in depVariables) {
       _propagatedFlagsInto(rule, variable);
+    }
+    // And the ldflags of the dependencies' public configs, on a target
+    // that links (_convertConfig).
+    if (_links(rule)) {
+      for (final variable in depVariables) {
+        _propagatedLinkConfigsInto(rule, variable);
+      }
     }
     // Nothing depends on a binary: what its public_deps would hand on goes
     // nowhere, and GN's own check only concerns dependents.
@@ -5007,6 +5054,25 @@ final class _Emitter {
     });
   }
 
+  /// The ldflags a dependency's public configs hand this target's link
+  /// ([DependencyResolver.linkConfigsOf]): a dependency on each such
+  /// config's ldflags library (_convertConfig), under the condition the
+  /// config reaches this target.
+  void _propagatedLinkConfigsInto(_Rule rule, GnVariable variable) {
+    _forEachItem(variable, into: _ListAttribute(), (_Element e) {
+      for (final ForwardedLinkConfig config in forwarded.linkConfigsOf(_gnLabel(_string(e)))) {
+        final Condition under = assumptions.apply(e.condition.and(config.condition));
+        if (under == Condition.never) {
+          continue;
+        }
+        final String label = _ldflagsLibrary(config.config, e.assignment.location);
+        rule
+            .list('deps')
+            .addUnique(under, _Item(_localLabel(label), comment: 'from ${_string(e)}'));
+      }
+    });
+  }
+
   /// The flags the public dependencies of [variable] hand this target
   /// ([forwarded]), which GN hands on to its dependents in turn -- public
   /// configs travel along public_deps chains -- collected into
@@ -5063,9 +5129,78 @@ final class _Emitter {
   /// The package of an absolute GN label (`//dir` of `//dir:name`).
   static String _gnPackageOf(String label) => label.substring(0, label.indexOf(':'));
 
+  /// Whether [rule] links -- an executable, a test, a shared library --
+  /// rather than being linked: where GN applies ldflags.
+  static bool _links(_Rule rule) =>
+      rule.kind != 'cc_library' &&
+      rule.kind != 'flutter_objc_library' &&
+      rule.kind != 'flutter_swift_library';
+
+  /// The config() a GN label (`//dir:name`) names: one of this file, or of
+  /// another converted file, through the resolver; null for a config the
+  /// tables hold the effect of (configEffects), or of a file the converter
+  /// does not read.
+  GnTarget? _configAt(String label) {
+    if (configEffects.containsKey(label)) {
+      return null;
+    }
+    if (_gnPackageOf(label) == gnPackage) {
+      final GnTarget? local = localConfigs[label.substring(label.indexOf(':') + 1)];
+      if (local != null) {
+        return local;
+      }
+    }
+    return forwarded.configOf(label);
+  }
+
+  /// Whether [config], the config() of GN label [label], brings ldflags to
+  /// what it applies to: its own, or those of a config it lists
+  /// ([bringsLdflags]).
+  bool _bringsLdflags(GnTarget config, String label) =>
+      bringsLdflags(config, label: label, configAt: _configAt);
+
+  /// The library that holds the ldflags of the config of GN label [config]:
+  /// the one the tables name for a config they map to its link flags alone
+  /// ([isLinkFlagsLibrary]), else the converted config's `<name>_ldflags`
+  /// (_convertConfig).
+  String _ldflagsLibrary(String config, GnLocation location) {
+    final ConfigEffect? effect = configEffects[config];
+    if (effect is ConfigDependency && effect.linkFlags) {
+      return effect.label;
+    }
+    return bazelLabel('$config$ldflagsSuffix', package: gnPackage, location: location);
+  }
+
+  /// The ldflags libraries of the configs a config of this file lists --
+  /// [variable], its `configs` -- as dependencies of [rule], each under
+  /// [under] and the condition it is listed under: GN applies a config's
+  /// configs wherever it applies the config (_convertConfig).
+  void _listedLdflagsInto(_Rule rule, GnVariable variable, Condition under) {
+    for (final GnListItem item in variable.liveItems) {
+      final GnValue value = item.value;
+      if (value is! GnStringValue) {
+        continue;
+      }
+      final String label = _gnLabel(value.value);
+      final GnTarget? listed = _configAt(label);
+      final Condition when = assumptions.apply(under.and(item.condition));
+      if (listed == null || !_bringsLdflags(listed, label) || when == Condition.never) {
+        continue;
+      }
+      final String library = bazelLabel(
+        '$label$ldflagsSuffix',
+        package: gnPackage,
+        location: item.assignment.location,
+      );
+      rule.list('deps').addUnique(when, _Item(_localLabel(library)));
+    }
+  }
+
   /// config("x") becomes a header-only library carrying the defines, include
-  /// directories and link flags, which dependents list in deps; Bazel
-  /// propagates those the way GN propagates a config. Compiler flags cannot
+  /// directories, libraries and frameworks, which dependents list in deps;
+  /// Bazel propagates those the way GN propagates a config. Its ldflags are
+  /// a second library's, `x_ldflags`, which only what GN applies them to
+  /// depends on (below). Compiler flags cannot
   /// travel that way: a target of this file that lists the config gets them
   /// inlined (and its dependents, for a public config, derive them from
   /// this file: dependency_resolver.dart); a config with flags that no target
@@ -5100,8 +5235,10 @@ final class _Emitter {
           _includeDirsInto(rule, variable, Condition.always, treeOnly: true);
         case 'libs':
         case 'frameworks':
-        case 'ldflags':
           _linkFlagsInto(rule, variable);
+        case 'ldflags':
+          // In a library of their own (below).
+          break;
         case 'visibility':
           // Local configs are only ever used by their own package.
           break;
@@ -5117,6 +5254,19 @@ final class _Emitter {
           break;
         case 'configs':
           // A config's own configs apply wherever it applies: dependencies.
+          // The ldflags they bring travel apart, as its own do (below). A
+          // listed config that the tables map to its link flags alone would
+          // ride the dependency to every link; none is listed so today.
+          for (final GnListItem item in variable.liveItems) {
+            final GnValue value = item.value;
+            if (value is GnStringValue && isLinkFlagsLibrary(_gnLabel(value.value))) {
+              throw GnError(
+                item.assignment.location,
+                'config ${target.name} lists ${value.value}, a config of link flags alone '
+                '(configEffects): not converted yet',
+              );
+            }
+          }
           _labelsInto(rule.list('deps'), variable, target);
         case 'cflags' || 'cflags_c' || 'cflags_cc' || 'cflags_objc' || 'cflags_objcc'
             when locallyUsedConfigs.contains(target.name):
@@ -5135,6 +5285,33 @@ final class _Emitter {
       }
     }
     rules.add(rule);
+    // The config's ldflags, in a library of their own beside it. GN gives
+    // a config's ldflags to the link of the target the config applies to
+    // and lets them go no further: on a library they do nothing, and they
+    // reach a dependent's link only through public_configs (direct
+    // dependents, and on along public_deps) or all_dependent_configs.
+    // Bazel hands a library's linkopts to everything that links it, so
+    // the ldflags cannot sit with the defines and the libraries, which do
+    // travel that way: only what GN applies them to depends on this
+    // library (_configsInto, _propagatedLinkConfigsInto). SwiftShader's
+    // WSI has `-weak_framework Metal` in a public config; its driver, a
+    // direct dependent, links Metal weakly, and flutter_tester, which
+    // reaches WSI through a static library, does not. A config that lists
+    // another brings that one's ldflags wherever it applies itself, so its
+    // ldflags library depends on the other's (ANGLE's angle_backend_config
+    // lists the Metal backend's config, which links Metal weakly).
+    if (_bringsLdflags(target, '$gnPackage:${target.name}')) {
+      final linkRule = _Rule('cc_library', '${target.name}$ldflagsSuffix', const <String>[]);
+      final GnVariable? ldflags = target.variables['ldflags'];
+      if (ldflags != null) {
+        _linkFlagsInto(linkRule, ldflags);
+      }
+      final GnVariable? listed = target.variables['configs'];
+      if (listed != null) {
+        _listedLdflagsInto(linkRule, listed, Condition.always);
+      }
+      rules.add(linkRule);
+    }
   }
 
   /// The variables GN's config() reads (`gn help config`); anything else in
@@ -5188,6 +5365,10 @@ final class _Emitter {
           continue;
         case 'defines':
           attribute = 'local_defines';
+        case 'ldflags' when !_links(rule):
+          // A library links nothing, and ldflags go no further than the
+          // target they apply to (_convertConfig).
+          continue;
         case 'libs' || 'frameworks' || 'ldflags':
           _linkFlagsInto(rule, variable, under: use.condition);
           continue;
@@ -5215,6 +5396,11 @@ final class _Emitter {
                   .list('deps')
                   .addUnique(use.condition.and(e.condition), _Item(_localLabel(label)));
             });
+            // And the ldflags they bring, where the target links
+            // (_convertConfig).
+            if (_links(rule)) {
+              _listedLdflagsInto(rule, variable, use.condition);
+            }
           }
           continue;
         default:
@@ -6419,7 +6605,12 @@ final class _Emitter {
   /// `copts`. A private config of another file is an `implementation_deps`
   /// entry, which Bazel applies to this target's compiles alone -- GN's
   /// private semantics -- except on a binary, which has no such attribute
-  /// and no dependents.
+  /// and no dependents. A config's ldflags apply where GN applies them and
+  /// nowhere else ([_convertConfig]): inlined with a private config of this
+  /// file on a target that links, a dependency on the config's ldflags
+  /// library otherwise. [links] says whether [rule] stands for a target
+  /// that links -- by its kind, when null; a shared library's interface, a
+  /// rule of the library's kind, does not.
   _WarningSet _configsInto(
     _Rule rule,
     GnVariable variable,
@@ -6427,9 +6618,14 @@ final class _Emitter {
     required _WarningSet warningSet,
     required Set<String> publicConfigs,
     required List<ForwardedFlag> propagatedFlags,
+    bool? links,
   }) {
     var result = warningSet;
     final private = variable.name == 'configs';
+    // Whether the ldflags these configs bring apply here (_convertConfig):
+    // on a target that links, and wherever the config is handed to every
+    // dependent, whose links a library's dependency reaches.
+    final bool ldflags = (links ?? _links(rule)) || variable.name == 'all_dependent_configs';
     for (final GnAssignment assignment in variable.assignments) {
       for (final _Element element in _elements(assignment, withComments: true)) {
         final String config = _string(element);
@@ -6480,6 +6676,17 @@ final class _Emitter {
           rule
               .list(private && rule.kind == 'cc_library' ? 'implementation_deps' : 'deps')
               .addUnique(assignment.condition, _item(_localLabel(label), element));
+          // Its ldflags library, where GN applies ldflags (_convertConfig):
+          // on a target that links, and on any target that hands the config
+          // to all its dependents.
+          if (ldflags && _bringsLdflags(remote, _gnLabel(config))) {
+            final String linkLabel = bazelLabel(
+              '${_gnLabel(config)}$ldflagsSuffix',
+              package: gnPackage,
+              location: assignment.location,
+            );
+            rule.list('deps').addUnique(assignment.condition, _Item(_localLabel(linkLabel)));
+          }
           continue;
         }
         final ConfigEffect? effect = config.startsWith(':')
@@ -6503,14 +6710,28 @@ final class _Emitter {
             } else if (!chromiumCode && result == _WarningSet.noChromiumCode) {
               result = _WarningSet.none;
             }
-          case ConfigDependency(:final String label, :final List<String> copts):
+          case ConfigDependency(
+            :final String label,
+            :final List<String> copts,
+            :final bool linkFlags,
+          ):
             if (assignment.op == '-=') {
               throw GnError(assignment.location, 'removing config $config is not supported');
             }
-            final attribute = private && local == null && rule.kind == 'cc_library'
-                ? 'implementation_deps'
-                : 'deps';
-            rule.list(attribute).addUnique(assignment.condition, _item(label, element));
+            // A library of the config's link flags alone (the tables' word)
+            // is a dependency where GN applies ldflags, as a converted
+            // config's ldflags library is (_convertConfig).
+            if (!linkFlags || ldflags) {
+              final attribute = private && local == null && rule.kind == 'cc_library'
+                  ? 'implementation_deps'
+                  : 'deps';
+              rule.list(attribute).addUnique(assignment.condition, _item(label, element));
+            }
+            // A config of this file with ldflags: its ldflags library too,
+            // where GN applies them (_convertConfig).
+            if (local != null && ldflags && _bringsLdflags(local, _gnLabel(config))) {
+              rule.list('deps').addUnique(assignment.condition, _Item('$label$ldflagsSuffix'));
+            }
             // The config's compiler flags, which the dependency cannot
             // carry: on this target's compiles, after its own flags and
             // the constants, where a config's flags sit in GN.

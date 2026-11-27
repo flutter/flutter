@@ -301,7 +301,8 @@ filegroup(
 # keeps in its dynamic symbol table, for the Dart VM to resolve at runtime
 # (the snapshot symbols, dart:ffi's lookups). GNU --dynamic-list on ELF, the
 # macOS linker's exported symbols list on a Mac; the files are
-# //flutter/common's.
+# //flutter/common's. Link flags alone: only a target that links depends on
+# this library, where GN gives it the config (configEffects).
 cc_library(
     name = "export_dynamic_symbols",
     additional_linker_inputs = select({

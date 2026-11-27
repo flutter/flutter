@@ -177,5 +177,6 @@ flutter_cc_test(
         "//engine/src/flutter/build/bazel/dart_wrap:libdart_jit",
         "//engine/src/flutter/shell/platform/common/client_wrapper:client_wrapper_library_stubs",
         "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from //flutter/testing
     ],
 )

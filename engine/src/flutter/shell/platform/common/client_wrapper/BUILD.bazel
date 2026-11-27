@@ -104,6 +104,7 @@ flutter_cc_test(
         # https://github.com/flutter/flutter/issues/41414.
         "//engine/src/flutter/build/bazel/dart_wrap:libdart_jit",
         "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:dynamic_symbols_ldflags",  # from //flutter/testing
     ],
 )
 
