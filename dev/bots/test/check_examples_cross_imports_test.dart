@@ -184,15 +184,15 @@ void main() {
 
     final String lines = <String>[
       '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-      '║ The following file in packages/flutter/examples/api/lib/sample_templates has a disallowed import of Material. Refactor it or move it to the Material examples.',
+      '║ The following file in packages/flutter/examples/api/lib/sample_templates has a disallowed import of Material. Refactor it or move it to the material_ui examples.',
       '║   packages/flutter/examples/api/lib/sample_templates/cupertino.0.dart',
       '╚═══════════════════════════════════════════════════════════════════════════════',
       '╔═╡ERROR #2╞════════════════════════════════════════════════════════════════════',
-      '║ The following file in packages/flutter/examples/api/lib/sample_templates has a disallowed import of Cupertino. Refactor it or move it to the Cupertino examples.',
+      '║ The following file in packages/flutter/examples/api/lib/sample_templates has a disallowed import of Cupertino. Refactor it or move it to the cupertino_ui examples.',
       '║   packages/flutter/examples/api/lib/sample_templates/material.0.dart',
       '╚═══════════════════════════════════════════════════════════════════════════════',
       '╔═╡ERROR #3╞════════════════════════════════════════════════════════════════════',
-      '║ The following file in packages/flutter/examples/api/lib/sample_templates has a disallowed import of Cupertino. Refactor it or move it to the Cupertino examples.',
+      '║ The following file in packages/flutter/examples/api/lib/sample_templates has a disallowed import of Cupertino. Refactor it or move it to the cupertino_ui examples.',
       '║   packages/flutter/examples/api/lib/sample_templates/widgets.0.dart',
       '╚═══════════════════════════════════════════════════════════════════════════════',
     ].join('\n');
@@ -249,15 +249,15 @@ void main() {
 
     final String lines = <String>[
       '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-      '║ The following file in packages/flutter/examples/api/test/sample_templates has a disallowed import of Material. Refactor it or move it to the Material examples.',
+      '║ The following file in packages/flutter/examples/api/test/sample_templates has a disallowed import of Material. Refactor it or move it to the material_ui examples.',
       '║   packages/flutter/examples/api/test/sample_templates/cupertino.0_test.dart',
       '╚═══════════════════════════════════════════════════════════════════════════════',
       '╔═╡ERROR #2╞════════════════════════════════════════════════════════════════════',
-      '║ The following file in packages/flutter/examples/api/test/sample_templates has a disallowed import of Cupertino. Refactor it or move it to the Cupertino examples.',
+      '║ The following file in packages/flutter/examples/api/test/sample_templates has a disallowed import of Cupertino. Refactor it or move it to the cupertino_ui examples.',
       '║   packages/flutter/examples/api/test/sample_templates/material.0_test.dart',
       '╚═══════════════════════════════════════════════════════════════════════════════',
       '╔═╡ERROR #3╞════════════════════════════════════════════════════════════════════',
-      '║ The following file in packages/flutter/examples/api/test/sample_templates has a disallowed import of Cupertino. Refactor it or move it to the Cupertino examples.',
+      '║ The following file in packages/flutter/examples/api/test/sample_templates has a disallowed import of Cupertino. Refactor it or move it to the cupertino_ui examples.',
       '║   packages/flutter/examples/api/test/sample_templates/widgets.0_test.dart',
       '╚═══════════════════════════════════════════════════════════════════════════════',
     ].join('\n');
@@ -312,7 +312,7 @@ void main() {
       }, shouldHaveErrors: true);
       final String lines = <String>[
         '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-        '║ The following file in $libraryName has a disallowed import of Material. Refactor it or move it to the Material examples.',
+        '║ The following file in $libraryName has a disallowed import of Material. Refactor it or move it to the material_ui examples.',
         '║   $dartFile',
         '╚═══════════════════════════════════════════════════════════════════════════════',
       ].join('\n');
@@ -338,7 +338,7 @@ void main() {
       }, shouldHaveErrors: true);
       final String lines = <String>[
         '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-        '║ The following 2 files in $libraryName have a disallowed import of Material. Refactor them or move them to the Material examples.',
+        '║ The following 2 files in $libraryName have a disallowed import of Material. Refactor them or move them to the material_ui examples.',
         '║   $dartFileOne',
         '║   $dartFileTwo',
         '╚═══════════════════════════════════════════════════════════════════════════════',
@@ -364,8 +364,101 @@ void main() {
       }, shouldHaveErrors: true);
       final String lines = <String>[
         '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-        '║ The following file in $libraryName has a disallowed import of Material. Refactor it or move it to the Material examples.',
+        '║ The following file in $libraryName has a disallowed import of Material. Refactor it or move it to the material_ui examples.',
         '║   $testDartFile',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+      ].join('\n');
+      expect(result, equals('$lines\n'));
+      expect(success, isFalse);
+    });
+
+    test('unknown $libraryName cross import of material_ui', () async {
+      final dartFile = '$libraryName/foo.dart';
+
+      final Directory examplesFilesDirectory = checkerDirectories.examplesFilesDirectoryFor(
+        libraryName,
+        checker.examplesDirectory,
+      );
+
+      buildKnownCrossImportExamplesFiles();
+      writeImportInFiles(
+        {dartFile},
+        inDirectory: examplesFilesDirectory,
+        importString: "import 'package:material_ui/material_ui.dart';",
+      );
+
+      bool? success;
+      final String result = await capture(() async {
+        success = checker.check();
+      }, shouldHaveErrors: true);
+      final String lines = <String>[
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+        '║ The following file in $libraryName has a disallowed import of material_ui. Refactor it or move it to the material_ui examples.',
+        '║   $dartFile',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+      ].join('\n');
+      expect(result, equals('$lines\n'));
+      expect(success, isFalse);
+    });
+
+    test('unknown $libraryName cross import of both Material and material_ui', () async {
+      final dartFile = '$libraryName/foo.dart';
+
+      final Directory examplesFilesDirectory = checkerDirectories.examplesFilesDirectoryFor(
+        libraryName,
+        checker.examplesDirectory,
+      );
+
+      buildKnownCrossImportExamplesFiles();
+      writeImportInFiles(
+        {dartFile},
+        inDirectory: examplesFilesDirectory,
+        importString:
+            "import 'package:flutter/material.dart';\n"
+            "import 'package:material_ui/material_ui.dart';",
+      );
+
+      bool? success;
+      final String result = await capture(() async {
+        success = checker.check();
+      }, shouldHaveErrors: true);
+      final String lines = <String>[
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+        '║ The following file in $libraryName has a disallowed import of Material. Refactor it or move it to the material_ui examples.',
+        '║   $dartFile',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+        '╔═╡ERROR #2╞════════════════════════════════════════════════════════════════════',
+        '║ The following file in $libraryName has a disallowed import of material_ui. Refactor it or move it to the material_ui examples.',
+        '║   $dartFile',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+      ].join('\n');
+      expect(result, equals('$lines\n'));
+      expect(success, isFalse);
+    });
+
+    test('unknown $libraryName cross import of cupertino_ui', () async {
+      final dartFile = '$libraryName/foo.dart';
+
+      final Directory examplesFilesDirectory = checkerDirectories.examplesFilesDirectoryFor(
+        libraryName,
+        checker.examplesDirectory,
+      );
+
+      buildKnownCrossImportExamplesFiles();
+      writeImportInFiles(
+        {dartFile},
+        inDirectory: examplesFilesDirectory,
+        importString: "import 'package:cupertino_ui/cupertino_ui.dart';",
+      );
+
+      bool? success;
+      final String result = await capture(() async {
+        success = checker.check();
+      }, shouldHaveErrors: true);
+      final String lines = <String>[
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+        '║ The following file in $libraryName has a disallowed import of cupertino_ui. Refactor it or move it to the cupertino_ui examples.',
+        '║   $dartFile',
         '╚═══════════════════════════════════════════════════════════════════════════════',
       ].join('\n');
       expect(result, equals('$lines\n'));
@@ -392,7 +485,41 @@ void main() {
       }, shouldHaveErrors: true);
       final String lines = <String>[
         '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-        '║ The following file in $libraryName has a disallowed import of Cupertino. Refactor it or move it to the Cupertino examples.',
+        '║ The following file in $libraryName has a disallowed import of Cupertino. Refactor it or move it to the cupertino_ui examples.',
+        '║   $dartFile',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+      ].join('\n');
+      expect(result, equals('$lines\n'));
+      expect(success, isFalse);
+    });
+
+    test('unknown $libraryName cross import of both Cupertino and cupertino_ui', () async {
+      final dartFile = '$libraryName/foo.dart';
+      final Directory examplesFilesDirectory = checkerDirectories.examplesFilesDirectoryFor(
+        libraryName,
+        checker.examplesDirectory,
+      );
+
+      buildKnownCrossImportExamplesFiles();
+      writeImportInFiles(
+        <String>{dartFile},
+        inDirectory: examplesFilesDirectory,
+        importString:
+            "import 'package:flutter/cupertino.dart';\n"
+            "import 'package:cupertino_ui/cupertino_ui.dart';",
+      );
+
+      bool? success;
+      final String result = await capture(() async {
+        success = checker.check();
+      }, shouldHaveErrors: true);
+      final String lines = <String>[
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+        '║ The following file in $libraryName has a disallowed import of Cupertino. Refactor it or move it to the cupertino_ui examples.',
+        '║   $dartFile',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+        '╔═╡ERROR #2╞════════════════════════════════════════════════════════════════════',
+        '║ The following file in $libraryName has a disallowed import of cupertino_ui. Refactor it or move it to the cupertino_ui examples.',
         '║   $dartFile',
         '╚═══════════════════════════════════════════════════════════════════════════════',
       ].join('\n');
@@ -422,7 +549,7 @@ void main() {
       }, shouldHaveErrors: true);
       final String lines = <String>[
         '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-        '║ The following 2 files in $libraryName have a disallowed import of Cupertino. Refactor them or move them to the Cupertino examples.',
+        '║ The following 2 files in $libraryName have a disallowed import of Cupertino. Refactor them or move them to the cupertino_ui examples.',
         '║   $dartFileOne',
         '║   $dartFileTwo',
         '╚═══════════════════════════════════════════════════════════════════════════════',
@@ -451,7 +578,7 @@ void main() {
       }, shouldHaveErrors: true);
       final String lines = <String>[
         '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-        '║ The following file in $libraryName has a disallowed import of Cupertino. Refactor it or move it to the Cupertino examples.',
+        '║ The following file in $libraryName has a disallowed import of Cupertino. Refactor it or move it to the cupertino_ui examples.',
         '║   $testDartFile',
         '╚═══════════════════════════════════════════════════════════════════════════════',
       ].join('\n');
@@ -511,7 +638,7 @@ void main() {
 
       final String lines = <String>[
         '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-        '║ The following file in $libraryName has a disallowed import of Material. Refactor it or move it to the Material examples.',
+        '║ The following file in $libraryName has a disallowed import of Material. Refactor it or move it to the material_ui examples.',
         '║   $libraryName/baz/bar/foo.dart',
         '╚═══════════════════════════════════════════════════════════════════════════════',
       ].join('\n');
@@ -617,7 +744,7 @@ void main() {
       }, shouldHaveErrors: true);
       final String lines = <String>[
         '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-        '║ The following file in $libraryName has a disallowed import of Material. Refactor it or move it to the Material examples.',
+        '║ The following file in $libraryName has a disallowed import of Material. Refactor it or move it to the material_ui examples.',
         '║   $dartFile',
         '╚═══════════════════════════════════════════════════════════════════════════════',
       ].join('\n');
@@ -643,7 +770,7 @@ void main() {
       }, shouldHaveErrors: true);
       final String lines = <String>[
         '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-        '║ The following 2 files in $libraryName have a disallowed import of Material. Refactor them or move them to the Material examples.',
+        '║ The following 2 files in $libraryName have a disallowed import of Material. Refactor them or move them to the material_ui examples.',
         '║   $dartFileOne',
         '║   $dartFileTwo',
         '╚═══════════════════════════════════════════════════════════════════════════════',
@@ -669,7 +796,7 @@ void main() {
       }, shouldHaveErrors: true);
       final String lines = <String>[
         '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-        '║ The following file in $libraryName has a disallowed import of Material. Refactor it or move it to the Material examples.',
+        '║ The following file in $libraryName has a disallowed import of Material. Refactor it or move it to the material_ui examples.',
         '║   $testDartFile',
         '╚═══════════════════════════════════════════════════════════════════════════════',
       ].join('\n');
@@ -698,7 +825,7 @@ void main() {
       }, shouldHaveErrors: true);
       final String lines = <String>[
         '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-        '║ The following file in $libraryName has a disallowed import of Cupertino. Refactor it or move it to the Cupertino examples.',
+        '║ The following file in $libraryName has a disallowed import of Cupertino. Refactor it or move it to the cupertino_ui examples.',
         '║   $dartFile',
         '╚═══════════════════════════════════════════════════════════════════════════════',
       ].join('\n');
@@ -728,7 +855,7 @@ void main() {
       }, shouldHaveErrors: true);
       final String lines = <String>[
         '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-        '║ The following 2 files in $libraryName have a disallowed import of Cupertino. Refactor them or move them to the Cupertino examples.',
+        '║ The following 2 files in $libraryName have a disallowed import of Cupertino. Refactor them or move them to the cupertino_ui examples.',
         '║   $dartFileOne',
         '║   $dartFileTwo',
         '╚═══════════════════════════════════════════════════════════════════════════════',
@@ -758,7 +885,7 @@ void main() {
       }, shouldHaveErrors: true);
       final String lines = <String>[
         '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-        '║ The following file in $libraryName has a disallowed import of Cupertino. Refactor it or move it to the Cupertino examples.',
+        '║ The following file in $libraryName has a disallowed import of Cupertino. Refactor it or move it to the cupertino_ui examples.',
         '║   $testDartFile',
         '╚═══════════════════════════════════════════════════════════════════════════════',
       ].join('\n');
@@ -777,6 +904,11 @@ void main() {
       final LibraryCrossImportStatementType importStatement =
           getCrossImportStatementForExamplesLibraryFile(dartFile);
       final String disallowedImportName = importStatement.readableName;
+      final String destination = switch (importStatement) {
+        LibraryCrossImportStatementType.material => 'material_ui',
+        LibraryCrossImportStatementType.cupertino => 'cupertino_ui',
+        _ => disallowedImportName,
+      };
 
       buildKnownCrossImportExamplesFiles();
       writeImportInFiles(
@@ -792,7 +924,7 @@ void main() {
 
       final String lines = <String>[
         '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-        '║ The following file in $libraryName has a disallowed import of $disallowedImportName. Refactor it or move it to the $disallowedImportName examples.',
+        '║ The following file in $libraryName has a disallowed import of $disallowedImportName. Refactor it or move it to the $destination examples.',
         '║   $dartFile',
         '╚═══════════════════════════════════════════════════════════════════════════════',
       ].join('\n');

@@ -7,7 +7,6 @@ import 'package:completion/completion.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../context/tool_context.dart';
 import '../runner/flutter_command.dart';
 
 class ShellCompletionCommand extends FlutterCommand {
@@ -18,9 +17,6 @@ class ShellCompletionCommand extends FlutterCommand {
           'Causes the given shell completion setup script to be overwritten if it already exists.',
     );
   }
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'bash-completion';

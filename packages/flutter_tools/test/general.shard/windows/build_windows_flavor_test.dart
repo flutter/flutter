@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -11,7 +12,6 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/cmake.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/windows/build_windows.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
@@ -19,7 +19,6 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
@@ -49,12 +48,10 @@ void main() {
 
   setUpAll(() {
     Cache.disableLocking();
-    Cache.flutterRoot = '';
   });
 
   setUp(() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
-    Cache.flutterRoot = flutterRoot;
     processManager = FakeProcessManager.empty();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
@@ -133,131 +130,119 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('getWindowsBuildDirectory', () {
-    testUsingContext(
-      'returns legacy path when no flavor',
-      () {
-        expect(
-          getWindowsBuildDirectory(TargetPlatform.windows_x64),
-          endsWith(fileSystem.path.join('windows', 'x64')),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+    test('returns legacy path when no flavor', () {
+      expect(
+        getWindowsBuildDirectory(
+          TargetPlatform.windows_x64,
+          config: Config.test(),
+          fileSystem: fileSystem,
+        ),
+        endsWith(fileSystem.path.join('windows', 'x64')),
+      );
+    });
 
-    testUsingContext(
-      'inserts flavor segment when flavor is set',
-      () {
-        expect(
-          getWindowsBuildDirectory(TargetPlatform.windows_x64, 'apple'),
-          endsWith(fileSystem.path.join('windows', 'x64', 'apple')),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+    test('inserts flavor segment when flavor is set', () {
+      expect(
+        getWindowsBuildDirectory(
+          TargetPlatform.windows_x64,
+          config: Config.test(),
+          fileSystem: fileSystem,
+          flavor: 'apple',
+        ),
+        endsWith(fileSystem.path.join('windows', 'x64', 'apple')),
+      );
+    });
   });
 
   // ---------------------------------------------------------------------------
   // Integration test: flutter build windows --flavor apple
   // ---------------------------------------------------------------------------
 
-  testUsingContext(
-    'Windows build with --flavor uses a flavor-specific build dir',
-    () async {
-      final fakeVisualStudio = FakeVisualStudio();
-      setUpMockProjectFilesForBuild();
+  test('Windows build with --flavor uses a flavor-specific build dir', () async {
+    final fakeVisualStudio = FakeVisualStudio();
+    setUpMockProjectFilesForBuild();
 
-      processManager = FakeProcessManager.list(<FakeCommand>[
-        cmakeGenerationCommand(flavor: 'apple'),
-        buildCommand('Release', flavor: 'apple'),
-      ]);
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeGenerationCommand(flavor: 'apple'),
+      buildCommand('Release', flavor: 'apple'),
+    ]);
 
-      final toolContext = FakeToolContext(
-        cache: Cache.test(
-          rootOverride: fileSystem.directory(flutterRoot),
-          logger: BufferLogger.test(),
-          processManager: processManager,
-        ),
-        fs: fileSystem,
+    final toolContext = FakeToolContext(
+      cache: Cache.test(
+        rootOverride: fileSystem.directory(flutterRoot),
         logger: BufferLogger.test(),
-        os: FakeOperatingSystemUtils(),
-        platform: windowsPlatform,
         processManager: processManager,
-        projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: BufferLogger.test()),
-      );
-      final command = BuildWindowsCommand(
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        featureFlags: TestFeatureFlags(isWindowsEnabled: true),
-        toolContext: toolContext,
-        verboseHelp: false,
-        visualStudio: fakeVisualStudio,
-      );
+      ),
+      fs: fileSystem,
+      logger: BufferLogger.test(),
+      os: FakeOperatingSystemUtils(),
+      platform: windowsPlatform,
+      processManager: processManager,
+      projectFactory: FlutterProjectFactory(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        config: FakeConfig(),
+      ),
+    );
+    final command = BuildWindowsCommand(
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      featureFlags: TestFeatureFlags(isWindowsEnabled: true),
+      toolContext: toolContext,
+      verboseHelp: false,
+      visualStudio: fakeVisualStudio,
+    );
 
-      await createTestCommandRunner(command)
-          .run(const <String>['windows', '--no-pub', '--flavor', 'apple']);
-      expect(processManager, hasNoRemainingExpectations);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Platform: () => windowsPlatform,
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-      Analytics: () => fakeAnalytics,
-    },
-  );
+    await createTestCommandRunner(
+      command,
+      fakeAnalytics,
+    ).run(const <String>['windows', '--no-pub', '--flavor', 'apple']);
+    expect(processManager, hasNoRemainingExpectations);
+  });
 
   // ---------------------------------------------------------------------------
   // Regression: build without flavor still works (legacy layout)
   // ---------------------------------------------------------------------------
 
-  testUsingContext(
-    'Windows build without --flavor uses legacy build dir (no flavor segment)',
-    () async {
-      final fakeVisualStudio = FakeVisualStudio();
-      setUpMockProjectFilesForBuild();
+  test('Windows build without --flavor uses legacy build dir (no flavor segment)', () async {
+    final fakeVisualStudio = FakeVisualStudio();
+    setUpMockProjectFilesForBuild();
 
-      processManager = FakeProcessManager.list(<FakeCommand>[
-        cmakeGenerationCommand(),
-        buildCommand('Release'),
-      ]);
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeGenerationCommand(),
+      buildCommand('Release'),
+    ]);
 
-      final toolContext = FakeToolContext(
-        cache: Cache.test(
-          rootOverride: fileSystem.directory(flutterRoot),
-          logger: BufferLogger.test(),
-          processManager: processManager,
-        ),
-        fs: fileSystem,
+    final toolContext = FakeToolContext(
+      cache: Cache.test(
+        rootOverride: fileSystem.directory(flutterRoot),
         logger: BufferLogger.test(),
-        os: FakeOperatingSystemUtils(),
-        platform: windowsPlatform,
         processManager: processManager,
-        projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: BufferLogger.test()),
-      );
-      final command = BuildWindowsCommand(
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        featureFlags: TestFeatureFlags(isWindowsEnabled: true),
-        toolContext: toolContext,
-        verboseHelp: false,
-        visualStudio: fakeVisualStudio,
-      );
+      ),
+      fs: fileSystem,
+      logger: BufferLogger.test(),
+      os: FakeOperatingSystemUtils(),
+      platform: windowsPlatform,
+      processManager: processManager,
+      projectFactory: FlutterProjectFactory(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        config: FakeConfig(),
+      ),
+    );
+    final command = BuildWindowsCommand(
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      featureFlags: TestFeatureFlags(isWindowsEnabled: true),
+      toolContext: toolContext,
+      verboseHelp: false,
+      visualStudio: fakeVisualStudio,
+    );
 
-      await createTestCommandRunner(command).run(const <String>['windows', '--no-pub']);
-      expect(processManager, hasNoRemainingExpectations);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Platform: () => windowsPlatform,
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-      Analytics: () => fakeAnalytics,
-    },
-  );
+    await createTestCommandRunner(
+      command,
+      fakeAnalytics,
+    ).run(const <String>['windows', '--no-pub']);
+    expect(processManager, hasNoRemainingExpectations);
+  });
 }
 
 // ---------------------------------------------------------------------------

@@ -70,7 +70,7 @@ class DartIsolate : public UIDartState {
     Dart_IsolateFlags Get() const;
 
    private:
-    Dart_IsolateFlags flags_;
+    Dart_IsolateFlags flags_{};
   };
 
   //----------------------------------------------------------------------------

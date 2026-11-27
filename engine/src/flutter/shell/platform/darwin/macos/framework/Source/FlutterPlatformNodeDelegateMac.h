@@ -55,7 +55,7 @@ class FlutterPlatformNodeDelegateMac : public FlutterPlatformNodeDelegate {
       ui::AXOffscreenResult* offscreen_result) const override;
 
  private:
-  ui::AXPlatformNode* ax_platform_node_;
+  ui::AXPlatformNode* ax_platform_node_ = nullptr;
   std::weak_ptr<AccessibilityBridge> bridge_;
   __weak FlutterViewController* view_controller_;
   mutable ui::AXNodeData cached_data_;

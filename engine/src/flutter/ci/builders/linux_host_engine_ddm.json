@@ -39,7 +39,6 @@
                 "--prebuilt-dart-sdk",
                 "--no-lto",
                 "--rbe",
-                "--no-goma",
                 "--gn-args=dart_dynamic_modules=true"
             ],
             "name": "ci/host_debug_ddm",

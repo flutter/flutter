@@ -7,6 +7,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner+FML.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
+#import "flutter/shell/platform/darwin/ios/ios_external_view_embedder.h"
 
 namespace flutter {
 namespace testing {
@@ -29,6 +30,24 @@ FlutterPlatformViewsController* CreateTestPlatformViewsController(NSString* labe
   FlutterPlatformViewsController* controller = [[FlutterPlatformViewsController alloc] init];
   controller.taskRunner = GetDefaultTaskRunner();
   return controller;
+}
+
+std::unique_ptr<ExternalViewEmbedder> CreateTestExternalViewEmbedder(
+    FlutterPlatformViewsController* controller) {
+  return std::make_unique<IOSExternalViewEmbedder>(controller, std::make_shared<FakeIOSContext>());
+}
+
+std::unique_ptr<Texture> FakeIOSContext::CreateExternalTexture(int64_t texture_id,
+                                                               NSObject<FlutterTexture>* texture) {
+  return nullptr;
+}
+
+std::unique_ptr<SurfaceFrame> CreateTestSurfaceFrame() {
+  return std::make_unique<SurfaceFrame>(
+      nullptr, SurfaceFrame::FramebufferInfo{},
+      [](const SurfaceFrame& surface_frame, DlCanvas* canvas) { return true; },
+      [](const SurfaceFrame& surface_frame) { return true; },
+      /*frame_size=*/DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
 }
 
 }  // namespace testing

@@ -50,12 +50,6 @@ class FilterContents : public Contents {
       BlurStyle mask_blur_style = BlurStyle::kNormal,
       const Geometry* mask_geometry = nullptr);
 
-  static std::shared_ptr<FilterContents> MakeBorderMaskBlur(
-      FilterInput::Ref input,
-      Sigma sigma_x,
-      Sigma sigma_y,
-      BlurStyle blur_style = BlurStyle::kNormal);
-
   static std::shared_ptr<FilterContents> MakeDirectionalMorphology(
       FilterInput::Ref input,
       Radius radius,
@@ -117,10 +111,11 @@ class FilterContents : public Contents {
   ///         effect.
   ///
   ///         However, local geometry defined in widget/canvas space (such as a
-  ///         bounded blur rectangle) requires the full current transformation
-  ///         matrix including translation to be mapped accurately to the
-  ///         backdrop texture space (e.g. when rendering bounded blurs inside
-  ///         scrolling views).
+  ///         bounded blur rectangle) requires the pass-relative transformation
+  ///         matrix (the current transform offset by the enclosing pass's
+  ///         global position) to be mapped accurately to the backdrop texture
+  ///         space (e.g. when rendering bounded blurs inside scrolling views
+  ///         or translated save layers).
   ///
   /// @see    `SetEffectTransform`
   void SetLocalToPassTransform(const Matrix& local_to_pass_transform);

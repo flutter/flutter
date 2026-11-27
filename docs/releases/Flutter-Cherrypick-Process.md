@@ -11,11 +11,21 @@ With branching and branch testability being supported for Flutter & Dart release
 > [NOTE] If you are trying to open a cherry-pick **before** that release has shipped (e.g., you would like to CP into 3.21 beta but the current beta is 3.20) then you will need to follow the manual cherry-pick instructions below.
 
 1. Add the `cp: beta` or `cp: stable` label to the pull request on flutter/flutter master. (you can find [beta](https://github.com/flutter/flutter/blob/beta/bin/internal/release-candidate-branch.version) and [stable](https://github.com/flutter/flutter/blob/stable/bin/internal/release-candidate-branch.version) candidate branch info by following the respective links)
-2. Wait about 30 seconds.
+2. Wait about 1-2 minutes.
 3. If automatic cherry-pick succeeds (no merge conflict), a new pull requested will be created and you will receive an email. Edit the cherry-pick details in the PR description of the generated pull request, and a release engineer will follow up on the request.
 4. If automatic cherry-pick fails, a comment will be left on the original PR. In this case you will need to follow instructions in the manual cherry-pick section below to manually create a cherry-pick PR.
 
 If for some reason, an automated cherry-pick can not be applied, please follow the manual cherry-pick instructions.
+
+### Older pull requests and retries
+
+Adding the label only works for pull requests whose merge commit contains `.github/workflows/cp-trigger.yml` (added in [#195536](https://github.com/flutter/flutter/pull/195536)). For pull requests merged before that, adding the label does nothing. Instead, someone with write access to flutter/flutter can start the same automated cherry-pick manually, either from the [Actions tab](https://github.com/flutter/flutter/actions/workflows/easy-cp.yml) ("Run workflow") or with the `gh` CLI:
+
+```sh
+gh workflow run easy-cp.yml -R flutter/flutter -f pr_number=<PR number> -f channel=<beta|stable>
+```
+
+This can also be used to retry an automated cherry-pick.
 
 ## Manually Create a Cherry-pick Request
 

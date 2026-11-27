@@ -5,11 +5,13 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
 
 import '../../src/common.dart';
 import '../../src/custom_devices_common.dart';
+import '../../src/fake_process_manager.dart';
 
 Map<String, dynamic> copyJsonObjectWith(
   Map<String, dynamic> object,
@@ -17,49 +19,45 @@ Map<String, dynamic> copyJsonObjectWith(
 ) => Map<String, dynamic>.of(object)..addAll(overrides);
 
 void main() {
-  testWithoutContext(
-    "CustomDevicesConfig logs no error when 'custom-devices' key is missing in config",
-    () {
-      final logger = BufferLogger.test();
-      final fileSystem = MemoryFileSystem.test();
-      final Directory directory = fileSystem.directory('custom_devices_config');
+  test("CustomDevicesConfig logs no error when 'custom-devices' key is missing in config", () {
+    final logger = BufferLogger.test();
+    final fileSystem = MemoryFileSystem.test();
+    final Directory directory = fileSystem.directory('custom_devices_config');
 
-      writeCustomDevicesConfigFile(directory);
+    writeCustomDevicesConfigFile(directory);
 
-      final customDevicesConfig = CustomDevicesConfig.test(
-        fileSystem: fileSystem,
-        directory: directory,
-        logger: logger,
-      );
+    final customDevicesConfig = CustomDevicesConfig.test(
+      fileSystem: fileSystem,
+      directory: directory,
+      logger: logger,
+      cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
+    );
 
-      expect(customDevicesConfig.devices, hasLength(0));
-      expect(logger.errorText, hasLength(0));
-    },
-  );
+    expect(customDevicesConfig.devices, hasLength(0));
+    expect(logger.errorText, hasLength(0));
+  });
 
-  testWithoutContext(
-    "CustomDevicesConfig logs error when 'custom-devices' key is not a JSON array",
-    () {
-      final logger = BufferLogger.test();
-      final fileSystem = MemoryFileSystem.test();
-      final Directory directory = fileSystem.directory('custom_devices_config');
+  test("CustomDevicesConfig logs error when 'custom-devices' key is not a JSON array", () {
+    final logger = BufferLogger.test();
+    final fileSystem = MemoryFileSystem.test();
+    final Directory directory = fileSystem.directory('custom_devices_config');
 
-      writeCustomDevicesConfigFile(directory, json: <String, dynamic>{'test': 'testvalue'});
+    writeCustomDevicesConfigFile(directory, json: <String, dynamic>{'test': 'testvalue'});
 
-      final customDevicesConfig = CustomDevicesConfig.test(
-        fileSystem: fileSystem,
-        directory: directory,
-        logger: logger,
-      );
+    final customDevicesConfig = CustomDevicesConfig.test(
+      fileSystem: fileSystem,
+      directory: directory,
+      logger: logger,
+      cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
+    );
 
-      const msg =
-          "Could not load custom devices config. config['custom-devices'] is not a JSON array.";
-      expect(() => customDevicesConfig.devices, throwsA(const CustomDeviceRevivalException(msg)));
-      expect(logger.errorText, contains(msg));
-    },
-  );
+    const msg =
+        "Could not load custom devices config. config['custom-devices'] is not a JSON array.";
+    expect(() => customDevicesConfig.devices, throwsA(const CustomDeviceRevivalException(msg)));
+    expect(logger.errorText, contains(msg));
+  });
 
-  testWithoutContext('CustomDeviceRevivalException serialization', () {
+  test('CustomDeviceRevivalException serialization', () {
     expect(const CustomDeviceRevivalException('testmessage').toString(), equals('testmessage'));
     expect(
       const CustomDeviceRevivalException.fromDescriptions(
@@ -70,7 +68,7 @@ void main() {
     );
   });
 
-  testWithoutContext('CustomDevicesConfig can load test config and logs no errors', () {
+  test('CustomDevicesConfig can load test config and logs no errors', () {
     final logger = BufferLogger.test();
     final fileSystem = MemoryFileSystem.test();
     final Directory directory = fileSystem.directory('custom_devices_config');
@@ -81,6 +79,7 @@ void main() {
       fileSystem: fileSystem,
       directory: directory,
       logger: logger,
+      cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
     );
 
     final List<CustomDeviceConfig> devices = customDevicesConfig.devices;
@@ -89,7 +88,7 @@ void main() {
     expect(devices.first, equals(testConfig));
   });
 
-  testWithoutContext('CustomDevicesConfig logs error when id is null', () {
+  test('CustomDevicesConfig logs error when id is null', () {
     final logger = BufferLogger.test();
     final fileSystem = MemoryFileSystem.test();
     final Directory directory = fileSystem.directory('custom_devices_config');
@@ -105,6 +104,7 @@ void main() {
       fileSystem: fileSystem,
       directory: directory,
       logger: logger,
+      cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
     );
 
     const msg = 'Could not load custom device from config index 0: Expected id to be a string.';
@@ -112,7 +112,7 @@ void main() {
     expect(logger.errorText, contains(msg));
   });
 
-  testWithoutContext('CustomDevicesConfig logs error when id is not a string', () {
+  test('CustomDevicesConfig logs error when id is not a string', () {
     final logger = BufferLogger.test();
     final fileSystem = MemoryFileSystem.test();
     final Directory directory = fileSystem.directory('custom_devices_config');
@@ -128,6 +128,7 @@ void main() {
       fileSystem: fileSystem,
       directory: directory,
       logger: logger,
+      cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
     );
 
     const msg = 'Could not load custom device from config index 0: Expected id to be a string.';
@@ -135,7 +136,7 @@ void main() {
     expect(logger.errorText, contains(msg));
   });
 
-  testWithoutContext('CustomDevicesConfig logs error when label is not a string', () {
+  test('CustomDevicesConfig logs error when label is not a string', () {
     final logger = BufferLogger.test();
     final fileSystem = MemoryFileSystem.test();
     final Directory directory = fileSystem.directory('custom_devices_config');
@@ -151,6 +152,7 @@ void main() {
       fileSystem: fileSystem,
       directory: directory,
       logger: logger,
+      cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
     );
 
     const msg = 'Could not load custom device from config index 0: Expected label to be a string.';
@@ -158,7 +160,7 @@ void main() {
     expect(logger.errorText, contains(msg));
   });
 
-  testWithoutContext('CustomDevicesConfig loads config when postBuild is null', () {
+  test('CustomDevicesConfig loads config when postBuild is null', () {
     final logger = BufferLogger.test();
     final fileSystem = MemoryFileSystem.test();
     final Directory directory = fileSystem.directory('custom_devices_config');
@@ -174,12 +176,13 @@ void main() {
       fileSystem: fileSystem,
       directory: directory,
       logger: logger,
+      cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
     );
 
     expect(customDevicesConfig.devices, hasLength(1));
   });
 
-  testWithoutContext('CustomDevicesConfig loads config without port forwarding', () {
+  test('CustomDevicesConfig loads config without port forwarding', () {
     final logger = BufferLogger.test();
     final fileSystem = MemoryFileSystem.test();
     final Directory directory = fileSystem.directory('custom_devices_config');
@@ -198,6 +201,7 @@ void main() {
       fileSystem: fileSystem,
       directory: directory,
       logger: logger,
+      cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
     );
 
     final List<CustomDeviceConfig> devices = customDevicesConfig.devices;
@@ -206,7 +210,7 @@ void main() {
     expect(devices.first.usesPortForwarding, false);
   });
 
-  testWithoutContext('CustomDevicesConfig logs error when port forward command is given but not regex', () {
+  test('CustomDevicesConfig logs error when port forward command is given but not regex', () {
     final logger = BufferLogger.test();
     final fileSystem = MemoryFileSystem.test();
     final Directory directory = fileSystem.directory('custom_devices_config');
@@ -222,6 +226,7 @@ void main() {
       fileSystem: fileSystem,
       directory: directory,
       logger: logger,
+      cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
     );
 
     const msg =

@@ -13,10 +13,7 @@ class SkwasmPicture implements LayerPicture, StackTraceDebugger {
       handle,
       this,
       'Picture',
-      onDispose: (PictureHandle h) {
-        pictureDispose(h);
-        imageTracker?.releaseAll();
-      },
+      onDispose: _createDisposer(imageTracker),
     );
     _init();
     ui.Picture.onCreate?.call(this);
@@ -31,9 +28,34 @@ class SkwasmPicture implements LayerPicture, StackTraceDebugger {
     _init();
   }
 
+  static void _disposePictureHandle(PictureHandle h) {
+    pictureDispose(h);
+  }
+
+  /// Builds the [UniqueRef] disposal callback without capturing `this`, so
+  /// [DomFinalizationRegistry]'s strongly held [UniqueRef] does not retain
+  /// [box] and prevent garbage collection.
+  static void Function(PictureHandle) _createDisposer(PictureImageTracker? tracker) {
+    if (tracker == null) {
+      return _disposePictureHandle;
+    }
+    return _createTrackedDisposer(tracker);
+  }
+
+  static void Function(PictureHandle) _createTrackedDisposer(PictureImageTracker tracker) {
+    return (PictureHandle h) {
+      try {
+        pictureDispose(h);
+      } finally {
+        tracker.releaseAll();
+      }
+    };
+  }
+
   final bool _isClone;
 
   /// Retained image sources for images recorded onto this picture.
+  @override
   final PictureImageTracker? imageTracker;
 
   void _init() {
@@ -76,7 +98,7 @@ class SkwasmPicture implements LayerPicture, StackTraceDebugger {
     ui.TargetPixelFormat targetFormat = ui.TargetPixelFormat.dontCare,
   }) {
     final ImageHandle handleImg = imageCreateFromPicture(handle, width, height);
-    return EngineImage(SkwasmImage(handleImg), width, height);
+    return EngineImage(SkwasmImage(handleImg), width, height, imageTracker: imageTracker);
   }
 
   @override
@@ -140,23 +162,22 @@ class SkwasmPictureRecorder extends SkwasmObjectWrapper<RawPictureRecorder>
     (tracker as PictureImageTracker).releaseAll();
   });
 
-  SkwasmCanvas? _recordingCanvas;
+  EngineCanvas? _recordingCanvas;
 
   /// Tracks [ImageSource] references for draw operations recorded on this recorder.
   final PictureImageTracker tracker = PictureImageTracker();
 
-  /// The active recording canvas, or null if not recording.
-  SkwasmCanvas? get recordingCanvas => _recordingCanvas;
-
   /// Begins recording canvas commands within the specified [bounds].
-  SkwasmCanvas beginRecording(ui.Rect bounds) {
+  EngineCanvas beginRecording(ui.Rect bounds) {
     if (isRecording) {
       throw StateError('PictureRecorder is already recording');
     }
     _isRecording = true;
-    final canvas = SkwasmCanvas.fromHandle(
-      withStackScope(
-        (StackScope s) => pictureRecorderBeginRecording(handle, s.convertRectToNative(bounds)),
+    final canvas = EngineCanvas(
+      SkwasmCanvas(
+        withStackScope(
+          (StackScope s) => pictureRecorderBeginRecording(handle, s.convertRectToNative(bounds)),
+        ),
       ),
       recorder: this,
       tracker: tracker,

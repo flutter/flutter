@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'package:flutter_driver/flutter_driver.dart';
+/// @docImport 'package:flutter_driver/flutter_driver.dart' as flutter_driver;
 ///
 /// @docImport 'integration_test_driver_extended.dart';
 library;
@@ -192,6 +193,169 @@ https://docs.flutter.dev/testing/integration-tests
 
     (reportData!['screenshots']! as List<dynamic>).add(data);
     return data['bytes']! as List<int>;
+  }
+
+  /// Web only. Performs [actions] in order as a single real browser pointer
+  /// sequence using WebDriver, and completes once the browser has dispatched
+  /// every event in the sequence.
+  ///
+  /// Each [WebDriverPointerAction.move] position in [actions] is a logical
+  /// position in [view], such as the one returned by [WidgetTester.getCenter].
+  /// If [view] is null, the implicit view is used. During a move with a
+  /// non-zero `duration`, the browser dispatches intermediate `pointermove`
+  /// events along the way. See [WebDriverPointerMove].
+  ///
+  /// Mouse buttons pressed with [WebDriverPointerAction.down] remain pressed
+  /// across calls until released with [WebDriverPointerAction.up], so a test
+  /// can split a drag across multiple calls to assert on intermediate state.
+  ///
+  /// ```dart
+  /// import 'package:flutter/widgets.dart';
+  /// import 'package:flutter_test/flutter_test.dart';
+  /// import 'package:integration_test/common.dart';
+  /// import 'package:integration_test/integration_test.dart';
+  ///
+  /// void main() {
+  ///   testWidgets('splits a drag across multiple calls', (WidgetTester tester) async {
+  ///     final IntegrationTestWidgetsFlutterBinding binding =
+  ///         IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  ///     const Key dragHandleKey = Key('drag-handle');
+  ///     final Offset start = tester.getCenter(find.byKey(dragHandleKey));
+  ///     final Offset end = start + const Offset(200, 0);
+  ///     await binding.webDriverPointerActions(<WebDriverPointerAction>[
+  ///       WebDriverPointerAction.move(start.dx, start.dy),
+  ///       const WebDriverPointerAction.down(),
+  ///       WebDriverPointerAction.move(
+  ///         end.dx,
+  ///         end.dy,
+  ///         duration: const Duration(milliseconds: 300),
+  ///       ),
+  ///       const WebDriverPointerAction.up(),
+  ///     ]);
+  ///   });
+  /// }
+  /// ```
+  ///
+  /// Unlike [WidgetTester] gesture helpers, which dispatch synthetic pointer
+  /// events directly to Flutter's gesture system, the pointer sequence goes
+  /// through the browser's own hit testing and event dispatch. This makes it
+  /// possible to test interactions with platform views such as
+  /// [HtmlElementView], for example an `<iframe>`'s mouse listeners, which
+  /// synthetic Flutter pointer events never reach. DOM listeners run before
+  /// the returned future completes, so their effects can be asserted
+  /// immediately after awaiting this method.
+  ///
+  /// {@template flutter.integration_test.webDriverPointerActions.devicePointerEvents}
+  /// This method does not modify [shouldPropagateDevicePointerEvents].
+  /// Browser pointer events arrive in the test binding as
+  /// [TestBindingEventSource.device] events, which the binding ignores by
+  /// default. To assert on Flutter widgets reacting to them (for example a
+  /// [GestureDetector], a [MouseRegion], or a button's `onPressed`), set
+  /// [shouldPropagateDevicePointerEvents] to true before calling this method,
+  /// and [WidgetTester.pump] afterwards to process the resulting frame.
+  ///
+  /// When semantics are enabled, the browser may hit test the semantics DOM
+  /// node of a widget instead of the Flutter view, and the widget may then
+  /// react through a semantics action regardless of
+  /// [shouldPropagateDevicePointerEvents]. To test raw pointer delivery, run
+  /// the test with semantics disabled (for example, `semanticsEnabled: false`
+  /// in [testWidgets]).
+  /// {@endtemplate}
+  ///
+  /// Only works on the web when tests are run via the `flutter drive` command
+  /// with a driver that uses [integrationDriver] from
+  /// `integration_test_driver_extended.dart`. Completes with an
+  /// [UnsupportedError] on other platforms, an [ArgumentError] if [actions] is
+  /// empty, any move coordinate or resulting viewport coordinate is not finite,
+  /// or any duration is negative, a [StateError] if [view] is null and there
+  /// is no implicit view, or an error if the driver fails to perform the
+  /// actions.
+  Future<void> webDriverPointerActions(
+    List<WebDriverPointerAction> actions, {
+    FlutterView? view,
+  }) async {
+    if (actions.isEmpty) {
+      throw ArgumentError.value(actions, 'actions', 'must not be empty');
+    }
+    for (final action in actions) {
+      if (action case WebDriverPointerMove(:final double x, :final double y)
+          when !x.isFinite || !y.isFinite) {
+        throw ArgumentError.value(
+          action,
+          'actions',
+          'move coordinates must be finite positions in the view',
+        );
+      }
+      if (action
+          case WebDriverPointerMove(:final Duration duration) ||
+              WebDriverPointerPause(:final Duration duration)
+          when duration.isNegative) {
+        throw ArgumentError.value(action, 'actions', 'duration must not be negative');
+      }
+    }
+    final FlutterView? targetView = view ?? platformDispatcher.implicitView;
+    if (targetView == null) {
+      throw StateError(
+        'webDriverPointerActions requires a view, but no view was provided and there is no implicit view.',
+      );
+    }
+    final Offset origin = driver_actions.viewportOrigin(targetView);
+    final viewportActions = <WebDriverPointerAction>[
+      for (final WebDriverPointerAction action in actions)
+        switch (action) {
+          WebDriverPointerMove() => _toViewportMove(action, origin),
+          WebDriverPointerDown() || WebDriverPointerUp() || WebDriverPointerPause() => action,
+        },
+    ];
+    await callbackManager.pointerActions(viewportActions);
+  }
+
+  static WebDriverPointerMove _toViewportMove(WebDriverPointerMove action, Offset origin) {
+    final double x = action.x + origin.dx;
+    final double y = action.y + origin.dy;
+    // Non-finite coordinates cannot be encoded for the driver and would leave
+    // the command waiting for a reply forever.
+    if (!x.isFinite || !y.isFinite) {
+      throw ArgumentError.value(action, 'actions', 'resulting viewport position must be finite');
+    }
+    return WebDriverPointerMove(x, y, duration: action.duration);
+  }
+
+  /// Web only. Performs a real browser pointer click at [position] using
+  /// WebDriver, and completes once the browser has dispatched the click.
+  ///
+  /// [position] is a logical position in [view], such as the one returned by
+  /// [WidgetTester.getCenter]. If [view] is null, the implicit view is used.
+  ///
+  /// This is a convenience wrapper around [webDriverPointerActions] that moves
+  /// to [position] and presses and releases [WebDriverMouseButton.primary].
+  /// For hovers, drags, or secondary-button clicks, call
+  /// [webDriverPointerActions] directly.
+  ///
+  /// Unlike [WidgetTester.tap], which dispatches synthetic pointer events
+  /// directly to Flutter's gesture system, the click goes through the
+  /// browser's own hit testing and event dispatch. This makes it possible to
+  /// test interactions with platform views such as [HtmlElementView], for
+  /// example an `<iframe>`'s click listeners, which synthetic Flutter pointer
+  /// events never reach. DOM listeners run before the returned future
+  /// completes, so their effects can be asserted immediately after awaiting
+  /// this method.
+  ///
+  /// {@macro flutter.integration_test.webDriverPointerActions.devicePointerEvents}
+  ///
+  /// Only works on the web when tests are run via the `flutter drive` command
+  /// with a driver that uses [integrationDriver] from
+  /// `integration_test_driver_extended.dart`. Completes with an
+  /// [UnsupportedError] on other platforms, an [ArgumentError] if [position]
+  /// or the resulting viewport position is not finite, a [StateError] if [view]
+  /// is null and there is no implicit view, or an error if the driver fails
+  /// to perform the click.
+  Future<void> webDriverClick(Offset position, {FlutterView? view}) {
+    return webDriverPointerActions(<WebDriverPointerAction>[
+      WebDriverPointerAction.move(position.dx, position.dy),
+      const WebDriverPointerAction.down(),
+      const WebDriverPointerAction.up(),
+    ], view: view);
   }
 
   /// Android only. Converts the Flutter surface to an image view.

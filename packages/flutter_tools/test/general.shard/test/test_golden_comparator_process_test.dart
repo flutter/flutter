@@ -4,9 +4,9 @@
 
 import 'dart:convert';
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/test/test_golden_comparator.dart';
 
 import '../../src/common.dart';
@@ -21,15 +21,16 @@ void main() {
     late FakeProcess Function(String) createFakeProcess;
 
     setUpAll(() {
-      imageFile = globals.fs.file('test_image_file');
+      final fileSystem = MemoryFileSystem.test();
+      imageFile = fileSystem.file('test_image_file');
       goldenKey = Uri.parse('file://golden_key');
-      imageFile2 = globals.fs.file('second_test_image_file');
+      imageFile2 = fileSystem.file('second_test_image_file');
       goldenKey2 = Uri.parse('file://second_golden_key');
       createFakeProcess = (String stdout) =>
           FakeProcess(exitCode: Future<int>.value(0), stdout: stdoutFromString(stdout));
     });
 
-    testWithoutContext('can pass data', () async {
+    test('can pass data', () async {
       final expectedResponse = <String, dynamic>{'success': true, 'message': 'some message'};
 
       final FakeProcess mockProcess = createFakeProcess('${jsonEncode(expectedResponse)}\n');
@@ -48,7 +49,7 @@ void main() {
       );
     });
 
-    testWithoutContext('can handle multiple requests', () async {
+    test('can handle multiple requests', () async {
       final expectedResponse1 = <String, dynamic>{'success': true, 'message': 'some message'};
       final expectedResponse2 = <String, dynamic>{
         'success': false,
@@ -78,7 +79,7 @@ void main() {
       );
     });
 
-    testWithoutContext('ignores anything that does not look like JSON', () async {
+    test('ignores anything that does not look like JSON', () async {
       final expectedResponse = <String, dynamic>{'success': true, 'message': 'some message'};
 
       final FakeProcess mockProcess = createFakeProcess('''

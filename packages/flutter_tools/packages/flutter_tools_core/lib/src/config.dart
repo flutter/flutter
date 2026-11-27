@@ -4,6 +4,8 @@
 
 import 'package:meta/meta.dart';
 
+import 'json_utils.dart';
+
 /// Representation of an experimental or platform-specific feature flag.
 @immutable
 class FeatureFlag {
@@ -16,21 +18,25 @@ class FeatureFlag {
 
   /// Deserializes a [FeatureFlag] from a JSON-serializable map.
   factory FeatureFlag.fromJson(Map<String, Object?> json) {
-    if (json case {'name': final String name, 'help': final String help}) {
-      return FeatureFlag(
-        name: name,
-        help: help,
-        environmentVariable: json['environmentVariable'] as String?,
-        enabledByDefault: json['enabledByDefault'] == true,
-      );
-    }
     return FeatureFlag(
-      name: json['name'] as String? ?? '',
-      help: json['help'] as String? ?? '',
-      environmentVariable: json['environmentVariable'] as String?,
-      enabledByDefault: json['enabledByDefault'] == true,
+      name: json.optionalField<String>(nameKey, defaultValue: ''),
+      help: json.optionalField<String>(helpKey, defaultValue: ''),
+      environmentVariable: json.nullableField<String>(environmentVariableKey),
+      enabledByDefault: json.optionalField<bool>(enabledByDefaultKey, defaultValue: false),
     );
   }
+
+  /// Map key for [enabledByDefault].
+  static const String enabledByDefaultKey = 'enabledByDefault';
+
+  /// Map key for [environmentVariable].
+  static const String environmentVariableKey = 'environmentVariable';
+
+  /// Map key for [help].
+  static const String helpKey = 'help';
+
+  /// Map key for [name].
+  static const String nameKey = 'name';
 
   /// The CLI flag name used in `flutter config --<name>` or `--no-<name>` (where
   /// `<name>` typically begins with `enable-`).
@@ -47,10 +53,10 @@ class FeatureFlag {
 
   /// Serializes the feature flag to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
-    'name': name,
-    'help': help,
-    'environmentVariable': ?environmentVariable,
-    'enabledByDefault': enabledByDefault,
+    nameKey: name,
+    helpKey: help,
+    environmentVariableKey: ?environmentVariable,
+    enabledByDefaultKey: enabledByDefault,
   };
 
   @override
@@ -77,15 +83,21 @@ class ConfigOption {
 
   /// Deserializes a [ConfigOption] from a JSON-serializable map.
   factory ConfigOption.fromJson(Map<String, Object?> json) {
-    if (json case {'name': final String name, 'help': final String help}) {
-      return ConfigOption(name: name, help: help, value: json['value'] as String?);
-    }
     return ConfigOption(
-      name: json['name'] as String? ?? '',
-      help: json['help'] as String? ?? '',
-      value: json['value'] as String?,
+      name: json.optionalField<String>(nameKey, defaultValue: ''),
+      help: json.optionalField<String>(helpKey, defaultValue: ''),
+      value: json.nullableField<String>(valueKey),
     );
   }
+
+  /// Map key for [help].
+  static const String helpKey = 'help';
+
+  /// Map key for [name].
+  static const String nameKey = 'name';
+
+  /// Map key for [value].
+  static const String valueKey = 'value';
 
   /// The configuration key name used in `flutter config --<name>=<value>`.
   final String name;
@@ -97,7 +109,7 @@ class ConfigOption {
   final String? value;
 
   /// Serializes the configuration option to a JSON-serializable map.
-  Map<String, Object?> toMap() => <String, Object?>{'name': name, 'help': help, 'value': ?value};
+  Map<String, Object?> toMap() => <String, Object?>{nameKey: name, helpKey: help, valueKey: ?value};
 
   @override
   String toString() => 'ConfigOption(name: $name, help: $help, value: $value)';

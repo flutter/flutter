@@ -8,6 +8,7 @@
 
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_opengl_manager.h"
 #include "flutter/shell/platform/linux/fl_renderable.h"
 #include "flutter/shell/platform/linux/fl_text_input_handler.h"
 #include "flutter/shell/platform/linux/fl_view_private.h"
@@ -255,4 +256,48 @@ TEST_F(FlViewTest, SizedToContent) {
 
   fl_gtk_widget_destroy(GTK_WIDGET(secondary_view));
   fl_gtk_widget_destroy(GTK_WIDGET(implicit_view));
+}
+
+// Check that destroying a view with its own engine doesn't break the OpenGL
+// state of another engine, as they share the same EGL display.
+// https://github.com/flutter/flutter/issues/194399
+TEST_F(FlViewTest, DestroyViewWithSeparateEngine) {
+  FlView* view1 = fl_view_new(project);
+  g_object_ref_sink(view1);
+  FlView* view2 = fl_view_new(project);
+  g_object_ref_sink(view2);
+
+  FlEngine* engine1 = fl_view_get_engine(view1);
+  FlEngine* engine2 = fl_view_get_engine(view2);
+  EXPECT_NE(engine1, engine2);
+
+  // Complete view removal so the engine is not held by the pending request.
+  fl_engine_get_embedder_api(engine2)->RemoveView = MOCK_ENGINE_PROC(
+      RemoveView, ([](auto engine, const FlutterRemoveViewInfo* info) {
+        FlutterRemoveViewResult result = {
+            .struct_size = sizeof(FlutterRemoveViewResult),
+            .removed = true,
+            .user_data = info->user_data};
+        info->remove_view_callback(&result);
+        return kSuccess;
+      }));
+
+  // Destroy the second view, which disposes its engine.
+  g_object_add_weak_pointer(G_OBJECT(engine2),
+                            reinterpret_cast<gpointer*>(&engine2));
+  fl_gtk_widget_destroy(GTK_WIDGET(view2));
+  g_object_unref(view2);
+  while (g_main_context_iteration(nullptr, FALSE)) {
+  }
+  ASSERT_EQ(engine2, nullptr);
+
+  // The first engine can still use OpenGL.
+  FlOpenGLManager* opengl_manager = fl_engine_get_opengl_manager(engine1);
+  EXPECT_TRUE(fl_opengl_manager_make_current(opengl_manager));
+  EXPECT_TRUE(fl_opengl_manager_make_resource_current(opengl_manager));
+  EXPECT_TRUE(fl_opengl_manager_make_platform_current(opengl_manager));
+  EXPECT_TRUE(fl_opengl_manager_clear_current(opengl_manager));
+
+  fl_gtk_widget_destroy(GTK_WIDGET(view1));
+  g_object_unref(view1);
 }

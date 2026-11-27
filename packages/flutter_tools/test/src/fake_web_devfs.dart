@@ -8,24 +8,23 @@ import 'dart:io' hide Directory, File;
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
+import 'package:flutter_tools/src/web/web_debug_config.dart';
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-/// Helper function to create a [WebDevFS] with sensible testbed defaults.
+/// Helper function to create a [WebDevFS] with sensible defaults.
 WebDevFS createWebDevFS({
   String packagesFilePath = '.dart_tool/package_config.json',
   UrlTunneller? urlTunneller,
@@ -46,37 +45,36 @@ WebDevFS createWebDevFS({
   Directory? rootDirectory,
   bool useDwdsWebSocketConnection = false,
   bool webCrossOriginIsolation = false,
-  FileSystem? fileSystem,
-  Logger? logger,
-  Platform? platform,
   bool testMode = true,
+  required ToolContext toolContext,
   Map<String, String> webDefines = const <String, String>{},
 }) {
+  final FileSystem fs = toolContext.fs;
   return WebDevFS(
     packagesFilePath: packagesFilePath,
     urlTunneller: urlTunneller,
-    useSseForDebugProxy: useSseForDebugProxy,
-    useSseForDebugBackend: useSseForDebugBackend,
-    useSseForInjectedClient: useSseForInjectedClient,
     buildInfo: buildInfo,
     enableDwds: enableDwds,
     ddsConfig: ddsConfig,
-    entrypoint: entrypoint ?? globals.fs.file('lib/main.dart').uri,
+    entrypoint: entrypoint ?? fs.file('lib/main.dart').uri,
     expressionCompiler: expressionCompiler,
     chromiumLauncher: chromiumLauncher,
-    nativeNullAssertions: nativeNullAssertions,
-    webDevServerConfig: webDevServerConfig,
-    webRenderer: webRenderer,
-    isWasm: isWasm,
     useLocalCanvasKit: useLocalCanvasKit,
-    rootDirectory: rootDirectory ?? globals.fs.currentDirectory,
+    rootDirectory: rootDirectory ?? fs.currentDirectory,
     useDwdsWebSocketConnection: useDwdsWebSocketConnection,
-    webCrossOriginIsolation: webCrossOriginIsolation,
-    fileSystem: fileSystem ?? globals.fs,
-    logger: logger ?? globals.logger,
-    platform: platform ?? globals.platform,
+    toolContext: toolContext,
     testMode: testMode,
-    webDefines: webDefines,
+    webConfig: WebDebugConfig(
+      useSseForDebugProxy: useSseForDebugProxy,
+      useSseForDebugBackend: useSseForDebugBackend,
+      useSseForInjectedClient: useSseForInjectedClient,
+      nativeNullAssertions: nativeNullAssertions,
+      devServerConfig: webDevServerConfig,
+      renderer: webRenderer,
+      useWasm: isWasm,
+      crossOriginIsolation: webCrossOriginIsolation,
+      webDefines: webDefines,
+    ),
   );
 }
 

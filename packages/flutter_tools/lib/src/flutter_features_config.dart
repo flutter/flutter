@@ -100,6 +100,9 @@ interface class FlutterFeaturesConfig {
   /// ENABLE_FOO=any-other-value flutter some-command
   /// ```
   bool? isEnabled(Feature feature) {
+    if (feature == toolExtensionsFeature && isSafeModeActive(_platform.environment)) {
+      return false;
+    }
     return _isEnabledByConfigValue(feature) ?? _isEnabledByPlatformEnvironment(feature);
   }
 

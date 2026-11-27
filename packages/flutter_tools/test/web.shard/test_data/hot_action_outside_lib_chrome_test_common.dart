@@ -40,7 +40,7 @@ void testHotActionOutsideLib(HotAction action) {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('$actionName applies code changes for an entrypoint outside lib/', () async {
+  test('$actionName applies code changes for an entrypoint outside lib/', () async {
     await flutter.run(
       device: GoogleChromeDevice.kChromeDeviceId,
       script: 'integration_test/main.dart',

@@ -56,14 +56,14 @@ class MockSnapshotDelegate : public SnapshotDelegate {
               (override));
   MOCK_METHOD(void,
               MakeImpellerSnapshot,
-              (sk_sp<DisplayList>,
+              (SnapshotDisplayListProvider,
                DlISize,
                std::function<void(std::shared_ptr<impeller::Texture>)>,
                SnapshotPixelFormat target_format),
               (override));
   MOCK_METHOD(std::shared_ptr<impeller::Texture>,
               MakeImpellerSnapshotSync,
-              (sk_sp<DisplayList>, DlISize, SnapshotPixelFormat),
+              (SnapshotDisplayListProvider, DlISize, SnapshotPixelFormat),
               (override));
   MOCK_METHOD(sk_sp<SkImage>,
               ConvertToRasterImage,

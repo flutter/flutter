@@ -263,13 +263,10 @@ On some platforms, there are multiple native languages that can be used to write
   - **Note**: Only Flutter team members may migrate an existing plugin's Java code
     to Kotlin, due to the potential difficulty of reviewing such PRs; migration
     PRs from non-team members will be rejected.
-- iOS: Depends on the plugin. The goal is to eventually migrate all plugins to Swift; see [the migration section below](#swift-migration-for-1p-plugins) for details. For non-migration PRs, use:
-  - Swift if the plugin is entirely Swift.
-  - Swift or Objective-C if the plugin is partially migrated.
-  - Objective-C if the plugin is still entirely Objective-C.
+- iOS: Swift.
+  - A small number of legacy implementations that will be removed in the future use Objective-C, and will not be converted to Swift. Changes to these files are the only case where Objective-C is used.
 - Linux: C. Use of C++ constructs is strongly discouraged; see [repo style notes](../../../CONTRIBUTING.md#style) for details
-- macOS: Swift only\*.
-  - \* In some cases an existing iOS implementation has been updated to support macOS, so is Objective-C (e.g., `in_app_purchase`). This is the only case where Objective-C is allowed for macOS plugins.
+- macOS: Swift.
 - Windows: C++.
 - Web: Dart.
 
@@ -501,35 +498,3 @@ To disable this feature, use `plaster="none"`.
 The plaster is indented as much as the `#enddocregion` of the region where the splice occurs.
 
 Regions are maximally unindented before being injected into the markdown files (while preserving relative indentation within the block).
-
-## Swift Migration for 1P Plugins
-
-### Preparation
-
-1. Read the [Swift migration design doc](https://docs.google.com/document/d/1XsaulkJA6_ZSpM7chkQLhQY25sQqhEMiqHMYzw8H85o/edit?resourcekey=0-_cUjF1c0iBvRLKfV-3gK5A), which covers several important topics such as the ["top down approach"](https://docs.google.com/document/d/1XsaulkJA6_ZSpM7chkQLhQY25sQqhEMiqHMYzw8H85o/edit?resourcekey=0-_cUjF1c0iBvRLKfV-3gK5A#heading=h.reauq7bq8vak). Feel free to leave any comments and feedback in the doc.
-
-2. Read Google's [Swift Style Guide](https://google.github.io/swift/) and Apple's [API Design Guidelines](https://www.swift.org/documentation/api-design-guidelines/) (which is endorsed by Google's Swift Style Guide).
-
-3. Pick a plugin that you are interested in from the [umbrella GitHub issue](https://github.com/flutter/flutter/issues/119015). This is for multiple contributors to coordinate with each other, and to avoid duplicate or conflicting work.
-
-### Project Settings
-
-1. Remove custom modulemap ([example](https://github.com/flutter/plugins/pull/6229/files)). This is due to a limitation in Cocoapods ([details](https://github.com/flutter/plugins/pull/6369#issue-1363961940)). This unfortunately means that we cannot use `Test` submodules, and all ObjC headers are exposed publicly during the migration.
-
-2. Add Swift dependency information to the podspec ([example](https://github.com/flutter/packages/blob/617f9d99954fe394dc91258c431c9a2626921e08/packages/quick_actions/quick_actions_ios/ios/quick_actions_ios.podspec#L17-L22)). Note that `.h` and `.m` should be removed from the `spec.source_files` after migration is done.
-
-3. After the plugin class is migrated to Swift, update `pluginClass` in `pubspec.yaml` ([example](https://github.com/flutter/packages/blob/617f9d99954fe394dc91258c431c9a2626921e08/packages/quick_actions/quick_actions_ios/pubspec.yaml#L16)).
-
-### Format your Swift code
-
-1. Install [swift-format](https://github.com/apple/swift-format). If you also contribute to the flutter engine, there is [an issue](https://github.com/flutter/flutter/issues/41129#issuecomment-1400812109) with the swift-format under `depot_tools`. Make sure to set up the export PATH properly to run your own copy of `swift-format`.
-
-2. Run `./script/tool_runner.sh format`
-
-### Testing
-
-To reduce the risk of regression, it is important to backfill unit tests to full coverage before the migration, and maintain full coverage during the migration. If possible (i.e., if adding testing does not require refactoring the plugin to make it testable), adding test coverage should be done in a separate PR before the conversion of the implementation.
-
-We do not report code coverage on the CI, since the number can actually be misleading (for example, a 100% coverage may make PR reviewers think that everything is fine, which is not necessarily true). Instead, you (and your PR reviewer) should evaluate whether the test is complete, by actually reading the test code (rather than just looking at the coverage). You may well want to use a coverage tool as part of your evaluation.
-
-During the migration, especially when backfilling tests, it is possible to discover existing bugs. Migration PRs should just focus on migration and should not contain bug fixes. You can either (1) fix the bug in ObjC first in a separate PR, or (2) if the bug is too hard to fix, just acknowledge the bug in a comment so that someone can fix it in the future.
