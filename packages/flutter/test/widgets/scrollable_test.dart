@@ -61,6 +61,35 @@ class NoScrollbarBehavior extends ScrollBehavior {
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
 }
 
+class _NonNotifyingScrollBehavior extends ScrollBehavior {
+  const _NonNotifyingScrollBehavior({required this.onShouldNotify});
+
+  final VoidCallback onShouldNotify;
+
+  @override
+  bool shouldNotify(ScrollBehavior oldDelegate) {
+    onShouldNotify();
+    return false;
+  }
+}
+
+class _InitStateScrollable extends Scrollable {
+  const _InitStateScrollable({required super.viewportBuilder, required this.onInit});
+
+  final ValueChanged<ScrollBehavior?> onInit;
+
+  @override
+  ScrollableState createState() => _InitStateScrollableState();
+}
+
+class _InitStateScrollableState extends ScrollableState {
+  @override
+  void initState() {
+    super.initState();
+    (widget as _InitStateScrollable).onInit(resolvedScrollBehavior);
+  }
+}
+
 const double dragOffset = 200.0;
 
 double getScrollOffset(WidgetTester tester, {bool last = true}) {
@@ -1573,6 +1602,107 @@ void main() {
       types(scrollable.resolvedPhysics),
       'AlwaysScrollableScrollPhysics ClampingScrollPhysics RangeMaintainingScrollPhysics',
     );
+  });
+
+  testWidgets('resolvedScrollBehavior getter', (WidgetTester tester) async {
+    final key = GlobalKey<ScrollableState>();
+    final ScrollBehavior inheritedBehavior = const ScrollBehavior().copyWith(
+      pointerAxisModifiers: <LogicalKeyboardKey>{LogicalKeyboardKey.controlLeft},
+    );
+    final ScrollBehavior explicitBehavior = const ScrollBehavior().copyWith(
+      pointerAxisModifiers: <LogicalKeyboardKey>{LogicalKeyboardKey.altLeft},
+    );
+
+    Widget buildFrame({ScrollBehavior? behavior, ScrollBehavior? inherited}) {
+      Widget scrollable = Scrollable(
+        key: key,
+        scrollBehavior: behavior,
+        viewportBuilder: (BuildContext context, ViewportOffset position) => Viewport(
+          offset: position,
+          slivers: const <Widget>[SliverToBoxAdapter(child: SizedBox(height: 2000.0))],
+        ),
+      );
+      if (inherited != null) {
+        scrollable = ScrollConfiguration(behavior: inherited, child: scrollable);
+      }
+      return Directionality(textDirection: TextDirection.ltr, child: scrollable);
+    }
+
+    final observedBehaviors = <ScrollBehavior?>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: _InitStateScrollable(
+          viewportBuilder: (BuildContext context, ViewportOffset position) => const SizedBox(),
+          onInit: observedBehaviors.add,
+        ),
+      ),
+    );
+    expect(observedBehaviors, <ScrollBehavior?>[null]);
+
+    await tester.pumpWidget(buildFrame());
+    expect(key.currentState!.resolvedScrollBehavior, const ScrollBehavior());
+
+    await tester.pumpWidget(buildFrame(inherited: inheritedBehavior));
+    expect(key.currentState!.resolvedScrollBehavior, same(inheritedBehavior));
+
+    await tester.pumpWidget(buildFrame(behavior: explicitBehavior, inherited: inheritedBehavior));
+    expect(key.currentState!.resolvedScrollBehavior, same(explicitBehavior));
+
+    await tester.pumpWidget(buildFrame(behavior: inheritedBehavior, inherited: explicitBehavior));
+    expect(key.currentState!.resolvedScrollBehavior, same(inheritedBehavior));
+
+    expect(
+      key.currentState!
+          .toDiagnosticsNode()
+          .getProperties()
+          .singleWhere((DiagnosticsNode property) => property.name == 'scroll behavior')
+          .value,
+      same(inheritedBehavior),
+    );
+
+    await tester.pumpWidget(buildFrame(inherited: explicitBehavior));
+    expect(key.currentState!.resolvedScrollBehavior, same(explicitBehavior));
+  });
+
+  testWidgets('ScrollBehavior updates match ScrollConfiguration notifications', (
+    WidgetTester tester,
+  ) async {
+    final key = GlobalKey<ScrollableState>();
+    var notifications = 0;
+    final behavior = _NonNotifyingScrollBehavior(onShouldNotify: () => notifications += 1);
+    Widget buildFrame(ScrollBehavior scrollBehavior) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Scrollable(
+          key: key,
+          scrollBehavior: scrollBehavior,
+          viewportBuilder: (BuildContext context, ViewportOffset position) => Viewport(
+            offset: position,
+            slivers: const <Widget>[SliverToBoxAdapter(child: SizedBox(height: 2000.0))],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(behavior));
+    final ScrollPosition position = key.currentState!.position;
+    await tester.pumpWidget(buildFrame(behavior));
+    expect(notifications, 0);
+    expect(key.currentState!.position, same(position));
+
+    final equivalentBehavior = _NonNotifyingScrollBehavior(
+      onShouldNotify: () => notifications += 1,
+    );
+    await tester.pumpWidget(buildFrame(equivalentBehavior));
+    expect(notifications, 1);
+    expect(key.currentState!.position, same(position));
+    expect(key.currentState!.resolvedScrollBehavior, same(behavior));
+
+    const ScrollBehavior differentType = NoScrollbarBehavior();
+    await tester.pumpWidget(buildFrame(differentType));
+    expect(key.currentState!.resolvedScrollBehavior, same(differentType));
+    expect(key.currentState!.position, isNot(same(position)));
   });
 
   testWidgets('dragDevices change updates widget', (WidgetTester tester) async {
