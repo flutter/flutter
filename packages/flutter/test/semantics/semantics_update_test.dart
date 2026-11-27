@@ -725,12 +725,20 @@ void main() {
       opacity.value = 1.0;
       await tester.pump();
       embedderTree.apply(SemanticsUpdateBuilderSpy.observations);
-      expect(
-        SemanticsUpdateBuilderSpy.observations.values.map(
-          (SemanticsNodeUpdateObservation observation) => observation.label,
-        ),
-        contains('inner overlay'),
-      );
+      final int innerOverlayId = SemanticsUpdateBuilderSpy.observations.entries
+          .singleWhere(
+            (MapEntry<int, SemanticsNodeUpdateObservation> entry) =>
+                entry.value.label == 'inner overlay',
+          )
+          .key;
+      expect(embedderTree.hasNode(innerOverlayId), isTrue);
+
+      // Hiding the anchor again removes the inner overlay child from the tree.
+      SemanticsUpdateBuilderSpy.observations.clear();
+      opacity.value = 0.0;
+      await tester.pump();
+      embedderTree.apply(SemanticsUpdateBuilderSpy.observations);
+      expect(embedderTree.hasNode(innerOverlayId), isFalse);
 
       SemanticsUpdateBuilderSpy.observations.clear();
       handle.dispose();
@@ -1040,8 +1048,26 @@ class _EmbedderSemanticsTree {
     for (final int updatedId in update.keys) {
       expect(reachable, contains(updatedId), reason: 'Updated node #$updatedId is an orphan.');
     }
+
+    // Hit-test order has to reach the same nodes as traversal order.
+    final reachableInHitTestOrder = <int>{};
+    void visitInHitTestOrder(int id) {
+      if (reachableInHitTestOrder.add(id)) {
+        _nodes[id]!.childrenInHitTestOrder.forEach(visitInHitTestOrder);
+      }
+    }
+
+    visitInHitTestOrder(0);
+    expect(
+      reachableInHitTestOrder,
+      reachable,
+      reason: 'Traversal order and hit-test order reach different nodes.',
+    );
     _nodes.removeWhere((int id, SemanticsNodeUpdateObservation _) => !reachable.contains(id));
   }
+
+  /// Whether the embedder currently holds the node with the given `id`.
+  bool hasNode(int id) => _nodes.containsKey(id);
 }
 
 /// A test widget that allows toggling the merging of its descendants' semantics
