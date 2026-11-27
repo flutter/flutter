@@ -48,9 +48,9 @@ template("metal_library") {
 
     args = [
       "--output",
-      rebase_path(metal_library_path, root_out_dir),
+      rebase_path(metal_library_path, root_build_dir),
       "--depfile",
-      rebase_path(depfile),
+      rebase_path(depfile, root_build_dir),
       "--metal-version=$metal_version",
     ]
 

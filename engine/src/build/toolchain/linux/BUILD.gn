@@ -6,13 +6,14 @@ import("//build/config/sysroot.gni")
 import("//build/toolchain/ccache.gni")
 import("//build/toolchain/gcc_toolchain.gni")
 import("//build/toolchain/rbe.gni")
+import("//build/toolchain/siso.gni")
 import("//build/toolchain/toolchain.gni")
 
 declare_args() {
   toolchain_prefix = ""
 }
 
-if (use_rbe) {
+if (use_rbe && !use_siso) {
   remote_wrapper =
       rebase_path("//flutter/build/rbe/remote_wrapper_linux.sh", root_build_dir)
   local_wrapper =
