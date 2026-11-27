@@ -254,6 +254,7 @@ class Visibility extends StatelessWidget {
     this.maintainSemantics = false,
     this.maintainInteractivity = false,
     this.maintainFocusability = false,
+    this.excludeFromSpacing = false,
   }) : assert(
          maintainState || !maintainAnimation,
          'Cannot maintain animations if the state is not also maintained.',
@@ -273,6 +274,10 @@ class Visibility extends StatelessWidget {
        assert(
          maintainState || !maintainFocusability,
          'Cannot maintain focusability if the state is not also maintained.',
+       ),
+       assert(
+         !maintainSize || !excludeFromSpacing,
+         'Cannot exclude from spacing if the size is maintained.',
        );
 
   /// Control whether the given [child] is [visible].
@@ -288,6 +293,7 @@ class Visibility extends StatelessWidget {
       maintainSemantics = true,
       maintainInteractivity = true,
       maintainFocusability = true,
+      excludeFromSpacing = false,
       replacement = const SizedBox.shrink(); // Unused since maintainState is always true.
 
   /// The widget to show or hide, as controlled by [visible].
@@ -420,6 +426,28 @@ class Visibility extends StatelessWidget {
   /// is set to true, then focus events will reach the child subtree.
   final bool maintainFocusability;
 
+  /// Whether a parent [Row], [Column] or [Flex] should place no spacing around
+  /// this widget when it is not [visible].
+  ///
+  /// By default, when this widget is not [visible], the [replacement] (or, if
+  /// [maintainState] is true, the offstage [child]) is still a child of the
+  /// parent, so a parent with a non-zero [Flex.spacing] places spacing around
+  /// it. If this flag is set to true, the parent instead lays out the remaining
+  /// children as if this widget were not in the list of children, which is the
+  /// same result as omitting it with a collection `if`.
+  ///
+  /// This only has an effect when this widget is a direct child of the parent
+  /// (or the child of a [Flexible] or [Expanded] that is). See
+  /// [ExcludeFromSpacing] for details.
+  ///
+  /// This flag can only be set if [maintainSize] is false, since a widget that
+  /// maintains its size keeps its spacing too.
+  ///
+  /// Toggling [visible] while this flag is true does not change the structure
+  /// of the subtree. Dynamically changing this flag itself may cause the
+  /// current state of the subtree to be lost.
+  final bool excludeFromSpacing;
+
   /// Tells the visibility state of an element in the tree based off its
   /// ancestor [Visibility] elements.
   ///
@@ -471,6 +499,9 @@ class Visibility extends StatelessWidget {
         assert(!maintainState);
         result = visible ? child : replacement;
       }
+      if (excludeFromSpacing) {
+        result = ExcludeFromSpacing(excluding: !visible, child: result);
+      }
     }
     return _VisibilityScope(isVisible: visible, child: result);
   }
@@ -493,6 +524,9 @@ class Visibility extends StatelessWidget {
         value: maintainInteractivity,
         ifFalse: 'maintainInteractivity',
       ),
+    );
+    properties.add(
+      FlagProperty('excludeFromSpacing', value: excludeFromSpacing, ifTrue: 'excludeFromSpacing'),
     );
   }
 }

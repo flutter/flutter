@@ -530,6 +530,208 @@ void main() {
     expect(box3.size.height, equals(100.0));
   });
 
+  group('RenderExcludeFromSpacing', () {
+    RenderBox square() {
+      return RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints.tightFor(width: 100.0, height: 100.0),
+      );
+    }
+
+    Offset getOffset(RenderBox box) {
+      final parentData = box.parentData! as FlexParentData;
+      return parentData.offset;
+    }
+
+    test('receives no spacing', () {
+      final RenderBox box1 = square();
+      final excluded = RenderExcludeFromSpacing();
+      final RenderBox box2 = square();
+      final RenderBox box3 = square();
+      final flex = RenderFlex(
+        textDirection: TextDirection.ltr,
+        mainAxisSize: MainAxisSize.min,
+        spacing: 14.0,
+      );
+      flex.addAll(<RenderBox>[box1, excluded, box2, box3]);
+      layout(flex, constraints: const BoxConstraints(maxWidth: 500.0, maxHeight: 400.0));
+
+      // Same as if `excluded` were not a child.
+      expect(flex.size.width, equals(328.0));
+      expect(getOffset(box1).dx, equals(0.0));
+      expect(getOffset(box2).dx, equals(114.0));
+      expect(getOffset(box3).dx, equals(228.0));
+      expect(excluded.size, Size.zero);
+
+      flex.direction = Axis.vertical;
+      pumpFrame();
+      expect(flex.size.height, equals(328.0));
+      expect(getOffset(box1).dy, equals(0.0));
+      expect(getOffset(box2).dy, equals(114.0));
+      expect(getOffset(box3).dy, equals(228.0));
+    });
+
+    test('receives no spacing as first or last child', () {
+      final excludedFirst = RenderExcludeFromSpacing();
+      final RenderBox box1 = square();
+      final RenderBox box2 = square();
+      final excludedLast = RenderExcludeFromSpacing();
+      final flex = RenderFlex(
+        textDirection: TextDirection.ltr,
+        mainAxisSize: MainAxisSize.min,
+        spacing: 14.0,
+      );
+      flex.addAll(<RenderBox>[excludedFirst, box1, box2, excludedLast]);
+      layout(flex, constraints: const BoxConstraints(maxWidth: 500.0, maxHeight: 400.0));
+
+      expect(flex.size.width, equals(214.0));
+      expect(getOffset(excludedFirst).dx, equals(0.0));
+      expect(getOffset(box1).dx, equals(0.0));
+      expect(getOffset(box2).dx, equals(114.0));
+      expect(getOffset(excludedLast).dx, equals(214.0));
+    });
+
+    test('respects text direction', () {
+      final RenderBox box1 = square();
+      final excluded = RenderExcludeFromSpacing();
+      final RenderBox box2 = square();
+      final flex = RenderFlex(
+        textDirection: TextDirection.rtl,
+        mainAxisSize: MainAxisSize.min,
+        spacing: 14.0,
+      );
+      flex.addAll(<RenderBox>[box1, excluded, box2]);
+      layout(flex, constraints: const BoxConstraints(maxWidth: 500.0, maxHeight: 400.0));
+
+      expect(flex.size.width, equals(214.0));
+      expect(getOffset(box2).dx, equals(0.0));
+      expect(getOffset(box1).dx, equals(114.0));
+    });
+
+    test('is not counted when distributing free space', () {
+      for (final MainAxisAlignment alignment in MainAxisAlignment.values) {
+        final withExcluded = <RenderBox>[square(), RenderExcludeFromSpacing(), square(), square()];
+        final withoutExcluded = <RenderBox>[square(), square(), square()];
+        final flexWithExcluded = RenderFlex(
+          textDirection: TextDirection.ltr,
+          mainAxisAlignment: alignment,
+          spacing: 14.0,
+        )..addAll(withExcluded);
+        final flexWithoutExcluded = RenderFlex(
+          textDirection: TextDirection.ltr,
+          mainAxisAlignment: alignment,
+          spacing: 14.0,
+        )..addAll(withoutExcluded);
+        const constraints = BoxConstraints(maxWidth: 500.0, maxHeight: 400.0);
+        layout(flexWithExcluded, constraints: constraints);
+        final List<double> offsetsWithExcluded = <RenderBox>[
+          withExcluded[0],
+          withExcluded[2],
+          withExcluded[3],
+        ].map((RenderBox box) => getOffset(box).dx).toList();
+        layout(flexWithoutExcluded, constraints: constraints);
+        final List<double> offsetsWithoutExcluded = withoutExcluded
+            .map((RenderBox box) => getOffset(box).dx)
+            .toList();
+        expect(offsetsWithExcluded, offsetsWithoutExcluded, reason: '$alignment');
+      }
+    });
+
+    test('toggling excluding updates the parent layout', () {
+      final RenderBox box1 = square();
+      final excluded = RenderExcludeFromSpacing();
+      final RenderBox box2 = square();
+      final flex = RenderFlex(
+        textDirection: TextDirection.ltr,
+        mainAxisSize: MainAxisSize.min,
+        spacing: 14.0,
+      );
+      flex.addAll(<RenderBox>[box1, excluded, box2]);
+      layout(flex, constraints: const BoxConstraints(maxWidth: 500.0, maxHeight: 400.0));
+      expect(getOffset(box2).dx, equals(114.0));
+
+      excluded.excluding = false;
+      pumpFrame();
+      expect(flex.size.width, equals(228.0));
+      expect(getOffset(excluded).dx, equals(114.0));
+      expect(getOffset(box2).dx, equals(128.0));
+
+      excluded.excluding = true;
+      pumpFrame();
+      expect(flex.size.width, equals(214.0));
+      expect(getOffset(box2).dx, equals(114.0));
+    });
+
+    test('a child laid out with zero size that is not excluded keeps its spacing', () {
+      final RenderBox box1 = square();
+      final zeroSize = RenderConstrainedBox(additionalConstraints: BoxConstraints.tight(Size.zero));
+      final RenderBox box2 = square();
+      final flex = RenderFlex(
+        textDirection: TextDirection.ltr,
+        mainAxisSize: MainAxisSize.min,
+        spacing: 14.0,
+      );
+      flex.addAll(<RenderBox>[box1, zeroSize, box2]);
+      layout(flex, constraints: const BoxConstraints(maxWidth: 500.0, maxHeight: 400.0));
+      expect(getOffset(box2).dx, equals(128.0));
+    });
+
+    test('only excluded children', () {
+      final flex = RenderFlex(
+        textDirection: TextDirection.ltr,
+        mainAxisSize: MainAxisSize.min,
+        spacing: 14.0,
+      );
+      flex.addAll(<RenderBox>[RenderExcludeFromSpacing(), RenderExcludeFromSpacing()]);
+      layout(flex, constraints: const BoxConstraints(maxWidth: 500.0, maxHeight: 400.0));
+      expect(flex.size, Size.zero);
+      expect(flex.getMinIntrinsicWidth(double.infinity), 0.0);
+      expect(flex.getMaxIntrinsicWidth(double.infinity), 0.0);
+    });
+
+    test('intrinsics and dry layout', () {
+      final flex = RenderFlex(textDirection: TextDirection.ltr, spacing: 16.0);
+      flex.addAll(<RenderBox>[square(), RenderExcludeFromSpacing(), square(), square()]);
+
+      expect(flex.getMinIntrinsicWidth(double.infinity), 332.0);
+      expect(flex.getMaxIntrinsicWidth(double.infinity), 332.0);
+      expect(flex.getMinIntrinsicHeight(double.infinity), 100.0);
+      expect(flex.getMaxIntrinsicHeight(double.infinity), 100.0);
+
+      flex.mainAxisSize = MainAxisSize.min;
+      const constraints = BoxConstraints(maxWidth: 500.0, maxHeight: 400.0);
+      expect(flex.getDryLayout(constraints), const Size(332.0, 100.0));
+      layout(flex, constraints: constraints);
+      expect(flex.size, const Size(332.0, 100.0));
+    });
+
+    test('lays out and paints its child', () {
+      final RenderBox child = square();
+      final excluded = RenderExcludeFromSpacing(child: child);
+      final RenderBox box = square();
+      final flex = RenderFlex(
+        textDirection: TextDirection.ltr,
+        mainAxisSize: MainAxisSize.min,
+        spacing: 14.0,
+      );
+      flex.addAll(<RenderBox>[excluded, box]);
+      layout(flex, constraints: const BoxConstraints(maxWidth: 500.0, maxHeight: 400.0));
+      expect(excluded.size, const Size(100.0, 100.0));
+      // No spacing between the excluded child and the next one.
+      expect(getOffset(box).dx, equals(100.0));
+      expect(flex.size.width, equals(200.0));
+    });
+
+    test('debugFillProperties', () {
+      final builder = DiagnosticPropertiesBuilder();
+      RenderExcludeFromSpacing(excluding: false).debugFillProperties(builder);
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
+      expect(description, contains('excluding: false'));
+    });
+  });
+
   test('Fit.loose', () {
     final box1 = RenderConstrainedBox(
       additionalConstraints: const BoxConstraints.tightFor(width: 100.0, height: 100.0),
