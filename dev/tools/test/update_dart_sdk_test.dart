@@ -48,6 +48,8 @@ List<int> _createZip(Map<String, String> files) {
 void main() {
   const FileSystem localFs = LocalFileSystem();
   const Platform platform = LocalPlatform();
+  // Set FORCE_POWERSHELL=true on Linux or macOS to exercise update_dart_sdk.ps1
+  // locally with `pwsh`.
   final usePowershellOnPosix = io.Platform.environment[_kForcePowershellEnv] == 'true';
   final bool usePowershell = platform.isWindows || usePowershellOnPosix;
   final scriptName = 'update_dart_sdk.${usePowershell ? 'ps1' : 'sh'}';
@@ -70,16 +72,21 @@ void main() {
     flutterRoot
         .childFile(localFs.path.join('bin', 'internal', scriptName))
         .copySync(updateScript.path);
+    // update_dart_sdk reads engine.realm directly; an empty file targets the default realm.
     cacheDir.childFile('engine.realm').writeAsStringSync('');
 
     serverZips = <String, List<int>>{};
     mockStorageServer = await io.HttpServer.bind(io.InternetAddress.loopbackIPv4, 0);
     mockStorageServer.listen((io.HttpRequest request) async {
       await request.drain<void>();
+      // Match by engine version path segment from
+      // /flutter_infra_release/flutter/<engine-version>/dart-sdk-<os>-<arch>.zip.
       for (final MapEntry(:key, :value) in serverZips.entries) {
         if (request.uri.pathSegments.contains(key)) {
           request.response.headers.contentType = io.ContentType.binary;
           request.response.headers.contentLength = value.length;
+          // update_dart_sdk.ps1 issues a HEAD probe on Windows ARM64 to check
+          // whether an ARM64 archive exists before falling back to x64.
           if (request.method != _kHeadMethod) {
             request.response.add(value);
           }
@@ -102,6 +109,8 @@ void main() {
   Future<void> runUpdateDartSdk() async {
     final String executable;
     final List<String> args;
+    // Match bin/internal/shared.bat by bypassing the host execution policy so
+    // PowerShell does not reject the copied script on Restricted Windows hosts.
     if (platform.isWindows) {
       executable = 'powershell';
       args = <String>['-ExecutionPolicy', 'Bypass', '-NoProfile', '-File', updateScript.path];
@@ -146,6 +155,9 @@ void main() {
       _kLicenseFileName: 'initial license content',
     };
     cacheDir.childFile('engine.stamp').writeAsStringSync(_kInitialEngineVersion);
+    // Include macOS codesigning metadata files at the archive root (see
+    // engine/src/flutter/build/archives/BUILD.gn) to verify they are discarded
+    // with the temp extraction directory rather than leaking into bin/cache/.
     serverZips[_kInitialEngineVersion] = _createZip(<String, String>{
       ...initialExpected,
       _kEntitlementsFileName: 'initial entitlements',
@@ -161,7 +173,8 @@ void main() {
     expect(cacheDir.childFile(_kEntitlementsFileName).existsSync(), isFalse);
     expect(cacheDir.childFile(_kWithoutEntitlementsFileName).existsSync(), isFalse);
 
-    // Simulate an update with a new engine version and updated archive contents.
+    // Simulate an engine version bump to verify existing SDK and license files
+    // are replaced without interactive overwrite prompts or conflicts.
     const updatedExpected = <String, String>{
       _kDartBinaryPath: 'updated dart binary',
       _kDartVersionPath: '3.1.0',
@@ -182,6 +195,8 @@ void main() {
     expect(cacheDir.childFile(_kEntitlementsFileName).existsSync(), isFalse);
     expect(cacheDir.childFile(_kWithoutEntitlementsFileName).existsSync(), isFalse);
 
+    // Verify neither the staging directory (dart-sdk.tmp) nor rotated backups
+    // (dart-sdk.old*) remain after a clean update.
     final List<FileSystemEntity> leftoverArtifacts = cacheDir
         .listSync()
         .where(
