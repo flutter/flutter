@@ -59,16 +59,22 @@ cc_library(
 
 # runtime/BUILD.gn's config("dart_config"), which the engine's dart:io glue
 # (//flutter/lib/io) lists privately: the defines it resolves to under the
-# host configurations tools/gn writes (DEBUG under --dart-debug, the wrap's
+# configurations tools/gn writes (DEBUG under --dart-debug, the wrap's
 # dart_debug flag, NDEBUG otherwise; DART_DYNAMIC_MODULES under the wrap's
-# dart_dynamic_modules flag; SUPPORT_PERFETTO and EXPERIMENTAL_VM_SERVICE are
-# the Dart arguments' defaults). Its compiler flags cannot ride a dependency;
-# the converter inlines them from its mapping (ConfigDependency.copts), and
-# they are the same either way since dart_debug_optimization_level stays "2".
+# dart_dynamic_modules flag; SUPPORT_PERFETTO where runtime_args.gni's
+# dart_support_perfetto holds, which is everywhere but where
+# dart_runtime_mode is "release", tools/gn's value for the release and
+# jit_release runtime modes; EXPERIMENTAL_VM_SERVICE is the Dart argument's
+# default). Its compiler flags cannot ride a dependency; the converter
+# inlines them from its mapping (ConfigDependency.copts), and they are the
+# same either way since dart_debug_optimization_level stays "2".
 cc_library(
     name = "dart_config",
-    defines = [
-        "SUPPORT_PERFETTO",
+    defines = select({
+        "@flutter//engine/src/flutter/common:runtime_mode_jit_release": [],
+        "@flutter//engine/src/flutter/common:runtime_mode_release": [],
+        "//conditions:default": ["SUPPORT_PERFETTO"],
+    }) + [
         "EXPERIMENTAL_VM_SERVICE",
     ] + select({
         "@flutter//engine/src/flutter/build/bazel/dart_wrap:dart_debug_enabled": ["DEBUG"],
