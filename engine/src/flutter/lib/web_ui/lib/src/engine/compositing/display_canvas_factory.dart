@@ -6,12 +6,7 @@ import 'package:ui/src/engine.dart';
 
 /// Caches canvases used to display Skia-drawn content.
 class DisplayCanvasFactory<T extends DisplayCanvas> {
-  DisplayCanvasFactory({required this.createCanvas}) {
-    assert(() {
-      registerHotRestartListener(dispose);
-      return true;
-    }());
-  }
+  DisplayCanvasFactory({required this.createCanvas});
 
   /// A function which is passed in as a constructor parameter which is used to
   /// create new display canvases.
