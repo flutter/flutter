@@ -62,7 +62,7 @@ if (![string]::IsNullOrEmpty($env:FLUTTER_PREBUILT_ENGINE_VERSION)) {
   $engineVersion = Invoke-Expression "& '$flutterRoot/bin/internal/content_aware_hash.ps1'"
 }
 
-# Writes $Value to $Path via a PID-scoped temporary file and atomic Move-Item
+# Writes $Value to $Path via a PID-scoped temporary file and Move-Item
 # retry loop when $Path does not exist or its contents have changed, minimizing
 # file-lock contention during parallel flutter executions.
 function Write-CacheFileIfChanged([string]$Path, [string]$Value) {
@@ -73,7 +73,7 @@ function Write-CacheFileIfChanged([string]$Path, [string]$Value) {
                 return
             }
         } catch {
-            # Fall through and rewrite atomically if reading collided with a concurrent move.
+            # Fall through and rewrite if reading collided with a concurrent move.
         }
     }
     $tmpPath = "$Path.tmp.$PID"
@@ -103,5 +103,4 @@ function Write-CacheFileIfChanged([string]$Path, [string]$Value) {
 Write-CacheFileIfChanged "$flutterRoot/bin/cache/engine.stamp" $engineVersion
 
 # The realm on CI is passed in.
-$engineRealm = if ($env:FLUTTER_REALM) { $env:FLUTTER_REALM } else { "" }
-Write-CacheFileIfChanged "$flutterRoot/bin/cache/engine.realm" $engineRealm
+Write-CacheFileIfChanged "$flutterRoot/bin/cache/engine.realm" "$env:FLUTTER_REALM"

@@ -71,14 +71,12 @@ write_cache_file_if_changed() {
   local value="${2%$'\r'}"
   if [ -f "$target" ]; then
     local existing
-    if existing="$(cat "$target" 2>/dev/null)" && [ "${existing%$'\r'}" = "$value" ]; then
+    if { existing="$(< "$target")"; } 2>/dev/null && [ "${existing%$'\r'}" = "$value" ]; then
       return 0
     fi
   fi
   local tmp="$target.tmp.$$"
-  trap "rm -f '$tmp'" EXIT
-  echo "$value" >"$tmp" && mv "$tmp" "$target"
-  trap - EXIT
+  echo "$value" >"$tmp" && mv "$tmp" "$target" || { rm -f "$tmp"; return 1; }
 }
 
 # Write the engine version out so downstream tools know what to look for.

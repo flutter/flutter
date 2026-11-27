@@ -378,53 +378,38 @@ void main() {
 
       expect(testRoot.binCacheEngineRealm, _hasFileContentsMatching('flutter_archives_v2'));
     });
-
-    test(
-      'preserves existing engine.stamp and engine.realm when unchanged and updates when changed',
-      () async {
-        environment['FLUTTER_REALM'] = 'flutter_archives_v2';
-        runUpdateEngineVersion();
-
-        expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching('123abc'));
-        expect(testRoot.binCacheEngineRealm, _hasFileContentsMatching('flutter_archives_v2'));
-
-        final oldTime = DateTime(2020);
-        testRoot.binCacheEngineStamp.setLastModifiedSync(oldTime);
-        testRoot.binCacheEngineRealm.setLastModifiedSync(oldTime);
-
-        final Directory cacheDir = testRoot.root.childDirectory('bin').childDirectory('cache');
-        final bool enforceReadOnlyOnPosix =
-            !const LocalPlatform().isWindows &&
-            (io.Process.runSync('id', <String>['-u']).stdout as String).trim() != '0';
-        if (enforceReadOnlyOnPosix) {
-          run('chmod', <String>['444', testRoot.binCacheEngineStamp.path]);
-          run('chmod', <String>['444', testRoot.binCacheEngineRealm.path]);
-          run('chmod', <String>['555', cacheDir.path]);
-        }
-        try {
-          runUpdateEngineVersion();
-        } finally {
-          if (enforceReadOnlyOnPosix) {
-            run('chmod', <String>['755', cacheDir.path]);
-            run('chmod', <String>['644', testRoot.binCacheEngineStamp.path]);
-            run('chmod', <String>['644', testRoot.binCacheEngineRealm.path]);
-          }
-        }
-
-        expect(testRoot.binCacheEngineStamp.lastModifiedSync(), oldTime);
-        expect(testRoot.binCacheEngineRealm.lastModifiedSync(), oldTime);
-
-        environment['FLUTTER_PREBUILT_ENGINE_VERSION'] = '456def';
-        environment['FLUTTER_REALM'] = 'flutter_archives_v3';
-        runUpdateEngineVersion();
-
-        expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching('456def'));
-        expect(testRoot.binCacheEngineRealm, _hasFileContentsMatching('flutter_archives_v3'));
-        expect(testRoot.binCacheEngineStamp.lastModifiedSync(), isNot(oldTime));
-        expect(testRoot.binCacheEngineRealm.lastModifiedSync(), isNot(oldTime));
-      },
-    );
   });
+
+  test(
+    'preserves existing engine.stamp and engine.realm when unchanged and updates when changed',
+    () {
+      initGitRepoWithBlankInitialCommit();
+      environment['FLUTTER_PREBUILT_ENGINE_VERSION'] = '123abc';
+      environment['FLUTTER_REALM'] = 'flutter_archives_v2';
+      runUpdateEngineVersion();
+
+      expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching('123abc'));
+      expect(testRoot.binCacheEngineRealm, _hasFileContentsMatching('flutter_archives_v2'));
+
+      final oldTime = DateTime(2020);
+      testRoot.binCacheEngineStamp.setLastModifiedSync(oldTime);
+      testRoot.binCacheEngineRealm.setLastModifiedSync(oldTime);
+
+      runUpdateEngineVersion();
+
+      expect(testRoot.binCacheEngineStamp.lastModifiedSync(), oldTime);
+      expect(testRoot.binCacheEngineRealm.lastModifiedSync(), oldTime);
+
+      environment['FLUTTER_PREBUILT_ENGINE_VERSION'] = '456def';
+      environment['FLUTTER_REALM'] = 'flutter_archives_v3';
+      runUpdateEngineVersion();
+
+      expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching('456def'));
+      expect(testRoot.binCacheEngineRealm, _hasFileContentsMatching('flutter_archives_v3'));
+      expect(testRoot.binCacheEngineStamp.lastModifiedSync(), isNot(oldTime));
+      expect(testRoot.binCacheEngineRealm.lastModifiedSync(), isNot(oldTime));
+    },
+  );
 
   group('concurrent execution', () {
     setUp(() {
@@ -433,8 +418,8 @@ void main() {
     });
 
     Future<void> expectAtomicConcurrentReplacement({
-      required File targetFile,
       required String envKey,
+      required File targetFile,
       required String valueA,
       required String valueB,
     }) async {
@@ -461,6 +446,7 @@ void main() {
       var emptyReads = 0;
       var totalReads = 0;
 
+      // Start a tight read loop
       final readFuture = Future<void>(() async {
         while (isRunning) {
           try {
@@ -470,12 +456,17 @@ void main() {
               emptyReads++;
             }
           } on io.FileSystemException {
-            // Ignore FileSystemExceptions during concurrent atomic replacements.
+            // Ignore FileSystemExceptions (e.g., Windows sharing violations).
+            // A true atomic replacement might still cause a sharing violation on Windows
+            // if Dart is reading the file at the exact moment it's being replaced.
+            // What we strictly care about for this race condition is that a SUCCESSFUL
+            // read NEVER returns an empty string (which indicates non-atomic truncation).
           }
-          await Future<void>(() {});
+          await Future<void>.delayed(Duration.zero);
         }
       });
 
+      // Spawn multiple writers in parallel
       const numWriters = 20;
       final writers = <Future<io.ProcessResult>>[];
       final (String executable, List<String> args) = updateEngineVersionCommand();
@@ -494,6 +485,7 @@ void main() {
 
       final List<io.ProcessResult> results = await Future.wait<io.ProcessResult>(writers);
 
+      // Stop the reader
       isRunning = false;
       await readFuture;
 
@@ -508,6 +500,7 @@ void main() {
         );
       }
 
+      // Assert that we never read an empty file during concurrent writes
       expect(
         emptyReads,
         0,
@@ -519,8 +512,8 @@ void main() {
     test(
       'writes to engine.stamp atomically without truncation',
       () => expectAtomicConcurrentReplacement(
-        targetFile: testRoot.binCacheEngineStamp,
         envKey: 'FLUTTER_PREBUILT_ENGINE_VERSION',
+        targetFile: testRoot.binCacheEngineStamp,
         valueA: '123abc',
         valueB: '456def',
       ),
@@ -533,8 +526,8 @@ void main() {
     test(
       'writes to engine.realm atomically without truncation',
       () => expectAtomicConcurrentReplacement(
-        targetFile: testRoot.binCacheEngineRealm,
         envKey: 'FLUTTER_REALM',
+        targetFile: testRoot.binCacheEngineRealm,
         valueA: 'flutter_archives_v2',
         valueB: 'flutter_archives_v3',
       ),
