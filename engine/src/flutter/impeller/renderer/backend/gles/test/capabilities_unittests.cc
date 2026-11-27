@@ -127,6 +127,18 @@ TEST(CapabilitiesGLES, SupportsTextureArrayViaEXTExtension) {
   EXPECT_TRUE(capabilities->SupportsTextureArrays());
 }
 
+TEST(CapabilitiesGLES, SupportsFloat16FormatsOnES3) {
+  auto mock_gles = MockGLES::Init(std::nullopt, "OpenGL ES 3.0");
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  EXPECT_TRUE(capabilities->SupportsFloat16Formats());
+}
+
+TEST(CapabilitiesGLES, DoesNotSupportFloat16FormatsOnES2) {
+  auto mock_gles = MockGLES::Init(std::nullopt, "OpenGL ES 2.0");
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  EXPECT_FALSE(capabilities->SupportsFloat16Formats());
+}
+
 TEST(CapabilitiesGLES, MaxShaderCompilerThreadsIsZeroWithoutExtension) {
   auto mock_gles = MockGLES::Init();
   auto capabilities = mock_gles->GetProcTable().GetCapabilities();

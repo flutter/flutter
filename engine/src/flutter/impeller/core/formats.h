@@ -111,6 +111,12 @@ enum class PixelFormat : uint8_t {
   kB10G10R10XRSRGB,
   kB10G10R10A10XR,
   kR32Float,
+  // 16-bit per channel color formats. These are sample-only; they cannot be
+  // used as render targets, storage textures, or transient attachments, and
+  // their support varies by device (see
+  // `Capabilities::SupportsFloat16Formats`).
+  kR16Float,
+  kR16G16Float,
   // Depth and stencil formats.
   kS8UInt,
   kD24UnormS8Uint,
@@ -178,6 +184,29 @@ constexpr bool IsCompressed(PixelFormat format) {
     default:
       return false;
   }
+}
+
+/// @brief Whether `format` is one of the sample-only 16-bit float color
+///        formats (`kR16Float` and `kR16G16Float`). Support for these varies
+///        by device, see `Capabilities::SupportsFloat16Formats`.
+///
+///        `kR16G16B16A16Float` is not included. It predates these formats and
+///        is usable as a render target.
+constexpr bool IsSampleOnlyFloat16(PixelFormat format) {
+  switch (format) {
+    case PixelFormat::kR16Float:
+    case PixelFormat::kR16G16Float:
+      return true;
+    default:
+      return false;
+  }
+}
+
+/// @brief Whether textures of `format` can only be sampled. Sample-only
+///        textures cannot be render targets, storage textures, or transient
+///        attachments.
+constexpr bool IsSampleOnly(PixelFormat format) {
+  return IsCompressed(format) || IsSampleOnlyFloat16(format);
 }
 
 /// @brief The compression family that `format` belongs to. Only valid for
@@ -325,6 +354,10 @@ constexpr const char* PixelFormatToString(PixelFormat format) {
       return "D32FloatS8UInt";
     case PixelFormat::kR32Float:
       return "R32Float";
+    case PixelFormat::kR16Float:
+      return "R16Float";
+    case PixelFormat::kR16G16Float:
+      return "R16G16Float";
     case PixelFormat::kBC1RGBAUNormInt:
       return "BC1RGBAUNormInt";
     case PixelFormat::kBC1RGBAUNormIntSRGB:
@@ -657,6 +690,7 @@ constexpr size_t BytesPerPixelForPixelFormat(PixelFormat format) {
     case PixelFormat::kS8UInt:
       return 1u;
     case PixelFormat::kR8G8UNormInt:
+    case PixelFormat::kR16Float:
       return 2u;
     case PixelFormat::kR8G8B8A8UNormInt:
     case PixelFormat::kR8G8B8A8UNormIntSRGB:
@@ -665,6 +699,7 @@ constexpr size_t BytesPerPixelForPixelFormat(PixelFormat format) {
     case PixelFormat::kB10G10R10XRSRGB:
     case PixelFormat::kB10G10R10XR:
     case PixelFormat::kR32Float:
+    case PixelFormat::kR16G16Float:
       return 4u;
     case PixelFormat::kD24UnormS8Uint:
       return 4u;

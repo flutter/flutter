@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
+#include <functional>
 #include <optional>
 #include <string_view>
+#include <vector>
 
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
@@ -227,6 +230,59 @@ TEST(CapabilitiesVKTest, ReportsBlockCompressedTextureSupport) {
       CompressedTextureFamily::kASTC));
   EXPECT_TRUE(capabilities_vk->SupportsTextureCompression(
       CompressedTextureFamily::kBC));
+}
+
+namespace {
+
+// Reports the formats a context needs to initialize, plus sampling, linear
+// filtering and copy support for every format in `sampleable`.
+std::function<void(VkPhysicalDevice, VkFormat, VkFormatProperties*)>
+FormatPropertiesWithSampleable(std::vector<VkFormat> sampleable) {
+  return [sampleable = std::move(sampleable)](
+             VkPhysicalDevice physicalDevice, VkFormat format,
+             VkFormatProperties* pFormatProperties) {
+    if (format == VK_FORMAT_R8G8B8A8_UNORM) {
+      pFormatProperties->optimalTilingFeatures =
+          static_cast<VkFormatFeatureFlags>(
+              vk::FormatFeatureFlagBits::eColorAttachment);
+    } else if (format == VK_FORMAT_D32_SFLOAT_S8_UINT) {
+      pFormatProperties->optimalTilingFeatures =
+          static_cast<VkFormatFeatureFlags>(
+              vk::FormatFeatureFlagBits::eDepthStencilAttachment);
+    } else if (std::find(sampleable.begin(), sampleable.end(), format) !=
+               sampleable.end()) {
+      pFormatProperties->optimalTilingFeatures =
+          static_cast<VkFormatFeatureFlags>(
+              vk::FormatFeatureFlagBits::eSampledImage |
+              vk::FormatFeatureFlagBits::eSampledImageFilterLinear |
+              vk::FormatFeatureFlagBits::eTransferSrc |
+              vk::FormatFeatureFlagBits::eTransferDst);
+    }
+  };
+}
+
+}  // namespace
+
+TEST(CapabilitiesVKTest, ReportsFloat16FormatSupport) {
+  const std::shared_ptr<ContextVK> context =
+      MockVulkanContextBuilder()
+          .SetPhysicalDeviceFormatPropertiesCallback(
+              FormatPropertiesWithSampleable(
+                  {VK_FORMAT_R16_SFLOAT, VK_FORMAT_R16G16_SFLOAT}))
+          .Build();
+  ASSERT_NE(context, nullptr);
+  EXPECT_TRUE(context->GetCapabilities()->SupportsFloat16Formats());
+}
+
+TEST(CapabilitiesVKTest, Float16FormatsNeedEveryFormat) {
+  // RG16 without R16 is not enough.
+  const std::shared_ptr<ContextVK> context =
+      MockVulkanContextBuilder()
+          .SetPhysicalDeviceFormatPropertiesCallback(
+              FormatPropertiesWithSampleable({VK_FORMAT_R16G16_SFLOAT}))
+          .Build();
+  ASSERT_NE(context, nullptr);
+  EXPECT_FALSE(context->GetCapabilities()->SupportsFloat16Formats());
 }
 
 // Impeller's 2D renderer relies on hardware support for a combined

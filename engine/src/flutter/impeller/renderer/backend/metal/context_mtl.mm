@@ -125,6 +125,9 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       .SetSupportsTextureCompression(
           CompressedTextureFamily::kASTCHDR,
           DeviceSupportsTextureCompressionAstcHdr(device))
+      // R16Float and RG16Float are sampleable and filterable on every Metal
+      // GPU family.
+      .SetSupportsFloat16Formats(true)
       .SetComputeLimits(InferMetalComputeLimits(device))
 #if FML_OS_IOS && !TARGET_OS_SIMULATOR
       .SetMinimumUniformAlignment(16)

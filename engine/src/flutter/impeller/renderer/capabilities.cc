@@ -129,6 +129,11 @@ class StandardCapabilities final : public Capabilities {
   }
 
   // |Capabilities|
+  bool SupportsFloat16Formats() const override {
+    return supports_float16_formats_;
+  }
+
+  // |Capabilities|
   uint32_t GetMaxSamplerAnisotropy() const override {
     return max_sampler_anisotropy_;
   }
@@ -170,6 +175,7 @@ class StandardCapabilities final : public Capabilities {
                        bool supports_texture_compression_etc2,
                        bool supports_texture_compression_astc,
                        bool supports_texture_compression_astc_hdr,
+                       bool supports_float16_formats,
                        const ComputeLimits& compute_limits)
       : supports_offscreen_msaa_(supports_offscreen_msaa),
         supports_ssbo_(supports_ssbo),
@@ -197,6 +203,7 @@ class StandardCapabilities final : public Capabilities {
         supports_texture_compression_astc_(supports_texture_compression_astc),
         supports_texture_compression_astc_hdr_(
             supports_texture_compression_astc_hdr),
+        supports_float16_formats_(supports_float16_formats),
         compute_limits_(compute_limits) {}
 
   friend class CapabilitiesBuilder;
@@ -224,6 +231,7 @@ class StandardCapabilities final : public Capabilities {
   bool supports_texture_compression_etc2_ = false;
   bool supports_texture_compression_astc_ = false;
   bool supports_texture_compression_astc_hdr_ = false;
+  bool supports_float16_formats_ = false;
   ComputeLimits compute_limits_;
 
   StandardCapabilities(const StandardCapabilities&) = delete;
@@ -347,6 +355,12 @@ CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsTextureCompression(
   return *this;
 }
 
+CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsFloat16Formats(
+    bool value) {
+  supports_float16_formats_ = value;
+  return *this;
+}
+
 CapabilitiesBuilder& CapabilitiesBuilder::SetMaxSamplerAnisotropy(
     uint32_t value) {
   max_sampler_anisotropy_ = value;
@@ -397,6 +411,7 @@ std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
       supports_texture_compression_etc2_,                                  //
       supports_texture_compression_astc_,                                  //
       supports_texture_compression_astc_hdr_,                              //
+      supports_float16_formats_,                                           //
       compute_limits_                                                      //
       ));
 }
