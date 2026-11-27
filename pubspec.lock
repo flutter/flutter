@@ -754,10 +754,10 @@ packages:
     dependency: transitive
     description:
       name: native_stack_traces
-      sha256: d34cf916db87b14d39465b3e3b4b4a8ee1f304bde6ed7605571e34802e3d6a11
+      sha256: "03a846b4fcb0227e53e0f44d2f76978c59457a42e6160224eb4e6e25f9a519cd"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.1"
+    version: "0.7.1"
   native_toolchain_c:
     dependency: "direct main"
     description:
