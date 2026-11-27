@@ -6,7 +6,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
+import '../src/fakes.dart';
 
 void main() {
   final FileSystem fs = LocalFileSystem.test(signals: FakeSignals());
