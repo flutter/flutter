@@ -55,7 +55,7 @@ class ToolExtensionEntryPoint {
         logger: logger,
         extensionName: extensionName,
       ),
-      exit: (int code) => throw UnsupportedError(
+      exit: (int code) => throw StateError(
         'Tool extensions must not call exit($code); throw ToolExtensionException instead.',
       ),
     );
@@ -110,7 +110,9 @@ class ToolExtensionEntryPoint {
     final peer = json_rpc.Peer.withoutJson(channel);
 
     for (final service in services) {
-      service.notificationSender = peer.sendNotification;
+      service
+        ..notificationSender = peer.sendNotification
+        ..requestSender = peer.sendRequest;
     }
     for (final (String method, Map<String, Object?> params) in pendingNotifications) {
       peer.sendNotification(method, params);
@@ -155,8 +157,19 @@ class ToolExtensionEntryPoint {
             '[ToolExtensionIsolate] RPC request "$fullMethod" threw ToolExtensionException: '
             '${error.message}',
           );
-          throw json_rpc.RpcException(ToolExtensionException.domainErrorCode, error.message);
+          throw json_rpc.RpcException(error.code, error.message, data: error.data);
         } on Object catch (error, stackTrace) {
+          if (error is UnsupportedError && error is! UnimplementedError) {
+            final String message = error.message ?? 'Unsupported operation.';
+            logger?.call(
+              '[ToolExtensionIsolate] RPC request "$fullMethod" threw UnsupportedError: '
+              '$message',
+            );
+            throw json_rpc.RpcException(
+              ToolExtensionException.unsupportedCapabilityErrorCode,
+              message,
+            );
+          }
           logger?.call(
             '[ToolExtensionIsolate] RPC request "$fullMethod" failed: $error\n$stackTrace',
           );

@@ -2,6 +2,39 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'exception.dart';
+
+const _kRpcRequestDataKey = 'request';
+
+/// Translates a JSON-RPC 2.0 error with [code], [message], and optional [data]
+/// into a [ToolExtensionException] when [code] represents a domain error
+/// (`-32001`) or unsupported optional capability (`-32002`), stripping
+/// `json_rpc_2`'s injected `'request'` entry and any non-string keys from
+/// [data].
+///
+/// Returns `null` for other JSON-RPC error codes.
+ToolExtensionException? tryParseToolExtensionRpcError({
+  required int code,
+  required String message,
+  Object? data,
+}) {
+  if (code != ToolExtensionException.domainErrorCode &&
+      code != ToolExtensionException.unsupportedCapabilityErrorCode) {
+    return null;
+  }
+  Map<String, Object?>? extractedData;
+  if (data is Map) {
+    final extracted = <String, Object?>{
+      for (final MapEntry(:Object? key, :Object? value) in data.entries)
+        if (key is String && key != _kRpcRequestDataKey) key: value,
+    };
+    if (extracted.isNotEmpty) {
+      extractedData = extracted;
+    }
+  }
+  return ToolExtensionException(message, code: code, data: extractedData);
+}
+
 /// Validation helpers for file system [Uri]s exchanged over the tool
 /// extension protocol.
 extension ExtensionUriValidation on Uri {
