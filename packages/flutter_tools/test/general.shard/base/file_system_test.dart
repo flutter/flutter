@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io' as io;
 
+import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -418,6 +419,103 @@ void main() {
       }
     });
   });
+
+  group('FileSystemLocking', () {
+    late _FakeLockFileSystem fs;
+    late BufferLogger logger;
+
+    setUp(() {
+      fs = _FakeLockFileSystem();
+      logger = BufferLogger.test();
+    });
+
+    for (final (String name, int errorCode) in <(String, int)>[
+      ('macOS ENOTSUP', 45),
+      ('macOS ENOLCK', 77),
+      ('macOS ENOSYS', 78),
+      ('POSIX EINVAL', 22),
+      ('Linux ENOTSUP', 95),
+      ('Linux ENOLCK', 37),
+      ('Linux ENOSYS', 38),
+      ('Windows ERROR_NOT_SUPPORTED', 50),
+    ]) {
+      testWithoutContext(
+        'proceeds without lock on FileSystemException with $name ($errorCode)',
+        () async {
+          fs.onLock = () => throw FileSystemException(
+            'lock failed',
+            '/test.lock',
+            OSError('Unsupported', errorCode),
+          );
+
+          final String result = await fs.runLocked<String>(
+            lockPath: '/test.lock',
+            scope: () => 'proceeded',
+            logger: logger,
+          );
+
+          expect(result, 'proceeded');
+          expect(fs.lockCount, 0);
+          expect(fs.unlockCount, 1);
+          expect(fs.lockAttempts, 1);
+          expect(
+            logger.traceText,
+            contains('Locking not supported: FileSystemException: lock failed'),
+          );
+          expect(logger.warningText, isNot(contains('Waiting for another flutter command')));
+        },
+      );
+    }
+
+    for (final (String name, int? errorCode) in <(String, int?)>[
+      ('null OSError (mock/test fakes)', null),
+      ('POSIX EINTR (4)', 4),
+      ('Linux EAGAIN (11)', 11),
+      ('POSIX EACCES (13)', 13),
+      ('macOS EAGAIN (35)', 35),
+      ('Windows ERROR_SHARING_VIOLATION (32)', 32),
+      ('Windows ERROR_LOCK_VIOLATION (33)', 33),
+    ]) {
+      testWithoutContext('retries on FileSystemException with $name and succeeds', () {
+        FakeAsync().run((FakeAsync async) {
+          var shouldThrow = true;
+          fs.onLock = () {
+            if (shouldThrow) {
+              shouldThrow = false;
+              throw FileSystemException(
+                'lock failed',
+                '/test.lock',
+                errorCode == null ? null : OSError('Lock error', errorCode),
+              );
+            }
+          };
+
+          String? result;
+          unawaited(
+            fs
+                .runLocked<String>(lockPath: '/test.lock', scope: () => 'success', logger: logger)
+                .then((String value) {
+                  result = value;
+                }),
+          );
+
+          async.flushMicrotasks();
+          expect(result, isNull);
+          expect(fs.lockAttempts, 1);
+
+          async.elapse(const Duration(milliseconds: 50));
+          expect(result, 'success');
+          expect(fs.lockCount, 1);
+          expect(fs.unlockCount, 2);
+          expect(fs.lockAttempts, 2);
+          expect(
+            logger.warningText,
+            contains('Waiting for another flutter command to release the lock...'),
+          );
+        });
+      });
+    }
+  });
 }
 
 class FakeProcessSignal extends Fake implements io.ProcessSignal {
@@ -425,4 +523,54 @@ class FakeProcessSignal extends Fake implements io.ProcessSignal {
 
   @override
   Stream<io.ProcessSignal> watch() => controller.stream;
+}
+
+class _FakeLockFileSystem extends Fake implements FileSystem {
+  int lockCount = 0;
+  int unlockCount = 0;
+  int lockAttempts = 0;
+  void Function()? onLock;
+
+  @override
+  File file(Object? path) => _FakeLockFile(this, path.toString());
+}
+
+class _FakeDirectory extends Fake implements Directory {
+  @override
+  void createSync({bool recursive = false}) {}
+}
+
+class _FakeLockFile extends Fake implements File {
+  _FakeLockFile(this._fileSystem, this.path);
+
+  final _FakeLockFileSystem _fileSystem;
+
+  @override
+  final String path;
+
+  @override
+  final Directory parent = _FakeDirectory();
+
+  @override
+  RandomAccessFile openSync({FileMode mode = FileMode.read}) {
+    return _FakeRandomAccessFile(_fileSystem);
+  }
+}
+
+class _FakeRandomAccessFile extends Fake implements RandomAccessFile {
+  _FakeRandomAccessFile(this._fileSystem);
+
+  final _FakeLockFileSystem _fileSystem;
+
+  @override
+  void lockSync([FileLock mode = FileLock.exclusive, int start = 0, int end = -1]) {
+    _fileSystem.lockAttempts++;
+    _fileSystem.onLock?.call();
+    _fileSystem.lockCount++;
+  }
+
+  @override
+  void closeSync() {
+    _fileSystem.unlockCount++;
+  }
 }

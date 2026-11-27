@@ -277,6 +277,26 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
 }
 
 extension FileSystemLocking on FileSystem {
+  static const _posixEinval = 22;
+  static const _linuxEnolck = 37;
+  static const _linuxEnosys = 38;
+  static const _linuxEnotsup = 95;
+  static const _macOSEnotsup = 45;
+  static const _macOSEnolck = 77;
+  static const _macOSEnosys = 78;
+  static const _windowsErrorNotSupported = 50;
+
+  static const _unsupportedLockErrorCodes = <int>{
+    _posixEinval,
+    _linuxEnolck,
+    _linuxEnosys,
+    _linuxEnotsup,
+    _macOSEnotsup,
+    _macOSEnolck,
+    _macOSEnosys,
+    _windowsErrorNotSupported,
+  };
+
   /// Runs [scope] while holding an exclusive file lock on the file at [lockPath].
   ///
   /// The lock is released after [scope] completes, even if it throws.
@@ -309,8 +329,15 @@ extension FileSystemLocking on FileSystem {
         if (openedFile != null) {
           try {
             openedFile.closeSync();
-          } on FileSystemException catch (_) {}
+          } on FileSystemException {
+            // Ignore errors when closing the file after lock acquisition fails.
+          }
           openedFile = null;
+        }
+        final int? errorCode = e.osError?.errorCode;
+        if (lockFailed && errorCode != null && _unsupportedLockErrorCodes.contains(errorCode)) {
+          logger?.printTrace('Locking not supported: $e');
+          break;
         }
         if (!printed) {
           final details = lockFailed ? '' : ' (Error: $e)';
