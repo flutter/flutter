@@ -10,6 +10,7 @@ import android.graphics.PixelFormat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -25,7 +26,7 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
     private final MethodChannel methodChannel;
     private final TouchPipe touchPipe;
 
-    SimplePlatformView(Context context, MethodChannel methodChannel) {
+    SimplePlatformView(Context context, MethodChannel methodChannel, boolean useVirtualDisplay) {
         this.methodChannel = methodChannel;
         view = new FrameLayout(context) {
             @Override
@@ -33,6 +34,11 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
                 return true;
             }
         };
+        if (useVirtualDisplay) {
+            // Adding a SurfaceView forces PlatformViewsController to use Virtual Display mode
+            // so SingleViewPresentation intercepts WindowManager calls.
+            view.addView(new SurfaceView(context));
+        }
         view.setBackgroundColor(0xff0000ff);
         this.methodChannel.setMethodCallHandler(this);
         touchPipe = new TouchPipe(this.methodChannel, view);
@@ -69,18 +75,18 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
         result.notImplemented();
     }
 
-    private void showAndHideAlertDialog(MethodChannel.Result result) {
+    private void showAndHideAlertDialog(final MethodChannel.Result result) {
         Context context = view.getContext();
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         TextView textView = new TextView(context);
         textView.setText("This alert dialog will close in 1 second");
         builder.setView(textView);
         final AlertDialog alertDialog = builder.show();
-        result.success(null);
         view.postDelayed(new Runnable() {
             @Override
             public void run() {
                 alertDialog.hide();
+                result.success(null);
             }
         }, 1000);
     }
@@ -89,6 +95,24 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
         Context context = view.getContext();
         final Button button = new Button(context);
         button.setText("This view is added as a window");
+        button.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(
+                    View v,
+                    int left,
+                    int top,
+                    int right,
+                    int bottom,
+                    int oldLeft,
+                    int oldTop,
+                    int oldRight,
+                    int oldBottom) {
+                if (right > left && bottom > top) {
+                    button.removeOnLayoutChangeListener(this);
+                    methodChannel.invokeMethod("onWindowAdded", null);
+                }
+            }
+        });
         final WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, 0, PixelFormat.OPAQUE);
         layoutParams.gravity = Gravity.FILL;
