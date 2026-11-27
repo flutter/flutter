@@ -158,6 +158,75 @@ void testMain() {
       expect(valueInOnFinishedRenderingFrame, isFalse);
     });
 
+    test('registers and unregisters windows', () {
+      final FrameService instance = FrameService.instance;
+      final int originalWindowCount = instance.debugRegisteredWindows.length;
+
+      instance.registerWindow(domWindow);
+      expect(instance.debugRegisteredWindows, contains(domWindow));
+
+      instance.unregisterWindow(domWindow);
+      expect(instance.debugRegisteredWindows, isNot(contains(domWindow)));
+      expect(instance.debugRegisteredWindows.length, originalWindowCount);
+    });
+
+    test('pending frame is rescheduled when its window is unregistered', () async {
+      // Emulates a Document Picture-in-Picture window that is closed while a
+      // frame is scheduled on it: its animation frame callback never fires.
+      final FrameService instance = FrameService.instance;
+      instance.debugResetFrameData();
+
+      final DomHTMLIFrameElement iframe = createDomHTMLIFrameElement();
+      domDocument.body!.append(iframe);
+      final DomWindow otherWindow = iframe.contentWindow;
+      instance.debugRegisteredWindows.toList().forEach(instance.unregisterWindow);
+      instance.registerWindow(otherWindow);
+
+      var frameCount = 0;
+      instance.onFinishedRenderingFrame = () {
+        frameCount++;
+      };
+
+      instance.scheduleFrame();
+      expect(instance.isFrameScheduled, isTrue);
+
+      // Detaching the iframe discards its pending animation frame callbacks.
+      iframe.remove();
+      instance.unregisterWindow(otherWindow);
+      expect(instance.isFrameScheduled, isTrue);
+
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+      expect(frameCount, 1);
+      expect(instance.frameData.frameNumber, 1);
+      expect(instance.isFrameScheduled, isFalse);
+    });
+
+    test('stale frame from an unregistered but still open window is ignored', () async {
+      final FrameService instance = FrameService.instance;
+      instance.debugResetFrameData();
+
+      final DomHTMLIFrameElement iframe = createDomHTMLIFrameElement();
+      domDocument.body!.append(iframe);
+      final DomWindow otherWindow = iframe.contentWindow;
+      instance.debugRegisteredWindows.toList().forEach(instance.unregisterWindow);
+      instance.registerWindow(otherWindow);
+
+      var frameCount = 0;
+      instance.onFinishedRenderingFrame = () {
+        frameCount++;
+      };
+
+      instance.scheduleFrame();
+      // The iframe stays attached, so its callback still fires, but it must
+      // not render a second frame.
+      instance.unregisterWindow(otherWindow);
+
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+      expect(frameCount, 1);
+      expect(instance.frameData.frameNumber, 1);
+      iframe.remove();
+    });
+
     test('Frame is cancelled after a hot restart', () async {
       final FrameService instance = FrameService.instance;
 

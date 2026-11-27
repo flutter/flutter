@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'configuration.dart';
+import 'dom.dart';
 import 'js_interop/js_app.dart';
 import 'js_interop/js_loader.dart';
 
@@ -74,6 +75,10 @@ class AppBootstrap {
       addView: (JsFlutterViewOptions options) {
         assert(configuration.multiViewEnabled, 'Cannot addView when multiView is not enabled');
         return viewManager.createAndRegisterView(options).viewId;
+      },
+      moveView: (int viewId, DomElement newHostElement) {
+        assert(configuration.multiViewEnabled, 'Cannot moveView when multiView is not enabled');
+        return viewManager.moveView(viewId, newHostElement);
       },
       removeView: (int viewId) {
         assert(configuration.multiViewEnabled, 'Cannot removeView when multiView is not enabled');
