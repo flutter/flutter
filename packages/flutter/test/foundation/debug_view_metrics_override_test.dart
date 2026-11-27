@@ -833,6 +833,7 @@ void main() {
     test('every forwarded FlutterView member', () {
       expect(wrappedView.display, same(realView.display));
       expect(wrappedView.displayCornerRadii, realView.displayCornerRadii);
+      expect(wrappedView.verticalBarEdge, realView.verticalBarEdge);
       expect(wrappedView.gestureSettings, realView.gestureSettings);
       expect(wrappedView.systemGestureInsets, same(realView.systemGestureInsets));
       // Display features are only rewritten when the device pixel ratio is

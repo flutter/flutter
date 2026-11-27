@@ -257,6 +257,9 @@ class _TestFlutterView implements FlutterView {
   ui.DisplayCornerRadii? get displayCornerRadii => null;
 
   @override
+  ui.VerticalBarEdge? get verticalBarEdge => null;
+
+  @override
   void render(ui.Scene scene, {ui.Size? size}) {
     onRender?.call(size);
   }

@@ -1484,6 +1484,37 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   _viewportMetrics.physical_max_height_constraint = _viewportMetrics.physical_height;
 }
 
+// Values of `flutter::ViewportMetrics::vertical_bar_edge`, matching the indices of dart:ui's
+// `VerticalBarEdge`.
+static constexpr int kVerticalBarEdgeNotReported = -1;
+#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 270100
+static constexpr int kVerticalBarEdgeNone = 0;
+static constexpr int kVerticalBarEdgeLeft = 1;
+static constexpr int kVerticalBarEdgeRight = 2;
+#endif  // __IPHONE_OS_VERSION_MAX_ALLOWED >= 270100
+
+// Returns the physical side of the system's vertical bar described by `traits`.
+//
+// UIKit reports a logical edge. The bar itself follows the hardware, so the edge is resolved with
+// the layout direction of the same trait collection: the leading edge is the left side in
+// left-to-right layouts and the right side in right-to-left layouts. It is read from the view
+// rather than the window or the scene because only the view reflects
+// `preferredVerticalBarBehavior`.
+static int FlutterVerticalBarEdgeFromTraits(UITraitCollection* traits) {
+#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 270100
+  if (@available(iOS 27.1, *)) {
+    UIVerticalBarEdge edge = traits.verticalBarEdge;
+    if (edge != UIVerticalBarEdgeLeading && edge != UIVerticalBarEdgeTrailing) {
+      return kVerticalBarEdgeNone;
+    }
+    BOOL isLeading = edge == UIVerticalBarEdgeLeading;
+    BOOL isRightToLeft = traits.layoutDirection == UITraitEnvironmentLayoutDirectionRightToLeft;
+    return isLeading != isRightToLeft ? kVerticalBarEdgeLeft : kVerticalBarEdgeRight;
+  }
+#endif  // __IPHONE_OS_VERSION_MAX_ALLOWED >= 270100
+  return kVerticalBarEdgeNotReported;
+}
+
 // Set _viewportMetrics physical paddings.
 //
 // Viewport paddings represent the iOS safe area insets.
@@ -1498,6 +1529,8 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   _viewportMetrics.physical_padding_left = self.view.safeAreaInsets.left * scale;
   _viewportMetrics.physical_padding_right = self.view.safeAreaInsets.right * scale;
   _viewportMetrics.physical_padding_bottom = self.view.safeAreaInsets.bottom * scale;
+  // The vertical bar edge explains part of the safe area, so it is sent with the paddings.
+  _viewportMetrics.vertical_bar_edge = FlutterVerticalBarEdgeFromTraits(self.view.traitCollection);
 }
 
 #pragma mark - Keyboard events

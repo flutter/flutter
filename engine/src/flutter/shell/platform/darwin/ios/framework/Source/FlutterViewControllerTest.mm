@@ -1358,6 +1358,83 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMVerifyAll(mockEngine);
 }
 
+#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 270100
+// Returns the vertical bar edge that the view controller sends to the engine when its view
+// reports `edge` and `layoutDirection`.
+- (int)verticalBarEdgeSentForEdge:(UIVerticalBarEdge)edge
+                  layoutDirection:(UITraitEnvironmentLayoutDirection)layoutDirection
+    API_AVAILABLE(ios(27.1)) {
+  // A fresh engine mock per call, so stubs from earlier calls can't capture the metrics.
+  id engineMock = OCMClassMock([FlutterEngine class]);
+  OCMStub([engineMock textInputPlugin]).andReturn(self.mockTextInputPlugin);
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
+  UIView* view = [self setUpMockView:viewControllerMock
+                              screen:[self setUpMockScreen]
+                           viewFrame:CGRectMake(0, 0, 400, 800)
+                      convertedFrame:CGRectZero];
+  id traitCollectionMock = OCMClassMock([UITraitCollection class]);
+  OCMStub([traitCollectionMock verticalBarEdge]).andReturn(edge);
+  OCMStub([traitCollectionMock layoutDirection]).andReturn(layoutDirection);
+  id viewMock = OCMPartialMock(view);
+  OCMStub([viewMock traitCollection]).andReturn(traitCollectionMock);
+  OCMStub([engineMock viewController]).andReturn(viewController);
+
+  __block int sentEdge = -2;
+  flutter::ViewportMetrics viewportMetrics;
+  OCMStub([engineMock updateViewportMetrics:viewportMetrics])
+      .ignoringNonObjectArgs()
+      .andDo(^(NSInvocation* invocation) {
+        flutter::ViewportMetrics sentMetrics;
+        [invocation getArgument:&sentMetrics atIndex:2];
+        sentEdge = sentMetrics.vertical_bar_edge;
+      });
+
+  [viewControllerMock viewSafeAreaInsetsDidChange];
+
+  [viewMock stopMocking];
+  [(id)viewControllerMock stopMocking];
+  [engineMock stopMocking];
+  return sentEdge;
+}
+#endif  // __IPHONE_OS_VERSION_MAX_ALLOWED >= 270100
+
+- (void)testViewportMetricsReportVerticalBarEdgeAsPhysicalSide {
+#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 270100
+  if (@available(iOS 27.1, *)) {
+    // The vertical bar follows the hardware, so only the logical edge flips in right-to-left.
+    XCTAssertEqual([self verticalBarEdgeSentForEdge:UIVerticalBarEdgeLeading
+                                    layoutDirection:UITraitEnvironmentLayoutDirectionLeftToRight],
+                   1);  // VerticalBarEdge.left
+    XCTAssertEqual([self verticalBarEdgeSentForEdge:UIVerticalBarEdgeTrailing
+                                    layoutDirection:UITraitEnvironmentLayoutDirectionLeftToRight],
+                   2);  // VerticalBarEdge.right
+    XCTAssertEqual([self verticalBarEdgeSentForEdge:UIVerticalBarEdgeLeading
+                                    layoutDirection:UITraitEnvironmentLayoutDirectionRightToLeft],
+                   2);  // VerticalBarEdge.right
+    XCTAssertEqual([self verticalBarEdgeSentForEdge:UIVerticalBarEdgeTrailing
+                                    layoutDirection:UITraitEnvironmentLayoutDirectionRightToLeft],
+                   1);  // VerticalBarEdge.left
+    return;
+  }
+#endif
+  XCTSkip(@"UITraitCollection.verticalBarEdge requires iOS 27.1.");
+}
+
+- (void)testViewportMetricsReportUnspecifiedVerticalBarEdgeAsNone {
+#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 270100
+  if (@available(iOS 27.1, *)) {
+    XCTAssertEqual([self verticalBarEdgeSentForEdge:UIVerticalBarEdgeUnspecified
+                                    layoutDirection:UITraitEnvironmentLayoutDirectionLeftToRight],
+                   0);  // VerticalBarEdge.none
+    return;
+  }
+#endif
+  XCTSkip(@"UITraitCollection.verticalBarEdge requires iOS 27.1.");
+}
+
 - (void)testUpdatedViewportMetricsDoesResizeFlutterViewWhenAutoResizable {
   FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
   [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];

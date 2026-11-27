@@ -3,7 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:ui'
-    show Brightness, DisplayFeature, DisplayFeatureState, DisplayFeatureType, GestureSettings;
+    show
+        Brightness,
+        DisplayFeature,
+        DisplayFeatureState,
+        DisplayFeatureType,
+        GestureSettings,
+        VerticalBarEdge;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
@@ -164,6 +170,40 @@ void main() {
     expect(data.gestureSettings.touchSlop, null);
     expect(data.displayFeatures, isEmpty);
     expect(data.displayCornerRadii, isNull);
+    expect(data.verticalBarEdge, isNull);
+  });
+
+  testWidgets('MediaQueryData.fromView reads verticalBarEdge from the view', (
+    WidgetTester tester,
+  ) async {
+    addTearDown(tester.view.resetVerticalBarEdge);
+
+    tester.view.verticalBarEdge = VerticalBarEdge.right;
+    expect(MediaQueryData.fromView(tester.view).verticalBarEdge, VerticalBarEdge.right);
+
+    tester.view.verticalBarEdge = VerticalBarEdge.none;
+    expect(MediaQueryData.fromView(tester.view).verticalBarEdge, VerticalBarEdge.none);
+  });
+
+  test('MediaQueryData keeps verticalBarEdge when copied or when padding is removed', () {
+    const data = MediaQueryData(
+      padding: EdgeInsets.only(left: 84),
+      verticalBarEdge: VerticalBarEdge.left,
+    );
+
+    expect(data.copyWith().verticalBarEdge, VerticalBarEdge.left);
+    expect(data.removePadding(removeLeft: true).verticalBarEdge, VerticalBarEdge.left);
+    expect(data.removeViewPadding(removeLeft: true).verticalBarEdge, VerticalBarEdge.left);
+  });
+
+  test('MediaQueryData equality, hashCode and toString include verticalBarEdge', () {
+    const left = MediaQueryData(verticalBarEdge: VerticalBarEdge.left);
+    const right = MediaQueryData(verticalBarEdge: VerticalBarEdge.right);
+
+    expect(left, isNot(right));
+    expect(left.hashCode, isNot(right.hashCode));
+    expect(left, const MediaQueryData(verticalBarEdge: VerticalBarEdge.left));
+    expect(left.toString(), contains('verticalBarEdge: VerticalBarEdge.left'));
   });
 
   testWidgets('MediaQueryData.fromView uses platformData if provided', (WidgetTester tester) async {
@@ -2025,6 +2065,14 @@ void main() {
         const _MediaQueryAspectCase(
           MediaQuery.maybeDisplayCornerRadiiOf,
           MediaQueryData(displayCornerRadii: BorderRadius.all(Radius.circular(33))),
+        ),
+        const _MediaQueryAspectCase(
+          MediaQuery.verticalBarEdgeOf,
+          MediaQueryData(verticalBarEdge: VerticalBarEdge.right),
+        ),
+        const _MediaQueryAspectCase(
+          MediaQuery.maybeVerticalBarEdgeOf,
+          MediaQueryData(verticalBarEdge: VerticalBarEdge.right),
         ),
       ],
     ),

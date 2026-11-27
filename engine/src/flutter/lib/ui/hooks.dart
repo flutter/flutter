@@ -35,6 +35,7 @@ void _addView(
   double displayCornerRadiusTopRight,
   double displayCornerRadiusBottomRight,
   double displayCornerRadiusBottomLeft,
+  int verticalBarEdge,
 ) {
   final _ViewConfiguration viewConfiguration = _buildViewConfiguration(
     devicePixelRatio,
@@ -65,6 +66,7 @@ void _addView(
     displayCornerRadiusTopRight,
     displayCornerRadiusBottomRight,
     displayCornerRadiusBottomLeft,
+    verticalBarEdge,
   );
   PlatformDispatcher.instance._addView(viewId, viewConfiguration);
 }
@@ -187,6 +189,17 @@ DisplayCornerRadii? _decodeDisplayCornerRadii({
   );
 }
 
+VerticalBarEdge? _decodeVerticalBarEdge(int verticalBarEdge) {
+  if (verticalBarEdge == _kUnsetVerticalBarEdge) {
+    return null;
+  }
+  assert(
+    verticalBarEdge >= 0 && verticalBarEdge < VerticalBarEdge.values.length,
+    'Unknown vertical bar edge: $verticalBarEdge',
+  );
+  return VerticalBarEdge.values[verticalBarEdge];
+}
+
 _ViewConfiguration _buildViewConfiguration(
   double devicePixelRatio,
   double width,
@@ -216,6 +229,7 @@ _ViewConfiguration _buildViewConfiguration(
   double displayCornerRadiusTopRight,
   double displayCornerRadiusBottomRight,
   double displayCornerRadiusBottomLeft,
+  int verticalBarEdge,
 ) {
   return _ViewConfiguration(
     devicePixelRatio: devicePixelRatio,
@@ -266,6 +280,7 @@ _ViewConfiguration _buildViewConfiguration(
       displayCornerRadiusBottomRight: displayCornerRadiusBottomRight,
       displayCornerRadiusBottomLeft: displayCornerRadiusBottomLeft,
     ),
+    verticalBarEdge: _decodeVerticalBarEdge(verticalBarEdge),
   );
 }
 
@@ -300,6 +315,7 @@ void _updateWindowMetrics(
   double displayCornerRadiusTopRight,
   double displayCornerRadiusBottomRight,
   double displayCornerRadiusBottomLeft,
+  int verticalBarEdge,
 ) {
   final _ViewConfiguration viewConfiguration = _buildViewConfiguration(
     devicePixelRatio,
@@ -330,6 +346,7 @@ void _updateWindowMetrics(
     displayCornerRadiusTopRight,
     displayCornerRadiusBottomRight,
     displayCornerRadiusBottomLeft,
+    verticalBarEdge,
   );
   PlatformDispatcher.instance._updateWindowMetrics(viewId, viewConfiguration);
 }

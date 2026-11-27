@@ -99,6 +99,32 @@ void main() {
       );
     });
 
+    testWidgets('can fake verticalBarEdge', (WidgetTester tester) async {
+      verifyPropertyFaked<VerticalBarEdge?>(
+        tester: tester,
+        realValue: trueImplicitView().verticalBarEdge,
+        fakeValue: VerticalBarEdge.right,
+        propertyRetriever: () => boundImplicitView().verticalBarEdge,
+        propertyFaker: (_, VerticalBarEdge? fakeValue) {
+          tester.view.verticalBarEdge = fakeValue;
+        },
+      );
+    });
+
+    testWidgets('can reset verticalBarEdge', (WidgetTester tester) async {
+      verifyPropertyReset<VerticalBarEdge?>(
+        tester: tester,
+        fakeValue: VerticalBarEdge.right,
+        propertyRetriever: () => boundImplicitView().verticalBarEdge,
+        propertyResetter: () {
+          tester.view.resetVerticalBarEdge();
+        },
+        propertyFaker: (VerticalBarEdge? fakeValue) {
+          tester.view.verticalBarEdge = fakeValue;
+        },
+      );
+    });
+
     testWidgets('can fake padding', (WidgetTester tester) async {
       verifyPropertyFaked<ViewPadding>(
         tester: tester,
@@ -313,6 +339,9 @@ void main() {
         physicalDoubleTapSlop: 5,
       );
 
+      final VerticalBarEdge? initialVerticalBarEdge = tester.view.verticalBarEdge;
+      tester.view.verticalBarEdge = VerticalBarEdge.right;
+
       final faked = FlutterViewSnapshot(tester.view);
 
       tester.view.reset();
@@ -321,6 +350,7 @@ void main() {
 
       expect(initial, isNot(matchesSnapshot(faked)));
       expect(initial, matchesSnapshot(reset));
+      expect(tester.view.verticalBarEdge, initialVerticalBarEdge);
     });
 
     testWidgets('render is passed through to backing FlutterView', (WidgetTester tester) async {

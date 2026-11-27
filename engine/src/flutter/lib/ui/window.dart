@@ -341,6 +341,24 @@ class FlutterView {
   /// versions, iOS, and other platforms, this value is `null`.
   DisplayCornerRadii? get displayCornerRadii => _viewConfiguration.displayCornerRadii;
 
+  /// The physical edge of this view that the system prefers for its vertical
+  /// bar, or null if the platform does not report it.
+  ///
+  /// This is the system's preference, not a description of what is drawn. The
+  /// edge can be reported while nothing occupies it, for example while the
+  /// status bar is hidden, so use [padding] to decide how much space to avoid
+  /// on each side.
+  ///
+  /// The value is a physical side and does not change with the text direction.
+  ///
+  /// [VerticalBarEdge.none] means that the platform reported that there is no
+  /// preferred edge, while null means that the platform does not report this
+  /// information.
+  ///
+  /// This is currently populated only on iOS 27.1 and later. On earlier iOS
+  /// versions and other platforms, this value is `null`.
+  VerticalBarEdge? get verticalBarEdge => _viewConfiguration.verticalBarEdge;
+
   /// Updates the view's rendering on the GPU with the newly provided [Scene].
   ///
   /// This function must be called within the scope of the

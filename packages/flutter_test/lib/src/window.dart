@@ -1275,6 +1275,35 @@ class TestFlutterView implements FlutterView {
     platformDispatcher._handleMetricsChanged();
   }
 
+  /// The vertical bar edge to use for this test.
+  ///
+  /// Defaults to the value provided by [FlutterView.verticalBarEdge]. This
+  /// can only be set in a test environment to emulate different view
+  /// configurations. A standard [FlutterView] is not mutable from the framework.
+  ///
+  /// See also:
+  ///
+  ///   * [FlutterView.verticalBarEdge] for the standard implementation
+  ///   * [resetVerticalBarEdge] to reset this value specifically
+  ///   * [reset] to reset all test values for this view
+  @override
+  VerticalBarEdge? get verticalBarEdge =>
+      _hasVerticalBarEdge ? _verticalBarEdge : _view.verticalBarEdge;
+  VerticalBarEdge? _verticalBarEdge;
+  bool _hasVerticalBarEdge = false;
+  set verticalBarEdge(VerticalBarEdge? value) {
+    _verticalBarEdge = value;
+    _hasVerticalBarEdge = true;
+    platformDispatcher._handleMetricsChanged();
+  }
+
+  /// Resets [verticalBarEdge] to the default value for this view.
+  void resetVerticalBarEdge() {
+    _verticalBarEdge = null;
+    _hasVerticalBarEdge = false;
+    platformDispatcher._handleMetricsChanged();
+  }
+
   /// The padding to use for this test.
   ///
   /// Defaults to the value provided by [FlutterView.padding]. This
@@ -1482,6 +1511,7 @@ class TestFlutterView implements FlutterView {
   ///   * [resetViewInsets] to reset [viewInsets] specifically
   ///   * [resetViewPadding] to reset [viewPadding] specifically
   ///   * [resetGestureSettings] to reset [gestureSettings] specifically
+  ///   * [resetVerticalBarEdge] to reset [verticalBarEdge] specifically
   void reset() {
     resetDevicePixelRatio();
     resetDisplayFeatures();
@@ -1492,6 +1522,7 @@ class TestFlutterView implements FlutterView {
     resetViewInsets();
     resetViewPadding();
     resetGestureSettings();
+    resetVerticalBarEdge();
   }
 
   /// This gives us some grace time when the dart:ui side adds something to
