@@ -17,6 +17,14 @@
 // ```
 // dart dev/tools/localization/bin/gen_missing_localizations.dart
 // ```
+//
+// Add the '--remove-undefined' flag to also remove resources that are no
+// longer in the English arb files from all of the other locale arb files,
+// including the regional and script ones (for example, `material_en_GB.arb`).
+//
+// ```
+// dart dev/tools/localization/bin/gen_missing_localizations.dart --remove-undefined
+// ```
 
 import 'dart:convert';
 import 'dart:io';
@@ -86,6 +94,17 @@ bool isPluralVariation(String key, Map<String, dynamic> bundle) {
   return bundle.containsKey('${prefix}Other');
 }
 
+/// Adds the resources of the `<groupPrefix>_en.arb` file that are missing from
+/// the language-level locale files in `localizationPath`, using the English
+/// strings as placeholders.
+///
+/// Regional and script locale files, such as `<groupPrefix>_en_GB.arb` or
+/// `<groupPrefix>_sr_Latn.arb`, are not filled in, because their missing
+/// resources fall back to the language-level locale.
+///
+/// If `removeUndefined` is true, resources that are no longer defined in the
+/// English file are also removed from every locale file, including the
+/// regional and script ones.
 void updateMissingResources(
   String localizationPath,
   String groupPrefix, {
@@ -106,8 +125,8 @@ void updateMissingResources(
       final String localeString = filenamePattern.firstMatch(entityPath)![1]!;
       final locale = LocaleInfo.fromString(localeString);
 
-      // Only look at top-level language locales
-      if (locale.length == 1) {
+      final isBaseLocale = locale.length == 1;
+      if (isBaseLocale || removeUndefined) {
         final arbFile = File(entityPath);
         final Map<String, dynamic> localeBundle = loadBundle(arbFile);
         final Set<String> localeResources = resourceKeys(localeBundle);
@@ -119,7 +138,9 @@ void updateMissingResources(
         // --remove-undefined is passed.
         if (removeUndefined) {
           bool isIncluded(String key) {
-            return !isPluralVariation(key, localeBundle) &&
+            // Check plural variations against the canonical locale, so the
+            // variations of a removed plural are removed too.
+            return !isPluralVariation(key, englishBundle) &&
                 !intentionallyOmitted(key, localeBundle);
           }
 
@@ -144,23 +165,27 @@ void updateMissingResources(
           }
         }
 
-        // Add in any resources that are in the canonical locale and not present
-        // in this locale.
-        final Set<String> missingResources = requiredKeys
-            .difference(localeResources)
-            .where(
-              (String key) =>
-                  !isPluralVariation(key, localeBundle) && !intentionallyOmitted(key, localeBundle),
-            )
-            .toSet();
-        if (missingResources.isNotEmpty) {
-          localeBundle.addEntries(
-            missingResources.map(
-              (String k) => MapEntry<String, String>(k, englishBundle[k].toString()),
-            ),
-          );
-          shouldWrite = true;
-          print('Updating $entityPath with missing entries for $missingResources');
+        // Regional and script bundles inherit strings from their parent locale.
+        if (isBaseLocale) {
+          // Add in any resources that are in the canonical locale and not present
+          // in this locale.
+          final Set<String> missingResources = requiredKeys
+              .difference(localeResources)
+              .where(
+                (String key) =>
+                    !isPluralVariation(key, localeBundle) &&
+                    !intentionallyOmitted(key, localeBundle),
+              )
+              .toSet();
+          if (missingResources.isNotEmpty) {
+            localeBundle.addEntries(
+              missingResources.map(
+                (String k) => MapEntry<String, String>(k, englishBundle[k].toString()),
+              ),
+            );
+            shouldWrite = true;
+            print('Updating $entityPath with missing entries for $missingResources');
+          }
         }
         if (shouldWrite) {
           writeBundle(arbFile, localeBundle);
