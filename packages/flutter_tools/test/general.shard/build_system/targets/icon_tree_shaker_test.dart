@@ -1071,6 +1071,175 @@ void main() {
 
     expect(processManager, hasNoRemainingExpectations);
   });
+
+  test('Reports a font asset that is not tree-shaken in trace output', () async {
+    final Environment environment = createEnvironment(<String, String>{
+      kIconTreeShakerFlag: 'true',
+      kBuildMode: 'release',
+    });
+    final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
+
+    const customFontPath = 'fonts/Roboto-Regular.ttf';
+    const customManifestJson =
+        '''
+[
+  {
+    "family": "Roboto",
+    "fonts": [
+      {
+        "asset": "$customFontPath"
+      }
+    ]
+  }
+]
+''';
+    fontManifestContent = DevFSStringContent(customManifestJson);
+
+    final iconTreeShaker = IconTreeShaker(
+      environment,
+      fontManifestContent,
+      logger: logger,
+      processManager: processManager,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
+    );
+
+    // No IconData in the recorded uses refers to the "Roboto" family.
+    writeRecordedUsesFile(appDill.path, content: emptyRecordedUsesResult);
+
+    final File inputFont = fileSystem.file('/input/fonts/Roboto-Regular.ttf')
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(<int>[..._kTtfHeaderBytes, ...List<int>.filled(2500, 0)]);
+
+    expect(
+      await iconTreeShaker.subsetFont(
+        input: inputFont,
+        outputPath: '/output/fonts/Roboto-Regular.ttf',
+        relativePath: customFontPath,
+      ),
+      false,
+    );
+
+    expect(processManager, hasNoRemainingExpectations);
+    expect(
+      logger.traceText,
+      contains(
+        'Font asset "Roboto-Regular.ttf" was not tree-shaken because no IconData in the '
+        'compiled app uses its font family.',
+      ),
+    );
+    expect(logger.statusText, isNot(contains('was not tree-shaken')));
+  });
+
+  test('Does not report a subset font asset as not tree-shaken', () async {
+    final Environment environment = createEnvironment(<String, String>{
+      kIconTreeShakerFlag: 'true',
+      kBuildMode: 'release',
+    });
+    final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
+
+    final iconTreeShaker = IconTreeShaker(
+      environment,
+      fontManifestContent,
+      logger: logger,
+      processManager: processManager,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
+    );
+    final stdinSink = CompleterIOSink();
+    writeRecordedUsesFile(appDill.path, content: validRecordedUsesResult);
+    resetFontSubsetInvocation(stdinSink: stdinSink);
+    final File inputFont = fileSystem.file(inputPath)..writeAsBytesSync(List<int>.filled(2500, 0));
+    fileSystem.file(outputPath)
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(List<int>.filled(1200, 0));
+
+    final bool subsetted = await iconTreeShaker.subsetFont(
+      input: inputFont,
+      outputPath: outputPath,
+      relativePath: relativePath,
+    );
+
+    expect(subsetted, true);
+    expect(processManager, hasNoRemainingExpectations);
+    expect(logger.statusText, contains('was tree-shaken, reducing it'));
+    expect(logger.statusText, isNot(contains('was not tree-shaken')));
+    expect(logger.traceText, isNot(contains('was not tree-shaken')));
+  });
+
+  test('Does not report a non-supported font as not tree-shaken', () async {
+    final Environment environment = createEnvironment(<String, String>{
+      kIconTreeShakerFlag: 'true',
+      kBuildMode: 'release',
+    });
+    final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
+
+    final iconTreeShaker = IconTreeShaker(
+      environment,
+      fontManifestContent,
+      logger: logger,
+      processManager: processManager,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
+    );
+
+    writeRecordedUsesFile(appDill.path, content: validRecordedUsesResult);
+
+    final File notAFont = fileSystem.file('input/foo/bar.txt')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('I could not think of a better string');
+    final bool subsetted = await iconTreeShaker.subsetFont(
+      input: notAFont,
+      outputPath: outputPath,
+      relativePath: relativePath,
+    );
+
+    expect(subsetted, false);
+    expect(processManager, hasNoRemainingExpectations);
+    expect(logger.statusText, isNot(contains('was not tree-shaken')));
+    expect(logger.traceText, isNot(contains('was not tree-shaken')));
+  });
+
+  test('Does not report a font file that is not in the font manifest as not tree-shaken', () async {
+    final Environment environment = createEnvironment(<String, String>{
+      kIconTreeShakerFlag: 'true',
+      kBuildMode: 'release',
+    });
+    final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
+
+    final iconTreeShaker = IconTreeShaker(
+      environment,
+      fontManifestContent,
+      logger: logger,
+      processManager: processManager,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
+    );
+
+    writeRecordedUsesFile(appDill.path, content: emptyRecordedUsesResult);
+
+    // Deferred components pass every asset to subsetFont, including plain
+    // assets that happen to be TTF files but are not fonts in the manifest.
+    final File plainAsset = fileSystem.file('/input/assets/deferred_font.ttf')
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(<int>[..._kTtfHeaderBytes, ...List<int>.filled(2500, 0)]);
+
+    expect(
+      await iconTreeShaker.subsetFont(
+        input: plainAsset,
+        outputPath: '/output/assets/deferred_font.ttf',
+        relativePath: 'assets/deferred_font.ttf',
+      ),
+      false,
+    );
+    expect(processManager, hasNoRemainingExpectations);
+    expect(logger.statusText, isNot(contains('was not tree-shaken')));
+    expect(logger.traceText, isNot(contains('was not tree-shaken')));
+  });
 }
 
 const Library iconDataLibrary = Library('package:flutter/src/widgets/icon_data.dart');

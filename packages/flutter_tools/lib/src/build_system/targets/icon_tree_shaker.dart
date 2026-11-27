@@ -99,6 +99,20 @@ class IconTreeShaker {
       _environment.defines[kIconTreeShakerFlag] == 'true' &&
       _environment.defines[kBuildMode] != 'debug';
 
+  /// The asset paths of every font in the font manifest.
+  ///
+  /// [subsetFont] is also called for files that are not fonts in the manifest
+  /// (for example, plain assets of deferred components), so this is used to
+  /// only report skipped fonts. Entries that do not match the expected shape
+  /// are skipped; [_parseFontJson] validates the entries it uses.
+  late final Set<String> _fontManifestAssets = <String>{
+    if (json.decode(_fontManifest!) case final List<Object?> families)
+      for (final Object? family in families)
+        if (family case {'fonts': final List<Object?> fonts})
+          for (final Object? font in fonts)
+            if (font case {'asset': final String asset}) asset,
+  };
+
   // Fills the [_iconData] map.
   Future<void> _getIconData(Environment environment) async {
     if (!enabled) {
@@ -209,6 +223,12 @@ class IconTreeShaker {
 
     final _IconTreeShakerData? iconTreeShakerData = _iconData![relativePath];
     if (iconTreeShakerData == null) {
+      if (_fontManifestAssets.contains(relativePath)) {
+        _logger.printTrace(
+          'Font asset "${input.basename}" was not tree-shaken because no IconData in the '
+          'compiled app uses its font family.',
+        );
+      }
       return false;
     }
 
