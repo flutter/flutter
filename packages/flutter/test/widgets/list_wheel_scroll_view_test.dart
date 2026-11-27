@@ -2034,6 +2034,73 @@ void main() {
     expect(tester.layers.whereType<OpacityLayer>(), hasLength(1));
   });
 
+  testWidgets('ListWheelScrollView reuses its opacity layer when it repaints', (
+    WidgetTester tester,
+  ) async {
+    final controller = FixedExtentScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      ListWheelScrollView(
+        controller: controller,
+        overAndUnderCenterOpacity: 0.5,
+        itemExtent: 20.0,
+        children: <Widget>[for (int i = 0; i < 20; i++) Container()],
+      ),
+    );
+    final OpacityLayer layer = tester.layers.whereType<OpacityLayer>().single;
+
+    controller.jumpTo(50.0);
+    await tester.pump();
+
+    expect(tester.layers.whereType<OpacityLayer>().single, same(layer));
+    expect(layer.debugDisposed, isFalse);
+  });
+
+  testWidgets(
+    'ListWheelScrollView releases its opacity layer when overAndUnderCenterOpacity becomes 1',
+    (WidgetTester tester) async {
+      Widget buildWheel(double opacity) {
+        return ListWheelScrollView(
+          overAndUnderCenterOpacity: opacity,
+          itemExtent: 20.0,
+          children: <Widget>[for (int i = 0; i < 20; i++) Container()],
+        );
+      }
+
+      await tester.pumpWidget(buildWheel(0.5));
+      final OpacityLayer layer = tester.layers.whereType<OpacityLayer>().single;
+
+      await tester.pumpWidget(buildWheel(1.0));
+
+      expect(tester.layers.whereType<OpacityLayer>(), isEmpty);
+      expect(layer.debugDisposed, isTrue);
+    },
+  );
+
+  testWidgets('ListWheelScrollView releases its layers when it has no children', (
+    WidgetTester tester,
+  ) async {
+    Widget buildWheel(int childCount) {
+      return ListWheelScrollView(
+        overAndUnderCenterOpacity: 0.5,
+        itemExtent: 2000.0, // Huge extent to trigger the clip.
+        children: <Widget>[for (int i = 0; i < childCount; i++) const SizedBox.expand()],
+      );
+    }
+
+    await tester.pumpWidget(buildWheel(3));
+    final RenderListWheelViewport viewport = tester.renderObject(find.byType(ListWheelViewport));
+    final clipLayer = viewport.debugLayer!.firstChild! as ClipRectLayer;
+    final OpacityLayer opacityLayer = tester.layers.whereType<OpacityLayer>().single;
+    expect(opacityLayer.parent, same(clipLayer));
+
+    await tester.pumpWidget(buildWheel(0));
+
+    expect(viewport.debugLayer!.firstChild, isNull);
+    expect(clipLayer.debugDisposed, isTrue);
+    expect(opacityLayer.debugDisposed, isTrue);
+  });
+
   // This is a regression test for https://github.com/flutter/flutter/issues/140780.
   // and https://github.com/flutter/flutter/issues/6537.
   testWidgets(

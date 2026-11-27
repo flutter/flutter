@@ -805,6 +805,9 @@ class RenderListWheelViewport extends RenderBox
         _clipRectLayer.layer = null;
         _paintVisibleChildren(context, offset);
       }
+    } else {
+      _clipRectLayer.layer = null;
+      _childOpacityLayerHandler.layer = null;
     }
   }
 
@@ -823,6 +826,7 @@ class RenderListWheelViewport extends RenderBox
   void _paintVisibleChildren(PaintingContext context, Offset offset) {
     // The magnifier cannot be turned off if the opacity is less than 1.0.
     if (overAndUnderCenterOpacity >= 1) {
+      _childOpacityLayerHandler.layer = null;
       _paintAllChildren(context, offset);
       return;
     }
@@ -835,6 +839,7 @@ class RenderListWheelViewport extends RenderBox
       (PaintingContext context, Offset offset) {
         _paintAllChildren(context, offset, center: false);
       },
+      oldLayer: _childOpacityLayerHandler.layer,
     );
     _paintAllChildren(context, offset, center: true);
   }
