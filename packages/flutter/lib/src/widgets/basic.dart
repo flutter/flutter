@@ -1904,9 +1904,46 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The filter quality with which to apply the transform as a bitmap operation.
   ///
   /// {@template flutter.widgets.Transform.optional.FilterQuality}
-  /// The transform will be applied by re-rendering the child if [filterQuality] is null,
-  /// otherwise it controls the quality of an [ImageFilter.matrix] applied to a bitmap
-  /// rendering of the child.
+  /// If null, the child's drawing commands are replayed under the transformed
+  /// coordinate system using a canvas transform, or a [TransformLayer] when the
+  /// subtree needs compositing. A pure translation is applied as an offset
+  /// without adding a layer. Otherwise, the child is rendered into a bitmap and
+  /// transformed using an [ImageFilter.matrix] with the specified sampling
+  /// quality. This forces compositing ([RenderObject.alwaysNeedsCompositing])
+  /// and adds an [ImageFilterLayer], which requires an offscreen buffer.
+  ///
+  /// Changing the transform only repaints; it does not rebuild or lay out the
+  /// child, regardless of this value. The child's paint method runs on each
+  /// frame in which the transform changes, except for descendants behind a
+  /// [RepaintBoundary], whose layers can be reused in either mode.
+  ///
+  /// The difference is in rasterization. With null, the drawing commands are
+  /// rasterized under the new matrix on each frame, preserving sharpness at
+  /// different scales. The cost depends on how expensive the child is to
+  /// rasterize at that scale or rotation, including its text, paths, and shadows.
+  /// With a non-null value, the child is rasterized in its untransformed
+  /// coordinate system into an offscreen buffer, and the transform resamples
+  /// that bitmap. This can avoid scale-dependent rasterization work, such as
+  /// re-rasterizing text at different scales. Backends with a suitable raster
+  /// cache can also reuse the child bitmap across frames. Without such caching,
+  /// rendering the offscreen buffer adds work on each frame, even when
+  /// descendant layers are retained. Scaling the bitmap up can reduce sharpness.
+  ///
+  /// Leave this null (the default) when:
+  ///
+  ///  * The child is cheap to rasterize, such as solid colors or simple shapes.
+  ///  * The transform is a pure translation, which needs no transform layer in
+  ///    this mode but still uses the bitmap path with a non-null value.
+  ///  * The subtree contains platform-composited views, such as [UiKitView],
+  ///    [AppKitView], [HtmlElementView], or Android views using hybrid
+  ///    composition ([AndroidView] and [AndroidViewSurface]). Their
+  ///    [PlatformViewLayer]s are composited by the platform rather than drawn
+  ///    into the offscreen buffer, so the [ImageFilter.matrix] transform does
+  ///    not apply to them.
+  ///
+  /// Consider a non-null value when a complex subtree is continuously scaled or
+  /// rotated and profiling shows that raster time dominates the frame. See
+  /// [FilterQuality] for the trade-offs between sampling qualities.
   /// {@endtemplate}
   final FilterQuality? filterQuality;
 
