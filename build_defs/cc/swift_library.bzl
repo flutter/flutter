@@ -17,7 +17,8 @@ arguments -- build/config/darwin's compiler config's `-sdk`, `-target
 target>[-simulator]`: the SDK, the triple and the Swift libraries'
 directories follow the target platform, macOS or iOS on a device or the
 simulator) and `-swift-version 5`; the compiler
-config's `-Onone` in an unoptimized build and `-O` in an optimized one,
+config's `-Onone` in an unoptimized build and, in an optimized one, `-O`
+for a Mac and `-Osize` for iOS (GN's optimize config builds iOS for size),
 `-g` (GN's symbols config on Apple); `--whole-module-optimization`
 (swift_whole_module_optimization is is_official_build, true in every
 engine build); `--mac-host-toolchain-path` for the Testing plugin --
@@ -288,9 +289,15 @@ def _flutter_swift_library_impl(ctx):
     args.add("--mac-host-toolchain-path", _XCODE_TOOLCHAIN)
 
     # build/config/compiler's optimize and symbols configs on Apple: -Onone
-    # (no_optimize, an unoptimized build), -O (optimize), -g (symbols).
-    mode = ctx.var["COMPILATION_MODE"]
-    args.add("-O" if mode == "opt" else "-Onone")
+    # (no_optimize, an unoptimized build); in an optimized one -Osize for
+    # iOS, which the optimize config builds for size (-Os for C++), and -O
+    # for a Mac (-O2); -g (symbols).
+    if ctx.var["COMPILATION_MODE"] != "opt":
+        args.add("-Onone")
+    elif ctx.target_platform_has_constraint(ctx.attr._ios[platform_common.ConstraintValueInfo]):
+        args.add("-Osize")
+    else:
+        args.add("-O")
     args.add("-g")
 
     ctx.actions.run(
