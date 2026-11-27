@@ -133,7 +133,10 @@ void main() {
       ),
     ]);
 
-    await expectLater(() => const KernelSnapshot().build(androidEnvironment), throwsException);
+    await expectLater(
+      () => const KernelSnapshot().build(androidEnvironment),
+      throwsA(isA<CompilerException>()),
+    );
     expect(processManager, hasNoRemainingExpectations);
   });
 

@@ -39,9 +39,10 @@ BundleBuilder createBundleBuilder({
   required FileSystem fileSystem,
   AndroidSdk? Function()? androidSdkBuilder,
   Artifacts? artifacts,
+  Logger? logger,
 }) {
   final processManager = FakeProcessManager.any();
-  final logger = BufferLogger.test();
+  logger ??= BufferLogger.test();
   final platform = FakePlatform();
   return BundleBuilder(
     analytics: const NoOpAnalytics(),
@@ -224,6 +225,43 @@ void main() {
       throwsToolExit(),
     );
   });
+
+  for (final verbose in <bool>[false, true]) {
+    test(
+      'BundleBuilder ${verbose ? 'logs' : 'suppresses'} error message on non-fatal build failure '
+      'when verbose is $verbose',
+      () async {
+        final fileSystem = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final BuildSystem buildSystem = TestBuildSystem.all(
+          BuildResult(
+            success: false,
+            exceptions: <String, ExceptionMeasurement>{
+              'hello': ExceptionMeasurement('hello', 'bar', StackTrace.current),
+            },
+          ),
+        );
+        await expectLater(
+          () =>
+              createBundleBuilder(
+                buildSystem: buildSystem,
+                fileSystem: fileSystem,
+                logger: verbose ? VerboseLogger(logger) : logger,
+              ).build(
+                platform: TargetPlatform.ios,
+                buildInfo: BuildInfo.debug,
+                project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+                mainPath: 'lib/main.dart',
+                assetDirPath: 'example',
+                depfilePath: 'example.d',
+                buildSystem: buildSystem,
+              ),
+          throwsToolExit(),
+        );
+        expect(logger.errorText, verbose ? contains('Target hello failed: bar') : isEmpty);
+      },
+    );
+  }
 
   test('Passes correct defines to build system', () async {
     final fileSystem = MemoryFileSystem.test();

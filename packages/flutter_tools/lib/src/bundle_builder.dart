@@ -116,12 +116,14 @@ class BundleBuilder {
 
     if (!result.success) {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
-        logger.printError(
-          'Target ${measurement.target} failed: ${measurement.exception}',
-          stackTrace: (measurement.fatal && measurement.exception is! ToolExit)
-              ? measurement.stackTrace
-              : null,
-        );
+        if (measurement.fatal || logger.isVerbose) {
+          logger.printError(
+            'Target ${measurement.target} failed: ${measurement.exception}',
+            stackTrace: (measurement.fatal && measurement.exception is! ToolExit)
+                ? measurement.stackTrace
+                : null,
+          );
+        }
       }
       throwToolExit('Failed to build bundle.');
     }

@@ -113,3 +113,13 @@ class ExtensionAssembleException implements Exception {
         : 'Extension assemble target "$target" failed.';
   }
 }
+
+/// An exception thrown when a compiler (such as the frontend server) fails
+/// to compile code, and has already emitted the compilation error messages to
+/// the logger.
+class CompilerException implements Exception {
+  const CompilerException();
+
+  @override
+  String toString() => 'compilation failed';
+}

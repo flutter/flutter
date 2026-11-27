@@ -900,6 +900,37 @@ void main() {
     expect(result.exceptions.keys, containsAll(<String>['B', 'C']));
   });
 
+  test('BuildSystem.build sets fatal: false only for CompilerException', () async {
+    final fileSystem = MemoryFileSystem.test();
+    final environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
+
+    final compilerTarget = TestTarget((Environment environment) async {
+      throw const CompilerException();
+    })..name = 'compiler_target';
+    final BuildResult compilerResult = await buildSystem.build(compilerTarget, environment);
+    expect(compilerResult.success, isFalse);
+    expect(compilerResult.exceptions['compiler_target']?.fatal, isFalse);
+    expect(
+      compilerResult.exceptions['compiler_target']?.exception.toString(),
+      'compilation failed',
+    );
+
+    final otherTarget = TestTarget((Environment environment) async {
+      throw Exception('unexpected error');
+    })..name = 'other_target';
+    final BuildResult otherResult = await buildSystem.build(otherTarget, environment);
+    expect(otherResult.success, isFalse);
+    expect(otherResult.exceptions['other_target']?.fatal, isTrue);
+  });
+
   test(
     'BuildSystem.build does not delete shared hooks outputs from previous runs of the same target',
     () async {
