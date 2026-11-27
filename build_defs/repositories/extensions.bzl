@@ -30,6 +30,7 @@ load(":host_files.bzl", "host_files")
 load(":host_platform.bzl", "BIN_CACHE_DART_SDK", "host_platform", "host_platform_values")
 load(":macos_sdk.bzl", "macos_sdk")
 load(":repositories.bzl", "cipd_download_url", "cipd_package", "engine_version_repository", "synced_repository")
+load(":tree_commit.bzl", "tree_commit_repository")
 
 _OVERLAYS = "//engine/src/flutter/build/bazel/third_party"
 
@@ -936,6 +937,16 @@ def _synced_deps_impl(mctx):
             engine_package_config = "@engine_package_config//:" + ENGINE_PACKAGE_CONFIG_FILE if converting else None,
         )
 
+    # When the commit of the Dart tree was made (tree_commit.bzl), which the
+    # wrapped build of the SDK stamps into the VM (the Dart overlay's
+    # version_in_with_commit_time).
+    dart = _SOURCE_REPOSITORIES["dart"].path
+    tree_commit_repository(
+        name = "dart_commit",
+        path = dart,
+        fetched = _fetched_build_file(dart),
+    )
+
     # The LTO variants of emscripten's system libraries, which the emsdk
     # repository's view links into the SDK's cache.
     emsdk_lto_libraries(
@@ -1004,6 +1015,7 @@ def _synced_deps_impl(mctx):
     return _metadata(mctx, direct = sorted(
         _SOURCE_REPOSITORIES.keys() + _TOOL_REPOSITORIES.keys() + _SYSROOT_REPOSITORIES.keys() + [
             BIN_CACHE_DART_SDK.lstrip("@"),
+            "dart_commit",
             "emsdk_lto",
             "engine_package_config",
             "host_files",

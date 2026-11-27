@@ -53,6 +53,36 @@ view of, named in the args so that the action's key carries it, where
 `darwin_sdk.gni` would otherwise ask `xcrun` -- and the prebuilt SDK is
 the Mac's for the CPU (`@dart_sdk_macos_arm64`, `@dart_sdk_macos_x64`).
 
+One thing GN's build of the SDK asks the machine rather than its inputs is
+the commit of the Dart tree. `tools/make_version.py` runs git for the VM's
+version string (the commit's time) and for the SDK hash (the commit's first
+ten digits), which the VM compares with the hash in a kernel file before it
+loads one; `tools/gn` gives the front ends the same digits as
+`dart_sdk_verification_hash`. An action has no repository to ask, so the
+wrapped build runs with `dart_version_git_info` off and is handed the two
+values instead. The hash is the `DEPS` pin's, for the front ends (the GN
+argument) and for the VM alike. The time is what git says of the tree a
+build reads, asked once, at fetch time, by a repository rule: `@dart_commit`
+(`build_defs/repositories/tree_commit.bzl`), which is read again when the
+tree's HEAD moves. Both reach the VM through `runtime/vm/version_in.cc`, the
+template of its `version.cc`: the overlay fills in the time
+(`@dart//:version_in_with_commit_time`), `dart_wrap` the hash
+(`:version_in`), and the result lies in the GN tree in the template's place
+(`@dart//:build_tree` leaves the template itself out, so a build without the
+filled-in one stops at a missing file rather than stamp ten zeros, a hash
+with which a VM loads the kernel file of any SDK). Only the overlay names
+`@dart_commit` when a package is loaded, and the smoke test by a file's
+label, so only a build that reads the Dart tree asks: to ask is to fetch the
+tree, in a checkout without `gclient sync`. Where git has no answer (a tree
+without its `.git`) the time is `Unknown timestamp`, the script's own words
+then. The prebuilt SDK's kernel files, and those its front ends write, carry
+no hash (ten zeros), which every VM loads; the hash decides between the
+wrapped build's own front ends and its VM, and against a kernel file of
+another build. The smoke test below expects the time in the VM's version
+string. What stays as with `tools/gn --no-dart-version-git-info`: the
+`revision` file and `dartdoc_options.yaml` of an SDK built from source
+(below), which the build writes without the commit.
+
 ```
 bazelisk build //engine/src/flutter/build/bazel/dart_wrap:dart_sdk   # everything
 bazelisk build //engine/src/flutter/build/bazel/dart_wrap:gen_snapshot

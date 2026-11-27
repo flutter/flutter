@@ -19,6 +19,7 @@
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+load("@bazel_skylib//rules:expand_template.bzl", "expand_template")
 load(
     "@host_platform//:host.bzl",
     "HOST_BUILDTOOLS",
@@ -44,6 +45,14 @@ load("//build_defs/repositories:deps.lock.bzl", "GIT_DEPS")
 package(default_visibility = ["//visibility:public"])
 
 _DART_REVISION = GIT_DEPS["engine/src/flutter/third_party/dart"]["revision"]
+
+# The SDK hash: the first ten digits of the Dart tree's DEPS revision. A front
+# end writes its hash into a kernel file, and a VM loads a kernel file that
+# carries the VM's own hash or none. The wrapped build's front ends take it
+# as tools/gn's dart_sdk_verification_hash (_GN_ARGS) and its VM through
+# :version_in, so the two agree. The prebuilt SDK's kernel files carry none
+# (ten zeros), as do those its front ends write.
+_SDK_HASH = _DART_REVISION[:10]
 
 # tools/gn's --dart-debug: runtime_args.gni's dart_debug, a Debug build of
 # the VM (DEBUG rather than NDEBUG: its assertions on, at the same -O2 since
@@ -277,13 +286,15 @@ filegroup(
 # What tools/gn would write to args.gn for this build, restricted to the
 # arguments the pruned GN graph declares (gn gen runs with
 # --fail-on-unused-args; dart_version, for one, belongs to
-# //flutter/shell/version). The SDK verification hash comes from the DEPS pin
-# rather than from git, as with tools/gn --no-dart-version-git-info.
+# //flutter/shell/version). dart_version_git_info is off, as with tools/gn
+# --no-dart-version-git-info: the build's actions have no repository to ask.
+# The SDK verification hash comes from the DEPS pin rather than from git, and
+# what the VM's version.cc would have asked git for is in :version_in.
 _GN_ARGS = {
     "buildtools_path": '"//flutter/buildtools"',
     "dart_component_kind": '"static_library"',
     "dart_lib_export_symbols": "false",
-    "dart_sdk_verification_hash": '"%s"' % _DART_REVISION[:10],
+    "dart_sdk_verification_hash": '"%s"' % _SDK_HASH,
     "dart_version_git_info": "false",
     # No LTO in any build. In a build without it (tools/gn --no-lto: the
     # debug builders, et's local_engine.json) that is GN's build. In a build
@@ -392,6 +403,22 @@ _GN_ARGS = {
     },
     "//conditions:default": {},
 })
+
+# runtime/vm/version_in.cc, the template tools/make_version.py writes the
+# VM's version.cc from, with the two values the script asks git for already
+# in place: the commit's time (the Dart overlay's
+# version_in_with_commit_time) and, here, the SDK hash (`git rev-parse
+# --short=10 HEAD`). The script runs with --no-git-hash (dart_version_git_info,
+# above) and would write "Unknown timestamp" and ten zeros there: a VM that
+# says nothing of its commit and, its hash being null, loads the kernel file
+# of any SDK (kernel_binary.cc's IsValidSdkHash). In the GN tree in the
+# template's place, which @dart//:build_tree leaves out.
+expand_template(
+    name = "version_in",
+    out = "version_in.cc",
+    substitutions = {"{{GIT_HASH}}": _SDK_HASH},
+    template = "@dart//:version_in_with_commit_time",
+)
 
 gn_build(
     name = "dart_sdk",
@@ -558,6 +585,8 @@ gn_build(
         "//engine/src/flutter/third_party/boringssl:gn_files": "flutter/third_party/boringssl",
         "@boringssl//:build_tree": "flutter/third_party/boringssl/src",
         "@dart//:build_tree": "flutter/third_party/dart",
+        # The VM's version template with the commit's time and hash (above).
+        ":version_in": "flutter/third_party/dart/runtime/vm",
         "@icu//:build_tree": "flutter/third_party/icu",
         "@libcxx//:build_tree": "flutter/third_party/libcxx",
         "@libcxxabi//:build_tree": "flutter/third_party/libcxxabi",

@@ -54,6 +54,7 @@ use_repo(
     "cpu_features",
     "cpython3",
     "dart",
+    "dart_commit",
     "dart_sdk_bin_cache",
     "dart_sdk_linux_arm64",
     "dart_sdk_linux_x64",
