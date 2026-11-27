@@ -1,0 +1,22 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The rules_fuchsia spike module's options: the engine's (the root
+# .bazelrc, which applies to the engine's module only) as far as a build of
+# the spike needs them. Keep the two in step.
+
+startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1
+
+# No convenience symlinks in this directory (the engine's go under
+# engine/src/out).
+common --experimental_convenience_symlinks=ignore
+
+build --incompatible_strict_action_env
+build --repo_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
+build --force_pic
+build --dynamic_mode=off
+build --@bazel_tools//tools/cpp:link_extra_libs=@flutter//engine/src/flutter/build/bazel/toolchains:cxx_runtime
+build --experimental_cc_static_library
+build --disk_cache=~/.cache/flutter_engine_bazel
+build --experimental_disk_cache_gc_max_size=20G

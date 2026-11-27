@@ -596,4 +596,293 @@ The input testing/foo:foo matches no targets, configs or files.
       reason: 'The log should not contain CI-prefixed builds',
     );
   });
+
+  group('--backend bazel', () {
+    // A Linux host build of a builder file: the kind the converter gives a
+    // Bazel configuration (tools/gn_to_bazel/lib/src/builders.dart).
+    Map<String, BuilderConfig> linuxConfigs() {
+      final builder = TestBuilderConfig();
+      builder.addBuild(
+        name: 'linux/host_debug',
+        dimension: TestDroneDimension.linux,
+        enableLto: false,
+        targetDir: 'host_debug',
+      );
+      // A developer's build: ninja's default target, everything (the helper
+      // names a target along with the directory).
+      final Map<String, Object?> json = builder.buildJson();
+      final build = (json['builds']! as List<Object?>).single! as Map<String, Object?>;
+      (build['ninja']! as Map<String, Object?>)['targets'] = <String>[];
+      return {
+        'local_engine': BuilderConfig.fromJson(map: json, path: 'ci/builders/local_engine.json'),
+      };
+    }
+
+    test("builds the targets' Bazel counterparts under the build's configuration", () async {
+      final testEnv = TestEnvironment.withTestEngine();
+      addTearDown(testEnv.cleanup);
+
+      final runner = ToolCommandRunner(environment: testEnv.environment, configs: linuxConfigs());
+      final int result = await runner.run([
+        'build',
+        '--config',
+        'host_debug',
+        '--backend',
+        'bazel',
+        '//flutter/fml:fml_unittests',
+        '//flutter/shell/...',
+        '//flutter/display_list:all',
+      ]);
+
+      printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
+      expect(result, equals(0));
+      expect(testEnv.processHistory, hasLength(1));
+      expect(testEnv.processHistory.single.command, <String>[
+        'bazelisk',
+        'build',
+        '--config=host_debug',
+        '//engine/src/flutter/fml:fml_unittests',
+        '//engine/src/flutter/shell/...',
+        '//engine/src/flutter/display_list:all',
+      ]);
+    });
+
+    test(
+      "with no targets builds the host's local engine manifest and names its directory",
+      () async {
+        // What Bazel answers: the output directory, and the target's files.
+        final testEnv = TestEnvironment.withTestEngine(
+          cannedProcesses: <CannedProcess>[
+            CannedProcess(
+              (command) => command.length > 1 && command[1] == 'info',
+              stdout: '/cache/execroot/_main/bazel-out\n',
+            ),
+            CannedProcess(
+              (command) => command.length > 1 && command[1] == 'cquery',
+              stdout:
+                  'bazel-out/k8-dbg/bin/engine/src/flutter/shell/testing/shipped/flutter_tester\n'
+                  'bazel-out/k8-dbg/bin/engine/src/flutter/local_engine.json\n',
+            ),
+          ],
+        );
+        addTearDown(testEnv.cleanup);
+
+        final runner = ToolCommandRunner(environment: testEnv.environment, configs: linuxConfigs());
+        final int result = await runner.run([
+          'build',
+          '--config',
+          'host_debug',
+          '--backend',
+          'bazel',
+        ]);
+
+        printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
+        expect(result, equals(0));
+        expect(testEnv.processHistory.map((p) => p.command), <List<String>>[
+          <String>['bazelisk', 'build', '--config=host_debug', '//engine/src/flutter:local_engine'],
+          <String>['bazelisk', 'info', '--config=host_debug', 'output_path'],
+          <String>[
+            'bazelisk',
+            'cquery',
+            '--config=host_debug',
+            '--output=files',
+            '//engine/src/flutter:local_engine',
+          ],
+        ]);
+        expect(
+          testEnv.testLogs.map((r) => r.message).join('\n'),
+          contains('--local-engine=/cache/execroot/_main/bazel-out/k8-dbg/bin/engine/src/flutter'),
+        );
+      },
+    );
+
+    test('with no targets fails when the local engine build fails', () async {
+      final testEnv = TestEnvironment.withTestEngine(
+        cannedProcesses: <CannedProcess>[
+          CannedProcess((command) => command.length > 1 && command[1] == 'build', exitCode: 1),
+        ],
+      );
+      addTearDown(testEnv.cleanup);
+
+      final runner = ToolCommandRunner(environment: testEnv.environment, configs: linuxConfigs());
+      final int result = await runner.run([
+        'build',
+        '--config',
+        'host_debug',
+        '--backend',
+        'bazel',
+      ]);
+
+      expect(result, equals(1));
+      expect(testEnv.processHistory, hasLength(1));
+    });
+
+    test('ET_BACKEND selects the backend', () async {
+      final testEnv = TestEnvironment.withTestEngine(
+        environment: <String, String>{'ET_BACKEND': 'bazel'},
+      );
+      addTearDown(testEnv.cleanup);
+
+      final runner = ToolCommandRunner(environment: testEnv.environment, configs: linuxConfigs());
+      final int result = await runner.run(['build', '--config', 'host_debug', '//flutter/fml:fml']);
+
+      printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
+      expect(result, equals(0));
+      expect(testEnv.processHistory.single.command.take(2), <String>['bazelisk', 'build']);
+    });
+
+    test('refuses a build the Bazel build has no configuration for', () async {
+      final testEnv = TestEnvironment.withTestEngine(abi: Abi.macosArm64);
+      addTearDown(testEnv.cleanup);
+
+      final builder = TestBuilderConfig();
+      builder.addBuild(name: 'macos/host_debug', dimension: TestDroneDimension.mac);
+      final runner = ToolCommandRunner(
+        environment: testEnv.environment,
+        configs: {'mac_test_config': builder.buildConfig(path: 'ci/builders/mac_test_config.json')},
+      );
+      final int result = await runner.run([
+        'build',
+        '--config',
+        'host_debug',
+        '--backend',
+        'bazel',
+      ]);
+
+      expect(result, equals(1));
+      expect(testEnv.processHistory, isEmpty);
+      expect(
+        testEnv.testLogs.map((r) => r.message),
+        contains(contains('no configuration for macos/host_debug')),
+      );
+    });
+
+    // An Android build of a Linux builder file: named with its `ci/` prefix
+    // on the command line, as under GN; the configuration and the install
+    // target are the converter's (`android_debug_x64`).
+    Map<String, BuilderConfig> androidConfigs() {
+      final builder = TestBuilderConfig();
+      builder.addBuild(
+        name: 'ci/android_debug_x64',
+        dimension: TestDroneDimension.linux,
+        gnFlags: ['--target-dir', 'ci/android_debug_x64', '--android', '--android-cpu=x64'],
+        enableLto: false,
+        targetDir: 'ci/android_debug_x64',
+      );
+      return {
+        'linux_android_debug_engine': builder.buildConfig(
+          path: 'ci/builders/linux_android_debug_engine.json',
+        ),
+      };
+    }
+
+    test("builds an Android target under the CI build's configuration", () async {
+      final testEnv = TestEnvironment.withTestEngine();
+      addTearDown(testEnv.cleanup);
+
+      final runner = ToolCommandRunner(environment: testEnv.environment, configs: androidConfigs());
+      final int result = await runner.run([
+        'build',
+        '--config',
+        'ci/android_debug_x64',
+        '--backend',
+        'bazel',
+        '//flutter/shell/platform/android:flutter_jar_zip',
+      ]);
+
+      printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
+      expect(result, equals(0));
+      expect(testEnv.processHistory.single.command, <String>[
+        'bazelisk',
+        'build',
+        '--config=android_debug_x64',
+        '//engine/src/flutter/shell/platform/android:flutter_jar_zip',
+      ]);
+    });
+
+    test("with no targets runs the Android builder's install into its target directory", () async {
+      final testEnv = TestEnvironment.withTestEngine();
+      addTearDown(testEnv.cleanup);
+
+      final runner = ToolCommandRunner(environment: testEnv.environment, configs: androidConfigs());
+      final int result = await runner.run([
+        'build',
+        '--config',
+        'ci/android_debug_x64',
+        '--backend',
+        'bazel',
+      ]);
+
+      printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
+      expect(result, equals(0));
+      expect(testEnv.processHistory.single.command, <String>[
+        'bazelisk',
+        'run',
+        '--config=android_debug_x64',
+        '//engine/src/flutter/ci/builders:android_debug_x64',
+        '--',
+        path.join(testEnv.environment.engine.outDir.path, 'ci', 'android_debug_x64'),
+      ]);
+    });
+
+    test("with no targets builds an Android developer's local engine and names the host's", () async {
+      // local_engine.json's Android build: ninja's default target,
+      // everything, read where Bazel builds it (the Gradle plugin takes the
+      // manifest's directory), paired with a host build of the same mode.
+      final builder = TestBuilderConfig();
+      builder.addBuild(
+        name: 'linux/android_debug_arm64',
+        dimension: TestDroneDimension.linux,
+        gnFlags: ['--android', '--android-cpu=arm64'],
+        enableLto: false,
+        targetDir: 'android_debug_arm64',
+      );
+      final Map<String, Object?> json = builder.buildJson();
+      final build = (json['builds']! as List<Object?>).single! as Map<String, Object?>;
+      (build['ninja']! as Map<String, Object?>)['targets'] = <String>[];
+      final testEnv = TestEnvironment.withTestEngine(
+        cannedProcesses: <CannedProcess>[
+          CannedProcess(
+            (command) => command.length > 1 && command[1] == 'info',
+            stdout: '/cache/execroot/_main/bazel-out\n',
+          ),
+          CannedProcess(
+            (command) => command.length > 1 && command[1] == 'cquery',
+            stdout: 'bazel-out/android_arm64-opt/bin/engine/src/flutter/local_engine.json\n',
+          ),
+        ],
+      );
+      addTearDown(testEnv.cleanup);
+
+      final runner = ToolCommandRunner(
+        environment: testEnv.environment,
+        configs: {
+          'local_engine': BuilderConfig.fromJson(map: json, path: 'ci/builders/local_engine.json'),
+        },
+      );
+      final int result = await runner.run([
+        'build',
+        '--config',
+        'android_debug_arm64',
+        '--backend',
+        'bazel',
+      ]);
+
+      printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
+      expect(result, equals(0));
+      expect(testEnv.processHistory.first.command, <String>[
+        'bazelisk',
+        'build',
+        '--config=android_debug_arm64',
+        '//engine/src/flutter:local_engine',
+      ]);
+      expect(
+        testEnv.testLogs.map((r) => r.message).join('\n'),
+        contains(
+          '--local-engine=/cache/execroot/_main/bazel-out/android_arm64-opt/bin/engine/src/flutter '
+          "--local-engine-host=<the host build's directory",
+        ),
+      );
+    });
+  });
 }

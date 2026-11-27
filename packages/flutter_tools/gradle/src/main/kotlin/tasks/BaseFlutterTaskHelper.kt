@@ -93,7 +93,10 @@ object BaseFlutterTaskHelper {
             workingDir(baseFlutterTask.sourceDir)
             baseFlutterTask.localEngine?.let {
                 args("--local-engine", it)
-                args("--local-engine-src-path", baseFlutterTask.localEngineSrcPath)
+                // A Bazel build directory goes by its own path, without a source path.
+                baseFlutterTask.localEngineSrcPath?.let { srcPath ->
+                    args("--local-engine-src-path", srcPath)
+                }
             }
             baseFlutterTask.localEngineHost?.let {
                 args("--local-engine-host", it)

@@ -1,0 +1,38 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @llvm_libc: header-only pieces of LLVM's libc that
+# libc++ uses for <charconv> (shared/str_to_float.h and friends). Mirrors
+# //flutter/build/secondary/flutter/third_party/llvm_libc/BUILD.gn.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+cc_library(
+    name = "llvm_libc",
+    hdrs = glob([
+        "hdr/**/*.h",
+        "include/**/*.h",
+        "shared/**/*.h",
+        "src/**/*.h",
+    ]),
+    defines = ["LIBC_NAMESPACE=__llvm_libc_fl"],
+    includes = ["."],
+    # llvm-libc is only used as a dependency of libc++.
+    visibility = ["@libcxx//:__pkg__"],
+)
+
+# What the GN build of this tree reads (//flutter/third_party/llvm_libc in
+# flutter/build/secondary, which builds libc++'s number parsing and printing
+# from src/__support), for rules that wrap a GN build.
+filegroup(
+    name = "build_tree",
+    srcs = glob([
+        "hdr/**",
+        "include/**",
+        "shared/**",
+        "src/__support/**",
+        "src/errno/**",
+    ]),
+    visibility = ["//visibility:public"],
+)

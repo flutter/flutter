@@ -1,0 +1,25 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The package flutter_tools' isolated/native_assets_* tests (integration.shard)
+# add to the projects they create: a build hook reading user defines.
+
+load("//build_defs/dart:flutter_project.bzl", "FLUTTER_PROJECT_GENERATED")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "project",
+    srcs = glob(
+        [
+            "hook/**",
+            "lib/**",
+            "src/**",
+            "test/**",
+        ],
+        exclude = FLUTTER_PROJECT_GENERATED,
+    ) + [
+        "pubspec.yaml",
+    ],
+)

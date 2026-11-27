@@ -1,0 +1,49 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# package:engine_tool: `et`, the engine's command-line tool. A Dart package
+# whose GN build file only registers its test files with `et test`
+# (dart_test(), a `dart test <file>` call written out as JSON for the tool to
+# run; not a build step), so there is nothing to convert; its tests are
+# run_tests.py's (--type dart-host).
+
+load("//build_defs/dart:package_test.bzl", "dart_package_test")
+
+package(default_visibility = ["//visibility:public"])
+
+# The library and the in-tree packages it imports (gn_to_bazel for the
+# Bazel backend of `et build` and `et test`: the configuration a build has,
+# the Bazel spelling of labels).
+filegroup(
+    name = "dart_sources",
+    srcs = glob(["lib/**/*.dart"]) + [
+        "//engine/src/flutter/tools/gn_to_bazel:dart_sources",
+        "//engine/src/flutter/tools/pkg/engine_build_configs:dart_sources",
+        "//engine/src/flutter/tools/pkg/engine_repo_tools:dart_sources",
+    ],
+)
+
+# The tests load the real builder configurations and .ci.yaml and run
+# bin/et, the shell entry point. That script resolves its own location
+# through `realpath`, so from the runfiles tree it reaches the checkout's
+# copy of this package -- the one read outside the declared inputs here --
+# and, where `gclient sync` has run, the checkout's prebuilt SDK. Where it
+# has not, the script asks for gclient under the GN backend and, under the
+# Bazel backend, asks Bazel where the SDK and the package configuration it
+# fetched are; the entry point's test answers that with the ones the test
+# itself runs on (a Bazel inside a test would wait for the build that is
+# running the test). `et fetch`'s tests make their own engine, with and
+# without a .gclient. So the suite passes in either kind of checkout.
+dart_package_test(
+    name = "tests",
+    data = [
+        "//engine/src/flutter:.ci.yaml",
+        "//engine/src/flutter:et_entry_points",
+        "//engine/src/flutter/ci:builder_configs",
+    ],
+    deps = [
+        ":dart_sources",
+        "//engine/src/flutter/tools/pkg/process_fakes:dart_sources",
+    ],
+)

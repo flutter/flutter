@@ -1,0 +1,823 @@
+#!/usr/bin/env python3
+#
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+"""The engine's CI on Bazel without a change to its recipe (see ci.md).
+
+The engine_v2 recipe builds a builder file's build by running three scripts
+of this repository: `tools/gn <flags>`, then the checkout's `ninja -C
+out/<dir> <targets>`, then the build's test steps (`testing/run_tests.py
+--variant <dir> --type ...` among them). With `--bazel` among the flags,
+tools/gn writes no GN build: it looks the flags up among the builder files'
+builds (builds.json beside this module, which the converter generates with
+ci/builders/BUILD.bazel) and writes a `build.ninja` into the build directory
+whose one edge runs the build's Bazel install target (`bazel_ci.py install
+<dir>`: `bazelisk run --config=<name> //engine/src/flutter/ci/builders:<name>
+-- <dir>`, which builds what the ninja targets build and lays it into the
+directory as GN would) -- with a phony edge per ninja target, so that the
+recipe's `ninja -C out/<dir> <targets>` runs the Bazel build. It also writes
+`bazel.json` beside it, which the edge reads and from which run_tests.py
+knows to run each `--type` as `bazelisk test --config=<name> <the type's
+suites>` rather than from the directory.
+
+This module is what both scripts share: the builds' table, the match of a
+flag list against it, the files written into the build directory, and the
+commands. It runs under the Python the recipe runs tools/gn with (python3,
+the standard library alone).
+"""
+
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import traceback
+import urllib.parse
+
+# The flags of a build that say where it runs rather than what it builds:
+# the recipe appends `--no-goma --no-rbe` to an official build's;
+# `--xcode-symlinks` is how a Mac build under reclient reaches Xcode (the
+# Mac builder files carry it in presubmit and not in their
+# postsubmit_overrides, which otherwise name the same build); `--bazel` is
+# this mode's own, and so are `--bazel-rbe` and `--no-bazel-rbe`. They are
+# left out when a flag list is matched against the builder files'.
+#
+# RBE_FLAGS are the ones that say whether the Bazel build's actions run on
+# Flutter's RBE instance (rbe_flag): tools/gn's own pair and this mode's,
+# one say between the four.
+RBE_FLAGS = {'--rbe': True, '--no-rbe': False, '--bazel-rbe': True, '--no-bazel-rbe': False}
+INFRA_FLAGS = frozenset([
+    '--bazel', '--rbe', '--no-rbe', '--goma', '--no-goma', '--xcode-symlinks',
+    '--no-xcode-symlinks', *RBE_FLAGS
+])
+
+# The value flags of the same kind: the recipe appends reproxy's address
+# (`--rbe-server-address=unix://...`) to a build with --rbe.
+_INFRA_VALUE_FLAGS = ('--rbe-server-address',)
+
+# `--gn-args=engine_version="<rev>"` is what the recipe adds to a monorepo
+# build (the engine's version string); a Bazel build of these builders
+# stamps the version from the checkout (@engine_version, which --config=ci
+# asks to: the root .bazelrc's common:stamp), so the flag is matched away
+# too.
+_IGNORED_GN_ARGS = ('engine_version=',)
+
+# What the recipe appends under its `no_lto` property (cocoon sets it on
+# every engine build of a presubmit: a try build without LTO is a faster
+# one): a build whose own flags lack it matches without it and runs with
+# LTO off -- the Bazel setting the converter maps `--no-lto` to
+# (build/bazel/BUILD.bazel's `lto`, on in the configuration otherwise). A
+# `--thin-lto` build's `thin_lto` stays on and says nothing without `lto`,
+# as tools/gn passes use_thin_lto under enable_lto alone.
+NO_LTO_FLAG = '--no-lto'
+LTO_OFF_OPTION = '--//engine/src/flutter/build/bazel:lto=false'
+
+# Where the build directory's Bazel files go.
+NINJA_FILE = 'build.ninja'
+BAZEL_JSON = 'bazel.json'
+STAMP = 'bazel_install.stamp'
+
+# The Bazel configuration every CI invocation adds (the root .bazelrc's
+# `ci` config: plain output for a log, failures spelled out).
+CI_CONFIG = 'ci'
+
+
+class BazelCiError(Exception):
+  """A reason the Bazel build cannot stand in for the GN one, for the user."""
+
+
+def host_os():
+  """The host as the builder files' table keys it: `linux` or `mac`."""
+  if sys.platform == 'darwin':
+    return 'mac'
+  if sys.platform.startswith('linux'):
+    return 'linux'
+  raise BazelCiError(f'tools/gn --bazel runs on Linux and macOS hosts; this is {sys.platform}')
+
+
+def repo_root(engine_src):
+  """The flutter/flutter checkout that holds `engine/src` (the Bazel workspace)."""
+  return os.path.dirname(os.path.dirname(os.path.abspath(engine_src)))
+
+
+def builds_table(engine_src):
+  """The path of the converter's table of the builder files' builds."""
+  return os.path.join(engine_src, 'flutter', 'build', 'bazel', 'builds.json')
+
+
+def load_builds(engine_src, host=None):
+  """The builds of the host from build/bazel/builds.json."""
+  with open(builds_table(engine_src), encoding='utf-8') as table_file:
+    table = json.load(table_file)
+  return table['builds'][host or host_os()]
+
+
+def normalized_flags(flags):
+  """A flag list as it is matched: `--x=v` split into `--x v`, the infrastructure flags out.
+
+  The order is kept: the recipe passes the builder file's flags as written,
+  with its own appended, and the table holds the file's.
+  """
+  out = []
+  for flag in flags:
+    if flag in INFRA_FLAGS:
+      continue
+    if flag.startswith('--gn-args=') and flag[len('--gn-args='):].startswith(_IGNORED_GN_ARGS):
+      continue
+    if flag.split('=', 1)[0] in _INFRA_VALUE_FLAGS:
+      continue
+    if flag.startswith('--') and '=' in flag:
+      name, value = flag.split('=', 1)
+      out.extend([name, value])
+    else:
+      out.append(flag)
+  return out
+
+
+def _target_dir(flags):
+  """The `--target-dir` value among normalized flags, if any."""
+  for i, flag in enumerate(flags):
+    if flag == '--target-dir' and i + 1 < len(flags):
+      return flags[i + 1]
+  return None
+
+
+def match_build(builds, flags):
+  """The build of `builds` whose tools/gn flags are `flags` (infrastructure flags aside).
+
+  The build is returned with an `options` list: the Bazel options the
+  flags add to its configuration (LTO off when the recipe appended
+  `--no-lto` to a build that has it on). Raises BazelCiError when none
+  matches (naming the builds of the same build directory, if any, and
+  their flags), or when the matching builds disagree about their Bazel
+  configuration.
+  """
+  wanted = normalized_flags(flags)
+  options = []
+  matches = [build for build in builds if normalized_flags(build['gn']) == wanted]
+  if not matches and NO_LTO_FLAG in wanted:
+    without = [flag for flag in wanted if flag != NO_LTO_FLAG]
+    matches = [build for build in builds if normalized_flags(build['gn']) == without]
+    if matches:
+      options.append(LTO_OFF_OPTION)
+  if not matches:
+    directory = _target_dir(wanted)
+    nearest = [build for build in builds if directory and build.get('build_directory') == directory]
+    lines = [
+        'tools/gn --bazel: no build of the builder files (ci/builders/*.json, as '
+        'build/bazel/builds.json lists them) has these flags:',
+        '  ' + ' '.join(wanted),
+    ]
+    if nearest:
+      lines.append(f'The builds of the same directory ({directory}) have:')
+      for build in nearest:
+        lines.append(
+            f"  {build['file']}'s {build['name']}: {' '.join(normalized_flags(build['gn']))}"
+        )
+    lines.append(
+        'A Bazel build of other flags is `et build --backend bazel` (a local engine); '
+        'a new builder build needs the converter rerun (tools/gn_to_bazel) for its table.'
+    )
+    raise BazelCiError('\n'.join(lines))
+  configs = {(build['config'], build['install']) for build in matches}
+  if len(configs) != 1:
+    names = ', '.join(f"{build['file']}'s {build['name']}" for build in matches)
+    raise BazelCiError(
+        f'tools/gn --bazel: {names} have the same flags but different Bazel '
+        f'configurations ({sorted(configs)}); the converter should have refused them'
+    )
+  build = matches[0]
+  if build['config'] is None:
+    raise BazelCiError(
+        f"tools/gn --bazel: {build['file']}'s {build['name']} has no Bazel configuration: " +
+        '; '.join(build['unsupported'])
+    )
+  if build['install'] is None:
+    raise BazelCiError(
+        f"tools/gn --bazel: {build['file']}'s {build['name']} has no install target "
+        '(nothing among its ninja targets has a Bazel counterpart' + (
+            f"; not built: {', '.join(build['ninja_targets_not_built'])}"
+            if build['ninja_targets_not_built'] else ''
+        ) + ')'
+    )
+  return {**build, 'options': options}
+
+
+def find_bazelisk(engine_src):
+  """bazelisk: DEPS' (download_bazelisk; third_party/bazelisk), else the one on PATH."""
+  exe = 'bazelisk.exe' if sys.platform.startswith('win') else 'bazelisk'
+  synced = os.path.join(engine_src, 'flutter', 'third_party', 'bazelisk', exe)
+  if os.path.isfile(synced):
+    return synced
+  on_path = shutil.which('bazelisk')
+  if on_path:
+    return on_path
+  raise BazelCiError(
+      'tools/gn --bazel needs bazelisk: sync with the gclient variable download_bazelisk '
+      f'set (DEPS puts it at {synced}) or install it on PATH '
+      '(https://github.com/bazelbuild/bazelisk#installation)'
+  )
+
+
+def on_bot():
+  """Whether this runs on a LUCI bot (the recipe sets LUCI_CONTEXT)."""
+  return 'LUCI_CONTEXT' in os.environ
+
+
+def bazel_home(engine_src):
+  """The directory that keeps Bazel's state for a build of this checkout.
+
+  On a bot, the task's temporary directory (`TMPDIR`, which the recipe
+  engine sets for every step of a build; swarming removes it with the
+  task), under `bazel_ci`. Nothing under the checkout outlives a build there: the recipe
+  force-mounts the `builder` cache at the start of every build, clobbering
+  the checkout and whatever is beneath it -- and an output root left
+  beneath it made the next build's clobber take an hour (the first
+  presubmit runs, PR #195825). A developer's state goes under the
+  checkout's `.bazel_ci/` (ignored by git), where it persists; BAZEL_CI_HOME
+  overrides both. The output root is under it, and so is bazelisk's
+  download of Bazel.
+  """
+  override = os.environ.get('BAZEL_CI_HOME')
+  if override:
+    return override
+  if on_bot():
+    # The recipe engine points TMPDIR at the task's temporary directory;
+    # failing that, LUCI_CONTEXT names a file in it.
+    task_tmp = os.environ.get('TMPDIR') or os.path.dirname(
+        os.path.abspath(os.environ['LUCI_CONTEXT'])
+    )
+    return os.path.join(task_tmp, 'bazel_ci')
+  return os.path.join(repo_root(engine_src), '.bazel_ci')
+
+
+def bazel_environment(engine_src):
+  """The environment variables the Bazel commands set."""
+  return {'BAZELISK_HOME': os.path.join(bazel_home(engine_src), 'bazelisk')}
+
+
+# How long a bot's Bazel server outlives its last command. The recipe's
+# process cleanup does not know the server (a detached JVM of several
+# gigabytes), which would otherwise idle for hours into the bot's next
+# task; the steps of one build (install, then the tests) are minutes apart.
+BOT_SERVER_IDLE_SECS = 300
+
+
+def startup_options(engine_src):
+  """Bazel's startup options: the output root under bazel_home; a bot's server idle limit."""
+  options = ['--output_user_root=' + os.path.join(bazel_home(engine_src), 'output')]
+  if on_bot():
+    options.append(f'--max_idle_secs={BOT_SERVER_IDLE_SECS}')
+  return options
+
+
+# The cap on the disk cache under .bazel_ci (Bazel's idle server collects
+# the cache down to it): room for the builders' configurations' exec
+# closures and a build's worth of objects.
+DISK_CACHE_GC_MAX_SIZE = '40G'
+
+
+def bot_cache_options(engine_src):
+  """A bot's caches: the disk cache in the task's directory, no repo contents cache.
+
+  The root .bazelrc names both under the user's home directory, for a
+  developer's builds. A bot's home outlives its tasks -- a Mac bot's for
+  years -- and nothing there bounds either cache: Bazel collects them in a
+  server that has idled for five minutes, and a bot's server exits after
+  five idle minutes or with its task. The home directory's caches would
+  also make a build depend on the builds the bot ran before it, which a
+  build that the infrastructure takes off RBE (an official one) must not.
+  So a bot's disk cache is under bazel_home, the task's like the output
+  root, and gone with it. It is still a cache between the steps of one
+  build: a test step looks thousands of compiles up in the caches again
+  (5,060 in a Mac builder's test step on 11-21, every one found in the
+  disk cache; by their number the install's, whose records of the
+  toolchain's headers do not hold from one analysis to the next) and
+  finds them there rather than downloading or compiling them a second
+  time. The repo contents cache is off, so every repository is laid in the
+  task's output base as before there was one. The repository cache stays
+  in the home directory: downloads by their sha256, checked when read.
+  """
+  return [
+      '--disk_cache=' + os.path.join(bazel_home(engine_src), 'disk_cache'),
+      '--repo_contents_cache=',
+  ]
+
+
+def build_options(engine_src, rbe=None):
+  """The options of every build command: RBE when the flags say so, and the caches.
+
+  A developer runs a builder file's builds one after another in one
+  checkout, and the flags that tell them apart -- asan, unoptimized,
+  dart_debug -- reach the exec configuration too (Bazel keeps a build
+  setting's value across the exec transition), whose output directory
+  does not spell them: each switch overwrites the host tools' outputs
+  (impellerc's closure: half of a cold build) and the next build of the
+  other value compiles them again. The first end-to-end run of the
+  recipe's sequence paid it (10-31: the second install of
+  ci/host_debug_unopt after ci/host_debug rebuilt the exec configuration,
+  10 minutes). A disk cache under .bazel_ci -- the checkout's, persisting
+  with it, bounded -- serves every such repeat; the root .bazelrc's
+  home-directory cache is the developer's own builds'. A bot builds one
+  build per task from nothing and keeps nothing of it (bazel_home): its
+  disk cache is the task's (bot_cache_options); it runs on RBE when its
+  flags say so (rbe_options; `rbe` is the flags' say, rbe_flag).
+  """
+  if on_bot():
+    return rbe_options(rbe) + bot_sandbox_options() + bot_cache_options(engine_src)
+  return rbe_options(rbe) + [
+      '--disk_cache=' + os.path.join(bazel_home(engine_src), 'disk_cache'),
+      '--experimental_disk_cache_gc_max_size=' + DISK_CACHE_GC_MAX_SIZE,
+  ]
+
+
+# A Bazel build runs its actions on Flutter's RBE instance when its flags
+# say so, as a GN build does (rbe_flag). A Linux host's are then the root
+# .bazelrc's build:rbe -- the reclient instance of the GN builds, its
+# debian11 image, 200 jobs, the bot's GCE credentials -- and the build
+# shares its results: it repeats nothing another bot has done since the
+# inputs changed. The wrapped GN builds' compiles go there too
+# (WRAP_RBE_FLAG); the engine's tests stay on the bot (TEST_OPTIONS). A
+# Mac's are build:rbe_mac: its C/C++/Objective-C compiles on the same
+# workers (the Apple toolchains' remote mode), the rest on the machine.
+#
+# Nothing but its flags makes a bot's build remote, so the builds the
+# infrastructure wants off RBE are off it, and off the remote cache with it:
+#
+# * A builder file's Bazel build carries `--no-rbe` where upstream's GN
+#   build carries `--rbe` -- the recipe starts its reclient proxy around
+#   ninja unless the flags hold `--no-rbe`, and this ninja runs Bazel --
+#   and `--bazel-rbe` after it when the build is to run on RBE:
+#   `... --no-rbe --bazel --bazel-rbe`.
+# * To an official build's flags the recipe appends `--no-goma --no-rbe`
+#   ("Goma/RBE is not supported for official builds"): the last say.
+# * A build's postsubmit_overrides name its flags again for the prod
+#   builds. Upstream's Mac ones say `--no-rbe` (the Mac artifacts are built
+#   without RBE); so do the Bazel builds', without `--bazel-rbe`.
+# * A build upstream runs with `--no-rbe` (ci/wasm_release, the license and
+#   the clangd builds) carries no `--bazel-rbe`.
+
+
+def rbe_flag(flags):
+  """What a flag list says about RBE: True, False, or None when it says nothing.
+
+  The last of RBE_FLAGS in the list, tools/gn's own pair and this mode's
+  alike: `--no-rbe --bazel --bazel-rbe` is a build on RBE whose recipe
+  starts no proxy, and the same list with the recipe's `--no-rbe` after it
+  (an official build) is a build on the machine.
+  """
+  value = None
+  for flag in flags:
+    value = RBE_FLAGS.get(flag, value)
+  return value
+
+
+# With --config=rbe, the wrapped GN builds' compiles go to the workers too
+# (the Dart runtime, the GL stack: build_defs/gn/gn_build.bzl's rbe --
+# reclient's proxy around ninja, as the recipe ran it around a GN build),
+# which takes the Dart runtime's wrap from 442 s to a few minutes on an
+# 8-core bot. The flag rather than the config carries it so that a build
+# with --config=rbe alone (test.dart's shards, which wrap nothing) does not
+# fetch reclient and the engine's configurations for it (@reclient,
+# @reclient_cfgs: gclient's use_rbe syncs them on a bot; a developer's
+# checkout without them falls back to the CIPD packages, the second of
+# which is Googlers-only).
+WRAP_RBE_FLAG = '--//engine/src/flutter/build/bazel:wrap_rbe'
+
+
+def rbe_config():
+  """This host's RBE options: Linux's `--config=rbe`, a Mac's `--config=rbe_mac`, with the wrap.
+
+  Else none. A Linux host runs everything on the workers; a Mac sends its
+  C/C++/Objective-C compiles there through the Apple toolchains' remote
+  mode (the root .bazelrc's build:rbe_mac) and keeps the rest -- the links,
+  the Apple tools, Swift, Dart -- on the machine. Both wrap the GN builds'
+  compiles with reclient's proxy (WRAP_RBE_FLAG: the host's reclient and
+  rewrapper configuration, build_defs/gn/gn_build.bzl). Any other host has
+  no workers to speak of.
+
+  Off a bot a Linux host's is `--config=rbe_dev`, build:rbe with the links
+  on the machine: a link an edit waits a minute for on a worker takes a few
+  seconds there (the root .bazelrc has the measurements). tools/gn draws
+  the same line for a GN build, whose reclient races on a workstation and
+  is remote_local_fallback on LUCI.
+  """
+  if sys.platform.startswith('linux'):
+    return ['--config=rbe' if on_bot() else '--config=rbe_dev', WRAP_RBE_FLAG]
+  if sys.platform == 'darwin':
+    return ['--config=rbe_mac', WRAP_RBE_FLAG]
+  return []
+
+
+def rbe_options(rbe=None):
+  """This host's RBE options (rbe_config) if the flags say RBE (`rbe`, rbe_flag), else none.
+
+  A build whose flags say nothing about it runs on the machine, a bot's as
+  a developer's. Never RBE on a host without workers for it (Windows).
+  """
+  return rbe_config() if rbe else []
+
+
+# Where a bot's sandboxes go when the machine has the memory for it: a
+# tmpfs, so that the symlink forest every sandboxed action lays and the
+# stash Bazel keeps of them cost no disk operations. A bot's disk is a
+# network one whose metadata rate is low: the presubmit runs of PR #195825
+# spent 20 minutes and more removing an output root (the first ones in the
+# recipe's clobber of the checkout, then in swarming's cleanup of the task
+# directory), most of it the sandboxes' trees.
+BOT_SANDBOX_BASE = '/dev/shm'
+BOT_SANDBOX_BASE_MIN_BYTES = 16 * 1024**3
+
+
+def bot_sandbox_options():
+  """`--sandbox_base=/dev/shm` when the bot has a tmpfs of 16 GB or more there."""
+  if not os.path.isdir(BOT_SANDBOX_BASE):
+    return []
+  if shutil.disk_usage(BOT_SANDBOX_BASE).total < BOT_SANDBOX_BASE_MIN_BYTES:
+    return []
+  return ['--sandbox_base=' + BOT_SANDBOX_BASE]
+
+
+def ninja_escape(text):
+  """`text` as a ninja path or identifier: `$`, `:` and spaces escaped."""
+  return text.replace('$', '$$').replace(':', '$:').replace(' ', '$ ')
+
+
+def shell_quote(text):
+  """`text` as one word of a POSIX shell command."""
+  if text and all(c.isalnum() or c in '-_./=+:@%' for c in text):
+    return text
+  return "'" + text.replace("'", "'\\''") + "'"
+
+
+def described_command(description, command, arguments):
+  """A Bazel command of a build directory's description (bazel.json).
+
+  `bazelisk <startup options> <command> --config=ci <build options>
+  --config=<name> <options> <arguments>`. The description holds the
+  options as tools/gn computed them from the checkout -- the output root
+  and the disk cache under bazel_home -- so
+  that the install and the tests run in one output root: computing them
+  again from the description's repo_root is what put run_tests.py's
+  output root two directories above the checkout (repo_root of a root).
+  """
+  return ([description['bazelisk']] + list(description['startup_options']) +
+          [command, '--config=' + CI_CONFIG] + list(description['build_options']) +
+          ['--config=' + description['config']] + list(description.get('options', [])) +
+          list(arguments))
+
+
+def install_command(description):
+  """`bazelisk run --config=<name> <options> <install> -- <dir>` of a description."""
+  return described_command(
+      description, 'run', [description['install'], '--', description['out_dir']]
+  )
+
+
+# What the wrapped GN builds' reclient proxy needs of a bot's task
+# environment, which a Bazel action does not see: LUCI's emulated metadata
+# server (GCE_METADATA_HOST=127.0.0.1:<the task's port>, and the two names
+# reclient's and Google's clients also read) and the switch to credentials
+# from it rather than Application Default Credentials, which inside the
+# sandbox find the VM's own metadata server and an account without the
+# scopes (every wrapped build of the first presubmit with route 1, 11-04).
+# Written before every Bazel command on a bot to a fixed path beside the
+# user's caches, which gn_build.py reads at run time (WRAP_RBE_ENV_FILE
+# there; not an action input, so the port is not in the action's key). No
+# secrets in it: a loopback address and two switches.
+WRAP_RBE_ENV_FILE = os.path.join('.cache', 'flutter_engine_bazel', 'wrap_rbe_env.json')
+WRAP_RBE_ENV_METADATA = ('GCE_METADATA_HOST', 'GCE_METADATA_IP', 'GCE_METADATA_ROOT')
+
+
+def write_wrap_rbe_env(home=None, environ=None):
+  """Writes WRAP_RBE_ENV_FILE from a bot's environment; its path, or None without the server."""
+  environ = os.environ if environ is None else environ
+  if not on_bot() or not environ.get('GCE_METADATA_HOST'):
+    return None
+  values = {name: environ[name] for name in WRAP_RBE_ENV_METADATA if environ.get(name)}
+  values['RBE_use_gce_credentials'] = 'true'
+  values['RBE_use_application_default_credentials'] = 'false'
+  path = os.path.join(home or os.path.expanduser('~'), WRAP_RBE_ENV_FILE)
+  os.makedirs(os.path.dirname(path), exist_ok=True)
+  with open(path, 'w', encoding='utf-8') as env_file:
+    json.dump(values, env_file, indent=2, sort_keys=True)
+    env_file.write('\n')
+  return path
+
+
+def run_install(out_dir):
+  """Runs the install of the build directory `out_dir` (its bazel.json); the exit status.
+
+  This is what the edge of the directory's build.ninja runs, through this
+  module rather than a shell: ninja learns that a console-pool command is
+  done when the write end of a pipe it hands the child is closed by
+  everyone who holds it, and the Bazel server the client starts inherits
+  what the client has and lives on after the command (its idle timeout is
+  hours) -- the first end-to-end run hung on a finished install (10-31).
+  Python's subprocess closes every descriptor above stderr in the child
+  (close_fds), so the server never holds ninja's pipe. (A shell loop over
+  `exec N>&-` did the same on a host whose /bin/sh is bash; the bots' is
+  dash, which has no descriptors above 9: "exec: 10: not found".)
+  """
+  description = read_build_directory(out_dir)
+  if description is None:
+    print(
+        f'{BAZEL_JSON} not found in {out_dir}: not a directory tools/gn --bazel wrote',
+        file=sys.stderr
+    )
+    return 1
+  command = install_command(description)
+  print(' '.join(shell_quote(w) for w in command), flush=True)
+  write_wrap_rbe_env()
+  result = subprocess.run(
+      command,
+      cwd=description['repo_root'],
+      env={**os.environ, **description['environment']},
+      close_fds=True,
+      check=False,
+  )
+  if result.returncode == 0:
+    with open(os.path.join(out_dir, STAMP), 'w', encoding='utf-8'):
+      pass
+  return result.returncode
+
+
+def ninja_file(engine_src, build, out_dir, bazelisk):
+  """The build.ninja that runs the build's install: one edge, a phony per ninja target."""
+  del engine_src, bazelisk  # In bazel.json, which the edge's command reads.
+  run = [sys.executable or 'python3', os.path.abspath(__file__), 'install', out_dir]
+  command = ' '.join(shell_quote(w) for w in run)
+  lines = [
+      f"# Written by flutter/tools/gn --bazel for {build['file']}'s {build['name']}: `ninja -C",
+      f'# {out_dir} <targets>` runs the Bazel build of the configuration',
+      f"# {build['config']} and lays its files here ({build['install']}); see",
+      '# flutter/build/bazel/ci.md.',
+      'ninja_required_version = 1.3',
+      '',
+      'rule bazel_install',
+      '  command = ' + command.replace('$', '$$'),
+      f"  description = bazel run --config={build['config']} "
+      f"{' '.join(build.get('options', []) + [build['install']])} -- {out_dir}",
+      '  pool = console',
+      '',
+      f'build {ninja_escape(STAMP)}: bazel_install',
+  ]
+  for target in build['ninja_targets']:
+    lines.append(f'build {ninja_escape(target)}: phony {ninja_escape(STAMP)}')
+  lines.append(f'default {ninja_escape(STAMP)}')
+  return '\n'.join(lines) + '\n'
+
+
+def write_build_directory(engine_src, build, out_dir, bazelisk, rbe=None):
+  """Writes build.ninja and bazel.json into `out_dir`; returns the paths written.
+
+  `rbe` is what the build's flags say about RBE (rbe_flag), recorded in the
+  description's build options: the install and the tests of the directory
+  run alike.
+  """
+  os.makedirs(out_dir, exist_ok=True)
+  # The install's edge has no inputs ninja could compare -- Bazel knows what
+  # changed -- so its stamp alone would keep ninja from running it again
+  # ("no work to do") in a build directory that outlives one run, as a
+  # developer's does (a bot's does not: the recipe removes out/ before every
+  # build). tools/gn runs
+  # before ninja in every build, and removing the stamp here makes each
+  # one's ninja run the install once.
+  stamp = os.path.join(out_dir, STAMP)
+  if os.path.lexists(stamp):
+    os.remove(stamp)
+  ninja_path = os.path.join(out_dir, NINJA_FILE)
+  with open(ninja_path, 'w', encoding='utf-8') as ninja:
+    ninja.write(ninja_file(engine_src, build, out_dir, bazelisk))
+  description = {
+      '_comment':
+          'Written by flutter/tools/gn --bazel; read by testing/run_tests.py '
+          '(flutter/build/bazel/ci.md).',
+      'file': build['file'],
+      'name': build['name'],
+      'config': build['config'],
+      'options': build.get('options', []),
+      'install': build['install'],
+      'tests': build['tests'],
+      'bazelisk': bazelisk,
+      'repo_root': repo_root(engine_src),
+      'startup_options': startup_options(engine_src),
+      'build_options': build_options(engine_src, rbe),
+      'environment': bazel_environment(engine_src),
+      'out_dir': out_dir,
+  }
+  json_path = os.path.join(out_dir, BAZEL_JSON)
+  with open(json_path, 'w', encoding='utf-8') as out:
+    json.dump(description, out, indent=2)
+    out.write('\n')
+  return [ninja_path, json_path]
+
+
+def read_build_directory(out_dir):
+  """The bazel.json of a build directory tools/gn --bazel wrote, or None for a GN one."""
+  path = os.path.join(out_dir, BAZEL_JSON)
+  if not os.path.isfile(path):
+    return None
+  with open(path, encoding='utf-8') as description:
+    return json.load(description)
+
+
+def test_suites(description, types):
+  """The Bazel suites of run_tests.py's `types` for a build directory's description.
+
+  `engine`, `dart`, ... are the build's run_tests.py types; `binaries` the
+  test executables its steps run from the build directory. A type the
+  build does not run, or has no Bazel test for, is an error: run_tests.py
+  would have run something there.
+  """
+  tests = description['tests']
+  suites = []
+  unknown = []
+  for test_type in types:
+    labels = tests['binaries'] if test_type == 'binaries' else tests['types'].get(test_type)
+    if labels is None:
+      unknown.append(test_type)
+      continue
+    for label in labels:
+      if label not in suites:
+        suites.append(label)
+  if unknown:
+    raise BazelCiError(
+        f"run_tests.py: {description['file']}'s {description['name']} runs no "
+        f"{', '.join(unknown)} tests under Bazel (its types: "
+        f"{', '.join(sorted(tests['types'])) or 'none'})"
+    )
+  if tests['missing']:
+    print(
+        'run_tests.py: not run, no Bazel test yet: ' + ', '.join(tests['missing']),
+        file=sys.stderr,
+    )
+  return suites
+
+
+def failed_test_logs(events):
+  """The logs of the test runs that did not pass, from Bazel's build events.
+
+  `events` is the file a test command's --build_event_json_file wrote: a
+  JSON object per line, a testSummary among them for every test the command
+  ran, with the logs of its runs that failed (a failed test's log, the
+  failed shards' of a sharded one, the failed attempts' of a flaky one) as
+  file:// URIs (--build_event_json_file_path_conversion=false; with a remote
+  cache they are bytestream:// ones otherwise, which name no file here). A
+  file that is not there names no log, and neither does a line that is not
+  an event (the server died as it wrote).
+  """
+  logs = []
+  try:
+    with open(events, encoding='utf-8', errors='replace') as lines:
+      for line in lines:
+        try:
+          event = json.loads(line)
+        except ValueError:
+          continue
+        if not isinstance(event, dict) or not isinstance(event.get('id'), dict):
+          continue
+        summary = event.get('testSummary')
+        if 'testSummary' not in event['id'] or not isinstance(summary, dict):
+          continue
+        for failed in summary.get('failed') or []:
+          uri = urllib.parse.urlsplit(failed.get('uri', '') if isinstance(failed, dict) else '')
+          log = urllib.parse.unquote(uri.path)
+          if uri.scheme == 'file' and log not in logs:
+            logs.append(log)
+  except OSError:
+    return []
+  return logs
+
+
+_TESTLOGS = re.compile(r'/bazel-out/[^/]+/testlogs/(.+)$')
+
+
+def test_log_name(log):
+  """The name of a test log's copy: its place under bazel-testlogs, flattened.
+
+  .../testlogs/engine/src/flutter/fml/fml_unittests/test.log is
+  engine_src_flutter_fml_fml_unittests.test.log; a shard's log
+  (fml_unittests/shard_1_of_2/test.log) and an attempt's
+  (fml_unittests/test_attempts/attempt_1.log) keep theirs in the name.
+  """
+  path = log.replace(os.sep, '/')
+  match = _TESTLOGS.search(path)
+  relative = match.group(1) if match else path.strip('/')
+  if relative.endswith('/test.log'):
+    relative = relative[:-len('/test.log')]
+  elif relative.endswith('.log'):
+    relative = relative[:-len('.log')]
+  return relative.replace('/', '_') + '.test.log'
+
+
+def copy_test_log(log, destination):
+  """Copies a test log; False, and a line on stderr, if it cannot be.
+
+  The contents alone: with a disk or a remote cache Bazel leaves its logs
+  read-only, and a copy that takes their mode (shutil.copy) cannot be
+  written a second time -- the recipe runs a failed step up to three times,
+  into one logs directory. A file already there is removed first for the
+  same reason.
+  """
+  try:
+    if os.path.lexists(destination):
+      os.remove(destination)
+    shutil.copyfile(log, destination)
+  except OSError as error:
+    print(f'run_tests.py: {log} not copied: {error}', file=sys.stderr)
+    return False
+  return True
+
+
+def copy_failed_test_logs(events, logs_dir):
+  """Copies the logs of the test runs that did not pass into `logs_dir`; how many.
+
+  CI's log collection uploads the directory. Which runs did not pass is
+  Bazel's account (failed_test_logs), not a reading of each test.xml: a
+  test may write that file itself, and need not write the truth of the run
+  (a googletest binary that lists its tests writes the list there).
+  """
+  logs = failed_test_logs(events)
+  if not logs:
+    return 0
+  os.makedirs(logs_dir, exist_ok=True)
+  copied = 0
+  for log in logs:
+    if copy_test_log(log, os.path.join(logs_dir, test_log_name(log))):
+      copied += 1
+  if copied:
+    print(f'run_tests.py: {copied} test log(s) copied to {logs_dir}', file=sys.stderr)
+  return copied
+
+
+# The engine's tests run on the machine, RBE or not (TEST_OPTIONS, before
+# the suites in run_tests' command): its suites want the display, the GPU
+# and the devices a bot has and a worker does not (the root .bazelrc's
+# build:rbe runs the headless Dart tests of the framework on the workers;
+# the engine's are left local as a whole rather than tagged one by one).
+TEST_OPTIONS = ['--strategy=TestRunner=sandboxed,local']
+
+
+def run_tests(description, types, logs_dir=None, extra_arguments=()):
+  """`bazelisk test --config=<name> <suites>` for run_tests.py's `types`; the exit status.
+
+  With a `logs_dir` (the recipe's FLUTTER_LOGS_DIR, run_tests.py's
+  --logs-dir) the command also writes its build events to a temporary file,
+  from which the logs of the runs that did not pass are copied into the
+  directory (copy_failed_test_logs). The exit status is Bazel's whatever
+  becomes of the copy: an error in it is printed, and decides nothing.
+  """
+  suites = test_suites(description, types)
+  if not suites:
+    print('run_tests.py: nothing to run under Bazel for ' + ', '.join(types), file=sys.stderr)
+    return 0
+  options = list(TEST_OPTIONS)
+  events = None
+  if logs_dir:
+    handle, events = tempfile.mkstemp(prefix='bazel_test_events_', suffix='.json')
+    os.close(handle)
+    options += [
+        '--build_event_json_file=' + events,
+        '--build_event_json_file_path_conversion=false',
+    ]
+  command = described_command(description, 'test', options + list(extra_arguments) + suites)
+  print('run_tests.py: ' + ' '.join(shell_quote(w) for w in command), file=sys.stderr)
+  sys.stderr.flush()
+  write_wrap_rbe_env()
+  try:
+    result = subprocess.run(
+        command,
+        cwd=description['repo_root'],
+        env={**os.environ, **description['environment']},
+        check=False,
+    )
+    if events:
+      try:
+        copy_failed_test_logs(events, logs_dir)
+      except Exception:  # pylint: disable=broad-except
+        # The step's verdict is the tests': the copy is a convenience.
+        traceback.print_exc()
+  finally:
+    if events:
+      try:
+        os.remove(events)
+      except OSError:
+        pass
+  return result.returncode
+
+
+def main(argv):
+  """`bazel_ci.py install <dir>`: the install of a build directory tools/gn --bazel wrote."""
+  if len(argv) == 3 and argv[1] == 'install':
+    return run_install(argv[2])
+  print(f'usage: {argv[0]} install <build directory>', file=sys.stderr)
+  return 2
+
+
+if __name__ == '__main__':
+  sys.exit(main(sys.argv))

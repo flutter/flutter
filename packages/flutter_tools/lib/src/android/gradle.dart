@@ -578,7 +578,7 @@ To fix this, you can either:
     final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
     if (localEngineInfo != null) {
       final Directory localEngineRepo = _getLocalEngineRepo(
-        engineOutPath: localEngineInfo.targetOutPath,
+        localEngineInfo: localEngineInfo,
         androidBuildInfo: androidBuildInfo,
         fileSystem: fs,
       );
@@ -591,7 +591,7 @@ To fix this, you can either:
       options.add('-Plocal-engine-out=${localEngineInfo.targetOutPath}');
       options.add('-Plocal-engine-host-out=${localEngineInfo.hostOutPath}');
       options.add(
-        '-Ptarget-platform=${_getTargetPlatformByLocalEnginePath(localEngineInfo.targetOutPath)}',
+        '-Ptarget-platform=${_getTargetPlatformByLocalEngineName(localEngineInfo.localTargetName)}',
       );
     } else if (androidBuildInfo.targetArchs.isNotEmpty) {
       final String targetPlatforms = androidBuildInfo.targetArchs
@@ -922,7 +922,7 @@ To fix this, you can either:
     final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
     if (localEngineInfo != null) {
       final Directory localEngineRepo = _getLocalEngineRepo(
-        engineOutPath: localEngineInfo.targetOutPath,
+        localEngineInfo: localEngineInfo,
         androidBuildInfo: androidBuildInfo,
         fileSystem: fs,
       );
@@ -945,7 +945,7 @@ To fix this, you can either:
         );
       }
       command.add(
-        '-Ptarget-platform=${_getTargetPlatformByLocalEnginePath(localEngineInfo.targetOutPath)}',
+        '-Ptarget-platform=${_getTargetPlatformByLocalEngineName(localEngineInfo.localTargetName)}',
       );
     } else if (androidBuildInfo.targetArchs.isNotEmpty) {
       final String targetPlatforms = androidBuildInfo.targetArchs
@@ -1433,24 +1433,29 @@ String _getLocalArtifactVersion(String pomPath, FileSystem fileSystem) {
 /// For example, if the engine is built locally at `<home>/engine/src/out/android_release_unopt`.
 /// This method generates symlinks in the temp directory to the engine artifacts
 /// following the convention specified on https://maven.apache.org/pom.html#Repositories.
+///
+/// The artifacts are the embedding's and the engine's POMs, jars and Maven
+/// metadata at the root of GN's build directory; a Bazel build directory
+/// maps them in its manifest ([LocalEngineLayout]).
 Directory _getLocalEngineRepo({
-  required String engineOutPath,
+  required LocalEngineInfo localEngineInfo,
   required AndroidBuildInfo androidBuildInfo,
   required FileSystem fileSystem,
 }) {
-  final String abi = _getAbiByLocalEnginePath(engineOutPath);
+  final String abi = _getAbiByLocalEngineName(localEngineInfo.localTargetName);
+  final layout = LocalEngineLayout.of(localEngineInfo.targetOutPath, fileSystem: fileSystem);
   final Directory localEngineRepo = fileSystem.systemTempDirectory.createTempSync(
     'flutter_tool_local_engine_repo.',
   );
   final String buildMode = androidBuildInfo.buildInfo.modeName;
   final String artifactVersion = _getLocalArtifactVersion(
-    fileSystem.path.join(engineOutPath, 'flutter_embedding_$buildMode.pom'),
+    layout.resolve(<String>['flutter_embedding_$buildMode.pom']),
     fileSystem,
   );
   for (final artifact in const <String>['pom', 'jar']) {
     // The Android embedding artifacts.
     _createSymlink(
-      fileSystem.path.join(engineOutPath, 'flutter_embedding_$buildMode.$artifact'),
+      layout.resolve(<String>['flutter_embedding_$buildMode.$artifact']),
       fileSystem.path.join(
         localEngineRepo.path,
         'io',
@@ -1463,7 +1468,7 @@ Directory _getLocalEngineRepo({
     );
     // The engine artifacts (libflutter.so).
     _createSymlink(
-      fileSystem.path.join(engineOutPath, '${abi}_$buildMode.$artifact'),
+      layout.resolve(<String>['${abi}_$buildMode.$artifact']),
       fileSystem.path.join(
         localEngineRepo.path,
         'io',
@@ -1477,7 +1482,7 @@ Directory _getLocalEngineRepo({
   }
   for (final artifact in <String>['flutter_embedding_$buildMode', '${abi}_$buildMode']) {
     _createSymlink(
-      fileSystem.path.join(engineOutPath, '$artifact.maven-metadata.xml'),
+      layout.resolve(<String>['$artifact.maven-metadata.xml']),
       fileSystem.path.join(localEngineRepo.path, 'io', 'flutter', artifact, 'maven-metadata.xml'),
       fileSystem,
     );
@@ -1485,21 +1490,25 @@ Directory _getLocalEngineRepo({
   return localEngineRepo;
 }
 
-String _getAbiByLocalEnginePath(String engineOutPath) {
+/// The Maven artifact ID's ABI of a local engine build, from the build's
+/// name (`android_debug_arm64`: GN's directory name, or a Bazel build's name
+/// from its manifest).
+String _getAbiByLocalEngineName(String localEngineName) {
   var result = 'armeabi_v7a';
-  if (engineOutPath.contains('x64')) {
+  if (localEngineName.contains('x64')) {
     result = 'x86_64';
-  } else if (engineOutPath.contains('arm64')) {
+  } else if (localEngineName.contains('arm64')) {
     result = 'arm64_v8a';
   }
   return result;
 }
 
-String _getTargetPlatformByLocalEnginePath(String engineOutPath) {
+/// The Gradle `target-platform` of a local engine build, from the build's name.
+String _getTargetPlatformByLocalEngineName(String localEngineName) {
   var result = 'android-arm';
-  if (engineOutPath.contains('x64')) {
+  if (localEngineName.contains('x64')) {
     result = 'android-x64';
-  } else if (engineOutPath.contains('arm64')) {
+  } else if (localEngineName.contains('arm64')) {
     result = 'android-arm64';
   }
   return result;

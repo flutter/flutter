@@ -1,0 +1,33 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The rules_fuchsia spike (metric 0.7): a gtest test component built for
+# Fuchsia with the engine's clang and the IDK gclient syncs, packaged as a
+# test package (.far) by the Fuchsia Bazel SDK rules -- the local half of the
+# metric; running it on the emulator is CI's half (see ../README.md). A
+# package of the spike's own module (../MODULE.bazel), built from that
+# directory: `bazelisk build //spike:spike_test_package`. Every target is
+# manual: the package is built by name, under its own transition to the
+# Fuchsia platform.
+
+load("@rules_fuchsia//fuchsia:defs.bzl", "fuchsia_cc_test", "fuchsia_unittest_package")
+
+package(default_visibility = ["//visibility:private"])
+
+fuchsia_cc_test(
+    name = "spike_test",
+    size = "small",
+    srcs = ["spike_test.cc"],
+    deps = ["@googletest//:gtest_main"],
+)
+
+# API level 31 is what the GN build targets (tools/fuchsia/gn-sdk's
+# gn_configs.gni, fuchsia_target_api_level). Manual like the test: the
+# package is a Fuchsia build, built by name.
+fuchsia_unittest_package(
+    name = "spike_test_package",
+    fuchsia_api_level = "31",
+    tags = ["manual"],
+    unit_tests = [":spike_test"],
+)

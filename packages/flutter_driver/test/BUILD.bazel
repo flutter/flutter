@@ -1,0 +1,33 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# flutter_driver's tests under Bazel: each *_test.dart compiled by the
+# frontend server from a prelude kernel and run on the Bazel-built
+# flutter_tester, as `flutter test` runs it
+# (//build_defs/dart:flutter_package_tests.bzl; research/15).
+#
+#   bazel test //packages/flutter_driver/test:tests
+
+load("//build_defs/dart:flutter_package_tests.bzl", "FRAMEWORK_IMPORTS", "flutter_package_tests")
+
+package(default_visibility = ["//visibility:public"])
+
+flutter_package_tests(
+    name = "tests",
+    srcs = glob(
+        ["**/*.dart"],
+        exclude = ["**/*_test.dart"],
+    ),
+    imports = FRAMEWORK_IMPORTS + ["package:flutter_driver/flutter_driver.dart"],
+    package = "flutter_driver",
+    packages = {
+        "//packages/fuchsia_remote_debug_protocol:sources": "fuchsia_remote_debug_protocol",
+    },
+    # src/web_tests is web-only (dart:js_interop; the web_long_running_tests
+    # shard runs it); the framework_tests shard runs src/real_tests.
+    tests = glob(
+        ["**/*_test.dart"],
+        exclude = ["src/web_tests/**"],
+    ),
+)

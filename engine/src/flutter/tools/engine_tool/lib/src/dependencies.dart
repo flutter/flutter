@@ -10,7 +10,11 @@ import 'dart_utils.dart';
 import 'environment.dart';
 import 'logger.dart';
 
-/// Update Flutter engine dependencies. Returns an exit code.
+/// Update Flutter engine dependencies with `gclient sync`, run from the
+/// directory of the checkout's `.gclient`. Returns an exit code.
+///
+/// This is the GN build's way; the Bazel build fetches what it reads itself
+/// (see `FetchCommand`).
 Future<int> fetchDependencies(Environment environment) async {
   if (!environment.processRunner.processManager.canRun('gclient')) {
     environment.logger.error('Cannot find the gclient command in your path');

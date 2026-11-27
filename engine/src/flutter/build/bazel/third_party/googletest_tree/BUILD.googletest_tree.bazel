@@ -1,0 +1,34 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# googletest's headers under the engine's root-relative spellings, which
+# GN's include directories resolve beside the canonical "gtest/gtest.h" that
+# googletest's own Bazel build (@googletest) exposes:
+# "third_party/googletest/googletest/include/gtest/<name>.h" through
+# //flutter:config's include directory (engine/src/flutter), and
+# "googletest/googletest/include/gtest/<name>.h" through the third_party
+# directory. Views of the same files under those prefixes, so that no engine
+# include changes for Bazel; the converter lists them beside every
+# @googletest dependency (bazel_mapping's rootIncludeViews).
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+_HEADERS = glob([
+    "googlemock/include/gmock/**/*.h",
+    "googletest/include/gtest/**/*.h",
+])
+
+cc_library(
+    name = "root_includes",
+    hdrs = _HEADERS,
+    include_prefix = "third_party/googletest",
+)
+
+cc_library(
+    name = "third_party_dir_includes",
+    hdrs = _HEADERS,
+    include_prefix = "googletest",
+)

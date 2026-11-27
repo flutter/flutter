@@ -18,6 +18,7 @@ source_set("flutter_vma") {
     "//flutter/fml",
     "//flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
     "//flutter/third_party/vulkan_memory_allocator",
+    "//flutter/vulkan/procs",
   ]
 
   public_configs = [ "//flutter:config" ]

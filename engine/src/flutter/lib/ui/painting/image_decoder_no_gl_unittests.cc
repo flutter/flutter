@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "flutter/fml/endianness.h"
+#include "flutter/testing/sk_data_fixtures.h"
 #include "impeller/renderer/capabilities.h"
 
 #if IMPELLER_SUPPORTS_RENDERING

@@ -2,10 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-config("benchmark_config") {
-  include_dirs = [ "//flutter/third_party/benchmark:benchmark_config" ]
-}
-
 source_set("benchmarking") {
   testonly = true
 
@@ -19,10 +15,7 @@ source_set("benchmarking") {
     "//flutter/third_party/benchmark",
   ]
 
-  public_configs = [
-    "//flutter:config",
-    ":benchmark_config",
-  ]
+  public_configs = [ "//flutter:config" ]
 }
 
 config("benchmark_library_config") {
@@ -43,7 +36,6 @@ source_set("benchmarking_library") {
 
   public_configs = [
     "//flutter:config",
-    ":benchmark_config",
     ":benchmark_library_config",
   ]
 }

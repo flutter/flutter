@@ -1,0 +1,47 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/third_party/accessibility/base/numerics/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+# This is a dependency-free, header-only, library, and it needs to stay that
+# way to facilitate pulling it into various third-party projects. So, this
+# file is here to protect against accidentally introducing external
+# dependencies or depending on internal implementation details.
+cc_library(
+    name = "numerics",
+    srcs = [
+        "checked_math_impl.h",
+        "clamped_math_impl.h",
+        "safe_conversions_arm_impl.h",
+        "safe_conversions_impl.h",
+        "safe_math_arm_impl.h",
+        "safe_math_clang_gcc_impl.h",
+        "safe_math_shared_impl.h",
+    ],
+    hdrs = [
+        "checked_math.h",
+        "clamped_math.h",
+        "math_constants.h",
+        "ranges.h",
+        "safe_conversions.h",
+        "safe_math.h",
+    ],
+    copts = CHROMIUM_CODE_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/third_party/accessibility:accessibility_config",
+        "//engine/src/flutter/third_party/accessibility/ax_build",
+    ],
+    alwayslink = True,
+)

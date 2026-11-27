@@ -13,6 +13,7 @@
   "builds": [
     {
       "name": "ci/wasm_release",
+      "timeout": 240,
       "drone_dimensions": [
         "device_type=none",
         "os=Linux",
@@ -20,12 +21,14 @@
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_emsdk": true
+        "download_emsdk": true,
+        "download_bazelisk": true
       },
       "gn": [
         "--web",
         "--runtime-mode=release",
-        "--no-rbe"
+        "--no-rbe",
+        "--bazel"
       ],
       "ninja": {
         "config": "wasm_release",

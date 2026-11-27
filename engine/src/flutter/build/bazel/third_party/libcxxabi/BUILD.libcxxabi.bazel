@@ -1,0 +1,109 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @libcxxabi: the libc++abi sources pinned in DEPS, built
+# into the engine's libc++. Mirrors
+# //flutter/build/secondary/flutter/third_party/libcxxabi/BUILD.gn.
+#
+# Like libc++'s, the public headers (include/) reach every C++ compile action
+# through the toolchain and are not declared on the library.
+
+load("@flutter//build_defs/cc:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# The toolchain derives its include path from this file's location.
+exports_files(["include/cxxabi.h"])
+
+filegroup(
+    name = "headers",
+    srcs = glob(["include/**"]),
+)
+
+cc_library(
+    name = "libcxxabi",
+    srcs = [
+        "src/abort_message.cpp",
+        "src/cxa_aux_runtime.cpp",
+        "src/cxa_default_handlers.cpp",
+        "src/cxa_demangle.cpp",
+        "src/cxa_exception_storage.cpp",
+        "src/cxa_guard.cpp",
+        "src/cxa_handlers.cpp",
+        "src/cxa_vector.cpp",
+        "src/cxa_virtual.cpp",
+        "src/fallback_malloc.cpp",
+        "src/private_typeinfo.cpp",
+        "src/stdlib_exception.cpp",
+        "src/stdlib_stdexcept.cpp",
+        "src/stdlib_typeinfo.cpp",
+    ] + glob(["src/**/*.h"]) + select({
+        # GN builds the ABI library without exception support on Android (the
+        # `else` branch of its is_mac/is_ios/is_linux condition): the
+        # no-exception stubs reference no unwinder, which matters because the
+        # engine links Android shared libraries with -nostdlib and no
+        # libunwind.
+        "@platforms//os:android": ["src/cxa_noexception.cpp"],
+        # No translation unit in the engine is built with exceptions, but the
+        # sanitizer runtimes on Linux (and Objective-C exceptions on Apple
+        # platforms) reference __cxa_begin_catch and __gxx_personality_v0, so
+        # the support is built here.
+        "//conditions:default": [
+            "src/cxa_exception.cpp",
+            "src/cxa_personality.cpp",
+        ],
+    }) + select({
+        # GN builds the thread_local destructor fallback everywhere but on
+        # Apple platforms (`is_fuchsia || (is_posix && !is_apple)`), whose
+        # libSystem provides it.
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["src/cxa_thread_atexit.cpp"],
+    }),
+    additional_linker_inputs = select({
+        "@platforms//os:ios": ["lib/new-delete.exp"],
+        "//conditions:default": [],
+    }),
+    # chromium_code's flags, as GN builds libc++abi (see @libcxx).
+    copts = CHROMIUM_CODE_COPTS + ["-frtti"] + select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["-fexceptions"],
+    }),
+    implementation_deps = ["@libcxx//:src_headers"],
+    # GN's libcxxabi_config on iOS: the global operator new and delete,
+    # which libc++'s new.cpp defines in this library, stay out of a
+    # framework's exports (lib/new-delete.exp lists their variants). A link
+    # flag of the library, so that it reaches every link that depends on it,
+    # as GN's public config does -- the iOS Flutter.framework, whose release
+    # binary the builders' Verify-export-symbols generator checks (the first
+    # Bazel builds on the Mac pool exported __Znwm and its eleven siblings,
+    # 11-04).
+    linkopts = select({
+        "@platforms//os:ios": ["-Wl,-unexported_symbols_list,$(execpath lib/new-delete.exp)"],
+        "//conditions:default": [],
+    }),
+    linkstatic = True,
+    local_defines = FLUTTER_LOCAL_DEFINES + [
+        "_LIBCPP_BUILDING_LIBRARY",
+        "_LIBCXXABI_BUILDING_LIBRARY",
+        "LIBCXXABI_SILENT_TERMINATE",
+        "_LIBCXXABI_DISABLE_VISIBILITY_ANNOTATIONS",
+    ],
+    textual_hdrs = glob([
+        "src/**/*.def",
+        "src/**/*.inc",
+    ]),
+    visibility = ["@libcxx//:__pkg__"],
+)
+
+# What the GN build of this tree reads (//flutter/third_party/libcxxabi in
+# flutter/build/secondary), for rules that wrap a GN build.
+filegroup(
+    name = "build_tree",
+    srcs = glob([
+        "include/**",
+        "src/**",
+    ]),
+)

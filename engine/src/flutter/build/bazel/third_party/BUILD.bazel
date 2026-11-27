@@ -1,0 +1,11 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Overlay BUILD files for dependencies that `gclient sync` populates (or that
+# are downloaded from CIPD). Each `<name>/BUILD.<name>.bazel` becomes the root
+# BUILD file of the `@<name>` repository; see ../extensions.bzl. They are
+# deliberately not named `BUILD.bazel` so that Bazel does not load them as
+# packages of this repository.
+
+exports_files(glob(["*/BUILD.*.bazel"]))

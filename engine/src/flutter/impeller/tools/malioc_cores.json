@@ -1,0 +1,122 @@
+[
+  {
+    "core": "Immortalis-G715",
+    "opengles_max_version": 320,
+    "vulkan_max_version": 160
+  },
+  {
+    "core": "Mali-G715",
+    "opengles_max_version": 320,
+    "vulkan_max_version": 160
+  },
+  {
+    "core": "Mali-G710",
+    "opengles_max_version": 320,
+    "vulkan_max_version": 160
+  },
+  {
+    "core": "Mali-G615",
+    "opengles_max_version": 320,
+    "vulkan_max_version": 160
+  },
+  {
+    "core": "Mali-G610",
+    "opengles_max_version": 320,
+    "vulkan_max_version": 160
+  },
+  {
+    "core": "Mali-G510",
+    "opengles_max_version": 320,
+    "vulkan_max_version": 160
+  },
+  {
+    "core": "Mali-G310",
+    "opengles_max_version": 320,
+    "vulkan_max_version": 160
+  },
+  {
+    "core": "Mali-G78AE",
+    "opengles_max_version": 320,
+    "vulkan_max_version": 160
+  },
+  {
+    "core": "Mali-G78",
+    "opengles_max_version": 320,
+    "vulkan_max_version": 160
+  },
+  {
+    "core": "Mali-G77",
+    "opengles_max_version": 320,
+    "vulkan_max_version": 160
+  },
+  {
+    "core": "Mali-G68",
+    "opengles_max_version": 320,
+    "vulkan_max_version": 160
+  },
+  {
+    "core": "Mali-G57",
+    "opengles_max_version": 320,
+    "vulkan_max_version": 160
+  },
+  {
+    "core": "Mali-G76",
+    "opengles_max_version": 320,
+    "vulkan_max_version": 160
+  },
+  {
+    "core": "Mali-G72",
+    "opengles_max_version": 320,
+    "vulkan_max_version": 160
+  },
+  {
+    "core": "Mali-G71",
+    "opengles_max_version": 320,
+    "vulkan_max_version": 160
+  },
+  {
+    "core": "Mali-G52",
+    "opengles_max_version": 320,
+    "vulkan_max_version": 160
+  },
+  {
+    "core": "Mali-G51",
+    "opengles_max_version": 320,
+    "vulkan_max_version": 160
+  },
+  {
+    "core": "Mali-G31",
+    "opengles_max_version": 320,
+    "vulkan_max_version": 160
+  },
+  {
+    "core": "Mali-T880",
+    "opengles_max_version": 320,
+    "vulkan_max_version": 120
+  },
+  {
+    "core": "Mali-T860",
+    "opengles_max_version": 320,
+    "vulkan_max_version": 120
+  },
+  {
+    "core": "Mali-T830",
+    "opengles_max_version": 320,
+    "vulkan_max_version": 120
+  },
+  {
+    "core": "Mali-T820",
+    "opengles_max_version": 320,
+    "vulkan_max_version": 120
+  },
+  {
+    "core": "Mali-T760",
+    "opengles_max_version": 320,
+    "vulkan_max_version": 120
+  },
+  {
+    "core": "Mali-T720",
+    "opengles_max_version": 310,
+    "vulkan_max_version": 0
+  }
+]

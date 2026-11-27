@@ -21,6 +21,26 @@ function canonical_path() {
   fi
 }
 
+# Whether this run uses the Bazel build: the last `--backend` of the command
+# line (up to a `--`), or ET_BACKEND where the command line has none, as the
+# tool reads them (tools/engine_tool: BuildPlan.backendFromArgResults).
+function uses_bazel() {
+  local backend="${ET_BACKEND:-}"
+  local previous=""
+  local argument
+  for argument in "$@"; do
+    if [[ "${argument}" == "--" ]]; then
+      break
+    elif [[ "${argument}" == --backend=* ]]; then
+      backend="${argument#--backend=}"
+    elif [[ "${previous}" == "--backend" ]]; then
+      backend="${argument}"
+    fi
+    previous="${argument}"
+  done
+  [[ "${backend}" == "bazel" ]]
+}
+
 SCRIPT_DIR="$(dirname -- "$(canonical_path "${BASH_SOURCE[0]}")")"
 ENGINE_DIR="$(cd "$SCRIPT_DIR/.."; pwd -P)"
 
@@ -51,10 +71,62 @@ esac
 PLATFORM="${OS}-${CPU}"
 DART_SDK_DIR="${ENGINE_DIR}/prebuilts/${PLATFORM}/dart-sdk"
 DART="${DART_SDK_DIR}/bin/dart"
+PACKAGES=()
 
 if [ ! -d "${ENGINE_DIR}/tools/engine_tool/.dart_tool" ]; then
-  echo "You must run 'gclient sync -D' before using this tool."
-  exit 1
+  # `gclient sync` has not run in this checkout: the prebuilt Dart SDK and the
+  # packages this tool imports are not in it. The GN build needs gclient's
+  # checkout. The Bazel build does not -- it fetches what a build reads --
+  # and then the tool runs on the same SDK and the same package resolution
+  # as Bazel fetches them (flutter/build/bazel/docs/dependencies.md).
+  if ! uses_bazel "$@"; then
+    echo "You must run 'gclient sync -D' before using this tool."
+    echo "(The Bazel build needs no gclient: --backend bazel, or ET_BACKEND=bazel.)"
+    exit 1
+  fi
+
+  BAZEL="$(command -v bazelisk || command -v bazel || true)"
+  if [[ -z "${BAZEL}" ]]; then
+    echo "Neither bazelisk nor bazel is on PATH. Install bazelisk" \
+      "(https://github.com/bazelbuild/bazelisk); the engine pins its Bazel" \
+      "version in .bazelversion."
+    exit 1
+  fi
+
+  # One query, which fetches the two if need be and says where they are: the
+  # engine's package configuration and the host's prebuilt Dart SDK, by the
+  # names the build itself knows them by. A query rather than a build, which
+  # would discard the analysis of the developer's last build whenever its
+  # options differ.
+  QUERY="labels(srcs, //engine/src/flutter:package_config) + @dart_sdk_${OS}_${CPU}//:bin/dart"
+  QUIET=("--ui_event_filters=-info,-debug")
+  if [[ ! -t 2 ]]; then
+    QUIET+=("--noshow_progress")
+  fi
+  if ! LOCATIONS="$(cd "${ENGINE_DIR}" && "${BAZEL}" query --output=location "${QUIET[@]}" "${QUERY}")"; then
+    echo "Bazel could not fetch the Dart SDK and the packages this tool runs on (see above)."
+    exit 1
+  fi
+  DART=""
+  PACKAGE_CONFIG=""
+  while IFS= read -r LOCATION; do
+    # <file>:<line>:<column>: source file <label>
+    FILE="${LOCATION%%:*}"
+    case "${FILE}" in
+      */bin/dart)
+        DART="${FILE}"
+        ;;
+      */package_config.json)
+        PACKAGE_CONFIG="${FILE}"
+        ;;
+    esac
+  done <<< "${LOCATIONS}"
+  if [[ ! -x "${DART}" || ! -f "${PACKAGE_CONFIG}" ]]; then
+    echo "Bazel did not say where the Dart SDK and the engine's package configuration are:"
+    echo "${LOCATIONS}"
+    exit 1
+  fi
+  PACKAGES=("--packages=${PACKAGE_CONFIG}")
 fi
 
-"${DART}" "${ENGINE_DIR}/tools/engine_tool/bin/et.dart" "$@"
+"${DART}" "${PACKAGES[@]}" "${ENGINE_DIR}/tools/engine_tool/bin/et.dart" "$@"

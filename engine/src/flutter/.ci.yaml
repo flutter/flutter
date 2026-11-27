@@ -207,9 +207,13 @@ targets:
       - "engine/src/flutter/**.frag"
       - "engine/src/flutter/**.vert"
 
+  # The Linux engine builders below whose builder files carry `--bazel` build
+  # with Bazel on the bot through the unchanged recipe (`tools/gn --bazel`,
+  # engine/src/flutter/build/bazel/ci.md). No remote cache yet: a bot that has
+  # not built the configuration before builds from scratch, hence timeout 240.
   - name: Linux linux_arm_host_engine
     recipe: engine_v2/engine_v2
-    timeout: 120
+    timeout: 240
     properties:
       add_recipes_cq: "true"
       release_build: "true"
@@ -227,7 +231,7 @@ targets:
 
   - name: Linux linux_arm_host_desktop_engine
     recipe: engine_v2/engine_v2
-    timeout: 120
+    timeout: 240
     properties:
       add_recipes_cq: "true"
       release_build: "true"
@@ -239,7 +243,7 @@ targets:
 
   - name: Linux linux_host_engine
     recipe: engine_v2/engine_v2
-    timeout: 120
+    timeout: 240
     properties:
       add_recipes_cq: "true"
       release_build: "true"
@@ -261,7 +265,7 @@ targets:
 
   - name: Linux linux_host_engine_ddm
     recipe: engine_v2/engine_v2
-    timeout: 120
+    timeout: 240
     enabled_branches:
       # Don't run this on release branches
       - master
@@ -282,7 +286,7 @@ targets:
 
   - name: Linux linux_host_engine_test
     recipe: engine_v2/engine_v2
-    timeout: 120
+    timeout: 240
     properties:
       config_name: linux_host_engine_test
       dependencies: >-
@@ -296,7 +300,7 @@ targets:
 
   - name: Linux linux_host_desktop_engine
     recipe: engine_v2/engine_v2
-    timeout: 120
+    timeout: 240
     properties:
       add_recipes_cq: "true"
       release_build: "true"
@@ -314,7 +318,7 @@ targets:
 
   - name: Linux linux_android_aot_engine
     recipe: engine_v2/engine_v2
-    timeout: 120
+    timeout: 240
     properties:
       add_recipes_cq: "true"
       release_build: "true"
@@ -332,7 +336,7 @@ targets:
 
   - name: Linux linux_android_aot_engine_ddm
     recipe: engine_v2/engine_v2
-    timeout: 120
+    timeout: 240
     enabled_branches:
       # Don't run this on release branches
       - master
@@ -353,7 +357,7 @@ targets:
 
   - name: Linux linux_android_debug_engine
     recipe: engine_v2/engine_v2
-    timeout: 120
+    timeout: 240
     properties:
       add_recipes_cq: "true"
       release_build: "true"
@@ -371,7 +375,7 @@ targets:
 
   - name: Linux linux_android_debug_engine_ddm
     recipe: engine_v2/engine_v2
-    timeout: 120
+    timeout: 240
     enabled_branches:
       # Don't run this on release branches
       - master
@@ -399,7 +403,7 @@ targets:
 
   - name: Linux linux_web_engine
     recipe: engine_v2/engine_v2
-    timeout: 120
+    timeout: 240
     properties:
       release_build: "true"
       config_name: linux_web_engine_build
@@ -437,7 +441,7 @@ targets:
 
   - name: Linux linux_unopt
     recipe: engine_v2/engine_v2
-    timeout: 120
+    timeout: 240
     properties:
       config_name: linux_unopt
 
@@ -672,7 +676,7 @@ targets:
   - name: Linux linux_android_aot_engine_size_exp
     recipe: engine_v2/engine_v2
     presubmit: false
-    timeout: 120
+    timeout: 240
     enabled_branches:
       # Don't run this on release branches
       - master

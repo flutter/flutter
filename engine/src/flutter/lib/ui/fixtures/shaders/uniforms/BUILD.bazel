@@ -1,0 +1,68 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/lib/ui/fixtures/shaders/uniforms/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/impeller:shaders.bzl", "impellerc")
+load("//build_defs/testing:testing.bzl", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "uniforms",
+    testonly = True,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":fixtures"],
+)
+
+impellerc(
+    name = "compile_uniforms",
+    intermediates_subdir = "iplr",
+    iplr = True,
+    mnemonic = "IMPELLERC_SKSL",
+    shader_target_flags = [
+        "--sksl",
+        "--runtime-stage-metal",
+        "--runtime-stage-gles",
+        "--runtime-stage-gles3",
+        "--runtime-stage-vulkan",
+    ],
+    shaders = [
+        "all_uniforms.frag",  # enable_unittests
+        "float_array_uniform.frag",  # enable_unittests
+        "float_uniform.frag",  # enable_unittests
+        "vec2_uniform.frag",  # enable_unittests
+        "vec2_array_uniform.frag",  # enable_unittests
+        "vec3_uniform.frag",  # enable_unittests
+        "vec3_array_uniform.frag",  # enable_unittests
+        "vec4_uniform.frag",  # enable_unittests
+        "vec4_array_uniform.frag",  # enable_unittests
+        "mat2_uniform.frag",  # enable_unittests
+        "mat2_array_uniform.frag",  # enable_unittests
+        "mat3_uniform.frag",  # enable_unittests
+        "mat3_array_uniform.frag",  # enable_unittests
+        "mat4_uniform.frag",  # enable_unittests
+        "mat4_array_uniform.frag",  # enable_unittests
+    ],
+    sl_file_extension = "iplr",
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+flutter_test_fixtures(
+    name = "fixtures",
+    dest = "//engine/src/flutter/lib/ui",
+    fixtures_targets = {":compile_uniforms": []},
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":compile_uniforms"],
+)

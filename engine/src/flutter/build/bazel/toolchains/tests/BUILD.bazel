@@ -1,0 +1,151 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Smoke tests for the hermetic toolchains: the first targets the Bazel build
+# compiles, and a quick check that a toolchain change still matches GN.
+
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
+load("//build_defs/cc:copts.bzl", "FLUTTER_CFLAGS_OBJCC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJCC")
+load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
+load("//build_defs/cc:swift_library.bzl", "flutter_swift_library")
+
+cc_test(
+    name = "cc_toolchain_smoke_test",
+    size = "small",
+    srcs = [
+        "cc_toolchain_smoke_test.cc",
+        "smoke_c_source.c",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    # The Linux toolchains' test: it fingerprints the Debian sysroot's glibc,
+    # which the Android (bionic) and wasm platforms have no counterpart of,
+    # and it runs on the host. Under those platforms it is incompatible
+    # rather than a compile error -- which is also what keeps it out of the
+    # Android build's compile_commands.json, and so out of its clang-tidy.
+    target_compatible_with = ["@platforms//os:linux"],
+    deps = ["@googletest//:gtest_main"],
+)
+
+# The macOS toolchains' test (macos_toolchain.bzl): the same checks against
+# the Xcode SDK, and Objective-C++ through flutter_objc_library -- the rule
+# GN's .mm sources go through, since cc_library takes no Objective-C
+# (build_defs/cc/objc_library.bzl) -- with the engine's Objective-C flags
+# and Foundation from the SDK.
+flutter_objc_library(
+    name = "macos_objc_smoke",
+    srcs = ["macos_objc_smoke.mm"],
+    hdrs = ["macos_objc_smoke.h"],
+    copts = FLUTTER_COPTS + MACOS_CFLAGS_OBJCC,
+    linkopts = [
+        "-framework",
+        "Foundation",
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = ["//engine/src:include_root"],
+)
+
+cc_test(
+    name = "macos_cc_toolchain_smoke_test",
+    size = "small",
+    srcs = [
+        "macos_cc_toolchain_smoke_test.cc",
+        "smoke_c_source.c",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = [
+        ":macos_objc_smoke",
+        "//engine/src:include_root",
+        "@googletest//:gtest_main",
+    ],
+)
+
+# flutter_swift_library's test (build_defs/cc/swift_library.bzl): a Swift
+# module compiled through GN's swiftc.py, calling C through its bridging
+# header, reached from Objective-C++ through its generated header -- the
+# shape of darwin/common's InternalFlutterSwiftCommon.
+cc_library(
+    name = "macos_swift_smoke_c",
+    srcs = ["macos_swift_smoke_c.c"],
+    hdrs = ["macos_swift_smoke_c.h"],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = ["//engine/src:include_root"],
+)
+
+flutter_swift_library(
+    name = "MacosSwiftSmoke",
+    srcs = ["MacosSwiftSmoke.swift"],
+    bridge_header = "macos_swift_smoke_bridging.h",
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = [":macos_swift_smoke_c"],
+)
+
+flutter_objc_library(
+    name = "macos_swift_smoke_test_objc",
+    testonly = True,
+    srcs = ["macos_swift_smoke_test.mm"],
+    copts = FLUTTER_COPTS + MACOS_CFLAGS_OBJCC,
+    linkopts = [
+        "-framework",
+        "Foundation",
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = [
+        ":MacosSwiftSmoke",
+        "//engine/src:include_root",
+        "@googletest//:gtest",
+    ],
+    alwayslink = True,
+)
+
+cc_test(
+    name = "macos_swift_smoke_test",
+    size = "small",
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = [
+        ":macos_swift_smoke_test_objc",
+        "@googletest//:gtest_main",
+    ],
+)
+
+# The iOS toolchains' check (macos_toolchain.bzl's ios_clang_toolchain): the
+# macOS checks against the iPhoneOS or iPhoneSimulator SDK, as a program --
+# nothing on the host runs an iOS binary; a Mac runs the simulator build
+# under `xcrun simctl spawn`, the device build is a link check. The
+# Objective-C++ is the macOS smoke's, with the engine's iOS flags (no
+# -fapplication-extension: config.gni's flutter_cflags_objc off is_mac).
+flutter_objc_library(
+    name = "ios_objc_smoke",
+    srcs = ["macos_objc_smoke.mm"],
+    hdrs = ["macos_objc_smoke.h"],
+    copts = FLUTTER_COPTS + FLUTTER_CFLAGS_OBJCC,
+    linkopts = [
+        "-framework",
+        "Foundation",
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = ["@platforms//os:ios"],
+    deps = ["//engine/src:include_root"],
+)
+
+cc_binary(
+    name = "ios_cc_toolchain_smoke",
+    srcs = [
+        "ios_cc_toolchain_smoke.cc",
+        "smoke_c_source.c",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = ["@platforms//os:ios"],
+    deps = [
+        ":ios_objc_smoke",
+        "//engine/src:include_root",
+    ],
+)

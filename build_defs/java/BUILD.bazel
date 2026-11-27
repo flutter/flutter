@@ -1,0 +1,15 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The Java side of the Android embedding's tests: maven.bzl (the `maven`
+# module extension over maven.lock.bzl, which maven_lock.py writes from
+# android_tests.artifacts) and robolectric.bzl (the compile of the tests and
+# their run under Robolectric on the engine's own JDK).
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "android_tests.artifacts",
+    "maven.lock.bzl",
+])

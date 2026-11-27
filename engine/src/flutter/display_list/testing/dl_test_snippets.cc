@@ -8,6 +8,7 @@
 #include "flutter/display_list/dl_text_skia.h"
 #include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/display_list/skia/dl_sk_canvas.h"
+#include "flutter/testing/sk_data_fixtures.h"
 #if IMPELLER_SUPPORTS_RENDERING
 #include "flutter/impeller/display_list/dl_text_impeller.h"  // nogncheck
 #include "flutter/impeller/typographer/backends/skia/text_frame_skia.h"  // nogncheck

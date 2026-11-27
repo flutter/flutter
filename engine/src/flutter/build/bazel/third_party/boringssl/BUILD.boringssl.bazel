@@ -1,0 +1,108 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @boringssl: the BoringSSL checkout pinned in DEPS, which
+# the engine builds with its own //flutter/third_party/boringssl/BUILD.gn
+# (this repository is the `src` subdirectory of that GN target). The targets
+# mirror that file. The source lists are the ones GN uses: BoringSSL's
+# `util/pregenerate` writes gen/sources.gni and gen/sources.bzl from the same
+# data, so a roll changes nothing here.
+
+# This file is loaded as the root of @boringssl, so the main module is named.
+load("@flutter//build_defs/cc:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_THIRD_PARTY_COPTS")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load(
+    ":gen/sources.bzl",
+    "bcm_internal_headers",
+    "bcm_sources",
+    "bcm_sources_asm",
+    "crypto_headers",
+    "crypto_internal_headers",
+    "crypto_sources",
+    "crypto_sources_asm",
+    "pki_headers",
+    "pki_internal_headers",
+    "pki_sources",
+    "ssl_headers",
+    "ssl_internal_headers",
+    "ssl_sources",
+)
+
+package(default_visibility = ["//visibility:public"])
+
+# config("internal_config") + config("component_config"), without the
+# component-build define. _XOPEN_SOURCE is the is_posix part.
+_IMPLEMENTATION_DEFINES = [
+    "BORINGSSL_IMPLEMENTATION",
+    "OPENSSL_SMALL",
+    "OPENSSL_STATIC_ARMCAP",
+] + select({
+    "@platforms//os:windows": [],
+    "//conditions:default": ["_XOPEN_SOURCE=700"],
+})
+
+# The `public` list of source_set("boringssl") -- crypto, ssl and pki headers,
+# plus pki's internal ones, which Chromium still reaches into -- with
+# config("external_config")'s include directory. The assembly includes
+# openssl/asm_base.h from here too.
+cc_library(
+    name = "public_headers",
+    hdrs = crypto_headers + ssl_headers + pki_headers + pki_internal_headers,
+    includes = ["include"],
+    visibility = ["//visibility:private"],
+)
+
+# source_set("boringssl_asm"): the GAS-compatible assembly, wrapped in
+# processor checks upstream so that every file builds for every target.
+# Windows x86 (NASM) and MSan builds use OPENSSL_NO_ASM instead; neither
+# toolchain exists here yet. GN leaves this one on chromium_code.
+cc_library(
+    name = "boringssl_asm",
+    srcs = bcm_sources_asm + crypto_sources_asm,
+    copts = CHROMIUM_CODE_COPTS,
+    linkstatic = True,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    visibility = ["//visibility:private"],
+    deps = [":public_headers"],
+)
+
+# source_set("boringssl"). Dependents get the public headers and include
+# directory through :public_headers.
+cc_library(
+    name = "boringssl",
+    srcs = bcm_internal_headers + bcm_sources + crypto_internal_headers + crypto_sources +
+           ssl_internal_headers + ssl_sources + pki_sources,
+    # no_chromium_code, plus component_config's C standard.
+    conlyopts = ["-std=c17"],
+    copts = FLUTTER_THIRD_PARTY_COPTS,
+    implementation_deps = [":boringssl_asm"],
+    linkstatic = True,
+    local_defines = _IMPLEMENTATION_DEFINES,
+    deps = [":public_headers"],
+)
+
+# What the GN build of this tree reads, for rules that wrap a GN build.
+filegroup(
+    name = "build_tree",
+    srcs = glob(
+        [
+            "crypto/**",
+            "decrepit/**",
+            # Generated source lists (sources.gni) and the assembly files.
+            "gen/**",
+            "include/**",
+            "pki/**",
+            "ssl/**",
+            "third_party/fiat/**",
+        ],
+        exclude = [
+            "**/test/**",
+            "**/testdata/**",
+            "**/*_test.cc",
+            "**/*_test.h",
+            "**/*_tests.cc",
+            "**/*_unittest.cc",
+        ],
+    ),
+)

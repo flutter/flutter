@@ -1,0 +1,22 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The engine's BoringSSL: GN's //flutter/third_party/boringssl. The checkout
+# it builds is the src/ subdirectory, repository @boringssl, where the
+# library target lives (its headers must be in the same repository as its
+# include directory); this alias keeps the GN label.
+
+package(default_visibility = ["//visibility:public"])
+
+alias(
+    name = "boringssl",
+    actual = "@boringssl//:boringssl",
+)
+
+# Input of the rules that wrap a GN build.
+filegroup(
+    name = "gn_files",
+    srcs = ["BUILD.gn"],
+    visibility = ["//engine/src/flutter/build/bazel:__subpackages__"],
+)

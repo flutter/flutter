@@ -1,0 +1,35 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Smoke test for the wrapped Dart SDK build: an embedder-style link of the
+# VM archive, and VM start-up.
+
+load("@rules_cc//cc:defs.bzl", "cc_test")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+cc_test(
+    name = "dart_vm_smoke_test",
+    size = "small",
+    srcs = ["dart_vm_smoke_test.cc"],
+    # The version the wrapped build stamped, for the test to expect: the
+    # numbers of tools/VERSION (tools/make_version.py reads them; a Dart roll
+    # moves them) and the time of the tree's commit as git gave it
+    # (@dart_commit; a file rather than its constant, so that loading this
+    # package fetches no tree).
+    args = [
+        "$(rootpath @dart//:tools/VERSION)",
+        "$(rootpath @dart_commit//:commit_time)",
+    ],
+    copts = FLUTTER_COPTS,
+    data = [
+        "@dart//:tools/VERSION",
+        "@dart_commit//:commit_time",
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src/flutter/build/bazel/dart_wrap:common_embedder_dart_io",
+        "//engine/src/flutter/build/bazel/dart_wrap:libdart_jit",
+        "@googletest//:gtest",
+    ],
+)

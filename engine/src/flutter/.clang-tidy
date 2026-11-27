@@ -52,6 +52,18 @@ CheckOptions:
 # ... those in ../../gen (generated files don't need to follow clang tidy)
 # ... those in flutter/third_party (we didn't author this code, it's a dep)
 #
+# A header is matched by the path the compile command spells it with, and
+# the two build systems spell the engine's differently: GN's commands run in
+# the build directory and include it as ../../flutter/<dir>/...; Bazel's run
+# in the execution root and include it as engine/src/flutter/<dir>/...
+# (-Iengine/src). The expression names both. Bazel's generated headers,
+# under bazel-out/<configuration>/bin/engine/src/flutter/..., are excluded
+# as GN's gen are: the Bazel alternative is anchored, and a path from the
+# execution root to them does not begin with engine/src. A header included
+# relative to the main file, which the compiler spells under the checkout's
+# absolute path, matches under neither (as it never did under GN): the
+# absolute path has no ../ or ^engine/src before its /flutter/.
+#
 # Unfortunately Clang Tidy uses an ancient version of regular expressions
 # without lookaheads, so the next best thing is to write out every directory
 # except third_party.
@@ -63,4 +75,4 @@ CheckOptions:
 # updated.
 #
 # tl;dr: I'm sorry.
-HeaderFilterRegex: "[..\/]+\/flutter\/(assets|benchmarking|bin|build|ci|common|display_list|docs|examples|flow|flutter_frontend_server|flutter_vma|fml|impeller|lib|runtime|shell|skia|skwasm|sky|testing|tools|txt|vulkan|wasm|web_sdk)\/.*"
+HeaderFilterRegex: "(^engine\/src|[..\/]+)\/flutter\/(assets|benchmarking|bin|build|ci|common|display_list|docs|examples|flow|flutter_frontend_server|flutter_vma|fml|impeller|lib|runtime|shell|skia|skwasm|sky|testing|tools|txt|vulkan|wasm|web_sdk)\/.*"

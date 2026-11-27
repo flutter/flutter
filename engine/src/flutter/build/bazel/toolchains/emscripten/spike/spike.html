@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<!-- Copyright 2013 The Flutter Authors. All rights reserved.
+     Use of this source code is governed by a BSD-style license that can be
+     found in the LICENSE file. -->
+<!-- Loads the spike module (an ES module, as GN's wasm toolchain links the
+     web engine's) and writes the results of its exports into the document,
+     where spike_test.sh reads them from headless Chrome's DOM dump. -->
+<html>
+<body>
+<pre id="results">loading</pre>
+<script type="module">
+  import factory from './spike_module.js';
+  const results = document.getElementById('results');
+  try {
+    const m = await factory();
+    const checks = [
+      ['add(2, 3)', m.add(2, 3), 5],
+      ['greet("bazel")', m.greet('bazel'), 'hello, bazel'],
+      ['_spike_add(40, 2)', m._spike_add(40, 2), 42],
+    ];
+    results.textContent = checks.map(([what, got, want]) =>
+      `${got === want ? 'PASS' : 'FAIL'} ${what} = ${JSON.stringify(got)}`).join('\n') + '\nDONE';
+  } catch (e) {
+    results.textContent = 'FAIL loading the module: ' + e + '\nDONE';
+  }
+</script>
+</body>
+</html>
