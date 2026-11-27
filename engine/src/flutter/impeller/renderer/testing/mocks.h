@@ -307,6 +307,8 @@ class MockCapabilities : public Capabilities {
               SupportsTextureCompression,
               (CompressedTextureFamily),
               (const override));
+  MOCK_METHOD(bool, SupportsFloat16Formats, (), (const override));
+  MOCK_METHOD(bool, SupportsNorm16Formats, (), (const override));
   MOCK_METHOD(PixelFormat, GetDefaultColorFormat, (), (const, override));
   MOCK_METHOD(PixelFormat, GetDefaultStencilFormat, (), (const, override));
   MOCK_METHOD(PixelFormat, GetDefaultDepthStencilFormat, (), (const, override));

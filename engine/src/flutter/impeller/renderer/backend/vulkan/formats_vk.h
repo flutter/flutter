@@ -178,6 +178,20 @@ constexpr vk::Format ToVKImageFormat(PixelFormat format) {
       return vk::Format::eR8G8Unorm;
     case PixelFormat::kR32Float:
       return vk::Format::eR32Sfloat;
+    case PixelFormat::kR16Float:
+      return vk::Format::eR16Sfloat;
+    case PixelFormat::kR16G16Float:
+      return vk::Format::eR16G16Sfloat;
+    case PixelFormat::kR16UNormInt:
+      return vk::Format::eR16Unorm;
+    case PixelFormat::kR16SNormInt:
+      return vk::Format::eR16Snorm;
+    case PixelFormat::kR16G16UNormInt:
+      return vk::Format::eR16G16Unorm;
+    case PixelFormat::kR16G16SNormInt:
+      return vk::Format::eR16G16Snorm;
+    case PixelFormat::kR16G16B16A16UNormInt:
+      return vk::Format::eR16G16B16A16Unorm;
     case PixelFormat::kBC1RGBAUNormInt:
       return vk::Format::eBc1RgbaUnormBlock;
     case PixelFormat::kBC1RGBAUNormIntSRGB:
@@ -243,6 +257,20 @@ constexpr PixelFormat ToPixelFormat(vk::Format format) {
       return PixelFormat::kR8UNormInt;
     case vk::Format::eR8G8Unorm:
       return PixelFormat::kR8G8UNormInt;
+    case vk::Format::eR16Sfloat:
+      return PixelFormat::kR16Float;
+    case vk::Format::eR16G16Sfloat:
+      return PixelFormat::kR16G16Float;
+    case vk::Format::eR16Unorm:
+      return PixelFormat::kR16UNormInt;
+    case vk::Format::eR16Snorm:
+      return PixelFormat::kR16SNormInt;
+    case vk::Format::eR16G16Unorm:
+      return PixelFormat::kR16G16UNormInt;
+    case vk::Format::eR16G16Snorm:
+      return PixelFormat::kR16G16SNormInt;
+    case vk::Format::eR16G16B16A16Unorm:
+      return PixelFormat::kR16G16B16A16UNormInt;
     default:
       return PixelFormat::kUnknown;
   }
@@ -464,6 +492,13 @@ constexpr bool PixelFormatIsDepthStencil(PixelFormat format) {
     case PixelFormat::kB10G10R10XRSRGB:
     case PixelFormat::kB10G10R10A10XR:
     case PixelFormat::kR32Float:
+    case PixelFormat::kR16Float:
+    case PixelFormat::kR16G16Float:
+    case PixelFormat::kR16UNormInt:
+    case PixelFormat::kR16SNormInt:
+    case PixelFormat::kR16G16UNormInt:
+    case PixelFormat::kR16G16SNormInt:
+    case PixelFormat::kR16G16B16A16UNormInt:
     case PixelFormat::kBC1RGBAUNormInt:
     case PixelFormat::kBC1RGBAUNormIntSRGB:
     case PixelFormat::kBC3RGBAUNormInt:
@@ -581,6 +616,13 @@ constexpr vk::ImageAspectFlags ToVKImageAspectFlags(PixelFormat format) {
     case PixelFormat::kB10G10R10XRSRGB:
     case PixelFormat::kB10G10R10A10XR:
     case PixelFormat::kR32Float:
+    case PixelFormat::kR16Float:
+    case PixelFormat::kR16G16Float:
+    case PixelFormat::kR16UNormInt:
+    case PixelFormat::kR16SNormInt:
+    case PixelFormat::kR16G16UNormInt:
+    case PixelFormat::kR16G16SNormInt:
+    case PixelFormat::kR16G16B16A16UNormInt:
     case PixelFormat::kBC1RGBAUNormInt:
     case PixelFormat::kBC1RGBAUNormIntSRGB:
     case PixelFormat::kBC3RGBAUNormInt:
@@ -678,6 +720,13 @@ constexpr vk::ImageAspectFlags ToImageAspectFlags(PixelFormat format) {
     case PixelFormat::kB10G10R10XRSRGB:
     case PixelFormat::kB10G10R10A10XR:
     case PixelFormat::kR32Float:
+    case PixelFormat::kR16Float:
+    case PixelFormat::kR16G16Float:
+    case PixelFormat::kR16UNormInt:
+    case PixelFormat::kR16SNormInt:
+    case PixelFormat::kR16G16UNormInt:
+    case PixelFormat::kR16G16SNormInt:
+    case PixelFormat::kR16G16B16A16UNormInt:
     case PixelFormat::kBC1RGBAUNormInt:
     case PixelFormat::kBC1RGBAUNormIntSRGB:
     case PixelFormat::kBC3RGBAUNormInt:
