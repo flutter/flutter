@@ -1537,93 +1537,38 @@ ${List<String>.generate(200, (int i) => '[CHROME STDOUT]: line-${i + 50}').join(
   });
 
   group('findChromeExecutable on linux', () {
-    void createExecutable(String path) {
-      fileSystem.file(path).createSync(recursive: true);
-    }
+    final Platform linux = FakePlatform(environment: <String, String>{});
 
-    testWithoutContext('returns google-chrome when it is on the PATH', () {
-      createExecutable('/usr/bin/google-chrome');
-      createExecutable('/usr/bin/chromium');
+    test('returns google-chrome when it can be run', () {
+      expect(findChromeExecutable(linux, fileSystem, processManager), kLinuxExecutable);
+    });
+
+    test('prefers chromium over chromium-browser when google-chrome cannot be run', () {
+      processManager.excludedExecutables = <String>{kLinuxExecutable};
+
+      expect(findChromeExecutable(linux, fileSystem, processManager), 'chromium');
+    });
+
+    test('returns chromium-browser when google-chrome and chromium cannot be run', () {
+      processManager.excludedExecutables = <String>{kLinuxExecutable, 'chromium'};
+
+      expect(findChromeExecutable(linux, fileSystem, processManager), 'chromium-browser');
+    });
+
+    test('returns google-chrome when no browser can be run', () {
+      processManager.excludedExecutables = <String>{kLinuxExecutable, ...kLinuxChromiumExecutables};
+
+      expect(findChromeExecutable(linux, fileSystem, processManager), kLinuxExecutable);
+    });
+
+    test('returns $kChromeEnvironment when it is set', () {
+      processManager.excludedExecutables = <String>{kLinuxExecutable};
 
       expect(
         findChromeExecutable(
-          FakePlatform(environment: <String, String>{'PATH': '/usr/bin'}),
+          FakePlatform(environment: <String, String>{kChromeEnvironment: '/opt/chrome/chrome'}),
           fileSystem,
-        ),
-        kLinuxExecutable,
-      );
-    });
-
-    testWithoutContext('prefers google-chrome over chromium earlier on the PATH', () {
-      createExecutable('/snap/bin/chromium');
-      createExecutable('/usr/bin/google-chrome');
-
-      expect(
-        findChromeExecutable(
-          FakePlatform(environment: <String, String>{'PATH': '/snap/bin:/usr/bin'}),
-          fileSystem,
-        ),
-        kLinuxExecutable,
-      );
-    });
-
-    testWithoutContext('returns chromium when google-chrome is not on the PATH', () {
-      createExecutable('/usr/bin/chromium');
-
-      expect(
-        findChromeExecutable(
-          FakePlatform(environment: <String, String>{'PATH': '/bin:/usr/bin'}),
-          fileSystem,
-        ),
-        'chromium',
-      );
-    });
-
-    testWithoutContext('returns chromium-browser when google-chrome is not on the PATH', () {
-      createExecutable('/usr/bin/chromium-browser');
-
-      expect(
-        findChromeExecutable(
-          FakePlatform(environment: <String, String>{'PATH': '/usr/bin'}),
-          fileSystem,
-        ),
-        'chromium-browser',
-      );
-    });
-
-    testWithoutContext('ignores browsers that are not on the PATH', () {
-      createExecutable('/opt/chromium/chromium');
-
-      expect(
-        findChromeExecutable(
-          FakePlatform(environment: <String, String>{'PATH': '/usr/bin'}),
-          fileSystem,
-        ),
-        kLinuxExecutable,
-      );
-    });
-
-    testWithoutContext('returns google-chrome when PATH is not set', () {
-      createExecutable('/usr/bin/chromium');
-
-      expect(
-        findChromeExecutable(FakePlatform(environment: <String, String>{}), fileSystem),
-        kLinuxExecutable,
-      );
-    });
-
-    testWithoutContext('returns $kChromeEnvironment when it is set', () {
-      createExecutable('/usr/bin/chromium');
-
-      expect(
-        findChromeExecutable(
-          FakePlatform(
-            environment: <String, String>{
-              'PATH': '/usr/bin',
-              kChromeEnvironment: '/opt/chrome/chrome',
-            },
-          ),
-          fileSystem,
+          processManager,
         ),
         '/opt/chrome/chrome',
       );

@@ -31,8 +31,8 @@ const kEdgeEnvironment = 'EDGE_ENVIRONMENT';
 /// The expected executable name on linux.
 const kLinuxExecutable = 'google-chrome';
 
-/// Chromium executable names on linux, used when [kLinuxExecutable] is not on
-/// the `PATH`.
+/// Chromium executable names on linux, used in this order when
+/// [kLinuxExecutable] cannot be run.
 const kLinuxChromiumExecutables = <String>['chromium', 'chromium-browser'];
 
 /// The expected executable name on macOS.
@@ -104,19 +104,29 @@ bool _isDbusError(String line) {
       line.contains('org.freedesktop.DBus');
 }
 
-typedef BrowserFinder = String Function(Platform, FileSystem);
+typedef BrowserFinder = String Function(Platform, FileSystem, ProcessManager);
 
 /// Find the chrome executable on the current platform.
 ///
-/// On linux, falls back to a Chromium executable on the `PATH` when
-/// [kLinuxExecutable] is not on the `PATH`. Does not verify whether the
-/// returned executable exists.
-String findChromeExecutable(Platform platform, FileSystem fileSystem) {
+/// On linux, returns the first of [kLinuxExecutable] and
+/// [kLinuxChromiumExecutables] that [ProcessManager.canRun] accepts, or
+/// [kLinuxExecutable] if none of them can be run. On other platforms, does not
+/// verify whether the executable exists.
+String findChromeExecutable(
+  Platform platform,
+  FileSystem fileSystem,
+  ProcessManager processManager,
+) {
   if (platform.environment.containsKey(kChromeEnvironment)) {
     return platform.environment[kChromeEnvironment]!;
   }
   if (platform.isLinux) {
-    return _findLinuxChromeExecutable(platform, fileSystem);
+    for (final executable in <String>[kLinuxExecutable, ...kLinuxChromiumExecutables]) {
+      if (processManager.canRun(executable)) {
+        return executable;
+      }
+    }
+    return kLinuxExecutable;
   }
   if (platform.isMacOS) {
     return kMacOSExecutable;
@@ -138,27 +148,10 @@ String findChromeExecutable(Platform platform, FileSystem fileSystem) {
   throwToolExit('Platform ${platform.operatingSystem} is not supported.');
 }
 
-/// Returns the first of [kLinuxExecutable] and [kLinuxChromiumExecutables]
-/// that is on the `PATH`, or [kLinuxExecutable] if none of them is.
-String _findLinuxChromeExecutable(Platform platform, FileSystem fileSystem) {
-  final List<String> searchPath = (platform.environment['PATH'] ?? '')
-      .split(':')
-      .where((String directory) => directory.isNotEmpty)
-      .toList();
-  for (final executable in <String>[kLinuxExecutable, ...kLinuxChromiumExecutables]) {
-    for (final directory in searchPath) {
-      if (fileSystem.isFileSync(fileSystem.path.join(directory, executable))) {
-        return executable;
-      }
-    }
-  }
-  return kLinuxExecutable;
-}
-
 /// Find the Microsoft Edge executable on the current platform.
 ///
 /// Does not verify whether the executable exists.
-String findEdgeExecutable(Platform platform, FileSystem fileSystem) {
+String findEdgeExecutable(Platform platform, FileSystem fileSystem, ProcessManager processManager) {
   if (platform.environment.containsKey(kEdgeEnvironment)) {
     return platform.environment[kEdgeEnvironment]!;
   }
@@ -207,7 +200,7 @@ class ChromiumLauncher {
 
   /// Whether we can locate the chrome executable.
   bool canFindExecutable() {
-    final String chrome = _browserFinder(_platform, _fileSystem);
+    final String chrome = _browserFinder(_platform, _fileSystem, _processManager);
     try {
       return _processManager.canRun(chrome);
     } on ArgumentError {
@@ -216,7 +209,7 @@ class ChromiumLauncher {
   }
 
   /// The executable this launcher will use.
-  String findExecutable() => _browserFinder(_platform, _fileSystem);
+  String findExecutable() => _browserFinder(_platform, _fileSystem, _processManager);
 
   /// Creates a user data directory for Chrome based on provided flags or creates a temporary one.
   ///
@@ -283,7 +276,7 @@ class ChromiumLauncher {
       );
     }
 
-    final String chromeExecutable = _browserFinder(_platform, _fileSystem);
+    final String chromeExecutable = _browserFinder(_platform, _fileSystem, _processManager);
 
     if (_logger.isVerbose) {
       _logger.printTrace('Will use Chromium executable at $chromeExecutable');
