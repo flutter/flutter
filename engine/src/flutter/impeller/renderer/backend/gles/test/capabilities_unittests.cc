@@ -127,6 +127,20 @@ TEST(CapabilitiesGLES, SupportsTextureArrayViaEXTExtension) {
   EXPECT_TRUE(capabilities->SupportsTextureArrays());
 }
 
+TEST(CapabilitiesGLES, DoesNotSupportTexture3DOnES2WithArrayExtension) {
+  // GL_NV_texture_array resolves the 3D entry points on ES 2.0, but only for
+  // GL_TEXTURE_2D_ARRAY.
+  auto const extensions = std::vector<const char*>{
+      "GL_KHR_debug",         //
+      "GL_NV_texture_array",  //
+  };
+  auto mock_gles = MockGLES::Init(extensions, "OpenGL ES 2.0");
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  EXPECT_TRUE(capabilities->SupportsTextureArrays());
+  EXPECT_FALSE(capabilities->SupportsTexture3D());
+  EXPECT_EQ(capabilities->GetMaximumTexture3DSize(), 0u);
+}
+
 TEST(CapabilitiesGLES, MaxShaderCompilerThreadsIsZeroWithoutExtension) {
   auto mock_gles = MockGLES::Init();
   auto capabilities = mock_gles->GetProcTable().GetCapabilities();

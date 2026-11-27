@@ -94,7 +94,11 @@ constexpr FlutterGPUTextureType FromImpellerTextureType(
       return FlutterGPUTextureType::kTextureExternalOES;
     case impeller::TextureType::kTexture2DArray:
       return FlutterGPUTextureType::kTexture2DArray;
+    case impeller::TextureType::kTexture3D:
+      // Not yet exposed by the Flutter GPU API, which never creates one.
+      break;
   }
+  FML_UNREACHABLE();
 }
 
 enum class FlutterGPUPixelFormat {
