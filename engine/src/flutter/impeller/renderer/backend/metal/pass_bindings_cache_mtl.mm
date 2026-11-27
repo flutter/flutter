@@ -31,107 +31,105 @@ void PassBindingsCacheMTL::SetDepthStencilState(
 bool PassBindingsCacheMTL::SetBuffer(ShaderStage stage,
                                      uint64_t index,
                                      uint64_t offset,
-                                     id<MTLBuffer> buffer) {
+                                     __unsafe_unretained id<MTLBuffer> buffer) {
   if (index == kOptimizedOutBinding) {
     // The shader compiler dead-code-eliminated this resource, so it has no
     // argument-table slot. Skip the bind rather than forward an out-of-range
     // index to Metal, which has no bounds check and would crash.
     return true;
   }
-  auto& buffers_map = buffers_[stage];
-  auto found = buffers_map.find(index);
-  if (found != buffers_map.end() && found->second.buffer == buffer) {
-    // The right buffer is bound. Check if its offset needs to be updated.
-    if (found->second.offset == offset) {
-      // Buffer and its offset is identical. Nothing to do.
-      return true;
-    }
+  if (stage != ShaderStage::kVertex && stage != ShaderStage::kFragment) {
+    VALIDATION_LOG << "Cannot bind buffer to unknown shader stage.";
+    return false;
+  }
+  const bool is_vertex = stage == ShaderStage::kVertex;
+  if (index < kMaxBuffers) {
+    BufferOffsetPair& bound = buffers_[is_vertex ? 0 : 1][index];
+    if (bound.buffer == buffer) {
+      // The right buffer is bound. Check if its offset needs to be updated.
+      if (bound.offset == offset) {
+        // Buffer and its offset is identical. Nothing to do.
+        return true;
+      }
 
-    // Only the offset needs to be updated.
-    found->second.offset = offset;
-
-    switch (stage) {
-      case ShaderStage::kVertex:
+      // Only the offset needs to be updated.
+      bound.offset = offset;
+      if (is_vertex) {
         [encoder_ setVertexBufferOffset:offset atIndex:index];
-        return true;
-      case ShaderStage::kFragment:
+      } else {
         [encoder_ setFragmentBufferOffset:offset atIndex:index];
-        return true;
-      default:
-        VALIDATION_LOG << "Cannot update buffer offset of an unknown stage.";
-        return false;
+      }
+      return true;
     }
-    return true;
+    bound.buffer = buffer;
+    bound.offset = static_cast<size_t>(offset);
   }
-  buffers_map[index] = {buffer, static_cast<size_t>(offset)};
-  switch (stage) {
-    case ShaderStage::kVertex:
-      [encoder_ setVertexBuffer:buffer offset:offset atIndex:index];
-      return true;
-    case ShaderStage::kFragment:
-      [encoder_ setFragmentBuffer:buffer offset:offset atIndex:index];
-      return true;
-    default:
-      VALIDATION_LOG << "Cannot bind buffer to unknown shader stage.";
-      return false;
+  if (is_vertex) {
+    [encoder_ setVertexBuffer:buffer offset:offset atIndex:index];
+  } else {
+    [encoder_ setFragmentBuffer:buffer offset:offset atIndex:index];
   }
-  return false;
+  return true;
 }
 
-bool PassBindingsCacheMTL::SetTexture(ShaderStage stage,
-                                      uint64_t index,
-                                      id<MTLTexture> texture) {
+bool PassBindingsCacheMTL::SetTexture(
+    ShaderStage stage,
+    uint64_t index,
+    __unsafe_unretained id<MTLTexture> texture) {
   if (index == kOptimizedOutBinding) {
     // See SetBuffer: a dead-code-eliminated sampler has no argument-table slot.
     return true;
   }
-  auto& texture_map = textures_[stage];
-  auto found = texture_map.find(index);
-  if (found != texture_map.end() && found->second == texture) {
-    // Already bound.
-    return true;
+  if (stage != ShaderStage::kVertex && stage != ShaderStage::kFragment) {
+    VALIDATION_LOG << "Cannot bind buffer to unknown shader stage.";
+    return false;
   }
-  texture_map[index] = texture;
-  switch (stage) {
-    case ShaderStage::kVertex:
-      [encoder_ setVertexTexture:texture atIndex:index];
+  const bool is_vertex = stage == ShaderStage::kVertex;
+  if (index < kMaxTextures) {
+    __unsafe_unretained id<MTLTexture>& bound =
+        textures_[is_vertex ? 0 : 1][index];
+    if (bound == texture) {
+      // Already bound.
       return true;
-    case ShaderStage::kFragment:
-      [encoder_ setFragmentTexture:texture atIndex:index];
-      return true;
-    default:
-      VALIDATION_LOG << "Cannot bind buffer to unknown shader stage.";
-      return false;
+    }
+    bound = texture;
   }
-  return false;
+  if (is_vertex) {
+    [encoder_ setVertexTexture:texture atIndex:index];
+  } else {
+    [encoder_ setFragmentTexture:texture atIndex:index];
+  }
+  return true;
 }
 
-bool PassBindingsCacheMTL::SetSampler(ShaderStage stage,
-                                      uint64_t index,
-                                      id<MTLSamplerState> sampler) {
+bool PassBindingsCacheMTL::SetSampler(
+    ShaderStage stage,
+    uint64_t index,
+    __unsafe_unretained id<MTLSamplerState> sampler) {
   if (index == kOptimizedOutBinding) {
     // See SetBuffer: a dead-code-eliminated sampler has no argument-table slot.
     return true;
   }
-  auto& sampler_map = samplers_[stage];
-  auto found = sampler_map.find(index);
-  if (found != sampler_map.end() && found->second == sampler) {
-    // Already bound.
-    return true;
+  if (stage != ShaderStage::kVertex && stage != ShaderStage::kFragment) {
+    VALIDATION_LOG << "Cannot bind buffer to unknown shader stage.";
+    return false;
   }
-  sampler_map[index] = sampler;
-  switch (stage) {
-    case ShaderStage::kVertex:
-      [encoder_ setVertexSamplerState:sampler atIndex:index];
+  const bool is_vertex = stage == ShaderStage::kVertex;
+  if (index < kMaxSamplers) {
+    __unsafe_unretained id<MTLSamplerState>& bound =
+        samplers_[is_vertex ? 0 : 1][index];
+    if (bound == sampler) {
+      // Already bound.
       return true;
-    case ShaderStage::kFragment:
-      [encoder_ setFragmentSamplerState:sampler atIndex:index];
-      return true;
-    default:
-      VALIDATION_LOG << "Cannot bind buffer to unknown shader stage.";
-      return false;
+    }
+    bound = sampler;
   }
-  return false;
+  if (is_vertex) {
+    [encoder_ setVertexSamplerState:sampler atIndex:index];
+  } else {
+    [encoder_ setFragmentSamplerState:sampler atIndex:index];
+  }
+  return true;
 }
 
 void PassBindingsCacheMTL::SetViewport(const Viewport& viewport) {

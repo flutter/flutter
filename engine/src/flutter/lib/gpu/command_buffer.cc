@@ -38,7 +38,7 @@ PassRecording* CommandBuffer::BeginPass(PassRecording::Kind kind,
     return nullptr;
   }
   EndOpenPass();
-  open_pass_ = std::make_unique<PassRecording>(kind);
+  open_pass_ = PassRecording::Acquire(kind);
   open_pass_owner_ = owner;
   return open_pass_.get();
 }
@@ -54,6 +54,7 @@ void CommandBuffer::EndOpenPass() {
     return;
   }
   open_pass_owner_ = nullptr;
+  recorded_bytes_ += open_pass_->ops.GetAllocatedSize();
   replay_queue_->Post(fml::MakeCopyable(
       [encoder = encoder_, recording = std::move(open_pass_)]() mutable {
         encoder->Encode(std::move(recording));
@@ -88,8 +89,8 @@ bool CommandBuffer::CopyBufferToTexture(DeviceBuffer& source,
   if (!blits) {
     return false;
   }
-  blits->Retain(source.GetBuffer());
-  blits->Retain(destination.GetTexture());
+  blits->Retain(source.GetRetainStamp(), source.GetBuffer());
+  blits->Retain(destination.GetRetainStamp(), destination.GetTexture());
   auto* op = blits->ops.Append<CopyBufferToTextureOp>();
   op->source = source.GetBuffer().get();
   op->source_offset = source_offset;
@@ -109,8 +110,8 @@ bool CommandBuffer::CopyTextureToBuffer(Texture& source,
   if (!blits) {
     return false;
   }
-  blits->Retain(source.GetTexture());
-  blits->Retain(destination.GetBuffer());
+  blits->Retain(source.GetRetainStamp(), source.GetTexture());
+  blits->Retain(destination.GetRetainStamp(), destination.GetBuffer());
   auto* op = blits->ops.Append<CopyTextureToBufferOp>();
   op->source = source.GetTexture().get();
   op->destination = destination.GetBuffer().get();
@@ -127,8 +128,8 @@ bool CommandBuffer::CopyTextureToTexture(Texture& source,
   if (!blits) {
     return false;
   }
-  blits->Retain(source.GetTexture());
-  blits->Retain(destination.GetTexture());
+  blits->Retain(source.GetRetainStamp(), source.GetTexture());
+  blits->Retain(destination.GetRetainStamp(), destination.GetTexture());
   auto* op = blits->ops.Append<CopyTextureToTextureOp>();
   op->source = source.GetTexture().get();
   op->destination = destination.GetTexture().get();
@@ -176,14 +177,18 @@ bool CommandBuffer::Submit(
         };
   }
 
+  replay_queue_->AddInFlightBytes(recorded_bytes_);
   if (replay_queue_->RunsOnCallingThread()) {
-    return CommandBufferEncoder::Submit(
-        std::move(encoder_), std::move(combined_completion_callback));
+    return CommandBufferEncoder::Submit(std::move(encoder_),
+                                        std::move(combined_completion_callback),
+                                        recorded_bytes_);
   }
-  replay_queue_->Post(fml::MakeCopyable(
-      [encoder = std::move(encoder_),
-       completion = std::move(combined_completion_callback)]() mutable {
-        CommandBufferEncoder::Submit(std::move(encoder), std::move(completion));
+  replay_queue_->Post(
+      fml::MakeCopyable([encoder = std::move(encoder_),
+                         completion = std::move(combined_completion_callback),
+                         bytes = recorded_bytes_]() mutable {
+        CommandBufferEncoder::Submit(std::move(encoder), std::move(completion),
+                                     bytes);
       }));
   return true;
 }

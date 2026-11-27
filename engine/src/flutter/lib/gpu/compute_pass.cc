@@ -243,7 +243,7 @@ absl::Status ComputePass::ApplyBindings(const Shader& shader) {
   // The slots and metadata the ops point at live in the reflection.
   const std::shared_ptr<const Shader::Reflection>& reflection =
       shader.GetReflection();
-  recording->Retain(reflection);
+  recording->Retain(reflection->retain_stamp, reflection);
 
   auto missing = [&shader](std::string_view kind, std::string_view name) {
     return absl::FailedPreconditionError(absl::StrCat(

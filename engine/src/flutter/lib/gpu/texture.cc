@@ -26,7 +26,6 @@
 
 #if IMPELLER_SUPPORTS_RENDERING
 #include "flutter/display_list/image/dl_image.h"      // nogncheck
-#include "impeller/display_list/aiks_context.h"       // nogncheck
 #include "impeller/display_list/dl_image_impeller.h"  // nogncheck
 #endif
 #include "third_party/tonic/converter/dart_converter.h"
@@ -42,10 +41,6 @@ Texture::Texture(std::shared_ptr<impeller::Texture> texture)
     : texture_(std::move(texture)) {}
 
 Texture::~Texture() = default;
-
-std::shared_ptr<impeller::Texture> Texture::GetTexture() {
-  return texture_;
-}
 
 // Returns the size in pixels of the given dimension at `mip_level`, clamped
 // at 1, matching standard mip-chain semantics. The Dart-side helper
@@ -163,8 +158,9 @@ static std::shared_ptr<impeller::Texture> GetTextureFromImage(
   if (!impeller_image) {
     return nullptr;
   }
-  impeller::AiksContext aiks_context(gpu_context->GetContextShared(), nullptr);
-  return impeller_image->GetImpellerTexture(aiks_context.GetContentContext());
+  // Resolved without a renderer. Building one here would create the whole
+  // content context, pipelines included, on the calling thread.
+  return impeller_image->GetResolvedTexture();
 }
 #endif
 

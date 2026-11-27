@@ -5,8 +5,11 @@
 #include "flutter/lib/gpu/replay.h"
 
 #include <algorithm>
+#include <atomic>
+#include <chrono>
 
 #include "dart_api.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/sampler_descriptor.h"
@@ -19,17 +22,23 @@ namespace gpu {
 
 namespace {
 
-// The recording keeps what its ops point at alive until the GPU finishes, so
-// replay hands the backend references that do not own them.
-template <typename T>
-std::shared_ptr<T> Unowned(T* object) {
-  return std::shared_ptr<T>(std::shared_ptr<T>(), object);
-}
+// Comfortably more than a heavy frame's recordings, so reaching it means the
+// caller is running ahead of the GPU rather than rendering frames.
+constexpr size_t kMaxInFlightBytes = 32 * 1024 * 1024;
 
+constexpr std::chrono::seconds kMaxInFlightWait(1);
+
+// The recording keeps the buffer alive until the GPU finishes, so the view
+// does not need to own it. Binding through an owning view would cost atomics
+// per bind, and on Vulkan a tracked object per bind.
 impeller::BufferView Borrow(const impeller::DeviceBuffer* buffer,
                             uint64_t offset,
                             uint64_t length) {
-  return impeller::BufferView(Unowned(buffer), impeller::Range(offset, length));
+  return impeller::BufferView(buffer, impeller::Range(offset, length));
+}
+
+impeller::BufferView Borrow(const impeller::BufferView& view) {
+  return impeller::BufferView(view.GetBuffer(), view.GetRange());
 }
 
 template <typename T>
@@ -56,25 +65,34 @@ PassReplayer::PassReplayer(impeller::Context& context) : context_(context) {}
 
 impeller::raw_ptr<const impeller::Sampler> PassReplayer::GetSampler(
     uint64_t key) {
-  return context_.GetSamplerLibrary()->GetSampler(
+  for (const auto& entry : samplers_) {
+    if (entry.first == key) {
+      return entry.second;
+    }
+  }
+  auto sampler = context_.GetSamplerLibrary()->GetSampler(
       impeller::SamplerDescriptor::FromKey(key));
+  samplers_.emplace_back(key, sampler);
+  return sampler;
 }
 
 void PassReplayer::SetPipelineState(PassRecording& recording,
                                     const SetPipelineStateOp& op) {
   if (pipeline_op_ && pipeline_op_->core == op.core &&
-      pipeline_op_->descriptor == op.descriptor) {
+      pipeline_op_->state == op.state) {
     return;
   }
   pipeline_op_ = &op;
-  std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>> pipeline =
-      op.core->Resolve(context_, *op.descriptor);
-  pipeline_ = impeller::PipelineRef(pipeline);
-  // Backends can read the pipeline until the work completes, and a shader
-  // reload can drop it from the library before then.
-  if (pipeline) {
-    recording.Retain(std::move(pipeline));
+  const RenderPipeline::Core::ResolvedPipeline& resolved =
+      op.core->Resolve(context_, op.state);
+  if (!resolved.pipeline) {
+    pipeline_ = impeller::PipelineRef();
+    return;
   }
+  pipeline_ = impeller::PipelineRef(resolved.pipeline);
+  // Backends can read the pipeline until the work completes, and a shader
+  // reload can drop it from the core and the library before then.
+  recording.Retain(resolved.retain_stamp, resolved.pipeline);
 }
 
 void PassReplayer::Draw(impeller::RenderPass& pass, const DrawOp& op) {
@@ -95,14 +113,15 @@ void PassReplayer::Draw(impeller::RenderPass& pass, const DrawOp& op) {
         continue;
       }
       pass.BindResource(buffer.stage, impeller::DescriptorType::kUniformBuffer,
-                        buffer.slot, buffer.metadata, buffer.view);
+                        buffer.slot, buffer.metadata, Borrow(buffer.view));
     }
     for (const BindingSet::TextureBinding& texture : set->texture_bindings) {
       if (texture.stage == impeller::ShaderStage::kCompute) {
         continue;
       }
       pass.BindResource(texture.stage, impeller::DescriptorType::kSampledImage,
-                        texture.slot, texture.metadata, texture.texture,
+                        texture.slot, texture.metadata,
+                        impeller::BorrowTexture(texture.texture.get()),
                         GetSampler(texture.sampler_key));
     }
   }
@@ -115,7 +134,7 @@ void PassReplayer::Draw(impeller::RenderPass& pass, const DrawOp& op) {
   for (const BindTextureOp* texture : textures_) {
     pass.BindResource(texture->stage, impeller::DescriptorType::kSampledImage,
                       texture->binding->slot, &texture->binding->metadata,
-                      Unowned(texture->texture),
+                      impeller::BorrowTexture(texture->texture),
                       GetSampler(texture->sampler_key));
   }
 
@@ -223,9 +242,13 @@ bool PassReplayer::ReplayCompute(const PassRecording& recording,
   bool success = true;
   recording.ops.ForEach([&](const OpHeader& header) {
     switch (header.op) {
-      case RecordedOp::kSetComputePipeline:
-        pass.SetPipeline(Unowned(As<SetComputePipelineOp>(header).pipeline));
+      case RecordedOp::kSetComputePipeline: {
+        // Non-owning for the same reason as `Borrow`.
+        pass.SetPipeline(std::shared_ptr<BackendComputePipeline>(
+            std::shared_ptr<BackendComputePipeline>(),
+            As<SetComputePipelineOp>(header).pipeline));
         break;
+      }
       case RecordedOp::kBindComputeBuffer: {
         const auto& op = As<BindComputeBufferOp>(header);
         pass.BindResource(impeller::ShaderStage::kCompute, op.type, *op.slot,
@@ -236,7 +259,7 @@ bool PassReplayer::ReplayCompute(const PassRecording& recording,
         const auto& op = As<BindComputeTextureOp>(header);
         pass.BindResource(impeller::ShaderStage::kCompute,
                           impeller::DescriptorType::kSampledImage, *op.slot,
-                          op.metadata, Unowned(op.texture),
+                          op.metadata, impeller::BorrowTexture(op.texture),
                           GetSampler(op.sampler_key));
         break;
       }
@@ -268,20 +291,24 @@ void PassReplayer::ReplayBlit(const PassRecording& recording,
         const auto& op = As<CopyBufferToTextureOp>(header);
         added = pass.AddCopy(
             Borrow(op.source, op.source_offset, op.source_length),
-            Unowned(op.destination), op.destination_region,
+            impeller::BorrowTexture(op.destination), op.destination_region,
             "CommandBuffer.copyBufferToTexture", op.mip_level, op.slice);
         break;
       }
       case RecordedOp::kCopyTextureToBuffer: {
         const auto& op = As<CopyTextureToBufferOp>(header);
-        added = pass.AddCopy(Unowned(op.source), Unowned(op.destination),
-                             op.source_region, op.destination_offset,
-                             "CommandBuffer.copyTextureToBuffer");
+        added = pass.AddCopy(
+            impeller::BorrowTexture(op.source),
+            std::shared_ptr<impeller::DeviceBuffer>(
+                std::shared_ptr<impeller::DeviceBuffer>(), op.destination),
+            op.source_region, op.destination_offset,
+            "CommandBuffer.copyTextureToBuffer");
         break;
       }
       case RecordedOp::kCopyTextureToTexture: {
         const auto& op = As<CopyTextureToTextureOp>(header);
-        added = pass.AddCopy(Unowned(op.source), Unowned(op.destination),
+        added = pass.AddCopy(impeller::BorrowTexture(op.source),
+                             impeller::BorrowTexture(op.destination),
                              op.source_region, op.destination_origin,
                              "CommandBuffer.copyTextureToTexture");
         break;
@@ -324,10 +351,37 @@ void ReplayQueue::Post(const fml::closure& task) {
   task_runner_->PostTask(task);
 }
 
+void ReplayQueue::AddInFlightBytes(size_t bytes) {
+  // Merged threads can't make progress while this one waits.
+  const bool can_wait =
+      task_runner_ && !task_runner_->RunsTasksOnCurrentThread();
+  std::unique_lock lock(in_flight_mutex_);
+  if (can_wait) {
+    in_flight_changed_.wait_for(lock, kMaxInFlightWait, [this]() {
+      return in_flight_bytes_ <= kMaxInFlightBytes;
+    });
+  }
+  in_flight_bytes_ += bytes;
+}
+
+void ReplayQueue::RemoveInFlightBytes(size_t bytes) {
+  {
+    std::scoped_lock lock(in_flight_mutex_);
+    in_flight_bytes_ -= bytes;
+  }
+  in_flight_changed_.notify_all();
+}
+
 CommandBufferEncoder::CommandBufferEncoder(std::shared_ptr<ReplayQueue> queue)
     : queue_(std::move(queue)) {}
 
-CommandBufferEncoder::~CommandBufferEncoder() = default;
+CommandBufferEncoder::~CommandBufferEncoder() {
+  // Recycled before the queue hears that the memory is free.
+  recordings_.clear();
+  if (in_flight_bytes_ > 0) {
+    queue_->RemoveInFlightBytes(in_flight_bytes_);
+  }
+}
 
 bool CommandBufferEncoder::DeferredPass::EncodeCommands() const {
   return render_pass ? render_pass->EncodeCommands()
@@ -348,6 +402,7 @@ bool CommandBufferEncoder::EnsureCommandBuffer() {
 }
 
 void CommandBufferEncoder::Encode(PassRecording::Ptr recording) {
+  TRACE_EVENT0("flutter", "FlutterGPU::EncodePass");
   if (EnsureCommandBuffer()) {
     switch (recording->GetKind()) {
       case PassRecording::Kind::kRender:
@@ -371,6 +426,9 @@ void CommandBufferEncoder::EncodeRenderPass(PassRecording& recording) {
     failed_ = true;
     return;
   }
+  pass->ReserveCommands(recording.draw_count, recording.uniform_bind_count,
+                        recording.texture_bind_count,
+                        recording.vertex_buffer_bind_count);
   queue_->GetReplayer().ReplayRender(recording, *pass);
   if (DefersEncoding()) {
     deferred_passes_.push_back({.render_pass = std::move(pass)});
@@ -409,14 +467,20 @@ void CommandBufferEncoder::EncodeBlitPass(const PassRecording& recording) {
 
 bool CommandBufferEncoder::Submit(
     std::shared_ptr<CommandBufferEncoder> encoder,
-    impeller::CommandBuffer::CompletionCallback completion) {
+    impeller::CommandBuffer::CompletionCallback completion,
+    size_t in_flight_bytes) {
+  TRACE_EVENT0("flutter", "FlutterGPU::Submit");
+  encoder->in_flight_bytes_ = in_flight_bytes;
   const std::shared_ptr<impeller::Context> context =
       encoder->queue_->GetContext();
 
+  // Backends report kError themselves for some failed submissions, so the
+  // completion runs at most once however the submission fails.
+  auto completed = std::make_shared<std::atomic<bool>>(false);
   impeller::CommandBuffer::CompletionCallback complete =
-      [completion =
-           std::move(completion)](impeller::CommandBuffer::Status status) {
-        if (completion) {
+      [completed, completion = std::move(completion)](
+          impeller::CommandBuffer::Status status) {
+        if (completion && !completed->exchange(true)) {
           completion(status);
         }
       };
@@ -437,7 +501,7 @@ bool CommandBufferEncoder::Submit(
 
   // A pass handed to the reactor points into the recordings, so even a failed
   // command buffer has to go through the queue, which outlasts the reactor's
-  // work, before they can be freed.
+  // work, before they can be recycled.
   if (failed && !encoded_deferred_pass) {
     complete(impeller::CommandBuffer::Status::kError);
     context->DisposeThreadLocalCachedResources();

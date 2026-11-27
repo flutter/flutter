@@ -39,6 +39,9 @@ class RenderPassMTL final : public RenderPass {
   size_t base_vertex_ = 0u;
   size_t vertex_count_ = 0u;
   bool has_valid_pipeline_ = false;
+  // The pipeline whose state is set on the encoder, which persists across
+  // draws.
+  const Pipeline<PipelineDescriptor>* bound_pipeline_ = nullptr;
   bool has_label_ = false;
   BufferView index_buffer_ = {};
   PrimitiveType primitive_type_ = {};

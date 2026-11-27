@@ -25,10 +25,6 @@ DeviceBuffer::DeviceBuffer(
 
 DeviceBuffer::~DeviceBuffer() = default;
 
-std::shared_ptr<impeller::DeviceBuffer> DeviceBuffer::GetBuffer() {
-  return device_buffer_;
-}
-
 bool DeviceBuffer::Overwrite(const tonic::DartByteData& source_bytes,
                              size_t destination_offset_in_bytes) {
   if (!device_buffer_->CopyHostBuffer(
