@@ -984,12 +984,14 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
 
   Future<void> ensureReadyForPlatformSpecificTooling({
     required PlistParser plistParser,
+    required TemplatePathProvider templatePathProvider,
     required TemplateRenderer templateRenderer,
     required ToolContext toolContext,
   }) async {
     final Cache cache = toolContext.cache;
     await _regenerateModuleFromTemplateIfNeeded(
       plistParser: plistParser,
+      templatePathProvider: templatePathProvider,
       templateRenderer: templateRenderer,
       toolContext: toolContext,
     );
@@ -1127,6 +1129,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
 
   Future<void> _regenerateModuleFromTemplateIfNeeded({
     required PlistParser plistParser,
+    required TemplatePathProvider templatePathProvider,
     required TemplateRenderer templateRenderer,
     required ToolContext toolContext,
   }) async {
@@ -1148,6 +1151,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       _fileSystem.path.join('module', 'ios', 'library'),
       ephemeralModuleDirectory,
       plistParser: plistParser,
+      templatePathProvider: templatePathProvider,
       templateRenderer: templateRenderer,
       toolContext: toolContext,
     );
@@ -1157,6 +1161,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
         _fileSystem.path.join('module', 'ios', 'host_app_ephemeral'),
         ephemeralModuleDirectory,
         plistParser: plistParser,
+        templatePathProvider: templatePathProvider,
         templateRenderer: templateRenderer,
         toolContext: toolContext,
       );
@@ -1165,6 +1170,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
           _fileSystem.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'),
           ephemeralModuleDirectory,
           plistParser: plistParser,
+          templatePathProvider: templatePathProvider,
           templateRenderer: templateRenderer,
           toolContext: toolContext,
         );
@@ -1223,6 +1229,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     String path,
     Directory target, {
     required PlistParser plistParser,
+    required TemplatePathProvider templatePathProvider,
     required TemplateRenderer templateRenderer,
     required ToolContext toolContext,
   }) async {
@@ -1238,6 +1245,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       fileSystem: _fileSystem,
       templateManifest: null,
       logger: _logger,
+      templatePathProvider: templatePathProvider,
       templateRenderer: templateRenderer,
     );
     final String iosBundleIdentifier =

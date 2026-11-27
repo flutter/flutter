@@ -24,7 +24,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('Newly added previews are detected (Legacy)', () async {
+  test('Newly added previews are detected (Legacy)', () async {
     final Stream<String> stream = await startWidgetPreview(
       tempDir: tempDir,
       legacyPreviewDetection: true,

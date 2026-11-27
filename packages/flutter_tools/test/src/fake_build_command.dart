@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/config.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -29,6 +28,7 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 
@@ -54,6 +54,7 @@ BuildCommand createFakeBuildCommand({
   PlistParser? plistParser,
   ProcessManager? processManager,
   ProcessUtils? processUtils,
+  TemplatePathProvider? templatePathProvider,
   TemplateRenderer? templateRenderer,
   AnsiTerminal? terminal,
   ToolContext? toolContext,
@@ -61,94 +62,25 @@ BuildCommand createFakeBuildCommand({
   Xcode? xcode,
   XcodeProjectInterpreter? xcodeProjectInterpreter,
 }) {
-  var resolvedFileSystem = fileSystem;
-  if (resolvedFileSystem == null) {
-    try {
-      resolvedFileSystem = context.get<FileSystem>();
-    } on Object {
-      // testWithoutContext or not provided.
-    }
-  }
-  final FileSystem fs = resolvedFileSystem ?? MemoryFileSystem.test();
-
-  var resolvedPlatform = platform;
-  if (resolvedPlatform == null) {
-    try {
-      resolvedPlatform = context.get<Platform>();
-    } on Object {
-      // testWithoutContext or not provided.
-    }
-  }
-  final Platform targetPlatform = resolvedPlatform ?? FakePlatform();
-
-  var resolvedFeatureFlags = featureFlags;
-  if (resolvedFeatureFlags == null) {
-    try {
-      resolvedFeatureFlags = context.get<FeatureFlags>();
-    } on Object {
-      // testWithoutContext or not provided.
-    }
-  }
-
-  var resolvedLogger = logger;
-  if (resolvedLogger == null) {
-    try {
-      resolvedLogger = context.get<Logger>();
-    } on Object {
-      // testWithoutContext or not provided.
-    }
-  }
-  final Logger targetLogger = resolvedLogger ?? BufferLogger.test();
-
-  var resolvedProcessManager = processManager;
-  if (resolvedProcessManager == null) {
-    try {
-      resolvedProcessManager = context.get<ProcessManager>();
-    } on Object {
-      // testWithoutContext or not provided.
-    }
-  }
-  final ProcessManager targetProcessManager = resolvedProcessManager ?? FakeProcessManager.any();
-
-  var resolvedOsUtils = osUtils;
-  if (resolvedOsUtils == null) {
-    try {
-      resolvedOsUtils = context.get<OperatingSystemUtils>();
-    } on Object {
-      // testWithoutContext or not provided.
-    }
-  }
-  final OperatingSystemUtils targetOsUtils = resolvedOsUtils ?? FakeOperatingSystemUtils();
-
-  var resolvedPlistParser = plistParser;
-  if (resolvedPlistParser == null) {
-    try {
-      resolvedPlistParser = context.get<PlistParser>();
-    } on Object {
-      // testWithoutContext or not provided.
-    }
-  }
-
-  var resolvedXcodeProjectInterpreter = xcodeProjectInterpreter;
-  if (resolvedXcodeProjectInterpreter == null) {
-    try {
-      resolvedXcodeProjectInterpreter = context.get<XcodeProjectInterpreter>();
-    } on Object {
-      // testWithoutContext or not provided.
-    }
-  }
-
-  final FeatureFlags targetFeatureFlags = resolvedFeatureFlags ?? TestFeatureFlags();
+  final FileSystem fs = fileSystem ?? MemoryFileSystem.test();
+  final Platform targetPlatform = platform ?? FakePlatform();
+  final Logger targetLogger = logger ?? BufferLogger.test();
+  final ProcessManager targetProcessManager = processManager ?? FakeProcessManager.any();
+  final OperatingSystemUtils targetOsUtils = osUtils ?? FakeOperatingSystemUtils();
+  final FeatureFlags targetFeatureFlags = featureFlags ?? TestFeatureFlags();
   final appleCtx = FakeAppleContext(
-    plistParser: resolvedPlistParser ?? FakePlistParser(),
+    plistParser: plistParser ?? FakePlistParser(),
     xcode: xcode ?? FakeXcode(),
-    xcodeProjectInterpreter: resolvedXcodeProjectInterpreter,
+    xcodeProjectInterpreter: xcodeProjectInterpreter,
   );
+  final Cache targetCache = cache ?? FakeCache();
+  final TemplatePathProvider targetTemplatePathProvider =
+      templatePathProvider ?? TemplatePathProvider(flutterRoot: targetCache.flutterRoot);
   final ToolContext targetToolContext =
       toolContext ??
       FakeToolContext(
         artifacts: artifacts ?? FakeArtifacts(),
-        cache: cache ?? FakeCache(),
+        cache: targetCache,
         config: config ?? FakeConfig(),
         fs: fs,
         flutterVersion: flutterVersion ?? FakeFlutterVersion(),
@@ -176,12 +108,17 @@ BuildCommand createFakeBuildCommand({
     appleContext: appleCtx,
     buildSystem: buildSystem ?? FakeBuildSystem(),
     featureFlags: targetFeatureFlags,
+    templatePathProvider: targetTemplatePathProvider,
     templateRenderer: templateRenderer ?? FakeTemplateRenderer(),
     toolContext: targetToolContext,
     verboseHelp: verboseHelp,
   );
   final ApplicationPackageFactory packageFactory =
-      applicationPackageFactory ?? FakeIOSApplicationPackageFactory(toolContext: targetToolContext);
+      applicationPackageFactory ??
+      FakeIOSApplicationPackageFactory(
+        templatePathProvider: targetTemplatePathProvider,
+        toolContext: targetToolContext,
+      );
   command.applicationPackages = packageFactory;
   for (final Command<void> subcommand in command.subcommands.values) {
     if (subcommand is FlutterCommand) {
@@ -192,8 +129,9 @@ BuildCommand createFakeBuildCommand({
 }
 
 class FakeIOSApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
-  FakeIOSApplicationPackageFactory({required this.toolContext});
+  FakeIOSApplicationPackageFactory({required this.templatePathProvider, required this.toolContext});
 
+  final TemplatePathProvider templatePathProvider;
   final ToolContext toolContext;
 
   @override
@@ -210,6 +148,12 @@ class FakeIOSApplicationPackageFactory extends Fake implements ApplicationPackag
     if (!project.ios.exists) {
       return null;
     }
-    return BuildableIOSApp(project.ios, 'com.example.test', 'Runner', toolContext: toolContext);
+    return BuildableIOSApp(
+      project.ios,
+      'com.example.test',
+      'Runner',
+      templatePathProvider: templatePathProvider,
+      toolContext: toolContext,
+    );
   }
 }

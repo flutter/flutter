@@ -49,12 +49,10 @@ Future<List<File>> copyNativeCodeAssetsAndroid(
 /// Get the [Architecture] for [cpuArch].
 Architecture getNativeAndroidArchitecture(CpuArch cpuArch) {
   return switch (cpuArch) {
-    CpuArch.armv7 => Architecture.arm,
-    CpuArch.arm64 => Architecture.arm64,
-    CpuArch.x64 => Architecture.x64,
-    CpuArch.x86 ||
-    CpuArch.riscv64 ||
-    CpuArch.unknown => throwToolExit('Invalid Android arch: $cpuArch.'),
+    .armv7 => Architecture.arm,
+    .arm64 => Architecture.arm64,
+    .x64 => Architecture.x64,
+    _ => throwToolExit('Invalid Android arch: $cpuArch.'),
   };
 }
 

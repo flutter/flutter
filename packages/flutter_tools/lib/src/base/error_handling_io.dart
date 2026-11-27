@@ -25,7 +25,6 @@ import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import 'common.dart' show ToolExit, throwToolExit;
-import 'context.dart';
 import 'platform.dart';
 
 // The Flutter tool hits file system and process errors that only the end-user can address.
@@ -1233,18 +1232,7 @@ class ErrorHandlingProcessManager extends ProcessManager {
   Map<String, String>? _propagateAnalyticsEnvironment(Map<String, String>? environment) {
     // Create a mutable copy of the environment map upfront to avoid redundant allocations later.
     final environmentResult = <String, String>{...?environment};
-    Analytics? analytics;
-    try {
-      analytics = _analytics();
-    } on ContextDependencyCycleException {
-      // This exception is thrown during early startup bootstrapping of the Flutter CLI.
-      // Specifically, `FlutterVersion` runs a synchronous `git log` command during its own
-      // construction to resolve version metadata. Because process execution is intercepted
-      // by this manager, looking up `Analytics` (which in turn depends on `FlutterVersion`)
-      // triggers a circular dependency cycle (`FlutterVersion -> Process -> Analytics -> FlutterVersion`).
-      // Catching `ContextDependencyCycleException` breaks this cycle, allowing us to safely
-      // skip analytics environment propagation for these early initialization commands.
-    }
+    final Analytics analytics = _analytics();
 
     // Propagate the unified analytics suppression flag.
     //
@@ -1268,16 +1256,32 @@ class ErrorHandlingProcessManager extends ProcessManager {
         _platform.environment[suppressKey] == 'true' || environmentResult[suppressKey] == 'true';
     if (suppressionRequested) {
       environmentResult[suppressKey] = 'true';
-    } else if (analytics != null) {
+    } else {
       environmentResult[suppressKey] = (!analytics.okToSend).toString();
     }
 
-    // Propagate the parent tool identifier down to the spawned process.
-    final String? parentTool = _platform.environment[DashEnvVar.tool.name];
+    // Propagate the root tool identifier down to the spawned process.
+    //
+    // This matches how `package:unified_analytics` resolves the root tool for
+    // this process (`DASH__TOOL` if it names a tool that can be a root tool,
+    // otherwise this tool), so the sub-tool reports the same root tool as this
+    // process. An invalid label or a shared component (for example
+    // `analysis-server`) is never passed on, and a caller-supplied value is
+    // ignored.
     environmentResult[DashEnvVar.tool.name] =
-        parentTool ?? environmentResult[DashEnvVar.tool.name] ?? DashTool.flutterTool.label;
+        _asRootToolLabel(_platform.environment[DashEnvVar.tool.name]) ?? DashTool.flutterTool.label;
 
     return environmentResult;
+  }
+
+  /// Returns [label] if it names a [DashTool] that can be a root tool, or
+  /// `null` otherwise.
+  static String? _asRootToolLabel(String? label) {
+    if (label == null) {
+      return null;
+    }
+    final DashTool? tool = DashTool.values.where((DashTool t) => t.label == label).firstOrNull;
+    return (tool?.canBeRootTool ?? false) ? label : null;
   }
 
   @override

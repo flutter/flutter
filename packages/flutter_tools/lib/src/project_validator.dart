@@ -10,6 +10,7 @@ import 'base/platform.dart';
 import 'cache.dart';
 import 'context/android_context.dart';
 import 'context/tool_context.dart';
+import 'features.dart';
 import 'flutter_manifest.dart';
 import 'git.dart';
 import 'project.dart';
@@ -37,8 +38,12 @@ abstract class MachineProjectValidator extends ProjectValidator {
 ///
 /// Specific info from different platforms should be written in their own ProjectValidator.
 class VariableDumpMachineProjectValidator extends MachineProjectValidator {
-  const VariableDumpMachineProjectValidator({required this._toolContext});
+  const VariableDumpMachineProjectValidator({
+    required this._featureFlags,
+    required this._toolContext,
+  });
 
+  final FeatureFlags _featureFlags;
   final ToolContext _toolContext;
 
   String _toJsonValue(Object? obj) {
@@ -59,6 +64,7 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
       flutterRoot: cache.flutterRoot,
       fs: fs,
       git: git,
+      isOmitLegacyVersionFileEnabled: () => _featureFlags.isOmitLegacyVersionFileEnabled,
       logger: logger,
       platform: platform,
     );

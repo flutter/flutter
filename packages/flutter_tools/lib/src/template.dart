@@ -7,7 +7,6 @@ import 'package:package_config/package_config.dart';
 import 'package:package_config/package_config_types.dart';
 
 import 'base/common.dart';
-import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/template.dart';
@@ -58,8 +57,6 @@ class TemplatePathProvider {
     return name == null ? templateDirectory : templateDirectory.childDirectory(name);
   }
 }
-
-TemplatePathProvider get templatePathProvider => context.get<TemplatePathProvider>()!;
 
 /// Expands templates in a directory to a destination. All files that must
 /// undergo template expansion should end with the `.tmpl` extension. All files
@@ -164,8 +161,9 @@ class Template {
   static Future<Template> fromName(
     String name, {
     required FileSystem fileSystem,
-    required Set<Uri>? templateManifest,
     required Logger logger,
+    required Set<Uri>? templateManifest,
+    required TemplatePathProvider templatePathProvider,
     required TemplateRenderer templateRenderer,
   }) async {
     // All named templates are placed in the 'templates' directory
@@ -185,8 +183,9 @@ class Template {
     List<String> names,
     Directory directory, {
     required FileSystem fileSystem,
-    required Set<Uri> templateManifest,
     required Logger logger,
+    required Set<Uri> templateManifest,
+    required TemplatePathProvider templatePathProvider,
     required TemplateRenderer templateRenderer,
   }) async {
     // All named templates are placed in the 'templates' directory

@@ -41,7 +41,7 @@ void main() {
         continue;
       }
       final hotReload = buildMode == 'debug' ? ' hot reload and hot restart' : '';
-      testWithoutContext('flutter run$hotReload with native assets $device $buildMode', () async {
+      test('flutter run$hotReload with native assets $device $buildMode', () async {
         await inTempDir((Directory tempDirectory) async {
           final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
           final Directory exampleDirectory = packageDirectory.childDirectory('example');
@@ -135,7 +135,7 @@ void main() {
     // the file is replaced, which is what rebuilding does to a bundle a debug
     // instance is still running, and the next `@Native` binding to resolve then
     // maps a second copy of the asset with its own copy of the library's state.
-    testWithoutContext('code asset is not mapped twice when its file is replaced', () async {
+    test('code asset is not mapped twice when its file is replaced', () async {
       await inTempDir((Directory tempDirectory) async {
         final Directory packageDirectory = await createTestProject(
           packageName,

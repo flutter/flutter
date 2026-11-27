@@ -17,7 +17,8 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 final _FakeAnalytics fakeAnalytics = _FakeAnalytics();
 
@@ -52,26 +53,26 @@ void main() {
     overrideWindowsRetryBackoffs = const <Duration>[];
   });
 
-  testWithoutContext('deleteIfExists does not delete if file does not exist', () {
+  test('deleteIfExists does not delete if file does not exist', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File file = fileSystem.file('file');
 
     expect(ErrorHandlingFileSystem.deleteIfExists(file), false);
   });
 
-  testWithoutContext('deleteIfExists deletes if file exists', () {
+  test('deleteIfExists deletes if file exists', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File file = fileSystem.file('file')..createSync();
 
     expect(ErrorHandlingFileSystem.deleteIfExists(file), true);
   });
 
-  testWithoutContext('create accepts exclusive argument', () {
+  test('create accepts exclusive argument', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     expect(fileSystem.file('file').create(exclusive: true), isNotNull);
   });
 
-  testWithoutContext('deleteIfExists handles separate program deleting file', () {
+  test('deleteIfExists handles separate program deleting file', () {
     late MemoryFileSystem memoryFileSystem;
     var inOpHandle = false;
     memoryFileSystem = MemoryFileSystem.test(
@@ -96,7 +97,7 @@ void main() {
     expect(ErrorHandlingFileSystem.deleteIfExists(file), true);
   });
 
-  testWithoutContext('deleteIfExists throws tool exit if file exists on read-only volume', () {
+  test('deleteIfExists throws tool exit if file exists on read-only volume', () {
     final exceptionHandler = FileExceptionHandler();
     final fileSystem = ErrorHandlingFileSystem(
       delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
@@ -113,7 +114,7 @@ void main() {
     expect(() => ErrorHandlingFileSystem.deleteIfExists(file), throwsToolExit());
   });
 
-  testWithoutContext('deleteIfExists does not tool exit if file exists on read-only '
+  test('deleteIfExists does not tool exit if file exists on read-only '
       'volume and it is run under noExitOnFailure', () {
     final exceptionHandler = FileExceptionHandler();
     final fileSystem = ErrorHandlingFileSystem(
@@ -135,7 +136,7 @@ void main() {
     }, throwsFileSystemException());
   });
 
-  testWithoutContext('deleteIfExists throws tool exit if the path is not found on Windows', () {
+  test('deleteIfExists throws tool exit if the path is not found on Windows', () {
     final exceptionHandler = FileExceptionHandler();
     final fileSystem = ErrorHandlingFileSystem(
       delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
@@ -170,7 +171,7 @@ void main() {
       exceptionHandler = FileExceptionHandler();
     });
 
-    testWithoutContext('bypasses error handling when noExitOnFailure is used', () {
+    test('bypasses error handling when noExitOnFailure is used', () {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: windowsPlatform,
@@ -200,7 +201,7 @@ void main() {
       expect(() => file.writeAsStringSync(''), throwsToolExit());
     });
 
-    testWithoutContext('when access is denied', () async {
+    test('when access is denied', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: windowsPlatform,
@@ -232,7 +233,7 @@ void main() {
       expect(() => file.createSync(), throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('when write protected or privilege not held', () async {
+    test('when write protected or privilege not held', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: windowsPlatform,
@@ -255,7 +256,7 @@ void main() {
       expect(() => file.createSync(), throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('when writing to a full device', () async {
+    test('when writing to a full device', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: windowsPlatform,
@@ -275,7 +276,7 @@ void main() {
       expect(() => file.writeAsStringSync(''), throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('when the file is being used by another program', () async {
+    test('when the file is being used by another program', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: windowsPlatform,
@@ -295,7 +296,7 @@ void main() {
       expect(() => file.writeAsStringSync(''), throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('when the device driver has a fatal error', () async {
+    test('when the device driver has a fatal error', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: windowsPlatform,
@@ -329,7 +330,7 @@ void main() {
       expect(() => file.createSync(), throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('when the device does not exist', () async {
+    test('when the device does not exist', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: windowsPlatform,
@@ -361,7 +362,7 @@ void main() {
       expect(() => file.createSync(), throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('when directory name is invalid', () async {
+    test('when directory name is invalid', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: windowsPlatform,
@@ -477,7 +478,7 @@ void main() {
       );
     });
 
-    testWithoutContext('when creating a temporary dir on a full device', () async {
+    test('when creating a temporary dir on a full device', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: windowsPlatform,
@@ -494,7 +495,7 @@ void main() {
       expect(() => directory.createTempSync('prefix'), throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('when creating a directory with permission issues', () async {
+    test('when creating a directory with permission issues', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: windowsPlatform,
@@ -511,7 +512,7 @@ void main() {
       expect(() => directory.createSync(recursive: true), throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('when checking for directory existence with permission issues', () async {
+    test('when checking for directory existence with permission issues', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: windowsPlatform,
@@ -529,7 +530,7 @@ void main() {
       expect(() => directory.existsSync(), throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('When reading from a file without permission', () {
+    test('When reading from a file without permission', () {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: windowsPlatform,
@@ -546,7 +547,7 @@ void main() {
       expect(() => file.readAsStringSync(), throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('When reading from a file or directory without permission', () {
+    test('When reading from a file or directory without permission', () {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: ThrowsOnCurrentDirectoryFileSystem(kUserPermissionDenied),
         platform: windowsPlatform,
@@ -558,7 +559,7 @@ void main() {
       );
     });
 
-    testWithoutContext('when the filename or extension is too long', () async {
+    test('when the filename or extension is too long', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: windowsPlatform,
@@ -607,7 +608,7 @@ void main() {
       exceptionHandler = FileExceptionHandler();
     });
 
-    testWithoutContext('when on a read-only file system (erofs)', () async {
+    test('when on a read-only file system (erofs)', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: linuxPlatform,
@@ -673,7 +674,7 @@ void main() {
       );
     });
 
-    testWithoutContext('when access is denied', () async {
+    test('when access is denied', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: linuxPlatform,
@@ -737,7 +738,7 @@ void main() {
       expect(() => file.readAsStringSync(), throwsToolExit(message: readMessage));
     });
 
-    testWithoutContext('when access is denied for directories', () async {
+    test('when access is denied for directories', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: linuxPlatform,
@@ -797,7 +798,7 @@ void main() {
       );
     });
 
-    testWithoutContext('when writing to a full device', () async {
+    test('when writing to a full device', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: linuxPlatform,
@@ -817,7 +818,7 @@ void main() {
       expect(() => file.writeAsStringSync(''), throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('when creating a temporary dir on a full device', () async {
+    test('when creating a temporary dir on a full device', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: linuxPlatform,
@@ -835,7 +836,7 @@ void main() {
       expect(() => directory.createTempSync('prefix'), throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('when checking for directory existence with permission issues', () async {
+    test('when checking for directory existence with permission issues', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: linuxPlatform,
@@ -853,7 +854,7 @@ void main() {
       expect(() => directory.existsSync(), throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('When the current working directory disappears', () async {
+    test('When the current working directory disappears', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: ThrowsOnCurrentDirectoryFileSystem(kSystemCodeCannotFindFile),
         platform: linuxPlatform,
@@ -865,7 +866,7 @@ void main() {
       );
     });
 
-    testWithoutContext('throws ToolExit on os error $kSystemCodeCannotFindFile', () {
+    test('throws ToolExit on os error $kSystemCodeCannotFindFile', () {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: linuxPlatform,
@@ -884,7 +885,7 @@ void main() {
       );
     });
 
-    testWithoutContext('when a cross-device link error occurs (exdev)', () async {
+    test('when a cross-device link error occurs (exdev)', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: linuxPlatform,
@@ -953,7 +954,7 @@ void main() {
       exceptionHandler = FileExceptionHandler();
     });
 
-    testWithoutContext('when on a read-only file system (erofs)', () async {
+    test('when on a read-only file system (erofs)', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: macOSPlatform,
@@ -1019,7 +1020,7 @@ void main() {
       );
     });
 
-    testWithoutContext('when access is denied', () async {
+    test('when access is denied', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: macOSPlatform,
@@ -1084,7 +1085,7 @@ void main() {
       expect(() => file.readAsStringSync(), throwsToolExit(message: readMessage));
     });
 
-    testWithoutContext('when access is denied for directories', () async {
+    test('when access is denied for directories', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: macOSPlatform,
@@ -1144,7 +1145,7 @@ void main() {
       );
     });
 
-    testWithoutContext('when writing to a full device', () async {
+    test('when writing to a full device', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: macOSPlatform,
@@ -1164,7 +1165,7 @@ void main() {
       expect(() => file.writeAsStringSync(''), throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('when creating a temporary dir on a full device', () async {
+    test('when creating a temporary dir on a full device', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: macOSPlatform,
@@ -1182,7 +1183,7 @@ void main() {
       expect(() => directory.createTempSync('prefix'), throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('when checking for directory existence with permission issues', () async {
+    test('when checking for directory existence with permission issues', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: macOSPlatform,
@@ -1200,7 +1201,7 @@ void main() {
       expect(() => directory.existsSync(), throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('When reading from a file without permission', () {
+    test('When reading from a file without permission', () {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: macOSPlatform,
@@ -1217,7 +1218,7 @@ void main() {
       expect(() => file.readAsStringSync(), throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('When reading from current directory without permission', () {
+    test('When reading from current directory without permission', () {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: ThrowsOnCurrentDirectoryFileSystem(eacces),
         platform: linuxPlatform,
@@ -1229,7 +1230,7 @@ void main() {
       );
     });
 
-    testWithoutContext('when a cross-device link error occurs (exdev)', () async {
+    test('when a cross-device link error occurs (exdev)', () async {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: macOSPlatform,
@@ -1278,7 +1279,7 @@ void main() {
     });
   });
 
-  testWithoutContext('Caches path context correctly', () {
+  test('Caches path context correctly', () {
     final fileSystem = FakeFileSystem();
     final FileSystem fs = ErrorHandlingFileSystem(
       delegate: fileSystem,
@@ -1288,7 +1289,7 @@ void main() {
     expect(identical(fs.path, fs.path), true);
   });
 
-  testWithoutContext('Clears cache when CWD changes', () {
+  test('Clears cache when CWD changes', () {
     final fileSystem = FakeFileSystem();
     final FileSystem fs = ErrorHandlingFileSystem(
       delegate: fileSystem,
@@ -1303,7 +1304,7 @@ void main() {
   });
 
   group('toString() gives toString() of delegate', () {
-    testWithoutContext('ErrorHandlingFileSystem', () {
+    test('ErrorHandlingFileSystem', () {
       final delegate = MemoryFileSystem.test();
       final FileSystem fs = ErrorHandlingFileSystem(
         delegate: delegate,
@@ -1314,7 +1315,7 @@ void main() {
       expect(fs.toString(), delegate.toString());
     });
 
-    testWithoutContext('ErrorHandlingFile', () {
+    test('ErrorHandlingFile', () {
       final delegate = MemoryFileSystem.test();
       final FileSystem fs = ErrorHandlingFileSystem(
         delegate: delegate,
@@ -1326,7 +1327,7 @@ void main() {
       expect(fs.file('file').toString(), file.toString());
     });
 
-    testWithoutContext('ErrorHandlingDirectory', () {
+    test('ErrorHandlingDirectory', () {
       final delegate = MemoryFileSystem.test();
       final FileSystem fs = ErrorHandlingFileSystem(
         delegate: delegate,
@@ -1341,7 +1342,7 @@ void main() {
     });
   });
 
-  testWithoutContext(
+  test(
     "ErrorHandlingFileSystem.systemTempDirectory wraps delegate filesystem's systemTempDirectory",
     () {
       final exceptionHandler = FileExceptionHandler();
@@ -1379,7 +1380,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
     },
   );
 
-  testWithoutContext("ErrorHandlingFileSystem.systemTempDirectory handles any exception thrown by the delegate's systemTempDirectory implementation", () {
+  test("ErrorHandlingFileSystem.systemTempDirectory handles any exception thrown by the delegate's systemTempDirectory implementation", () {
     final exceptionHandler = FileExceptionHandler();
     exceptionHandler.addTempError(
       FileSystemOp.create,
@@ -1407,72 +1408,66 @@ Please ensure that the SDK and/or project is installed in a location that has re
     const kAccessDisabledByPolicy = 1260;
     const kSystemIntegrityPolicyViolation = 454;
 
-    testWithoutContext(
-      'when PackageProcess throws an exception containing non-executable bits',
-      () {
-        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>['foo'],
-            exception: ProcessPackageExecutableNotFoundException(
-              '',
-              candidates: <String>['not-empty'],
-            ),
+    test('when PackageProcess throws an exception containing non-executable bits', () {
+      final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['foo'],
+          exception: ProcessPackageExecutableNotFoundException(
+            '',
+            candidates: <String>['not-empty'],
           ),
-          const FakeCommand(
-            command: <String>['foo'],
-            exception: ProcessPackageExecutableNotFoundException(
-              '',
-              candidates: <String>['not-empty'],
-            ),
+        ),
+        const FakeCommand(
+          command: <String>['foo'],
+          exception: ProcessPackageExecutableNotFoundException(
+            '',
+            candidates: <String>['not-empty'],
           ),
-        ]);
+        ),
+      ]);
 
-        final ProcessManager processManager = createProcessManager(
-          delegate: fakeProcessManager,
-          platform: windowsPlatform,
-        );
+      final ProcessManager processManager = createProcessManager(
+        delegate: fakeProcessManager,
+        platform: windowsPlatform,
+      );
 
-        const expectedMessage =
-            'The Flutter tool could not locate an executable with suitable permissions';
+      const expectedMessage =
+          'The Flutter tool could not locate an executable with suitable permissions';
 
-        expect(
-          () async => processManager.start(<String>['foo']),
-          throwsToolExit(message: expectedMessage),
-        );
-        expect(
-          () async => processManager.runSync(<String>['foo']),
-          throwsToolExit(message: expectedMessage),
-        );
-      },
-    );
+      expect(
+        () async => processManager.start(<String>['foo']),
+        throwsToolExit(message: expectedMessage),
+      );
+      expect(
+        () async => processManager.runSync(<String>['foo']),
+        throwsToolExit(message: expectedMessage),
+      );
+    });
 
-    testWithoutContext(
-      'when PackageProcess throws an exception without containing non-executable bits',
-      () {
-        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>['foo'],
-            exception: ProcessPackageExecutableNotFoundException(''),
-          ),
-          const FakeCommand(
-            command: <String>['foo'],
-            exception: ProcessPackageExecutableNotFoundException(''),
-          ),
-        ]);
+    test('when PackageProcess throws an exception without containing non-executable bits', () {
+      final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['foo'],
+          exception: ProcessPackageExecutableNotFoundException(''),
+        ),
+        const FakeCommand(
+          command: <String>['foo'],
+          exception: ProcessPackageExecutableNotFoundException(''),
+        ),
+      ]);
 
-        final ProcessManager processManager = createProcessManager(
-          delegate: fakeProcessManager,
-          platform: windowsPlatform,
-        );
+      final ProcessManager processManager = createProcessManager(
+        delegate: fakeProcessManager,
+        platform: windowsPlatform,
+      );
 
-        // If there were no located executables treat this as a programming error and rethrow the original
-        // exception.
-        expect(() async => processManager.start(<String>['foo']), throwsProcessException());
-        expect(() async => processManager.runSync(<String>['foo']), throwsProcessException());
-      },
-    );
+      // If there were no located executables treat this as a programming error and rethrow the original
+      // exception.
+      expect(() async => processManager.start(<String>['foo']), throwsProcessException());
+      expect(() async => processManager.runSync(<String>['foo']), throwsProcessException());
+    });
 
-    testWithoutContext('when the device is full', () {
+    test('when the device is full', () {
       final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['foo'],
@@ -1509,7 +1504,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       );
     });
 
-    testWithoutContext('when the file is being used by another program', () {
+    test('when the file is being used by another program', () {
       final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['foo'],
@@ -1545,7 +1540,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       );
     });
 
-    testWithoutContext('when permissions are denied', () {
+    test('when permissions are denied', () {
       final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['foo'],
@@ -1583,7 +1578,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       );
     });
 
-    testWithoutContext('when cannot run executable', () {
+    test('when cannot run executable', () {
       final throwingFakeProcessManager = ThrowingFakeProcessManager(
         const ProcessException('', <String>[], '', kUserPermissionDenied),
       );
@@ -1601,7 +1596,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       );
     });
 
-    testWithoutContext('when the filename or extension is too long', () async {
+    test('when the filename or extension is too long', () async {
       final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['foo', '--bar'],
@@ -1657,7 +1652,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       );
     });
 
-    testWithoutContext('when directory name is invalid', () async {
+    test('when directory name is invalid', () async {
       final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['foo', '--bar'],
@@ -1717,7 +1712,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       ('Windows group policy', kAccessDisabledByPolicy),
       ('Windows system integrity policy violation', kSystemIntegrityPolicyViolation),
     ]) {
-      testWithoutContext('when blocked by $name', () {
+      test('when blocked by $name', () {
         final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
           FakeCommand(
             command: const <String>['foo'],
@@ -1760,7 +1755,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
     const enospc = 28;
     const eacces = 13;
 
-    testWithoutContext('when writing to a full device', () {
+    test('when writing to a full device', () {
       final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['foo'],
@@ -1796,7 +1791,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       );
     });
 
-    testWithoutContext('when permissions are denied', () {
+    test('when permissions are denied', () {
       final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['foo'],
@@ -1834,7 +1829,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       );
     });
 
-    testWithoutContext('when cannot run executable', () {
+    test('when cannot run executable', () {
       final throwingFakeProcessManager = ThrowingFakeProcessManager(
         const ProcessException('', <String>[], '', eacces),
       );
@@ -1863,7 +1858,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
     const ebadarch = 86;
     const eagain = 35;
 
-    testWithoutContext('when writing to a full device', () {
+    test('when writing to a full device', () {
       final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['foo'],
@@ -1899,7 +1894,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       );
     });
 
-    testWithoutContext('when permissions are denied', () {
+    test('when permissions are denied', () {
       final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['foo'],
@@ -1937,7 +1932,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       );
     });
 
-    testWithoutContext('when cannot run executable', () {
+    test('when cannot run executable', () {
       final throwingFakeProcessManager = ThrowingFakeProcessManager(
         const ProcessException('', <String>[], '', eacces),
       );
@@ -1959,7 +1954,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       );
     });
 
-    testWithoutContext('when bad CPU type', () async {
+    test('when bad CPU type', () async {
       final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['foo', '--bar'],
@@ -1998,7 +1993,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       );
     });
 
-    testWithoutContext('when up against resource limits (EAGAIN)', () async {
+    test('when up against resource limits (EAGAIN)', () async {
       final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['foo', '--bar'],
@@ -2023,7 +2018,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
     });
   });
 
-  testWithoutContext('ErrorHandlingProcessManager delegates killPid correctly', () async {
+  test('ErrorHandlingProcessManager delegates killPid correctly', () async {
     final fakeProcessManager = FakeSignalProcessManager();
     final ProcessManager processManager = createProcessManager(
       delegate: fakeProcessManager,
@@ -2051,7 +2046,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       );
     });
 
-    testWithoutContext('copySync handles error if openSync on source file fails', () {
+    test('copySync handles error if openSync on source file fails', () {
       final File source = fileSystem.file('source');
 
       exceptionHandler.addError(
@@ -2071,7 +2066,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       );
     });
 
-    testWithoutContext('copySync handles error if createSync on destination file fails', () {
+    test('copySync handles error if createSync on destination file fails', () {
       fileSystem.file('source').createSync();
       final File dest = fileSystem.file('dest');
 
@@ -2091,7 +2086,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
     });
 
     // dart:io is able to clobber read-only files.
-    testWithoutContext('copySync will copySync even if the destination is not writable', () {
+    test('copySync will copySync even if the destination is not writable', () {
       fileSystem.file('source').createSync();
       final File dest = fileSystem.file('dest');
 
@@ -2106,7 +2101,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       expect(dest, exists);
     });
 
-    testWithoutContext('copySync will copySync if there are no exceptions', () {
+    test('copySync will copySync if there are no exceptions', () {
       fileSystem.file('source').createSync();
       final File dest = fileSystem.file('dest');
 
@@ -2115,23 +2110,20 @@ Please ensure that the SDK and/or project is installed in a location that has re
       expect(dest, exists);
     });
 
-    testWithoutContext(
-      'copySync can directly copy bytes if both files can be opened but copySync fails',
-      () {
-        final expectedBytes = List<int>.generate(64 * 1024 + 3, (int i) => i.isEven ? 0 : 1);
-        fileSystem.file('source').writeAsBytesSync(expectedBytes);
-        final File dest = fileSystem.file('dest');
+    test('copySync can directly copy bytes if both files can be opened but copySync fails', () {
+      final expectedBytes = List<int>.generate(64 * 1024 + 3, (int i) => i.isEven ? 0 : 1);
+      fileSystem.file('source').writeAsBytesSync(expectedBytes);
+      final File dest = fileSystem.file('dest');
 
-        exceptionHandler.addError(
-          dest,
-          FileSystemOp.copy,
-          FileSystemException('', dest.path, const OSError('', eaccess)),
-        );
+      exceptionHandler.addError(
+        dest,
+        FileSystemOp.copy,
+        FileSystemException('', dest.path, const OSError('', eaccess)),
+      );
 
-        fileSystem.file('source').copySync('dest');
-        expect(dest.readAsBytesSync(), expectedBytes);
-      },
-    );
+      fileSystem.file('source').copySync('dest');
+      expect(dest.readAsBytesSync(), expectedBytes);
+    });
   });
 
   group('Async I/O wrapping', () {
@@ -2146,7 +2138,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       );
     });
 
-    testWithoutContext('asynchronous exists is wrapped and throws ToolExit on eacces', () async {
+    test('asynchronous exists is wrapped and throws ToolExit on eacces', () async {
       final File file = fileSystem.file('file');
       exceptionHandler.addError(
         file,
@@ -2157,18 +2149,15 @@ Please ensure that the SDK and/or project is installed in a location that has re
       expect(() => file.exists(), throwsToolExit());
     });
 
-    testWithoutContext(
-      'asynchronous readAsString is wrapped and throws ToolExit on eacces',
-      () async {
-        final File file = fileSystem.file('file')..createSync();
-        exceptionHandler.addError(
-          file,
-          FileSystemOp.read,
-          const FileSystemException('', '', OSError('', 13)), // eacces
-        );
-        expect(() => file.readAsString(), throwsToolExit());
-      },
-    );
+    test('asynchronous readAsString is wrapped and throws ToolExit on eacces', () async {
+      final File file = fileSystem.file('file')..createSync();
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.read,
+        const FileSystemException('', '', OSError('', 13)), // eacces
+      );
+      expect(() => file.readAsString(), throwsToolExit());
+    });
   });
 
   group('Missing file mapping', () {
@@ -2188,7 +2177,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       );
     });
 
-    testWithoutContext('POSIX enoent (2) throws clean ToolExit', () async {
+    test('POSIX enoent (2) throws clean ToolExit', () async {
       final File file = linuxFileSystem.file('file');
       exceptionHandler.addError(
         file,
@@ -2201,7 +2190,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       );
     });
 
-    testWithoutContext('Windows kFileNotFound (2) throws clean ToolExit', () async {
+    test('Windows kFileNotFound (2) throws clean ToolExit', () async {
       final File file = windowsFileSystem.file('file');
       exceptionHandler.addError(
         file,
@@ -2214,7 +2203,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       );
     });
 
-    testWithoutContext('Windows kPathNotFound (3) throws clean ToolExit', () async {
+    test('Windows kPathNotFound (3) throws clean ToolExit', () async {
       final File file = windowsFileSystem.file('file');
       exceptionHandler.addError(
         file,
@@ -2248,7 +2237,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       overrideWindowsRetryBackoffs = originalBackoffs;
     });
 
-    testWithoutContext('recovers from transient lock during retry loop (sync)', () {
+    test('recovers from transient lock during retry loop (sync)', () {
       attemptsLeft = 3; // Fails 3 times, succeeds on 4th (attempt index 3)
       final memoryFileSystem = MemoryFileSystem.test(
         opHandle: (String path, FileSystemOp op) {
@@ -2273,7 +2262,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       expect(memoryFileSystem.file('/file').readAsStringSync(), 'content');
     });
 
-    testWithoutContext('fails after 5 transient locks and throws ToolExit (sync)', () {
+    test('fails after 5 transient locks and throws ToolExit (sync)', () {
       attemptsLeft = 6; // Fails 6 times
       final memoryFileSystem = MemoryFileSystem.test(
         opHandle: (String path, FileSystemOp op) {
@@ -2298,7 +2287,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       );
     });
 
-    testWithoutContext('recovers from transient lock during retry loop (async)', () async {
+    test('recovers from transient lock during retry loop (async)', () async {
       attemptsLeft = 3; // Fails 3 times, succeeds on 4th (attempt index 3)
       final memoryFileSystem = MemoryFileSystem.test(
         opHandle: (String path, FileSystemOp op) {
@@ -2325,7 +2314,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
   });
 
   group('deleteIfExists with broken symlinks', () {
-    testWithoutContext('successfully clears a broken symlink on disk', () {
+    test('successfully clears a broken symlink on disk', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final Link link = fileSystem.link('broken_link');
       link.createSync('non_existent_target');
@@ -2351,7 +2340,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
           ('AsciiCodec(allowInvalid: true)', const AsciiCodec(allowInvalid: true), '\uFFFD\uFFFDA'),
           ('latin1', latin1, '\u00FF\u00FEA'),
         ]) {
-      testWithoutContext('forwards $encodingName to LocalFileSystem delegate', () {
+      test('forwards $encodingName to LocalFileSystem delegate', () {
         final localFileSystem = LocalFileSystem.test(signals: FakeSignals());
         addTearDown(localFileSystem.dispose);
         final Directory tempDir = localFileSystem.systemTempDirectory.createTempSync(

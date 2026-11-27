@@ -21,7 +21,7 @@ void main() {
     await fs.dispose();
   });
 
-  testWithoutContext(
+  test(
     'flutter command can receive `!`, avoiding expansion by cmd.exe',
     () async {
       final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter.bat');
@@ -37,7 +37,7 @@ void main() {
     skip: !Platform.isWindows, // [intended] relies on Windows's cmd.exe
   );
 
-  testWithoutContext('windows entrypoint batch scripts do not enable delayed expansion', () {
+  test('windows entrypoint batch scripts do not enable delayed expansion', () {
     final String flutterRoot = getFlutterRoot();
     final File flutterBat = fs.file(fs.path.join(flutterRoot, 'bin', 'flutter.bat'));
     final File dartBat = fs.file(fs.path.join(flutterRoot, 'bin', 'dart.bat'));

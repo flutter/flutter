@@ -57,9 +57,11 @@ import androidx.window.layout.WindowLayoutInfo;
 import io.flutter.Build.API_LEVELS;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterJNI;
+import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
+import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
 import java.lang.reflect.Field;
@@ -121,6 +123,47 @@ public class FlutterViewTest {
     // Value should not exclude descendants because platform views are added as child views and
     // can be eligible for autofill (e.g. a WebView).
     assertEquals(View.IMPORTANT_FOR_AUTOFILL_YES, flutterView.getImportantForAutofill());
+  }
+
+  @Test
+  public void onCheckIsTextEditor_reflectsAttachedTextInputClient() {
+    FlutterView flutterView = new FlutterView(ctx);
+    FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    TextInputChannel textInputChannel = spy(new TextInputChannel(mock(DartExecutor.class)));
+    when(flutterEngine.getTextInputChannel()).thenReturn(textInputChannel);
+
+    // A detached view has no text input plugin to consult.
+    assertFalse(flutterView.onCheckIsTextEditor());
+
+    flutterView.attachToFlutterEngine(flutterEngine);
+    assertFalse(flutterView.onCheckIsTextEditor());
+
+    ArgumentCaptor<TextInputChannel.TextInputMethodHandler> handlerCaptor =
+        ArgumentCaptor.forClass(TextInputChannel.TextInputMethodHandler.class);
+    verify(textInputChannel).setTextInputMethodHandler(handlerCaptor.capture());
+    handlerCaptor
+        .getValue()
+        .setClient(
+            0,
+            new TextInputChannel.Configuration(
+                false,
+                false,
+                true,
+                true,
+                false,
+                TextInputChannel.TextCapitalization.NONE,
+                new TextInputChannel.InputType(
+                    TextInputChannel.TextInputType.TEXT, false, false, false),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null));
+    assertTrue(flutterView.onCheckIsTextEditor());
+
+    flutterView.detachFromFlutterEngine();
+    assertFalse(flutterView.onCheckIsTextEditor());
   }
 
   @Test

@@ -10,7 +10,6 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
 import '../base/io.dart';
@@ -33,9 +32,7 @@ import '../device.dart';
 import '../doctor.dart';
 import '../features.dart';
 import '../flutter_plugins.dart';
-import '../ios/plist_parser.dart';
 import '../package_graph.dart';
-import '../persistent_tool_state.dart';
 import '../pre_run_validator.dart';
 import '../project.dart';
 import '../reporting/unified_analytics.dart';
@@ -184,6 +181,7 @@ abstract final class FlutterCommandCategory {
 abstract class FlutterCommand extends Command<void> {
   FlutterCommand({
     required this.toolContext,
+    this._applicationPackages,
     this.verboseHelp = false,
     this._outputPreferences,
     DeviceManager? deviceManager,
@@ -210,7 +208,6 @@ abstract class FlutterCommand extends Command<void> {
   UserMessages get _userMessages => toolContext.userMessages;
   PreRunValidator get _preRunValidator => toolContext.preRunValidator;
   OperatingSystemUtils get _os => toolContext.os;
-  PersistentToolState? get _persistentToolState => toolContext.persistentToolState;
   Platform get _platform => toolContext.platform;
   FileSystem get _fs => toolContext.fs;
   FlutterProjectFactory get _projectFactory => toolContext.projectFactory;
@@ -218,12 +215,6 @@ abstract class FlutterCommand extends Command<void> {
   Cache get _cache => toolContext.cache;
   FlutterVersion get _flutterVersion => toolContext.flutterVersion;
   FileSystemUtils get _fsUtils => toolContext.fileSystemUtils;
-
-  /// The currently executing command (or sub-command).
-
-  ///
-  /// Will be `null` until the top-most command has begun execution.
-  static FlutterCommand? get current => context.get<FlutterCommand>();
 
   /// The option name for a custom VM Service port.
   static const vmServicePortOption = 'vm-service-port';
@@ -588,7 +579,7 @@ abstract class FlutterCommand extends Command<void> {
   /// This is only a default. Gradle injects it when the merged manifest does
   /// not set `io.flutter.embedding.android.EnableHcpp` at all, so an entry in
   /// the manifest wins over it. [explicitEnableHcpp] in turn wins over both.
-  bool get enableHcpp => explicitEnableHcpp ?? runner?.featureFlags?.isHcppEnabled ?? false;
+  bool get enableHcpp => explicitEnableHcpp ?? runner?.featureFlags.isHcppEnabled ?? false;
 
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
@@ -855,41 +846,35 @@ abstract class FlutterCommand extends Command<void> {
   /// and [runCommand] to execute the command
   /// so that this method can record and report the overall time to analytics.
   @override
-  Future<void> run() {
+  Future<void> run() async {
     final DateTime startTime = _clock.now();
 
-    return context.run<void>(
-      name: 'command',
-      overrides: <Type, Generator>{FlutterCommand: () => this},
-      body: () async {
-        if (hasOption(CommonOptions.fatalWarnings)) {
-          _logger.fatalWarnings = getValue(CommonOptions.fatalWarnings);
-        }
-        _printDeprecationWarning();
-        final String? commandPath = await usagePath;
-        if (commandPath != null) {
-          _registerSignalHandlers(commandPath, startTime);
-        }
-        var commandResult = FlutterCommandResult.fail();
-        try {
-          commandResult = await verifyThenRunCommand(commandPath);
-        } finally {
-          final DateTime endTime = _clock.now();
-          _logger.printTrace(
-            _userMessages.flutterElapsedTime(
-              name,
-              getElapsedAsMilliseconds(endTime.difference(startTime)),
-            ),
-          );
-          if (commandPath != null) {
-            _sendPostUsage(commandPath, commandResult, startTime, endTime);
-          }
-          if (hasOption(CommonOptions.fatalWarnings)) {
-            _logger.checkForFatalLogs();
-          }
-        }
-      },
-    );
+    if (hasOption(CommonOptions.fatalWarnings)) {
+      _logger.fatalWarnings = getValue(CommonOptions.fatalWarnings);
+    }
+    _printDeprecationWarning();
+    final String? commandPath = await usagePath;
+    if (commandPath != null) {
+      _registerSignalHandlers(commandPath, startTime);
+    }
+    var commandResult = FlutterCommandResult.fail();
+    try {
+      commandResult = await verifyThenRunCommand(commandPath);
+    } finally {
+      final DateTime endTime = _clock.now();
+      _logger.printTrace(
+        _userMessages.flutterElapsedTime(
+          name,
+          getElapsedAsMilliseconds(endTime.difference(startTime)),
+        ),
+      );
+      if (commandPath != null) {
+        _sendPostUsage(commandPath, commandResult, startTime, endTime);
+      }
+      if (hasOption(CommonOptions.fatalWarnings)) {
+        _logger.checkForFatalLogs();
+      }
+    }
   }
 
   @override
@@ -1178,14 +1163,14 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
-    final PersistentToolState? persistentToolState = _persistentToolState;
-    if (_os.hostPlatform == HostPlatform.darwin_x64 &&
-        (persistentToolState?.shouldShowIntelMacWarning ?? true)) {
+    if (_os.hostPlatform == .darwin_x64) {
+      // This is about the host machine rather than the project, so it should
+      // not fail commands that treat warnings as fatal.
       _logger.printWarning(
         'Flutter is deprecating support for Intel-based Macs. '
         'A future version of Flutter will require an Apple Silicon Mac to build applications.',
+        fatal: false,
       );
-      persistentToolState?.shouldShowIntelMacWarning = false;
     }
 
     if (refreshWirelessDevices) {
@@ -1233,7 +1218,7 @@ abstract class FlutterCommand extends Command<void> {
     project.checkForDeprecation(deprecationBehavior: deprecationBehavior);
 
     if (shouldRunPub) {
-      await pub.get(
+      await runner!.pub.get(
         context: PubContext.getVerifyContext(name),
         project: project,
         checkUpToDate: cachePubGet,
@@ -1285,21 +1270,21 @@ abstract class FlutterCommand extends Command<void> {
     PackageGraph? packageGraph,
     PackageConfig? packageConfig,
   }) {
+    final FlutterCommandRunner commandRunner = runner!;
     return project.regeneratePlatformSpecificTooling(
       toolContext: toolContext,
-      analytics: _analytics,
-      cocoaPods: runner?.cocoaPods,
+      analytics: commandRunner.analytics,
+      cocoaPods: commandRunner.cocoaPods,
       deprecationBehavior: deprecationBehavior,
-      featureFlags: runner?.featureFlags ?? featureFlags,
-      gradleUtils: runner?.gradleUtils,
-      plistParser:
-          runner?.plistParser ??
-          PlistParser(fileSystem: _fs, logger: _logger, processManager: toolContext.processManager),
+      featureFlags: commandRunner.featureFlags,
+      gradleUtils: commandRunner.gradleUtils,
+      plistParser: commandRunner.plistParser,
       releaseMode: releaseMode,
       pubspecCache: pubspecCache,
       packageGraph: packageGraph,
       packageConfig: packageConfig,
-      templateRenderer: runner!.templateRenderer!,
+      templatePathProvider: commandRunner.templatePathProvider,
+      templateRenderer: commandRunner.templateRenderer,
     );
   }
 
@@ -1403,9 +1388,8 @@ abstract class FlutterCommand extends Command<void> {
     return help;
   }
 
-  // TODO(bkonyi): Remove once commands using ApplicationPackageFactory are migrated to explicit dependency injection, https://github.com/flutter/flutter/issues/47161.
-  ApplicationPackageFactory? get applicationPackages =>
-      _applicationPackages ?? ApplicationPackageFactory.instance;
+  ApplicationPackageFactory get applicationPackages =>
+      _applicationPackages ?? runner!.applicationPackageFactory;
   set applicationPackages(ApplicationPackageFactory? value) {
     _applicationPackages = value;
   }
@@ -1454,7 +1438,7 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
       final TargetPlatform targetPlatform = await device.targetPlatform;
       final DevelopmentArtifact? developmentArtifact = artifactFromTargetPlatform(
         targetPlatform,
-        runner?.featureFlags ?? featureFlags,
+        runner!.featureFlags,
       );
       if (developmentArtifact != null) {
         artifacts.add(developmentArtifact);

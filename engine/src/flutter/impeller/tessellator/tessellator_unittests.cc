@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <cmath>
+#include <limits>
+
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 
@@ -706,6 +709,149 @@ TEST(TessellatorTest, EarlyReturnEmptyConvexShape) {
 
   EXPECT_TRUE(points.empty());
   EXPECT_TRUE(indices.empty());
+}
+
+namespace {
+size_t QuadrantSteps(Tessellator& tessellator, Scalar pixel_radius) {
+  return tessellator.GetTrigsForDeviceRadius(pixel_radius).GetSteps();
+}
+}  // namespace
+
+TEST(TessellatorTest, MaxQuadrantDivisionsMatchesFloatPrecision) {
+  // The cap is the smallest N whose chord error, relative to the radius,
+  // is no larger than float32 unit roundoff (2^-24).
+  constexpr double kUnitRoundoff = 0x1p-24;
+  constexpr double kCap = Tessellator::kMaxQuadrantDivisions;
+  EXPECT_LE(1.0 - std::cos(kPiOver4 / kCap), kUnitRoundoff);
+  EXPECT_GT(1.0 - std::cos(kPiOver4 / (kCap - 1.0)), kUnitRoundoff);
+}
+
+TEST(TessellatorTest, QuadrantDivisionsForNonPositiveAndNaNRadii) {
+  Tessellator tessellator;
+  constexpr Scalar kNaN = std::numeric_limits<Scalar>::quiet_NaN();
+  constexpr Scalar kInf = std::numeric_limits<Scalar>::infinity();
+
+  EXPECT_EQ(QuadrantSteps(tessellator, 0.0f), 1u);
+  EXPECT_EQ(QuadrantSteps(tessellator, -0.0f), 1u);
+  EXPECT_EQ(QuadrantSteps(tessellator, -1.0f), 1u);
+  EXPECT_EQ(QuadrantSteps(tessellator, -1e10f), 1u);
+  EXPECT_EQ(QuadrantSteps(tessellator, -kInf), 1u);
+  EXPECT_EQ(QuadrantSteps(tessellator, kNaN), 1u);
+}
+
+TEST(TessellatorTest, QuadrantDivisionsForHugeRadiiAreCapped) {
+  Tessellator tessellator;
+  constexpr size_t kCap = Tessellator::kMaxQuadrantDivisions;
+
+  // Values at and beyond INT_MAX should not overflow the float-to-int
+  // conversion or index the precomputed table with a negative index.
+  EXPECT_EQ(QuadrantSteps(tessellator, 2147483648.0f), kCap);  // 2^31
+  EXPECT_EQ(QuadrantSteps(tessellator, 5.23111424e9f), kCap);
+  EXPECT_EQ(QuadrantSteps(tessellator, 1e10f), kCap);
+  EXPECT_EQ(QuadrantSteps(tessellator, 1e30f), kCap);
+  EXPECT_EQ(QuadrantSteps(tessellator, std::numeric_limits<Scalar>::max()),
+            kCap);
+  EXPECT_EQ(QuadrantSteps(tessellator, std::numeric_limits<Scalar>::infinity()),
+            kCap);
+}
+
+TEST(TessellatorTest, QuadrantDivisionsReachCapAtExpectedRadius) {
+  Tessellator tessellator;
+  constexpr size_t kCap = Tessellator::kMaxQuadrantDivisions;
+
+  // The tolerance formula reaches the cap at
+  // kCircleTolerance / 2^-24 ~= 1.68M pixels.
+  EXPECT_LT(QuadrantSteps(tessellator, 1.6e6f), kCap);
+  EXPECT_EQ(QuadrantSteps(tessellator, 1.7e6f), kCap);
+}
+
+TEST(TessellatorTest, QuadrantDivisionsAreMonotonicAcrossAllRanges) {
+  Tessellator tessellator;
+  constexpr size_t kCap = Tessellator::kMaxQuadrantDivisions;
+
+  // Dense across the precomputed table and the table/formula boundary.
+  size_t previous = QuadrantSteps(tessellator, 0.5f);
+  // (Integer loop counters, since clang-tidy rejects floating point ones.)
+  for (int half_radius = 2; half_radius <= 2200; half_radius++) {
+    Scalar radius = static_cast<Scalar>(half_radius) * 0.5f;
+    size_t steps = QuadrantSteps(tessellator, radius);
+    EXPECT_GE(steps, previous) << "radius = " << radius;
+    EXPECT_LE(steps, kCap) << "radius = " << radius;
+    previous = steps;
+  }
+
+  // Geometric sweep from there up through the cap and beyond INT_MAX:
+  // 1100 * 1.25^i for i in [0, 175), the last of which is about 8e19.
+  for (int i = 0; i < 175; i++) {
+    double radius = 1100.0 * std::pow(1.25, i);
+    size_t steps = QuadrantSteps(tessellator, static_cast<Scalar>(radius));
+    EXPECT_GE(steps, previous) << "radius = " << radius;
+    EXPECT_LE(steps, kCap) << "radius = " << radius;
+    previous = steps;
+  }
+  EXPECT_EQ(previous, kCap);
+}
+
+TEST(TessellatorTest, FilledEllipseDivisionsUseRadiusNotDiameter) {
+  Tessellator tessellator;
+
+  // A 200x100 ellipse has a maximum radius of 100, so it should be divided
+  // the same way as a circle of radius 100 (not 200).
+  auto check = [&tessellator](const Matrix& transform, const Rect& bounds) {
+    Scalar max_radius = bounds.GetSize().MaxDimension() * 0.5f;
+    auto ellipse = tessellator.FilledEllipse(transform, bounds);
+    auto circle = tessellator.FilledCircle(transform, {}, max_radius);
+    EXPECT_EQ(ellipse.GetVertexCount(), circle.GetVertexCount())
+        << "bounds = " << bounds << ", transform = " << transform;
+  };
+
+  check({}, Rect::MakeXYWH(0, 0, 200, 100));
+  check({}, Rect::MakeXYWH(0, 0, 100, 200));
+  check({}, Rect::MakeXYWH(-50, 30, 7, 3));
+  check(Matrix::MakeScale({3.0, 3.0, 1.0}), Rect::MakeXYWH(10, 10, 300, 40));
+  check(Matrix::MakeScale({0.01, 0.01, 1.0}),
+        Rect::MakeXYWH(0, 0, 5000, 20000));
+  // Large enough that the formula path (not the table) is used.
+  check({}, Rect::MakeXYWH(0, 0, 4000, 3000));
+}
+
+TEST(TessellatorTest, FilledEllipseWithHugeBoundsDoesNotCrash) {
+  Tessellator tessellator;
+
+  auto check = [&tessellator](const Matrix& transform, const Rect& bounds) {
+    auto generator = tessellator.FilledEllipse(transform, bounds);
+    // Each trig sample (divisions + 1 of them) produces 4 vertices.
+    EXPECT_EQ(generator.GetVertexCount(),
+              (Tessellator::kMaxQuadrantDivisions + 1) * 4)
+        << "bounds = " << bounds << ", transform = " << transform;
+
+    size_t generated = 0;
+    generator.GenerateVertices([&generated](const Point&) { generated++; });
+    EXPECT_EQ(generated, generator.GetVertexCount());
+  };
+
+  // The exact oval from the crash in the wild (a blurred, almost fully
+  // transparent oval drawn by an expanding glow animation).
+  check(Matrix::MakeTranslation({1074.5, 639.5, 0}),
+        Rect::MakeLTRB(-3.53067392e9f, -1.95301376e9f,  //
+                       1.70044006e9f, 3.27809997e9f));
+
+  // Non-square variant, so the ellipse (not circle) path is definitely used.
+  check({}, Rect::MakeLTRB(-1e10f, -5e9f, 1e10f, 5e9f));
+
+  // Modest bounds made huge by the transform.
+  check(Matrix::MakeScale({1e8, 1e8, 1.0}), Rect::MakeXYWH(0, 0, 100, 50));
+}
+
+TEST(TessellatorTest, FilledRoundRectWithHugeRadiiDoesNotCrash) {
+  Tessellator tessellator;
+  constexpr size_t kCap = Tessellator::kMaxQuadrantDivisions;
+
+  // Corner radii smaller than half the bounds, so the round-rect path
+  // (rather than the ellipse fallback) is taken.
+  auto generator = tessellator.FilledRoundRect(
+      {}, Rect::MakeLTRB(-1e10f, -1e10f, 1e10f, 1e10f), Size(4e9f, 4e9f));
+  EXPECT_EQ(generator.GetVertexCount(), (kCap + 1) * 4);
 }
 
 }  // namespace testing

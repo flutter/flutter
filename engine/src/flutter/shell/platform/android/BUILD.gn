@@ -13,6 +13,7 @@ import("//flutter/shell/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/version/version.gni")
 import("//flutter/testing/symbols/check_forbidden_native_symbols.gni")
+import("//flutter/testing/testing.gni")
 import("//flutter/vulkan/config.gni")
 
 shell_gpu_configuration("android_gpu_configuration") {
@@ -40,6 +41,10 @@ source_set("image_generator") {
   ]
 }
 
+test_fixtures("flutter_shell_native_fixtures") {
+  fixtures = []
+}
+
 executable("flutter_shell_native_unittests") {
   visibility = [ "*" ]
   testonly = true
@@ -60,10 +65,13 @@ executable("flutter_shell_native_unittests") {
   public_configs = [ "//flutter:config" ]
   defines = [ "TESTING" ]
   deps = [
+    ":flutter_shell_native_fixtures",
     ":flutter_shell_native_src",
     "//flutter/fml",
+    "//flutter/impeller/renderer/testing:mocks",
     "//flutter/shell/platform/android/jni:jni_mock",
     "//flutter/shell/platform/android/jni:mock_jni_env",
+    "//flutter/testing:testing_lib",
     "//flutter/third_party/googletest:gmock",
     "//flutter/third_party/googletest:gtest",
   ]
