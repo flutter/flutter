@@ -9,25 +9,27 @@
 #include <utility>
 
 #include "flutter/fml/cpu_affinity.h"
+#include "flutter/fml/logging.h"
 #include "flutter/fml/thread.h"
 #include "flutter/fml/trace_event.h"
-#include "impeller/base/validation.h"
 
 namespace impeller {
 
 class WaitSetEntry {
  public:
-  static std::shared_ptr<WaitSetEntry> Create(vk::UniqueFence p_fence,
-                                              fml::closure p_callback) {
+  static std::shared_ptr<WaitSetEntry> Create(
+      vk::UniqueFence p_fence,
+      std::function<void(bool)> p_callback) {
     return std::shared_ptr<WaitSetEntry>(
         new WaitSetEntry(std::move(p_fence), std::move(p_callback)));
   }
 
-  void UpdateSignalledStatus(const vk::Device& device) {
-    if (is_signalled_) {
-      return;
-    }
-    is_signalled_ = device.getFenceStatus(fence_.get()) == vk::Result::eSuccess;
+  ~WaitSetEntry() { callback_(is_signalled_); }
+
+  vk::Result UpdateSignalledStatus(const vk::Device& device) {
+    const auto result = device.getFenceStatus(fence_.get());
+    is_signalled_ = result == vk::Result::eSuccess;
+    return result;
   }
 
   const vk::Fence& GetFence() const { return fence_.get(); }
@@ -36,10 +38,10 @@ class WaitSetEntry {
 
  private:
   vk::UniqueFence fence_;
-  fml::ScopedCleanupClosure callback_;
+  std::function<void(bool)> callback_;
   bool is_signalled_ = false;
 
-  WaitSetEntry(vk::UniqueFence p_fence, fml::closure p_callback)
+  WaitSetEntry(vk::UniqueFence p_fence, std::function<void(bool)> p_callback)
       : fence_(std::move(p_fence)), callback_(std::move(p_callback)) {}
 
   WaitSetEntry(const WaitSetEntry&) = delete;
@@ -63,7 +65,7 @@ FenceWaiterVK::~FenceWaiterVK() {
 absl::Status FenceWaiterVK::AddFence(
     vk::UniqueFence fence,
     const std::function<absl::Status(vk::Fence)>& submit_callback,
-    fml::closure completion_callback) {
+    std::function<void(bool)> completion_callback) {
   if (!fence || !submit_callback || !completion_callback) {
     return absl::Status(absl::StatusCode::kInvalidArgument,
                         "Invalid arguments");
@@ -71,7 +73,7 @@ absl::Status FenceWaiterVK::AddFence(
   {
     // Maintain the invariant that terminate_ is accessed only under the lock.
     std::scoped_lock lock(wait_set_mutex_);
-    if (terminate_) {
+    if (terminate_ || device_lost_) {
       return absl::Status(absl::StatusCode::kCancelled,
                           "Fence waiter is terminated");
     }
@@ -168,20 +170,25 @@ bool FenceWaiterVK::Wait() {
       /*pFences=*/fences.data(),
       /*waitAll=*/false,
       /*timeout=*/std::chrono::nanoseconds{100ms}.count());
-  if (!(result == vk::Result::eSuccess || result == vk::Result::eTimeout)) {
-    VALIDATION_LOG << "Fence waiter encountered an unexpected error. Tearing "
-                      "down the waiter thread.";
-    return false;
-  }
-
-  // One or more fences have been signaled. Find out which ones and update
-  // their signaled statuses.
-  {
+  bool lost = result == vk::Result::eErrorDeviceLost;
+  if (!lost) {
+    if (result != vk::Result::eSuccess && result != vk::Result::eTimeout) {
+      // A failed allocation during the wait does not retire GPU resources.
+      std::this_thread::sleep_for(100ms);
+    }
     TRACE_EVENT0("impeller", "CheckFenceStatus");
     for (auto& entry : wait_set) {
-      entry->UpdateSignalledStatus(device);
+      if (entry->UpdateSignalledStatus(device) ==
+          vk::Result::eErrorDeviceLost) {
+        lost = true;
+        break;
+      }
     }
-    wait_set.clear();
+  }
+  wait_set.clear();
+  if (lost) {
+    DrainAfterDeviceLoss(device);
+    return false;
   }
 
   // Quickly acquire the wait set lock and erase signaled entries. Make sure
@@ -209,6 +216,33 @@ bool FenceWaiterVK::Wait() {
   }
 
   return true;
+}
+
+void FenceWaiterVK::DrainAfterDeviceLoss(const vk::Device& device) {
+  WaitSet pending;
+  {
+    std::scoped_lock lock(wait_set_mutex_);
+    device_lost_ = true;
+    pending.swap(wait_set_);
+  }
+  FML_LOG(ERROR) << "Vulkan device lost while waiting for submission fences.";
+  // Cover every accepted submission, including fences added during the
+  // wait-any that detected loss. On a lost device an infinite wait must
+  // return in finite time. DEVICE_LOST is equivalent to SUCCESS for
+  // determining whether resources are still in use, not for client results.
+  const auto fences = GetFencesForWaitSet(pending);
+  if (fences.empty()) {
+    return;
+  }
+  for (;;) {
+    const auto result = device.waitForFences(fences.size(), fences.data(),
+                                             /*waitAll=*/true, UINT64_MAX);
+    if (result == vk::Result::eSuccess ||
+        result == vk::Result::eErrorDeviceLost) {
+      return;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
 }
 
 void FenceWaiterVK::Terminate() {

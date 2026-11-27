@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <atomic>
+
 #include "gtest/gtest.h"
 
 #include "impeller/renderer/backend/vulkan/android/android_test_utils.h"
@@ -29,7 +31,7 @@ class FakeSurfaceControl : public SurfaceControl {
 
 TEST(AndroidAHBSwapchainTest,
      AHBSwapchainNoFenceWaitAfterAcquireNextImageFailure) {
-  bool wait_for_fences_called = false;
+  std::atomic_bool wait_for_fences_called = false;
   auto const context =
       MockVulkanContextBuilder()
           .SetDeviceExtensions(kAndroidDeviceExtensions)
@@ -53,7 +55,7 @@ TEST(AndroidAHBSwapchainTest,
   // Call AcquireNextDrawable again.  vkWaitForFences should not be called
   // because no command was submitted and no fences are pending.
   ahb_swapchain->AcquireNextDrawable();
-  EXPECT_FALSE(wait_for_fences_called);
+  EXPECT_FALSE(wait_for_fences_called.load());
 }
 
 TEST(AndroidAHBSwapchainTest, AHBSwapchainDtorCallsWaitIdle) {
