@@ -130,7 +130,14 @@ void main() {
   setUpAll(() async {
     binding = TestServiceExtensionsBinding();
     final view = RenderView(view: binding.platformDispatcher.views.single);
-    owner = PipelineOwner(onSemanticsUpdate: (ui.SemanticsUpdate _) {})..rootNode = view;
+    owner = PipelineOwner(
+      onSemanticsUpdate: (ui.SemanticsUpdate _) {},
+      onFlushedPaint: (bool isDirty) {
+        if (isDirty) {
+          view.markNeedsCompositeFrame();
+        }
+      },
+    )..rootNode = view;
     binding.rootPipelineOwner.adoptChild(owner);
     binding.addRenderView(view);
     view.prepareInitialFrame();
