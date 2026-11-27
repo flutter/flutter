@@ -120,7 +120,10 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       return null;
     }
     if (_extensionManager case final extensionManager?) {
-      await extensionManager.ensureInitialized();
+      await extensionManager.ensureInitialized(
+        includeWorkspaceMembers: true,
+        requiredServices: const <String>{ConfigurationExtension.serviceNamespace},
+      );
       final List<ConfigurationExtension> extensions = extensionManager.configurationExtensions;
       if (extensions.isNotEmpty) {
         return ExtensionConfiguration(extensions: extensions, logger: _toolContext.logger);

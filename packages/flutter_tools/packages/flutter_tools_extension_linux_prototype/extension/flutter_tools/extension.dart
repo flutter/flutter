@@ -4,6 +4,6 @@
 
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 
-Future<void> main(List<String> args, [Object? message]) async {
+Future<void> main(List<String> args, Object? message) async {
   await linuxExtensionEntryPoint(message);
 }

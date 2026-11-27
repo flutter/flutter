@@ -46,8 +46,9 @@ import '../doctor.dart';
 import '../emulator.dart';
 import '../experimental/extension_build_manager.dart';
 import '../experimental/extension_clean_manager.dart';
-import '../experimental/extension_discovery.dart';
+import '../experimental/extension_kernel_compiler.dart';
 import '../experimental/extension_manager.dart';
+import '../experimental/project_extension_finder.dart';
 import '../features.dart';
 import '../flutter_application_package.dart';
 import '../flutter_cache.dart';
@@ -248,7 +249,6 @@ class ToolDependencies {
     Doctor? doctor,
     DoctorValidatorsProvider? doctorValidatorsProvider,
     bool enablePreRunValidator = false,
-    List<ExtensionEntryPoint> extensionEntryPoints = const <ExtensionEntryPoint>[],
     FeatureFlags? featureFlags,
     FlutterHookRunner? flutterHookRunner,
     String? flutterRoot,
@@ -729,10 +729,19 @@ class ToolDependencies {
       platform: finalPlatform,
     );
 
+    final projectExtensionFinder = ProjectExtensionFinder(fileSystem: finalFS, logger: finalLogger);
+    final extensionKernelCompiler = ExtensionKernelCompiler(
+      fileSystem: finalFS,
+      flutterRoot: finalFS.directory(finalFlutterRoot),
+      logger: finalLogger,
+      platform: finalPlatform,
+      processManager: finalProcessManager,
+    );
     final extensionManager = ExtensionManager(
-      entryPoints: extensionEntryPoints,
+      extensionFinder: projectExtensionFinder,
       featureFlags: finalFeatureFlags,
       hostPlatform: finalOS.hostPlatform,
+      kernelCompiler: extensionKernelCompiler,
       logger: finalLogger,
     );
     finalShutdownHooks.addShutdownHook(extensionManager.dispose);

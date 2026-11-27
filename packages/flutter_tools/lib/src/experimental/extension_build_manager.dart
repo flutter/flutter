@@ -27,6 +27,8 @@ base class ExtensionBuildManager {
 
   List<ExtensionBuildTarget>? _cachedBuildTargets;
   List<ExtensionAssembleTarget>? _cachedAssembleTargets;
+  int _cachedBuildGeneration = -1;
+  int _cachedAssembleGeneration = -1;
   final _buildTargetToConnection = <String, ExtensionConnection>{};
   final _assembleTargetToConnection = <String, ExtensionConnection>{};
 
@@ -58,11 +60,10 @@ base class ExtensionBuildManager {
     if (!_featureFlags.isToolExtensionsEnabled) {
       return const <ExtensionBuildTarget>[];
     }
-    if (_cachedBuildTargets case final cachedTargets?) {
-      return cachedTargets;
-    }
 
     final List<ExtensionBuildTarget>? targets = await _queryTargets<ExtensionBuildTarget>(
+      cachedGeneration: _cachedBuildGeneration,
+      cachedTargets: _cachedBuildTargets,
       connectionMap: _buildTargetToConnection,
       listFromJson: ExtensionBuildTarget.listFromJson,
       nameOf: (ExtensionBuildTarget target) => target.name,
@@ -73,6 +74,7 @@ base class ExtensionBuildManager {
       return const <ExtensionBuildTarget>[];
     }
     _cachedBuildTargets = targets;
+    _cachedBuildGeneration = _extensionManager.connectionGeneration;
     return targets;
   }
 
@@ -81,11 +83,10 @@ base class ExtensionBuildManager {
     if (!_featureFlags.isToolExtensionsEnabled) {
       return const <ExtensionAssembleTarget>[];
     }
-    if (_cachedAssembleTargets case final cachedTargets?) {
-      return cachedTargets;
-    }
 
     final List<ExtensionAssembleTarget>? targets = await _queryTargets<ExtensionAssembleTarget>(
+      cachedGeneration: _cachedAssembleGeneration,
+      cachedTargets: _cachedAssembleTargets,
       connectionMap: _assembleTargetToConnection,
       listFromJson: ExtensionAssembleTarget.listFromJson,
       nameOf: (ExtensionAssembleTarget target) => target.name,
@@ -96,10 +97,13 @@ base class ExtensionBuildManager {
       return const <ExtensionAssembleTarget>[];
     }
     _cachedAssembleTargets = targets;
+    _cachedAssembleGeneration = _extensionManager.connectionGeneration;
     return targets;
   }
 
   Future<List<T>?> _queryTargets<T extends Object>({
+    required int cachedGeneration,
+    required List<T>? cachedTargets,
     required Map<String, ExtensionConnection> connectionMap,
     required List<T> Function(Object? result) listFromJson,
     required String Function(T target) nameOf,
@@ -107,10 +111,16 @@ base class ExtensionBuildManager {
     required String targetKind,
   }) async {
     try {
-      await _extensionManager.ensureInitialized();
+      await _extensionManager.ensureInitialized(
+        requiredServices: const <String>{BuildService.serviceNamespace},
+      );
     } on Object catch (e) {
       _logger.printTrace('Failed to initialize extension manager: $e');
       return null;
+    }
+
+    if (cachedTargets != null && _extensionManager.connectionGeneration == cachedGeneration) {
+      return cachedTargets;
     }
 
     final targets = <T>[];
@@ -252,7 +262,9 @@ base class ExtensionBuildManager {
     }
 
     try {
-      await _extensionManager.ensureInitialized();
+      await _extensionManager.ensureInitialized(
+        requiredServices: const <String>{BuildService.serviceNamespace},
+      );
     } on Object catch (e) {
       _logger.printTrace('Failed to initialize extension manager: $e');
       return ExtensionBuildResult(

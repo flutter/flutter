@@ -13,6 +13,7 @@ import '../base/logger.dart';
 import '../features.dart';
 import 'extension_discovery.dart';
 import 'extension_manager.dart';
+import 'project_extension_finder.dart';
 
 const Duration _kRpcTimeout = Duration(seconds: 5);
 
@@ -38,6 +39,7 @@ base class ExtensionTemplateManager extends TemplateService {
   final Logger _logger;
 
   List<ProjectTemplate>? _cachedTemplates;
+  int _cachedGeneration = -1;
 
   /// Retrieve the cached templates synchronously.
   ///
@@ -46,18 +48,22 @@ base class ExtensionTemplateManager extends TemplateService {
 
   /// Retrieve templates by routing `template.getProjectTemplates` to active tool extensions.
   ///
-  /// Results are cached after the first successful call.
+  /// Results are cached after the first successful call and refreshed if
+  /// additional extension connections are registered.
   Future<List<ProjectTemplate>> getProjectTemplates() async {
     if (!_featureFlags.isToolExtensionsEnabled) {
       return const <ProjectTemplate>[];
     }
-    if (_cachedTemplates != null) {
-      return _cachedTemplates!;
+    await _extensionManager.ensureInitialized(
+      requiredServices: const <String>{TemplateService.serviceNamespace},
+    );
+    if (_cachedTemplates case final cachedTemplates?
+        when _extensionManager.connectionGeneration == _cachedGeneration) {
+      return cachedTemplates;
     }
 
-    await _extensionManager.ensureInitialized();
-
     final templates = <ProjectTemplate>[];
+    final seenNames = <String>{};
     final List<ExtensionConnection> connections = _extensionManager.connections
         .where(
           (ExtensionConnection c) =>
@@ -84,44 +90,64 @@ base class ExtensionTemplateManager extends TemplateService {
       }),
     );
 
-    results.forEach(templates.addAll);
+    for (final templateList in results) {
+      for (final template in templateList) {
+        if (seenNames.add(template.name)) {
+          templates.add(template);
+        } else {
+          _logger.printWarning(
+            'Skipping duplicate project template "${template.name}" from extension.',
+          );
+        }
+      }
+    }
 
     _cachedTemplates = templates;
+    _cachedGeneration = _extensionManager.connectionGeneration;
     return templates;
   }
 
   /// Resolves a template package URI to a local directory.
   ///
-  /// Currently only supports 'package:flutter_tools/' and
-  /// 'package:flutter_tools_extension_linux_prototype/' URIs, resolving them
-  /// relative to the Flutter SDK root.
+  /// Supports `package:flutter_tools/` and discovered project extension package URIs.
   Directory resolveTemplateDirectory(String templatePath) {
-    if (templatePath.startsWith('package:flutter_tools/')) {
-      final String relativePath = templatePath.substring('package:flutter_tools/'.length);
-      final String absolutePath = _fileSystem.path.join(
-        _flutterRoot,
-        'packages',
-        'flutter_tools',
-        'lib',
-        relativePath,
-      );
-      return _fileSystem.directory(absolutePath);
-    }
-    // TODO(bkonyi): Resolve package URIs generically using package config or discovered paths.
-    if (templatePath.startsWith('package:flutter_tools_extension_linux_prototype/')) {
-      final String relativePath = templatePath.substring(
-        'package:flutter_tools_extension_linux_prototype/'.length,
-      );
-      final String absolutePath = _fileSystem.path.join(
-        _flutterRoot,
-        'packages',
-        'flutter_tools',
-        'packages',
-        'flutter_tools_extension_linux_prototype',
-        'lib',
-        relativePath,
-      );
-      return _fileSystem.directory(absolutePath);
+    if (templatePath.startsWith('package:')) {
+      final String withoutScheme = templatePath.substring('package:'.length);
+      final int slashIndex = withoutScheme.indexOf('/');
+      if (slashIndex > 0) {
+        final String packageName = withoutScheme.substring(0, slashIndex);
+        final String relativePath = withoutScheme.substring(slashIndex + 1);
+        if (packageName == 'flutter_tools') {
+          final String absolutePath = _fileSystem.path.join(
+            _flutterRoot,
+            'packages',
+            'flutter_tools',
+            'lib',
+            relativePath,
+          );
+          return _fileSystem.directory(absolutePath);
+        }
+        for (final DiscoveredProjectExtension ext in _extensionManager.discoveredExtensions) {
+          if (ext.name == packageName) {
+            final Directory packageLibDir = _fileSystem.directory(ext.packageUri);
+            final String normalizedLibPath = _fileSystem.path.normalize(
+              packageLibDir.absolute.path,
+            );
+            final String resolvedPath = _fileSystem.path.normalize(
+              _fileSystem.path.joinAll(<String>[normalizedLibPath, ...relativePath.split('/')]),
+            );
+            if (!_fileSystem.path.isWithin(normalizedLibPath, resolvedPath) &&
+                !_fileSystem.path.equals(normalizedLibPath, resolvedPath)) {
+              throw ArgumentError.value(
+                templatePath,
+                'templatePath',
+                'Template path escapes package lib/ directory.',
+              );
+            }
+            return _fileSystem.directory(resolvedPath);
+          }
+        }
+      }
     }
     throw ArgumentError('Unsupported template path format: $templatePath');
   }

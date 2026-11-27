@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -16,6 +18,8 @@ import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
+import 'package:flutter_tools/src/experimental/project_extension_finder.dart';
+import 'package:flutter_tools/src/experimental/templates.dart';
 import 'package:flutter_tools/src/flutter_features.dart';
 import 'package:flutter_tools/src/flutter_features_config.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -25,6 +29,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -210,7 +215,7 @@ void main() {
     });
   });
 
-  group('Tool Extensions Safe Mode', () {
+  group('Tool Extensions Safe Mode & Custom Platforms', () {
     test('FLUTTER_NO_EXTENSIONS=1 overrides FLUTTER_TOOL_EXTENSIONS=true', () {
       final logger = BufferLogger.test();
       final platform = FakePlatform(
@@ -324,6 +329,73 @@ void main() {
 
       await manager.dispose();
     });
+
+    test(
+      'ExtensionTemplateManager resolves package: template paths for discovered extensions',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final Directory projectDir = fs.directory('/workspace/app')..createSync(recursive: true);
+        fs.currentDirectory = projectDir;
+
+        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: app
+dev_dependencies:
+  my_custom_ext:
+    path: ../my_custom_ext
+''');
+
+        final Directory extDir = fs.directory('/workspace/my_custom_ext')
+          ..createSync(recursive: true);
+        extDir
+            .childDirectory('extension')
+            .childDirectory('flutter_tools')
+            .childFile('extension.dart')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('Future<void> main(List<String> args, Object? message) async {}');
+        final Directory templateSourceDir =
+            extDir.childDirectory('lib').childDirectory('templates').childDirectory('custom-app')
+              ..createSync(recursive: true);
+        templateSourceDir.childFile('.custom_info.copy.tmpl').writeAsStringSync('Verified\n');
+
+        writePackageConfigFiles(
+          directory: projectDir,
+          mainLibName: 'app',
+          packages: <String, String>{'my_custom_ext': '../my_custom_ext'},
+          devDependencies: <String>['my_custom_ext'],
+        );
+
+        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+        final manager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          extensionFinder: ProjectExtensionFinder(fileSystem: fs, logger: logger),
+          featureFlags: featureFlags,
+        );
+        final templateManager = ExtensionTemplateManager(
+          extensionManager: manager,
+          featureFlags: featureFlags,
+          fileSystem: fs,
+          flutterRoot: '/flutter',
+          logger: logger,
+        );
+
+        await manager.discoverExtensions(startDir: projectDir);
+
+        final Directory resolvedDir = templateManager.resolveTemplateDirectory(
+          'package:my_custom_ext/templates/custom-app',
+        );
+        expect(resolvedDir.path, templateSourceDir.path);
+        expect(resolvedDir.existsSync(), isTrue);
+
+        expect(
+          () => templateManager.resolveTemplateDirectory('package:my_custom_ext/../outside'),
+          throwsArgumentError,
+        );
+
+        await manager.dispose();
+      },
+    );
   });
 }
 

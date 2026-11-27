@@ -33,7 +33,11 @@ class ExtensionCleanManager {
     }
 
     try {
-      await _extensionManager.ensureInitialized();
+      await _extensionManager.ensureInitialized(
+        includeWorkspaceMembers: true,
+        requiredServices: const <String>{CleanService.serviceNamespace},
+        startDir: project.directory,
+      );
     } on Object catch (e) {
       _logger.printWarning('Failed to initialize extension manager for clean: $e');
       return;

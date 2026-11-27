@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 import 'package:process/process.dart';
 
 import 'runner.dart' as runner;
@@ -49,7 +48,6 @@ import 'src/commands/upgrade.dart';
 import 'src/commands/widget_preview.dart';
 import 'src/context/tool_context.dart';
 import 'src/context/tool_dependencies.dart';
-import 'src/experimental/extension_discovery.dart';
 import 'src/experimental/extension_manager.dart';
 import 'src/experimental/templates.dart';
 import 'src/features.dart';
@@ -126,7 +124,6 @@ Future<void> main(List<String> args) async {
   final ToolDependencies toolDependencies = await ToolDependencies.bootstrap(
     buildTargets: const BuildTargetsImpl(),
     enablePreRunValidator: true,
-    extensionEntryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
     flutterHookRunner: FlutterHookRunnerNative(),
     logger: logger,
     nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
