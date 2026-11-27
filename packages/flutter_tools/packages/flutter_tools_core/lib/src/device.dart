@@ -54,7 +54,6 @@ class TargetDevice {
     this.isSupported = true,
     this.sdkNameAndVersion,
     this.supportsInstall = false,
-    this.supportsScreenRecording = false,
     this.supportsScreenshot = false,
     this.targetPlatform,
   });
@@ -72,10 +71,6 @@ class TargetDevice {
       isSupported: json.optionalField<bool>(isSupportedKey, defaultValue: true),
       sdkNameAndVersion: json.nullableField<String>(sdkNameAndVersionKey),
       supportsInstall: json.optionalField<bool>(supportsInstallKey, defaultValue: false),
-      supportsScreenRecording: json.optionalField<bool>(
-        supportsScreenRecordingKey,
-        defaultValue: false,
-      ),
       supportsScreenshot: json.optionalField<bool>(supportsScreenshotKey, defaultValue: false),
       targetPlatform: json.nullableField<String>(targetPlatformKey),
     );
@@ -107,9 +102,6 @@ class TargetDevice {
 
   /// Map key for [supportsScreenshot].
   static const String supportsScreenshotKey = 'supportsScreenshot';
-
-  /// Map key for [supportsScreenRecording].
-  static const String supportsScreenRecordingKey = 'supportsScreenRecording';
 
   /// Map key for [targetPlatform].
   static const String targetPlatformKey = 'targetPlatform';
@@ -165,12 +157,6 @@ class TargetDevice {
   /// Whether the device supports capturing screenshots via `DeviceService.takeScreenshot`.
   final bool supportsScreenshot;
 
-  /// Whether the device supports screen recording via
-  /// `DeviceService.startScreenRecording`,
-  /// `DeviceService.waitForScreenRecording`, and
-  /// `DeviceService.stopScreenRecording`.
-  final bool supportsScreenRecording;
-
   /// Target platform identifier string (e.g. `'linux-x64'`, `'linux-arm64'`, `'android-arm64'`).
   final String? targetPlatform;
 
@@ -185,7 +171,6 @@ class TargetDevice {
     sdkNameAndVersionKey: ?sdkNameAndVersion,
     supportsInstallKey: supportsInstall,
     supportsScreenshotKey: supportsScreenshot,
-    supportsScreenRecordingKey: supportsScreenRecording,
     targetPlatformKey: ?targetPlatform,
   };
 
@@ -196,8 +181,7 @@ class TargetDevice {
       'ephemeral: $ephemeral, isSupported: $isSupported, '
       'buildTarget: $buildTarget, '
       'supportsInstall: $supportsInstall, '
-      'supportsScreenshot: $supportsScreenshot, '
-      'supportsScreenRecording: $supportsScreenRecording)';
+      'supportsScreenshot: $supportsScreenshot)';
 
   @override
   bool operator ==(Object other) {
@@ -212,7 +196,6 @@ class TargetDevice {
             other.sdkNameAndVersion == sdkNameAndVersion &&
             other.supportsInstall == supportsInstall &&
             other.supportsScreenshot == supportsScreenshot &&
-            other.supportsScreenRecording == supportsScreenRecording &&
             other.targetPlatform == targetPlatform);
   }
 
@@ -227,7 +210,6 @@ class TargetDevice {
     sdkNameAndVersion,
     supportsInstall,
     supportsScreenshot,
-    supportsScreenRecording,
     targetPlatform,
   );
 }
@@ -242,13 +224,17 @@ class ExtensionDebuggingOptions {
   ///
   /// Throws a [FormatException] if required fields are missing or invalid.
   factory ExtensionDebuggingOptions.fromJson(Map<String, Object?> json) {
-    final BuildMode buildMode = _parseBuildMode(
-      json.requiredField<String>(buildModeKey),
-      buildModeKey,
-      json,
-    );
+    final BuildMode buildMode = _parseBuildMode(json.requiredField<String>(buildModeKey), json);
     final bool debuggingEnabled = json.requiredField<bool>(debuggingEnabledKey);
     return ExtensionDebuggingOptions(buildMode: buildMode, debuggingEnabled: debuggingEnabled);
+  }
+
+  static BuildMode _parseBuildMode(String modeName, Map<String, Object?> json) {
+    try {
+      return BuildMode.fromCliName(modeName);
+    } on ArgumentError catch (e) {
+      throw FormatException('Invalid "$buildModeKey": ${e.message}', json);
+    }
   }
 
   /// Map key for [buildMode].
@@ -315,10 +301,12 @@ final class ExtensionApplicationResolutionContext {
   /// Throws a [FormatException] if required fields are missing or invalid.
   factory ExtensionApplicationResolutionContext.fromJson(Map<String, Object?> json) {
     final String deviceId = json.requiredField<String>(deviceIdKey);
-    final BuildMode buildMode = _parseBuildMode(
-      json.requiredField<String>(buildModeKey),
-      buildModeKey,
-    );
+    final BuildMode buildMode;
+    try {
+      buildMode = BuildMode.fromCliName(json.requiredField<String>(buildModeKey));
+    } on ArgumentError catch (e) {
+      throw FormatException('Invalid "$buildModeKey": ${e.message}');
+    }
     final project = ExtensionFlutterProject.fromJson(
       json.requiredField<Map<String, Object?>>(projectKey),
     );
@@ -459,14 +447,6 @@ final class ExtensionApplicationPackage {
 
   @override
   int get hashCode => Object.hash(appId, bundleUri);
-}
-
-BuildMode _parseBuildMode(String modeName, String fieldKey, [Map<String, Object?>? source]) {
-  try {
-    return BuildMode.fromCliName(modeName);
-  } on ArgumentError catch (e) {
-    throw FormatException('Invalid "$fieldKey": ${e.message}', source);
-  }
 }
 
 Uri? _parseOptionalArtifactUri(Map<String, Object?> json, String key) {

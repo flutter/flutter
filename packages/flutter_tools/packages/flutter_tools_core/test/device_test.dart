@@ -28,7 +28,6 @@ void main() {
         ephemeral: false,
         sdkNameAndVersion: 'Custom Linux 1.0.0',
         supportsInstall: true,
-        supportsScreenRecording: true,
         supportsScreenshot: true,
         targetPlatform: 'linux-x64',
       );
@@ -43,7 +42,6 @@ void main() {
       expect(map['sdkNameAndVersion'], 'Custom Linux 1.0.0');
       expect(map[TargetDevice.supportsInstallKey], isTrue);
       expect(map[TargetDevice.supportsScreenshotKey], isTrue);
-      expect(map[TargetDevice.supportsScreenRecordingKey], isTrue);
       expect(map['targetPlatform'], 'linux-x64');
 
       final parsed = TargetDevice.fromJson(map);
@@ -53,7 +51,6 @@ void main() {
       expect(parsed.toString(), contains('custom-linux-build'));
       expect(parsed.toString(), contains('supportsInstall: true'));
       expect(parsed.toString(), contains('supportsScreenshot: true'));
-      expect(parsed.toString(), contains('supportsScreenRecording: true'));
     });
 
     test('deserializes correctly with minimal fields and default values', () {
@@ -73,7 +70,6 @@ void main() {
       expect(device.sdkNameAndVersion, isNull);
       expect(device.supportsInstall, isFalse);
       expect(device.supportsScreenshot, isFalse);
-      expect(device.supportsScreenRecording, isFalse);
       expect(device.targetPlatform, isNull);
 
       final Map<String, Object?> map = device.toMap();
@@ -81,7 +77,6 @@ void main() {
       expect(map.containsKey('sdkNameAndVersion'), isFalse);
       expect(map[TargetDevice.supportsInstallKey], isFalse);
       expect(map[TargetDevice.supportsScreenshotKey], isFalse);
-      expect(map[TargetDevice.supportsScreenRecordingKey], isFalse);
       expect(map.containsKey('targetPlatform'), isFalse);
     });
 

@@ -30,6 +30,7 @@ import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/test/integration_test_device.dart';
+import 'package:flutter_tools/src/test/test_device.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart'
@@ -134,6 +135,13 @@ final class _FakeTestDeviceService extends DeviceService {
         category: Category.desktop,
         id: 'no_target_device',
         name: 'No Target Device',
+        ephemeral: false,
+        targetPlatform: 'custom-embedder-arm64',
+      ),
+      TargetDevice(
+        category: Category.desktop,
+        id: 'no_install_device',
+        name: 'No Install Device',
         buildTarget: 'fake-test-build',
         ephemeral: false,
         targetPlatform: 'custom-embedder-arm64',
@@ -177,13 +185,6 @@ final class _FakeTestDeviceService extends DeviceService {
   Future<ExtensionApplicationPackage?> resolveApplication(
     ExtensionApplicationResolutionContext context,
   ) async {
-    eventSendPort?.send(<String, Object?>{
-      'event': 'resolve',
-      'buildMode': context.buildMode.cliName,
-      'deviceId': context.deviceId,
-      'flavor': context.flavor,
-      'applicationBinaryUri': context.applicationBinaryUri?.toString(),
-    });
     final flavorSegment = context.flavor != null ? '${context.flavor}/' : '';
     return ExtensionApplicationPackage(
       appId: resolvedAppId,
@@ -244,7 +245,7 @@ final class _FakeTestDeviceService extends DeviceService {
     required String deviceId,
     required Uri executableUri,
   }) async {
-    if (deviceId == 'fake_test_device' || deviceId == 'no_target_device') {
+    if (deviceId == 'fake_test_device' || deviceId == 'no_install_device') {
       final bool launched =
           executableUri == Uri.file('/tmp/fake_bundle/debug/app') &&
           debuggingOptions ==
@@ -263,7 +264,7 @@ final class _FakeTestDeviceService extends DeviceService {
 
   @override
   Future<Uri?> getVmServiceUri({required String deviceId}) async {
-    if ((deviceId == 'fake_test_device' || deviceId == 'no_target_device') &&
+    if ((deviceId == 'fake_test_device' || deviceId == 'no_install_device') &&
         _runningDevices.contains(deviceId)) {
       return Uri.parse('http://127.0.0.1:8181/abcd=/');
     }
@@ -271,8 +272,8 @@ final class _FakeTestDeviceService extends DeviceService {
   }
 
   @override
-  Future<bool> stopApp({required String deviceId, String? appId}) async {
-    eventSendPort?.send(<String, Object?>{'event': 'stopApp', 'appId': appId});
+  Future<bool> stopApp({required String deviceId}) async {
+    eventSendPort?.send(<String, Object?>{'event': 'stopApp', 'deviceId': deviceId});
     return _runningDevices.remove(deviceId);
   }
 
@@ -323,7 +324,7 @@ final class _CustomLogStreamingDeviceService extends DeviceService {
   Future<Uri?> getVmServiceUri({required String deviceId}) async => null;
 
   @override
-  Future<bool> stopApp({required String deviceId, String? appId}) async => false;
+  Future<bool> stopApp({required String deviceId}) async => false;
 
   @override
   Future<void> startLogStream({required String deviceId, String? appId}) async {
@@ -368,7 +369,6 @@ void main() {
         entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
         featureFlags: featureFlags,
       );
-      addTearDown(manager.dispose);
       final discovery = ExtensionDevices(
         extensionBuildManager: ExtensionBuildManager(
           extensionManager: manager,
@@ -376,19 +376,20 @@ void main() {
           logger: logger,
         ),
         extensionManager: manager,
-        toolContext: FakeToolContext(fs: MemoryFileSystem.test(), logger: logger),
+        fileSystem: MemoryFileSystem.test(),
+        logger: logger,
       );
 
       final List<Device> devices = await discovery.devices();
       expect(devices, isEmpty);
-      expect(manager.deviceExtensions, isEmpty);
+
+      await manager.dispose();
     });
 
     test(
       'DevicesCommand output does not include custom extension devices when feature flag disabled',
       () async {
         final logger = BufferLogger.test();
-        final toolContext = FakeToolContext(fs: MemoryFileSystem.test(), logger: logger);
         final featureFlags = TestFeatureFlags();
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
@@ -396,7 +397,6 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        addTearDown(manager.dispose);
         final testDeviceManager = TestDeviceManager(
           logger: logger,
           discoverers: <DeviceDiscovery>[
@@ -407,10 +407,12 @@ void main() {
                 logger: logger,
               ),
               extensionManager: manager,
-              toolContext: toolContext,
+              fileSystem: MemoryFileSystem.test(),
+              logger: logger,
             ),
           ],
         );
+        final toolContext = FakeToolContext(logger: logger);
         final devicesCommand = DevicesCommand(
           deviceManager: testDeviceManager,
           doctor: FakeDoctor(),
@@ -424,11 +426,20 @@ void main() {
 
         await runner.run(<String>['devices']);
         expect(logger.statusText, isNot(contains('Linux Custom Extension Prototype Device')));
+
+        await manager.dispose();
       },
     );
   });
 
   group('Tool Extensions Device Integration - Enabled', () {
+    ExtensionManager? logsExtensionManager;
+
+    tearDown(() async {
+      await logsExtensionManager?.dispose();
+      logsExtensionManager = null;
+    });
+
     test('FlutterProject.toExtensionProject extracts project and manifest metadata', () async {
       final fs = MemoryFileSystem.test();
       final Directory tempDir = fs.systemTempDirectory.createTempSync(
@@ -486,7 +497,6 @@ flutter:
         entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
         featureFlags: featureFlags,
       );
-      addTearDown(manager.dispose);
       final discovery = ExtensionDevices(
         extensionBuildManager: ExtensionBuildManager(
           extensionManager: manager,
@@ -494,7 +504,8 @@ flutter:
           logger: logger,
         ),
         extensionManager: manager,
-        toolContext: FakeToolContext(fs: localFs, logger: logger, projectFactory: projectFactory),
+        fileSystem: MemoryFileSystem.test(),
+        logger: logger,
       );
 
       final List<Device> devices = await discovery.devices();
@@ -511,13 +522,14 @@ flutter:
 
       tempDir.childDirectory('linux').createSync();
       expect(await devices.first.isSupportedForProject(project), isTrue);
+
+      await manager.dispose();
     });
 
     test(
       'DevicesCommand output includes custom extension device when feature flag enabled',
       () async {
         final logger = BufferLogger.test();
-        final toolContext = FakeToolContext(fs: MemoryFileSystem.test(), logger: logger);
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
@@ -525,7 +537,6 @@ flutter:
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        addTearDown(manager.dispose);
         final testDeviceManager = TestDeviceManager(
           logger: logger,
           discoverers: <DeviceDiscovery>[
@@ -536,10 +547,12 @@ flutter:
                 logger: logger,
               ),
               extensionManager: manager,
-              toolContext: toolContext,
+              fileSystem: MemoryFileSystem.test(),
+              logger: logger,
             ),
           ],
         );
+        final toolContext = FakeToolContext(logger: logger);
         final devicesCommand = DevicesCommand(
           deviceManager: testDeviceManager,
           doctor: FakeDoctor(),
@@ -553,65 +566,70 @@ flutter:
 
         await runner.run(<String>['devices']);
         expect(logger.statusText, contains('Linux Custom Extension Prototype Device'));
+
+        await manager.dispose();
       },
     );
 
-    test('LogsCommand streams device-wide log output without calling ApplicationPackageFactory on extension devices', () async {
-      final logger = _LogLineWaitingBufferLogger(targetLine: 'Custom device log line 2');
-      final toolContext = FakeToolContext(fs: MemoryFileSystem.test(), logger: logger);
-      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
-      final manager = ExtensionManager(
-        entryPoints: <ExtensionEntryPoint>[_customLogStreamingExtensionEntryPoint],
-        featureFlags: featureFlags,
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
-      );
-      addTearDown(manager.dispose);
-      final deviceManager = TestDeviceManager(
-        discoverers: <DeviceDiscovery>[
-          ExtensionDevices(
-            extensionBuildManager: ExtensionBuildManager(
-              extensionManager: manager,
-              featureFlags: featureFlags,
-              logger: logger,
+    test(
+      'LogsCommand streams log output from custom extension device when feature flag enabled',
+      () async {
+        final logger = _LogLineWaitingBufferLogger(targetLine: 'Custom device log line 2');
+        final extensionLogger = BufferLogger.test();
+        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+        logsExtensionManager = ExtensionManager(
+          entryPoints: <ExtensionEntryPoint>[_customLogStreamingExtensionEntryPoint],
+          featureFlags: featureFlags,
+          hostPlatform: HostPlatform.linux_x64,
+          logger: extensionLogger,
+        );
+        final deviceManager = TestDeviceManager(
+          logger: extensionLogger,
+          discoverers: <DeviceDiscovery>[
+            ExtensionDevices(
+              extensionBuildManager: ExtensionBuildManager(
+                extensionManager: logsExtensionManager!,
+                featureFlags: featureFlags,
+                logger: extensionLogger,
+              ),
+              extensionManager: logsExtensionManager!,
+              fileSystem: MemoryFileSystem.test(),
+              logger: extensionLogger,
             ),
-            extensionManager: manager,
-            toolContext: toolContext,
-          ),
-        ],
-        logger: logger,
-      );
-      final intSignal = _FakeProcessSignal();
-      final termSignal = _FakeProcessSignal();
-      final logsCommand = LogsCommand(
-        applicationPackageFactory: _FakeApplicationPackageFactory(),
-        sigint: intSignal,
-        sigterm: termSignal,
-        toolContext: toolContext,
-      );
-      final runner = TestFlutterCommandRunner(
-        deviceManager: deviceManager,
-        doctor: FakeDoctor(),
-        featureFlags: featureFlags,
-        toolContext: toolContext,
-      )..addCommand(logsCommand);
+          ],
+        );
+        final intSignal = _FakeProcessSignal();
+        final termSignal = _FakeProcessSignal();
+        final toolContext = FakeToolContext(logger: logger);
+        final logsCommand = LogsCommand(
+          applicationPackageFactory: _FakeApplicationPackageFactory(),
+          sigint: intSignal,
+          sigterm: termSignal,
+          toolContext: toolContext,
+        );
+        final runner = TestFlutterCommandRunner(
+          deviceManager: deviceManager,
+          featureFlags: featureFlags,
+          toolContext: toolContext,
+        )..addCommand(logsCommand);
 
-      final Future<void> commandFuture = runner.run(<String>[
-        'logs',
-        '-d',
-        _customExtensionDeviceId,
-      ]);
+        final Future<void> commandFuture = runner.run(<String>[
+          'logs',
+          '-d',
+          _customExtensionDeviceId,
+        ]);
 
-      await logger.receivedTargetLine.future;
+        await logger.receivedTargetLine.future;
 
-      expect(logger.statusText, contains('Showing $_customExtensionDeviceName logs:'));
-      expect(logger.statusText, contains('Custom device log line 1'));
-      expect(logger.statusText, contains('Custom device log line 2'));
+        expect(logger.statusText, contains('Showing $_customExtensionDeviceName logs:'));
+        expect(logger.statusText, contains('Custom device log line 1'));
+        expect(logger.statusText, contains('Custom device log line 2'));
 
-      intSignal.send(1);
-      await commandFuture;
-      await logsCommand.device?.dispose();
-    });
+        intSignal.send(1);
+        await commandFuture;
+        await logsCommand.device?.dispose();
+      },
+    );
 
     group('ExtensionBackedDevice startApp and stopApp', () {
       Future<(ExtensionManager, BufferLogger, MemoryFileSystem, List<Device>)>
@@ -635,11 +653,8 @@ flutter:
             logger: logger,
           ),
           extensionManager: manager,
-          toolContext: FakeToolContext(
-            cache: Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem),
-            fs: fileSystem,
-            logger: logger,
-          ),
+          fileSystem: fileSystem,
+          logger: logger,
         );
         final List<Device> devices = await discovery.devices();
         return (manager, logger, fileSystem, devices);
@@ -674,6 +689,21 @@ flutter:
           contains(
             'Prebuilt application bundles are not supported yet for tool extension devices.',
           ),
+        );
+      });
+
+      test('fails when device does not specify a buildTarget', () async {
+        final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
+        final Device noTargetDevice = devices.firstWhere((Device d) => d.id == 'no_target_device');
+
+        final LaunchResult noTargetResult = await noTargetDevice.startApp(
+          null,
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        );
+        expect(noTargetResult.started, isFalse);
+        expect(
+          logger.errorText,
+          contains('does not specify a buildTarget for launching applications.'),
         );
       });
 
@@ -728,265 +758,246 @@ flutter:
       );
     });
 
-    group(
-      'InstallCommand, ScreenshotCommand, Drive, and IntegrationTest on ExtensionBackedDevice',
-      () {
-        late MemoryFileSystem fileSystem;
-        late BufferLogger logger;
-        late ReceivePort eventPort;
-        late List<Map<String, Object?>> recordedEvents;
-        late ExtensionManager extensionManager;
-        late FakeToolContext toolContext;
-        late TestDeviceManager deviceManager;
+    group('InstallCommand, ScreenshotCommand, Drive, and IntegrationTest on ExtensionBackedDevice', () {
+      late MemoryFileSystem fileSystem;
+      late BufferLogger logger;
+      late ReceivePort eventPort;
+      late List<Map<String, Object?>> recordedEvents;
+      late ExtensionManager extensionManager;
+      late FakeToolContext toolContext;
+      late TestDeviceManager deviceManager;
 
-        setUp(() {
-          fileSystem = MemoryFileSystem.test();
-          fileSystem.currentDirectory
-              .childFile('pubspec.yaml')
-              .writeAsStringSync('name: test_app\n');
-          logger = BufferLogger.test();
-          recordedEvents = <Map<String, Object?>>[];
-          eventPort = ReceivePort();
-          eventPort.listen((Object? message) {
-            if (message case final Map<String, Object?> map) {
-              recordedEvents.add(map);
-            }
-          });
+      setUp(() {
+        fileSystem = MemoryFileSystem.test();
+        fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: test_app\n');
+        logger = BufferLogger.test();
+        recordedEvents = <Map<String, Object?>>[];
+        eventPort = ReceivePort();
+        eventPort.listen((Object? message) {
+          if (message case final Map<String, Object?> map) {
+            recordedEvents.add(map);
+          }
+        });
 
-          final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
-          toolContext = FakeToolContext(
-            cache: Cache.test(processManager: FakeProcessManager.any()),
-            fs: fileSystem,
+        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+        final cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
+        final config = Config.test();
+        toolContext = FakeToolContext(
+          cache: cache,
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          processManager: FakeProcessManager.any(),
+          projectFactory: FlutterProjectFactory(
+            config: config,
+            fileSystem: fileSystem,
             logger: logger,
-            processManager: FakeProcessManager.any(),
-            projectFactory: FlutterProjectFactory(
-              config: Config.test(),
+          ),
+        );
+        extensionManager = ExtensionManager(
+          entryPoints: <ExtensionEntryPoint>[_createInstallTestEntryPoint(eventPort.sendPort)],
+          featureFlags: featureFlags,
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+        );
+        deviceManager = TestDeviceManager(
+          discoverers: <DeviceDiscovery>[
+            ExtensionDevices(
+              cache: cache,
+              config: config,
+              extensionBuildManager: ExtensionBuildManager(
+                extensionManager: extensionManager,
+                featureFlags: featureFlags,
+                logger: logger,
+              ),
+              extensionManager: extensionManager,
               fileSystem: fileSystem,
               logger: logger,
             ),
-          );
-          extensionManager = ExtensionManager(
-            entryPoints: <ExtensionEntryPoint>[_createInstallTestEntryPoint(eventPort.sendPort)],
-            featureFlags: featureFlags,
-            hostPlatform: HostPlatform.linux_x64,
-            logger: logger,
-          );
-          deviceManager = TestDeviceManager(
-            discoverers: <DeviceDiscovery>[
-              ExtensionDevices(
-                extensionBuildManager: ExtensionBuildManager(
-                  extensionManager: extensionManager,
-                  featureFlags: featureFlags,
-                  logger: logger,
-                ),
-                extensionManager: extensionManager,
-                toolContext: toolContext,
-              ),
-            ],
-            fileSystem: fileSystem,
-            logger: logger,
-          );
-        });
+          ],
+          fileSystem: fileSystem,
+          logger: logger,
+        );
+      });
 
-        tearDown(() async {
-          eventPort.close();
-          await extensionManager.dispose();
-        });
+      tearDown(() async {
+        eventPort.close();
+        await extensionManager.dispose();
+      });
 
-        TestFlutterCommandRunner createRunnerWith(FlutterCommand command) {
-          return TestFlutterCommandRunner(
-            deviceManager: deviceManager,
-            doctor: FakeDoctor(),
-            featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-            toolContext: toolContext,
-          )..addCommand(command);
-        }
+      TestFlutterCommandRunner createRunnerWith(FlutterCommand command) {
+        return TestFlutterCommandRunner(
+          deviceManager: deviceManager,
+          doctor: FakeDoctor(),
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          toolContext: toolContext,
+        )..addCommand(command);
+      }
 
-        test('InstallCommand resolves appId via resolveApplication for --use-application-binary and --uninstall-only', () async {
-          final File prebuiltFile = fileSystem.file('prebuilt.bin')..createSync();
-          final command = InstallCommand(
+      test('InstallCommand installs prebuilt file and directory bundles and handles --uninstall-only', () async {
+        final File prebuiltFile = fileSystem.file('prebuilt.bin')..createSync();
+        final Directory prebuiltDir = fileSystem.directory('prebuilt_dir.app')..createSync();
+        final TestFlutterCommandRunner runner = createRunnerWith(
+          InstallCommand(
             applicationPackages: _FakeApplicationPackageFactory(),
             toolContext: toolContext,
             verboseHelp: false,
-          );
-          final TestFlutterCommandRunner runner = createRunnerWith(command);
-
-          await runner.run(<String>[
-            'install',
-            '-d',
-            'fake_test_device',
-            '--use-application-binary=prebuilt.bin',
-          ]);
-          await pumpEventQueue();
-          expect(
-            logger.statusText,
-            contains('Installing prebuilt.bin to Fake Test Extension Device...'),
-          );
-          expect(recordedEvents.where((Map<String, Object?> e) => e['event'] == 'build'), isEmpty);
-          expect(
-            recordedEvents,
-            containsAll(<Object>[
-              <String, Object?>{
-                'event': 'isAppInstalled',
-                'appId': _FakeTestDeviceService.resolvedAppId,
-              },
-              <String, Object?>{
-                'event': 'install',
-                'bundleUri': prebuiltFile.absolute.uri.toString(),
-                'prebuiltApplication': true,
-              },
-            ]),
-          );
-
-          // Running install a second time detects the installed app and uninstalls it first.
-          logger.clear();
-          await runner.run(<String>[
-            'install',
-            '-d',
-            'fake_test_device',
-            '--use-application-binary=prebuilt.bin',
-          ]);
-          await pumpEventQueue();
-          expect(logger.statusText, contains('Uninstalling old version...'));
-          expect(
-            recordedEvents,
-            contains(
-              equals(<String, Object?>{
-                'event': 'uninstall',
-                'appId': _FakeTestDeviceService.resolvedAppId,
-              }),
-            ),
-          );
-
-          // --uninstall-only uninstalls using resolved appId, and skips when not installed.
-          logger.clear();
-          await runner.run(<String>['install', '-d', 'fake_test_device', '--uninstall-only']);
-          expect(
-            logger.statusText,
-            contains('Uninstalling test_app from Fake Test Extension Device...'),
-          );
-          logger.clear();
-          await runner.run(<String>['install', '-d', 'fake_test_device', '--uninstall-only']);
-          expect(
-            logger.statusText,
-            contains('test_app not found on Fake Test Extension Device, skipping uninstall'),
-          );
-
-          // Directory bundles (--use-application-binary=prebuilt_dir.app) pass validation and install cleanly.
-          logger.clear();
-          recordedEvents.clear();
-          final Directory prebuiltDir = fileSystem.directory('prebuilt_dir.app')..createSync();
-          await runner.run(<String>[
-            'install',
-            '-d',
-            'fake_test_device',
-            '--use-application-binary=prebuilt_dir.app',
-          ]);
-          await pumpEventQueue();
-          expect(
-            recordedEvents,
-            contains(
-              equals(<String, Object?>{
-                'event': 'install',
-                'bundleUri': prebuiltDir.absolute.uri.toString(),
-                'prebuiltApplication': true,
-              }),
-            ),
-          );
-        });
-
-        test('InstallCommand without --use-application-binary never builds, preserves installed app when bundle is missing, and installs existing built bundle', () async {
-          fileSystem.file('prebuilt.bin').createSync();
-          final command = InstallCommand(
-            applicationPackages: _FakeApplicationPackageFactory(),
-            toolContext: toolContext,
-            verboseHelp: false,
-          );
-          final TestFlutterCommandRunner runner = createRunnerWith(command);
-
-          // Pre-install an app so we can prove a missing non-prebuilt bundle does NOT uninstall it!
-          await runner.run(<String>[
-            'install',
-            '-d',
-            'fake_test_device',
-            '--use-application-binary=prebuilt.bin',
-          ]);
-          await pumpEventQueue();
-          recordedEvents.clear();
-          logger.clear();
-
-          // Non-prebuilt install before building fails with actionable hint and does NOT uninstall!
-          await expectLater(
-            runner.run(<String>['install', '-d', 'fake_test_device', '--flavor', 'prod']),
-            throwsToolExit(message: 'Install failed'),
-          );
-          await pumpEventQueue();
-          expect(
-            logger.errorText,
-            contains(
-              'Run "flutter build fake-test-build" first, or pass "--use-application-binary".',
-            ),
-          );
-          expect(
-            recordedEvents.where(
-              (Map<String, Object?> e) =>
-                  e['event'] == 'build' ||
-                  e['event'] == 'isAppInstalled' ||
-                  e['event'] == 'uninstall',
-            ),
-            isEmpty,
-          );
-
-          // Once the prior build output exists at the resolved bundleUri, flutter install installs it.
-          logger.clear();
-          final File builtBundle =
-              fileSystem.currentDirectory
-                  .childDirectory('build')
-                  .childDirectory('custom_os')
-                  .childDirectory('prod')
-                  .childDirectory('release')
-                  .childFile('app.pkg')
-                ..createSync(recursive: true);
-          await runner.run(<String>['install', '-d', 'fake_test_device', '--flavor', 'prod']);
-          await pumpEventQueue();
-          expect(logger.statusText, contains('Uninstalling old version...'));
-          expect(
-            logger.statusText,
-            contains('Installing test_app to Fake Test Extension Device...'),
-          );
-          expect(
-            recordedEvents,
-            contains(
-              equals(<String, Object?>{
-                'event': 'install',
-                'bundleUri': builtBundle.absolute.uri.toString(),
-                'prebuiltApplication': false,
-              }),
-            ),
-          );
-        });
-
-        test(
-          'InstallCommand throws ToolExit when extension device has supportsInstall false',
-          () async {
-            final command = InstallCommand(
-              applicationPackages: _FakeApplicationPackageFactory(),
-              toolContext: toolContext,
-              verboseHelp: false,
-            );
-            final TestFlutterCommandRunner runner = createRunnerWith(command);
-
-            await expectLater(
-              runner.run(<String>['install', '-d', 'no_target_device']),
-              throwsToolExit(message: 'flutter install is not supported on No Target Device'),
-            );
-          },
+          ),
         );
 
-        test('ScreenshotCommand captures screenshot when supportsScreenshot is true and rejects unsupported devices', () async {
+        await runner.run(<String>[
+          'install',
+          '-d',
+          'fake_test_device',
+          '--use-application-binary=prebuilt.bin',
+        ]);
+        await pumpEventQueue();
+        expect(
+          logger.statusText,
+          contains('Installing prebuilt.bin to Fake Test Extension Device...'),
+        );
+        expect(recordedEvents.where((Map<String, Object?> e) => e['event'] == 'build'), isEmpty);
+        expect(
+          recordedEvents,
+          containsAll(<Object>[
+            <String, Object?>{
+              'event': 'isAppInstalled',
+              'appId': _FakeTestDeviceService.resolvedAppId,
+            },
+            <String, Object?>{
+              'event': 'install',
+              'bundleUri': prebuiltFile.absolute.uri.toString(),
+              'prebuiltApplication': true,
+            },
+          ]),
+        );
+
+        // Re-install detects installed app and uninstalls it first; --uninstall-only removes then skips.
+        logger.clear();
+        await runner.run(<String>[
+          'install',
+          '-d',
+          'fake_test_device',
+          '--use-application-binary=prebuilt_dir.app',
+        ]);
+        await pumpEventQueue();
+        expect(logger.statusText, contains('Uninstalling old version...'));
+        expect(
+          recordedEvents,
+          containsAll(<Object>[
+            <String, Object?>{'event': 'uninstall', 'appId': _FakeTestDeviceService.resolvedAppId},
+            <String, Object?>{
+              'event': 'install',
+              'bundleUri': prebuiltDir.absolute.uri.toString(),
+              'prebuiltApplication': true,
+            },
+          ]),
+        );
+
+        logger.clear();
+        await runner.run(<String>['install', '-d', 'fake_test_device', '--uninstall-only']);
+        expect(
+          logger.statusText,
+          contains(
+            'Uninstalling ${_FakeTestDeviceService.resolvedAppId} from Fake Test Extension Device...',
+          ),
+        );
+        logger.clear();
+        await runner.run(<String>['install', '-d', 'fake_test_device', '--uninstall-only']);
+        expect(
+          logger.statusText,
+          contains(
+            '${_FakeTestDeviceService.resolvedAppId} not found on Fake Test Extension Device, skipping uninstall',
+          ),
+        );
+      });
+
+      test('InstallCommand preserves installed app when built bundle is missing, then installs once built', () async {
+        fileSystem.file('prebuilt.bin').createSync();
+        final TestFlutterCommandRunner runner = createRunnerWith(
+          InstallCommand(
+            applicationPackages: _FakeApplicationPackageFactory(),
+            toolContext: toolContext,
+            verboseHelp: false,
+          ),
+        );
+
+        await runner.run(<String>[
+          'install',
+          '-d',
+          'fake_test_device',
+          '--use-application-binary=prebuilt.bin',
+        ]);
+        await pumpEventQueue();
+        recordedEvents.clear();
+        logger.clear();
+
+        await expectLater(
+          runner.run(<String>['install', '-d', 'fake_test_device', '--flavor', 'prod']),
+          throwsToolExit(message: 'Install failed'),
+        );
+        await pumpEventQueue();
+        expect(
+          logger.errorText,
+          contains(
+            'Run "flutter build fake-test-build" first, or pass "--use-application-binary".',
+          ),
+        );
+        expect(
+          recordedEvents.where(
+            (Map<String, Object?> e) =>
+                e['event'] == 'build' ||
+                e['event'] == 'isAppInstalled' ||
+                e['event'] == 'uninstall',
+          ),
+          isEmpty,
+        );
+
+        logger.clear();
+        final File builtBundle =
+            fileSystem.currentDirectory
+                .childDirectory('build')
+                .childDirectory('custom_os')
+                .childDirectory('prod')
+                .childDirectory('release')
+                .childFile('app.pkg')
+              ..createSync(recursive: true);
+        await runner.run(<String>['install', '-d', 'fake_test_device', '--flavor', 'prod']);
+        await pumpEventQueue();
+        expect(logger.statusText, contains('Uninstalling old version...'));
+        expect(
+          recordedEvents,
+          contains(
+            equals(<String, Object?>{
+              'event': 'install',
+              'bundleUri': builtBundle.absolute.uri.toString(),
+              'prebuiltApplication': false,
+            }),
+          ),
+        );
+      });
+
+      test('InstallCommand throws ToolExit when supportsInstall is false', () async {
+        final TestFlutterCommandRunner runner = createRunnerWith(
+          InstallCommand(
+            applicationPackages: _FakeApplicationPackageFactory(),
+            toolContext: toolContext,
+            verboseHelp: false,
+          ),
+        );
+        await expectLater(
+          runner.run(<String>['install', '-d', 'no_install_device']),
+          throwsToolExit(message: 'flutter install is not supported on No Install Device'),
+        );
+      });
+
+      test(
+        'ScreenshotCommand captures screenshot and rejects unsupported or failing devices',
+        () async {
           final File outputFile = fileSystem.file('shot.png')..writeAsBytesSync(<int>[1, 2, 3, 4]);
-          final command = ScreenshotCommand(toolContext: toolContext);
-          final TestFlutterCommandRunner runner = createRunnerWith(command);
+          final TestFlutterCommandRunner runner = createRunnerWith(
+            ScreenshotCommand(toolContext: toolContext),
+          );
 
           await runner.run(<String>[
             'screenshot',
@@ -1008,10 +1019,9 @@ flutter:
           );
 
           await expectLater(
-            runner.run(<String>['screenshot', '-d', 'no_target_device', '--out', outputFile.path]),
-            throwsToolExit(message: 'Screenshot not supported for No Target Device.'),
+            runner.run(<String>['screenshot', '-d', 'no_install_device', '--out', outputFile.path]),
+            throwsToolExit(message: 'Screenshot not supported for No Install Device.'),
           );
-
           await expectLater(
             runner.run(<String>[
               'screenshot',
@@ -1026,21 +1036,21 @@ flutter:
                   '("unknown_extension"): Simulated screenshot error on failing_build_device',
             ),
           );
-        });
+        },
+      );
 
-        test('FlutterDriverService resolves extension package on TargetPlatform.unsupported and tears down cleanly regardless of supportsInstall', () async {
-          final List<Device> devices = await deviceManager.getDevices();
-          final Device installableDevice = devices.firstWhere(
-            (Device d) => d.id == 'fake_test_device',
-          );
-          final Device nonInstallableDevice = devices.firstWhere(
-            (Device d) => d.id == 'no_target_device',
-          );
-          expect(await installableDevice.targetPlatform, TargetPlatform.unsupported);
-          expect(await nonInstallableDevice.targetPlatform, TargetPlatform.unsupported);
+      test('FlutterDriverService resolves extension package and tears down cleanly regardless of supportsInstall', () async {
+        final List<Device> devices = await deviceManager.getDevices();
+        final Device installableDevice = devices.firstWhere(
+          (Device d) => d.id == 'fake_test_device',
+        );
+        final Device nonInstallableDevice = devices.firstWhere(
+          (Device d) => d.id == 'no_install_device',
+        );
 
+        FlutterDriverService createDriverService() {
           final fakeVmServiceHost = FakeVmServiceHost(requests: const <VmServiceExpectation>[]);
-          final driverService = FlutterDriverService(
+          return FlutterDriverService(
             applicationPackageFactory: _FakeApplicationPackageFactory(),
             dartSdkPath: 'dart',
             devtoolsLauncher: FakeDevtoolsLauncher(),
@@ -1058,112 +1068,106 @@ flutter:
               required Logger logger,
             }) async => fakeVmServiceHost.vmService,
           );
+        }
 
-          // 1. Device with supportsInstall: true resolves package, starts app-scoped log stream, stops, and uninstalls.
-          await driverService.start(
-            BuildInfo.debug,
-            installableDevice,
-            DebuggingOptions.enabled(BuildInfo.debug, enableDds: false),
-            mainPath: 'test_driver/app.dart',
-          );
-          await driverService.stop();
-          await pumpEventQueue();
-          expect(logger.errorText, isEmpty);
-          expect(
-            recordedEvents,
-            containsAll(<Object>[
-              <String, Object?>{
-                'event': 'startLogStream',
-                'appId': _FakeTestDeviceService.resolvedAppId,
-              },
-              <String, Object?>{'event': 'stopApp', 'appId': _FakeTestDeviceService.resolvedAppId},
-              <String, Object?>{
-                'event': 'uninstall',
-                'appId': _FakeTestDeviceService.resolvedAppId,
-              },
-            ]),
-          );
+        final FlutterDriverService driver1 = createDriverService();
+        await driver1.start(
+          BuildInfo.debug,
+          installableDevice,
+          DebuggingOptions.enabled(BuildInfo.debug, enableDds: false),
+          mainPath: 'test_driver/app.dart',
+        );
+        await driver1.stop();
+        await pumpEventQueue();
+        expect(logger.errorText, isEmpty);
+        expect(
+          recordedEvents,
+          containsAll(<Object>[
+            <String, Object?>{
+              'event': 'startLogStream',
+              'appId': _FakeTestDeviceService.resolvedAppId,
+            },
+            <String, Object?>{'event': 'stopApp', 'deviceId': 'fake_test_device'},
+            <String, Object?>{'event': 'uninstall', 'appId': _FakeTestDeviceService.resolvedAppId},
+          ]),
+        );
 
-          // 2. Device with supportsInstall: false succeeds teardown quietly without printing Failed to uninstall app.
-          recordedEvents.clear();
-          logger.clear();
-          final fakeVmServiceHost2 = FakeVmServiceHost(requests: const <VmServiceExpectation>[]);
-          final driverService2 = FlutterDriverService(
-            applicationPackageFactory: _FakeApplicationPackageFactory(),
-            dartSdkPath: 'dart',
-            devtoolsLauncher: FakeDevtoolsLauncher(),
-            toolContext: toolContext,
-            vmServiceConnector: (
-              Uri httpUri, {
-              ReloadSources? reloadSources,
-              Restart? restart,
-              CompileExpression? compileExpression,
-              FlutterProject? flutterProject,
-              FlutterVersion? flutterVersion,
-              PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-              CompressionOptions compression = CompressionOptions.compressionDefault,
-              Device? device,
-              required Logger logger,
-            }) async => fakeVmServiceHost2.vmService,
-          );
-          await driverService2.start(
-            BuildInfo.debug,
-            nonInstallableDevice,
-            DebuggingOptions.enabled(BuildInfo.debug, enableDds: false),
-            mainPath: 'test_driver/app.dart',
-          );
-          await driverService2.stop();
-          await pumpEventQueue();
-          expect(logger.errorText, isEmpty);
-          expect(
-            recordedEvents.where((Map<String, Object?> e) => e['event'] == 'uninstall'),
-            isEmpty,
-          );
-        });
+        recordedEvents.clear();
+        logger.clear();
+        final FlutterDriverService driver2 = createDriverService();
+        await driver2.start(
+          BuildInfo.debug,
+          nonInstallableDevice,
+          DebuggingOptions.enabled(BuildInfo.debug, enableDds: false),
+          mainPath: 'test_driver/app.dart',
+        );
+        await driver2.stop();
+        await pumpEventQueue();
+        expect(logger.errorText, isEmpty);
+        expect(
+          recordedEvents.where((Map<String, Object?> e) => e['event'] == 'uninstall'),
+          isEmpty,
+        );
+      });
 
-        test('IntegrationTestTestDevice resolves extension package on TargetPlatform.unsupported and forwards external entrypointPath and teardown appId', () async {
-          final List<Device> devices = await deviceManager.getDevices();
-          final Device device = devices.firstWhere((Device d) => d.id == 'fake_test_device');
-          expect(await device.targetPlatform, TargetPlatform.unsupported);
+      test('IntegrationTestTestDevice resolves extension package and tears down cleanly', () async {
+        final List<Device> devices = await deviceManager.getDevices();
+        final Device device = devices.firstWhere((Device d) => d.id == 'fake_test_device');
+        expect(await device.targetPlatform, TargetPlatform.unsupported);
 
-          final testDevice = IntegrationTestTestDevice(
-            applicationPackageFactory: _FakeApplicationPackageFactory(),
-            compileExpression: null,
-            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, enableDds: false),
-            device: device,
-            id: 1,
-            toolContext: toolContext,
-            userIdentifier: null,
-          );
+        final testDevice = IntegrationTestTestDevice(
+          applicationPackageFactory: _FakeApplicationPackageFactory(),
+          compileExpression: null,
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, enableDds: false),
+          device: device,
+          id: 1,
+          toolContext: toolContext,
+          userIdentifier: null,
+          vmServiceConnector:
+              (
+                Uri httpUri, {
+                ReloadSources? reloadSources,
+                Restart? restart,
+                CompileExpression? compileExpression,
+                FlutterProject? flutterProject,
+                FlutterVersion? flutterVersion,
+                PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+                CompressionOptions compression = CompressionOptions.compressionDefault,
+                Device? device,
+                required Logger logger,
+              }) async => throw TestDeviceException(
+                'Simulated VM service connect stop',
+                StackTrace.current,
+              ),
+        );
 
-          // Launch with an external generated entrypoint path; start() connects to VM service
-          // (which fails in this hermetic test because 127.0.0.1:8181 is not open, AFTER
-          // package resolution and startApp have succeeded), then kill() stops and uninstalls.
-          await expectLater(
-            testDevice.start('/tmp/flutter_test_listener.1234/listener.dart'),
-            throwsA(anything),
-          );
-          await testDevice.kill();
-          await pumpEventQueue();
+        await expectLater(
+          testDevice.start('/tmp/flutter_test_listener.1234/listener.dart'),
+          throwsA(
+            isA<TestDeviceException>().having(
+              (TestDeviceException e) => e.message,
+              'message',
+              'Simulated VM service connect stop',
+            ),
+          ),
+        );
+        await testDevice.kill();
+        await pumpEventQueue();
 
-          expect(
-            recordedEvents,
-            containsAll(<Object>[
-              <String, Object?>{
-                'event': 'build',
-                'buildMode': 'debug',
-                'mainPath': '/tmp/flutter_test_listener.1234/listener.dart',
-              },
-              <String, Object?>{'event': 'stopApp', 'appId': _FakeTestDeviceService.resolvedAppId},
-              <String, Object?>{
-                'event': 'uninstall',
-                'appId': _FakeTestDeviceService.resolvedAppId,
-              },
-            ]),
-          );
-        });
-      },
-    );
+        expect(
+          recordedEvents,
+          containsAll(<Object>[
+            <String, Object?>{
+              'event': 'build',
+              'buildMode': 'debug',
+              'mainPath': '/tmp/flutter_test_listener.1234/listener.dart',
+            },
+            <String, Object?>{'event': 'stopApp', 'deviceId': 'fake_test_device'},
+            <String, Object?>{'event': 'uninstall', 'appId': _FakeTestDeviceService.resolvedAppId},
+          ]),
+        );
+      });
+    });
   });
 }
 

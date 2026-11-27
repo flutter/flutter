@@ -78,9 +78,8 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   @override
   Future<FlutterCommandResult> runCommand() async {
     final Device targetDevice = device!;
-    final ApplicationPackage? package = await getApplicationPackageForDevice(
+    final ApplicationPackage? package = await applicationPackages.getPackageForDevice(
       targetDevice,
-      factoryBuilder: () => applicationPackages,
       applicationBinary: _applicationBinary,
       buildInfo: await getBuildInfo(),
     );

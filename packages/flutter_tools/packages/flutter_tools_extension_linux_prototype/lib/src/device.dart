@@ -65,22 +65,18 @@ final class LinuxDeviceService extends DeviceService {
       return null;
     }
     final String? binaryName = getLinuxCmakeBinaryName(context.project.directory);
-    if (context.applicationBinaryUri case final Uri prebuiltUri) {
-      final String fallbackName = context.project.appName.isNotEmpty
-          ? context.project.appName
-          : prebuiltUri.pathSegments.lastWhere((String s) => s.isNotEmpty, orElse: () => 'app');
-      return ExtensionApplicationPackage(appId: binaryName ?? fallbackName, bundleUri: prebuiltUri);
-    }
     if (binaryName == null) {
       return null;
     }
     return ExtensionApplicationPackage(
       appId: binaryName,
-      bundleUri: customLinuxExecutableUri(
-        binaryName: binaryName,
-        buildDirectory: context.project.buildDirectory,
-        buildMode: context.buildMode,
-      ),
+      bundleUri:
+          context.applicationBinaryUri ??
+          customLinuxExecutableUri(
+            binaryName: binaryName,
+            buildDirectory: context.project.buildDirectory,
+            buildMode: context.buildMode,
+          ),
     );
   }
 
@@ -197,7 +193,7 @@ final class LinuxDeviceService extends DeviceService {
   }
 
   @override
-  Future<bool> stopApp({required String deviceId, String? appId}) async {
+  Future<bool> stopApp({required String deviceId}) async {
     final _RunningApp? runningApp = _runningApps[deviceId];
     if (runningApp == null || !runningApp.process.kill()) {
       return false;

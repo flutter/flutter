@@ -37,77 +37,92 @@ void main() {
       expect(device.supportsInstall, isTrue);
     });
 
-    test('resolveApplication resolves CMake BINARY_NAME, custom buildDirectory, and prebuilt binary', () async {
-      final Directory tempDir = Directory.systemTemp.createTempSync('linux_device_resolve_test.');
-      addTearDown(() => tempDir.deleteSync(recursive: true));
+    test(
+      'resolveApplication resolves CMake BINARY_NAME, custom buildDirectory, and prebuilt binary',
+      () async {
+        final Directory tempDir = Directory.systemTemp.createTempSync('linux_device_resolve_test.');
+        addTearDown(() => tempDir.deleteSync(recursive: true));
 
-      final Uri customBuildDirUri = tempDir.uri.resolve('custom_out/');
-      final project = ExtensionFlutterProject(
-        appName: 'pubspec_app',
-        buildDirectory: customBuildDirUri,
-        directory: tempDir.uri,
-      );
-      final service = LinuxDeviceService();
+        final Uri customBuildDirUri = tempDir.uri.resolve('custom_out/');
+        final project = ExtensionFlutterProject(
+          appName: 'pubspec_app',
+          buildDirectory: customBuildDirUri,
+          directory: tempDir.uri,
+        );
+        final service = LinuxDeviceService();
 
-      // Unknown device returns null.
-      expect(
-        await service.resolveApplication(
-          ExtensionApplicationResolutionContext(
-            buildMode: .release,
-            deviceId: 'unknown_device',
-            project: project,
+        // Unknown device returns null.
+        expect(
+          await service.resolveApplication(
+            ExtensionApplicationResolutionContext(
+              buildMode: .release,
+              deviceId: 'unknown_device',
+              project: project,
+            ),
           ),
-        ),
-        isNull,
-      );
+          isNull,
+        );
 
-      // Without linux/CMakeLists.txt and without prebuilt binary, returns null.
-      expect(
-        await service.resolveApplication(
-          ExtensionApplicationResolutionContext(
-            buildMode: .release,
-            deviceId: LinuxDeviceService.customLinuxDeviceId,
-            project: project,
+        // Without linux/CMakeLists.txt and without prebuilt binary, returns null.
+        expect(
+          await service.resolveApplication(
+            ExtensionApplicationResolutionContext(
+              buildMode: .release,
+              deviceId: LinuxDeviceService.customLinuxDeviceId,
+              project: project,
+            ),
           ),
-        ),
-        isNull,
-      );
+          isNull,
+        );
 
-      // With prebuilt binary and no CMakeLists.txt, falls back to project.appName and prebuilt URI.
-      final Uri prebuiltUri = tempDir.uri.resolve('prebuilt.bin');
-      expect(
-        await service.resolveApplication(
-          ExtensionApplicationResolutionContext(
-            applicationBinaryUri: prebuiltUri,
-            buildMode: .release,
-            deviceId: LinuxDeviceService.customLinuxDeviceId,
-            project: project,
+        // With prebuilt binary and no CMakeLists.txt, returns null so the host falls back to pubspec appName.
+        final Uri prebuiltUri = tempDir.uri.resolve('prebuilt.bin');
+        expect(
+          await service.resolveApplication(
+            ExtensionApplicationResolutionContext(
+              applicationBinaryUri: prebuiltUri,
+              buildMode: .release,
+              deviceId: LinuxDeviceService.customLinuxDeviceId,
+              project: project,
+            ),
           ),
-        ),
-        ExtensionApplicationPackage(appId: 'pubspec_app', bundleUri: prebuiltUri),
-      );
+          isNull,
+        );
 
-      // With linux/CMakeLists.txt defining BINARY_NAME, resolves binaryName and expected bundleUri.
-      final linuxDir = Directory.fromUri(tempDir.uri.resolve('linux'))..createSync();
-      File('${linuxDir.path}/CMakeLists.txt')
-          .writeAsStringSync('set(BINARY_NAME "custom_runner_bin")\n');
+        // With linux/CMakeLists.txt defining BINARY_NAME, resolves binaryName and expected bundleUri (or prebuilt URI).
+        final linuxDir = Directory.fromUri(tempDir.uri.resolve('linux'))..createSync();
+        File('${linuxDir.path}/CMakeLists.txt')
+            .writeAsStringSync('set(BINARY_NAME "custom_runner_bin")\n');
 
-      expect(
-        await service.resolveApplication(
-          ExtensionApplicationResolutionContext(
-            buildMode: .release,
-            deviceId: LinuxDeviceService.customLinuxDeviceId,
-            project: project,
+        expect(
+          await service.resolveApplication(
+            ExtensionApplicationResolutionContext(
+              applicationBinaryUri: prebuiltUri,
+              buildMode: .release,
+              deviceId: LinuxDeviceService.customLinuxDeviceId,
+              project: project,
+            ),
           ),
-        ),
-        ExtensionApplicationPackage(
-          appId: 'custom_runner_bin',
-          bundleUri: customBuildDirUri.resolve(
-            'linux_extension/x64/release/bundle/custom_runner_bin',
+          ExtensionApplicationPackage(appId: 'custom_runner_bin', bundleUri: prebuiltUri),
+        );
+
+        expect(
+          await service.resolveApplication(
+            ExtensionApplicationResolutionContext(
+              buildMode: .release,
+              deviceId: LinuxDeviceService.customLinuxDeviceId,
+              project: project,
+            ),
           ),
-        ),
-      );
-    });
+          ExtensionApplicationPackage(
+            appId: 'custom_runner_bin',
+            bundleUri: customBuildDirUri.resolve(
+              'linux_extension/x64/release/bundle/custom_runner_bin',
+            ),
+          ),
+        );
+      },
+    );
 
     test('installApp, isAppInstalled, and uninstallApp mirror DesktopDevice behavior', () async {
       final Directory tempDir = Directory.systemTemp.createTempSync('linux_device_install_test.');

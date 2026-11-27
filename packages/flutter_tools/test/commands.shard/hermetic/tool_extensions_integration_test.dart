@@ -305,7 +305,8 @@ void main() {
       final discovery = ExtensionDevices(
         extensionBuildManager: buildManager,
         extensionManager: manager,
-        toolContext: toolContext,
+        fileSystem: toolContext.fs,
+        logger: logger,
       );
       final probeCommand = _ExtensionDevicesProbeCommand(
         toolContext: toolContext,

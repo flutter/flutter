@@ -18,10 +18,7 @@ extension ExtensionUriValidation on Uri {
   /// Whether this URI is an absolute `file:` URI pointing to a non-root file or
   /// bundle directory, with no query or fragment components.
   bool get isValidArtifactUri =>
-      isScheme('file') &&
-      hasAbsolutePath &&
-      !hasQuery &&
-      !hasFragment &&
+      (isValidFileUri || isValidDirectoryUri) &&
       pathSegments.any((String segment) => segment.isNotEmpty);
 }
 

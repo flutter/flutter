@@ -19,47 +19,18 @@ import '../base/logger.dart';
 import '../build_info.dart';
 import '../build_system/targets/extension.dart';
 import '../cache.dart';
-import '../context/tool_context.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../project.dart';
+import '../vmservice.dart';
 import 'extension_build_manager.dart';
-import 'extension_device_log_reader.dart';
 import 'extension_discovery.dart';
 import 'extension_manager.dart';
-
-export 'extension_device_log_reader.dart';
-
-/// Resolves an [ApplicationPackage] for [device], delegating directly to
-/// [ExtensionBackedDevice.resolveApplicationPackage] for extension-backed
-/// devices without evaluating [factoryBuilder], and delegating to
-/// [ApplicationPackageFactory.getPackageForPlatform] on the factory returned by
-/// [factoryBuilder] otherwise.
-Future<ApplicationPackage?> getApplicationPackageForDevice(
-  Device device, {
-  required ApplicationPackageFactory? Function() factoryBuilder,
-  File? applicationBinary,
-  BuildInfo? buildInfo,
-}) async {
-  if (device is ExtensionBackedDevice) {
-    return device.resolveApplicationPackage(
-      applicationBinary: applicationBinary,
-      buildInfo: buildInfo,
-    );
-  }
-  final TargetPlatform targetPlatform = await device.targetPlatform;
-  return factoryBuilder()?.getPackageForPlatform(
-    targetPlatform,
-    applicationBinary: applicationBinary,
-    buildInfo: buildInfo,
-  );
-}
 
 /// An [ApplicationPackage] representing an application targeting a custom tool
 /// extension device.
 class ExtensionBackedApplicationPackage extends ApplicationPackage {
-  ExtensionBackedApplicationPackage({required super.id, this.bundleUri, String? name})
-    : name = name ?? id;
+  ExtensionBackedApplicationPackage({required super.id, this.bundleUri});
 
   /// Expected application bundle `file:` [Uri] resolved by the owning
   /// extension, or `null` when the bundle location cannot be determined without
@@ -67,7 +38,7 @@ class ExtensionBackedApplicationPackage extends ApplicationPackage {
   final Uri? bundleUri;
 
   @override
-  final String name;
+  String get name => id;
 }
 
 /// A prebuilt [ExtensionBackedApplicationPackage] supplied via
@@ -77,19 +48,20 @@ class PrebuiltExtensionBackedApplicationPackage extends ExtensionBackedApplicati
   PrebuiltExtensionBackedApplicationPackage({
     required this.applicationPackage,
     required super.id,
-    Uri? bundleUri,
-    String? name,
-  }) : super(
-         bundleUri: bundleUri ?? applicationPackage.absolute.uri,
-         name: name ?? applicationPackage.basename,
-       );
+    required Uri super.bundleUri,
+    required this.name,
+  });
 
   @override
   final FileSystemEntity applicationPackage;
+
+  @override
+  final String name;
 }
 
 /// A host-side [DeviceService] client adapter delegating RPC queries to an [ExtensionConnection].
 final class ExtensionDeviceClient extends DeviceService {
+  /// Creates an [ExtensionDeviceClient] wrapping the host [connection].
   ExtensionDeviceClient(this.connection, {required this._logger});
 
   /// The active extension isolate connection.
@@ -161,7 +133,6 @@ final class ExtensionDeviceClient extends DeviceService {
     final Object? rawResult = await connection.sendRequest(
       DeviceService.resolveApplicationMethod,
       params: context.toMap(),
-      timeout: null,
     );
     if (rawResult == null) {
       return null;
@@ -169,12 +140,11 @@ final class ExtensionDeviceClient extends DeviceService {
     if (rawResult case final Map<String, Object?> map) {
       return ExtensionApplicationPackage.fromJson(map);
     }
-    final message =
-        'ExtensionDeviceClient received invalid response for '
-        '"${DeviceService.resolveApplicationMethod}": expected Map<String, Object?> or null, '
-        'got ${rawResult.runtimeType}.';
-    _logger.printError(message);
-    throw FormatException(message);
+    throw FormatException(
+      'ExtensionDeviceClient received invalid response for '
+      '"${DeviceService.resolveApplicationMethod}": expected Map<String, Object?> or null, '
+      'got ${rawResult.runtimeType}.',
+    );
   }
 
   @override
@@ -226,16 +196,14 @@ final class ExtensionDeviceClient extends DeviceService {
         DeviceService.appIdParam: appId,
         DeviceService.deviceIdParam: deviceId,
       },
-      timeout: null,
     );
     if (rawResult case final bool installed) {
       return installed;
     }
-    final message =
-        'ExtensionDeviceClient received invalid response for '
-        '"${DeviceService.isAppInstalledMethod}": expected bool, got ${rawResult.runtimeType}.';
-    _logger.printError(message);
-    throw FormatException(message);
+    throw FormatException(
+      'ExtensionDeviceClient received invalid response for '
+      '"${DeviceService.isAppInstalledMethod}": expected bool, got ${rawResult.runtimeType}.',
+    );
   }
 
   @override
@@ -252,72 +220,6 @@ final class ExtensionDeviceClient extends DeviceService {
       },
       timeout: null,
     );
-  }
-
-  @override
-  Future<void> startScreenRecording({
-    required String deviceId,
-    required Uri outputFileUri,
-    Duration? duration,
-  }) async {
-    _logger.printTrace(
-      'ExtensionDeviceClient starting screen recording on "$deviceId" to "$outputFileUri" via RPC '
-      '("${DeviceService.startScreenRecordingMethod}")...',
-    );
-    await connection.sendRequest(
-      DeviceService.startScreenRecordingMethod,
-      params: <String, Object?>{
-        DeviceService.deviceIdParam: deviceId,
-        DeviceService.durationMsParam: ?duration?.inMilliseconds,
-        DeviceService.outputFileUriParam: outputFileUri.toString(),
-      },
-      timeout: null,
-    );
-  }
-
-  @override
-  Future<Uri> waitForScreenRecording({required String deviceId}) async {
-    _logger.printTrace(
-      'ExtensionDeviceClient awaiting screen recording completion on "$deviceId" via RPC '
-      '("${DeviceService.waitForScreenRecordingMethod}")...',
-    );
-    final Object? rawResult = await connection.sendRequest(
-      DeviceService.waitForScreenRecordingMethod,
-      params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
-      timeout: null,
-    );
-    return _parseRecordingFileUri(rawResult, DeviceService.waitForScreenRecordingMethod);
-  }
-
-  @override
-  Future<Uri> stopScreenRecording({required String deviceId}) async {
-    _logger.printTrace(
-      'ExtensionDeviceClient stopping screen recording on "$deviceId" via RPC '
-      '("${DeviceService.stopScreenRecordingMethod}")...',
-    );
-    final Object? rawResult = await connection.sendRequest(
-      DeviceService.stopScreenRecordingMethod,
-      params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
-      timeout: null,
-    );
-    return _parseRecordingFileUri(rawResult, DeviceService.stopScreenRecordingMethod);
-  }
-
-  Uri _parseRecordingFileUri(Object? rawResult, String method) {
-    if (rawResult case final String rawUri) {
-      final Uri? uri = Uri.tryParse(rawUri);
-      if (uri != null && uri.isValidFileUri) {
-        return uri;
-      }
-      final message = 'ExtensionDeviceClient received invalid file URI for "$method": "$rawUri".';
-      _logger.printError(message);
-      throw FormatException(message);
-    }
-    final message =
-        'ExtensionDeviceClient received invalid response for "$method": '
-        'expected String, got ${rawResult.runtimeType}.';
-    _logger.printError(message);
-    throw FormatException(message);
   }
 
   @override
@@ -338,6 +240,8 @@ final class ExtensionDeviceClient extends DeviceService {
           DeviceService.deviceIdParam: deviceId,
           DeviceService.executableUriParam: executableUri.toString(),
         },
+        // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
+        // https://github.com/flutter/flutter/issues/193955.
         timeout: null,
       );
       if (rawResult case final bool launched) {
@@ -366,6 +270,8 @@ final class ExtensionDeviceClient extends DeviceService {
       final Object? rawResult = await connection.sendRequest(
         DeviceService.getVmServiceUriMethod,
         params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
+        // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
+        // https://github.com/flutter/flutter/issues/193955.
         timeout: null,
       );
       if (rawResult case {DeviceService.vmServiceUriKey: final String uriStr}) {
@@ -397,7 +303,7 @@ final class ExtensionDeviceClient extends DeviceService {
   }
 
   @override
-  Future<bool> stopApp({required String deviceId, String? appId}) async {
+  Future<bool> stopApp({required String deviceId}) async {
     _logger.printTrace(
       'ExtensionDeviceClient stopping app on "$deviceId" via RPC '
       '("${DeviceService.stopAppMethod}")...',
@@ -405,11 +311,7 @@ final class ExtensionDeviceClient extends DeviceService {
     try {
       final Object? rawResult = await connection.sendRequest(
         DeviceService.stopAppMethod,
-        params: <String, Object?>{
-          DeviceService.appIdParam: ?appId,
-          DeviceService.deviceIdParam: deviceId,
-        },
-        timeout: null,
+        params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
       );
       if (rawResult case final bool stopped) {
         return stopped;
@@ -455,17 +357,190 @@ final class ExtensionDeviceClient extends DeviceService {
   }
 }
 
+/// A [DeviceLogReader] that streams log lines from a tool extension isolate
+/// via [DeviceService.logEntryNotificationMethod] notifications.
+class ExtensionDeviceLogReader extends DeviceLogReader {
+  ExtensionDeviceLogReader._({
+    required this._connection,
+    required this._deviceId,
+    required this._deviceService,
+    required this._logger,
+    required this.name,
+    this._appId,
+    this._onDispose,
+  }) {
+    // Defer flushing buffered lines to a microtask so that if multiple
+    // subscribers attach to the broadcast stream in the same synchronous turn,
+    // all of them receive the initial buffered lines rather than only the first
+    // subscriber that triggered onListen synchronously.
+    _logLinesController = StreamController<String>.broadcast(
+      onListen: () => scheduleMicrotask(_flushPendingLines),
+    );
+  }
+
+  /// Creates an [ExtensionDeviceLogReader] and starts the device log stream on
+  /// the extension isolate.
+  static Future<ExtensionDeviceLogReader> create({
+    required ExtensionConnection connection,
+    required String deviceId,
+    required DeviceService deviceService,
+    required Logger logger,
+    required String name,
+    String? appId,
+    void Function()? onDispose,
+  }) async {
+    final reader = ExtensionDeviceLogReader._(
+      appId: appId,
+      connection: connection,
+      deviceId: deviceId,
+      deviceService: deviceService,
+      logger: logger,
+      name: name,
+      onDispose: onDispose,
+    );
+    await reader._startLogStream();
+    return reader;
+  }
+
+  static const _maxPendingLines = 1000;
+
+  final String? _appId;
+  final ExtensionConnection _connection;
+  final String _deviceId;
+  final DeviceService _deviceService;
+  final Logger _logger;
+  final void Function()? _onDispose;
+  final _pendingLines = <String>[];
+
+  @override
+  final String name;
+
+  late final StreamController<String> _logLinesController;
+  StreamSubscription<Map<String, Object?>>? _notificationSubscription;
+  bool _closeAfterFlush = false;
+  bool _isDisposed = false;
+
+  /// Optional application ID filter forwarded to `device.startLogStream`.
+  String? get appId => _appId;
+
+  /// Whether this reader has been disposed.
+  bool get isDisposed => _isDisposed;
+
+  /// Whether at least one listener is currently subscribed to [logLines].
+  bool get hasActiveSubscriber => _logLinesController.hasListener;
+
+  @override
+  Stream<String> get logLines => _logLinesController.stream;
+
+  void _flushPendingLines() {
+    if (_isDisposed || _logLinesController.isClosed) {
+      return;
+    }
+    if (_pendingLines.isNotEmpty) {
+      _pendingLines.forEach(_logLinesController.add);
+      _pendingLines.clear();
+    }
+    if (_closeAfterFlush) {
+      unawaited(_logLinesController.close());
+    }
+  }
+
+  Future<void> _startLogStream() async {
+    try {
+      _notificationSubscription = _connection
+          .onNotification(DeviceService.logEntryNotificationMethod)
+          .listen(
+            (Map<String, Object?> params) {
+              if (_isDisposed || _logLinesController.isClosed) {
+                return;
+              }
+              if (params[DeviceService.deviceIdParam] == _deviceId) {
+                if (params[DeviceService.lineKey] case final String line) {
+                  if (_logLinesController.hasListener) {
+                    _logLinesController.add(line);
+                  } else if (_pendingLines.length < _maxPendingLines) {
+                    _pendingLines.add(line);
+                  }
+                }
+              }
+            },
+            onDone: () {
+              if (_isDisposed || _logLinesController.isClosed) {
+                return;
+              }
+              if (_pendingLines.isEmpty) {
+                unawaited(_logLinesController.close());
+              } else {
+                _closeAfterFlush = true;
+              }
+            },
+          );
+      await _deviceService.startLogStream(appId: _appId, deviceId: _deviceId);
+    } on ToolExtensionException catch (error) {
+      _logger.printWarning('Extension "${_connection.extensionName}": ${error.message}');
+      await _cleanupOnStartFailure();
+    } on Object catch (error) {
+      _logger.printWarning('Failed to start log stream for extension device "$_deviceId": $error');
+      await _cleanupOnStartFailure();
+    }
+  }
+
+  Future<void> _cleanupOnStartFailure() async {
+    if (!_isDisposed) {
+      _isDisposed = true;
+      _onDispose?.call();
+      await _notificationSubscription?.cancel();
+      _notificationSubscription = null;
+      if (!_logLinesController.isClosed) {
+        await _logLinesController.close();
+      }
+    }
+  }
+
+  @override
+  Future<void> provideVmService(FlutterVmService connectedVmService) async {}
+
+  @override
+  Future<void> dispose() async {
+    if (_isDisposed) {
+      return;
+    }
+    _isDisposed = true;
+    _onDispose?.call();
+    _pendingLines.clear();
+    await _notificationSubscription?.cancel();
+    _notificationSubscription = null;
+    try {
+      await _deviceService.stopLogStream(deviceId: _deviceId);
+    } on Object {
+      // Ignore errors when stopping log streams during disposal.
+    }
+    if (!_logLinesController.isClosed) {
+      await _logLinesController.close();
+    }
+  }
+}
+
 /// A host-side [DeviceDiscovery] mechanism that discovers devices registered by active extensions.
 class ExtensionDevices extends PollingDeviceDiscovery {
+  /// Creates an [ExtensionDevices] instance.
   ExtensionDevices({
     required this._extensionBuildManager,
     required this._extensionManager,
-    required this._toolContext,
+    required this._fileSystem,
+    required this._logger,
+    this._artifacts,
+    this._cache,
+    this._config,
   }) : super('tool_extension');
 
+  final Artifacts? _artifacts;
+  final Cache? _cache;
+  final Config? _config;
   final ExtensionBuildManager _extensionBuildManager;
   final ExtensionManager _extensionManager;
-  final ToolContext _toolContext;
+  final FileSystem _fileSystem;
+  final Logger _logger;
   final _devicesByKey = <(ExtensionConnection, String), ExtensionBackedDevice>{};
   final _diagnosticsByConnection = <ExtensionConnection, String>{};
 
@@ -483,12 +558,11 @@ class ExtensionDevices extends PollingDeviceDiscovery {
     Duration? timeout,
     bool forWirelessDiscovery = false,
   }) async {
-    final Logger logger = _toolContext.logger;
-    logger.printTrace('ExtensionDevices polling active tool extension devices...');
+    _logger.printTrace('ExtensionDevices polling active tool extension devices...');
     await _extensionManager.ensureInitialized();
     final List<DeviceService> deviceServices = _extensionManager.deviceExtensions;
     if (deviceServices.isEmpty) {
-      logger.printTrace('ExtensionDevices found 0 active device extensions.');
+      _logger.printTrace('ExtensionDevices found 0 active device extensions.');
       _disposeCachedDevices();
       return <Device>[];
     }
@@ -503,10 +577,10 @@ class ExtensionDevices extends PollingDeviceDiscovery {
               return (service, devices, null);
             } on ToolExtensionException catch (e) {
               final diagnostic = 'Extension "${service.connection.extensionName}": ${e.message}';
-              logger.printTrace(diagnostic);
+              _logger.printTrace(diagnostic);
               return (service, null, diagnostic);
             } on Object catch (e, st) {
-              logger.printTrace('Error querying device extension service: $e\n$st');
+              _logger.printTrace('Error querying device extension service: $e\n$st');
               return (service, null, null);
             }
           }),
@@ -541,11 +615,15 @@ class ExtensionDevices extends PollingDeviceDiscovery {
           device = existing;
         } else {
           device = ExtensionBackedDevice(
+            artifacts: _artifacts,
             buildManager: _extensionBuildManager,
+            cache: _cache,
+            config: _config,
             connection: service.connection,
             deviceService: service,
+            fileSystem: _fileSystem,
+            logger: _logger,
             targetDevice: targetDevice,
-            toolContext: _toolContext,
           );
           _devicesByKey[key] = device;
         }
@@ -568,7 +646,7 @@ class ExtensionDevices extends PollingDeviceDiscovery {
       }
     }
 
-    logger.printTrace('ExtensionDevices retrieved ${targetDevices.length} target device(s).');
+    _logger.printTrace('ExtensionDevices retrieved ${targetDevices.length} target device(s).');
     return targetDevices;
   }
 
@@ -592,23 +670,31 @@ class ExtensionDevices extends PollingDeviceDiscovery {
 
 /// A host-side [Device] wrapper representing a target device backed by a tool extension.
 class ExtensionBackedDevice extends Device {
+  /// Creates an [ExtensionBackedDevice] wrapping a [TargetDevice].
   ExtensionBackedDevice({
     required this._buildManager,
     required this.connection,
     required this._deviceService,
+    required this._fileSystem,
+    required super.logger,
     required this._targetDevice,
-    required ToolContext super.toolContext,
+    this._artifacts,
+    this._cache,
+    this._config,
   }) : super(
          _targetDevice.id,
          category: _targetDevice.category,
          ephemeral: _targetDevice.ephemeral,
-         logger: toolContext.logger,
          platformType: PlatformType.custom,
        );
 
+  final Artifacts? _artifacts;
   final ExtensionBuildManager _buildManager;
+  final Cache? _cache;
+  final Config? _config;
   final ExtensionConnection connection;
   final DeviceService _deviceService;
+  final FileSystem _fileSystem;
   TargetDevice _targetDevice;
   Future<ExtensionDeviceLogReader>? _logReader;
   bool _disposed = false;
@@ -616,8 +702,6 @@ class ExtensionBackedDevice extends Device {
   @override
   String get name => _targetDevice.name;
 
-  /// Whether this device supports installing and uninstalling application
-  /// packages via `flutter install`.
   @override
   bool get supportsInstall => _targetDevice.supportsInstall;
 
@@ -670,12 +754,15 @@ class ExtensionBackedDevice extends Device {
     File? applicationBinary,
     BuildInfo? buildInfo,
   }) async {
-    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
-    final FlutterProject project = projectFactory.fromDirectory(fs.currentDirectory);
+    final FlutterProject project = FlutterProject.current(
+      _fileSystem,
+      config: _config,
+      logger: logger,
+    );
 
     final Uri? applicationBinaryUri;
     if (applicationBinary != null) {
-      applicationBinaryUri = _resolveArtifactUri(fs, applicationBinary);
+      applicationBinaryUri = _resolveArtifactUri(_fileSystem, applicationBinary);
       if (!applicationBinaryUri.isValidArtifactUri) {
         logger.printError('Invalid application binary path: ${applicationBinary.path}');
         return null;
@@ -698,8 +785,8 @@ class ExtensionBackedDevice extends Device {
     ExtensionApplicationPackage? resolved;
     try {
       resolved = await _deviceService.resolveApplication(context);
-    } on json_rpc.RpcException catch (err, stack) {
-      if (err.code == error_code.METHOD_NOT_FOUND) {
+    } on Object catch (err, stack) {
+      if (err is json_rpc.RpcException && err.code == error_code.METHOD_NOT_FOUND) {
         logger.printTrace(
           'Extension "${connection.extensionName}" does not implement '
           '"${DeviceService.resolveApplicationMethod}"; falling back to pubspec app name.',
@@ -709,36 +796,21 @@ class ExtensionBackedDevice extends Device {
         logger.printTrace('$stack');
         return null;
       }
-    } on Exception catch (err, stack) {
-      logger.printError(_formatDeviceError('Failed to resolve application for "$id"', err));
-      logger.printTrace('$stack');
-      return null;
     }
 
-    final String fallbackAppName = project.manifest.appName.isNotEmpty
-        ? project.manifest.appName
-        : project.directory.basename;
-    final String appId = resolved?.appId ?? fallbackAppName;
+    final String appId = resolved?.appId ?? project.manifest.appName;
     final Uri? bundleUri = resolved?.bundleUri ?? applicationBinaryUri;
 
     if (applicationBinary != null) {
-      final FileSystemEntity resolvedEntity = bundleUri != null
-          ? _resolveArtifactEntity(fs, bundleUri)
-          : (fs.isDirectorySync(applicationBinary.path)
-                ? fs.directory(applicationBinary.path)
-                : applicationBinary);
+      final Uri resolvedBundleUri = bundleUri!;
       return PrebuiltExtensionBackedApplicationPackage(
-        applicationPackage: resolvedEntity,
-        bundleUri: bundleUri,
+        applicationPackage: _resolveArtifactEntity(_fileSystem, resolvedBundleUri),
+        bundleUri: resolvedBundleUri,
         id: appId,
         name: applicationBinary.basename,
       );
     }
-    return ExtensionBackedApplicationPackage(
-      bundleUri: bundleUri,
-      id: appId,
-      name: fallbackAppName,
-    );
+    return ExtensionBackedApplicationPackage(bundleUri: bundleUri, id: appId);
   }
 
   @override
@@ -761,18 +833,13 @@ class ExtensionBackedDevice extends Device {
         return NoOpDeviceLogReader(name);
       }
       if (!existingReader.isDisposed) {
-        if (existingReader.appId != resolvedAppId) {
-          if (!existingReader.hasActiveSubscriber) {
-            await existingReader.reconfigureAppId(resolvedAppId, clearPendingLines: true);
-          } else if (existingReader.appId != null) {
-            await existingReader.reconfigureAppId(null);
-          }
+        if (existingReader.appId == resolvedAppId || existingReader.hasActiveSubscriber) {
+          return existingReader;
         }
-        return existingReader;
+        await existingReader.dispose();
       }
       if (identical(_logReader, existingFuture)) {
         _logReader = null;
-        break;
       }
     }
 
@@ -824,31 +891,18 @@ class ExtensionBackedDevice extends Device {
 
   /// Validates that [app] points to an existing application bundle on disk
   /// before standalone installation, logging an actionable error if missing.
-  bool hasValidInstallBundle(ApplicationPackage app) {
-    if (!supportsInstall) {
-      return true;
-    }
-    return _requireExistingBundleUri(app) != null;
-  }
+  bool hasValidInstallBundle(ApplicationPackage app) => _requireExistingBundleUri(app) != null;
 
   Uri? _requireExistingBundleUri(ApplicationPackage app) {
-    final FileSystem fs = toolContext.fs;
-    final prebuiltApplication = app is PrebuiltApplicationPackage;
-    final Uri? bundleUri = switch (app) {
-      ExtensionBackedApplicationPackage(:final Uri? bundleUri) => bundleUri,
-      PrebuiltApplicationPackage(:final FileSystemEntity applicationPackage) => _resolveArtifactUri(
-        fs,
-        applicationPackage,
-      ),
-      _ => null,
-    };
+    final Uri? bundleUri = app is ExtensionBackedApplicationPackage ? app.bundleUri : null;
     final String? bundlePath = bundleUri != null && bundleUri.isValidArtifactUri
-        ? fs.path.fromUri(bundleUri)
+        ? _fileSystem.path.fromUri(bundleUri)
         : null;
     final bool bundleExists =
-        bundlePath != null && (fs.isFileSync(bundlePath) || fs.isDirectorySync(bundlePath));
+        bundlePath != null &&
+        (_fileSystem.isFileSync(bundlePath) || _fileSystem.isDirectorySync(bundlePath));
     if (!bundleExists) {
-      if (prebuiltApplication) {
+      if (app is PrebuiltApplicationPackage) {
         logger.printError(
           'Prebuilt application binary does not exist'
           '${bundlePath != null ? ': $bundlePath' : '.'}',
@@ -887,8 +941,7 @@ class ExtensionBackedDevice extends Device {
   String _formatDeviceError(String summary, Object error) {
     final String detail = switch (error) {
       ToolExtensionException(:final String message) ||
-      json_rpc.RpcException(:final String message) ||
-      ExtensionConnectionException(:final String message) => message,
+      json_rpc.RpcException(:final String message) => message,
       _ => '$error',
     };
     return '$summary ("${connection.extensionName}"): $detail';
@@ -910,7 +963,7 @@ class ExtensionBackedDevice extends Device {
         prebuiltApplication: app is PrebuiltApplicationPackage,
       );
       return true;
-    } on Exception catch (err, stack) {
+    } on Object catch (err, stack) {
       logger.printError(
         _formatDeviceError('Failed to install application "${app.id}" on "$id"', err),
       );
@@ -938,32 +991,36 @@ class ExtensionBackedDevice extends Device {
       return null;
     }
 
-    final ToolContext(:Artifacts artifacts, :Cache cache, :Config config, :FileSystem fs) =
-        toolContext;
-    final Directory projectDir = fs.currentDirectory;
-    final Directory buildOutputDir = projectDir.childDirectory(getBuildDirectory(config, fs));
+    final Directory projectDir = _fileSystem.currentDirectory;
+    final Directory buildOutputDir = projectDir.childDirectory(
+      _config != null ? getBuildDirectory(_config, _fileSystem) : 'build',
+    );
     final Directory outputDir = target.outputDir.contains('{')
         ? resolveExtensionOutputDir(
             buildMode: buildMode,
             buildOutputDir: buildOutputDir,
-            fileSystem: fs,
+            fileSystem: _fileSystem,
             projectDir: projectDir,
             target: target,
           )
-        : fs.directory(
-            fs.path.isRelative(target.outputDir)
-                ? fs.path.join(projectDir.path, target.outputDir)
+        : _fileSystem.directory(
+            _fileSystem.path.isRelative(target.outputDir)
+                ? _fileSystem.path.join(projectDir.path, target.outputDir)
                 : target.outputDir,
           );
-    final Map<String, String> resolvedArtifacts = resolveExtensionBuildTargetArtifacts(
-      artifacts: artifacts,
-      buildMode: buildMode,
-      target: target,
-    );
+    final Map<String, String> resolvedArtifacts = _artifacts != null
+        ? resolveExtensionBuildTargetArtifacts(
+            artifacts: _artifacts,
+            buildMode: buildMode,
+            target: target,
+          )
+        : const <String, String>{};
+
+    final String flutterRootPath = _cache?.flutterRoot ?? projectDir.path;
 
     final ExtensionBuildResult result = await _buildManager.build(
       buildMode: buildMode,
-      flutterRoot: fs.directory(cache.flutterRoot).uri,
+      flutterRoot: _fileSystem.directory(flutterRootPath).uri,
       mainPath: targetMainPath,
       outputDir: outputDir.uri,
       projectRoot: projectDir.uri,
@@ -1044,8 +1101,7 @@ class ExtensionBackedDevice extends Device {
 
   @override
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
-    final String? appId = app != null && app.id.isNotEmpty ? app.id : null;
-    return _deviceService.stopApp(appId: appId, deviceId: id);
+    return _deviceService.stopApp(deviceId: id);
   }
 
   @override
@@ -1062,7 +1118,7 @@ class ExtensionBackedDevice extends Device {
     try {
       await _deviceService.uninstallApp(appId: app.id, deviceId: id);
       return true;
-    } on Exception catch (err, stack) {
+    } on Object catch (err, stack) {
       logger.printError(
         _formatDeviceError('Failed to uninstall application "${app.id}" from "$id"', err),
       );
@@ -1084,7 +1140,7 @@ class ExtensionBackedDevice extends Device {
     }
     try {
       return await _deviceService.isAppInstalled(appId: app.id, deviceId: id);
-    } on Exception catch (err, stack) {
+    } on Object catch (err, stack) {
       logger.printError(
         _formatDeviceError('Failed to check if application "${app.id}" is installed on "$id"', err),
       );
@@ -1100,7 +1156,7 @@ class ExtensionBackedDevice extends Device {
   Future<void> takeScreenshot(File outputFile) async {
     try {
       await _deviceService.takeScreenshot(deviceId: id, outputFileUri: outputFile.absolute.uri);
-    } on Exception catch (err, stack) {
+    } on Object catch (err, stack) {
       logger.printTrace('$stack');
       throwToolExit(_formatDeviceError('Failed to take screenshot on "$id"', err));
     }

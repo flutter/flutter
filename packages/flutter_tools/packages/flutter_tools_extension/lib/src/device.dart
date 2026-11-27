@@ -25,9 +25,6 @@ abstract base class DeviceService extends ToolExtensionService {
   static const String _uninstallAppRpcMethod = 'uninstallApp';
   static const String _isAppInstalledRpcMethod = 'isAppInstalled';
   static const String _takeScreenshotRpcMethod = 'takeScreenshot';
-  static const String _startScreenRecordingRpcMethod = 'startScreenRecording';
-  static const String _waitForScreenRecordingRpcMethod = 'waitForScreenRecording';
-  static const String _stopScreenRecordingRpcMethod = 'stopScreenRecording';
   static const String _launchAppRpcMethod = 'launchApp';
   static const String _getVmServiceUriRpcMethod = 'getVmServiceUri';
   static const String _stopAppRpcMethod = 'stopApp';
@@ -56,19 +53,6 @@ abstract base class DeviceService extends ToolExtensionService {
 
   /// RPC method identifier to capture a screenshot from a target device.
   static const String takeScreenshotMethod = '$serviceNamespace.$_takeScreenshotRpcMethod';
-
-  /// RPC method identifier to start a screen recording on a target device.
-  static const String startScreenRecordingMethod =
-      '$serviceNamespace.$_startScreenRecordingRpcMethod';
-
-  /// RPC method identifier to await completion of an active screen recording on
-  /// a target device.
-  static const String waitForScreenRecordingMethod =
-      '$serviceNamespace.$_waitForScreenRecordingRpcMethod';
-
-  /// RPC method identifier to stop an active screen recording on a target device.
-  static const String stopScreenRecordingMethod =
-      '$serviceNamespace.$_stopScreenRecordingRpcMethod';
 
   /// RPC method identifier to launch an application on a target device.
   static const String launchAppMethod = '$serviceNamespace.$_launchAppRpcMethod';
@@ -106,9 +90,6 @@ abstract base class DeviceService extends ToolExtensionService {
 
   /// RPC parameter key for the capture output file URI.
   static const String outputFileUriParam = 'outputFileUri';
-
-  /// RPC parameter key for the optional screen recording duration in milliseconds.
-  static const String durationMsParam = 'durationMs';
 
   /// RPC parameter key for the executable URI to launch.
   static const String executableUriParam = 'executableUri';
@@ -194,43 +175,6 @@ abstract base class DeviceService extends ToolExtensionService {
     throw UnsupportedError('Screenshots are not supported on $deviceId.');
   }
 
-  /// Starts a screen recording on the device with [deviceId], writing the
-  /// captured video to [outputFileUri] and optionally capping its length at
-  /// [duration].
-  ///
-  /// Implementations should return once recording has been initiated so the
-  /// host tool can await completion via [waitForScreenRecording] while
-  /// remaining able to terminate the recording early via [stopScreenRecording].
-  ///
-  /// Throws an [UnsupportedError] by default if the device does not support
-  /// screen recording.
-  Future<void> startScreenRecording({
-    required String deviceId,
-    required Uri outputFileUri,
-    Duration? duration,
-  }) async {
-    throw UnsupportedError('Screen recording is not supported on $deviceId.');
-  }
-
-  /// Waits for an active screen recording on the device with [deviceId] to
-  /// finish (whether capped by `duration` or stopped via [stopScreenRecording])
-  /// and returns the `file:` [Uri] of the finalized output file.
-  ///
-  /// Throws an [UnsupportedError] by default if the device does not support
-  /// screen recording.
-  Future<Uri> waitForScreenRecording({required String deviceId}) async {
-    throw UnsupportedError('Screen recording is not supported on $deviceId.');
-  }
-
-  /// Stops an active screen recording on the device with [deviceId] and returns
-  /// the `file:` [Uri] of the finalized output file.
-  ///
-  /// Throws an [UnsupportedError] by default if the device does not support
-  /// screen recording.
-  Future<Uri> stopScreenRecording({required String deviceId}) async {
-    throw UnsupportedError('Screen recording is not supported on $deviceId.');
-  }
-
   /// Launches the application at [executableUri] on the device with [deviceId]
   /// using the given [debuggingOptions].
   ///
@@ -253,13 +197,9 @@ abstract base class DeviceService extends ToolExtensionService {
 
   /// Stops the running application on [deviceId].
   ///
-  /// When [appId] is non-null, implementations may scope termination to that
-  /// specific application; when [appId] is `null`, implementations stop the
-  /// active or most recently launched Flutter application on [deviceId].
-  ///
   /// Returns `true` if a running application was stopped, or `false` if no
   /// application was running on [deviceId] or stopping it failed.
-  Future<bool> stopApp({required String deviceId, String? appId});
+  Future<bool> stopApp({required String deviceId});
 
   /// Starts streaming log output for the device identified by [deviceId],
   /// optionally filtered to [appId] when non-null.
@@ -296,9 +236,6 @@ abstract base class DeviceService extends ToolExtensionService {
       _uninstallAppRpcMethod: _uninstallAppRpc,
       _isAppInstalledRpcMethod: _isAppInstalledRpc,
       _takeScreenshotRpcMethod: _takeScreenshotRpc,
-      _startScreenRecordingRpcMethod: _startScreenRecordingRpc,
-      _waitForScreenRecordingRpcMethod: _waitForScreenRecordingRpc,
-      _stopScreenRecordingRpcMethod: _stopScreenRecordingRpc,
       _launchAppRpcMethod: _launchAppRpc,
       _getVmServiceUriRpcMethod: _getVmServiceUriRpc,
       _stopAppRpcMethod: _stopAppRpc,
@@ -340,7 +277,7 @@ abstract base class DeviceService extends ToolExtensionService {
     return resolved?.toMap();
   }
 
-  Future<Object?> _installAppRpc(Map<String, Object?> params) async {
+  Future<void> _installAppRpc(Map<String, Object?> params) async {
     final String deviceId = _parseDeviceId(params);
     final Uri bundleUri;
     final bool prebuiltApplication;
@@ -358,14 +295,12 @@ abstract base class DeviceService extends ToolExtensionService {
       deviceId: deviceId,
       prebuiltApplication: prebuiltApplication,
     );
-    return null;
   }
 
-  Future<Object?> _uninstallAppRpc(Map<String, Object?> params) async {
+  Future<void> _uninstallAppRpc(Map<String, Object?> params) async {
     final String deviceId = _parseDeviceId(params);
     final String appId = _parseRequiredAppId(params);
     await uninstallApp(appId: appId, deviceId: deviceId);
-    return null;
   }
 
   Future<bool> _isAppInstalledRpc(Map<String, Object?> params) async {
@@ -383,50 +318,6 @@ abstract base class DeviceService extends ToolExtensionService {
       throw RpcException.invalidParams(e.message);
     }
     await takeScreenshot(deviceId: deviceId, outputFileUri: outputFileUri);
-  }
-
-  Future<void> _startScreenRecordingRpc(Map<String, Object?> params) async {
-    final String deviceId = _parseDeviceId(params);
-    final Uri outputFileUri;
-    final int? durationMs;
-    try {
-      outputFileUri = _requireFileUri(params, outputFileUriParam);
-      durationMs = params.nullableField<int>(durationMsParam);
-      if (durationMs != null && durationMs < 0) {
-        throw const FormatException('Invalid "$durationMsParam": must be non-negative.');
-      }
-    } on FormatException catch (e) {
-      throw RpcException.invalidParams(e.message);
-    }
-    await startScreenRecording(
-      deviceId: deviceId,
-      duration: durationMs != null ? Duration(milliseconds: durationMs) : null,
-      outputFileUri: outputFileUri,
-    );
-  }
-
-  Future<String> _waitForScreenRecordingRpc(Map<String, Object?> params) async {
-    final String deviceId = _parseDeviceId(params);
-    final Uri recordingUri = await waitForScreenRecording(deviceId: deviceId);
-    if (!recordingUri.isValidFileUri) {
-      throw StateError(
-        'waitForScreenRecording returned an invalid file URI "$recordingUri" '
-        '(expected an absolute "file:" file URI).',
-      );
-    }
-    return recordingUri.toString();
-  }
-
-  Future<String> _stopScreenRecordingRpc(Map<String, Object?> params) async {
-    final String deviceId = _parseDeviceId(params);
-    final Uri recordingUri = await stopScreenRecording(deviceId: deviceId);
-    if (!recordingUri.isValidFileUri) {
-      throw StateError(
-        'stopScreenRecording returned an invalid file URI "$recordingUri" '
-        '(expected an absolute "file:" file URI).',
-      );
-    }
-    return recordingUri.toString();
   }
 
   static Uri _requireArtifactUri(Map<String, Object?> params, String key) {
@@ -532,9 +423,7 @@ abstract base class DeviceService extends ToolExtensionService {
   }
 
   Future<bool> _stopAppRpc(Map<String, Object?> params) async {
-    final String deviceId = _parseDeviceId(params);
-    final String? appId = _parseOptionalAppId(params);
-    return stopApp(appId: appId, deviceId: deviceId);
+    return stopApp(deviceId: _parseDeviceId(params));
   }
 
   Future<Object?> _startLogStreamRpc(Map<String, Object?> params) async {

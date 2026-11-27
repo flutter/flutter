@@ -10,6 +10,8 @@ import 'android/android_device_discovery.dart';
 import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
 import 'application_package.dart';
+import 'artifacts.dart';
+import 'base/config.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
@@ -17,6 +19,7 @@ import 'base/template.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'build_system/build_targets.dart';
+import 'cache.dart';
 import 'context/apple_context.dart';
 import 'context/tool_context.dart';
 import 'custom_devices/custom_device.dart';
@@ -80,6 +83,9 @@ class FlutterDeviceManager extends DeviceManager {
 
   List<DeviceDiscovery> _createDeviceDiscoverers() {
     final ToolContext(
+      :Artifacts artifacts,
+      :Cache cache,
+      :Config config,
       :FileSystem fs,
       :Logger logger,
       :Platform platform,
@@ -153,7 +159,11 @@ class FlutterDeviceManager extends DeviceManager {
       ExtensionDevices(
         extensionBuildManager: _extensionBuildManager,
         extensionManager: _extensionManager,
-        toolContext: _toolContext,
+        fileSystem: fs,
+        logger: logger,
+        artifacts: artifacts,
+        cache: cache,
+        config: config,
       ),
     ];
   }

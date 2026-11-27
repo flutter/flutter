@@ -39,7 +39,6 @@ import 'context/tool_context.dart';
 import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
-import 'experimental/extension_device_manager.dart';
 import 'features.dart' show FeatureFlags;
 import 'hook_runner.dart' show FlutterHookRunner;
 import 'ios/application_package.dart';
@@ -384,9 +383,8 @@ class FlutterDevice {
       'on ${device!.displayName} in $modeName mode...',
     );
 
-    package = await getApplicationPackageForDevice(
+    package = await hotRunner.applicationPackageFactory.getPackageForDevice(
       device!,
-      factoryBuilder: () => hotRunner.applicationPackageFactory,
       buildInfo: hotRunner.debuggingOptions.buildInfo,
       applicationBinary: hotRunner.applicationBinary,
     );
@@ -439,9 +437,8 @@ class FlutterDevice {
   Future<int> runCold({required ColdRunner coldRunner, String? route}) async {
     final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
         _toolContext;
-    package = await getApplicationPackageForDevice(
+    package = await coldRunner.applicationPackageFactory.getPackageForDevice(
       device!,
-      factoryBuilder: () => coldRunner.applicationPackageFactory,
       buildInfo: coldRunner.debuggingOptions.buildInfo,
       applicationBinary: coldRunner.applicationBinary,
     );
