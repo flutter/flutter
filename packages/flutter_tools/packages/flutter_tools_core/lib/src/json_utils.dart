@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+final RegExp _windowsDriveSegmentRegExp = RegExp(r'^[a-zA-Z]:$');
+
 /// Validation helpers for file system [Uri]s exchanged over the tool
 /// extension protocol.
 extension ExtensionUriValidation on Uri {
@@ -24,9 +26,17 @@ extension ExtensionUriValidation on Uri {
   ///
   /// Validates build and executable artifacts that may be either files or
   /// directory bundles, whereas [isValidFileUri] validates file-only URIs.
-  bool get isValidArtifactUri =>
-      (isValidFileUri || isValidDirectoryUri) &&
-      pathSegments.any((String segment) => segment.isNotEmpty);
+  bool get isValidArtifactUri {
+    if (!isValidFileUri && !isValidDirectoryUri) {
+      return false;
+    }
+    final List<String> nonEmptySegments = pathSegments
+        .where((String segment) => segment.isNotEmpty)
+        .toList();
+    return nonEmptySegments.isNotEmpty &&
+        !(nonEmptySegments.length == 1 &&
+            _windowsDriveSegmentRegExp.hasMatch(nonEmptySegments.single));
+  }
 }
 
 /// Shared JSON deserialization utilities for Flutter tool extension models.

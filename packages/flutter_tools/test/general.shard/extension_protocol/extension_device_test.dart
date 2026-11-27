@@ -170,28 +170,22 @@ final class _FakeExtensionBuildManager extends ExtensionBuildManager {
 
   @override
   Future<ExtensionBuildResult> build({
-    required BuildInfo buildInfo,
-    required FileSystem fileSystem,
+    required BuildMode buildMode,
     required Uri flutterRoot,
     required String mainPath,
     required Uri outputDir,
     required Uri projectRoot,
     required Map<String, String> resolvedArtifacts,
     required String targetName,
-    String? targetDeviceId,
-    String? targetPlatform,
   }) async {
     buildCalls.add(<String, Object?>{
-      'buildInfo': buildInfo,
-      'fileSystem': fileSystem,
+      'buildMode': buildMode,
       'flutterRoot': flutterRoot,
       'mainPath': mainPath,
       'outputDir': outputDir,
       'projectRoot': projectRoot,
       'resolvedArtifacts': resolvedArtifacts,
-      'targetDeviceId': targetDeviceId,
       'targetName': targetName,
-      'targetPlatform': targetPlatform,
     });
     return buildResult;
   }
@@ -693,7 +687,7 @@ void main() {
       );
 
       final LaunchResult result = await device.startApp(
-        ExtensionApplicationPackage(id: 'test_app'),
+        ExtensionBackedApplicationPackage(id: 'test_app'),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       );
       expect(result.started, isFalse);
@@ -703,7 +697,7 @@ void main() {
       );
     });
 
-    test('ExtensionBackedDevice.startApp and stopApp forward BuildInfo, appId, directory bundle URIs, ExtensionDebuggingOptions, and retry reuse', () async {
+    test('ExtensionBackedDevice.startApp and stopApp forward appId, directory bundle URIs, ExtensionDebuggingOptions, and prebuilt launches', () async {
       final eventPort = ReceivePort();
       addTearDown(eventPort.close);
       final Stream<Map<String, Object?>> events = eventPort
@@ -760,20 +754,7 @@ void main() {
       addTearDown(stopSub.cancel);
 
       final debuggingOptions = DebuggingOptions.enabled(
-        const BuildInfo(
-          BuildMode.debug,
-          'prod',
-          buildName: '2.3.4',
-          buildNumber: '42',
-          dartDefines: <String>['API_URL=https://api.example.com?a=1', 'EMPTY_KEY'],
-          dartObfuscation: true,
-          extraFrontEndOptions: <String>['--enable-asserts'],
-          extraGenSnapshotOptions: <String>['--deterministic'],
-          packageConfigPath: '.dart_tool/package_config.json',
-          splitDebugInfoPath: 'symbols/out',
-          trackWidgetCreation: true,
-          treeShakeIcons: false,
-        ),
+        BuildInfo.debug,
         dartEntrypointArgs: <String>['--arg1', 'val1'],
         deviceVmServicePort: 8181,
         hostVmServicePort: 8282,
@@ -782,7 +763,7 @@ void main() {
         verboseSystemLogs: true,
       );
 
-      final appPackage = ExtensionApplicationPackage(id: 'com.example.test_app');
+      final appPackage = ExtensionBackedApplicationPackage(id: 'com.example.test_app');
       final LaunchResult buildLaunchResult = await device.startApp(
         appPackage,
         debuggingOptions: debuggingOptions,
@@ -795,11 +776,8 @@ void main() {
 
       expect(buildManager.buildCalls, hasLength(1));
       final Map<String, Object?> buildCall = buildManager.buildCalls.single;
-      expect(buildCall['buildInfo'], same(debuggingOptions.buildInfo));
-      expect(buildCall['fileSystem'], same(fileSystem));
+      expect(buildCall['buildMode'], BuildMode.debug);
       expect(buildCall['mainPath'], fileSystem.file('/project/lib/custom_main.dart').path);
-      expect(buildCall['targetDeviceId'], _primaryDeviceId);
-      expect(buildCall['targetPlatform'], 'custom-arm64');
       expect((buildCall['outputDir']! as Uri).path, endsWith('/build/linux/linux-x64/debug/'));
       expect(
         (buildCall['resolvedArtifacts']! as Map<String, String>).keys,
@@ -842,26 +820,26 @@ void main() {
       expect(stopEvents[0][DeviceService.appIdParam], 'com.example.test_app');
       expect(stopEvents[1][DeviceService.appIdParam], isNull);
 
-      // Retry with prebuiltApplication: true on a non-prebuilt package reuses the built executableUri
-      // without rebuilding and without mislabeling the launch as prebuiltApplication: true.
+      // Retry with prebuiltApplication: true on a non-prebuilt package rebuilds rather than
+      // reusing stale state across launches, and keeps prebuiltApplication: false on the wire.
       final LaunchResult retryLaunchResult = await device.startApp(
         appPackage,
         debuggingOptions: debuggingOptions,
         prebuiltApplication: true,
       );
       expect(retryLaunchResult.started, isTrue);
-      expect(buildManager.buildCalls, hasLength(1));
+      expect(buildManager.buildCalls, hasLength(2));
       expect(launchEvents, hasLength(2));
       expect(launchEvents[1][DeviceService.appIdParam], 'com.example.test_app');
       expect(launchEvents[1][DeviceService.prebuiltApplicationParam], isFalse);
       expect(launchEvents[1][DeviceService.executableUriParam], 'file:///build/custom/MyApp.app/');
 
-      // Launching a PrebuiltExtensionApplicationPackage skips build and sets prebuiltApplication: true
-      // for both single-file binaries and directory bundles.
+      // Launching a PrebuiltExtensionBackedApplicationPackage skips build and sets
+      // prebuiltApplication: true for both single-file binaries and directory bundles.
       final File prebuiltFile = fileSystem.file('/prebuilt/app.bundle')
         ..createSync(recursive: true);
       final LaunchResult prebuiltLaunchResult = await device.startApp(
-        PrebuiltExtensionApplicationPackage(
+        PrebuiltExtensionBackedApplicationPackage(
           applicationPackage: prebuiltFile,
           id: 'com.example.prebuilt_app',
         ),
@@ -869,7 +847,7 @@ void main() {
         prebuiltApplication: true,
       );
       expect(prebuiltLaunchResult.started, isTrue);
-      expect(buildManager.buildCalls, hasLength(1));
+      expect(buildManager.buildCalls, hasLength(2));
       expect(launchEvents, hasLength(3));
       expect(launchEvents[2][DeviceService.appIdParam], 'com.example.prebuilt_app');
       expect(launchEvents[2][DeviceService.prebuiltApplicationParam], isTrue);
@@ -878,7 +856,7 @@ void main() {
       final Directory prebuiltBundleDir = fileSystem.directory('/prebuilt/Bundle.app')
         ..createSync(recursive: true);
       final LaunchResult prebuiltDirLaunchResult = await device.startApp(
-        PrebuiltExtensionApplicationPackage(
+        PrebuiltExtensionBackedApplicationPackage(
           applicationPackage: prebuiltBundleDir,
           id: 'com.example.prebuilt_bundle',
         ),
@@ -891,8 +869,7 @@ void main() {
       expect(launchEvents[3][DeviceService.prebuiltApplicationParam], isTrue);
       expect(launchEvents[3][DeviceService.executableUriParam], 'file:///prebuilt/Bundle.app/');
 
-      // A subsequent failed build clears _lastBuiltExecutableUri so a retry with
-      // prebuiltApplication: true does not launch the stale binary from the earlier build.
+      // A failed build aborts launch without invoking DeviceService.launchApp.
       buildManager.buildResult = const ExtensionBuildResult(
         errorMessage: 'Simulated build failure',
         success: false,
@@ -900,16 +877,10 @@ void main() {
       final LaunchResult failedBuildResult = await device.startApp(
         appPackage,
         debuggingOptions: debuggingOptions,
-      );
-      expect(failedBuildResult.started, isFalse);
-      expect(buildManager.buildCalls, hasLength(2));
-
-      final LaunchResult retryAfterFailedBuildResult = await device.startApp(
-        appPackage,
-        debuggingOptions: debuggingOptions,
         prebuiltApplication: true,
       );
-      expect(retryAfterFailedBuildResult.started, isFalse);
+      expect(failedBuildResult.started, isFalse);
+      expect(buildManager.buildCalls, hasLength(3));
       expect(launchEvents, hasLength(4));
     });
 
@@ -981,7 +952,7 @@ void main() {
       addTearDown(device.dispose);
 
       final LaunchResult launchResult = await device.startApp(
-        ExtensionApplicationPackage(id: 'com.example.app'),
+        ExtensionBackedApplicationPackage(id: 'com.example.app'),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       );
       expect(launchResult.started, isFalse);
@@ -996,7 +967,9 @@ void main() {
       expect(logger.errorText, isNot(contains('JSON-RPC error')));
 
       logger.clear();
-      final bool stopped = await device.stopApp(ExtensionApplicationPackage(id: 'com.example.app'));
+      final bool stopped = await device.stopApp(
+        ExtensionBackedApplicationPackage(id: 'com.example.app'),
+      );
       expect(stopped, isFalse);
       expect(
         logger.errorText,
@@ -1032,7 +1005,7 @@ void main() {
 
       logger.clear();
       final LaunchResult timeoutLaunchResult = await timeoutDevice.startApp(
-        ExtensionApplicationPackage(id: 'com.example.app'),
+        ExtensionBackedApplicationPackage(id: 'com.example.app'),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       );
       expect(timeoutLaunchResult.started, isFalse);
@@ -1046,7 +1019,7 @@ void main() {
 
       logger.clear();
       final bool timeoutStopped = await timeoutDevice.stopApp(
-        ExtensionApplicationPackage(id: 'com.example.app'),
+        ExtensionBackedApplicationPackage(id: 'com.example.app'),
       );
       expect(timeoutStopped, isFalse);
       expect(

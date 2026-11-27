@@ -662,6 +662,13 @@ void main() {
         expect(
           () => ExtensionBuildResult.fromJson(const <String, Object?>{
             'success': true,
+            'executableUri': 'file:///C:/',
+          }),
+          throwsA(isA<FormatException>()),
+        );
+        expect(
+          () => ExtensionBuildResult.fromJson(const <String, Object?>{
+            'success': true,
             'executableUri': 'relative/path/app',
           }),
           throwsA(isA<FormatException>()),

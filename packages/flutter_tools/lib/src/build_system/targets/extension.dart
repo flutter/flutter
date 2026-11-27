@@ -158,8 +158,6 @@ class ExtensionTarget extends Target {
       projectRoot: projectDir.uri,
       resolvedArtifacts: resolvedArtifacts,
       targetName: assembleTarget.name,
-      trackWidgetCreation: defines[kTrackWidgetCreation] == 'true',
-      treeShakeIcons: defines[kIconTreeShakerFlag] == 'true',
     );
 
     if (!result.success) {

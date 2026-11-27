@@ -274,19 +274,10 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
     required super.toolContext,
     required super.verboseHelp,
   }) : super(logger: toolContext.logger) {
-    registerOptionBundles(const <OptionBundle>[
-      CommonBuildOptionsBundle(),
-      BuildModeOptionsBundle(),
-    ]);
+    registerOptionBundle(const BuildModeOptionsBundle());
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
-      CommonOptions.dartDefines,
-      CommonOptions.dartDefineFromFile,
-      BuildInfoOptions.flavor,
-      BuildInfoOptions.splitDebugInfo,
-      BuildInfoOptions.obfuscate,
-      BuildInfoOptions.extraFrontEndOptions,
-      BuildInfoOptions.extraGenSnapshotOptions,
-      BuildInfoOptions.trackWidgetCreation,
+      CommonOptions.target,
+      CommonOptions.pub,
     ], verboseHelp: verboseHelp);
   }
 
@@ -319,16 +310,15 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
       buildMode: buildInfo.mode,
       target: target,
     );
+
     final ExtensionBuildResult result = await _buildManager.build(
-      buildInfo: buildInfo,
-      fileSystem: fs,
+      buildMode: buildInfo.mode,
       flutterRoot: fs.directory(cache.flutterRoot).uri,
-      mainPath: fs.file(targetFile).absolute.path,
+      mainPath: targetFile,
       outputDir: outputDir.uri,
       projectRoot: projectDir.uri,
       resolvedArtifacts: resolvedArtifacts,
       targetName: target.name,
-      targetPlatform: target.targetPlatform,
     );
 
     if (result.success) {

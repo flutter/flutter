@@ -1392,6 +1392,94 @@ class DebuggingOptions {
     }
     return args;
   }
+
+  /// Computes the Flutter engine command-line switches for these debugging
+  /// options (with no leading `--`, matching `FLUTTER_ENGINE_SWITCH_*`).
+  List<String> computeFlutterEngineSwitches({String? route, bool traceStartup = false}) {
+    final switches = <String>['enable-dart-profiling=true'];
+
+    if (profileStartup) {
+      switches.add('profile-startup=true');
+    }
+    if (traceStartup) {
+      switches.add('trace-startup=true');
+    }
+    if (route != null) {
+      switches.add('route=$route');
+    }
+    if (enableSoftwareRendering) {
+      switches.add('enable-software-rendering=true');
+    }
+    if (skiaDeterministicRendering) {
+      switches.add('skia-deterministic-rendering=true');
+    }
+    if (traceSkia) {
+      switches.add('trace-skia=true');
+    }
+    if (traceAllowlist != null) {
+      switches.add('trace-allowlist=$traceAllowlist');
+    }
+    if (traceSkiaAllowlist != null) {
+      switches.add('trace-skia-allowlist=$traceSkiaAllowlist');
+    }
+    if (traceSystrace) {
+      switches.add('trace-systrace=true');
+    }
+    if (traceToFile != null) {
+      switches.add('trace-to-file=$traceToFile');
+    }
+    if (endlessTraceBuffer) {
+      switches.add('endless-trace-buffer=true');
+    }
+    if (profileMicrotasks) {
+      switches.add('profile-microtasks=true');
+    }
+    if (purgePersistentCache) {
+      switches.add('purge-persistent-cache=true');
+    }
+    switch (enableImpeller) {
+      case ImpellerStatus.enabled:
+        switches.add('enable-impeller=true');
+      case ImpellerStatus.disabled:
+        switches.add('enable-impeller=false');
+      case ImpellerStatus.platformDefault:
+        break;
+    }
+    if (enableFlutterGpu) {
+      switches.add('enable-flutter-gpu=true');
+    }
+    // Options only supported when there is a VM Service connection between the
+    // tool and the device, usually in debug or profile mode.
+    if (debuggingEnabled) {
+      if (deviceVmServicePort != null) {
+        switches.add('vm-service-port=$deviceVmServicePort');
+      }
+      if (buildInfo.isDebug) {
+        switches.add('enable-checked-mode=true');
+        switches.add('verify-entry-points=true');
+      }
+      if (startPaused) {
+        switches.add('start-paused=true');
+      }
+      if (disableServiceAuthCodes) {
+        switches.add('disable-service-auth-codes=true');
+      }
+      if (disableServiceOriginCheck) {
+        switches.add('disable-service-origin-check=true');
+      }
+      final String dartVmFlags = dartFlags;
+      if (dartVmFlags.isNotEmpty) {
+        switches.add('dart-flags=$dartVmFlags');
+      }
+      if (useTestFonts) {
+        switches.add('use-test-fonts=true');
+      }
+      if (verboseSystemLogs) {
+        switches.add('verbose-logging=true');
+      }
+    }
+    return switches;
+  }
 }
 
 class LaunchResult {

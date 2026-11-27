@@ -372,6 +372,26 @@ exec sleep 30
 ''');
       await Process.run('chmod', <String>['+x', bundledExecutable.path]);
 
+      // Directory bundle launch rejects appId containing path traversal or separators.
+      await expectLater(
+        service.launchApp(
+          appId: '../fake_app.sh',
+          debuggingOptions: const ExtensionDebuggingOptions(
+            buildMode: .debug,
+            debuggingEnabled: true,
+          ),
+          deviceId: LinuxDeviceService.customLinuxDeviceId,
+          executableUri: bundleDir.absolute.uri,
+        ),
+        throwsA(
+          isA<ToolExtensionException>().having(
+            (ToolExtensionException e) => e.message,
+            'message',
+            contains('Invalid application identifier "../fake_app.sh"'),
+          ),
+        ),
+      );
+
       await service.launchApp(
         appId: 'my_bundled_app',
         debuggingOptions: const ExtensionDebuggingOptions(

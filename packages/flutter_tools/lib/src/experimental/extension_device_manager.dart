@@ -16,7 +16,6 @@ import '../base/logger.dart';
 import '../build_info.dart';
 import '../build_system/targets/extension.dart';
 import '../cache.dart';
-import '../desktop_device.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../project.dart';
@@ -512,7 +511,6 @@ class ExtensionBackedDevice extends Device {
   final FileSystem _fileSystem;
   TargetDevice _targetDevice;
   Future<ExtensionDeviceLogReader>? _logReader;
-  Uri? _lastBuiltExecutableUri;
   bool _disposed = false;
 
   @override
@@ -607,31 +605,53 @@ class ExtensionBackedDevice extends Device {
     if (package == null) {
       throw StateError('Cannot start an application on $name without an ApplicationPackage.');
     }
-    final (Uri executableUri, bool isPrebuiltLaunch)? resolvedLaunch = prebuiltApplication
-        ? _resolvePrebuiltExecutableUri(package)
-        : await _buildApplicationExecutableUri(
-            buildInfo: debuggingOptions.buildInfo,
-            mainPath: mainPath,
-          );
-    if (resolvedLaunch == null) {
+    final isPrebuilt = package is PrebuiltApplicationPackage;
+    final Uri? executableUri;
+    if (isPrebuilt) {
+      final FileSystemEntity binaryEntity = package.applicationPackage;
+      if (!binaryEntity.existsSync()) {
+        logger.printError('Prebuilt application binary does not exist: ${binaryEntity.path}');
+        return LaunchResult.failed();
+      }
+      final Uri resolvedUri = binaryEntity.absolute.uri;
+      if (!resolvedUri.isValidArtifactUri) {
+        logger.printError('Invalid prebuilt application binary URI: $resolvedUri');
+        return LaunchResult.failed();
+      }
+      executableUri = resolvedUri;
+    } else {
+      executableUri = await _buildApplicationExecutableUri(
+        buildMode: debuggingOptions.buildInfo.mode,
+        mainPath: mainPath,
+      );
+    }
+    if (executableUri == null) {
       return LaunchResult.failed();
     }
-    final (Uri executableUri, bool isPrebuiltLaunch) = resolvedLaunch;
 
     final bool debuggingEnabled = debuggingOptions.debuggingEnabled;
     final traceStartup = platformArgs?['trace-startup'] == true;
     try {
       await _deviceService.launchApp(
         appId: package.id,
-        debuggingOptions: debuggingOptions.toExtensionDebuggingOptions(
+        debuggingOptions: ExtensionDebuggingOptions(
+          buildMode: debuggingOptions.buildInfo.mode,
+          dartEntrypointArgs: debuggingOptions.dartEntrypointArgs,
+          debuggingEnabled: debuggingEnabled,
+          deviceVmServicePort: debuggingOptions.deviceVmServicePort,
+          engineSwitches: debuggingOptions.computeFlutterEngineSwitches(
+            route: route,
+            traceStartup: traceStartup,
+          ),
+          hostVmServicePort: debuggingOptions.hostVmServicePort,
           route: route,
-          traceStartup: traceStartup,
+          uninstallFirst: debuggingOptions.uninstallFirst,
         ),
         deviceId: id,
         executableUri: executableUri,
-        prebuiltApplication: isPrebuiltLaunch,
+        prebuiltApplication: isPrebuilt,
       );
-    } on Exception catch (e, stack) {
+    } on Object catch (e, stack) {
       logger.printError(
         'Failed to launch application on $name ("${connection.extensionName}"): '
         '${e is ToolExtensionException ? e.message : e}',
@@ -652,34 +672,10 @@ class ExtensionBackedDevice extends Device {
     return LaunchResult.succeeded();
   }
 
-  (Uri executableUri, bool isPrebuiltLaunch)? _resolvePrebuiltExecutableUri(
-    ApplicationPackage package,
-  ) {
-    if (package is PrebuiltApplicationPackage) {
-      final FileSystemEntity binaryEntity = package.applicationPackage;
-      if (!binaryEntity.existsSync()) {
-        logger.printError('Prebuilt application binary does not exist: ${binaryEntity.path}');
-        return null;
-      }
-      final Uri resolvedUri = binaryEntity.absolute.uri;
-      if (!resolvedUri.isValidArtifactUri) {
-        logger.printError('Invalid prebuilt application binary URI: $resolvedUri');
-        return null;
-      }
-      return (resolvedUri, true);
-    }
-    if (_lastBuiltExecutableUri case final Uri builtUri) {
-      return (builtUri, false);
-    }
-    logger.printError('No prebuilt application package or prior build output available for $name.');
-    return null;
-  }
-
-  Future<(Uri executableUri, bool isPrebuiltLaunch)?> _buildApplicationExecutableUri({
-    required BuildInfo buildInfo,
+  Future<Uri?> _buildApplicationExecutableUri({
+    required BuildMode buildMode,
     required String? mainPath,
   }) async {
-    _lastBuiltExecutableUri = null;
     final String? buildTargetName = _targetDevice.buildTarget;
     if (buildTargetName == null) {
       logger.printError('Device $name does not specify a buildTarget for launching applications.');
@@ -698,7 +694,6 @@ class ExtensionBackedDevice extends Device {
       return null;
     }
 
-    final BuildMode buildMode = buildInfo.mode;
     final Directory projectDir = _fileSystem.currentDirectory;
     final Directory buildOutputDir = projectDir.childDirectory(
       _config != null ? getBuildDirectory(_config, _fileSystem) : 'build',
@@ -727,16 +722,13 @@ class ExtensionBackedDevice extends Device {
     final String flutterRootPath = _cache?.flutterRoot ?? projectDir.path;
 
     final ExtensionBuildResult result = await _buildManager.build(
-      buildInfo: buildInfo,
-      fileSystem: _fileSystem,
+      buildMode: buildMode,
       flutterRoot: _fileSystem.directory(flutterRootPath).uri,
       mainPath: absoluteMainPath,
       outputDir: outputDir.uri,
       projectRoot: projectDir.uri,
       resolvedArtifacts: resolvedArtifacts,
-      targetDeviceId: id,
       targetName: buildTargetName,
-      targetPlatform: _targetDevice.targetPlatform ?? target.targetPlatform,
     );
     if (!result.success) {
       final String? errorMessage = result.errorMessage;
@@ -754,8 +746,7 @@ class ExtensionBackedDevice extends Device {
       );
       return null;
     }
-    _lastBuiltExecutableUri = builtExecutableUri;
-    return (builtExecutableUri, false);
+    return builtExecutableUri;
   }
 
   @override
@@ -764,7 +755,7 @@ class ExtensionBackedDevice extends Device {
     try {
       await _deviceService.stopApp(appId: appId, deviceId: id);
       return true;
-    } on Exception catch (e, stack) {
+    } on Object catch (e, stack) {
       logger.printError(
         'Failed to stop application on $name ("${connection.extensionName}"): '
         '${e is ToolExtensionException ? e.message : e}',
@@ -779,24 +770,4 @@ class ExtensionBackedDevice extends Device {
 
   @override
   Future<bool> isAppInstalled(ApplicationPackage app, {String? userIdentifier}) async => false;
-}
-
-/// Converts host [DebuggingOptions] into a serializable [ExtensionDebuggingOptions].
-extension ExtensionDebuggingOptionsConversion on DebuggingOptions {
-  /// Creates an [ExtensionDebuggingOptions] descriptor for this configuration.
-  ExtensionDebuggingOptions toExtensionDebuggingOptions({
-    String? route,
-    bool traceStartup = false,
-  }) {
-    return ExtensionDebuggingOptions(
-      buildMode: buildInfo.mode,
-      dartEntrypointArgs: dartEntrypointArgs,
-      debuggingEnabled: debuggingEnabled,
-      deviceVmServicePort: deviceVmServicePort,
-      engineSwitches: computeFlutterEngineSwitches(this, route: route, traceStartup: traceStartup),
-      hostVmServicePort: hostVmServicePort,
-      route: route,
-      uninstallFirst: uninstallFirst,
-    );
-  }
 }

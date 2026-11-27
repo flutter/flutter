@@ -44,8 +44,6 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
   Uri? invokedProjectRoot;
   Map<String, String>? invokedResolvedArtifacts;
   String? invokedTargetName;
-  bool? invokedTrackWidgetCreation;
-  bool? invokedTreeShakeIcons;
 
   @override
   Future<ExtensionBuildResult> assemble({
@@ -57,8 +55,6 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
     required Uri projectRoot,
     required Map<String, String> resolvedArtifacts,
     required String targetName,
-    required bool trackWidgetCreation,
-    required bool treeShakeIcons,
   }) async {
     assembleCount += 1;
     invokedBuildDir = buildDir;
@@ -69,8 +65,6 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
     invokedProjectRoot = projectRoot;
     invokedResolvedArtifacts = resolvedArtifacts;
     invokedTargetName = targetName;
-    invokedTrackWidgetCreation = trackWidgetCreation;
-    invokedTreeShakeIcons = treeShakeIcons;
     onAssemble?.call(buildDir);
     return buildResult ?? const ExtensionBuildResult(success: true);
   }
@@ -174,15 +168,6 @@ void main() {
     expect(buildManager.invokedBuildDir, equals(environment.buildDir.uri));
     expect(buildManager.invokedFlutterRoot, equals(environment.flutterRootDir.uri));
     expect(buildManager.invokedResolvedArtifacts, isEmpty);
-    expect(buildManager.invokedTrackWidgetCreation, isFalse);
-    expect(buildManager.invokedTreeShakeIcons, isFalse);
-
-    environment.defines[kTrackWidgetCreation] = 'true';
-    environment.defines[kIconTreeShakerFlag] = 'true';
-    await target.build(environment);
-
-    expect(buildManager.invokedTrackWidgetCreation, isTrue);
-    expect(buildManager.invokedTreeShakeIcons, isTrue);
   });
 
   test('ExtensionTarget resolves and passes artifacts', () async {

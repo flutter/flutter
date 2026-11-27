@@ -118,10 +118,7 @@ void main() {
       ),
     );
 
-    final linuxApp = PrebuiltLinuxApp(
-      applicationPackage: MemoryFileSystem.test().file('foo'),
-      executable: 'foo',
-    );
+    final linuxApp = PrebuiltLinuxApp(applicationPackage: MemoryFileSystem.test().file('foo'));
 
     expect(device.id, 'testid');
     expect(device.name, 'testlabel');
@@ -433,10 +430,7 @@ void main() {
 
     expect(
       await device.installApp(
-        PrebuiltLinuxApp(
-          applicationPackage: MemoryFileSystem.test().file('exe'),
-          executable: 'exe',
-        ),
+        PrebuiltLinuxApp(applicationPackage: MemoryFileSystem.test().file('exe')),
       ),
       true,
     );
@@ -502,7 +496,6 @@ void main() {
         ),
         appPackage: PrebuiltLinuxApp(
           applicationPackage: MemoryFileSystem.test().file('testexecutable'),
-          executable: 'testexecutable',
         ),
         logger: BufferLogger.test(),
         processManager: processManager,
@@ -546,7 +539,6 @@ void main() {
       ),
       appPackage: PrebuiltLinuxApp(
         applicationPackage: MemoryFileSystem.test().file('testexecutable'),
-        executable: 'testexecutable',
       ),
       logger: BufferLogger.test(),
       processManager: processManager,
@@ -591,7 +583,6 @@ void main() {
     // buildable app as long as we pass prebuiltApplication as false
     final app = PrebuiltLinuxApp(
       applicationPackage: MemoryFileSystem.test().file('testexecutable'),
-      executable: 'testexecutable',
     );
 
     final Directory configFileDir = fs.directory('custom_devices_config_dir');
@@ -703,7 +694,6 @@ void main() {
     // buildable app as long as we pass prebuiltApplication as false
     final app = PrebuiltLinuxApp(
       applicationPackage: MemoryFileSystem.test().file('testexecutable'),
-      executable: 'testexecutable',
     );
 
     // finally start actually testing things

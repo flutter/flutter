@@ -69,9 +69,17 @@ final class LinuxDeviceService extends DeviceService {
       throw ToolExtensionException('Unknown device "$deviceId".');
     }
     final String artifactPath = executableUri.toFilePath();
-    final executable = FileSystemEntity.isDirectorySync(artifactPath)
-        ? File.fromUri(Directory(artifactPath).uri.resolve(appId))
-        : File(artifactPath);
+    final File executable;
+    if (FileSystemEntity.isDirectorySync(artifactPath)) {
+      if (appId == '.' || appId == '..' || appId.contains('/') || appId.contains(r'\')) {
+        throw ToolExtensionException(
+          'Invalid application identifier "$appId" for bundle directory "$artifactPath".',
+        );
+      }
+      executable = File('${Directory(artifactPath).path}${Platform.pathSeparator}$appId');
+    } else {
+      executable = File(artifactPath);
+    }
     if (!executable.existsSync()) {
       throw ToolExtensionException('Application executable does not exist: ${executable.path}');
     }

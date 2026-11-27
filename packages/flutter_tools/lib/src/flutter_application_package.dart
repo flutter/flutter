@@ -21,17 +21,18 @@ import 'windows/application_package.dart';
 
 /// An [ApplicationPackage] representing an application targeting a custom tool
 /// extension device.
-class ExtensionApplicationPackage extends ApplicationPackage {
-  ExtensionApplicationPackage({required super.id}) : name = id;
+class ExtensionBackedApplicationPackage extends ApplicationPackage {
+  ExtensionBackedApplicationPackage({required super.id}) : name = id;
 
   @override
   final String name;
 }
 
-/// A prebuilt [ExtensionApplicationPackage] supplied via `--use-application-binary`.
-class PrebuiltExtensionApplicationPackage extends ExtensionApplicationPackage
+/// A prebuilt [ExtensionBackedApplicationPackage] supplied via
+/// `--use-application-binary`.
+class PrebuiltExtensionBackedApplicationPackage extends ExtensionBackedApplicationPackage
     implements PrebuiltApplicationPackage {
-  PrebuiltExtensionApplicationPackage({required this.applicationPackage, required super.id});
+  PrebuiltExtensionBackedApplicationPackage({required this.applicationPackage, required super.id});
 
   @override
   final FileSystemEntity applicationPackage;
@@ -128,13 +129,13 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
         // once available so unsupported built-in architectures are not routed here.
         final String id = _currentProject().manifest.appName;
         if (applicationBinary == null) {
-          return ExtensionApplicationPackage(id: id);
+          return ExtensionBackedApplicationPackage(id: id);
         }
         final FileSystem fs = _toolContext.fs;
         final FileSystemEntity entity = fs.isDirectorySync(applicationBinary.path)
             ? fs.directory(applicationBinary.path)
             : applicationBinary;
-        return PrebuiltExtensionApplicationPackage(applicationPackage: entity, id: id);
+        return PrebuiltExtensionBackedApplicationPackage(applicationPackage: entity, id: id);
       case .fuchsia || .unsupported:
         TargetPlatform.throwUnsupportedTarget();
     }

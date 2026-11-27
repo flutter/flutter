@@ -455,7 +455,12 @@ void main() {
       expect(Uri.parse('file:///path/to/bundle/').isValidFileUri, isFalse);
       expect(Uri.parse('file:///path/to/app.pkg').isValidArtifactUri, isTrue);
       expect(Uri.parse('file:///path/to/bundle/').isValidArtifactUri, isTrue);
+      expect(Uri.parse('file:///C:/path/to/app.exe').isValidArtifactUri, isTrue);
+      expect(Uri.parse('file:///C:/path/to/bundle/').isValidArtifactUri, isTrue);
       expect(Uri.parse('file:///').isValidArtifactUri, isFalse);
+      expect(Uri.parse('file:///C:/').isValidArtifactUri, isFalse);
+      expect(Uri.parse('file:///c:/').isValidArtifactUri, isFalse);
+      expect(Uri.parse('file:///C:').isValidArtifactUri, isFalse);
       expect(Uri.parse('http://example.com/app.pkg').isValidArtifactUri, isFalse);
       expect(Uri.parse('relative/app.pkg').isValidArtifactUri, isFalse);
       expect(Uri.parse('file:///path/to/app.pkg?query=1').isValidArtifactUri, isFalse);
