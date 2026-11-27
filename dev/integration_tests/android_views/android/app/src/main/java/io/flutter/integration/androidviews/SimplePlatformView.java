@@ -10,6 +10,7 @@ import android.graphics.PixelFormat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -25,7 +26,7 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
     private final MethodChannel methodChannel;
     private final TouchPipe touchPipe;
 
-    SimplePlatformView(Context context, MethodChannel methodChannel) {
+    SimplePlatformView(Context context, MethodChannel methodChannel, boolean useVirtualDisplay) {
         this.methodChannel = methodChannel;
         view = new FrameLayout(context) {
             @Override
@@ -33,6 +34,11 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
                 return true;
             }
         };
+        if (useVirtualDisplay) {
+            // Adding a SurfaceView forces PlatformViewsController to use Virtual Display mode
+            // so SingleViewPresentation intercepts WindowManager calls.
+            view.addView(new SurfaceView(context));
+        }
         view.setBackgroundColor(0xff0000ff);
         this.methodChannel.setMethodCallHandler(this);
         touchPipe = new TouchPipe(this.methodChannel, view);

@@ -42,7 +42,7 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
             height: 300,
             child: AndroidView(
               key: const ValueKey<String>('PlatformView'),
-              viewType: 'simple_view',
+              viewType: 'simple_vd_view',
               onPlatformViewCreated: onPlatformViewCreated,
             ),
           ),

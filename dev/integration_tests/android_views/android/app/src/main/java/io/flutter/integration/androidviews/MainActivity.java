@@ -39,7 +39,11 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
         flutterEngine
             .getPlatformViewsController()
             .getRegistry()
-            .registerViewFactory("simple_view", new SimpleViewFactory(executor));
+            .registerViewFactory("simple_view", new SimpleViewFactory(executor, false));
+        flutterEngine
+            .getPlatformViewsController()
+            .getRegistry()
+            .registerViewFactory("simple_vd_view", new SimpleViewFactory(executor, true));
         mMethodChannel = new MethodChannel(executor, "android_views_integration");
         mMethodChannel.setMethodCallHandler(this);
         GeneratedPluginRegistrant.registerWith(flutterEngine);
