@@ -275,7 +275,7 @@ void main() {
     expect(() => asLogger<MachineOutputLogger>(notifyingLogger), throwsStateError);
   });
 
-  group('AppContext', () {
+  group('VerboseLogger', () {
     late FakeStopwatch fakeStopWatch;
 
     setUp(() {
