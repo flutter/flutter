@@ -45,9 +45,23 @@ final String _androidEngineTestPath = path.join('dev', 'integration_tests', 'and
 Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) async {
   print('Running Flutter Driver Android tests (backend=$impellerBackend)');
 
+  // Temporarily skip these two tests on the Vulkan emulator due to a gfxstream
+  // GL-VK interop regression in newer Android Emulator versions where
+  // AHardwareBuffers written via an offscreen OpenGL FBO read back as black
+  // when sampled in Vulkan. Both tests continue to run on OpenGL ES
+  // (ImpellerBackend.opengles).
+  const kTemporarilySkippedOnVulkan = <String>{
+    'surface_texture_smiley_face_main.dart',
+    'virtual_display_platform_view_main.dart',
+  };
+
   await _withPatchedManifest(impellerBackend, (List<FileSystemEntity> mains, File _) async {
     for (final file in mains) {
       if (file.path.contains('hcpp')) {
+        continue;
+      }
+      if (impellerBackend == ImpellerBackend.vulkan &&
+          kTemporarilySkippedOnVulkan.contains(path.basename(file.path))) {
         continue;
       }
       await _runTest(file, impellerBackend: impellerBackend);

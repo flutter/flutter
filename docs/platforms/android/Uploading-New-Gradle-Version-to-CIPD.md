@@ -16,16 +16,18 @@ Some links in the instructions below are Google-internal.
    you are a member of this
    group [here](https://chrome-infra-auth.appspot.com/auth/groups/google%2Fflutter-cipd-writers@twosync.google.com).
 
-### Identify the New Gradle Version
+### Determine the New Gradle Version
 
-3. Identify the new Gradle Version to include in the upload script. From the dev folder run:
+3. Determine the new Gradle version to include in the upload script. Choose a newer Gradle version that is compatible with newer versions of the other Android dependencies.
+   You should also identify the current Gradle version used in our test apps. This helps catch any previous uploads we may have missed and informs your choice of the new version.
+
    ```sh
    git grep "distributionUrl" | sed -E 's/.*\/gradle-([0-9.]+[^.]*)\.zip.*/\1/'
    ```
    For REPLACEME versions check the ModuleTest versions
    [here](https://github.com/flutter/flutter/blob/master/dev/devicelab/bin/tasks/build_android_host_app_with_module_aar.dart#L449-L456).
 
-4. Update the versions array with these new versions in the generate_gradle_cipd_packages.dart script. Gradle distributions in the dev folder should only use the 'bin' distribution type.
+4. Update the versions array by adding the new Gradle versions in the generate_gradle_cipd_packages.dart script. Upload both the 'bin' and 'all' Gradle distribution types as we test against both.
 
 ### Upload to CIPD
 

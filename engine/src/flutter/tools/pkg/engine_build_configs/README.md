@@ -31,7 +31,7 @@ $ dart bin/run.dart [build config name] [build name]
 For example:
 
 ```
-$ dart bin/run.dart mac_unopt host_debug_unopt
+$ dart bin/run.dart mac_host_debug_unopt_arm64 ci/host_debug_unopt_arm64
 ```
 
 The build config names are the names of the json files under ci/builders.

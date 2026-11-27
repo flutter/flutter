@@ -339,6 +339,13 @@ void FlutterWindow::OnCursorRectUpdated(const Rect& rect) {
 
 void FlutterWindow::OnResetImeComposing() {
   AbortImeComposing();
+  if (ime_end_composition_deferred_) {
+    EndImeComposition();
+  }
+  // The text input client is no longer composing, whether or not the IME goes
+  // on to end the composition.
+  ime_composing_ = false;
+  ime_composing_implicitly_ = false;
 }
 
 bool FlutterWindow::OnBitmapSurfaceCleared() {
@@ -964,8 +971,17 @@ void FlutterWindow::OnImeSetContext(UINT const message,
 void FlutterWindow::OnImeStartComposition(UINT const message,
                                           WPARAM const wparam,
                                           LPARAM const lparam) {
-  text_input_manager_->CreateImeWindow();
-  OnComposeBegin();
+  if (ime_end_composition_deferred_) {
+    // The result that the previous composition's end is waiting for has not
+    // arrived yet. End that composition before starting a new one.
+    EndImeComposition();
+  }
+  if (ime_composing_implicitly_) {
+    // A WM_IME_COMPOSITION message has already begun this composition.
+    ime_composing_implicitly_ = false;
+    return;
+  }
+  BeginImeComposition();
 }
 
 void FlutterWindow::OnImeComposition(UINT const message,
@@ -974,33 +990,66 @@ void FlutterWindow::OnImeComposition(UINT const message,
   // Update the IME window position.
   text_input_manager_->UpdateImeWindow();
 
-  if (lparam == 0) {
+  if (ime_composing_ && lparam == 0) {
     OnComposeChange(u"", 0);
     OnComposeCommit();
   }
+
+  // The strings below are readable only while the IME window is active, so a
+  // string that arrives after the composition has ended is ignored. The legacy
+  // Microsoft Korean IME may send the composing text that way when the window
+  // loses focus.
 
   // Process GCS_RESULTSTR at fisrt, because Google Japanese Input and ATOK
   // send both GCS_RESULTSTR and GCS_COMPSTR to commit composed text and send
   // new composing text.
   if (lparam & GCS_RESULTSTR) {
-    // Commit but don't end composing.
     // Read the committed composing string.
     std::optional<std::u16string> text = text_input_manager_->GetResultString();
     if (text) {
+      if (!ime_composing_) {
+        // No WM_IME_STARTCOMPOSITION preceded this message.
+        BeginImeComposition();
+        ime_composing_implicitly_ = true;
+      }
+      // Commit but don't end composing.
       int pos = GetCursorPositionForComposition(*text_input_manager_, lparam,
                                                 text->length());
-      OnComposeChange(text.value(), pos);
+      OnComposeChange(*text, pos);
       OnComposeCommit();
     }
   }
+  std::optional<std::u16string> composing_text;
   if (lparam & GCS_COMPSTR) {
     // Read the in-progress composing string.
-    std::optional<std::u16string> text =
-        text_input_manager_->GetComposingString();
-    if (text) {
+    composing_text = text_input_manager_->GetComposingString();
+    if (composing_text) {
+      if (!ime_composing_) {
+        BeginImeComposition();
+        ime_composing_implicitly_ = true;
+      }
       int pos = GetCursorPositionForComposition(*text_input_manager_, lparam,
-                                                text->length());
-      OnComposeChange(text.value(), pos);
+                                                composing_text->length());
+      OnComposeChange(*composing_text, pos);
+    }
+  }
+
+  if (ime_end_composition_deferred_) {
+    // This is the result that WM_IME_ENDCOMPOSITION was waiting for.
+    EndImeComposition();
+  } else if (ime_composing_implicitly_) {
+    if (!(lparam & GCS_COMPSTR)) {
+      // A message without GCS_COMPSTR, such as one that only moves the cursor,
+      // says nothing about the composing text, so read it.
+      composing_text = text_input_manager_->GetComposingString();
+    }
+    if (!composing_text || composing_text->empty()) {
+      // WM_IME_ENDCOMPOSITION may never arrive for a composition that was begun
+      // implicitly, so end it once no composing text is left. The IME window
+      // stays active so that later strings can still be read.
+      ime_composing_ = false;
+      ime_composing_implicitly_ = false;
+      OnComposeEnd();
     }
   }
 }
@@ -1008,8 +1057,51 @@ void FlutterWindow::OnImeComposition(UINT const message,
 void FlutterWindow::OnImeEndComposition(UINT const message,
                                         WPARAM const wparam,
                                         LPARAM const lparam) {
+  if (HasQueuedImeResult()) {
+    // The legacy Microsoft Korean IME sends WM_IME_ENDCOMPOSITION before the
+    // result string when a non-Hangul key such as space, a digit or
+    // punctuation ends the composition. In the 3-beolsik layouts the result
+    // also carries that key's character, which arrives in no other message.
+    // Ending the composition now would deactivate the IME window, leaving the
+    // result unreadable, so wait for the result.
+    // See https://github.com/flutter/flutter/issues/140537.
+    if (!ime_composing_) {
+      // The 3-beolsik layouts send the same messages, without
+      // WM_IME_STARTCOMPOSITION, when nothing is being composed.
+      BeginImeComposition();
+    }
+    ime_end_composition_deferred_ = true;
+    return;
+  }
+  EndImeComposition();
+}
+
+void FlutterWindow::BeginImeComposition() {
+  if (ime_composing_) {
+    // Beginning the composition again would leave the composing text applied
+    // so far behind as plain text.
+    return;
+  }
+  ime_composing_ = true;
+  text_input_manager_->CreateImeWindow();
+  OnComposeBegin();
+}
+
+void FlutterWindow::EndImeComposition() {
+  ime_end_composition_deferred_ = false;
+  ime_composing_ = false;
+  ime_composing_implicitly_ = false;
   text_input_manager_->DestroyImeWindow();
   OnComposeEnd();
+}
+
+bool FlutterWindow::HasQueuedImeResult() {
+  MSG next_message;
+  if (!Win32PeekMessage(&next_message, WM_IME_COMPOSITION, WM_IME_COMPOSITION,
+                        PM_NOREMOVE)) {
+    return false;
+  }
+  return (next_message.lParam & GCS_RESULTSTR) != 0;
 }
 
 void FlutterWindow::OnImeRequest(UINT const message,

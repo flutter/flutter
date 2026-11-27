@@ -8,7 +8,6 @@ import '../base/common.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/utils.dart';
-import '../context/tool_context.dart';
 import '../doctor.dart';
 import '../doctor_validator.dart';
 import '../emulator.dart';
@@ -19,7 +18,7 @@ class EmulatorsCommand extends FlutterCommand {
   EmulatorsCommand({
     required this._doctor,
     required this._emulatorManager,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     super.verboseHelp,
   }) {
     argParser.addOption('launch', help: 'The full or partial ID of the emulator to launch.');
@@ -41,9 +40,6 @@ class EmulatorsCommand extends FlutterCommand {
 
   final Doctor _doctor;
   final EmulatorManager _emulatorManager;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'emulators';

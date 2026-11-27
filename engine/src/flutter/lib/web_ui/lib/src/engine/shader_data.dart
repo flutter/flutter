@@ -95,6 +95,28 @@ class ShaderData {
   List<UniformData> uniforms;
   int floatCount;
   int textureCount;
+
+  /// Returns the index of the image sampler uniform named [name] among the
+  /// shader's image sampler uniforms, as passed to
+  /// `FragmentShader.setImageSampler`.
+  ///
+  /// Throws an [ArgumentError] if there is no uniform named [name], or if that
+  /// uniform is not an image sampler.
+  int getImageSamplerIndex(String name) {
+    var index = 0;
+    for (final UniformData uniform in uniforms) {
+      if (uniform.name == name) {
+        if (uniform.type != UniformType.SampledImage) {
+          throw ArgumentError('Uniform "$name" is not an image sampler.');
+        }
+        return index;
+      }
+      if (uniform.type == UniformType.SampledImage) {
+        index += 1;
+      }
+    }
+    throw ArgumentError('No uniform named "$name".');
+  }
 }
 
 class UniformData {

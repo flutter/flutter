@@ -4,7 +4,6 @@
 
 import '../../base/file_system.dart';
 import '../../base/project_migrator.dart';
-import '../../globals.dart' as globals;
 import '../../ios/plist_parser.dart';
 import '../../xcode_project.dart';
 
@@ -16,15 +15,16 @@ import '../../xcode_project.dart';
 /// NSApplication to FlutterApplication. Now that this is no longer necessary,
 /// we apply the reverse migration for anyone who was previously migrated.
 class FlutterApplicationMigration extends ProjectMigrator {
-  FlutterApplicationMigration(MacOSProject project, super.logger)
+  FlutterApplicationMigration(MacOSProject project, super.logger, {required this._plistParser})
     : _infoPlistFile = project.defaultHostInfoPlist;
 
   final File _infoPlistFile;
+  final PlistParser _plistParser;
 
   @override
   Future<void> migrate() async {
     if (_infoPlistFile.existsSync()) {
-      final String? principalClass = globals.plistParser.getValueFromFile<String>(
+      final String? principalClass = _plistParser.getValueFromFile<String>(
         _infoPlistFile.path,
         PlistParser.kNSPrincipalClassKey,
       );
@@ -41,7 +41,7 @@ class FlutterApplicationMigration extends ProjectMigrator {
       logger.printStatus(
         'Updating ${_infoPlistFile.basename} to use NSApplication instead of FlutterApplication.',
       );
-      final bool success = globals.plistParser.replaceKey(
+      final bool success = _plistParser.replaceKey(
         _infoPlistFile.path,
         key: PlistParser.kNSPrincipalClassKey,
         value: 'NSApplication',

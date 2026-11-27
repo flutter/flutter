@@ -9,13 +9,12 @@ import 'package:multicast_dns/multicast_dns.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import 'base/common.dart';
-import 'base/context.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'device.dart';
-import 'globals.dart' as globals;
 
 // macOS error code for EADDRINUSE.
 const _kMacOSAddressAlreadyInUseErrno = 48;
@@ -51,6 +50,7 @@ class MDnsVmServiceDiscovery {
   MDnsVmServiceDiscovery({
     required this._analytics,
     required this._logger,
+    required this._platform,
     MDnsClient? mdnsClient,
     MDnsClient? preliminaryMDnsClient,
   }) : _client = mdnsClient ?? MDnsClient(),
@@ -64,11 +64,10 @@ class MDnsVmServiceDiscovery {
 
   final Logger _logger;
   final Analytics _analytics;
+  final Platform _platform;
 
   @visibleForTesting
   static const dartVmServiceName = '_dartVmService._tcp.local';
-
-  static MDnsVmServiceDiscovery? get instance => context.get<MDnsVmServiceDiscovery>();
 
   /// Executes an mDNS query for Dart VM Services.
   /// Checks for services that have already been launched.
@@ -278,7 +277,7 @@ class MDnsVmServiceDiscovery {
     try {
       return await completer.future;
     } on SocketException catch (e, stackTrace) {
-      if (!globals.platform.isMacOS) {
+      if (!_platform.isMacOS) {
         rethrow;
       }
       _logger.printTrace('mDNS discovery failed: $e\n$stackTrace');

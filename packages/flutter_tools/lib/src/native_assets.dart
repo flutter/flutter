@@ -4,6 +4,8 @@
 
 import 'asset.dart';
 import 'build_info.dart';
+import 'context/tool_context.dart';
+import 'features.dart';
 import 'project.dart';
 
 typedef TestCompilerNativeAssetsBuildResult = ({
@@ -14,10 +16,24 @@ typedef TestCompilerNativeAssetsBuildResult = ({
 /// An interface to enable overriding native assets build logic in other
 /// build systems.
 abstract class TestCompilerNativeAssetsBuilder {
-  Future<Uri?> build(BuildInfo buildInfo);
+  Future<Uri?> build(
+    BuildInfo buildInfo, {
+    required FeatureFlags featureFlags,
+    required ToolContext toolContext,
+  });
 
-  Future<TestCompilerNativeAssetsBuildResult> buildWithHookResult(BuildInfo buildInfo) async =>
-      (nativeAssetsManifest: await build(buildInfo), flutterHookResult: null);
+  Future<TestCompilerNativeAssetsBuildResult> buildWithHookResult(
+    BuildInfo buildInfo, {
+    required FeatureFlags featureFlags,
+    required ToolContext toolContext,
+  }) async => (
+    nativeAssetsManifest: await build(
+      buildInfo,
+      featureFlags: featureFlags,
+      toolContext: toolContext,
+    ),
+    flutterHookResult: null,
+  );
 
   /// Returns the Windows native assets build directory.
   ///
@@ -25,5 +41,5 @@ abstract class TestCompilerNativeAssetsBuilder {
   /// return value of this function, DLLs in the native assets build directory can
   /// be found by the dynamic linker. This is necessary to support native asset
   /// libraries that dynamically link to other libraries.
-  String windowsBuildDirectory(FlutterProject project);
+  String windowsBuildDirectory(FlutterProject project, {required ToolContext toolContext});
 }

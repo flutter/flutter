@@ -148,6 +148,21 @@ void main() {
     );
   });
 
+  testWidgets('TestWidgetsFlutterBinding.reset clears defaultRouteNameTestValue', (
+    WidgetTester tester,
+  ) async {
+    final TestWidgetsFlutterBinding binding = retrieveTestBinding(tester);
+    binding.platformDispatcher.defaultRouteNameTestValue = 'fake_route';
+    expect(binding.platformDispatcher.defaultRouteName, 'fake_route');
+
+    binding.reset();
+
+    expect(
+      binding.platformDispatcher.defaultRouteName,
+      PlatformDispatcher.instance.defaultRouteName,
+    );
+  });
+
   testWidgets('TestPlatformDispatcher can fake accessibility features', (
     WidgetTester tester,
   ) async {
@@ -210,6 +225,20 @@ void main() {
       retrieveTestBinding(tester).platformDispatcher.localesTestValue = expectedValue;
       expect(observer.locales, equals(expectedValue));
       retrieveTestBinding(tester).platformDispatcher.localesTestValue = defaultLocales;
+    },
+  );
+
+  testWidgets(
+    'TestPlatformDispatcher sends fake alwaysUse24HourFormat when WidgetsBindingObserver notifiers are called',
+    (WidgetTester tester) async {
+      addTearDown(tester.platformDispatcher.clearAlwaysUse24HourTestValue);
+      final bool defaultFormat = WidgetsBinding.instance.platformDispatcher.alwaysUse24HourFormat;
+      final observer = TestObserver();
+      retrieveTestBinding(tester).addObserver(observer);
+      addTearDown(() => retrieveTestBinding(tester).removeObserver(observer));
+      final bool expectedValue = !defaultFormat;
+      retrieveTestBinding(tester).platformDispatcher.alwaysUse24HourFormatTestValue = expectedValue;
+      expect(observer.alwaysUse24HourFormat, equals(expectedValue));
     },
   );
 
@@ -426,6 +455,8 @@ void main() {
   testWidgets('TestPlatformDispatcher has a working scaleFontSize implementation', (
     WidgetTester tester,
   ) async {
+    // The fake implements textScaleFactor but not scaleFontSize. The test
+    // dispatcher still scales text with it, linearly.
     expect(
       TestPlatformDispatcher(
         platformDispatcher: _FakePlatformDispatcher(
@@ -436,6 +467,26 @@ void main() {
       2.0,
     );
   });
+
+  testWidgets(
+    'TestPlatformDispatcher scales with the wrapped dispatcher unless a test value is set',
+    (WidgetTester tester) async {
+      final dispatcher = TestPlatformDispatcher(
+        platformDispatcher: _CurvedFakePlatformDispatcher(
+          displays: <Display>[_FakeDisplay(id: 2)],
+          views: <FlutterView>[_FakeFlutterView(display: _FakeDisplay(id: 1))],
+        ),
+      );
+      // The wrapped dispatcher's own curve is not a multiple of its factor.
+      expect(dispatcher.scaleFontSize(10.0), 25.0);
+
+      dispatcher.textScaleFactorTestValue = 3.0;
+      expect(dispatcher.scaleFontSize(10.0), 30.0);
+
+      dispatcher.clearTextScaleFactorTestValue();
+      expect(dispatcher.scaleFontSize(10.0), 25.0);
+    },
+  );
 
   // TODO(pdblasi-google): Removed this group of tests when the Display API is stable and supported on all platforms.
   group('TestPlatformDispatcher with unsupported Display API', () {
@@ -644,10 +695,16 @@ void main() {
 
 class TestObserver with WidgetsBindingObserver {
   List<Locale>? locales;
+  bool? alwaysUse24HourFormat;
 
   @override
   void didChangeLocales(List<Locale>? locales) {
     this.locales = locales;
+  }
+
+  @override
+  void didChangeAlwaysUse24HourFormat() {
+    alwaysUse24HourFormat = WidgetsBinding.instance.platformDispatcher.alwaysUse24HourFormat;
   }
 }
 
@@ -722,4 +779,13 @@ class _FakePlatformDispatcher extends Fake implements PlatformDispatcher {
   void resetInternalState() {
     resetInternalStateCalled = true;
   }
+}
+
+/// A fake whose font scaling is a curve rather than a multiple of its factor,
+/// so that a test can tell which of the two a [TestPlatformDispatcher] used.
+class _CurvedFakePlatformDispatcher extends _FakePlatformDispatcher {
+  _CurvedFakePlatformDispatcher({required super.displays, required super.views});
+
+  @override
+  double scaleFontSize(double unscaledFontSize) => unscaledFontSize * 2.0 + 5.0;
 }

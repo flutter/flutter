@@ -158,7 +158,7 @@ static void settings_portal_changed_cb(GDBusProxy* proxy,
     return;
   }
 
-  FlSetting setting;
+  FlSetting setting{};
   g_autoptr(GVariant) value = nullptr;
   g_variant_get(parameters, "(&s&sv)", &setting.ns, &setting.key, &value);
   set_value(portal, &setting, value);

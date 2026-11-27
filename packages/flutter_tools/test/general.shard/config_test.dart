@@ -29,27 +29,27 @@ void main() {
     );
   });
 
-  testWithoutContext('Config get set value', () async {
+  test('Config get set value', () async {
     expect(config.getValue('foo'), null);
     config.setValue('foo', 'bar');
     expect(config.getValue('foo'), 'bar');
     expect(config.keys, contains('foo'));
   });
 
-  testWithoutContext('Config get set bool value', () async {
+  test('Config get set bool value', () async {
     expect(config.getValue('foo'), null);
     config.setValue('foo', true);
     expect(config.getValue('foo'), true);
     expect(config.keys, contains('foo'));
   });
 
-  testWithoutContext('Config containsKey', () async {
+  test('Config containsKey', () async {
     expect(config.containsKey('foo'), false);
     config.setValue('foo', 'bar');
     expect(config.containsKey('foo'), true);
   });
 
-  testWithoutContext('Config removeValue', () async {
+  test('Config removeValue', () async {
     expect(config.getValue('foo'), null);
     config.setValue('foo', 'bar');
     expect(config.getValue('foo'), 'bar');
@@ -59,7 +59,7 @@ void main() {
     expect(config.keys, isNot(contains('foo')));
   });
 
-  testWithoutContext('Config does not error on a file with a deprecated field', () {
+  test('Config does not error on a file with a deprecated field', () {
     final bufferLogger = BufferLogger.test();
     final File file = memoryFileSystem.file('.flutter_example')
       ..writeAsStringSync('''
@@ -82,7 +82,7 @@ void main() {
     expect(bufferLogger.errorText, isEmpty);
   });
 
-  testWithoutContext('Config parse error', () {
+  test('Config parse error', () {
     final bufferLogger = BufferLogger.test();
     final File file = memoryFileSystem.file('.flutter_example')..writeAsStringSync('{"hello":"bar');
     config = Config(
@@ -96,7 +96,7 @@ void main() {
     expect(bufferLogger.errorText, contains('Failed to decode preferences'));
   });
 
-  testWithoutContext('Config does not error on missing file', () {
+  test('Config does not error on missing file', () {
     final bufferLogger = BufferLogger.test();
     final File file = memoryFileSystem.file('example');
     config = Config(
@@ -110,7 +110,7 @@ void main() {
     expect(bufferLogger.errorText, isEmpty);
   });
 
-  testWithoutContext('Config does not error on a normally fatal file system exception', () {
+  test('Config does not error on a normally fatal file system exception', () {
     final bufferLogger = BufferLogger.test();
     final Platform platform = FakePlatform();
     final File file = ErrorHandlingFile(
@@ -125,7 +125,7 @@ void main() {
     expect(bufferLogger.errorText, contains(r'sudo chown -R $(whoami) /testfile'));
   });
 
-  testWithoutContext('Config.createForTesting does not error when failing to delete a file', () {
+  test('Config.createForTesting does not error when failing to delete a file', () {
     final bufferLogger = BufferLogger.test();
 
     final handler = FileExceptionHandler();
@@ -145,7 +145,7 @@ void main() {
     Config.createForTesting(file, bufferLogger);
   });
 
-  testWithoutContext('Config in home dir is used if it exists', () {
+  test('Config in home dir is used if it exists', () {
     memoryFileSystem.file('.flutter_example').writeAsStringSync('{"hello":"bar"}');
     config = Config(
       'example',
@@ -157,20 +157,17 @@ void main() {
     expect(memoryFileSystem.file('.config/flutter/example').existsSync(), false);
   });
 
-  testWithoutContext(
-    'Config is created in config dir if it does not already exist in home dir',
-    () {
-      config = Config(
-        'example',
-        fileSystem: memoryFileSystem,
-        logger: BufferLogger.test(),
-        platform: fakePlatform,
-      );
+  test('Config is created in config dir if it does not already exist in home dir', () {
+    config = Config(
+      'example',
+      fileSystem: memoryFileSystem,
+      logger: BufferLogger.test(),
+      platform: fakePlatform,
+    );
 
-      config.setValue('foo', 'bar');
-      expect(memoryFileSystem.file('.config/flutter/example').existsSync(), true);
-    },
-  );
+    config.setValue('foo', 'bar');
+    expect(memoryFileSystem.file('.config/flutter/example').existsSync(), true);
+  });
 }
 
 class FakeFile extends Fake implements File {

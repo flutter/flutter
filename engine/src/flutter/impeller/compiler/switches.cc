@@ -115,6 +115,8 @@ void Switches::PrintHelp(std::ostream& stream) {
             "targeting metal)"
          << std::endl;
   stream << optional_prefix << "--require-framebuffer-fetch" << std::endl;
+  stream << optional_prefix << "--minify (minify generated GLSL shader source)"
+         << std::endl;
   stream << optional_prefix
          << "--verbose (output full error messages in stderr. If not set, long "
             "error messages are written to a file, and a truncated version is "
@@ -205,6 +207,7 @@ Switches::Switches(const fml::CommandLine& command_line)
       use_half_textures(command_line.HasOption("use-half-textures")),
       require_framebuffer_fetch(
           command_line.HasOption("require-framebuffer-fetch")),
+      minify(command_line.HasOption("minify")),
       verbose(command_line.HasOption("verbose")),
       target_platform_(TargetPlatformFromCommandLine(command_line)),
       runtime_stages_(RuntimeStagesFromCommandLine(command_line)) {
@@ -337,6 +340,7 @@ SourceOptions Switches::CreateSourceOptions() const {
   options.metal_version = metal_version;
   options.use_half_textures = use_half_textures;
   options.require_framebuffer_fetch = require_framebuffer_fetch;
+  options.minify = minify;
   return options;
 }
 

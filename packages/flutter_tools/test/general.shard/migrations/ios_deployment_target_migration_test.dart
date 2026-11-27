@@ -34,7 +34,7 @@ void main() {
       mockIosProject.appFrameworkInfoPlist = appFrameworkInfoPlist;
     });
 
-    testWithoutContext('skips migration if files do not exist', () async {
+    test('skips migration if files do not exist', () async {
       final migration = IOSDeploymentTargetMigration(mockIosProject, testLogger);
 
       await migration.migrate();
@@ -47,7 +47,7 @@ void main() {
       expect(appFrameworkInfoPlist.existsSync(), isFalse);
     });
 
-    testWithoutContext('migrates project.pbxproj', () async {
+    test('migrates project.pbxproj', () async {
       xcodeProjectInfoFile.writeAsStringSync('''
 IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -72,7 +72,7 @@ IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 ''');
     });
 
-    testWithoutContext('migrates Podfile', () async {
+    test('migrates Podfile', () async {
       podfile.writeAsStringSync('''
 platform :ios, '9.0'
 platform :ios, '11.0'
@@ -95,7 +95,7 @@ platform :ios, '15.0'
 ''');
     });
 
-    testWithoutContext('migrates AppFrameworkInfo.plist', () async {
+    test('migrates AppFrameworkInfo.plist', () async {
       appFrameworkInfoPlist.writeAsStringSync('''
 <dict>
   <key>MinimumOSVersion</key>
@@ -126,7 +126,7 @@ platform :ios, '15.0'
 ''');
     });
 
-    testWithoutContext('does not migrate if already up to date', () async {
+    test('does not migrate if already up to date', () async {
       xcodeProjectInfoFile.writeAsStringSync('IPHONEOS_DEPLOYMENT_TARGET = 16.0;');
       podfile.writeAsStringSync("platform :ios, '16.0'");
       appFrameworkInfoPlist.writeAsStringSync('''

@@ -4,6 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -21,12 +22,11 @@ import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fakes.dart';
 import 'resident_runner_helpers.dart' show createColdRunner;
 
 void main() {
-  testUsingContext('Exits with code 2 when HttpException is thrown '
+  test('Exits with code 2 when HttpException is thrown '
       'during VM service connection', () async {
     final residentCompiler = FakeResidentCompiler();
     final device = FakeDevice()
@@ -54,7 +54,7 @@ void main() {
   });
 
   group('cleanupAtFinish()', () {
-    testUsingContext('disposes each device', () async {
+    test('disposes each device', () async {
       final device1 = FakeDevice();
       final device2 = FakeDevice();
       final flutterDevice1 = FakeFlutterDevice(device1);
@@ -84,7 +84,7 @@ void main() {
       fakePlatform = FakePlatform(environment: <String, String>{});
     });
 
-    testUsingContext('calls runCold on attached device', () async {
+    test('calls runCold on attached device', () async {
       final device = FakeDevice();
       final flutterDevice = FakeFlutterDevice(device)..runColdCode = 1;
       final devices = <FlutterDevice>[flutterDevice];
@@ -99,69 +99,52 @@ void main() {
       expect(result, 1);
     });
 
-    testUsingContext(
-      'with traceStartup, no env variable',
-      () async {
-        final device = FakeDevice();
-        final flutterDevice = FakeFlutterDevice(device);
-        final devices = <FlutterDevice>[flutterDevice];
-        final File applicationBinary = MemoryFileSystem.test().file('binary');
-        final int result = await createColdRunner(
-          devices,
-          applicationBinary: applicationBinary,
-          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
-          target: 'main.dart',
-          traceStartup: true,
-        ).run();
+    test('with traceStartup, no env variable', () async {
+      final device = FakeDevice();
+      final flutterDevice = FakeFlutterDevice(device);
+      final devices = <FlutterDevice>[flutterDevice];
+      final File applicationBinary = MemoryFileSystem.test().file('binary');
+      final int result = await createColdRunner(
+        devices,
+        applicationBinary: applicationBinary,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        target: 'main.dart',
+        toolContext: FakeToolContext(fs: memoryFileSystem, platform: fakePlatform),
+        traceStartup: true,
+      ).run();
 
-        expect(result, 0);
-        expect(
-          memoryFileSystem
-              .directory(getBuildDirectory())
-              .childFile('start_up_info.json')
-              .existsSync(),
-          true,
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => memoryFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () => fakePlatform,
-      },
-    );
+      expect(result, 0);
+      expect(
+        memoryFileSystem
+            .directory(getBuildDirectory(Config.test(), memoryFileSystem))
+            .childFile('start_up_info.json')
+            .existsSync(),
+        true,
+      );
+    });
 
-    testUsingContext(
-      'with traceStartup, env variable',
-      () async {
-        fakePlatform.environment[kFlutterTestOutputsDirEnvName] = 'test_output_dir';
+    test('with traceStartup, env variable', () async {
+      fakePlatform.environment[kFlutterTestOutputsDirEnvName] = 'test_output_dir';
 
-        final device = FakeDevice();
-        final flutterDevice = FakeFlutterDevice(device);
-        final devices = <FlutterDevice>[flutterDevice];
-        final File applicationBinary = MemoryFileSystem.test().file('binary');
-        final int result = await createColdRunner(
-          devices,
-          applicationBinary: applicationBinary,
-          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
-          target: 'main.dart',
-          traceStartup: true,
-        ).run();
+      final device = FakeDevice();
+      final flutterDevice = FakeFlutterDevice(device);
+      final devices = <FlutterDevice>[flutterDevice];
+      final File applicationBinary = MemoryFileSystem.test().file('binary');
+      final int result = await createColdRunner(
+        devices,
+        applicationBinary: applicationBinary,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        target: 'main.dart',
+        toolContext: FakeToolContext(fs: memoryFileSystem, platform: fakePlatform),
+        traceStartup: true,
+      ).run();
 
-        expect(result, 0);
-        expect(
-          memoryFileSystem
-              .directory('test_output_dir')
-              .childFile('start_up_info.json')
-              .existsSync(),
-          true,
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => memoryFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () => fakePlatform,
-      },
-    );
+      expect(result, 0);
+      expect(
+        memoryFileSystem.directory('test_output_dir').childFile('start_up_info.json').existsSync(),
+        true,
+      );
+    });
   });
 }
 
@@ -241,6 +224,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    Artifacts? artifacts,
     String? appName = 'Fake App',
     int? ddsPort,
     FlutterDevice? device,
@@ -264,7 +248,7 @@ class TestFlutterDevice extends FlutterDevice {
     Future<Uri>? vmServiceUri,
   }) : super(
          device,
-         toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
+         toolContext: FakeToolContext(artifacts: Artifacts.test()),
          targetPlatform: .unsupported,
          buildInfo: BuildInfo.debug,
          generator: generator,

@@ -10,8 +10,8 @@
 #include "flutter/shell/platform/embedder/tests/embedder_test_backingstore_producer.h"
 #include "flutter/shell/platform/embedder/tests/embedder_unittests_util.h"
 
-#include "third_party/skia/include/core/SkCPURecorder.h"
 #include "third_party/skia/include/core/SkImage.h"
+#include "third_party/skia/include/core/SkRecorder.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/encode/SkPngEncoder.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
@@ -103,6 +103,8 @@ std::string FixtureNameForBackend(EmbedderTestContextType backend,
   switch (backend) {
     case EmbedderTestContextType::kVulkanContext:
       return "vk_" + name;
+    case EmbedderTestContextType::kVulkanImpellerContext:
+      return "vk_impeller_" + name;
     default:
       return name;
   }
@@ -113,6 +115,7 @@ EmbedderTestBackingStoreProducer::RenderTargetType GetRenderTargetFromBackend(
     bool opengl_framebuffer) {
   switch (backend) {
     case EmbedderTestContextType::kVulkanContext:
+    case EmbedderTestContextType::kVulkanImpellerContext:
       return EmbedderTestBackingStoreProducer::RenderTargetType::kVulkanImage;
     case EmbedderTestContextType::kOpenGLContext:
       if (opengl_framebuffer) {
@@ -133,6 +136,7 @@ void ConfigureBackingStore(FlutterBackingStore& backing_store,
                            bool opengl_framebuffer) {
   switch (backend) {
     case EmbedderTestContextType::kVulkanContext:
+    case EmbedderTestContextType::kVulkanImpellerContext:
       backing_store.type = kFlutterBackingStoreTypeVulkan;
       break;
     case EmbedderTestContextType::kOpenGLContext:
@@ -191,7 +195,7 @@ bool ImageMatchesFixture(const std::string& fixture_file_name,
   FML_CHECK(scene_image) << "Invalid scene image.";
 
   auto scene_image_subset = scene_image->makeSubset(
-      skcpu::Recorder::TODO(),
+      SkRecorder::TODO(),
       SkIRect::MakeWH(fixture_image->width(), fixture_image->height()), {});
 
   FML_CHECK(scene_image_subset)

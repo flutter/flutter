@@ -7,8 +7,8 @@
 
 #include <functional>
 
-#include "fml/status.h"
 #include "impeller/renderer/command_buffer.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace impeller {
 
@@ -19,7 +19,7 @@ class CommandQueue {
   using CompletionCallback = std::function<void(CommandBuffer::Status)>;
 
   struct SubmitResult {
-    fml::Status status;
+    absl::Status status;
     std::shared_ptr<CommandBufferSchedulingReceipt> scheduling_receipt;
   };
 
@@ -40,7 +40,7 @@ class CommandQueue {
   ///        Only the Metal and Vulkan backends can give a status beyond
   ///        successful encoding. This callback may be called more than once and
   ///        potentially on a different thread.
-  virtual fml::Status Submit(
+  virtual absl::Status Submit(
       const std::vector<std::shared_ptr<CommandBuffer>>& buffers,
       const CompletionCallback& completion_callback = {});
 

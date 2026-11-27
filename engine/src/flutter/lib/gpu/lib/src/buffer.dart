@@ -128,6 +128,11 @@ base class DeviceBuffer extends NativeFieldWrapperClass1 {
   /// If performing this copy would result in an out of bounds write to the
   /// buffer, then the write will not be attempted and will fail.
   ///
+  /// The write happens immediately, but the GPU reads the buffer when it reaches
+  /// the work that uses it, which can be well after [CommandBuffer.submit]
+  /// returns. Write new data somewhere the work in flight isn't reading, as
+  /// [HostBuffer] does, rather than over data that was already submitted.
+  ///
   /// Returns [true] if the write was successful, or [false] if the write
   /// failed due to an internal error.
   bool overwrite(ByteData sourceBytes, {int destinationOffsetInBytes = 0}) {
@@ -188,9 +193,10 @@ base class DeviceBuffer extends NativeFieldWrapperClass1 {
 /// uniform or vertex data that needs to change from frame to frame.
 ///
 /// Different platforms have different data alignment requirements when reading
-/// [DeviceBuffer] data for shader uniforms. [HostBuffer] uses
-/// [GpuContext.minimumUniformByteAlignment] to align each emplacement
-/// automatically, so that they may be used in uniform bindings.
+/// [DeviceBuffer] data for shader uniforms and storage buffers. [HostBuffer]
+/// aligns each emplacement to both [GpuContext.minimumUniformByteAlignment]
+/// and [GpuContext.minimumStorageBufferByteAlignment] automatically, so that
+/// they may be used in uniform and storage buffer bindings.
 ///
 /// The length of each [DeviceBuffer] block is determined by
 /// [blockLengthInBytes] and cannot be changed after creation of the
@@ -226,6 +232,16 @@ base class HostBuffer {
 
   final List<List<DeviceBuffer>> _buffers = [];
 
+  /// The alignment of every emplacement, so that any of them can be bound as
+  /// a uniform or a storage buffer. Both device alignments are powers of two
+  /// (Vulkan requires it, and Metal's are fixed powers of two), so the larger
+  /// one is a multiple of the smaller.
+  late final int _emplacementAlignment =
+      _gpuContext.minimumUniformByteAlignment >
+          _gpuContext.minimumStorageBufferByteAlignment
+      ? _gpuContext.minimumUniformByteAlignment
+      : _gpuContext.minimumStorageBufferByteAlignment;
+
   /// Creates a new HostBuffer.
   HostBuffer._initialize(
     this._gpuContext, {
@@ -257,12 +273,11 @@ base class HostBuffer {
       );
     }
 
-    int padding =
-        _gpuContext.minimumUniformByteAlignment -
-        (_offsetCursor % _gpuContext.minimumUniformByteAlignment);
+    final int alignment = _emplacementAlignment;
+    int padding = alignment - (_offsetCursor % alignment);
     // If the padding is the full alignment size, then we're already aligned.
     // So reset the padding to zero.
-    padding %= _gpuContext.minimumUniformByteAlignment;
+    padding %= alignment;
     if (_offsetCursor + padding >= blockLengthInBytes) {
       DeviceBuffer buffer = _allocateNewBlock(blockLengthInBytes);
       _buffers[_frameCursor].add(buffer);
@@ -290,8 +305,8 @@ base class HostBuffer {
   /// that references the new data in the buffer.
   ///
   /// This method automatically inserts padding in-between emplace calls in the
-  /// buffer if necessary to abide by platform-specific uniform alignment
-  /// requirements.
+  /// buffer if necessary to abide by platform-specific uniform and storage
+  /// buffer alignment requirements.
   ///
   /// The [DeviceBuffer] referenced in the [BufferView] has already been
   /// flushed, so there is no need to call [DeviceBuffer.flush] before

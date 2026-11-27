@@ -243,6 +243,7 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryMTL::GetPipeline(
     }
   }
   auto weak_this = weak_from_this();
+  const MTLSize max_threads_per_threadgroup = device_.maxThreadsPerThreadgroup;
 
   auto completion_handler =
       ^(id<MTLComputePipelineState> _Nullable compute_pipeline_state,
@@ -251,6 +252,21 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryMTL::GetPipeline(
         if (error != nil) {
           VALIDATION_LOG << "Could not create compute pipeline: "
                          << error.localizedDescription.UTF8String;
+          promise->set_value(nullptr);
+          return;
+        }
+
+        // Metal supplies the threadgroup size at dispatch and aborts if it
+        // exceeds the device or pipeline limit, so check the shader's declared
+        // size here. The pipeline's total limit can be below the device's, for
+        // example when the shader uses many registers.
+        if (absl::Status status = descriptor.ValidateWorkgroupSize(
+                {static_cast<uint32_t>(max_threads_per_threadgroup.width),
+                 static_cast<uint32_t>(max_threads_per_threadgroup.height),
+                 static_cast<uint32_t>(max_threads_per_threadgroup.depth)},
+                compute_pipeline_state.maxTotalThreadsPerThreadgroup);
+            !status.ok()) {
+          VALIDATION_LOG << status.message();
           promise->set_value(nullptr);
           return;
         }
@@ -288,9 +304,18 @@ bool PipelineLibraryMTL::HasPipeline(const PipelineDescriptor& descriptor) {
 void PipelineLibraryMTL::RemovePipelinesWithEntryPoint(
     std::shared_ptr<const ShaderFunction> function) {
   Lock lock(pipelines_mutex_);
+  // Skip pipelines without an entry point for the function's stage: render
+  // pipelines have none for the compute stage. Compute pipelines are cached
+  // separately.
   fml::erase_if(pipelines_, [&](auto item) {
-    return item->first.GetEntrypointForStage(function->GetStage())
-        ->IsEqual(*function);
+    const std::shared_ptr<const ShaderFunction> entrypoint =
+        item->first.GetEntrypointForStage(function->GetStage());
+    return entrypoint && entrypoint->IsEqual(*function);
+  });
+  fml::erase_if(compute_pipelines_, [&](auto item) {
+    const std::shared_ptr<const ShaderFunction> entrypoint =
+        item->first.GetStageEntrypoint();
+    return entrypoint && entrypoint->IsEqual(*function);
   });
 }
 

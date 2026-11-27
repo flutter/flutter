@@ -13,7 +13,7 @@ namespace txt {
 class TextShadow {
  public:
   SkColor color = SK_ColorBLACK;
-  SkPoint offset;
+  SkPoint offset{};
   double blur_sigma = 0.0;
 
   TextShadow();

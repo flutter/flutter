@@ -6,9 +6,9 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../convert.dart';
-import '../globals.dart' as globals;
 import 'async_guard.dart';
 import 'exit.dart';
 import 'io.dart';
@@ -674,28 +674,33 @@ class _DefaultProcessUtils implements ProcessUtils {
   }
 }
 
-Future<int> exitWithHooks(int code, {required ShutdownHooks shutdownHooks}) async {
+Future<int> exitWithHooks(
+  int code, {
+  required Analytics analytics,
+  required Logger logger,
+  required ShutdownHooks shutdownHooks,
+}) async {
   // Suppress the consent notice in machine mode to avoid corrupting machine-readable
   // output streams (e.g. JSON/daemon), and defer marking it as shown until an interactive run.
-  if (globals.analytics.shouldShowMessage && !globals.logger.isMachine) {
-    globals.logger.printStatus(globals.analytics.getConsentMessage);
-    globals.analytics.clientShowedMessage();
+  if (analytics.shouldShowMessage && !logger.isMachine) {
+    logger.printStatus(analytics.getConsentMessage);
+    analytics.clientShowedMessage();
 
     // This trace is searched for in tests.
-    globals.logger.printTrace('Showed analytics consent message.');
+    logger.printTrace('Showed analytics consent message.');
   }
 
   // Run shutdown hooks before flushing logs
-  await shutdownHooks.runShutdownHooks(globals.logger);
+  await shutdownHooks.runShutdownHooks(logger);
 
   final completer = Completer<void>();
 
-  await globals.analytics.close();
+  await analytics.close();
 
   // Give the task / timer queue one cycle through before we hard exit.
   Timer.run(() {
     try {
-      globals.printTrace('exiting with code $code');
+      logger.printTrace('exiting with code $code');
       exit(code);
       completer.complete();
       // This catches all exceptions because the error is propagated on the

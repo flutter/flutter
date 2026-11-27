@@ -8,10 +8,10 @@ import 'package:code_assets/code_assets.dart';
 
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
+import '../../../base/logger.dart';
 import '../../../base/process.dart';
 import '../../../build_info.dart';
 import '../../../build_system/targets/darwin.dart';
-import '../../../globals.dart' as globals;
 import '../native_assets.dart';
 import '../native_assets_manifest.dart';
 
@@ -64,8 +64,12 @@ Future<void> createInfoPlist(String name, Directory target, {String? minimumIOSV
 /// The dylibs must have different architectures. E.g. a dylib targeting
 /// arm64 ios simulator cannot be combined with a dylib targeting arm64
 /// ios device or macos arm64.
-Future<void> lipoDylibs(File target, List<File> sources) async {
-  final RunResult lipoResult = await globals.processUtils.run(<String>[
+Future<void> lipoDylibs(
+  File target,
+  List<File> sources, {
+  required ProcessUtils processUtils,
+}) async {
+  final RunResult lipoResult = await processUtils.run(<String>[
     'xcrun',
     'lipo',
     '-create',
@@ -80,26 +84,78 @@ Future<void> lipoDylibs(File target, List<File> sources) async {
 
 /// Sets the install names in a dylib with a Mach-O format.
 ///
-/// On macOS and iOS, opening a dylib at runtime fails if the path inside the
-/// dylib itself does not correspond to the path that the file is at. Therefore,
-/// native assets copied into their final location also need their install name
-/// updated with the `install_name_tool`.
+/// On macOS and iOS, native assets copied into their final location need their
+/// install names updated with the `install_name_tool`: a dylib finds its
+/// dependencies by the install names in its load commands, and in app builds
+/// the native assets manifest refers to a code asset by its install name
+/// (https://github.com/flutter/flutter/issues/190799).
 ///
 /// [oldToNewInstallNames] is a map from old to new install names, that should
 /// be applied to the dependencies of the dylib. Entries in this map for
 /// dependencies that are not present in the dylib are ignored. The install
 /// name of a dependencies needs to be updated if the location of the dependency
 /// has changed.
-Future<void> setInstallNamesDylib(
+///
+/// If [keepInstallNameIfItDoesNotFit] is true and `install_name_tool` reports
+/// that the header of [dylibFile] has no room for the updated load commands,
+/// the install name of [dylibFile] is left as it is and only its dependencies
+/// are updated. This happens for a dylib that was linked without
+/// `-headerpad_max_install_names`, such as a prebuilt one. If the dependencies
+/// do not fit either, or `install_name_tool` fails for any other reason, the
+/// tool exits.
+///
+/// Returns whether the install name of [dylibFile] was set to
+/// [newInstallName].
+Future<bool> setInstallNamesDylib(
   File dylibFile,
   String newInstallName,
-  Map<String, String> oldToNewInstallNames,
-) async {
-  final RunResult setInstallNamesResult = await globals.processUtils.run(<String>[
+  Map<String, String> oldToNewInstallNames, {
+  required ProcessUtils processUtils,
+  bool keepInstallNameIfItDoesNotFit = false,
+}) async {
+  final RunResult setInstallNamesResult = await _runInstallNameTool(
+    dylibFile,
+    oldToNewInstallNames,
+    newInstallName: newInstallName,
+    processUtils: processUtils,
+  );
+  if (setInstallNamesResult.exitCode == 0) {
+    return true;
+  }
+  RunResult? changeDependenciesResult;
+  if (keepInstallNameIfItDoesNotFit &&
+      setInstallNamesResult.stderr.contains(_kLoadCommandsDoNotFit)) {
+    changeDependenciesResult = await _runInstallNameTool(
+      dylibFile,
+      oldToNewInstallNames,
+      processUtils: processUtils,
+    );
+    if (changeDependenciesResult.exitCode == 0) {
+      return false;
+    }
+  }
+  throwToolExit(
+    'Failed to change install names in $dylibFile'
+    '${changeDependenciesResult == null ? '' : ', also after keeping its install name'}:\n'
+    'id -> $newInstallName\n'
+    'dependencies -> $newInstallName\n'
+    '${setInstallNamesResult.stderr}'
+    '${changeDependenciesResult == null ? '' : '\nAfter keeping the install name:\n${changeDependenciesResult.stderr}'}',
+  );
+}
+
+/// Runs `install_name_tool` on [dylibFile] with a `-change` for each entry of
+/// [oldToNewInstallNames], and with `-id` when [newInstallName] is given.
+Future<RunResult> _runInstallNameTool(
+  File dylibFile,
+  Map<String, String> oldToNewInstallNames, {
+  required ProcessUtils processUtils,
+  String? newInstallName,
+}) {
+  return processUtils.run(<String>[
     'xcrun',
     'install_name_tool',
-    '-id',
-    newInstallName,
+    if (newInstallName != null) ...<String>['-id', newInstallName],
     for (final MapEntry<String, String> entry in oldToNewInstallNames.entries) ...<String>[
       '-change',
       entry.key,
@@ -107,18 +163,20 @@ Future<void> setInstallNamesDylib(
     ],
     dylibFile.path,
   ]);
-  if (setInstallNamesResult.exitCode != 0) {
-    throwToolExit(
-      'Failed to change install names in $dylibFile:\n'
-      'id -> $newInstallName\n'
-      'dependencies -> $newInstallName\n'
-      '${setInstallNamesResult.stderr}',
-    );
-  }
 }
 
-Future<Set<String>> getInstallNamesDylib(File dylibFile) async {
-  final RunResult installNameResult = await globals.processUtils.run(<String>[
+/// What `install_name_tool` prints when a dylib's header has no room for the
+/// larger load commands.
+///
+/// If a later version words this differently, the fallback in
+/// [setInstallNamesDylib] no longer applies and the tool exits as before.
+const _kLoadCommandsDoNotFit = 'larger updated load commands do not fit';
+
+Future<Set<String>> getInstallNamesDylib(
+  File dylibFile, {
+  required ProcessUtils processUtils,
+}) async {
+  final RunResult installNameResult = await processUtils.run(<String>[
     'xcrun',
     'otool',
     '-D',
@@ -139,8 +197,12 @@ Future<Set<String>> getInstallNamesDylib(File dylibFile) async {
 }
 
 /// Creates a dSYM bundle for a dylib.
-Future<void> dsymutilDylib(File dylibFile, String dsymPath) async {
-  final RunResult result = await globals.processUtils.run(<String>[
+Future<void> dsymutilDylib(
+  File dylibFile,
+  String dsymPath, {
+  required ProcessUtils processUtils,
+}) async {
+  final RunResult result = await processUtils.run(<String>[
     'xcrun',
     'dsymutil',
     dylibFile.path,
@@ -155,8 +217,12 @@ Future<void> dsymutilDylib(File dylibFile, String dsymPath) async {
 /// Strips a dylib.
 ///
 /// This is useful for release builds to reduce binary size.
-Future<void> stripDylib(File dylibFile) async {
-  final RunResult result = await globals.processUtils.run(<String>[
+Future<void> stripDylib(
+  File dylibFile, {
+  required Logger logger,
+  required ProcessUtils processUtils,
+}) async {
+  final RunResult result = await processUtils.run(<String>[
     'xcrun',
     'strip',
     '-x', // Remove local symbols.
@@ -164,8 +230,8 @@ Future<void> stripDylib(File dylibFile) async {
     dylibFile.path,
   ]);
   if (result.exitCode != 0) {
-    globals.logger.printError(result.stdout);
-    globals.logger.printError(result.stderr);
+    logger.printError(result.stdout);
+    logger.printError(result.stderr);
     throwToolExit('strip failed with exit code ${result.exitCode}');
   }
 }
@@ -173,8 +239,9 @@ Future<void> stripDylib(File dylibFile) async {
 Future<void> codesignDylib(
   String? codesignIdentity,
   BuildMode buildMode,
-  FileSystemEntity target,
-) async {
+  FileSystemEntity target, {
+  required ProcessUtils processUtils,
+}) async {
   if (codesignIdentity == null || codesignIdentity.isEmpty) {
     codesignIdentity = '-';
   }
@@ -190,7 +257,7 @@ Future<void> codesignDylib(
     ],
     target.path,
   ];
-  final RunResult codesignResult = await globals.processUtils.run(codesignCommand);
+  final RunResult codesignResult = await processUtils.run(codesignCommand);
   if (codesignResult.exitCode != 0) {
     throwToolExit(
       'Failed to code sign binary: exit code: ${codesignResult.exitCode} '
@@ -205,10 +272,13 @@ Future<void> codesignDylib(
 ///
 /// If no XCode installation was found, [throwIfNotFound] controls whether this
 /// throws or returns `null`.
-Future<CCompilerConfig?> cCompilerConfigMacOS({required bool throwIfNotFound}) async {
-  final Uri? compiler = await _findXcrunBinary('clang', throwIfNotFound);
-  final Uri? archiver = await _findXcrunBinary('ar', throwIfNotFound);
-  final Uri? linker = await _findXcrunBinary('ld', throwIfNotFound);
+Future<CCompilerConfig?> cCompilerConfigMacOS({
+  required ProcessUtils processUtils,
+  required bool throwIfNotFound,
+}) async {
+  final Uri? compiler = await _findXcrunBinary('clang', throwIfNotFound, processUtils);
+  final Uri? archiver = await _findXcrunBinary('ar', throwIfNotFound, processUtils);
+  final Uri? linker = await _findXcrunBinary('ld', throwIfNotFound, processUtils);
 
   if (compiler == null || archiver == null || linker == null) {
     assert(!throwIfNotFound);
@@ -219,12 +289,12 @@ Future<CCompilerConfig?> cCompilerConfigMacOS({required bool throwIfNotFound}) a
 }
 
 /// Invokes `xcrun --find` to find the full path to [binaryName].
-Future<Uri?> _findXcrunBinary(String binaryName, bool throwIfNotFound) async {
-  final RunResult xcrunResult = await globals.processUtils.run(<String>[
-    'xcrun',
-    '--find',
-    binaryName,
-  ]);
+Future<Uri?> _findXcrunBinary(
+  String binaryName,
+  bool throwIfNotFound,
+  ProcessUtils processUtils,
+) async {
+  final RunResult xcrunResult = await processUtils.run(<String>['xcrun', '--find', binaryName]);
   if (xcrunResult.exitCode != 0) {
     if (throwIfNotFound) {
       throwToolExit('Failed to find $binaryName with xcrun:\n${xcrunResult.stderr}');
@@ -356,6 +426,7 @@ Map<Architecture?, List<String>> parseOtoolArchitectureSections(String output) {
 /// architecture is used.
 Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsApple(
   List<FlutterCodeAsset> nativeAssets, {
+  required Logger logger,
   Uri? absolutePath,
 }) {
   final alreadyTakenNamesPerArch = <Architecture, Set<String>>{};
@@ -400,6 +471,7 @@ Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsApple(
         'package providing the asset. Please report this to the '
         'package maintainers and ensure the "build.dart" hook '
         'produces consistent filenames.',
+        logger: logger,
       );
     }
 

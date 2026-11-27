@@ -6,6 +6,7 @@
 #define FLUTTER_TXT_SRC_TXT_PARAGRAPH_STYLE_H_
 
 #include <climits>
+#include <optional>
 #include <string>
 
 #include "font_style.h"
@@ -95,6 +96,10 @@ class ParagraphStyle {
   // opportunity. Defaults to true, which renders the hyphen (Hyphens.manual);
   // false suppresses it (Hyphens.hidden).
   bool render_soft_hyphens = true;
+
+  // The string drawn at a soft hyphen line break when render_soft_hyphens is
+  // true. Unset keeps Skia's default, "-"; the empty string draws nothing.
+  std::optional<std::u16string> soft_hyphen_string;
 
   TextStyle GetTextStyle() const;
 

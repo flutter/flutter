@@ -17,6 +17,7 @@ class AndroidContextGLImpeller : public AndroidContext {
   AndroidContextGLImpeller(
       std::unique_ptr<impeller::egl::Display> display,
       bool enable_gpu_tracing,
+      const impeller::Flags& impeller_flags,
       std::shared_ptr<fml::BasicTaskRunner> io_task_runner);
 
   ~AndroidContextGLImpeller();

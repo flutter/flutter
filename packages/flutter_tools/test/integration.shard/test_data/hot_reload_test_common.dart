@@ -32,7 +32,7 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
       tryToDelete(tempDir);
     });
 
-    testWithoutContext('single and multiple hot reloads', () async {
+    test('single and multiple hot reloads', () async {
       await runFlutterWithDevice(
         flutter,
         chrome: chrome,
@@ -78,7 +78,7 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
       }
     });
 
-    testWithoutContext('newly added code executes during hot reload', () async {
+    test('newly added code executes during hot reload', () async {
       final stdout = StringBuffer();
       final sawTick1 = Completer<void>();
       final sawTick2 = Completer<void>();
@@ -111,7 +111,7 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
       }
     });
 
-    testWithoutContext('hot restart works without error', () async {
+    test('hot restart works without error', () async {
       await runFlutterWithDevice(
         flutter,
         chrome: chrome,
@@ -121,7 +121,7 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
       await flutter.hotRestart();
     });
 
-    testWithoutContext(
+    test(
       'breakpoints are hit after hot reload',
       () async {
         Isolate isolate;
@@ -199,7 +199,7 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
       skip: chrome,
     );
 
-    testWithoutContext(
+    test(
       "hot reload doesn't reassemble if paused",
       () async {
         final sawTick1 = Completer<void>();

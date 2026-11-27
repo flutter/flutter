@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_CAPABILITIES_GLES_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_CAPABILITIES_GLES_H_
 
+#include <array>
 #include <cstddef>
 
 #include "impeller/base/backend_cast.h"
@@ -80,8 +81,23 @@ class CapabilitiesGLES final
   /// Whether uploads must reset a stale shared-context texture binding.
   bool NeedsTextureUploadRebind() const;
 
+  /// Whether uniform data must be stored in GL buffers that are never also
+  /// bound as vertex or index buffers.
+  bool NeedsSeparateUniformBuffers() const;
+
   /// @brief Whether this is an ES GL variant or (if false) desktop GL.
   bool IsES() const;
+
+  /// @brief The value of `GL_MAX_SHADER_COMPILER_THREADS_KHR` as returned by
+  ///        `glGetIntegerv` if GL_KHR_parallel_shader_compile (or its desktop
+  ///        GL equivalent, GL_ARB_parallel_shader_compile) is supported,
+  ///        otherwise 0.
+  ///
+  ///        A value of 0 means the driver will not compile shaders in
+  ///        parallel. A value of -1 means the implementation-dependent
+  ///        maximum; the limit is a GLuint whose initial value is 0xFFFFFFFF,
+  ///        which reads back as -1 through `glGetIntegerv`.
+  int32_t GetMaxShaderCompilerThreads() const;
 
   // |Capabilities|
   /// Always false. Rendering into a non-zero mip level is not yet implemented
@@ -176,6 +192,9 @@ class CapabilitiesGLES final
   // |Capabilities|
   bool NeedsPartitionedHostBuffer() const override;
 
+  // |Capabilities|
+  ComputeLimits GetComputeLimits() const override;
+
  private:
   bool supports_texture_to_texture_blits_ = false;
   bool supports_framebuffer_fetch_ = false;
@@ -186,6 +205,7 @@ class CapabilitiesGLES final
   bool supports_texture_max_level_ = false;
   bool supports_texture_array_ = false;
   bool needs_texture_upload_rebind_ = false;
+  bool needs_separate_uniform_buffers_ = false;
   bool is_angle_ = false;
   bool is_es_ = false;
   bool supports_texture_compression_bc_ = false;
@@ -193,6 +213,7 @@ class CapabilitiesGLES final
   bool supports_texture_compression_astc_ = false;
   bool supports_texture_compression_astc_hdr_ = false;
   uint32_t max_sampler_anisotropy_ = 1;
+  int32_t max_shader_compiler_threads_ = 0;
   PixelFormat default_glyph_atlas_format_ = PixelFormat::kUnknown;
 };
 

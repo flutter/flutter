@@ -977,7 +977,7 @@ class VerboseLogger extends DelegatingLogger {
     bool? wrap,
     bool fatal = true,
   }) {
-    hadWarningOutput = true;
+    hadWarningOutput = hadWarningOutput || fatal;
     _emit(
       _LogType.warning,
       wrapText(
@@ -988,6 +988,7 @@ class VerboseLogger extends DelegatingLogger {
         columnWidth: _outputPreferences.wrapColumn,
       ),
       stackTrace,
+      fatal,
     );
   }
 
@@ -1056,7 +1057,7 @@ class VerboseLogger extends DelegatingLogger {
     )..start();
   }
 
-  void _emit(_LogType type, String message, [StackTrace? stackTrace]) {
+  void _emit(_LogType type, String message, [StackTrace? stackTrace, bool fatal = true]) {
     if (message.trim().isEmpty) {
       return;
     }
@@ -1086,7 +1087,7 @@ class VerboseLogger extends DelegatingLogger {
           super.printError(indent + stackTrace.toString().replaceAll('\n', '\n$indent'));
         }
       case _LogType.warning:
-        super.printWarning(prefix + terminal.bolden(indentMessage));
+        super.printWarning(prefix + terminal.bolden(indentMessage), fatal: fatal);
       case _LogType.status:
         super.printStatus(prefix + terminal.bolden(indentMessage));
       case _LogType.trace:

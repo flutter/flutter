@@ -62,31 +62,25 @@ std::unique_ptr<ComputePipelineVK> PipelineLibraryVK::CreateComputePipeline(
   if (!strong_device) {
     return nullptr;
   }
-  auto device_properties = strong_device->GetPhysicalDevice().getProperties();
-  auto max_wg_size = device_properties.limits.maxComputeWorkGroupSize;
 
-  // Specialization constant 0 carries the workgroup size. Set it to the device
-  // maximum. This only affects shaders that declare their size with
-  // `local_size_x_id = 0`. A shader with a literal `local_size` has no such
-  // constant, so Vulkan ignores this and uses the size baked into the module.
-  vk::SpecializationMapEntry specialization_map_entry[1];
-
-  uint32_t workgroup_size_x = max_wg_size[0];
-  specialization_map_entry[0].constantID = 0;
-  specialization_map_entry[0].offset = 0;
-  specialization_map_entry[0].size = sizeof(uint32_t);
-
-  vk::SpecializationInfo specialization_info;
-  specialization_info.mapEntryCount = 1;
-  specialization_info.pMapEntries = &specialization_map_entry[0];
-  specialization_info.dataSize = sizeof(uint32_t);
-  specialization_info.pData = &workgroup_size_x;
+  // The workgroup size is baked into the shader module. Check it against the
+  // device limits here so that an oversized workgroup fails with a clear error
+  // rather than as undefined behavior in the driver.
+  const vk::PhysicalDeviceLimits limits =
+      strong_device->GetPhysicalDevice().getProperties().limits;
+  if (absl::Status status = desc.ValidateWorkgroupSize(
+          {limits.maxComputeWorkGroupSize[0], limits.maxComputeWorkGroupSize[1],
+           limits.maxComputeWorkGroupSize[2]},
+          limits.maxComputeWorkGroupInvocations);
+      !status.ok()) {
+    VALIDATION_LOG << status.message();
+    return nullptr;
+  }
 
   vk::PipelineShaderStageCreateInfo info;
   info.setStage(vk::ShaderStageFlagBits::eCompute);
   info.setPName("main");
   info.setModule(ShaderFunctionVK::Cast(entrypoint.get())->GetModule());
-  info.setPSpecializationInfo(&specialization_info);
   pipeline_info.setStage(info);
 
   //----------------------------------------------------------------------------
@@ -162,7 +156,6 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryVK::GetPipeline(
     return found->second;
   }
 
-  cache_dirty_ = true;
   if (!IsValid()) {
     return {
         descriptor,
@@ -185,12 +178,18 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryVK::GetPipeline(
       return;
     }
 
-    promise->set_value(PipelineVK::Create(
+    auto pipeline = PipelineVK::Create(
         descriptor,                                            //
         PipelineLibraryVK::Cast(*thiz).device_holder_.lock(),  //
         weak_this,                                             //
         next_key                                               //
-        ));
+    );
+    if (pipeline) {
+      // Only mark the cache dirty once the pipeline has been created, as that
+      // is when it is added to the Vulkan pipeline cache.
+      PipelineLibraryVK::Cast(*thiz).cache_dirty_ = true;
+    }
+    promise->set_value(std::move(pipeline));
   };
 
   if (async) {
@@ -213,7 +212,6 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryVK::GetPipeline(
     return found->second;
   }
 
-  cache_dirty_ = true;
   if (!IsValid()) {
     return {
         descriptor,
@@ -247,6 +245,9 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryVK::GetPipeline(
       return;
     }
 
+    // Only mark the cache dirty once the pipeline has been created, as that is
+    // when it is added to the Vulkan pipeline cache.
+    PipelineLibraryVK::Cast(*self).cache_dirty_ = true;
     promise->set_value(std::move(pipeline));
   };
 
@@ -270,23 +271,32 @@ void PipelineLibraryVK::RemovePipelinesWithEntryPoint(
     std::shared_ptr<const ShaderFunction> function) {
   Lock lock(pipelines_mutex_);
 
+  // Skip pipelines without an entry point for the function's stage: render
+  // pipelines have none for the compute stage. Compute pipelines are cached
+  // separately.
   fml::erase_if(pipelines_, [&](auto item) {
-    return item->first.GetEntrypointForStage(function->GetStage())
-        ->IsEqual(*function);
+    const std::shared_ptr<const ShaderFunction> entrypoint =
+        item->first.GetEntrypointForStage(function->GetStage());
+    return entrypoint && entrypoint->IsEqual(*function);
+  });
+  fml::erase_if(compute_pipelines_, [&](auto item) {
+    const std::shared_ptr<const ShaderFunction> entrypoint =
+        item->first.GetStageEntrypoint();
+    return entrypoint && entrypoint->IsEqual(*function);
   });
 }
 
 void PipelineLibraryVK::DidAcquireSurfaceFrame() {
   if (++frames_acquired_ == 50u) {
-    if (cache_dirty_) {
-      cache_dirty_ = false;
-      PersistPipelineCacheToDisk();
-    }
+    PersistPipelineCacheToDisk();
     frames_acquired_ = 0;
   }
 }
 
 void PipelineLibraryVK::PersistPipelineCacheToDisk() {
+  if (!cache_dirty_.exchange(false)) {
+    return;
+  }
   worker_task_runner_->PostTask(
       [weak_cache = decltype(pso_cache_)::weak_type(pso_cache_)]() {
         auto cache = weak_cache.lock();
