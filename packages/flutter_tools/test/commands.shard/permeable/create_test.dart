@@ -49,8 +49,8 @@ import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_http_client.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/pubspec_schema.dart';
 import '../../src/test_flutter_command_runner.dart';

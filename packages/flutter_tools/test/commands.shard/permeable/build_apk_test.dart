@@ -27,13 +27,13 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/android_common.dart';
 import '../../src/common.dart';
-import '../../src/context.dart' show FakeSignals;
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart'
     show
         FakeAndroidContext,
         FakeFlutterVersion,
         FakeOperatingSystemUtils,
+        FakeSignals,
         FakeToolContext,
         TestFeatureFlags;
 import '../../src/test_build_system.dart';

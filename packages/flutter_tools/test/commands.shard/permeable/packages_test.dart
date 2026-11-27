@@ -28,7 +28,6 @@ import 'package:yaml/yaml.dart';
 
 import '../../integration.shard/test_utils.dart';
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';

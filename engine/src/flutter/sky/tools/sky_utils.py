@@ -181,14 +181,8 @@ def _regenerate_symlinks(framework_dir):
       os.path.join('Versions', 'Current', framework_name),
       os.path.join(framework_dir, framework_name)
   )
-  if os.path.exists(os.path.join(framework_dir, 'Versions', 'A', 'Headers')):
-    os.symlink(
-        os.path.join('Versions', 'Current', 'Headers'), os.path.join(framework_dir, 'Headers')
-    )
-  if os.path.exists(os.path.join(framework_dir, 'Versions', 'A', 'Modules')):
-    os.symlink(
-        os.path.join('Versions', 'Current', 'Modules'), os.path.join(framework_dir, 'Modules')
-    )
+  os.symlink(os.path.join('Versions', 'Current', 'Headers'), os.path.join(framework_dir, 'Headers'))
+  os.symlink(os.path.join('Versions', 'Current', 'Modules'), os.path.join(framework_dir, 'Modules'))
   os.symlink(
       os.path.join('Versions', 'Current', 'Resources'), os.path.join(framework_dir, 'Resources')
   )
@@ -217,7 +211,7 @@ def _process_macos_framework(args, dst, framework_dylib, dsym):
     extract_dsym(framework_dylib, dsym)
 
   if args.strip:
-    unstripped_out = os.path.join(dst, f'{os.path.basename(framework_dylib)}.unstripped')
+    unstripped_out = os.path.join(dst, 'FlutterMacOS.unstripped')
     strip_binary(framework_dylib, unstripped_out)
 
 

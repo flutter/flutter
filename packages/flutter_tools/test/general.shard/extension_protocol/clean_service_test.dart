@@ -15,7 +15,7 @@ import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:test/test.dart';
 
-import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 final class _TestCleanService extends CleanService {
   _TestCleanService(this.onClean);

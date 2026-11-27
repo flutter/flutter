@@ -22,8 +22,8 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fake_http_client.dart';
+import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
 const unameCommandForX64 = FakeCommand(command: <String>['uname', '-m'], stdout: 'x86_64');
