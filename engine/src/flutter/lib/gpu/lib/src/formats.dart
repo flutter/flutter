@@ -167,6 +167,46 @@ enum PixelFormat {
   /// ASTC HDR, 8x8 blocks, 16 bytes per block. Modern mobile ASTC HDR family.
   /// HDR samples are linear floating point, so there is no sRGB variant.
   astc8x8HDR,
+
+  // 16-bit per channel formats. These are sample-only, like the
+  // block-compressed formats, and are linearly filterable wherever they are
+  // supported. Check [GpuContext.supportsTextureFormat] before allocating.
+
+  /// A single 16 bit (half precision) floating point component.
+  ///
+  /// Available on Metal, Vulkan, and OpenGL ES 3.0 or newer. Half precision
+  /// has an 11 bit significand, so integers above 2048 are not all
+  /// representable; prefer [r16UNormInt] for 16 bit integer data.
+  r16Float,
+
+  /// Two 16 bit (half precision) floating point components (red, green).
+  ///
+  /// Available on Metal, Vulkan, and OpenGL ES 3.0 or newer.
+  r16g16Float,
+
+  /// A single 16 bit component, stored as an unsigned normalized integer.
+  ///
+  /// Holds all 65,536 levels of 16 bit unsigned data, such as depth maps,
+  /// elevation, or medical images, and samples them as values in `[0, 1]`.
+  /// Optional on Vulkan and OpenGL ES (`GL_EXT_texture_norm16`).
+  r16UNormInt,
+
+  /// A single 16 bit component, stored as a signed normalized integer.
+  ///
+  /// Samples as values in `[-1, 1]`. Optional on Vulkan and OpenGL ES.
+  r16SNormInt,
+
+  /// Two 16 bit components (red, green), stored as unsigned normalized
+  /// integers. Optional on Vulkan and OpenGL ES.
+  r16g16UNormInt,
+
+  /// Two 16 bit components (red, green), stored as signed normalized integers.
+  /// Optional on Vulkan and OpenGL ES.
+  r16g16SNormInt,
+
+  /// Four 16 bit components (red, green, blue, alpha), stored as unsigned
+  /// normalized integers. Optional on Vulkan and OpenGL ES.
+  r16g16b16a16UNormInt,
 }
 
 /// The family of a block-compressed pixel format. Hardware support for
@@ -191,6 +231,28 @@ extension PixelFormatProperties on PixelFormat {
   /// Whether this is a block-compressed pixel format.
   bool get isCompressed {
     return blockWidth > 1 || blockHeight > 1;
+  }
+
+  /// Whether textures of this format can only be sampled.
+  ///
+  /// Sample-only textures cannot be render targets, written from shaders,
+  /// multisampled, or allocated with [StorageMode.deviceTransient]. This
+  /// covers the block-compressed formats and the 16 bit per channel formats
+  /// other than [PixelFormat.r16g16b16a16Float].
+  bool get isSampleOnly {
+    switch (this) {
+      case PixelFormat.r16Float:
+      case PixelFormat.r16g16Float:
+      case PixelFormat.r16UNormInt:
+      case PixelFormat.r16SNormInt:
+      case PixelFormat.r16g16UNormInt:
+      case PixelFormat.r16g16SNormInt:
+      case PixelFormat.r16g16b16a16UNormInt:
+        return true;
+      // ignore: no_default_cases
+      default:
+        return isCompressed;
+    }
   }
 
   /// The width, in texels, of a single block. Uncompressed formats return 1.
@@ -260,6 +322,9 @@ extension PixelFormatProperties on PixelFormat {
       case PixelFormat.s8UInt:
         return 1;
       case PixelFormat.r8g8UNormInt:
+      case PixelFormat.r16Float:
+      case PixelFormat.r16UNormInt:
+      case PixelFormat.r16SNormInt:
         return 2;
       case PixelFormat.r8g8b8a8UNormInt:
       case PixelFormat.r8g8b8a8UNormIntSRGB:
@@ -267,10 +332,14 @@ extension PixelFormatProperties on PixelFormat {
       case PixelFormat.b8g8r8a8UNormIntSRGB:
       case PixelFormat.r32Float:
       case PixelFormat.d24UnormS8Uint:
+      case PixelFormat.r16g16Float:
+      case PixelFormat.r16g16UNormInt:
+      case PixelFormat.r16g16SNormInt:
         return 4;
       case PixelFormat.d32FloatS8UInt:
         return 5;
       case PixelFormat.r16g16b16a16Float:
+      case PixelFormat.r16g16b16a16UNormInt:
         return 8;
       case PixelFormat.r32g32b32a32Float:
         return 16;

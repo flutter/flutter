@@ -558,6 +558,121 @@ void main() async {
     expect(gpu.PixelFormat.astc8x8HDR.compressionFamily, gpu.TextureCompressionFamily.astcHdr);
   });
 
+  test('16-bit per channel formats are sample-only with the expected sizes', () async {
+    expect(gpu.PixelFormat.r16Float.bytesPerBlock, 2);
+    expect(gpu.PixelFormat.r16UNormInt.bytesPerBlock, 2);
+    expect(gpu.PixelFormat.r16SNormInt.bytesPerBlock, 2);
+    expect(gpu.PixelFormat.r16g16Float.bytesPerBlock, 4);
+    expect(gpu.PixelFormat.r16g16UNormInt.bytesPerBlock, 4);
+    expect(gpu.PixelFormat.r16g16SNormInt.bytesPerBlock, 4);
+    expect(gpu.PixelFormat.r16g16b16a16UNormInt.bytesPerBlock, 8);
+
+    for (final format in <gpu.PixelFormat>[
+      gpu.PixelFormat.r16Float,
+      gpu.PixelFormat.r16g16Float,
+      gpu.PixelFormat.r16UNormInt,
+      gpu.PixelFormat.r16SNormInt,
+      gpu.PixelFormat.r16g16UNormInt,
+      gpu.PixelFormat.r16g16SNormInt,
+      gpu.PixelFormat.r16g16b16a16UNormInt,
+    ]) {
+      expect(format.isSampleOnly, true, reason: '$format');
+      expect(format.isCompressed, false, reason: '$format');
+      expect(format.blockWidth, 1, reason: '$format');
+      expect(gpu.gpuContext.supportsTextureFormat(format), isA<bool>());
+      expect(gpu.gpuContext.supportsTextureFormat(format, renderTarget: true), false);
+      expect(gpu.gpuContext.supportsTextureFormat(format, shaderWrite: true), false);
+    }
+
+    // The four channel half-float format stays usable as a render target.
+    expect(gpu.PixelFormat.r16g16b16a16Float.isSampleOnly, false);
+    expect(gpu.PixelFormat.bc1RGBAUNormInt.isSampleOnly, true);
+    expect(gpu.PixelFormat.r8g8b8a8UNormInt.isSampleOnly, false);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('GpuContext.createTexture rejects a 16-bit format as render target', () async {
+    try {
+      gpu.gpuContext.createTexture(
+        gpu.StorageMode.hostVisible,
+        4,
+        4,
+        format: gpu.PixelFormat.r16UNormInt,
+      );
+      fail('Exception not thrown for a 16-bit render target.');
+    } catch (e) {
+      expect(e.toString(), contains('sample-only'));
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('Texture.overwrite uploads tightly packed 16-bit data', () async {
+    if (!gpu.gpuContext.supportsTextureFormat(gpu.PixelFormat.r16UNormInt)) {
+      markTestSkipped('16-bit normalized formats are not supported on this device.');
+      return;
+    }
+    // An odd width checks that rows are tightly packed (6 bytes per row).
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible,
+      3,
+      3,
+      format: gpu.PixelFormat.r16UNormInt,
+      enableRenderTargetUsage: false,
+    );
+    expect(texture.getBaseMipLevelSizeInBytes(), 3 * 3 * 2);
+    texture.overwrite(Uint16List(3 * 3).buffer.asByteData());
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('sampling 16-bit textures returns the uploaded values', () async {
+    // 0x8000 / 0xFFFF and half-float 0x3800 both sample as ~0.5.
+    final cases = <gpu.PixelFormat, int>{
+      gpu.PixelFormat.r16UNormInt: 0x8000,
+      gpu.PixelFormat.r16Float: 0x3800,
+    };
+    final gpu.RenderPipeline pipeline = await createTextureRenderPipeline();
+    for (final MapEntry<gpu.PixelFormat, int> entry in cases.entries) {
+      if (!gpu.gpuContext.supportsTextureFormat(entry.key)) {
+        continue;
+      }
+      final gpu.Texture texture = gpu.gpuContext.createTexture(
+        gpu.StorageMode.hostVisible,
+        4,
+        4,
+        format: entry.key,
+        enableRenderTargetUsage: false,
+      );
+      texture.overwrite((Uint16List(4 * 4)..fillRange(0, 16, entry.value)).buffer.asByteData());
+
+      final RenderPassState state = createSimpleRenderPass();
+      state.renderPass.bindPipeline(pipeline);
+      // A fullscreen quad with white vertex colors, so the sampled value
+      // passes through unmodified.
+      final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+      final gpu.BufferView vertices = transients.emplace(
+        float32(<double>[
+          -1, -1, 0, 0, 0, 1, 1, 1, 1, //
+          1, -1, 0, 1, 0, 1, 1, 1, 1, //
+          1, 1, 0, 1, 1, 1, 1, 1, 1, //
+          -1, -1, 0, 0, 0, 1, 1, 1, 1, //
+          1, 1, 0, 1, 1, 1, 1, 1, 1, //
+          -1, 1, 0, 0, 1, 1, 1, 1, 1, //
+        ]),
+      );
+      state.renderPass.bindVertexBuffer(vertices);
+      state.renderPass.bindUniform(
+        pipeline.vertexShader.getUniformSlot('VertInfo'),
+        transients.emplace(mvpUBO(Matrix4.identity())),
+      );
+      state.renderPass.bindTexture(pipeline.fragmentShader.getUniformSlot('tex'), texture);
+      state.renderPass.draw(6);
+      state.commandBuffer.submit();
+
+      // The single sampled channel lands in red, which is byte 0 or 2
+      // depending on whether the render target is RGBA or BGRA; the other is 0.
+      final ByteData pixels = await readTextureBytes(state.renderTexture);
+      final int red = math.max(pixels.getUint8(0), pixels.getUint8(2));
+      expect((red - 128).abs(), lessThanOrEqualTo(1), reason: '${entry.key} sampled as $red');
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   test('GpuContext.supportsTextureCompression returns a bool per family', () async {
     // The exact answer depends on the device, but each query must return.
     expect(gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.bc), isA<bool>());

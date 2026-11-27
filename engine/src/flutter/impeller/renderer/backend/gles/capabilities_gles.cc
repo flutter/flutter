@@ -56,6 +56,9 @@ static const constexpr char* kTextureCompressionAstcOesExt =
 static const constexpr char* kTextureCompressionAstcHdrExt =
     "GL_KHR_texture_compression_astc_hdr";
 
+// https://registry.khronos.org/OpenGL/extensions/EXT/EXT_texture_norm16.txt
+static const constexpr char* kTextureNorm16Ext = "GL_EXT_texture_norm16";
+
 // https://registry.khronos.org/OpenGL/extensions/APPLE/APPLE_texture_max_level.txt
 static const constexpr char* kAppleTextureMaxLevelExt =
     "GL_APPLE_texture_max_level";
@@ -249,6 +252,16 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   supports_texture_compression_etc2_ =
       desc->IsES() && desc->GetGlVersion().major_version >= 3;
 
+  // GL_R16F and GL_RG16F (with GL_RED, GL_RG and GL_HALF_FLOAT) are core and
+  // texture-filterable on desktop GL 3.0 and OpenGL ES 3.0.
+  supports_float16_formats_ = desc->GetGlVersion().major_version >= 3;
+
+  // 16-bit normalized formats are core and texture-filterable on desktop GL
+  // 3.1 (SNorm arrived in 3.1). OpenGL ES needs GL_EXT_texture_norm16.
+  supports_norm16_formats_ =
+      desc->IsES() ? desc->HasExtension(kTextureNorm16Ext)
+                   : desc->GetGlVersion().IsAtLeast(Version(3, 1));
+
   // GL_TEXTURE_MAX_LEVEL is core on desktop GL and ES 3.0+, and available on
   // ES 2.0 through GL_APPLE_texture_max_level.
   supports_texture_max_level_ = !desc->IsES() ||
@@ -427,6 +440,14 @@ bool CapabilitiesGLES::SupportsTextureCompression(
       return supports_texture_compression_astc_hdr_;
   }
   return false;
+}
+
+bool CapabilitiesGLES::SupportsFloat16Formats() const {
+  return supports_float16_formats_;
+}
+
+bool CapabilitiesGLES::SupportsNorm16Formats() const {
+  return supports_norm16_formats_;
 }
 
 PixelFormat CapabilitiesGLES::GetDefaultGlyphAtlasFormat() const {

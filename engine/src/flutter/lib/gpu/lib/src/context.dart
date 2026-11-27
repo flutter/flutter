@@ -138,10 +138,17 @@ base class GpuContext extends NativeFieldWrapperClass1 {
   /// Whether this device can allocate a texture of the given [format] with
   /// the requested usage flags.
   ///
-  /// For block-compressed formats this returns false if either [renderTarget]
-  /// or [shaderWrite] is true, since compressed formats are sample-only.
-  /// For uncompressed formats this currently returns true: today the
-  /// underlying capability surface does not vary by per-format usage.
+  /// For sample-only formats (see [PixelFormatProperties.isSampleOnly]) this
+  /// returns false if either [renderTarget] or [shaderWrite] is true. For the
+  /// block-compressed formats it then reports whether the format's family is
+  /// supported (see [supportsTextureCompression]). For the 16 bit per channel
+  /// formats it reports whether the device can sample and linearly filter
+  /// them. The normalized formats ([PixelFormat.r16UNormInt] and friends) are
+  /// optional on Vulkan and OpenGL ES, and the half-float formats need OpenGL
+  /// ES 3.0.
+  ///
+  /// For other formats this currently returns true: today the underlying
+  /// capability surface does not vary by per-format usage.
   bool supportsTextureFormat(
     PixelFormat format, {
     bool renderTarget = false,
@@ -263,18 +270,20 @@ base class GpuContext extends NativeFieldWrapperClass1 {
         'GpuContext.doesSupportTextureArrays before creating one.',
       );
     }
-    if (format.isCompressed) {
+    if (format.isSampleOnly) {
       if (enableRenderTargetUsage ||
           enableShaderWriteUsage ||
           !enableShaderReadUsage ||
           sampleCount != 1 ||
           storageMode == StorageMode.deviceTransient) {
         throw ArgumentError(
-          'Compressed pixel format $format can only be used as a sample-only '
-          'texture (sampleCount=1, enableShaderReadUsage=true, no render '
-          'target, no shader write, and storageMode != deviceTransient)',
+          'Pixel format $format can only be used as a sample-only texture '
+          '(sampleCount=1, enableShaderReadUsage=true, no render target, no '
+          'shader write, and storageMode != deviceTransient)',
         );
       }
+    }
+    if (format.isCompressed) {
       final int bw = format.blockWidth;
       final int bh = format.blockHeight;
       if (width % bw != 0 || height % bh != 0) {
