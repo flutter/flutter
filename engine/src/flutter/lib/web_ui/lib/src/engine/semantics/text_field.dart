@@ -208,9 +208,8 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
 
   @override
   void addEventHandlers() {
-    if (inputConfiguration.autofillGroup != null) {
-      subscriptions.addAll(inputConfiguration.autofillGroup!.addInputEventListeners());
-    }
+    // The autofill group's fields are observed by the form itself, see
+    // EngineAutofillForm.attachPersistentFormListeners.
 
     // Subscribe to text and selection changes.
     subscriptions.add(
@@ -240,10 +239,9 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
           );
     applyConfiguration(inputConfiguration);
 
-    // Build the autofill form here, before [addEventHandlers] runs (it runs
-    // later in the same [enable] call). [addEventHandlers] subscribes to the
-    // `input` events of the synthetic group fields, so those fields must exist
-    // by then or non-focused fields would never propagate autofilled values.
+    // Build the autofill form here, which also subscribes to the synthetic
+    // group fields so that non-focused fields propagate autofilled values (see
+    // EngineAutofillForm.attachPersistentFormListeners).
     //
     // Note [placeElement]/[placeForm] are never reached via the normal
     // placement path in semantics mode ([initializeElementPlacement] is a

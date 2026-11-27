@@ -32,6 +32,9 @@ final class ViewFocusBinding {
   /// <body> and WebKit refocuses it a frame later. Deferring the report lets
   /// that refocus cancel it, so the view is not briefly reported unfocused.
   /// See: https://github.com/flutter/flutter/issues/189744
+  ///
+  /// A password manager filling an autofill form blurs each field to <body>
+  /// the same way before it focuses the next. See [_handleFocusout].
   Timer? _pendingFocusoutTimer;
 
   /// Whether the document itself still has focus.
@@ -101,19 +104,31 @@ final class ViewFocusBinding {
     // text-editing element to <body> (relatedTarget == null) while the document
     // still has focus, and WebKit refocuses it a frame later. Reporting the view
     // unfocused on that blink tears the text connection down and drops the
-    // keyboard. Defer only that precise case, re-deriving from the live focus so
+    // keyboard. Defer that case, re-deriving from the live focus so
     // an immediate refocus is a no-op ([_handleFocusin] cancels the timer).
+    //
+    // A password manager filling a multi-field autofill form blurs each field to
+    // <body> the same way before it focuses the next. Reporting the view
+    // unfocused in between churns the text connection and some managers then
+    // fill only the first field, so a field of such a form defers too, also
+    // while the page has lost focus to a manager popup.
+    //
     // Anything else, a non-editing element, a genuine focus loss, or the page
-    // itself losing focus, reports immediately.
+    // itself losing focus outside such a form, reports immediately.
     // https://github.com/flutter/flutter/issues/189744
-    if (isIosSafari &&
-        willGainFocus == null &&
-        _documentHasFocus &&
-        textEditing.isActiveTextEditingElement(target)) {
+    final bool isAutofillFormField = _isAutofillFormField(target);
+    if (willGainFocus == null &&
+        (isAutofillFormField ||
+            (isIosSafari && _documentHasFocus && textEditing.isActiveTextEditingElement(target)))) {
       _pendingFocusoutTimer?.cancel();
       _pendingFocusoutTimer = Timer(kTransientBlurSettleDelay, () {
         _pendingFocusoutTimer = null;
-        _handleFocusChange(domDocument.activeElement);
+        // An autofill field whose document lost the focus meanwhile (a window
+        // or tab switch, or a manager popup) is unfocused: the active element
+        // is stale and still names the blurred field.
+        _handleFocusChange(
+          isAutofillFormField && !_documentHasFocus ? null : domDocument.activeElement,
+        );
       });
       return;
     }
@@ -133,6 +148,27 @@ final class ViewFocusBinding {
   late final DomEventListener _handleKeyUp = createDomEventListener((DomEvent event) {
     _viewFocusDirection = ui.ViewFocusDirection.forward;
   });
+
+  /// Whether [element] is a field of a form the engine built for an autofill
+  /// group with more than one field, which the engine marks with
+  /// [autofillFormClass]. A password manager steps only between such fields;
+  /// fields of any other form never take the deferral.
+  ///
+  /// In semantics mode the focused field is a semantics-owned input outside
+  /// the form, linked to it by its `form` attribute, but the semantics text
+  /// field ends editing on its own `blur` before this `focusout` is handled,
+  /// so the deferral has nothing to keep alive there and does not apply to it.
+  bool _isAutofillFormField(DomElement? element) {
+    if (element == null) {
+      return false;
+    }
+    final String tag = element.tagName.toLowerCase();
+    if (tag != 'input' && tag != 'textarea') {
+      return false;
+    }
+    final DomElement? form = element.closest('form');
+    return form != null && form.classList.contains(autofillFormClass);
+  }
 
   void _handleFocusChange(DomElement? focusedElement) {
     final int? viewId = _viewId(focusedElement);
