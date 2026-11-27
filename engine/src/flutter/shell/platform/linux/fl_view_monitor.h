@@ -19,6 +19,10 @@ G_DECLARE_FINAL_TYPE(FlViewMonitor, fl_view_monitor, FL, VIEW_MONITOR, GObject);
  * Helper class to allow the Flutter engine to monitor a FlView using FFI.
  * Callbacks are called in the isolate this class was created with.
  *
+ * This internal FFI signature must match the framework's _FlViewMonitor
+ * binding in _window_linux.dart. Exporting the symbol does not make adding
+ * arguments compatible with existing callers.
+ *
  * Returns: a new #FlViewMonitor.
  */
 FlViewMonitor* fl_view_monitor_new(FlView* view, void (*on_first_frame)(void));
