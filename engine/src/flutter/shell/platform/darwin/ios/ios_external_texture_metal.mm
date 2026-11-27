@@ -42,4 +42,8 @@ void IOSExternalTextureMetal::OnTextureUnregistered() {
   [darwin_external_texture_metal_ onTextureUnregistered];
 }
 
+sk_sp<DlImage> IOSExternalTextureMetal::CreateDlImage(impeller::AiksContext* aiks_context) {
+  return [darwin_external_texture_metal_ createDlImageWithAiksContext:aiks_context];
+}
+
 }  // namespace flutter
