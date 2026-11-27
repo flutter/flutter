@@ -4,7 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/asset.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -16,90 +16,80 @@ import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/template.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_vm_services.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
-import '../../src/testbed.dart';
 import '../resident_runner_helpers.dart';
 
 void main() {
-  late TestBed testbed;
   late FakeDevFS devFS;
   late MemoryFileSystem fileSystem;
   FakeVmServiceHost? fakeVmServiceHost;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    testbed = TestBed(
-      setup: () {
-        fileSystem.file(fileSystem.path.join('build', 'app.dill'))
-          ..createSync(recursive: true)
-          ..writeAsStringSync('ABC');
-      },
-      overrides: <Type, Generator>{FileSystem: () => fileSystem},
-    );
+    fileSystem.file(fileSystem.path.join('build', 'app.dill'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('ABC');
     devFS = FakeDevFS();
   });
 
-  testUsingContext(
-    'use the nativeAssetsYamlFile when provided',
-    () => testbed.run(() async {
-      final device = FakeDevice(targetPlatform: TargetPlatform.darwin, sdkNameAndVersion: 'Macos');
-      final residentCompiler = FakeResidentCompiler();
-      final flutterDevice = FakeFlutterDevice()
-        ..testUri = testUri
-        ..vmServiceHost = (() => fakeVmServiceHost)
-        ..device = device
-        ..fakeDevFS = devFS
-        ..targetPlatform = TargetPlatform.darwin
-        ..generator = residentCompiler;
+  test('use the nativeAssetsYamlFile when provided', () async {
+    final logger = BufferLogger.test();
+    final toolContext = FakeToolContext(fs: fileSystem, logger: logger);
+    final device = FakeDevice(targetPlatform: TargetPlatform.darwin, sdkNameAndVersion: 'Macos');
+    final residentCompiler = FakeResidentCompiler();
+    final flutterDevice = FakeFlutterDevice()
+      ..testUri = testUri
+      ..vmServiceHost = (() => fakeVmServiceHost)
+      ..device = device
+      ..fakeDevFS = devFS
+      ..targetPlatform = TargetPlatform.darwin
+      ..generator = residentCompiler;
 
-      fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
-      fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
-      final residentRunner = HotRunner(
-        <FlutterDevice>[flutterDevice],
-        applicationPackageFactory: FlutterApplicationPackageFactory(
-          androidSdkBuilder: () => null,
-          plistParserBuilder: FakePlistParser.new,
-          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
-          toolContext: const DelegatingToolContext(),
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+    final residentRunner = HotRunner(
+      <FlutterDevice>[flutterDevice],
+      applicationPackageFactory: FlutterApplicationPackageFactory(
+        androidSdkBuilder: () => null,
+        plistParserBuilder: FakePlistParser.new,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+        toolContext: toolContext,
+      ),
+      assetBundleFactory: AssetBundleFactory.defaultInstance(
+        fileSystem: fileSystem,
+        flutterRoot: getFlutterRoot(),
+        logger: logger,
+        platform: FakePlatform(),
+      ),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      buildTargets: const BuildTargetsImpl(),
+      featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(
+        const BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          trackWidgetCreation: true,
+          packageConfigPath: '.dart_tool/package_config.json',
         ),
-        assetBundleFactory: AssetBundleFactory.defaultInstance(
-          fileSystem: fileSystem,
-          flutterRoot: getFlutterRoot(),
-          logger: testLogger,
-          platform: FakePlatform(),
-        ),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        buildTargets: const BuildTargetsImpl(),
-        featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
-        stayResident: false,
-        debuggingOptions: DebuggingOptions.enabled(
-          const BuildInfo(
-            BuildMode.debug,
-            '',
-            treeShakeIcons: false,
-            trackWidgetCreation: true,
-            packageConfigPath: '.dart_tool/package_config.json',
-          ),
-        ),
-        target: 'main.dart',
-        toolContext: const DelegatingToolContext(),
-        xcode: null,
-        analytics: getInitializedFakeAnalyticsInstance(
-          fs: MemoryFileSystem.test(),
-          fakeFlutterVersion: FakeFlutterVersion(),
-        ),
-        nativeAssetsYamlFile: 'foo.yaml',
-      );
+      ),
+      target: 'main.dart',
+      toolContext: toolContext,
+      xcode: null,
+      analytics: getInitializedFakeAnalyticsInstance(
+        fs: MemoryFileSystem.test(),
+        fakeFlutterVersion: FakeFlutterVersion(),
+      ),
+      nativeAssetsYamlFile: 'foo.yaml',
+    );
 
-      final int result = await residentRunner.run();
-      expect(result, 0);
+    final int result = await residentRunner.run();
+    expect(result, 0);
 
-      expect(residentCompiler.recompileCalled, true);
-      expect(residentCompiler.receivedNativeAssetsYaml, fileSystem.path.toUri('foo.yaml'));
-    }),
-    overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.any()},
-  );
+    expect(residentCompiler.recompileCalled, true);
+    expect(residentCompiler.receivedNativeAssetsYaml, fileSystem.path.toUri('foo.yaml'));
+  });
 }

@@ -10,9 +10,6 @@ import 'package:ui/ui.dart' as ui;
 /// A layer is the lowest-level rendering primitive. It represents an atomic
 /// painting command.
 abstract class Layer implements ui.EngineLayer {
-  /// The layer that contains us as a child.
-  ContainerLayer? parent;
-
   /// An estimated rectangle that this layer will draw into.
   ui.Rect paintBounds = ui.Rect.zero;
 
@@ -30,6 +27,9 @@ abstract class Layer implements ui.EngineLayer {
 abstract class ContainerLayer extends Layer {
   final List<Layer> children = <Layer>[];
 
+  int _pendingRenderCount = 0;
+  bool _isHandleDisposed = false;
+
   /// The list of child layers.
   ///
   /// Useful in tests.
@@ -37,12 +37,55 @@ abstract class ContainerLayer extends Layer {
 
   /// Register [child] as a child of this layer.
   void add(Layer child) {
-    child.parent = this;
     children.add(child);
+  }
+
+  /// Marks this layer and its descendant [ContainerLayer]s as pending render so
+  /// child [PictureLayer]s are not disposed before rasterization completes.
+  void pinForRender() {
+    _pendingRenderCount++;
+    if (_pendingRenderCount > 1) {
+      // Descendants are already pinned.
+      return;
+    }
+    for (final Layer child in children) {
+      if (child is ContainerLayer) {
+        child.pinForRender();
+      }
+    }
+  }
+
+  /// Unmarks a pending render on this layer and its descendant [ContainerLayer]s,
+  /// disposing owned [PictureLayer]s once no renders remain and the layer handle
+  /// has been disposed.
+  void unpinForRender() {
+    assert(_pendingRenderCount > 0, 'Cannot unpin a ContainerLayer with _pendingRenderCount == 0');
+    _pendingRenderCount--;
+    if (_pendingRenderCount > 0) {
+      // Still pinned by another pending render.
+      return;
+    }
+    for (final Layer child in children) {
+      if (child is ContainerLayer) {
+        child.unpinForRender();
+      }
+    }
+    _maybeDisposePictures();
   }
 
   @override
   void dispose() {
+    if (_isHandleDisposed) {
+      return;
+    }
+    _isHandleDisposed = true;
+    _maybeDisposePictures();
+  }
+
+  void _maybeDisposePictures() {
+    if (!_isHandleDisposed || _pendingRenderCount > 0) {
+      return;
+    }
     // Dispose of any picture layers that we own. Picture layers cannot be
     // retained between frames so this ContainerLayer is the only owner.
     // Therefore, we dispose of them here.

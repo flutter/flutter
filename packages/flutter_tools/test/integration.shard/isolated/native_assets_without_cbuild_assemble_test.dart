@@ -70,7 +70,7 @@ void _testBuildCommand({
   required ProcessManager processManager,
   required bool codeSign,
 }) {
-  testWithoutContext('flutter build "$buildCommand" succeeds without libraries', () async {
+  test('flutter build "$buildCommand" succeeds without libraries', () async {
     await inTempDir((Directory tempDirectory) async {
       const packageName = 'uses_package_hooks';
 
@@ -164,7 +164,7 @@ void _testBuildBundle({
   required String hooksVersionConstraint,
   required ProcessManager processManager,
 }) {
-  testWithoutContext(
+  test(
     'flutter build bundle --target-platform=$targetPlatform succeeds without libraries',
     () async {
       await inTempDir((Directory tempDirectory) async {

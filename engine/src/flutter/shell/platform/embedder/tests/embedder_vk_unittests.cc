@@ -12,6 +12,7 @@
 
 #include "embedder.h"
 #include "embedder_engine.h"
+#include "flutter/fml/closure.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
@@ -82,8 +83,18 @@ PFN_vkVoidFunction GetDeviceProcAddr(VkDevice device, const char* pName) {
   return g_vulkan_proc_info.get_device_proc_addr(device, pName);
 }
 
+// Skia resolves device functions through vkGetDeviceProcAddr, so it is caught
+// in GetDeviceProcAddr. Impeller initializes its dispatcher with the instance
+// alone and resolves device functions here, by name, so vkQueueSubmit has to be
+// caught on this route too.
 PFN_vkVoidFunction GetInstanceProcAddr(VkInstance instance, const char* pName) {
   FML_DCHECK(g_vulkan_proc_info.get_instance_proc_addr != nullptr);
+  if (std::strcmp(pName, "vkQueueSubmit") == 0) {
+    g_vulkan_proc_info.queue_submit_proc_addr =
+        reinterpret_cast<PFN_vkQueueSubmit>(
+            g_vulkan_proc_info.get_instance_proc_addr(instance, pName));
+    return reinterpret_cast<PFN_vkVoidFunction>(QueueSubmit);
+  }
   if (std::strcmp(pName, "vkGetDeviceProcAddr") == 0) {
     g_vulkan_proc_info.get_device_proc_addr =
         reinterpret_cast<PFN_vkGetDeviceProcAddr>(
@@ -413,25 +424,31 @@ TEST_F(EmbedderTest, ImpellerVulkanBackingStoreNullImageInvokesCleanup) {
 
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
+// Hands the engine GetInstanceProcAddr above in place of the real
+// vkGetInstanceProcAddr, so that its vkQueueSubmit lands in QueueSubmit.
+static void* SwapInInstanceProcAddr(void* user_data,
+                                    FlutterVulkanInstanceHandle instance,
+                                    const char* name) {
+  if (std::strcmp(name, "vkGetInstanceProcAddr") == 0) {
+    g_vulkan_proc_info.get_instance_proc_addr =
+        reinterpret_cast<PFN_vkGetInstanceProcAddr>(
+            EmbedderTestContextVulkan::InstanceProcAddr(user_data, instance,
+                                                        name));
+    return reinterpret_cast<void*>(GetInstanceProcAddr);
+  }
+  return EmbedderTestContextVulkan::InstanceProcAddr(user_data, instance, name);
+}
+
 TEST_F(EmbedderTest, CanSwapOutVulkanCalls) {
+  // The capture is global. Declared before the engine so that the engine has
+  // shut down by the time it is cleared.
+  fml::ScopedCleanupClosure reset_proc_info([] { g_vulkan_proc_info = {}; });
   fml::AutoResetWaitableEvent latch;
 
   EmbedderTestContextVulkan& context =
       GetEmbedderContext<EmbedderTestContextVulkan>();
   context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
-  context.SetVulkanInstanceProcAddressCallback(
-      [](void* user_data, FlutterVulkanInstanceHandle instance,
-         const char* name) -> void* {
-        if (std::strcmp(name, "vkGetInstanceProcAddr") == 0) {
-          g_vulkan_proc_info.get_instance_proc_addr =
-              reinterpret_cast<PFN_vkGetInstanceProcAddr>(
-                  EmbedderTestContextVulkan::InstanceProcAddr(user_data,
-                                                              instance, name));
-          return reinterpret_cast<void*>(GetInstanceProcAddr);
-        }
-        return EmbedderTestContextVulkan::InstanceProcAddr(user_data, instance,
-                                                           name);
-      });
+  context.SetVulkanInstanceProcAddressCallback(SwapInInstanceProcAddr);
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(DlISize(1024, 1024));
@@ -831,6 +848,52 @@ TEST_F(EmbedderTest, RenderNV12TextureWithSkiaVulkan) {
   WaitAndVerifyFrame(latch, rendered_scene, "external_texture_nv12.png",
                      kWidth * 2);
 }
+
+#if IMPELLER_SUPPORTS_RENDERING
+
+/// Verifies Vulkan proc interception under Impeller. Because Impeller does not
+/// submit command buffers during context setup, this test renders a frame to
+/// trigger `vkQueueSubmit`.
+TEST_F(EmbedderTest, CanSwapOutVulkanCallsWithImpeller) {
+  // Declared before the engine so that the engine has shut down by the time
+  // the capture is cleared.
+  fml::ScopedCleanupClosure reset_proc_info([] { g_vulkan_proc_info = {}; });
+
+  auto& context =
+      static_cast<EmbedderTestContextVulkan&>(GetVulkanImpellerContext());
+  context.SetVulkanInstanceProcAddressCallback(SwapInInstanceProcAddr);
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetDartEntrypoint("render_impeller_test");
+  builder.SetSurface(DlISize(800, 600));
+  builder.SetCompositor();
+  builder.SetRenderTargetType(
+      EmbedderTestBackingStoreProducer::RenderTargetType::kVulkanImage);
+
+  fml::AutoResetWaitableEvent latch;
+  context.GetCompositor().SetNextPresentCallback(
+      [&](FlutterViewId view_id, const FlutterLayer** layers,
+          size_t layers_count) { latch.Signal(); });
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  // WaitWithTimeout returns true when it timed out.
+  ASSERT_FALSE(latch.WaitWithTimeout(fml::TimeDelta::FromSeconds(30)))
+      << "no frame reached the compositor";
+  engine.reset();
+  EXPECT_TRUE(g_vulkan_proc_info.did_call_queue_submit);
+}
+
+#endif  // IMPELLER_SUPPORTS_RENDERING
 
 }  // namespace testing
 }  // namespace flutter

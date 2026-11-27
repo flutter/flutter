@@ -50,6 +50,11 @@ EmbedderTestContext& EmbedderTest::GetVulkanContext() {
   FML_LOG(FATAL) << "Vulkan is not supported in this build";
   std::terminate();
 }
+
+EmbedderTestContext& EmbedderTest::GetVulkanImpellerContext() {
+  FML_LOG(FATAL) << "Vulkan is not supported in this build";
+  std::terminate();
+}
 #endif
 
 EmbedderTestContext& EmbedderTestMultiBackend::GetEmbedderContext(
@@ -63,6 +68,8 @@ EmbedderTestContext& EmbedderTestMultiBackend::GetEmbedderContext(
       return GetSoftwareContext();
     case EmbedderTestContextType::kVulkanContext:
       return GetVulkanContext();
+    case EmbedderTestContextType::kVulkanImpellerContext:
+      return GetVulkanImpellerContext();
   }
 }
 

@@ -16,4 +16,10 @@ EmbedderTestContext& EmbedderTest::GetVulkanContext() {
   return *vulkan_context_.get();
 }
 
+EmbedderTestContext& EmbedderTest::GetVulkanImpellerContext() {
+  auto& context = static_cast<EmbedderTestContextVulkan&>(GetVulkanContext());
+  context.SetEnableImpeller(true);
+  return context;
+}
+
 }  // namespace flutter::testing
