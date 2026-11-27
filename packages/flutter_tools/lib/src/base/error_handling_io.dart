@@ -55,6 +55,9 @@ const int kSystemCodeSharingViolation = 32;
 /// On Windows this is error code 33: ERROR_LOCK_VIOLATION.
 const int kSystemCodeLockViolation = 33;
 
+/// On Windows this is error code 145: ERROR_DIR_NOT_EMPTY.
+const int kSystemCodeDirNotEmpty = 145;
+
 /// On Windows this is error code 1224: ERROR_USER_MAPPED_FILE.
 const int kSystemCodeUserMappedSectionOpened = 1224;
 
@@ -705,7 +708,11 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
       platform: _platform,
       failureMessage: 'Flutter failed to delete a directory at "${delegate.path}"',
       posixPermissionSuggestion: recursive ? null : _posixPermissionSuggestion(delegate.path),
-      ignoreErrorCodes: const <int>[kSystemCodeCannotFindFile, kSystemCodePathNotFound],
+      ignoreErrorCodes: <int>[
+        kSystemCodeCannotFindFile,
+        kSystemCodePathNotFound,
+        if (!recursive) kSystemCodeDirNotEmpty,
+      ],
     );
   }
 
@@ -716,7 +723,11 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
       platform: _platform,
       failureMessage: 'Flutter failed to delete a directory at "${delegate.path}"',
       posixPermissionSuggestion: recursive ? null : _posixPermissionSuggestion(delegate.path),
-      ignoreErrorCodes: const <int>[kSystemCodeCannotFindFile, kSystemCodePathNotFound],
+      ignoreErrorCodes: <int>[
+        kSystemCodeCannotFindFile,
+        kSystemCodePathNotFound,
+        if (!recursive) kSystemCodeDirNotEmpty,
+      ],
     );
   }
 
@@ -1033,7 +1044,8 @@ bool _isWindowsTransientLock(int errorCode) {
   return errorCode == kSystemCodeAccessDenied ||
       errorCode == kSystemCodeSharingViolation ||
       errorCode == kSystemCodeLockViolation ||
-      errorCode == kSystemCodeUserMappedSectionOpened;
+      errorCode == kSystemCodeUserMappedSectionOpened ||
+      errorCode == kSystemCodeDirNotEmpty;
 }
 
 Future<T> _run<T>(
@@ -1486,6 +1498,7 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
   const kSharingViolation = 32;
   const kLockViolation = 33;
   const kDeviceFull = 112;
+  const kDirNotEmpty = 145;
   const kFilenameExcedRange = 206;
   const kDeviceDoesNotExist = 433;
   const kSystemIntegrityPolicyViolation = 454;
@@ -1515,7 +1528,7 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
           '$e\n'
           'Please consider moving the Flutter SDK and/or project to a shorter path, '
           'or enabling long paths on Windows.',
-    kSharingViolation || kLockViolation || kUserMappedSectionOpened =>
+    kSharingViolation || kLockViolation || kUserMappedSectionOpened || kDirNotEmpty =>
       '$message. The file is being used by another program.'
           '\n$e\n'
           'Do you have an antivirus program running? '
