@@ -149,6 +149,7 @@ class Chrome extends Browser {
           // line, which _spawnChromiumProcess reads; so more than one suite
           // can run on a machine at once.
           '--remote-debugging-port=0',
+          '--js-flags=--expose-gc',
 
           // SwiftShader support on ARM macs is disabled until they upgrade to a newer
           // version of LLVM, see https://issuetracker.google.com/issues/165000222. In

@@ -1526,7 +1526,7 @@ load("//build_defs/testing:ios_xctest.bzl", "ios_xctest")
 # run_ios_tests.sh (bin/run_ios_tests.dart): `xcodebuild -project
 # <build directory>/ios_scenario_app/Scenarios/Scenarios.xcodeproj -sdk
 # iphonesimulator -scheme Scenarios -destination <an iPhone SE (3rd
-# generation) simulator of the iOS 26.2 runtime> clean test
+# generation) simulator of the iOS 27.2 runtime> clean test
 # FLUTTER_ENGINE=<variant>`, after `defaults write com.apple.iphonesimulator
 # RotateWindowWhenSignaledByGuest -int 1` for the platform view rotation
 # test; the project embeds ../../Flutter.xcframework and App.framework out of
@@ -1547,7 +1547,7 @@ ios_xctest(
     # The app's group reaches Flutter.xcframework through ios/BUILD.gn's.
     engine = [":ios_scenario_app"],
     result_bundle = "ios_scenario",
-    runtime = "com.apple.CoreSimulator.SimRuntime.iOS-26-2",
+    runtime = "com.apple.CoreSimulator.SimRuntime.iOS-27-2",
     scheme = "Scenarios",
     setup = ["defaults write com.apple.iphonesimulator RotateWindowWhenSignaledByGuest -int 1"],
     simulator_name = "iPhone SE (3rd generation)",

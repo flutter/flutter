@@ -479,7 +479,7 @@ void main() {
     },
   );
 
-  testWithoutContext('finds a Bazel build directory by the name its manifest carries', () async {
+  test('finds a Bazel build directory by the name its manifest carries', () async {
     // `bazel build --config=host_debug_unopt //engine/src/flutter:local_engine`
     // writes local_engine.json, naming GN's build directory, under
     // out/bazel-out/<configuration>/bin/engine/src/flutter; --local-engine
@@ -589,7 +589,7 @@ void main() {
     );
   });
 
-  testWithoutContext('fails if --local-engine-host is used without --local-engine', () async {
+  test('fails if --local-engine-host is used without --local-engine', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Directory localEngine = fileSystem.directory(
       '$kArbitraryEngineRoot/src/out/android_debug_unopt_arm64/',

@@ -25,7 +25,7 @@ VARS = {
     "clang_version": "git_revision:07d67299a15ce03b053736e2d31a668ee0576987",
     "dart_ai_rev": "9c96bfe5f091c9451eff5b59c9bffeb2e806b875",
     "dart_binaryen_rev": "a631c1445ced72a905b3303b26f148fc706647dd",
-    "dart_boringssl_rev": "ebd922adc708a48b0cccfcdf81e854a3fdc1b7b6",
+    "dart_boringssl_rev": "ddd732967025c608598b9984a1ada358fa82f6f0",
     "dart_core_rev": "78ffcc3b27c108ab42ec862b245ee6cee98ac56d",
     "dart_devtools_rev": "84fb7cc7cba29c54f94164275eff81c717bdc7cf",
     "dart_ecosystem_rev": "1d2b5ff862c6b93cd86dd06eadac4c9f4d5d6c20",
@@ -35,7 +35,7 @@ VARS = {
     "dart_perfetto_rev": "13ce0c9e13b0940d2476cd0cff2301708a9a2e2b",
     "dart_protobuf_rev": "19191c8c5881d4a63db804bbed26fa1dcdd17ed0",
     "dart_pub_rev": "9df389a76385f82c1165c7cf93b78807b5ea8890",
-    "dart_revision": "10aef26c73f52c7221562ca3abcc94c077a5a68d",
+    "dart_revision": "691817e0ec3b722c9e0eb47cbcb90a3672cd1001",
     "dart_sync_http_rev": "6666fff944221891182e1f80bf56569338164d72",
     "dart_tools_rev": "528491a40525edcbcd3281b79e97482260951dbf",
     "dart_vector_math_rev": "cf3b5db7340d317dd3489e5a35434b408020a852",
@@ -55,7 +55,7 @@ VARS = {
     "flutter_git": "https://flutter.googlesource.com",
     "fuchsia_gn_sdk_version": "kFdyRnojbVy0cxvRZueVcnyi4XuxGnAiSK0YOvpzOG8C",
     "fuchsia_sdk_path": "",
-    "fuchsia_test_scripts_version": "oEU515sDqSTvD8SpxKQZK5U4uzo-VV_raZOIqsDjE-oC",
+    "fuchsia_test_scripts_version": "d5xIJpr0HxkwjlpnreR1MZeeoaMVL__bVx9ktdLb07UC",
     "gcloud_version": "version:3@591.0.0.chromium.4",
     "llvm_git": "https://llvm.googlesource.com",
     "ocmock_rev": "c4ec0e3a7a9f56cfdbd0aa01f4f97bb4b75c5ef8",
@@ -64,7 +64,7 @@ VARS = {
     "run_fuchsia_emu": False,
     "setup_githooks": True,
     "skia_git": "https://skia.googlesource.com",
-    "skia_revision": "694af434cadde557a06db8eaa6491a6bc7b6f913",
+    "skia_revision": "d693d85a4b77fed604935878e1bcab4797aa6592",
     "upstream_VulkanMemoryAllocator": "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git",
     "upstream_abseil-cpp": "https://github.com/abseil/abseil-cpp.git",
     "upstream_angle": "https://github.com/google/angle.git",
@@ -146,7 +146,7 @@ GIT_DEPS = {
     },
     "engine/src/flutter/third_party/boringssl/src": {
         "url": "https://boringssl.googlesource.com/boringssl.git",
-        "revision": "ebd922adc708a48b0cccfcdf81e854a3fdc1b7b6",
+        "revision": "ddd732967025c608598b9984a1ada358fa82f6f0",
     },
     "engine/src/flutter/third_party/brotli": {
         "url": "https://skia.googlesource.com/external/github.com/google/brotli.git",
@@ -158,7 +158,7 @@ GIT_DEPS = {
     },
     "engine/src/flutter/third_party/dart": {
         "url": "https://dart.googlesource.com/sdk.git",
-        "revision": "10aef26c73f52c7221562ca3abcc94c077a5a68d",
+        "revision": "691817e0ec3b722c9e0eb47cbcb90a3672cd1001",
     },
     "engine/src/flutter/third_party/dart/third_party/binaryen/src": {
         "url": "https://chromium.googlesource.com/external/github.com/WebAssembly/binaryen.git",
@@ -382,7 +382,7 @@ GIT_DEPS = {
     },
     "engine/src/flutter/third_party/skia": {
         "url": "https://skia.googlesource.com/skia.git",
-        "revision": "694af434cadde557a06db8eaa6491a6bc7b6f913",
+        "revision": "d693d85a4b77fed604935878e1bcab4797aa6592",
     },
     "engine/src/flutter/third_party/sqlite": {
         "url": "https://flutter.googlesource.com/third_party/sqlite",
@@ -572,7 +572,7 @@ CIPD_DEPS = {
         "packages": [
             {
                 "package": "flutter/dart-sdk/linux-arm64",
-                "version": "git_revision:10aef26c73f52c7221562ca3abcc94c077a5a68d",
+                "version": "git_revision:691817e0ec3b722c9e0eb47cbcb90a3672cd1001",
             },
         ],
         "condition": "host_os == \"linux\" and download_dart_sdk",
@@ -581,7 +581,7 @@ CIPD_DEPS = {
         "packages": [
             {
                 "package": "flutter/dart-sdk/linux-amd64",
-                "version": "git_revision:10aef26c73f52c7221562ca3abcc94c077a5a68d",
+                "version": "git_revision:691817e0ec3b722c9e0eb47cbcb90a3672cd1001",
             },
         ],
         "condition": "host_os == \"linux\" and download_dart_sdk",
@@ -599,7 +599,7 @@ CIPD_DEPS = {
         "packages": [
             {
                 "package": "flutter/dart-sdk/mac-arm64",
-                "version": "git_revision:10aef26c73f52c7221562ca3abcc94c077a5a68d",
+                "version": "git_revision:691817e0ec3b722c9e0eb47cbcb90a3672cd1001",
             },
         ],
         "condition": "host_os == \"mac\" and download_dart_sdk",
@@ -617,7 +617,7 @@ CIPD_DEPS = {
         "packages": [
             {
                 "package": "flutter/dart-sdk/mac-amd64",
-                "version": "git_revision:10aef26c73f52c7221562ca3abcc94c077a5a68d",
+                "version": "git_revision:691817e0ec3b722c9e0eb47cbcb90a3672cd1001",
             },
         ],
         "condition": "host_os == \"mac\" and download_dart_sdk",
@@ -635,7 +635,7 @@ CIPD_DEPS = {
         "packages": [
             {
                 "package": "flutter/dart-sdk/windows-arm64",
-                "version": "git_revision:10aef26c73f52c7221562ca3abcc94c077a5a68d",
+                "version": "git_revision:691817e0ec3b722c9e0eb47cbcb90a3672cd1001",
             },
         ],
         "condition": "host_os == \"win\" and download_dart_sdk",
@@ -644,7 +644,7 @@ CIPD_DEPS = {
         "packages": [
             {
                 "package": "flutter/dart-sdk/windows-amd64",
-                "version": "git_revision:10aef26c73f52c7221562ca3abcc94c077a5a68d",
+                "version": "git_revision:691817e0ec3b722c9e0eb47cbcb90a3672cd1001",
             },
         ],
         "condition": "host_os == \"win\" and download_dart_sdk",
@@ -773,7 +773,7 @@ CIPD_DEPS = {
         "packages": [
             {
                 "package": "chromium/fuchsia/test-scripts",
-                "version": "oEU515sDqSTvD8SpxKQZK5U4uzo-VV_raZOIqsDjE-oC",
+                "version": "d5xIJpr0HxkwjlpnreR1MZeeoaMVL__bVx9ktdLb07UC",
             },
         ],
         "condition": "download_fuchsia_deps",
@@ -782,7 +782,7 @@ CIPD_DEPS = {
         "packages": [
             {
                 "package": "fuchsia/sdk/core/linux-amd64",
-                "version": "BOgXtIYxLYcCkRou2Hu48jAKM0ZC0HVkprkPp0ojSTMC",
+                "version": "0bgCrr76CM4IqPO0vBRNd4punu98Mlp8la8nFTKQQu0C",
             },
         ],
         "condition": "download_fuchsia_deps and not download_fuchsia_sdk",
@@ -806,7 +806,7 @@ CIPD_DEPS = {
 # an anonymous caller; a download of it goes unverified.
 CIPD_SHA256 = {
     "chromium/fuchsia/gn-sdk@kFdyRnojbVy0cxvRZueVcnyi4XuxGnAiSK0YOvpzOG8C": "905772467a236d5cb4731bd166e795727ca2e17bb11a702248ad183afa73386f",
-    "chromium/fuchsia/test-scripts@oEU515sDqSTvD8SpxKQZK5U4uzo-VV_raZOIqsDjE-oC": "a04539d79b03a924ef0fc4a9c4a4192b9538bb3a3e555feb699388aac0e313ea",
+    "chromium/fuchsia/test-scripts@d5xIJpr0HxkwjlpnreR1MZeeoaMVL__bVx9ktdLb07UC": "779c48269af41f19308e5a67ade47531979ea1a3152fffdb571f64b5d2dbd3b5",
     "dart/dart-sdk/linux-amd64@git_revision:5521341774cb336e5b4c39c9c970dab2cd666854": "0f744b949e560497663cad683fd54d86da4ab04ba6778b9502d3363ff83e38d8",
     "dart/dart-sdk/linux-arm64@git_revision:5521341774cb336e5b4c39c9c970dab2cd666854": "adda0fca9506e5bdcbd29f5540196229e554dec8f82f8bd2bd03b83f4d47c71e",
     "dart/dart-sdk/mac-amd64@git_revision:5521341774cb336e5b4c39c9c970dab2cd666854": "b8480a5bd2ce6f76bd4075701febb9769d8519be8d91a3726c34ff125e903dd9",
@@ -820,12 +820,12 @@ CIPD_SHA256 = {
     "flutter/android/sdk/all/mac-amd64@version:37v2": "20b410b045015e8e1f58c2f5437f3df25bed61f2675816771623c5378dbf1a8d",
     "flutter/android/sdk/all/mac-arm64@version:37v2": "9efe002af38e8e8e2615eb838fd63022d72d25c4893a32f25d73eb823123b752",
     "flutter/android/sdk/all/windows-amd64@version:37v2": "93e9937e8165e5fc5d66240fd54be752ff785d10f08cc009638a16c44b07d06c",
-    "flutter/dart-sdk/linux-amd64@git_revision:10aef26c73f52c7221562ca3abcc94c077a5a68d": "834354eee53fdb4f17b1c9c8f966a57783a05d1bb931edfccf49ee1bd749486a",
-    "flutter/dart-sdk/linux-arm64@git_revision:10aef26c73f52c7221562ca3abcc94c077a5a68d": "3e95bc2b0bf10c9e5d3340cd0431bc0d7a1a5645191bd90e3c0052ebd40e7f5b",
-    "flutter/dart-sdk/mac-amd64@git_revision:10aef26c73f52c7221562ca3abcc94c077a5a68d": "069b9770d871a2651c805c46729fbedbc6cd926989d536b38cb4f3869d7854eb",
-    "flutter/dart-sdk/mac-arm64@git_revision:10aef26c73f52c7221562ca3abcc94c077a5a68d": "f3a4b8707fab0fe908a688ca5c5da85b235e6a400bc7651736e37c0bbe7723ef",
-    "flutter/dart-sdk/windows-amd64@git_revision:10aef26c73f52c7221562ca3abcc94c077a5a68d": "3274e88f891bc9b6759a6d837e432fecc3b7ee574092a07077fcf17e81843613",
-    "flutter/dart-sdk/windows-arm64@git_revision:10aef26c73f52c7221562ca3abcc94c077a5a68d": "d0a0f91b8cc0987ecf4341c9bdf6d27f19e30571beefd13a651f2f2d69bc0f06",
+    "flutter/dart-sdk/linux-amd64@git_revision:691817e0ec3b722c9e0eb47cbcb90a3672cd1001": "c575438def5391e68665b677b23c0dc151a4714e205e3b2af0c31eb210a373d1",
+    "flutter/dart-sdk/linux-arm64@git_revision:691817e0ec3b722c9e0eb47cbcb90a3672cd1001": "c7c237d30ab05beec0716aaaf96343223212f77f2b7584c56cf2d27c518a05c8",
+    "flutter/dart-sdk/mac-amd64@git_revision:691817e0ec3b722c9e0eb47cbcb90a3672cd1001": "05314cf2aba39391e0ad5181127b10baca2bc8309bee13d682fdda07c1bb530d",
+    "flutter/dart-sdk/mac-arm64@git_revision:691817e0ec3b722c9e0eb47cbcb90a3672cd1001": "a5a85b68882ae81ce25fb60f894f5f64447d4aa180037d4834dc3689c6fe099a",
+    "flutter/dart-sdk/windows-amd64@git_revision:691817e0ec3b722c9e0eb47cbcb90a3672cd1001": "e9ec39935ec45f752db6b7fd4c85781bad86d89a8c5f91932f995b25d8be7b2d",
+    "flutter/dart-sdk/windows-arm64@git_revision:691817e0ec3b722c9e0eb47cbcb90a3672cd1001": "ad6cb17b5fa853ade89631a6383ab919b8b7bc28b20e2f5c04379b29b5abe68a",
     "flutter/flutter_font_fallbacks@eafae0f49fbf9af7858049ad666b7223bdd7588162d8a687ec7870eb5952055d": "0c9032d50844b3778f11ab6bf48000f2d64ff48604143136a381582579a6c1c6",
     "flutter/gradle@version:9.5.0": "09a46c01393cb8296e359d8df8ec711fee014f6b00495bef6d61d7ed0809bcf7",
     "flutter/java/openjdk/linux-amd64@version:25.0.2": "289ac0ed752de3e1b8163e7924083cc059d6be62c1b1a036123bd1d189320496",
@@ -838,7 +838,7 @@ CIPD_SHA256 = {
     "flutter/tools/esbuild/mac-arm64@0.19.5": "38097ca7917d2283472c196b5990a49efbbeb2a27edc93060f69a4bf25a58b26",
     "flutter/tools/esbuild/windows-amd64@0.19.5": "302f87a5cde99ae40a9f68d8fff69028af34071142401ff7c74bc59c6bddf067",
     "flutter_internal/rbe/reclient_cfgs@Vk7WiSKwQdBHbCrZ9PtRl3po2WpRFQZSag9M6-sxF_0C": "564ed68922b041d0476c2ad9f4fb51977a68d96a511506526a0f4cebeb3117fd",
-    "fuchsia/sdk/core/linux-amd64@BOgXtIYxLYcCkRou2Hu48jAKM0ZC0HVkprkPp0ojSTMC": "04e817b486312d8702911a2ed87bb8f2300a334642d07564a6b90fa74a234933",
+    "fuchsia/sdk/core/linux-amd64@0bgCrr76CM4IqPO0vBRNd4punu98Mlp8la8nFTKQQu0C": "d1b802aebefa08ce08a8f3b4bc144d778a6e9eef7c325a7c95af2715329042ed",
     "fuchsia/third_party/clang/linux-amd64@git_revision:07d67299a15ce03b053736e2d31a668ee0576987": "6b657ccd9ca05c6b9e4458181ec71f1dbaf7122a5e6df7aaaec381a31ab34bd3",
     "fuchsia/third_party/clang/linux-arm64@git_revision:07d67299a15ce03b053736e2d31a668ee0576987": "d9184447ddffff3697036c312e6faf884f27ccb6889475737ee3e6d1e7603861",
     "fuchsia/third_party/clang/mac-amd64@git_revision:07d67299a15ce03b053736e2d31a668ee0576987": "b59fccc120d7f6c7306085fec4868044f5a3551105775f215e8875597d9f82f8",

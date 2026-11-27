@@ -918,48 +918,39 @@ void main() {
       );
     });
 
-    testWithoutContext(
-      "names GN's build directories to a re-entrant build by name, with the engine source",
-      () {
-        localEngineInfo = LocalEngineInfo(
-          targetOutPath: '/engine/src/out/linux_debug_unopt',
-          hostOutPath: '/engine/src/out/host_debug_unopt',
-          fileSystem: fileSystem,
-        );
-        expect(
-          localEngineInfo.toReentrantBuildEnvironment(fileSystem: fileSystem),
-          <String, String>{
-            'FLUTTER_ENGINE': '/engine/src',
-            'LOCAL_ENGINE': 'linux_debug_unopt',
-            'LOCAL_ENGINE_HOST': 'host_debug_unopt',
-          },
-        );
-      },
-    );
+    test("names GN's build directories to a re-entrant build by name, with the engine source", () {
+      localEngineInfo = LocalEngineInfo(
+        targetOutPath: '/engine/src/out/linux_debug_unopt',
+        hostOutPath: '/engine/src/out/host_debug_unopt',
+        fileSystem: fileSystem,
+      );
+      expect(localEngineInfo.toReentrantBuildEnvironment(fileSystem: fileSystem), <String, String>{
+        'FLUTTER_ENGINE': '/engine/src',
+        'LOCAL_ENGINE': 'linux_debug_unopt',
+        'LOCAL_ENGINE_HOST': 'host_debug_unopt',
+      });
+    });
 
-    testWithoutContext(
-      'names a Bazel build directory to a re-entrant build by its path, without a source',
-      () {
-        // A Bazel build directory is known by its manifest; its path is what
-        // --local-engine takes, and the tool finds the source as for any
-        // absolute path.
-        const bazelBin = '/checkout/engine/src/bazel-bin/engine/src/flutter';
-        fileSystem.file(fileSystem.path.join(bazelBin, 'local_engine.json'))
-          ..createSync(recursive: true)
-          ..writeAsStringSync('{"name": "host_debug_unopt", "entries": {}}');
-        localEngineInfo = LocalEngineInfo(
-          targetOutPath: bazelBin,
-          hostOutPath: bazelBin,
-          fileSystem: fileSystem,
-          targetName: 'host_debug_unopt',
-          hostName: 'host_debug_unopt',
-        );
-        expect(
-          localEngineInfo.toReentrantBuildEnvironment(fileSystem: fileSystem),
-          <String, String>{'LOCAL_ENGINE': bazelBin, 'LOCAL_ENGINE_HOST': bazelBin},
-        );
-      },
-    );
+    test('names a Bazel build directory to a re-entrant build by its path, without a source', () {
+      // A Bazel build directory is known by its manifest; its path is what
+      // --local-engine takes, and the tool finds the source as for any
+      // absolute path.
+      const bazelBin = '/checkout/engine/src/bazel-bin/engine/src/flutter';
+      fileSystem.file(fileSystem.path.join(bazelBin, 'local_engine.json'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"name": "host_debug_unopt", "entries": {}}');
+      localEngineInfo = LocalEngineInfo(
+        targetOutPath: bazelBin,
+        hostOutPath: bazelBin,
+        fileSystem: fileSystem,
+        targetName: 'host_debug_unopt',
+        hostName: 'host_debug_unopt',
+      );
+      expect(localEngineInfo.toReentrantBuildEnvironment(fileSystem: fileSystem), <String, String>{
+        'LOCAL_ENGINE': bazelBin,
+        'LOCAL_ENGINE_HOST': bazelBin,
+      });
+    });
   });
 
   group('LocalEngineLayout', () {
@@ -1039,7 +1030,7 @@ void main() {
       ),
     );
 
-    testWithoutContext('resolves GN paths through the manifest', () {
+    test('resolves GN paths through the manifest', () {
       final layout = LocalEngineLayout.of(bazelBin, fileSystem: fileSystem);
       expect(layout.hasManifest, isTrue);
       expect(layout.name, 'host_debug_unopt');
@@ -1079,7 +1070,7 @@ void main() {
       );
     });
 
-    testWithoutContext("is GN's layout without a manifest", () {
+    test("is GN's layout without a manifest", () {
       final String gnOut = fileSystem.path.join('/out', 'host_debug_unopt');
       final layout = LocalEngineLayout.of(gnOut, fileSystem: fileSystem);
       expect(layout.hasManifest, isFalse);
@@ -1090,7 +1081,7 @@ void main() {
       );
     });
 
-    testWithoutContext('rejects a manifest without entries', () {
+    test('rejects a manifest without entries', () {
       fileSystem.file(fileSystem.path.join(bazelBin, 'local_engine.json')).writeAsStringSync('{}');
       expect(
         () => LocalEngineLayout.of(bazelBin, fileSystem: fileSystem),
@@ -1098,7 +1089,7 @@ void main() {
       );
     });
 
-    testWithoutContext('CachedLocalEngineArtifacts reads a Bazel build directory', () {
+    test('CachedLocalEngineArtifacts reads a Bazel build directory', () {
       final Artifacts artifacts = bazelArtifacts();
       expect(artifacts.localEngineInfo!.localTargetName, 'host_debug_unopt');
       expect(artifacts.localEngineInfo!.localHostName, 'host_debug_unopt');
@@ -1189,137 +1180,130 @@ void main() {
       );
     });
 
-    testWithoutContext(
-      'finds the Apple frameworks inside the xcframeworks the manifest places',
-      () {
-        // A Mac host build's and an iOS simulator build's manifests: each
-        // xcframework is one entry (a directory the build assembles), and the
-        // framework is its slice's, as in GN's build directory.
-        final String macosBin = fileSystem.path.join(
-          execroot,
-          'bazel-out',
-          'macos_arm64_debug-dbg',
-          'bin',
-          'engine',
-          'src',
-          'flutter',
-        );
-        final String iosBin = fileSystem.path.join(
-          execroot,
-          'bazel-out',
-          'ios_sim_arm64_debug-dbg',
-          'bin',
-          'engine',
-          'src',
-          'flutter',
-        );
-        final String macosFramework = fileSystem.path.join(
-          macosBin,
-          'shell',
-          'platform',
-          'darwin',
-          'macos',
-          'FlutterMacOS.xcframework',
-          'macos-arm64',
-          'FlutterMacOS.framework',
-        );
-        final String iosFramework = fileSystem.path.join(
-          iosBin,
-          'shell',
-          'platform',
-          'darwin',
-          'ios',
-          'Flutter.xcframework',
-          'ios-arm64-simulator',
-          'Flutter.framework',
-        );
-        fileSystem.directory(macosFramework).createSync(recursive: true);
-        fileSystem.directory(iosFramework).createSync(recursive: true);
-        fileSystem
-            .file(fileSystem.path.join(macosBin, 'local_engine.json'))
-            .writeAsStringSync(
-              json.encode(<String, Object>{
-                'name': 'host_debug_unopt_arm64',
-                'entries': <String, String>{
-                  'FlutterMacOS.xcframework':
-                      'shell/platform/darwin/macos/FlutterMacOS.xcframework',
-                  'flutter_tester': 'shell/testing/flutter_tester',
-                },
-              }),
-            );
-        fileSystem
-            .file(fileSystem.path.join(iosBin, 'local_engine.json'))
-            .writeAsStringSync(
-              json.encode(<String, Object>{
-                'name': 'ios_debug_sim_unopt_arm64',
-                'entries': <String, String>{
-                  'Flutter.xcframework': 'shell/platform/darwin/ios/Flutter.xcframework',
-                },
-              }),
-            );
-        final macPlatform = FakePlatform(operatingSystem: 'macos');
-        final Artifacts macos = CachedLocalEngineArtifacts(
-          macosBin,
-          engineOutPath: macosBin,
-          toolContext: FakeToolContext(
-            cache: cache,
-            fs: fileSystem,
-            os: FakeOperatingSystemUtils(),
-            platform: macPlatform,
-            processManager: processManager,
-          ),
-        );
-        expect(
-          macos.getArtifactPath(Artifact.flutterMacOSXcframework, platform: TargetPlatform.darwin),
-          fileSystem.path.dirname(fileSystem.path.dirname(macosFramework)),
-        );
-        expect(
-          macos.getArtifactPath(Artifact.flutterMacOSFramework, platform: TargetPlatform.darwin),
-          macosFramework,
-        );
-        expect(
-          macos.getArtifactPath(
-            Artifact.flutterMacOSFrameworkDsym,
-            platform: TargetPlatform.darwin,
-          ),
-          fileSystem.path.join(
-            fileSystem.path.dirname(macosFramework),
-            'dSYMs',
-            'FlutterMacOS.framework.dSYM',
-          ),
-        );
-        final Artifacts ios = CachedLocalEngineArtifacts(
-          macosBin,
-          engineOutPath: iosBin,
-          toolContext: FakeToolContext(
-            cache: cache,
-            fs: fileSystem,
-            os: FakeOperatingSystemUtils(),
-            platform: macPlatform,
-            processManager: processManager,
-          ),
-        );
-        expect(ios.localEngineInfo!.localTargetName, 'ios_debug_sim_unopt_arm64');
-        expect(
-          ios.getArtifactPath(Artifact.flutterXcframework, platform: TargetPlatform.ios),
-          fileSystem.path.dirname(fileSystem.path.dirname(iosFramework)),
-        );
-        expect(
-          ios.getArtifactPath(
-            Artifact.flutterFramework,
-            platform: TargetPlatform.ios,
-            mode: BuildMode.debug,
-            environmentType: EnvironmentType.simulator,
-          ),
-          iosFramework,
-        );
-        // The host's tools come from the host build.
-        expect(
-          ios.getArtifactPath(Artifact.flutterTester),
-          fileSystem.path.join(macosBin, 'shell', 'testing', 'flutter_tester'),
-        );
-      },
-    );
+    test('finds the Apple frameworks inside the xcframeworks the manifest places', () {
+      // A Mac host build's and an iOS simulator build's manifests: each
+      // xcframework is one entry (a directory the build assembles), and the
+      // framework is its slice's, as in GN's build directory.
+      final String macosBin = fileSystem.path.join(
+        execroot,
+        'bazel-out',
+        'macos_arm64_debug-dbg',
+        'bin',
+        'engine',
+        'src',
+        'flutter',
+      );
+      final String iosBin = fileSystem.path.join(
+        execroot,
+        'bazel-out',
+        'ios_sim_arm64_debug-dbg',
+        'bin',
+        'engine',
+        'src',
+        'flutter',
+      );
+      final String macosFramework = fileSystem.path.join(
+        macosBin,
+        'shell',
+        'platform',
+        'darwin',
+        'macos',
+        'FlutterMacOS.xcframework',
+        'macos-arm64',
+        'FlutterMacOS.framework',
+      );
+      final String iosFramework = fileSystem.path.join(
+        iosBin,
+        'shell',
+        'platform',
+        'darwin',
+        'ios',
+        'Flutter.xcframework',
+        'ios-arm64-simulator',
+        'Flutter.framework',
+      );
+      fileSystem.directory(macosFramework).createSync(recursive: true);
+      fileSystem.directory(iosFramework).createSync(recursive: true);
+      fileSystem
+          .file(fileSystem.path.join(macosBin, 'local_engine.json'))
+          .writeAsStringSync(
+            json.encode(<String, Object>{
+              'name': 'host_debug_unopt_arm64',
+              'entries': <String, String>{
+                'FlutterMacOS.xcframework': 'shell/platform/darwin/macos/FlutterMacOS.xcframework',
+                'flutter_tester': 'shell/testing/flutter_tester',
+              },
+            }),
+          );
+      fileSystem
+          .file(fileSystem.path.join(iosBin, 'local_engine.json'))
+          .writeAsStringSync(
+            json.encode(<String, Object>{
+              'name': 'ios_debug_sim_unopt_arm64',
+              'entries': <String, String>{
+                'Flutter.xcframework': 'shell/platform/darwin/ios/Flutter.xcframework',
+              },
+            }),
+          );
+      final macPlatform = FakePlatform(operatingSystem: 'macos');
+      final Artifacts macos = CachedLocalEngineArtifacts(
+        macosBin,
+        engineOutPath: macosBin,
+        toolContext: FakeToolContext(
+          cache: cache,
+          fs: fileSystem,
+          os: FakeOperatingSystemUtils(),
+          platform: macPlatform,
+          processManager: processManager,
+        ),
+      );
+      expect(
+        macos.getArtifactPath(Artifact.flutterMacOSXcframework, platform: TargetPlatform.darwin),
+        fileSystem.path.dirname(fileSystem.path.dirname(macosFramework)),
+      );
+      expect(
+        macos.getArtifactPath(Artifact.flutterMacOSFramework, platform: TargetPlatform.darwin),
+        macosFramework,
+      );
+      expect(
+        macos.getArtifactPath(Artifact.flutterMacOSFrameworkDsym, platform: TargetPlatform.darwin),
+        fileSystem.path.join(
+          fileSystem.path.dirname(macosFramework),
+          'dSYMs',
+          'FlutterMacOS.framework.dSYM',
+        ),
+      );
+      final Artifacts ios = CachedLocalEngineArtifacts(
+        macosBin,
+        engineOutPath: iosBin,
+        toolContext: FakeToolContext(
+          cache: cache,
+          fs: fileSystem,
+          os: FakeOperatingSystemUtils(),
+          platform: macPlatform,
+          processManager: processManager,
+        ),
+      );
+      expect(ios.localEngineInfo!.localTargetName, 'ios_debug_sim_unopt_arm64');
+      expect(
+        ios.getArtifactPath(Artifact.flutterXcframework, platform: TargetPlatform.ios),
+        fileSystem.path.dirname(fileSystem.path.dirname(iosFramework)),
+      );
+      expect(
+        ios.getArtifactPath(
+          Artifact.flutterFramework,
+          platform: TargetPlatform.ios,
+          mode: BuildMode.debug,
+          environmentType: EnvironmentType.simulator,
+        ),
+        iosFramework,
+      );
+      // The host's tools come from the host build.
+      expect(
+        ios.getArtifactPath(Artifact.flutterTester),
+        fileSystem.path.join(macosBin, 'shell', 'testing', 'flutter_tester'),
+      );
+    });
   });
 
   group('DeferredArtifacts', () {

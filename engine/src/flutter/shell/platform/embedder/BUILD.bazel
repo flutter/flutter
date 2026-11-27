@@ -225,6 +225,11 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
+        ":when_shell_enable_vulkan_and_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/impeller/renderer/backend/vulkan
+        ],
+        "//conditions:default": [],
+    }) + select({
         ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
             "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
@@ -270,6 +275,18 @@ flutter_objc_library(
             "-Wno-suggest-override",  # from //flutter/impeller
             "-Wno-unused-private-field",  # from //flutter/impeller
             "-Wno-unused-variable",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_vulkan_and_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-deprecated-copy",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-implicit-fallthrough",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-nullability-completeness",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-suggest-destructor-override",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-suggest-override",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-unused-private-field",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-unused-variable",  # from //flutter/impeller/renderer/backend/vulkan
         ],
         "//conditions:default": [],
     }) + select({
@@ -401,6 +418,7 @@ flutter_objc_library(
     }) + select({
         ":when_shell_enable_vulkan_and_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan": [
             "//engine/src/flutter/impeller/display_list",  # embedder_enable_vulkan && impeller_supports_rendering
+            "//engine/src/flutter/impeller/renderer/backend/vulkan",  # embedder_enable_vulkan && impeller_supports_rendering
         ],
         "//conditions:default": [],
     }) + select({
@@ -583,6 +601,11 @@ cc_library(
             "-Wno-redundant-parens",  # from //flutter/impeller
         ],
         "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_vulkan_and_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/impeller/renderer/backend/vulkan
+        ],
+        "//conditions:default": [],
     }),
     cxxopts = select({
         ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
@@ -630,6 +653,18 @@ cc_library(
             "-Wno-suggest-override",  # from //flutter/impeller
             "-Wno-unused-private-field",  # from //flutter/impeller
             "-Wno-unused-variable",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_vulkan_and_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-deprecated-copy",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-implicit-fallthrough",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-nullability-completeness",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-suggest-destructor-override",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-suggest-override",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-unused-private-field",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-unused-variable",  # from //flutter/impeller/renderer/backend/vulkan
         ],
         "//conditions:default": [],
     }) + select({
@@ -705,6 +740,7 @@ cc_library(
     }) + select({
         ":when_shell_enable_vulkan_and_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan": [
             "//engine/src/flutter/impeller/display_list",  # embedder_enable_vulkan && impeller_supports_rendering
+            "//engine/src/flutter/impeller/renderer/backend/vulkan",  # embedder_enable_vulkan && impeller_supports_rendering
         ],
         "//conditions:default": [],
     }) + select({
@@ -839,6 +875,11 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
+        ":when_shell_enable_vulkan_and_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/impeller/renderer/backend/vulkan
+        ],
+        "//conditions:default": [],
+    }) + select({
         ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
             "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
@@ -884,6 +925,18 @@ flutter_objc_library(
             "-Wno-suggest-override",  # from //flutter/impeller
             "-Wno-unused-private-field",  # from //flutter/impeller
             "-Wno-unused-variable",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_vulkan_and_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-deprecated-copy",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-implicit-fallthrough",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-nullability-completeness",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-suggest-destructor-override",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-suggest-override",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-unused-private-field",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-unused-variable",  # from //flutter/impeller/renderer/backend/vulkan
         ],
         "//conditions:default": [],
     }) + select({
@@ -1016,6 +1069,7 @@ flutter_objc_library(
     }) + select({
         ":when_shell_enable_vulkan_and_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan": [
             "//engine/src/flutter/impeller/display_list",  # embedder_enable_vulkan && impeller_supports_rendering
+            "//engine/src/flutter/impeller/renderer/backend/vulkan",  # embedder_enable_vulkan && impeller_supports_rendering
         ],
         "//conditions:default": [],
     }) + select({
@@ -1198,6 +1252,11 @@ cc_library(
             "-Wno-redundant-parens",  # from //flutter/impeller
         ],
         "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_vulkan_and_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/impeller/renderer/backend/vulkan
+        ],
+        "//conditions:default": [],
     }),
     cxxopts = select({
         ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
@@ -1245,6 +1304,18 @@ cc_library(
             "-Wno-suggest-override",  # from //flutter/impeller
             "-Wno-unused-private-field",  # from //flutter/impeller
             "-Wno-unused-variable",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_vulkan_and_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-deprecated-copy",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-implicit-fallthrough",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-nullability-completeness",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-suggest-destructor-override",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-suggest-override",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-unused-private-field",  # from //flutter/impeller/renderer/backend/vulkan
+            "-Wno-unused-variable",  # from //flutter/impeller/renderer/backend/vulkan
         ],
         "//conditions:default": [],
     }) + select({
@@ -1321,6 +1392,7 @@ cc_library(
     }) + select({
         ":when_shell_enable_vulkan_and_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan": [
             "//engine/src/flutter/impeller/display_list",  # embedder_enable_vulkan && impeller_supports_rendering
+            "//engine/src/flutter/impeller/renderer/backend/vulkan",  # embedder_enable_vulkan && impeller_supports_rendering
         ],
         "//conditions:default": [],
     }) + select({
@@ -1393,6 +1465,8 @@ flutter_test_fixtures(
         "fixtures/verifyb143464703_soft_noxform.png",
         "fixtures/vk_dpr_noxform.png",
         "fixtures/vk_gradient.png",
+        "fixtures/vk_impeller_dpr_noxform.png",
+        "fixtures/vk_impeller_gradient.png",
     ],
 )
 

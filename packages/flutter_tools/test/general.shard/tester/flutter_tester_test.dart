@@ -218,15 +218,13 @@ Hello!
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       );
 
-        expect(result.started, isTrue);
-        expect(result.vmServiceUri, vmServiceUri);
-        expect(logLines.last, 'Hello!');
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      },
-      overrides: startOverrides,
-    );
+      expect(result.started, isTrue);
+      expect(result.vmServiceUri, vmServiceUri);
+      expect(logLines.last, 'Hello!');
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
 
-    testUsingContext("names a local engine's icudtl.dat to flutter_tester", () async {
+    test("names a local engine's icudtl.dat to flutter_tester", () async {
       final artifacts = Artifacts.testLocalEngine(
         localEngine: 'out/android_debug_unopt',
         localEngineHost: 'out/host_debug_unopt',
@@ -283,7 +281,7 @@ Hello!
       );
       expect(result.started, isTrue);
       expect(fakeProcessManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator>{...startOverrides, Artifacts: () => Artifacts.test()});
+    });
   });
 }
 
