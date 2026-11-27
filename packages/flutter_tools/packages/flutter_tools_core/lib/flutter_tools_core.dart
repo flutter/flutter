@@ -18,4 +18,5 @@ export 'src/exception.dart';
 export 'src/extension_package_config.dart';
 export 'src/log.dart';
 export 'src/project.dart';
+export 'src/rpc_methods.dart';
 export 'src/templates.dart';

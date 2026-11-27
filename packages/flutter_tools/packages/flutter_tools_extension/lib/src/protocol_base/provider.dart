@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' show IOOverrides;
+import 'dart:convert' show Encoding;
+import 'dart:io' show Directory, IOOverrides, Stdin, systemEncoding;
 import 'dart:isolate';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
@@ -17,7 +18,7 @@ import 'service.dart';
 /// Extension packages invoke [ToolExtensionEntryPoint.run] in their isolate
 /// entrypoint function, passing the initial Isolate send port and list of
 /// supported extension services.
-class ToolExtensionEntryPoint {
+abstract final class ToolExtensionEntryPoint {
   /// The reserved JSON-RPC method name used to query extension capabilities.
   static const String getCapabilitiesMethod = 'extension.getCapabilities';
 
@@ -26,6 +27,9 @@ class ToolExtensionEntryPoint {
 
   /// The reserved JSON-RPC method name used to request graceful extension shutdown.
   static const String shutdownMethod = 'extension.shutdown';
+
+  static const String _acknowledgedKey = 'acknowledged';
+  static const _emptyStdin = _EmptyStdin();
 
   /// Entrypoint function to serve [services] over the Isolate [sendPort].
   ///
@@ -47,6 +51,7 @@ class ToolExtensionEntryPoint {
         'Expected a SendPort as the initial isolate message.',
       );
     }
+    final Directory initialCurrentDirectory = Directory.current;
     await IOOverrides.runZoned(
       () => _runInZone(
         sendPort,
@@ -55,6 +60,12 @@ class ToolExtensionEntryPoint {
         logger: logger,
         extensionName: extensionName,
       ),
+      getCurrentDirectory: () => initialCurrentDirectory,
+      setCurrentDirectory: (String _) => throw StateError(
+        'Tool extensions must not modify Directory.current; '
+        'resolve paths against project URIs or pass an explicit workingDirectory instead.',
+      ),
+      stdin: () => _emptyStdin,
       exit: (int code) => throw UnsupportedError(
         'Tool extensions must not call exit($code); throw ToolExtensionException instead.',
       ),
@@ -117,7 +128,7 @@ class ToolExtensionEntryPoint {
     }
     pendingNotifications.clear();
 
-    peer.registerMethod(getCapabilitiesMethod, () {
+    peer.registerMethod(getCapabilitiesMethod, (json_rpc.Parameters _) {
       logger?.call('[ToolExtensionIsolate] Handling extension.getCapabilities query.');
       return capabilities.toMap();
     });
@@ -136,7 +147,7 @@ class ToolExtensionEntryPoint {
           }
         }),
       );
-      return null;
+      return <String, Object?>{_acknowledgedKey: true};
     });
 
     rpcHandlers.forEach((String fullMethod, ExtensionRpcHandler handler) {
@@ -168,4 +179,55 @@ class ToolExtensionEntryPoint {
     logger?.call('[ToolExtensionIsolate] Isolate peer listening for RPC requests.');
     await peer.listen();
   }
+}
+
+final class _EmptyStdin extends Stream<List<int>> implements Stdin {
+  const _EmptyStdin();
+
+  static const _terminalMutationError =
+      'Tool extensions must not modify stdin terminal settings; '
+      'use host-mediated prompt RPCs instead.';
+
+  @override
+  StreamSubscription<List<int>> listen(
+    void Function(List<int> event)? onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) => const Stream<List<int>>.empty().listen(
+    onData,
+    onError: onError,
+    onDone: onDone,
+    cancelOnError: cancelOnError,
+  );
+
+  @override
+  bool get echoMode => false;
+
+  @override
+  set echoMode(bool value) => throw StateError(_terminalMutationError);
+
+  @override
+  bool get echoNewlineMode => false;
+
+  @override
+  set echoNewlineMode(bool value) => throw StateError(_terminalMutationError);
+
+  @override
+  bool get hasTerminal => false;
+
+  @override
+  bool get lineMode => true;
+
+  @override
+  set lineMode(bool value) => throw StateError(_terminalMutationError);
+
+  @override
+  int readByteSync() => -1;
+
+  @override
+  String? readLineSync({Encoding encoding = systemEncoding, bool retainNewlines = false}) => null;
+
+  @override
+  bool get supportsAnsiEscapes => false;
 }

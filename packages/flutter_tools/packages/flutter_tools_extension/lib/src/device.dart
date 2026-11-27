@@ -5,6 +5,7 @@
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_core/json.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' show RpcException;
+import 'package:meta/meta.dart';
 
 import 'protocol_base/service.dart';
 
@@ -122,6 +123,7 @@ abstract base class DeviceService extends ToolExtensionService {
   /// Sends a [logEntryNotificationMethod] JSON-RPC notification containing a
   /// single log [line] (excluding any trailing newline) from [deviceId] to the
   /// host tool.
+  @nonVirtual
   void emitLogLine({required String deviceId, required String line}) {
     sendNotification(logEntryNotificationMethod, <String, Object?>{
       deviceIdParam: deviceId,
