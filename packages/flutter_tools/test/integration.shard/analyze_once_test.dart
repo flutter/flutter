@@ -21,17 +21,26 @@ void main() {
     List<String> statusTextContains = const <String>[],
     List<String> errorTextContains = const <String>[],
     String exitMessageContains = '',
+    List<String> stderrNotContains = const <String>[],
+    Map<String, String>? environment,
     int exitCode = 0,
   }) async {
-    final ProcessResult result = await processManager.run(<String>[
-      fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter'),
-      '--no-color',
-      ...arguments,
-    ], workingDirectory: projectPath);
+    final ProcessResult result = await processManager.run(
+      <String>[
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter'),
+        '--no-color',
+        ...arguments,
+      ],
+      workingDirectory: projectPath,
+      environment: environment,
+    );
     expect(result, ProcessResultMatcher(exitCode: exitCode));
     assertContains(result.stdout.toString(), statusTextContains);
     assertContains(result.stdout.toString(), errorTextContains);
     expect(result.stderr, contains(exitMessageContains));
+    for (final text in stderrNotContains) {
+      expect(result.stderr.toString(), isNot(contains(text)));
+    }
   }
 
   void createDotPackages(String projectPath) {
@@ -359,6 +368,138 @@ analyzer:
       exitMessageContains: '1 issue found.',
       exitCode: 1,
     );
+  });
+
+  group('plugin trust', () {
+    const untrustedWarning = 'because they are not trusted.';
+
+    Map<String, String> setupPluginProject() {
+      final Directory pluginDir = tempDir.childDirectory('my_plugin')..createSync(recursive: true);
+      pluginDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: my_plugin
+environment:
+  sdk: ^3.0.0
+''');
+      pluginDir.childDirectory('lib')
+        ..createSync(recursive: true)
+        ..childFile('main.dart').writeAsStringSync('void pluginEntry() {}\n');
+      fileSystem.file(fileSystem.path.join(projectPath, 'analysis_options.yaml')).writeAsStringSync(
+        '''
+plugins:
+  my_plugin:
+    path: ../my_plugin
+''',
+      );
+      final Directory stateDir = tempDir.childDirectory('analyzer_state')..createSync();
+      return <String, String>{
+        'ANALYZER_STATE_LOCATION_OVERRIDE': stateDir.path,
+        // Setting FLUTTER_HOST forces BotDetector.isRunningOnBot to false so
+        // these tests behave the same on CI and locally.
+        'FLUTTER_HOST': 'test',
+      };
+    }
+
+    test('--plugins runs plugins once without persisting trust', () async {
+      final Map<String, String> env = setupPluginProject();
+
+      await runCommand(
+        arguments: <String>['analyze', '--no-pub'],
+        statusTextContains: <String>['No issues found!'],
+        exitMessageContains: untrustedWarning,
+        environment: env,
+      );
+      await runCommand(
+        arguments: <String>['analyze', '--no-pub', '--plugins'],
+        statusTextContains: <String>['No issues found!'],
+        stderrNotContains: <String>[untrustedWarning],
+        environment: env,
+      );
+      await runCommand(
+        arguments: <String>['analyze', '--no-pub'],
+        statusTextContains: <String>['No issues found!'],
+        exitMessageContains: untrustedWarning,
+        environment: env,
+      );
+    });
+
+    test('--trust-plugins persists trust until plugin contents change', () async {
+      final Map<String, String> env = setupPluginProject();
+
+      await runCommand(
+        arguments: <String>['analyze', '--no-pub', '--trust-plugins'],
+        statusTextContains: <String>['No issues found!'],
+        stderrNotContains: <String>[untrustedWarning],
+        environment: env,
+      );
+      await runCommand(
+        arguments: <String>['analyze', '--no-pub'],
+        statusTextContains: <String>['No issues found!'],
+        stderrNotContains: <String>[untrustedWarning],
+        environment: env,
+      );
+
+      tempDir
+          .childDirectory('my_plugin')
+          .childDirectory('lib')
+          .childFile('main.dart')
+          .writeAsStringSync('void pluginEntry() { int.parse("1"); }\n');
+      await runCommand(
+        arguments: <String>['analyze', '--no-pub'],
+        statusTextContains: <String>['No issues found!'],
+        exitMessageContains: untrustedWarning,
+        environment: env,
+      );
+    });
+
+    test('--always-trust-plugins persists across plugin changes', () async {
+      final Map<String, String> env = setupPluginProject();
+
+      await runCommand(
+        arguments: <String>['analyze', '--no-pub', '--always-trust-plugins'],
+        statusTextContains: <String>['No issues found!'],
+        stderrNotContains: <String>[untrustedWarning],
+        environment: env,
+      );
+      tempDir
+          .childDirectory('my_plugin')
+          .childDirectory('lib')
+          .childFile('main.dart')
+          .writeAsStringSync('void pluginEntry() { int.parse("2"); }\n');
+      await runCommand(
+        arguments: <String>['analyze', '--no-pub'],
+        statusTextContains: <String>['No issues found!'],
+        stderrNotContains: <String>[untrustedWarning],
+        environment: env,
+      );
+    });
+
+    test('--never-trust-plugins persists across plugin changes', () async {
+      final Map<String, String> env = setupPluginProject();
+
+      await runCommand(
+        arguments: <String>['analyze', '--no-pub'],
+        statusTextContains: <String>['No issues found!'],
+        exitMessageContains: untrustedWarning,
+        environment: env,
+      );
+      await runCommand(
+        arguments: <String>['analyze', '--no-pub', '--never-trust-plugins'],
+        statusTextContains: <String>['No issues found!'],
+        stderrNotContains: <String>[untrustedWarning],
+        environment: env,
+      );
+      tempDir
+          .childDirectory('my_plugin')
+          .childDirectory('lib')
+          .childFile('main.dart')
+          .writeAsStringSync('void pluginEntry() { int.parse("3"); }\n');
+      await runCommand(
+        arguments: <String>['analyze', '--no-pub'],
+        statusTextContains: <String>['No issues found!'],
+        stderrNotContains: <String>[untrustedWarning],
+        environment: env,
+      );
+    });
   });
 }
 

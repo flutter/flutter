@@ -41,6 +41,8 @@ const int _WM_CLOSE = 0x0010;
 
 const int _WA_INACTIVE = 0;
 
+const int _GW_OWNER = 4;
+
 const int _SW_RESTORE = 9;
 const int _SW_MAXIMIZE = 3;
 const int _SW_MINIMIZE = 6;
@@ -1152,18 +1154,20 @@ class PopupWindowControllerWin32 extends PopupWindowController
     int wParam,
     int lParam,
   ) {
-    if (message == _WM_ACTIVATE) {
+    if (message == _WM_ACTIVATE && (wParam & 0xFFFF) == _WA_INACTIVE) {
       // If focus has changed for a window that is managed by this application
-      // AND the new focus is neither the parent window nor a descendant of the
-      // popup, close the popup.
+      // AND the new focus is neither the parent window nor the popup or one of
+      // its descendants (e.g. a nested popup that it owns), close the popup.
       final HWND parentHwnd = _Win32PlatformInterface.getWindowHandle(
         WidgetsBinding.instance.platformDispatcher.engineId!,
         parent.rootView.viewId,
       );
-      final HWND hFocused = _Win32PlatformInterface.getForegroundWindow();
+      // During WM_ACTIVATE, GetForegroundWindow may still return the previous
+      // foreground window. lParam identifies the window being activated when
+      // this popup is deactivated, so use it to make dismissal deterministic.
+      final hFocused = ffi.Pointer<ffi.Void>.fromAddress(lParam);
       if (hFocused != parentHwnd &&
-          hFocused != getWindowHandle() &&
-          !_Win32PlatformInterface.isChild(getWindowHandle(), hFocused)) {
+          !_Win32PlatformInterface.isSelfOrDescendant(getWindowHandle(), hFocused)) {
         scheduleMicrotask(destroy);
       }
       return null;
@@ -1857,6 +1861,24 @@ class _Win32PlatformInterface {
 
   @ffi.Native<ffi.Bool Function(HWND, HWND)>(symbol: 'IsChild')
   external static bool isChild(HWND parent, HWND child);
+
+  @ffi.Native<HWND Function(HWND, ffi.Uint32)>(symbol: 'GetWindow')
+  external static HWND getWindow(HWND windowHandle, int command);
+
+  /// Returns whether [windowHandle] is [ancestorHandle], one of its child
+  /// windows, or a window that is directly or transitively owned by it.
+  static bool isSelfOrDescendant(HWND ancestorHandle, HWND windowHandle) {
+    for (
+      var current = windowHandle;
+      current != ffi.nullptr;
+      current = getWindow(current, _GW_OWNER)
+    ) {
+      if (current == ancestorHandle || isChild(ancestorHandle, current)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   @ffi.Native<ffi.Bool Function(HWND, ffi.Pointer<_Win32Rect>)>(symbol: 'GetWindowRect')
   external static bool getWindowRect(HWND windowHandle, ffi.Pointer<_Win32Rect> rect);
