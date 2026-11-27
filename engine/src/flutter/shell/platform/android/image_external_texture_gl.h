@@ -39,7 +39,7 @@ class ImageExternalTextureGL : public ImageExternalTexture {
       std::optional<HardwareBufferKey> id,
       impeller::UniqueEGLImageKHR&& egl_image) = 0;
 
-  void UpdateImage(JavaLocalRef& hardware_buffer,
+  bool UpdateImage(JavaLocalRef& hardware_buffer,
                    const SkRect& bounds,
                    PaintContext& context);
 
