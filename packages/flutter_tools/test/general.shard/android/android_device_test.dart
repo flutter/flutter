@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -39,6 +40,36 @@ void main() {
     expect(properties['ro.build.characteristics'], 'emulator');
     expect(properties['ro.product.cpu.abi'], 'x86_64');
     expect(properties['ro.build.version.sdk'], '23');
+  });
+
+  test('getprop shows a slow warning instead of timing out', () async {
+    final logger = _SpinnerLogger();
+    final completer = Completer<void>();
+    final AndroidDevice device = setUpAndroidDevice(
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>['adb', '-s', '1234', 'shell', 'getprop'],
+          stdout: '[ro.product.cpu.abi]: [x86_64]',
+          completer: completer,
+        ),
+      ]),
+      logger: logger,
+    );
+
+    final Future<TargetPlatform> targetPlatform = device.targetPlatform;
+    await pumpEventQueue();
+
+    expect(logger.timeout, const Duration(seconds: 30));
+    expect(
+      logger.slowWarningCallback!(),
+      'Retrieving device properties for TestModel is taking longer than expected. '
+      'Ensure the device is responsive.',
+    );
+    expect(logger.stopped, isFalse);
+
+    completer.complete();
+    expect(await targetPlatform, TargetPlatform.android_x64);
+    expect(logger.stopped, isTrue);
   });
 
   test('adb exiting with heap corruption is only allowed on windows', () async {
@@ -621,13 +652,14 @@ AndroidDevice setUpAndroidDevice({
   FileSystem? fileSystem,
   ProcessManager? processManager,
   Platform? platform,
+  Logger? logger,
   AndroidConsoleSocketFactory androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
 }) {
   androidSdk ??= FakeAndroidSdk();
   return AndroidDevice(
     id ?? '1234',
     modelID: 'TestModel',
-    logger: BufferLogger.test(),
+    logger: logger ?? BufferLogger.test(),
     platform: platform ?? FakePlatform(),
     androidSdk: androidSdk,
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
@@ -880,4 +912,24 @@ class FakeDisconnectingAndroidConsoleSocket extends Fake implements Socket {
 
   @override
   void destroy() {}
+}
+
+class _SpinnerLogger extends BufferLogger {
+  _SpinnerLogger() : super.test();
+
+  Duration? timeout;
+  SlowWarningCallback? slowWarningCallback;
+  bool stopped = false;
+
+  @override
+  Status startSpinner({
+    void Function()? onFinish,
+    Duration? timeout,
+    SlowWarningCallback? slowWarningCallback,
+    TerminalColor? warningColor,
+  }) {
+    this.timeout = timeout;
+    this.slowWarningCallback = slowWarningCallback;
+    return super.startSpinner(onFinish: () => stopped = true);
+  }
 }

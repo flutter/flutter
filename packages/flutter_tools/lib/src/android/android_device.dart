@@ -51,6 +51,9 @@ const kKnownHardware = <String, HardwareType>{
   'samsungexynos7570': HardwareType.physical,
 };
 
+/// How long `adb shell getprop` may run before a slow warning is shown.
+const _kGetpropSlowWarningDuration = Duration(seconds: 30);
+
 /// A physical Android device or emulator.
 ///
 /// While [isLocalEmulator] attempts to distinguish between the device categories,
@@ -103,6 +106,12 @@ class AndroidDevice extends Device {
     final List<String> propCommand = adbCommandForDevice(<String>['shell', 'getprop']);
     _logger.printTrace(propCommand.join(' '));
 
+    final Status status = _logger.startSpinner(
+      timeout: _kGetpropSlowWarningDuration,
+      slowWarningCallback: () =>
+          'Retrieving device properties for $name is taking longer than expected. '
+          'Ensure the device is responsive.',
+    );
     try {
       // We pass an encoding of latin1 so that we don't try and interpret the
       // `adb shell getprop` result as UTF8.
@@ -119,6 +128,8 @@ class AndroidDevice extends Device {
       }
     } on ProcessException catch (error) {
       _logger.printError('Error retrieving device properties for $name: $error');
+    } finally {
+      status.stop();
     }
     return properties;
   }();
