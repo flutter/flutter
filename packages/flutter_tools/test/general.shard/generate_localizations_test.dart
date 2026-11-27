@@ -992,6 +992,51 @@ class AppLocalizationsEn extends AppLocalizations {
 }
 ''');
     });
+
+    test('throws ToolExit when dart format fails', () async {
+      _standardFlutterDirectoryL10nSetup(fs);
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'Artifact.engineDartBinary',
+            'format',
+            '/lib/l10n/app_localizations_en.dart',
+            '/lib/l10n/app_localizations_es.dart',
+            '/lib/l10n/app_localizations.dart',
+          ],
+          exitCode: 65,
+          stdout: 'Formatted no files in 0.00 seconds.',
+          stderr: 'Could not format because the source could not be parsed.',
+        ),
+      ]);
+
+      await expectLater(
+        generateLocalizations(
+          fileSystem: fs,
+          options: LocalizationOptions(
+            arbDir: Uri.directory(defaultL10nPath).path,
+            outputDir: Uri.directory(defaultL10nPath, windows: false).path,
+            templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false).path,
+          ),
+          logger: BufferLogger.test(),
+          projectDir: fs.currentDirectory,
+          dependenciesDir: fs.currentDirectory,
+          artifacts: artifacts,
+          processManager: processManager,
+        ),
+        throwsToolExit(
+          message: '''
+`dart format` failed with exit code 65
+
+stdout:
+Formatted no files in 0.00 seconds.
+
+stderr:
+Could not format because the source could not be parsed.''',
+        ),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
   });
 
   group('loadResources', () {
@@ -3828,6 +3873,75 @@ flutter:
   ];
 '''),
       );
+    });
+  });
+
+  // Regression tests for https://github.com/flutter/flutter/issues/195904.
+  group('invalid identifier validation', () {
+    const cases = <({String description, String arb, String expectedMessage})>[
+      (
+        description: 'numeric template placeholder name',
+        arb: '{"handsPlayed": "Hands played: {count}", "@handsPlayed": {"placeholders": {"count": {"type": "int"}, "1": {"type": "String"}}}}',
+        expectedMessage: 'Invalid placeholder name "1" in message "handsPlayed".',
+      ),
+      (
+        description: 'empty template placeholder name',
+        arb: '{"greeting": "Hello", "@greeting": {"placeholders": {"": {"type": "String"}}}}',
+        expectedMessage: 'Invalid placeholder name "" in message "greeting".',
+      ),
+      (
+        description: 'wildcard template placeholder name',
+        arb: '{"greeting": "Hello", "@greeting": {"placeholders": {"_": {"type": "String"}}}}',
+        expectedMessage: 'Invalid placeholder name "_" in message "greeting".',
+      ),
+      (
+        description: 'punctuation in template placeholder name',
+        arb: '{"greeting": "Hello", "@greeting": {"placeholders": {"user-name": {"type": "String"}}}}',
+        expectedMessage: 'Invalid placeholder name "user-name" in message "greeting".',
+      ),
+      (
+        description: 'reserved-word template placeholder name',
+        arb:
+            '{"greeting": "Hello", "@greeting": {"placeholders": {"default": {"type": "String"}}}}',
+        expectedMessage: 'Invalid placeholder name "default" in message "greeting".',
+      ),
+      (
+        description: 'inferred undeclared invalid placeholder name',
+        arb: '{"greeting": "Hello {a|b}"}',
+        expectedMessage: 'Invalid placeholder name "a|b" in message "greeting".',
+      ),
+      (
+        description: 'reserved-word ARB resource ID',
+        arb: '{"continue": "Continue"}',
+        expectedMessage: 'Invalid ARB resource name "continue"',
+      ),
+    ];
+
+    for (final (:String description, :String arb, :String expectedMessage) in cases) {
+      test('throws L10nException on $description', () {
+        expect(
+          () => setupLocalizations(<String, String>{'en': arb}),
+          throwsA(
+            isA<L10nException>().having(
+              (L10nException e) => e.message,
+              'message',
+              contains(expectedMessage),
+            ),
+          ),
+        );
+        expect(
+          fs.file(fs.path.join(defaultL10nPath, defaultOutputFileString)).existsSync(),
+          isFalse,
+        );
+      });
+    }
+
+    test('ignores unused invalid placeholder keys in non-template ARB metadata', () {
+      setupLocalizations(<String, String>{
+        'en': '{"greeting": "Hello {user}", "@greeting": {"placeholders": {"user": {"type": "String"}}}}',
+        'es': '{"greeting": "Hola {user}", "@greeting": {"placeholders": {"user": {"type": "String"}, "1": {"type": "String"}}}}',
+      });
+      expect(getGeneratedFileContent(locale: 'es'), contains('String greeting(String user)'));
     });
   });
 }

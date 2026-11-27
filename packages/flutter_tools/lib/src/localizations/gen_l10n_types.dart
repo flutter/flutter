@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:analyzer/dart/ast/token.dart';
 import 'package:intl/locale.dart';
 
 import '../base/common.dart';
@@ -181,6 +182,22 @@ class OptionalParameter {
 
   final String name;
   final Object value;
+}
+
+/// Whether [name] is a Dart reserved word.
+bool isDartReservedWord(String name) => Keyword.keywords[name]?.isReservedWord ?? false;
+
+final _validPlaceholderNameRegExp = RegExp(r'^[a-zA-Z_$][a-zA-Z0-9_$]*$');
+
+void _validatePlaceholderName(String resourceId, String name) {
+  if (name == '_' || isDartReservedWord(name) || !_validPlaceholderNameRegExp.hasMatch(name)) {
+    throw L10nException(
+      'Invalid placeholder name "$name" in message "$resourceId". '
+      'Placeholder names must be valid Dart identifiers: they cannot be empty, '
+      'be a single underscore, start with a number, contain non-alphanumeric '
+      'characters, or be a Dart reserved word.',
+    );
+  }
 }
 
 // One message parameter: one placeholder from an @foo entry in the template ARB file.
@@ -425,6 +442,9 @@ class Message {
     }
     // Infer the placeholders
     _inferPlaceholders();
+    for (final String name in templatePlaceholders.keys) {
+      _validatePlaceholderName(resourceId, name);
+    }
   }
 
   final String resourceId;

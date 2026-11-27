@@ -97,11 +97,11 @@ Future<LocalizationsGenerator> generateLocalizations({
     final command = <String>[dartBinary, 'format', ...formatFileList];
     final ProcessResult result = await processManager.run(command);
     if (result.exitCode != 0) {
-      throw ProcessException(dartBinary, command, '''
+      throwToolExit('''
 `dart format` failed with exit code ${result.exitCode}
 
 stdout:\n${result.stdout}\n
-stderr:\n${result.stderr}''', result.exitCode);
+stderr:\n${result.stderr}''');
     }
   }
 
@@ -959,7 +959,7 @@ class LocalizationsGenerator {
     if (name[0].contains(RegExp(r'\d'))) {
       return false;
     }
-    return true;
+    return !isDartReservedWord(name);
   }
 
   void _addToFileList(List<String> fileList, String path) {
@@ -978,8 +978,9 @@ class LocalizationsGenerator {
         throw L10nException(
           'Invalid ARB resource name "$resourceId" in $templateArbFile.\n'
           'Resources names must be valid Dart method names: they have to be '
-          'camel case, cannot start with a number or underscore, and cannot '
-          'contain non-alphanumeric characters.',
+          'camel case, cannot start with a number or underscore, cannot '
+          'contain non-alphanumeric characters, and cannot be a Dart '
+          'reserved word.',
         );
       }
     }
