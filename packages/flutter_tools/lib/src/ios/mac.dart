@@ -466,7 +466,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   // -destination already determines the SDK, so -sdk is not passed. An explicit -sdk would also be
-  // applied to host tools of Swift package plugins and build them with the simulator SDK.
+  // applied to host tools of Swift package plugins, building them with the simulator SDK.
   buildCommands.add('-destination');
   if (deviceID != null) {
     buildCommands.add('id=$deviceID');
