@@ -16,6 +16,7 @@ import logging
 import os
 import sys
 
+from pathlib import Path
 from typing import Any, Iterable, List, Mapping, Set
 
 # The import is coming from vpython wheel and pylint cannot find it.
@@ -30,11 +31,6 @@ sys.path.insert(
     0, os.path.join(os.path.dirname(__file__), '../../tools/fuchsia/test_scripts/test/')
 )
 
-# pylint: disable=import-error, wrong-import-position
-from bundled_test_runner import run_tests, TestCase
-from common import DIR_SRC_ROOT
-from compatible_utils import force_running_unattended
-
 if len(sys.argv) == 2:
   VARIANT = sys.argv[1]
   sys.argv.pop()
@@ -42,7 +38,26 @@ elif len(sys.argv) == 1:
   VARIANT = 'fuchsia_debug_x64'
 else:
   assert False, 'Expect only one parameter as the compile output directory.'
+# with_envs.py has no knowledge of VARIANT, so set FUCHSIA_ORCHESTRATE_CONFIG
+# here before importing test_scripts (common reads it at import time).
+os.environ['FUCHSIA_ORCHESTRATE_CONFIG'] = os.path.join(
+    os.path.dirname(__file__),
+    'orchestrate_x64_arm64.json' if VARIANT.endswith(('_arm64',
+                                                      '_arm64_tester')) else 'orchestrate_x64.json',
+)
+
+# pylint: disable=import-error, wrong-import-position
+from bundled_test_runner import run_tests, TestCase
+from common import DIR_SRC_ROOT, IMAGES_ROOT, SDK_ROOT
+from compatible_utils import force_running_unattended
+
 OUT_DIR = os.path.join(DIR_SRC_ROOT, 'out', VARIANT)
+
+
+def _force_symlink(src: str, dst: str) -> None:
+  # Remove the old one if it exists, usually happens on the devbox.
+  Path(dst).unlink(missing_ok=True)
+  os.symlink(src, dst)
 
 
 # Visible for testing
@@ -61,13 +76,7 @@ def resolve_packages(tests: Iterable[Mapping[str, Any]]) -> Set[str]:
       # Make a symbolic link to match the name of the package itself without the
       # '-0.far' suffix.
       new_package = os.path.join(OUT_DIR, package.replace('-0.far', '.far'))
-      try:
-        # Remove the old one if it exists, usually happen on the devbox, so
-        # ignore the FileNotFoundError.
-        os.remove(new_package)
-      except FileNotFoundError:
-        pass
-      os.symlink(package, new_package)
+      _force_symlink(package, new_package)
       resolved_packages.add(new_package)
     else:
       resolved_packages.add(os.path.join(OUT_DIR, package))
@@ -92,11 +101,13 @@ def main() -> int:
   logging.basicConfig(level=logging.INFO)
   logging.info('Running tests in %s', OUT_DIR)
   force_running_unattended()
+  _force_symlink(SDK_ROOT, os.path.join(OUT_DIR, 'fuchsia-sdk'))
+  _force_symlink(IMAGES_ROOT, os.path.join(OUT_DIR, 'fuchsia-images'))
+  assert VARIANT.endswith(('_arm64', '_arm64_tester', '_x64', '_x64_tester')
+                         ), 'Unsupported variant ' + VARIANT
   sys.argv.append('--out-dir=' + OUT_DIR)
   sys.argv.append('--test-realm=/core/testing/system-tests')
-  if VARIANT.endswith('_arm64') or VARIANT.endswith('_arm64_tester'):
-    sys.argv.append('--product=terminal.qemu-arm64')
-
+  sys.argv.append('--orchestrate')
   sys.argv.append('--logs-dir=' + os.environ.get('FLUTTER_LOGS_DIR', '/tmp/log'))
   with open(os.path.join(os.path.dirname(__file__), 'test_suites.yaml'), 'r') as file:
     tests = yaml.safe_load(file)
