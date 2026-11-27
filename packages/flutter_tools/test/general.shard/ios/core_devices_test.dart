@@ -4388,6 +4388,66 @@ invalid JSON
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
     });
+
+    group('start screen recording', () {
+      const deviceId = 'device-id';
+      const destination = '/path/to/recording.mp4';
+
+      testWithoutContext('Successful start screen recording', () async {
+        fakeProcessManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'capture',
+              'screen-record',
+              '--device',
+              deviceId,
+              '--destination',
+              destination,
+            ],
+          ),
+        );
+
+        await deviceControl.startScreenRecording(deviceId: deviceId, destination: destination);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext(
+        'startScreenRecording passes duration and jsonOutput to devicectl',
+        () async {
+          final File jsonOutput = fileSystem.file('/tmp/results.json');
+          fakeProcessManager.addCommand(
+            FakeCommand(
+              command: <String>[
+                'xcrun',
+                'devicectl',
+                'device',
+                'capture',
+                'screen-record',
+                '--device',
+                deviceId,
+                '--destination',
+                destination,
+                '--duration',
+                '30',
+                '--json-output',
+                jsonOutput.path,
+              ],
+            ),
+          );
+
+          await deviceControl.startScreenRecording(
+            deviceId: deviceId,
+            destination: destination,
+            duration: const Duration(seconds: 30),
+            jsonOutput: jsonOutput,
+          );
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        },
+      );
+    });
   });
 }
 
@@ -4399,7 +4459,6 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
     this.launchResult,
     this.terminateSuccess = true,
     this.runningProcesses = const <IOSCoreDeviceRunningProcess>[],
-    this.takeScreenshotSuccess = true,
   });
 
   bool installSuccess;
@@ -4411,11 +4470,10 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   int? processTerminated;
   List<IOSCoreDeviceRunningProcess> runningProcesses;
   bool get terminateProcessCalled => processTerminated != null;
-  bool takeScreenshotSuccess;
 
   @override
   Future<bool> takeScreenshot({required String deviceId, required String destination}) async {
-    return takeScreenshotSuccess;
+    return true;
   }
 
   @override

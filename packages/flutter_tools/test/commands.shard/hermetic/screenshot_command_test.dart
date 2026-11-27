@@ -20,6 +20,7 @@ import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -30,13 +31,13 @@ void main() {
   });
 
   group('Validate screenshot options', () {
-    test('has non-nullable toolContext', () {
+    testWithoutContext('has non-nullable toolContext', () {
       final toolContext = FakeToolContext();
       final command = ScreenshotCommand(toolContext: toolContext);
       expect(command.toolContext, same(toolContext));
     });
 
-    test('rasterizer and skia screenshots do not require a device', () async {
+    testWithoutContext('rasterizer and skia screenshots do not require a device', () async {
       final toolContext = FakeToolContext(fs: MemoryFileSystem.test());
       final command = ScreenshotCommand(
         toolContext: toolContext,
@@ -71,7 +72,7 @@ void main() {
       );
     });
 
-    test('rasterizer and skia screenshots require VM Service uri', () async {
+    testWithoutContext('rasterizer and skia screenshots require VM Service uri', () async {
       final toolContext = FakeToolContext(fs: MemoryFileSystem.test());
       await expectLater(
         () =>
@@ -81,7 +82,7 @@ void main() {
       );
     });
 
-    test('device screenshots require device', () async {
+    testUsingContext('device screenshots require device', () async {
       final toolContext = FakeToolContext(fs: MemoryFileSystem.test());
       await expectLater(
         () =>
@@ -91,7 +92,7 @@ void main() {
       );
     });
 
-    test('device screenshots cannot provide VM Service', () async {
+    testWithoutContext('device screenshots cannot provide VM Service', () async {
       final toolContext = FakeToolContext(fs: MemoryFileSystem.test());
       await expectLater(
         () =>
@@ -103,7 +104,7 @@ void main() {
   });
 
   group('Screenshot file validation', () {
-    test('successful in pwd', () async {
+    testWithoutContext('successful in pwd', () async {
       final fs = MemoryFileSystem.test();
       fs.file('test.png').createSync();
       fs.directory('sub_dir').createSync();
@@ -113,7 +114,7 @@ void main() {
       expect(() => ScreenshotCommand.checkOutput(fs.file('sub_dir/test.png'), fs), returnsNormally);
     });
 
-    test('failed in pwd', () async {
+    testWithoutContext('failed in pwd', () async {
       final fs = MemoryFileSystem.test();
       fs.directory('sub_dir').createSync();
 
@@ -141,7 +142,7 @@ void main() {
   });
 
   group('Screenshot output validation', () {
-    test('successful', () async {
+    testWithoutContext('successful', () async {
       final fs = MemoryFileSystem.test();
       fs.file('test.png').createSync();
 
@@ -151,7 +152,7 @@ void main() {
       );
     });
 
-    test('failed', () async {
+    testWithoutContext('failed', () async {
       final fs = MemoryFileSystem.test();
       fs.file('test.png').writeAsStringSync('{"jsonrpc":"2.0", "error":"something"}');
 
@@ -163,16 +164,19 @@ void main() {
       );
     });
 
-    test('succeeds for binary non-UTF-8 file under 1000 bytes on ErrorHandlingFileSystem', () {
-      final fs = ErrorHandlingFileSystem(
-        delegate: MemoryFileSystem.test(),
-        platform: FakePlatform(),
-      );
-      final File outputFile = fs.file('flutter_01.skp')
-        ..writeAsBytesSync(const <int>[0x89, 0x50, 0x4E, 0x47, 0xFF, 0xFE, 0xFD]);
+    testWithoutContext(
+      'succeeds for binary non-UTF-8 file under 1000 bytes on ErrorHandlingFileSystem',
+      () {
+        final fs = ErrorHandlingFileSystem(
+          delegate: MemoryFileSystem.test(),
+          platform: FakePlatform(),
+        );
+        final File outputFile = fs.file('flutter_01.skp')
+          ..writeAsBytesSync(const <int>[0x89, 0x50, 0x4E, 0x47, 0xFF, 0xFE, 0xFD]);
 
-      expect(() => ScreenshotCommand.ensureOutputIsNotJsonRpcError(outputFile), returnsNormally);
-    });
+        expect(() => ScreenshotCommand.ensureOutputIsNotJsonRpcError(outputFile), returnsNormally);
+      },
+    );
   });
 
   group('Screenshot for devices unsupported for project', () {
@@ -186,7 +190,7 @@ void main() {
       toolContext = FakeToolContext(fs: MemoryFileSystem.test(), logger: logger);
     });
 
-    test('should not throw for a single device', () async {
+    testUsingContext('should not throw for a single device', () async {
       final command = ScreenshotCommand(toolContext: toolContext);
 
       final deviceUnsupportedForProject = _ScreenshotDevice(
@@ -197,14 +201,10 @@ void main() {
 
       testDeviceManager.devices = <Device>[deviceUnsupportedForProject];
 
-      final runner = TestFlutterCommandRunner(
-        deviceManager: testDeviceManager,
-        toolContext: toolContext,
-      )..addCommand(command);
-      await runner.run(<String>['screenshot']);
-    });
+      await createTestCommandRunner(command).run(<String>['screenshot']);
+    }, overrides: <Type, Generator>{DeviceManager: () => testDeviceManager});
 
-    test('should tool exit for multiple devices', () async {
+    testUsingContext('should tool exit for multiple devices', () async {
       final command = ScreenshotCommand(toolContext: toolContext);
 
       final devicesUnsupportedForProject = <_ScreenshotDevice>[
@@ -214,12 +214,8 @@ void main() {
 
       testDeviceManager.devices = devicesUnsupportedForProject;
 
-      final runner = TestFlutterCommandRunner(
-        deviceManager: testDeviceManager,
-        toolContext: toolContext,
-      )..addCommand(command);
       await expectLater(
-        () => runner.run(<String>['screenshot']),
+        () => createTestCommandRunner(command).run(<String>['screenshot']),
         throwsToolExit(message: 'Must have a connected device for screenshot type device'),
       );
 
@@ -232,11 +228,11 @@ Device 1 (mobile) • 123 • android • 1.2.3
 Device 2 (mobile) • 456 • android • 1.2.3
 '''),
       );
-    });
+    }, overrides: <Type, Generator>{DeviceManager: () => testDeviceManager});
   });
 
   group('Skia screenshot execution', () {
-    test('successful Skia screenshot with custom out', () async {
+    testWithoutContext('successful Skia screenshot with custom out', () async {
       final fs = MemoryFileSystem.test();
       final logger = BufferLogger.test();
       final toolContext = FakeToolContext(fs: fs, logger: logger);
@@ -282,7 +278,7 @@ Device 2 (mobile) • 456 • android • 1.2.3
       expect(logger.statusText, contains('Screenshot written to screenshot.skp (0kB).'));
     });
 
-    test('failed Skia screenshot when disconnected', () async {
+    testWithoutContext('failed Skia screenshot when disconnected', () async {
       final fs = MemoryFileSystem.test();
       final logger = BufferLogger.test();
       final toolContext = FakeToolContext(fs: fs, logger: logger);
@@ -317,7 +313,7 @@ Device 2 (mobile) • 456 • android • 1.2.3
       );
     });
 
-    test('throws ToolExit when screenshotSkp fails with RPCError', () async {
+    testWithoutContext('throws ToolExit when screenshotSkp fails with RPCError', () async {
       final fs = MemoryFileSystem.test();
       final logger = BufferLogger.test();
       final toolContext = FakeToolContext(fs: fs, logger: logger);
