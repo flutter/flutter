@@ -18,47 +18,41 @@ const macOSDebugMessage = 'A summary of your macOS bundle analysis can be found 
 const runDevToolsMessage = 'dart devtools ';
 
 void main() {
-  testWithoutContext(
-    '--analyze-size flag produces expected output on hello_world for Android',
-    () async {
-      final String workingDirectory = fileSystem.path.join(
-        getFlutterRoot(),
-        'examples',
-        'hello_world',
-      );
-      final ProcessResult result = await processManager.run(<String>[
-        flutterBin,
-        'build',
-        'apk',
-        '--verbose',
-        '--analyze-size',
-        '--target-platform=android-arm64',
-      ], workingDirectory: workingDirectory);
+  test('--analyze-size flag produces expected output on hello_world for Android', () async {
+    final String workingDirectory = fileSystem.path.join(
+      getFlutterRoot(),
+      'examples',
+      'hello_world',
+    );
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      'build',
+      'apk',
+      '--verbose',
+      '--analyze-size',
+      '--target-platform=android-arm64',
+    ], workingDirectory: workingDirectory);
 
-      expect(
-        result,
-        const ProcessResultMatcher(stdoutPattern: 'app-release.apk (total compressed)'),
-      );
+    expect(result, const ProcessResultMatcher(stdoutPattern: 'app-release.apk (total compressed)'));
 
-      final String line = result.stdout
-          .toString()
-          .split('\n')
-          .firstWhere((String line) => line.contains(apkDebugMessage));
+    final String line = result.stdout
+        .toString()
+        .split('\n')
+        .firstWhere((String line) => line.contains(apkDebugMessage));
 
-      final String outputFilePath = line.split(apkDebugMessage).last.trim();
-      expect(fileSystem.file(fileSystem.path.join(workingDirectory, outputFilePath)), exists);
-      expect(outputFilePath, contains('.flutter-devtools'));
+    final String outputFilePath = line.split(apkDebugMessage).last.trim();
+    expect(fileSystem.file(fileSystem.path.join(workingDirectory, outputFilePath)), exists);
+    expect(outputFilePath, contains('.flutter-devtools'));
 
-      final String devToolsCommand = result.stdout
-          .toString()
-          .split('\n')
-          .firstWhere((String line) => line.contains(runDevToolsMessage));
-      final String commandArguments = devToolsCommand.split(runDevToolsMessage).last.trim();
-      expect(commandArguments.contains('--appSizeBase=$outputFilePath'), isTrue);
-    },
-  );
+    final String devToolsCommand = result.stdout
+        .toString()
+        .split('\n')
+        .firstWhere((String line) => line.contains(runDevToolsMessage));
+    final String commandArguments = devToolsCommand.split(runDevToolsMessage).last.trim();
+    expect(commandArguments.contains('--appSizeBase=$outputFilePath'), isTrue);
+  });
 
-  testWithoutContext(
+  test(
     '--analyze-size flag produces expected output on hello_world for iOS',
     () async {
       final String workingDirectory = fileSystem.path.join(
@@ -104,7 +98,7 @@ void main() {
     skip: !platform.isMacOS, // [intended] iOS can only be built on macos.
   );
 
-  testWithoutContext(
+  test(
     '--analyze-size flag produces expected output on hello_world for macOS',
     () async {
       final String workingDirectory = fileSystem.path.join(
@@ -162,7 +156,7 @@ void main() {
     skip: !platform.isMacOS, // [intended] this is a macos only test.
   );
 
-  testWithoutContext('--analyze-size is only supported in release mode', () async {
+  test('--analyze-size is only supported in release mode', () async {
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'build',
@@ -181,70 +175,64 @@ void main() {
     );
   });
 
-  testWithoutContext(
-    '--analyze-size is not supported in combination with --split-debug-info',
-    () async {
-      final command = <String>[
-        flutterBin,
-        'build',
-        'apk',
-        '--verbose',
-        '--analyze-size',
-        '--target-platform=android-arm64',
-        '--split-debug-info=infos',
-      ];
-      final String workingDirectory = fileSystem.path.join(
-        getFlutterRoot(),
-        'examples',
-        'hello_world',
-      );
-      final ProcessResult result = await processManager.run(
-        command,
-        workingDirectory: workingDirectory,
-      );
+  test('--analyze-size is not supported in combination with --split-debug-info', () async {
+    final command = <String>[
+      flutterBin,
+      'build',
+      'apk',
+      '--verbose',
+      '--analyze-size',
+      '--target-platform=android-arm64',
+      '--split-debug-info=infos',
+    ];
+    final String workingDirectory = fileSystem.path.join(
+      getFlutterRoot(),
+      'examples',
+      'hello_world',
+    );
+    final ProcessResult result = await processManager.run(
+      command,
+      workingDirectory: workingDirectory,
+    );
 
-      expect(
-        result,
-        const ProcessResultMatcher(
-          exitCode: 1,
-          stderrPattern: '"--analyze-size" cannot be combined with "--split-debug-info"',
-        ),
-      );
-    },
-  );
+    expect(
+      result,
+      const ProcessResultMatcher(
+        exitCode: 1,
+        stderrPattern: '"--analyze-size" cannot be combined with "--split-debug-info"',
+      ),
+    );
+  });
 
-  testWithoutContext(
-    '--analyze-size allows overriding the directory for code size files',
-    () async {
-      final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_size_test.');
+  test('--analyze-size allows overriding the directory for code size files', () async {
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_size_test.');
 
-      final command = <String>[
-        flutterBin,
-        'build',
-        'apk',
-        '--verbose',
-        '--analyze-size',
-        '--code-size-directory=${tempDir.path}',
-        '--target-platform=android-arm64',
-        '--release',
-      ];
-      final String workingDirectory = fileSystem.path.join(
-        getFlutterRoot(),
-        'examples',
-        'hello_world',
-      );
-      final ProcessResult result = await processManager.run(
-        command,
-        workingDirectory: workingDirectory,
-      );
+    final command = <String>[
+      flutterBin,
+      'build',
+      'apk',
+      '--verbose',
+      '--analyze-size',
+      '--code-size-directory=${tempDir.path}',
+      '--target-platform=android-arm64',
+      '--release',
+    ];
+    final String workingDirectory = fileSystem.path.join(
+      getFlutterRoot(),
+      'examples',
+      'hello_world',
+    );
+    final ProcessResult result = await processManager.run(
+      command,
+      workingDirectory: workingDirectory,
+    );
 
-      expect(result, const ProcessResultMatcher());
+    expect(result, const ProcessResultMatcher());
 
-      expect(tempDir, exists);
-      expect(tempDir.childFile('snapshot.arm64-v8a.json'), exists);
-      expect(tempDir.childFile('trace.arm64-v8a.json'), exists);
+    expect(tempDir, exists);
+    expect(tempDir.childFile('snapshot.arm64-v8a.json'), exists);
+    expect(tempDir.childFile('trace.arm64-v8a.json'), exists);
 
-      tempDir.deleteSync(recursive: true);
-    },
-  );
+    tempDir.deleteSync(recursive: true);
+  });
 }

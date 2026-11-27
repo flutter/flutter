@@ -58,7 +58,7 @@ void main() {
     }
   }
 
-  testWithoutContext('breaks when AnimationController listener throws', () async {
+  test('breaks when AnimationController listener throws', () async {
     final project = TestProject(r'''
       AnimationController(vsync: TestVSync(), duration: Duration.zero)
         ..addListener(() {
@@ -70,7 +70,7 @@ void main() {
     await expectException(project, "throw 'AnimationController listener';");
   });
 
-  testWithoutContext('breaks when AnimationController status listener throws', () async {
+  test('breaks when AnimationController status listener throws', () async {
     final project = TestProject(r'''
       AnimationController(vsync: TestVSync(), duration: Duration.zero)
         ..addStatusListener((AnimationStatus _) {
@@ -82,7 +82,7 @@ void main() {
     await expectException(project, "throw 'AnimationController status listener';");
   });
 
-  testWithoutContext('breaks when ChangeNotifier listener throws', () async {
+  test('breaks when ChangeNotifier listener throws', () async {
     final project = TestProject(r'''
        ValueNotifier<int>(0)
          ..addListener(() {
@@ -94,7 +94,7 @@ void main() {
     await expectException(project, "throw 'ValueNotifier listener';");
   });
 
-  testWithoutContext('breaks when handling a gesture throws', () async {
+  test('breaks when handling a gesture throws', () async {
     final project = TestProject(r'''
       await tester.pumpWidget(
         MaterialApp(
@@ -114,7 +114,7 @@ void main() {
     await expectException(project, "throw 'while handling a gesture';");
   });
 
-  testWithoutContext('breaks when platform message callback throws', () async {
+  test('breaks when platform message callback throws', () async {
     final project = TestProject(r'''
       BasicMessageChannel<String>('foo', const StringCodec()).setMessageHandler((_) {
         throw 'platform message callback';
@@ -125,7 +125,7 @@ void main() {
     await expectException(project, "throw 'platform message callback';");
   });
 
-  testWithoutContext('breaks when SliverChildBuilderDelegate.builder throws', () async {
+  test('breaks when SliverChildBuilderDelegate.builder throws', () async {
     final project = TestProject(r'''
       await tester.pumpWidget(MaterialApp(
         home: ListView.builder(
@@ -139,7 +139,7 @@ void main() {
     await expectException(project, "throw 'cannot build child';");
   });
 
-  testWithoutContext('breaks when EditableText.onChanged throws', () async {
+  test('breaks when EditableText.onChanged throws', () async {
     final project = TestProject(r'''
       await tester.pumpWidget(MaterialApp(
         home: Material(
@@ -156,7 +156,7 @@ void main() {
     await expectException(project, "throw 'onChanged';");
   });
 
-  testWithoutContext('breaks when EditableText.onEditingComplete throws', () async {
+  test('breaks when EditableText.onEditingComplete throws', () async {
     final project = TestProject(r'''
       await tester.pumpWidget(MaterialApp(
         home: Material(
@@ -175,7 +175,7 @@ void main() {
     await expectException(project, "throw 'onEditingComplete';");
   });
 
-  testWithoutContext('breaks when EditableText.onSelectionChanged throws', () async {
+  test('breaks when EditableText.onSelectionChanged throws', () async {
     final project = TestProject(r'''
       await tester.pumpWidget(MaterialApp(
         home: SelectableText('hello',
@@ -190,7 +190,7 @@ void main() {
     await expectException(project, "throw 'onSelectionChanged';");
   });
 
-  testWithoutContext('breaks when Action listener throws', () async {
+  test('breaks when Action listener throws', () async {
     final project = TestProject(r'''
       CallbackAction<Intent>(onInvoke: (Intent _) { })
         ..addActionListener((_) {
@@ -202,7 +202,7 @@ void main() {
     await expectException(project, "throw 'action listener';");
   });
 
-  testWithoutContext('breaks when pointer route throws', () async {
+  test('breaks when pointer route throws', () async {
     final project = TestProject(r'''
       PointerRouter()
         ..addRoute(2, (PointerEvent event) {
@@ -214,7 +214,7 @@ void main() {
     await expectException(project, "throw 'pointer route';");
   });
 
-  testWithoutContext('breaks when PointerSignalResolver callback throws', () async {
+  test('breaks when PointerSignalResolver callback throws', () async {
     final project = TestProject(r'''
       const PointerScrollEvent originalEvent = PointerScrollEvent();
       PointerSignalResolver()
@@ -227,7 +227,7 @@ void main() {
     await expectException(project, "throw 'PointerSignalResolver callback';");
   });
 
-  testWithoutContext('breaks when PointerSignalResolver callback throws', () async {
+  test('breaks when PointerSignalResolver callback throws', () async {
     final project = TestProject(r'''
       FocusManager.instance
         ..addHighlightModeListener((_) {
@@ -240,7 +240,7 @@ void main() {
     await expectException(project, "throw 'highlight mode listener';");
   });
 
-  testWithoutContext('breaks when GestureBinding.dispatchEvent throws', () async {
+  test('breaks when GestureBinding.dispatchEvent throws', () async {
     final project = TestProject(r'''
       await tester.pumpWidget(
         MouseRegion(
@@ -260,7 +260,7 @@ void main() {
     await expectException(project, "throw 'onHover';");
   });
 
-  testWithoutContext('breaks when ImageStreamListener.onImage throws', () async {
+  test('breaks when ImageStreamListener.onImage throws', () async {
     final project = TestProject(
       r'''
       final Completer<ImageInfo> completer = Completer<ImageInfo>();
@@ -281,7 +281,7 @@ void main() {
     await expectException(project, "throw 'setImage';");
   });
 
-  testWithoutContext('breaks when ImageStreamListener.onError throws', () async {
+  test('breaks when ImageStreamListener.onError throws', () async {
     final project = TestProject(r'''
       final Completer<ImageInfo> completer = Completer<ImageInfo>();
       OneFrameImageStreamCompleter(completer.future)
@@ -297,7 +297,7 @@ void main() {
     await expectException(project, "throw 'onError';");
   });
 
-  testWithoutContext('breaks when LayoutBuilder.builder throws', () async {
+  test('breaks when LayoutBuilder.builder throws', () async {
     final project = TestProject(r'''
       await tester.pumpWidget(LayoutBuilder(
         builder: (_, __) {
@@ -309,7 +309,7 @@ void main() {
     await expectException(project, "throw 'LayoutBuilder.builder';");
   });
 
-  testWithoutContext('breaks when _CallbackHookProvider callback throws', () async {
+  test('breaks when _CallbackHookProvider callback throws', () async {
     final project = TestProject(r'''
       RootBackButtonDispatcher()
         ..addCallback(() {
@@ -321,7 +321,7 @@ void main() {
     await expectException(project, "throw '_CallbackHookProvider.callback';");
   });
 
-  testWithoutContext('breaks when TimingsCallback throws', () async {
+  test('breaks when TimingsCallback throws', () async {
     final project = TestProject(r'''
       SchedulerBinding.instance!.addTimingsCallback((List<FrameTiming> timings) {
         throw 'TimingsCallback';
@@ -332,7 +332,7 @@ void main() {
     await expectException(project, "throw 'TimingsCallback';");
   });
 
-  testWithoutContext('breaks when TimingsCallback throws', () async {
+  test('breaks when TimingsCallback throws', () async {
     final project = TestProject(r'''
       SchedulerBinding.instance!.scheduleTask(
         () {
@@ -346,7 +346,7 @@ void main() {
     await expectException(project, "throw 'scheduled task';");
   });
 
-  testWithoutContext('breaks when FrameCallback throws', () async {
+  test('breaks when FrameCallback throws', () async {
     final project = TestProject(r'''
       SchedulerBinding.instance!.addPostFrameCallback((_) {
         throw 'FrameCallback';
@@ -357,7 +357,7 @@ void main() {
     await expectException(project, "throw 'FrameCallback';");
   });
 
-  testWithoutContext('breaks when attaching to render tree throws', () async {
+  test('breaks when attaching to render tree throws', () async {
     final project = TestProject(
       r'''
       await tester.pumpWidget(TestWidget());
@@ -378,7 +378,7 @@ void main() {
     await expectException(project, "throw 'create element';");
   });
 
-  testWithoutContext('breaks when RenderObject.performLayout throws', () async {
+  test('breaks when RenderObject.performLayout throws', () async {
     final project = TestProject(
       r'''
       TestRender().layout(BoxConstraints());
@@ -396,7 +396,7 @@ void main() {
     await expectException(project, "throw 'performLayout';");
   });
 
-  testWithoutContext('breaks when RenderObject.performResize throws', () async {
+  test('breaks when RenderObject.performResize throws', () async {
     final project = TestProject(
       r'''
       TestRender().layout(BoxConstraints());
@@ -417,7 +417,7 @@ void main() {
     await expectException(project, "throw 'performResize';");
   });
 
-  testWithoutContext('breaks when RenderObject.performLayout (without resize) throws', () async {
+  test('breaks when RenderObject.performLayout (without resize) throws', () async {
     final project = TestProject(
       r'''
       await tester.pumpWidget(TestWidget());
@@ -455,7 +455,7 @@ void main() {
     await expectException(project, "throw 'performLayout without resize';");
   });
 
-  testWithoutContext('breaks when StatelessWidget.build throws', () async {
+  test('breaks when StatelessWidget.build throws', () async {
     final project = TestProject(
       r'''
       await tester.pumpWidget(TestWidget());
@@ -473,7 +473,7 @@ void main() {
     await expectException(project, "throw 'StatelessWidget.build';");
   });
 
-  testWithoutContext('breaks when StatefulWidget.build throws', () async {
+  test('breaks when StatefulWidget.build throws', () async {
     final project = TestProject(
       r'''
       await tester.pumpWidget(TestWidget());
@@ -496,7 +496,7 @@ void main() {
     await expectException(project, "throw 'StatefulWidget.build';");
   });
 
-  testWithoutContext('breaks when finalizing the tree throws', () async {
+  test('breaks when finalizing the tree throws', () async {
     final project = TestProject(
       r'''
       await tester.pumpWidget(TestWidget());
@@ -523,7 +523,7 @@ void main() {
     await expectException(project, "throw 'dispose';");
   });
 
-  testWithoutContext('breaks when rebuilding dirty elements throws', () async {
+  test('breaks when rebuilding dirty elements throws', () async {
     final project = TestProject(
       r'''
       await tester.pumpWidget(TestWidget());

@@ -94,7 +94,7 @@ void main() {
   }
 
   group('$WidgetPreviewDtdServices', () {
-    testWithoutContext(
+    test(
       'handles ${WidgetPreviewDtdServices.kHotRestartPreviewer} invocations',
       () async {
         // Start DTD and register the widget preview DTD services with a custom handler for hot
@@ -116,7 +116,7 @@ void main() {
       },
     );
 
-    testWithoutContext(
+    test(
       'handles ${WidgetPreviewDtdServices.kGetDevToolsUri} invocation',
       () async {
         // Start DTD and register the widget preview DTD services.
@@ -139,57 +139,52 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'can set and retreive values from $PersistentPreferences',
-      () async {
-        dtdServer = await launchDtdServer();
+    test('can set and retreive values from $PersistentPreferences', () async {
+      dtdServer = await launchDtdServer();
 
-        // The properties file should be created by the PersistentProperties constructor.
-        final File preferencesFile = dtdServer.preferences.file;
-        expect(preferencesFile.existsSync(), true);
+      // The properties file should be created by the PersistentProperties constructor.
+      final File preferencesFile = dtdServer.preferences.file;
+      expect(preferencesFile.existsSync(), true);
 
-        // Connect to the DTD instance.
-        final dtd = WidgetPreviewScaffoldDtdServices();
-        await dtd.connect(dtdUri: dtdServer.dtdUri);
+      // Connect to the DTD instance.
+      final dtd = WidgetPreviewScaffoldDtdServices();
+      await dtd.connect(dtdUri: dtdServer.dtdUri);
 
-        const kTestKey = 'myKey';
+      const kTestKey = 'myKey';
 
-        // The preferences file should be empty.
-        expect(await dtd.getPreference(kTestKey), null);
-        expect(preferencesFile.readAsStringSync(), isEmpty);
+      // The preferences file should be empty.
+      expect(await dtd.getPreference(kTestKey), null);
+      expect(preferencesFile.readAsStringSync(), isEmpty);
 
-        // Set a preference and ensure it's read back.
-        const kFirstValue = 'foo';
-        await dtd.setPreference(kTestKey, kFirstValue);
-        expect(await dtd.getPreference(kTestKey), kFirstValue);
-        expect(json.decode(preferencesFile.readAsStringSync()), {
-          kTestKey: kFirstValue,
-        });
+      // Set a preference and ensure it's read back.
+      const kFirstValue = 'foo';
+      await dtd.setPreference(kTestKey, kFirstValue);
+      expect(await dtd.getPreference(kTestKey), kFirstValue);
+      expect(json.decode(preferencesFile.readAsStringSync()), {
+        kTestKey: kFirstValue,
+      });
 
-        // Overwrite kTestKey and ensure it's read back.
-        const kSecondValue = 'bar';
-        await dtd.setPreference(kTestKey, kSecondValue);
-        expect(await dtd.getPreference(kTestKey), kSecondValue);
-        expect(json.decode(preferencesFile.readAsStringSync()), {
-          kTestKey: kSecondValue,
-        });
+      // Overwrite kTestKey and ensure it's read back.
+      const kSecondValue = 'bar';
+      await dtd.setPreference(kTestKey, kSecondValue);
+      expect(await dtd.getPreference(kTestKey), kSecondValue);
+      expect(json.decode(preferencesFile.readAsStringSync()), {
+        kTestKey: kSecondValue,
+      });
 
-        // Write a flag.
-        const kFlagKey = 'flag';
-        await dtd.setPreference(kFlagKey, true);
-        expect(await dtd.getFlag(kFlagKey), true);
-        expect(json.decode(preferencesFile.readAsStringSync()), {
-          kFlagKey: true,
-          kTestKey: kSecondValue,
-        });
+      // Write a flag.
+      const kFlagKey = 'flag';
+      await dtd.setPreference(kFlagKey, true);
+      expect(await dtd.getFlag(kFlagKey), true);
+      expect(json.decode(preferencesFile.readAsStringSync()), {
+        kFlagKey: true,
+        kTestKey: kSecondValue,
+      });
 
-        // Remove an entry.
-        await dtd.setPreference(kTestKey, null);
-        expect(await dtd.getPreference(kTestKey), null);
-        expect(json.decode(preferencesFile.readAsStringSync()), {
-          kFlagKey: true,
-        });
-      },
-    );
+      // Remove an entry.
+      await dtd.setPreference(kTestKey, null);
+      expect(await dtd.getPreference(kTestKey), null);
+      expect(json.decode(preferencesFile.readAsStringSync()), {kFlagKey: true});
+    });
   });
 }

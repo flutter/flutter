@@ -46,7 +46,7 @@ void main() {
     expect(res, isA<InstanceRef>().having((InstanceRef o) => o.kind, 'kind', 'Bool'));
   }
 
-  testWithoutContext('flutter run outputs info messages from dwds in verbose mode', () async {
+  test('flutter run outputs info messages from dwds in verbose mode', () async {
     final Future<dynamic> info = expectLater(
       flutter.stdout,
       emitsThrough(contains('Loaded debug metadata')),

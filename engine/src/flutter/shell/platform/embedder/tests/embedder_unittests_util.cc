@@ -103,6 +103,8 @@ std::string FixtureNameForBackend(EmbedderTestContextType backend,
   switch (backend) {
     case EmbedderTestContextType::kVulkanContext:
       return "vk_" + name;
+    case EmbedderTestContextType::kVulkanImpellerContext:
+      return "vk_impeller_" + name;
     default:
       return name;
   }
@@ -113,6 +115,7 @@ EmbedderTestBackingStoreProducer::RenderTargetType GetRenderTargetFromBackend(
     bool opengl_framebuffer) {
   switch (backend) {
     case EmbedderTestContextType::kVulkanContext:
+    case EmbedderTestContextType::kVulkanImpellerContext:
       return EmbedderTestBackingStoreProducer::RenderTargetType::kVulkanImage;
     case EmbedderTestContextType::kOpenGLContext:
       if (opengl_framebuffer) {
@@ -133,6 +136,7 @@ void ConfigureBackingStore(FlutterBackingStore& backing_store,
                            bool opengl_framebuffer) {
   switch (backend) {
     case EmbedderTestContextType::kVulkanContext:
+    case EmbedderTestContextType::kVulkanImpellerContext:
       backing_store.type = kFlutterBackingStoreTypeVulkan;
       break;
     case EmbedderTestContextType::kOpenGLContext:

@@ -21,7 +21,7 @@ void main() {
     setUpAll(() {
       Cache.disableLocking();
     });
-    testWithoutContext('has correct properties', () {
+    test('has correct properties', () {
       final command = DebugAdapterCommand(toolContext: FakeToolContext());
 
       expect(command.name, 'debug-adapter');
@@ -33,7 +33,7 @@ void main() {
       expect(verboseCommand.hidden, false);
     });
 
-    testWithoutContext('runs and shuts down when input stream closes', () async {
+    test('runs and shuts down when input stream closes', () async {
       final fs = MemoryFileSystem.test();
       final logger = BufferLogger.test();
       final stdio = FakeStdio();

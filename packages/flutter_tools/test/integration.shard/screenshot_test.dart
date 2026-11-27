@@ -243,7 +243,7 @@ void main() {
   }
 
   // Regression test for https://github.com/flutter/flutter/issues/196119.
-  testWithoutContext(
+  test(
     'flutter screenshot --type=skia exits cleanly with ToolExit when Impeller is enabled',
     () async {
       final Uri vmServiceUri = await startFlutterTester(enableImpeller: true);
@@ -269,7 +269,7 @@ void main() {
     },
   );
 
-  testWithoutContext(
+  test(
     'flutter screenshot --type=skia writes SKP file when software rendering is enabled',
     () async {
       final Uri vmServiceUri = await startFlutterTester(enableImpeller: false);
