@@ -90,7 +90,7 @@ def _apple_universal_impl(ctx):
     args.use_param_file("@%s", use_always = True)
     args.set_param_file_format("multiline")
     args.add("--script", ctx.file.script)
-    inputs = [ctx.file.script] + ctx.files.script_deps
+    inputs = [ctx.file.script, ctx.file._modes] + ctx.files.script_deps
 
     # Each build's part of its build directory: the entries of its deps'
     # closures under the paths the script reads, by their build-directory
@@ -212,6 +212,11 @@ apple_universal = rule(
         "_wrapper": attr.label(
             default = "//build_defs/dist:universal.py",
             allow_single_file = True,
+        ),
+        "_modes": attr.label(
+            default = "//build_defs/dist:modes.py",
+            allow_single_file = True,
+            doc = "The mode a staged file gets, which universal.py imports.",
         ),
         "_allowlist_function_transition": attr.label(
             default = "@bazel_tools//tools/allowlists/function_transition_allowlist",

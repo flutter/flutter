@@ -24,4 +24,7 @@ exports_files([
     "zip_bundle.py",
     # universal.bzl's layout of several builds for the recipe's generators.
     "universal.py",
+    # The mode a file ships with, for zip_bundle.py and universal.py, and
+    # the pass an install makes over what it laid.
+    "modes.py",
 ])

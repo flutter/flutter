@@ -21,7 +21,9 @@ under a destination, GN's directory sources), the readme written by the
 rule from the version @engine_version//:version.bzl carries, and the
 archive at `zip_archives/<output>` under the package. The converter writes
 the calls from GN's zip_bundle invocations (tools/gn_to_bazel:
-templateMappings).
+templateMappings). An entry's mode is GN's -- 0755 for a program, 0644 for
+the rest -- and not the file's, which under Bazel is 0555 for every output
+of an action (modes.py, through zip_bundle.py).
 
 A zip_tree is a directory entry of a GN zip_bundle -- `source` a directory,
 which zip.py walks -- or the GTK shell's idiom of one entry per output of a
@@ -245,7 +247,7 @@ def _zip_bundle_impl(ctx):
         executable = ctx.executable._python,
         arguments = [args],
         inputs = depset(
-            inputs + [ctx.file._wrapper, ctx.file._script],
+            inputs + [ctx.file._wrapper, ctx.file._modes, ctx.file._script],
             transitive = [ctx.attr._python_runtime[DefaultInfo].files],
         ),
         outputs = [output],
@@ -312,6 +314,11 @@ zip_bundle = rule(
         "_wrapper": attr.label(
             default = "//build_defs/dist:zip_bundle.py",
             allow_single_file = True,
+        ),
+        "_modes": attr.label(
+            default = "//build_defs/dist:modes.py",
+            allow_single_file = True,
+            doc = "The mode an entry is stored with, which zip_bundle.py imports.",
         ),
         "_python": attr.label(
             default = "@cpython3//:bin/python3",

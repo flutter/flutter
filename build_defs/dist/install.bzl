@@ -33,6 +33,12 @@ build directory itself, `gen`, `flutter_patched_sdk`), for rules that do not
 say; `trees` are zip_tree targets, whose files go at their paths under the
 tree's destination (`dart-sdk/bin/dart`); `archives` are zip_bundle targets,
 whose archives go under `zip_archives/` at the path the bundle names.
+
+What an install lays has the modes GN's build directory has: 0755 for a
+program, 0644 for the rest (modes.py, run over the copies at the end of the
+script). The copies themselves would be 0555 one and all, as every output of
+a Bazel action is, and the recipe's generators zip the Apple frameworks from
+this directory, modes included: a framework's headers went out executable.
 """
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
@@ -135,9 +141,11 @@ def _install_impl(ctx):
             # A directory artifact: its contents under the path. Bazel's
             # output directories are read-only, and a copy keeps the mode;
             # the next install must be able to replace what is inside, as
-            # it can in GN's build directory.
+            # it can in GN's build directory. The directories are made
+            # writable at once, so that an install cut short here can still
+            # be removed by the next; the files get their modes below.
             lines.append('cp -r "%s/." "$dest/%s"' % (source, path))
-            lines.append('chmod -R u+w "$dest/%s"' % path)
+            lines.append('find "$dest/%s" -type d -exec chmod u+w {} +' % path)
         elif file.is_symlink:
             # A symlink output (a framework bundle's `Versions/Current ->
             # A`, framework.bzl): the link itself, with its relative target,
@@ -151,6 +159,14 @@ def _install_impl(ctx):
             # -f besides the removal above, for a destination the shell
             # cannot remove but can replace.
             lines.append('cp -f "%s" "$dest/%s"' % (source, path))
+
+    # The modes GN's build directory has (modes.py): 0755 for a program,
+    # 0644 for the rest -- writable, then, either way. A copy of one of
+    # Bazel's outputs is 0555 whatever it holds, and a copy of a file that
+    # Bazel fetched from CIPD is the owner's alone.
+    lines.append('"%s" -B "%s" "$dest" <<\'INSTALLED\'' % (ctx.executable._python.short_path, ctx.file._modes.short_path))
+    lines.extend([path for file, path in unique if not file.is_symlink])
+    lines.append("INSTALLED")
     lines.append('echo "%d files into $dest"' % len(unique))
     script = ctx.actions.declare_file(ctx.label.name + ".sh")
     ctx.actions.write(script, "\n".join(lines) + "\n", is_executable = True)
@@ -186,7 +202,11 @@ def _install_impl(ctx):
         runfiles_symlinks[targets_file] = targets
     return [DefaultInfo(
         executable = script,
-        runfiles = ctx.runfiles(symlinks = runfiles_symlinks),
+        runfiles = ctx.runfiles(
+            files = [ctx.file._modes, ctx.executable._python],
+            transitive_files = ctx.attr._python_runtime[DefaultInfo].files,
+            symlinks = runfiles_symlinks,
+        ),
     )]
 
 # The attributes naming an install's files, shared with local_engine.bzl.
@@ -231,6 +251,19 @@ _install = rule(
         "optimized": attr.bool(
             doc = "Whether this is an optimized build; GN's name carries _unopt otherwise.",
         ),
+        "_modes": attr.label(
+            default = "//build_defs/dist:modes.py",
+            allow_single_file = True,
+            doc = "The pass over the installed files' modes, which the script runs.",
+        ),
+        "_python": attr.label(
+            default = "@cpython3//:bin/python3",
+            allow_single_file = True,
+            executable = True,
+            cfg = "exec",
+            doc = "The checkout's Python, the host's, for that pass.",
+        ),
+        "_python_runtime": attr.label(default = "@cpython3//:runtime"),
     },
 )
 

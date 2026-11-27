@@ -27,6 +27,10 @@ import shutil
 import sys
 import tempfile
 
+# modes.py, beside this script.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import modes  # pylint: disable=wrong-import-position
+
 
 def _expanded(argv):
   """argv with Bazel's parameter files (`@file`, one argument per line) read in."""
@@ -69,10 +73,12 @@ def _copy(source, destination):
       _copy(os.path.join(source, name), os.path.join(destination, name))
     return
   shutil.copyfile(source, destination)
-  shutil.copymode(source, destination)
-  # Writable: the build's outputs are read-only, and the recipe strips the
-  # fat binary in place (strip -x -S: "not writable" otherwise; the Mac's T47).
-  os.chmod(destination, os.stat(destination).st_mode | 0o200)
+  # With the mode the file ships with, not the 0555 of every output of the
+  # build: 0644 for a header or a plist, 0755 for the binary, as GN's build
+  # directory has them and as xcodebuild copies them into the xcframework.
+  # Writable either way, which the recipe needs: it strips the fat binary in
+  # place (strip -x -S: "not writable" otherwise; the Mac's T47).
+  os.chmod(destination, modes.shipped_mode(source))
 
 
 def _relink_frameworks(root):

@@ -67,6 +67,22 @@ files come sorted, after the list's files).
 `tools/gn_to_bazel/tool/artifact_diff.py` compares the two builds' archives
 entry by entry.
 
+An entry's mode is GN's: 0755 for a program, 0644 for the rest. `zip.py`
+stores the mode each file has, which in GN's build directory is the file's
+own. A Bazel build's files have less of one -- every output of an action is
+0555, a licence and a library alike, and a repository Bazel fetched from
+CIPD has the 0600 and 0700 the package stores, the owner's alone -- so
+`zip_bundle.py` has `zip.py` store the mode the file ships with
+(`build_defs/dist/modes.py`): 0644 without an execute bit; the execute bit
+kept where the mode is the file's own (a writable file: a source, or one a
+script laid out); and for an action's output 0755 if it is a program (an
+ELF or Mach-O executable or library, a wasm module, a script) and 0644 if
+not. The universal Apple targets stage their builds' files the same way, so
+a framework's headers are 0644 when `xcodebuild` copies them; and an
+install ends with the same pass over what it laid (`modes.py <directory>`),
+because the recipe's generators zip the Apple frameworks from the installed
+directory, with the modes they find there.
+
 The GTK bundle places every header the copy `publish_headers_linux` lays
 into `flutter_linux/` at its build-directory path -- GN's `foreach` over
 `get_target_outputs(":publish_headers_linux")` with `destination =

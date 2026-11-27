@@ -16,14 +16,43 @@ build (a framework bundle's `Versions/Current -> A`, framework.bzl), which
 Bazel hands over as the symlink it is, with its relative target, stays one:
 that is the entry GN's archive has. The sandbox's own links are absolute.
 
+zip.py stores each file with the mode it has (ZipFile.write), which in GN's
+build directory is the file's own and in Bazel's is not: an action's output
+is 0555 whatever it holds, a file fetched from CIPD 0600 or 0700. Each
+regular file is stored with the mode it ships with instead (modes.py: 0755
+for a program, 0644 for the rest), which is the mode GN's archive has.
+
 Usage: zip_bundle.py <zip.py> -o <output> -i <source> <destination>...
 """
 
 import os
 import runpy
 import shutil
+import stat
 import sys
 import tempfile
+import zipfile
+
+# modes.py, beside this script.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import modes  # pylint: disable=wrong-import-position
+
+
+def _store_shipped_modes():
+  """Has zipfile record a regular file's shipped mode in place of its own.
+
+  ZipFile.write, which zip.py calls for every file, builds the entry with
+  ZipInfo.from_file: the file's st_mode in the upper half of external_attr.
+  """
+  from_file = zipfile.ZipInfo.from_file.__func__
+
+  def shipped(cls, filename, arcname=None, **kwargs):
+    info = from_file(cls, filename, arcname, **kwargs)
+    if not info.is_dir():
+      info.external_attr = (stat.S_IFREG | modes.shipped_mode(filename)) << 16
+    return info
+
+  zipfile.ZipInfo.from_file = classmethod(shipped)
 
 
 def main(argv):
@@ -41,6 +70,7 @@ def main(argv):
           shutil.copytree(source, copy, symlinks=False)
           source = copy
         args[i + 1] = source
+    _store_shipped_modes()
     sys.argv = [script] + args
     runpy.run_path(script, run_name='__main__')
 
