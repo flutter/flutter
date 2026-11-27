@@ -1353,29 +1353,34 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
     await chrome.close();
   });
 
-  test('respects custom user data directory flag', () async {
-    const customUserDataDir = '/custom/chrome/data/dir';
-    processManager.addCommand(
-      const FakeCommand(
-        command: <String>[
-          'example_chrome',
-          '--user-data-dir=$customUserDataDir',
-          '--remote-debugging-port=0',
-          ...kChromeArgs,
-          'example_url',
-        ],
-        stderr: kDevtoolsStderr,
-      ),
-    );
+  for (final customUserDataDir in <String>[
+    '/custom/chrome/data/dir',
+    '/custom/chrome/profile=user=one',
+  ]) {
+    test('respects custom user data directory flag: $customUserDataDir', () async {
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            'example_chrome',
+            '--user-data-dir=$customUserDataDir',
+            '--remote-debugging-port=0',
+            ...kChromeArgs,
+            'example_url',
+          ],
+          stderr: kDevtoolsStderr,
+        ),
+      );
 
-    await expectReturnsNormallyLater(
-      chromeLauncher.launch(
-        'example_url',
-        skipCheck: true,
-        webBrowserFlags: <String>['--user-data-dir=$customUserDataDir'],
-      ),
-    );
-  });
+      await expectReturnsNormallyLater(
+        chromeLauncher.launch(
+          'example_url',
+          skipCheck: true,
+          webBrowserFlags: <String>['--user-data-dir=$customUserDataDir'],
+        ),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
+  }
 
   group('Chromium crash diagnostics', () {
     void addChromeProcessCommand(_ControllableProcess process) {
