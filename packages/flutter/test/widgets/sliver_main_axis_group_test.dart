@@ -15,6 +15,37 @@ const double VIEWPORT_WIDTH = 300;
 const Color _debugAmber = Color(0xFFFFC107);
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/196649.
+  testWidgets('SliverMainAxisGroup does not report slivers in the cache extent as painted', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 200,
+            height: 200,
+            child: CustomScrollView(
+              slivers: <Widget>[
+                SliverMainAxisGroup(
+                  slivers: <Widget>[
+                    SliverToBoxAdapter(child: SizedBox(height: 200)),
+                    SliverToBoxAdapter(child: SizedBox(height: 100)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    final RenderSliverMainAxisGroup group = tester.renderObject(find.byType(SliverMainAxisGroup));
+    expect(group.paintsChild(group.firstChild!), isTrue);
+    expect(group.paintsChild(group.lastChild!), isFalse);
+  });
+
   testWidgets('SliverMainAxisGroup is laid out properly', (WidgetTester tester) async {
     final items = List<int>.generate(20, (int i) => i);
     final controller = ScrollController();

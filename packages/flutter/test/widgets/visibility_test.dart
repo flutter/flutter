@@ -30,6 +30,24 @@ class _TestStateState extends State<TestState> {
 }
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/196649.
+  testWidgets('Visibility.maintain reports the child as painted only when visible', (
+    WidgetTester tester,
+  ) async {
+    bool paintsChild() {
+      final RenderProxyBox visibility = tester.renderObject(
+        find.byType(Visibility, skipOffstage: false),
+      );
+      return visibility.paintsChild(visibility.child!);
+    }
+
+    await tester.pumpWidget(const Visibility.maintain(visible: false, child: SizedBox()));
+    expect(paintsChild(), isFalse);
+
+    await tester.pumpWidget(const Visibility.maintain(child: SizedBox()));
+    expect(paintsChild(), isTrue);
+  });
+
   testWidgets('Visibility', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
     final log = <String>[];

@@ -60,7 +60,53 @@ class DuplicatePainterOpacityFlowDelegate extends OpacityFlowDelegate {
   }
 }
 
+// Paints only the children in `opacities`, with the given opacity.
+class _PaintsChildrenDelegate extends FlowDelegate {
+  _PaintsChildrenDelegate(this.opacities);
+
+  final Map<int, double> opacities;
+
+  @override
+  void paintChildren(FlowPaintingContext context) {
+    opacities.forEach((int i, double opacity) => context.paintChild(i, opacity: opacity));
+  }
+
+  @override
+  bool shouldRepaint(_PaintsChildrenDelegate oldDelegate) => opacities != oldDelegate.opacities;
+}
+
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/196649.
+  testWidgets('Flow only reports children painted with a nonzero opacity as painted', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Flow(
+        delegate: _PaintsChildrenDelegate(<int, double>{0: 1.0, 1: 0.0}),
+        children: const <Widget>[SizedBox(), SizedBox(), SizedBox()],
+      ),
+    );
+    final RenderFlow flow = tester.renderObject(find.byType(Flow));
+    final List<RenderBox> children = flow.getChildrenAsList();
+    // Painted.
+    expect(flow.paintsChild(children[0]), isTrue);
+    // Passed to paintChild with zero opacity, which skips painting.
+    expect(flow.paintsChild(children[1]), isFalse);
+    // Not passed to paintChild.
+    expect(flow.paintsChild(children[2]), isFalse);
+  });
+
+  test('RenderFlow reports a child as painted before its first paint', () {
+    // An ancestor such as Material may ask before the RenderFlow paints for
+    // the first time.
+    final child = RenderConstrainedBox(additionalConstraints: const BoxConstraints());
+    final flow = RenderFlow(
+      delegate: _PaintsChildrenDelegate(const <int, double>{0: 1.0}),
+      children: <RenderBox>[child],
+    );
+    expect(flow.paintsChild(child), isTrue);
+  });
+
   testWidgets('Flow control test', (WidgetTester tester) async {
     final startOffset = AnimationController.unbounded(vsync: tester);
     addTearDown(startOffset.dispose);

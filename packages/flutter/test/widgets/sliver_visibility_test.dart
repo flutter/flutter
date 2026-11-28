@@ -32,6 +32,38 @@ class _TestStateState extends State<TestState> {
 }
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/196649.
+  testWidgets('SliverVisibility.maintain reports the sliver as painted only when visible', (
+    WidgetTester tester,
+  ) async {
+    bool paintsChild() {
+      final RenderProxySliver visibility = tester.renderObject(
+        find.byType(SliverVisibility, skipOffstage: false),
+      );
+      return visibility.paintsChild(visibility.child!);
+    }
+
+    Widget buildVisibility(bool visible) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverVisibility.maintain(
+              visible: visible,
+              sliver: const SliverToBoxAdapter(child: SizedBox(height: 100)),
+            ),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildVisibility(false));
+    expect(paintsChild(), isFalse);
+
+    await tester.pumpWidget(buildVisibility(true));
+    expect(paintsChild(), isTrue);
+  });
+
   testWidgets('SliverVisibility', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
     final log = <String>[];

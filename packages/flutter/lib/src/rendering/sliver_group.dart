@@ -134,6 +134,12 @@ class RenderSliverCrossAxisGroup extends RenderSliver
   }
 
   @override
+  bool paintsChild(RenderSliver child) {
+    assert(child.parent == this);
+    return child.geometry?.visible ?? false;
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     RenderSliver? child = firstChild;
 
@@ -421,6 +427,12 @@ class RenderSliverMainAxisGroup extends RenderSliver
       };
       child = advance(child);
     }
+  }
+
+  @override
+  bool paintsChild(RenderSliver child) {
+    assert(child.parent == this);
+    return child.geometry?.visible ?? false;
   }
 
   @override

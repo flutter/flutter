@@ -669,14 +669,25 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   @override
   bool paintsChild(RenderBox child) {
     final childParentData = child.parentData as SliverMultiBoxAdaptorParentData?;
-    return childParentData?.index != null && !_keepAliveBucket.containsKey(childParentData!.index);
+    if (childParentData?.index == null || _keepAliveBucket.containsKey(childParentData!.index)) {
+      return false;
+    }
+    // A child that was moved or inserted since the last layout may have no
+    // layout offset or size until it is laid out again.
+    if (childScrollOffset(child) == null || !child.hasSize) {
+      return false;
+    }
+    final double mainAxisDelta = childMainAxisPosition(child);
+    return mainAxisDelta < constraints.remainingPaintExtent &&
+        mainAxisDelta + paintExtentOf(child) > 0;
   }
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    if (!paintsChild(child)) {
+    final childParentData = child.parentData as SliverMultiBoxAdaptorParentData?;
+    if (childParentData?.index == null || _keepAliveBucket.containsKey(childParentData!.index)) {
       // This can happen if some child asks for the global transform even though
-      // they are not getting painted. In that case, the transform sets set to
+      // they have no index or are kept alive. In that case, the transform is set to
       // zero since [applyPaintTransformForBoxChild] would end up throwing due
       // to the child not being configured correctly for applying a transform.
       // There's no assert here because asking for the paint transform is a

@@ -9,6 +9,62 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/196649.
+  testWidgets('SliverResizingHeader only reports the child as painted when it is visible', (
+    WidgetTester tester,
+  ) async {
+    const minKey = Key('min');
+    const maxKey = Key('max');
+    const childKey = Key('child');
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverResizingHeader(
+              minExtentPrototype: SizedBox(key: minKey, height: 50),
+              maxExtentPrototype: SizedBox(key: maxKey, height: 100),
+              child: SizedBox(key: childKey),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    bool paintsChild(Key key) {
+      final RenderObject header = tester.renderObject(
+        find.byType(SliverResizingHeader, skipOffstage: false),
+      );
+      RenderObject child = tester.renderObject(find.byKey(key, skipOffstage: false));
+      while (child.parent != header) {
+        child = child.parent!;
+      }
+      return header.paintsChild(child);
+    }
+
+    expect(paintsChild(minKey), isFalse);
+    expect(paintsChild(maxKey), isFalse);
+    expect(paintsChild(childKey), isTrue);
+
+    // The header is in the cache extent below the viewport.
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverToBoxAdapter(child: SizedBox(height: 600)),
+            SliverResizingHeader(
+              minExtentPrototype: SizedBox(key: minKey, height: 50),
+              maxExtentPrototype: SizedBox(key: maxKey, height: 100),
+              child: SizedBox(key: childKey),
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(paintsChild(childKey), isFalse);
+  });
+
   testWidgets('SliverResizingHeader basics', (WidgetTester tester) async {
     Widget buildFrame({required Axis axis, required bool reverse}) {
       final (Widget minPrototype, Widget maxPrototype) = switch (axis) {
