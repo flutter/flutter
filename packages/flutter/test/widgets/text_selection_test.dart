@@ -2253,6 +2253,357 @@ void main() {
     expect(customControls.builtHandleTypes.first, TextSelectionHandleType.left);
     expect(customControls.builtHandleTypes.last, TextSelectionHandleType.right);
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+  group('shouldHandlePointer', () {
+    // The "icon" occupies the top left corner of the detector, like an
+    // interactive widget in a text field's decoration. Pointers pressed down
+    // on it are recorded by a Listener that is deeper in the tree than the
+    // TextSelectionGestureDetector, so it sees each PointerDownEvent first.
+    const iconCenter = Offset(50.0, 50.0);
+    const textCenter = Offset(400.0, 300.0);
+
+    late List<String> log;
+    late Set<int> iconPointers;
+    late List<int> filteredPointers;
+
+    setUp(() {
+      log = <String>[];
+      iconPointers = <int>{};
+      filteredPointers = <int>[];
+    });
+
+    bool rejectIconPointers(PointerDownEvent event) {
+      filteredPointers.add(event.pointer);
+      return !iconPointers.contains(event.pointer);
+    }
+
+    Widget buildIcon() {
+      return Listener(
+        onPointerDown: (PointerDownEvent event) => iconPointers.add(event.pointer),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapDown: (_) => log.add('icon.onTapDown'),
+          onTap: () => log.add('icon.onTap'),
+          onTapCancel: () => log.add('icon.onTapCancel'),
+          child: const SizedBox(width: 100.0, height: 100.0),
+        ),
+      );
+    }
+
+    Future<void> pumpDetector(
+      WidgetTester tester, {
+      required bool Function(PointerDownEvent event)? shouldHandlePointer,
+    }) async {
+      await tester.pumpWidget(
+        TextSelectionGestureDetector(
+          behavior: HitTestBehavior.opaque,
+          shouldHandlePointer: shouldHandlePointer,
+          onTapTrackStart: () => log.add('onTapTrackStart'),
+          onTapDown: (_) => log.add('onTapDown'),
+          onForcePressStart: (_) => log.add('onForcePressStart'),
+          onForcePressEnd: (_) => log.add('onForcePressEnd'),
+          onSecondaryTap: () => log.add('onSecondaryTap'),
+          onSecondaryTapDown: (_) => log.add('onSecondaryTapDown'),
+          onSingleTapUp: (_) => log.add('onSingleTapUp'),
+          onSingleTapCancel: () => log.add('onSingleTapCancel'),
+          onUserTap: () => log.add('onUserTap'),
+          onSingleLongTapStart: (_) => log.add('onSingleLongTapStart'),
+          onSingleLongTapMoveUpdate: (_) => log.add('onSingleLongTapMoveUpdate'),
+          onSingleLongTapEnd: (_) => log.add('onSingleLongTapEnd'),
+          onSingleLongTapCancel: () => log.add('onSingleLongTapCancel'),
+          onDoubleTapDown: (_) => log.add('onDoubleTapDown'),
+          onTripleTapDown: (_) => log.add('onTripleTapDown'),
+          onDragSelectionStart: (_) => log.add('onDragSelectionStart'),
+          onDragSelectionUpdate: (_) => log.add('onDragSelectionUpdate'),
+          onDragSelectionEnd: (_) => log.add('onDragSelectionEnd'),
+          child: Align(alignment: Alignment.topLeft, child: buildIcon()),
+        ),
+      );
+    }
+
+    Iterable<String> detectorCalls() => log.where((String entry) => !entry.startsWith('icon.'));
+
+    testWidgets('keeps the recognizers registered under their public types', (
+      WidgetTester tester,
+    ) async {
+      await pumpDetector(tester, shouldHandlePointer: rejectIconPointers);
+
+      final RawGestureDetector rawGestureDetector = tester.widget(
+        find
+            .descendant(
+              of: find.byType(TextSelectionGestureDetector),
+              matching: find.byType(RawGestureDetector),
+            )
+            .first,
+      );
+      final Type dragRecognizerType = switch (defaultTargetPlatform) {
+        TargetPlatform.android ||
+        TargetPlatform.fuchsia ||
+        TargetPlatform.iOS => TapAndHorizontalDragGestureRecognizer,
+        TargetPlatform.linux ||
+        TargetPlatform.macOS ||
+        TargetPlatform.windows => TapAndPanGestureRecognizer,
+      };
+      expect(
+        rawGestureDetector.gestures.keys,
+        unorderedEquals(<Type>[
+          TapGestureRecognizer,
+          LongPressGestureRecognizer,
+          dragRecognizerType,
+          ForcePressGestureRecognizer,
+        ]),
+      );
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('a tap on a rejected pointer only reaches the inner gesture detector', (
+      WidgetTester tester,
+    ) async {
+      await pumpDetector(tester, shouldHandlePointer: rejectIconPointers);
+
+      await tester.tapAt(iconCenter);
+      await tester.pumpAndSettle();
+
+      expect(log, <String>['icon.onTapDown', 'icon.onTap']);
+      expect(filteredPointers, hasLength(greaterThanOrEqualTo(1)));
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets(
+      'a long press on a rejected pointer lets the inner gesture detector tap on release',
+      (WidgetTester tester) async {
+        await pumpDetector(tester, shouldHandlePointer: rejectIconPointers);
+
+        final TestGesture gesture = await tester.startGesture(iconCenter);
+        await tester.pump(const Duration(seconds: 2));
+        // The inner tap is still pending; it is neither canceled nor accepted
+        // by a competing long press.
+        expect(log, <String>['icon.onTapDown']);
+
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(log, <String>['icon.onTapDown', 'icon.onTap']);
+      },
+      variant: TargetPlatformVariant.all(),
+    );
+
+    testWidgets('without a filter, a long press on the inner gesture detector is a long press', (
+      WidgetTester tester,
+    ) async {
+      await pumpDetector(tester, shouldHandlePointer: null);
+
+      final TestGesture gesture = await tester.startGesture(iconCenter);
+      await tester.pump(const Duration(seconds: 2));
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(log, contains('onSingleLongTapStart'));
+      expect(log, contains('icon.onTapCancel'));
+      expect(log, isNot(contains('icon.onTap')));
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('drags on a rejected pointer do not reach the detector', (
+      WidgetTester tester,
+    ) async {
+      await pumpDetector(tester, shouldHandlePointer: rejectIconPointers);
+
+      for (final kind in <PointerDeviceKind>[PointerDeviceKind.touch, PointerDeviceKind.mouse]) {
+        final TestGesture gesture = await tester.startGesture(iconCenter, kind: kind);
+        await tester.pump();
+        await gesture.moveBy(const Offset(300.0, 0.0));
+        await tester.pump();
+        await gesture.moveBy(const Offset(100.0, 0.0));
+        await tester.pump();
+        await gesture.up();
+        await tester.pumpAndSettle();
+        await gesture.removePointer();
+      }
+
+      expect(detectorCalls(), isEmpty);
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('a secondary tap on a rejected pointer does not reach the detector', (
+      WidgetTester tester,
+    ) async {
+      await pumpDetector(tester, shouldHandlePointer: rejectIconPointers);
+
+      final TestGesture gesture = await tester.startGesture(
+        iconCenter,
+        kind: PointerDeviceKind.mouse,
+        buttons: kSecondaryButton,
+      );
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(filteredPointers, isNotEmpty);
+      expect(detectorCalls(), isEmpty);
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('a force press on a rejected pointer does not reach the detector', (
+      WidgetTester tester,
+    ) async {
+      await pumpDetector(tester, shouldHandlePointer: rejectIconPointers);
+
+      final int pointer = tester.nextPointer;
+      final TestGesture gesture = await tester.createGesture();
+      await gesture.downWithCustomEvent(
+        iconCenter,
+        PointerDownEvent(
+          pointer: pointer,
+          position: iconCenter,
+          pressure: 0.0,
+          pressureMax: 6.0,
+          pressureMin: 0.0,
+        ),
+      );
+      await gesture.updateWithCustomEvent(
+        PointerMoveEvent(pointer: pointer, position: iconCenter, pressure: 0.5, pressureMin: 0),
+      );
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(filteredPointers, contains(pointer));
+      expect(detectorCalls(), isEmpty);
+      expect(log, contains('icon.onTap'));
+    });
+
+    testWidgets('is evaluated for each pointer', (WidgetTester tester) async {
+      await pumpDetector(tester, shouldHandlePointer: rejectIconPointers);
+
+      // Hold a rejected pointer on the icon while another pointer taps the text.
+      final TestGesture iconGesture = await tester.startGesture(iconCenter, pointer: 1);
+      await tester.pump(const Duration(milliseconds: 50));
+      final TestGesture textGesture = await tester.startGesture(textCenter, pointer: 2);
+      await tester.pump(const Duration(milliseconds: 50));
+      await textGesture.up();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(filteredPointers.toSet(), <int>{1, 2});
+      expect(detectorCalls(), containsAllInOrder(<String>['onTapDown', 'onSingleTapUp']));
+      expect(log, isNot(contains('icon.onTap')));
+
+      await iconGesture.up();
+      await tester.pumpAndSettle();
+      expect(log, contains('icon.onTap'));
+      expect(log, isNot(contains('icon.onTapCancel')));
+    });
+
+    testWidgets('a rejected pointer does not affect a gesture in progress', (
+      WidgetTester tester,
+    ) async {
+      await pumpDetector(tester, shouldHandlePointer: rejectIconPointers);
+
+      final TestGesture textGesture = await tester.startGesture(textCenter, pointer: 1);
+      await tester.pump(const Duration(milliseconds: 100));
+      final TestGesture iconGesture = await tester.startGesture(iconCenter, pointer: 2);
+      await iconGesture.up();
+      await tester.pump(const Duration(seconds: 2));
+
+      expect(log, contains('icon.onTap'));
+      expect(detectorCalls(), contains('onSingleLongTapStart'));
+      expect(detectorCalls(), isNot(contains('onSingleLongTapCancel')));
+
+      await textGesture.up();
+      await tester.pumpAndSettle();
+      expect(detectorCalls(), contains('onSingleLongTapEnd'));
+    });
+
+    testWidgets('returning true for every pointer does not change the behavior', (
+      WidgetTester tester,
+    ) async {
+      Future<List<String>> runGestures(bool Function(PointerDownEvent event)? filter) async {
+        log = <String>[];
+        await pumpDetector(tester, shouldHandlePointer: filter);
+        // Rebuild from scratch so that the recognizers' state does not carry over.
+        await tester.pumpWidget(const SizedBox());
+        await pumpDetector(tester, shouldHandlePointer: filter);
+
+        await tester.tapAt(iconCenter);
+        await tester.pump(const Duration(seconds: 1));
+        await tester.tapAt(textCenter);
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.tapAt(textCenter);
+        await tester.pump(const Duration(seconds: 1));
+        final TestGesture longPress = await tester.startGesture(iconCenter);
+        await tester.pump(const Duration(seconds: 2));
+        await longPress.up();
+        await tester.pump(const Duration(seconds: 1));
+        final TestGesture drag = await tester.startGesture(textCenter);
+        await tester.pump();
+        await drag.moveBy(const Offset(-200.0, 0.0));
+        await tester.pump();
+        await drag.up();
+        await tester.pumpAndSettle();
+        return log;
+      }
+
+      final List<String> withoutFilter = await runGestures(null);
+      final List<String> withPermissiveFilter = await runGestures((_) => true);
+      expect(withoutFilter, isNotEmpty);
+      expect(withPermissiveFilter, withoutFilter);
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('TextSelectionGestureDetectorBuilder.shouldHandlePointer is respected', (
+      WidgetTester tester,
+    ) async {
+      final editableTextKey = GlobalKey<EditableTextState>();
+      final delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
+        editableTextKey: editableTextKey,
+        forcePressEnabled: true,
+        selectionEnabled: true,
+      );
+      final builder = _PointerFilteringGestureDetectorBuilder(
+        delegate: delegate,
+        rejectedPointers: iconPointers,
+        log: log,
+      );
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: builder.buildGestureDetector(
+            behavior: HitTestBehavior.translucent,
+            child: Stack(
+              children: <Widget>[
+                Positioned.fill(
+                  child: FakeEditableText(
+                    key: editableTextKey,
+                    controller: controller,
+                    focusNode: focusNode,
+                  ),
+                ),
+                Positioned(left: 0.0, top: 0.0, child: buildIcon()),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
+      final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+
+      // A long press on the icon is not handled by the builder.
+      TestGesture gesture = await tester.startGesture(iconCenter);
+      await tester.pump(const Duration(seconds: 2));
+      expect(log, <String>['icon.onTapDown']);
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(log, <String>['icon.onTapDown', 'icon.onTap']);
+      expect(state.showToolbarCalled, isFalse);
+      expect(renderEditable.selectWordCalled, isFalse);
+      expect(renderEditable.selectPositionAtCalled, isFalse);
+      expect(renderEditable.selectPositionCalled, isFalse);
+
+      // A long press on the text is still handled by the builder.
+      log.clear();
+      gesture = await tester.startGesture(textCenter);
+      await tester.pump(const Duration(seconds: 2));
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(log, containsAllInOrder(<String>['onTapDown', 'onSingleLongTapStart']));
+    }, variant: TargetPlatformVariant.all());
+  });
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate
@@ -2271,6 +2622,38 @@ class FakeTextSelectionGestureDetectorBuilderDelegate
 
   @override
   final bool selectionEnabled;
+}
+
+class _PointerFilteringGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
+  _PointerFilteringGestureDetectorBuilder({
+    required super.delegate,
+    required this.rejectedPointers,
+    required this.log,
+  });
+
+  final Set<int> rejectedPointers;
+  final List<String> log;
+
+  @override
+  bool shouldHandlePointer(PointerDownEvent event) => !rejectedPointers.contains(event.pointer);
+
+  @override
+  void onTapDown(TapDragDownDetails details) {
+    log.add('onTapDown');
+    super.onTapDown(details);
+  }
+
+  @override
+  void onSingleLongTapStart(LongPressStartDetails details) {
+    log.add('onSingleLongTapStart');
+    super.onSingleLongTapStart(details);
+  }
+
+  @override
+  void onSingleTapUp(TapDragUpDetails details) {
+    log.add('onSingleTapUp');
+    super.onSingleTapUp(details);
+  }
 }
 
 class FakeEditableText extends EditableText {

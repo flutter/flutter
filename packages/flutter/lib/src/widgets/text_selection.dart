@@ -3406,6 +3406,32 @@ class TextSelectionGestureDetectorBuilder {
     _hideMagnifierIfSupportedByPlatform();
   }
 
+  /// Whether the text selection gestures should handle the pointer that
+  /// produced [event].
+  ///
+  /// This is called when a pointer is pressed down on the
+  /// [TextSelectionGestureDetector] built by [buildGestureDetector], before
+  /// its gesture recognizers are offered the pointer. Returning false keeps
+  /// every text selection gesture recognizer (tap, long press, drag and force
+  /// press) out of the gesture arena for that pointer, so none of this
+  /// builder's handlers are called for it and other gesture recognizers, such
+  /// as those of an interactive widget in an [InputDecoration.prefixIcon] or
+  /// [InputDecoration.suffixIcon], can win the gesture uncontested. Pointers
+  /// that are already being handled are not affected.
+  ///
+  /// This is evaluated separately for each pointer, and may be called more
+  /// than once for the same event, so it should be fast and free of side
+  /// effects.
+  ///
+  /// By default, it returns true, so every pointer is handled.
+  ///
+  /// See also:
+  ///
+  ///  * [TextSelectionGestureDetector.shouldHandlePointer], which this
+  ///    method is passed to.
+  @protected
+  bool shouldHandlePointer(PointerDownEvent event) => true;
+
   /// Returns a [TextSelectionGestureDetector] configured with the handlers
   /// provided by this builder.
   ///
@@ -3435,6 +3461,7 @@ class TextSelectionGestureDetectorBuilder {
       onDragSelectionUpdate: onDragSelectionUpdate,
       onDragSelectionEnd: onDragSelectionEnd,
       onUserTapAlwaysCalled: onUserTapAlwaysCalled,
+      shouldHandlePointer: shouldHandlePointer,
       behavior: behavior,
       child: child,
     );
@@ -3479,6 +3506,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
     this.onDragSelectionUpdate,
     this.onDragSelectionEnd,
     this.onUserTapAlwaysCalled = false,
+    this.shouldHandlePointer,
     this.behavior,
     required this.child,
   });
@@ -3571,6 +3599,29 @@ class TextSelectionGestureDetector extends StatefulWidget {
   ///
   /// Defaults to false, so [onUserTap] is only called for each distinct tap.
   final bool onUserTapAlwaysCalled;
+
+  /// Called when a pointer is pressed down on this widget, before any of its
+  /// gesture recognizers are offered the pointer, to decide whether this
+  /// widget should handle the pointer.
+  ///
+  /// If this returns false for a [PointerDownEvent], none of this widget's
+  /// gesture recognizers track that pointer or enter the gesture arena for
+  /// it, so none of this widget's callbacks are called for it. This allows
+  /// another gesture recognizer under the same pointer, for example one in an
+  /// [InputDecoration.suffixIcon] of a text field, to win the gesture
+  /// uncontested. Pointers that are already being handled are not affected.
+  ///
+  /// This is evaluated separately for each pointer, and may be called more
+  /// than once for the same event, so it should be fast and free of side
+  /// effects.
+  ///
+  /// If null, which is the default, every pointer is handled.
+  ///
+  /// See also:
+  ///
+  ///  * [TextSelectionGestureDetectorBuilder.shouldHandlePointer], which
+  ///    provides this callback for the detectors it builds.
+  final bool Function(PointerDownEvent event)? shouldHandlePointer;
 
   /// How this gesture detector should behave during hit testing.
   ///
@@ -3695,12 +3746,22 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     widget.onSingleLongTapCancel?.call();
   }
 
+  bool _shouldHandlePointer(PointerDownEvent event) {
+    return widget.shouldHandlePointer?.call(event) ?? true;
+  }
+
   @override
   Widget build(BuildContext context) {
     final gestures = <Type, GestureRecognizerFactory>{};
 
+    // The recognizers are private subclasses that consult
+    // widget.shouldHandlePointer, but they are registered under their public
+    // types so that the gestures can still be looked up by those types.
     gestures[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-      () => TapGestureRecognizer(debugOwner: this),
+      () => _TextSelectionTapGestureRecognizer(
+        debugOwner: this,
+        shouldHandlePointer: _shouldHandlePointer,
+      ),
       (TapGestureRecognizer instance) {
         instance
           ..onSecondaryTap = widget.onSecondaryTap
@@ -3714,9 +3775,10 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
         widget.onSingleLongTapCancel != null) {
       gestures[LongPressGestureRecognizer] =
           GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
-            () => LongPressGestureRecognizer(
+            () => _TextSelectionLongPressGestureRecognizer(
               debugOwner: this,
               supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch},
+              shouldHandlePointer: _shouldHandlePointer,
             ),
             (LongPressGestureRecognizer instance) {
               instance
@@ -3737,7 +3799,10 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
         case TargetPlatform.iOS:
           gestures[TapAndHorizontalDragGestureRecognizer] =
               GestureRecognizerFactoryWithHandlers<TapAndHorizontalDragGestureRecognizer>(
-                () => TapAndHorizontalDragGestureRecognizer(debugOwner: this),
+                () => _TextSelectionTapAndHorizontalDragGestureRecognizer(
+                  debugOwner: this,
+                  shouldHandlePointer: _shouldHandlePointer,
+                ),
                 (TapAndHorizontalDragGestureRecognizer instance) {
                   instance
                     // Text selection should start from the position of the first pointer
@@ -3759,7 +3824,10 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
         case TargetPlatform.windows:
           gestures[TapAndPanGestureRecognizer] =
               GestureRecognizerFactoryWithHandlers<TapAndPanGestureRecognizer>(
-                () => TapAndPanGestureRecognizer(debugOwner: this),
+                () => _TextSelectionTapAndPanGestureRecognizer(
+                  debugOwner: this,
+                  shouldHandlePointer: _shouldHandlePointer,
+                ),
                 (TapAndPanGestureRecognizer instance) {
                   instance
                     // Text selection should start from the position of the first pointer
@@ -3781,7 +3849,10 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     if (widget.onForcePressStart != null || widget.onForcePressEnd != null) {
       gestures[ForcePressGestureRecognizer] =
           GestureRecognizerFactoryWithHandlers<ForcePressGestureRecognizer>(
-            () => ForcePressGestureRecognizer(debugOwner: this),
+            () => _TextSelectionForcePressGestureRecognizer(
+              debugOwner: this,
+              shouldHandlePointer: _shouldHandlePointer,
+            ),
             (ForcePressGestureRecognizer instance) {
               instance
                 ..onStart = widget.onForcePressStart != null ? _forcePressStarted : null
@@ -3797,6 +3868,71 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       child: widget.child,
     );
   }
+}
+
+// Keeps a gesture recognizer from tracking pointers rejected by
+// TextSelectionGestureDetector.shouldHandlePointer.
+//
+// A rejected pointer is ignored entirely, rather than passed to
+// GestureRecognizer.handleNonAllowedPointer, so that it does not affect
+// gestures that are already in progress for other pointers.
+mixin _TextSelectionPointerFilterMixin on GestureRecognizer {
+  bool Function(PointerDownEvent event) get shouldHandlePointer;
+
+  @override
+  void addPointer(PointerDownEvent event) {
+    if (shouldHandlePointer(event)) {
+      super.addPointer(event);
+    }
+  }
+}
+
+class _TextSelectionTapGestureRecognizer extends TapGestureRecognizer
+    with _TextSelectionPointerFilterMixin {
+  _TextSelectionTapGestureRecognizer({super.debugOwner, required this.shouldHandlePointer});
+
+  @override
+  final bool Function(PointerDownEvent event) shouldHandlePointer;
+}
+
+class _TextSelectionLongPressGestureRecognizer extends LongPressGestureRecognizer
+    with _TextSelectionPointerFilterMixin {
+  _TextSelectionLongPressGestureRecognizer({
+    super.debugOwner,
+    super.supportedDevices,
+    required this.shouldHandlePointer,
+  });
+
+  @override
+  final bool Function(PointerDownEvent event) shouldHandlePointer;
+}
+
+class _TextSelectionTapAndHorizontalDragGestureRecognizer
+    extends TapAndHorizontalDragGestureRecognizer
+    with _TextSelectionPointerFilterMixin {
+  _TextSelectionTapAndHorizontalDragGestureRecognizer({
+    super.debugOwner,
+    required this.shouldHandlePointer,
+  });
+
+  @override
+  final bool Function(PointerDownEvent event) shouldHandlePointer;
+}
+
+class _TextSelectionTapAndPanGestureRecognizer extends TapAndPanGestureRecognizer
+    with _TextSelectionPointerFilterMixin {
+  _TextSelectionTapAndPanGestureRecognizer({super.debugOwner, required this.shouldHandlePointer});
+
+  @override
+  final bool Function(PointerDownEvent event) shouldHandlePointer;
+}
+
+class _TextSelectionForcePressGestureRecognizer extends ForcePressGestureRecognizer
+    with _TextSelectionPointerFilterMixin {
+  _TextSelectionForcePressGestureRecognizer({super.debugOwner, required this.shouldHandlePointer});
+
+  @override
+  final bool Function(PointerDownEvent event) shouldHandlePointer;
 }
 
 /// A [ValueNotifier] whose [value] indicates whether the current contents of
