@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/backend/metal/surface_mtl.h"
 
+#include <QuartzCore/CATransaction.h>
+
 #include "flutter/fml/trace_event.h"
 #include "flutter/impeller/renderer/command_buffer.h"
 #include "impeller/base/validation.h"
@@ -22,6 +24,9 @@ static_assert(__has_feature(objc_arc), "ARC must be enabled.");
 @end
 
 namespace impeller {
+
+static NSString* const kPendingTransactionDrawablesKey =
+    @"io.flutter.impeller.pendingTransactionDrawables";
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunguarded-availability-new"
@@ -286,12 +291,27 @@ bool SurfaceMTL::Present() const {
     constexpr bool alwaysWaitForScheduling = false;
 #endif  // defined(FML_OS_IOS_SIMULATOR) && defined(FML_ARCH_CPU_X86_64)
 
-    // If the threads have been merged, or there is a pending frame capture,
-    // then block on cmd buffer scheduling to ensure that the
-    // transaction/capture work correctly.
-    if (present_with_transaction_ || [[NSThread currentThread] isMainThread] ||
-        [[MTLCaptureManager sharedCaptureManager] isCapturing] ||
-        alwaysWaitForScheduling) {
+    const bool can_defer_transaction_presentation =
+        present_with_transaction_ && !frame_boundary_ &&
+        !alwaysWaitForScheduling &&
+        ![[MTLCaptureManager sharedCaptureManager] isCapturing];
+    if (can_defer_transaction_presentation) {
+      // Surfaces in a frame share a command queue. Retain intermediate
+      // drawables in the current transaction until the final command buffer
+      // has been scheduled.
+      [command_buffer commit];
+      NSMutableArray<id<MTLDrawable>>* pending_drawables =
+          [CATransaction valueForKey:kPendingTransactionDrawablesKey];
+      if (!pending_drawables) {
+        pending_drawables = [[NSMutableArray alloc] init];
+        [CATransaction setValue:pending_drawables
+                         forKey:kPendingTransactionDrawablesKey];
+      }
+      [pending_drawables addObject:drawable_];
+    } else if (present_with_transaction_ ||
+               [[NSThread currentThread] isMainThread] ||
+               alwaysWaitForScheduling ||
+               [[MTLCaptureManager sharedCaptureManager] isCapturing]) {
       TRACE_EVENT0("flutter", "waitUntilScheduled");
       [command_buffer commit];
 #if defined(FML_OS_IOS_SIMULATOR) && defined(FML_ARCH_CPU_X86_64)
@@ -299,6 +319,14 @@ bool SurfaceMTL::Present() const {
 #else
       [command_buffer waitUntilScheduled];
 #endif  // defined(FML_OS_IOS_SIMULATOR) && defined(FML_ARCH_CPU_X86_64)
+      if (present_with_transaction_) {
+        NSArray<id<MTLDrawable>>* pending_drawables =
+            [CATransaction valueForKey:kPendingTransactionDrawablesKey];
+        [CATransaction setValue:nil forKey:kPendingTransactionDrawablesKey];
+        for (id<MTLDrawable> drawable in pending_drawables) {
+          [drawable present];
+        }
+      }
       [drawable_ present];
     } else {
       // The drawable may come from a FlutterMetalLayer, so it can't be
