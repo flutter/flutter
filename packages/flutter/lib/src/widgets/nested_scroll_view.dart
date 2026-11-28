@@ -1247,6 +1247,17 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   AxisDirection get axisDirection => context.axisDirection;
 
   @override
+  set semanticsScrollInProgress(bool value) {
+    super.semanticsScrollInProgress = value;
+    if (this == coordinator._outerPosition) {
+      // A drag on the outer scrollable also moves the inner positions.
+      for (final _NestedScrollPosition position in coordinator._innerPositions) {
+        position.semanticsScrollInProgress = value;
+      }
+    }
+  }
+
+  @override
   void absorb(ScrollPosition other) {
     super.absorb(other);
     activity!.updateDelegate(this);
@@ -1323,8 +1334,19 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
       return 0.0;
     }
     // Check for overscroll:
-    final double overscroll = physics.applyBoundaryConditions(this, newPixels);
-    final double actualNewPixels = newPixels - overscroll;
+    double overscroll = physics.applyBoundaryConditions(this, newPixels);
+    double actualNewPixels = newPixels - overscroll;
+    if (semanticsScrollInProgress) {
+      // A semantics scroll stops at the boundary instead of moving further
+      // out of range, as in [setPixels].
+      final double clampedPixels = clampDouble(
+        actualNewPixels,
+        math.min(oldPixels, minScrollExtent),
+        math.max(oldPixels, maxScrollExtent),
+      );
+      overscroll += actualNewPixels - clampedPixels;
+      actualNewPixels = clampedPixels;
+    }
     if (actualNewPixels != oldPixels) {
       forcePixels(actualNewPixels);
       didUpdateScrollPositionBy(actualNewPixels - oldPixels);
