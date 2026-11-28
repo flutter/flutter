@@ -713,7 +713,8 @@ class _DirectionalPolicyData {
 /// data for the affected [FocusScopeNode]. If the previous direction was the
 /// opposite of the current direction, then the this policy will request focus
 /// on the previously focused node. Change to another direction other than the
-/// current one or its opposite will clear the stack.
+/// current one or its opposite will clear the stack, as will a directional move
+/// within another [FocusScopeNode].
 ///
 /// For instance, if the focus moves down, down, down, and then up, up, up, it
 /// will follow the same path through the widgets in both directions. However,
@@ -814,6 +815,12 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     TraversalDirection direction, {
     bool forward = true,
   }) {
+    // Focusing a scope hands focus on to one of its descendants, which are
+    // candidates themselves, so a scope only gets in their way with a rect
+    // that spans all of them. A scope is its own nearest scope.
+    traversalDescendants = traversalDescendants.where(
+      (FocusNode node) => node.nearestScope != node,
+    );
     switch (direction) {
       case TraversalDirection.down:
       case TraversalDirection.up:
@@ -1142,7 +1149,14 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
       // Returns true if successfully popped the history.
       bool popOrInvalidate(TraversalDirection direction) {
         final FocusNode lastNode = policyData.history.removeLast().node;
-        if (Scrollable.maybeOf(lastNode.context!) != Scrollable.maybeOf(primaryFocus!.context!)) {
+        // Only scrollables along the axis of the move matter, so that nested
+        // scrollables along the other axis do not discard the history.
+        final Axis axis = switch (direction) {
+          TraversalDirection.up || TraversalDirection.down => Axis.vertical,
+          TraversalDirection.left || TraversalDirection.right => Axis.horizontal,
+        };
+        if (Scrollable.maybeOf(lastNode.context!, axis: axis) !=
+            Scrollable.maybeOf(primaryFocus!.context!, axis: axis)) {
           invalidateScopeData(nearestScope);
           return false;
         }
@@ -1211,41 +1225,10 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
   }
 
   bool _requestTraversalFocusInDirection(
-    FocusNode currentNode,
     FocusNode node,
-    FocusScopeNode nearestScope,
     TraversalDirection direction,
     _FocusTraversalGroupNode? groupNode,
   ) {
-    if (node is FocusScopeNode) {
-      if (node.focusedChild != null) {
-        return _requestTraversalFocusInDirection(
-          currentNode,
-          node.focusedChild!,
-          node,
-          direction,
-          groupNode,
-        );
-      }
-      final FocusNode firstNode = findFirstFocusInDirection(node, direction) ?? currentNode;
-      switch (direction) {
-        case TraversalDirection.up:
-        case TraversalDirection.left:
-          _requestFocus(
-            firstNode,
-            groupNode,
-            alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
-          );
-        case TraversalDirection.right:
-        case TraversalDirection.down:
-          _requestFocus(
-            firstNode,
-            groupNode,
-            alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
-          );
-      }
-      return true;
-    }
     final bool nodeHadPrimaryFocus = node.hasPrimaryFocus;
     switch (direction) {
       case TraversalDirection.up:
@@ -1336,13 +1319,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         return false;
     }
     if (found != null) {
-      return _requestTraversalFocusInDirection(
-        currentNode,
-        found,
-        nearestScope,
-        direction,
-        groupNode,
-      );
+      return _requestTraversalFocusInDirection(found, direction, groupNode);
     }
     return false;
   }
@@ -1360,7 +1337,8 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
   /// policy data for the affected [FocusScopeNode]. If the previous direction
   /// was the opposite of the current direction, then the this policy will
   /// request focus on the previously focused node. Change to another direction
-  /// other than the current one or its opposite will clear the stack.
+  /// other than the current one or its opposite will clear the stack, as will a
+  /// directional move within another [FocusScopeNode].
   ///
   /// If this function returns true when called by a subclass, then the subclass
   /// should return true and not request focus from any node.
@@ -1369,7 +1347,11 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
   bool inDirection(FocusNode currentNode, TraversalDirection direction) {
     final _FocusTraversalGroupNode? groupNode = FocusTraversalGroup._getGroupNode(currentNode);
     final FocusScopeNode nearestScope = currentNode.nearestScope!;
-    final FocusNode? focusedChild = nearestScope.focusedChild;
+    // A move within this scope leaves the history of every other scope stale.
+    _policyData.removeWhere((FocusScopeNode scope, _) => scope != nearestScope);
+    // A scope's rect spans all of its children, so start from the innermost
+    // focused node to reflect where focus actually is.
+    final FocusNode? focusedChild = nearestScope.focusedChild?.innermostFocusedChild;
     if (focusedChild == null) {
       final FocusNode firstFocus = findFirstFocusInDirection(currentNode, direction) ?? currentNode;
       switch (direction) {
@@ -1400,13 +1382,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     );
     if (found != null) {
       _pushPolicyData(direction, nearestScope, focusedChild);
-      return _requestTraversalFocusInDirection(
-        currentNode,
-        found,
-        nearestScope,
-        direction,
-        groupNode,
-      );
+      return _requestTraversalFocusInDirection(found, direction, groupNode);
     }
     return _onEdgeForDirection(currentNode, focusedChild, groupNode, direction);
   }
