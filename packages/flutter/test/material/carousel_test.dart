@@ -2929,6 +2929,60 @@ void main() {
 
     expect(position.pixels, 0.0);
   });
+
+  test('CarouselScrollPhysics.allowSelectionEdgeScrolling is false', () {
+    expect(const CarouselScrollPhysics().allowSelectionEdgeScrolling, isFalse);
+    expect(
+      const ClampingScrollPhysics(parent: CarouselScrollPhysics()).allowSelectionEdgeScrolling,
+      isFalse,
+    );
+  });
+
+  testWidgets('CarouselView does not snap items when selection extends past edge', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/190737.
+    final controller = CarouselController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.macOS),
+        home: Scaffold(
+          body: SelectionArea(
+            child: CarouselView(
+              itemSnapping: true,
+              controller: controller,
+              itemExtent: 300.0,
+              children: List<Widget>.generate(5, (int index) {
+                return Center(child: Text('Item $index content'));
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(controller.offset, 0.0);
+
+    final Offset start = tester.getCenter(find.text('Item 0 content'));
+    final Rect box = tester.getRect(find.byType(CarouselView));
+    final target = Offset(box.right + 40.0, box.center.dy);
+
+    final TestGesture gesture = await tester.startGesture(start, kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(target);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // The CarouselView should not have scrolled / snapped to the next item.
+    expect(controller.offset, 0.0);
+    expect(tester.takeException(), isNull);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
 }
 
 Finder getItem(int index) {
