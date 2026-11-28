@@ -99,6 +99,17 @@ HCURSOR WindowsProcTable::SetCursor(HCURSOR cursor) const {
   return ::SetCursor(cursor);
 }
 
+UINT_PTR WindowsProcTable::SetTimer(HWND hwnd,
+                                    UINT_PTR timer_id,
+                                    UINT interval,
+                                    TIMERPROC callback) const {
+  return ::SetTimer(hwnd, timer_id, interval, callback);
+}
+
+BOOL WindowsProcTable::KillTimer(HWND hwnd, UINT_PTR timer_id) const {
+  return ::KillTimer(hwnd, timer_id);
+}
+
 BOOL WindowsProcTable::EnableNonClientDpiScaling(HWND hwnd) const {
   if (!enable_non_client_dpi_scaling_.has_value()) {
     return FALSE;

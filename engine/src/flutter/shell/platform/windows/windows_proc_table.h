@@ -91,6 +91,21 @@ class WindowsProcTable {
   // https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-setcursor
   virtual HCURSOR SetCursor(HCURSOR cursor) const;
 
+  // Creates a timer with the specified time-out value.
+  //
+  // See:
+  // https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-settimer
+  virtual UINT_PTR SetTimer(HWND hwnd,
+                            UINT_PTR timer_id,
+                            UINT interval,
+                            TIMERPROC callback) const;
+
+  // Destroys the specified timer.
+  //
+  // See:
+  // https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-killtimer
+  virtual BOOL KillTimer(HWND hwnd, UINT_PTR timer_id) const;
+
   // Enables automatic display scaling of the non-client area portions of the
   // specified top-level window.
   //

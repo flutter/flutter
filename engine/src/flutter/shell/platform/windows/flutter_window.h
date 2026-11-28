@@ -198,6 +198,10 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   // Called on a resize or focus event.
   virtual void OnWindowStateEvent(WindowStateEvent event);
 
+  // Enables or disables gesture polling. Called on the platform thread by its
+  // interaction event handler.
+  void SetDirectManipulationNeedsUpdate(bool needs_update);
+
  protected:
   // Base constructor for mocks.
   FlutterWindow();
@@ -302,6 +306,9 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
 
   // Timer identifier for DirectManipulation gesture polling.
   static const int kDirectManipulationTimer = 1;
+
+  // Also guards against WM_TIMER messages queued before KillTimer was called.
+  bool direct_manipulation_timer_running_ = false;
 
   // Release OS resources associated with the window.
   void Destroy();

@@ -23,6 +23,9 @@ UINT MockWindow::GetDpi() {
 
 void MockWindow::SetDirectManipulationOwner(
     std::unique_ptr<DirectManipulationOwner> owner) {
+  if (direct_manipulation_owner_) {
+    direct_manipulation_owner_->Destroy();
+  }
   direct_manipulation_owner_ = std::move(owner);
 }
 
