@@ -323,4 +323,118 @@ void main() {
     );
     expect(tester.getSize(find.byType(RichText)), Size.zero);
   });
+
+  group('selection registrar', () {
+    Widget richText(
+      SelectionRegistrar? registrar, {
+      Key? key,
+      Color color = const Color(0x660000FF),
+    }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: RichText(
+          key: key,
+          selectionRegistrar: registrar,
+          selectionColor: color,
+          text: const TextSpan(
+            text: 'hello ',
+            children: <InlineSpan>[
+              WidgetSpan(child: _InitCounter()),
+              TextSpan(text: ' world'),
+            ],
+          ),
+        ),
+      );
+    }
+
+    setUp(() {
+      _InitCounter.initCount = 0;
+    });
+
+    testWidgets('registers one grouped selectable and follows registrar changes', (
+      WidgetTester tester,
+    ) async {
+      final a = _RecordingRegistrar();
+      final b = _RecordingRegistrar();
+
+      await tester.pumpWidget(richText(a));
+      expect(a.selectables, hasLength(1));
+      expect(b.selectables, isEmpty);
+
+      await tester.pumpWidget(richText(b));
+      expect(a.selectables, isEmpty);
+      expect(b.selectables, hasLength(1));
+
+      await tester.pumpWidget(richText(b, color: const Color(0x6600FF00)));
+      expect(b.selectables, hasLength(1));
+      // Changing between non-null registrars keeps the state of WidgetSpans.
+      expect(_InitCounter.initCount, 1);
+
+      await tester.pumpWidget(richText(null));
+      expect(a.selectables, isEmpty);
+      expect(b.selectables, isEmpty);
+
+      await tester.pumpWidget(richText(a));
+      expect(a.selectables, hasLength(1));
+
+      await tester.pumpWidget(const SizedBox());
+      expect(a.selectables, isEmpty);
+    });
+
+    testWidgets('moves its registration when reparented with a GlobalKey', (
+      WidgetTester tester,
+    ) async {
+      final a = _RecordingRegistrar();
+      final b = _RecordingRegistrar();
+      final GlobalKey key = GlobalKey();
+
+      await tester.pumpWidget(Column(children: <Widget>[richText(a, key: key)]));
+      expect(a.selectables, hasLength(1));
+
+      await tester.pumpWidget(
+        Column(
+          children: <Widget>[
+            const SizedBox(),
+            Padding(
+              padding: const EdgeInsets.all(4),
+              child: richText(b, key: key),
+            ),
+          ],
+        ),
+      );
+      expect(a.selectables, isEmpty);
+      expect(b.selectables, hasLength(1));
+      expect(_InitCounter.initCount, 1);
+    });
+  });
+}
+
+class _RecordingRegistrar extends SelectionRegistrar {
+  final Set<Selectable> selectables = <Selectable>{};
+
+  @override
+  void add(Selectable selectable) => selectables.add(selectable);
+
+  @override
+  void remove(Selectable selectable) => selectables.remove(selectable);
+}
+
+class _InitCounter extends StatefulWidget {
+  const _InitCounter();
+
+  static int initCount = 0;
+
+  @override
+  State<_InitCounter> createState() => _InitCounterState();
+}
+
+class _InitCounterState extends State<_InitCounter> {
+  @override
+  void initState() {
+    super.initState();
+    _InitCounter.initCount += 1;
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox(width: 10, height: 10);
 }
