@@ -1,5 +1,6 @@
 package io.flutter.plugin.editing;
 
+import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -28,6 +29,7 @@ import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
@@ -35,6 +37,7 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.TextAttribute;
 import androidx.core.view.inputmethod.InputConnectionCompat;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -48,6 +51,7 @@ import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.common.JSONMethodCodec;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.util.FakeKeyEvent;
+import io.flutter.view.AccessibilityBridge;
 import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -1326,6 +1330,219 @@ public class InputConnectionAdaptorTest {
         editable,
         null,
         mockFlutterJNI);
+  }
+
+  private static InputConnectionAdaptor sampleInputConnectionAdaptorWithView(
+      View view, ListenableEditingState editable) {
+    if (view.getContext() == null) {
+      when(view.getContext()).thenReturn(ApplicationProvider.getApplicationContext());
+    }
+    TextInputChannel textInputChannel = mock(TextInputChannel.class);
+    ScribeChannel scribeChannel = mock(ScribeChannel.class);
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    return new InputConnectionAdaptor(
+        view,
+        0,
+        textInputChannel,
+        scribeChannel,
+        mock(KeyboardManager.class),
+        editable,
+        null,
+        mockFlutterJNI);
+  }
+
+  private static final int IN_COMPOSITION = AccessibilityEvent.TEXT_CHANGE_TYPE_IN_COMPOSITION;
+  private static final int COMMITTED_BY_IME = AccessibilityEvent.TEXT_CHANGE_TYPE_COMMITTED_BY_IME;
+  private static final int SUGGESTION_SELECTED =
+      AccessibilityEvent.TEXT_CHANGE_TYPE_CONVERSION_SUGGESTION_SELECTED_BY_IME;
+
+  private static TextAttribute textAttribute(boolean suggestionSelected) {
+    return new TextAttribute.Builder().setTextSuggestionSelected(suggestionSelected).build();
+  }
+
+  private static AccessibilityBridge mockBridgeFor(View view) {
+    AccessibilityBridge mockBridge = mock(AccessibilityBridge.class);
+    when(view.getAccessibilityNodeProvider()).thenReturn(mockBridge);
+    return mockBridge;
+  }
+
+  @Test
+  public void commitText_withTextAttribute_recordsCommittedByImeOnce() {
+    View mockView = mock(View.class);
+    AccessibilityBridge mockBridge = mockBridgeFor(mockView);
+    InputConnectionAdaptor adaptor =
+        sampleInputConnectionAdaptorWithView(mockView, sampleEditable(0, 0, ""));
+
+    adaptor.commitText("hello", 1, textAttribute(false));
+
+    verify(mockBridge, times(1)).addImeTextChange(anyString(), anyInt());
+    verify(mockBridge).addImeTextChange("hello", COMMITTED_BY_IME);
+  }
+
+  @Test
+  public void commitText_withNullTextAttribute_recordsCommittedByIme() {
+    View mockView = mock(View.class);
+    AccessibilityBridge mockBridge = mockBridgeFor(mockView);
+    InputConnectionAdaptor adaptor =
+        sampleInputConnectionAdaptorWithView(mockView, sampleEditable(0, 0, ""));
+
+    adaptor.commitText("hello", 1, null);
+
+    verify(mockBridge).addImeTextChange("hello", COMMITTED_BY_IME);
+  }
+
+  @Test
+  public void commitText_withoutTextAttribute_recordsCommittedByIme() {
+    View mockView = mock(View.class);
+    AccessibilityBridge mockBridge = mockBridgeFor(mockView);
+    InputConnectionAdaptor adaptor =
+        sampleInputConnectionAdaptorWithView(mockView, sampleEditable(0, 0, ""));
+
+    adaptor.commitText("hello", 1);
+
+    verify(mockBridge).addImeTextChange("hello", COMMITTED_BY_IME);
+  }
+
+  @Test
+  public void setComposingText_withTextAttribute_recordsInCompositionOnce() {
+    View mockView = mock(View.class);
+    AccessibilityBridge mockBridge = mockBridgeFor(mockView);
+    InputConnectionAdaptor adaptor =
+        sampleInputConnectionAdaptorWithView(mockView, sampleEditable(0, 0, ""));
+
+    adaptor.setComposingText("test", 1, textAttribute(false));
+
+    verify(mockBridge, times(1)).addImeTextChange(anyString(), anyInt());
+    verify(mockBridge).addImeTextChange("test", IN_COMPOSITION);
+  }
+
+  @Test
+  public void setComposingText_withSuggestionSelected_recordsSuggestionSelectedInComposition() {
+    View mockView = mock(View.class);
+    AccessibilityBridge mockBridge = mockBridgeFor(mockView);
+    InputConnectionAdaptor adaptor =
+        sampleInputConnectionAdaptorWithView(mockView, sampleEditable(0, 0, ""));
+
+    adaptor.setComposingText("漢字", 1, textAttribute(true));
+
+    verify(mockBridge).addImeTextChange("漢字", IN_COMPOSITION | SUGGESTION_SELECTED);
+  }
+
+  @Test
+  public void setComposingText_suggestionSelectedDoesNotLeakIntoLaterCalls() {
+    View mockView = mock(View.class);
+    AccessibilityBridge mockBridge = mockBridgeFor(mockView);
+    InputConnectionAdaptor adaptor =
+        sampleInputConnectionAdaptorWithView(mockView, sampleEditable(0, 0, ""));
+
+    adaptor.setComposingText("漢字", 1, textAttribute(true));
+    adaptor.setComposingText("漢字の", 1);
+
+    verify(mockBridge).addImeTextChange("漢字の", IN_COMPOSITION);
+  }
+
+  @Test
+  public void commitText_withoutTextAttribute_keepsSuggestionSelectedFromComposingText() {
+    // Gboard composes with setComposingText(..., TextAttribute) and commits with the 2-arg
+    // commitText. A platform EditText reports that commit as COMMITTED | SUGGESTION_SELECTED.
+    View mockView = mock(View.class);
+    AccessibilityBridge mockBridge = mockBridgeFor(mockView);
+    InputConnectionAdaptor adaptor =
+        sampleInputConnectionAdaptorWithView(mockView, sampleEditable(0, 0, ""));
+
+    adaptor.setComposingText("漢字", 1, textAttribute(true));
+    adaptor.commitText("漢字", 1);
+
+    verify(mockBridge).addImeTextChange("漢字", COMMITTED_BY_IME | SUGGESTION_SELECTED);
+  }
+
+  @Test
+  public void commitText_withNullTextAttribute_keepsSuggestionSelectedFromComposingText() {
+    View mockView = mock(View.class);
+    AccessibilityBridge mockBridge = mockBridgeFor(mockView);
+    InputConnectionAdaptor adaptor =
+        sampleInputConnectionAdaptorWithView(mockView, sampleEditable(0, 0, ""));
+
+    adaptor.setComposingText("漢字", 1, textAttribute(true));
+    adaptor.commitText("漢字", 1, null);
+
+    verify(mockBridge).addImeTextChange("漢字", COMMITTED_BY_IME | SUGGESTION_SELECTED);
+  }
+
+  @Test
+  public void commitText_withTextAttribute_usesItsSuggestionSelectedValue() {
+    View mockView = mock(View.class);
+    AccessibilityBridge mockBridge = mockBridgeFor(mockView);
+    InputConnectionAdaptor adaptor =
+        sampleInputConnectionAdaptorWithView(mockView, sampleEditable(0, 0, ""));
+
+    adaptor.setComposingText("漢字", 1, textAttribute(true));
+    adaptor.commitText("漢字", 1, textAttribute(false));
+
+    verify(mockBridge).addImeTextChange("漢字", COMMITTED_BY_IME);
+  }
+
+  @Test
+  public void setComposingText_withoutTextAttribute_recordsInComposition() {
+    View mockView = mock(View.class);
+    AccessibilityBridge mockBridge = mockBridgeFor(mockView);
+    InputConnectionAdaptor adaptor =
+        sampleInputConnectionAdaptorWithView(mockView, sampleEditable(0, 0, ""));
+
+    adaptor.setComposingText("ねこ", 1);
+
+    verify(mockBridge).addImeTextChange("ねこ", IN_COMPOSITION);
+  }
+
+  @Test
+  public void setComposingText_withEmptyText_recordsCommittedByIme() {
+    View mockView = mock(View.class);
+    AccessibilityBridge mockBridge = mockBridgeFor(mockView);
+    InputConnectionAdaptor adaptor =
+        sampleInputConnectionAdaptorWithView(mockView, sampleEditable(0, 0, "initial"));
+
+    adaptor.setComposingText("", 1, textAttribute(false));
+
+    verify(mockBridge).addImeTextChange("initial", COMMITTED_BY_IME);
+  }
+
+  @Test
+  public void setComposingRegionAndFinishComposingText_doNotRecordTextChanges() {
+    // A platform EditText sends no TYPE_VIEW_TEXT_CHANGED for these calls because the text does
+    // not change.
+    View mockView = mock(View.class);
+    AccessibilityBridge mockBridge = mockBridgeFor(mockView);
+    InputConnectionAdaptor adaptor =
+        sampleInputConnectionAdaptorWithView(mockView, sampleEditable(0, 0, "hello"));
+
+    adaptor.setComposingRegion(0, 5, textAttribute(false));
+    adaptor.finishComposingText();
+
+    verify(mockBridge, never()).addImeTextChange(anyString(), anyInt());
+  }
+
+  @Test
+  public void commitText_withAccessibilityDisabled_doesNotThrow() {
+    View mockView = mock(View.class);
+    when(mockView.getAccessibilityNodeProvider()).thenReturn(null);
+    InputConnectionAdaptor adaptor =
+        sampleInputConnectionAdaptorWithView(mockView, sampleEditable(0, 0, ""));
+
+    assertTrue(adaptor.commitText("hello", 1, textAttribute(false)));
+  }
+
+  @Test
+  @Config(sdk = API_LEVELS.API_36)
+  public void commitText_preApi37_doesNotRecordTextChanges() {
+    View mockView = mock(View.class);
+    AccessibilityBridge mockBridge = mockBridgeFor(mockView);
+    InputConnectionAdaptor adaptor =
+        sampleInputConnectionAdaptorWithView(mockView, sampleEditable(0, 0, ""));
+
+    adaptor.commitText("hello", 1, new TextAttribute.Builder().build());
+    adaptor.setComposingText("hi", 1);
+
+    verify(mockBridge, never()).addImeTextChange(anyString(), anyInt());
   }
 
   private static class Emoji {
