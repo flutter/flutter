@@ -721,6 +721,16 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     originalEvent.offsetLocation(xOffset, yOffset);
   }
 
+  private static boolean hasSamePointerIds(
+      MotionEvent trackedEvent, PointerProperties[] pointerProperties) {
+    for (int i = 0; i < pointerProperties.length; i++) {
+      if (trackedEvent.getPointerId(i) != pointerProperties[i].id) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   @VisibleForTesting
   public MotionEvent toMotionEvent(
       float density, PlatformViewTouch touch, boolean usingVirtualDisplay) {
@@ -745,15 +755,16 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
             .toArray(new PointerProperties[touch.pointerCount]);
 
     if (!usingVirtualDisplay && trackedEvent != null) {
-      // We have the original event. Check if pointer counts and actions match.
+      // We have the original event. Check if pointer counts, actions, and pointer IDs match.
       if (trackedEvent.getPointerCount() == touch.pointerCount
-          && trackedEvent.getAction() == touch.action) {
+          && trackedEvent.getAction() == touch.action
+          && hasSamePointerIds(trackedEvent, pointerProperties)) {
         // This preserves the verifiable input flag.
         translateMotionEvent(trackedEvent, pointerCoords);
         return trackedEvent;
       }
 
-      // Pointer count or action mismatch detected
+      // Pointer count, action, or pointer ID mismatch detected
       // (e.g., gesture recognizer filtered some pointers).
       // This commonly occurs when:
       // - Multi-touch gestures (zoom/pinch) are filtered by gesture recognizers
