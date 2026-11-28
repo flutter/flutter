@@ -3,7 +3,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.7|Mac-26.6",
+        "os=Mac-26.6",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -63,7 +63,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.7|Mac-26.6",
+        "os=Mac-26.6",
         "device_type=none"
       ],
       "gclient_variables": {
