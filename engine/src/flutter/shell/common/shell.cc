@@ -27,6 +27,7 @@
 #include "flutter/fml/paths.h"
 #include "flutter/fml/task_runner_util.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/runtime/dart_heap_profiler.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/common/base64.h"
 #include "flutter/shell/common/engine.h"
@@ -754,6 +755,7 @@ void Shell::NotifyLowMemoryWarning() const {
   // Since a valid shell will not be returned to the embedder without a valid
   // DartVMRef, we can be certain that this is a safe spot to assume a VM is
   // running.
+  DartHeapProfiler::NotifyLowMemory();
   ::Dart_NotifyLowMemory();
 
   task_runners_.GetRasterTaskRunner()->PostTask(

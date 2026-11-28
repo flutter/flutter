@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/common/heapprofd.gni")
+
 # The engine build uses some Chromium-sourced versions of third-party
 # dependencies (e.g, ANGLE, abseil) to use their GN build files, but we don't
 # want the Chromium-specific parts of the build.
@@ -14,5 +16,27 @@ perfetto_build_with_embedder = true
 
 perfetto_root_path = "//flutter/third_party/dart/third_party/perfetto/src/"
 
-perfetto_protobuf_target_prefix = "//flutter/third_party/dart/third_party/perfetto/mock_protobuf"
+perfetto_protobuf_target_prefix =
+    "//flutter/third_party/dart/third_party/perfetto/mock_protobuf"
 perfetto_protobuf_gni = perfetto_protobuf_target_prefix + "/proto_library.gni"
+
+if (flutter_enable_heapprofd) {
+  # Omit .eh_frame unwind tables on Perfetto helper targets; Perfetto code is
+  # never on a Dart allocation callstack and builds with -fno-exceptions.
+  template("source_set") {
+    target("source_set", target_name) {
+      forward_variables_from(invoker, "*")
+      if (filter_include(
+              [ get_label_info(":$target_name", "dir") ],
+              [ "//flutter/third_party/dart/third_party/perfetto/*" ]) != []) {
+        if (!defined(cflags)) {
+          cflags = []
+        }
+        cflags += [
+          "-fno-unwind-tables",
+          "-fno-asynchronous-unwind-tables",
+        ]
+      }
+    }
+  }
+}

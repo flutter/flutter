@@ -22,6 +22,7 @@
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/android/android_context_vk_impeller.h"
+#include "flutter/shell/platform/android/android_dart_heap_profiler.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/flutter_main.h"
@@ -204,6 +205,7 @@ void FlutterMain::Init(JNIEnv* env,
   // longer be a singleton.
   g_flutter_main.reset(new FlutterMain(settings, android_rendering_api));
   g_flutter_main->SetupDartVMServiceUriCallback(env);
+  InitializeAndroidDartHeapProfiler(api_level);
 }
 
 void FlutterMain::SetupDartVMServiceUriCallback(JNIEnv* env) {
