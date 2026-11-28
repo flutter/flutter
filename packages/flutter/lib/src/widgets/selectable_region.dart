@@ -2588,8 +2588,22 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   Comparator<Selectable> get compareOrder => _compareScreenOrder;
 
   static int _compareScreenOrder(Selectable a, Selectable b) {
-    final Rect rectA = MatrixUtils.transformRect(a.getTransformTo(null), _getBoundingBox(a));
-    final Rect rectB = MatrixUtils.transformRect(b.getTransformTo(null), _getBoundingBox(b));
+    final ({RenderParagraph paragraph, int start})? fragmentA =
+        RenderParagraph.selectableFragmentInfo(a);
+    final ({RenderParagraph paragraph, int start})? fragmentB =
+        RenderParagraph.selectableFragmentInfo(b);
+    if (fragmentA != null && fragmentA.paragraph == fragmentB?.paragraph) {
+      return fragmentA.start.compareTo(fragmentB!.start);
+    }
+    // A wrapped fragment can extend left of a preceding fragment on a later line.
+    final Rect rectA = MatrixUtils.transformRect(
+      a.getTransformTo(null),
+      fragmentA == null ? _getBoundingBox(a) : a.boundingBoxes.first,
+    );
+    final Rect rectB = MatrixUtils.transformRect(
+      b.getTransformTo(null),
+      fragmentB == null ? _getBoundingBox(b) : b.boundingBoxes.first,
+    );
     final int result = _compareVertically(rectA, rectB);
     if (result != 0) {
       return result;
@@ -3021,6 +3035,14 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         }
       }
       if (globalRectsContainPosition) {
+        if (event is SelectParagraphSelectionEvent && !event.absorb) {
+          final RenderParagraph? paragraph = RenderParagraph.selectableFragmentInfo(
+            selectables[index],
+          )?.paragraph;
+          if (paragraph != null) {
+            return _selectParagraphFragments(paragraph, event);
+          }
+        }
         final SelectionGeometry existingGeometry = selectables[index].value;
         lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
         if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
@@ -3057,6 +3079,28 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         // selection of other selectables to keep selection in sync.
         _clearSelectables(skipIndex: nearestIndex);
         currentSelectionStartIndex = currentSelectionEndIndex = nearestIndex;
+      }
+    }
+    return SelectionResult.end;
+  }
+
+  SelectionResult _selectParagraphFragments(
+    RenderParagraph paragraph,
+    SelectParagraphSelectionEvent event,
+  ) {
+    _clearSelectables();
+    currentSelectionStartIndex = currentSelectionEndIndex = -1;
+    for (var index = 0; index < selectables.length; index += 1) {
+      final Selectable selectable = selectables[index];
+      if (RenderParagraph.selectableFragmentInfo(selectable)?.paragraph != paragraph) {
+        continue;
+      }
+      dispatchSelectionEventToChild(selectable, event);
+      if (selectable.value.hasSelection) {
+        if (currentSelectionStartIndex == -1) {
+          currentSelectionStartIndex = index;
+        }
+        currentSelectionEndIndex = index;
       }
     }
     return SelectionResult.end;
