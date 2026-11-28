@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <utility>
+
 #include "flutter/testing/testing.h"  // IWYU pragma: keep.
 #include "fml/synchronization/count_down_latch.h"
 #include "fml/synchronization/waitable_event.h"
@@ -64,10 +66,17 @@ class DeathRattle final {
   explicit DeathRattle(std::function<void()> callback)
       : callback_(std::move(callback)) {}
 
-  DeathRattle(DeathRattle&&) = default;
-  DeathRattle& operator=(DeathRattle&&) = default;
+  // A moved-from std::function is left in an unspecified state. libc++ keeps
+  // a small callable in it, which would fire the callback a second time, and
+  // the MSVC STL empties it, which would make the destructor throw.
+  DeathRattle(DeathRattle&& other) noexcept
+      : callback_(std::exchange(other.callback_, nullptr)) {}
 
-  ~DeathRattle() { callback_(); }
+  ~DeathRattle() {
+    if (callback_) {
+      callback_();
+    }
+  }
 
  private:
   std::function<void()> callback_;
@@ -105,6 +114,17 @@ std::shared_ptr<std::vector<std::string>> ReclaimAndGetMockVulkanFunctions(
 }
 
 }  // namespace
+
+TEST(CommandPoolRecyclerVKTest, DeathRattleFiresOnceWhenMoved) {
+  // WaitForReclaim relies on this: it moves its DeathRattle into a resource
+  // and then destroys the moved-from local.
+  int rattles = 0;
+  {
+    DeathRattle rattle([&rattles]() { rattles++; });
+    DeathRattle moved(std::move(rattle));
+  }
+  EXPECT_EQ(rattles, 1);
+}
 
 TEST(CommandPoolRecyclerVKTest, ReclaimMakesCommandPoolAvailable) {
   auto const context = MockVulkanContextBuilder().Build();
