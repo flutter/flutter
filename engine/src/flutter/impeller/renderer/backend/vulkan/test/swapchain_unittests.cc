@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
+#include "fml/synchronization/count_down_latch.h"
 #include "gtest/gtest.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
@@ -202,6 +203,26 @@ TEST(SwapchainTest, SwapchainSizeChangeDoesNotAcquireDrawable) {
   EXPECT_EQ(acquire_call_count, 1);
 }
 
+namespace {
+
+// Flush FenceWaiterVK with two sequential submits so the first batch's
+// erased_entries cleanup (including released GPUProbes) has fully completed
+// before assertions or subsequent wrap-around frames run.
+void FlushFenceWaiter(const std::shared_ptr<ContextVK>& context) {
+  for (int i = 0; i < 2; ++i) {
+    auto latch = std::make_shared<fml::CountDownLatch>(1u);
+    auto flush_cmd = context->CreateCommandBuffer();
+    ASSERT_TRUE(
+        context->GetCommandQueue()
+            ->Submit({flush_cmd},
+                     [latch](CommandBuffer::Status) { latch->CountDown(); })
+            .ok());
+    latch->Wait();
+  }
+}
+
+}  // namespace
+
 #ifdef IMPELLER_DEBUG
 TEST(SwapchainTest, TracesOnscreenCommandBufferStartAndEnd) {
   auto const context =
@@ -219,8 +240,8 @@ TEST(SwapchainTest, TracesOnscreenCommandBufferStartAndEnd) {
                              /*enable_msaa=*/false);
   ASSERT_TRUE(swapchain->IsValid());
 
-  // Render 3 frames so the first frame's synchronizer slot (kMaxFramesInFlight
-  // == 2) is reused and its GPUProbe is destroyed, triggering query readback.
+  // Render 3 frames and verify each onscreen command buffer records both start
+  // and end timestamps and triggers query readback once its fence completes.
   for (size_t i = 0; i < 3u; ++i) {
     auto drawable = swapchain->AcquireNextDrawable();
     ASSERT_NE(drawable, nullptr);
@@ -247,11 +268,52 @@ TEST(SwapchainTest, TracesOnscreenCommandBufferStartAndEnd) {
   }
 
   swapchain.reset();
+  FlushFenceWaiter(context);
 
   auto query_counts = GetQueryPoolResultCounts(context->GetDevice());
   ASSERT_EQ(query_counts.size(), 3u);
   for (uint32_t count : query_counts) {
     EXPECT_EQ(count, 2u);
+  }
+}
+
+TEST(SwapchainTest, IdleSwapchainReleasesFinalCmdBufferProbe) {
+  auto const context =
+      MockVulkanContextBuilder()
+          .SetSettingsCallback([](ContextVK::Settings& settings) {
+            settings.enable_gpu_tracing = true;
+          })
+          .Build();
+  ASSERT_TRUE(context->GetGPUTracer()->IsEnabled());
+
+  // Present once on swapchain1, then leave it idle.
+  auto surface1 = CreateSurface(*context);
+  SetSwapchainImageSize(ISize{1, 1});
+  auto swapchain1 = KHRSwapchainVK::Create(context, std::move(surface1),
+                                           ISize(1, 1), /*enable_msaa=*/false);
+  ASSERT_NE(swapchain1, nullptr);
+  auto drawable1 = swapchain1->AcquireNextDrawable();
+  ASSERT_NE(drawable1, nullptr);
+  auto cmd_buffer = context->CreateCommandBuffer();
+  ASSERT_NE(cmd_buffer, nullptr);
+  swapchain1->AddFinalCommandBuffer(std::move(cmd_buffer));
+  ASSERT_TRUE(drawable1->Present());
+
+  FlushFenceWaiter(context);
+  EXPECT_EQ(GetQueryPoolResultCounts(context->GetDevice()).size(), 1u);
+
+  // Present 17 frames on swapchain2 (exceeding kTraceStatesSize = 16).
+  // If swapchain1 retained its final_cmd_buffer GPUProbe, wrapping back to
+  // state 0 trips FML_DCHECK(state.pending_buffers == 0u).
+  auto surface2 = CreateSurface(*context);
+  auto swapchain2 = KHRSwapchainVK::Create(context, std::move(surface2),
+                                           ISize(1, 1), /*enable_msaa=*/false);
+  ASSERT_NE(swapchain2, nullptr);
+  for (int i = 0; i < 17; ++i) {
+    auto drawable2 = swapchain2->AcquireNextDrawable();
+    ASSERT_NE(drawable2, nullptr);
+    ASSERT_TRUE(drawable2->Present());
+    FlushFenceWaiter(context);
   }
 }
 #endif  // IMPELLER_DEBUG

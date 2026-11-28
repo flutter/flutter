@@ -470,10 +470,12 @@ bool KHRSwapchainImplVK::Present(
     barrier.dst_stage = vk::PipelineStageFlagBits::eBottomOfPipe;
 
     if (!image->SetLayout(barrier).ok()) {
+      sync->final_cmd_buffer.reset();
       return false;
     }
 
     if (!final_cmd_buffer.EndCommandBuffer()) {
+      sync->final_cmd_buffer.reset();
       return false;
     }
   }
@@ -494,9 +496,12 @@ bool KHRSwapchainImplVK::Present(
     if (result != vk::Result::eSuccess) {
       VALIDATION_LOG << "Could not wait on render semaphore: "
                      << vk::to_string(result);
+      sync->final_cmd_buffer.reset();
       return false;
     }
     sync->acquire_fence_pending = true;
+    context.GetGPUTracer()->ReleaseCommandBufferOnFence(
+        context, *sync->final_cmd_buffer);
   }
 
   //----------------------------------------------------------------------------

@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/vulkan/tracked_objects_vk.h"
 
+#include "fml/logging.h"
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/gpu_tracer_vk.h"
 
@@ -78,7 +79,12 @@ DescriptorPoolVK& TrackedObjectsVK::GetDescriptorPool() {
 }
 
 GPUProbe& TrackedObjectsVK::GetGPUProbe() const {
+  FML_DCHECK(probe_);
   return *probe_.get();
+}
+
+std::unique_ptr<GPUProbe> TrackedObjectsVK::ReleaseGPUProbe() {
+  return std::move(probe_);
 }
 
 }  // namespace impeller

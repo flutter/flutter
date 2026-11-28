@@ -39,6 +39,10 @@ class TrackedObjectsVK {
 
   GPUProbe& GetGPUProbe() const;
 
+  GPUProbe* GetGPUProbePtr() const { return probe_.get(); }
+
+  std::unique_ptr<GPUProbe> ReleaseGPUProbe();
+
  private:
   std::shared_ptr<DescriptorPoolVK> desc_pool_;
   // `shared_ptr` since command buffers have a link to the command pool.

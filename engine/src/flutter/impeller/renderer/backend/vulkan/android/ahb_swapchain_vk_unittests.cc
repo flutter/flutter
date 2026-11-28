@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "fml/synchronization/count_down_latch.h"
 #include "gtest/gtest.h"
 
 #include "impeller/renderer/backend/vulkan/android/android_test_utils.h"
@@ -145,8 +146,8 @@ TEST(AndroidAHBSwapchainTest, TracesOnscreenCommandBufferStartAndEnd) {
   ASSERT_NE(ahb_swapchain, nullptr);
   ASSERT_TRUE(ahb_swapchain->IsValid());
 
-  // Render 3 frames so the first frame's synchronizer slot
-  // (kMaxPendingPresents == 2) is reused and its GPUProbe completes.
+  // Render 3 frames and verify each onscreen command buffer records both start
+  // and end timestamps and triggers query readback once its fence completes.
   for (size_t i = 0; i < 3u; ++i) {
     auto drawable = ahb_swapchain->AcquireNextDrawable();
     ASSERT_NE(drawable, nullptr);
@@ -174,6 +175,17 @@ TEST(AndroidAHBSwapchainTest, TracesOnscreenCommandBufferStartAndEnd) {
   }
 
   ahb_swapchain.reset();
+
+  for (int i = 0; i < 2; ++i) {
+    auto latch = std::make_shared<fml::CountDownLatch>(1u);
+    auto flush_cmd = context->CreateCommandBuffer();
+    ASSERT_TRUE(
+        context->GetCommandQueue()
+            ->Submit({flush_cmd},
+                     [latch](CommandBuffer::Status) { latch->CountDown(); })
+            .ok());
+    latch->Wait();
+  }
 
   auto query_counts =
       impeller::testing::GetQueryPoolResultCounts(context->GetDevice());
