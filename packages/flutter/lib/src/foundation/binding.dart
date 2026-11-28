@@ -215,7 +215,8 @@ abstract class BindingBase {
   /// Unlike the views [platformDispatcher] reports, this window — like
   /// [ui.window] and [ui.PlatformDispatcher.instance] — reports the metrics the
   /// platform reports, and does not apply the debug-only
-  /// [debugViewMetricsOverrides] that tooling such as DevTools installs.
+  /// [debugViewMetricsOverrides] and [debugAllViewsMetricsOverride] that
+  /// tooling such as DevTools installs.
   ///
   /// See also:
   ///
@@ -255,13 +256,13 @@ abstract class BindingBase {
   ///
   /// In debug mode, this is [ui.PlatformDispatcher.instance] wrapped by
   /// [debugApplyViewMetricsOverrides], so that it and the views it reports apply
-  /// [debugViewMetricsOverrides]; see [DebugViewMetricsOverride]. The views it
-  /// reports are therefore not identical to the ones
+  /// [debugViewMetricsOverrides] and [debugAllViewsMetricsOverride]. The
+  /// views it reports are therefore not identical to the ones
   /// [ui.PlatformDispatcher.instance] reports; compare views by
   /// [FlutterView.viewId] when both are in hand. A subclass that overrides
   /// this accessor should build on `super.platformDispatcher`, the way
   /// [TestWidgetsFlutterBinding] does, or apply [debugApplyViewMetricsOverrides]
-  /// to the dispatcher it supplies instead.
+  /// to the dispatcher it supplies instead. See [DebugViewMetricsOverride].
   ui.PlatformDispatcher get platformDispatcher => _platformDispatcher;
   final ui.PlatformDispatcher _platformDispatcher = kDebugMode
       ? debugApplyViewMetricsOverrides(ui.PlatformDispatcher.instance)
@@ -655,20 +656,22 @@ abstract class BindingBase {
         name: FoundationServiceExtensions.brightnessOverride.name,
         callback: (Map<String, String> parameters) async {
           if (parameters.containsKey('value')) {
-            debugBrightnessOverride = switch (parameters['value']) {
-              'Brightness.light' => ui.Brightness.light,
-              'Brightness.dark' => ui.Brightness.dark,
-              _ => null,
+            final ui.Brightness? previousBrightness =
+                debugAllViewsMetricsOverride?.platformBrightness;
+            final DebugViewMetricsOverride allViews =
+                debugAllViewsMetricsOverride ?? const DebugViewMetricsOverride();
+            debugAllViewsMetricsOverride = switch (parameters['value']) {
+              'Brightness.light' => allViews.copyWith(platformBrightness: ui.Brightness.light),
+              'Brightness.dark' => allViews.copyWith(platformBrightness: ui.Brightness.dark),
+              _ => allViews.copyWith(
+                clear: const <DebugViewMetric>{DebugViewMetric.platformBrightness},
+              ),
             };
-            _postExtensionStateChangedEvent(
-              FoundationServiceExtensions.brightnessOverride.name,
-              (debugBrightnessOverride ?? platformDispatcher.platformBrightness).toString(),
-            );
-            await reassembleApplication();
+            if (debugAllViewsMetricsOverride?.platformBrightness != previousBrightness) {
+              _postViewMetricsOverrideChangeEvents(previousBrightness);
+            }
           }
-          return <String, dynamic>{
-            'value': (debugBrightnessOverride ?? platformDispatcher.platformBrightness).toString(),
-          };
+          return <String, dynamic>{'value': platformDispatcher.platformBrightness.toString()};
         },
       );
 
@@ -690,16 +693,21 @@ abstract class BindingBase {
   static const String _overridesParameter = 'overrides';
   static const String _clearAllParameter = 'clearAll';
 
+  // The `viewId` that names [debugAllViewsMetricsOverride], and its key in the
+  // reply and the event.
+  static const String _allViewsId = 'all';
+
   /// Implements the `ext.flutter.viewMetricsOverride` service extension.
   ///
   /// See [FoundationServiceExtensions.viewMetricsOverride] for the parameters,
-  /// the reply, and the event it posts.
+  /// the reply, and the events it posts.
   Future<Map<String, Object?>> _debugHandleViewMetricsOverrideServiceExtension(
     Map<String, String> parameters,
   ) async {
+    final ui.Brightness? previousBrightness = debugAllViewsMetricsOverride?.platformBrightness;
     if (parameters[_clearAllParameter] == 'true') {
       if (debugClearViewMetricsOverrides()) {
-        _postViewMetricsOverrideStateChangedEvent();
+        _postViewMetricsOverrideChangeEvents(previousBrightness);
       }
       return _viewMetricsOverrideResult();
     }
@@ -715,9 +723,10 @@ abstract class BindingBase {
       return _viewMetricsOverrideResult();
     }
     final int? viewId = int.tryParse(rawViewId);
-    if (viewId == null || viewId < 0) {
+    if (rawViewId != _allViewsId && (viewId == null || viewId < 0)) {
       throw FormatException(
-        'The $_viewIdParameter parameter must be a non-negative integer, got "$rawViewId".',
+        'The $_viewIdParameter parameter must be a non-negative integer or "$_allViewsId", '
+        'got "$rawViewId".',
       );
     }
 
@@ -731,8 +740,17 @@ abstract class BindingBase {
           'The $_overridesParameter parameter must be a JSON object.',
         ),
       };
-      if (debugSetViewMetricsOverride(viewId, override)) {
-        _postViewMetricsOverrideStateChangedEvent();
+      final bool changed;
+      // The check above leaves null only for `all`.
+      if (viewId == null) {
+        final DebugViewMetricsOverride? previous = debugAllViewsMetricsOverride;
+        debugAllViewsMetricsOverride = override;
+        changed = debugAllViewsMetricsOverride != previous;
+      } else {
+        changed = debugSetViewMetricsOverride(viewId, override);
+      }
+      if (changed) {
+        _postViewMetricsOverrideChangeEvents(previousBrightness);
       }
     }
 
@@ -749,24 +767,37 @@ abstract class BindingBase {
   }
 
   // [debugViewMetricsOverrides] with its view ids stringified, because
-  // json.encode accepts only String keys. It calls toJson on the values itself.
-  // Both the reply and the event carry this map.
+  // json.encode accepts only String keys, plus [debugAllViewsMetricsOverride]
+  // under `all`. json.encode calls toJson on the values. Both the reply and the
+  // event carry this map.
   Map<String, DebugViewMetricsOverride> _viewMetricsOverridesWithStringKeys() {
+    final DebugViewMetricsOverride? allViews = debugAllViewsMetricsOverride;
     return <String, DebugViewMetricsOverride>{
+      if (allViews != null) _allViewsId: allViews,
       for (final MapEntry<int, DebugViewMetricsOverride> entry in debugViewMetricsOverrides.entries)
         '${entry.key}': entry.value,
     };
   }
 
-  // The whole of [debugViewMetricsOverrides], rather than the entry that
-  // changed, because one event then describes the state of the extension for a
-  // client that missed the ones before it — including the clearAll that leaves
-  // no entry to report.
-  void _postViewMetricsOverrideStateChangedEvent() {
+  /// Posts the event of the viewMetricsOverride extension, and the event of the
+  /// brightnessOverride extension when the brightness of
+  /// [debugAllViewsMetricsOverride] is no longer [previousBrightness].
+  ///
+  /// The viewMetricsOverride event carries every override, rather than the one
+  /// that changed, because one event then describes the state of the extension
+  /// for a client that missed the ones before it. That includes the clearAll
+  /// that leaves no override to report.
+  void _postViewMetricsOverrideChangeEvents(ui.Brightness? previousBrightness) {
     _postExtensionStateChangedEvent(
       FoundationServiceExtensions.viewMetricsOverride.name,
       _viewMetricsOverridesWithStringKeys(),
     );
+    if (debugAllViewsMetricsOverride?.platformBrightness != previousBrightness) {
+      _postExtensionStateChangedEvent(
+        FoundationServiceExtensions.brightnessOverride.name,
+        platformDispatcher.platformBrightness.toString(),
+      );
+    }
   }
 
   /// Whether [lockEvents] is currently locking events.

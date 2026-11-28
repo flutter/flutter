@@ -548,7 +548,9 @@ void main() {
   testWidgets('Text color is correctly resolved when CupertinoThemeData.brightness is null', (
     WidgetTester tester,
   ) async {
-    debugBrightnessOverride = Brightness.dark;
+    debugAllViewsMetricsOverride = const DebugViewMetricsOverride(
+      platformBrightness: Brightness.dark,
+    );
 
     await tester.pumpWidget(const CupertinoApp(home: CupertinoPageScaffold(child: Text('Hello'))));
 
@@ -575,13 +577,15 @@ void main() {
     // (color = Color(0xff000000), *darkColor = Color(0xffffffff)*, resolved by: Builder)
     expect(textColor.toString(), CupertinoColors.label.resolveFrom(capturedContext).toString());
 
-    debugBrightnessOverride = null;
+    debugAllViewsMetricsOverride = null;
   });
 
   testWidgets('Cursor color is resolved when CupertinoThemeData.brightness is null', (
     WidgetTester tester,
   ) async {
-    debugBrightnessOverride = Brightness.dark;
+    debugAllViewsMetricsOverride = const DebugViewMetricsOverride(
+      platformBrightness: Brightness.dark,
+    );
 
     RenderEditable findRenderEditable(WidgetTester tester) {
       final RenderObject root = tester.renderObject(find.byType(EditableText));
@@ -632,7 +636,7 @@ void main() {
     // Alpha value needs to be 0, because cursor is not visible by default.
     expect(cursorColor, CupertinoColors.activeOrange.darkColor.withAlpha(0));
 
-    debugBrightnessOverride = null;
+    debugAllViewsMetricsOverride = null;
   });
 
   testWidgets('Assert in buildScrollbar that controller != null when using it', (
