@@ -420,10 +420,6 @@ class Image extends StatefulWidget {
   /// true when [cacheWidth] and [cacheHeight] describe the image's on-screen
   /// size in logical pixels.
   ///
-  /// In the case where the network image is on the Web platform, the [cacheWidth]
-  /// and [cacheHeight] parameters are ignored as the web engine delegates
-  /// image decoding to the web which does not support custom decode sizes.
-  ///
   /// ### Same-origin policy on Web
   ///
   /// Due to browser restriction on Cross-Origin Resource Sharing (CORS),
@@ -449,6 +445,7 @@ class Image extends StatefulWidget {
   ///  * The `headers` argument must be null or empty.
   ///  * Some image options are ignored, including [opacity], [colorBlendMode],
   ///    [repeat], filtering, and blurring.
+  ///  * [cacheWidth] and [cacheHeight] are ignored.
   ///
   /// By default, this feature is turned off ([WebHtmlElementStrategy.never]).
   ///
