@@ -265,11 +265,11 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
         } else {
           HapticFeedback.selectionClick();
         }
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
+      case TargetPlatform.android ||
+          TargetPlatform.fuchsia ||
+          TargetPlatform.linux ||
+          TargetPlatform.macOS ||
+          TargetPlatform.windows:
         break;
     }
   }
