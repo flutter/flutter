@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
 import 'package:quiver/testing/async.dart';
@@ -3323,6 +3324,104 @@ void _testTextField() {
 
     semantics().semanticsEnabled = false;
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/195289
+  test('does not blur a focused text field when a node is inserted above or removed from '
+      'its ancestors', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    _pumpFocusedTextField(withNode3: false);
+
+    final DomElement input = owner().debugSemanticsTree![2]!.element.querySelector('input')!;
+    expect(domDocument.activeElement, input);
+
+    var blurCount = 0;
+    final DomEventListener onBlur = createDomEventListener((DomEvent _) {
+      blurCount += 1;
+    });
+    input.addEventListener('blur', onBlur);
+
+    // Insert node 3 between node 0 and node 1, as the framework does when a
+    // new sibling (e.g. an overlay or a tooltip) appears next to a route.
+    _pumpFocusedTextField(withNode3: true);
+
+    expect(blurCount, 0);
+    expect(domDocument.activeElement, input);
+
+    _pumpFocusedTextField(withNode3: false);
+
+    expect(blurCount, 0);
+    expect(domDocument.activeElement, input);
+
+    input.removeEventListener('blur', onBlur);
+    semantics().semanticsEnabled = false;
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/195289 in
+  // browsers without `moveBefore`, such as Safari.
+  test('keeps the focus of a text field moved without moveBefore', () {
+    final elementPrototype = (globalContext['Element']! as JSObject)['prototype']! as JSObject;
+    final JSAny? moveBefore = elementPrototype['moveBefore'];
+    elementPrototype.delete('moveBefore'.toJS);
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    try {
+      _pumpFocusedTextField(withNode3: false);
+
+      final DomElement input = owner().debugSemanticsTree![2]!.element.querySelector('input')!;
+      expect(domDocument.activeElement, input);
+
+      _pumpFocusedTextField(withNode3: true);
+      expect(domDocument.activeElement, input);
+
+      _pumpFocusedTextField(withNode3: false);
+      expect(domDocument.activeElement, input);
+    } finally {
+      if (moveBefore != null) {
+        elementPrototype['moveBefore'] = moveBefore;
+      }
+      semantics().semanticsEnabled = false;
+    }
+  });
+}
+
+/// Sends 0 > (3 >) 1 > 2, where 2 is a focused text field.
+///
+/// Parents are sent before their children, as the framework does.
+void _pumpFocusedTextField({required bool withNode3}) {
+  final builder = ui.SemanticsUpdateBuilder();
+  void container(int id, int childId) {
+    updateNode(
+      builder,
+      id: id,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      childrenInHitTestOrder: Int32List.fromList(<int>[childId]),
+      childrenInTraversalOrder: Int32List.fromList(<int>[childId]),
+    );
+  }
+
+  container(0, withNode3 ? 3 : 1);
+  if (withNode3) {
+    container(3, 1);
+  }
+  container(1, 2);
+  updateNode(
+    builder,
+    id: 2,
+    flags: const ui.SemanticsFlags(
+      isTextField: true,
+      isFocused: ui.Tristate.isTrue,
+      isEnabled: ui.Tristate.isTrue,
+    ),
+    transform: Matrix4.identity().toFloat64(),
+    rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+  );
+  owner().updateSemantics(builder.build());
 }
 
 void _testCheckables() {
