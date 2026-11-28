@@ -2077,7 +2077,10 @@ void main() {
       const Radius.circular(1),
     );
 
-    expect(editable, paints..rrect(color: cursorColor.withOpacity(0.75), rrect: expectedRRect));
+    expect(
+      editable,
+      paints..rrect(color: cursorColor.withValues(alpha: .75), rrect: expectedRRect),
+    );
 
     // Change the text viewport offset.
     editable.offset = ViewportOffset.fixed(200);
@@ -2090,7 +2093,10 @@ void main() {
     );
     pumpFrame(phase: EnginePhase.compositingBits);
 
-    expect(editable, paints..rrect(color: cursorColor.withOpacity(0.75), rrect: expectedRRect));
+    expect(
+      editable,
+      paints..rrect(color: cursorColor.withValues(alpha: 0.75), rrect: expectedRRect),
+    );
   });
 
   test('getWordAtOffset with a negative position', () {
