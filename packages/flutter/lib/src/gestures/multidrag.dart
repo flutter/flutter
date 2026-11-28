@@ -51,6 +51,8 @@ abstract class MultiDragPointerState {
   /// The global coordinates of the pointer when the pointer contacted the screen.
   final Offset initialPosition;
 
+  late final Offset _initialLocalPosition;
+
   final VelocityTracker _velocityTracker;
 
   /// The kind of pointer performing the multi-drag gesture.
@@ -99,6 +101,7 @@ abstract class MultiDragPointerState {
           sourceTimeStamp: event.timeStamp,
           delta: event.delta,
           globalPosition: event.position,
+          localPosition: event.localPosition,
         ),
       );
     } else {
@@ -145,6 +148,7 @@ abstract class MultiDragPointerState {
       sourceTimeStamp: _lastPendingEventTimestamp,
       delta: pendingDelta!,
       globalPosition: initialPosition,
+      localPosition: _initialLocalPosition,
     );
     _pendingDelta = null;
     _lastPendingEventTimestamp = null;
@@ -243,8 +247,12 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
     assert(_pointers != null);
     assert(!_pointers!.containsKey(event.pointer));
     final MultiDragPointerState state = createNewPointerState(event);
+    state._initialLocalPosition = PointerEvent.transformPosition(
+      event.transform,
+      state.initialPosition,
+    );
     _pointers![event.pointer] = state;
-    GestureBinding.instance.pointerRouter.addRoute(event.pointer, _handleEvent);
+    GestureBinding.instance.pointerRouter.addRoute(event.pointer, _handleEvent, event.transform);
     state._setArenaEntry(GestureBinding.instance.gestureArena.add(event.pointer, this));
   }
 
