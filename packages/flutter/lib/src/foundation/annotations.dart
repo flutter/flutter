@@ -37,7 +37,7 @@
 ///    represents the class.
 ///  * [Summary], which is used to provide a one-line description of a
 ///    class that overrides the inline documentations' own description.
-class Category {
+final class Category {
   /// Create an annotation to provide a categorization of a class.
   const Category(this.sections);
 
@@ -72,7 +72,7 @@ class Category {
 ///  * [Category], to help place the class in an index.
 ///  * [Summary], which is used to provide a one-line description of a
 ///    class that overrides the inline documentations' own description.
-class DocumentationIcon {
+final class DocumentationIcon {
   /// Create an annotation to provide a URL to an image describing a class.
   const DocumentationIcon(this.url);
 
@@ -109,7 +109,7 @@ class DocumentationIcon {
 ///  * [Category], to help place the class in an index.
 ///  * [DocumentationIcon], which is used to give the URL to an image that
 ///    represents the class.
-class Summary {
+final class Summary {
   /// Create an annotation to provide a short description of a class.
   const Summary(this.text);
 

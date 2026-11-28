@@ -38,7 +38,7 @@ abstract final class AccessibilityInspectorKeys {
 }
 
 /// Service that handles accessibility and semantics inspection.
-class AccessibilityInspector {
+final class AccessibilityInspector {
   AccessibilityInspector._();
 
   /// The active [AccessibilityInspector] instance.
