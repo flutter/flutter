@@ -163,11 +163,17 @@ TEST_P(TextureGLESTest, Binds2DTexture) {
         TextureGLES::Type::kTexture);
     EXPECT_EQ(TextureGLES::Cast(*texture).ComputeTypeForBinding(GL_FRAMEBUFFER),
               TextureGLES::Type::kTextureMultisampled);
+    EXPECT_EQ(TextureGLES::Cast(*texture).ComputeTypeForBinding(
+                  GL_FRAMEBUFFER, /*for_reading=*/true),
+              TextureGLES::Type::kTexture);
   } else {
     EXPECT_EQ(
         TextureGLES::Cast(*texture).ComputeTypeForBinding(GL_READ_FRAMEBUFFER),
         TextureGLES::Type::kRenderBufferMultisampled);
     EXPECT_EQ(TextureGLES::Cast(*texture).ComputeTypeForBinding(GL_FRAMEBUFFER),
+              TextureGLES::Type::kRenderBufferMultisampled);
+    EXPECT_EQ(TextureGLES::Cast(*texture).ComputeTypeForBinding(
+                  GL_FRAMEBUFFER, /*for_reading=*/true),
               TextureGLES::Type::kRenderBufferMultisampled);
   }
 }
