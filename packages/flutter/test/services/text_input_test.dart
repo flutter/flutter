@@ -931,6 +931,28 @@ void main() {
       expect(client.latestMethodCall, isEmpty);
     });
 
+    test('content insertion channel reports errors to FlutterError.onError', () async {
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      final errors = <FlutterErrorDetails>[];
+      FlutterError.onError = errors.add;
+      addTearDown(() => FlutterError.onError = originalOnError);
+      final client = ThrowingInsertContentClient(TextEditingValue.empty);
+      final TextInputConnection connection = TextInput.attach(
+        client,
+        const TextInputConfiguration(),
+      );
+      addTearDown(connection.close);
+
+      await sendBinaryCommitContent(-1, Uint8List(1));
+
+      expect(errors, hasLength(1));
+      expect(errors.single.exception, isA<StateError>());
+      expect(
+        errors.single.context.toString(),
+        contains('during method call ContentInsertion.commitContent'),
+      );
+    });
+
     test('TextInputClient performSelectors method is called', () async {
       final client = FakeTextInputClient(TextEditingValue.empty);
       const configuration = TextInputConfiguration();
@@ -2419,5 +2441,14 @@ class FakeTextInputControl with TextInputControl {
   @override
   void requestAutofill() {
     methodCalls.add('requestAutofill');
+  }
+}
+
+class ThrowingInsertContentClient extends FakeTextInputClient {
+  ThrowingInsertContentClient(super.currentTextEditingValue);
+
+  @override
+  void insertContent(KeyboardInsertedContent content) {
+    throw StateError('insertContent failed');
   }
 }

@@ -1994,7 +1994,7 @@ class TextInput {
   TextInput._() {
     _channel = SystemChannels.textInput;
     _channel.setMethodCallHandler(_loudlyHandleTextInputInvocation);
-    SystemChannels.contentInsertion.setMethodCallHandler(_handleContentInsertionInvocation);
+    SystemChannels.contentInsertion.setMethodCallHandler(_loudlyHandleContentInsertionInvocation);
   }
 
   /// Set the [MethodChannel] used to communicate with the system's text input
@@ -2168,9 +2168,19 @@ class TextInput {
   /// Returns true if a scribble interaction is currently happening.
   bool get scribbleInProgress => _scribbleInProgress;
 
-  Future<dynamic> _loudlyHandleTextInputInvocation(MethodCall call) async {
+  Future<dynamic> _loudlyHandleTextInputInvocation(MethodCall call) {
+    return _handleLoudly(call, _handleTextInputInvocation);
+  }
+
+  Future<void> _loudlyHandleContentInsertionInvocation(MethodCall call) {
+    return _handleLoudly(call, _handleContentInsertionInvocation);
+  }
+
+  // Reports errors to FlutterError.onError, since the engine may not listen
+  // for a reply.
+  Future<T> _handleLoudly<T>(MethodCall call, Future<T> Function(MethodCall) handler) async {
     try {
-      return await _handleTextInputInvocation(call);
+      return await handler(call);
     } catch (exception, stack) {
       _reportError(
         exception,
