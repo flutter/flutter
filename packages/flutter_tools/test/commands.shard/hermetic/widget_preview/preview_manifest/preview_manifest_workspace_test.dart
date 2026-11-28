@@ -71,19 +71,13 @@ void main() {
         expect(manifest.pubspecHashes.keys, originalWorkspacePubspecPaths);
 
         // Add a new workspace project, but don't update the workspace's pubspec to include it
-        // yet.
-        String pubspecPath = await waitForPubspecChangeDetected(
-          changeOperation: () =>
-              workspace.createWorkspaceProject(name: 'baz', updateWorkspacePubspec: false),
-        );
-
-        // Update the manifest and verify we haven't added any new pubspec hashes, since the new
-        // workspace project technically isn't part of the workspace yet.
-        manifest.updatePubspecHash(updatedPubspecPath: pubspecPath);
+        // yet. Creating an unlisted subproject's pubspec.yaml is ignored until it is added
+        // to the workspace pubspec.
+        await workspace.createWorkspaceProject(name: 'baz', updateWorkspacePubspec: false);
         expect(manifest.pubspecHashes.keys, originalWorkspacePubspecPaths);
 
         // Update the workspace to include the newly added project.
-        pubspecPath = await waitForPubspecChangeDetected(
+        final String pubspecPath = await waitForPubspecChangeDetected(
           changeOperation: () => workspace.updatePubspec(),
         );
 

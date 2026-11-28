@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
+import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
@@ -136,6 +137,153 @@ void main() {
       expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
     });
 
+    test('ignores changes to pubspec.yaml in nested non-project directories', () async {
+      expectNPreviewReloadTimingEvents(0);
+      expect(detectedPubspecChanges, isEmpty);
+
+      final String nestedPubspecPath = fs.path.join(
+        _kProjectRootPath,
+        '.claude',
+        'worktrees',
+        'foo',
+        'pubspec.yaml',
+      );
+
+      await emitEvent(WatchEvent(ChangeType.MODIFY, nestedPubspecPath));
+
+      expect(detectedPubspecChanges, isEmpty);
+      expect(detectedNonDartFileChanges, isEmpty);
+      expectNPreviewReloadTimingEvents(0);
+      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+    });
+
+    test('detects changes to glob-matched workspace member pubspec.yaml', () async {
+      project.manifest = FlutterManifest.createFromString('''
+name: workspace_root
+workspace:
+  - packages/*
+''', logger: logger)!;
+      final String newMemberPubspecPath = fs.path.join(
+        _kProjectRootPath,
+        'packages',
+        'new_pkg',
+        'pubspec.yaml',
+      );
+      fs.file(newMemberPubspecPath).createSync(recursive: true);
+
+      await emitEvent(WatchEvent(ChangeType.ADD, newMemberPubspecPath));
+
+      expect(detectedPubspecChanges, <String>[newMemberPubspecPath]);
+      expect(detectedNonDartFileChanges, isEmpty);
+      expectNPreviewReloadTimingEvents(0);
+      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+    });
+
+    test('ignores unlisted, hidden, and build pubspec.yaml with ** workspace', () async {
+      project.manifest = FlutterManifest.createFromString('''
+name: workspace_root
+workspace:
+  - "**"
+''', logger: logger)!;
+      final String unlistedPubspecPath = fs.path.join(
+        _kProjectRootPath,
+        'other',
+        'pkg',
+        'pubspec.yaml',
+      );
+      final String hiddenPubspecPath = fs.path.join(
+        _kProjectRootPath,
+        '.claude',
+        'worktrees',
+        'foo',
+        'pubspec.yaml',
+      );
+      final String buildPubspecPath = fs.path.join(
+        _kProjectRootPath,
+        'build',
+        'foo',
+        'pubspec.yaml',
+      );
+
+      // Update manifest to a narrower pattern to verify unlisted paths are ignored.
+      project.manifest = FlutterManifest.createFromString('''
+name: workspace_root
+workspace:
+  - packages/*
+''', logger: logger)!;
+      await emitEvent(WatchEvent(ChangeType.MODIFY, unlistedPubspecPath));
+
+      // Switch to '**' and verify hidden and build directories are still ignored.
+      project.manifest = FlutterManifest.createFromString('''
+name: workspace_root
+workspace:
+  - "**"
+''', logger: logger)!;
+      await emitEvent(WatchEvent(ChangeType.MODIFY, hiddenPubspecPath));
+      await emitEvent(WatchEvent(ChangeType.MODIFY, buildPubspecPath));
+
+      expect(detectedPubspecChanges, isEmpty);
+      expect(detectedNonDartFileChanges, isEmpty);
+      expectNPreviewReloadTimingEvents(0);
+      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+    });
+
+    test('detects pubspec.yaml changes when project root is symlinked', () async {
+      final Directory realRoot = fs.directory('/private/var/folders/project')
+        ..createSync(recursive: true);
+      final Link symlinkRoot = fs.link('/var/folders/project')
+        ..createSync(realRoot.path, recursive: true);
+      final File realPubspec = realRoot.childFile('pubspec.yaml')
+        ..writeAsStringSync('''
+name: app
+workspace:
+  - packages/*
+''');
+
+      final symlinkProject = FakeFlutterProject(fs.directory(symlinkRoot.path));
+      final symlinkWatcher = FakeWatcher();
+      final symlinkPubspecChanges = <String>[];
+      final symlinkDetector = LspPreviewDetector(
+        dtd: fakeDtd,
+        onChangeDetected: (_) {},
+        onPubspecChangeDetected: symlinkPubspecChanges.add,
+        previewAnalytics: previewAnalytics,
+        project: symlinkProject,
+        suppressAnalytics: false,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fs,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+          shutdownHooks: shutdownHooks,
+        ),
+        analysisServerFactory: () async => fakeAnalysisServer,
+        onNonDartFileChangeDetected: (_) {},
+        watcherBuilder: (_) => symlinkWatcher,
+      );
+      addTearDown(() async {
+        await symlinkDetector.dispose();
+        await symlinkWatcher.close();
+      });
+      await symlinkDetector.initialize();
+
+      symlinkWatcher.emitEvent(WatchEvent(ChangeType.MODIFY, realPubspec.path));
+      // Simulate a deleted workspace member pubspec.yaml under the symlinked root
+      // so _resolveSymlinksAndCanonicalize walks up to the existing ancestor.
+      final String deletedMemberPubspec = fs.path.join(
+        realRoot.path,
+        'packages',
+        'deleted_pkg',
+        'pubspec.yaml',
+      );
+      symlinkWatcher.emitEvent(WatchEvent(ChangeType.REMOVE, deletedMemberPubspec));
+      await pumpEventQueue();
+      await symlinkDetector.mutex.runGuarded(() async {});
+
+      expect(symlinkPubspecChanges, <String>[realPubspec.path, deletedMemberPubspec]);
+    });
+
     test('notifies onNonDartFileChangeDetected and does not report preview reload timing when non-Dart file is modified', () async {
       expectNPreviewReloadTimingEvents(0);
       expect(detectedChanges, isEmpty);
@@ -239,10 +387,20 @@ void main() {
 }
 
 class FakeFlutterProject extends Fake implements FlutterProject {
-  FakeFlutterProject(this.directory);
+  FakeFlutterProject(this.directory)
+    : manifest = FlutterManifest.empty(logger: BufferLogger.test());
 
   @override
   final Directory directory;
+
+  @override
+  FlutterManifest manifest;
+
+  @override
+  File get pubspecFile => directory.childFile('pubspec.yaml');
+
+  @override
+  List<FlutterProject> get workspaceProjects => const <FlutterProject>[];
 
   @override
   void reloadManifest({Logger? logger, FileSystem? fs}) {}

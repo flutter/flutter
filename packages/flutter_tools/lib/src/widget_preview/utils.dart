@@ -10,7 +10,13 @@ import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:collection/collection.dart';
+import 'package:glob/glob.dart';
+import 'package:path/path.dart' as path;
 
+import '../base/file_system.dart';
+import '../base/logger.dart';
+import '../flutter_manifest.dart';
+import '../project.dart';
 import 'dependency_graph.dart';
 
 extension TokenExtension on Token {
@@ -124,4 +130,86 @@ class PreviewDetectorMutex {
 
   var _locked = false;
   final _outstandingRequests = Queue<Completer<void>>();
+}
+
+/// Convenience extensions for examining [FlutterProject] in widget preview context.
+extension FlutterProjectPreviewExtension on FlutterProject {
+  /// Returns whether [pubspecPath] corresponds to the `pubspec.yaml` of this
+  /// project or one of its workspace projects (including glob-matched entries).
+  bool isPubspecForProject(String pubspecPath) {
+    final FileSystem fs = directory.fileSystem;
+    final String resolvedPubspecPath = _resolveSymlinksAndCanonicalize(fs, pubspecPath);
+    if (resolvedPubspecPath == _resolveSymlinksAndCanonicalize(fs, pubspecFile.path)) {
+      return true;
+    }
+    if (fs.path.basename(resolvedPubspecPath) != 'pubspec.yaml') {
+      return false;
+    }
+
+    final String resolvedRootDir = _resolveSymlinksAndCanonicalize(fs, directory.path);
+    final String candidateDir = fs.path.dirname(resolvedPubspecPath);
+    if (!fs.path.isWithin(resolvedRootDir, candidateDir)) {
+      return false;
+    }
+
+    final String relativeDir = fs.path.relative(candidateDir, from: resolvedRootDir);
+    final bool hasIgnoredSegment = fs.path
+        .split(relativeDir)
+        .any((String segment) => segment.startsWith('.') || segment == 'build');
+    if (hasIgnoredSegment) {
+      return false;
+    }
+
+    return _workspacePatterns(fs).any((String pattern) {
+      final String normalized = path.posix.normalize(pattern.replaceAll(r'\', '/'));
+      return normalized != '.' && Glob(normalized, context: fs.path).matches(relativeDir);
+    });
+  }
+
+  List<String> _workspacePatterns(FileSystem fs) {
+    if (!pubspecFile.existsSync()) {
+      return manifest.workspace;
+    }
+    try {
+      return FlutterManifest.createFromPath(
+            pubspecFile.path,
+            fileSystem: fs,
+            logger: BufferLogger.test(),
+          )?.workspace ??
+          manifest.workspace;
+    } on FormatException {
+      return manifest.workspace;
+    } on FileSystemException {
+      return manifest.workspace;
+    }
+  }
+}
+
+/// Resolves symlinks for [rawPath] (walking up to the nearest existing ancestor
+/// if [rawPath] does not exist on disk) before canonicalizing.
+String _resolveSymlinksAndCanonicalize(FileSystem fs, String rawPath) {
+  String current = fs.path.canonicalize(rawPath);
+  final trailingSegments = <String>[];
+  while (true) {
+    if (fs.typeSync(current) != FileSystemEntityType.notFound) {
+      try {
+        final String resolved = fs.directory(current).resolveSymbolicLinksSync();
+        if (trailingSegments.isEmpty) {
+          return fs.path.canonicalize(resolved);
+        }
+        return fs.path.canonicalize(
+          fs.path.joinAll(<String>[resolved, ...trailingSegments.reversed]),
+        );
+      } on FileSystemException {
+        break;
+      }
+    }
+    final String parent = fs.path.dirname(current);
+    if (parent == current) {
+      break;
+    }
+    trailingSegments.add(fs.path.basename(current));
+    current = parent;
+  }
+  return fs.path.canonicalize(rawPath);
 }
