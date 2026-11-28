@@ -1352,13 +1352,40 @@ class WebReleaseBundle extends Target {
         ? webResources.listSync(recursive: true).whereType<File>().toList()
         : <File>[];
 
-    // Copy other resource files out of web/ directory.
+    final bool caseInsensitiveFileSystem =
+        environment.platform.isWindows || environment.platform.isMacOS;
+    String assetKey(String path) => caseInsensitiveFileSystem ? path.toLowerCase() : path;
+    final generatedAssets = <String, String>{
+      for (final File asset in outputDirectory.listSync(recursive: true).whereType<File>())
+        assetKey(fileSystem.path.relative(asset.path, from: outputDir.path)): fileSystem.path
+            .relative(asset.path, from: outputDir.path),
+    };
+    final collisions = <String, String>{};
+    for (final inputFile in inputResourceFiles) {
+      final String relativePath = fileSystem.path.relative(inputFile.path, from: webResources.path);
+      if (relativePath == 'index.html' || relativePath == 'flutter_bootstrap.js') {
+        continue;
+      }
+      final String? generatedAsset = generatedAssets[assetKey(relativePath)];
+      if (generatedAsset != null) {
+        collisions['web/$relativePath'] = generatedAsset;
+      }
+    }
+    if (collisions.isNotEmpty) {
+      final String details = collisions.entries
+          .map((MapEntry<String, String> entry) => '  ${entry.key} -> ${entry.value}')
+          .join('\n');
+      throwToolExit(
+        'Web resources would overwrite a Flutter asset at the same path:\n'
+        '$details\n'
+        'Rename or remove the files in web/ and rebuild.',
+      );
+    }
     final copiedInputResourceFiles = <File>[];
     final outputResourcesFiles = <File>[];
     for (final inputFile in inputResourceFiles) {
       final String relativePath = fileSystem.path.relative(inputFile.path, from: webResources.path);
       if (relativePath == 'index.html' || relativePath == 'flutter_bootstrap.js') {
-        // Skip these, these are handled by the templated file target.
         continue;
       }
       final File outputFile = fileSystem.file(fileSystem.path.join(outputDir.path, relativePath));

@@ -479,6 +479,144 @@ _flutter.loader.load();
     expect(environment.outputDir.childFile('foo.txt').readAsStringSync(), 'B');
   });
 
+  for (final MapEntry<String, Platform> entry in <String, Platform>{
+    'assets/AssetManifest.bin.json': linux,
+    'assets/assetmanifest.bin.json': windows,
+  }.entries) {
+    test(
+      'WebReleaseBundle rejects web resource "${entry.key}" that overwrites a Flutter asset',
+      () async {
+        environment.defines[kBuildMode] = 'release';
+        final testEnvironment = entry.value == windows
+            ? Environment.test(
+                fs.currentDirectory,
+                projectDir: environment.projectDir,
+                outputDir: environment.outputDir,
+                buildDir: environment.buildDir,
+                defines: environment.defines,
+                artifacts: environment.artifacts,
+                featureFlags: environment.featureFlags,
+                processManager: processManager,
+                logger: environment.logger,
+                fileSystem: fs,
+                platform: windows,
+              )
+            : environment;
+        final Directory webResources = environment.projectDir.childDirectory('web');
+        webResources.childFile(entry.key)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('from web');
+        testEnvironment.buildDir.createSync(recursive: true);
+        testEnvironment.buildDir.childFile('main.dart.js').createSync();
+        testEnvironment.buildDir.childFile('main.dart.js.info.json').createSync();
+        testEnvironment.buildDir.childFile('main.dart.js.map').createSync();
+
+        await expectLater(
+          WebReleaseBundle(
+            <WebCompilerConfig>[const JsCompilerConfig()],
+            const NoOpAnalytics(),
+            engineRevision: _kEngineRevision,
+          ).build(testEnvironment),
+          throwsToolExit(message: 'would overwrite a Flutter asset at the same path'),
+        );
+      },
+    );
+  }
+
+  test('WebReleaseBundle rejects a web resource that collides with a pubspec asset', () async {
+    environment.defines[kBuildMode] = 'release';
+    environment.projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: foo
+flutter:
+  assets:
+    - logo.png
+''');
+    environment.projectDir.childFile('logo.png')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('logo-bytes');
+    final Directory webResources = environment.projectDir.childDirectory('web');
+    webResources.childFile('assets/logo.png')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('from web');
+    environment.buildDir.childFile('main.dart.js').createSync();
+    environment.buildDir.childFile('main.dart.js.info.json').createSync();
+    environment.buildDir.childFile('main.dart.js.map').createSync();
+
+    await expectLater(
+      WebReleaseBundle(
+        <WebCompilerConfig>[const JsCompilerConfig()],
+        const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
+      ).build(environment),
+      throwsToolExit(message: 'web/assets/logo.png -> assets/logo.png'),
+    );
+  });
+
+  test('WebReleaseBundle does not reject a pre-hash asset path with --web-content-hash', () async {
+    environment.defines[kBuildMode] = 'release';
+    environment.outputDir.childFile('flutter_bootstrap.js')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('_flutter.buildConfig = {"assetManifest":"placeholder"};\n');
+    final Directory webResources = environment.projectDir.childDirectory('web');
+    webResources.childFile('assets/AssetManifest.bin.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('from web');
+    environment.buildDir.childFile('main.dart.01234567.js').createSync();
+    environment.buildDir.childFile('main.dart.01234567.js.map').createSync();
+
+    await WebReleaseBundle(
+      <WebCompilerConfig>[const JsCompilerConfig(webContentHash: true)],
+      const NoOpAnalytics(),
+      engineRevision: _kEngineRevision,
+    ).build(environment);
+
+    expect(
+      environment.outputDir.childFile('assets/AssetManifest.bin.json').readAsStringSync(),
+      'from web',
+    );
+  });
+
+  test('WebReleaseBundle reports hashed asset collisions and leaves no partial outputs', () async {
+    environment.defines[kBuildMode] = 'release';
+    environment.outputDir.childFile('flutter_bootstrap.js')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('_flutter.buildConfig = {"assetManifest":"placeholder"};\n');
+    environment.projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: foo
+flutter:
+  assets:
+    - logo.png
+''');
+    environment.projectDir.childFile('logo.png')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('logo-bytes');
+    final String hashedBasename = computeHashedBasename(
+      'logo.png',
+      computeShortContentHash(utf8.encode('logo-bytes')),
+      fs,
+    );
+    final Directory webResources = environment.projectDir.childDirectory('web');
+    webResources.childFile('assets/splash.png')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('from web');
+    webResources.childFile('assets/$hashedBasename')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('from web');
+    environment.buildDir.childFile('main.dart.01234567.js').createSync();
+    environment.buildDir.childFile('main.dart.01234567.js.map').createSync();
+
+    await expectLater(
+      WebReleaseBundle(
+        <WebCompilerConfig>[const JsCompilerConfig(webContentHash: true)],
+        const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
+      ).build(environment),
+      throwsToolExit(message: 'web/assets/$hashedBasename -> assets/$hashedBasename'),
+    );
+    expect(environment.outputDir.childFile('assets/splash.png').existsSync(), isFalse);
+    expect(environment.buildDir.childFile('web_resources.d').existsSync(), isFalse);
+  });
+
   test('WebReleaseBundle copies over output files when they change', () async {
     final Directory webResources = environment.projectDir.childDirectory('web');
     webResources.childFile('foo.txt')
@@ -799,8 +937,8 @@ _flutter.loader.load();
         '       ^\n'
         'Deprecated JS interop libraries are imported through:\n'
         '  main library\n'
-        '  └── package:foo/main.dart\n'
-        '      └── dart:html\n'
+        '  â””â”€â”€ package:foo/main.dart\n'
+        '      â””â”€â”€ dart:html\n'
         'Error: Compilation failed.\n';
     processManager.addCommand(
       FakeCommand(
