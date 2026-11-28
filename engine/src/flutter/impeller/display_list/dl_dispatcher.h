@@ -359,6 +359,12 @@ class CanvasDlDispatcher : public DlDispatcherBase {
 class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
                             public flutter::IgnoreDrawDispatchHelper {
  public:
+  struct SaveFrame {
+    Matrix matrix;
+    // Note: cull rects are always in the global coordinate space.
+    Rect cull_rect;
+  };
+
   FirstPassDispatcher(const ContentContext& renderer,
                       const Matrix& initial_matrix,
                       const Rect cull_rect);
@@ -459,11 +465,8 @@ class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
   const Rect GetCurrentLocalCullingBounds() const;
 
   const ContentContext& renderer_;
-  Matrix matrix_;
-  std::vector<Matrix> stack_;
+  std::vector<SaveFrame> stack_;
   std::unordered_map<int64_t, BackdropData> backdrop_data_;
-  // note: cull rects are always in the global coordinate space.
-  std::vector<Rect> cull_rect_state_;
   bool has_image_filter_ = false;
   size_t backdrop_count_ = 0;
   Paint paint_;
