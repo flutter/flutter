@@ -9,6 +9,7 @@ void main() {
   final Paint paint = Paint()..color = Color(0xFFFFFFFF);
   print(jsonEncode(<String, String>{
     'Paint.toString': paint.toString(),
+    'Size.toString': const Size(12.5, 34.0).toString(),
     'Brightness.toString': Brightness.dark.toString(),
     'Foo.toString': Foo().toString(),
     'Keep.toString': Keep().toString(),
