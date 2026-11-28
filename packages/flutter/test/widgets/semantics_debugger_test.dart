@@ -260,7 +260,7 @@ void main() {
     ); // hitting the debugger);
     await tester.pump();
 
-    expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(-480.0));
+    expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(-600.0));
 
     await tester.fling(
       find.byType(ListView),
@@ -270,7 +270,7 @@ void main() {
     ); // hitting the debugger);
     await tester.pump();
 
-    expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(-480.0));
+    expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(-600.0));
 
     await tester.fling(
       find.byType(ListView),
@@ -280,7 +280,7 @@ void main() {
     ); // hitting the debugger);
     await tester.pump();
 
-    expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(-480.0));
+    expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(-600.0));
 
     await tester.fling(
       find.byType(ListView),
