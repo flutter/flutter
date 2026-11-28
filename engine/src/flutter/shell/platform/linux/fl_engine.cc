@@ -41,6 +41,10 @@ struct _FlEngine {
   // Thread the GLib main loop is running on.
   GThread* thread;
 
+  // Serialize asynchronous replies and texture calls with native shutdown.
+  GRecMutex lifecycle_mutex;
+  gboolean shutting_down;
+
   // The project this engine is running.
   FlDartProject* project;
 
@@ -589,15 +593,40 @@ static void fl_engine_set_property(GObject* object,
   }
 }
 
+static void shutdown_engine(FlEngine* self) {
+  g_return_if_fail(self->thread == g_thread_self());
+  {
+    g_autoptr(GRecMutexLocker) lock =
+        g_rec_mutex_locker_new(&self->lifecycle_mutex);
+    if (self->shutting_down) {
+      return;
+    }
+    self->shutting_down = TRUE;
+  }
+  // Closing admission also waits for texture calls and replies in
+  // flight. Do not hold that lock across Shutdown: it joins engine workers.
+  auto engine = self->engine;
+  self->engine = nullptr;
+  if (engine != nullptr && self->embedder_api.Shutdown(engine) != kSuccess) {
+    g_warning("Failed to shutdown Flutter engine");
+    return;
+  }
+}
+
+void fl_engine_shutdown(FlEngine* self) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+  g_autoptr(FlEngine) retained = FL_ENGINE(g_object_ref(self));
+  shutdown_engine(self);
+}
+
+static void application_shutdown_cb(GApplication*, FlEngine* self) {
+  fl_engine_shutdown(self);
+}
+
 static void fl_engine_dispose(GObject* object) {
   FlEngine* self = FL_ENGINE(object);
 
-  if (self->engine != nullptr) {
-    if (self->embedder_api.Shutdown(self->engine) != kSuccess) {
-      g_warning("Failed to shutdown Flutter engine");
-    }
-    self->engine = nullptr;
-  }
+  shutdown_engine(self);
 
   if (self->aot_data != nullptr) {
     if (self->embedder_api.CollectAOTData(self->aot_data) != kSuccess) {
@@ -639,7 +668,13 @@ static void fl_engine_dispose(GObject* object) {
   G_OBJECT_CLASS(fl_engine_parent_class)->dispose(object);
 }
 
+static void fl_engine_finalize(GObject* object) {
+  g_rec_mutex_clear(&FL_ENGINE(object)->lifecycle_mutex);
+  G_OBJECT_CLASS(fl_engine_parent_class)->finalize(object);
+}
+
 static void fl_engine_class_init(FlEngineClass* klass) {
+  G_OBJECT_CLASS(klass)->finalize = fl_engine_finalize;
   G_OBJECT_CLASS(klass)->dispose = fl_engine_dispose;
   G_OBJECT_CLASS(klass)->set_property = fl_engine_set_property;
 
@@ -661,6 +696,7 @@ static void fl_engine_class_init(FlEngineClass* klass) {
 
 static void fl_engine_init(FlEngine* self) {
   self->thread = g_thread_self();
+  g_rec_mutex_init(&self->lifecycle_mutex);
 
   self->embedder_api.struct_size = sizeof(FlutterEngineProcTable);
   if (FlutterEngineGetProcAddresses(&self->embedder_api) != kSuccess) {
@@ -760,6 +796,12 @@ FlDisplayMonitor* fl_engine_get_display_monitor(FlEngine* self) {
 
 gboolean fl_engine_start(FlEngine* self, GError** error) {
   g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
+
+  if (self->shutting_down) {
+    g_set_error(error, fl_engine_error_quark(), FL_ENGINE_ERROR_FAILED,
+                "Cannot restart a shut down engine");
+    return FALSE;
+  }
 
   FlutterRendererConfig config = {};
   config.type = self->renderer_type;
@@ -936,6 +978,16 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
 
   fl_display_monitor_start(self->display_monitor);
 
+  GApplication* application = g_application_get_default();
+  if (application != nullptr) {
+    // The main loop has stopped when this signal is emitted. Finish native
+    // shutdown synchronously before the RUN_LAST class handler tears down
+    // runner resources, even if plugins or views still reference this engine.
+    g_signal_connect_object(application, "shutdown",
+                            G_CALLBACK(application_shutdown_cb), self,
+                            static_cast<GConnectFlags>(0));
+  }
+
   return TRUE;
 }
 
@@ -947,6 +999,9 @@ void fl_engine_notify_display_update(FlEngine* self,
                                      const FlutterEngineDisplay* displays,
                                      size_t displays_length) {
   g_return_if_fail(FL_IS_ENGINE(self));
+  if (self->shutting_down) {
+    return;
+  }
 
   FlutterEngineResult result = self->embedder_api.NotifyDisplayUpdate(
       self->engine, kFlutterEngineDisplaysUpdateTypeStartup, displays,
@@ -973,6 +1028,12 @@ FlutterViewId fl_engine_add_view(FlEngine* self,
   g_return_val_if_fail(FL_IS_ENGINE(self), -1);
 
   g_autoptr(GTask) task = g_task_new(self, cancellable, callback, user_data);
+
+  if (self->shutting_down) {
+    g_task_return_new_error(task, fl_engine_error_quark(),
+                            FL_ENGINE_ERROR_FAILED, "Engine is shut down");
+    return -1;
+  }
 
   FlutterViewId view_id = self->next_view_id;
   self->next_view_id++;
@@ -1037,6 +1098,11 @@ void fl_engine_remove_view(FlEngine* self,
 
   g_autoptr(GTask) task = g_task_new(self, cancellable, callback, user_data);
 
+  if (self->shutting_down) {
+    g_task_return_boolean(task, TRUE);
+    return;
+  }
+
   FlutterRemoveViewInfo info;
   info.struct_size = sizeof(FlutterRemoveViewInfo);
   info.view_id = view_id;
@@ -1087,7 +1153,9 @@ gboolean fl_engine_send_platform_message_response(
   g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
   g_return_val_if_fail(handle != nullptr, FALSE);
 
-  if (self->engine == nullptr) {
+  g_autoptr(GRecMutexLocker) lock =
+      g_rec_mutex_locker_new(&self->lifecycle_mutex);
+  if (self->shutting_down || self->engine == nullptr) {
     g_set_error(error, fl_engine_error_quark(), FL_ENGINE_ERROR_FAILED,
                 "No engine to send response to");
     return FALSE;
@@ -1564,6 +1632,12 @@ void fl_engine_dispatch_semantics_action(FlEngine* self,
 gboolean fl_engine_mark_texture_frame_available(FlEngine* self,
                                                 int64_t texture_id) {
   g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
+  g_autoptr(GRecMutexLocker) lock =
+      g_rec_mutex_locker_new(&self->lifecycle_mutex);
+  if (self->shutting_down) {
+    return FALSE;
+  }
+
   return self->embedder_api.MarkExternalTextureFrameAvailable(
              self->engine, texture_id) == kSuccess;
 }
@@ -1571,6 +1645,12 @@ gboolean fl_engine_mark_texture_frame_available(FlEngine* self,
 gboolean fl_engine_register_external_texture(FlEngine* self,
                                              int64_t texture_id) {
   g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
+  g_autoptr(GRecMutexLocker) lock =
+      g_rec_mutex_locker_new(&self->lifecycle_mutex);
+  if (self->shutting_down) {
+    return FALSE;
+  }
+
   return self->embedder_api.RegisterExternalTexture(self->engine, texture_id) ==
          kSuccess;
 }
@@ -1578,6 +1658,12 @@ gboolean fl_engine_register_external_texture(FlEngine* self,
 gboolean fl_engine_unregister_external_texture(FlEngine* self,
                                                int64_t texture_id) {
   g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
+  g_autoptr(GRecMutexLocker) lock =
+      g_rec_mutex_locker_new(&self->lifecycle_mutex);
+  if (self->shutting_down) {
+    return FALSE;
+  }
+
   return self->embedder_api.UnregisterExternalTexture(self->engine,
                                                       texture_id) == kSuccess;
 }
@@ -1595,6 +1681,10 @@ FlTaskRunner* fl_engine_get_task_runner(FlEngine* self) {
 
 void fl_engine_execute_task(FlEngine* self, FlutterTask* task) {
   g_return_if_fail(FL_IS_ENGINE(self));
+  if (self->shutting_down) {
+    return;
+  }
+
   if (self->embedder_api.RunTask(self->engine, task) != kSuccess) {
     g_warning("Failed to run task");
   }
