@@ -2416,8 +2416,8 @@ void main() {
         logger.errorText,
         contains(
           'Image asset manifest at "$projectLaunchImageContentsJsonPath" was invalid JSON. '
-          'Ensure the file contains valid JSON (for example, remove any trailing commas):\n'
-          'FormatException: Unexpected character (at line 8, character 3)',
+          'Ensure the file contains valid JSON (for example, remove any trailing commas).\n'
+          'Details: FormatException: Unexpected character (at line 8, character 3)',
         ),
       );
     },
@@ -2484,10 +2484,11 @@ void main() {
   );
 
   testUsingContext(
-    'Validate image assets does not crash when asset directory exists without Contents.json',
+    'Validate image assets warns and fails when asset directory exists without Contents.json',
     () async {
       const projectIconDirPath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset';
       const projectLaunchImageDirPath = 'ios/Runner/Assets.xcassets/LaunchImage.imageset';
+      final String missingManifestPath = fileSystem.path.join(projectIconDirPath, 'Contents.json');
 
       fakeProcessManager.addCommands(<FakeCommand>[
         setUpFakeXcodeBuildHandler(
@@ -2504,10 +2505,18 @@ void main() {
       createErrorFreeArchiveMockFiles(fileSystem);
 
       final BuildCommand command = createBuildCommand();
-      await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
+      await expectToolExitLater(
+        createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']),
+        contains(
+          'Missing Contents.json at "$missingManifestPath". '
+          'Restore the file in the iOS asset catalog to build an IPA.',
+        ),
+      );
 
-      expect(fakeProcessManager, hasNoRemainingExpectations);
-      expect(logger.errorText, isEmpty);
+      expect(
+        logger.errorText,
+        contains('Image asset manifest at "$missingManifestPath" is missing.'),
+      );
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,

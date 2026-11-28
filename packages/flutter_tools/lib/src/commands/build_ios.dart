@@ -214,7 +214,11 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     }
     final File contentsJsonFile = contentsJsonDirectory.childFile('Contents.json');
     if (!contentsJsonFile.existsSync()) {
-      return <_ImageAssetFileKey, String>{};
+      logger.printError('Image asset manifest at "${contentsJsonFile.path}" is missing.');
+      throwToolExit(
+        'Missing Contents.json at "${contentsJsonFile.path}". '
+        'Restore the file in the iOS asset catalog to build an IPA.',
+      );
     }
     final Object? decodedContents;
     try {
@@ -225,7 +229,8 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     } on FormatException catch (e) {
       logger.printError(
         'Image asset manifest at "${contentsJsonFile.path}" was invalid JSON. '
-        'Ensure the file contains valid JSON (for example, remove any trailing commas):\n$e',
+        'Ensure the file contains valid JSON (for example, remove any trailing commas).\n'
+        'Details: $e',
       );
       return <_ImageAssetFileKey, String>{};
     }
