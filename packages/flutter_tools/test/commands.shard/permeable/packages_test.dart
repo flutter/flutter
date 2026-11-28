@@ -20,11 +20,8 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
-<<<<<<< HEAD
-import 'package:flutter_tools/src/dart/pub.dart';
-=======
 import 'package:flutter_tools/src/context/tool_context.dart';
->>>>>>> upstream/master
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -556,8 +553,9 @@ flutter:
       final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect(
-        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
-            .eventData['packagesNumberPlugins'],
+        (await getCommand.unifiedAnalyticsUsageValues(
+          'pub/get',
+        )).eventData['packagesNumberPlugins'],
         0,
       );
     });
@@ -577,8 +575,9 @@ flutter:
 
       // A plugin example depends on the plugin itself, and integration_test.
       expect(
-        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
-            .eventData['packagesNumberPlugins'],
+        (await getCommand.unifiedAnalyticsUsageValues(
+          'pub/get',
+        )).eventData['packagesNumberPlugins'],
         2,
       );
     });
@@ -591,8 +590,9 @@ flutter:
       final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect(
-        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
-            .eventData['packagesProjectModule'],
+        (await getCommand.unifiedAnalyticsUsageValues(
+          'pub/get',
+        )).eventData['packagesProjectModule'],
         false,
       );
     });
@@ -607,8 +607,9 @@ flutter:
       final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect(
-        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
-            .eventData['packagesProjectModule'],
+        (await getCommand.unifiedAnalyticsUsageValues(
+          'pub/get',
+        )).eventData['packagesProjectModule'],
         true,
       );
     });
@@ -621,8 +622,9 @@ flutter:
       final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect(
-        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
-            .eventData['packagesAndroidEmbeddingVersion'],
+        (await getCommand.unifiedAnalyticsUsageValues(
+          'pub/get',
+        )).eventData['packagesAndroidEmbeddingVersion'],
         'v2',
       );
     });
