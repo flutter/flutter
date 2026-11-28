@@ -166,12 +166,15 @@ AccessibilityBridgeMac::MacOSEventsFromAXEvent(ui::AXEventGenerator::Event event
         // the FlutterTextField directly. Only need to make sure it is the
         // first responder.
         id native_text_field = mac_platform_node_delegate->GetNativeViewAccessible();
-        FML_DCHECK([native_text_field isKindOfClass:FlutterTextField.class]);
-        id focused = mac_platform_node_delegate->GetFocus();
-        if (!focused || native_text_field == focused) {
-          [(FlutterTextField*)native_text_field startEditing];
+        if ([native_text_field isKindOfClass:FlutterTextField.class]) {
+          id focused = mac_platform_node_delegate->GetFocus();
+          if (!focused || native_text_field == focused) {
+            [(FlutterTextField*)native_text_field startEditing];
+          }
+          break;
         }
-        break;
+        // A text field role does not guarantee a FlutterTextField native node.
+        // Fall back to the standard value notification for other node types.
       }
       events.push_back({
           .name = NSAccessibilityValueChangedNotification,
