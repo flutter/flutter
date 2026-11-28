@@ -25,7 +25,11 @@ import '../plugins.dart';
 import '../xcode_project.dart';
 
 final _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
-final _varExpr = RegExp(r'\$\(([^)]*)\)');
+
+/// Matches an Xcode build setting reference in either the `$(VAR)` or the
+/// `${VAR}` form. Apple only documents `$(VAR)`, but Xcode also expands
+/// `${VAR}` in Info.plist.
+final _varExpr = RegExp(r'\$(?:\(([^)]*)\)|\{([^}]*)\})');
 
 /// Matches each `XCLocalSwiftPackageReference` object body in a
 /// `project.pbxproj` file, capturing its `relativePath` value.
@@ -582,13 +586,15 @@ Map<String, String> parseXcodeBuildSettings(String showBuildSettingsOutput) {
 
 /// Substitutes variables in [str] with their values from the specified Xcode
 /// project and target.
+///
+/// Both the `$(VAR)` and the `${VAR}` forms are substituted.
 String substituteXcodeVariables(String str, Map<String, String> xcodeBuildSettings) {
   final Iterable<Match> matches = _varExpr.allMatches(str);
   if (matches.isEmpty) {
     return str;
   }
 
-  return str.replaceAllMapped(_varExpr, (Match m) => xcodeBuildSettings[m[1]!] ?? m[0]!);
+  return str.replaceAllMapped(_varExpr, (Match m) => xcodeBuildSettings[m[1] ?? m[2]] ?? m[0]!);
 }
 
 /// Xcode SDKs. Corresponds to undocumented Xcode SUPPORTED_PLATFORMS values.
