@@ -873,6 +873,86 @@ void main() {
       expect(client.latestMethodCall, 'commitContent');
     });
 
+    Future<void> sendBinaryCommitContent(int clientId, Uint8List data) {
+      return binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/contentinsertion',
+        const StandardMethodCodec().encodeMethodCall(
+          MethodCall('ContentInsertion.commitContent', <Object?>[
+            clientId,
+            <String, Object?>{
+              'mimeType': 'image/gif',
+              'uri': 'content://com.google.android.inputmethod.latin.fileprovider/test.gif',
+              'data': data,
+            },
+          ]),
+        ),
+        (ByteData? _) {},
+      );
+    }
+
+    test('TextInputClient insertContent is called from the content insertion channel', () async {
+      final client = FakeTextInputClient(TextEditingValue.empty);
+      final TextInputConnection connection = TextInput.attach(
+        client,
+        const TextInputConfiguration(),
+      );
+      addTearDown(connection.close);
+      final data = Uint8List.fromList(<int>[0, 1, 0, 1, 0, 1, 0, 0, 0]);
+
+      await sendBinaryCommitContent(-1, data);
+
+      expect(client.latestMethodCall, 'commitContent');
+      final KeyboardInsertedContent content = client.latestInsertedContent!;
+      expect(content.mimeType, 'image/gif');
+      expect(content.uri, 'content://com.google.android.inputmethod.latin.fileprovider/test.gif');
+      expect(content.data, data);
+    });
+
+    test('content insertion channel ignores content for another client', () async {
+      final client = FakeTextInputClient(TextEditingValue.empty);
+      final TextInputConnection connection = TextInput.attach(
+        client,
+        const TextInputConfiguration(),
+      );
+      addTearDown(connection.close);
+
+      const otherClientId = 123456;
+      await sendBinaryCommitContent(otherClientId, Uint8List(1));
+
+      expect(client.latestMethodCall, isEmpty);
+    });
+
+    test('content insertion channel ignores content without a connection', () async {
+      final client = FakeTextInputClient(TextEditingValue.empty);
+      TextInput.attach(client, const TextInputConfiguration()).close();
+
+      await sendBinaryCommitContent(-1, Uint8List(1));
+
+      expect(client.latestMethodCall, isEmpty);
+    });
+
+    test('content insertion channel reports errors to FlutterError.onError', () async {
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      final errors = <FlutterErrorDetails>[];
+      FlutterError.onError = errors.add;
+      addTearDown(() => FlutterError.onError = originalOnError);
+      final client = ThrowingInsertContentClient(TextEditingValue.empty);
+      final TextInputConnection connection = TextInput.attach(
+        client,
+        const TextInputConfiguration(),
+      );
+      addTearDown(connection.close);
+
+      await sendBinaryCommitContent(-1, Uint8List(1));
+
+      expect(errors, hasLength(1));
+      expect(errors.single.exception, isA<StateError>());
+      expect(
+        errors.single.context.toString(),
+        contains('during method call ContentInsertion.commitContent'),
+      );
+    });
+
     test('TextInputClient performSelectors method is called', () async {
       final client = FakeTextInputClient(TextEditingValue.empty);
       const configuration = TextInputConfiguration();
@@ -2199,6 +2279,7 @@ class FakeTextInputClient with TextInputClient {
   FakeTextInputClient(this.currentTextEditingValue);
 
   String latestMethodCall = '';
+  KeyboardInsertedContent? latestInsertedContent;
   final List<String> performedSelectors = <String>[];
   late Map<String, dynamic>? latestPrivateCommandData;
 
@@ -2222,6 +2303,7 @@ class FakeTextInputClient with TextInputClient {
   @override
   void insertContent(KeyboardInsertedContent content) {
     latestMethodCall = 'commitContent';
+    latestInsertedContent = content;
   }
 
   @override
@@ -2359,5 +2441,14 @@ class FakeTextInputControl with TextInputControl {
   @override
   void requestAutofill() {
     methodCalls.add('requestAutofill');
+  }
+}
+
+class ThrowingInsertContentClient extends FakeTextInputClient {
+  ThrowingInsertContentClient(super.currentTextEditingValue);
+
+  @override
+  void insertContent(KeyboardInsertedContent content) {
+    throw StateError('insertContent failed');
   }
 }

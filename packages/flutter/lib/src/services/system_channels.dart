@@ -341,6 +341,26 @@ abstract final class SystemChannels {
   ///     and the [Locale] for the text to be spell checked with.
   static const MethodChannel spellCheck = OptionalMethodChannel('flutter/spellcheck');
 
+  /// A [MethodChannel] for rich content, such as images, that the platform
+  /// inserts into the active text input client.
+  ///
+  /// Unlike [textInput], this channel uses the [StandardMethodCodec], which
+  /// transfers the content's bytes as a single binary blob.
+  ///
+  /// The following incoming method is defined for this channel (registered
+  /// using [MethodChannel.setMethodCallHandler]):
+  ///
+  ///  * `ContentInsertion.commitContent`: The platform inserted content into
+  ///    the text input client. The arguments are a list with the client ID
+  ///    and a map with the keys `mimeType` (a [String]), `uri` (a [String])
+  ///    and `data` (a [Uint8List], or null if the bytes are unavailable).
+  ///
+  /// See also:
+  ///
+  ///  * [KeyboardInsertedContent], which holds the inserted content.
+  ///  * [TextInputClient.insertContent], which receives it.
+  static const MethodChannel contentInsertion = OptionalMethodChannel('flutter/contentinsertion');
+
   /// A JSON [MethodChannel] for handling undo events.
   static const MethodChannel undoManager = OptionalMethodChannel(
     'flutter/undomanager',
