@@ -2752,4 +2752,106 @@ void main() {
     expect(didEndPan, isTrue);
     didEndPan = false;
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/187991.
+  testGesture('Pointer pan/zoom drag reports accurate localPosition under translation', (
+    GestureTester tester,
+  ) {
+    final pan = PanGestureRecognizer();
+    addTearDown(pan.dispose);
+
+    Offset? downLocalPosition;
+    Offset? startLocalPosition;
+    Offset? updateLocalPosition;
+    Offset? updateDelta;
+    Offset? endLocalPosition;
+
+    pan.onDown = (DragDownDetails details) {
+      downLocalPosition = details.localPosition;
+    };
+    pan.onStart = (DragStartDetails details) {
+      startLocalPosition = details.localPosition;
+    };
+    pan.onUpdate = (DragUpdateDetails details) {
+      updateLocalPosition = details.localPosition;
+      updateDelta = details.delta;
+    };
+    pan.onEnd = (DragEndDetails details) {
+      endLocalPosition = details.localPosition;
+    };
+
+    // Global-to-local transform for a widget positioned at (100, 200) and scaled by 0.5
+    // (i.e. local = (global - (100, 200)) * 2).
+    final Matrix4 transform = (Matrix4.identity()..scaleByDouble(2.0, 2.0, 1.0, 1.0)).multiplied(
+      Matrix4.translationValues(-100.0, -200.0, 0.0),
+    );
+
+    final pointer = TestPointer(2, PointerDeviceKind.trackpad);
+    final PointerPanZoomStartEvent start = pointer
+        .panZoomStart(const Offset(120.0, 230.0))
+        .transformed(transform);
+    pan.addPointerPanZoom(start);
+    tester.closeArena(2);
+    tester.route(start);
+    expect(downLocalPosition, const Offset(40.0, 60.0));
+    expect(startLocalPosition, const Offset(40.0, 60.0));
+
+    tester.route(pointer.panZoomUpdate(const Offset(120.0, 230.0), pan: const Offset(15.0, 25.0)));
+    expect(updateDelta, const Offset(30.0, 50.0));
+    expect(updateLocalPosition, const Offset(70.0, 110.0));
+
+    tester.route(pointer.panZoomEnd());
+    expect(endLocalPosition, const Offset(70.0, 110.0));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/197356.
+  testGesture('Pointer pan/zoom fling velocity is computed in local coordinates', (
+    GestureTester tester,
+  ) {
+    final verticalDrag = VerticalDragGestureRecognizer();
+    addTearDown(verticalDrag.dispose);
+
+    double? primaryVelocity;
+    Velocity? endVelocity;
+    verticalDrag.onEnd = (DragEndDetails details) {
+      primaryVelocity = details.primaryVelocity;
+      endVelocity = details.velocity;
+    };
+
+    // Global-to-local transform combining translation, 90-degree rotation, and 2x scale:
+    // global delta (dx, dy) maps to local delta (2 * dy, -2 * dx).
+    const kPi = 3.141592652589793;
+    final Matrix4 transform =
+        (Matrix4.rotationZ(-kPi / 2)..scaleByDouble(2.0, 2.0, 1.0, 1.0)).multiplied(
+          Matrix4.translationValues(-100.0, -200.0, 0.0),
+        );
+
+    final pointer = TestPointer(2, PointerDeviceKind.trackpad);
+    final PointerPanZoomStartEvent start = pointer
+        .panZoomStart(const Offset(120.0, 230.0), timeStamp: const Duration(milliseconds: 10))
+        .transformed(transform);
+    verticalDrag.addPointerPanZoom(start);
+    tester.closeArena(2);
+    tester.route(start);
+    tester.route(
+      pointer.panZoomUpdate(
+        const Offset(120.0, 230.0),
+        pan: const Offset(20.0, 0.0),
+        timeStamp: const Duration(milliseconds: 20),
+      ),
+    );
+    tester.route(
+      pointer.panZoomUpdate(
+        const Offset(120.0, 230.0),
+        pan: const Offset(40.0, 0.0),
+        timeStamp: const Duration(milliseconds: 30),
+      ),
+    );
+    tester.route(pointer.panZoomEnd());
+
+    // Global +20px/10ms along X maps to -4000px/s along local Y.
+    expect(primaryVelocity, moreOrLessEquals(-4000.0));
+    expect(endVelocity!.pixelsPerSecond.dx, moreOrLessEquals(0.0));
+    expect(endVelocity!.pixelsPerSecond.dy, moreOrLessEquals(-4000.0));
+  });
 }

@@ -660,7 +660,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
             event is PointerPanZoomUpdateEvent)) {
       final Offset position = switch (event) {
         PointerPanZoomStartEvent() => Offset.zero,
-        PointerPanZoomUpdateEvent() => event.pan,
+        PointerPanZoomUpdateEvent() => event.localPan,
         _ => event.localPosition,
       };
       _velocityTrackers[event.pointer]!.addPosition(event.timeStamp, position);
