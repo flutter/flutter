@@ -2807,6 +2807,7 @@ class RenderFittedBox extends RenderProxyBox {
   void _markNeedResolution() {
     _resolvedAlignment = null;
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   bool _fitAffectsLayout(BoxFit fit) {
@@ -2837,6 +2838,7 @@ class RenderFittedBox extends RenderProxyBox {
     } else {
       _clearPaintData();
       markNeedsPaint();
+      markNeedsSemanticsUpdate();
     }
   }
 
@@ -3047,6 +3049,22 @@ class RenderFittedBox extends RenderProxyBox {
     } else {
       _updatePaintData();
       transform.multiply(_transform!);
+    }
+  }
+
+  @override
+  Rect? describeApproximatePaintClip(RenderObject child) {
+    switch (clipBehavior) {
+      case Clip.none:
+        return null;
+      case Clip.hardEdge:
+      case Clip.antiAlias:
+      case Clip.antiAliasWithSaveLayer:
+        if (child is! RenderBox || !paintsChild(child)) {
+          return null;
+        }
+        _updatePaintData();
+        return _hasVisualOverflow! ? Offset.zero & size : null;
     }
   }
 

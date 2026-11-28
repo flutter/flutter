@@ -217,4 +217,119 @@ void main() {
     );
     expect(tester.getSize(find.byType(Flow)), Size.zero);
   });
+
+  testWidgets('Flow clips the semantics rect of an overflowing child', (WidgetTester tester) async {
+    Widget buildFlow(Clip clipBehavior) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: Flow(
+              delegate: _TranslateFlowDelegate(const Offset(0, 50)),
+              clipBehavior: clipBehavior,
+              children: <Widget>[
+                Semantics(
+                  label: 'target',
+                  container: true,
+                  child: const SizedBox(width: 100, height: 100),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Only the top half of the target is inside the clip.
+    await tester.pumpWidget(buildFlow(Clip.hardEdge));
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('target')).rect,
+      const Rect.fromLTRB(0, 0, 100, 50),
+    );
+
+    // Without clipping, the whole target is visible.
+    await tester.pumpWidget(buildFlow(Clip.none));
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('target')).rect,
+      const Rect.fromLTRB(0, 0, 100, 100),
+    );
+  });
+
+  testWidgets('Flow updates semantics when only repainting', (WidgetTester tester) async {
+    final children = <Widget>[
+      Semantics(label: 'target', container: true, child: const SizedBox(width: 100, height: 100)),
+    ];
+
+    Widget buildFlow(FlowDelegate delegate) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: Flow.unwrapped(delegate: delegate, children: children),
+          ),
+        ),
+      );
+    }
+
+    Rect targetRect() => tester.getSemantics(find.bySemanticsLabel('target')).rect;
+
+    // Repaint triggered by FlowDelegate.shouldRepaint.
+    await tester.pumpWidget(buildFlow(_TranslateFlowDelegate(Offset.zero)));
+    expect(targetRect(), const Rect.fromLTRB(0, 0, 100, 100));
+    await tester.pumpWidget(buildFlow(_TranslateFlowDelegate(const Offset(0, 50))));
+    expect(targetRect(), const Rect.fromLTRB(0, 0, 100, 50));
+
+    // Repaint triggered by the repaint listenable.
+    final offset = ValueNotifier<Offset>(Offset.zero);
+    addTearDown(offset.dispose);
+    await tester.pumpWidget(buildFlow(_ListenableTranslateFlowDelegate(offset)));
+    expect(targetRect(), const Rect.fromLTRB(0, 0, 100, 100));
+    offset.value = const Offset(0, 50);
+    await tester.pump();
+    expect(targetRect(), const Rect.fromLTRB(0, 0, 100, 50));
+    offset.value = const Offset(0, -25);
+    await tester.pump();
+    expect(targetRect(), const Rect.fromLTRB(0, 25, 100, 100));
+  });
+}
+
+class _TranslateFlowDelegate extends FlowDelegate {
+  _TranslateFlowDelegate(this.offset);
+
+  final Offset offset;
+
+  @override
+  void paintChildren(FlowPaintingContext context) {
+    for (var i = 0; i < context.childCount; ++i) {
+      context.paintChild(i, transform: Matrix4.translationValues(offset.dx, offset.dy, 0.0));
+    }
+  }
+
+  @override
+  bool shouldRepaint(_TranslateFlowDelegate oldDelegate) => offset != oldDelegate.offset;
+}
+
+class _ListenableTranslateFlowDelegate extends FlowDelegate {
+  _ListenableTranslateFlowDelegate(this.offset) : super(repaint: offset);
+
+  final ValueNotifier<Offset> offset;
+
+  @override
+  void paintChildren(FlowPaintingContext context) {
+    for (var i = 0; i < context.childCount; ++i) {
+      context.paintChild(
+        i,
+        transform: Matrix4.translationValues(offset.value.dx, offset.value.dy, 0.0),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_ListenableTranslateFlowDelegate oldDelegate) => offset != oldDelegate.offset;
 }
