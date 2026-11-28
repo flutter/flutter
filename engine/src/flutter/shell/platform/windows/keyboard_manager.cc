@@ -108,6 +108,48 @@ LPARAM NormalizeShiftLParam(WPARAM wparam, LPARAM lparam) {
   return (lparam & ~kScanCodeAndExtendedMask) | (normalized << 16);
 }
 
+// Returns true for extended keys whose MAPVK_VK_TO_VSC_EX scan code lacks the
+// 0xE0 prefix, which would otherwise resolve to the numpad or Pause.
+bool IsExtendedKeyWithoutPrefix(WPARAM virtual_key) {
+  switch (virtual_key) {
+    case VK_PRIOR:
+    case VK_NEXT:
+    case VK_END:
+    case VK_HOME:
+    case VK_LEFT:
+    case VK_UP:
+    case VK_RIGHT:
+    case VK_DOWN:
+    case VK_INSERT:
+    case VK_DELETE:
+    case VK_NUMLOCK:
+      return true;
+    default:
+      return false;
+  }
+}
+
+// Returns |lparam| with a zero scan code replaced by the scan code of
+// |virtual_key| in the current layout.
+//
+// Injected input, such as the Ctrl+V sent when an item is picked from the
+// clipboard history, can have a zero scan code on every message, which would
+// resolve all of its keys to the same physical key.
+// See https://github.com/flutter/flutter/issues/143997.
+LPARAM FillZeroScanCode(WPARAM virtual_key, LPARAM lparam) {
+  if (((lparam >> 16) & 0xff) != 0) {
+    return lparam;
+  }
+  const UINT scancode = MapVirtualKey(virtual_key, MAPVK_VK_TO_VSC_EX);
+  const UINT prefix = scancode >> 8;
+  if ((scancode & 0xff) == 0 || (prefix != 0 && prefix != 0xe0)) {
+    return lparam;
+  }
+  const LPARAM extended =
+      prefix == 0xe0 || IsExtendedKeyWithoutPrefix(virtual_key) ? 1 : 0;
+  return lparam | (LPARAM{scancode & 0xff} << 16) | (extended << 24);
+}
+
 bool IsPrintable(uint32_t c) {
   constexpr char32_t kMinPrintable = ' ';
   constexpr char32_t kDelete = 0x7F;
@@ -205,9 +247,11 @@ bool KeyboardManager::HandleMessage(UINT const action,
       // OnText if the key down event is not handled.
       if (current_session_.front().IsGeneralKeyDown()) {
         const Win32Message first_message = current_session_.front();
-        const uint8_t scancode = (lparam >> 16) & 0xff;
+        const LPARAM key_lparam =
+            FillZeroScanCode(first_message.wparam, lparam);
+        const uint8_t scancode = (key_lparam >> 16) & 0xff;
         const uint16_t key_code = first_message.wparam;
-        const bool extended = ((lparam >> 24) & 0x01) == 0x01;
+        const bool extended = ((key_lparam >> 24) & 0x01) == 0x01;
         const bool was_down = lparam & 0x40000000;
         // Certain key combinations yield control characters as WM_CHAR's
         // lParam. For example, 0x01 for Ctrl-A. Filter these characters. See
@@ -268,7 +312,8 @@ bool KeyboardManager::HandleMessage(UINT const action,
         return false;
       }
 
-      const LPARAM key_lparam = NormalizeShiftLParam(wparam, lparam);
+      const LPARAM key_lparam =
+          FillZeroScanCode(wparam, NormalizeShiftLParam(wparam, lparam));
       const uint8_t scancode = (key_lparam >> 16) & 0xff;
       const bool extended = ((key_lparam >> 24) & 0x01) == 0x01;
       // If the key is a modifier, get its side.

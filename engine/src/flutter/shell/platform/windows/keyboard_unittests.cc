@@ -71,6 +71,7 @@ constexpr uint64_t kVirtualKeyE = 0x45;
 constexpr uint64_t kVirtualKeyF = 0x46;
 constexpr uint64_t kVirtualKeyO = 0x4f;
 constexpr uint64_t kVirtualKeyQ = 0x51;
+constexpr uint64_t kVirtualKeyV = 0x56;
 constexpr uint64_t kVirtualKeyW = 0x57;
 
 constexpr bool kSynthesized = true;
@@ -1335,6 +1336,97 @@ TEST_F(KeyboardTest, CtrlLeftKeyA) {
                        kNotSynthesized);
   tester.clear_key_calls();
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1);
+}
+
+// The Ctrl+V injected when an item is picked from the Windows 11 clipboard
+// history has a zero scan code on every message. Ctrl and V must still resolve
+// to distinct physical keys.
+//
+// Regression test for https://github.com/flutter/flutter/issues/143997.
+TEST_F(KeyboardTest, CtrlVWithZeroScanCodes) {
+  KeyboardTester tester{GetContext()};
+  tester.Responding(false);
+
+  // Press ControlLeft
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LCONTROL, true, false},
+      WmKeyDownInfo{VK_CONTROL, 0, kNotExtended, kWasUp}.Build(kWmResultZero)});
+
+  EXPECT_EQ(tester.key_calls.size(), 1);
+  EXPECT_CALL_IS_EVENT(tester.key_calls[0], kFlutterKeyEventTypeDown,
+                       kPhysicalControlLeft, kLogicalControlLeft, "",
+                       kNotSynthesized);
+  tester.clear_key_calls();
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1);
+
+  // Press V
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyDownInfo{kVirtualKeyV, 0, kNotExtended, kWasUp}.Build(kWmResultZero),
+      WmCharInfo{0x16, 0, kNotExtended, kWasUp}.Build(kWmResultZero)});
+
+  EXPECT_EQ(tester.key_calls.size(), 1);
+  EXPECT_CALL_IS_EVENT(tester.key_calls[0], kFlutterKeyEventTypeDown,
+                       kPhysicalKeyV, kLogicalKeyV, "", kNotSynthesized);
+  tester.clear_key_calls();
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 2);
+
+  // Release V
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{kVirtualKeyV, 0, kNotExtended}.Build(kWmResultZero)});
+
+  EXPECT_EQ(tester.key_calls.size(), 1);
+  EXPECT_CALL_IS_EVENT(tester.key_calls[0], kFlutterKeyEventTypeUp,
+                       kPhysicalKeyV, kLogicalKeyV, "", kNotSynthesized);
+  tester.clear_key_calls();
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1);
+
+  // Release ControlLeft
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LCONTROL, false, true},
+      WmKeyUpInfo{VK_CONTROL, 0, kNotExtended}.Build(kWmResultZero)});
+
+  EXPECT_EQ(tester.key_calls.size(), 1);
+  EXPECT_CALL_IS_EVENT(tester.key_calls[0], kFlutterKeyEventTypeUp,
+                       kPhysicalControlLeft, kLogicalControlLeft, "",
+                       kNotSynthesized);
+  tester.clear_key_calls();
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1);
+}
+
+// A zero scan code resolves to the standard physical key of the virtual key,
+// including extended keys, and keeps the extended bit of the message.
+//
+// Regression test for https://github.com/flutter/flutter/issues/143997.
+TEST_F(KeyboardTest, ZeroScanCodeResolvesToStandardPhysicalKey) {
+  KeyboardTester tester{GetContext()};
+  tester.Responding(true);
+
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyDownInfo{VK_LEFT, 0, kNotExtended, kWasUp}.Build(kWmResultZero)});
+
+  ASSERT_EQ(tester.key_calls.size(), 1u);
+  EXPECT_CALL_IS_EVENT(tester.key_calls[0], kFlutterKeyEventTypeDown,
+                       kPhysicalArrowLeft, kLogicalArrowLeft, "",
+                       kNotSynthesized);
+  tester.clear_key_calls();
+
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_RCONTROL, true, false},
+      WmKeyDownInfo{VK_CONTROL, 0, kExtended, kWasUp}.Build(kWmResultZero)});
+
+  ASSERT_EQ(tester.key_calls.size(), 1u);
+  EXPECT_CALL_IS_EVENT(tester.key_calls[0], kFlutterKeyEventTypeDown,
+                       kPhysicalControlRight, kLogicalControlRight, "",
+                       kNotSynthesized);
+  tester.clear_key_calls();
+
+  // A key without a scan code in the layout keeps the Windows plane value.
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyDownInfo{VK_NONAME, 0, kNotExtended, kWasUp}.Build(kWmResultZero)});
+
+  ASSERT_EQ(tester.key_calls.size(), 1u);
+  EXPECT_EQ(tester.key_calls[0].key_event.physical, 0x1600000000u);
+  tester.clear_key_calls();
 }
 
 // Press Ctrl-1. This is special because it yields no WM_CHAR for the 1.
