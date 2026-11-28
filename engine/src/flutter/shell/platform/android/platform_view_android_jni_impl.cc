@@ -62,6 +62,14 @@ static jmethodID g_flutter_callback_info_constructor = nullptr;
 
 static jfieldID g_jni_shell_holder_field = nullptr;
 
+static jfieldID g_refresh_rate_fps_field = nullptr;
+
+static jfieldID g_display_width_field = nullptr;
+
+static jfieldID g_display_height_field = nullptr;
+
+static jfieldID g_display_density_field = nullptr;
+
 #define FLUTTER_FOR_EACH_JNI_METHOD(V)                                        \
   V(g_handle_platform_message_method, handlePlatformMessage,                  \
     "(Ljava/lang/String;Ljava/nio/ByteBuffer;IJ)V")                           \
@@ -969,6 +977,34 @@ bool RegisterApi(JNIEnv* env) {
 
   if (g_jni_shell_holder_field == nullptr) {
     FML_LOG(ERROR) << "Could not locate FlutterJNI's nativeShellHolderId field";
+    return false;
+  }
+
+  g_refresh_rate_fps_field =
+      env->GetStaticFieldID(g_flutter_jni_class->obj(), "refreshRateFPS", "F");
+  if (g_refresh_rate_fps_field == nullptr) {
+    FML_LOG(ERROR) << "Could not locate FlutterJNI's refreshRateFPS field";
+    return false;
+  }
+
+  g_display_width_field =
+      env->GetStaticFieldID(g_flutter_jni_class->obj(), "displayWidth", "F");
+  if (g_display_width_field == nullptr) {
+    FML_LOG(ERROR) << "Could not locate FlutterJNI's displayWidth field";
+    return false;
+  }
+
+  g_display_height_field =
+      env->GetStaticFieldID(g_flutter_jni_class->obj(), "displayHeight", "F");
+  if (g_display_height_field == nullptr) {
+    FML_LOG(ERROR) << "Could not locate FlutterJNI's displayHeight field";
+    return false;
+  }
+
+  g_display_density_field =
+      env->GetStaticFieldID(g_flutter_jni_class->obj(), "displayDensity", "F");
+  if (g_display_density_field == nullptr) {
+    FML_LOG(ERROR) << "Could not locate FlutterJNI's displayDensity field";
     return false;
   }
 
@@ -1978,76 +2014,42 @@ PlatformViewAndroidJNIImpl::FlutterViewComputePlatformResolvedLocale(
   return out;
 }
 
-double PlatformViewAndroidJNIImpl::GetDisplayRefreshRate() {
+namespace {
+
+double GetStaticDisplayMetric(
+    const fml::jni::JavaObjectWeakGlobalRef& java_object_ref,
+    jfieldID field_id,
+    double fallback) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
 
-  auto java_object = java_object_.get(env);
-  if (java_object.is_null()) {
-    return kUnknownDisplayRefreshRate;
+  auto java_object = java_object_ref.get(env);
+  if (java_object.is_null() || g_flutter_jni_class == nullptr ||
+      g_flutter_jni_class->is_null() || field_id == nullptr) {
+    return fallback;
   }
 
-  fml::jni::ScopedJavaLocalRef<jclass> clazz(
-      env, env->GetObjectClass(java_object.obj()));
-  if (clazz.is_null()) {
-    return kUnknownDisplayRefreshRate;
-  }
+  jfloat value = env->GetStaticFloatField(g_flutter_jni_class->obj(), field_id);
+  FML_CHECK(fml::jni::CheckException(env));
+  return static_cast<double>(value);
+}
 
-  jfieldID fid = env->GetStaticFieldID(clazz.obj(), "refreshRateFPS", "F");
-  return static_cast<double>(env->GetStaticFloatField(clazz.obj(), fid));
+}  // namespace
+
+double PlatformViewAndroidJNIImpl::GetDisplayRefreshRate() {
+  return GetStaticDisplayMetric(java_object_, g_refresh_rate_fps_field,
+                                kUnknownDisplayRefreshRate);
 }
 
 double PlatformViewAndroidJNIImpl::GetDisplayWidth() {
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-
-  auto java_object = java_object_.get(env);
-  if (java_object.is_null()) {
-    return -1;
-  }
-
-  fml::jni::ScopedJavaLocalRef<jclass> clazz(
-      env, env->GetObjectClass(java_object.obj()));
-  if (clazz.is_null()) {
-    return -1;
-  }
-
-  jfieldID fid = env->GetStaticFieldID(clazz.obj(), "displayWidth", "F");
-  return static_cast<double>(env->GetStaticFloatField(clazz.obj(), fid));
+  return GetStaticDisplayMetric(java_object_, g_display_width_field, -1);
 }
 
 double PlatformViewAndroidJNIImpl::GetDisplayHeight() {
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-
-  auto java_object = java_object_.get(env);
-  if (java_object.is_null()) {
-    return -1;
-  }
-
-  fml::jni::ScopedJavaLocalRef<jclass> clazz(
-      env, env->GetObjectClass(java_object.obj()));
-  if (clazz.is_null()) {
-    return -1;
-  }
-
-  jfieldID fid = env->GetStaticFieldID(clazz.obj(), "displayHeight", "F");
-  return static_cast<double>(env->GetStaticFloatField(clazz.obj(), fid));
+  return GetStaticDisplayMetric(java_object_, g_display_height_field, -1);
 }
 
 double PlatformViewAndroidJNIImpl::GetDisplayDensity() {
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-
-  auto java_object = java_object_.get(env);
-  if (java_object.is_null()) {
-    return -1;
-  }
-
-  fml::jni::ScopedJavaLocalRef<jclass> clazz(
-      env, env->GetObjectClass(java_object.obj()));
-  if (clazz.is_null()) {
-    return -1;
-  }
-
-  jfieldID fid = env->GetStaticFieldID(clazz.obj(), "displayDensity", "F");
-  return static_cast<double>(env->GetStaticFloatField(clazz.obj(), fid));
+  return GetStaticDisplayMetric(java_object_, g_display_density_field, -1);
 }
 
 bool PlatformViewAndroidJNIImpl::RequestDartDeferredLibrary(
