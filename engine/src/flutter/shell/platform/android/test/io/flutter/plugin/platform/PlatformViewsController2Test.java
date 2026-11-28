@@ -1169,6 +1169,114 @@ public class PlatformViewsController2Test {
     ShadowLooper.idleMainLooper();
   }
 
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void onDisplayPlatformView_updatesOffsetWithoutRequestingLayout() {
+    final PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+
+    final int platformViewId = 0;
+    final View androidView = new View(ApplicationProvider.getApplicationContext());
+    final PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    final PlatformView platformView = mock(PlatformView.class);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    controller.getRegistry().registerViewFactory("testType", viewFactory);
+
+    final FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    final FlutterView flutterView = attach(jni, controller);
+
+    createPlatformView(jni, controller, platformViewId, "testType");
+
+    final FlutterMutatorsStack stack1 = new FlutterMutatorsStack();
+    stack1.pushTransform(new float[] {1, 0, 5, 0, 1, 10, 0, 0, 1});
+    controller.onDisplayPlatformView(platformViewId, 5, 10, 50, 50, 50, 50, stack1);
+
+    final FlutterMutatorView parentView = controller.getPlatformViewParent(platformViewId);
+    assertNotNull(parentView);
+    flutterView.measure(
+        View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY),
+        View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY));
+    flutterView.layout(0, 0, 100, 100);
+    assertFalse(flutterView.isLayoutRequested());
+    assertFalse(parentView.isLayoutRequested());
+    assertFalse(androidView.isLayoutRequested());
+    assertEquals(5, parentView.getLeft());
+    assertEquals(10, parentView.getTop());
+
+    final FlutterMutatorsStack stack2 = new FlutterMutatorsStack();
+    stack2.pushTransform(new float[] {1, 0, 15, 0, 1, 25, 0, 0, 1});
+    controller.onDisplayPlatformView(platformViewId, 15, 25, 50, 50, 50, 50, stack2);
+
+    assertFalse(flutterView.isLayoutRequested());
+    assertFalse(parentView.isLayoutRequested());
+    assertFalse(androidView.isLayoutRequested());
+    assertEquals(15, parentView.getLeft());
+    assertEquals(25, parentView.getTop());
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void onDisplayPlatformView_reordersViewsOnlyWhenZOrderChanges() {
+    final PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+
+    final PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    when(viewFactory.create(any(), anyInt(), any()))
+        .thenAnswer(
+            invocation -> {
+              final PlatformView pv = mock(PlatformView.class);
+              when(pv.getView()).thenReturn(new View(ApplicationProvider.getApplicationContext()));
+              return pv;
+            });
+    controller.getRegistry().registerViewFactory("testType", viewFactory);
+
+    final FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    final FlutterView flutterView = attach(jni, controller);
+
+    createPlatformView(jni, controller, 1, "testType");
+    createPlatformView(jni, controller, 2, "testType");
+
+    // Frame 1: display view 1 then view 2.
+    final FlutterMutatorsStack stack = new FlutterMutatorsStack();
+    controller.onDisplayPlatformView(1, 0, 0, 50, 50, 50, 50, stack);
+    controller.onDisplayPlatformView(2, 0, 0, 50, 50, 50, 50, stack);
+    controller.swapTransactions();
+    controller.onEndFrame();
+    ShadowLooper.idleMainLooper();
+
+    final FlutterMutatorView parent1 = controller.getPlatformViewParent(1);
+    final FlutterMutatorView parent2 = controller.getPlatformViewParent(2);
+    assertTrue(flutterView.indexOfChild(parent1) < flutterView.indexOfChild(parent2));
+
+    flutterView.measure(
+        View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY),
+        View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY));
+    flutterView.layout(0, 0, 100, 100);
+    assertFalse(flutterView.isLayoutRequested());
+
+    // Frame 2: same z-order (1 then 2) with updated offset does not request layout.
+    controller.onDisplayPlatformView(1, 0, 10, 50, 50, 50, 50, stack);
+    controller.onDisplayPlatformView(2, 0, 20, 50, 50, 50, 50, stack);
+    controller.swapTransactions();
+    controller.onEndFrame();
+    ShadowLooper.idleMainLooper();
+
+    assertFalse(flutterView.isLayoutRequested());
+    assertTrue(flutterView.indexOfChild(parent1) < flutterView.indexOfChild(parent2));
+
+    // Frame 3: reversed z-order (2 then 1) brings view 1 in front of view 2.
+    controller.onDisplayPlatformView(2, 0, 20, 50, 50, 50, 50, stack);
+    controller.onDisplayPlatformView(1, 0, 10, 50, 50, 50, 50, stack);
+    controller.swapTransactions();
+    controller.onEndFrame();
+    ShadowLooper.idleMainLooper();
+
+    assertTrue(flutterView.indexOfChild(parent2) < flutterView.indexOfChild(parent1));
+  }
+
   private static ByteBuffer encodeMethodCall(MethodCall call) {
     final ByteBuffer buffer = StandardMethodCodec.INSTANCE.encodeMethodCall(call);
     buffer.rewind();
