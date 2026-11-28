@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <atomic>
+#include <cstring>
 #include <memory>
 #include <vector>
 
@@ -231,6 +232,64 @@ TEST(CommandBufferGLES, BufferToTextureBlitCanBeSubmittedBeforeContextCurrent) {
   worker->SetAllowed(true);
   EXPECT_TRUE(context->GetReactor()->React());
   EXPECT_TRUE(texture_generated);
+  EXPECT_TRUE(texture_uploaded);
+}
+
+// Views from a `HostBuffer` don't own their buffers, so the caller can release
+// the buffer while the blit waits for a context, such as when the surface that
+// owns the `HostBuffer` is torn down. The blit must keep the buffer alive and
+// upload its contents rather than read freed memory.
+// See https://github.com/flutter/flutter/issues/197137.
+TEST(CommandBufferGLES, DeferredBlitUploadsAfterSourceBufferIsReleased) {
+  auto mock_gles_impl = std::make_unique<NiceMock<MockGLESImpl>>();
+  auto& mock_gles_impl_ref = *mock_gles_impl;
+  auto mock_gles = MockGLES::Init(std::move(mock_gles_impl));
+  auto context = CreateFakeGLESContext();
+  auto context_base = std::static_pointer_cast<Context>(context);
+  auto worker = std::make_shared<ToggleWorker>(false);
+  context->AddReactorWorker(worker);
+
+  uint8_t pixels[16];
+  for (size_t i = 0; i < sizeof(pixels); i++) {
+    pixels[i] = static_cast<uint8_t>(i + 1);
+  }
+  bool texture_uploaded = false;
+  EXPECT_CALL(mock_gles_impl_ref,
+              TexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 2, 2, _, _, _))
+      .WillOnce([&](GLenum target, GLint level, GLint xoffset, GLint yoffset,
+                    GLsizei width, GLsizei height, GLenum format, GLenum type,
+                    const void* data) {
+        texture_uploaded = true;
+        ASSERT_NE(data, nullptr);
+        EXPECT_EQ(std::memcmp(data, pixels, sizeof(pixels)), 0);
+      });
+
+  TextureDescriptor texture_descriptor;
+  texture_descriptor.size = {2, 2};
+  texture_descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
+  auto texture = context_base->GetResourceAllocator()->CreateTexture(
+      texture_descriptor, /*threadsafe=*/true);
+  ASSERT_TRUE(texture);
+
+  auto buffer = context_base->GetResourceAllocator()->CreateBufferWithCopy(
+      pixels, sizeof(pixels));
+  ASSERT_TRUE(buffer);
+
+  auto command_buffer = context_base->CreateCommandBuffer();
+  ASSERT_TRUE(command_buffer);
+  auto blit_pass = command_buffer->CreateBlitPass();
+  ASSERT_TRUE(blit_pass);
+
+  EXPECT_TRUE(blit_pass->AddCopy(
+      BufferView(buffer.get(), Range(0, sizeof(pixels))), texture,
+      IRect::MakeXYWH(0, 0, 2, 2), "Deferred upload from a released buffer"));
+  EXPECT_TRUE(blit_pass->EncodeCommands());
+  EXPECT_TRUE(context_base->GetCommandQueue()->Submit({command_buffer}).ok());
+  buffer.reset();
+  EXPECT_FALSE(texture_uploaded);
+
+  worker->SetAllowed(true);
+  EXPECT_TRUE(context->GetReactor()->React());
   EXPECT_TRUE(texture_uploaded);
 }
 
