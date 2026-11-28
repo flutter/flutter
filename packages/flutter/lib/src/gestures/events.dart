@@ -2217,16 +2217,45 @@ class _TransformedPointerPanZoomStartEvent extends _TransformedPointerEvent
 }
 
 mixin _CopyPointerPanZoomUpdateEvent on PointerEvent {
-  /// The total pan offset of the pan/zoom.
+  /// The total pan offset of the pan/zoom in global coordinates.
+  ///
+  /// See also:
+  ///
+  ///  * [localPan], which is the [pan] transformed into the local coordinate
+  ///    system of the event receiver.
   Offset get pan;
 
-  /// The total pan offset of the pan/zoom, transformed into local coordinates.
+  /// The [pan] transformed into the event receiver's local coordinate system
+  /// according to [transform].
+  ///
+  /// Because a pan/zoom gesture starts at [position] and moves to
+  /// `position + pan` in global coordinates, `localPosition + localPan` equals
+  /// `position + pan` transformed into local coordinates.
+  ///
+  /// If this event has not been transformed, [pan] is returned as-is.
+  ///
+  /// See also:
+  ///
+  ///  * [pan], which is the total pan offset in global coordinates.
   Offset get localPan;
 
-  /// The amount the pan offset changed since the last event.
+  /// The amount the pan offset changed since the last event in global
+  /// coordinates.
+  ///
+  /// See also:
+  ///
+  ///  * [localPanDelta], which is the [panDelta] transformed into the local
+  ///    coordinate system of the event receiver.
   Offset get panDelta;
 
-  /// The amount the pan offset changed since the last event, transformed into local coordinates.
+  /// The [panDelta] transformed into the event receiver's local coordinate
+  /// system according to [transform].
+  ///
+  /// If this event has not been transformed, [panDelta] is returned as-is.
+  ///
+  /// See also:
+  ///
+  ///  * [panDelta], which is the pan offset delta in global coordinates.
   Offset get localPanDelta;
 
   /// The scale (zoom factor) of the pan/zoom.
@@ -2335,11 +2364,15 @@ class _TransformedPointerPanZoomUpdateEvent extends _TransformedPointerEvent
     implements PointerPanZoomUpdateEvent {
   _TransformedPointerPanZoomUpdateEvent(this.original, this.transform);
 
+  // In global coordinates, the pan gesture starts at `position` and is
+  // currently at `position + pan`.
+  late final Offset _localPanPosition = PointerEvent.transformPosition(transform, position + pan);
+
   @override
   Offset get pan => original.pan;
 
   @override
-  late final Offset localPan = PointerEvent.transformPosition(transform, pan);
+  late final Offset localPan = _localPanPosition - localPosition;
 
   @override
   Offset get panDelta => original.panDelta;
@@ -2348,8 +2381,8 @@ class _TransformedPointerPanZoomUpdateEvent extends _TransformedPointerEvent
   late final Offset localPanDelta = PointerEvent.transformDeltaViaPositions(
     transform: transform,
     untransformedDelta: panDelta,
-    untransformedEndPosition: pan,
-    transformedEndPosition: localPan,
+    untransformedEndPosition: position + pan,
+    transformedEndPosition: _localPanPosition,
   );
 
   @override
