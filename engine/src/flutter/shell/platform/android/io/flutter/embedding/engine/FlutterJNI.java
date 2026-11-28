@@ -1414,15 +1414,16 @@ public class FlutterJNI {
     platformViewsController2.onEndFrame();
   }
 
+  // Called from the raster thread (or any thread) to allocate the HCPP overlay SurfaceControl at
+  // the requested buffer size in physical pixels.
   @SuppressWarnings("unused")
   @SuppressLint("NewApi")
-  @UiThread
-  public FlutterOverlaySurface createOverlaySurface2() {
+  public FlutterOverlaySurface createOverlaySurface2(int width, int height) {
     if (platformViewsController2 == null) {
       throw new RuntimeException(
           "platformViewsController must be set before attempting to position an overlay surface");
     }
-    return platformViewsController2.createOverlaySurface();
+    return platformViewsController2.createOverlaySurface(width, height);
   }
 
   @SuppressWarnings("unused")

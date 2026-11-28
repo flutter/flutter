@@ -31,6 +31,7 @@ import io.flutter.embedding.engine.renderer.FlutterUiResizeListener;
 import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
+import io.flutter.plugin.platform.PlatformViewsController2;
 import java.nio.ByteBuffer;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -279,6 +280,20 @@ public class FlutterJNITest {
 
     // --- Verify Results ---
     verify(platformViewsController, times(1)).createOverlaySurface();
+  }
+
+  @Test
+  public void createOverlaySurface2_callsPlatformViewsController2WithDimensions() {
+    PlatformViewsController2 platformViewsController2 = mock(PlatformViewsController2.class);
+
+    FlutterJNI flutterJNI = new FlutterJNI();
+    flutterJNI.setPlatformViewsController2(platformViewsController2);
+
+    // --- Execute Test ---
+    flutterJNI.createOverlaySurface2(1080, 2400);
+
+    // --- Verify Results ---
+    verify(platformViewsController2, times(1)).createOverlaySurface(1080, 2400);
   }
 
   @Test

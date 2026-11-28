@@ -117,6 +117,9 @@ void SurfaceContextVK::MarkFrameEnd() {
 }
 
 void SurfaceContextVK::UpdateSurfaceSize(const ISize& size) const {
+  if (!swapchain_) {
+    return;
+  }
   swapchain_->UpdateSurfaceSize(size);
 }
 

@@ -55,6 +55,14 @@ TEST(SurfaceContextVK, TearsDownSwapchain) {
   EXPECT_EQ(surface_context.AcquireNextSurface(), nullptr);
 }
 
+TEST(SurfaceContextVK, UpdateSurfaceSizeWithoutSwapchainIsNoOp) {
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
+  SurfaceContextVK surface_context(context);
+
+  surface_context.UpdateSurfaceSize({200, 200});
+  EXPECT_EQ(surface_context.AcquireNextSurface(), nullptr);
+}
+
 TEST(SurfaceContextVK, ForwardsSubmissionTracker) {
   std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
   SurfaceContextVK surface_context(context);
