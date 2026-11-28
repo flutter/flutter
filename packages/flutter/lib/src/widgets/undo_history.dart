@@ -123,19 +123,33 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
       // throttling delay is pending), the initial push should not be canceled.
       return;
     }
-    if (_throttleTimer?.isActive ?? false) {
-      _throttleTimer?.cancel(); // Cancel ongoing push, if any.
-      _update(_stack.currentValue);
-    } else {
-      _update(_stack.undo());
-    }
+    _flushPendingPush();
+    _update(_stack.undo());
     _updateState();
   }
 
   @override
   void redo() {
+    _flushPendingPush();
     _update(_stack.redo());
     _updateState();
+  }
+
+  // Records the latest value immediately instead of waiting for the throttling
+  // delay to elapse.
+  //
+  // Undo and redo operate on the stack, so a change that is still waiting to be
+  // pushed has to be recorded first. Otherwise it would be dropped, which would
+  // make it impossible to redo it after an undo, and would make a redo revert
+  // it even though there is nothing to redo.
+  void _flushPendingPush() {
+    if (!(_throttleTimer?.isActive ?? false)) {
+      return;
+    }
+    _throttleTimer!.cancel();
+    _throttleTimer = null;
+    // _lastValue is the value that the pending push would have recorded.
+    _stack.push(_lastValue as T);
   }
 
   @override
