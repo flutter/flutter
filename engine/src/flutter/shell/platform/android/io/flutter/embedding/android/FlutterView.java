@@ -133,6 +133,9 @@ public class FlutterView extends FrameLayout
   // Connections to a Flutter execution context.
   @Nullable private FlutterEngine flutterEngine;
 
+  // A FlutterScrollCaptureCallback, which requires API 31, while attached to an engine.
+  @Nullable private Object scrollCaptureCallback;
+
   @NonNull
   private final Set<FlutterEngineAttachmentListener> flutterEngineAttachmentListeners =
       new HashSet<>();
@@ -1274,6 +1277,18 @@ public class FlutterView extends FrameLayout
     flutterEngine.getPlatformViewsController().attachToView(this);
     flutterEngine.getPlatformViewsController2().attachToView(this);
 
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_31) {
+      // Lets Android's scrolling screenshots capture scrollable Flutter content. The images come
+      // from the engine's screenshot of the last rendered frame rather than from
+      // android.view.PixelCopy, which cannot read the frames presented through some rendering
+      // backends (for example, Impeller's Vulkan backend on some devices).
+      final FlutterRenderer renderer = flutterEngine.getRenderer();
+      scrollCaptureCallback =
+          new FlutterScrollCaptureCallback(
+              this, flutterEngine.getScrollCaptureChannel(), renderer::getBitmap);
+      setScrollCaptureCallback((FlutterScrollCaptureCallback) scrollCaptureCallback);
+    }
+
     // Notify engine attachment listeners of the attachment.
     for (FlutterEngineAttachmentListener listener : flutterEngineAttachmentListeners) {
       listener.onFlutterEngineAttachedToFlutterView(flutterEngine);
@@ -1311,6 +1326,12 @@ public class FlutterView extends FrameLayout
     }
 
     getContext().getContentResolver().unregisterContentObserver(systemSettingsObserver);
+
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_31 && scrollCaptureCallback != null) {
+      ((FlutterScrollCaptureCallback) scrollCaptureCallback).dispose();
+      scrollCaptureCallback = null;
+      setScrollCaptureCallback(null);
+    }
 
     flutterEngine.getPlatformViewsController().detachFromView();
     flutterEngine.getPlatformViewsController2().detachFromView();

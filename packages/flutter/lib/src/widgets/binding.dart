@@ -38,6 +38,7 @@ import 'package:flutter/services.dart';
 
 import '../foundation/_features.dart';
 import '_accessibility_evaluations.dart';
+import '_scroll_capture.dart';
 import '_window.dart';
 import 'accessibility_inspector.dart';
 import 'app.dart';
@@ -492,6 +493,7 @@ mixin WidgetsBinding
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
     SystemChannels.backGesture.setMethodCallHandler(_handleBackGestureInvocation);
     SystemChannels.statusBar.setMethodCallHandler(_handleStatusBarActions);
+    SystemChannels.scrollCapture.setMethodCallHandler(_scrollCaptureHandler.handleMethodCall);
     assert(() {
       FlutterErrorDetails.propertiesTransformers.add(debugTransformDebugCreator);
       return true;
@@ -499,6 +501,10 @@ mixin WidgetsBinding
     platformMenuDelegate = DefaultPlatformMenuDelegate();
     _windowingOwner = createWindowingOwner();
   }
+
+  late final ScrollCaptureHandler _scrollCaptureHandler = ScrollCaptureHandler(
+    rootElement: () => rootElement,
+  );
 
   /// The current [WidgetsBinding], if one has been created.
   ///
