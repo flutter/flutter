@@ -114,6 +114,10 @@ abstract class AccessibilityEvaluation {
 ///
 /// An evaluation which enforces that all tappable semantics nodes have a minimum
 /// size.
+///
+/// Targets at a scrollable boundary are skipped when the scrollable exposes an
+/// action that can reveal more of the target. This avoids reporting targets
+/// whose tap areas have been partially scrolled out of view.
 @internal
 class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
   /// Create a new [MinimumTapTargetEvaluation].
@@ -161,15 +165,15 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
     SemanticsNode? current = node;
 
     while (current != null) {
+      // Skip potentially clipped targets only when scrolling can reveal more
+      // of them. Compare bounds before moving into the parent's coordinate space.
+      if (current.flagsCollection.hasImplicitScrolling &&
+          _isAtScrollableBoundary(paintBounds, current)) {
+        return violations;
+      }
       final Matrix4? transform = current.transform;
       if (transform != null) {
         paintBounds = MatrixUtils.transformRect(transform, paintBounds);
-      }
-      // Skip node if it is touching the edge of the scrollable, since it might
-      // be partially scrolled offscreen.
-      if (current.flagsCollection.hasImplicitScrolling &&
-          _isAtBoundary(paintBounds, current.rect)) {
-        return violations;
       }
       current = current.parent;
     }
@@ -192,6 +196,21 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
       );
     }
     return violations;
+  }
+
+  static bool _isAtScrollableBoundary(Rect child, SemanticsNode parent) {
+    final SemanticsData data = parent.getSemanticsData();
+    final Rect bounds = parent.rect;
+    // Scroll actions describe finger movement, not viewport movement. For
+    // example, scrollRight reveals content clipped at the left edge.
+    return (child.left - bounds.left <= _kMinimumGapToBoundary &&
+            data.hasAction(ui.SemanticsAction.scrollRight)) ||
+        (bounds.right - child.right <= _kMinimumGapToBoundary &&
+            data.hasAction(ui.SemanticsAction.scrollLeft)) ||
+        (child.top - bounds.top <= _kMinimumGapToBoundary &&
+            data.hasAction(ui.SemanticsAction.scrollDown)) ||
+        (bounds.bottom - child.bottom <= _kMinimumGapToBoundary &&
+            data.hasAction(ui.SemanticsAction.scrollUp));
   }
 
   static bool _isAtBoundary(Rect child, Rect parent) {
