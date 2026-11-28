@@ -13,6 +13,7 @@ import '../web/compile.dart';
 import '../web/content_hash.dart';
 import '../web/web_constants.dart';
 import '../web/web_options.dart';
+import '../web/web_resources.dart';
 import '../web_template.dart';
 import 'build.dart';
 
@@ -180,21 +181,26 @@ class BuildWebCommand extends BuildSubCommand {
         'To configure this project for the web, run flutter create . --platforms web',
       );
     }
-    final File indexHtmlFile = toolContext.fs.file(project.web.indexFile.path);
-    if (indexHtmlFile.existsSync()) {
+    final File? indexHtmlFile = resolveWebResourceFile(
+      webDirectory: project.web.directory,
+      relativePath: 'index.html',
+      flavor: buildInfo.flavor,
+    );
+    if (indexHtmlFile != null) {
       final String indexHtmlContent = indexHtmlFile.readAsStringSync();
       if (!indexHtmlContent.contains(kBaseHrefPlaceholder) && baseHref != null) {
         throwToolExit(
           "Couldn't find the placeholder for base href. "
-          'Please add `<base href="$kBaseHrefPlaceholder">` to web/index.html',
+          'Please add `<base href="$kBaseHrefPlaceholder">` to ${indexHtmlFile.path}',
         );
       }
       if (webContentHash) {
-        final File bootstrapJsFile = project.web.directory.childFile('flutter_bootstrap.js');
-        _validateIndexHtmlForContentHash(
-          indexHtmlFile,
-          bootstrapJsFile: bootstrapJsFile.existsSync() ? bootstrapJsFile : null,
+        final File? bootstrapJsFile = resolveWebResourceFile(
+          webDirectory: project.web.directory,
+          relativePath: 'flutter_bootstrap.js',
+          flavor: buildInfo.flavor,
         );
+        _validateIndexHtmlForContentHash(indexHtmlFile, bootstrapJsFile: bootstrapJsFile);
       }
     }
 

@@ -39,6 +39,7 @@ import '../web/memory_fs.dart';
 import '../web/module_metadata.dart';
 import '../web/web_constants.dart';
 import '../web/web_debug_config.dart';
+import '../web/web_resources.dart';
 import '../web_template.dart';
 import 'proxy_middleware.dart';
 import 'release_asset_server.dart';
@@ -81,8 +82,11 @@ class WebAssetServer implements AssetReader {
     required this.useLocalCanvasKit,
     required this._toolContext,
     this._baseHref,
+    this._flavor,
     this._webDefines = const <String, String>{},
-  }) : basePath = WebTemplate.baseHref(htmlTemplate(_toolContext.fs, 'index.html', _kDefaultIndex));
+  }) : basePath = WebTemplate.baseHref(
+         htmlTemplate(_toolContext.fs, 'index.html', _kDefaultIndex, flavor: _flavor),
+       );
 
   // Fallback to "application/octet-stream" on null which
   // makes no claims as to the structure of the data.
@@ -282,6 +286,7 @@ class WebAssetServer implements AssetReader {
       useLocalCanvasKit: useLocalCanvasKit,
       toolContext: toolContext,
       baseHref: webDevServerConfig.baseHref,
+      flavor: buildInfo.flavor,
       webDefines: webConfig.webDefines,
     );
     if (webDevServerConfig.baseHref case final String baseHref?) {
@@ -402,6 +407,7 @@ class WebAssetServer implements AssetReader {
 
   final Map<String, String> _webDefines;
   final String? _baseHref;
+  final String? _flavor;
   final HttpServer _httpServer;
   final _webMemoryFS = WebMemoryFS();
   final PackageConfig _packages;
@@ -535,15 +541,35 @@ class WebAssetServer implements AssetReader {
       }
     }
 
+    // `web/flavors/` is reserved for flavor-specific resources and is not part
+    // of the resources served to the application.
+    if (isWebFlavorsPath(requestPath)) {
+      return shelf.Response.notFound('');
+    }
+
     if (!file.existsSync()) {
-      final Uri? webPath = resolveRequestPathUnder(
-        fs.currentDirectory.childDirectory('web').uri,
-        requestPath,
-        fileSystem: fs,
-        windows: platform.isWindows,
-      );
-      if (webPath != null) {
-        file = fs.file(webPath);
+      final Directory webDirectory = fs.currentDirectory.childDirectory('web');
+      if (_flavor != null && isValidWebFlavorName(_flavor)) {
+        final Uri? flavorPath = resolveRequestPathUnder(
+          webDirectory.childDirectory(kWebFlavorsDirectoryName).childDirectory(_flavor).uri,
+          requestPath,
+          fileSystem: fs,
+          windows: platform.isWindows,
+        );
+        if (flavorPath != null) {
+          file = fs.file(flavorPath);
+        }
+      }
+      if (!file.existsSync()) {
+        final Uri? webPath = resolveRequestPathUnder(
+          webDirectory.uri,
+          requestPath,
+          fileSystem: fs,
+          windows: platform.isWindows,
+        );
+        if (webPath != null) {
+          file = fs.file(webPath);
+        }
       }
     }
 
@@ -662,6 +688,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       _toolContext.fs,
       'flutter_bootstrap.js',
       generateDefaultFlutterBootstrapScript(),
+      flavor: _flavor,
     );
     return bootstrapTemplate.withSubstitutions(
       baseHref: _baseHref ?? '/',
@@ -680,7 +707,12 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
   }
 
   shelf.Response _serveIndexHtml() {
-    final WebTemplate indexHtml = getWebTemplate(_toolContext.fs, 'index.html', _kDefaultIndex);
+    final WebTemplate indexHtml = getWebTemplate(
+      _toolContext.fs,
+      'index.html',
+      _kDefaultIndex,
+      flavor: _flavor,
+    );
     return shelf.Response.ok(
       indexHtml.withSubstitutions(
         baseHref: _baseHref ?? '/',

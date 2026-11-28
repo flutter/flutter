@@ -345,7 +345,7 @@ class BuildInfo {
       'PERFORMANCE_MEASUREMENT_FILE': ?performanceMeasurementFile,
       'PACKAGE_CONFIG': packageConfigPath,
       'CODE_SIZE_DIRECTORY': ?codeSizeDirectory,
-      'FLAVOR': ?flavor,
+      kFlavorBuildKey: ?flavor,
     };
   }
 }
@@ -1072,6 +1072,10 @@ const kBuildName = 'BuildName';
 
 /// The app flavor to build.
 const kFlavor = 'Flavor';
+
+/// The key under which [BuildInfo.toBuildSystemEnvironment] passes the app
+/// flavor to the build system.
+const kFlavorBuildKey = 'FLAVOR';
 
 /// Environment variable of the flavor to be set in dartDefines to be accessed
 /// by the `appFlavor` service.

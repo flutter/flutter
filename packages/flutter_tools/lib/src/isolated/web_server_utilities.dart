@@ -6,6 +6,7 @@ import 'package:logging/logging.dart' as logging;
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../web/web_resources.dart';
 import '../web_template.dart';
 
 /// Logs [event] to [logger].
@@ -123,17 +124,32 @@ Uri? resolveRequestPathUnder(
 ///
 /// It reads the content of [filename] using [htmlTemplate] and wraps it
 /// in a [WebTemplate] object.
-WebTemplate getWebTemplate(FileSystem fileSystem, String filename, String fallbackContent) {
-  final String htmlContent = htmlTemplate(fileSystem, filename, fallbackContent);
+WebTemplate getWebTemplate(
+  FileSystem fileSystem,
+  String filename,
+  String fallbackContent, {
+  String? flavor,
+}) {
+  final String htmlContent = htmlTemplate(fileSystem, filename, fallbackContent, flavor: flavor);
   return WebTemplate(htmlContent);
 }
 
 /// Reads the content of an HTML template file.
 ///
 /// This function looks for [filename] in the `web` directory of the
-/// current project. If the file exists, its content is returned. Otherwise,
+/// current project, preferring the version in `web/flavors/<flavor>/` when
+/// [flavor] is set. If the file exists, its content is returned. Otherwise,
 /// [fallbackContent] is returned.
-String htmlTemplate(FileSystem fileSystem, String filename, String fallbackContent) {
-  final File template = fileSystem.currentDirectory.childDirectory('web').childFile(filename);
-  return template.existsSync() ? template.readAsStringSync() : fallbackContent;
+String htmlTemplate(
+  FileSystem fileSystem,
+  String filename,
+  String fallbackContent, {
+  String? flavor,
+}) {
+  final File? template = resolveWebResourceFile(
+    webDirectory: fileSystem.currentDirectory.childDirectory('web'),
+    relativePath: filename,
+    flavor: flavor,
+  );
+  return template != null ? template.readAsStringSync() : fallbackContent;
 }

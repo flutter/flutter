@@ -835,6 +835,45 @@ void main() {
       expect(await response.readAsString(), 'custom dir asset');
     });
 
+    test('returns 404 for requests under the reserved flavors directory', () async {
+      fileSystem.file('web/index.html')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('hello');
+      fileSystem.file('web/flavors/staging/manifest.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('staging');
+
+      final WebAssetServer server = await WebAssetServer.start(
+        null,
+        null,
+        BuildInfo.debug,
+        false,
+        const DartDevelopmentServiceConfiguration(enable: false),
+        Uri.base,
+        null,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          config: Config.test(),
+          fs: fileSystem,
+          flutterVersion: FakeFlutterVersion(),
+          logger: BufferLogger.test(),
+          platform: platform,
+        ),
+        webConfig: const WebDebugConfig(
+          useSseForDebugBackend: false,
+          useSseForDebugProxy: false,
+          useSseForInjectedClient: false,
+        ),
+        useLocalCanvasKit: false,
+        testMode: true,
+      );
+
+      final Response response = await server.handleRequest(
+        Request('GET', Uri.parse('http://localhost:8080/flavors/staging/manifest.json')),
+      );
+      expect(response.statusCode, HttpStatus.notFound);
+    });
+
     group('on Windows', () {
       late FileSystem windowsFileSystem;
       late Platform windowsPlatform;

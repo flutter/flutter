@@ -30,6 +30,7 @@ import '../vmservice.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/web_debug_config.dart';
+import '../web/web_resources.dart';
 import '../web_template.dart';
 import 'web_asset_server.dart';
 
@@ -233,8 +234,12 @@ class WebDevFS implements DevFS {
   final Directory rootDirectory;
 
   Future<void> _validateTemplateFile(String filename) async {
-    final File file = _toolContext.fs.currentDirectory.childDirectory('web').childFile(filename);
-    if (!file.existsSync()) {
+    final File? file = resolveWebResourceFile(
+      webDirectory: _toolContext.fs.currentDirectory.childDirectory('web'),
+      relativePath: filename,
+      flavor: buildInfo.flavor,
+    );
+    if (file == null) {
       return;
     }
 
