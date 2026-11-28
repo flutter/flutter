@@ -285,8 +285,11 @@ void main() {
       FlutterError.onError = oldHandler;
     }
 
+    // The size access error is thrown while checking the dry layout in
+    // debugCheckingIntrinsics mode, so it is nested (and indented) in the
+    // error that explains that check.
     expect(
-      errorDetails.toString().replaceAll('\n', ' '),
+      errorDetails.toString().replaceAll(RegExp(r'\s+'), ' '),
       contains(
         'RenderBox.size accessed in '
         'InvalidSizeAccessInDryLayoutBox.computeDryLayout. '
@@ -1355,6 +1358,230 @@ void main() {
     );
   });
 
+  group('exceptions thrown while debugCheckingIntrinsics', () {
+    List<FlutterErrorDetails> takeErrors() {
+      return TestRenderingFlutterBinding.instance.takeAllFlutterErrorDetails().toList();
+    }
+
+    List<FlutterErrorDetails> layoutAndTakeErrors(
+      RenderBox box, {
+      EnginePhase phase = EnginePhase.layout,
+    }) {
+      final errors = <FlutterErrorDetails>[];
+      layout(box, phase: phase, onErrors: () => errors.addAll(takeErrors()));
+      return errors;
+    }
+
+    tearDown(() {
+      // Avoid leaking the error handler and errors into other tests, see
+      // https://github.com/flutter/flutter/issues/186482.
+      TestRenderingFlutterBinding.instance.onErrors = null;
+      takeErrors();
+    });
+
+    test('are explained when an intrinsic dimension method throws', () {
+      final box = _ThrowsDuringDebugCheckRenderBox(_DebugCheckMethod.minIntrinsicWidth);
+
+      final List<FlutterErrorDetails> errors = layoutAndTakeErrors(box);
+
+      expect(errors, hasLength(1));
+      final Object exception = errors.single.exception;
+      expect(exception, isA<FlutterError>());
+      expect(exception, isA<AssertionError>());
+      final error = exception as FlutterError;
+      expect(
+        error.diagnostics.first.toString(),
+        '_ThrowsDuringDebugCheckRenderBox.getMinIntrinsicWidth(Infinity) threw an exception '
+        'during a debug-only consistency check.',
+      );
+      final String message = error.toStringDeep().replaceAll(RegExp(r'\s+'), ' ');
+      expect(message, contains('Because debugCheckIntrinsicSizes is true'));
+      expect(message, contains('These checks only run in debug mode.'));
+      expect(message, contains('may have been thrown by a descendant'));
+      expect(message, contains('The original exception was: Bad state: minIntrinsicWidth'));
+      expect(message, contains('RenderObject.debugCheckingIntrinsics is true'));
+      expect(
+        message,
+        contains('https://github.com/flutter/flutter/issues/new?template=02_bug.yml'),
+      );
+      expect(
+        errors.single.stack.toString(),
+        contains('_ThrowsDuringDebugCheckRenderBox.computeMinIntrinsicWidth'),
+      );
+      expect(RenderObject.debugCheckingIntrinsics, isFalse);
+    });
+
+    test('include the argument that was passed to the intrinsic dimension method', () {
+      final box = _ThrowsDuringDebugCheckRenderBox(_DebugCheckMethod.maxIntrinsicHeight);
+
+      final List<FlutterErrorDetails> errors = layoutAndTakeErrors(box);
+
+      expect(errors, hasLength(1));
+      expect(
+        (errors.single.exception as FlutterError).diagnostics.first.toString(),
+        startsWith('_ThrowsDuringDebugCheckRenderBox.getMaxIntrinsicHeight(800.0) threw'),
+      );
+    });
+
+    test('are explained when computeDryLayout throws', () {
+      final box = _ThrowsDuringDebugCheckRenderBox(_DebugCheckMethod.dryLayout);
+
+      final List<FlutterErrorDetails> errors = layoutAndTakeErrors(box);
+
+      expect(errors, hasLength(1));
+      expect(
+        (errors.single.exception as FlutterError).diagnostics.first.toString(),
+        startsWith(
+          '_ThrowsDuringDebugCheckRenderBox.getDryLayout(BoxConstraints(w=800.0, h=600.0)) threw',
+        ),
+      );
+      expect(
+        errors.single.stack.toString(),
+        contains('_ThrowsDuringDebugCheckRenderBox.computeDryLayout'),
+      );
+      expect(RenderObject.debugCheckingIntrinsics, isFalse);
+
+      // The dry layout bookkeeping is reset, so a later frame is not affected.
+      box.shouldThrow = false;
+      box.markNeedsLayout();
+      pumpFrame(onErrors: () => fail('Unexpected errors: ${takeErrors()}'));
+    });
+
+    test('are reported without interrupting paint when computeDryBaseline throws', () {
+      final box = _ThrowsDuringDebugCheckRenderBox(_DebugCheckMethod.dryBaseline);
+
+      final List<FlutterErrorDetails> errors = layoutAndTakeErrors(box, phase: EnginePhase.paint);
+
+      expect(errors, hasLength(1));
+      final FlutterErrorDetails details = errors.single;
+      expect(
+        (details.exception as FlutterError).diagnostics.first.toString(),
+        startsWith(
+          '_ThrowsDuringDebugCheckRenderBox.getDryBaseline('
+          'BoxConstraints(w=800.0, h=600.0), TextBaseline.alphabetic) threw',
+        ),
+      );
+      expect(
+        details.stack.toString(),
+        contains('_ThrowsDuringDebugCheckRenderBox.computeDryBaseline'),
+      );
+      expect(
+        details.context.toString(),
+        'while verifying the baselines of _ThrowsDuringDebugCheckRenderBox',
+      );
+      expect(RenderObject.debugCheckingIntrinsics, isFalse);
+      expect(RenderObject.debugActivePaint, isNull);
+
+      box.shouldThrow = false;
+      box.markNeedsLayout();
+      pumpFrame(
+        phase: EnginePhase.paint,
+        onErrors: () => fail('Unexpected errors: ${takeErrors()}'),
+      );
+    });
+
+    test('are explained when computeDistanceToActualBaseline throws', () {
+      final box = _ThrowsDuringDebugCheckRenderBox(_DebugCheckMethod.actualBaseline);
+
+      final List<FlutterErrorDetails> errors = layoutAndTakeErrors(box, phase: EnginePhase.paint);
+
+      expect(errors, hasLength(1));
+      expect(
+        (errors.single.exception as FlutterError).diagnostics.first.toString(),
+        startsWith(
+          '_ThrowsDuringDebugCheckRenderBox.getDistanceToBaseline('
+          'TextBaseline.alphabetic, onlyReal: true) threw',
+        ),
+      );
+      expect(
+        errors.single.stack.toString(),
+        contains('_ThrowsDuringDebugCheckRenderBox.computeDistanceToActualBaseline'),
+      );
+    });
+
+    test('preserve the diagnostics of an original FlutterError', () {
+      final box = _ThrowsDuringDebugCheckRenderBox(
+        _DebugCheckMethod.minIntrinsicWidth,
+        error: FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Original summary.'),
+          ErrorHint('Original hint.'),
+        ]),
+      );
+
+      final List<FlutterErrorDetails> errors = layoutAndTakeErrors(box);
+
+      expect(errors, hasLength(1));
+      final error = errors.single.exception as FlutterError;
+      expect(error.diagnostics.first.toString(), contains('getMinIntrinsicWidth(Infinity) threw'));
+      final String message = error.toStringDeep().replaceAll(RegExp(r'\s+'), ' ');
+      expect(message, contains('The original exception was: Original summary. Original hint.'));
+    });
+
+    test('are explained when a non-Error object is thrown', () {
+      final box = _ThrowsDuringDebugCheckRenderBox(
+        _DebugCheckMethod.minIntrinsicWidth,
+        error: 'a string',
+      );
+
+      final List<FlutterErrorDetails> errors = layoutAndTakeErrors(box);
+
+      expect(errors, hasLength(1));
+      expect(
+        errors.single.exception.toString(),
+        contains('The original exception was:\n  a string'),
+      );
+    });
+
+    test('mention that a descendant may have thrown', () {
+      final child = _ThrowsDuringDebugCheckRenderBox(_DebugCheckMethod.minIntrinsicWidth);
+      final parent = RenderPositionedBox(child: child);
+
+      final List<FlutterErrorDetails> errors = layoutAndTakeErrors(parent);
+
+      // The child's own check fails first, then the parent's check fails when
+      // it asks the child for its intrinsic width.
+      expect(errors, hasLength(2));
+      final FlutterErrorDetails parentDetails = errors.last;
+      final error = parentDetails.exception as FlutterError;
+      expect(
+        error.diagnostics.first.toString(),
+        startsWith('RenderPositionedBox.getMinIntrinsicWidth(Infinity) threw'),
+      );
+      expect(
+        error.toStringDeep().replaceAll(RegExp(r'\s+'), ' '),
+        contains('may have been thrown by a descendant of this RenderPositionedBox'),
+      );
+      expect(
+        parentDetails.stack.toString(),
+        contains('_ThrowsDuringDebugCheckRenderBox.computeMinIntrinsicWidth'),
+      );
+    });
+
+    test('do not affect intrinsic protocol violations', () {
+      final box = _NegativeMinIntrinsicWidthRenderBox();
+
+      final List<FlutterErrorDetails> errors = layoutAndTakeErrors(box);
+
+      expect(errors, hasLength(1));
+      final error = errors.single.exception as FlutterError;
+      expect(
+        error.diagnostics.first.toString(),
+        contains('violate the intrinsic protocol contract'),
+      );
+      expect(error.toStringDeep(), isNot(contains('debug-only consistency check')));
+    });
+
+    test('are not caught when debugCheckIntrinsicSizes is false', () {
+      debugCheckIntrinsicSizes = false;
+      addTearDown(() => debugCheckIntrinsicSizes = true);
+      final box = _ThrowsDuringDebugCheckRenderBox(_DebugCheckMethod.minIntrinsicWidth);
+
+      layout(box, onErrors: () => fail('Unexpected errors: ${takeErrors()}'));
+
+      expect(() => box.getMinIntrinsicWidth(double.infinity), throwsStateError);
+    });
+  });
+
   group('BaselineOffset', () {
     test('minOf', () {
       expect(BaselineOffset.noBaseline.minOf(BaselineOffset.noBaseline), BaselineOffset.noBaseline);
@@ -1382,4 +1609,81 @@ class _DummyHitTestTarget implements HitTestTarget {
 
 class MyHitTestResult extends HitTestResult {
   void publicPushTransform(Matrix4 transform) => pushTransform(transform);
+}
+
+enum _DebugCheckMethod {
+  minIntrinsicWidth,
+  maxIntrinsicHeight,
+  dryLayout,
+  dryBaseline,
+  actualBaseline,
+}
+
+/// Throws [error] from the method described by [method] while
+/// [shouldThrow] is true.
+class _ThrowsDuringDebugCheckRenderBox extends RenderBox {
+  _ThrowsDuringDebugCheckRenderBox(this.method, {Object? error})
+    : error = error ?? StateError(method.name);
+
+  final _DebugCheckMethod method;
+  final Object error;
+  bool shouldThrow = true;
+
+  void _throwIf(_DebugCheckMethod method) {
+    if (shouldThrow && this.method == method) {
+      // ignore: only_throw_errors, testing that any thrown object is handled.
+      throw error;
+    }
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    _throwIf(_DebugCheckMethod.minIntrinsicWidth);
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    // Only throw for the finite width taken from the constraints.
+    if (width.isFinite) {
+      _throwIf(_DebugCheckMethod.maxIntrinsicHeight);
+    }
+    return 0.0;
+  }
+
+  @override
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    _throwIf(_DebugCheckMethod.dryLayout);
+    return constraints.biggest;
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    _throwIf(_DebugCheckMethod.dryBaseline);
+    return null;
+  }
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    _throwIf(_DebugCheckMethod.actualBaseline);
+    return null;
+  }
+
+  @override
+  void performLayout() {
+    size = constraints.biggest;
+  }
+}
+
+class _NegativeMinIntrinsicWidthRenderBox extends RenderBox {
+  @override
+  double computeMinIntrinsicWidth(double height) => -1.0;
+
+  @override
+  Size computeDryLayout(covariant BoxConstraints constraints) => constraints.biggest;
+
+  @override
+  void performLayout() {
+    size = constraints.biggest;
+  }
 }
