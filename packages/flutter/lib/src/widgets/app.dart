@@ -1817,7 +1817,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         // parameter.
         builder: (BuildContext context) {
           final String title = widget.onGenerateTitle!(context);
-          return Title(title: title, color: widget.color.withOpacity(1.0), child: result);
+          return Title(title: title, color: widget.color.withValues(alpha: 1.0), child: result);
         },
       );
     } else if (widget.title == null && kIsWeb) {
@@ -1826,7 +1826,11 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       // Refer to https://github.com/flutter/flutter/pull/152003 for more info.
       title = null;
     } else {
-      title = Title(title: widget.title ?? '', color: widget.color.withOpacity(1.0), child: result);
+      title = Title(
+        title: widget.title ?? '',
+        color: widget.color.withValues(alpha: 1.0),
+        child: result,
+      );
     }
 
     return RootRestorationScope(
