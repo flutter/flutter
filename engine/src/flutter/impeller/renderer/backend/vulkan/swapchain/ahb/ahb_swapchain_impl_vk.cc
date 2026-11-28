@@ -11,6 +11,7 @@
 #include "impeller/renderer/backend/vulkan/swapchain/ahb/ahb_formats.h"
 #include "impeller/renderer/backend/vulkan/swapchain/ahb/external_semaphore_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/surface_vk.h"
+#include "impeller/renderer/backend/vulkan/swapchain/swapchain_vk.h"
 #include "impeller/toolkit/android/surface_transaction.h"
 #include "impeller/toolkit/android/surface_transaction_stats.h"
 
@@ -46,8 +47,15 @@ bool AHBFrameSynchronizerVK::IsValid() const {
   return is_valid;
 }
 
+void AHBFrameSynchronizerVK::ResetOnscreenState() {
+  has_onscreen = false;
+  final_cmd_buffer.reset();
+  pending_submission.Complete();
+}
+
 bool AHBFrameSynchronizerVK::WaitForFence(const vk::Device& device) {
   if (!acquire_fence_pending) {
+    ResetOnscreenState();
     return true;
   }
   if (auto result = device.waitForFences(
@@ -60,6 +68,7 @@ bool AHBFrameSynchronizerVK::WaitForFence(const vk::Device& device) {
     return false;
   }
   acquire_fence_pending = false;
+  ResetOnscreenState();
   if (auto result = device.resetFences(*acquire);
       result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Could not reset fence: " << vk::to_string(result);
@@ -94,9 +103,14 @@ AHBSwapchainImplVK::AHBSwapchainImplVK(
   transients_ = std::make_shared<SwapchainTransientsVK>(
       context, ToSwapchainTextureDescriptor(desc_), enable_msaa);
 
+  auto context_strong = context.lock();
+  if (!context_strong) {
+    return;
+  }
+  auto& context_vk = ContextVK::Cast(*context_strong);
   for (auto i = 0u; i < kMaxPendingPresents; i++) {
     auto sync = std::make_unique<AHBFrameSynchronizerVK>(
-        ContextVK::Cast(*context.lock()).GetDeviceHolder()->GetDevice());
+        context_vk.GetDeviceHolder()->GetDevice());
     if (!sync->IsValid()) {
       return;
     }
@@ -174,15 +188,16 @@ std::unique_ptr<Surface> AHBSwapchainImplVK::AcquireNextDrawable() {
   }
 #endif  // IMPELLER_DEBUG
 
+  size_t frame_index = frame_index_;
   auto surface = SurfaceVK::WrapSwapchainImage(
       transients_, pool_entry.texture,
-      [weak = weak_from_this(), texture = pool_entry.texture]() {
+      [weak = weak_from_this(), texture = pool_entry.texture, frame_index]() {
         auto thiz = weak.lock();
         if (!thiz) {
           VALIDATION_LOG << "Swapchain died before image could be presented.";
           return false;
         }
-        return thiz->Present(texture);
+        return thiz->Present(texture, frame_index);
       });
 
   if (!surface) {
@@ -193,13 +208,20 @@ std::unique_ptr<Surface> AHBSwapchainImplVK::AcquireNextDrawable() {
 }
 
 bool AHBSwapchainImplVK::Present(
-    const std::shared_ptr<AHBTextureSourceVK>& texture) {
+    const std::shared_ptr<AHBTextureSourceVK>& texture,
+    size_t frame_index) {
   fml::ScopedCleanupClosure mark_frame_end([&transients = transients_]() {
     auto context = transients->GetContext().lock();
     if (context) {
       ContextVK::Cast(*context).GetGPUTracer()->MarkFrameEnd();
     }
   });
+  if (frame_index >= frame_data_.size()) {
+    return false;
+  }
+  auto& sync = frame_data_[frame_index];
+  fml::ScopedCleanupClosure cancel_pending(
+      [&sync]() { sync->ResetOnscreenState(); });
 
   auto control = surface_control_.lock();
   if (!control || !control->IsValid()) {
@@ -212,12 +234,13 @@ bool AHBSwapchainImplVK::Present(
     return false;
   }
 
-  auto present_ready = SubmitSignalForPresentReady(texture);
+  auto present_ready = SubmitSignalForPresentReady(texture, frame_index);
 
   if (!present_ready) {
     VALIDATION_LOG << "Could not submit completion signal.";
     return false;
   }
+  cancel_pending.Release();
 
   android::SurfaceTransaction transaction =
       (cb_) ? cb_() : impeller::android::SurfaceTransaction();
@@ -242,12 +265,21 @@ bool AHBSwapchainImplVK::Present(
 
 void AHBSwapchainImplVK::AddFinalCommandBuffer(
     std::shared_ptr<CommandBuffer> cmd_buffer) {
-  frame_data_[frame_index_]->final_cmd_buffer = std::move(cmd_buffer);
+  auto& sync = frame_data_[frame_index_];
+  sync->final_cmd_buffer = std::move(cmd_buffer);
+  sync->has_onscreen = true;
+  // Record before RenderToTarget calls HostBuffer::Reset(), which runs before
+  // Present().
+  if (auto context = transients_->GetContext().lock()) {
+    sync->pending_submission = PendingGpuSubmission(
+        ContextVK::Cast(*context).GetMutableSubmissionTracker());
+  }
 }
 
 std::shared_ptr<ExternalSemaphoreVK>
 AHBSwapchainImplVK::SubmitSignalForPresentReady(
-    const std::shared_ptr<AHBTextureSourceVK>& texture) const {
+    const std::shared_ptr<AHBTextureSourceVK>& texture,
+    size_t frame_index) const {
   auto context = transients_->GetContext().lock();
   if (!context) {
     return nullptr;
@@ -258,11 +290,12 @@ AHBSwapchainImplVK::SubmitSignalForPresentReady(
     return nullptr;
   }
 
-  auto& sync = frame_data_[frame_index_];
-  auto command_buffer = sync->final_cmd_buffer;
-  if (!command_buffer) {
+  auto& sync = frame_data_[frame_index];
+  if (!sync->has_onscreen || !sync->final_cmd_buffer) {
     return nullptr;
   }
+  sync->has_onscreen = false;
+  auto command_buffer = sync->final_cmd_buffer;
   CommandBufferVK& command_buffer_vk = CommandBufferVK::Cast(*command_buffer);
   const auto command_encoder_vk = command_buffer_vk.GetCommandBuffer();
   if (!command_buffer_vk.EndCommandBuffer()) {
@@ -282,12 +315,14 @@ AHBSwapchainImplVK::SubmitSignalForPresentReady(
   submit_info.setPSignalSemaphores(&sync->present_ready->GetHandle());
   submit_info.setSignalSemaphoreCount(1);
 
-  auto result = ContextVK::Cast(*context).GetGraphicsQueue()->Submit(
-      submit_info, *sync->acquire);
+  const auto& context_vk = ContextVK::Cast(*context);
+  auto result =
+      context_vk.GetGraphicsQueue()->Submit(submit_info, *sync->acquire);
   if (result != vk::Result::eSuccess) {
     return nullptr;
   }
   sync->acquire_fence_pending = true;
+  TrackSwapchainSubmissionWithFenceWaiter(context_vk, sync->pending_submission);
   return present_ready;
 }
 

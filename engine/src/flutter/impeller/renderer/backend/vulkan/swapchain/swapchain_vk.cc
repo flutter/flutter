@@ -5,7 +5,9 @@
 #include "impeller/renderer/backend/vulkan/swapchain/swapchain_vk.h"
 
 #include "flutter/fml/trace_event.h"
+#include "impeller/core/gpu_submission_tracker.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/backend/vulkan/fence_waiter_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/khr/khr_swapchain_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 
@@ -87,5 +89,35 @@ std::shared_ptr<SwapchainVK> SwapchainVK::Create(
 SwapchainVK::SwapchainVK() = default;
 
 SwapchainVK::~SwapchainVK() = default;
+
+void TrackSwapchainSubmissionWithFenceWaiter(
+    const ContextVK& context,
+    const PendingGpuSubmission& submission) {
+  if (!submission.IsPending()) {
+    return;
+  }
+  auto fence_result = context.GetDevice().createFenceUnique({});
+  if (fence_result.result != vk::Result::eSuccess) {
+    return;
+  }
+  auto submit_callback = [&context](vk::Fence fence) {
+    auto status = context.GetGraphicsQueue()->Submit(fence);
+    if (status != vk::Result::eSuccess) {
+      return absl::Status(absl::StatusCode::kCancelled,
+                          "Failed to submit swapchain completion fence.");
+    }
+    return absl::OkStatus();
+  };
+  const auto& tracker = submission.GetTracker();
+  uint64_t id = submission.GetId();
+  // Queue a separate fence for FenceWaiterVK because the swapchain retains
+  // sync->acquire for AcquireNextDrawable(), and relying solely on
+  // WaitForFence() would freeze CompletedThrough() for the whole ContextVK if
+  // this swapchain goes idle. WaitForFence() and ~FrameSynchronizer() still
+  // act as backstops if FenceWaiterVK is unavailable or terminating.
+  [[maybe_unused]] auto status = context.GetFenceWaiter()->AddFence(
+      std::move(fence_result.value), submit_callback,
+      [tracker, id]() { tracker->RecordCompletion(id); });
+}
 
 }  // namespace impeller

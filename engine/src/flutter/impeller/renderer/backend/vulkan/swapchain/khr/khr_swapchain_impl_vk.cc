@@ -4,16 +4,18 @@
 
 #include "impeller/renderer/backend/vulkan/swapchain/khr/khr_swapchain_impl_vk.h"
 
-#include "fml/closure.h"
+#include "flutter/fml/closure.h"
 #include "fml/synchronization/semaphore.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/gpu_submission_tracker.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/gpu_tracer_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/khr/khr_swapchain_image_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/surface_vk.h"
+#include "impeller/renderer/backend/vulkan/swapchain/swapchain_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
 #include "impeller/renderer/context.h"
 
@@ -25,6 +27,7 @@ struct KHRFrameSynchronizerVK {
   vk::UniqueFence acquire;
   bool acquire_fence_pending = false;
   vk::UniqueSemaphore render_ready;
+  PendingGpuSubmission pending_submission;
   std::shared_ptr<CommandBuffer> final_cmd_buffer;
   bool is_valid = false;
   // Whether the renderer attached an onscreen command buffer to render to.
@@ -45,8 +48,15 @@ struct KHRFrameSynchronizerVK {
 
   ~KHRFrameSynchronizerVK() = default;
 
+  void ResetOnscreenState() {
+    has_onscreen = false;
+    final_cmd_buffer.reset();
+    pending_submission.Complete();
+  }
+
   bool WaitForFence(const vk::Device& device) {
     if (!acquire_fence_pending) {
+      ResetOnscreenState();
       return true;
     }
     if (auto result = device.waitForFences(
@@ -59,6 +69,7 @@ struct KHRFrameSynchronizerVK {
       return false;
     }
     acquire_fence_pending = false;
+    ResetOnscreenState();
     if (auto result = device.resetFences(*acquire);
         result != vk::Result::eSuccess) {
       VALIDATION_LOG << "Could not reset fence: " << vk::to_string(result);
@@ -413,15 +424,17 @@ KHRSwapchainImplVK::AcquireResult KHRSwapchainImplVK::AcquireNextDrawable() {
 
   auto image = images_[index % images_.size()];
   uint32_t image_index = index;
+  size_t frame_index = current_frame_;
   return AcquireResult{SurfaceVK::WrapSwapchainImage(
       transients_,  // transients
       image,        // swapchain image
-      [weak_swapchain = weak_from_this(), image, image_index]() -> bool {
+      [weak_swapchain = weak_from_this(), image, image_index,
+       frame_index]() -> bool {
         auto swapchain = weak_swapchain.lock();
         if (!swapchain) {
           return false;
         }
-        return swapchain->Present(image, image_index);
+        return swapchain->Present(image, image_index, frame_index);
       }  // swap callback
       )};
 }
@@ -431,18 +444,32 @@ void KHRSwapchainImplVK::AddFinalCommandBuffer(
   const auto& sync = synchronizers_[current_frame_];
   sync->final_cmd_buffer = std::move(cmd_buffer);
   sync->has_onscreen = true;
+  // Record before RenderToTarget calls HostBuffer::Reset(), which runs before
+  // Present().
+  if (auto context_strong = context_.lock()) {
+    sync->pending_submission = PendingGpuSubmission(
+        ContextVK::Cast(*context_strong).GetMutableSubmissionTracker());
+  }
 }
 
 bool KHRSwapchainImplVK::Present(
     const std::shared_ptr<KHRSwapchainImageVK>& image,
-    uint32_t index) {
+    uint32_t index,
+    size_t frame_index) {
+  if (frame_index >= synchronizers_.size()) {
+    return false;
+  }
+
+  const auto& sync = synchronizers_[frame_index];
+  fml::ScopedCleanupClosure cancel_pending(
+      [&sync]() { sync->ResetOnscreenState(); });
+
   auto context_strong = context_.lock();
   if (!context_strong) {
     return false;
   }
 
   const auto& context = ContextVK::Cast(*context_strong);
-  const auto& sync = synchronizers_[current_frame_];
   fml::ScopedCleanupClosure mark_frame_end(
       [&context]() { context.GetGPUTracer()->MarkFrameEnd(); });
 
@@ -497,6 +524,8 @@ bool KHRSwapchainImplVK::Present(
       return false;
     }
     sync->acquire_fence_pending = true;
+    cancel_pending.Release();
+    TrackSwapchainSubmissionWithFenceWaiter(context, sync->pending_submission);
   }
 
   //----------------------------------------------------------------------------

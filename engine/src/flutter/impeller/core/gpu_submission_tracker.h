@@ -6,6 +6,8 @@
 #define FLUTTER_IMPELLER_CORE_GPU_SUBMISSION_TRACKER_H_
 
 #include <cstdint>
+#include <memory>
+#include <utility>
 #include <vector>
 
 #include "impeller/base/thread.h"
@@ -44,6 +46,59 @@ class GpuSubmissionTracker {
   // tracks GPU queue depth and stays small, so erasure is cheap and steady
   // state performs no heap allocation.
   std::vector<uint64_t> pending_ IPLR_GUARDED_BY(mutex_);
+};
+
+/// @brief RAII handle for a queued or in-flight GPU submission recorded in a
+///        [GpuSubmissionTracker].
+///
+/// Calling [Complete] or destroying a live handle calls
+/// [GpuSubmissionTracker::RecordCompletion] for the recorded id if it has not
+/// already been completed.
+class PendingGpuSubmission {
+ public:
+  PendingGpuSubmission() = default;
+
+  explicit PendingGpuSubmission(std::shared_ptr<GpuSubmissionTracker> tracker)
+      : tracker_(std::move(tracker)),
+        id_(tracker_ ? tracker_->RecordSubmission() : 0) {}
+
+  ~PendingGpuSubmission() { Complete(); }
+
+  PendingGpuSubmission(const PendingGpuSubmission&) = delete;
+  PendingGpuSubmission& operator=(const PendingGpuSubmission&) = delete;
+
+  PendingGpuSubmission(PendingGpuSubmission&& other) noexcept
+      : tracker_(std::move(other.tracker_)), id_(std::exchange(other.id_, 0)) {}
+
+  PendingGpuSubmission& operator=(PendingGpuSubmission&& other) noexcept {
+    if (this != &other) {
+      Complete();
+      tracker_ = std::move(other.tracker_);
+      id_ = std::exchange(other.id_, 0);
+    }
+    return *this;
+  }
+
+  bool IsPending() const { return tracker_ != nullptr; }
+
+  uint64_t GetId() const { return id_; }
+
+  const std::shared_ptr<GpuSubmissionTracker>& GetTracker() const {
+    return tracker_;
+  }
+
+  /// Marks the recorded submission as completed if it is still pending.
+  void Complete() {
+    if (tracker_) {
+      tracker_->RecordCompletion(id_);
+      tracker_.reset();
+      id_ = 0;
+    }
+  }
+
+ private:
+  std::shared_ptr<GpuSubmissionTracker> tracker_;
+  uint64_t id_ = 0;
 };
 
 }  // namespace impeller
