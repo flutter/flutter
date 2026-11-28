@@ -162,6 +162,40 @@ void main() {
   });
 
   group('Tap', () {
+    for (final behavior in <HitTestBehavior?>[null, ...HitTestBehavior.values]) {
+      testWidgets('Padded text with ${behavior?.name ?? 'default'} behavior', (
+        WidgetTester tester,
+      ) async {
+        var taps = 0;
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: GestureDetector(
+                behavior: behavior,
+                onTap: () {
+                  taps += 1;
+                },
+                child: const Padding(padding: EdgeInsets.all(40.0), child: Text('Tap here')),
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('Tap here'));
+        expect(taps, 1);
+
+        final Rect bounds = tester.getRect(find.byType(GestureDetector));
+        await tester.tapAt(bounds.topLeft + const Offset(10.0, 10.0));
+        final bool includesPadding =
+            behavior == HitTestBehavior.opaque || behavior == HitTestBehavior.translucent;
+        expect(taps, includesPadding ? 2 : 1);
+
+        await tester.tapAt(bounds.topLeft - const Offset(10.0, 10.0));
+        expect(taps, includesPadding ? 2 : 1);
+      });
+    }
+
     final buttonVariant = ButtonVariant(
       values: <int>[kPrimaryButton, kSecondaryButton, kTertiaryButton],
       descriptions: <int, String>{

@@ -162,6 +162,30 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer>
 ///
 /// ### Troubleshooting
 ///
+/// Why doesn't tapping the padding around my child call [onTap]?
+///
+/// When [child] is not null, [behavior] defaults to
+/// [HitTestBehavior.deferToChild], so this widget only receives pointer events
+/// where its child is hit. For example, [Padding] around a [Text] widget does
+/// not make the padded area respond to taps. Set [behavior] to
+/// [HitTestBehavior.opaque] or [HitTestBehavior.translucent] to receive pointer
+/// events throughout the gesture detector's bounds, including the padding.
+///
+/// {@tool snippet}
+/// This example makes both the text and the surrounding padding respond to taps.
+///
+/// ```dart
+/// GestureDetector(
+///   behavior: HitTestBehavior.opaque,
+///   onTap: () { debugPrint('Tapped'); },
+///   child: const Padding(
+///     padding: EdgeInsets.all(40.0),
+///     child: Text('Tap here'),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
 /// Why isn't my parent [GestureDetector.onTap] method called?
 ///
 /// Given a parent [GestureDetector] with an onTap callback, and a child
@@ -1002,6 +1026,11 @@ class GestureDetector extends StatelessWidget {
   ///
   /// This defaults to [HitTestBehavior.deferToChild] if [child] is not null and
   /// [HitTestBehavior.translucent] if child is null.
+  ///
+  /// With [HitTestBehavior.deferToChild], padding around the child does not
+  /// receive pointer events unless a descendant is hit there. Use
+  /// [HitTestBehavior.opaque] or [HitTestBehavior.translucent] to receive pointer
+  /// events throughout this widget's bounds.
   ///
   /// See [HitTestBehavior] for the allowed values and their meanings.
   final HitTestBehavior? behavior;
