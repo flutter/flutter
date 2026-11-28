@@ -34,6 +34,10 @@ vk::ImageLayout TextureSourceVK::SetLayoutWithoutEncoding(
 }
 
 absl::Status TextureSourceVK::SetLayout(const BarrierVK& barrier) const {
+  vk::Image image = GetImage();
+  if (!image) {
+    return absl::FailedPreconditionError("Texture image is null.");
+  }
   const vk::ImageLayout old_layout =
       SetLayoutWithoutEncoding(barrier.new_layout);
   vk::ImageMemoryBarrier image_barrier;
@@ -41,7 +45,7 @@ absl::Status TextureSourceVK::SetLayout(const BarrierVK& barrier) const {
   image_barrier.dstAccessMask = barrier.dst_access;
   image_barrier.oldLayout = old_layout;
   image_barrier.newLayout = barrier.new_layout;
-  image_barrier.image = GetImage();
+  image_barrier.image = image;
   image_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
   image_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
   image_barrier.subresourceRange.aspectMask = ToImageAspectFlags(desc_.format);
@@ -66,21 +70,23 @@ void TextureSourceVK::SetCachedFrameData(const FramebufferAndRenderPass& data,
                                          SampleCount sample_count,
                                          uint32_t mip_level,
                                          uint32_t slice) {
-  for (auto& entry : frame_data_) {
+  Lock lock(frame_data_->mutex);
+  for (auto& entry : frame_data_->entries) {
     if (entry.sample_count == sample_count && entry.mip_level == mip_level &&
         entry.slice == slice) {
       entry.data = data;
       return;
     }
   }
-  frame_data_.push_back({sample_count, mip_level, slice, data});
+  frame_data_->entries.push_back({sample_count, mip_level, slice, data});
 }
 
 FramebufferAndRenderPass TextureSourceVK::GetCachedFrameData(
     SampleCount sample_count,
     uint32_t mip_level,
     uint32_t slice) const {
-  for (const auto& entry : frame_data_) {
+  Lock lock(frame_data_->mutex);
+  for (const auto& entry : frame_data_->entries) {
     if (entry.sample_count == sample_count && entry.mip_level == mip_level &&
         entry.slice == slice) {
       return entry.data;

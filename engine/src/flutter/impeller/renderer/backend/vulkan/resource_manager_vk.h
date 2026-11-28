@@ -64,6 +64,14 @@ class ResourceManagerVK final
   void Reclaim(std::unique_ptr<ResourceVK> resource);
 
   //----------------------------------------------------------------------------
+  /// @brief      Terminates and joins the resource manager thread, draining all
+  ///             queued reclaimables.
+  ///
+  ///             Idempotent. Any resources passed to `Reclaim` after
+  ///             termination are destroyed inline on the calling thread.
+  void Terminate();
+
+  //----------------------------------------------------------------------------
   /// @brief      Destroys the resource manager.
   ///
   /// The resource manager will stop collecting resources and will be destroyed
@@ -74,6 +82,7 @@ class ResourceManagerVK final
   using Reclaimables = std::vector<std::unique_ptr<ResourceVK>>;
 
   ResourceManagerVK();
+  std::mutex terminate_mutex_;
   std::mutex reclaimables_mutex_;
   std::condition_variable reclaimables_cv_;
   Reclaimables reclaimables_;
@@ -87,13 +96,6 @@ class ResourceManagerVK final
   ///
   /// This method is called implicitly by `Create`.
   void Start();
-
-  //----------------------------------------------------------------------------
-  /// @brief      Terminates the resource manager thread.
-  ///
-  /// Any resources given to the resource manager post termination will be
-  /// collected when the resource manager is collected.
-  void Terminate();
 
   ResourceManagerVK(const ResourceManagerVK&) = delete;
 
@@ -121,6 +123,9 @@ class ResourceVKT : public ResourceVK {
 
   /// @brief      Returns a pointer to the resource.
   const ResourceType* Get() const { return &resource_; }
+
+  /// @brief      Returns a mutable pointer to the resource.
+  ResourceType* GetMutable() { return &resource_; }
 
  private:
   // Prevents subclassing, use `UniqueResourceVKT`.
@@ -173,6 +178,12 @@ class UniqueResourceVKT final {
     FML_CHECK(resource_) << "UniqueResourceVKT was reclaimed.";
 
     return resource_.get()->Get();
+  }
+
+  /// @brief      Returns a mutable pointer to the resource, or nullptr if
+  ///             reclaimed.
+  ResourceType* GetMutable() {
+    return resource_ ? resource_->GetMutable() : nullptr;
   }
 
   /// @brief      Reclaims the existing resource, if any, and replaces it.

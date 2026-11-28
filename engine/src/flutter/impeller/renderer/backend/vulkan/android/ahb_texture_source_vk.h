@@ -53,7 +53,7 @@ class AHBTextureSourceVK final : public TextureSourceVK {
   vk::ImageView GetRenderTargetView(uint32_t mip_level,
                                     uint32_t array_layer) const override;
 
-  bool IsValid() const;
+  bool IsValid() const override;
 
   // |TextureSourceVK|
   bool IsSwapchainImage() const override;

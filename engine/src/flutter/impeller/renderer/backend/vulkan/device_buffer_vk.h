@@ -21,7 +21,8 @@ class DeviceBufferVK final : public DeviceBuffer,
                  std::weak_ptr<Context> context,
                  UniqueBufferVMA buffer,
                  VmaAllocationInfo info,
-                 bool is_host_coherent);
+                 bool is_host_coherent,
+                 std::shared_ptr<VmaResourceTracker> tracker);
 
   // |DeviceBuffer|
   ~DeviceBufferVK() override;
@@ -35,18 +36,29 @@ class DeviceBufferVK final : public DeviceBuffer,
   friend class AllocatorVK;
 
   struct BufferResource {
+    std::shared_ptr<VmaResourceTracker> tracker;
     UniqueBufferVMA buffer;
     VmaAllocationInfo info = {};
 
     BufferResource() = default;
 
-    BufferResource(UniqueBufferVMA p_buffer, VmaAllocationInfo p_info)
-        : buffer(std::move(p_buffer)), info(p_info) {}
+    BufferResource(UniqueBufferVMA p_buffer,
+                   VmaAllocationInfo p_info,
+                   std::shared_ptr<VmaResourceTracker> p_tracker)
+        : tracker(std::move(p_tracker)),
+          buffer(std::move(p_buffer)),
+          info(p_info) {}
 
-    BufferResource(BufferResource&& o) {
-      std::swap(o.buffer, buffer);
-      std::swap(o.info, info);
+    BufferResource(BufferResource&& o) noexcept
+        : tracker(std::move(o.tracker)),
+          buffer(std::move(o.buffer)),
+          info(o.info) {
+      o.info = {};
     }
+
+    ~BufferResource();
+
+    static void Invalidate(void* ptr);
 
     BufferResource(const BufferResource&) = delete;
 
@@ -54,6 +66,7 @@ class DeviceBufferVK final : public DeviceBuffer,
   };
 
   std::weak_ptr<Context> context_;
+  std::shared_ptr<VmaResourceTracker> tracker_;
   UniqueResourceVKT<BufferResource> resource_;
   bool is_host_coherent_ = false;
 

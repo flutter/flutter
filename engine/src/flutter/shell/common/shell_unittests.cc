@@ -60,6 +60,17 @@
 #include "flutter/vulkan/vulkan_application.h"  // nogncheck
 #endif
 
+#if IMPELLER_SUPPORTS_RENDERING && IMPELLER_ENABLE_VULKAN
+#include "flutter/lib/ui/painting/image.h"
+#include "impeller/display_list/dl_image_impeller.h"
+#include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
+#include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/render_pass.h"
+#include "impeller/renderer/render_target.h"
+#include "third_party/dart/runtime/include/dart_native_api.h"
+#endif  // IMPELLER_SUPPORTS_RENDERING && IMPELLER_ENABLE_VULKAN
+
 // CREATE_FFI_LAMBDA is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 
@@ -6111,6 +6122,181 @@ TEST_F(ShellTest, SpawnedShellSharesThreadMergerWhenParentSetupIsDeferred) {
   DestroyShell(std::move(parent_shell), task_runners);
 #endif  // OS_FUCHSIA
 }
+
+#if IMPELLER_SUPPORTS_RENDERING && IMPELLER_ENABLE_VULKAN
+TEST_F(ShellTest, VulkanContextReleasedWhileChildIsolateOutlivesShell) {
+  class MockVulkanImpellerPlatformView : public PlatformView {
+   public:
+    MockVulkanImpellerPlatformView(
+        PlatformView::Delegate& delegate,
+        const TaskRunners& task_runners,
+        std::shared_ptr<impeller::ContextVK> context_vk)
+        : PlatformView(delegate, task_runners),
+          context_vk_(std::move(context_vk)) {}
+
+    ~MockVulkanImpellerPlatformView() override {
+      if (context_vk_) {
+        context_vk_->Shutdown();
+        context_vk_.reset();
+      }
+    }
+
+    std::shared_ptr<impeller::Context> GetImpellerContext() const override {
+      return context_vk_;
+    }
+
+   private:
+    std::shared_ptr<impeller::ContextVK> context_vk_;
+  };
+
+  auto settings = CreateSettingsForFixture();
+  settings.enable_impeller = true;
+  // Keep the Dart VM alive across Shell destruction (matching Android where
+  // DartVM outlives individual FlutterEngine instances) so the child isolate
+  // genuinely outlives Shell teardown.
+  std::optional<DartVMRef> vm_ref = DartVMRef::Create(settings);
+
+  std::shared_ptr<std::vector<std::string>> called;
+  std::weak_ptr<impeller::ContextVK> weak_context;
+  std::weak_ptr<impeller::Allocator> weak_allocator;
+  std::weak_ptr<impeller::DeviceHolderVK> weak_device_holder;
+
+  std::weak_ptr<impeller::Texture> weak_texture;
+  fml::AutoResetWaitableEvent child_ready;
+  Dart_Port child_exit_port = ILLEGAL_PORT;
+
+  AddFfiNativeCallback(
+      "CreateTestVulkanImage", CREATE_FFI_LAMBDA([&]() -> Dart_Handle {
+        auto ctx = weak_context.lock();
+        if (!ctx) {
+          ADD_FAILURE() << "ContextVK expired before CreateTestVulkanImage";
+          return Dart_Null();
+        }
+        auto texture = ctx->GetResourceAllocator()->CreateTexture(
+            impeller::TextureDescriptor{
+                .storage_mode = impeller::StorageMode::kDevicePrivate,
+                .format = impeller::PixelFormat::kR8G8B8A8UNormInt,
+                .size = {64, 64},
+                .usage = impeller::TextureUsage::kRenderTarget |
+                         impeller::TextureUsage::kShaderRead,
+            });
+        if (!texture) {
+          ADD_FAILURE() << "Failed to allocate test Vulkan texture";
+          return Dart_Null();
+        }
+        // Populate cached frame_data_ (framebuffer and render pass) on the
+        // texture to exercise both frame_data_ and VMA sweep on teardown.
+        {
+          impeller::RenderTarget render_target;
+          impeller::ColorAttachment color0;
+          color0.texture = texture;
+          render_target.SetColorAttachment(color0, 0);
+          auto cmd_buffer = ctx->CreateCommandBuffer();
+          if (!cmd_buffer) {
+            ADD_FAILURE() << "Failed to create command buffer";
+            return Dart_Null();
+          }
+          auto render_pass = cmd_buffer->CreateRenderPass(render_target);
+          if (!render_pass) {
+            ADD_FAILURE() << "Failed to create render pass";
+            return Dart_Null();
+          }
+          render_pass->EncodeCommands();
+        }
+        ctx->DisposeThreadLocalCachedResources();
+        weak_texture = texture;
+        auto canvas_image = CanvasImage::Create();
+        canvas_image->set_image(
+            impeller::DlImageImpeller::Make(std::move(texture)));
+        return canvas_image->CreateOuterWrapping();
+      }));
+
+  AddFfiNativeCallback("NotifyChildIsolateReady",
+                       CREATE_FFI_LAMBDA([&](int64_t exit_port_id) {
+                         child_exit_port = exit_port_id;
+                         child_ready.Signal();
+                       }));
+
+  std::unique_ptr<Shell> shell = CreateShell({
+      .settings = settings,
+      .platform_view_create_callback =
+          [&](Shell& shell) {
+            // Create ContextVK on the platform thread so MockVulkanState is
+            // created and destroyed on the same thread.
+            auto context_vk =
+                impeller::testing::MockVulkanContextBuilder().Build();
+            EXPECT_TRUE(context_vk);
+            called = impeller::testing::GetMockVulkanFunctions(
+                context_vk->GetDevice());
+            weak_context = context_vk;
+            weak_allocator = context_vk->GetResourceAllocator();
+            weak_device_holder = context_vk->GetDeviceHolder();
+            return std::make_unique<MockVulkanImpellerPlatformView>(
+                shell, shell.GetTaskRunners(), std::move(context_vk));
+          },
+  });
+  ASSERT_NE(shell, nullptr);
+  ASSERT_TRUE(shell->IsSetup());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("vulkanTeardownWithSurvivingChildIsolate");
+  RunEngine(shell.get(), std::move(configuration));
+  child_ready.Wait();
+
+  // Destroy the Shell while the child isolate is still alive and the
+  // CanvasImage has not been collected.
+  DestroyShell(std::move(shell));
+
+  // Verify the CanvasImage's underlying texture is still alive in the
+  // IsolateGroup heap, yet ContextVK, AllocatorVK, and DeviceHolderVK were all
+  // released immediately during Shell teardown.
+  EXPECT_FALSE(weak_texture.expired());
+  EXPECT_TRUE(weak_context.expired());
+  EXPECT_TRUE(weak_allocator.expired());
+  EXPECT_TRUE(weak_device_holder.expired());
+
+  auto destroy_fb =
+      std::find(called->begin(), called->end(), "vkDestroyFramebuffer");
+  auto destroy_rp =
+      std::find(called->begin(), called->end(), "vkDestroyRenderPass");
+  auto destroy_image_view =
+      std::find(called->begin(), called->end(), "vkDestroyImageView");
+  auto destroy_image =
+      std::find(called->begin(), called->end(), "vkDestroyImage");
+  auto destroy_device =
+      std::find(called->begin(), called->end(), "vkDestroyDevice");
+  EXPECT_NE(destroy_fb, called->end());
+  EXPECT_NE(destroy_rp, called->end());
+  EXPECT_NE(destroy_image_view, called->end());
+  EXPECT_NE(destroy_image, called->end());
+  EXPECT_NE(destroy_device, called->end());
+  EXPECT_LT(destroy_fb, destroy_device);
+  EXPECT_LT(destroy_rp, destroy_device);
+  EXPECT_LT(destroy_image_view, destroy_device);
+  EXPECT_LT(destroy_image, destroy_device);
+  EXPECT_EQ(std::find(destroy_device, called->end(), "vkDestroyFramebuffer"),
+            called->end());
+  EXPECT_EQ(std::find(destroy_device, called->end(), "vkDestroyRenderPass"),
+            called->end());
+  EXPECT_EQ(std::find(destroy_device, called->end(), "vkDestroyImageView"),
+            called->end());
+  EXPECT_EQ(std::find(destroy_device, called->end(), "vkDestroyImage"),
+            called->end());
+
+  // Let the surviving child isolate exit and drop the VM ref to
+  // deterministically join IsolateGroup teardown and CanvasImage finalization
+  // after VkDevice is destroyed.
+  const size_t calls_after_shell_destroy = called->size();
+  ASSERT_NE(child_exit_port, ILLEGAL_PORT);
+  Dart_CObject exit_msg;
+  exit_msg.type = Dart_CObject_kNull;
+  EXPECT_TRUE(Dart_PostCObject(child_exit_port, &exit_msg));
+  vm_ref.reset();
+
+  EXPECT_TRUE(weak_texture.expired());
+  EXPECT_EQ(called->size(), calls_after_shell_destroy);
+}
+#endif  // IMPELLER_SUPPORTS_RENDERING && IMPELLER_ENABLE_VULKAN
 
 }  // namespace testing
 }  // namespace flutter

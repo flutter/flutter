@@ -11,6 +11,7 @@
 #include "impeller/renderer/backend/vulkan/device_holder_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 
+#include <atomic>
 #include <cstdint>
 #include <memory>
 
@@ -42,16 +43,22 @@ class AllocatorVK final : public Allocator {
  private:
   friend class ContextVK;
 
+  std::shared_ptr<VmaResourceTracker> tracker_ =
+      std::make_shared<VmaResourceTracker>();
   UniqueAllocatorVMA allocator_;
   UniquePoolVMA staging_buffer_pool_;
   std::weak_ptr<Context> context_;
   std::weak_ptr<DeviceHolderVK> device_holder_;
   ISize max_texture_size_;
-  bool is_valid_ = false;
+  std::atomic<bool> is_valid_{false};
   bool supports_memoryless_textures_ = false;
   // TODO(jonahwilliams): figure out why CI can't create these buffer pools.
   bool created_buffer_pool_ = true;
   vk::PhysicalDeviceMemoryProperties memory_properties_;
+
+  /// Invalidate all live VMA-backed textures and buffers and destroy the
+  /// underlying VmaPool and VmaAllocator while VkDevice is still valid.
+  void Invalidate();
 
   AllocatorVK(std::weak_ptr<Context> context,
               uint32_t vulkan_api_version,

@@ -143,8 +143,25 @@ ContextVK::~ContextVK() {
   if (device_holder_ && device_holder_->device) {
     [[maybe_unused]] auto result = device_holder_->device->waitIdle();
   }
+  if (fence_waiter_) {
+    fence_waiter_->Terminate();
+  }
+  if (resource_manager_) {
+    resource_manager_->Terminate();
+    resource_manager_.reset();
+  }
+  if (raster_message_loop_) {
+    raster_message_loop_->Terminate();
+    raster_message_loop_.reset();
+  }
   if (command_pool_recycler_) {
     command_pool_recycler_->DestroyThreadLocalPools();
+  }
+  // Sweep any remaining tracked VMA allocations while VkDevice is still valid
+  // (even if Shutdown() was skipped or an external shared_ptr<Allocator>
+  // outlives ContextVK).
+  if (allocator_) {
+    static_cast<AllocatorVK*>(allocator_.get())->Invalidate();
   }
 }
 
@@ -640,14 +657,21 @@ ContextVK::GetConcurrentWorkerTaskRunner() const {
 
 void ContextVK::Shutdown() {
   // There are multiple objects, for example |CommandPoolVK|, that in their
-  // destructors make a strong reference to |ContextVK|. Resetting these shared
-  // pointers ensures that cleanup happens in a correct order.
+  // destructors make a strong reference to |ContextVK|. Terminating these
+  // worker threads ensures that cleanup happens in a correct order without
+  // mutating shared_ptr members concurrently with in-flight workers that still
+  // hold a strong reference to |ContextVK|.
   //
   // tl;dr: Without it, we get thread::join failures on shutdown.
-  fence_waiter_->Terminate();
-  resource_manager_.reset();
-
-  raster_message_loop_->Terminate();
+  if (fence_waiter_) {
+    fence_waiter_->Terminate();
+  }
+  if (resource_manager_) {
+    resource_manager_->Terminate();
+  }
+  if (raster_message_loop_) {
+    raster_message_loop_->Terminate();
+  }
 }
 
 std::shared_ptr<SurfaceContextVK> ContextVK::CreateSurfaceContext() {

@@ -142,7 +142,7 @@ SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
 
   context.SetDebugName(pass.get(), debug_label_.c_str());
 
-  return MakeSharedVK(std::move(pass));
+  return MakeSharedVK(std::move(pass), context.GetDeviceHolder());
 }
 
 RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
@@ -349,7 +349,7 @@ SharedHandleVK<vk::Framebuffer> RenderPassVK::CreateVKFramebuffer(
     return {};
   }
 
-  return MakeSharedVK(std::move(framebuffer));
+  return MakeSharedVK(std::move(framebuffer), context.GetDeviceHolder());
 }
 
 // |RenderPass|

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <android/hardware_buffer.h>
+#include <algorithm>
 #include <memory>
 
 #include "flutter/testing/testing.h"
@@ -10,8 +11,10 @@
 #include "impeller/renderer/backend/vulkan/android/ahb_texture_source_vk.h"
 #include "impeller/renderer/backend/vulkan/android/android_test_utils.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/surface_context_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
+#include "impeller/renderer/backend/vulkan/texture_source_vk.h"
 #include "impeller/toolkit/android/hardware_buffer.h"
 #include "impeller/toolkit/android/surface_transaction.h"
 
@@ -185,12 +188,44 @@ TEST(AndroidVulkanTest, TextureSourceDeleteAfterContextDelete) {
       std::make_shared<AHBTextureSourceVK>(context, buffer.get(), desc);
   ASSERT_TRUE(texture->IsValid());
 
+  // Populate cached frame data (framebuffer and render pass). Unlike allocated
+  // textures, AHBTextureSourceVK does not retain DeviceHolderVK, so destroying
+  // the texture after the context must not invoke vkDestroyFramebuffer or
+  // vkDestroyRenderPass on the destroyed VkDevice.
+  auto framebuffer =
+      context->GetDevice().createFramebufferUnique(vk::FramebufferCreateInfo{});
+  ASSERT_EQ(framebuffer.result, vk::Result::eSuccess);
+  auto render_pass =
+      context->GetDevice().createRenderPassUnique(vk::RenderPassCreateInfo{});
+  ASSERT_EQ(render_pass.result, vk::Result::eSuccess);
+  texture->SetCachedFrameData(
+      FramebufferAndRenderPass{
+          .framebuffer = MakeSharedVK(std::move(framebuffer.value),
+                                      context->GetDeviceHolder()),
+          .render_pass = MakeSharedVK(std::move(render_pass.value),
+                                      context->GetDeviceHolder()),
+      },
+      SampleCount::kCount1,
+      /*mip_level=*/0,
+      /*slice=*/0);
+
+  auto called = GetMockVulkanFunctions(context->GetDevice());
+
   // Delete the context and its VkDevice.
+  context->Shutdown();
   context.reset();
+
+  EXPECT_NE(std::find(called->begin(), called->end(), "vkDestroyDevice"),
+            called->end());
 
   // Delete the AHBTextureSourceVK and verify that the destructor does not call
   // Vulkan APIs on a VkDevice that is no longer valid.
   texture.reset();
+
+  EXPECT_EQ(std::find(called->begin(), called->end(), "vkDestroyFramebuffer"),
+            called->end());
+  EXPECT_EQ(std::find(called->begin(), called->end(), "vkDestroyRenderPass"),
+            called->end());
 }
 
 }  // namespace impeller::android::testing

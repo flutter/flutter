@@ -21,7 +21,7 @@ class KHRSwapchainImageVK final : public TextureSourceVK {
   // |TextureSourceVK|
   ~KHRSwapchainImageVK() override;
 
-  bool IsValid() const;
+  bool IsValid() const override;
 
   // |TextureSourceVK|
   vk::Image GetImage() const override;

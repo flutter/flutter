@@ -502,7 +502,7 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage16Float) {
   EXPECT_CALL(*image, GetImpellerTexture(::testing::_))
       .WillOnce(Return(texture));
   std::vector<uint8_t> buffer;
-  buffer.reserve(100 * 100 * 8);
+  buffer.resize(100 * 100 * 8);
   auto context = MakeConvertDlImageToSkImageContext(buffer);
   bool did_call = false;
   MockSnapshotDelegate snapshot_delegate;
@@ -536,7 +536,7 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage10XR) {
   EXPECT_CALL(*image, GetImpellerTexture(::testing::_))
       .WillOnce(Return(texture));
   std::vector<uint8_t> buffer;
-  buffer.reserve(100 * 100 * 4);
+  buffer.resize(100 * 100 * 4);
   auto context = MakeConvertDlImageToSkImageContext(buffer);
   bool did_call = false;
   MockSnapshotDelegate snapshot_delegate;
@@ -572,8 +572,8 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImageTextureSizeMismatch) {
   EXPECT_CALL(*image, GetImpellerTexture(::testing::_))
       .WillOnce(Return(texture));
   std::vector<uint8_t> buffer;
-  buffer.reserve(desc.size.width * desc.size.height *
-                 impeller::BytesPerPixelForPixelFormat(desc.format));
+  buffer.resize(desc.size.width * desc.size.height *
+                impeller::BytesPerPixelForPixelFormat(desc.format));
   auto context = MakeConvertDlImageToSkImageContext(buffer);
 
   bool did_call = false;

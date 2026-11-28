@@ -654,3 +654,34 @@ void hitTestOutsidePlatformViewMain() {
     return HitTestResponse.empty;
   };
 }
+
+@Native<Handle Function()>(symbol: 'CreateTestVulkanImage')
+external Image? _createTestVulkanImage();
+
+@Native<Void Function(Int64)>(symbol: 'NotifyChildIsolateReady')
+external void _notifyChildIsolateReady(int exitPortId);
+
+// Retained on the root isolate's static field table so the CanvasImage remains
+// uncollected in the shared IsolateGroup heap while a child isolate outlives
+// Shell teardown.
+@pragma('vm:entry-point')
+// ignore: unused_element
+Image? _retainedVulkanImage;
+
+void _survivingChildIsolateMain(SendPort readyPort) {
+  final ReceivePort exitPort = ReceivePort();
+  readyPort.send(exitPort.sendPort);
+  exitPort.first.then((_) {
+    exitPort.close();
+  });
+}
+
+@pragma('vm:entry-point')
+Future<void> vulkanTeardownWithSurvivingChildIsolate() async {
+  _retainedVulkanImage = _createTestVulkanImage();
+  final ReceivePort readyPort = ReceivePort();
+  await Isolate.spawn(_survivingChildIsolateMain, readyPort.sendPort);
+  final SendPort childExitPort = (await readyPort.first) as SendPort;
+  readyPort.close();
+  _notifyChildIsolateReady(childExitPort.nativePort);
+}
