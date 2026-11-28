@@ -229,8 +229,6 @@ void main() {
         '-scheme',
         'Runner',
         'BUILD_DIR=/build/ios',
-        '-sdk',
-        if (simulator) ...<String>['iphonesimulator'] else ...<String>['iphoneos'],
         if (deviceId != null) ...<String>[
           '-destination',
           'id=$deviceId',
@@ -554,6 +552,31 @@ void main() {
     expect(configFile, exists);
     final String configContent = configFile.readAsStringSync();
     expect(configContent, contains('TRACK_WIDGET_CREATION=false'));
+  });
+
+  test('ios simulator build with device ID does not pass -sdk to xcode build', () async {
+    processManager.addCommands(<FakeCommand>[
+      setUpFakeXcodeBuildHandler(
+        simulator: true,
+        deviceId: '1234',
+        onRun: (_) {
+          fileSystem
+              .directory('build/ios/Debug-iphonesimulator/Runner.app')
+              .createSync(recursive: true);
+        },
+      ),
+      ...postBuildCommands(),
+    ]);
+    createMinimalMockProjectFiles();
+
+    await createBuildRunner().run(const <String>[
+      'build',
+      'ios',
+      '--simulator',
+      '--no-pub',
+      '--device-id',
+      '1234',
+    ]);
   });
 
   test('ios build invokes xcode build with verbosity', () async {
