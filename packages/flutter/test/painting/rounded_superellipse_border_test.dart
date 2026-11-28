@@ -332,4 +332,25 @@ void main() {
       );
     });
   });
+
+  test('RoundedSuperellipseBorder to CircleBorder lerp equality accounts for eccentricity', () {
+    const border = RoundedSuperellipseBorder(borderRadius: BorderRadius.all(Radius.circular(16)));
+    final ShapeBorder round = ShapeBorder.lerp(border, const CircleBorder(), 0.5)!;
+    final ShapeBorder oval = ShapeBorder.lerp(border, const CircleBorder(eccentricity: 1.0), 0.5)!;
+    expect(round, isNot(oval));
+    expect(round.hashCode, isNot(oval.hashCode));
+    expect(oval, ShapeBorder.lerp(border, const CircleBorder(eccentricity: 1.0), 0.5));
+  });
+
+  test('RoundedSuperellipseBorder to CircleBorder lerp interpolates eccentricity', () {
+    const border = RoundedSuperellipseBorder(borderRadius: BorderRadius.all(Radius.circular(16)));
+    final ShapeBorder round = ShapeBorder.lerp(border, const CircleBorder(), 0.5)!;
+    final ShapeBorder oval = ShapeBorder.lerp(border, const CircleBorder(eccentricity: 1.0), 0.5)!;
+    expect(
+      ShapeBorder.lerp(round, oval, 0.5),
+      ShapeBorder.lerp(border, const CircleBorder(eccentricity: 0.5), 0.5),
+    );
+    expect(ShapeBorder.lerp(const CircleBorder(eccentricity: 1.0), round, 1.0), round);
+    expect(ShapeBorder.lerp(round, const CircleBorder(eccentricity: 1.0), 0.0), round);
+  });
 }

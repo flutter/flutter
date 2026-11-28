@@ -642,4 +642,25 @@ void main() {
     expect(direct50.hashCode, indirect50.hashCode);
     expect(direct50.toString(), indirect50.toString());
   });
+
+  test('StadiumBorder to CircleBorder lerp equality accounts for eccentricity', () {
+    const stadium = StadiumBorder();
+    final ShapeBorder round = ShapeBorder.lerp(stadium, const CircleBorder(), 0.5)!;
+    final ShapeBorder oval = ShapeBorder.lerp(stadium, const CircleBorder(eccentricity: 1.0), 0.5)!;
+    expect(round, isNot(oval));
+    expect(round.hashCode, isNot(oval.hashCode));
+    expect(oval, ShapeBorder.lerp(stadium, const CircleBorder(eccentricity: 1.0), 0.5));
+  });
+
+  test('StadiumBorder to CircleBorder lerp interpolates eccentricity', () {
+    const stadium = StadiumBorder();
+    final ShapeBorder round = ShapeBorder.lerp(stadium, const CircleBorder(), 0.5)!;
+    final ShapeBorder oval = ShapeBorder.lerp(stadium, const CircleBorder(eccentricity: 1.0), 0.5)!;
+    expect(
+      ShapeBorder.lerp(round, oval, 0.5),
+      ShapeBorder.lerp(stadium, const CircleBorder(eccentricity: 0.5), 0.5),
+    );
+    expect(ShapeBorder.lerp(const CircleBorder(eccentricity: 1.0), round, 1.0), round);
+    expect(ShapeBorder.lerp(round, const CircleBorder(eccentricity: 1.0), 0.0), round);
+  });
 }
