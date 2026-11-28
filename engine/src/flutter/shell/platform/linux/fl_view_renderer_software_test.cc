@@ -10,6 +10,7 @@
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_view_renderer.h"
 #include "flutter/shell/platform/linux/fl_view_renderer_software.h"
+#include "flutter/shell/platform/linux/testing/fl_test_gtk_logs.h"
 #include "flutter/shell/platform/linux/testing/mock_gtk.h"
 
 // MOCK_ENGINE_PROC is leaky by design
@@ -66,6 +67,30 @@ TEST_F(FlViewRendererSoftwareTest, PresentLayersAfterDestroy) {
   fl_view_renderer_present_layers(FL_VIEW_RENDERER(renderer), nullptr, 0);
 
   g_object_unref(renderer);
+}
+
+TEST_F(FlViewRendererSoftwareTest, PresentLayersAfterRealizedDestroy) {
+  StartEngine();
+  fl_engine_get_embedder_api(engine)->ScheduleFrame =
+      MOCK_ENGINE_PROC(ScheduleFrame, ([](auto engine) { return kSuccess; }));
+
+  g_autoptr(FlViewRendererSoftware) renderer =
+      fl_view_renderer_software_new(engine, FALSE);
+  g_object_ref_sink(renderer);
+  GtkWidget* window = gtk_offscreen_window_new();
+  gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(renderer));
+  gtk_widget_show_all(window);
+  ASSERT_TRUE(gtk_widget_get_realized(GTK_WIDGET(renderer)));
+  fl_gtk_widget_destroy(GTK_WIDGET(renderer));
+  fl_gtk_widget_destroy(window);
+
+  flutter::testing::fl_reset_received_gtk_log_levels();
+  fl_view_renderer_present_layers(FL_VIEW_RENDERER(renderer), nullptr, 0);
+  EXPECT_FALSE(
+      flutter::testing::fl_has_received_gtk_log_level(G_LOG_LEVEL_CRITICAL));
+
+  while (g_main_context_iteration(nullptr, FALSE)) {
+  }
 }
 
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)
