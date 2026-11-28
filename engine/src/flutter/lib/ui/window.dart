@@ -950,6 +950,25 @@ class AccessibilityFeatures {
   bool get invertColors => _kInvertColorsIndex & _index != 0;
 
   /// The platform is requesting that animations be disabled or simplified.
+  ///
+  /// This is the broader of the two motion-related flags. The Flutter framework
+  /// reacts to it automatically; for example, an `AnimationController` may skip
+  /// or shorten its animations when it is set.
+  ///
+  /// How this flag is set depends on the platform:
+  ///
+  ///  * Android: set when the "Transition animation scale" developer setting
+  ///    is set to zero (or the "Remove animations" accessibility setting is
+  ///    enabled).
+  ///  * Linux: set when the desktop environment has animations disabled.
+  ///  * Web: set together with [reduceMotion] when the
+  ///    `prefers-reduced-motion` media query matches.
+  ///  * iOS: never set. The "Reduce Motion" setting is reported only through
+  ///    [reduceMotion].
+  ///
+  /// See also:
+  ///
+  ///  * [reduceMotion], a narrower request to tone down non-essential motion.
   bool get disableAnimations => _kDisableAnimationsIndex & _index != 0;
 
   /// The platform is requesting that text be rendered at a bold font weight.
@@ -960,7 +979,25 @@ class AccessibilityFeatures {
   /// The platform is requesting that certain animations be simplified and
   /// parallax effects removed.
   ///
-  /// Only supported on iOS.
+  /// Unlike [disableAnimations], the framework does not change animation
+  /// playback automatically when this is set. It is meant to be read by code
+  /// that wants to tone down non-essential motion, for example by replacing a
+  /// slide transition with a cross-fade.
+  ///
+  /// How this flag is set depends on the platform:
+  ///
+  ///  * iOS: set when the "Reduce Motion" accessibility setting is enabled.
+  ///  * Web: set, together with [disableAnimations], when the
+  ///    `prefers-reduced-motion` media query matches.
+  ///  * Android and Linux: never set. [disableAnimations] is set instead.
+  ///
+  /// Because [disableAnimations] is not set on iOS, consider checking both
+  /// flags to honor the user's preference on every platform.
+  ///
+  /// See also:
+  ///
+  ///  * [disableAnimations], the broader request to disable or simplify
+  ///    animations.
   bool get reduceMotion => _kReduceMotionIndex & _index != 0;
 
   /// The platform is requesting that UI be rendered with darker colors.
