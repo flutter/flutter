@@ -498,6 +498,28 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
     _recognizer = null;
   }
 
+  /// Converts a drag anchor, which [DragAnchorStrategy] reports in the local
+  /// coordinate space of this draggable, to the coordinate space of the overlay
+  /// that hosts the feedback.
+  ///
+  /// Without this conversion a transform between the draggable and the overlay
+  /// (such as a [Transform.scale]) would offset the feedback by an amount that
+  /// grows with the distance between the drag anchor and the origin of the
+  /// draggable, which makes the feedback land in a different place depending on
+  /// where the drag started.
+  Offset _dragAnchorToOverlaySpace(Offset anchor, OverlayState overlayState) {
+    if (anchor == Offset.zero) {
+      return anchor;
+    }
+    final RenderObject? draggableBox = context.findRenderObject();
+    final RenderObject? overlayBox = overlayState.context.findRenderObject();
+    if (draggableBox is! RenderBox || overlayBox is! RenderBox) {
+      return anchor;
+    }
+    final Offset origin = overlayBox.globalToLocal(draggableBox.localToGlobal(Offset.zero));
+    return overlayBox.globalToLocal(draggableBox.localToGlobal(anchor)) - origin;
+  }
+
   void _routePointer(PointerDownEvent event) {
     if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags!) {
       return;
@@ -509,13 +531,20 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
     if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags!) {
       return null;
     }
-    final Offset dragStartPoint;
-    dragStartPoint = widget.dragAnchorStrategy(widget, context, position);
+    final OverlayState overlayState = Overlay.of(
+      context,
+      debugRequiredFor: widget,
+      rootOverlay: widget.rootOverlay,
+    );
+    final Offset dragStartPoint = _dragAnchorToOverlaySpace(
+      widget.dragAnchorStrategy(widget, context, position),
+      overlayState,
+    );
     setState(() {
       _activeCount += 1;
     });
     final avatar = _DragAvatar<T>(
-      overlayState: Overlay.of(context, debugRequiredFor: widget, rootOverlay: widget.rootOverlay),
+      overlayState: overlayState,
       data: widget.data,
       axis: widget.axis,
       initialPosition: position,
@@ -851,6 +880,10 @@ class _DragAvatar<T extends Object> extends Drag {
     required this.ignoringFeedbackPointer,
     required this.viewId,
   }) : _position = initialPosition {
+    final box = overlayState.context.findRenderObject()! as RenderBox;
+    _globalDragStartPoint = dragStartPoint == Offset.zero
+        ? Offset.zero
+        : box.localToGlobal(dragStartPoint) - box.localToGlobal(Offset.zero);
     _entry = OverlayEntry(builder: _build);
     overlayState.insert(_entry!);
     updateDrag(initialPosition);
@@ -858,7 +891,9 @@ class _DragAvatar<T extends Object> extends Drag {
 
   final T? data;
   final Axis? axis;
+  // Feedback layout uses the overlay's coordinates, while callbacks use global coordinates.
   final Offset dragStartPoint;
+  late final Offset _globalDragStartPoint;
   final Widget? feedback;
   final Offset feedbackOffset;
   final DragUpdateCallback? onDragUpdate;
@@ -896,7 +931,7 @@ class _DragAvatar<T extends Object> extends Drag {
   }
 
   void updateDrag(Offset globalPosition) {
-    _lastOffset = globalPosition - dragStartPoint;
+    _lastOffset = globalPosition - _globalDragStartPoint;
     if (overlayState.mounted) {
       final box = overlayState.context.findRenderObject()! as RenderBox;
       final Offset overlaySpaceOffset = box.globalToLocal(globalPosition);
