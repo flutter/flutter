@@ -27,8 +27,63 @@ import org.json.JSONObject;
 public class PlatformChannel {
   private static final String TAG = "PlatformChannel";
 
+  /**
+   * Used while no {@link PlatformMessageHandler} is set, such as before an Activity attaches to the
+   * engine or after it detaches. Calls are parsed and answered as they are with a handler, so that
+   * the Dart side never waits for a reply, but they have no effect.
+   */
+  private static final PlatformMessageHandler NO_OP_MESSAGE_HANDLER =
+      new PlatformMessageHandler() {
+        @Override
+        public void playSystemSound(@NonNull SoundType soundType) {}
+
+        @Override
+        public void vibrateHapticFeedback(@NonNull HapticFeedbackType feedbackType) {}
+
+        @Override
+        public void setPreferredOrientations(int androidOrientation) {}
+
+        @Override
+        public void setApplicationSwitcherDescription(
+            @NonNull AppSwitcherDescription description) {}
+
+        @Override
+        public void showSystemOverlays(@NonNull List<SystemUiOverlay> overlays) {}
+
+        @Override
+        public void showSystemUiMode(@NonNull SystemUiMode mode) {}
+
+        @Override
+        public void setSystemUiChangeListener() {}
+
+        @Override
+        public void restoreSystemUiOverlays() {}
+
+        @Override
+        public void setSystemUiOverlayStyle(@NonNull SystemChromeStyle systemUiOverlayStyle) {}
+
+        @Override
+        public void popSystemNavigator() {}
+
+        @Override
+        public CharSequence getClipboardData(@Nullable ClipboardContentFormat format) {
+          return null;
+        }
+
+        @Override
+        public void setClipboardData(@NonNull String text) {}
+
+        @Override
+        public boolean clipboardHasStrings() {
+          return false;
+        }
+
+        @Override
+        public void share(@NonNull String text) {}
+      };
+
   @NonNull public final MethodChannel channel;
-  @Nullable private PlatformMessageHandler platformMessageHandler;
+  @NonNull private PlatformMessageHandler platformMessageHandler = NO_OP_MESSAGE_HANDLER;
   // This state belongs to the FlutterEngine, so retain it while Activities attach and detach.
   @Nullable private Boolean frameworkHandlesBack;
 
@@ -40,14 +95,6 @@ public class PlatformChannel {
           String method = call.method;
           Object arguments = call.arguments;
           Log.v(TAG, "Received '" + method + "' message.");
-
-          if (platformMessageHandler == null
-              && !method.equals("SystemNavigator.setFrameworkHandlesBack")) {
-            // If no explicit PlatformMessageHandler has been registered then we don't
-            // need to forward this call to an API. Return.
-            return;
-          }
-
           try {
             switch (method) {
               case "SystemSound.play":
@@ -142,9 +189,7 @@ public class PlatformChannel {
                 break;
               case "SystemNavigator.setFrameworkHandlesBack":
                 frameworkHandlesBack = (boolean) arguments;
-                if (platformMessageHandler != null) {
-                  platformMessageHandler.setFrameworkHandlesBack(frameworkHandlesBack);
-                }
+                platformMessageHandler.setFrameworkHandlesBack(frameworkHandlesBack);
                 result.success(null);
                 break;
               case "SystemNavigator.pop":
@@ -162,6 +207,7 @@ public class PlatformChannel {
                       // An unsupported content format was requested. Return failure.
                       result.error(
                           "error", "No such clipboard content format: " + contentFormatName, null);
+                      break;
                     }
                   }
 
@@ -222,9 +268,14 @@ public class PlatformChannel {
   /**
    * Sets the {@link PlatformMessageHandler} which receives all events and requests that are parsed
    * from the underlying platform channel.
+   *
+   * <p>While the handler is {@code null}, calls are still answered but have no effect. The last
+   * value of {@code SystemNavigator.setFrameworkHandlesBack} is passed to the next non-null
+   * handler.
    */
   public void setPlatformMessageHandler(@Nullable PlatformMessageHandler platformMessageHandler) {
-    this.platformMessageHandler = platformMessageHandler;
+    this.platformMessageHandler =
+        platformMessageHandler != null ? platformMessageHandler : NO_OP_MESSAGE_HANDLER;
     if (platformMessageHandler != null && frameworkHandlesBack != null) {
       platformMessageHandler.setFrameworkHandlesBack(frameworkHandlesBack);
     }
