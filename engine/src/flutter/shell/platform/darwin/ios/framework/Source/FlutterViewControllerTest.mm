@@ -2582,6 +2582,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [NSObject cancelPreviousPerformRequestsWithTarget:flutterViewController];
   [flutterViewController deregisterNotifications];
   [mockApplication stopMocking];
+  // Tear down the real surface/vsync registration created above so it doesn't keep ticking
+  // during later tests in the same process.
+  [engine destroyContext];
 }
 
 // Verifies a layout pass while the application is backgrounded does not create the surface.
@@ -2611,6 +2614,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   [flutterViewController deregisterNotifications];
   [mockApplication stopMocking];
+  [engine destroyContext];
 }
 
 // Verifies rendering resumes when the application returns to the foreground. UIApplication
@@ -2659,6 +2663,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [NSObject cancelPreviousPerformRequestsWithTarget:flutterViewController];
   [flutterViewController deregisterNotifications];
   [mockApplication stopMocking];
+  [engine destroyContext];
 }
 
 - (void)testLifeCycleNotificationApplicationWillResignActive {
@@ -2906,6 +2911,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMVerify([mockVC surfaceUpdated:YES]);
   OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.inactive"]);
   [flutterViewController deregisterNotifications];
+  [engine destroyContext];
 }
 
 - (void)testLifeCycleNotificationSceneWillEnterForeground {
@@ -2943,6 +2949,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.inactive"]);
   [flutterViewController deregisterNotifications];
   [mockBundle stopMocking];
+  [engine destroyContext];
 }
 
 - (void)testLifeCycleNotificationCancelledInvalidResumed {
