@@ -641,12 +641,6 @@ To fix this, you can either:
       }
     }
     options.addAll(androidBuildInfo.toGradleConfig());
-    if (buildInfo.fileSystemRoots.isNotEmpty) {
-      options.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
-    }
-    if (buildInfo.fileSystemScheme != null) {
-      options.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
-    }
 
     options.addAll(_getAndroidNdkProvisioningProperties());
     late Stopwatch sw;

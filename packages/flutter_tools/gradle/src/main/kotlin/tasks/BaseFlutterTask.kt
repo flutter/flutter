@@ -50,14 +50,6 @@ open class BaseFlutterTask : DefaultTask() {
     @Input
     var verbose: Boolean? = null
 
-    @Optional
-    @Input
-    var fileSystemRoots: Array<String>? = null
-
-    @Optional
-    @Input
-    var fileSystemScheme: String? = null
-
     @Input
     var trackWidgetCreation: Boolean? = null
 
