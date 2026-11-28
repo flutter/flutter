@@ -710,6 +710,107 @@ void main() {
     expect(render.backgroundCursorColor, Colors.green);
   });
 
+  testWidgets('passwordRules is sent in the autofill configuration', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            backgroundCursorColor: Colors.grey,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            autofillHints: const <String>[AutofillHints.newPassword],
+            passwordRules: const PasswordRules(
+              required: <Set<PasswordCharacterClass>>[
+                <PasswordCharacterClass>{PasswordCharacterClass.digit},
+              ],
+              minLength: 12,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.showKeyboard(find.byType(EditableText));
+
+    expect(
+      tester.testTextInput.setClientArgs!['autofill'],
+      containsPair('passwordRules', <String, Object>{
+        'required': <List<Object>>[
+          <Object>['digit'],
+        ],
+        'minLength': 12,
+      }),
+    );
+  });
+
+  testWidgets('changing passwordRules updates the input configuration', (
+    WidgetTester tester,
+  ) async {
+    Widget buildEditableText(PasswordRules? passwordRules) {
+      return MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            backgroundCursorColor: Colors.grey,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            autofillHints: const <String>[AutofillHints.newPassword],
+            passwordRules: passwordRules,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildEditableText(null));
+    await tester.showKeyboard(find.byType(EditableText));
+    tester.testTextInput.log.clear();
+
+    await tester.pumpWidget(buildEditableText(const PasswordRules(minLength: 16)));
+
+    final MethodCall updateConfig = tester.testTextInput.log.singleWhere(
+      (MethodCall call) => call.method == 'TextInput.updateConfig',
+    );
+    expect(
+      ((updateConfig.arguments as Map<String, dynamic>)['autofill']
+          as Map<String, dynamic>)['passwordRules'],
+      <String, Object>{'minLength': 16},
+    );
+
+    // Equal rules do not update the configuration again.
+    tester.testTextInput.log.clear();
+    await tester.pumpWidget(buildEditableText(const PasswordRules(minLength: 16)));
+    expect(tester.testTextInput.log, isNot(contains(matchesMethodCall('TextInput.updateConfig'))));
+  });
+
+  testWidgets('passwordRules is not sent when autofill is disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            backgroundCursorColor: Colors.grey,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            autofillHints: null,
+            passwordRules: const PasswordRules(minLength: 12),
+          ),
+        ),
+      ),
+    );
+    await tester.showKeyboard(find.byType(EditableText));
+
+    expect(tester.testTextInput.setClientArgs!['autofill'], isNull);
+  });
+
   testWidgets('text keyboard is requested when maxLines is default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(

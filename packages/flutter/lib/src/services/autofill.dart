@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
+import 'password_rules.dart';
 import 'text_input.dart';
 
 export 'text_input.dart'
@@ -642,12 +643,14 @@ class AutofillConfiguration {
     required List<String> autofillHints,
     required TextEditingValue currentEditingValue,
     String? hintText,
+    PasswordRules? passwordRules,
   }) : this._(
          enabled: true,
          uniqueIdentifier: uniqueIdentifier,
          autofillHints: autofillHints,
          currentEditingValue: currentEditingValue,
          hintText: hintText,
+         passwordRules: passwordRules,
        );
 
   const AutofillConfiguration._({
@@ -655,6 +658,7 @@ class AutofillConfiguration {
     required this.uniqueIdentifier,
     this.autofillHints = const <String>[],
     this.hintText,
+    this.passwordRules,
     required this.currentEditingValue,
   });
 
@@ -734,6 +738,21 @@ class AutofillConfiguration {
   /// be a useful indication to the platform autofill service.
   final String? hintText;
 
+  /// {@template flutter.services.AutofillConfiguration.passwordRules}
+  /// The requirements a password must satisfy, used by the platform's password
+  /// manager when it suggests a strong password for this input field.
+  ///
+  /// This is typically used together with [AutofillHints.newPassword].
+  ///
+  /// Only supported on iOS, where it is translated to
+  /// [UITextInputPasswordRules](https://developer.apple.com/documentation/uikit/uitextinputpasswordrules).
+  /// Other platforms ignore this value.
+  ///
+  /// Defaults to null, which means the platform's default password rules are
+  /// used.
+  /// {@endtemplate}
+  final PasswordRules? passwordRules;
+
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic>? toJson() {
     return enabled
@@ -742,6 +761,7 @@ class AutofillConfiguration {
             'hints': autofillHints,
             'editingValue': currentEditingValue.toJSON(),
             'hintText': ?hintText,
+            'passwordRules': ?passwordRules?.toJson(),
           }
         : null;
   }
@@ -759,7 +779,8 @@ class AutofillConfiguration {
         other.uniqueIdentifier == uniqueIdentifier &&
         listEquals(other.autofillHints, autofillHints) &&
         other.currentEditingValue == currentEditingValue &&
-        other.hintText == hintText;
+        other.hintText == hintText &&
+        other.passwordRules == passwordRules;
   }
 
   @override
@@ -770,6 +791,7 @@ class AutofillConfiguration {
       Object.hashAll(autofillHints),
       currentEditingValue,
       hintText,
+      passwordRules,
     );
   }
 
@@ -781,6 +803,7 @@ class AutofillConfiguration {
       'autofillHints: $autofillHints',
       'currentEditingValue: $currentEditingValue',
       if (hintText != null) 'hintText: $hintText',
+      if (passwordRules != null) 'passwordRules: $passwordRules',
     ];
     return 'AutofillConfiguration(${description.join(', ')})';
   }
