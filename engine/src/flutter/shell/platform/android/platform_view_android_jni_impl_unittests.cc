@@ -5,6 +5,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
@@ -13,7 +14,10 @@
 #include "flutter/shell/platform/android/jni/mock_jni_env.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 #include "flutter/shell/platform/android/platform_view_android_jni_impl.h"
+#include "flutter/shell/platform/android/surface_texture_external_texture.h"
 #include "impeller/toolkit/android/proc_table.h"
+#include "third_party/skia/include/core/SkBitmap.h"
+#include "third_party/skia/include/core/SkImage.h"
 
 namespace flutter {
 namespace testing {
@@ -357,6 +361,112 @@ TEST(FindFirstLoadableLibraryTest, EmptyReturnsNull) {
   EXPECT_EQ(FindFirstLoadableLibrary(
                 {}, [](const std::string&) -> void* { return nullptr; }),
             nullptr);
+}
+
+class TestSurfaceTextureExternalTexture : public SurfaceTextureExternalTexture {
+ public:
+  TestSurfaceTextureExternalTexture(
+      int64_t id,
+      const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture,
+      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade)
+      : SurfaceTextureExternalTexture(id, surface_texture, jni_facade) {}
+
+  int process_frame_count() const { return process_frame_count_; }
+  int draw_frame_count() const { return draw_frame_count_; }
+
+ protected:
+  void ProcessFrame(PaintContext& context, const SkRect& bounds) override {
+    process_frame_count_++;
+    if (state_ == AttachmentState::kUninitialized) {
+      Attach(1);
+    }
+    Update();
+    SkBitmap bitmap;
+    bitmap.allocN32Pixels(1, 1);
+    dl_image_ = DlImageSkia::Make(SkImages::RasterFromBitmap(bitmap));
+  }
+
+  void DrawFrame(PaintContext& context,
+                 const SkRect& bounds,
+                 const DlImageSampling sampling) const override {
+    draw_frame_count_++;
+  }
+
+ private:
+  int process_frame_count_ = 0;
+  mutable int draw_frame_count_ = 0;
+};
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       SurfaceTextureExternalTexturePaintShouldUpdate) {
+  MockJNIEnvProvider env_provider;
+  auto jni = std::make_shared<JNIMock>();
+  fml::jni::ScopedJavaGlobalRef<jobject> surface_texture;
+  TestSurfaceTextureExternalTexture texture(1, surface_texture, jni);
+  Texture& base_texture = texture;
+  Texture::PaintContext context;
+  const DlRect bounds = DlRect::MakeWH(100, 100);
+
+  // 1. First Paint (dl_image_ == nullptr, freeze = false):
+  // Should attach, update, and draw even if ShouldUpdate() returns false.
+  EXPECT_CALL(*jni, SurfaceTextureShouldUpdate(_)).WillOnce(Return(false));
+  EXPECT_CALL(*jni, SurfaceTextureAttachToGLContext(_, 1)).Times(1);
+  EXPECT_CALL(*jni, SurfaceTextureUpdateTexImage(_)).Times(1);
+  EXPECT_CALL(*jni, SurfaceTextureGetTransformMatrix(_))
+      .WillOnce(Return(SkM44()));
+  base_texture.Paint(context, bounds, /*freeze=*/false,
+                     DlImageSampling::kNearestNeighbor);
+  EXPECT_EQ(texture.process_frame_count(), 1);
+  EXPECT_EQ(texture.draw_frame_count(), 1);
+  ::testing::Mock::VerifyAndClearExpectations(jni.get());
+
+  // 2. Subsequent Paint with freeze = false and ShouldUpdate() == false:
+  // Should NOT process frame / update tex image, but should still draw cached
+  // dl_image_.
+  EXPECT_CALL(*jni, SurfaceTextureShouldUpdate(_)).WillOnce(Return(false));
+  EXPECT_CALL(*jni, SurfaceTextureUpdateTexImage(_)).Times(0);
+  base_texture.Paint(context, bounds, /*freeze=*/false,
+                     DlImageSampling::kNearestNeighbor);
+  EXPECT_EQ(texture.process_frame_count(), 1);
+  EXPECT_EQ(texture.draw_frame_count(), 2);
+  ::testing::Mock::VerifyAndClearExpectations(jni.get());
+
+  // 3. Subsequent Paint with freeze = false and ShouldUpdate() == true:
+  // Should process frame / update tex image and draw.
+  EXPECT_CALL(*jni, SurfaceTextureShouldUpdate(_)).WillOnce(Return(true));
+  EXPECT_CALL(*jni, SurfaceTextureUpdateTexImage(_)).Times(1);
+  EXPECT_CALL(*jni, SurfaceTextureGetTransformMatrix(_))
+      .WillOnce(Return(SkM44()));
+  base_texture.Paint(context, bounds, /*freeze=*/false,
+                     DlImageSampling::kNearestNeighbor);
+  EXPECT_EQ(texture.process_frame_count(), 2);
+  EXPECT_EQ(texture.draw_frame_count(), 3);
+  ::testing::Mock::VerifyAndClearExpectations(jni.get());
+
+  // 4. Subsequent Paint with freeze = true (even if a new frame is available):
+  // Should NOT check ShouldUpdate() or update tex image, and should draw cached
+  // dl_image_.
+  EXPECT_CALL(*jni, SurfaceTextureShouldUpdate(_)).Times(0);
+  EXPECT_CALL(*jni, SurfaceTextureUpdateTexImage(_)).Times(0);
+  base_texture.Paint(context, bounds, /*freeze=*/true,
+                     DlImageSampling::kNearestNeighbor);
+  EXPECT_EQ(texture.process_frame_count(), 2);
+  EXPECT_EQ(texture.draw_frame_count(), 4);
+  ::testing::Mock::VerifyAndClearExpectations(jni.get());
+
+  // 5. First Paint on a new texture with freeze = true (dl_image_ == nullptr):
+  // Should still process frame to populate initial dl_image_.
+  TestSurfaceTextureExternalTexture frozen_initial_texture(2, surface_texture,
+                                                           jni);
+  Texture& base_frozen_texture = frozen_initial_texture;
+  EXPECT_CALL(*jni, SurfaceTextureAttachToGLContext(_, 1)).Times(1);
+  EXPECT_CALL(*jni, SurfaceTextureUpdateTexImage(_)).Times(1);
+  EXPECT_CALL(*jni, SurfaceTextureGetTransformMatrix(_))
+      .WillOnce(Return(SkM44()));
+  base_frozen_texture.Paint(context, bounds, /*freeze=*/true,
+                            DlImageSampling::kNearestNeighbor);
+  EXPECT_EQ(frozen_initial_texture.process_frame_count(), 1);
+  EXPECT_EQ(frozen_initial_texture.draw_frame_count(), 1);
 }
 
 }  // namespace testing

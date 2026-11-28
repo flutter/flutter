@@ -43,7 +43,7 @@ void SurfaceTextureExternalTexture::Paint(PaintContext& context,
     return;
   }
   const bool should_process_frame =
-      !freeze || ShouldUpdate() || dl_image_ == nullptr;
+      (!freeze && ShouldUpdate()) || dl_image_ == nullptr;
   if (should_process_frame) {
     ProcessFrame(context, ToSkRect(bounds));
   }
