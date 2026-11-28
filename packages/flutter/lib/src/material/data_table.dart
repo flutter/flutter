@@ -429,8 +429,18 @@ class DataCell {
 ///
 /// [DataTable] can be sorted on the basis of any column in [columns] in
 /// ascending or descending order. If [sortColumnIndex] is non-null, then the
-/// table will be sorted by the values in the specified column. The boolean
-/// [sortAscending] flag controls the sort order.
+/// specified column shows a sort indicator, and the boolean [sortAscending]
+/// flag controls its direction. [DataTable] does not reorder [rows] itself; the
+/// [DataColumn.onSort] callback is expected to sort the data and rebuild the
+/// table with the new [sortColumnIndex] and [sortAscending] values.
+///
+/// {@tool dartpad}
+/// This sample shows how to sort a [DataTable] by a single column. Tapping the
+/// "Name" or "Age" heading sorts the rows by that column, and tapping the same
+/// heading again reverses the order. The "Role" column is not sortable.
+///
+/// ** See code in examples/api/lib/material/data_table/data_table.2.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
