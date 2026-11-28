@@ -5,13 +5,10 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
-import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -19,8 +16,6 @@ import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
-import 'package:flutter_tools/src/doctor.dart';
-import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/flutter_device_manager.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
@@ -32,12 +27,10 @@ import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
@@ -82,7 +75,7 @@ void main() {
       fs.file('/pubspec.yaml').createSync();
     });
 
-    testUsingContext('successfully bootstraps all contexts with core overrides', () async {
+    test('successfully bootstraps all contexts with core overrides', () async {
       // Set up mock Android SDK directory to verify eager location works with overridden FS
       fs.directory('/home/user/Android/Sdk/licenses').createSync(recursive: true);
 
@@ -155,39 +148,36 @@ void main() {
       expect(dependencies.androidContext.gradleUtils, isNotNull);
     });
 
-    testUsingContext(
-      'defers XCDevice construction until accessed and memoizes across reads',
-      () async {
-        final shutdownHooks = ShutdownHooks();
-        final ToolDependencies dependencies = await ToolDependencies.bootstrap(
-          fs: fs,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-          shutdownHooks: shutdownHooks,
-          templateRenderer: FakeTemplateRenderer(),
-        );
+    test('defers XCDevice construction until accessed and memoizes across reads', () async {
+      final shutdownHooks = ShutdownHooks();
+      final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+        fs: fs,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+        shutdownHooks: shutdownHooks,
+        templateRenderer: FakeTemplateRenderer(),
+      );
 
-        final int hooksAfterBootstrap = shutdownHooks.registeredHooks.length;
+      final int hooksAfterBootstrap = shutdownHooks.registeredHooks.length;
 
-        final XCDevice xcdevice1 = dependencies.appleContext.xcdevice;
-        expect(shutdownHooks.registeredHooks, hasLength(hooksAfterBootstrap + 1));
+      final XCDevice xcdevice1 = dependencies.appleContext.xcdevice;
+      expect(shutdownHooks.registeredHooks, hasLength(hooksAfterBootstrap + 1));
 
-        final XCDevice xcdevice2 = dependencies.appleContext.xcdevice;
-        expect(xcdevice1, same(xcdevice2));
-        expect(shutdownHooks.registeredHooks, hasLength(hooksAfterBootstrap + 1));
+      final XCDevice xcdevice2 = dependencies.appleContext.xcdevice;
+      expect(xcdevice1, same(xcdevice2));
+      expect(shutdownHooks.registeredHooks, hasLength(hooksAfterBootstrap + 1));
 
-        final Xcode xcode1 = dependencies.appleContext.xcode;
-        final Xcode xcode2 = dependencies.appleContext.xcode;
-        expect(xcode1, same(xcode2));
+      final Xcode xcode1 = dependencies.appleContext.xcode;
+      final Xcode xcode2 = dependencies.appleContext.xcode;
+      expect(xcode1, same(xcode2));
 
-        final CocoaPods pods1 = dependencies.appleContext.cocoaPods;
-        final CocoaPods pods2 = dependencies.appleContext.cocoaPods;
-        expect(pods1, same(pods2));
-      },
-    );
+      final CocoaPods pods1 = dependencies.appleContext.cocoaPods;
+      final CocoaPods pods2 = dependencies.appleContext.cocoaPods;
+      expect(pods1, same(pods2));
+    });
 
-    testUsingContext('respects explicit overrides for Android SDK and Studio', () async {
+    test('respects explicit overrides for Android SDK and Studio', () async {
       final mockSdk = FakeAndroidSdk();
       final mockStudio = FakeAndroidStudio();
 
@@ -205,7 +195,7 @@ void main() {
       expect(dependencies.androidContext.androidStudio, same(mockStudio));
     });
 
-    testUsingContext('respects explicit overrides for BuildTargets', () async {
+    test('respects explicit overrides for BuildTargets', () async {
       final mockBuildTargets = FakeBuildTargets();
 
       final ToolDependencies dependencies = await ToolDependencies.bootstrap(
@@ -220,7 +210,7 @@ void main() {
       expect(dependencies.buildTargets, same(mockBuildTargets));
     });
 
-    testUsingContext('respects explicit overrides for DeviceManager', () async {
+    test('respects explicit overrides for DeviceManager', () async {
       final mockDeviceManager = FakeDeviceManager();
 
       final ToolDependencies dependencies = await ToolDependencies.bootstrap(
@@ -235,7 +225,7 @@ void main() {
       expect(dependencies.deviceManager, same(mockDeviceManager));
     });
 
-    testUsingContext('respects explicit overrides for FeatureFlags', () async {
+    test('respects explicit overrides for FeatureFlags', () async {
       final mockFeatureFlags = TestFeatureFlags();
 
       final ToolDependencies dependencies = await ToolDependencies.bootstrap(
@@ -250,7 +240,7 @@ void main() {
       expect(dependencies.featureFlags, same(mockFeatureFlags));
     });
 
-    testUsingContext('respects explicit overrides for Apple dependencies', () async {
+    test('respects explicit overrides for Apple dependencies', () async {
       final mockCocoaPods = FakeCocoaPods();
       final mockCocoaPodsValidator = FakeCocoaPodsValidator();
       final mockIOSSimulatorUtils = FakeIOSSimulatorUtils();
@@ -297,7 +287,7 @@ void main() {
       expect(xcodeProjectInterpreter, same(mockXcodeProjectInterpreter));
     });
 
-    testUsingContext('resolves DeferredArtifacts to local engine artifacts', () async {
+    test('resolves DeferredArtifacts to local engine artifacts', () async {
       final ToolDependencies dependencies = await ToolDependencies.bootstrap(
         fs: fs,
         logger: logger,
@@ -432,68 +422,6 @@ void main() {
 
       expect(dependencies.toolContext.preRunValidator, isNot(isA<NoOpPreRunValidator>()));
     });
-  });
-
-  group('runInContext fallback generators', () {
-    var sdkEvaluations = 0;
-    var studioEvaluations = 0;
-    var javaEvaluations = 0;
-
-    setUp(() {
-      sdkEvaluations = 0;
-      studioEvaluations = 0;
-      javaEvaluations = 0;
-    });
-
-    testUsingContext(
-      'AndroidWorkflow, EmulatorManager, and DoctorValidatorsProvider defer AndroidSdk, AndroidStudio, and Java until validators run',
-      () {
-        expect(context.get<AndroidWorkflow>(), isA<AndroidWorkflow>());
-        expect(context.get<WindowsWorkflow>(), isNotNull);
-        expect(context.get<EmulatorManager>(), isNotNull);
-        final Doctor doctor = context.get<Doctor>()!;
-        final DoctorValidatorsProvider provider = context.get<DoctorValidatorsProvider>()!;
-        expect(sdkEvaluations, 0);
-        expect(studioEvaluations, 0);
-        expect(javaEvaluations, 0);
-
-        expect(provider.validators, isNotEmpty);
-        expect(sdkEvaluations, 1);
-        expect(studioEvaluations, 0);
-        expect(javaEvaluations, 1);
-
-        expect(doctor.validators, isNotEmpty);
-        expect(sdkEvaluations, 1);
-        expect(studioEvaluations, 0);
-        expect(javaEvaluations, 1);
-      },
-      overrides: <Type, Generator>{
-        AndroidSdk: () {
-          sdkEvaluations++;
-          return FakeAndroidSdk();
-        },
-        AndroidStudio: () {
-          studioEvaluations++;
-          return FakeAndroidStudio();
-        },
-        FlutterVersion: _StubFlutterVersion.new,
-        Java: () {
-          javaEvaluations++;
-          return FakeJava();
-        },
-        FileSystem: () {
-          final fs = MemoryFileSystem.test();
-          fs.directory('/flutter/packages/flutter_tools').createSync(recursive: true);
-          fs.file('/pubspec.yaml').createSync();
-          return fs;
-        },
-        Logger: BufferLogger.test,
-        Platform: () => FakePlatform(
-          environment: <String, String>{'FLUTTER_ROOT': '/flutter', 'HOME': '/home/user'},
-        ),
-        ProcessManager: FakeProcessManager.any,
-      },
-    );
   });
 
   group('AndroidContext', () {

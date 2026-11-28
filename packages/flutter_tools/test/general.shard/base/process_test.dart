@@ -473,6 +473,20 @@ void main() {
       expect(logger.statusText, isNot(contains(analytics.getConsentMessage)));
     });
 
+    test('does not print analytics welcome message if logger.isMachine is true', () async {
+      setExitFunctionForTests((int exitCode) {});
+
+      final shutdownHooks = ShutdownHooks();
+      await exitWithHooks(
+        0,
+        analytics: analytics,
+        logger: _FakeMachineLogger(logger),
+        shutdownHooks: shutdownHooks,
+      );
+      expect(logger.statusText, isNot(contains(analytics.getConsentMessage)));
+      expect(analytics.shouldShowMessage, isTrue);
+    });
+
     test('[sync] exceptions thrown from a hook do not crash the tool', () async {
       setExitFunctionForTests((int exitCode) {});
 
@@ -813,4 +827,11 @@ class _ThrowsOnFlushIOSink extends MemoryIOSink {
   Future<Object?> flush() async {
     throw const SocketException('Write failed', osError: OSError('Broken pipe', 32));
   }
+}
+
+class _FakeMachineLogger extends DelegatingLogger {
+  _FakeMachineLogger(super.delegate);
+
+  @override
+  bool get isMachine => true;
 }

@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
+import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
 void main() {
@@ -162,6 +162,38 @@ void main() {
           'bin',
           'snapshots',
           'frontend_server_aot.dart.snapshot',
+        ),
+      );
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.vmserviceFramework,
+          platform: TargetPlatform.ios,
+          mode: BuildMode.profile,
+        ),
+        fileSystem.path.join(
+          'root',
+          'bin',
+          'cache',
+          'artifacts',
+          'engine',
+          'ios-profile',
+          'VMService.framework',
+        ),
+      );
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.vmserviceFramework,
+          platform: TargetPlatform.darwin,
+          mode: BuildMode.profile,
+        ),
+        fileSystem.path.join(
+          'root',
+          'bin',
+          'cache',
+          'artifacts',
+          'engine',
+          'darwin-x64-profile',
+          'VMService.framework',
         ),
       );
     });
@@ -506,6 +538,22 @@ void main() {
       expect(
         artifacts.getArtifactPath(Artifact.genSnapshot),
         fileSystem.path.join('/out', 'android_debug_unopt', 'universal', 'gen_snapshot'),
+      );
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.vmserviceFramework,
+          platform: TargetPlatform.ios,
+          mode: BuildMode.profile,
+        ),
+        fileSystem.path.join('/out', 'android_debug_unopt', 'VMService.framework'),
+      );
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.vmserviceFramework,
+          platform: TargetPlatform.darwin,
+          mode: BuildMode.profile,
+        ),
+        fileSystem.path.join('/out', 'android_debug_unopt', 'VMService.framework'),
       );
     });
 

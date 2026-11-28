@@ -27,6 +27,9 @@ import 'dart/package_map.dart';
 /// Opt-in changes to the dart compilers.
 const kDartCompilerExperiments = <String>[];
 
+/// Keeps absolute paths to the dart_plugin_registrant out of compiled output.
+const kDartPluginRegistrantScheme = 'org-dartlang-plugin-registrant';
+
 /// Whether DDC canary features are enabled.
 ///
 /// This is the single source of truth for DDC canary mode. It controls both
@@ -330,6 +333,11 @@ class KernelCompiler {
       _fileSystem.file(outputFilePath).createSync(recursive: true);
     }
 
+    // Check before adding the plugin registrant root below so it doesn't disable --depfile.
+    if (fileSystemRoots != null && fileSystemRoots.isNotEmpty) {
+      depFilePath = null;
+    }
+
     // Check if there's a Dart plugin registrant.
     // This is contained in the file `dart_plugin_registrant.dart` under `.dart_tools/flutter_build/`.
     final File? dartPluginRegistrant = checkDartPluginRegistry
@@ -339,14 +347,16 @@ class KernelCompiler {
     String? dartPluginRegistrantUri;
     if (dartPluginRegistrant != null && dartPluginRegistrant.existsSync()) {
       final Uri dartPluginRegistrantFileUri = dartPluginRegistrant.uri;
-      dartPluginRegistrantUri =
-          packageConfig.toPackageUriForWorkspace(dartPluginRegistrantFileUri)?.toString() ??
-          toMultiRootPath(
-            dartPluginRegistrantFileUri,
-            _fileSystemScheme,
-            _fileSystemRoots,
-            _fileSystem.path.separator == r'\',
-          );
+
+      dartPluginRegistrantUri = packageConfig
+          .toPackageUriForWorkspace(dartPluginRegistrantFileUri)
+          ?.toString();
+
+      if (dartPluginRegistrantUri == null) {
+        fileSystemScheme ??= kDartPluginRegistrantScheme;
+        fileSystemRoots = <String>[...?fileSystemRoots, dartPluginRegistrant.parent.path];
+        dartPluginRegistrantUri = '$fileSystemScheme:///${dartPluginRegistrant.basename}';
+      }
     }
 
     final List<String> commandToStartFrontendServer = _commandToStartFrontendServer(
@@ -375,11 +385,7 @@ class KernelCompiler {
           ],
           if (packagesPath != null) ...<String>['--packages', packagesPath],
           if (outputFilePath != null) ...<String>['--output-dill', outputFilePath],
-          if (depFilePath != null &&
-              (fileSystemRoots == null || fileSystemRoots.isEmpty)) ...<String>[
-            '--depfile',
-            depFilePath,
-          ],
+          if (depFilePath != null) ...<String>['--depfile', depFilePath],
           if (fileSystemRoots != null)
             for (final String root in fileSystemRoots) ...<String>['--filesystem-root', root],
           if (fileSystemScheme != null) ...<String>['--filesystem-scheme', fileSystemScheme],
