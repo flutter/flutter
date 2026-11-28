@@ -35,6 +35,8 @@ Trigger this skill by providing a merged PR number or URL and optionally the tar
    <DART_EXECUTABLE> .agents/skills/flutter-cherry-pick/scripts/flutter_cp.dart --pr <ORIGINAL_PR> --channel <CHANNEL> --action start
    ```
 2. **Evaluate Script Output:**
+   * The script requests reviews on the CP PR from the original PR's author and approvers (skipping you and bots). If it prints `WARNING: Could not request reviews`, mention those people on the CP PR instead.
+   * A manual CP PR starts with the cherry-pick template as its body, so it isn't closed for an empty description. You still fill in the template in Phase 4.
    * **Exit Code 0 (Success):**
      - The output will end with `SUCCESS:AUTOMATED:<CP_PR>` or `SUCCESS:MANUAL:<CP_PR>`.
      - Extract the `<CP_PR>` number.
