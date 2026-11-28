@@ -200,7 +200,6 @@ SKWASM_EXPORT SkPathBuilder* path_combine(SkPathOp operation,
   if (auto result = Op(path1->snapshot(), path2->snapshot(), operation)) {
     Skwasm::live_path_count++;
     SkPathBuilder* output = new SkPathBuilder(result.value());
-    output->setFillType(path1->fillType());
     return output;
   } else {
     return nullptr;

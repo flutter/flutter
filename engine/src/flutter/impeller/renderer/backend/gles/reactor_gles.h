@@ -7,6 +7,8 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
+#include <thread>
 #include <vector>
 
 #include "fml/closure.h"
@@ -186,7 +188,11 @@ class ReactorGLES {
   /// @brief      Collect a reactor handle.
   ///
   ///             This can be called on any thread. Even one that doesn't have
-  ///             an OpenGL context.
+  ///             an OpenGL context. When the calling thread can react, the GL
+  ///             object is deleted by a later reaction on that same thread, so
+  ///             the deletion is ordered after the commands its context issued
+  ///             against the object. A framebuffer is always deleted by the
+  ///             thread that created it, whichever thread collects it.
   ///
   /// @param[in]  handle  The reactor handle handle
   ///
@@ -281,6 +287,9 @@ class ReactorGLES {
     std::optional<GLStorage> name;
     std::optional<std::string> pending_debug_label;
     bool pending_collection = false;
+    /// The thread that collected this handle, when it could react. Only that
+    /// thread deletes the object, unless the handle has an owner thread.
+    std::optional<std::thread::id> collecting_thread;
     fml::ScopedCleanupClosure callback = {};
 
     LiveHandle() = default;

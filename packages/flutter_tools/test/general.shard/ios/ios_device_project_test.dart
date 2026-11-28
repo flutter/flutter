@@ -21,80 +21,52 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
-// FlutterProject still depends on context.
 void main() {
-  late FileSystem fileSystem;
-
-  // This setup is required to inject the context.
-  setUp(() {
-    fileSystem = MemoryFileSystem.test();
-  });
-
-  testUsingContext(
-    'IOSDevice.isSupportedForProject is true on module project',
-    () async {
-      fileSystem.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync(r'''
+  test('IOSDevice.isSupportedForProject is true on module project', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    fileSystem.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
 name: example
 flutter:
   module: {}
   ''');
-      final FlutterProject flutterProject = FlutterProject.fromDirectory(
-        fileSystem.currentDirectory,
-        logger: BufferLogger.test(),
-      );
-      final IOSDevice device = setUpIOSDevice(fileSystem);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(
+      fileSystem.currentDirectory,
+      logger: BufferLogger.test(),
+    );
+    final IOSDevice device = setUpIOSDevice(fileSystem);
 
-      expect(device.isSupportedForProject(flutterProject), true);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+    expect(device.isSupportedForProject(flutterProject), true);
+  });
 
-  testUsingContext(
-    'IOSDevice.isSupportedForProject is true with editable host app',
-    () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      fileSystem.file('pubspec.yaml').createSync();
-      fileSystem.directory('ios').createSync();
-      final FlutterProject flutterProject = FlutterProject.fromDirectory(
-        fileSystem.currentDirectory,
-        logger: BufferLogger.test(),
-      );
-      final IOSDevice device = setUpIOSDevice(fileSystem);
+  test('IOSDevice.isSupportedForProject is true with editable host app', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.directory('ios').createSync();
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(
+      fileSystem.currentDirectory,
+      logger: BufferLogger.test(),
+    );
+    final IOSDevice device = setUpIOSDevice(fileSystem);
 
-      expect(device.isSupportedForProject(flutterProject), true);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+    expect(device.isSupportedForProject(flutterProject), true);
+  });
 
-  testUsingContext(
-    'IOSDevice.isSupportedForProject is false with no host app and no module',
-    () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      fileSystem.file('pubspec.yaml').createSync();
-      final FlutterProject flutterProject = FlutterProject.fromDirectory(
-        fileSystem.currentDirectory,
-        logger: BufferLogger.test(),
-      );
-      final IOSDevice device = setUpIOSDevice(fileSystem);
+  test('IOSDevice.isSupportedForProject is false with no host app and no module', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    fileSystem.file('pubspec.yaml').createSync();
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(
+      fileSystem.currentDirectory,
+      logger: BufferLogger.test(),
+    );
+    final IOSDevice device = setUpIOSDevice(fileSystem);
 
-      expect(device.isSupportedForProject(flutterProject), false);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+    expect(device.isSupportedForProject(flutterProject), false);
+  });
 }
 
 IOSDevice setUpIOSDevice(FileSystem fileSystem) {
@@ -111,6 +83,7 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
   );
   return IOSDevice(
     'test',
+    featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
     toolContext: toolContext,
     xcode: FakeXcode(),
     iosDeploy: IOSDeploy(toolContext: toolContext),

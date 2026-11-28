@@ -4,7 +4,6 @@
 
 import 'dart:ffi' show Abi;
 
-import 'package:archive/archive.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' show HostPlatform;
 import 'package:meta/meta.dart';
@@ -534,58 +533,48 @@ class _WindowsUtils extends OperatingSystemUtils {
     return <File>[_fileSystem.file(lines.first.trim())];
   }
 
+  // `windir` is defined as `%SystemRoot%` on Windows, so prefer `SYSTEMROOT`
+  // and fall back to `WINDIR`, then the default install location if neither
+  // is set (`Platform.environment` lookups are case-insensitive on Windows).
+  late final String _tarPath = _fileSystem.path.join(
+    _platform.environment['SYSTEMROOT'] ?? _platform.environment['WINDIR'] ?? r'C:\Windows',
+    'System32',
+    'tar.exe',
+  );
+
+  // Windows 10 build 17063+ (version 1803) and Windows 11 include bsdtar in
+  // System32\tar.exe, which extracts both .zip and .tar.gz archives natively on
+  // disk without reading archives into Dart heap memory.
+  //
+  // Resolve System32\tar.exe explicitly to avoid invoking GNU tar from Git for
+  // Windows or MSYS2 if present earlier on PATH.
+  //
+  // bsdtar rejects entries with '..' components and strips leading '/', '\',
+  // and drive letters unless -P (--absolute-paths) is passed (zip-slip
+  // protection, see https://github.com/flutter/flutter/issues/185794). Never
+  // pass -P or --absolute-paths.
+  void _unpackWithTar(File file, Directory targetDirectory) {
+    if (!_processManager.canRun(_tarPath)) {
+      throwToolExit('Unable to find "$_tarPath". Unable to extract ${file.path}.');
+    }
+    if (!targetDirectory.existsSync()) {
+      targetDirectory.createSync(recursive: true);
+    }
+    _processUtils.runSync(
+      <String>[_tarPath, '-xf', file.path, '-C', targetDirectory.path],
+      throwOnError: true,
+      verboseExceptions: true,
+    );
+  }
+
   @override
   void unzip(File file, Directory targetDirectory) {
-    final Archive archive = ZipDecoder().decodeBytes(file.readAsBytesSync());
-    _unpackArchive(archive, targetDirectory);
+    _unpackWithTar(file, targetDirectory);
   }
 
   @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
-    final Archive archive = TarDecoder().decodeBytes(
-      GZipDecoder().decodeBytes(gzippedTarFile.readAsBytesSync()),
-    );
-    _unpackArchive(archive, targetDirectory);
-  }
-
-  void _unpackArchive(Archive archive, Directory targetDirectory) {
-    // The target directory does not change across entries, so compute its
-    // canonical form once instead of per file.
-    final String targetDirectoryCanonicalPath = _fileSystem.path.canonicalize(targetDirectory.path);
-    for (final ArchiveFile archiveFile in archive.files) {
-      // The archive package doesn't correctly set isFile.
-      if (!archiveFile.isFile || archiveFile.name.endsWith('/')) {
-        continue;
-      }
-
-      final File destFile = _fileSystem.file(
-        _fileSystem.path.canonicalize(
-          _fileSystem.path.join(targetDirectory.path, archiveFile.name),
-        ),
-      );
-
-      // Validate that the destFile is within the targetDirectory we want to
-      // extract to.
-      //
-      // See https://snyk.io/research/zip-slip-vulnerability for more context.
-      final String destinationFileCanonicalPath = _fileSystem.path.canonicalize(destFile.path);
-      final bool isAtRoot = _fileSystem.path.equals(
-        targetDirectoryCanonicalPath,
-        destinationFileCanonicalPath,
-      );
-      if (!isAtRoot &&
-          !_fileSystem.path.isWithin(targetDirectoryCanonicalPath, destinationFileCanonicalPath)) {
-        throw StateError(
-          'Tried to extract the file $destinationFileCanonicalPath outside of the '
-          'target directory $targetDirectoryCanonicalPath',
-        );
-      }
-
-      if (!destFile.parent.existsSync()) {
-        destFile.parent.createSync(recursive: true);
-      }
-      destFile.writeAsBytesSync(archiveFile.content as List<int>);
-    }
+    _unpackWithTar(gzippedTarFile, targetDirectory);
   }
 
   @override

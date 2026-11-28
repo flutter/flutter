@@ -6,7 +6,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
+import '../src/fakes.dart';
 
 void main() {
   final FileSystem fs = LocalFileSystem.test(signals: FakeSignals());
@@ -18,7 +18,7 @@ void main() {
   ];
 
   group('Flutter Tools Pub Workspace', () {
-    testWithoutContext('root pubspec.yaml declares all sub-packages in workspace', () {
+    test('root pubspec.yaml declares all sub-packages in workspace', () {
       final File pubspecFile = fs.file(fs.path.join(flutterToolsRoot, 'pubspec.yaml'));
       expect(pubspecFile.existsSync(), isTrue);
 
@@ -34,7 +34,7 @@ void main() {
       }
     });
 
-    testWithoutContext('member pubspec.yaml files declare workspace resolution', () {
+    test('member pubspec.yaml files declare workspace resolution', () {
       for (final member in expectedWorkspaceMembers) {
         final File memberPubspec = fs.file(fs.path.join(flutterToolsRoot, member, 'pubspec.yaml'));
         expect(

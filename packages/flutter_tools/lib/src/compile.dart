@@ -13,7 +13,6 @@ import 'package:uuid/uuid.dart';
 import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/config.dart';
-import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
@@ -27,6 +26,9 @@ import 'dart/package_map.dart';
 
 /// Opt-in changes to the dart compilers.
 const kDartCompilerExperiments = <String>[];
+
+/// Keeps absolute paths to the dart_plugin_registrant out of compiled output.
+const kDartPluginRegistrantScheme = 'org-dartlang-plugin-registrant';
 
 /// Whether DDC canary features are enabled.
 ///
@@ -331,6 +333,11 @@ class KernelCompiler {
       _fileSystem.file(outputFilePath).createSync(recursive: true);
     }
 
+    // Check before adding the plugin registrant root below so it doesn't disable --depfile.
+    if (fileSystemRoots != null && fileSystemRoots.isNotEmpty) {
+      depFilePath = null;
+    }
+
     // Check if there's a Dart plugin registrant.
     // This is contained in the file `dart_plugin_registrant.dart` under `.dart_tools/flutter_build/`.
     final File? dartPluginRegistrant = checkDartPluginRegistry
@@ -340,42 +347,24 @@ class KernelCompiler {
     String? dartPluginRegistrantUri;
     if (dartPluginRegistrant != null && dartPluginRegistrant.existsSync()) {
       final Uri dartPluginRegistrantFileUri = dartPluginRegistrant.uri;
-      dartPluginRegistrantUri =
-          packageConfig.toPackageUriForWorkspace(dartPluginRegistrantFileUri)?.toString() ??
-          toMultiRootPath(
-            dartPluginRegistrantFileUri,
-            _fileSystemScheme,
-            _fileSystemRoots,
-            _fileSystem.path.separator == r'\',
-          );
+
+      dartPluginRegistrantUri = packageConfig
+          .toPackageUriForWorkspace(dartPluginRegistrantFileUri)
+          ?.toString();
+
+      if (dartPluginRegistrantUri == null) {
+        fileSystemScheme ??= kDartPluginRegistrantScheme;
+        fileSystemRoots = <String>[...?fileSystemRoots, dartPluginRegistrant.parent.path];
+        dartPluginRegistrantUri = '$fileSystemScheme:///${dartPluginRegistrant.basename}';
+      }
     }
 
-    final List<String> commandToStartFrontendServer;
-    if (frontendServerStarterPath != null && frontendServerStarterPath.isNotEmpty) {
-      final String engineDartPath = _artifacts.getArtifactPath(
-        Artifact.engineDartBinary,
-        platform: platform,
-      );
-      if (!_processManager.canRun(engineDartPath)) {
-        throwToolExit('Unable to find Dart binary at $engineDartPath');
-      }
-      commandToStartFrontendServer = <String>[engineDartPath, frontendServerStarterPath];
-    } else {
-      final String engineDartAotRuntimePath = _artifacts.getArtifactPath(
-        Artifact.engineDartAotRuntime,
-        platform: platform,
-      );
-      if (!_processManager.canRun(engineDartAotRuntimePath)) {
-        throwToolExit('Unable to find dartaotruntime binary at $engineDartAotRuntimePath');
-      }
-      commandToStartFrontendServer = <String>[
-        engineDartAotRuntimePath,
-        _artifacts.getArtifactPath(
-          Artifact.frontendServerSnapshotForEngineDartSdk,
-          platform: platform,
-        ),
-      ];
-    }
+    final List<String> commandToStartFrontendServer = _commandToStartFrontendServer(
+      artifacts: _artifacts,
+      processManager: _processManager,
+      frontendServerStarterPath: frontendServerStarterPath,
+      platform: platform,
+    );
 
     final List<String> command =
         commandToStartFrontendServer +
@@ -396,11 +385,7 @@ class KernelCompiler {
           ],
           if (packagesPath != null) ...<String>['--packages', packagesPath],
           if (outputFilePath != null) ...<String>['--output-dill', outputFilePath],
-          if (depFilePath != null &&
-              (fileSystemRoots == null || fileSystemRoots.isEmpty)) ...<String>[
-            '--depfile',
-            depFilePath,
-          ],
+          if (depFilePath != null) ...<String>['--depfile', depFilePath],
           if (fileSystemRoots != null)
             for (final String root in fileSystemRoots) ...<String>['--filesystem-root', root],
           if (fileSystemScheme != null) ...<String>['--filesystem-scheme', fileSystemScheme],
@@ -436,6 +421,39 @@ class KernelCompiler {
     }
     return null;
   }
+}
+
+/// Returns the command used to start the frontend server.
+///
+/// When [frontendServerStarterPath] is provided, the frontend server is run
+/// from source with the Dart binary. Otherwise its AOT snapshot is run with
+/// `dartaotruntime`, which must be present in the Flutter cache. If it is not
+/// (for example because the cache is corrupted, partially downloaded, or
+/// quarantined by antivirus software), the tool exits with an actionable
+/// message instead of crashing when the process fails to start.
+List<String> _commandToStartFrontendServer({
+  required Artifacts artifacts,
+  required ProcessManager processManager,
+  required String? frontendServerStarterPath,
+  required TargetPlatform? platform,
+}) {
+  if (frontendServerStarterPath != null && frontendServerStarterPath.isNotEmpty) {
+    return <String>[
+      artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform),
+      frontendServerStarterPath,
+    ];
+  }
+  final String engineDartAotRuntimePath = artifacts.getArtifactPath(
+    Artifact.engineDartAotRuntime,
+    platform: platform,
+  );
+  if (!processManager.canRun(engineDartAotRuntimePath)) {
+    throwToolExit('Unable to find dartaotruntime binary at $engineDartAotRuntimePath');
+  }
+  return <String>[
+    engineDartAotRuntimePath,
+    artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk, platform: platform),
+  ];
 }
 
 /// Class that allows to serialize compilation requests to the compiler.
@@ -541,9 +559,6 @@ class _RejectRequest extends _CompilationRequest {
   @override
   Future<CompilerOutput?> _run(DefaultResidentCompiler compiler) async => compiler._reject();
 }
-
-ResidentCompilerFactory get residentCompilerFactory =>
-    context.get<ResidentCompilerFactory>() ?? const ResidentCompilerFactory();
 
 /// A factory for generating [ResidentCompiler] instances.
 class ResidentCompilerFactory {
@@ -958,21 +973,12 @@ class DefaultResidentCompiler implements ResidentCompiler {
     final TargetPlatform? platform = (targetModel == TargetModel.dartdevc)
         ? TargetPlatform.web_javascript
         : null;
-    late final List<String> commandToStartFrontendServer;
-    if (frontendServerStarterPath != null && frontendServerStarterPath!.isNotEmpty) {
-      commandToStartFrontendServer = <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform),
-        frontendServerStarterPath!,
-      ];
-    } else {
-      commandToStartFrontendServer = <String>[
-        artifacts.getArtifactPath(Artifact.engineDartAotRuntime, platform: platform),
-        artifacts.getArtifactPath(
-          Artifact.frontendServerSnapshotForEngineDartSdk,
-          platform: platform,
-        ),
-      ];
-    }
+    final List<String> commandToStartFrontendServer = _commandToStartFrontendServer(
+      artifacts: artifacts,
+      processManager: _processManager,
+      frontendServerStarterPath: frontendServerStarterPath,
+      platform: platform,
+    );
 
     final command = <String>[
       ...commandToStartFrontendServer,

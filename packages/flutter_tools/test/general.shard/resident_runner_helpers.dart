@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools/src/hook_runner.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
@@ -51,6 +52,7 @@ HotRunner createHotRunner(
   BuildTargets? buildTargets,
   FlutterHookRunner? dartBuilder,
   String? dillOutputPath,
+  FeatureFlags? featureFlags,
   bool hostIsIde = false,
   HotRunnerConfig? hotRunnerConfig,
   bool machine = false,
@@ -61,9 +63,10 @@ HotRunner createHotRunner(
   ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
   bool stayResident = true,
   StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-  ToolContext toolContext = const DelegatingToolContext(),
+  ToolContext? toolContext,
   Xcode? xcode,
 }) {
+  toolContext ??= FakeToolContext();
   final ToolContext(:Cache cache, :FileSystem fs, :Logger logger, :Platform platform) = toolContext;
   buildSystem ??= FlutterBuildSystem(fileSystem: fs, logger: logger, platform: platform);
 
@@ -89,6 +92,7 @@ HotRunner createHotRunner(
     buildSystem: buildSystem,
     buildTargets: buildTargets ?? const BuildTargetsImpl(),
     debuggingOptions: debuggingOptions,
+    featureFlags: featureFlags ?? TestFeatureFlags(),
     target: target,
     toolContext: toolContext,
     xcode: xcode,
@@ -121,12 +125,14 @@ ColdRunner createColdRunner(
   BuildSystem? buildSystem,
   BuildTargets? buildTargets,
   FlutterHookRunner? dartBuilder,
+  FeatureFlags? featureFlags,
   bool machine = false,
   bool stayResident = true,
-  ToolContext toolContext = const DelegatingToolContext(),
+  ToolContext? toolContext,
   bool traceStartup = false,
   Xcode? xcode,
 }) {
+  toolContext ??= FakeToolContext();
   final ToolContext(:Cache cache, :FileSystem fs, :Logger logger, :Platform platform) = toolContext;
   return ColdRunner(
     flutterDevices,
@@ -151,6 +157,7 @@ ColdRunner createColdRunner(
         buildSystem ?? FlutterBuildSystem(fileSystem: fs, logger: logger, platform: platform),
     buildTargets: buildTargets ?? const BuildTargetsImpl(),
     debuggingOptions: debuggingOptions,
+    featureFlags: featureFlags ?? TestFeatureFlags(),
     target: target,
     toolContext: toolContext,
     xcode: xcode,
@@ -313,7 +320,7 @@ class FakeDartDevelopmentServiceException implements DartDevelopmentServiceExcep
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice(super.device, {Future<Uri>? vmServiceUri})
     : super(
-        toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
+        toolContext: FakeToolContext(artifacts: Artifacts.test()),
         generator: FakeResidentCompiler(),
         targetPlatform: .unsupported,
         buildInfo: BuildInfo.debug,
@@ -444,7 +451,7 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
     this.fakeDevFS, {
     Future<Uri>? vmServiceUri,
   }) : super(
-         toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
+         toolContext: FakeToolContext(artifacts: Artifacts.test()),
          targetPlatform: .unsupported,
          buildInfo: buildInfo,
          generator: residentCompiler,

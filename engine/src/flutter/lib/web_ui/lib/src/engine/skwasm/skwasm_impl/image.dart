@@ -20,8 +20,14 @@ class SkwasmImage implements BackendImage {
   /// The native pointer/handle to the image inside the Skwasm instance.
   final ImageHandle handle;
 
+  bool _isDisposed = false;
+
   @override
   void dispose() {
+    if (_isDisposed) {
+      return;
+    }
+    _isDisposed = true;
     imageDispose(handle);
   }
 

@@ -82,7 +82,7 @@ void main() {
         migration = CmakeAndroid16kPagesMigration(project, bufferLogger);
       });
 
-      testWithoutContext('do nothing when files missing', () async {
+      test('do nothing when files missing', () async {
         cmakeFile.deleteSync();
         await migration.migrate();
         expect(
@@ -91,13 +91,13 @@ void main() {
         );
       });
 
-      testWithoutContext('migrate', () async {
+      test('migrate', () async {
         cmakeFile.writeAsStringSync(_sampleCmakeListsTxtUnmigrated);
         await migration.migrate();
         expect(cmakeFile.readAsStringSync(), _sampleCmakeListsTxtMigrated);
       });
 
-      testWithoutContext('do nothing when already migrated', () async {
+      test('do nothing when already migrated', () async {
         expect(cmakeFile.readAsStringSync(), _sampleCmakeListsTxtMigrated);
         await migration.migrate();
         expect(cmakeFile.readAsStringSync(), _sampleCmakeListsTxtMigrated);

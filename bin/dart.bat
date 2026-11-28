@@ -15,6 +15,17 @@ SETLOCAL
 
 FOR %%i IN ("%~dp0..") DO SET FLUTTER_ROOT=%%~fi
 
+REM If available, add location of bundled mingit to PATH
+SET mingit_path=%FLUTTER_ROOT%\bin\mingit\cmd
+IF EXIST "%mingit_path%" SET PATH=%PATH%;%mingit_path%
+
+REM Test if Git is available on the host
+WHERE /Q git
+IF "%ERRORLEVEL%" NEQ "0" (
+  ECHO Error: Unable to find git in your PATH.
+  EXIT /B 1
+)
+
 REM Detect which PowerShell executable is available on the host
 REM PowerShell version <= 5: PowerShell.exe
 REM PowerShell version >= 6: pwsh.exe

@@ -272,6 +272,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
         platform: toolContext.platform,
       ),
       buildTargets: const NoOpBuildTargets(),
+      featureFlags: featureFlags,
       toolContext: toolContext,
     );
 

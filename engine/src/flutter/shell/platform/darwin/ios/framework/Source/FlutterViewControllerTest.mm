@@ -340,6 +340,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 @property(nonatomic, strong) FlutterVSyncClient* keyboardAnimationVSyncClient;
 @property(nonatomic, strong) FlutterVSyncClient* touchRateCorrectionVSyncClient;
 @property(nonatomic, assign) BOOL awokenFromNib;
+@property(nonatomic, strong) UIScrollView* scrollView;
 
 - (void)surfaceUpdated:(BOOL)appeared;
 - (void)performOrientationUpdate:(UIInterfaceOrientationMask)new_preferences;
@@ -501,26 +502,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterKeyboardInsetManager* manager =
       (FlutterKeyboardInsetManager*)viewController.keyboardInsetManager;
 
-  id viewClassMock = OCMClassMock([UIView class]);
-  OCMStub([viewClassMock animateWithDuration:0.25 animations:[OCMArg any] completion:[OCMArg any]])
-      .andDo(^(NSInvocation* invocation) {
-        // -getArgument:atIndex: does a raw memcpy without retaining; declare the block locals
-        // __unsafe_unretained so ARC doesn't over-release the invocation-owned blocks.
-        __unsafe_unretained void (^animations)(void);
-        [invocation getArgument:&animations atIndex:3];
-        if (animations) {
-          animations();
-        }
-        __unsafe_unretained void (^completion)(BOOL finished);
-        [invocation getArgument:&completion atIndex:4];
-        if (completion) {
-          completion(YES);
-        }
-      });
-
   // Pre-seed a spring animation. startKeyBoardAnimation: must call
   // setUpKeyboardSpringAnimationIfNeeded:, which clears it back to nil since the UIView animation
-  // is mocked out and therefore produces no real "position" CASpringAnimation to derive one from.
+  // produces no "position" CASpringAnimation to derive one from.
   manager.targetViewInsetBottom = 320;
   manager.keyboardSpringAnimation = [[SpringAnimation alloc] initWithStiffness:100
                                                                        damping:10
@@ -529,11 +513,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                      fromValue:0
                                                                        toValue:320];
   XCTAssertNotNil(manager.keyboardSpringAnimation);
-
   [manager startKeyBoardAnimation:0.25];
-
   XCTAssertNil(manager.keyboardSpringAnimation);
-  [viewClassMock stopMocking];
 }
 
 - (void)testSetupKeyboardSpringAnimationIfNeeded {
@@ -1639,6 +1620,18 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   }
   XCTAssertNil(weakViewController);
   XCTAssertNil(weakView);
+}
+
+- (void)testLoadViewHidesScrollEdgeEffectsOnScrollToTopHelper {
+  if (@available(iOS 26.0, *)) {
+    FlutterViewController* viewController =
+        [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
+    [viewController loadView];
+    XCTAssertTrue(viewController.scrollView.topEdgeEffect.hidden);
+    XCTAssertTrue(viewController.scrollView.bottomEdgeEffect.hidden);
+    XCTAssertTrue(viewController.scrollView.leftEdgeEffect.hidden);
+    XCTAssertTrue(viewController.scrollView.rightEdgeEffect.hidden);
+  }
 }
 
 #pragma mark - Platform Brightness

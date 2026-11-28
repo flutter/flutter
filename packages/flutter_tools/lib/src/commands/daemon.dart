@@ -45,6 +45,7 @@ import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../vmservice.dart';
+import '../web/web_debug_config.dart';
 import '../web/web_runner.dart';
 
 const protocolVersion = '0.6.1';
@@ -131,7 +132,7 @@ class DaemonCommand extends FlutterCommand {
         buildTargets: _buildTargets,
         deviceManager: _deviceManager,
         devtoolsLauncher: _devtoolsLauncher,
-        featureFlags: featureFlags,
+        featureFlags: runner!.featureFlags,
         flutterHookRunner: _flutterHookRunner,
         java: _java,
         logger: StdoutLogger(
@@ -161,7 +162,7 @@ class DaemonCommand extends FlutterCommand {
       buildTargets: _buildTargets,
       deviceManager: _deviceManager,
       devtoolsLauncher: _devtoolsLauncher,
-      featureFlags: featureFlags,
+      featureFlags: runner!.featureFlags,
       flutterHookRunner: _flutterHookRunner,
       java: _java,
       notifyingLogger: asLogger<NotifyingLogger>(logger),
@@ -334,6 +335,7 @@ class Daemon {
         assetBundleFactory: assetBundleFactory,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        featureFlags: featureFlags,
         flutterHookRunner: flutterHookRunner,
         webRunnerFactory: webRunnerFactory,
         xcode: xcode,
@@ -866,6 +868,7 @@ class AppDomain extends Domain {
     required this._assetBundleFactory,
     required this._buildSystem,
     required this._buildTargets,
+    required this._featureFlags,
     required this._xcode,
     this._flutterHookRunner,
     this._webRunnerFactory,
@@ -881,6 +884,7 @@ class AppDomain extends Domain {
   final AssetBundleFactory _assetBundleFactory;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
+  final FeatureFlags _featureFlags;
   final FlutterHookRunner? _flutterHookRunner;
   final WebRunnerFactory? _webRunnerFactory;
   final Xcode? _xcode;
@@ -900,7 +904,6 @@ class AppDomain extends Domain {
     String? route,
     DebuggingOptions options,
     bool enableHotReload, {
-    Map<String, String> webDefines = const <String, String>{},
     File? applicationBinary,
     required bool trackWidgetCreation,
     String? projectRootPath,
@@ -944,6 +947,7 @@ class AppDomain extends Domain {
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
         debuggingOptions: options,
+        featureFlags: _featureFlags,
         flutterHookRunner: _flutterHookRunner,
         flutterProject: flutterProject,
         machine: machine,
@@ -951,7 +955,6 @@ class AppDomain extends Domain {
         target: target,
         toolContext: toolContext,
         urlTunneller: options.webConfig.enableExposeUrl ? daemon.daemonDomain.exposeUrl : null,
-        webDefines: webDefines,
       );
     } else if (enableHotReload) {
       runner = HotRunner(
@@ -965,6 +968,7 @@ class AppDomain extends Domain {
         dartBuilder: _flutterHookRunner,
         debuggingOptions: options,
         dillOutputPath: dillOutputPath,
+        featureFlags: _featureFlags,
         hostIsIde: true,
         machine: machine,
         projectRootPath: projectRootPath,
@@ -983,6 +987,7 @@ class AppDomain extends Domain {
         buildTargets: _buildTargets,
         dartBuilder: _flutterHookRunner,
         debuggingOptions: options,
+        featureFlags: _featureFlags,
         machine: machine,
         target: target,
         toolContext: toolContext,
@@ -1495,6 +1500,7 @@ class DeviceDomain extends Domain {
         castStringKeyedMap(args['debuggingOptions'])!,
         // We are using prebuilts, build info does not matter here.
         BuildInfo.dummy,
+        platformOptionParsers: const <PlatformDebuggingOptionsParser>[WebDebugConfig.tryFromJson],
       ),
       mainPath: _getStringArg(args, 'mainPath'),
       route: _getStringArg(args, 'route'),

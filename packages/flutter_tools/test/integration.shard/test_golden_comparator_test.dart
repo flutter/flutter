@@ -126,7 +126,7 @@ void main() {
     return comparator;
   }
 
-  testWithoutContext('successful comparison is successful', () async {
+  test('successful comparison is successful', () async {
     final TestGoldenComparator comparator = createComparator();
     final TestGoldenComparison result = await comparator.compare(
       Uri(path: testProject.testFilePath),
@@ -137,7 +137,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/174267.
-  testWithoutContext('failed comparison is failed but not crashed', () async {
+  test('failed comparison is failed but not crashed', () async {
     final TestGoldenComparator comparator = createComparator();
     final TestGoldenComparison result = await comparator.compare(
       Uri(path: testProject.testFilePath),

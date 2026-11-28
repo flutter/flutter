@@ -3480,6 +3480,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         _attributedIncreasedValue != config.attributedIncreasedValue ||
         _attributedDecreasedValue != config.attributedDecreasedValue ||
         _tooltip != config.tooltip ||
+        _identifier != config.identifier ||
         _flags != config._flags ||
         _textDirection != config.textDirection ||
         _sortKey != config._sortKey ||

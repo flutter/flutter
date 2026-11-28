@@ -372,6 +372,7 @@ class DriveCommand extends RunCommandBase {
       buildTargets: buildTargets,
       dartSdkPath: toolContext.artifacts.getArtifactPath(.engineDartBinary),
       devtoolsLauncher: _devtoolsLauncher,
+      featureFlags: runner!.featureFlags,
       flutterHookRunner: _flutterHookRunner,
       toolContext: toolContext,
       webRunnerFactory: _webRunnerFactory,
@@ -408,7 +409,6 @@ class DriveCommand extends RunCommandBase {
             if (traceStartup) 'trace-startup': traceStartup,
             if (web) 'no-launch-chrome': true,
           },
-          webDefines: extractWebDefines(),
         );
       } else {
         final Uri? uri = Uri.tryParse(useExistingApp);
