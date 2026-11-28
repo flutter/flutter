@@ -1025,7 +1025,13 @@ class SelectableRegionState extends State<SelectableRegion>
   }
 
   void _handleTouchLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    _selectEndTo(offset: details.globalPosition, textGranularity: TextGranularity.word);
+    // The update is continuous so the selection keeps auto scrolling when the
+    // drag position rests at the edge of a scrollable.
+    _selectEndTo(
+      offset: details.globalPosition,
+      continuous: true,
+      textGranularity: TextGranularity.word,
+    );
     _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
     _updateSelectedContentIfNeeded();
   }
@@ -1130,6 +1136,7 @@ class SelectableRegionState extends State<SelectableRegion>
           SelectionEdgeUpdateEvent.forEnd(
             globalPosition: _selectionEndPosition!,
             granularity: textGranularity,
+            deviceKind: _lastPointerDeviceKind,
           ),
         ) ==
         SelectionResult.pending) {
@@ -1184,6 +1191,7 @@ class SelectableRegionState extends State<SelectableRegion>
           SelectionEdgeUpdateEvent.forStart(
             globalPosition: _selectionStartPosition!,
             granularity: textGranularity,
+            deviceKind: _lastPointerDeviceKind,
           ),
         ) ==
         SelectionResult.pending) {
@@ -1437,7 +1445,11 @@ class SelectableRegionState extends State<SelectableRegion>
   }) {
     if (!continuous) {
       _selectable?.dispatchSelectionEvent(
-        SelectionEdgeUpdateEvent.forEnd(globalPosition: offset, granularity: textGranularity),
+        SelectionEdgeUpdateEvent.forEnd(
+          globalPosition: offset,
+          granularity: textGranularity,
+          deviceKind: _lastPointerDeviceKind,
+        ),
       );
       return;
     }
@@ -1484,7 +1496,11 @@ class SelectableRegionState extends State<SelectableRegion>
   }) {
     if (!continuous) {
       _selectable?.dispatchSelectionEvent(
-        SelectionEdgeUpdateEvent.forStart(globalPosition: offset, granularity: textGranularity),
+        SelectionEdgeUpdateEvent.forStart(
+          globalPosition: offset,
+          granularity: textGranularity,
+          deviceKind: _lastPointerDeviceKind,
+        ),
       );
       return;
     }
