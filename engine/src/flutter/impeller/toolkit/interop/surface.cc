@@ -4,6 +4,7 @@
 
 #include "impeller/toolkit/interop/surface.h"
 
+#include "flutter/fml/trace_event.h"
 #include "impeller/base/validation.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
@@ -41,6 +42,7 @@ bool Surface::DrawDisplayList(const DisplayList& dl) const {
 }
 
 bool Surface::Present() const {
+  TRACE_EVENT0("impeller", "Surface::Present");
   if (!IsValid()) {
     return false;
   }
