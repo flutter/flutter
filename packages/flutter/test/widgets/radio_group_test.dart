@@ -304,6 +304,198 @@ void main() {
     expect(textFieldAfter.hasFocus, isFalse);
   });
 
+  group('Radio group Tab stop', () {
+    // Builds radios 0, 1 and 2 in a radio group whose value is 1, between two
+    // text fields. Checks that Tab and Shift+Tab stop once in the group, on the
+    // radio with the value [expected], and that moving focus doesn't change the
+    // selection.
+    Future<void> expectSingleTabStop(
+      WidgetTester tester, {
+      required int expected,
+      bool excludeSelected = false,
+      int? nested,
+      int? inSkippedScope,
+    }) async {
+      final before = FocusNode();
+      addTearDown(before.dispose);
+      final after = FocusNode();
+      addTearDown(after.dispose);
+      final radios = <FocusNode>[FocusNode(), FocusNode(), FocusNode()];
+      for (final radio in radios) {
+        addTearDown(radio.dispose);
+      }
+
+      Widget buildRadio(int value) {
+        Widget radio = TestRadio<int>(value: value, focusNode: radios[value]);
+        if (value == 1 && excludeSelected) {
+          radio = ExcludeFocus(child: radio);
+        }
+        if (value == nested) {
+          radio = FocusTraversalGroup(child: radio);
+        }
+        if (value == inSkippedScope) {
+          radio = FocusScope(skipTraversal: true, child: radio);
+        }
+        return radio;
+      }
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Column(
+            children: <Widget>[
+              TestTextField(focusNode: before),
+              RadioGroup<int>(
+                groupValue: 1,
+                onChanged: (int? value) => fail('Tab traversal changed the selection to $value'),
+                child: Column(children: <Widget>[for (var i = 0; i < 3; i++) buildRadio(i)]),
+              ),
+              TestTextField(focusNode: after),
+            ],
+          ),
+        ),
+      );
+
+      before.requestFocus();
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(radios[expected].hasPrimaryFocus, isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(after.hasPrimaryFocus, isTrue);
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(radios[expected].hasPrimaryFocus, isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+      await tester.pump();
+      expect(before.hasPrimaryFocus, isTrue);
+    }
+
+    testWidgets('falls back to the first radio when the selected radio cannot take focus', (
+      WidgetTester tester,
+    ) async {
+      await expectSingleTabStop(tester, excludeSelected: true, expected: 0);
+    });
+
+    testWidgets('stays on the selected radio inside a nested FocusTraversalGroup', (
+      WidgetTester tester,
+    ) async {
+      await expectSingleTabStop(tester, nested: 1, expected: 1);
+    });
+
+    testWidgets('is the radio in a nested FocusTraversalGroup before the selected radio', (
+      WidgetTester tester,
+    ) async {
+      await expectSingleTabStop(tester, excludeSelected: true, nested: 0, expected: 0);
+    });
+
+    testWidgets('is the radio in a nested FocusTraversalGroup after the selected radio', (
+      WidgetTester tester,
+    ) async {
+      await expectSingleTabStop(tester, excludeSelected: true, nested: 2, expected: 2);
+    });
+
+    testWidgets('skips a radio in a FocusScope that traversal skips', (WidgetTester tester) async {
+      await expectSingleTabStop(tester, excludeSelected: true, inSkippedScope: 0, expected: 2);
+    });
+
+    testWidgets('is the radio in a nested FocusScope when the selected radio cannot take focus', (
+      WidgetTester tester,
+    ) async {
+      final before = FocusNode();
+      addTearDown(before.dispose);
+      final after = FocusNode();
+      addTearDown(after.dispose);
+      final radios = <FocusNode>[FocusNode(), FocusNode(), FocusNode()];
+      for (final radio in radios) {
+        addTearDown(radio.dispose);
+      }
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Column(
+            children: <Widget>[
+              TestTextField(focusNode: before),
+              RadioGroup<int>(
+                groupValue: 1,
+                onChanged: (int? value) => fail('Tab traversal changed the selection to $value'),
+                child: Column(
+                  children: <Widget>[
+                    TestRadio<int>(value: 0, focusNode: radios[0]),
+                    ExcludeFocus(child: TestRadio<int>(value: 1, focusNode: radios[1])),
+                    FocusScope(child: TestRadio<int>(value: 2, focusNode: radios[2])),
+                  ],
+                ),
+              ),
+              TestTextField(focusNode: after),
+            ],
+          ),
+        ),
+      );
+
+      before.requestFocus();
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(radios[2].hasPrimaryFocus, isTrue);
+
+      after.requestFocus();
+      await tester.pump();
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+      await tester.pump();
+      expect(radios[2].hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets('stays on the selected radio when traversal starts inside a skipped FocusScope', (
+      WidgetTester tester,
+    ) async {
+      final inside = FocusNode();
+      addTearDown(inside.dispose);
+      final radios = <FocusNode>[FocusNode(), FocusNode()];
+      for (final radio in radios) {
+        addTearDown(radio.dispose);
+      }
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: RadioGroup<int>(
+            groupValue: 1,
+            onChanged: (int? value) => fail('Tab traversal changed the selection to $value'),
+            child: FocusScope(
+              skipTraversal: true,
+              child: Column(
+                children: <Widget>[
+                  TestRadio<int>(value: 0, focusNode: radios[0]),
+                  TestRadio<int>(value: 1, focusNode: radios[1]),
+                  TestTextField(focusNode: inside),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      inside.requestFocus();
+      await tester.pump();
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+      await tester.pump();
+      expect(radios[1].hasPrimaryFocus, isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(inside.hasPrimaryFocus, isTrue);
+    });
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/175258.
   testWidgets('Radio group throws on multiple selection', (WidgetTester tester) async {
     final key1 = UniqueKey();

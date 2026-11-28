@@ -34,10 +34,13 @@ import 'shortcuts.dart';
 /// radio buttons that matches [APG](https://www.w3.org/WAI/ARIA/apg/patterns/radio/).
 ///
 /// The keyboard behaviors are:
-/// * Tab and Shift+Tab: moves focus into and out of radio group. When focus
-///   moves into a radio group and a radio button is select, focus is set on
-///   selected button. Otherwise, it focus the first radio button in reading
-///   order.
+/// * Tab and Shift+Tab move focus into and out of the group. When focus moves
+///   into the group and a radio button is selected, focus is set on the
+///   selected button. If no radio button is selected, or Tab can't reach the
+///   selected one (for example, because it is disabled in the default
+///   navigation mode), focus is set on the first radio button in reading order
+///   that Tab can reach. Radio buttons inside a nested [FocusTraversalGroup] or
+///   [FocusScope] follow that group's or scope's traversal policy instead.
 /// * Space: toggle the selection on the focused radio button.
 /// * Right and down arrow key: move selection to next radio button in the group
 ///   in reading order.
@@ -340,12 +343,12 @@ mixin RadioClient<T> {
 /// it skips nodes of unselected radio button if there is one selected radio
 /// button.
 ///
-/// If none of the radio is selected, this defaults to
-/// [ReadingOrderTraversalPolicy] for all nodes.
-///
-/// This policy is to ensure when tabbing into a radio group, it will only focus
-/// the current selected radio button and prevent focus from reaching unselected
-/// ones.
+/// If none of the radio is selected, this keeps only the first radio in reading
+/// order. If Tab can't reach the selected radio (for example, because it is
+/// disabled), this keeps only the first of this group's own radios in reading
+/// order that Tab can reach. It defers instead to a radio that Tab can reach
+/// inside a nested focus traversal group or focus scope among the nodes being
+/// sorted, whose own policy decides whether that radio is a Tab stop.
 class _SkipUnselectedRadioPolicy<T> extends ReadingOrderTraversalPolicy {
   _SkipUnselectedRadioPolicy(this.radios, this.groupValue);
   final Set<RadioClient<T>> radios;
@@ -353,10 +356,51 @@ class _SkipUnselectedRadioPolicy<T> extends ReadingOrderTraversalPolicy {
 
   bool _radioSelected(RadioClient<T> radio) => radio.radioValue == groupValue;
 
+  /// Whether focus traversal from the current node can reach the node.
+  ///
+  /// Besides the node's own state, a focus scope that skips traversal hides the
+  /// nodes inside it from traversal that starts outside it.
+  static bool _isTraversalCandidate(FocusNode node, FocusNode currentNode) {
+    if (node == currentNode) {
+      return true;
+    }
+    if (node.parent == null || !node.canRequestFocus || node.skipTraversal) {
+      return false;
+    }
+    for (final FocusNode ancestor in node.ancestors) {
+      if (ancestor is FocusScopeNode &&
+          ancestor.skipTraversal &&
+          ancestor != currentNode &&
+          !currentNode.ancestors.contains(ancestor)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   @override
   Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants, FocusNode currentNode) {
     final Iterable<FocusNode> nodesInReadOrder = super.sortDescendants(descendants, currentNode);
     RadioClient<T>? selected = radios.firstWhereOrNull(_radioSelected);
+
+    // If Tab can't reach the selected radio, for example because it is
+    // disabled, treat the group as if none of the radios are selected, so that
+    // the first of its own radios becomes the Tab stop. The descendants hold
+    // only this group's own members. If Tab can reach a radio inside a nested
+    // focus traversal group or focus scope that is one of these members
+    // instead, defer to that group's or scope's policy.
+    if (selected != null && !_isTraversalCandidate(selected.focusNode, currentNode)) {
+      final Set<FocusNode> members = descendants.toSet();
+      final bool nestedCandidate = radios.any(
+        (RadioClient<T> radio) =>
+            !members.contains(radio.focusNode) &&
+            radio.focusNode.ancestors.any(members.contains) &&
+            _isTraversalCandidate(radio.focusNode, currentNode),
+      );
+      if (!nestedCandidate) {
+        selected = null;
+      }
+    }
 
     if (selected == null) {
       // None of the radio are selected. Select the first radio in read order.
