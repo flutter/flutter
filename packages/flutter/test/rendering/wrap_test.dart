@@ -180,6 +180,44 @@ void main() {
     expect(renderWrap.computeMinIntrinsicWidth(80), 80);
   });
 
+  test('Horizontal Wrap max intrinsic width includes spacing', () {
+    final children = <RenderBox>[
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints.tightFor(width: 25, height: 25),
+      ),
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints.tightFor(width: 100, height: 25),
+      ),
+    ];
+
+    final renderWrap = RenderWrap();
+    children.forEach(renderWrap.add);
+    renderWrap.spacing = 8;
+    renderWrap.direction = Axis.horizontal;
+
+    // Without spacing this would be 125; with spacing it must be 133 so
+    // IntrinsicWidth(stepWidth: 56) can expand to the next menu width step.
+    expect(renderWrap.computeMaxIntrinsicWidth(double.infinity), 133);
+  });
+
+  test('Vertical Wrap max intrinsic height includes spacing', () {
+    final children = <RenderBox>[
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints.tightFor(width: 25, height: 25),
+      ),
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints.tightFor(width: 25, height: 100),
+      ),
+    ];
+
+    final renderWrap = RenderWrap();
+    children.forEach(renderWrap.add);
+    renderWrap.spacing = 8;
+    renderWrap.direction = Axis.vertical;
+
+    expect(renderWrap.computeMaxIntrinsicHeight(double.infinity), 133);
+  });
+
   test('Wrap respects clipBehavior', () {
     const viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     final context = TestClipPaintingContext();
