@@ -1168,6 +1168,17 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     _platformDispatcher.updateSemantics(update);
   }
 
+  /// Forwards [PlatformDispatcher.setSemanticsTreeEnabled] to the wrapped
+  /// dispatcher.
+  ///
+  /// An explicit override is required so the call is not swallowed by
+  /// [noSuchMethod], which returns null as a grace-time fallback for new
+  /// dart:ui methods during engine rolls.
+  @override
+  void setSemanticsTreeEnabled(bool enabled) {
+    _platformDispatcher.setSemanticsTreeEnabled(enabled);
+  }
+
   /// This gives us some grace time when the dart:ui side adds something to
   /// [PlatformDispatcher], and makes things easier when we do rolls to give
   /// us time to catch up.
