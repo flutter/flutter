@@ -24,6 +24,7 @@ FLUTTER_ASSERT_ARC
 @property(nonatomic, copy) NSString* autofillId;
 @property(nonatomic, assign) BOOL preventCursorDismissWhenResignFirstResponder;
 - (void)setEditableTransform:(NSArray*)matrix;
+- (void)setText:(nullable NSString*)text;
 - (void)setTextInputClient:(int)client;
 - (void)setTextInputState:(NSDictionary*)state;
 - (void)setMarkedRect:(CGRect)markedRect;
@@ -612,6 +613,20 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
                                              toPosition:inputView.endOfDocument];
   NSString* substring = [inputView textInRange:range];
   XCTAssertEqualObjects(substring, @"Á");
+}
+
+- (void)testSetTextReplacesEntireDocumentRegardlessOfSelection {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [inputView insertText:@"previous"];
+  inputView.selectedTextRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(2, 2)];
+  FlutterTextInputView* mockInputView = OCMPartialMock(inputView);
+
+  [inputView setText:@"123456"];
+
+  OCMVerify([mockInputView replaceRange:[OCMArg checkWithBlock:^BOOL(FlutterTextRange* range) {
+                             return NSEqualRanges(range.range, NSMakeRange(0, 8));
+                           }]
+                               withText:@"123456"]);
 }
 
 - (void)testTextInRangeAcceptsNSNotFoundLocationGracefully {

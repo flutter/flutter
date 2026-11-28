@@ -2377,6 +2377,17 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   return self.text.length > 0;
 }
 
+// Workaround for https://github.com/flutter/flutter/issues/176872.
+// On affected iOS versions, UIKit can commit the SMS code as marked text
+// before delivering the full code through AutoFill. UIKit calls setText:
+// for that delivery when available. Its insertText: fallback appends a
+// second copy when the candidate has already been committed.
+- (void)setText:(nullable NSString*)text {
+  UITextRange* document = [self textRangeFromPosition:self.beginningOfDocument
+                                           toPosition:self.endOfDocument];
+  [self replaceRange:document withText:text ?: @""];
+}
+
 - (void)insertText:(NSString*)text {
   if (self.temporarilyDeletedComposedCharacter.length > 0 && text.length == 1 && !text.UTF8String &&
       [text characterAtIndex:0] == [self.temporarilyDeletedComposedCharacter characterAtIndex:0]) {
