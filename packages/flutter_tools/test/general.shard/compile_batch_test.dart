@@ -484,7 +484,7 @@ void main() {
     expect((await output)?.outputFilename, '');
   });
 
-  for (final style in <FileSystemStyle>[FileSystemStyle.posix, FileSystemStyle.windows]) {
+  for (final style in [FileSystemStyle.posix, FileSystemStyle.windows]) {
     final styleName = style == FileSystemStyle.windows ? 'windows' : 'posix';
 
     test(
@@ -523,12 +523,12 @@ void main() {
               '--filesystem-root',
               fileSystemRoot,
               '--filesystem-scheme',
-              'org-dartlang-plugin-registrant',
+              kDartPluginRegistrantScheme,
               '--source',
-              'org-dartlang-plugin-registrant:///dart_plugin_registrant.dart',
+              '$kDartPluginRegistrantScheme:///dart_plugin_registrant.dart',
               '--source',
               'package:flutter/src/dart_plugin_registrant.dart',
-              '-Dflutter.dart_plugin_registrant=org-dartlang-plugin-registrant:///dart_plugin_registrant.dart',
+              '-Dflutter.dart_plugin_registrant=$kDartPluginRegistrantScheme:///dart_plugin_registrant.dart',
               '--verbosity=error',
               '--native-assets-only',
             ],
@@ -592,12 +592,12 @@ void main() {
             '--filesystem-root',
             '.dart_tools/flutter_build',
             '--filesystem-scheme',
-            'org-dartlang-plugin-registrant',
+            kDartPluginRegistrantScheme,
             '--source',
-            'org-dartlang-plugin-registrant:///dart_plugin_registrant.dart',
+            '$kDartPluginRegistrantScheme:///dart_plugin_registrant.dart',
             '--source',
             'package:flutter/src/dart_plugin_registrant.dart',
-            '-Dflutter.dart_plugin_registrant=org-dartlang-plugin-registrant:///dart_plugin_registrant.dart',
+            '-Dflutter.dart_plugin_registrant=$kDartPluginRegistrantScheme:///dart_plugin_registrant.dart',
             '--verbosity=error',
             'scheme:///main.dart',
           ],
