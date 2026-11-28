@@ -15676,6 +15676,51 @@ void main() {
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/111054.
+  testWidgets('context menu hides when the platform asks it to dismiss', (
+    WidgetTester tester,
+  ) async {
+    controller.text = 'How are you';
+    final toolbarKey = UniqueKey();
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: EditableText(
+          controller: controller,
+          backgroundCursorColor: Colors.grey,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: testTextSelectionHandleControls,
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return SizedBox.shrink(key: toolbarKey);
+          },
+        ),
+      ),
+    );
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pump();
+    expect(state.showToolbar(), isTrue);
+    await tester.pump();
+    expect(find.byKey(toolbarKey), findsOneWidget);
+
+    // Opening the platform menu bar or dragging the window sends this.
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(
+      const MethodCall('ContextMenu.onDismissContextMenu'),
+    );
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/platform',
+      message,
+      (_) {},
+    );
+    await tester.pump();
+
+    expect(find.byKey(toolbarKey), findsNothing);
+    expect(focusNode.hasFocus, isTrue);
+  }, skip: isContextMenuProvidedByPlatform);
+
   testWidgets(
     'contextMenuBuilder can be updated to display a new menu',
     (WidgetTester tester) async {

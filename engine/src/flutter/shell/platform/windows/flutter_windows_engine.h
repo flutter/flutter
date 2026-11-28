@@ -303,6 +303,9 @@ class FlutterWindowsEngine {
                               LPARAM lparam,
                               AppExitType exit_type);
 
+  // Asks the framework to close an open context menu.
+  void DismissContextMenu();
+
   // Called when a WM_DWMCOMPOSITIONCHANGED message is received.
   void OnDwmCompositionChanged();
 

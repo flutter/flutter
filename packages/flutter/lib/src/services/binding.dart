@@ -269,6 +269,15 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     }
   }
 
+  /// Called when the embedder asks Flutter to dismiss an open context menu.
+  ///
+  /// Desktop embedders send `ContextMenu.onDismissContextMenu` when the user
+  /// opens a platform menu or starts dragging a window. Those interactions do
+  /// not change [AppLifecycleState].
+  @protected
+  @mustCallSuper
+  void handleDismissContextMenu() {}
+
   /// Called in response to the `ext.flutter.evict` service extension.
   ///
   /// This is used by the `flutter` tool during hot reload so that any images
@@ -438,6 +447,8 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
       case 'SystemChrome.systemUIChange':
         final args = methodCall.arguments as List<dynamic>;
         await _systemUiChangeCallback?.call(args[0] as bool);
+      case 'ContextMenu.onDismissContextMenu':
+        handleDismissContextMenu();
       case 'System.requestAppExit':
         return <String, dynamic>{'response': (await handleRequestAppExit()).name};
       default:

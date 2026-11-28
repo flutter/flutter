@@ -624,6 +624,14 @@ void fl_engine_update_accessibility_features(FlEngine* engine, int32_t flags);
 void fl_engine_request_app_exit(FlEngine* engine);
 
 /**
+ * fl_engine_dismiss_context_menu:
+ * @engine: an #FlEngine.
+ *
+ * Asks the framework to close an open context menu.
+ */
+void fl_engine_dismiss_context_menu(FlEngine* engine);
+
+/**
  * fl_engine_get_keyboard_manager:
  * @engine: an #FlEngine.
  *

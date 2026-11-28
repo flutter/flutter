@@ -444,6 +444,13 @@ LRESULT HostWindow::HandleMessage(HWND hwnd,
       is_being_destroyed_ = true;
       break;
 
+    case WM_ENTERMENULOOP:
+    case WM_ENTERSIZEMOVE:
+      // Opening the menu bar or dragging the window does not deactivate the
+      // application, but a Flutter context menu should still close.
+      engine_->DismissContextMenu();
+      break;
+
     case WM_NCLBUTTONDOWN: {
       // Fix for 500ms hang after user clicks on the title bar, but before
       // moving mouse. Reference:
