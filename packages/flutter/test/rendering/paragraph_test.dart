@@ -1102,6 +1102,90 @@ void main() {
       expect(paintingContext.canvas.drawnRectPaint!.color, isSameColorAs(selectionColor));
     });
 
+    test('repeated paints keep a single leader for each selection handle', () {
+      // Regression test for https://github.com/flutter/flutter/issues/140543.
+      final registrar = TestSelectionRegistrar();
+      final paragraph = RenderParagraph(
+        const TextSpan(text: '1234567'),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+      );
+      layout(paragraph);
+      final startLink = LayerLink();
+      final endLink = LayerLink();
+      final Selectable selectable = registrar.selectables.single;
+      selectable.dispatchSelectionEvent(const SelectAllSelectionEvent());
+      selectable.pushHandleLayers(startLink, endLink);
+
+      final root = ContainerLayer()..attach(Object());
+      final context = PaintingContext(root, paragraph.paintBounds);
+      paragraph.paint(context, Offset.zero);
+      final LeaderLayer startLeader = startLink.leader!;
+      final LeaderLayer endLeader = endLink.leader!;
+      expect(startLeader.attached, isTrue);
+      expect(endLeader.attached, isTrue);
+
+      paragraph.paint(context, Offset.zero);
+      expect(startLink.leader, same(startLeader));
+      expect(endLink.leader, same(endLeader));
+
+      // Finish the second paint's recording before rebuilding the layer tree.
+      context.addLayer(ContainerLayer());
+
+      root.removeAllChildren();
+      paragraph.paint(context, Offset.zero);
+      expect(startLink.leader, isNot(same(startLeader)));
+      expect(endLink.leader, isNot(same(endLeader)));
+
+      selectable.pushHandleLayers(null, null);
+      root.removeAllChildren();
+      root.detach();
+      expect(startLink.leader, isNull);
+      expect(endLink.leader, isNull);
+    });
+
+    test('repeated paints before attachment keep a single leader for each selection handle', () {
+      final registrar = TestSelectionRegistrar();
+      final paragraph = RenderParagraph(
+        const TextSpan(text: '1234567'),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+      );
+      layout(paragraph);
+      final startLink = LayerLink();
+      final endLink = LayerLink();
+      final Selectable selectable = registrar.selectables.single;
+      selectable.dispatchSelectionEvent(const SelectAllSelectionEvent());
+      selectable.pushHandleLayers(startLink, endLink);
+      final root = ContainerLayer();
+      addTearDown(() {
+        selectable.pushHandleLayers(null, null);
+        root.removeAllChildren();
+        if (root.attached) {
+          root.detach();
+        }
+      });
+
+      // A new repaint boundary paints its children before its layer is attached.
+      final context = PaintingContext(root, paragraph.paintBounds);
+      paragraph.paint(context, Offset.zero);
+      paragraph.paint(context, Offset.zero);
+      context.addLayer(ContainerLayer());
+
+      final leaders = <LeaderLayer>[];
+      for (Layer? layer = root.firstChild; layer != null; layer = layer.nextSibling) {
+        if (layer is LeaderLayer) {
+          leaders.add(layer);
+        }
+      }
+      expect(leaders.where((LeaderLayer layer) => layer.link == startLink), hasLength(1));
+      expect(leaders.where((LeaderLayer layer) => layer.link == endLink), hasLength(1));
+
+      root.attach(Object());
+      expect(startLink.leader, same(leaders[0]));
+      expect(endLink.leader, same(leaders[1]));
+    });
+
     // Regression test for https://github.com/flutter/flutter/issues/182776.
     test('paints selection highlights outside fade layer and handles after text', () async {
       final registrar = TestSelectionRegistrar();
