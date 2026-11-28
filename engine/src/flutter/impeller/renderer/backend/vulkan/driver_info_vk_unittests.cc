@@ -155,6 +155,7 @@ TEST(DriverInfoVKTest, CanGenerateMipMaps) {
 TEST(DriverInfoVKTest, DriverParsingMali) {
   EXPECT_EQ(GetMaliVersion("Mali-G51-MORE STUFF"), MaliGPU::kG51);
   EXPECT_EQ(GetMaliVersion("Mali-G51"), MaliGPU::kG51);
+  EXPECT_EQ(GetMaliVersion("Mali-G72 MP3"), MaliGPU::kG72);
   EXPECT_EQ(GetMaliVersion("Mali-111111"), MaliGPU::kUnknown);
 }
 
@@ -178,9 +179,16 @@ TEST(DriverInfoVKTest, DisabledDevices) {
   EXPECT_TRUE(IsBadVersionTest("Adreno (TM) 650"));
 }
 
+TEST(DriverInfoVKTest, DisabledDevicesMali) {
+  EXPECT_TRUE(IsBadVersionTest("Mali-G72", /*qc=*/false));
+  EXPECT_TRUE(IsBadVersionTest("Mali-G72 MP3", /*qc=*/false));
+}
+
 TEST(DriverInfoVKTest, EnabledDevicesMali) {
   EXPECT_FALSE(IsBadVersionTest("Mali-G52", /*qc=*/false));
+  EXPECT_FALSE(IsBadVersionTest("Mali-G52 MC2", /*qc=*/false));
   EXPECT_FALSE(IsBadVersionTest("Mali-G54-MORE STUFF", /*qc=*/false));
+  EXPECT_FALSE(IsBadVersionTest("Mali-G68", /*qc=*/false));
 }
 
 TEST(DriverInfoVKTest, EnabledDevicesAdreno) {

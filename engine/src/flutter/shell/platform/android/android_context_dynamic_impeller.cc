@@ -80,7 +80,13 @@ static std::shared_ptr<AndroidContextVKImpeller>
 GetActualRenderingAPIForImpeller(
     int api_level,
     const AndroidContext::ContextSettings& settings) {
-  constexpr int kMinimumAndroidApiLevelForMediaTekVulkan = 32;
+  // Compared against the vendor partition's API level. Devices rarely rebuild
+  // their vendor partition, so MediaTek devices that launched on API 31 keep
+  // reporting it after OS updates. Many of those work with Vulkan, see
+  // https://github.com/flutter/flutter/issues/193148. SoCs with known Vulkan
+  // defects at this level are blocked by GPU in
+  // |impeller::DriverInfoVK::IsKnownBadDriver|.
+  constexpr int kMinimumAndroidApiLevelForMediaTekVulkan = 31;
 
   // have requisite features to support platform views.
   //
