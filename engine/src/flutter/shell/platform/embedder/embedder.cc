@@ -1162,7 +1162,8 @@ MakeRenderTargetFromBackingStoreImpeller(
     const fml::closure& on_release,
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
     const FlutterBackingStoreConfig& config,
-    const FlutterOpenGLFramebuffer* framebuffer) {
+    const FlutterOpenGLFramebuffer* framebuffer,
+    bool supports_direct_msaa4_rendering) {
 #if defined(SHELL_ENABLE_GL) && defined(IMPELLER_SUPPORTS_RENDERING)
   auto format = FlutterFormatToImpellerPixelFormat(framebuffer->target);
   if (!format.has_value()) {
@@ -1244,7 +1245,7 @@ MakeRenderTargetFromBackingStoreImpeller(
   return std::make_unique<flutter::EmbedderRenderTargetImpeller>(
       backing_store, aiks_context,
       std::make_unique<impeller::RenderTarget>(std::move(render_target_desc)),
-      on_release, framebuffer_destruct);
+      on_release, framebuffer_destruct, supports_direct_msaa4_rendering);
 #else
   return nullptr;
 #endif
@@ -1548,9 +1549,20 @@ CreateEmbedderRenderTarget(
         }
         case kFlutterOpenGLTargetTypeFramebuffer: {
           if (enable_impeller) {
+            bool supports_direct_msaa4_rendering = false;
+#if defined(_WIN32) && defined(SHELL_ENABLE_GL) && \
+    defined(IMPELLER_SUPPORTS_RENDERING)
+            if (backing_store.open_gl.framebuffer.name != 0 &&
+                compositor->supports_direct_msaa4_rendering_callback) {
+              supports_direct_msaa4_rendering =
+                  compositor->supports_direct_msaa4_rendering_callback(
+                      &backing_store, compositor->user_data);
+            }
+#endif
             render_target = MakeRenderTargetFromBackingStoreImpeller(
                 backing_store, collect_callback.Release(), aiks_context, config,
-                &backing_store.open_gl.framebuffer);
+                &backing_store.open_gl.framebuffer,
+                supports_direct_msaa4_rendering);
             break;
           } else {
             auto skia_surface = MakeSkSurfaceFromBackingStore(
@@ -1684,7 +1696,14 @@ InferExternalViewEmbedderFromArgs(const FlutterCompositor* compositor,
                         "present_view_callback must be provided but not both.");
   }
 
-  FlutterCompositor captured_compositor = *compositor;
+  const FlutterCompositor captured_compositor = {
+      .struct_size = sizeof(FlutterCompositor),
+      .user_data = compositor->user_data,
+      .create_backing_store_callback = c_create_callback,
+      .collect_backing_store_callback = c_collect_callback,
+      .supports_direct_msaa4_rendering_callback = SAFE_ACCESS(
+          compositor, supports_direct_msaa4_rendering_callback, nullptr),
+  };
 
   flutter::EmbedderExternalViewEmbedder::CreateRenderTargetCallback
       create_render_target_callback =

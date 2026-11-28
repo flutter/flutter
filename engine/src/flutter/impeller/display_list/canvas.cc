@@ -4,6 +4,7 @@
 
 #include "impeller/display_list/canvas.h"
 
+#include <algorithm>
 #include <memory>
 #include <optional>
 #include <unordered_map>
@@ -1939,15 +1940,19 @@ void Canvas::SaveLayer(const Paint& paint,
     if (!will_cache_backdrop_texture || !backdrop_data->texture_slot) {
       backdrop_count_ -= backdrop_count;
 
-      // The onscreen texture can be flipped to if:
-      // 1. The device supports framebuffer fetch, or the final target can
-      //    continue the MSAA pass and no root blend needs a backdrop read.
-      // 2. There are no more backdrop filters
-      // 3. The current render pass is for the onscreen pass.
+      // A shared filter snapshot draws its layer's children in the parent
+      // pass. Their blends can read the destination even after the last
+      // backdrop input was captured.
+      const auto shares_filter_snapshot = [](const auto& entry) {
+        return entry.second.backdrop_count > 1 &&
+               entry.second.all_filters_equal;
+      };
       const bool should_use_onscreen =
+          backdrop_count_ == 0 && render_passes_.size() == 1u &&
           (renderer_.GetDeviceCapabilities().SupportsFramebufferFetch() ||
-           can_finish_on_external_target_) &&
-          backdrop_count_ == 0 && render_passes_.size() == 1u;
+           (can_finish_on_external_target_ &&
+            std::none_of(backdrop_data_.begin(), backdrop_data_.end(),
+                         shares_filter_snapshot)));
       input_texture = FlipBackdrop(
           GetGlobalPassPosition(),                                //
           /*should_remove_texture=*/will_cache_backdrop_texture,  //

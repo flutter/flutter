@@ -373,14 +373,12 @@ class Layer {
     auto cull_rect =
         impeller::Rect::MakeSize(impeller_target->GetRenderTargetSize());
 
-    impeller::RenderToTarget(
-        aiks_context->GetContentContext(),  //
-        render_target_->GetImpellerRenderTargetForDisplayList(
-            *display_list),                    //
-        display_list,                          //
-        cull_rect,                             //
-        /*reset_host_buffer=*/frame_boundary,  //
-        /*is_onscreen=*/false                  //
+    impeller::RenderToTarget(aiks_context->GetContentContext(),     //
+                             *impeller_target,                      //
+                             display_list,                          //
+                             cull_rect,                             //
+                             /*reset_host_buffer=*/frame_boundary,  //
+                             /*is_onscreen=*/false                  //
     );
   }
 #endif  // IMPELLER_SUPPORTS_RENDERING

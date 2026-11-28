@@ -204,6 +204,42 @@ TEST_P(AiksTest, LastExternalBackdropWithoutFramebufferFetch) {
   }
 }
 
+TEST_P(AiksTest, BackdropGroupKeepsRootReadableAfterLastBackdropInput) {
+  auto& context = GetContentContext();
+  if (context.GetDeviceCapabilities().SupportsFramebufferFetch() ||
+      !context.GetDeviceCapabilities().SupportsOffscreenMSAA()) {
+    GTEST_SKIP() << "Requires offscreen MSAA without framebuffer fetch.";
+  }
+  auto canvas = CreateTestCanvas(context, std::nullopt,
+                                 /*requires_readback=*/true,
+                                 /*can_finish_on_external_target=*/true);
+  const auto rect = Rect::MakeXYWH(0, 0, 50, 50);
+  const auto blur =
+      flutter::DlImageFilter::MakeBlur(4, 4, flutter::DlTileMode::kClamp);
+  constexpr int64_t kSharedId = 7;
+  canvas->SetBackdropData(
+      {{kSharedId, {.backdrop_count = 2, .coverage_union = rect}}}, 3);
+  canvas->DrawRect(rect, {.color = Color::Azure()});
+  canvas->SaveLayer({}, rect, blur.get(),
+                    ContentBoundsPromise::kContainsContents, 1, false,
+                    kSharedId);
+  canvas->Restore();
+
+  // The independent filter captures the last backdrop input. The second
+  // grouped layer will still draw its children directly into the root pass.
+  canvas->SaveLayer({}, rect, blur.get(),
+                    ContentBoundsPromise::kContainsContents, 1);
+  canvas->Restore();
+  ASSERT_TRUE(canvas->RequiresReadback());
+  canvas->SaveLayer({}, rect, blur.get(),
+                    ContentBoundsPromise::kContainsContents, 1, false,
+                    kSharedId);
+  canvas->DrawRect(
+      rect, {.color = Color::Red(), .blend_mode = BlendMode::kDifference});
+  canvas->Restore();
+  canvas->EndReplay();
+}
+
 TEST_P(AiksTest, BackdropCountDownBackdropId) {
   ContentContext& context = GetContentContext();
   if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {

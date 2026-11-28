@@ -12,7 +12,6 @@
 #include "flutter/impeller/display_list/dl_dispatcher.h"
 #include "flutter/impeller/renderer/backend/gles/gles.h"
 #include "flutter/impeller/renderer/backend/gles/surface_gles.h"
-#include "flutter/impeller/renderer/backend/gles/windows_backdrop_target.h"
 #include "flutter/shell/platform/embedder/embedder_render_target_impeller.h"
 #include "flutter/shell/platform/embedder/embedder_surface_gl_impeller.h"
 #include "flutter/shell/platform/windows/compositor_opengl.h"
@@ -52,6 +51,39 @@ void ExpectNoGLError() {
       reinterpret_cast<PFNGLGETERRORPROC>(kEGLResolver("glGetError"));
   ASSERT_NE(get_error, nullptr);
   EXPECT_EQ(get_error(), static_cast<GLenum>(GL_NO_ERROR));
+}
+
+// Equal filters sharing an ID can draw their children directly into the parent
+// pass. The independent backdrop can be the last one that needs a fresh read
+// even though a grouped child still needs the destination afterwards.
+sk_sp<DisplayList> MakeGroupedBackdropScene(bool interleaved,
+                                            bool blend_child) {
+  DisplayListBuilder builder;
+  builder.DrawPaint(DlPaint(DlColor(0xff204087)));
+  builder.DrawRect(DlRect::MakeLTRB(1, 0, 13, 24),
+                   DlPaint(DlColor(0xffe72c15)));
+  builder.DrawRect(DlRect::MakeLTRB(10, 16, 31, 21),
+                   DlPaint(DlColor(0xff25a849)));
+  const auto blur = DlImageFilter::MakeBlur(2, 2, DlTileMode::kClamp);
+  auto panel = [&](DlRect clip, std::optional<int64_t> backdrop_id) {
+    builder.Save();
+    builder.ClipRect(clip, DlClipOp::kIntersect, false);
+    builder.SaveLayer(std::nullopt, nullptr, blur.get(), backdrop_id);
+    if (blend_child && backdrop_id.has_value()) {
+      builder.DrawRect(
+          DlRect::MakeLTRB(4, 5, 28, 20),
+          DlPaint(DlColor(0xff49c3e1)).setBlendMode(DlBlendMode::kDifference));
+    }
+    builder.DrawRect(clip, DlPaint(DlColor(0x10141414)));
+    builder.Restore();
+    builder.Restore();
+  };
+  panel(DlRect::MakeLTRB(2, 2, 21, 18), 7);
+  if (interleaved) {
+    panel(DlRect::MakeLTRB(0, 0, 8, 8), std::nullopt);
+  }
+  panel(DlRect::MakeLTRB(12, 8, 29, 23), 7);
+  return builder.Build();
 }
 
 struct TestParams {
@@ -165,25 +197,24 @@ TEST_P(CompositorOpenGLANGLETest, VerifyExternalBackdropFramebuffer) {
   FlutterBackingStoreConfig config = {};
   config.size = {32, 24};
   FlutterBackingStore store = {};
+  store.struct_size = sizeof(store);
   ASSERT_TRUE(compositor.CreateBackingStore(config, &store));
   fml::ScopedCleanupClosure release(
       [&] { EXPECT_TRUE(compositor.CollectBackingStore(&store)); });
   impeller::ProcTableGLES gl{kEGLResolver};
   ASSERT_TRUE(gl.IsValid());
-  if (gl.GetDescription()->GetGlVersion().major_version < 3) {
-    GTEST_SKIP() << "The external framebuffer guard requires GLES 3.";
-  }
-  const auto fbo = store.open_gl.framebuffer.name;
   if (!GetParam().enable_impeller) {
-    EXPECT_FALSE(impeller::IsCompatibleWindowsBackdropTarget(gl, fbo, 32, 24));
+    EXPECT_FALSE(compositor.SupportsDirectMSAA4Rendering(store));
     return;
   }
-  if (gl.GetCapabilities()->SupportsImplicitResolvingMSAA() ||
+  if (gl.GetDescription()->GetGlVersion().major_version < 3 ||
+      gl.GetCapabilities()->SupportsImplicitResolvingMSAA() ||
       !gl.GetCapabilities()->SupportsOffscreenMSAA() ||
       store.open_gl.framebuffer.target != GL_BGRA8_EXT) {
     GTEST_SKIP()
-        << "The framebuffer mutations require a BGRA8 MSAA renderbuffer.";
+        << "Requires the Windows compositor's explicit BGRA8 MSAA target.";
   }
+  const auto fbo = store.open_gl.framebuffer.name;
   auto* egl_context = engine()->egl_manager()->render_context();
   EmbedderSurfaceGLSkia::GLDispatchTable dispatch = {};
   dispatch.gl_make_current_callback = [&] {
@@ -203,17 +234,28 @@ TEST_P(CompositorOpenGLANGLETest, VerifyExternalBackdropFramebuffer) {
   ASSERT_TRUE(surface->IsValid());
   auto gpu_surface = surface->CreateGPUSurface();
   ASSERT_TRUE(gpu_surface->IsValid());
-  auto wrapped = impeller::SurfaceGLES::WrapFBO(
-      surface->CreateImpellerContext(), [] { return true; }, fbo,
-      impeller::PixelFormat::kB8G8R8A8UNormInt, {32, 24});
-  ASSERT_TRUE(wrapped);
-  EmbedderRenderTargetImpeller cached(
-      store, gpu_surface->GetAiksContext(),
-      std::make_unique<impeller::RenderTarget>(wrapped->GetRenderTarget()),
-      nullptr, nullptr);
+  auto wrap_store = [&](const FlutterBackingStore& backing_store,
+                        bool supports_direct_msaa4_rendering) {
+    auto wrapped = impeller::SurfaceGLES::WrapFBO(
+        surface->CreateImpellerContext(), [] { return true; },
+        backing_store.open_gl.framebuffer.name,
+        impeller::PixelFormat::kB8G8R8A8UNormInt, {32, 24});
+    if (!wrapped) {
+      return std::unique_ptr<EmbedderRenderTargetImpeller>{};
+    }
+    return std::make_unique<EmbedderRenderTargetImpeller>(
+        backing_store, gpu_surface->GetAiksContext(),
+        std::make_unique<impeller::RenderTarget>(wrapped->GetRenderTarget()),
+        nullptr, nullptr, supports_direct_msaa4_rendering);
+  };
+  auto owned =
+      wrap_store(store, compositor.SupportsDirectMSAA4Rendering(store));
+  // A custom embedder can report the same format and FBO name. Its attachment
+  // lifetime is independent of the Windows compositor's.
+  auto external_store = store;
+  auto external = wrap_store(external_store, false);
+  ASSERT_TRUE(owned && external);
   DisplayListBuilder builder;
-  builder.DrawPaint(DlPaint());
-  auto plain = builder.Build();
   const auto blur = DlImageFilter::MakeBlur(3, 3, DlTileMode::kClamp);
   builder.DrawPaint(
       DlPaint(DlColor(0x800000ff)).setBlendMode(DlBlendMode::kSrc));
@@ -227,107 +269,87 @@ TEST_P(CompositorOpenGLANGLETest, VerifyExternalBackdropFramebuffer) {
   builder.Restore();
   auto backdrop = builder.Build();
   ASSERT_TRUE(backdrop->root_has_backdrop_filter());
-  ASSERT_FALSE(cached.GetImpellerRenderTargetForDisplayList(*plain)
-                   .HasVerifiedExternalMSAA4());
-  GLuint framebuffers[3], renderbuffers[3];
-  gl.GenFramebuffers(3, framebuffers);
-  gl.GenRenderbuffers(3, renderbuffers);
+  ASSERT_TRUE(owned->GetImpellerRenderTarget()->HasVerifiedExternalMSAA4());
+  ASSERT_FALSE(external->GetImpellerRenderTarget()->HasVerifiedExternalMSAA4());
+
+  GLuint readback_fbo;
+  std::array<GLuint, 2> readback_buffers;
+  gl.GenFramebuffers(1, &readback_fbo);
+  gl.GenRenderbuffers(2, readback_buffers.data());
   fml::ScopedCleanupClosure clean([&] {
-    gl.DeleteFramebuffers(3, framebuffers);
-    gl.DeleteRenderbuffers(3, renderbuffers);
+    gl.DeleteFramebuffers(1, &readback_fbo);
+    gl.DeleteRenderbuffers(2, readback_buffers.data());
   });
-  gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers[2]);
-  gl.BindRenderbuffer(GL_RENDERBUFFER, renderbuffers[2]);
+  gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, readback_fbo);
+  gl.BindRenderbuffer(GL_RENDERBUFFER, readback_buffers[0]);
   gl.RenderbufferStorage(GL_RENDERBUFFER, GL_BGRA8_EXT, 32, 24);
   gl.FramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                             GL_RENDERBUFFER, renderbuffers[2]);
+                             GL_RENDERBUFFER, readback_buffers[0]);
   ASSERT_EQ(gl.CheckFramebufferStatus(GL_DRAW_FRAMEBUFFER),
             static_cast<GLenum>(GL_FRAMEBUFFER_COMPLETE));
   using Pixels = std::array<uint8_t, 32 * 24 * 4>;
-  auto render_and_read = [&](Pixels& pixels) {
+  auto render_and_read = [&](EmbedderRenderTargetImpeller& target,
+                             const sk_sp<DisplayList>& scene, Pixels& pixels) {
     gl.BindFramebuffer(GL_FRAMEBUFFER, fbo);
     gl.Disable(GL_SCISSOR_TEST);
     gl.ColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
     gl.ClearColor(1, 0, 1, 1);
     gl.Clear(GL_COLOR_BUFFER_BIT);
     ASSERT_TRUE(impeller::RenderToTarget(
-        cached.GetAiksContext()->GetContentContext(),
-        cached.GetImpellerRenderTargetForDisplayList(*backdrop), backdrop,
+        target.GetAiksContext()->GetContentContext(),
+        *target.GetImpellerRenderTarget(), scene,
         DlRect::MakeLTRB(0, 0, 32, 24), /*reset_host_buffer=*/true,
         /*is_onscreen=*/false));
     gl.Disable(GL_SCISSOR_TEST);
     gl.BindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
-    gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers[2]);
+    gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, readback_fbo);
     gl.BlitFramebuffer(0, 0, 32, 24, 0, 0, 32, 24, GL_COLOR_BUFFER_BIT,
                        GL_NEAREST);
-    gl.BindFramebuffer(GL_READ_FRAMEBUFFER, framebuffers[2]);
+    gl.BindFramebuffer(GL_READ_FRAMEBUFFER, readback_fbo);
     gl.ReadPixels(0, 0, 32, 24, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
     gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
     ExpectNoGLError();
   };
-  auto binding = [&](GLenum key) {
-    GLint value;
-    gl.GetIntegerv(key, &value);
-    return static_cast<GLuint>(value);
-  };
-  auto check = [&](bool expected) {
-    ASSERT_EQ(gl.CheckFramebufferStatus(GL_DRAW_FRAMEBUFFER),
-              static_cast<GLenum>(GL_FRAMEBUFFER_COMPLETE));
-    gl.BindFramebuffer(GL_READ_FRAMEBUFFER, framebuffers[0]);
-    gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers[1]);
-    gl.BindRenderbuffer(GL_RENDERBUFFER, renderbuffers[0]);
-    EXPECT_EQ(cached.GetImpellerRenderTargetForDisplayList(*backdrop)
-                  .HasVerifiedExternalMSAA4(),
-              expected);
-    EXPECT_FALSE(cached.GetImpellerRenderTarget()->HasVerifiedExternalMSAA4());
-    EXPECT_EQ(binding(GL_READ_FRAMEBUFFER_BINDING), framebuffers[0]);
-    EXPECT_EQ(binding(GL_DRAW_FRAMEBUFFER_BINDING), framebuffers[1]);
-    EXPECT_EQ(binding(GL_RENDERBUFFER_BINDING), renderbuffers[0]);
-    gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-  };
-  gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-  check(true);
-  Pixels original{}, fallback{}, repaired{};
-  render_and_read(original);
+  Pixels original{}, fallback{};
+  ASSERT_NO_FATAL_FAILURE(render_and_read(*owned, backdrop, original));
+  ASSERT_NO_FATAL_FAILURE(render_and_read(*external, backdrop, fallback));
+  EXPECT_EQ(original, fallback);
   EXPECT_EQ(original[0], 255u);           // Opaque red at the left edge.
   EXPECT_EQ(original[31 * 4 + 3], 128u);  // Translucent blue at the right.
   EXPECT_GT(original[(12 * 32 + 16) * 4 + 1], 32u);  // Green inside the clip.
 
-  GLint stencil = 0;
-  gl.GetFramebufferAttachmentParameteriv(
-      GL_DRAW_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
-      GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &stencil);
-  gl.FramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
-                             GL_RENDERBUFFER, 0);
-  check(false);
-  gl.FramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                             GL_RENDERBUFFER, 0);
-  check(false);
-  render_and_read(fallback);
-  EXPECT_EQ(original, fallback);
-  gl.FramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                             GL_RENDERBUFFER, stencil);
-  check(true);
-  render_and_read(repaired);
-  EXPECT_EQ(original, repaired);
+  for (bool interleaved : {false, true}) {
+    SCOPED_TRACE(interleaved);
+    auto grouped = MakeGroupedBackdropScene(interleaved, /*blend_child=*/true);
+    auto control = MakeGroupedBackdropScene(interleaved, /*blend_child=*/false);
+    ASSERT_TRUE(grouped->root_has_backdrop_filter());
+    ASSERT_LE(grouped->max_root_blend_mode(), DlBlendMode::kModulate);
+    Pixels without_child{};
+    ASSERT_NO_FATAL_FAILURE(render_and_read(*external, control, without_child));
+    ASSERT_NO_FATAL_FAILURE(render_and_read(*external, grouped, fallback));
+    ASSERT_NE(fallback, without_child);
+    ASSERT_NO_FATAL_FAILURE(render_and_read(*owned, grouped, original));
+    EXPECT_EQ(original, fallback);
+  }
 
-  gl.BindRenderbuffer(GL_RENDERBUFFER, renderbuffers[1]);
-  gl.RenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGBA8, 32, 24);
-  gl.FramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1,
-                             GL_RENDERBUFFER, renderbuffers[1]);
-  check(true);
-  const GLenum outputs[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-  auto draw_buffers =
-      reinterpret_cast<PFNGLDRAWBUFFERSPROC>(kEGLResolver("glDrawBuffers"));
-  ASSERT_NE(draw_buffers, nullptr);
-  draw_buffers(2, outputs);
-  check(false);
-  draw_buffers(1, outputs);
-  gl.FramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1,
-                             GL_RENDERBUFFER, 0);
-  gl.FramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                             GL_RENDERBUFFER, renderbuffers[1]);
-  check(false);
+  // Deleting the attachments of an unbound FBO retires their names while the
+  // FBO retains their storage. Importing the FBO must never rebind those names.
+  gl.BindFramebuffer(GL_FRAMEBUFFER, readback_fbo);
+  gl.BindRenderbuffer(GL_RENDERBUFFER, readback_buffers[1]);
+  gl.RenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 32, 24);
+  gl.FramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+                             GL_RENDERBUFFER, readback_buffers[1]);
+  gl.BindFramebuffer(GL_FRAMEBUFFER, fbo);
+  const auto retired = readback_buffers;
+  gl.DeleteRenderbuffers(2, retired.data());
+  readback_buffers.fill(0);
+  external_store.open_gl.framebuffer.name = readback_fbo;
+  auto retired_target = wrap_store(external_store, false);
+  ASSERT_TRUE(retired_target);
+  EXPECT_FALSE(
+      retired_target->GetImpellerRenderTarget()->HasVerifiedExternalMSAA4());
+  EXPECT_FALSE(gl.IsRenderbuffer(retired[0]));
+  EXPECT_FALSE(gl.IsRenderbuffer(retired[1]));
   ExpectNoGLError();
 }
 

@@ -27,6 +27,10 @@ class CompositorOpenGL : public Compositor {
                           FlutterBackingStore* result) override;
 
   /// |Compositor|
+  bool SupportsDirectMSAA4Rendering(
+      const FlutterBackingStore& store) const override;
+
+  /// |Compositor|
   bool CollectBackingStore(const FlutterBackingStore* store) override;
 
   /// |Compositor|

@@ -21,6 +21,7 @@ struct FramebufferBackingStore {
   uint32_t texture_id = 0;
   uint32_t color_renderbuffer_id = 0;
   uint32_t depth_stencil_id = 0;
+  bool supports_direct_msaa4_rendering = false;
 };
 
 typedef const impeller::GLProc<decltype(glBlitFramebuffer)> BlitFramebufferProc;
@@ -146,6 +147,13 @@ bool CompositorOpenGL::CreateBackingStore(
   }
 
   result->type = kFlutterBackingStoreTypeOpenGL;
+  if (store->color_renderbuffer_id != 0 && store->depth_stencil_id != 0 &&
+      store->framebuffer_id != 0 && format_.sized_format == GL_BGRA8_EXT &&
+      gl_->CheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
+    GLint samples = 0;
+    gl_->GetIntegerv(GL_SAMPLES, &samples);
+    store->supports_direct_msaa4_rendering = samples == 4;
+  }
   result->open_gl.type = kFlutterOpenGLTargetTypeFramebuffer;
   result->open_gl.framebuffer.name = store->framebuffer_id;
   result->open_gl.framebuffer.target = format_.sized_format;
@@ -155,6 +163,13 @@ bool CompositorOpenGL::CreateBackingStore(
     // on FlutterCompositor.collect_backing_store_callback during engine start.
   };
   return true;
+}
+
+bool CompositorOpenGL::SupportsDirectMSAA4Rendering(
+    const FlutterBackingStore& store) const {
+  const auto* framebuffer = static_cast<const FramebufferBackingStore*>(
+      store.open_gl.framebuffer.user_data);
+  return framebuffer->supports_direct_msaa4_rendering;
 }
 
 bool CompositorOpenGL::CollectBackingStore(const FlutterBackingStore* store) {
