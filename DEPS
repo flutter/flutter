@@ -41,6 +41,8 @@ vars = {
   # See https://github.com/flutter/flutter/wiki/Engine-pre‐submits-and-post‐submits#post-submit
   'clang_version': 'git_revision:07d67299a15ce03b053736e2d31a668ee0576987',
 
+  'rust_version': 'git_revisions:8eb778d04094d3af4b26580cab327e0413eb1e02,7d66e20c4d8720201f46589adb40e4d0d6ef9a75',
+
   'reclient_version': 're_client_version:0.185.0.db415f21-gomaip',
 
   'gcloud_version': 'version:3@591.0.0.chromium.4',
@@ -549,6 +551,9 @@ deps = {
   'engine/src/third_party/abseil-cpp':
   Var('chromium_git') + '/chromium/src/third_party/abseil-cpp' + '@' + 'ff6e8ce3e932c16cebd1611c8fc42c45080a0e55',
 
+  'engine/src/third_party/rust':
+  Var('chromium_git') + '/chromium/src/third_party/rust' + '@' + 'eae40af851521a8f4bbf3b537c994aecde1646ea',
+
    # Dart packages
   'engine/src/flutter/third_party/pkg/archive':
   Var('chromium_git') + '/external/github.com/brendan-duncan/archive.git' + '@' + 'f1d164f8f5d8aea0be620a9b1e8d300b75a29388', # 3.6.1
@@ -729,6 +734,61 @@ deps = {
       }
     ],
     'condition': 'host_os == "linux" or host_os == "mac"',
+    'dep_type': 'cipd',
+  },
+
+  'engine/src/flutter/buildtools/mac-x64/rust': {
+    'packages': [
+      {
+        'package': 'fuchsia/third_party/rust/host/mac-amd64',
+        'version': Var('rust_version'),
+      }
+    ],
+    'condition': 'host_os == "mac"',
+    'dep_type': 'cipd',
+  },
+
+  'engine/src/flutter/buildtools/mac-arm64/rust': {
+    'packages': [
+      {
+        'package': 'fuchsia/third_party/rust/host/mac-arm64',
+        'version': Var('rust_version'),
+      }
+    ],
+    'condition': 'host_os == "mac" and host_cpu == "arm64"',
+    'dep_type': 'cipd',
+  },
+
+  'engine/src/flutter/buildtools/linux-x64/rust': {
+    'packages': [
+      {
+        'package': 'fuchsia/third_party/rust/host/linux-amd64',
+        'version': Var('rust_version'),
+      }
+    ],
+    'condition': 'host_os == "linux"',
+    'dep_type': 'cipd',
+  },
+
+  'engine/src/flutter/buildtools/linux-arm64/rust': {
+    'packages': [
+      {
+        'package': 'fuchsia/third_party/rust/host/linux-arm64',
+        'version': Var('rust_version'),
+      }
+    ],
+    'condition': 'host_os == "linux" and host_cpu == "arm64"',
+    'dep_type': 'cipd',
+  },
+
+  'engine/src/flutter/buildtools/windows-x64/rust': {
+    'packages': [
+      {
+        'package': 'fuchsia/third_party/rust/host/windows-amd64',
+        'version': Var('rust_version'),
+      }
+    ],
+    'condition': 'download_windows_deps',
     'dep_type': 'cipd',
   },
 

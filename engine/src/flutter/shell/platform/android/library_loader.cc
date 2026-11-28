@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/fml/platform/android/jni_util.h"
+#include "flutter/rust/bridge.rs.h"
 #include "flutter/shell/platform/android/android_image_generator.h"
 #include "flutter/shell/platform/android/flutter_main.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
@@ -10,6 +11,9 @@
 
 // This is called by the VM when the shared library is first loaded.
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
+  auto greeting = flutter::rust::rust_greeting(JNI_VERSION_1_4);
+  FML_CHECK(!greeting.empty());
+
   // Initialize the Java VM.
   fml::jni::InitJavaVM(vm);
 
