@@ -597,6 +597,16 @@ void EmbedderExternalViewEmbedder::SubmitFlutterView(
 
   builder.Render();
 
+#if IMPELLER_SUPPORTS_RENDERING
+  // The offscreen RenderToTarget path does not dispose thread-local backend
+  // resources.
+  if (aiks_context) {
+    if (auto context = aiks_context->GetContext()) {
+      context->DisposeThreadLocalCachedResources();
+    }
+  }
+#endif  // IMPELLER_SUPPORTS_RENDERING
+
 #if !SLIMPELLER
   // We are going to be transferring control back over to the embedder there
   // the context may be trampled upon again. Flush all operations to the
