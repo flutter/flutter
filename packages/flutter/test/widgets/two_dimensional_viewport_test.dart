@@ -695,11 +695,8 @@ void main() {
         expect(find.byKey(checkBoxKey), findsOneWidget);
 
         // Hover over widget to make it keep alive.
-        final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-        await gesture.addPointer(location: Offset.zero);
+        final TestGesture gesture = await tester.startHover(find.byKey(checkBoxKey));
         addTearDown(gesture.removePointer);
-        await tester.pump();
-        await gesture.moveTo(tester.getCenter(find.byKey(checkBoxKey)));
         await tester.pump();
 
         // Scroll away, should be kept alive still.

@@ -11426,11 +11426,7 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-      pointer: 1,
-    );
-    await gesture.addPointer(location: tester.getCenter(find.byType(EditableText)));
+    await tester.startHover(find.byType(EditableText), pointer: 1);
 
     await tester.pump();
 

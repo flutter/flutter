@@ -1780,11 +1780,7 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-      pointer: 1,
-    );
-    await gesture.addPointer(location: tester.getCenter(find.byType(Text)));
+    await tester.startHover(find.byType(Text), pointer: 1);
 
     await tester.pump();
 
@@ -1847,11 +1843,7 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-      pointer: 1,
-    );
-    await gesture.addPointer(location: tester.getCenter(find.byType(Text)));
+    await tester.startHover(find.byType(Text), pointer: 1);
 
     await tester.pump();
 
