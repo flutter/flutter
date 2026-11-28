@@ -29,6 +29,7 @@ import '../../web/content_hash.dart';
 import '../../web/file_generators/flutter_service_worker_js.dart';
 import '../../web/file_generators/main_dart.dart' as main_dart;
 import '../../web/web_constants.dart';
+import '../../web/web_resources.dart';
 import '../../web_template.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -1246,6 +1247,16 @@ class WebReleaseBundle extends Target {
         if (environment.featureFlags.isRecordUseEnabled)
           for (final String filename in _recordedUsesFileNames)
             Source.pattern('{BUILD_DIR}/$filename'),
+        // Web resources are copied verbatim, so adding, removing, or editing
+        // one has to invalidate this target. The templated files are handled by
+        // [WebTemplatedFiles] and are excluded here.
+        for (final resource in resolveWebResources(
+          webDirectory: environment.resolvedProjectDir.childDirectory('web'),
+          flavor: environment.defines[kFlavorBuildKey],
+        ))
+          if (resource.relativePath != 'index.html' &&
+              resource.relativePath != 'flutter_bootstrap.js')
+            Source.pattern('{PROJECT_DIR}/web/${resource.relativePath}', optional: true),
       ],
     ),
     if (_hasWebContentHash) ...<Source>[
@@ -1348,26 +1359,29 @@ class WebReleaseBundle extends Target {
     }
 
     final Directory webResources = projectDir.childDirectory('web');
-    final List<File> inputResourceFiles = webResources.existsSync()
-        ? webResources.listSync(recursive: true).whereType<File>().toList()
-        : <File>[];
+    final List<WebResource> inputResourceFiles = resolveWebResources(
+      webDirectory: webResources,
+      flavor: environment.defines[kFlavorBuildKey],
+    );
 
     // Copy other resource files out of web/ directory.
     final copiedInputResourceFiles = <File>[];
     final outputResourcesFiles = <File>[];
-    for (final inputFile in inputResourceFiles) {
-      final String relativePath = fileSystem.path.relative(inputFile.path, from: webResources.path);
-      if (relativePath == 'index.html' || relativePath == 'flutter_bootstrap.js') {
+    for (final resource in inputResourceFiles) {
+      if (resource.relativePath == 'index.html' ||
+          resource.relativePath == 'flutter_bootstrap.js') {
         // Skip these, these are handled by the templated file target.
         continue;
       }
-      final File outputFile = fileSystem.file(fileSystem.path.join(outputDir.path, relativePath));
+      final File outputFile = fileSystem.file(
+        fileSystem.path.joinAll(<String>[outputDir.path, ...resource.relativePath.split('/')]),
+      );
       if (!outputFile.parent.existsSync()) {
         outputFile.parent.createSync(recursive: true);
       }
-      copiedInputResourceFiles.add(inputFile);
+      copiedInputResourceFiles.add(resource.file);
       outputResourcesFiles.add(outputFile);
-      inputFile.copySync(outputFile.path);
+      resource.file.copySync(outputFile.path);
     }
     final resourceFile = Depfile(copiedInputResourceFiles, outputResourcesFiles);
     depfileService.writeToFile(
@@ -1564,10 +1578,15 @@ $supportsDart2WasmLine''';
   @override
   Future<void> build(Environment environment) async {
     final Directory webResources = environment.resolvedProjectDir.childDirectory('web');
-    final File inputFlutterBootstrapJs = webResources.childFile('flutter_bootstrap.js');
+    final String? flavor = environment.defines[kFlavorBuildKey];
+    final File? inputFlutterBootstrapJs = resolveWebResourceFile(
+      webDirectory: webResources,
+      relativePath: 'flutter_bootstrap.js',
+      flavor: flavor,
+    );
     final templatedInputs = <File>[];
     final String inputBootstrapContent;
-    if (inputFlutterBootstrapJs.existsSync()) {
+    if (inputFlutterBootstrapJs != null) {
       templatedInputs.add(inputFlutterBootstrapJs);
       inputBootstrapContent = await inputFlutterBootstrapJs.readAsString();
     } else {
@@ -1609,9 +1628,13 @@ $supportsDart2WasmLine''';
     await outputFlutterBootstrapJs.writeAsString(bootstrapContent);
     final templatedOutputs = <File>[outputFlutterBootstrapJs];
 
-    final File inputIndexHtml = webResources.childFile('index.html');
+    final File? inputIndexHtml = resolveWebResourceFile(
+      webDirectory: webResources,
+      relativePath: 'index.html',
+      flavor: flavor,
+    );
     final File outputIndexHtml = outputDir.childFile('index.html');
-    if (inputIndexHtml.existsSync()) {
+    if (inputIndexHtml != null) {
       templatedInputs.add(inputIndexHtml);
       final indexHtmlTemplate = WebTemplate(inputIndexHtml.readAsStringSync());
 
@@ -1656,8 +1679,15 @@ $supportsDart2WasmLine''';
 
   @override
   List<Source> get inputs => <Source>[
-    const Source.pattern('{PROJECT_DIR}/web/index.html', optional: true),
-    const Source.pattern('{PROJECT_DIR}/web/flutter_bootstrap.js', optional: true),
+    Source.fromEnvironment(
+      (Environment environment) => <Source>[
+        for (final WebResource resource in resolveWebResources(
+          webDirectory: environment.resolvedProjectDir.childDirectory('web'),
+          flavor: environment.defines[kFlavorBuildKey],
+        ))
+          Source.pattern('{PROJECT_DIR}/web/${resource.relativePath}', optional: true),
+      ],
+    ),
     const Source.hostArtifact(HostArtifact.flutterWebSdk),
     if (_hasWasmBuild)
       const Source.pattern('{BUILD_DIR}/${Dart2WasmTarget.supportJsFileName}', optional: true),

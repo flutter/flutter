@@ -113,6 +113,9 @@ abstract class ChromiumDevice extends WebDevice {
   Future<bool> isSupported() async => chromeLauncher.canFindExecutable();
 
   @override
+  bool get supportsFlavors => true;
+
+  @override
   DevicePortForwarder? get portForwarder => const NoOpDevicePortForwarder();
 
   @override

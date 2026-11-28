@@ -2356,8 +2356,10 @@ _flutter.loader.load();
     );
     expect(target.buildKey, jsonEncode(<String>[jsTarget.buildKey]));
     expect(target.dependencies, <Object>[jsTarget]);
-    // Three static inputs plus one {BUILD_DIR} pattern per build stem.
-    expect(target.inputs.length, 3 + jsTarget.buildPatternStems.length);
+    // The templated web files are resolved at build time from a single
+    // [Source.fromEnvironment], so two inputs plus one {BUILD_DIR} pattern per
+    // build stem.
+    expect(target.inputs.length, 2 + jsTarget.buildPatternStems.length);
     expect(jsTarget.buildPatternStems, contains('main.dart.*.js'));
 
     final noHashTarget = WebTemplatedFiles(
