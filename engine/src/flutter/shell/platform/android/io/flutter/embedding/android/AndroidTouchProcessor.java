@@ -15,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
@@ -178,11 +179,35 @@ public class AndroidTouchProcessor {
     // Prepare a data packet of the appropriate size and order.
     // Allocate space for an additional pointer if this is an ACTION_UP or ACTION_POINTER_UP
     // event taken with device type touch, to handle the synthesized PointerChange.REMOVE event.
-    int totalPointerCount = originalPointerCount + (shouldRemovePointer ? 1 : 0);
+    final int historySize =
+        maskedAction == MotionEvent.ACTION_MOVE
+                && originalPointerCount == 1
+                && deviceType == PointerDeviceKind.STYLUS
+            ? event.getHistorySize()
+            : 0;
+    int totalPointerCount = originalPointerCount + historySize + (shouldRemovePointer ? 1 : 0);
     ByteBuffer packet =
         ByteBuffer.allocateDirect(totalPointerCount * POINTER_DATA_FIELD_COUNT * BYTES_PER_FIELD);
     packet.order(ByteOrder.LITTLE_ENDIAN);
 
+    if (historySize > 0) {
+      // Android batches older pen samples into the MOVE. Keep their order and mark them so
+      // platform views do not forward each sample as a separate native event.
+      MotionEvent.PointerCoords sample = new MotionEvent.PointerCoords();
+      for (int h = 0; h < historySize; h++) {
+        event.getHistoricalPointerCoords(0, h, sample);
+        addPointerForIndex(
+            event,
+            0,
+            pointerChange,
+            POINTER_DATA_FLAG_BATCHED,
+            transformMatrix,
+            packet,
+            null,
+            sample,
+            event.getHistoricalEventTime(h));
+      }
+    }
     if (updateForSinglePointer) {
       // ACTION_DOWN and ACTION_POINTER_DOWN always apply to a single pointer only.
       addPointerForIndex(event, event.getActionIndex(), pointerChange, 0, transformMatrix, packet);
@@ -266,7 +291,15 @@ public class AndroidTouchProcessor {
 
     // ACTION_HOVER_MOVE always applies to a single pointer only.
     addPointerForIndex(
-        event, event.getActionIndex(), pointerChange, 0, IDENTITY_TRANSFORM, packet, context);
+        event,
+        event.getActionIndex(),
+        pointerChange,
+        0,
+        IDENTITY_TRANSFORM,
+        packet,
+        context,
+        null,
+        event.getEventTime());
     if (packet.position() % (POINTER_DATA_FIELD_COUNT * BYTES_PER_FIELD) != 0) {
       throw new AssertionError("Packet position is not on field boundary.");
     }
@@ -285,7 +318,15 @@ public class AndroidTouchProcessor {
       Matrix transformMatrix,
       ByteBuffer packet) {
     addPointerForIndex(
-        event, pointerIndex, pointerChange, pointerData, transformMatrix, packet, null);
+        event,
+        pointerIndex,
+        pointerChange,
+        pointerData,
+        transformMatrix,
+        packet,
+        null,
+        null,
+        event.getEventTime());
   }
 
   // Some screen mirroring tools will occasionally report the same ID as having different associated
@@ -309,7 +350,9 @@ public class AndroidTouchProcessor {
       int pointerData,
       Matrix transformMatrix,
       ByteBuffer packet,
-      Context context) {
+      Context context,
+      @Nullable MotionEvent.PointerCoords historical,
+      long eventTime) {
     if (pointerChange == -1) {
       return;
     }
@@ -322,7 +365,10 @@ public class AndroidTouchProcessor {
     int pointerKind = getPointerDeviceTypeForToolType(event.getToolType(pointerIndex));
     // We use this in lieu of using event.getRawX and event.getRawY as we wish to support
     // earlier versions than API level 29.
-    float[] viewToScreenCoords = {event.getX(pointerIndex), event.getY(pointerIndex)};
+    float[] viewToScreenCoords = {
+      historical == null ? event.getX(pointerIndex) : historical.x,
+      historical == null ? event.getY(pointerIndex) : historical.y
+    };
     transformMatrix.mapPoints(viewToScreenCoords);
     long buttons;
     if (pointerKind == PointerDeviceKind.MOUSE) {
@@ -356,7 +402,7 @@ public class AndroidTouchProcessor {
     }
 
     long motionEventId = 0;
-    if (trackMotionEvents) {
+    if (trackMotionEvents && historical == null) {
       MotionEventTracker.MotionEventId trackedEvent = motionEventTracker.track(event);
       motionEventId = trackedEvent.getId();
     }
@@ -367,7 +413,7 @@ public class AndroidTouchProcessor {
             : PointerSignalKind.NONE;
 
     // Convert from milliseconds to microseconds.
-    long timeStamp = event.getEventTime() * 1000;
+    long timeStamp = eventTime * 1000;
 
     packet.putLong(motionEventId); // motionEventId
     packet.putLong(timeStamp); // time_stamp
@@ -402,7 +448,8 @@ public class AndroidTouchProcessor {
 
     packet.putLong(0); // synthesized
 
-    packet.putDouble(event.getPressure(pointerIndex)); // pressure
+    packet.putDouble(
+        historical == null ? event.getPressure(pointerIndex) : historical.pressure); // pressure
     double pressureMin = 0.0;
     double pressureMax = 1.0;
     if (event.getDevice() != null) {
@@ -417,25 +464,40 @@ public class AndroidTouchProcessor {
     packet.putDouble(pressureMax); // pressure_max
 
     if (pointerKind == PointerDeviceKind.STYLUS) {
-      packet.putDouble(event.getAxisValue(MotionEvent.AXIS_DISTANCE, pointerIndex)); // distance
+      packet.putDouble(
+          historical == null
+              ? event.getAxisValue(MotionEvent.AXIS_DISTANCE, pointerIndex)
+              : historical.getAxisValue(MotionEvent.AXIS_DISTANCE)); // distance
       packet.putDouble(0.0); // distance_max
     } else {
       packet.putDouble(0.0); // distance
       packet.putDouble(0.0); // distance_max
     }
 
-    packet.putDouble(event.getSize(pointerIndex)); // size
+    packet.putDouble(historical == null ? event.getSize(pointerIndex) : historical.size); // size
 
-    packet.putDouble(event.getToolMajor(pointerIndex)); // radius_major
-    packet.putDouble(event.getToolMinor(pointerIndex)); // radius_minor
+    packet.putDouble(
+        historical == null
+            ? event.getToolMajor(pointerIndex)
+            : historical.toolMajor); // radius_major
+    packet.putDouble(
+        historical == null
+            ? event.getToolMinor(pointerIndex)
+            : historical.toolMinor); // radius_minor
 
     packet.putDouble(0.0); // radius_min
     packet.putDouble(0.0); // radius_max
 
-    packet.putDouble(event.getAxisValue(MotionEvent.AXIS_ORIENTATION, pointerIndex)); // orientation
+    packet.putDouble(
+        historical == null
+            ? event.getAxisValue(MotionEvent.AXIS_ORIENTATION, pointerIndex)
+            : historical.orientation); // orientation
 
     if (pointerKind == PointerDeviceKind.STYLUS) {
-      packet.putDouble(event.getAxisValue(MotionEvent.AXIS_TILT, pointerIndex)); // tilt
+      packet.putDouble(
+          historical == null
+              ? event.getAxisValue(MotionEvent.AXIS_TILT, pointerIndex)
+              : historical.getAxisValue(MotionEvent.AXIS_TILT)); // tilt
     } else {
       packet.putDouble(0.0); // tilt
     }
