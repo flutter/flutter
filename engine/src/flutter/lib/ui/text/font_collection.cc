@@ -156,8 +156,11 @@ void FontCollection::RegisterTestFonts() {
 void FontCollection::LoadFontFromList(Dart_Handle font_data_handle,
                                       Dart_Handle callback,
                                       const std::string& family_name) {
-  tonic::Uint8List font_data(font_data_handle);
+  // This must run before the typed data is acquired below: while the data is
+  // acquired, the guard cannot throw and execution would continue in a
+  // non-root isolate, which has no PlatformConfiguration.
   UIDartState::ThrowIfUIOperationsProhibited();
+  tonic::Uint8List font_data(font_data_handle);
   FontCollection& font_collection = UIDartState::Current()
                                         ->platform_configuration()
                                         ->client()
