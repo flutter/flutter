@@ -307,6 +307,13 @@ FLUTTER_DARWIN_EXPORT
  * Accessing properties or sending messages to it will result in undefined behavior or runtime
  * errors.
  *
+ * This method shuts down the engine's root Dart isolate, not background child isolates spawned via
+ * Dart's `Isolate.spawn`. Child isolates that outlive `-destroyContext` keep the shared Dart
+ * isolate group heap alive, which can retain native GPU resources or cause crashes during
+ * subsequent garbage collection. Terminate any spawned child isolates before destroying the engine
+ * context, retain and reuse the `FlutterEngine`, or run independent background work in a separate
+ * `FlutterEngine`.
+ *
  * The engine cannot be run again: `-run` and the `-runWithEntrypoint:` variants return `NO`.
  */
 - (void)destroyContext;

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:isolate';
 /// @docImport 'dart:ui';
 ///
 /// @docImport 'package:flutter/widgets.dart';
@@ -118,6 +119,12 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// [BackgroundIsolateBinaryMessenger.ensureInitialized], which takes a
   /// [RootIsolateToken] as its argument. The value `null` is returned when
   /// executed from background isolates.
+  ///
+  /// Background isolates spawned via [Isolate.spawn] share the root isolate's
+  /// isolate group and are not automatically terminated when the host
+  /// `FlutterEngine` is destroyed. Terminate spawned background isolates before
+  /// destroying the host engine so they do not keep the shared isolate group
+  /// heap and native GPU resources alive.
   static ui.RootIsolateToken? get rootIsolateToken => ui.RootIsolateToken.instance;
 
   /// The low level buffering and dispatch mechanism for messages sent by

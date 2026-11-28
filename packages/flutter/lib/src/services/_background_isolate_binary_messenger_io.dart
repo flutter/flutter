@@ -12,6 +12,14 @@ import 'binary_messenger.dart';
 import 'binding.dart';
 
 /// A [BinaryMessenger] for use on background (non-root) isolates.
+///
+/// Background isolates spawned from the root isolate via `Isolate.spawn` share
+/// the engine's Dart isolate group and are not automatically terminated when
+/// the host `FlutterEngine` is destroyed. Allowing spawned isolates to outlive
+/// their host engine keeps the shared isolate group heap alive, which can
+/// retain native GPU resources or cause crashes during subsequent garbage
+/// collection. Terminate background isolates before destroying the host engine,
+/// or retain and reuse the engine across host lifecycle changes.
 class BackgroundIsolateBinaryMessenger extends BinaryMessenger {
   BackgroundIsolateBinaryMessenger._();
 
