@@ -2,8 +2,36 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/toolchain/toolchain.gni")
 import("//flutter/build/zip_bundle.gni")
 import("//flutter/impeller/tools/impeller.gni")
+
+if (is_mac) {
+  import("//build/config/darwin/darwin_sdk.gni")
+}
+
+declare_args() {
+  # Prelinks libimpeller.a into a single object that only exports the C API.
+  # On Windows, renames every other symbol in impeller.lib instead.
+  impeller_prelink_static_library = true
+}
+
+_prelink_static_library = impeller_prelink_static_library && is_clang &&
+                          (is_mac || is_linux || is_android || is_win)
+
+if (host_os == "win") {
+  _buildtools_host_dir = "$buildtools_path/windows-${host_cpu}"
+} else {
+  _buildtools_host_dir = "$buildtools_path/${host_os}-${host_cpu}"
+}
+
+if (is_win) {
+  _static_library_prefix = ""
+  _static_library_extension = "lib"
+} else {
+  _static_library_prefix = "lib"
+  _static_library_extension = "a"
+}
 
 embed_blob("embedded_icu_data") {
   symbol_name = "embedded_icu_data"
@@ -103,16 +131,156 @@ impeller_component("shared_library") {
   deps = [ ":interop" ]
 }
 
-impeller_component("static_library") {
+impeller_component("static_library_archive") {
   target_type = "static_library"
 
   complete_static_lib = true
 
-  output_name = "impeller"
+  if (_prelink_static_library) {
+    output_name = "impeller_unprelinked"
+  } else {
+    output_name = "impeller"
+  }
 
   deps = [ ":interop" ]
   if (use_flutter_cxx) {
     deps += [ "//flutter/third_party/libcxx" ]
+  }
+}
+
+if (_prelink_static_library) {
+  # See prelink_static_library.py.
+  action("static_library") {
+    script = "prelink_static_library.py"
+
+    _archive = "$target_out_dir/${_static_library_prefix}impeller_unprelinked.${_static_library_extension}"
+    _work_dir = "$target_gen_dir/prelink_static_library"
+
+    inputs = [
+      _archive,
+      "impeller.h",
+    ]
+    outputs = [ "$target_out_dir/${_static_library_prefix}impeller.${_static_library_extension}" ]
+
+    args = [
+      "--input",
+      rebase_path(_archive, root_build_dir),
+      "--output",
+      rebase_path(outputs[0], root_build_dir),
+      "--header",
+      rebase_path("impeller.h", root_build_dir),
+      "--clang-bin",
+      rebase_path("$_buildtools_host_dir/clang/bin", root_build_dir),
+      "--work-dir",
+      rebase_path(_work_dir, root_build_dir),
+    ]
+
+    if (is_mac) {
+      if (target_cpu == "x64") {
+        _arch = "x86_64"
+      } else {
+        _arch = target_cpu
+      }
+      args += [
+        "--format",
+        "macho",
+        "--arch",
+        _arch,
+        "--sysroot",
+        rebase_path(mac_sdk_path, root_build_dir),
+        "--ld",
+        rebase_path("$mac_host_toolchain_path/usr/bin/ld", root_build_dir),
+      ]
+    } else if (is_win) {
+      args += [
+        "--format",
+        "coff",
+      ]
+    } else {
+      args += [
+        "--format",
+        "elf",
+      ]
+    }
+
+    deps = [ ":static_library_archive" ]
+  }
+} else {
+  group("static_library") {
+    public_deps = [ ":static_library_archive" ]
+  }
+}
+
+_build_static_library_link_test =
+    _prelink_static_library && (is_mac || is_linux || is_win)
+
+if (_build_static_library_link_test) {
+  embed_blob("static_library_link_test_font") {
+    symbol_name = "static_library_link_test_font"
+    blob = "//flutter/txt/third_party/fonts/Roboto-Regular.ttf"
+    hdr = "$target_gen_dir/static_library_link_test_font.h"
+    cc = "$target_gen_dir/static_library_link_test_font.cc"
+    deps = []
+  }
+
+  # Links the prelinked static library, and nothing else from the engine. See
+  # static_library_link_test.cc.
+  executable("static_library_link_test") {
+    testonly = true
+
+    output_name = "impeller_static_library_link_test"
+
+    sources = [ "static_library_link_test.cc" ]
+
+    # Uses the Impeller and ICU headers without depending on their targets,
+    # which would link other copies of the libraries.
+    check_includes = false
+
+    include_dirs = [
+      "//flutter",
+      "//flutter/third_party/icu/source/common",
+    ]
+
+    libs = [ "$target_out_dir/${_static_library_prefix}impeller.${_static_library_extension}" ]
+
+    deps = [
+      ":static_library",
+      ":static_library_link_test_font",
+    ]
+
+    if (is_mac) {
+      frameworks = [
+        "AppKit.framework",
+        "CoreFoundation.framework",
+        "CoreGraphics.framework",
+        "CoreText.framework",
+        "Foundation.framework",
+        "ImageIO.framework",
+        "Metal.framework",
+        "MetalPerformanceShaders.framework",
+        "QuartzCore.framework",
+      ]
+    } else if (is_win) {
+      libs += [
+        "rpcrt4.lib",
+        "shlwapi.lib",
+        "user32.lib",
+        "winmm.lib",
+      ]
+    } else {
+      libs += [
+        "dl",
+        "m",
+        "pthread",
+      ]
+    }
+  }
+}
+
+group("static_library_tests") {
+  testonly = true
+  if (_build_static_library_link_test) {
+    deps = [ ":static_library_link_test" ]
   }
 }
 

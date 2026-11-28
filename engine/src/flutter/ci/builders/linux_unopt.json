@@ -99,6 +99,11 @@
                     "name": "Tests of tools/gn",
                     "language": "python3",
                     "script": "flutter/tools/gn_test.py"
+                },
+                {
+                    "name": "Tests of impeller/toolkit/interop/prelink_static_library.py",
+                    "language": "python3",
+                    "script": "flutter/impeller/toolkit/interop/prelink_static_library_test.py"
                 }
             ],
             "timeout": 120

@@ -577,6 +577,15 @@ def run_cc_tests(
     if is_linux():
       xvfb.stop_virtual_x(build_name)
 
+  if is_mac() or is_linux() or is_windows():
+    # Links the prelinked Impeller static library.
+    run_engine_executable(
+        build_dir,
+        'impeller_static_library_link_test',
+        executable_filter,
+        coverage=coverage,
+    )
+
   if is_mac():
     # macOS Desktop unit tests written in Swift.
     run_engine_executable(
