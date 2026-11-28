@@ -491,7 +491,12 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
         (style == null) != (textSpan.style == null)) {
       return RenderComparison.layout;
     }
-    RenderComparison result = recognizer == textSpan.recognizer
+    RenderComparison result =
+        recognizer == textSpan.recognizer &&
+            semanticsLabel == textSpan.semanticsLabel &&
+            semanticsIdentifier == textSpan.semanticsIdentifier &&
+            locale == textSpan.locale &&
+            spellOut == textSpan.spellOut
         ? RenderComparison.identical
         : RenderComparison.metadata;
     if (style != null) {
@@ -533,6 +538,8 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
         other.recognizer == recognizer &&
         other.semanticsLabel == semanticsLabel &&
         other.semanticsIdentifier == semanticsIdentifier &&
+        other.locale == locale &&
+        other.spellOut == spellOut &&
         onEnter == other.onEnter &&
         onExit == other.onExit &&
         mouseCursor == other.mouseCursor &&
@@ -546,6 +553,8 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     recognizer,
     semanticsLabel,
     semanticsIdentifier,
+    locale,
+    spellOut,
     onEnter,
     onExit,
     mouseCursor,
