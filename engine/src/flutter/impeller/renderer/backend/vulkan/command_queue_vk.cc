@@ -6,6 +6,7 @@
 
 #include "impeller/renderer/backend/vulkan/command_queue_vk.h"
 
+#include "flutter/fml/trace_event.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
@@ -23,6 +24,7 @@ CommandQueueVK::~CommandQueueVK() = default;
 absl::Status CommandQueueVK::Submit(
     const std::vector<std::shared_ptr<CommandBuffer>>& buffers,
     const CompletionCallback& completion_callback) {
+  TRACE_EVENT0("impeller", "CommandQueueVK::Submit");
   if (buffers.empty()) {
     return absl::Status(absl::StatusCode::kInvalidArgument,
                         "No command buffers provided.");
