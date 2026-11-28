@@ -149,6 +149,9 @@ object BaseFlutterTaskHelper {
 
             args("-dAndroidArchs=${baseFlutterTask.targetPlatformValues!!.joinToString(" ")}")
             args("-dMinSdkVersion=${baseFlutterTask.minSdkVersion}")
+            baseFlutterTask.ndkVersion?.let {
+                args("-dNdkVersion=$it")
+            }
             args(generateRuleNames(baseFlutterTask))
         }
 

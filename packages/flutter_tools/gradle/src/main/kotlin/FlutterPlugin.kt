@@ -544,12 +544,14 @@ class FlutterPlugin : Plugin<Project> {
             targetPlatforms: List<String>
         ): TaskProvider<FlutterTask> {
             val buildMode: String = flutterBuildModeFor(variant)
+            val configuredNdkVersion: String? = FlutterPluginUtils.getConfiguredNdkVersion(project)
             return project.tasks.register(flutterCompileTaskName(variant.name), FlutterTask::class.java) {
                 configureCompileTask(
                     project = project,
                     flutterGradlePlugin = flutterGradlePlugin,
                     buildMode = buildMode,
                     minSdkVersion = variant.minSdk.apiLevel,
+                    ndkVersion = configuredNdkVersion,
                     variantName = variant.name,
                     flavorName = variant.flavorName ?: "",
                     targetPlatforms = targetPlatforms
@@ -578,6 +580,7 @@ class FlutterPlugin : Plugin<Project> {
             flutterGradlePlugin: FlutterPlugin,
             buildMode: String,
             minSdkVersion: Int,
+            ndkVersion: String?,
             variantName: String,
             flavorName: String,
             targetPlatforms: List<String>
@@ -587,6 +590,7 @@ class FlutterPlugin : Plugin<Project> {
             flutterExecutable = flutterGradlePlugin.flutterExecutable
             this.buildMode = buildMode
             this.minSdkVersion = minSdkVersion
+            this.ndkVersion = ndkVersion
             localEngine = flutterGradlePlugin.localEngine
             localEngineHost = flutterGradlePlugin.localEngineHost
             localEngineSrcPath = flutterGradlePlugin.localEngineSrcPath

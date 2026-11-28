@@ -19,6 +19,7 @@ import '../../build_info.dart'
         getCpuArchsFromEnv,
         kAndroidArchs,
         kIosArchs,
+        kNdkVersion,
         kSdkRoot;
 import '../../build_system/exceptions.dart' show MissingDefineException;
 import '../../context/android_context.dart' show AndroidSdkProvider;
@@ -422,12 +423,14 @@ final class AndroidAssetTarget extends CodeAssetTarget {
     required super.architecture,
     required Map<String, String> environmentDefines,
     required super.supportedAssetTypes,
-  }) : _androidCodeConfig = AndroidCodeConfig(
+  }) : _ndkVersion = environmentDefines[kNdkVersion],
+       _androidCodeConfig = AndroidCodeConfig(
          targetNdkApi: targetAndroidNdkApi(environmentDefines),
        ),
        super(os: OS.android);
 
   final AndroidSdkProvider? _androidSdkProvider;
+  final String? _ndkVersion;
   final AndroidCodeConfig? _androidCodeConfig;
 
   @override
@@ -436,6 +439,7 @@ final class AndroidAssetTarget extends CodeAssetTarget {
     bool mustMatchAppBuild = true,
   }) async => cCompilerConfigSync = await cCompilerConfigAndroid(
     androidSdk: _androidSdkProvider?.androidSdk,
+    ndkVersion: _ndkVersion,
   );
 
   @override

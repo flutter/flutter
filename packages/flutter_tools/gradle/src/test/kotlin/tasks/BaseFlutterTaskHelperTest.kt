@@ -33,6 +33,7 @@ class BaseFlutterTaskHelperTest {
         internal const val EXTRA_GEN_SNAPSHOT_OPTIONS_TEST = "--debugger"
         internal const val TARGET_PLATFORM_VALUES_JOINED_LIST = "android linux"
         val MIN_SDK_VERSION_TEST = DependencyVersionChecker.warnMinSdkVersion
+        internal const val NDK_VERSION_TEST = "27.0.12077973"
 
         // Using File.separator to ensure all paths use platform-specific separators
         internal val FLUTTER_ROOT_ABSOLUTE_PATH_TEST = "/path/to/flutter".replace("/", File.separator)
@@ -209,6 +210,7 @@ class BaseFlutterTaskHelperTest {
         every { baseFlutterTask.targetPlatformValues } returns BaseFlutterTaskPropertiesTest.targetPlatformValuesList
 
         every { baseFlutterTask.minSdkVersion } returns BaseFlutterTaskPropertiesTest.MIN_SDK_VERSION_TEST
+        every { baseFlutterTask.ndkVersion } returns BaseFlutterTaskPropertiesTest.NDK_VERSION_TEST
 
         // Mock the method calls. We collapse all the args mock calls into four calls.
         every { mockExecSpec.executable(any<String>()) } returns mockExecSpec
@@ -255,6 +257,7 @@ class BaseFlutterTaskHelperTest {
         verify { mockExecSpec.args("--ExtraFrontEndOptions=${BaseFlutterTaskPropertiesTest.EXTRA_FRONTEND_OPTIONS_TEST}") }
         verify { mockExecSpec.args("-dAndroidArchs=${BaseFlutterTaskPropertiesTest.TARGET_PLATFORM_VALUES_JOINED_LIST}") }
         verify { mockExecSpec.args("-dMinSdkVersion=${BaseFlutterTaskPropertiesTest.MIN_SDK_VERSION_TEST}") }
+        verify { mockExecSpec.args("-dNdkVersion=${BaseFlutterTaskPropertiesTest.NDK_VERSION_TEST}") }
         verify { mockExecSpec.args(ruleNamesList) }
     }
 
@@ -310,6 +313,7 @@ class BaseFlutterTaskHelperTest {
         every { baseFlutterTask.targetPlatformValues } returns BaseFlutterTaskPropertiesTest.targetPlatformValuesList
 
         every { baseFlutterTask.minSdkVersion } returns BaseFlutterTaskPropertiesTest.MIN_SDK_VERSION_TEST
+        every { baseFlutterTask.ndkVersion } returns null
 
         // Mock the method calls. We collapse all the args mock calls into four calls.
         every { mockExecSpec.executable(any<String>()) } returns mockExecSpec

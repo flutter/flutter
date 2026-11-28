@@ -33,6 +33,10 @@ open class BaseFlutterTask : DefaultTask() {
 
     @Optional
     @Input
+    var ndkVersion: String? = null
+
+    @Optional
+    @Input
     var localEngine: String? = null
 
     @Optional
