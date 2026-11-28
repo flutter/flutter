@@ -340,6 +340,11 @@ const android::HardwareBuffer* AHBTextureSourceVK::GetBackingStore() const {
   return backing_store_.get();
 }
 
+std::shared_ptr<android::HardwareBuffer>
+AHBTextureSourceVK::GetSharedBackingStore() const {
+  return backing_store_;
+}
+
 vk::UniqueImage AHBTextureSourceVK::CreateVKImageWrapperForAndroidHarwareBuffer(
     const vk::Device& device,
     const AHBProperties& ahb_props,

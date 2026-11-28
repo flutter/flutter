@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <vector>
 
 #include "flutter/fml/closure.h"
 #include "impeller/base/thread.h"
@@ -129,6 +130,8 @@ class AHBSwapchainImplVK final
       IPLR_GUARDED_BY(currently_displayed_texture_mutex_);
   uint64_t last_completed_present_id_
       IPLR_GUARDED_BY(currently_displayed_texture_mutex_) = 0;
+  std::vector<std::shared_ptr<AHBTextureSourceVK>> in_flight_textures_
+      IPLR_GUARDED_BY(currently_displayed_texture_mutex_);
 
   std::vector<std::unique_ptr<AHBFrameSynchronizerVK>> frame_data_;
   size_t frame_index_ = 0;
@@ -158,7 +161,7 @@ class AHBSwapchainImplVK final
       const std::shared_ptr<AHBTextureSourceVK>& texture) const;
 
   void OnTextureUpdatedOnSurfaceControl(
-      std::shared_ptr<AHBTextureSourceVK> texture,
+      const std::weak_ptr<AHBTextureSourceVK>& weak_texture,
       ASurfaceTransactionStats* stats,
       uint64_t present_id);
 };

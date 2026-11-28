@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <unistd.h>
+
+#include <algorithm>
+
 #include "gtest/gtest.h"
 
 #include "impeller/renderer/backend/vulkan/android/android_test_utils.h"
@@ -10,6 +14,7 @@
 #include "impeller/renderer/backend/vulkan/swapchain/ahb/ahb_swapchain_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
 #include "impeller/renderer/render_pass.h"
+#include "impeller/toolkit/android/hardware_buffer.h"
 #include "impeller/toolkit/android/proc_table.h"
 #include "impeller/toolkit/android/surface_control.h"
 
@@ -183,5 +188,101 @@ TEST(AndroidAHBSwapchainTest, TracesOnscreenCommandBufferStartAndEnd) {
   }
 }
 #endif  // IMPELLER_DEBUG
+
+TEST(AndroidAHBSwapchainTest,
+     AHBSwapchainTeardownReleasesVulkanResourcesWithPendingCallback) {
+  if (!HardwareBuffer::IsAvailableOnPlatform()) {
+    GTEST_SKIP() << "Hardware buffers are not supported on this platform.";
+  }
+
+  struct PendingTransactionCallback {
+    void* context = nullptr;
+    ASurfaceTransaction_OnComplete func = nullptr;
+  };
+  static PendingTransactionCallback g_pending;
+  g_pending = {};
+
+  struct ScopedProcTableOverride {
+    ProcTable& table = GetMutableProcTable();
+    decltype(table.ASurfaceTransaction_create.proc) orig_create =
+        table.ASurfaceTransaction_create.proc;
+    decltype(table.ASurfaceTransaction_delete.proc) orig_delete =
+        table.ASurfaceTransaction_delete.proc;
+    decltype(table.ASurfaceTransaction_setBuffer.proc) orig_set_buffer =
+        table.ASurfaceTransaction_setBuffer.proc;
+    decltype(table.ASurfaceTransaction_setOnComplete.proc)
+        orig_set_on_complete = table.ASurfaceTransaction_setOnComplete.proc;
+    decltype(table.ASurfaceTransaction_apply.proc) orig_apply =
+        table.ASurfaceTransaction_apply.proc;
+
+    ScopedProcTableOverride() {
+      table.ASurfaceTransaction_create.proc = []() -> ASurfaceTransaction* {
+        return reinterpret_cast<ASurfaceTransaction*>(0x1);
+      };
+      table.ASurfaceTransaction_delete.proc = [](ASurfaceTransaction*) {};
+      table.ASurfaceTransaction_setBuffer.proc =
+          [](ASurfaceTransaction*, ASurfaceControl*, AHardwareBuffer*,
+             int acquire_fence_fd) {
+            if (acquire_fence_fd >= 0) {
+              ::close(acquire_fence_fd);
+            }
+          };
+      table.ASurfaceTransaction_setOnComplete.proc =
+          [](ASurfaceTransaction*, void* context,
+             ASurfaceTransaction_OnComplete func) {
+            g_pending.context = context;
+            g_pending.func = func;
+          };
+      table.ASurfaceTransaction_apply.proc = [](ASurfaceTransaction*) {};
+    }
+
+    ~ScopedProcTableOverride() {
+      table.ASurfaceTransaction_create.proc = orig_create;
+      table.ASurfaceTransaction_delete.proc = orig_delete;
+      table.ASurfaceTransaction_setBuffer.proc = orig_set_buffer;
+      table.ASurfaceTransaction_setOnComplete.proc = orig_set_on_complete;
+      table.ASurfaceTransaction_apply.proc = orig_apply;
+    }
+  } proc_override;
+
+  auto context = MockVulkanContextBuilder()
+                     .SetDeviceExtensions(kAndroidDeviceExtensions)
+                     .Build();
+  const vk::Device device = context->GetDevice();
+
+  auto ahb_swapchain = std::shared_ptr<AHBSwapchainVK>(new AHBSwapchainVK(
+      context, std::make_shared<FakeSurfaceControl>(), {}, {100, 100}, false));
+
+  auto surface = ahb_swapchain->AcquireNextDrawable();
+  ASSERT_TRUE(surface);
+  auto cmd_buffer = context->CreateCommandBuffer();
+  ASSERT_TRUE(cmd_buffer);
+  ahb_swapchain->AddFinalCommandBuffer(std::move(cmd_buffer));
+  ASSERT_TRUE(surface->Present());
+  surface.reset();
+
+  ASSERT_NE(g_pending.func, nullptr);
+
+  // Destroy the swapchain before SurfaceFlinger invokes the transaction
+  // completion callback. All Vulkan child objects owned by AHBTextureSourceVK
+  // must be destroyed before vkDestroyDevice runs during context shutdown.
+  ahb_swapchain.reset();
+
+  auto called_functions = GetMockVulkanFunctions(device);
+  EXPECT_NE(std::find(called_functions->begin(), called_functions->end(),
+                      "vkDestroyImage"),
+            called_functions->end());
+  EXPECT_NE(std::find(called_functions->begin(), called_functions->end(),
+                      "vkDestroyImageView"),
+            called_functions->end());
+
+  context->Shutdown();
+  context.reset();
+
+  // Invoking the retained completion callback after swapchain and context
+  // teardown should safely no-op.
+  g_pending.func(g_pending.context,
+                 reinterpret_cast<ASurfaceTransactionStats*>(0x1));
+}
 
 }  // namespace impeller::android::testing
