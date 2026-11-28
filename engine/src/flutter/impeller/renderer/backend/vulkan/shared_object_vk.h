@@ -6,7 +6,9 @@
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_SHARED_OBJECT_VK_H_
 
 #include <memory>
+#include <utility>
 
+#include "impeller/renderer/backend/vulkan/device_holder_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 
 namespace impeller {
@@ -23,7 +25,20 @@ class SharedObjectVKT : public SharedObjectVK {
   using UniqueResource =
       vk::UniqueHandle<Resource, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE>;
 
-  explicit SharedObjectVKT(UniqueResource res) : resource_(std::move(res)) {}
+  SharedObjectVKT(UniqueResource res,
+                  std::weak_ptr<DeviceHolderVK> device_holder)
+      : resource_(std::move(res)), device_holder_(std::move(device_holder)) {}
+
+  ~SharedObjectVKT() override {
+    auto device_holder = device_holder_.lock();
+    if (!device_holder || !device_holder->GetDevice()) {
+      // The device has already been destroyed. Release the handle without
+      // calling vkDestroy* on a dead VkDevice.
+      resource_.release();
+    } else {
+      resource_.reset();
+    }
+  }
 
   // NOLINTNEXTLINE(google-explicit-constructor)
   operator Resource() const { return Get(); }
@@ -34,6 +49,7 @@ class SharedObjectVKT : public SharedObjectVK {
 
  private:
   UniqueResource resource_;
+  std::weak_ptr<DeviceHolderVK> device_holder_;
 
   SharedObjectVKT(const SharedObjectVKT&) = delete;
 
@@ -42,11 +58,13 @@ class SharedObjectVKT : public SharedObjectVK {
 
 template <class T>
 auto MakeSharedVK(
-    vk::UniqueHandle<T, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE> handle) {
+    vk::UniqueHandle<T, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE> handle,
+    std::weak_ptr<DeviceHolderVK> device_holder) {
   if (!handle) {
     return std::shared_ptr<SharedObjectVKT<T>>{nullptr};
   }
-  return std::make_shared<SharedObjectVKT<T>>(std::move(handle));
+  return std::make_shared<SharedObjectVKT<T>>(std::move(handle),
+                                              std::move(device_holder));
 }
 
 template <class T>

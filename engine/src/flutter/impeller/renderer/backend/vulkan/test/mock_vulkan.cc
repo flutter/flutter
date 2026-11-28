@@ -68,8 +68,6 @@ struct MockSwapchainKHR {
 
 struct MockSemaphore {};
 
-struct MockFramebuffer {};
-
 static ISize currentImageSize = ISize{1, 1};
 
 class MockPhysicalDevice {
@@ -1158,14 +1156,57 @@ VkResult vkCreateFramebuffer(VkDevice device,
                              const VkFramebufferCreateInfo* pCreateInfo,
                              const VkAllocationCallbacks* pAllocator,
                              VkFramebuffer* pFramebuffer) {
-  *pFramebuffer = reinterpret_cast<VkFramebuffer>(new MockFramebuffer());
+  static std::atomic_uint64_t next_handle = 0x1000;
+  *pFramebuffer = reinterpret_cast<VkFramebuffer>(next_handle.fetch_add(1));
   return VK_SUCCESS;
 }
 
 void vkDestroyFramebuffer(VkDevice device,
                           VkFramebuffer framebuffer,
                           const VkAllocationCallbacks* pAllocator) {
-  delete reinterpret_cast<MockFramebuffer*>(framebuffer);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
+  mock_device->AddCalledFunction("vkDestroyFramebuffer");
+}
+
+void vkDestroyRenderPass(VkDevice device,
+                         VkRenderPass renderPass,
+                         const VkAllocationCallbacks* pAllocator) {
+  MockDevice* mock_device = MockDevice::Unwrap(device);
+  mock_device->AddCalledFunction("vkDestroyRenderPass");
+}
+
+VkResult vkCreateSampler(VkDevice device,
+                         const VkSamplerCreateInfo* pCreateInfo,
+                         const VkAllocationCallbacks* pAllocator,
+                         VkSampler* pSampler) {
+  static std::atomic_uint64_t next_handle = 0x1000;
+  *pSampler = reinterpret_cast<VkSampler>(next_handle.fetch_add(1));
+  return VK_SUCCESS;
+}
+
+void vkDestroySampler(VkDevice device,
+                      VkSampler sampler,
+                      const VkAllocationCallbacks* pAllocator) {
+  MockDevice* mock_device = MockDevice::Unwrap(device);
+  mock_device->AddCalledFunction("vkDestroySampler");
+}
+
+VkResult vkCreateSamplerYcbcrConversion(
+    VkDevice device,
+    const VkSamplerYcbcrConversionCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkSamplerYcbcrConversion* pYcbcrConversion) {
+  static std::atomic_uint64_t next_handle = 0x1000;
+  *pYcbcrConversion =
+      reinterpret_cast<VkSamplerYcbcrConversion>(next_handle.fetch_add(1));
+  return VK_SUCCESS;
+}
+
+void vkDestroySamplerYcbcrConversion(VkDevice device,
+                                     VkSamplerYcbcrConversion ycbcrConversion,
+                                     const VkAllocationCallbacks* pAllocator) {
+  MockDevice* mock_device = MockDevice::Unwrap(device);
+  mock_device->AddCalledFunction("vkDestroySamplerYcbcrConversion");
 }
 
 void vkTrimCommandPool(VkDevice device,
@@ -1296,6 +1337,8 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return reinterpret_cast<PFN_vkVoidFunction>(vkBindBufferMemory);
   } else if (strcmp("vkCreateRenderPass", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreateRenderPass);
+  } else if (strcmp("vkDestroyRenderPass", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyRenderPass);
   } else if (strcmp("vkCreateDescriptorSetLayout", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreateDescriptorSetLayout);
   } else if (strcmp("vkCreatePipelineLayout", pName) == 0) {
@@ -1401,6 +1444,17 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreateFramebuffer);
   } else if (strcmp("vkDestroyFramebuffer", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyFramebuffer);
+  } else if (strcmp("vkCreateSampler", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCreateSampler);
+  } else if (strcmp("vkDestroySampler", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDestroySampler);
+  } else if (strcmp("vkCreateSamplerYcbcrConversion", pName) == 0 ||
+             strcmp("vkCreateSamplerYcbcrConversionKHR", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCreateSamplerYcbcrConversion);
+  } else if (strcmp("vkDestroySamplerYcbcrConversion", pName) == 0 ||
+             strcmp("vkDestroySamplerYcbcrConversionKHR", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(
+        vkDestroySamplerYcbcrConversion);
   } else if (strcmp("vkTrimCommandPool", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkTrimCommandPool);
   } else if (strcmp("vkGetPipelineCacheData", pName) == 0) {
