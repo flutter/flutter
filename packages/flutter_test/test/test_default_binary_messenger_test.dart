@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
@@ -43,6 +44,25 @@ class WorkingTestDelegate extends BinaryMessenger {
     ByteData? data,
     ui.PlatformMessageResponseCallback? callback,
   ) => throw UnimplementedError();
+  @override
+  void setMessageHandler(String channel, MessageHandler? handler) => throw UnimplementedError();
+}
+
+class PendingTestDelegate extends BinaryMessenger {
+  PendingTestDelegate(this.future);
+
+  final Future<ByteData?> future;
+
+  @override
+  Future<ByteData?>? send(String channel, ByteData? message) => future;
+
+  @override
+  Future<void> handlePlatformMessage(
+    String channel,
+    ByteData? data,
+    ui.PlatformMessageResponseCallback? callback,
+  ) => throw UnimplementedError();
+
   @override
   void setMessageHandler(String channel, MessageHandler? handler) => throw UnimplementedError();
 }
@@ -138,4 +158,31 @@ void main() {
     expect(done, isTrue);
     // A short timeout makes a hang in tear down fail fast.
   }, timeout: const Timeout(Duration(seconds: 5)));
+
+  test('clearPendingMessages resets pendingMessageCount', () {
+    final completer = Completer<ByteData?>();
+    final binaryMessenger = TestDefaultBinaryMessenger(PendingTestDelegate(completer.future));
+    expect(binaryMessenger.pendingMessageCount, 0);
+
+    unawaited(binaryMessenger.send('unanswered_channel', null));
+    expect(binaryMessenger.pendingMessageCount, 1);
+
+    binaryMessenger.clearPendingMessages();
+    expect(binaryMessenger.pendingMessageCount, 0);
+
+    // Completing afterwards is a no-op and does not throw.
+    completer.complete();
+  });
+
+  group('pending messages isolation across tests', () {
+    testWidgets('first test sends unanswered platform message', (WidgetTester tester) async {
+      expect(tester.binding.defaultBinaryMessenger.pendingMessageCount, 0);
+      unawaited(tester.binding.defaultBinaryMessenger.send('unanswered_channel', null));
+      expect(tester.binding.defaultBinaryMessenger.pendingMessageCount, 1);
+    });
+
+    testWidgets('second test starts with 0 pending messages', (WidgetTester tester) async {
+      expect(tester.binding.defaultBinaryMessenger.pendingMessageCount, 0);
+    });
+  });
 }
