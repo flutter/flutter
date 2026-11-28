@@ -56,8 +56,10 @@ FLUTTER_ASSERT_ARC
     return NO;
   }
 
-  if ([semanticsObject hasChildren]) {
-    return NO;
+  if (@available(iOS 27.0, *)) {
+    if ([semanticsObject hasChildren]) {
+      return NO;
+    }
   }
 
   if (bridge->isVoiceOverRunning()) {
@@ -133,33 +135,44 @@ FLUTTER_ASSERT_ARC
   if (!semanticsObject.bridge) {
     return nil;
   }
-  return ([semanticsObject uid] == kRootNodeId) ? semanticsObject.bridgeView
-                                                : semanticsObject.parent.accessibilityContainer;
+  if (@available(iOS 27.0, *)) {
+    return ([semanticsObject uid] == kRootNodeId) ? semanticsObject.bridgeView
+                                                  : semanticsObject.parent.accessibilityContainer;
+  }
+  return semanticsObject.accessibilityContainer;
 }
 
 - (NSInteger)accessibilityElementCount {
-  return self.semanticsObject.children.count;
+  if (@available(iOS 27.0, *)) {
+    return self.semanticsObject.children.count;
+  }
+  return 0;
 }
 
 - (nullable id)accessibilityElementAtIndex:(NSInteger)index {
-  NSArray<SemanticsObject*>* children = self.semanticsObject.children;
-  if (index < 0 || index >= static_cast<NSInteger>(children.count)) {
-    return nil;
+  if (@available(iOS 27.0, *)) {
+    NSArray<SemanticsObject*>* children = self.semanticsObject.children;
+    if (index < 0 || index >= static_cast<NSInteger>(children.count)) {
+      return nil;
+    }
+    SemanticsObject* child = children[index];
+    if ([child hasChildren]) {
+      return child.accessibilityContainer;
+    }
+    return child.nativeAccessibility;
   }
-  SemanticsObject* child = children[index];
-  if ([child hasChildren]) {
-    return child.accessibilityContainer;
-  }
-  return child.nativeAccessibility;
+  return nil;
 }
 
 - (NSInteger)indexOfAccessibilityElement:(id)element {
-  NSArray<SemanticsObject*>* children = self.semanticsObject.children;
-  for (size_t i = 0; i < children.count; i++) {
-    SemanticsObject* child = children[i];
-    if ((![child hasChildren] && child.nativeAccessibility == element) ||
-        ([child hasChildren] && [child accessibilityContainer] == element)) {
-      return i;
+  if (@available(iOS 27.0, *)) {
+    NSArray<SemanticsObject*>* children = self.semanticsObject.children;
+    for (size_t i = 0; i < children.count; i++) {
+      SemanticsObject* child = children[i];
+      if ((![child hasChildren] && child.nativeAccessibility == element) ||
+          ([child hasChildren] && [child accessibilityContainer] == element)) {
+        return i;
+      }
     }
   }
   return NSNotFound;
