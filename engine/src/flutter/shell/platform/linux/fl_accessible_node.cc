@@ -61,6 +61,7 @@ struct FlAccessibleNodePrivate {
   gsize actions_length;
   GPtrArray* children;
   FlutterSemanticsFlags flags;
+  int32_t heading_level;
 };
 
 enum { PROP_0, PROP_ENGINE, PROP_VIEW_ID, PROP_ID, PROP_LAST };
@@ -242,8 +243,11 @@ static AtkRole fl_accessible_node_get_role(AtkObject* accessible) {
   if (priv->flags.is_text_field) {
     return ATK_ROLE_TEXT;
   }
-  if (priv->flags.is_header) {
+  if (priv->heading_level > 0) {
     return ATK_ROLE_HEADING;
+  }
+  if (priv->flags.is_header) {
+    return ATK_ROLE_HEADER;
   }
   if (priv->flags.is_link) {
     return ATK_ROLE_LINK;
@@ -253,6 +257,22 @@ static AtkRole fl_accessible_node_get_role(AtkObject* accessible) {
   }
 
   return ATK_ROLE_PANEL;
+}
+
+// Implements AtkObject::get_attributes.
+static AtkAttributeSet* fl_accessible_node_get_attributes(
+    AtkObject* accessible) {
+  FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(accessible);
+  AtkAttributeSet* attributes = nullptr;
+
+  if (priv->heading_level > 0) {
+    AtkAttribute* level = g_new(AtkAttribute, 1);
+    level->name = g_strdup("level");
+    level->value = g_strdup_printf("%d", priv->heading_level);
+    attributes = g_slist_prepend(attributes, level);
+  }
+
+  return attributes;
 }
 
 // Implements AtkObject::ref_state_set.
@@ -502,6 +522,7 @@ static void fl_accessible_node_class_init(FlAccessibleNodeClass* klass) {
   ATK_OBJECT_CLASS(klass)->ref_child = fl_accessible_node_ref_child;
   ATK_OBJECT_CLASS(klass)->get_role = fl_accessible_node_get_role;
   ATK_OBJECT_CLASS(klass)->ref_state_set = fl_accessible_node_ref_state_set;
+  ATK_OBJECT_CLASS(klass)->get_attributes = fl_accessible_node_get_attributes;
   FL_ACCESSIBLE_NODE_CLASS(klass)->set_name = fl_accessible_node_set_name_impl;
   FL_ACCESSIBLE_NODE_CLASS(klass)->set_extents =
       fl_accessible_node_set_extents_impl;
@@ -816,6 +837,14 @@ void fl_accessible_node_set_text_direction(FlAccessibleNode* self,
 
   return FL_ACCESSIBLE_NODE_GET_CLASS(self)->set_text_direction(self,
                                                                 direction);
+}
+
+void fl_accessible_node_set_heading_level(FlAccessibleNode* self,
+                                          int32_t heading_level) {
+  g_return_if_fail(FL_IS_ACCESSIBLE_NODE(self));
+
+  FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(self);
+  priv->heading_level = heading_level;
 }
 
 void fl_accessible_node_perform_action(FlAccessibleNode* self,
