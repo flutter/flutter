@@ -144,6 +144,9 @@ class HostBuffer {
 
   /// @brief Retrieve internal buffer state for test expectations.
   TestStateQuery GetStateForTest();
+  std::weak_ptr<const DeviceBuffer> GetCurrentBufferForTest() const {
+    return GetCurrentBuffer();
+  }
 
  private:
   [[nodiscard]] std::tuple<Range, std::shared_ptr<DeviceBuffer>, DeviceBuffer*>

@@ -5,6 +5,9 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_DEVICE_HOLDER_VK_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_DEVICE_HOLDER_VK_H_
 
+#include <memory>
+
+#include "impeller/base/thread.h"
 #include "impeller/renderer/backend/vulkan/vk.h"  // IWYU pragma: keep.
 
 namespace impeller {
@@ -22,6 +25,13 @@ class DeviceHolderVK {
   virtual const vk::Device& GetDevice() const = 0;
 
   virtual const vk::PhysicalDevice& GetPhysicalDevice() const = 0;
+
+  // Serializes host queue access with device-wide idle waits.
+  // Acquire this mutex before an individual queue mutex.
+  std::shared_ptr<Mutex> GetQueueHostMutex() const { return queue_host_mutex_; }
+
+ private:
+  const std::shared_ptr<Mutex> queue_host_mutex_ = std::make_shared<Mutex>();
 };
 
 }  // namespace impeller

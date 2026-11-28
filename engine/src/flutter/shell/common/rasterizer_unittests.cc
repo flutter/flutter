@@ -7,9 +7,13 @@
 #include "flow/surface_frame.h"
 #include "flutter/shell/common/rasterizer.h"
 
+#include <chrono>
+#include <future>
 #include <memory>
 #include <optional>
+#include <thread>
 
+#include "flutter/display_list/dl_builder.h"
 #include "flutter/flow/frame_timings.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/time/time_point.h"
@@ -24,7 +28,14 @@
 #include "gmock/gmock.h"
 #if IMPELLER_SUPPORTS_RENDERING
 #include "impeller/display_list/aiks_context.h"  // nogncheck
-#endif                                           // IMPELLER_SUPPORTS_RENDERING
+#if IMPELLER_ENABLE_VULKAN
+#include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"  // nogncheck
+#include "impeller/renderer/blit_pass.h"
+#include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/command_queue.h"
+#include "impeller/renderer/context.h"  // nogncheck
+#endif                                  // IMPELLER_ENABLE_VULKAN
+#endif                                  // IMPELLER_SUPPORTS_RENDERING
 
 using testing::_;
 using testing::ByMove;
@@ -140,6 +151,12 @@ class MockAiksContext : public impeller::AiksContext {
   MOCK_METHOD(void, ClearRenderTargetCache, (), (const, override));
   MOCK_METHOD(void, ClearCachedTextures, (), (const, override));
 };
+
+class MockSnapshotSurfaceProducer : public SnapshotSurfaceProducer {
+ public:
+  MOCK_METHOD(std::unique_ptr<Surface>, CreateSnapshotSurface, (), (override));
+};
+
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }  // namespace
 
@@ -164,6 +181,18 @@ TEST(RasterizerTest, isAiksContextInitialized) {
 }
 
 #if IMPELLER_SUPPORTS_RENDERING
+TEST(RasterizerTest, GetAiksContextWithoutImpellerContextReturnsNull) {
+  NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+  Rasterizer rasterizer(delegate);
+
+  auto& snapshot_delegate =
+      static_cast<SnapshotController::Delegate&>(rasterizer);
+  EXPECT_EQ(snapshot_delegate.GetAiksContext(), nullptr);
+  EXPECT_EQ(snapshot_delegate.CreateHeadlessAiksContext(), nullptr);
+}
+
 TEST(RasterizerTest, NotifyLowMemoryWarningClearsImpellerCache) {
   std::string test_name =
       ::testing::UnitTest::GetInstance()->current_test_info()->name();
@@ -223,6 +252,355 @@ TEST(RasterizerTest, ClearRenderTargetCacheClearsImpellerCache) {
   rasterizer->Setup(std::move(surface));
   rasterizer->ClearRenderTargetCache();
 }
+
+#if IMPELLER_ENABLE_VULKAN
+static void InstallSnapshotBackend(Rasterizer& rasterizer,
+                                   std::shared_ptr<impeller::Context> context) {
+  std::promise<std::shared_ptr<impeller::Context>> promise;
+  promise.set_value(std::move(context));
+  rasterizer.SetImpellerContext(
+      std::make_shared<impeller::ImpellerContextFuture>(promise.get_future()));
+}
+
+TEST(RasterizerTest, HeadlessCacheRepeatedSnapshot) {
+  using namespace impeller::testing;
+  NiceMock<MockDelegate> delegate;
+  Settings settings;
+  settings.enable_impeller = true;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+  auto backend = CreateMockVulkanContextWithShaders();
+  ASSERT_TRUE(backend);
+  Rasterizer rasterizer(delegate);
+  InstallSnapshotBackend(rasterizer, backend);
+  const auto device = backend->GetDevice();
+  auto idle_count = [&] {
+    return GetMockVulkanFunctionCallCount(device, "vkDeviceWaitIdle");
+  };
+  auto& selection = static_cast<SnapshotController::Delegate&>(rasterizer);
+  auto& snapshots = static_cast<SnapshotDelegate&>(rasterizer);
+  auto cached = selection.CreateHeadlessAiksContext();
+  ASSERT_TRUE(cached);
+  auto& arena = cached->GetContentContext().GetTransientsDataBuffer();
+  std::weak_ptr<impeller::AiksContext> cached_weak = cached;
+  const size_t idle_before = idle_count();
+  DisplayListBuilder builder;
+  builder.DrawRect(DlRect::MakeLTRB(1, 1, 6, 6), DlPaint());
+  auto list = builder.Build();
+  for (int i = 0; i < 2; ++i) {
+    const auto slot = arena.GetStateForTest().current_frame;
+    auto texture = snapshots.MakeImpellerSnapshotSync(
+        [&](impeller::AiksContext* used) {
+          EXPECT_EQ(cached.get(), used);
+          return list;
+        },
+        {8, 8}, SnapshotPixelFormat::kDontCare);
+    ASSERT_TRUE(texture);
+    EXPECT_EQ(arena.GetStateForTest().current_frame,
+              (slot + 1) % impeller::kHostBufferArenaSize);
+  }
+  EXPECT_EQ(idle_count(), idle_before);
+  cached.reset();
+  rasterizer.SetImpellerContext(nullptr);
+  EXPECT_TRUE(cached_weak.expired());
+}
+
+TEST(RasterizerTest, HeadlessCacheArenaWithPendingFence) {
+  using namespace impeller::testing;
+  NiceMock<MockDelegate> delegate;
+  Settings settings;
+  settings.enable_impeller = true;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+  auto backend = CreateMockVulkanContextWithShaders();
+  ASSERT_TRUE(backend);
+  Rasterizer rasterizer(delegate);
+  InstallSnapshotBackend(rasterizer, backend);
+  auto cached = static_cast<SnapshotController::Delegate&>(rasterizer)
+                    .CreateHeadlessAiksContext();
+  ASSERT_TRUE(cached);
+  auto& arena = cached->GetContentContext().GetTransientsDataBuffer();
+  auto backing = arena.GetCurrentBufferForTest();
+  auto& snapshots = static_cast<SnapshotDelegate&>(rasterizer);
+  DisplayListBuilder builder;
+  builder.DrawRect(DlRect::MakeLTRB(1, 1, 6, 6), DlPaint());
+  auto list = builder.Build();
+  auto take_snapshot = [&] {
+    return snapshots.MakeImpellerSnapshotSync(
+        [&](impeller::AiksContext*) { return list; }, DlISize{8, 8},
+        SnapshotPixelFormat::kDontCare);
+  };
+  MockFence* pending = nullptr;
+  size_t callback_count = 0;
+  SetMockVulkanQueueSubmitCallback(backend->GetDevice(), [&](MockFence* f) {
+    if (++callback_count > 1) {
+      return;
+    }
+    f->SetStatus(impeller::vk::Result::eNotReady);
+    pending = f;
+  });
+  // Always allow the waiter to drain if an assertion ends the test early.
+  fml::ScopedCleanupClosure release([&] {
+    if (pending) {
+      pending->SetStatus(impeller::vk::Result::eSuccess);
+    }
+  });
+  for (size_t i = 0; i < 2 * impeller::kHostBufferArenaSize; ++i) {
+    ASSERT_TRUE(take_snapshot());
+    ASSERT_NE(pending, nullptr);
+  }
+  EXPECT_EQ(callback_count, 1u);
+  EXPECT_FALSE(backing.expired());
+  // After two rotations the original slot has a new buffer, while the
+  // unsignaled submission still keeps the original buffer alive.
+  EXPECT_NE(backing.lock(), arena.GetCurrentBufferForTest().lock());
+  pending->SetStatus(impeller::vk::Result::eSuccess);
+  pending = nullptr;
+  auto tracker = backend->GetSubmissionTracker();
+  const auto id = tracker->LatestSubmission();
+  const auto deadline =
+      std::chrono::steady_clock::now() + std::chrono::seconds(5);
+  while (tracker->CompletedThrough() < id &&
+         std::chrono::steady_clock::now() < deadline) {
+    std::this_thread::yield();
+  }
+  ASSERT_EQ(tracker->CompletedThrough(), id);
+  ASSERT_TRUE(take_snapshot());
+  EXPECT_TRUE(backing.expired());
+}
+
+static void CheckHeadlessReplacement(bool keep_old_context) {
+  using namespace impeller::testing;
+  NiceMock<MockDelegate> delegate;
+  Settings settings;
+  settings.enable_impeller = true;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+  auto a = CreateMockVulkanContextWithShaders();
+  auto b = CreateMockVulkanContextWithShaders();
+  ASSERT_TRUE(a && b);
+  Rasterizer rasterizer(delegate);
+  InstallSnapshotBackend(rasterizer, a);
+  auto& selection = static_cast<SnapshotController::Delegate&>(rasterizer);
+  auto old = selection.CreateHeadlessAiksContext();
+  ASSERT_TRUE(old);
+  auto& arena = old->GetContentContext().GetTransientsDataBuffer();
+  auto source = arena.EmplaceUniform(1.f);
+  auto backing = arena.GetCurrentBufferForTest();
+  auto command = a->CreateCommandBuffer();
+  ASSERT_TRUE(command);
+  auto pass = command->CreateBlitPass();
+  ASSERT_TRUE(pass);
+  impeller::TextureDescriptor desc;
+  desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+  desc.size = {1, 1};
+  auto target = a->GetResourceAllocator()->CreateTexture(desc);
+  ASSERT_TRUE(target);
+  ASSERT_TRUE(pass->AddCopy(std::move(source), target));
+  ASSERT_TRUE(pass->EncodeCommands());
+  pass.reset();
+  MockFence* pending = nullptr;
+  SetMockVulkanQueueSubmitCallback(a->GetDevice(), [&](MockFence* fence) {
+    fence->SetStatus(impeller::vk::Result::eNotReady);
+    pending = fence;
+  });
+  auto done = std::make_shared<fml::ManualResetWaitableEvent>();
+  ASSERT_TRUE(a->GetCommandQueue()
+                  ->Submit({command},
+                           [done](auto status) {
+                             EXPECT_EQ(
+                                 status,
+                                 impeller::CommandBuffer::Status::kCompleted);
+                             done->Signal();
+                           })
+                  .ok());
+  ASSERT_NE(pending, nullptr);
+  command.reset();
+  auto replace_backend = [&] {
+    InstallSnapshotBackend(rasterizer, b);
+    auto& snapshots = static_cast<SnapshotDelegate&>(rasterizer);
+    bool routed_to_b = false;
+    snapshots.MakeImpellerSnapshotSync(
+        [&](impeller::AiksContext* selected) {
+          routed_to_b = selected && selected->GetContext() == b;
+          return sk_sp<DisplayList>();
+        },
+        {8, 8}, SnapshotPixelFormat::kDontCare);
+    EXPECT_TRUE(routed_to_b);
+  };
+  if (keep_old_context) {
+    replace_backend();
+    EXPECT_FALSE(backing.expired());
+  } else {
+    old.reset();
+  }
+  fml::ManualResetWaitableEvent complete_fence;
+  // If teardown waits for device idle, the mock driver must finish the
+  // submission before returning. An asynchronous teardown can return first.
+  SetNextMockIdleCallback(a->GetDevice(), [&] {
+    complete_fence.Signal();
+    EXPECT_FALSE(done->WaitWithTimeout(fml::TimeDelta::FromSeconds(5)));
+  });
+  std::thread gpu([&] {
+    // A fence-only teardown can block without entering the idle callback.
+    // Allow that fence to progress independently of the teardown thread.
+    complete_fence.WaitWithTimeout(fml::TimeDelta::FromMilliseconds(250));
+    EXPECT_FALSE(backing.expired()) << "buffer released before its fence";
+    pending->SetStatus(impeller::vk::Result::eSuccess);
+  });
+  if (keep_old_context) {
+    old.reset();
+  } else {
+    replace_backend();
+  }
+  complete_fence.Signal();
+  gpu.join();
+  SetNextMockIdleCallback(a->GetDevice(), {});
+  ASSERT_FALSE(done->WaitWithTimeout(fml::TimeDelta::FromSeconds(5)));
+  EXPECT_TRUE(backing.expired());
+
+  auto next = selection.CreateHeadlessAiksContext();
+  ASSERT_TRUE(next);
+  EXPECT_EQ(next->GetContext(), b);
+  EXPECT_EQ(next, selection.CreateHeadlessAiksContext());
+  next.reset();
+  rasterizer.SetImpellerContext(nullptr);
+  a->Shutdown();
+  b->Shutdown();
+}
+
+TEST(RasterizerTest, HeadlessCacheReplaceWithPendingFence) {
+  CheckHeadlessReplacement(false);
+}
+
+TEST(RasterizerTest, HeadlessCacheReplaceWithOutstandingOwner) {
+  CheckHeadlessReplacement(true);
+}
+
+TEST(RasterizerTest,
+     HeadlessSnapshotOwnsContextAcrossCacheEvictionBeforeSubmit) {
+  using namespace impeller::testing;
+  NiceMock<MockDelegate> delegate;
+  Settings settings;
+  settings.enable_impeller = true;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+  auto backend = CreateMockVulkanContextWithShaders();
+  ASSERT_TRUE(backend);
+  Rasterizer rasterizer(delegate);
+  InstallSnapshotBackend(rasterizer, backend);
+  auto& selection = static_cast<SnapshotController::Delegate&>(rasterizer);
+  std::weak_ptr<impeller::AiksContext> selected =
+      selection.CreateHeadlessAiksContext();
+  ASSERT_FALSE(selected.expired());
+
+  auto command = backend->CreateCommandBuffer();
+  ASSERT_TRUE(command);
+  impeller::TextureDescriptor desc;
+  desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+  desc.size = {1, 1};
+  auto target = backend->GetResourceAllocator()->CreateTexture(desc);
+  ASSERT_TRUE(target);
+  auto tracker = backend->GetSubmissionTracker();
+  bool submitted = false;
+  auto provider = [&](impeller::AiksContext* context) -> sk_sp<DisplayList> {
+    auto& arena = context->GetContentContext().GetTransientsDataBuffer();
+    auto source = arena.EmplaceUniform(1.f);
+    auto backing = arena.GetCurrentBufferForTest();
+    EXPECT_EQ(source.GetBuffer(), backing.lock().get());
+    auto pass = command->CreateBlitPass();
+    if (!pass || !pass->AddCopy(std::move(source), target) ||
+        !pass->EncodeCommands()) {
+      return nullptr;
+    }
+    pass.reset();
+    const auto last = tracker->LatestSubmission();
+
+    // Drop the cache's reference after recording, before the queue has a
+    // submission to track. The snapshot itself must still own its context.
+    rasterizer.SetImpellerContext(nullptr);
+    EXPECT_EQ(tracker->LatestSubmission(), last);
+    EXPECT_FALSE(selected.expired());
+    EXPECT_FALSE(backing.expired());
+    if (selected.expired() || backing.expired()) {
+      return nullptr;
+    }
+    submitted = backend->GetCommandQueue()->Submit({command}).ok();
+    EXPECT_GT(tracker->LatestSubmission(), last);
+    DisplayListBuilder builder;
+    builder.DrawRect(DlRect::MakeLTRB(1, 1, 6, 6), DlPaint());
+    return builder.Build();
+  };
+  auto& snapshots = static_cast<SnapshotDelegate&>(rasterizer);
+  EXPECT_TRUE(snapshots.MakeImpellerSnapshotSync(
+      provider, {8, 8}, SnapshotPixelFormat::kDontCare));
+  EXPECT_TRUE(submitted);
+  EXPECT_TRUE(selected.expired());
+  EXPECT_EQ(selection.CreateHeadlessAiksContext(), nullptr);
+}
+
+TEST(RasterizerTest, HeadlessCacheRejectsShutdownBackend) {
+  using namespace impeller::testing;
+  NiceMock<MockDelegate> delegate;
+  Settings settings;
+  settings.enable_impeller = true;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+  auto backend = CreateMockVulkanContextWithShaders();
+  ASSERT_TRUE(backend);
+  Rasterizer rasterizer(delegate);
+  InstallSnapshotBackend(rasterizer, backend);
+  auto& selection = static_cast<SnapshotController::Delegate&>(rasterizer);
+  ASSERT_TRUE(selection.CreateHeadlessAiksContext());
+  backend->Shutdown();
+  EXPECT_EQ(selection.CreateHeadlessAiksContext(), nullptr);
+}
+
+static void ExpectHeadlessVulkanSnapshot(
+    std::unique_ptr<SnapshotSurfaceProducer> producer) {
+  NiceMock<MockDelegate> delegate;
+  Settings settings;
+  settings.enable_impeller = true;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+
+  auto vulkan_context = impeller::testing::CreateMockVulkanContextWithShaders();
+  ASSERT_TRUE(vulkan_context);
+  ASSERT_EQ(vulkan_context->GetBackendType(),
+            impeller::Context::BackendType::kVulkan);
+  std::promise<std::shared_ptr<impeller::Context>> context_promise;
+  context_promise.set_value(vulkan_context);
+
+  Rasterizer rasterizer(delegate);
+  rasterizer.SetImpellerContext(
+      std::make_shared<impeller::ImpellerContextFuture>(
+          context_promise.get_future()));
+
+  rasterizer.SetSnapshotSurfaceProducer(std::move(producer));
+
+  bool received_expected_context = false;
+  auto& snapshot_delegate = static_cast<SnapshotDelegate&>(rasterizer);
+  auto result = snapshot_delegate.MakeImpellerSnapshotSync(
+      [&received_expected_context,
+       vulkan_context](impeller::AiksContext* aiks_context) {
+        received_expected_context =
+            aiks_context != nullptr &&
+            aiks_context->GetContext() == vulkan_context;
+        DisplayListBuilder builder;
+        builder.DrawRect(DlRect::MakeLTRB(0, 0, 1, 1), DlPaint());
+        return builder.Build();
+      },
+      DlISize{1, 1}, SnapshotPixelFormat::kDontCare);
+
+  ASSERT_TRUE(result);
+  EXPECT_EQ(result->GetSize(), (impeller::ISize{1, 1}));
+  EXPECT_TRUE(received_expected_context);
+}
+
+TEST(RasterizerTest, SnapshotUsesHeadlessVulkanContextWithoutProducer) {
+  ExpectHeadlessVulkanSnapshot(nullptr);
+}
+
+TEST(RasterizerTest, SnapshotUsesHeadlessVulkanContextWhenProducerFails) {
+  auto producer = std::make_unique<MockSnapshotSurfaceProducer>();
+  EXPECT_CALL(*producer, CreateSnapshotSurface()).WillOnce(Return(nullptr));
+  ExpectHeadlessVulkanSnapshot(std::move(producer));
+}
+#endif  // IMPELLER_ENABLE_VULKAN
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
 static std::unique_ptr<FrameTimingsRecorder> CreateFinishedBuildRecorder(

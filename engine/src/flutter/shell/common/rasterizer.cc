@@ -75,6 +75,9 @@ fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> Rasterizer::GetSnapshotDelegate()
 
 void Rasterizer::SetImpellerContext(
     std::shared_ptr<impeller::ImpellerContextFuture> impeller_context) {
+#if IMPELLER_SUPPORTS_RENDERING
+  headless_vulkan_context_.reset();
+#endif
   impeller_context_ = std::move(impeller_context);
 }
 

@@ -716,30 +716,53 @@ class Rasterizer final : public SnapshotDelegate,
 #endif
   }
 
-  // |SnapshotController::Delegate|
+  // |SnapshotDelegate| and |SnapshotController::Delegate|
   std::shared_ptr<impeller::AiksContext> GetAiksContext() const override {
 #if IMPELLER_SUPPORTS_RENDERING
     if (surface_) {
       return surface_->GetAiksContext();
     }
-    // There is no surface to get an AiksContext from, so construct a new one.
-    // On OpenGL ES, that requires a current context, so we can't construct one
-    // directly. Create a snapshot surface to make an offscreen context current,
-    // then return the snapshot surface's AiksContext. Only OpenGL ES provides a
-    // snapshot surface, so other backends skip this.
+    // On OpenGL ES the producer makes an offscreen context current before
+    // constructing the surface's AiksContext.
     if (snapshot_surface_producer_) {
       if (std::unique_ptr<Surface> snapshot_surface =
               snapshot_surface_producer_->CreateSnapshotSurface()) {
         return snapshot_surface->GetAiksContext();
       }
     }
-    // Other backends can construct an AiksContext directly.
-    if (auto context = impeller_context_->GetContext()) {
+#endif
+    return CreateHeadlessAiksContext();
+  }
+
+  // |SnapshotController::Delegate|
+  std::shared_ptr<impeller::AiksContext> CreateHeadlessAiksContext()
+      const override {
+#if IMPELLER_SUPPORTS_RENDERING
+    auto context =
+        impeller_context_ ? impeller_context_->GetContext() : nullptr;
+    if (!context || context->GetBackendType() ==
+                        impeller::Context::BackendType::kOpenGLES) {
+      return nullptr;
+    }
+    if (context->GetBackendType() != impeller::Context::BackendType::kVulkan) {
       return std::make_shared<impeller::AiksContext>(
           context, impeller::TypographerContextSkia::Make());
     }
-#endif
+    if (!context->IsValid()) {
+      return nullptr;
+    }
+    if (!headless_vulkan_context_) {
+      auto headless = std::make_shared<impeller::AiksContext>(
+          context, impeller::TypographerContextSkia::Make());
+      if (!headless->IsValid()) {
+        return nullptr;
+      }
+      headless_vulkan_context_ = std::move(headless);
+    }
+    return headless_vulkan_context_;
+#else
     return nullptr;
+#endif
   }
 
   // |SnapshotController::Delegate|
@@ -807,6 +830,9 @@ class Rasterizer final : public SnapshotDelegate,
   Delegate& delegate_;
   [[maybe_unused]] MakeGpuImageBehavior gpu_image_behavior_;
   std::shared_ptr<impeller::ImpellerContextFuture> impeller_context_;
+#if IMPELLER_SUPPORTS_RENDERING
+  mutable std::shared_ptr<impeller::AiksContext> headless_vulkan_context_;
+#endif
   std::unique_ptr<Surface> surface_;
   std::unique_ptr<SnapshotSurfaceProducer> snapshot_surface_producer_;
   std::unique_ptr<flutter::CompositorContext> compositor_context_;

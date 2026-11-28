@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
 
+#include <algorithm>
+#include <array>
 #include <atomic>
 #include <cstdint>
 #include <cstring>
@@ -12,7 +14,11 @@
 
 #include "flutter/fml/logging.h"
 #include "impeller/base/thread_safety.h"
+#include "impeller/entity/vk/entity_shaders_vk.h"
+#include "impeller/entity/vk/framebuffer_blend_shaders_vk.h"
+#include "impeller/entity/vk/modern_shaders_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"  // IWYU pragma: keep.
+#include "impeller/renderer/vk/compute_shaders_vk.h"
 #include "third_party/swiftshader/include/vulkan/vulkan_core.h"
 #include "vulkan/vulkan.hpp"
 
@@ -24,12 +30,8 @@ namespace {
 class MockDevice;
 
 struct MockCommandBuffer {
-  explicit MockCommandBuffer(
-      MockDevice& device,
-      std::shared_ptr<std::vector<std::string>> called_functions)
-      : device_(device), called_functions_(std::move(called_functions)) {}
+  explicit MockCommandBuffer(MockDevice& device) : device_(device) {}
   MockDevice& device_;
-  std::shared_ptr<std::vector<std::string>> called_functions_;
   std::vector<VkImageMemoryBarrier> image_memory_barriers_;
   std::vector<VkViewport> recorded_viewports_;
   std::vector<VkPipelineStageFlagBits> recorded_timestamps_;
@@ -71,6 +73,14 @@ struct MockSemaphore {};
 struct MockFramebuffer {};
 
 static ISize currentImageSize = ISize{1, 1};
+
+struct MockDeviceMemory {
+  explicit MockDeviceMemory(VkDeviceSize size)
+      : data(new uint8_t[size]), size(size) {}
+
+  std::unique_ptr<uint8_t[]> data;
+  VkDeviceSize size;
+};
 
 class MockPhysicalDevice {
  public:
@@ -121,7 +131,7 @@ class MockDevice final {
   }
 
   MockCommandBuffer* NewCommandBuffer() {
-    auto buffer = std::make_unique<MockCommandBuffer>(*this, called_functions_);
+    auto buffer = std::make_unique<MockCommandBuffer>(*this);
     MockCommandBuffer* result = buffer.get();
     Lock lock(command_buffers_mutex_);
     command_buffers_.emplace_back(std::move(buffer));
@@ -156,6 +166,44 @@ class MockDevice final {
     called_functions_->push_back(function);
   }
 
+  size_t GetCalledFunctionCount(const std::string& function) {
+    Lock lock(called_functions_mutex_);
+    return std::count(called_functions_->begin(), called_functions_->end(),
+                      function);
+  }
+
+  void SetQueueSubmitCallback(std::function<void(MockFence*)> callback) {
+    Lock lock(queue_submit_callback_mutex_);
+    queue_submit_callback_ = std::move(callback);
+  }
+
+  void RunQueueSubmitCallback(MockFence* fence) {
+    std::function<void(MockFence*)> callback;
+    {
+      Lock lock(queue_submit_callback_mutex_);
+      callback = std::exchange(queue_submit_callback_, {});
+    }
+    if (callback) {
+      callback(fence);
+    }
+  }
+
+  void SetQueuePresentCallback(std::function<void()> callback) {
+    Lock lock(queue_present_callback_mutex_);
+    queue_present_callback_ = std::move(callback);
+  }
+
+  void RunQueuePresentCallback() {
+    std::function<void()> callback;
+    {
+      Lock lock(queue_present_callback_mutex_);
+      callback = std::exchange(queue_present_callback_, {});
+    }
+    if (callback) {
+      callback();
+    }
+  }
+
   void AddQueryPoolResultCount(uint32_t query_count) {
     Lock lock(called_functions_mutex_);
     query_pool_result_counts_.push_back(query_count);
@@ -169,6 +217,8 @@ class MockDevice final {
   uint64_t NextMockTimestamp() {
     return next_mock_timestamp_.fetch_add(1000000u);
   }
+
+  std::function<void()> next_idle_callback;
 
   MockQueue& GetQueue() { return queue_; }
 
@@ -192,6 +242,14 @@ class MockDevice final {
   Mutex commmand_pools_mutex_;
   std::vector<std::unique_ptr<MockCommandPool>> command_pools_
       IPLR_GUARDED_BY(commmand_pools_mutex_);
+
+  Mutex queue_submit_callback_mutex_;
+  std::function<void(MockFence*)> queue_submit_callback_
+      IPLR_GUARDED_BY(queue_submit_callback_mutex_);
+
+  Mutex queue_present_callback_mutex_;
+  std::function<void()> queue_present_callback_
+      IPLR_GUARDED_BY(queue_present_callback_mutex_);
 
   MockQueue queue_;
   std::atomic<uint64_t> next_mock_timestamp_{1000000u};
@@ -352,6 +410,8 @@ void vkGetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice,
       static_cast<VkSampleCountFlags>(VK_SAMPLE_COUNT_1_BIT |
                                       VK_SAMPLE_COUNT_4_BIT);
   pProperties->limits.maxImageDimension2D = 4096;
+  pProperties->limits.maxFramebufferWidth = 4096;
+  pProperties->limits.maxFramebufferHeight = 4096;
   pProperties->limits.timestampPeriod = 1;
   if (GetMockVulkanState().physical_device_properties_callback) {
     GetMockVulkanState().physical_device_properties_callback(physicalDevice,
@@ -586,7 +646,44 @@ VkResult vkAllocateMemory(VkDevice device,
                           const VkMemoryAllocateInfo* pAllocateInfo,
                           const VkAllocationCallbacks* pAllocator,
                           VkDeviceMemory* pMemory) {
-  *pMemory = reinterpret_cast<VkDeviceMemory>(0xCAFEB0BA);
+  *pMemory = reinterpret_cast<VkDeviceMemory>(
+      new MockDeviceMemory(pAllocateInfo->allocationSize));
+  return VK_SUCCESS;
+}
+
+void vkFreeMemory(VkDevice device,
+                  VkDeviceMemory memory,
+                  const VkAllocationCallbacks* pAllocator) {
+  delete reinterpret_cast<MockDeviceMemory*>(memory);
+}
+
+VkResult vkMapMemory(VkDevice device,
+                     VkDeviceMemory memory,
+                     VkDeviceSize offset,
+                     VkDeviceSize size,
+                     VkMemoryMapFlags flags,
+                     void** ppData) {
+  auto* device_memory = reinterpret_cast<MockDeviceMemory*>(memory);
+  if (offset >= device_memory->size ||
+      (size != VK_WHOLE_SIZE && size > device_memory->size - offset)) {
+    return VK_ERROR_MEMORY_MAP_FAILED;
+  }
+  *ppData = device_memory->data.get() + offset;
+  return VK_SUCCESS;
+}
+
+void vkUnmapMemory(VkDevice device, VkDeviceMemory memory) {}
+
+VkResult vkFlushMappedMemoryRanges(VkDevice device,
+                                   uint32_t memoryRangeCount,
+                                   const VkMappedMemoryRange* pMemoryRanges) {
+  return VK_SUCCESS;
+}
+
+VkResult vkInvalidateMappedMemoryRanges(
+    VkDevice device,
+    uint32_t memoryRangeCount,
+    const VkMappedMemoryRange* pMemoryRanges) {
   return VK_SUCCESS;
 }
 
@@ -618,7 +715,7 @@ VkResult vkCreateBuffer(VkDevice device,
                         const VkBufferCreateInfo* pCreateInfo,
                         const VkAllocationCallbacks* pAllocator,
                         VkBuffer* pBuffer) {
-  *pBuffer = reinterpret_cast<VkBuffer>(0xDEADDEAD);
+  *pBuffer = reinterpret_cast<VkBuffer>(new VkDeviceSize(pCreateInfo->size));
   return VK_SUCCESS;
 }
 
@@ -626,8 +723,10 @@ void vkGetBufferMemoryRequirements2KHR(
     VkDevice device,
     const VkBufferMemoryRequirementsInfo2* pInfo,
     VkMemoryRequirements2* pMemoryRequirements) {
-  pMemoryRequirements->memoryRequirements.size = 1024;
-  pMemoryRequirements->memoryRequirements.memoryTypeBits = 1;
+  auto& requirements = pMemoryRequirements->memoryRequirements;
+  requirements.size = *reinterpret_cast<const VkDeviceSize*>(pInfo->buffer);
+  requirements.alignment = 16;
+  requirements.memoryTypeBits = 1;
 }
 
 VkResult vkBindBufferMemory(VkDevice device,
@@ -635,6 +734,12 @@ VkResult vkBindBufferMemory(VkDevice device,
                             VkDeviceMemory memory,
                             VkDeviceSize memoryOffset) {
   return VK_SUCCESS;
+}
+
+void vkDestroyBuffer(VkDevice device,
+                     VkBuffer buffer,
+                     const VkAllocationCallbacks* pAllocator) {
+  delete reinterpret_cast<VkDeviceSize*>(buffer);
 }
 
 VkResult vkCreateRenderPass(VkDevice device,
@@ -680,6 +785,9 @@ VkResult vkCreateGraphicsPipelines(
 VkResult vkDeviceWaitIdle(VkDevice device) {
   MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkDeviceWaitIdle");
+  if (auto callback = std::exchange(mock_device->next_idle_callback, {})) {
+    callback();
+  }
   return VK_SUCCESS;
 }
 
@@ -852,6 +960,8 @@ VkResult vkQueueSubmit(VkQueue queue,
                        VkFence fence) {
   const MockQueue* mock_queue = reinterpret_cast<const MockQueue*>(queue);
   mock_queue->device().AddCalledFunction("vkQueueSubmit");
+  mock_queue->device().RunQueueSubmitCallback(
+      reinterpret_cast<MockFence*>(fence));
   return VK_SUCCESS;
 }
 
@@ -859,6 +969,7 @@ VkResult vkQueuePresentKHR(VkQueue queue,
                            const VkPresentInfoKHR* pPresentInfo) {
   const MockQueue* mock_queue = reinterpret_cast<const MockQueue*>(queue);
   mock_queue->device().AddCalledFunction("vkQueuePresentKHR");
+  mock_queue->device().RunQueuePresentCallback();
   return VK_SUCCESS;
 }
 
@@ -1280,6 +1391,16 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
         vkGetImageMemoryRequirements2KHR);
   } else if (strcmp("vkAllocateMemory", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkAllocateMemory);
+  } else if (strcmp("vkFreeMemory", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkFreeMemory);
+  } else if (strcmp("vkMapMemory", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkMapMemory);
+  } else if (strcmp("vkUnmapMemory", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkUnmapMemory);
+  } else if (strcmp("vkFlushMappedMemoryRanges", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkFlushMappedMemoryRanges);
+  } else if (strcmp("vkInvalidateMappedMemoryRanges", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkInvalidateMappedMemoryRanges);
   } else if (strcmp("vkBindImageMemory", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkBindImageMemory);
   } else if (strcmp("vkCreateImageView", pName) == 0) {
@@ -1294,6 +1415,8 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
         vkGetBufferMemoryRequirements2KHR);
   } else if (strcmp("vkBindBufferMemory", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkBindBufferMemory);
+  } else if (strcmp("vkDestroyBuffer", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyBuffer);
   } else if (strcmp("vkCreateRenderPass", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreateRenderPass);
   } else if (strcmp("vkCreateDescriptorSetLayout", pName) == 0) {
@@ -1474,10 +1597,51 @@ std::shared_ptr<ContextVK> MockVulkanContextBuilder::Build() {
   return ContextVK::Create(PrepareSettings());
 }
 
+std::shared_ptr<ContextVK> CreateMockVulkanContextWithShaders() {
+  return MockVulkanContextBuilder()
+      .SetSettingsCallback([](ContextVK::Settings& settings) {
+        settings.shader_libraries_data = {
+            std::make_shared<fml::NonOwnedMapping>(
+                impeller_entity_shaders_vk_data,
+                impeller_entity_shaders_vk_length),
+            std::make_shared<fml::NonOwnedMapping>(
+                impeller_modern_shaders_vk_data,
+                impeller_modern_shaders_vk_length),
+            std::make_shared<fml::NonOwnedMapping>(
+                impeller_framebuffer_blend_shaders_vk_data,
+                impeller_framebuffer_blend_shaders_vk_length),
+            std::make_shared<fml::NonOwnedMapping>(
+                impeller_compute_shaders_vk_data,
+                impeller_compute_shaders_vk_length),
+        };
+      })
+      .Build();
+}
+
 std::shared_ptr<std::vector<std::string>> GetMockVulkanFunctions(
     VkDevice device) {
   MockDevice* mock_device = MockDevice::Unwrap(device);
   return mock_device->GetCalledFunctions();
+}
+
+void SetNextMockIdleCallback(VkDevice device, std::function<void()> callback) {
+  MockDevice::Unwrap(device)->next_idle_callback = std::move(callback);
+}
+
+void SetMockVulkanQueueSubmitCallback(
+    VkDevice device,
+    std::function<void(MockFence*)> callback) {
+  MockDevice::Unwrap(device)->SetQueueSubmitCallback(std::move(callback));
+}
+
+void SetMockVulkanQueuePresentCallback(VkDevice device,
+                                       std::function<void()> callback) {
+  MockDevice::Unwrap(device)->SetQueuePresentCallback(std::move(callback));
+}
+
+size_t GetMockVulkanFunctionCallCount(VkDevice device,
+                                      const std::string& function) {
+  return MockDevice::Unwrap(device)->GetCalledFunctionCount(function);
 }
 
 void SetSwapchainImageSize(ISize size) {

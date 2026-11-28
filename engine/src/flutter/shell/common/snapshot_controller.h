@@ -28,13 +28,15 @@ class SnapshotController {
     virtual ~Delegate() = default;
     virtual const std::unique_ptr<Surface>& GetSurface() const = 0;
     virtual bool IsAiksContextInitialized() const = 0;
-    /// Returns the onscreen surface's AiksContext or, if there is no onscreen
-    /// surface, may construct a new AiksContext.
-    ///
-    /// Constructing an AiksContext issues graphics commands. On backends that
-    /// need a current context (OpenGL ES), make a rendering context current
-    /// before calling this when |GetSurface| is null.
+
+    /// Gets an AiksContext, creating a snapshot surface if necessary.
     virtual std::shared_ptr<impeller::AiksContext> GetAiksContext() const = 0;
+
+    /// Creates an AiksContext without a surface. Returns nullptr when the
+    /// Impeller context is missing or the backend needs a current context.
+    virtual std::shared_ptr<impeller::AiksContext> CreateHeadlessAiksContext()
+        const = 0;
+
     virtual const std::unique_ptr<SnapshotSurfaceProducer>&
     GetSnapshotSurfaceProducer() const = 0;
     virtual std::shared_ptr<const fml::SyncSwitch> GetIsGpuDisabledSyncSwitch()

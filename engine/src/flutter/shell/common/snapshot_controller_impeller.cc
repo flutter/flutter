@@ -23,7 +23,8 @@ std::shared_ptr<impeller::Texture> DoMakeRasterSnapshot(
     const sk_sp<DisplayList>& display_list,
     DlISize size,
     const std::shared_ptr<impeller::AiksContext>& context,
-    SnapshotPixelFormat pixel_format) {
+    SnapshotPixelFormat pixel_format,
+    bool reset_host_buffer = false) {
   TRACE_EVENT0("flutter", __FUNCTION__);
   if (!context) {
     return nullptr;
@@ -62,8 +63,7 @@ std::shared_ptr<impeller::Texture> DoMakeRasterSnapshot(
   }
 
   return impeller::DisplayListToTexture(
-      display_list, render_target_size, *context,
-      /*reset_host_buffer=*/false,
+      display_list, render_target_size, *context, reset_host_buffer,
       /*generate_mips=*/false, impeller_pixel_format);
 }
 
@@ -73,6 +73,7 @@ std::shared_ptr<impeller::Texture> DoMakeRasterSnapshot(
 struct SnapshotContext {
   // Destroyed in reverse order: the context result is released before the
   // offscreen surface it made current.
+  bool reset_host_buffer = false;
   std::unique_ptr<Surface> pbuffer_surface;
   std::unique_ptr<GLContextResult> context_result;
   std::shared_ptr<impeller::AiksContext> aiks_context;
@@ -94,26 +95,31 @@ SnapshotContext MakeSnapshotContextCurrent(
       return result;
     }
     result.aiks_context = delegate.GetAiksContext();
-  } else if (const std::unique_ptr<SnapshotSurfaceProducer>& producer =
-                 delegate.GetSnapshotSurfaceProducer()) {
+    return result;
+  }
+  if (const auto& producer = delegate.GetSnapshotSurfaceProducer()) {
     // The producer makes its offscreen surface current before it constructs
     // the surface's AiksContext, so reuse that AiksContext rather than asking
     // the delegate, which would construct yet another one.
     result.pbuffer_surface = producer->CreateSnapshotSurface();
-    if (!result.pbuffer_surface) {
+    if (result.pbuffer_surface) {
+      result.context_result =
+          result.pbuffer_surface->MakeRenderContextCurrent();
+      if (!result.context_result || !result.context_result->GetResult()) {
+        return result;
+      }
+      result.aiks_context = result.pbuffer_surface->GetAiksContext();
       return result;
     }
-    result.context_result = result.pbuffer_surface->MakeRenderContextCurrent();
-    if (!result.context_result || !result.context_result->GetResult()) {
-      return result;
-    }
-    result.aiks_context = result.pbuffer_surface->GetAiksContext();
-  } else {
-    // No surface and no way to make one. Backends that get here (Metal,
-    // Vulkan) have no notion of a current context, so constructing an
-    // AiksContext is safe.
-    result.aiks_context = delegate.GetAiksContext();
   }
+  // Some backends have a producer object but cannot create an offscreen
+  // surface. Backends without a thread-local rendering context, such as
+  // Vulkan, can construct the headless AiksContext directly.
+  result.aiks_context = delegate.CreateHeadlessAiksContext();
+  result.reset_host_buffer =
+      result.aiks_context &&
+      result.aiks_context->GetContext()->GetBackendType() ==
+          impeller::Context::BackendType::kVulkan;
   return result;
 }
 
@@ -134,7 +140,8 @@ std::shared_ptr<impeller::Texture> DoMakeRasterSnapshot(
   if (!display_list) {
     return nullptr;
   }
-  return DoMakeRasterSnapshot(display_list, size, aiks_context, pixel_format);
+  return DoMakeRasterSnapshot(display_list, size, aiks_context, pixel_format,
+                              snapshot_context.reset_host_buffer);
 }
 
 std::shared_ptr<impeller::Texture> DoMakeRasterSnapshot(
