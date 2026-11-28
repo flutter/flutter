@@ -28,7 +28,7 @@ import 'dart/package_map.dart';
 const kDartCompilerExperiments = <String>[];
 
 /// Keeps absolute paths to the dart_plugin_registrant out of compiled output.
-const kDartPluginRegistrantScheme = 'org-dartlang-plugin-registrant';
+const kDartPluginRegistrantScheme = 'org-dartlang-sdk';
 
 /// Whether DDC canary features are enabled.
 ///
