@@ -218,8 +218,8 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
   String get description => 'Tappable objects should be at least $size';
 }
 
-/// A guideline which enforces that all nodes with a tap or long press action
-/// also have a label.
+/// A guideline which enforces that all nodes with a tap or long press action,
+/// and all link nodes that have a URL, also have a label.
 ///
 /// See also:
 ///  * [AccessibilityGuideline], which provides a general overview of
@@ -229,7 +229,7 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
   const LabeledTapTargetGuideline._();
 
   @override
-  String get description => 'Tappable widgets should have a semantic label';
+  String get description => 'Tappable widgets and links should have a semantic label';
 
   @override
   FutureOr<Evaluation> evaluate(WidgetTester tester) {
@@ -255,13 +255,18 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
       return result;
     }
     final SemanticsData data = node.getSemanticsData();
-    // Skip node if it has no actions, or is marked as hidden.
-    if (!data.hasAction(ui.SemanticsAction.longPress) && !data.hasAction(ui.SemanticsAction.tap)) {
+    final bool isTappable =
+        data.hasAction(ui.SemanticsAction.longPress) || data.hasAction(ui.SemanticsAction.tap);
+    final bool isLink =
+        data.flagsCollection.isLink && (data.linkUrl?.toString().isNotEmpty ?? false);
+    // Skip the node if it is neither tappable nor a link.
+    if (!isTappable && !isLink) {
       return result;
     }
-    if ((data.label.isEmpty) && (data.tooltip.isEmpty)) {
+    if (data.label.isEmpty && data.tooltip.isEmpty) {
+      final kind = isTappable ? 'tappable' : 'link';
       result += Evaluation.fail(
-        '$node: expected tappable node to have semantic label, '
+        '$node: expected $kind node to have semantic label, '
         'but none was found.',
       );
     }
@@ -814,8 +819,8 @@ const AccessibilityGuideline iOSTapTargetGuideline = MinimumTapTargetGuideline(
 ///    accessibility guidelines and how to use them.
 const AccessibilityGuideline textContrastGuideline = MinimumTextContrastGuideline();
 
-/// A guideline which enforces that all nodes with a tap or long press action
-/// also have a label.
+/// A guideline which enforces that all nodes with a tap or long press action,
+/// and all link nodes that have a URL, also have a label.
 ///
 ///  * [AccessibilityGuideline], which provides a general overview of
 ///    accessibility guidelines and how to use them.
