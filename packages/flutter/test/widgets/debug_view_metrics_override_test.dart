@@ -860,26 +860,44 @@ void main() {
       late MediaQueryData data;
       await tester.pumpWidget(_capture((MediaQueryData value) => data = value));
 
-      for (final MapEntry<String, (DebugViewMetricsOverride, _MetricReader, Object?)> entry
-          in _surfacedMetrics.entries) {
-        final (DebugViewMetricsOverride override, _MetricReader read, Object? expected) =
-            entry.value;
-        final Object? reported = read(data);
-        debugSetViewMetricsOverride(tester.view.viewId, override);
-        await tester.pump();
-        final Object? overridden = read(data);
-        debugSetViewMetricsOverride(tester.view.viewId, null);
-        await tester.pump();
+      // Each metric is installed as the view's entry, and as the override for
+      // every view beneath an entry that sets only a metric MediaQuery does not
+      // surface, so that a metric left out of their merge is caught.
+      final installers = <String, void Function(DebugViewMetricsOverride? override)>{
+        "the view's entry": (DebugViewMetricsOverride? override) {
+          debugSetViewMetricsOverride(tester.view.viewId, override);
+        },
+        'the override for every view': (DebugViewMetricsOverride? override) {
+          debugAllViewsMetricsOverride = override;
+          debugSetViewMetricsOverride(
+            tester.view.viewId,
+            override == null ? null : const DebugViewMetricsOverride(autoPlayVideos: false),
+          );
+        },
+      };
+      for (final MapEntry<String, void Function(DebugViewMetricsOverride?)> install
+          in installers.entries) {
+        for (final MapEntry<String, (DebugViewMetricsOverride, _MetricReader, Object?)> entry
+            in _surfacedMetrics.entries) {
+          final (DebugViewMetricsOverride override, _MetricReader read, Object? expected) =
+              entry.value;
+          final Object? reported = read(data);
+          install.value(override);
+          await tester.pump();
+          final Object? overridden = read(data);
+          install.value(null);
+          await tester.pump();
 
-        expect(overridden, expected, reason: '${entry.key} was not honored');
-        expect(
-          reported,
-          isNot(expected),
-          reason:
-              '${entry.key} would read the same without the override, so the '
-              'test cannot tell whether it was honored',
-        );
-        expect(read(data), reported, reason: '${entry.key} was not restored');
+          expect(overridden, expected, reason: '${entry.key} in ${install.key} was not honored');
+          expect(
+            reported,
+            isNot(expected),
+            reason:
+                '${entry.key} would read the same without the override, so the '
+                'test cannot tell whether it was honored',
+          );
+          expect(read(data), reported, reason: '${entry.key} in ${install.key} was not restored');
+        }
       }
       debugClearViewMetricsOverrides();
       await tester.pump();
