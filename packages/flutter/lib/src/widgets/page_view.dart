@@ -33,6 +33,12 @@ import 'scrollable.dart';
 import 'sliver_fill.dart';
 import 'viewport.dart';
 
+/// These defaults keep PageController's animation methods consistent with the
+/// other widgets-layer scrolling APIs. They are private because callers can
+/// always provide their own duration and curve.
+const Duration _kDefaultPageAnimationDuration = Duration(milliseconds: 300);
+const Curve _kDefaultPageAnimationCurve = Curves.ease;
+
 /// A controller for [PageView].
 ///
 /// A page controller lets you manipulate which page is visible in a [PageView].
@@ -197,10 +203,17 @@ class PageController extends ScrollController {
 
   /// Animates the controlled [PageView] from the current page to the given page.
   ///
-  /// The animation lasts for the given duration and follows the given curve.
+  /// The animation lasts for the given [duration] and follows the given [curve].
+  /// If they are omitted, the animation lasts 300 milliseconds and follows
+  /// [Curves.ease].
+  ///
   /// The returned [Future] resolves when the animation completes.
   @awaitNotRequired
-  Future<void> animateToPage(int page, {required Duration duration, required Curve curve}) {
+  Future<void> animateToPage(
+    int page, {
+    Duration duration = _kDefaultPageAnimationDuration,
+    Curve curve = _kDefaultPageAnimationCurve,
+  }) {
     assert(_debugCheckPageControllerAttached());
     final position = this.position as _PagePosition;
     if (position._cachedPage != null) {
@@ -242,19 +255,31 @@ class PageController extends ScrollController {
 
   /// Animates the controlled [PageView] to the next page.
   ///
-  /// The animation lasts for the given duration and follows the given curve.
+  /// The animation lasts for the given [duration] and follows the given [curve].
+  /// If they are omitted, the animation lasts 300 milliseconds and follows
+  /// [Curves.ease].
+  ///
   /// The returned [Future] resolves when the animation completes.
   @awaitNotRequired
-  Future<void> nextPage({required Duration duration, required Curve curve}) {
+  Future<void> nextPage({
+    Duration duration = _kDefaultPageAnimationDuration,
+    Curve curve = _kDefaultPageAnimationCurve,
+  }) {
     return animateToPage(page!.round() + 1, duration: duration, curve: curve);
   }
 
   /// Animates the controlled [PageView] to the previous page.
   ///
-  /// The animation lasts for the given duration and follows the given curve.
+  /// The animation lasts for the given [duration] and follows the given [curve].
+  /// If they are omitted, the animation lasts 300 milliseconds and follows
+  /// [Curves.ease].
+  ///
   /// The returned [Future] resolves when the animation completes.
   @awaitNotRequired
-  Future<void> previousPage({required Duration duration, required Curve curve}) {
+  Future<void> previousPage({
+    Duration duration = _kDefaultPageAnimationDuration,
+    Curve curve = _kDefaultPageAnimationCurve,
+  }) {
     return animateToPage(page!.round() - 1, duration: duration, curve: curve);
   }
 
