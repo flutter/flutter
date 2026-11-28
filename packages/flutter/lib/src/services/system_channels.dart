@@ -4,6 +4,7 @@
 
 /// @docImport 'dart:typed_data';
 ///
+/// @docImport 'package:flutter/rendering.dart';
 /// @docImport 'package:flutter/semantics.dart';
 /// @docImport 'package:flutter/widgets.dart';
 ///
@@ -614,4 +615,15 @@ abstract final class SystemChannels {
   ///  * `isSupported`: Returns whether or not setting content sensitivity levels is supported on the
   ///     device.
   static const MethodChannel sensitiveContent = OptionalMethodChannel('flutter/sensitivecontent');
+
+  /// A [MethodChannel] for capturing screenshots of [RenderView] trees.
+  ///
+  /// The following incoming methods are defined for this channel (registered
+  /// using [MethodChannel.setMethodCallHandler]):
+  ///
+  ///  * `Screenshot.captureView`: Captures the [RenderView] matching the given
+  ///    `viewId` argument (or the first [RenderView] if `null`) using
+  ///    [OffsetLayer.toImage] and returns a [Map] containing `width` ([int]),
+  ///    `height` ([int]), and `bytes` ([Uint8List] in [ImageByteFormat.rawRgba]).
+  static const MethodChannel screenshot = OptionalMethodChannel('flutter/screenshot');
 }

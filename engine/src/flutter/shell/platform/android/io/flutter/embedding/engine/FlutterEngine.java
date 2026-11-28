@@ -35,6 +35,7 @@ import io.flutter.embedding.engine.systemchannels.NavigationChannel;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
 import io.flutter.embedding.engine.systemchannels.ProcessTextChannel;
 import io.flutter.embedding.engine.systemchannels.RestorationChannel;
+import io.flutter.embedding.engine.systemchannels.ScreenshotChannel;
 import io.flutter.embedding.engine.systemchannels.ScribeChannel;
 import io.flutter.embedding.engine.systemchannels.SensitiveContentChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
@@ -107,6 +108,7 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
   @NonNull private final RestorationChannel restorationChannel;
   @NonNull private final PlatformChannel platformChannel;
   @NonNull private final ProcessTextChannel processTextChannel;
+  @NonNull private final ScreenshotChannel screenshotChannel;
   @NonNull private final ScribeChannel scribeChannel;
   @NonNull private final SensitiveContentChannel sensitiveContentChannel;
   @NonNull private final SettingsChannel settingsChannel;
@@ -367,6 +369,7 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
     platformChannel = new PlatformChannel(dartExecutor);
     processTextChannel = new ProcessTextChannel(dartExecutor, context.getPackageManager());
     restorationChannel = new RestorationChannel(dartExecutor, waitForRestorationData);
+    screenshotChannel = new ScreenshotChannel(dartExecutor);
     scribeChannel = new ScribeChannel(dartExecutor);
     sensitiveContentChannel = new SensitiveContentChannel(dartExecutor);
     settingsChannel = new SettingsChannel(dartExecutor);
@@ -409,7 +412,7 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
       attachToJni();
     }
 
-    this.renderer = new FlutterRenderer(flutterJNI);
+    this.renderer = new FlutterRenderer(flutterJNI, screenshotChannel);
     this.platformViewsController = platformViewsController;
     this.platformViewsController2 = platformViewsController2;
 
@@ -657,6 +660,15 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
   @NonNull
   public ScribeChannel getScribeChannel() {
     return scribeChannel;
+  }
+
+  /**
+   * System channel that requests asynchronous {@link android.graphics.Bitmap} captures of a Flutter
+   * view from the framework.
+   */
+  @NonNull
+  public ScreenshotChannel getScreenshotChannel() {
+    return screenshotChannel;
   }
 
   /** System channel that handles getting and setting content sensitivity. */
