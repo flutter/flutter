@@ -15,6 +15,7 @@ uniform FragInfo {
   float use_text_color;
   f16vec4 text_color;
   float text_contrast;
+  float text_coverage_gamma;
 }
 frag_info;
 
@@ -37,6 +38,17 @@ void main() {
       coverage = float(value.a);
     } else {
       coverage = float(value.r);
+    }
+
+    if (frag_info.text_coverage_gamma != 1.0) {
+      // Remaps the coverage ramp itself rather than its complement. Used for
+      // dark text, where the ramp reaching the atlas is too shallow: the
+      // DirectWrite mask is never gamma corrected, and the luminance driven
+      // text_contrast below is anchored at 1.0 for black, so nothing fills in
+      // the dark end. A power curve lifts the faint edge pixels that read as a
+      // halo, which the binomial form below cannot do because its slope tends
+      // to the exponent as coverage goes to zero.
+      coverage = pow(coverage, frag_info.text_coverage_gamma);
     }
 
     if (frag_info.text_contrast != 1.0) {
