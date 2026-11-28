@@ -1083,6 +1083,83 @@ void main() {
       handle.dispose();
     });
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/170571
+  testWidgets('SliverPersistentHeader rebuilds when an inherited widget it depends on changes', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const InheritedColorHeaderApp());
+    expect(tester.widget<ColoredBox>(find.byType(ColoredBox)).color, const Color(0xFF00FF00));
+
+    tester.state<InheritedColorHeaderAppState>(find.byType(InheritedColorHeaderApp)).toggle();
+    await tester.pump();
+
+    expect(tester.widget<ColoredBox>(find.byType(ColoredBox)).color, const Color(0xFF0000FF));
+  });
+}
+
+class InheritedColor extends InheritedWidget {
+  const InheritedColor({required this.color, required super.child});
+
+  final Color color;
+
+  static Color of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<InheritedColor>()!.color;
+  }
+
+  @override
+  bool updateShouldNotify(InheritedColor oldWidget) => color != oldWidget.color;
+}
+
+class InheritedColorDelegate extends SliverPersistentHeaderDelegate {
+  @override
+  double get maxExtent => 100.0;
+
+  @override
+  double get minExtent => 100.0;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return ColoredBox(color: InheritedColor.of(context), child: const SizedBox.expand());
+  }
+
+  // The delegate itself has no configuration, so returning false is correct.
+  // The header must still rebuild when the inherited color it depends on changes.
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) => false;
+}
+
+class InheritedColorHeaderApp extends StatefulWidget {
+  const InheritedColorHeaderApp({super.key});
+
+  @override
+  State<InheritedColorHeaderApp> createState() => InheritedColorHeaderAppState();
+}
+
+class InheritedColorHeaderAppState extends State<InheritedColorHeaderApp> {
+  Color color = const Color(0xFF00FF00);
+
+  void toggle() {
+    setState(() {
+      color = const Color(0xFF0000FF);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InheritedColor(
+      color: color,
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverPersistentHeader(pinned: true, delegate: InheritedColorDelegate()),
+            const BigSliver(height: 550.0),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {
