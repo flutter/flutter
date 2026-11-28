@@ -635,6 +635,17 @@ class _TreeSliverState<T> extends State<TreeSliver<T>>
         _unpackActiveNodes(depth: depth + 1, nodes: node.children, parent: node);
       }
     }
+    if (depth == 0) {
+      _currentAnimationForParent.removeWhere((TreeSliverNode<T> node, _AnimationRecord record) {
+        if (_activeNodes.contains(node)) {
+          return false;
+        }
+        record.animation.dispose();
+        record.controller.dispose();
+        return true;
+      });
+      _updateActiveAnimations();
+    }
   }
 
   final Map<TreeSliverNode<T>, _AnimationRecord> _currentAnimationForParent =
@@ -891,13 +902,13 @@ class _TreeSliverState<T> extends State<TreeSliver<T>>
                   _currentAnimationForParent[node]!.animation.dispose();
                   _currentAnimationForParent[node]!.controller.dispose();
                   _currentAnimationForParent.remove(node);
-                  _updateActiveAnimations();
                   // If the node is collapsing, we need to unpack the active
                   // nodes to remove the ones that were removed from the tree.
                   // This is only necessary if the node is collapsing.
                   if (!node._expanded) {
                     _unpackActiveNodes();
                   }
+                  _updateActiveAnimations();
                 case AnimationStatus.forward:
                 case AnimationStatus.reverse:
               }
