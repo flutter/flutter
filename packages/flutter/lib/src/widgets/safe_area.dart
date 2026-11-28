@@ -112,10 +112,21 @@ class SafeArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    EdgeInsets padding = MediaQuery.paddingOf(context);
+    MediaQueryData data = MediaQuery.of(context);
+    EdgeInsets padding = data.padding;
     // Bottom padding has been consumed - i.e. by the keyboard
     if (maintainBottomViewPadding) {
-      padding = padding.copyWith(bottom: MediaQuery.viewPaddingOf(context).bottom);
+      padding = padding.copyWith(bottom: data.viewPadding.bottom);
+    }
+
+    data = data.removePadding(
+      removeLeft: left,
+      removeTop: top,
+      removeRight: right,
+      removeBottom: bottom && !maintainBottomViewPadding,
+    );
+    if (bottom && maintainBottomViewPadding) {
+      data = data.removeViewPadding(removeBottom: true);
     }
 
     return Padding(
@@ -125,14 +136,7 @@ class SafeArea extends StatelessWidget {
         right: math.max(right ? padding.right : 0.0, minimum.right),
         bottom: math.max(bottom ? padding.bottom : 0.0, minimum.bottom),
       ),
-      child: MediaQuery.removePadding(
-        context: context,
-        removeLeft: left,
-        removeTop: top,
-        removeRight: right,
-        removeBottom: bottom,
-        child: child,
-      ),
+      child: MediaQuery(data: data, child: child),
     );
   }
 
