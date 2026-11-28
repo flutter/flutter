@@ -712,7 +712,7 @@ typedef BoxHitTest = bool Function(BoxHitTestResult result, Offset position);
 ///
 ///  * [RenderBox.hitTest], which documents more details around hit testing
 ///    [RenderBox]es.
-typedef BoxHitTestWithOutOfBandPosition = bool Function(BoxHitTestResult result);
+typedef BoxHitTestWithOutOfBandPosition = HitTestWithOutOfBandPosition<BoxHitTestResult>;
 
 /// The result of performing a hit test on [RenderBox]es.
 ///
@@ -884,61 +884,6 @@ class BoxHitTestResult extends HitTestResult {
     if (transform != null) {
       popTransform();
     }
-    return isHit;
-  }
-
-  /// Pass-through method for adding a hit test while manually managing
-  /// the position transformation logic.
-  ///
-  /// The actual hit testing of the child needs to be implemented in the
-  /// provided `hitTest` callback. The position needs to be handled by
-  /// the caller.
-  ///
-  /// The function returns the return value of the `hitTest` callback.
-  ///
-  /// A `paintOffset`, `paintTransform`, or `rawTransform` should be
-  /// passed to the method to update the hit test stack.
-  ///
-  ///  * `paintOffset` has the semantics of the `offset` passed to
-  ///    [addWithPaintOffset].
-  ///
-  ///  * `paintTransform` has the semantics of the `transform` passed to
-  ///    [addWithPaintTransform], except that it must be invertible; it
-  ///    is the responsibility of the caller to ensure this.
-  ///
-  ///  * `rawTransform` has the semantics of the `transform` passed to
-  ///    [addWithRawTransform].
-  ///
-  /// Exactly one of these must be non-null.
-  ///
-  /// See also:
-  ///
-  ///  * [addWithPaintTransform], which takes a generic paint transform matrix and
-  ///    documents the intended usage of this API in more detail.
-  bool addWithOutOfBandPosition({
-    Offset? paintOffset,
-    Matrix4? paintTransform,
-    Matrix4? rawTransform,
-    required BoxHitTestWithOutOfBandPosition hitTest,
-  }) {
-    assert(
-      (paintOffset == null && paintTransform == null && rawTransform != null) ||
-          (paintOffset == null && paintTransform != null && rawTransform == null) ||
-          (paintOffset != null && paintTransform == null && rawTransform == null),
-      'Exactly one transform or offset argument must be provided.',
-    );
-    if (paintOffset != null) {
-      pushOffset(-paintOffset);
-    } else if (rawTransform != null) {
-      pushTransform(rawTransform);
-    } else {
-      assert(paintTransform != null);
-      paintTransform = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(paintTransform!));
-      assert(paintTransform != null, 'paintTransform must be invertible.');
-      pushTransform(paintTransform!);
-    }
-    final bool isHit = hitTest(this);
-    popTransform();
     return isHit;
   }
 }
