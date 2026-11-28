@@ -121,6 +121,12 @@ class BoxShadow extends ui.Shadow {
     if (identical(a, b)) {
       return a;
     }
+    if (t == 0.0 && a != null) {
+      return a;
+    }
+    if (t == 1.0 && b != null) {
+      return b;
+    }
     if (a == null) {
       return b!.scale(t);
     }
