@@ -39,8 +39,11 @@ static constexpr char kIcuDataPath[] = "/pkg/data/icudtl.dat";
 // timezone files.
 static constexpr char kICUTZEnv[] = "ICU_TIMEZONE_FILES_DIR";
 
-// The data directory containing ICU timezone data files.
-static constexpr char kICUTZDataDir[] = "/config/data/tzdata/icu/44/le";
+// The directory containing ICU timezone data files.
+// See:
+// https://fuchsia.dev/fuchsia-src/development/internationalization/icu_data#timezone_configuration_data
+// https://fuchsia.dev/fuchsia-src/concepts/process/namespaces
+static constexpr char kICUTZDataDir[] = "/config/tzdata/icu/44/le";
 
 // Map the memory into the process and return a pointer to the memory.
 uintptr_t GetICUData(const fuchsia::mem::Buffer& icu_data) {
