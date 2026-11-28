@@ -43,9 +43,10 @@ import 'media_query.dart';
 ///
 /// Similarly to [SafeArea], this widget assumes there is no added padding
 /// between it and the first [MediaQuery] ancestor. The [child] is wrapped in a
-/// new [MediaQuery] instance containing the [DisplayFeature]s that exist in the
-/// selected sub-screen, with coordinates relative to the sub-screen. Padding is
-/// also adjusted to zero out any sides that were avoided by this widget.
+/// new [MediaQuery] instance with the size of the selected sub-screen,
+/// containing the [DisplayFeature]s that exist in the sub-screen, with
+/// coordinates relative to the sub-screen. Padding is also adjusted to zero out
+/// any sides that were avoided by this widget.
 ///
 /// See also:
 ///
@@ -81,8 +82,9 @@ class DisplayFeatureSubScreen extends StatelessWidget {
   ///
   /// The padding on the [MediaQuery] for the [child] will be suitably adjusted
   /// to zero out any sides that were avoided by this widget. The [MediaQuery]
-  /// for the [child] will no longer contain any display features that split the
-  /// screen into sub-screens.
+  /// for the [child] will have the size of the selected sub-screen, and will no
+  /// longer contain any display features that split the screen into
+  /// sub-screens.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
@@ -114,7 +116,29 @@ class DisplayFeatureSubScreen extends StatelessWidget {
         right: parentSize.width - closestSubScreen.right,
         bottom: parentSize.height - closestSubScreen.bottom,
       ),
-      child: MediaQuery(data: mediaQuery.removeDisplayFeatures(closestSubScreen), child: child),
+      child: MediaQuery(data: _subScreenMediaQuery(mediaQuery, closestSubScreen), child: child),
+    );
+  }
+
+  /// Returns the [MediaQueryData] for a child laid out in [subScreen].
+  ///
+  /// The [MediaQueryData.size] is the size of the sub-screen and the
+  /// [DisplayFeature]s are relative to the sub-screen.
+  static MediaQueryData _subScreenMediaQuery(MediaQueryData mediaQuery, Rect subScreen) {
+    final MediaQueryData data = mediaQuery.removeDisplayFeatures(subScreen);
+    if (identical(data, mediaQuery)) {
+      return mediaQuery;
+    }
+    return data.copyWith(
+      size: subScreen.size,
+      displayFeatures: <DisplayFeature>[
+        for (final DisplayFeature displayFeature in data.displayFeatures)
+          DisplayFeature(
+            bounds: displayFeature.bounds.shift(-subScreen.topLeft),
+            type: displayFeature.type,
+            state: displayFeature.state,
+          ),
+      ],
     );
   }
 
