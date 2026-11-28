@@ -37,8 +37,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import '../foundation/_features.dart';
-import '_accessibility_evaluations.dart';
 import '_window.dart';
+import 'accessibility_evaluations.dart';
 import 'accessibility_inspector.dart';
 import 'app.dart';
 import 'debug.dart';
@@ -785,9 +785,17 @@ mixin WidgetsBinding
                 'minNormalTextContrastRatio': final String minNormalTextContrastRatio,
                 'minLargeTextContrastRatio': final String minLargeTextContrastRatio,
               }) {
+                final double normalRatio = double.parse(minNormalTextContrastRatio);
+                final double largeRatio = double.parse(minLargeTextContrastRatio);
                 final EvaluationResult result = await MinimumTextContrastEvaluation(
-                  minNormalTextContrastRatio: double.parse(minNormalTextContrastRatio),
-                  minLargeTextContrastRatio: double.parse(minLargeTextContrastRatio),
+                  targetContrastRatio: (double? fontSize, {required bool bold}) {
+                    final double size = fontSize ?? 12.0;
+                    if ((bold && size >= MinimumTextContrastEvaluation.kBoldTextMinimumSize) ||
+                        size >= MinimumTextContrastEvaluation.kLargeTextMinimumSize) {
+                      return largeRatio;
+                    }
+                    return normalRatio;
+                  },
                 ).evaluate(this);
                 return _formatEvaluationResult(result.violations);
               }

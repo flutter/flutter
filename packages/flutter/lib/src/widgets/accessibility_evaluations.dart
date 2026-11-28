@@ -12,6 +12,7 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
 import 'binding.dart';
@@ -20,12 +21,6 @@ import 'framework.dart';
 import 'text.dart';
 import 'title.dart';
 
-/// {@template flutter.widgets.accessibility_evaluations.internal}
-/// Do not use in production.
-///
-/// Flutter will make breaking changes to this API, even in patch versions.
-/// {@endtemplate}
-///
 /// Types of accessibility evaluations that can be performed on the semantics tree.
 ///
 /// The `.name` of each enum value is used:
@@ -33,7 +28,6 @@ import 'title.dart';
 ///   [WidgetsServiceExtensions.accessibilityEvaluations] service extension.
 /// * As the `rule` field value in each issue map returned by the
 ///   [AccessibilityServiceExtensions.getSemanticsTree] service extension.
-@internal
 enum AccessibilityEvaluationType {
   /// Enforces that all tappable semantics nodes have a minimum size.
   ///
@@ -68,10 +62,28 @@ enum AccessibilityEvaluationType {
   title,
 }
 
-/// {@macro flutter.widgets.accessibility_evaluations.internal}
+/// Signature for a predicate that determines whether a [SemanticsNode] should
+/// be skipped during an [AccessibilityEvaluation].
 ///
+/// Used by [MinimumTapTargetEvaluation.shouldSkipNode],
+/// [MinimumTextContrastEvaluation.shouldSkipNode], and
+/// [MinimumNonTextContrastEvaluation.shouldSkipNode].
+typedef SemanticsNodeSkipPredicate = bool Function(SemanticsNode node);
+
+/// Signature for a predicate that determines whether `paintBounds` is
+/// considered off-screen in `window`.
+///
+/// Used by [MinimumTextContrastEvaluation.isNodeOffScreen] and
+/// [MinimumNonTextContrastEvaluation.isNodeOffScreen].
+typedef NodeOffScreenPredicate = bool Function(Rect paintBounds, ui.FlutterView window);
+
+/// Signature for a callback that returns the required contrast ratio for text
+/// with the given `fontSize` and `bold` setting.
+///
+/// Used by [MinimumTextContrastEvaluation.targetContrastRatio].
+typedef TargetContrastRatioCallback = double Function(double? fontSize, {required bool bold});
+
 /// A violation of a semantics node.
-@internal
 class Violation {
   /// Creates a violation.
   const Violation(this.node, this.reason);
@@ -83,22 +95,34 @@ class Violation {
   final String reason;
 }
 
-/// {@macro flutter.widgets.accessibility_evaluations.internal}
-///
-/// The result of evaluating a semantics node by an [AccessibilityEvaluation].
-@internal
+/// The result of evaluating a widget tree by an [AccessibilityEvaluation].
 class EvaluationResult {
-  /// Creates a passing evaluation.
-  EvaluationResult(this.violations);
+  /// Creates an evaluation result with the given [violations].
+  const EvaluationResult(this.violations);
 
   /// A list of violations found. An empty list means the evaluation passed.
   final List<Violation> violations;
 }
 
-/// {@macro flutter.widgets.accessibility_evaluations.internal}
+/// A class that evaluates a single accessibility rule against the current
+/// semantics tree.
 ///
-/// A class that evaluates a single accessibility rule.
-@internal
+/// Subclasses implement [evaluate] to inspect the [WidgetsBinding.renderViews]
+/// and return an [EvaluationResult] containing any [Violation]s found.
+///
+/// See also:
+///  * [MinimumTapTargetEvaluation], which checks that tappable nodes have a
+///    minimum size.
+///  * [LabeledTapTargetEvaluation], which enforces that all nodes with a tap or
+///    long press action also have a label.
+///  * [MinimumTextContrastEvaluation], which verifies that text meets WCAG
+///    contrast requirements.
+///  * [MinimumNonTextContrastEvaluation], which verifies that non-text controls
+///    meet WCAG contrast requirements.
+///  * [UnlabeledLeafNodeEvaluation], which enforces that leaf nodes have an
+///    accessible label, value, hint, or tooltip.
+///  * [TitleEvaluation], which enforces that the application has at least one
+///    [Title] widget.
 abstract class AccessibilityEvaluation {
   /// A const constructor allows subclasses to be const.
   const AccessibilityEvaluation();
@@ -110,17 +134,28 @@ abstract class AccessibilityEvaluation {
   FutureOr<EvaluationResult> evaluate(WidgetsBinding binding);
 }
 
-/// {@macro flutter.widgets.accessibility_evaluations.internal}
+/// {@template flutter.widgets.accessibility_evaluations.minimumTapTarget}
+/// Enforces that all tappable semantics nodes have a minimum size.
 ///
-/// An evaluation which enforces that all tappable semantics nodes have a minimum
-/// size.
-@internal
+/// Each platform defines its own guidelines for minimum tap areas.
+/// {@endtemplate}
 class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
-  /// Create a new [MinimumTapTargetEvaluation].
-  const MinimumTapTargetEvaluation({required this.size});
+  /// Creates a new [MinimumTapTargetEvaluation].
+  const MinimumTapTargetEvaluation({
+    required this.size,
+    this.shouldSkipNode = defaultShouldSkipNode,
+  });
 
+  /// {@template flutter.widgets.accessibility_evaluations.minimumTapTarget.size}
   /// The minimum allowed size of a tappable node.
+  /// {@endtemplate}
   final Size size;
+
+  /// A callback that determines whether a [SemanticsNode] should be skipped
+  /// during minimum tap target evaluation.
+  ///
+  /// Defaults to [defaultShouldSkipNode].
+  final SemanticsNodeSkipPredicate shouldSkipNode;
 
   /// The gap between targets to their parent scrollables to be considered valid
   /// tap targets.
@@ -204,11 +239,14 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
     return true;
   }
 
-  /// Returns whether [SemanticsNode] should be skipped for minimum tap target
+  /// {@template flutter.widgets.accessibility_evaluations.minimumTapTarget.shouldSkipNode}
+  /// Returns whether [node] should be skipped for minimum tap target
   /// evaluation.
   ///
-  /// Skips nodes which are link, hidden, or do not have actions.
-  bool shouldSkipNode(SemanticsNode node) {
+  /// Skips nodes that are links, hidden, or do not have tap or long-press
+  /// actions.
+  /// {@endtemplate}
+  static bool defaultShouldSkipNode(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
     // Skip node if it has no actions, or is marked as hidden.
     if ((!data.hasAction(ui.SemanticsAction.longPress) &&
@@ -224,12 +262,11 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
   }
 }
 
-/// {@macro flutter.widgets.accessibility_evaluations.internal}
-///
-/// An evaluation which enforces that all nodes with a tap or long press action
-/// also have a label.
-@internal
+/// {@template flutter.widgets.accessibility_evaluations.labeledTapTarget}
+/// Enforces that all nodes with a tap or long press action also have a label.
+/// {@endtemplate}
 class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
+  /// Creates a new [LabeledTapTargetEvaluation].
   const LabeledTapTargetEvaluation();
 
   @override
@@ -281,54 +318,67 @@ class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
 
 /// Base class for evaluations that verify nodes meet minimum contrast levels.
 abstract class _ContrastEvaluation extends AccessibilityEvaluation {
-  const _ContrastEvaluation();
+  const _ContrastEvaluation({required this.shouldSkipNode, required this.isNodeOffScreen});
 
   static const double _kContrastTolerance = -0.01;
+
+  /// A callback that determines whether contrast evaluation should be skipped
+  /// for a [SemanticsNode] while still traversing its children.
+  final SemanticsNodeSkipPredicate shouldSkipNode;
+
+  /// A callback that determines whether a node's `paintBounds` is considered
+  /// off-screen in `window`.
+  final NodeOffScreenPredicate isNodeOffScreen;
 
   @override
   Future<EvaluationResult> evaluate(WidgetsBinding binding) async {
     final violations = <Violation>[];
     for (final RenderView renderView in binding.renderViews) {
-      final layer = renderView.debugLayer! as OffsetLayer;
-      final SemanticsNode root = renderView.owner!.semanticsOwner!.rootSemanticsNode!;
+      final ContainerLayer? layer = renderView.debugLayer;
+      final SemanticsNode? root = renderView.owner?.semanticsOwner?.rootSemanticsNode;
+      if (layer is! OffsetLayer || root == null) {
+        continue;
+      }
 
       final double ratio = 1 / renderView.flutterView.devicePixelRatio;
       final ui.Image image = await layer.toImage(renderView.paintBounds, pixelRatio: ratio);
       final ByteData byteData = (await image.toByteData())!;
-      violations.addAll(await _evaluateNode(root, image, byteData, renderView));
+      violations.addAll(_evaluateNode(binding, root, image, byteData, renderView));
       image.dispose();
     }
 
     return EvaluationResult(violations);
   }
 
-  Future<List<Violation>> _evaluateNode(
+  List<Violation> _evaluateNode(
+    WidgetsBinding binding,
     SemanticsNode node,
     ui.Image image,
     ByteData byteData,
     RenderView renderView,
-  ) async {
+  ) {
     final violations = <Violation>[];
 
     if (_shouldSkipNodeTraversal(node)) {
       return violations;
     }
 
-    final SemanticsData data = node.getSemanticsData();
     final children = <SemanticsNode>[];
     node.visitChildren((SemanticsNode child) {
       children.add(child);
       return true;
     });
     for (final child in children) {
-      violations.addAll(await _evaluateNode(child, image, byteData, renderView));
+      violations.addAll(_evaluateNode(binding, child, image, byteData, renderView));
     }
 
-    if (_shouldSkipNodeEvaluation(data)) {
+    if (shouldSkipNode(node)) {
       return violations;
     }
 
-    return evaluateNodeContent(node, data, image, byteData, renderView);
+    // Preserve child violations when evaluating an ancestor node.
+    violations.addAll(_evaluateNodeContent(binding, node, image, byteData, renderView));
+    return violations;
   }
 
   bool _shouldSkipNodeTraversal(SemanticsNode node) {
@@ -339,74 +389,72 @@ abstract class _ContrastEvaluation extends AccessibilityEvaluation {
         isDisabled;
   }
 
-  bool _shouldSkipNodeEvaluation(SemanticsData data);
-
-  Future<List<Violation>> evaluateNodeContent(
+  List<Violation> _evaluateNodeContent(
+    WidgetsBinding binding,
     SemanticsNode node,
-    SemanticsData data,
     ui.Image image,
     ByteData byteData,
     RenderView renderView,
   );
-
-  /// Returns if a rectangle of node is off the screen.
-  ///
-  /// Allows node to be off screen partially before culling the node.
-  bool _isNodeOffScreen(Rect paintBounds, ui.FlutterView window) {
-    final Size windowLogicalSize = window.physicalSize / window.devicePixelRatio;
-    return paintBounds.top < -50.0 ||
-        paintBounds.left < -50.0 ||
-        paintBounds.bottom > windowLogicalSize.height + 50.0 ||
-        paintBounds.right > windowLogicalSize.width + 50.0;
-  }
 }
 
-/// {@macro flutter.widgets.accessibility_evaluations.internal}
+/// {@template flutter.widgets.accessibility_evaluations.minimumTextContrast}
+/// Verifies that all nodes that contribute semantics via text meet minimum
+/// contrast levels.
 ///
-/// An evaluation which verifies that all nodes that contribute semantics via text
-/// meet minimum contrast levels.
-///
-/// The evaluations are defined by the Web Content Accessibility Guidelines,
-/// http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html.
-@internal
+/// This traverses the semantics tree looking for nodes with values or labels
+/// that correspond to a [Text] or [EditableText] widget. Given the background
+/// pixels for the area around each widget, it partitions the colors into
+/// "light" and "dark" and chooses the most frequently occurring color in each
+/// partition as a representative of the foreground and background colors. The
+/// contrast ratio is calculated from these colors according to the
+/// [WCAG](https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html#contrast-ratiodef).
+/// {@endtemplate}
 class MinimumTextContrastEvaluation extends _ContrastEvaluation {
-  /// Create a new [MinimumTextContrastEvaluation].
+  /// Creates a new [MinimumTextContrastEvaluation].
+  ///
+  /// [targetContrastRatio] defaults to [defaultTargetContrastRatio],
+  /// [shouldSkipNode] defaults to [defaultShouldSkipNode],
+  /// and [isNodeOffScreen] defaults to [defaultIsNodeOffScreen].
   const MinimumTextContrastEvaluation({
-    required this.minNormalTextContrastRatio,
-    required this.minLargeTextContrastRatio,
+    this.targetContrastRatio = defaultTargetContrastRatio,
+    super.shouldSkipNode = defaultShouldSkipNode,
+    super.isNodeOffScreen = defaultIsNodeOffScreen,
   });
 
-  /// The minimum contrast ratio for normal text.
+  /// A callback that returns the required contrast ratio for the given
+  /// `fontSize` and `bold` setting.
   ///
-  /// Normal text is text that is smaller than [kLargeTextMinimumSize] (18.0) or
-  /// smaller than [kBoldTextMinimumSize] (14.0) if bold.
-  final double minNormalTextContrastRatio;
+  /// Defaults to [defaultTargetContrastRatio].
+  final TargetContrastRatioCallback targetContrastRatio;
 
-  /// The minimum contrast ratio for large text.
-  ///
-  /// Large text is text that is at least [kLargeTextMinimumSize] (18.0) or at
-  /// least [kBoldTextMinimumSize] (14.0) if bold.
-  final double minLargeTextContrastRatio;
-
+  /// {@template flutter.widgets.accessibility_evaluations.minimumTextContrast.kLargeTextMinimumSize}
   /// The minimum text size considered large for contrast checking.
   ///
   /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+  /// {@endtemplate}
   static const int kLargeTextMinimumSize = 18;
 
+  /// {@template flutter.widgets.accessibility_evaluations.minimumTextContrast.kBoldTextMinimumSize}
   /// The minimum text size for bold text to be considered large for contrast
   /// checking.
   ///
   /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+  /// {@endtemplate}
   static const int kBoldTextMinimumSize = 14;
 
+  /// {@template flutter.widgets.accessibility_evaluations.minimumTextContrast.kMinimumRatioNormalText}
   /// The minimum contrast ratio for normal text.
   ///
   /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+  /// {@endtemplate}
   static const double kMinimumRatioNormalText = 4.5;
 
+  /// {@template flutter.widgets.accessibility_evaluations.minimumTextContrast.kMinimumRatioLargeText}
   /// The minimum contrast ratio for large text.
   ///
   /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+  /// {@endtemplate}
   static const double kMinimumRatioLargeText = 3.0;
 
   static const double _kDefaultFontSize = 12.0;
@@ -414,37 +462,74 @@ class MinimumTextContrastEvaluation extends _ContrastEvaluation {
   @override
   AccessibilityEvaluationType get type => AccessibilityEvaluationType.minimumTextContrast;
 
-  @override
-  bool _shouldSkipNodeEvaluation(SemanticsData data) =>
-      data.flagsCollection.scopesRoute || (data.label.trim().isEmpty && data.value.trim().isEmpty);
+  /// Returns whether text contrast evaluation should be skipped for [node].
+  ///
+  /// Skips routes which might have labels, and nodes without any text.
+  static bool defaultShouldSkipNode(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+    return data.flagsCollection.scopesRoute ||
+        (data.label.trim().isEmpty && data.value.trim().isEmpty);
+  }
+
+  /// {@template flutter.widgets.accessibility_evaluations.contrast.isNodeOffScreen}
+  /// Returns whether [paintBounds] is off the screen in [window].
+  ///
+  /// Allows a node to be partially off-screen before culling it.
+  /// {@endtemplate}
+  static bool defaultIsNodeOffScreen(Rect paintBounds, ui.FlutterView window) {
+    final Size windowLogicalSize = window.physicalSize / window.devicePixelRatio;
+    return paintBounds.top < -50.0 ||
+        paintBounds.left < -50.0 ||
+        paintBounds.bottom > windowLogicalSize.height + 50.0 ||
+        paintBounds.right > windowLogicalSize.width + 50.0;
+  }
+
+  /// {@template flutter.widgets.accessibility_evaluations.minimumTextContrast.targetContrastRatio}
+  /// Returns the required contrast ratio for the [fontSize] and [bold] setting.
+  ///
+  /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+  /// {@endtemplate}
+  static double defaultTargetContrastRatio(double? fontSize, {required bool bold}) {
+    final double fontSizeOrDefault = fontSize ?? _kDefaultFontSize;
+    if ((bold && fontSizeOrDefault >= kBoldTextMinimumSize) ||
+        fontSizeOrDefault >= kLargeTextMinimumSize) {
+      return kMinimumRatioLargeText;
+    }
+    return kMinimumRatioNormalText;
+  }
 
   @override
-  Future<List<Violation>> evaluateNodeContent(
+  List<Violation> _evaluateNodeContent(
+    WidgetsBinding binding,
     SemanticsNode node,
-    SemanticsData data,
     ui.Image image,
     ByteData byteData,
     RenderView renderView,
-  ) async {
+  ) {
+    final Element? rootElement = binding.rootElement;
+    if (rootElement == null) {
+      return <Violation>[];
+    }
     final violations = <Violation>[];
+    final SemanticsData data = node.getSemanticsData();
     final String text = data.label.isEmpty ? data.value : data.label;
     final Iterable<Element> elements = _collectElementsByText(
-      WidgetsBinding.instance.rootElement!,
+      rootElement,
       text,
-    );
+    ).where((Element element) => _isHitTestable(binding, element));
     for (final element in elements) {
-      violations.addAll(await _evaluateElement(node, element, image, byteData, renderView));
+      violations.addAll(_evaluateElement(node, element, image, byteData, renderView));
     }
     return violations;
   }
 
-  Future<List<Violation>> _evaluateElement(
+  List<Violation> _evaluateElement(
     SemanticsNode node,
     Element element,
     ui.Image image,
     ByteData byteData,
     RenderView renderView,
-  ) async {
+  ) {
     // Look up inherited text properties to determine text size and weight.
     late bool isBold;
     double? fontSize;
@@ -502,7 +587,7 @@ class MinimumTextContrastEvaluation extends _ContrastEvaluation {
       throw StateError('Unexpected widget type: ${widget.runtimeType}');
     }
 
-    if (_isNodeOffScreen(paintBoundsWithOffset, renderView.flutterView)) {
+    if (isNodeOffScreen(paintBoundsWithOffset, renderView.flutterView)) {
       return <Violation>[];
     }
 
@@ -521,16 +606,16 @@ class MinimumTextContrastEvaluation extends _ContrastEvaluation {
     final report = _ContrastReport(colorHistogram);
 
     final double contrastRatio = report.contrastRatio();
-    final double targetContrastRatio = _targetContrastRatio(fontSize, bold: isBold);
+    final double requiredContrastRatio = targetContrastRatio(fontSize, bold: isBold);
 
-    if (contrastRatio - targetContrastRatio >= _ContrastEvaluation._kContrastTolerance) {
+    if (contrastRatio - requiredContrastRatio >= _ContrastEvaluation._kContrastTolerance) {
       return <Violation>[];
     }
     return <Violation>[
       Violation(
         node,
         '$node:\n'
-        'Expected contrast ratio of at least $targetContrastRatio '
+        'Expected contrast ratio of at least $requiredContrastRatio '
         'but found ${contrastRatio.toStringAsFixed(2)} '
         'for a font size of $fontSize.\n'
         'The computed colors were:\n'
@@ -540,42 +625,44 @@ class MinimumTextContrastEvaluation extends _ContrastEvaluation {
       ),
     ];
   }
-
-  /// Returns the required contrast ratio for the [fontSize] and [bold] setting.
-  ///
-  /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
-  double _targetContrastRatio(double? fontSize, {required bool bold}) {
-    final double fontSizeOrDefault = fontSize ?? _kDefaultFontSize;
-    if ((bold && fontSizeOrDefault >= kBoldTextMinimumSize) ||
-        fontSizeOrDefault >= kLargeTextMinimumSize) {
-      return minLargeTextContrastRatio;
-    }
-    return minNormalTextContrastRatio;
-  }
 }
 
-/// {@macro flutter.widgets.accessibility_evaluations.internal}
-///
-/// An evaluation which verifies that all nodes that represent non-text controls
-/// meet minimum contrast levels of 3.0.
+/// Verifies that all nodes representing non-text controls meet
+/// [minContrastRatio] (3.0 by default).
 ///
 /// The evaluations are defined by the Web Content Accessibility Guidelines,
 /// https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html
-@internal
 class MinimumNonTextContrastEvaluation extends _ContrastEvaluation {
-  /// Create a new [MinimumNonTextContrastEvaluation].
-  const MinimumNonTextContrastEvaluation();
+  /// Creates a new [MinimumNonTextContrastEvaluation].
+  ///
+  /// [minContrastRatio] defaults to [kMinimumRatioNonText],
+  /// [shouldSkipNode] defaults to [defaultShouldSkipNode],
+  /// and [isNodeOffScreen] defaults to
+  /// [MinimumTextContrastEvaluation.defaultIsNodeOffScreen].
+  const MinimumNonTextContrastEvaluation({
+    this.minContrastRatio = kMinimumRatioNonText,
+    super.shouldSkipNode = defaultShouldSkipNode,
+    super.isNodeOffScreen = MinimumTextContrastEvaluation.defaultIsNodeOffScreen,
+  });
+
+  /// The minimum contrast ratio required for non-text controls.
+  ///
+  /// Defaults to [kMinimumRatioNonText].
+  final double minContrastRatio;
 
   /// The minimum contrast ratio for non-text controls.
   ///
   /// Defined by http://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html
-  static const double _kMinimumRatioNonText = 3.0;
+  static const double kMinimumRatioNonText = 3.0;
 
   @override
   AccessibilityEvaluationType get type => AccessibilityEvaluationType.minimumNonTextContrast;
 
-  @override
-  bool _shouldSkipNodeEvaluation(SemanticsData data) {
+  /// Returns whether non-text contrast evaluation should be skipped for [node].
+  ///
+  /// Skips routes and nodes that do not represent interactive controls.
+  static bool defaultShouldSkipNode(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
     if (data.flagsCollection.scopesRoute) {
       return true;
     }
@@ -593,13 +680,13 @@ class MinimumNonTextContrastEvaluation extends _ContrastEvaluation {
   }
 
   @override
-  Future<List<Violation>> evaluateNodeContent(
+  List<Violation> _evaluateNodeContent(
+    WidgetsBinding binding,
     SemanticsNode node,
-    SemanticsData data,
     ui.Image image,
     ByteData byteData,
     RenderView renderView,
-  ) async {
+  ) {
     final violations = <Violation>[];
     Rect nodeBounds = node.rect;
     SemanticsNode? current = node;
@@ -621,7 +708,7 @@ class MinimumNonTextContrastEvaluation extends _ContrastEvaluation {
 
     final Rect inflatedBounds = logicalBounds.inflate(4.0);
 
-    if (_isNodeOffScreen(inflatedBounds, renderView.flutterView)) {
+    if (isNodeOffScreen(inflatedBounds, renderView.flutterView)) {
       return violations;
     }
 
@@ -639,7 +726,7 @@ class MinimumNonTextContrastEvaluation extends _ContrastEvaluation {
     final report = _ContrastReport(colorHistogram);
     final double contrastRatio = report.contrastRatio();
 
-    if (contrastRatio - _kMinimumRatioNonText >= _ContrastEvaluation._kContrastTolerance) {
+    if (contrastRatio - minContrastRatio >= _ContrastEvaluation._kContrastTolerance) {
       return violations;
     }
 
@@ -647,7 +734,7 @@ class MinimumNonTextContrastEvaluation extends _ContrastEvaluation {
       Violation(
         node,
         '$node:\n'
-        'Expected non-text control contrast ratio of at least ${_kMinimumRatioNonText.toStringAsFixed(1)} '
+        'Expected non-text control contrast ratio of at least ${minContrastRatio.toStringAsFixed(1)} '
         'but found ${contrastRatio.toStringAsFixed(2)}.\n'
         'The computed colors were:\n'
         'light - ${report.lightColor}, dark - ${report.darkColor}\n'
@@ -754,12 +841,45 @@ Map<Color, int> _colorsWithinRect(ByteData data, Rect paintBounds, int width, in
 Iterable<Element> _collectElementsByText(Element root, String text) {
   final result = <Element>[];
   root.visitChildren((Element child) {
-    if (child.widget is Text && (child.widget as Text).data == text) {
+    final Widget widget = child.widget;
+    if ((widget is Text && (widget.data ?? widget.textSpan?.toPlainText()) == text) ||
+        (widget is EditableText && widget.controller.text == text)) {
       result.add(child);
     }
     result.addAll(_collectElementsByText(child, text));
   });
   return result;
+}
+
+bool _isRenderObjectAncestorOfTarget(RenderObject renderObject, HitTestTarget target) {
+  if (target == renderObject) {
+    return true;
+  }
+  if (target is RenderObject) {
+    for (RenderObject? current = target.parent; current != null; current = current.parent) {
+      if (current == renderObject) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+// Checks whether the center of [element] can be hit-tested in its enclosing
+// [RenderView], so obscured text (such as text behind a modal or backdrop) is
+// skipped.
+bool _isHitTestable(WidgetsBinding binding, Element element) {
+  final RenderObject? object = element.renderObject;
+  final RenderObject? root = object?.owner?.rootNode;
+  if (root is! RenderView || object is! RenderBox || !object.hasSize) {
+    return false;
+  }
+  final Offset absoluteOffset = object.localToGlobal(object.size.center(Offset.zero));
+  final hitResult = HitTestResult();
+  binding.hitTestInView(hitResult, absoluteOffset, root.flutterView.viewId);
+  return hitResult.path.any(
+    (HitTestEntry entry) => _isRenderObjectAncestorOfTarget(object, entry.target),
+  );
 }
 
 final int _scrollingActions =
@@ -821,12 +941,10 @@ bool _isImportantForAccessibility(SemanticsNode node) {
   return false;
 }
 
-/// {@macro flutter.widgets.accessibility_evaluations.internal}
-///
 /// An evaluation which enforces that all leaf semantics nodes have a label,
 /// value, hint, or tooltip.
-@internal
 class UnlabeledLeafNodeEvaluation extends AccessibilityEvaluation {
+  /// Creates a new [UnlabeledLeafNodeEvaluation].
   const UnlabeledLeafNodeEvaluation();
 
   @override
@@ -884,13 +1002,10 @@ class UnlabeledLeafNodeEvaluation extends AccessibilityEvaluation {
   }
 }
 
-/// {@macro flutter.widgets.accessibility_evaluations.internal}
-///
 /// An evaluation which enforces that the application has at least one [Title]
 /// widget to set the web page title.
-@internal
 class TitleEvaluation extends AccessibilityEvaluation {
-  /// Create a new [TitleEvaluation].
+  /// Creates a new [TitleEvaluation].
   const TitleEvaluation();
 
   @override
