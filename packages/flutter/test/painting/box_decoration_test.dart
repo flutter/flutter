@@ -82,6 +82,34 @@ void main() {
     expect(decoration.border, const _TestBoxBorder(2.0));
   });
 
+  test('BoxDecoration.scale keeps backgroundBlendMode', () {
+    const decoration = BoxDecoration(
+      color: Color(0xFFFFFFFF),
+      backgroundBlendMode: BlendMode.overlay,
+    );
+
+    expect(decoration.scale(0.5).backgroundBlendMode, BlendMode.overlay);
+  });
+
+  test('BoxDecoration.lerp keeps backgroundBlendMode', () {
+    const a = BoxDecoration(color: Color(0x00FFFFFF), backgroundBlendMode: BlendMode.overlay);
+    const b = BoxDecoration(color: Color(0x80FFFFFF), backgroundBlendMode: BlendMode.overlay);
+
+    expect(BoxDecoration.lerp(a, b, 0.25)!.backgroundBlendMode, BlendMode.overlay);
+    expect(BoxDecoration.lerp(a, b, 0.75)!.backgroundBlendMode, BlendMode.overlay);
+    expect(BoxDecoration.lerp(null, b, 0.5)!.backgroundBlendMode, BlendMode.overlay);
+    expect(BoxDecoration.lerp(a, null, 0.5)!.backgroundBlendMode, BlendMode.overlay);
+  });
+
+  test('BoxDecoration.lerp switches backgroundBlendMode at t = 0.5', () {
+    const a = BoxDecoration(color: Color(0xFF000000), backgroundBlendMode: BlendMode.overlay);
+    const b = BoxDecoration(color: Color(0xFFFFFFFF), backgroundBlendMode: BlendMode.multiply);
+
+    expect(BoxDecoration.lerp(a, b, 0.25)!.backgroundBlendMode, BlendMode.overlay);
+    expect(BoxDecoration.lerp(a, b, 0.5)!.backgroundBlendMode, BlendMode.multiply);
+    expect(BoxDecoration.lerp(a, b, 0.75)!.backgroundBlendMode, BlendMode.multiply);
+  });
+
   test('BoxDecoration with BorderRadiusDirectional', () {
     const decoration = BoxDecoration(
       color: Color(0xFF000000),
