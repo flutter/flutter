@@ -57,6 +57,59 @@ void main() {
     });
 
     group('findRichText', () {
+      testWidgets('ignores WidgetSpan placeholders in Text.rich', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          _boilerplate(
+            const Text.rich(
+              TextSpan(
+                text: 'Hello ',
+                children: <InlineSpan>[
+                  WidgetSpan(child: SizedBox()),
+                  TextSpan(text: ' world'),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        expect(find.text('Hello  world'), findsOneWidget);
+      });
+
+      testWidgets('ignores WidgetSpan placeholders in RichText', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          _boilerplate(
+            RichText(
+              text: const TextSpan(
+                text: 'Hello ',
+                children: <InlineSpan>[
+                  WidgetSpan(child: SizedBox()),
+                  TextSpan(text: ' world'),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        expect(find.text('Hello  world', findRichText: true), findsOneWidget);
+      });
+
+      testWidgets('textContaining matches across a WidgetSpan', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          _boilerplate(
+            const Text.rich(
+              TextSpan(
+                text: 'Hello ',
+                children: <InlineSpan>[
+                  WidgetSpan(child: SizedBox()),
+                  TextSpan(text: ' world'),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        expect(find.textContaining('o  w'), findsOneWidget);
+      });
       testWidgets('finds RichText widgets when enabled', (WidgetTester tester) async {
         await tester.pumpWidget(
           _boilerplate(
