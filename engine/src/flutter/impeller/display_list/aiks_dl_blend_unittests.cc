@@ -1001,5 +1001,56 @@ TEST_P(AiksTest, EmulatedAdvancedBlendRestore) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+// Bug: https://github.com/flutter/flutter/issues/160589
+TEST_P(AiksTest, AdvancedBlendSaveLayerRestoreNoFbFetchKeepsClip) {
+  if (GetParam() != PlaygroundBackend::kMetal) {
+    GTEST_SKIP()
+        << "This backend doesn't yet support setting device capabilities.";
+  }
+
+  std::shared_ptr<const Capabilities> old_capabilities =
+      GetContext()->GetCapabilities();
+  auto mock_capabilities = std::make_shared<MockCapabilities>();
+  EXPECT_CALL(*mock_capabilities, SupportsFramebufferFetch())
+      .Times(::testing::AtLeast(1))
+      .WillRepeatedly(::testing::Return(false));
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultColorFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultStencilFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              GetDefaultDepthStencilFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsOffscreenMSAA);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              SupportsImplicitResolvingMSAA);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsReadFromResolve);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsSSBO);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsCompute);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              SupportsTextureToTextureBlits);
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultGlyphAtlasFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsTriangleFan);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              SupportsDecalSamplerAddressMode);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsPrimitiveRestart);
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetMinimumUniformAlignment);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              GetMaximumRenderPassAttachmentSize);
+  ASSERT_TRUE(SetCapabilities(mock_capabilities).ok());
+
+  DisplayListBuilder builder;
+  builder.DrawPaint(DlPaint(DlColor(0xFF808080)));
+  builder.Save();
+  builder.ClipPath(DlPath::MakeCircle(DlPoint(200, 200), 150));
+  DlPaint layer_paint;
+  layer_paint.setBlendMode(DlBlendMode::kSoftLight);
+  builder.SaveLayer(std::nullopt, &layer_paint);
+  builder.DrawPaint(DlPaint(DlColor::kBlue()));
+  builder.Restore();
+  builder.Restore();
+
+  // The blended blue must stay inside the circle clip. The rest of the
+  // window must stay grey.
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller
