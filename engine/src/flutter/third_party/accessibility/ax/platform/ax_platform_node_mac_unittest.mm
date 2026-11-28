@@ -67,4 +67,40 @@ TEST_F(AXPlatformNodeMacTest, AccessibilityRangeForPositionDoesntCrash) {
   [native_root accessibilityRangeForPosition:(NSPoint)point];
 }
 
+TEST_F(AXPlatformNodeMacTest, AccessibilityIdentifierReturnsIdentifier) {
+  AXNodeData root;
+  root.id = 1;
+  root.AddStringAttribute(ax::mojom::StringAttribute::kIdentifier, "probe.button");
+
+  Init(root);
+  AXPlatformNode* platform_node = AXPlatformNodeFromNode(GetRootAsAXNode());
+  ASSERT_TRUE(platform_node != nullptr);
+  AXPlatformNodeCocoa* native_root = platform_node->GetNativeViewAccessible();
+  ASSERT_TRUE(native_root != nullptr);
+
+  EXPECT_TRUE([[native_root accessibilityIdentifier] isEqualToString:@"probe.button"]);
+}
+
+// The accessibility bridge always sets kIdentifier, so an empty value must be
+// treated like a missing one.
+TEST_F(AXPlatformNodeMacTest, AccessibilityIdentifierIsNilWhenMissingOrEmpty) {
+  AXNodeData root;
+  root.id = 1;
+  root.child_ids = {2};
+
+  AXNodeData child;
+  child.id = 2;
+  child.AddStringAttribute(ax::mojom::StringAttribute::kIdentifier, "");
+
+  Init(root, child);
+  AXNode* root_node = GetRootAsAXNode();
+  AXPlatformNode* root_platform_node = AXPlatformNodeFromNode(root_node);
+  AXPlatformNode* child_platform_node = AXPlatformNodeFromNode(root_node->children()[0]);
+  ASSERT_TRUE(root_platform_node != nullptr);
+  ASSERT_TRUE(child_platform_node != nullptr);
+
+  EXPECT_EQ([root_platform_node->GetNativeViewAccessible() accessibilityIdentifier], nil);
+  EXPECT_EQ([child_platform_node->GetNativeViewAccessible() accessibilityIdentifier], nil);
+}
+
 }  // namespace ui
