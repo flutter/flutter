@@ -4018,6 +4018,29 @@ Future<void> main() async {
 
     await tester.pumpAndSettle();
   });
+
+  testWidgets(
+    'Route is brought back onstage when the other route is removed before the hero transition starts',
+    (WidgetTester tester) async {
+      final navigatorKey = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(MaterialApp(navigatorKey: navigatorKey, home: const Text('home')));
+
+      navigatorKey.currentState!.push(
+        MaterialPageRoute<void>(builder: (BuildContext context) => const Text('page')),
+      );
+      await tester.pump(const Duration(milliseconds: 16));
+
+      // Remove the route before the hero transition starts.
+      final above = MaterialPageRoute<void>(builder: (BuildContext context) => const Text('above'));
+      navigatorKey.currentState!.push(above);
+      navigatorKey.currentState!.removeRoute(above);
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(seconds: 2));
+
+      expect(find.text('above'), findsNothing);
+      expect(find.text('page'), findsOneWidget);
+    },
+  );
 }
 
 class TestDependencies extends StatelessWidget {
