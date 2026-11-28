@@ -14,7 +14,7 @@ ViewportMetrics::ViewportMetrics(double p_device_pixel_ratio,
                                  double p_physical_width,
                                  double p_physical_height,
                                  double p_physical_touch_slop,
-                                 size_t p_display_id)
+                                 int64_t p_display_id)
     : device_pixel_ratio(p_device_pixel_ratio),
       physical_width(p_physical_width),
       physical_height(p_physical_height),
@@ -48,7 +48,7 @@ ViewportMetrics::ViewportMetrics(
     const std::vector<double>& p_physical_display_features_bounds,
     const std::vector<int>& p_physical_display_features_type,
     const std::vector<int>& p_physical_display_features_state,
-    size_t p_display_id,
+    int64_t p_display_id,
     double p_physical_display_corner_radius_top_left,
     double p_physical_display_corner_radius_top_right,
     double p_physical_display_corner_radius_bottom_right,
