@@ -9,7 +9,6 @@
 ///
 /// @docImport 'package:flutter_driver/flutter_driver.dart' as flutter_driver;
 ///
-/// @docImport 'controller.dart';
 /// @docImport 'test_pointer.dart';
 /// @docImport 'widget_tester.dart';
 library;
@@ -34,6 +33,7 @@ import 'package:test_api/scaffolding.dart' as test_package show Timeout;
 import 'package:vector_math/vector_math_64.dart';
 
 import '_binding_io.dart' if (dart.library.js_interop) '_binding_web.dart' as binding;
+import 'controller.dart';
 import 'goldens.dart';
 import 'platform.dart';
 import 'restoration.dart';
@@ -1228,6 +1228,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _restorationManager = null;
     platformDispatcher.clearDefaultRouteNameTestValue();
     resetGestureBinding();
+    WidgetController.resetPointerIdentifier();
     testTextInput.reset();
     if (registerTestTextInput) {
       _testTextInput.register();

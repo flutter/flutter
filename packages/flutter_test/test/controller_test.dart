@@ -20,6 +20,21 @@ class TestDragData {
 }
 
 void main() {
+  testWidgets(
+    'each test starts with its own pointer sequence',
+    (WidgetTester tester) async {
+      expect(tester.nextPointer, 1);
+      await tester.createGesture();
+      expect(tester.nextPointer, 2);
+      await tester.createGesture(pointer: 42);
+      expect(tester.nextPointer, 2);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.android,
+    }),
+  );
+
   testWidgets('WidgetTester.drag must break the offset into multiple parallel components if '
       'the drag goes outside the touch slop values', (WidgetTester tester) async {
     // This test checks to make sure that the total drag will be correctly split into

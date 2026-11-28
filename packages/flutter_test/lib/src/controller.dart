@@ -1951,6 +1951,12 @@ abstract class WidgetController {
 
   static int _nextPointer = 1;
 
+  /// Restarts the sequence of gesture pointer identifiers for a new widget test.
+  @internal
+  static void resetPointerIdentifier() {
+    _nextPointer = 1;
+  }
+
   static int _getNextPointer() {
     final int result = _nextPointer;
     _nextPointer += 1;
