@@ -4,6 +4,7 @@
 
 #include "impeller/entity/contents/text_contents.h"
 
+#include <algorithm>
 #include <cstring>
 #include <optional>
 #include <utility>
@@ -297,8 +298,36 @@ bool TextContents::Render(const ContentContext& renderer,
     Scalar luma =
         color.red * 0.2126f + color.green * 0.7152f + color.blue * 0.0722f;
     frag_info.text_contrast = 1.0f + luma * kMaxGammaCorrection;
+    // The contrast ramp is anchored at 1.0 for black text, so black gets no
+    // correction at all from it. That anchor is right on Linux, where FreeType
+    // bakes the device gamma into the mask. On Windows the glyphs come from
+    // DirectWrite and the coverage reaches the atlas unmodified, so black is
+    // the one colour left with a ramp that is too shallow, which reads as soft
+    // small text rather than as light text.
+    //
+    // The exponent above alone cannot fill that in: it remaps 1 - coverage,
+    // whose slope tends to the exponent as coverage approaches zero, so the
+    // faintest edge pixels barely move. Those are exactly the pixels that read
+    // as a blur halo. Remapping the coverage itself with a power curve does
+    // reach them, and it deepens the solid core too.
+    //
+    // The gamma is held at full strength for everything at or below
+    // kDarkTextLumaFull, then fades to nothing by kDarkTextLumaRange.
+    // Saturating the dark end matters: a linear fade gives #1A1A1A only 64% of
+    // the correction, and that is the near-black most themes use for body
+    // text. Above kDarkTextLumaRange the ramp above is already doing its job,
+    // so those colours keep the appearance they have today.
+    constexpr Scalar kDarkTextLumaRange = 0.26f;  // no effect above ~#464646
+    constexpr Scalar kDarkTextLumaFull = 0.20f;   // full effect below ~#333333
+    constexpr Scalar kDarkTextCoverageGamma = 1.0f / 1.26f;
+    const Scalar dark = std::clamp((kDarkTextLumaRange - luma) /
+                                       (kDarkTextLumaRange - kDarkTextLumaFull),
+                                   0.0f, 1.0f);
+    frag_info.text_coverage_gamma =
+        1.0f + (kDarkTextCoverageGamma - 1.0f) * dark;
   } else {
     frag_info.text_contrast = 1.0f;
+    frag_info.text_coverage_gamma = 1.0f;
   }
 
   FS::BindFragInfo(
