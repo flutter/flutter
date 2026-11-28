@@ -58,6 +58,7 @@ void main(List<String> arguments) {
     throw UnimplementedError('Script only support running on Linux or MacOS.');
   }
   final String nmPath = p.join(buildToolsPath, platform, 'clang', 'bin', 'llvm-nm');
+  final String readelfPath = p.join(buildToolsPath, platform, 'clang', 'bin', 'llvm-readelf');
   if (!Directory(outPath).existsSync()) {
     print('error: build out directory not found: $outPath');
     exit(1);
@@ -79,7 +80,7 @@ void main(List<String> arguments) {
 
   var failures = 0;
   failures += _checkIos(outPath, nmPath, iosReleaseBuilds);
-  failures += _checkAndroid(outPath, nmPath, androidReleaseBuilds);
+  failures += _checkAndroid(outPath, nmPath, readelfPath, androidReleaseBuilds);
   if (Platform.isLinux) {
     failures += _checkLinux(outPath, nmPath, hostReleaseBuilds);
   }
@@ -120,7 +121,7 @@ int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
   return failures;
 }
 
-int _checkAndroid(String outPath, String nmPath, Iterable<String> builds) {
+int _checkAndroid(String outPath, String nmPath, String readelfPath, Iterable<String> builds) {
   var failures = 0;
   for (final build in builds) {
     final String libFlutter = p.join(outPath, build, 'libflutter.so');
@@ -158,8 +159,45 @@ int _checkAndroid(String outPath, String nmPath, Iterable<String> builds) {
     } else {
       print('OK: $libFlutter');
     }
+    failures += _checkAndroidPageAlignment(libFlutter, readelfPath);
   }
   return failures;
+}
+
+/// Verifies that [libFlutter] is laid out for 16 KB pages: every PT_LOAD is
+/// aligned to at least 16 KB, and PT_GNU_RELRO ends on a 16 KB boundary.
+///
+/// See https://developer.android.com/guide/practices/page-sizes.
+int _checkAndroidPageAlignment(String libFlutter, String readelfPath) {
+  const pageSize = 0x4000;
+  final ProcessResult result = Process.runSync(readelfPath, <String>['-lW', libFlutter]);
+  if (result.exitCode != 0) {
+    print('ERROR: failed to execute "llvm-readelf -lW $libFlutter":\n${result.stderr}');
+    return 1;
+  }
+  final errors = <String>{};
+  for (final String line in LineSplitter.split(result.stdout as String)) {
+    // Type Offset VirtAddr PhysAddr FileSiz MemSiz Flg Align
+    // Flg may contain a space ("R E"), so read Align from the end.
+    final List<String> fields = line.trim().split(RegExp(r'\s+'));
+    if (fields.first == 'LOAD') {
+      final int align = int.parse(fields.last);
+      if (align < pageSize) {
+        errors.add('PT_LOAD alignment is 0x${align.toRadixString(16)}');
+      }
+    } else if (fields.first == 'GNU_RELRO') {
+      final int end = int.parse(fields[2]) + int.parse(fields[5]);
+      if (end % pageSize != 0) {
+        errors.add('PT_GNU_RELRO ends at 0x${end.toRadixString(16)}');
+      }
+    }
+  }
+  if (errors.isNotEmpty) {
+    print('ERROR: $libFlutter is not 16 KB page aligned: ${errors.join(', ')}');
+    return 1;
+  }
+  print('OK: $libFlutter is 16 KB page aligned');
+  return 0;
 }
 
 int _checkLinux(String outPath, String nmPath, Iterable<String> builds) {
