@@ -17,8 +17,6 @@ class FlutterCompileOptionsTest {
     fun `from reads each compile property from the project`() {
         val project =
             projectWithProperties(
-                FlutterCompileOptions.FILE_SYSTEM_ROOTS_PROPERTY to "root1",
-                FlutterCompileOptions.FILE_SYSTEM_SCHEME_PROPERTY to "custom-scheme",
                 FlutterCompileOptions.TRACK_WIDGET_CREATION_PROPERTY to "false",
                 FlutterCompileOptions.FRONTEND_SERVER_STARTER_PATH_PROPERTY to "starter.dart",
                 FlutterCompileOptions.EXTRA_FRONT_END_OPTIONS_PROPERTY to "--opt1",
@@ -35,8 +33,6 @@ class FlutterCompileOptionsTest {
 
         val options = FlutterCompileOptions.from(project)
 
-        assertEquals(listOf("root1"), options.fileSystemRoots)
-        assertEquals("custom-scheme", options.fileSystemScheme)
         assertEquals(false, options.trackWidgetCreation)
         assertEquals("starter.dart", options.frontendServerStarterPath)
         assertEquals("--opt1", options.extraFrontEndOptions)
@@ -55,8 +51,6 @@ class FlutterCompileOptionsTest {
     fun `from falls back to defaults when no properties are set`() {
         val options = FlutterCompileOptions.from(projectWithProperties())
 
-        assertNull(options.fileSystemRoots)
-        assertNull(options.fileSystemScheme)
         assertNull(options.frontendServerStarterPath)
         assertNull(options.extraFrontEndOptions)
         assertNull(options.extraGenSnapshotOptions)
@@ -78,7 +72,7 @@ class FlutterCompileOptionsTest {
     fun `options resolved from equivalent projects are equal`() {
         val properties =
             arrayOf(
-                FlutterCompileOptions.FILE_SYSTEM_ROOTS_PROPERTY to "root1",
+                FlutterCompileOptions.SPLIT_DEBUG_INFO_PROPERTY to "debug/info",
                 FlutterCompileOptions.DART_DEFINES_PROPERTY to "key=val"
             )
 
@@ -91,7 +85,7 @@ class FlutterCompileOptionsTest {
             options !=
                 FlutterCompileOptions.from(
                     projectWithProperties(
-                        FlutterCompileOptions.FILE_SYSTEM_ROOTS_PROPERTY to "other-root",
+                        FlutterCompileOptions.SPLIT_DEBUG_INFO_PROPERTY to "other/info",
                         FlutterCompileOptions.DART_DEFINES_PROPERTY to "key=val"
                     )
                 )

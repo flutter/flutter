@@ -592,8 +592,6 @@ class FlutterPlugin : Plugin<Project> {
             localEngineSrcPath = flutterGradlePlugin.localEngineSrcPath
             targetPath = FlutterPluginUtils.getFlutterTarget(project)
             verbose = FlutterPluginUtils.isProjectVerbose(project)
-            fileSystemRoots = compileOptions.fileSystemRoots?.toTypedArray()
-            fileSystemScheme = compileOptions.fileSystemScheme
             trackWidgetCreation = compileOptions.trackWidgetCreation
             targetPlatformValues = targetPlatforms
             sourceDir = FlutterPluginUtils.getFlutterSourceDirectory(project)

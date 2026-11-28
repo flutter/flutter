@@ -714,7 +714,6 @@ class FlutterPluginTest {
     ) {
         val env = setupTestProjectEnvironment(tempDir)
         val project = env.project
-        every { project.findProperty("filesystem-scheme") } returns "custom-scheme"
         every { project.findProperty("track-widget-creation") } returns "false"
         every { project.findProperty("frontend-server-starter-path") } returns "starter.dart"
         every { project.findProperty("extra-front-end-options") } returns "--opt1"
@@ -747,7 +746,6 @@ class FlutterPluginTest {
         verify { mockFlutterTask.treeShakeIcons = true }
         verify { mockFlutterTask.deferredComponents = true }
         verify { mockFlutterTask.validateDeferredComponents = false }
-        verify { mockFlutterTask.fileSystemScheme = "custom-scheme" }
         verify { mockFlutterTask.frontendServerStarterPath = "starter.dart" }
         verify { mockFlutterTask.extraFrontEndOptions = "--opt1" }
         verify { mockFlutterTask.extraGenSnapshotOptions = "--opt2" }
