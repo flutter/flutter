@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/services.dart';
+library;
+
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
@@ -12,6 +15,9 @@ import 'framework.dart';
 ///
 ///  * [Layer.find], for an example of how this value is retrieved.
 ///  * [AnnotatedRegionLayer], the layer pushed into the layer tree.
+///  * [SystemChrome.setSystemUIOverlayStyle], which explains how to use an
+///    `AnnotatedRegion<SystemUiOverlayStyle>` to control the style of the
+///    system status bar and navigation bar.
 class AnnotatedRegion<T extends Object> extends SingleChildRenderObjectWidget {
   /// Creates a new annotated region to insert [value] into the layer tree.
   ///
