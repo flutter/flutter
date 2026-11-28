@@ -918,6 +918,195 @@ void main() {
     );
   });
 
+  group('Radio arrow keys from a disabled radio with focus in directional navigation', () {
+    // Builds [count] radios along [axis] in [direction], with the radios in
+    // [radioDirections] in their own text direction. The radio with the value
+    // [disabled] is selected and disabled, and Tab focuses it. Then checks that
+    // [key] focuses and selects the radio with the value [expected].
+    Future<void> expectArrowFromDisabled(
+      WidgetTester tester, {
+      required TextDirection direction,
+      Axis axis = Axis.horizontal,
+      required int count,
+      required int disabled,
+      Map<int, TextDirection> radioDirections = const <int, TextDirection>{},
+      required LogicalKeyboardKey key,
+      required int expected,
+    }) async {
+      final nodes = <FocusNode>[for (var i = 0; i < count; i++) FocusNode()];
+      for (final node in nodes) {
+        addTearDown(node.dispose);
+      }
+      int? value = disabled;
+      Widget buildRadio(int i) {
+        final Widget radio = Radio<int>(value: i, focusNode: nodes[i], enabled: i != disabled);
+        final TextDirection? radioDirection = radioDirections[i];
+        return radioDirection == null
+            ? radio
+            : Directionality(textDirection: radioDirection, child: radio);
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(navigationMode: NavigationMode.directional),
+            child: Directionality(
+              textDirection: direction,
+              child: Material(
+                child: StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) => RadioGroup<int>(
+                    groupValue: value,
+                    onChanged: (int? next) => setState(() {
+                      value = next;
+                    }),
+                    child: Flex(
+                      direction: axis,
+                      children: <Widget>[for (var i = 0; i < count; i++) buildRadio(i)],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(nodes[disabled].hasPrimaryFocus, isTrue);
+      expect(value, disabled);
+      await tester.sendKeyEvent(key);
+      await tester.pump();
+      expect(nodes[expected].hasPrimaryFocus, isTrue);
+      expect(value, expected);
+    }
+
+    for (final (
+          String layout,
+          TextDirection direction,
+          Axis axis,
+          Map<LogicalKeyboardKey, int> keys,
+        )
+        in <(String, TextDirection, Axis, Map<LogicalKeyboardKey, int>)>[
+          (
+            'a left-to-right row',
+            TextDirection.ltr,
+            Axis.horizontal,
+            <LogicalKeyboardKey, int>{
+              LogicalKeyboardKey.arrowRight: 3,
+              LogicalKeyboardKey.arrowLeft: 1,
+            },
+          ),
+          (
+            'a right-to-left row',
+            TextDirection.rtl,
+            Axis.horizontal,
+            <LogicalKeyboardKey, int>{
+              LogicalKeyboardKey.arrowRight: 1,
+              LogicalKeyboardKey.arrowLeft: 3,
+            },
+          ),
+          (
+            'a column',
+            TextDirection.ltr,
+            Axis.vertical,
+            <LogicalKeyboardKey, int>{
+              LogicalKeyboardKey.arrowDown: 3,
+              LogicalKeyboardKey.arrowUp: 1,
+            },
+          ),
+        ]) {
+      testWidgets('select the adjacent radios in $layout', (WidgetTester tester) async {
+        for (final MapEntry<LogicalKeyboardKey, int> entry in keys.entries) {
+          await expectArrowFromDisabled(
+            tester,
+            direction: direction,
+            axis: axis,
+            count: 5,
+            disabled: 2,
+            key: entry.key,
+            expected: entry.value,
+          );
+        }
+      });
+    }
+
+    testWidgets('keep their mapping when the disabled radio has another text direction', (
+      WidgetTester tester,
+    ) async {
+      // A left-to-right row of 0, 1 and 2, where 0 and 2 are in right-to-left
+      // text, then a right-to-left row of 2, 1 and 0, where 1 is in left-to-right
+      // text. Right selects 2 and 0, on the right in each row.
+      for (final (
+            TextDirection direction,
+            Map<int, TextDirection> radioDirections,
+            int right,
+            int left,
+          )
+          in <(TextDirection, Map<int, TextDirection>, int, int)>[
+            (
+              TextDirection.ltr,
+              const <int, TextDirection>{0: TextDirection.rtl, 2: TextDirection.rtl},
+              2,
+              0,
+            ),
+            (TextDirection.rtl, const <int, TextDirection>{1: TextDirection.ltr}, 0, 2),
+          ]) {
+        for (final (LogicalKeyboardKey key, int expected) in <(LogicalKeyboardKey, int)>[
+          (LogicalKeyboardKey.arrowRight, right),
+          (LogicalKeyboardKey.arrowLeft, left),
+        ]) {
+          await expectArrowFromDisabled(
+            tester,
+            direction: direction,
+            count: 3,
+            disabled: 1,
+            radioDirections: radioDirections,
+            key: key,
+            expected: expected,
+          );
+        }
+      }
+    });
+
+    testWidgets('do nothing when all the radios are disabled', (WidgetTester tester) async {
+      final nodes = <FocusNode>[FocusNode(), FocusNode()];
+      for (final node in nodes) {
+        addTearDown(node.dispose);
+      }
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(navigationMode: NavigationMode.directional),
+            child: Material(
+              child: RadioGroup<int>(
+                groupValue: 0,
+                onChanged: (int? value) => fail('An arrow key changed the selection to $value'),
+                child: Row(
+                  children: <Widget>[
+                    for (var i = 0; i < 2; i++)
+                      Radio<int>(value: i, focusNode: nodes[i], enabled: false),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(nodes[0].hasPrimaryFocus, isTrue);
+      for (final key in <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowDown,
+      ]) {
+        await tester.sendKeyEvent(key);
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+        expect(nodes[0].hasPrimaryFocus, isTrue);
+      }
+    });
+  });
+
   testWidgets('Radio can be controlled by keyboard shortcuts', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     int? groupValue = 1;
