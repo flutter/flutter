@@ -82,7 +82,7 @@ enum MaxLengthEnforcement {
 /// implement the [formatEditUpdate] method.
 ///
 /// ## Handling emojis and other complex characters
-/// {@macro flutter.widgets.EditableText.onChanged}
+/// {@macro flutter.widgets.editableText.onChangedComplexCharacters}
 ///
 /// See also:
 ///
