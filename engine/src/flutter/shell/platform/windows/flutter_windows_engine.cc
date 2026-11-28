@@ -522,6 +522,12 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
     return host->compositor_->CollectBackingStore(backing_store);
   };
 
+  compositor.supports_direct_msaa4_rendering_callback =
+      [](const FlutterBackingStore* store, void* user_data) {
+        auto* host = static_cast<FlutterWindowsEngine*>(user_data);
+        return host->compositor_->SupportsDirectMSAA4Rendering(*store);
+      };
+
   compositor.present_view_callback =
       [](const FlutterPresentViewInfo* info) -> bool {
     auto host = static_cast<FlutterWindowsEngine*>(info->user_data);

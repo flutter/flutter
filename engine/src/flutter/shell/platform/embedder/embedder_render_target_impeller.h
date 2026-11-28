@@ -16,7 +16,8 @@ class EmbedderRenderTargetImpeller final : public EmbedderRenderTarget {
       std::shared_ptr<impeller::AiksContext> aiks_context,
       std::unique_ptr<impeller::RenderTarget> impeller_target,
       fml::closure on_release,
-      fml::closure framebuffer_destruction_callback);
+      fml::closure framebuffer_destruction_callback,
+      bool supports_direct_msaa4_rendering = false);
 
   // |EmbedderRenderTarget|
   ~EmbedderRenderTargetImpeller() override;

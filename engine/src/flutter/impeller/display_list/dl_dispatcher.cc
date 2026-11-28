@@ -948,7 +948,12 @@ CanvasDlDispatcher::CanvasDlDispatcher(ContentContext& renderer,
               is_onscreen,
               has_root_backdrop_filter ||
                   RequiresReadbackForBlends(renderer, max_root_blend_mode),
-              cull_rect),
+              cull_rect,
+              has_root_backdrop_filter &&
+                  cull_rect ==
+                      IRect32::MakeSize(render_target.GetRenderTargetSize()) &&
+                  max_root_blend_mode <= Entity::kLastPipelineBlendMode &&
+                  render_target.HasVerifiedExternalMSAA4()),
       renderer_(renderer) {}
 
 Canvas& CanvasDlDispatcher::GetCanvas() {

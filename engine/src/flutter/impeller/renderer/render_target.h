@@ -7,6 +7,7 @@
 
 #include <functional>
 #include <map>
+#include <memory>
 #include <optional>
 
 #include "flutter/fml/hash_combine.h"
@@ -89,6 +90,18 @@ class RenderTarget final {
 
   SampleCount GetSampleCount() const;
 
+  // An embedder-owned framebuffer may have a multisample color renderbuffer
+  // whose resolve is performed by the embedder after the final render pass.
+  bool HasVerifiedExternalMSAA4() const {
+    return color0_ && verified_external_msaa4_.lock() == color0_->texture;
+  }
+  void SetVerifiedExternalMSAA4(const std::shared_ptr<Texture>& color) {
+    verified_external_msaa4_ = color;
+  }
+  void UseExternalMSAA4ForContinuedPass() {
+    use_external_sample_count_ = HasVerifiedExternalMSAA4();
+  }
+
   bool HasColorAttachment(size_t index) const;
 
   ISize GetRenderTargetSize() const;
@@ -135,6 +148,8 @@ class RenderTarget final {
   RenderTargetConfig ToConfig() const;
 
  private:
+  std::weak_ptr<Texture> verified_external_msaa4_;
+  bool use_external_sample_count_ = false;
   std::optional<ColorAttachment> color0_;
   std::optional<DepthAttachment> depth_;
   std::optional<StencilAttachment> stencil_;

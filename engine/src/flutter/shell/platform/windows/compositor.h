@@ -29,6 +29,11 @@ class Compositor {
   virtual bool CreateBackingStore(const FlutterBackingStoreConfig& config,
                                   FlutterBackingStore* backing_store_out) = 0;
 
+  // Whether this compositor's backing store can resolve an external MSAA pass.
+  virtual bool SupportsDirectMSAA4Rendering(const FlutterBackingStore&) const {
+    return false;
+  }
+
   // Destroys a backing store and releases its resources.
   virtual bool CollectBackingStore(const FlutterBackingStore* store) = 0;
 

@@ -4,6 +4,7 @@
 
 #include "impeller/display_list/canvas.h"
 
+#include <algorithm>
 #include <memory>
 #include <optional>
 #include <unordered_map>
@@ -484,11 +485,13 @@ Canvas::Canvas(ContentContext& renderer,
                const RenderTarget& render_target,
                bool is_onscreen,
                bool requires_readback,
-               IRect32 cull_rect)
+               IRect32 cull_rect,
+               bool can_finish_on_external_target)
     : renderer_(renderer),
       render_target_(render_target),
       is_onscreen_(is_onscreen),
       requires_readback_(requires_readback),
+      can_finish_on_external_target_(can_finish_on_external_target),
       clip_coverage_stack_(EntityPassClipStack(
           Rect::MakeSize(render_target.GetRenderTargetSize()))) {
   Initialize(Rect::MakeLTRB(cull_rect.GetLeft(), cull_rect.GetTop(),
@@ -1937,13 +1940,19 @@ void Canvas::SaveLayer(const Paint& paint,
     if (!will_cache_backdrop_texture || !backdrop_data->texture_slot) {
       backdrop_count_ -= backdrop_count;
 
-      // The onscreen texture can be flipped to if:
-      // 1. The device supports framebuffer fetch
-      // 2. There are no more backdrop filters
-      // 3. The current render pass is for the onscreen pass.
+      // A shared filter snapshot draws its layer's children in the parent
+      // pass. Their blends can read the destination even after the last
+      // backdrop input was captured.
+      const auto shares_filter_snapshot = [](const auto& entry) {
+        return entry.second.backdrop_count > 1 &&
+               entry.second.all_filters_equal;
+      };
       const bool should_use_onscreen =
-          renderer_.GetDeviceCapabilities().SupportsFramebufferFetch() &&
-          backdrop_count_ == 0 && render_passes_.size() == 1u;
+          backdrop_count_ == 0 && render_passes_.size() == 1u &&
+          (renderer_.GetDeviceCapabilities().SupportsFramebufferFetch() ||
+           (can_finish_on_external_target_ &&
+            std::none_of(backdrop_data_.begin(), backdrop_data_.end(),
+                         shares_filter_snapshot)));
       input_texture = FlipBackdrop(
           GetGlobalPassPosition(),                                //
           /*should_remove_texture=*/will_cache_backdrop_texture,  //
@@ -2578,6 +2587,9 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
   }
 
   if (should_use_onscreen) {
+    if (can_finish_on_external_target_) {
+      render_target_.UseExternalMSAA4ForContinuedPass();
+    }
     ColorAttachment color0 = render_target_.GetColorAttachment(0);
     // When MSAA is being used, we end up overriding the entire backdrop by
     // drawing the previous pass texture, and so we don't have to clear it and

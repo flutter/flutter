@@ -2382,6 +2382,20 @@ typedef struct {
   ///
   /// The callback should return true if the operation was successful.
   FlutterPresentViewCallback present_view_callback;
+
+  /// Optional. Windows Impeller may call this once when importing a named
+  /// OpenGL framebuffer returned by create_backing_store_callback. Return
+  /// true to allow the engine to finish rendering directly into it. This
+  /// requires a complete framebuffer with a 4-sample BGRA8 color renderbuffer
+  /// at color attachment 0 as its sole draw output and a packed 4-sample
+  /// depth24/stencil8 renderbuffer. Both must match the requested backing
+  /// store size. The compositor must preserve this configuration until
+  /// collection and resolve the color buffer for presentation.
+  ///
+  /// If absent or false, the engine uses its normal rendering path.
+  bool (*supports_direct_msaa4_rendering_callback)(
+      const FlutterBackingStore* backing_store,
+      void* user_data);
 } FlutterCompositor;
 
 typedef struct {
