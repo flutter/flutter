@@ -99,6 +99,7 @@
     @"--platform-view-partial-intersection-fractional-coordinate",
     @"--platform-view-rotate",
     @"--platform-view-scrolling-under-widget",
+    @"--platform-view-share-sheet-dismiss",
     @"--platform-view-surrounding-layers-fractional-coordinate",
     @"--platform-view-transform",
     @"--platform-view-two-intersecting-overlays",
@@ -241,6 +242,41 @@
                     [[UITextField alloc] initWithFrame:CGRectMake(0, 400, 300, 100)];
                 text.text = dict[@"method"];
                 [flutterViewController.view addSubview:text];
+              }];
+  } else if ([scenarioIdentifier isEqualToString:@"platform_view_share_sheet_dismiss"]) {
+    // Present a share sheet once Dart has rendered the platform view, and expose the share sheet
+    // state as labels for the UI test. The labels are placed below the area the test taps on, and
+    // UILabel does not receive touches, so they do not interfere with the test.
+    __weak FlutterViewController* weakFlutterViewController = flutterViewController;
+    void (^addStatusLabel)(NSString*) = ^(NSString* status) {
+      UILabel* label = [[UILabel alloc] initWithFrame:CGRectMake(0, 300, 300, 50)];
+      label.text = status;
+      label.accessibilityIdentifier = status;
+      [weakFlutterViewController.view addSubview:label];
+    };
+    [engine.binaryMessenger
+        setMessageHandlerOnChannel:@"present_share_sheet"
+              binaryMessageHandler:^(NSData* _Nullable message, FlutterBinaryReply _Nonnull reply) {
+                UIActivityViewController* shareSheet =
+                    [[UIActivityViewController alloc] initWithActivityItems:@[ @"Share sheet" ]
+                                                      applicationActivities:nil];
+                // On iPad, the share sheet is presented as a popover, which crashes without a
+                // source view. Anchor it at the bottom center, so that the top of the screen,
+                // where the test taps, is outside of the popover.
+                UIView* sourceView = weakFlutterViewController.view;
+                shareSheet.popoverPresentationController.sourceView = sourceView;
+                shareSheet.popoverPresentationController.sourceRect = CGRectMake(
+                    CGRectGetMidX(sourceView.bounds), CGRectGetMaxY(sourceView.bounds) - 1, 1, 1);
+                shareSheet.completionWithItemsHandler =
+                    ^(UIActivityType activityType, BOOL completed, NSArray* returnedItems,
+                      NSError* activityError) {
+                      addStatusLabel(@"share_sheet_dismissed");
+                    };
+                [weakFlutterViewController presentViewController:shareSheet
+                                                        animated:YES
+                                                      completion:^{
+                                                        addStatusLabel(@"share_sheet_presented");
+                                                      }];
               }];
   }
 
