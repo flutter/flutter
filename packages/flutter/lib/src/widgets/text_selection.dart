@@ -537,6 +537,16 @@ class TextSelectionOverlay {
     if (_value == newValue) {
       return;
     }
+    // If the text and the selection both change while a handle is being dragged
+    // (e.g. the keyboard deletes text), the drag no longer matches the text, so
+    // end it. A change that keeps the selection, such as appending text, does
+    // not end the drag.
+    if ((_selectionOverlay.isDraggingStartHandle || _selectionOverlay.isDraggingEndHandle) &&
+        newValue.text != _value.text &&
+        newValue.selection != _value.selection) {
+      _dragStartSelection = null;
+      _selectionOverlay._endHandleDrags();
+    }
     _value = newValue;
     _updateSelectionOverlay();
     // _updateSelectionOverlay may not rebuild the selection overlay if the
@@ -1269,6 +1279,31 @@ class SelectionOverlay {
   bool get isDraggingStartHandle => _isDraggingStartHandle || _startHandleDragInProgress;
   bool _isDraggingStartHandle = false;
 
+  // Whether the rest of the current gesture on the start handle should be
+  // ignored, because the drag was ended before the pointer was lifted.
+  //
+  // See [_endHandleDrags].
+  bool _ignoreStartHandleDrag = false;
+
+  // Ends any selection handle drag that is in progress, and ignores the rest of
+  // its gesture until the pointer is lifted.
+  //
+  // This is used when the text and the selection change while a handle is
+  // being dragged, which makes the rest of the drag meaningless.
+  void _endHandleDrags() {
+    if (isDraggingStartHandle) {
+      _ignoreStartHandleDrag = true;
+      _startHandleDragInProgress = false;
+      _isDraggingStartHandle = false;
+    }
+    if (isDraggingEndHandle) {
+      _ignoreEndHandleDrag = true;
+      _endHandleDragInProgress = false;
+      _isDraggingEndHandle = false;
+    }
+    hideMagnifier();
+  }
+
   // Whether the start handle can be dragged.
   //
   // On Apple and web platforms only one selection handle can be dragged
@@ -1293,6 +1328,8 @@ class SelectionOverlay {
 
   void _handleStartHandleDragStart(DragStartDetails details) {
     assert(!_isDraggingStartHandle);
+    // A new gesture has started, so stop ignoring the start handle.
+    _ignoreStartHandleDrag = false;
     // Calling OverlayEntry.remove may not happen until the following frame, so
     // it's possible for the handles to receive a gesture after calling remove.
     if (_handles == null) {
@@ -1314,7 +1351,7 @@ class SelectionOverlay {
       _isDraggingStartHandle = false;
       return;
     }
-    if (!_canDragStartHandle) {
+    if (_ignoreStartHandleDrag || !_canDragStartHandle) {
       return;
     }
     // The handle drag may have been blocked before on Apple platforms and the web
@@ -1342,6 +1379,11 @@ class SelectionOverlay {
 
   void _handleStartHandleDragEnd(DragEndDetails details) {
     _isDraggingStartHandle = false;
+    if (_ignoreStartHandleDrag) {
+      // The drag was already ended by _endHandleDrags.
+      _ignoreStartHandleDrag = false;
+      return;
+    }
     // Calling OverlayEntry.remove may not happen until the following frame, so
     // it's possible for the handles to receive a gesture after calling remove.
     if (_handles == null) {
@@ -1390,6 +1432,12 @@ class SelectionOverlay {
   bool get isDraggingEndHandle => _isDraggingEndHandle || _endHandleDragInProgress;
   bool _isDraggingEndHandle = false;
 
+  // Whether the rest of the current gesture on the end handle should be
+  // ignored, because the drag was ended before the pointer was lifted.
+  //
+  // See [_endHandleDrags].
+  bool _ignoreEndHandleDrag = false;
+
   // Whether the end handle can be dragged.
   //
   // On Apple and web platforms only one selection handle can be dragged
@@ -1414,6 +1462,8 @@ class SelectionOverlay {
 
   void _handleEndHandleDragStart(DragStartDetails details) {
     assert(!_isDraggingEndHandle);
+    // A new gesture has started, so stop ignoring the end handle.
+    _ignoreEndHandleDrag = false;
     // Calling OverlayEntry.remove may not happen until the following frame, so
     // it's possible for the handles to receive a gesture after calling remove.
     if (_handles == null) {
@@ -1435,7 +1485,7 @@ class SelectionOverlay {
       _isDraggingEndHandle = false;
       return;
     }
-    if (!_canDragEndHandle) {
+    if (_ignoreEndHandleDrag || !_canDragEndHandle) {
       return;
     }
     // The handle drag may have been blocked before on Apple platforms and the web
@@ -1463,6 +1513,11 @@ class SelectionOverlay {
 
   void _handleEndHandleDragEnd(DragEndDetails details) {
     _isDraggingEndHandle = false;
+    if (_ignoreEndHandleDrag) {
+      // The drag was already ended by _endHandleDrags.
+      _ignoreEndHandleDrag = false;
+      return;
+    }
     // Calling OverlayEntry.remove may not happen until the following frame, so
     // it's possible for the handles to receive a gesture after calling remove.
     if (_handles == null) {
