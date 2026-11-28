@@ -37,6 +37,22 @@ TEST(StringUtilsTest, canUTF8ToUTF16) {
   EXPECT_EQ(UTF8ToUTF16(utf8).compare(u"äåè"), 0);
 }
 
+TEST(StringUtilsTest, UTF16LengthOfUTF8MatchesUTF8ToUTF16) {
+  const std::string strings[] = {
+      "",
+      "abc",
+      "\xC3\xA4\xC3\xA5\xC3\xA8",              // äåè
+      "\xD7\xA9\xD7\x9C\xD7\x95\xD7\x9D abc",  // Hebrew and ASCII
+      "\xE2\x82\xAC\xE0\xA4\xB9",              // Three-byte sequences
+      "\xF0\x9F\x98\x80\xF0\x9F\x91\x8D",      // Surrogate pairs
+      std::string("ab\0cd", 5),                // Embedded NUL
+  };
+  for (const std::string& utf8 : strings) {
+    EXPECT_EQ(UTF16LengthOfUTF8(utf8), UTF8ToUTF16(utf8).length()) << utf8;
+  }
+  EXPECT_EQ(UTF16LengthOfUTF8("a\xF0\x9F\x98\x80"), 3u);
+}
+
 TEST(StringUtilsTest, canUTF16ToUTF8) {
   std::u16string utf16 = u"äåè";
   EXPECT_EQ(UTF16ToUTF8(utf16).compare("äåè"), 0);

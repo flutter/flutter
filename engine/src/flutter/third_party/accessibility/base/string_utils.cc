@@ -68,6 +68,22 @@ std::u16string UTF8ToUTF16(std::string src) {
   return fml::Utf8ToUtf16(src);
 }
 
+size_t UTF16LengthOfUTF8(const std::string& src) {
+  size_t length = 0;
+  // Stops at the first NUL, as UTF8ToUTF16 does.
+  for (const char* c = src.c_str(); *c != '\0'; ++c) {
+    const unsigned char byte = static_cast<unsigned char>(*c);
+    if ((byte & 0xC0) != 0x80) {
+      ++length;
+    }
+    // A four-byte sequence becomes a surrogate pair.
+    if (byte >= 0xF0) {
+      ++length;
+    }
+  }
+  return length;
+}
+
 std::string UTF16ToUTF8(std::u16string src) {
   return fml::Utf16ToUtf8(src);
 }
