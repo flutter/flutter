@@ -184,13 +184,6 @@ class LspPreviewDetector {
   Future<void> _fileAddedOrUpdated({required String filePath}) async {
     if (filePath.isPubspec) {
       if (project.isPubspecForProject(filePath)) {
-        if (project.isRootPubspec(filePath)) {
-          try {
-            project.reloadManifest(logger: logger, fs: fs);
-          } on Exception catch (e) {
-            logger.printTrace('Failed to reload manifest after pubspec change: $e');
-          }
-        }
         onPubspecChangeDetected(filePath);
       }
       return;

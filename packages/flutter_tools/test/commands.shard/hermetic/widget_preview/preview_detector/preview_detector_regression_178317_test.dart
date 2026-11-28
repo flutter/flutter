@@ -103,6 +103,18 @@ void main() {
       watcher.controller.add(WatchEvent(ChangeType.MODIFY, project.pubspecFile.path));
       await pumpEventQueue();
       expect(detectedPubspecPaths, <String>[project.pubspecFile.path]);
+
+      project.pubspecFile.writeAsStringSync('''
+name: workspace_root
+workspace:
+  - packages/*
+''');
+      final File memberPubspec = fs.file(
+        fs.path.join(project.directory.path, 'packages', 'member_pkg', 'pubspec.yaml'),
+      )..createSync(recursive: true);
+      watcher.controller.add(WatchEvent(ChangeType.ADD, memberPubspec.path));
+      await pumpEventQueue();
+      expect(detectedPubspecPaths, <String>[project.pubspecFile.path, memberPubspec.path]);
     });
   });
 }

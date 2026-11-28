@@ -158,14 +158,11 @@ void main() {
     });
 
     test('detects changes to glob-matched workspace member pubspec.yaml', () async {
-      project.manifest = FlutterManifest.createFromString(
-        '''
+      project.manifest = FlutterManifest.createFromString('''
 name: workspace_root
 workspace:
   - packages/*
-''',
-        logger: logger,
-      )!;
+''', logger: logger)!;
       final String newMemberPubspecPath = fs.path.join(
         _kProjectRootPath,
         'packages',
@@ -182,11 +179,66 @@ workspace:
       expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
     });
 
+    test('ignores unlisted, hidden, and build pubspec.yaml with ** workspace', () async {
+      project.manifest = FlutterManifest.createFromString('''
+name: workspace_root
+workspace:
+  - "**"
+''', logger: logger)!;
+      final String unlistedPubspecPath = fs.path.join(
+        _kProjectRootPath,
+        'other',
+        'pkg',
+        'pubspec.yaml',
+      );
+      final String hiddenPubspecPath = fs.path.join(
+        _kProjectRootPath,
+        '.claude',
+        'worktrees',
+        'foo',
+        'pubspec.yaml',
+      );
+      final String buildPubspecPath = fs.path.join(
+        _kProjectRootPath,
+        'build',
+        'foo',
+        'pubspec.yaml',
+      );
+
+      // Update manifest to a narrower pattern to verify unlisted paths are ignored.
+      project.manifest = FlutterManifest.createFromString('''
+name: workspace_root
+workspace:
+  - packages/*
+''', logger: logger)!;
+      await emitEvent(WatchEvent(ChangeType.MODIFY, unlistedPubspecPath));
+
+      // Switch to '**' and verify hidden and build directories are still ignored.
+      project.manifest = FlutterManifest.createFromString('''
+name: workspace_root
+workspace:
+  - "**"
+''', logger: logger)!;
+      await emitEvent(WatchEvent(ChangeType.MODIFY, hiddenPubspecPath));
+      await emitEvent(WatchEvent(ChangeType.MODIFY, buildPubspecPath));
+
+      expect(detectedPubspecChanges, isEmpty);
+      expect(detectedNonDartFileChanges, isEmpty);
+      expectNPreviewReloadTimingEvents(0);
+      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+    });
+
     test('detects pubspec.yaml changes when project root is symlinked', () async {
       final Directory realRoot = fs.directory('/private/var/folders/project')
         ..createSync(recursive: true);
-      final Link symlinkRoot = fs.link('/var/folders/project')..createSync(realRoot.path, recursive: true);
-      final File realPubspec = realRoot.childFile('pubspec.yaml')..writeAsStringSync('name: app\n');
+      final Link symlinkRoot = fs.link('/var/folders/project')
+        ..createSync(realRoot.path, recursive: true);
+      final File realPubspec = realRoot.childFile('pubspec.yaml')
+        ..writeAsStringSync('''
+name: app
+workspace:
+  - packages/*
+''');
 
       final symlinkProject = FakeFlutterProject(fs.directory(symlinkRoot.path));
       final symlinkWatcher = FakeWatcher();
@@ -217,29 +269,35 @@ workspace:
       await symlinkDetector.initialize();
 
       symlinkWatcher.emitEvent(WatchEvent(ChangeType.MODIFY, realPubspec.path));
+      // Simulate a deleted workspace member pubspec.yaml under the symlinked root
+      // so _resolveSymlinksAndCanonicalize walks up to the existing ancestor.
+      final String deletedMemberPubspec = fs.path.join(
+        realRoot.path,
+        'packages',
+        'deleted_pkg',
+        'pubspec.yaml',
+      );
+      symlinkWatcher.emitEvent(WatchEvent(ChangeType.REMOVE, deletedMemberPubspec));
       await pumpEventQueue();
       await symlinkDetector.mutex.runGuarded(() async {});
 
-      expect(symlinkPubspecChanges, <String>[realPubspec.path]);
+      expect(symlinkPubspecChanges, <String>[realPubspec.path, deletedMemberPubspec]);
     });
 
-    test(
-      'notifies onNonDartFileChangeDetected and does not report preview reload timing when non-Dart file is modified',
-      () async {
-        expectNPreviewReloadTimingEvents(0);
-        expect(detectedChanges, isEmpty);
-        expect(detectedPubspecChanges, isEmpty);
-        expect(detectedNonDartFileChanges, isEmpty);
+    test('notifies onNonDartFileChangeDetected and does not report preview reload timing when non-Dart file is modified', () async {
+      expectNPreviewReloadTimingEvents(0);
+      expect(detectedChanges, isEmpty);
+      expect(detectedPubspecChanges, isEmpty);
+      expect(detectedNonDartFileChanges, isEmpty);
 
-        await emitEvent(WatchEvent(ChangeType.MODIFY, _kNonDartFilePath));
+      await emitEvent(WatchEvent(ChangeType.MODIFY, _kNonDartFilePath));
 
-        expect(detectedChanges, isEmpty);
-        expect(detectedPubspecChanges, isEmpty);
-        expect(detectedNonDartFileChanges, <String>[_kNonDartFilePath]);
-        expectNPreviewReloadTimingEvents(0);
-        expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
-      },
-    );
+      expect(detectedChanges, isEmpty);
+      expect(detectedPubspecChanges, isEmpty);
+      expect(detectedNonDartFileChanges, <String>[_kNonDartFilePath]);
+      expectNPreviewReloadTimingEvents(0);
+      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+    });
 
     test('does not report preview reload timing for ignored directories', () async {
       expectNPreviewReloadTimingEvents(0);
@@ -288,51 +346,49 @@ workspace:
       },
     );
 
-    test(
-      'does not launch analysis server and waits for analysis over DTD when connected to an existing DTD instance',
-      () async {
-        await detector.dispose();
+    test('does not launch analysis server and waits for analysis over DTD when connected to an existing DTD instance', () async {
+      await detector.dispose();
 
-        fakeDtd = FakeWidgetPreviewDtdServices()..dtdUri = Uri.parse('ws://127.0.0.1:12345');
-        detector = LspPreviewDetector(
-          dtd: fakeDtd,
-          onChangeDetected: detectedChanges.add,
-          onPubspecChangeDetected: detectedPubspecChanges.add,
-          previewAnalytics: previewAnalytics,
-          project: project,
-          suppressAnalytics: false,
-          toolContext: FakeToolContext(
-            artifacts: Artifacts.test(),
-            fs: fs,
-            logger: logger,
-            platform: platform,
-            processManager: FakeProcessManager.any(),
-            shutdownHooks: shutdownHooks,
-          ),
-          analysisServerFactory: () async => fakeAnalysisServer,
-          watcherBuilder: (_) => fakeWatcher,
-        );
-        await detector.initialize();
+      fakeDtd = FakeWidgetPreviewDtdServices()..dtdUri = Uri.parse('ws://127.0.0.1:12345');
+      detector = LspPreviewDetector(
+        dtd: fakeDtd,
+        onChangeDetected: detectedChanges.add,
+        onPubspecChangeDetected: detectedPubspecChanges.add,
+        previewAnalytics: previewAnalytics,
+        project: project,
+        suppressAnalytics: false,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fs,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+          shutdownHooks: shutdownHooks,
+        ),
+        analysisServerFactory: () async => fakeAnalysisServer,
+        watcherBuilder: (_) => fakeWatcher,
+      );
+      await detector.initialize();
 
-        expect(detector.analysisServer, isNull);
-        expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
-        expect(fakeDtd.waitForAnalysisCallCount, 0);
+      expect(detector.analysisServer, isNull);
+      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+      expect(fakeDtd.waitForAnalysisCallCount, 0);
 
-        await detector.waitForAnalysis();
-        expect(fakeDtd.waitForAnalysisCallCount, 1);
-        expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+      await detector.waitForAnalysis();
+      expect(fakeDtd.waitForAnalysisCallCount, 1);
+      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
 
-        await emitEvent(WatchEvent(ChangeType.MODIFY, _kDartFilePath));
-        expect(detectedChanges, hasLength(1));
-        expect(fakeDtd.waitForAnalysisCallCount, 2);
-        expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
-      },
-    );
+      await emitEvent(WatchEvent(ChangeType.MODIFY, _kDartFilePath));
+      expect(detectedChanges, hasLength(1));
+      expect(fakeDtd.waitForAnalysisCallCount, 2);
+      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+    });
   });
 }
 
 class FakeFlutterProject extends Fake implements FlutterProject {
-  FakeFlutterProject(this.directory) : manifest = FlutterManifest.empty(logger: BufferLogger.test());
+  FakeFlutterProject(this.directory)
+    : manifest = FlutterManifest.empty(logger: BufferLogger.test());
 
   @override
   final Directory directory;

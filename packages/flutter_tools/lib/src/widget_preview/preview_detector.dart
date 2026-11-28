@@ -186,13 +186,6 @@ class PreviewDetector {
       // the preview scaffold's pubspec to be updated.
       if (eventPath.isPubspec) {
         if (project.isPubspecForProject(eventPath)) {
-          if (project.isRootPubspec(eventPath)) {
-            try {
-              project.reloadManifest(logger: logger, fs: fs);
-            } on Exception catch (e) {
-              logger.printTrace('Failed to reload manifest after pubspec change: $e');
-            }
-          }
           onPubspecChangeDetected(eventPath);
         }
         return;
